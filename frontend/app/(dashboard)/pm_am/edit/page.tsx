@@ -1,15 +1,6 @@
-"use client";
-
-import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
+// ... other imports ...
 import { DateInput } from "@astryxdesign/core/DateInput";
+import { TextArea } from "@astryxdesign/core/TextArea"; // Ensure TextArea is imported
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { HomeIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -20,7 +11,7 @@ function EditPMContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pmId = searchParams.get("id");
-  
+
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +23,11 @@ function EditPMContent() {
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [pmNumber, setPmNumber] = useState("");
+
+  // New state variables for the new fields
+  const [completedAt, setCompletedAt] = useState<ISODate | undefined>(undefined);
+  const [completedBy, setCompletedBy] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
 
   useEffect(() => {
     if (!pmId) {
@@ -49,6 +45,11 @@ function EditPMContent() {
           setDescription(json.description || "");
           setNotes(json.notes || "");
           setPmNumber(`PM-${String(json.id).padStart(3, '0')}`);
+
+          // Set new state variables
+          setCompletedAt(json.completed_at || undefined);
+          setCompletedBy(json.completed_by_name || ""); // Assuming API returns name, adjust if it's an ID
+          setRescheduleReason(json.reschedule_reason || "");
         } else {
           setError("ไม่พบข้อมูลแผน PM");
         }
@@ -65,13 +66,20 @@ function EditPMContent() {
       // First fetch the existing data to preserve fields we aren't editing
       const currentRes = await fetch(`/api/v1/pm_am.php?id=${pmId}`);
       const currentData = await currentRes.json();
-      
+
       const payload = {
         ...currentData,
         title,
         status,
         due_date: dueDate || null,
         notes,
+        // Include new fields in the payload if they are being updated or are relevant
+        reschedule_reason: rescheduleReason, // Include reschedule reason
+        // completed_at and completed_by are typically set by a completion action,
+        // so we might not edit them directly here, but include if API allows.
+        // If they are meant to be updated here, uncomment and adjust:
+        // completed_at: status === 'completed' ? (completedAt || new Date().toISOString().split('T')[0]) : null,
+        // completed_by: status === 'completed' ? (completedBy || 'current_user_id') : null,
       };
 
       const res = await fetch(`/api/v1/pm_am.php?id=${pmId}`, {
@@ -124,10 +132,11 @@ function EditPMContent() {
               </div>
             )}
 
-            <TextInput label="ชื่องาน PM"
+            <TextInput
+              label="ชื่องาน PM"
               value={title}
               onChange={setTitle}  />
-            
+
             <Selector
               label="สถานะปัจจุบัน"
               placeholder="เลือกสถานะ"
@@ -154,6 +163,32 @@ function EditPMContent() {
               value={notes}
               onChange={setNotes}
             />
+
+            {/* Conditionally render completed_at and completed_by if status is 'completed' */}
+            {status === "completed" && completedAt && (
+              <TextInput
+                label="วันที่เสร็จสิ้น"
+                value={completedAt.split('T')[0]} // Display only the date part
+                readOnly
+              />
+            )}
+            {status === "completed" && completedBy && (
+              <TextInput
+                label="ผู้ดำเนินการ"
+                value={completedBy}
+                readOnly
+              />
+            )}
+
+            {/* Conditionally render rescheduleReason if status is 'skipped' or 'overdue' */}
+            {(status === "skipped" || status === "overdue") && (
+              <TextArea
+                label="เหตุผลในการเลื่อน/ข้าม"
+                placeholder="ระบุเหตุผลที่ทำให้งานนี้ถูกเลื่อนหรือข้ามรอบ"
+                value={rescheduleReason}
+                onChange={setRescheduleReason}
+              />
+            )}
 
             <HStack gap={3} hAlign="end">
               <Button label="ยกเลิก" variant="secondary" onClick={() => router.push("/pm_am")} />
