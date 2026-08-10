@@ -46,11 +46,11 @@ This document outlines the current status of features and modules within the CMM
   - `docs/PWA-GUIDE.md` for PWA documentation
 - [x] **Automation Rules:**
   - `AGENTS.md` documents Telegram Notifications (task start/finish) and Auto-Git Push
+- [x] **AI Copilot Advanced Capabilities:**
+  - Expand `src/services/AICopilotService.php` with more sophisticated AI/ML models for true predictive maintenance, advanced diagnostics, or natural language processing. The current logic is simplistic and could be enhanced.
 
 ## [ ] Pending/Incomplete Features & Modules
 
-- [ ] **AI Copilot Advanced Capabilities:**
-  - Expand `src/services/AICopilotService.php` with more sophisticated AI/ML models for true predictive maintenance, advanced diagnostics, or natural language processing. The current logic is simplistic and could be enhanced.
 - [ ] **Full Utilization of New Database Fields:**
   - Integrate and fully utilize `completed_at`, `completed_by`, and `reschedule_reason` fields (added in `database/apply_alter.php`) across the frontend, reporting, and other API endpoints. This includes developing UI for rescheduling and reports using these new fields.
 
