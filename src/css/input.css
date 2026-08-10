@@ -1,0 +1,82 @@
+/* Import Astryx Reset, Core components and Theme tokens first */
+@import "../../node_modules/@astryxdesign/core/src/reset.css";
+@import "../../node_modules/@astryxdesign/core/dist/astryx.css";
+@import "../../node_modules/@astryxdesign/theme-neutral/dist/theme.css";
+
+/* Tailwind Base directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Additional utility overrides or root mappings */
+:root {
+  /* Backwards compatibility for legacy custom styles */
+  --hp-primary: var(--color-accent);
+  --hp-ink: var(--color-text-primary);
+  --hp-canvas: var(--color-background-body);
+  --hp-cloud: var(--color-background-muted);
+  --hp-fog: var(--color-border);
+  --hp-steel: var(--color-border-emphasized);
+  --hp-hairline: var(--color-border);
+
+  /* Legacy layout mapping compatibility */
+  --ln-canvas: var(--color-background-body);
+  --ln-surface-1: var(--color-background-surface);
+  --ln-surface-2: var(--color-background-muted);
+  --ln-border: var(--color-border);
+  --ln-primary: var(--color-accent);
+  --ln-ink: var(--color-text-primary);
+}
+
+/* Base modifications */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-background-body);
+    color: var(--color-text-primary);
+    font-family: 'Figtree', 'Sarabun', system-ui, sans-serif;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-background-body);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-emphasized);
+    border-radius: var(--radius-inner);
+  }
+}
+
+/* AUTOMATIC DARK/LIGHT MODE CARD & TEXT OVERRIDES */
+.dark .bg-white, html.dark .bg-white { background-color: var(--color-background-surface) !important; }
+.dark .bg-slate-50, html.dark .bg-slate-50 { background-color: var(--color-background-muted) !important; }
+.dark .bg-slate-100, html.dark .bg-slate-100 { background-color: var(--color-background-body) !important; }
+.dark .text-slate-900, html.dark .text-slate-900 { color: var(--color-text-primary) !important; }
+.dark .text-slate-800, html.dark .text-slate-800 { color: var(--color-text-primary) !important; }
+.dark .text-slate-700, html.dark .text-slate-700 { color: var(--color-text-secondary) !important; }
+.dark .text-slate-600, html.dark .text-slate-600 { color: var(--color-text-secondary) !important; }
+.dark .text-slate-500, html.dark .text-slate-500 { color: var(--color-text-disabled) !important; }
+.dark .border-slate-100, html.dark .border-slate-100 { border-color: var(--color-border) !important; }
+.dark .border-slate-200, html.dark .border-slate-200 { border-color: var(--color-border) !important; }
+.dark .border-slate-300, html.dark .border-slate-300 { border-color: var(--color-border-emphasized) !important; }
+.dark .divide-slate-100 > * + *, html.dark .divide-slate-100 > * + * { border-color: var(--color-border) !important; }
+.dark .divide-slate-200 > * + *, html.dark .divide-slate-200 > * + * { border-color: var(--color-border) !important; }
+
+/* Same for light mode to enforce Astryx canvas colors */
+html:not(.dark) .bg-white { background-color: var(--color-background-surface) !important; }
+html:not(.dark) .bg-slate-50 { background-color: var(--color-background-muted) !important; }
+html:not(.dark) .bg-slate-100 { background-color: var(--color-background-body) !important; }
+html:not(.dark) .text-slate-900 { color: var(--color-text-primary) !important; }
+html:not(.dark) .text-slate-800 { color: var(--color-text-primary) !important; }
+html:not(.dark) .text-slate-700 { color: var(--color-text-secondary) !important; }
+html:not(.dark) .text-slate-600 { color: var(--color-text-secondary) !important; }
+html:not(.dark) .text-slate-500 { color: var(--color-text-disabled) !important; }
+html:not(.dark) .border-slate-100 { border-color: var(--color-border) !important; }
+html:not(.dark) .border-slate-200 { border-color: var(--color-border) !important; }
+html:not(.dark) .border-slate-300 { border-color: var(--color-border-emphasized) !important; }
+html:not(.dark) .divide-slate-100 > * + * { border-color: var(--color-border) !important; }
+html:not(.dark) .divide-slate-200 > * + * { border-color: var(--color-border) !important; }

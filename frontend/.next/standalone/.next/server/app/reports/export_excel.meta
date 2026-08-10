@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(dashboard)/layout,_N_T_/(dashboard)/reports/layout,_N_T_/(dashboard)/reports/export_excel/layout,_N_T_/(dashboard)/reports/export_excel/page,_N_T_/reports/export_excel"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGRhc2hib2FyZCk/reports/export_excel/__PAGE__",
+    "/!KGRhc2hib2FyZCk/reports/export_excel",
+    "/!KGRhc2hib2FyZCk/reports",
+    "/!KGRhc2hib2FyZCk",
+    "/_index",
+    "/_head"
+  ]
+}

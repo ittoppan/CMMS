@@ -1,0 +1,17 @@
+{
+  "name": "cmms-tpt",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/css/input.css -o ./public/css/app.css --minify",
+    "watch:css": "tailwindcss -i ./src/css/input.css -o ./public/css/app.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "@astryxdesign/cli": "^0.1.9",
+    "@astryxdesign/core": "^0.1.9",
+    "@astryxdesign/theme-neutral": "^0.1.9"
+  }
+}

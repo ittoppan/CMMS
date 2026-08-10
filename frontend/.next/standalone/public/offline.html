@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0D4785" />
+  <title>ออฟไลน์ — CMMS-TOPPAN</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', 'Noto Sans Thai', -apple-system, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #0f172a 100%);
+      padding: 24px;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    }
+    .logo {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 20px;
+      border-radius: 22px;
+      background: #0D4785;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    h1 { font-size: 20px; color: #0f172a; margin-bottom: 8px; }
+    p { font-size: 14px; color: #64748b; line-height: 1.7; margin-bottom: 24px; }
+    .hint {
+      font-size: 12px;
+      color: #94a3b8;
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 16px;
+      line-height: 1.8;
+    }
+    .hint b { color: #475569; }
+    .btn {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      background: #0D4785;
+      color: #ffffff;
+      margin-top: 16px;
+    }
+    .btn:active { transform: translateY(1px); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">C</div>
+    <h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1>
+    <p>ขณะนี้คุณใช้งานแบบออฟไลน์<br />กรุณาเชื่อมต่อเครือข่ายแล้วลองใหม่อีกครั้ง</p>
+    <div class="hint">
+      ข้อมูลที่เคยโหลดไว้แล้วจะยังแสดงได้ เช่น ฟอร์มแจ้งซ่อม แดชบอร์ด และเช็คชีท PM<br />
+      <b>การแจ้งซ่อม / บันทึกข้อมูลต้องเชื่อมต่ออินเทอร์เน็ต</b>
+    </div>
+    <button class="btn" onclick="location.reload()">ลองเชื่อมต่อใหม่</button>
+  </div>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(dashboard)/layout,_N_T_/(dashboard)/asset_registry/layout,_N_T_/(dashboard)/asset_registry/criticality/layout,_N_T_/(dashboard)/asset_registry/criticality/page,_N_T_/asset_registry/criticality"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGRhc2hib2FyZCk/asset_registry/criticality/__PAGE__",
+    "/!KGRhc2hib2FyZCk/asset_registry/criticality",
+    "/!KGRhc2hib2FyZCk/asset_registry",
+    "/!KGRhc2hib2FyZCk",
+    "/_index",
+    "/_head"
+  ]
+}
