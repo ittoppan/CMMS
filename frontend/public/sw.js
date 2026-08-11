@@ -1,4 +1,4 @@
-/* CMMS-TPT Service Worker — PWA full-app shell v5
+/* CMMS-TPT Service Worker — PWA full-app shell v6
  * กลยุทธ์:
  *  - Navigation: network-first → cache → offline.html → synthesized offline page (ไม่คืน undefined เด็ดขาด)
  *  - API (GET /api/v1/*): network-first + cache fallback
@@ -6,9 +6,9 @@
  *  - Install: precache แบบ per-URL (URL หนึ่งพัง ไม่ล้มทั้งชุด)
  *  ทุก respondWith คืน Response เสมอ — ป้องกัน "Failed to convert value to 'Response'"
  */
-const SHELL_CACHE = "cmms-tpt-shell-v5";
-const ASSET_CACHE = "cmms-tpt-assets-v5";
-const API_CACHE = "cmms-tpt-api-v5";
+const SHELL_CACHE = "cmms-tpt-shell-v6";
+const ASSET_CACHE = "cmms-tpt-assets-v6";
+const API_CACHE = "cmms-tpt-api-v6";
 
 const PRECACHE_URLS = [
   "/",

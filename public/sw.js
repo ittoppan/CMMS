@@ -1,5 +1,5 @@
 /* ============================================================
-   CMMS-TOPPAN Service Worker (PHP app) — PWA shell v2
+   CMMS-TOPPAN Service Worker (PHP app) — PWA shell v3
    ------------------------------------------------------------
    - Navigation: network-first → cache → offline.html → synthesized offline page
    - API (GET /api/*): network-first + cache fallback
@@ -7,9 +7,9 @@
    - Install: per-URL precache (URL หนึ่งพัง ไม่ล้มทั้งชุด)
    - ทุก respondWith คืน Response เสมอ (กัน "Failed to convert value to 'Response'")
    ============================================================ */
-const SHELL_CACHE = "cmms-tpt-php-shell-v2";
-const ASSET_CACHE = "cmms-tpt-php-assets-v2";
-const API_CACHE   = "cmms-tpt-php-api-v2";
+const SHELL_CACHE = "cmms-tpt-php-shell-v3";
+const ASSET_CACHE = "cmms-tpt-php-assets-v3";
+const API_CACHE   = "cmms-tpt-php-api-v3";
 
 const PRECACHE_URLS = [
   "/",
