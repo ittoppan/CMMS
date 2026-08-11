@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../src/includes/layout.php';
 $pageTitle = 'เพิ่มแผน PM - CMMS-TPT';
+$pageName  = 'สร้างแผนบำรุงรักษา';
 $pdo = getDb();
 
 $assets = $pdo->query('SELECT id, code, name FROM asset_registry WHERE status = "active" ORDER BY name')->fetchAll();
@@ -57,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 renderHeader();
 function sel($a,$b){return $a===$b?'selected':'';} ?>
 <div class="max-w-3xl mx-auto">
-    <div class="mb-6">
+    <div class="mb-6 page-heading">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>
         <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มแผน Preventive Maintenance</h1>
     </div>
@@ -186,9 +187,9 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
             <label class="block text-sm font-medium text-gray-700">เหตุผลที่เลื่อนกำหนดการ</label>
             <textarea name="reschedule_reason" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
-        <div class="flex gap-3">
-            <button type="submit" class="btn-primary">บันทึก</button>
-            <a href="index.php" class="btn-secondary">ยกเลิก</a>
+        <div class="form-actions flex gap-3">
+            <button type="submit" class="btn btn-primary flex-1">💾 บันทึกแผนงาน</button>
+            <a href="index.php" class="btn btn-secondary flex-1">ยกเลิก</a>
         </div>
     </form>
 </div>

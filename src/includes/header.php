@@ -14,6 +14,12 @@ $brandLogo = $brandingSettings['company_logo'] ?? '';
 $brandCompany = $brandingSettings['company_name'] ?? 'บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด';
 $brandThemeHex = $brandingSettings['theme_primary_hex'] ?? '#003399';
 $brandLogoPos = $brandingSettings['logo_position'] ?? 'both';
+
+// Mobile native app-bar title: prefer $pageName, else strip the site suffix
+$appBarTitle = $pageName ?? '';
+if ($appBarTitle === '') {
+    $appBarTitle = preg_replace('/\s*[-–—|]\s*CMMS.*$/i', '', $pageTitle ?? '') ?: 'CMMS-TOPPAN';
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= htmlspecialchars($currentLang) ?>" class="h-full" data-theme="light" data-astryx-theme="neutral">
@@ -31,6 +37,7 @@ $brandLogoPos = $brandingSettings['logo_position'] ?? 'both';
 
     <link rel="stylesheet" href="/css/daisy-compat.css?v=<?= time() ?>">
     <link rel="stylesheet" href="/css/app.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/mobile-shell.css?v=<?= time() ?>">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script>
         if ('serviceWorker' in navigator) {
@@ -54,10 +61,30 @@ $brandLogoPos = $brandingSettings['logo_position'] ?? 'both';
     <?php endif; ?>
 
     <!-- ═══════════ MAIN CONTENT CONTAINER ═══════════ -->
-    <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden min-w-0">
-        
-        <!-- Topbar Header (Astryx TopNav) -->
-        <header class="sticky top-0 bg-surface border-b border-border z-30 px-4 sm:px-6 lg:px-8 py-2.5">
+    <div class="main-scroll relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden min-w-0">
+
+        <?php if (isset($_SESSION['user_id'])): ?>
+        <!-- ═══════════ MOBILE NATIVE APP BAR (< 1024px) ═══════════ -->
+        <header class="mobile-app-bar">
+            <div class="mobile-app-bar-inner">
+                <button type="button" class="mobile-app-bar-btn" onclick="history.back()" aria-label="ย้อนกลับ">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <?php if (!empty($brandLogo)): ?>
+                <img src="<?= getImageUrl($brandLogo, 'asset') ?>" alt="TOPPAN" class="mobile-app-bar-logo">
+                <?php endif; ?>
+                <h1 class="mobile-app-bar-title"><?= htmlspecialchars($appBarTitle) ?></h1>
+                <select onchange="location.href='?lang='+this.value;" class="mobile-app-bar-lang" aria-label="ภาษา">
+                    <option value="th" <?= ($currentLang ?? 'th') === 'th' ? 'selected' : '' ?>>TH</option>
+                    <option value="en" <?= ($currentLang ?? 'th') === 'en' ? 'selected' : '' ?>>EN</option>
+                    <option value="jp" <?= ($currentLang ?? 'th') === 'jp' ? 'selected' : '' ?>>JP</option>
+                </select>
+            </div>
+        </header>
+        <?php endif; ?>
+
+        <!-- Topbar Header (Astryx TopNav) — desktop only -->
+        <header class="desktop-topbar sticky top-0 bg-surface border-b border-border z-30 px-4 sm:px-6 lg:px-8 py-2.5">
             <div class="flex-1 flex items-center justify-between w-full">
                     
                     <!-- Topbar Left: Mobile Hamburger Toggle & Search -->
