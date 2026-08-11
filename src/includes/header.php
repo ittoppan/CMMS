@@ -25,7 +25,7 @@ if ($appBarTitle === '') {
 <html lang="<?= htmlspecialchars($currentLang) ?>" class="h-full" data-theme="light" data-astryx-theme="neutral">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title><?= htmlspecialchars($pageTitle ?? 'CMMS-TOPPAN — Enterprise Maintenance Suite') ?></title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text y='22' x='6' font-size='18' fill='white' font-weight='800'>C</text></svg>">
     <link rel="manifest" href="/manifest.json">

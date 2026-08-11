@@ -768,9 +768,14 @@ h1, h2, h3, h4 {
    - Bottom Nav สูง 60px + safe-area-inset-bottom
    - ใช้ < 1024px (แท็บเล็ตตั้ง + มือถือ)
    ================================================ */
+/* Global overflow guards + universal box model —
+   root-level safeguards, ใช้ได้กับทุกหน้า (ห้าม patch รายหน้า) */
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
+  box-sizing: border-box;
+}
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -778,8 +783,23 @@ html, body {
 .cmms-mobile-bottom-nav { display: none; }
 
 @media (max-width: 1023.98px) {
-  /* ซ่อน TopNav แบบ desktop — Mobile App Bar แทนที่ */
-  [class*="TopNav_topNav"] { display: none !important; }
+  /* ซ่อน TopNav แบบ desktop — Mobile App Bar แทนที่
+     (คลาสจริงคือ .astryx-top-nav — selector เดิม [class*="TopNav_topNav"]
+     ไม่ตรงกับคลาสที่ Astryx render จริง จึงไม่เคยซ่อนได้เลย) */
+  .astryx-top-nav { display: none !important; }
+
+  /* แถว header/toolbar ในเนื้อหาที่กว้างเกินจอ (เช่น title + ปุ่ม FMEA)
+     ให้ wrap ลงบรรทัดใหม่แทนการเลื่อนซ้าย-ขวา */
+  .astryx-layout-content .astryx-stack.horizontal {
+    flex-wrap: wrap;
+  }
+
+  /* Astryx Text component เปิด white-space: nowrap ไว้เป็นค่าเริ่มต้น
+     ทำให้ข้อความยาว (เช่น subtitle หน้ากระดาน) ไม่ยอมขึ้นบรรทัดใหม่
+     จนกว้างเกินจอ — บนมือถืออนุญาตให้ wrap ได้ */
+  .astryx-text {
+    white-space: normal !important;
+  }
 
   /* ── Mobile App Bar ── */
   .cmms-mobile-app-bar {
@@ -872,8 +892,9 @@ html, body {
   .cmms-mobile-nav-item.active,
   .cmms-mobile-nav-item:active { color: var(--cmms-primary); }
 
-  /* กันคอนเทนต์ถูก App Bar / Bottom Nav ทับ */
-  [class*="AppShell"] {
+  /* กันคอนเทนต์ถูก App Bar / Bottom Nav ทับ
+     (คลาสจริงคือ .astryx-app-shell — selector เดิม [class*="AppShell"] ไม่ตรง) */
+  .astryx-app-shell {
     padding-top: calc(56px + env(safe-area-inset-top)) !important;
     padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
   }

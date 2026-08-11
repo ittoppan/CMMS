@@ -386,6 +386,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     {/* ═══════════ MOBILE NATIVE APP BAR (< 1024px) ═══════════ */}
     <header className="cmms-mobile-app-bar">
+      {/* Hamburger — เปิด SideNav drawer ของ Astryx (ปุ่ม "Open navigation"
+          มีเฉพาะโหมด mobile <768px ของ Astryx — click ผ่าน element ที่ซ่อนไว้) */}
+      <button
+        type="button"
+        className="cmms-mobile-app-bar-btn"
+        aria-label="เปิดเมนู"
+        onClick={() => document.querySelector('button[aria-label="Open navigation"]')?.click()}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+      </button>
       <button
         type="button"
         className="cmms-mobile-app-bar-btn"
