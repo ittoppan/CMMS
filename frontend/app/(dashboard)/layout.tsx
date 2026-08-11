@@ -124,10 +124,43 @@ function getPageTitle(pathname: string): string {
   return PAGE_TITLES[pathname] || pathname.split("/").pop() || "";
 }
 
+// ═══════════ เมนู bottom nav มือถือ: ปุ่มเปลี่ยนตามสิทธิ์แต่ละบทบาท (role-based) ═══════════
+// key = menu_key เดียวกับ menu_catalog.php (ใช้ canShow() filter สิทธิ์อีกที)
+const BOTTOM_NAV_ITEMS: Record<string, { label: string; href: string; icon: React.ComponentType<{ className?: string }> }> = {
+  dashboard:             { label: "หน้าแรก",     href: "/dashboard",          icon: HomeIcon },
+  "repair/my_tasks":     { label: "งานของฉัน",   href: "/repair/my_tasks",    icon: ClipboardDocumentCheckIcon },
+  "repair/request":      { label: "แจ้งซ่อม",    href: "/repair/request",     icon: WrenchScrewdriverIcon },
+  "repair/tracking":     { label: "ติดตามงาน",   href: "/repair/tracking",    icon: MapIcon },
+  "pm_am/checksheet":    { label: "เช็คชีตตามแผน", href: "/pm_am/checksheet",  icon: ClipboardDocumentListIcon },
+  "pm_am/calendar":      { label: "แผน PM",      href: "/pm_am/calendar",     icon: CalendarDaysIcon },
+  asset_registry:        { label: "เครื่องจักร",  href: "/asset_registry",     icon: BuildingOffice2Icon },
+  "qr-sheet":            { label: "สแกน QR",     href: "/qr-sheet",           icon: MagnifyingGlassIcon },
+  analytics:             { label: "คลังข้อมูล",   href: "/analytics",          icon: ChartBarIcon },
+  notifications:         { label: "แจ้งเตือน",    href: "/notifications",      icon: BellAlertIcon },
+  "reports/export_excel":{ label: "ส่งออก Excel", href: "/reports/export_excel", icon: TableCellsIcon },
+  "reports/monthly_pdf": { label: "รายงาน PDF",   href: "/reports/monthly_pdf", icon: DocumentArrowDownIcon },
+  settings:              { label: "ตั้งค่า",      href: "/settings",           icon: Cog6ToothIcon },
+};
+
+// ลำดับปุ่มล่างตามบทบาท (roleName มาจาก permission API) แล้ว filter ด้วย canShow
+const BOTTOM_NAV_ROLE_ORDER: Record<string, string[]> = {
+  Admin:      ["dashboard", "repair/request", "pm_am/calendar", "asset_registry", "settings"],
+  Manager:    ["dashboard", "pm_am/checksheet", "pm_am/calendar", "repair/my_tasks", "asset_registry"],
+  Technician: ["dashboard", "repair/my_tasks", "pm_am/checksheet", "repair/request", "asset_registry"],
+  Operator:   ["dashboard", "repair/request", "repair/tracking", "qr-sheet", "notifications"],
+  Viewer:     ["dashboard", "analytics", "notifications", "reports/export_excel", "reports/monthly_pdf"],
+};
+const DEFAULT_BOTTOM_NAV_ORDER = ["dashboard", "repair/request", "pm_am/calendar", "asset_registry", "settings"];
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { canShow, roleName, userFullName, simulated } = useMenuPermission();
+
+  // Bottom nav มือถือ: เรียงปุ่มตามบทบาท แล้ว filter ด้วยสิทธิ์เมนู (canShow)
+  const bottomNav = (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER)
+    .filter((key) => BOTTOM_NAV_ITEMS[key] && canShow(key))
+    .map((key) => BOTTOM_NAV_ITEMS[key]);
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
 
   // Auth guard: ถ้า session ไม่ถูกต้อง (401) → ไปหน้า login
@@ -408,28 +441,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <h1 className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</h1>
     </header>
 
-    {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (< 1024px) ═══════════ */}
+    {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (< 1024px) — ปุ่มตามสิทธิ์บทบาท ═══════════ */}
     <nav className="cmms-mobile-bottom-nav" aria-label="เมนูหลัก">
-      <a href="/dashboard" className={`cmms-mobile-nav-item ${pathname === "/dashboard" ? "active" : ""}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>หน้าแรก</span>
-      </a>
-      <a href="/repair" className={`cmms-mobile-nav-item ${pathname.startsWith("/repair") ? "active" : ""}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        <span>แจ้งซ่อม</span>
-      </a>
-      <a href="/pm_am" className={`cmms-mobile-nav-item ${pathname.startsWith("/pm_am") ? "active" : ""}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>แผน PM</span>
-      </a>
-      <a href="/asset_registry" className={`cmms-mobile-nav-item ${pathname.startsWith("/asset_registry") ? "active" : ""}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <span>เครื่องจักร</span>
-      </a>
-      <a href="/settings" className={`cmms-mobile-nav-item ${pathname.startsWith("/settings") ? "active" : ""}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
-        <span>ตั้งค่า</span>
-      </a>
+      {bottomNav.map((item) => {
+        const ItemIcon = item.icon;
+        return (
+          <a key={item.href} href={item.href} className={`cmms-mobile-nav-item ${isSelected(item.href) ? "active" : ""}`}>
+            <ItemIcon className="w-5 h-5" />
+            <span>{item.label}</span>
+          </a>
+        );
+      })}
     </nav>
     </>
   );
