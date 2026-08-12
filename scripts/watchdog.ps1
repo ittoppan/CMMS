@@ -18,12 +18,11 @@ $root   = "C:\inetpub\wwwroot\cmms-tpt"
 $logDir = Join-Path $root "logs"
 $log    = Join-Path $logDir "watchdog.log"
 $lock   = Join-Path $logDir "watchdog.lock"
+$phpExe = $null
 $cmdPhp = Get-Command php -ErrorAction SilentlyContinue
-if ($cmdPhp) {
-    $phpExe = $cmdPhp.Source
-} else {
-    $phpExe = "C:\Program Files\PHP\php.exe"
-}
+if ($cmdPhp) { $phpExe = $cmdPhp.Source }
+if (-not $phpExe -and (Test-Path -LiteralPath "C:\PHP\php.exe")) { $phpExe = "C:\PHP\php.exe" }
+if (-not $phpExe -and (Test-Path -LiteralPath "C:\Program Files\PHP\php.exe")) { $phpExe = "C:\Program Files\PHP\php.exe" }
 $notifyScript = Join-Path $root "scripts\watchdog-notify.php"
 
 if (-not (Test-Path -LiteralPath $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
@@ -47,8 +46,9 @@ function Send-Alert([string]$message) {
     if (Test-Path -LiteralPath $notifyScript) {
         try {
             # ส่งผ่านไฟล์ชั่วคราวเพื่อไม่ให้ข้อความพังเพราะ quoting ใน cmd
+            # เขียนแบบ UTF-8 ไม่มี BOM (ไม่งั้น BOM จะหลุดเข้าไปต้นข้อความใน LINE)
             $tmpMsg = Join-Path $env:TEMP "cmms-watchdog-msg.txt"
-            Set-Content -LiteralPath $tmpMsg -Value $message -Encoding utf8 -NoNewline
+            [System.IO.File]::WriteAllText($tmpMsg, $message, (New-Object System.Text.UTF8Encoding $false))
             & $phpExe $notifyScript $tmpMsg | Out-Null
             Write-Log "LINE alert sent: $($message.Split("`n")[0])"
             Remove-Item -LiteralPath $tmpMsg -Force -ErrorAction SilentlyContinue
@@ -88,6 +88,28 @@ try {
                     $newUrl = ((Get-Content -LiteralPath $urlFile -Raw) -split "\s+")[0]
                     Send-Alert "🔄 [CMMS Watchdog] tunnel ถูก restart — URL ใหม่: $newUrl"
                 }
+            }
+        }
+        # 1.2) daily alert check (วันละ 1 ครั้ง) — PM ใกล้กำหนด + สต็อกต่ำ
+        $alertDateFile = Join-Path $logDir "alert_check.date"
+        $todayStr = Get-Date -Format "yyyy-MM-dd"
+        $lastCheck = ""
+        if (Test-Path -LiteralPath $alertDateFile) { $lastCheck = ((Get-Content -LiteralPath $alertDateFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastCheck -ne $todayStr) {
+            Write-Log "Daily alert check ($todayStr)..."
+            $checkScript = Join-Path $root "scripts\alert_check.php"
+            if ($phpExe -and (Test-Path -LiteralPath $checkScript)) {
+                try {
+                    # อ่าน output ของ php เป็น UTF-8 (กันตัวหนังสือไทยเพี้ยนใน log)
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    & $phpExe $checkScript 2>&1 | ForEach-Object { Write-Log "  alert_check: $_" }
+                    Set-Content -LiteralPath $alertDateFile -Value $todayStr -Encoding ascii
+                    Write-Log "Daily alert check done"
+                } catch {
+                    Write-Log "Daily alert check FAILED: $_"
+                }
+            } else {
+                Write-Log "alert_check.php not found or php missing ($phpExe)"
             }
         }
         exit 0

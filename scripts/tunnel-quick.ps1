@@ -55,6 +55,20 @@ if ($url) {
     $url | Out-File -FilePath $urlFile -Encoding ascii
     Write-Host "==> Tunnel URL: $url" -ForegroundColor Green
     Write-Host "    (บันทึกไว้ที่ logs\tunnel-url.txt)" -ForegroundColor DarkGray
+
+    # รอให้ URL ตอบสนองจริง (ตอน boot node อาจยังไม่พร้อม — แค่รายงาน ไม่ block)
+    $reachable = $false
+    for ($i = 0; $i -lt 10; $i++) {
+        Start-Sleep -Seconds 2
+        try {
+            if ((Invoke-WebRequest -Uri "$url/login" -UseBasicParsing -TimeoutSec 8).StatusCode -eq 200) { $reachable = $true; break }
+        } catch {}
+    }
+    if ($reachable) {
+        Write-Host "    URL ตอบสนองแล้ว (HTTP 200)" -ForegroundColor Green
+    } else {
+        Write-Host "    URL ยังไม่ตอบสนอง (node อาจยังไม่พร้อม) — watchdog จะจัดการให้" -ForegroundColor Yellow
+    }
 } else {
     Write-Host "!! ยังไม่เห็น URL ใน log — ดู logs\cloudflared.log" -ForegroundColor Red
     exit 1

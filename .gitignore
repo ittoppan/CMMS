@@ -3,6 +3,9 @@ vendor/
 .env
 *.log
 
+# Runtime data (watchdog, tunnel, pids)
+logs/
+
 # Next.js build artifacts
 frontend/.next/
 frontend/tsconfig.tsbuildinfo
