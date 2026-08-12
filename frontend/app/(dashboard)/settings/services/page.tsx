@@ -219,7 +219,7 @@ export default function SystemServicesPage() {
           <Card padding={5}>
             <VStack gap={3}>
               <VStack gap={1}>
-                <Heading level={3}>🔗 External Access — URL สำหรับ LINE</Heading>
+                <Heading level={3}>External Access — URL สำหรับ LINE</Heading>
                 <Text type="body" size="sm" color="secondary">
                   คัดลอกไปวางใน LINE Developers Console — LIFF Endpoint URL กับ Webhook URL (ต้องตั้งค่าที่ละรายการ)
                 </Text>
@@ -249,14 +249,14 @@ export default function SystemServicesPage() {
                 onCopy={() => copyText("ngrok", ngrokUrl)}
               />
               <Text type="body" size="sm" color="secondary">
-                💡 Tunnel URL เปลี่ยนทุกครั้งที่รัน Cloudflare ใหม่ — หลังกด "รัน" ให้รีเฟรชหน้านี้เพื่อดึง URL ล่าสุดมาใส่ Console
+                Tunnel URL เปลี่ยนทุกครั้งที่รัน Cloudflare ใหม่ — หลังกด "รัน" ให้รีเฟรชหน้านี้เพื่อดึง URL ล่าสุดมาใส่ Console
               </Text>
             </VStack>
           </Card>
 
           <Card padding={4} style={{ background: "var(--cmms-bg-subtle, #f8fafc)" }}>
             <VStack gap={2}>
-              <Text type="body" size="sm" weight="semibold">💡 คำแนะนำการใช้งาน</Text>
+              <Text type="body" size="sm" weight="semibold">คำแนะนำการใช้งาน</Text>
               <Text type="body" size="sm" color="secondary">
                 ลำดับการรันที่ถูกต้อง: ① MySQL → ② PHP API (IIS) → ③ Web App (Next.js) → ④ Cloudflare Tunnel (หรือ ngrok)
                 <br />

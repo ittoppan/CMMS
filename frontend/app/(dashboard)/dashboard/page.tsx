@@ -158,14 +158,14 @@ export default function DashboardPage() {
       if (lowStock.length > 0) {
         lines.push(`📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ ${lowStock.length} รายการ: ${lowStock.slice(0, 5).map((s: any) => `${s.name} (เหลือ ${s.stock_qty}/${s.min_stock})`).join(", ")}`);
       } else {
-        lines.push("📦 ไม่มีอะไหล่ต่ำกว่าจุดสั่งซื้อในขณะนี้");
+        lines.push("ไม่มีอะไหล่ต่ำกว่าจุดสั่งซื้อในขณะนี้");
       }
     }
     if (/งานซ่อม|wo|งาน/.test(t)) {
       lines.push(`🔧 งานซ่อมทั้งหมด ${kpis.total} รายการ · เสร็จ ${kpis.completed} · กำลังทำ ${kpis.inprogress} · เกินกำหนด ${kpis.overdue}`);
     }
     if (/downtime|หยุด|เสีย/.test(t)) {
-      lines.push(`⏱️ Downtime รวม ${esgData.total_downtime_minutes.toLocaleString()} นาที (สูญเสียพลังงานคิดเป็น ${esgData.energy_waste_thb.toLocaleString()} บาท)`);
+      lines.push(`⏱ Downtime รวม ${esgData.total_downtime_minutes.toLocaleString()} นาที (สูญเสียพลังงานคิดเป็น ${esgData.energy_waste_thb.toLocaleString()} บาท)`);
     }
     if (lines.length === 0) {
       return `📊 ผมช่วยสรุปข้อมูลในระบบได้ เช่น พิมพ์ "ค่าใช้จ่ายเดือนนี้" "PM ทันกำหนด" "สต็อกต่ำ" "งานซ่อม" หรือ "downtime"`;
@@ -584,13 +584,13 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('overview')}
                 className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'overview' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
-                📈 ภาพรวม
+                ภาพรวม
               </button>
               <button
                 onClick={() => setActiveTab('performance')}
                 className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'performance' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
-                ⚙️ ประสิทธิภาพ
+                ประสิทธิภาพ
               </button>
               <button
                 onClick={() => setActiveTab('live')}
@@ -661,7 +661,7 @@ export default function DashboardPage() {
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
                         <VStack gap={1}>
-                          <Heading level={4} className="font-bold">📊 กราฟเปรียบเทียบปริมาณงานซ่อม ({selectedYear})</Heading>
+                          <Heading level={4} className="font-bold">กราฟเปรียบเทียบปริมาณงานซ่อม ({selectedYear})</Heading>
                           <Text type="body" size="sm" color="secondary">เปรียบเทียบงานซ่อมเสร็จ เครื่องชำรุด และค่าใช้จ่าย</Text>
                         </VStack>
                         <Badge label={viewMode === 'monthly' ? `6 เดือน` : `12 เดือน`} variant="info" size="sm" />
@@ -686,7 +686,7 @@ export default function DashboardPage() {
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
                         <VStack gap={1}>
-                          <Heading level={4} className="font-bold">📈 แนวโน้ม MTBF & MTTR ({selectedYear})</Heading>
+                          <Heading level={4} className="font-bold">แนวโน้ม MTBF & MTTR ({selectedYear})</Heading>
                           <Text type="body" size="sm" color="secondary">MTBF (เวลาทำงานเฉลี่ยก่อนชำรุด) vs MTTR (เวลาซ่อมเฉลี่ย)</Text>
                         </VStack>
                         <Badge label="ตัวชี้วัดความน่าเชื่อถือ" variant="error" size="sm" />
@@ -712,7 +712,7 @@ export default function DashboardPage() {
                   <VStack gap={4}>
                     <HStack hAlign="between" vAlign="center">
                       <VStack gap={1}>
-                        <Heading level={4} className="font-bold">🍩 สัดส่วนค่าใช้จ่ายซ่อมบำรุง ({selectedYear})</Heading>
+                        <Heading level={4} className="font-bold">สัดส่วนค่าใช้จ่ายซ่อมบำรุง ({selectedYear})</Heading>
                         <Text type="body" size="sm" color="secondary">แยกตามหมวดหมู่: ค่าอะไหล่, ค่าแรง, จ้างเหมา</Text>
                       </VStack>
                       <Badge label="วิเคราะห์ค่าใช้จ่าย" variant="warning" size="sm" />
@@ -761,7 +761,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
-                        <Heading level={4} className="font-bold flex items-center gap-2">📊 การวิเคราะห์สาเหตุรากของปัญหา (Pareto 80/20)</Heading>
+                        <Heading level={4} className="font-bold flex items-center gap-2">การวิเคราะห์สาเหตุรากของปัญหา (Pareto 80/20)</Heading>
                         <Badge label="การวิเคราะห์ RCA" variant="warning" size="sm" />
                       </HStack>
                       <ResponsiveContainer width="100%" height={300}>
@@ -783,7 +783,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
-                        <Heading level={4} className="font-bold flex items-center gap-2">📅 อัตราการปฏิบัติตามแผน PM</Heading>
+                        <Heading level={4} className="font-bold flex items-center gap-2">อัตราการปฏิบัติตามแผน PM</Heading>
                       </HStack>
                       <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
@@ -816,7 +816,7 @@ export default function DashboardPage() {
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
                         <Heading level={4} className="text-white font-bold flex items-center gap-2">
-                          <MapIcon className="w-5 h-5 text-cyan-400"/> 🗺️ แผนผังโรงงานแบบเรียลไทม์
+                          <MapIcon className="w-5 h-5 text-cyan-400"/> แผนผังโรงงานแบบเรียลไทม์
                         </Heading>
                         <Badge label="จำลองเครื่องจักรดิจิทัล" variant="info" size="sm" />
                       </HStack>
@@ -851,7 +851,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <Heading level={4} className="font-bold flex items-center gap-2">
-                        <TrophyIcon className="w-5 h-5 text-amber-500"/> 🏆 ผู้ปฏิบัติงานยอดเยี่ยม
+                        <TrophyIcon className="w-5 h-5 text-amber-500"/> ผู้ปฏิบัติงานยอดเยี่ยม
                       </Heading>
                       <VStack gap={4}>
                         {topPerformers.length === 0 ? (
@@ -897,7 +897,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <Heading level={4} className="font-bold flex items-center gap-2">
-                        <UsersIcon className="w-5 h-5 text-emerald-500"/> 📍 Live Technician Tracker
+                        <UsersIcon className="w-5 h-5 text-emerald-500"/> Live Technician Tracker
                       </Heading>
                       <VStack gap={4}>
                         {liveTechTrackers.length === 0 ? (
@@ -941,7 +941,7 @@ export default function DashboardPage() {
                             </HStack>
                             <Text type="body" size="sm" color="secondary" className="truncate">{asset.name}</Text>
                             <Text type="body" size="sm" className="text-slate-500">
-                              {asset.status === 'down' ? '⚠️ หยุดทำงาน' : `ตรวจสอบล่าสุด: ${asset.lastChecked}`}
+                              {asset.status === 'down' ? '⚠ หยุดทำงาน' : `ตรวจสอบล่าสุด: ${asset.lastChecked}`}
                             </Text>
                           </div>
                         ))}
@@ -956,7 +956,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
-                        <Heading level={4} className="font-bold">⏱️ ไทม์ไลน์กิจกรรม (ไลฟ์)</Heading>
+                        <Heading level={4} className="font-bold">⏱ ไทม์ไลน์กิจกรรม (ไลฟ์)</Heading>
                         <Badge label="เรียลไทม์" variant="primary" size="sm" />
                       </HStack>
                       <div className="relative pl-6 mt-4 space-y-6 before:absolute before:left-6 before:top-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
@@ -987,7 +987,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
-                        <Heading level={4} className="font-bold">⚠️ แจ้งเตือนอะไหล่ใกล้หมดสต็อก</Heading>
+                        <Heading level={4} className="font-bold">แจ้งเตือนอะไหล่ใกล้หมดสต็อก</Heading>
                         <Link href="/spare_parts">
                           <Text type="body" size="sm" color="primary" className="font-bold hover:underline">ไปที่คลังอะไหล่ →</Text>
                         </Link>
@@ -1015,7 +1015,7 @@ export default function DashboardPage() {
                 <Card elevation="high" padding={6}>
                   <VStack gap={4}>
                     <Heading level={4} className="font-bold flex items-center gap-2">
-                      <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-500"/> 📋 สรุปการตรวจเช็คประจำวัน
+                      <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-500"/> สรุปการตรวจเช็คประจำวัน
                     </Heading>
                     <Grid columns={{ minWidth: 250, repeat: "fit" }} gap={4}>
                       <Card elevation="medium" padding={5} className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700/50">
@@ -1100,7 +1100,9 @@ export default function DashboardPage() {
                 ) : drillDownMachines.map((m, i) => (
                   <div key={i} className="flex justify-between items-center p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <HStack gap={3} vAlign="center">
-                      <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 text-xl">⚠️</div>
+                      <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                        <WrenchScrewdriverIcon className="w-6 h-6" />
+                      </div>
                       <VStack gap={1}>
                         <Text type="body" weight="bold">{m.asset_name || m.title || "งานซ่อม"}</Text>
                         <Text type="supporting" color="secondary">{m.work_order_no} · ซ่อมโดย: {m.assigned_name || "ยังไม่มอบหมาย"}</Text>

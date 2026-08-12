@@ -231,7 +231,7 @@ export default function RepairHistoryPage() {
         <Badge label={`👷 ค่าแรง: ${stats.costLabor.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`} variant="info" />
         <Badge label={`🏭 ค่าจ้างภายนอก: ${stats.costOutsource.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`} variant="warning" />
         {stats.downtime > 0 && (
-          <Badge label={`⏱️ เวลาหยุดเครื่องรวม: ${stats.downtime.toLocaleString("th-TH")} นาที`} variant="info" />
+          <Badge label={`⏱ เวลาหยุดเครื่องรวม: ${stats.downtime.toLocaleString("th-TH")} นาที`} variant="info" />
         )}
       </HStack>
 

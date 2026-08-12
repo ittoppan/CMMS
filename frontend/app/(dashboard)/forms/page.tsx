@@ -161,7 +161,7 @@ export default function FormsPage() {
       }
     } catch (e) {
       console.error("Upload form error", e);
-      setUpMsg({ text: "❌ ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setUpMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
     } finally {
       setUpLoading(false);
     }

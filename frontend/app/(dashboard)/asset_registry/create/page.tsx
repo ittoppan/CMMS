@@ -118,7 +118,7 @@ export default function CreateAssetPage() {
               background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)',
               fontSize: '0.85rem', fontWeight: 600,
             }}>
-              ⚠️ {errorMessage}
+              {errorMessage}
             </div>
           )}
 
@@ -177,9 +177,9 @@ export default function CreateAssetPage() {
                 value={form.criticality}
                 onChange={(v: string) => update("criticality", v)}
                 options={[
-                  { value: "A", label: "🔴 Class A — ส่งผลต่อการผลิตหลักหยุดชะงัก" },
-                  { value: "B", label: "🟡 Class B — เครื่องจักรรอง สำรองได้" },
-                  { value: "C", label: "🟢 Class C — อุปกรณ์ทั่วไป" },
+                  { value: "A", label: "Class A — ส่งผลต่อการผลิตหลักหยุดชะงัก" },
+                  { value: "B", label: "Class B — เครื่องจักรรอง สำรองได้" },
+                  { value: "C", label: "Class C — อุปกรณ์ทั่วไป" },
                 ]}
               />
             </Field>
@@ -191,10 +191,10 @@ export default function CreateAssetPage() {
                 value={form.status}
                 onChange={(v: string) => update("status", v)}
                 options={[
-                  { value: "running", label: "🟢 เดินเครื่องทำงานปกติ" },
-                  { value: "breakdown", label: "🔴 เครื่องเสีย" },
-                  { value: "maintenance", label: "🟡 กำลังทำซ่อมบำรุง" },
-                  { value: "standby", label: "🔵 พร้อมใช้งานสำรอง" },
+                  { value: "running", label: "เดินเครื่องทำงานปกติ" },
+                  { value: "breakdown", label: "เครื่องเสีย" },
+                  { value: "maintenance", label: "กำลังทำซ่อมบำรุง" },
+                  { value: "standby", label: "พร้อมใช้งานสำรอง" },
                 ]}
               />
             </Field>
@@ -229,7 +229,7 @@ export default function CreateAssetPage() {
               />
             </Field>
 
-            <Field label="📸 รูปภาพเครื่องจักร" inputID="image_path">
+            <Field label="รูปภาพเครื่องจักร" inputID="image_path">
               <ImageUploadField
                 value={form.image_path || null}
                 onChange={(url) => update("image_path", url || "")}

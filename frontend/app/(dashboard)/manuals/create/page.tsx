@@ -97,7 +97,7 @@ export default function ManualCreatePage() {
         <VStack gap={5} style={{ maxWidth: 640 }}>
           {error && (
             <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-              ⚠️ {error}
+              {error}
             </div>
           )}
 

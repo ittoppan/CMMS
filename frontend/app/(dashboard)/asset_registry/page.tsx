@@ -317,9 +317,9 @@ export default function AssetRegistryPage() {
               onChange={setCriticalityFilter}
               options={[
                 { value: "all", label: "ทุกระดับความสำคัญ" },
-                { value: "A", label: "🔴 ระดับ A" },
-                { value: "B", label: "🟡 ระดับ B" },
-                { value: "C", label: "🟢 ระดับ C" },
+                { value: "A", label: "ระดับ A" },
+                { value: "B", label: "ระดับ B" },
+                { value: "C", label: "ระดับ C" },
               ]}
             />
             <Selector
@@ -330,10 +330,10 @@ export default function AssetRegistryPage() {
               onChange={setStatusFilter}
               options={[
                 { value: "all", label: "ทุกสถานะการทำงาน" },
-                { value: "running", label: "🟢 กำลังทำงานปกติ" },
-                { value: "breakdown", label: "🔴 เครื่องเสีย" },
-                { value: "maintenance", label: "🟡 กำลังทำซ่อมบำรุง" },
-                { value: "standby", label: "🔵 พร้อมใช้งาน" },
+                { value: "running", label: "กำลังทำงานปกติ" },
+                { value: "breakdown", label: "เครื่องเสีย" },
+                { value: "maintenance", label: "กำลังทำซ่อมบำรุง" },
+                { value: "standby", label: "พร้อมใช้งาน" },
               ]}
             />
           </>

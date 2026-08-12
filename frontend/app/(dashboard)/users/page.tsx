@@ -388,7 +388,7 @@ export default function UsersPage() {
                   background: 'var(--cmms-success-light)', color: 'var(--cmms-success)',
                   fontWeight: 600,
                 }}>
-                  ✅ ลบผู้ใช้ {deleteTarget.fullName} เรียบร้อยแล้ว
+                  ลบผู้ใช้ {deleteTarget.fullName} เรียบร้อยแล้ว
                 </div>
               ) : (
                 <>

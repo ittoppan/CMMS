@@ -303,8 +303,8 @@ export default function MyTasksPage() {
           <Text type="body" size="sm" color="disabled">-</Text>
         ) : (
           <HStack gap={1} vAlign="center">
-            {task.beforeImg && <Badge label="📸 ก่อนซ่อม" variant="error" />}
-            {task.afterImg && <Badge label="📸 หลังซ่อม" variant="success" />}
+            {task.beforeImg && <Badge label="ก่อนซ่อม" variant="error" />}
+            {task.afterImg && <Badge label="หลังซ่อม" variant="success" />}
           </HStack>
         ),
     },
@@ -469,7 +469,7 @@ export default function MyTasksPage() {
               </Field>
 
               {/* 📸 AFTER REPAIR IMAGE UPLOAD */}
-              <Field label="📸 แนบรูปถ่ายหลังซ่อมเสร็จ" inputID="afterPhoto">
+              <Field label="แนบรูปถ่ายหลังซ่อมเสร็จ" inputID="afterPhoto">
                 <VStack gap={2}>
                   <FileInput
                     label="รูปหลังซ่อม"
@@ -489,15 +489,15 @@ export default function MyTasksPage() {
                   {afterImg && (
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'var(--cmms-success-bg)', padding: 10, borderRadius: 8, border: '1px solid var(--cmms-success)' }}>
                       <img src={afterImg} alt="รูปตัวอย่างหลังซ่อม" style={{ width: 60, height: 60, borderRadius: 6, objectFit: 'cover' }} />
-                      <Text type="body" size="sm" weight="bold" style={{ color: 'var(--cmms-success)' }}>✓ พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ</Text>
+                      <Text type="body" size="sm" weight="bold" style={{ color: 'var(--cmms-success)' }}>พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ</Text>
                     </div>
                   )}
                 </VStack>
               </Field>
 
-              {/* 👤 RECEIVER NAME & ✍️ SIGNATURE CANVAS */}
+              {/* 👤 RECEIVER NAME & ✍ SIGNATURE CANVAS */}
               <Grid columns={2} gap={4}>
-                <Field label="👤 ชื่อผู้รับมอบงานซ่อมเสร็จ *" inputID="recName" isRequired>
+                <Field label="ชื่อผู้รับมอบงานซ่อมเสร็จ *" inputID="recName" isRequired>
                   <TextInput
                     label="ชื่อผู้รับมอบงาน"
                     isLabelHidden
@@ -507,7 +507,7 @@ export default function MyTasksPage() {
                   />
                 </Field>
 
-                <Field label="✍️ ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์) *" inputID="sigCanvas">
+                <Field label="ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์) *" inputID="sigCanvas">
                   <VStack gap={1}>
                     <canvas
                       ref={canvasRef}
@@ -533,7 +533,7 @@ export default function MyTasksPage() {
                         variant="ghost"
                         size="sm"
                         onClick={clearSignature}
-                        label="🗑️ ล้างลายเซ็น"
+                        label="ล้างลายเซ็น"
                         style={{ color: 'var(--cmms-danger)' }}
                       />
                     </HStack>

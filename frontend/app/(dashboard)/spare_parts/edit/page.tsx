@@ -149,7 +149,7 @@ function EditSparePartContent() {
                 background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)',
                 fontSize: '0.85rem', fontWeight: 600,
               }}>
-                ⚠️ {errorMessage}
+                {errorMessage}
               </div>
             )}
 
@@ -253,7 +253,7 @@ function EditSparePartContent() {
                 />
               </Field>
 
-              <Field label="📸 รูปภาพอะไหล่" inputID="image_url">
+              <Field label="รูปภาพอะไหล่" inputID="image_url">
                 <ImageUploadField
                   value={form.image_url || null}
                   onChange={(url) => update("image_url", url || "")}

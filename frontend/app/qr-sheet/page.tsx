@@ -94,7 +94,7 @@ export default function QrSheetPage() {
           </Text>
         </VStack>
         <div className="no-print">
-          <Button label="🖨️ ปริ้นติกเกอร์" variant="primary" size="lg" isDisabled={generating} onClick={() => window.print()} />
+          <Button label="ปริ้นติกเกอร์" variant="primary" size="lg" isDisabled={generating} onClick={() => window.print()} />
         </div>
       </HStack>
 

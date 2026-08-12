@@ -145,7 +145,7 @@ export default function AnalyticsDashboardPage() {
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>📊 วิเคราะห์ประสิทธิภาพการซ่อมบำรุง</Heading>
+            <Heading level={2}>วิเคราะห์ประสิทธิภาพการซ่อมบำรุง</Heading>
             <Badge label="ข้อมูลจริง" variant="info" />
           </HStack>
           <Text type="body" color="secondary">ติดตาม MTBF, MTTR, งานซ่อม และค่าใช้จ่ายรายเดือนของโรงงาน</Text>

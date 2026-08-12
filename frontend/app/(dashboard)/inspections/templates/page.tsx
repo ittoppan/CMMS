@@ -229,7 +229,7 @@ export default function InspectionTemplatesPage() {
                       />
                     </div>
                     <div style={{ width: 130 }}>
-                      <Selector label="ประเภท" isLabelHidden value={it.type} onChange={(v) => updateItem(idx, { type: v === "value" ? "value" : "check" })} options={[{ value: "check", label: "✓ ตรวจ" }, { value: "value", label: "# ค่าตัวเลข" }]} />
+                      <Selector label="ประเภท" isLabelHidden value={it.type} onChange={(v) => updateItem(idx, { type: v === "value" ? "value" : "check" })} options={[{ value: "check", label: "ตรวจ" }, { value: "value", label: "# ค่าตัวเลข" }]} />
                     </div>
                     <Button label="" variant="ghost" size="sm" icon={<Icon icon={TrashIcon} size="sm" color="error" />} onClick={() => removeItem(idx)} />
                   </HStack>

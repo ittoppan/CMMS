@@ -167,7 +167,7 @@ export default function RegisterPage() {
         <SuccessDialog
           title="ผูกบัญชีสำเร็จ!"
           message={<>ลงทะเบียน LINE ID กับ<Text type="body" color="primary" weight="bold" as="span">{boundUser.full_name}</Text></>}
-          primaryLabel="📋 ไปแจ้งซ่อมเลย"
+          primaryLabel="ไปแจ้งซ่อมเลย"
           secondaryLabel="แจ้งซ่อมอีกทีหลัง"
           stackButtons
           onPrimary={() => (window.location.href = "/repair/request")}
@@ -261,7 +261,7 @@ export default function RegisterPage() {
                   background: "#eff6ff", border: "1px solid #93c5fd", color: "#1e40af",
                   fontSize: "0.8rem", fontWeight: 600, lineHeight: 1.5,
                 }}>
-                  ⚠️ ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี
+                  ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี
                   (หรือเปิดลิงก์นี้จากแชท LINE เพื่อผูกอัตโนมัติ)
                 </div>
               )}
@@ -282,7 +282,7 @@ export default function RegisterPage() {
                   <Text type="body" size="sm" color="secondary">
                     LINE ID นี้ผูกกับเลขพนักงาน {boundUser.employee_code} อยู่แล้ว — ไปแจ้งซ่อมได้เลย
                   </Text>
-                  <Button label="📋 ไปแจ้งซ่อม" variant="primary" width="100%" onClick={() => (window.location.href = "/repair/request")} />
+                  <Button label="ไปแจ้งซ่อม" variant="primary" width="100%" onClick={() => (window.location.href = "/repair/request")} />
                 </VStack>
               ) : (
                 <VStack gap={4}>
@@ -325,7 +325,7 @@ export default function RegisterPage() {
                       background: "#fef2f2", border: "1px solid #fca5a5", color: "#b91c1c",
                       fontSize: "0.8rem", fontWeight: 600, lineHeight: 1.5,
                     }}>
-                      ❌ {error}
+                      {error}
                     </div>
                   )}
 
@@ -333,7 +333,7 @@ export default function RegisterPage() {
                     {liffStatus === "external" && !lineUserId ? (
                       <>
                         <Button
-                          label="🔗 ล็อกอินด้วย LINE เพื่อผูกบัญชี"
+                          label="ล็อกอินด้วย LINE เพื่อผูกบัญชี"
                           variant="primary"
                           width="100%"
                           onClick={() => (window.location.href = "/line_login.php")}

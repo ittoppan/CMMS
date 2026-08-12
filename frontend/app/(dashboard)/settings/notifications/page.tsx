@@ -209,7 +209,7 @@ export default function NotificationsSettingsPage() {
   // สร้าง Flex Message JSON ต้นฉบับ (ตรงกับ payload ที่ระบบส่งจริง)
   const flexJson = useMemo(() => {
     const headerColor = /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8";
-    const headerTitle = fillVars(activeTpl.header_title || "🔔 CMMS-TPT NOTIFICATION");
+    const headerTitle = fillVars(activeTpl.header_title || "CMMS-TPT NOTIFICATION");
     const bodyText = fillVars(activeTpl.body_text || "ข้อความแจ้งเตือนจากระบบ");
     const btnLabel = fillVars(activeTpl.btn_label || "ดูรายละเอียดในระบบ");
     const bubble = {
@@ -246,7 +246,7 @@ export default function NotificationsSettingsPage() {
     } catch { /* clipboard ไม่พร้อม — ข้าม */ }
   };
 
-  const previewTitle = (activeTpl.header_title || "🔔 CMMS-TPT NOTIFICATION")
+  const previewTitle = (activeTpl.header_title || "CMMS-TPT NOTIFICATION")
     .replace(/{work_order_id}/g, "WO-1002")
     .replace(/{requisition_no}/g, "REQ-001")
     .replace(/{item_code}/g, "SUP0010917");
@@ -285,8 +285,8 @@ export default function NotificationsSettingsPage() {
 
       {/* Channel tabs */}
       <TabList value={activeChannel} onChange={setActiveChannel} hasDivider layout="fill" aria-label="ช่องทางการแจ้งเตือน">
-        <Tab value="line" label="💬 LINE Messenger" />
-        <Tab value="email" label="✉️ อีเมล (Email)" />
+        <Tab value="line" label="LINE Messenger" />
+        <Tab value="email" label="อีเมล (Email)" />
       </TabList>
 
       {activeChannel === "email" && <EmailNotifySettings />}
@@ -510,7 +510,7 @@ export default function NotificationsSettingsPage() {
                 }}>
                   <HStack gap={2} vAlign="center">
                     <Text type="body" size="sm" weight="bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
-                      {testResult.ok ? "✅ " : "⚠️ "}{testResult.msg}
+                      {testResult.ok ? "✅ " : " "}{testResult.msg}
                     </Text>
                   </HStack>
                 </Card>
@@ -567,7 +567,7 @@ export default function NotificationsSettingsPage() {
                 >
                   {/* Header */}
                   <div style={{ background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: 12 }}>
-                    {previewTitle || "🔔 แจ้งเตือน CMMS-TPT"}
+                    {previewTitle || "แจ้งเตือน CMMS-TPT"}
                   </div>
                   {/* Body */}
                   <div style={{ padding: "10px 12px", fontSize: 11.5, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
