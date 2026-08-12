@@ -101,7 +101,7 @@ function LoginContent() {
         style={{
           position: "relative",
           padding: 48,
-          background: "linear-gradient(135deg, #0E1524 0%, #312E81 55%, #6D28D9 100%)",
+          background: "linear-gradient(135deg, #0B1F4B 0%, #193264 55%, #0068B5 100%)",
         }}
       >
         {/* QR-code grid — ลายตารางแบบ QR ที่ช่างสแกนบนเครื่องจักร */}

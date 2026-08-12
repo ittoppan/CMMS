@@ -14,6 +14,26 @@
    that nothing ever adds, so dark: utilities stay inert forever. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* TOPPAN brand palette: remap Tailwind indigo/purple utilities → TOPPAN Blue family
+   (ครอบทุกหน้าที่ใช้ indigo-*/purple-* ให้เป็นน้ำเงินแบรนด์เดียวกัน) */
+@theme {
+  --color-indigo-100: #E6F0FA;
+  --color-indigo-200: #C2DDF2;
+  --color-indigo-300: #8FC0E8;
+  --color-indigo-400: #3E8FCF;
+  --color-indigo-500: #0068B5;
+  --color-indigo-600: #005FA3;
+  --color-indigo-700: #00508C;
+  --color-indigo-800: #193264;
+  --color-indigo-900: #12244A;
+  --color-purple-400: #3E8FCF;
+  --color-purple-500: #0068B5;
+  --color-purple-600: #005FA3;
+  --color-purple-700: #00508C;
+  --color-purple-800: #193264;
+  --color-purple-900: #12244A;
+}
+
 /* ================================================
    CMMS-TOPPAN Design System v2.0
    Premium Light Mode for Manufacturing
@@ -38,39 +58,40 @@ body {
 }
 
 :root {
-  /* === Theme A: Indigo & Violet (Premium) ===
-     โทนม่วงครามพรีเมียม — accent indigo #4F46E5
-     gradient ฟ้า→ม่วง sidebar เข้มทึบ เหมาะ enterprise */
-  --color-accent: #4F46E5;
-  --color-accent-muted: rgba(79, 70, 229, 0.12);
+  /* === TOPPAN Brand Theme ===
+     สีจากเว็บ holdings.toppan.com — TOPPAN Blue #0068B5
+     + Deep Navy #193264 + พื้นหลัง #F5F7FA
+     (อ้างอิง: https://www.holdings.toppan.com/en/) */
+  --color-accent: #0068B5;
+  --color-accent-muted: rgba(0, 104, 181, 0.12);
   --color-on-accent: #FFFFFF;
-  --color-text-accent: #4338CA;
-  --color-icon-accent: #4F46E5;
-  --color-background-blue: rgba(79, 70, 229, 0.10);
-  --color-border-blue: #4F46E5;
-  --color-icon-blue: #4F46E5;
-  --color-text-blue: #3730A3;
-  --color-background-body: #F5F6FB;
+  --color-text-accent: #00508C;
+  --color-icon-accent: #0068B5;
+  --color-background-blue: rgba(0, 104, 181, 0.10);
+  --color-border-blue: #0068B5;
+  --color-icon-blue: #0068B5;
+  --color-text-blue: #00508C;
+  --color-background-body: #F5F7FA;
   --color-background-surface: #FFFFFF;
   --color-background-card: #FFFFFF;
-  --color-background-muted: #EEF0F8;
+  --color-background-muted: #EEF1F6;
   --color-background-popover: #FFFFFF;
-  --color-text-primary: #0E1524;
+  --color-text-primary: #22262E;
   --color-text-secondary: #475569;
   --color-text-disabled: #9AA4B8;
-  --color-border: #E3E7F0;
-  --color-border-emphasized: #C7CDE0;
-  --color-neutral: rgba(79, 70, 229, 0.08);
-  --color-shadow: rgba(30, 27, 75, 0.08);
-  --color-skeleton: #E3E7F0;
-  --color-track: #E3E7F0;
+  --color-border: #E4E8EE;
+  --color-border-emphasized: #C9D2DC;
+  --color-neutral: rgba(0, 104, 181, 0.08);
+  --color-shadow: rgba(25, 50, 100, 0.08);
+  --color-skeleton: #E4E8EE;
+  --color-track: #E4E8EE;
 
   /* === Brand Colors (Astryx Theme Tokens) ===
      ค่าทั้งหมดอ้างอิง astryx theme (--color-*) เพื่อให้
      ทั้งระบบตามธีม astryx — เปลี่ยน theme ทีหลัง แค่สลับ
      ไฟล์ theme แล้วทุกหน้าจะเปลี่ยนสีตามอัตโนมัติ */
   --cmms-primary: var(--color-accent);
-  --cmms-primary-hover: #4338CA;
+  --cmms-primary-hover: #00508C;
   --cmms-primary-light: var(--color-background-blue);
   --cmms-primary-glow: var(--color-accent-muted);
 
@@ -87,9 +108,9 @@ body {
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);
   --cmms-bg-card-hover: var(--color-background-muted);
-  --cmms-bg-sidebar: #0E1524;
-  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --cmms-bg-sidebar-active: linear-gradient(135deg, #4F46E5, #7C3AED);
+  --cmms-bg-sidebar: #193264;
+  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --cmms-bg-sidebar-active: linear-gradient(135deg, #193264, #0068B5);
   --cmms-bg-topnav: var(--color-background-surface);
   --cmms-bg-muted: var(--color-background-muted);
   --cmms-bg-wash: var(--color-background-muted);
@@ -128,7 +149,7 @@ body {
   --cmms-transition-slow: 300ms ease;
 
   /* === Gradients === */
-  --cmms-gradient-primary: linear-gradient(135deg, #4F46E5, #8B5CF6);
+  --cmms-gradient-primary: linear-gradient(135deg, #0068B5, #0093FF);
   --cmms-gradient-success: linear-gradient(135deg, #059669, #10B981);
   --cmms-gradient-warning: linear-gradient(135deg, #D97706, #F59E0B);
   --cmms-gradient-danger: linear-gradient(135deg, #DC2626, #EF4444);
@@ -1329,7 +1350,7 @@ next-route-announcer {
 .cmms-andon-board {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, #0B1220 0%, #101A2E 100%);
+  background: linear-gradient(180deg, #12244A 0%, #193264 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--cmms-radius-xl);
   padding: 18px 20px 16px;

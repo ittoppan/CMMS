@@ -27,7 +27,7 @@ const isHex = (v: string) => /^#[0-9a-fA-F]{3,8}$/.test(v);
 export default function ThemeSettingsPanel({ values, onChange, onSave, saving }: Props) {
   const [previewKey, setPreviewKey] = useState<string | null>(null);
 
-  const primary = isHex(values.theme_primary_hex) ? values.theme_primary_hex : "#4F46E5";
+  const primary = isHex(values.theme_primary_hex) ? values.theme_primary_hex : "#0068B5";
   const secondary = isHex(values.theme_secondary_hex) ? values.theme_secondary_hex : "";
   const preset = (values.theme_preset as string) || "indigo";
 
@@ -134,7 +134,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
               value={values.theme_primary_hex ?? ""}
               onChange={(e) => onChange("theme_primary_hex", e.target.value)}
               onBlur={() => preview(preset, primary)}
-              placeholder="#4F46E5"
+              placeholder="#0068B5"
               style={{ width: 110, padding: "6px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", font: "inherit", fontSize: 13 }}
             />
           </HStack>
@@ -144,7 +144,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
           <HStack gap={2} vAlign="center">
             <input
               type="color"
-              value={isHex(secondary) ? secondary : "#8B5CF6"}
+              value={isHex(secondary) ? secondary : "#0093FF"}
               onChange={(e) => {
                 onChange("theme_secondary_hex", e.target.value);
                 preview(preset, primary, e.target.value);
@@ -156,7 +156,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
               value={values.theme_secondary_hex ?? ""}
               onChange={(e) => onChange("theme_secondary_hex", e.target.value)}
               onBlur={() => preview(preset, primary, secondary)}
-              placeholder="#8B5CF6"
+              placeholder="#0093FF"
               style={{ width: 110, padding: "6px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", font: "inherit", fontSize: 13 }}
             />
           </HStack>

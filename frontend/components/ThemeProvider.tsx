@@ -13,6 +13,13 @@ export const THEME_PRESETS: Record<
   string,
   { label: string; primary: string; gradient: string; sidebar: string; body: string }
 > = {
+  toppan: {
+    label: "TOPPAN Blue",
+    primary: "#0068B5",
+    gradient: "linear-gradient(135deg, #193264, #0068B5)",
+    sidebar: "#193264",
+    body: "#F5F7FA",
+  },
   indigo: {
     label: "Indigo & Violet",
     primary: "#4F46E5",
