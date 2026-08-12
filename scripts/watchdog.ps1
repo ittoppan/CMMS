@@ -92,7 +92,8 @@ try {
         }
         # 1.3) weekly report (สัปดาห์ละ 1 ครั้ง, ทุกวันจันทร์) — สรุปงานซ่อมบำรุงประจำสัปดาห์
         $weekFile = Join-Path $logDir "weekly_report.date"
-        $thisWeek = (Get-Date -Format "yyyy") + "-W" + [System.Globalization.ISOWeek]::GetWeekOfYear((Get-Date))
+        # หมายเลขสัปดาห์แบบง่าย (เปลี่ยนทุกสัปดาห์ — ใช้เป็น trigger รายสัปดาห์; ISOWeek ไม่มีใน PS 5.1)
+        $thisWeek = (Get-Date -Format "yyyy") + "-W" + ([math]::Floor((((Get-Date).DayOfYear - 1) / 7) + 1))
         $lastWeek = ""
         if (Test-Path -LiteralPath $weekFile) { $lastWeek = ((Get-Content -LiteralPath $weekFile -Raw) -replace "[\r\n]", "").Trim() }
         if ($lastWeek -ne $thisWeek) {
