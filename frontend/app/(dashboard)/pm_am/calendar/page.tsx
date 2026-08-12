@@ -9,22 +9,27 @@ import { Calendar } from "@astryxdesign/core/Calendar";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
-import { 
+import {
   PlusIcon,
-  WrenchScrewdriverIcon,
   ClockIcon,
   CalendarDaysIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon
 } from "@heroicons/react/24/outline";
+import AndonLamp from "@/components/AndonLamp";
 
 const todayStr = new Date().toISOString().slice(0, 10);
 
-const statusDot: Record<string, "success" | "warning" | "error" | "accent"> = {
-  scheduled: "accent",
-  overdue: "error",
-  completed: "success",
-  "in-progress": "warning",
+// สถานะ → ไฟ Andon: เขียวเสร็จ / เหลืองกำลังทำ / แดงเลยกำหนด / เทารอทำ
+const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
+  const v = String(s || "").toLowerCase();
+  if (v === "completed") return "ok";
+  if (v === "in-progress" || v === "in_progress") return "warn";
+  if (v === "overdue") return "down";
+  return "idle";
+};
+
+const pmStatusLabel: Record<string, string> = {
+  scheduled: "รอทำ", overdue: "เลยกำหนด", completed: "เสร็จสิ้น",
+  "in-progress": "กำลังทำ", in_progress: "กำลังทำ",
 };
 
 const freqColors: Record<string, "info" | "warning" | "success" | "neutral" | "blue"> = {
@@ -74,8 +79,11 @@ export default function PMCalendarPage() {
     <VStack gap={6}>
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">
+            PM / AM Calendar · CMMS-TOPPAN
+          </Text>
           <Heading level={2}>ปฏิทินงานซ่อมบำรุง (PM Calendar)</Heading>
-          <Text type="body" color="secondary">ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน (Preventive & Autonomous Maintenance)</Text>
+          <Text type="body" color="secondary">ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน — ไฟแดงคืองานเลยกำหนด ไฟเหลืองคือต้องทำ</Text>
         </VStack>
         <HStack gap={3}>
           <Button
@@ -95,54 +103,58 @@ export default function PMCalendarPage() {
         </HStack>
       </HStack>
 
-      <Grid columns={4} gap={4}>
-         <Card padding={4} variant="muted" style={{ borderLeft: '4px solid var(--color-error)' }}>
-           <HStack gap={3} vAlign="center">
-             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--color-error-wash)' }}>
-               <Icon icon={ExclamationTriangleIcon} color="error" size="md" />
-             </div>
-             <VStack gap={1}>
-                <Text type="supporting" weight="bold" style={{ color: "var(--color-error)" }}>งานเลยกำหนด</Text>
-               <Heading level={3}>{overdueCount} <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>งาน</span></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+      <Grid columns={{ minWidth: 230, repeat: "fit" }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="down" size="sm" />
+              <Text type="supporting" color="secondary">งานเลยกำหนด</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              {overdueCount}
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </VStack>
+        </Card>
 
-         <Card padding={4} variant="muted" style={{ borderLeft: '4px solid var(--color-accent)' }}>
-           <HStack gap={3} vAlign="center">
-             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--color-accent-wash)' }}>
-               <Icon icon={CalendarDaysIcon} color="accent" size="md" />
-             </div>
-             <VStack gap={1}>
-               <Text type="supporting" weight="bold" color="accent" style={{ textTransform: 'uppercase' }}>แผนงานวันนี้ (Today)</Text>
-               <Heading level={3}>{todayCount} <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>งาน</span></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="warn" size="sm" />
+              <Text type="supporting" color="secondary">แผนงานวันนี้ (Today)</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              {todayCount}
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </VStack>
+        </Card>
 
-         <Card padding={4} variant="muted" style={{ borderLeft: '4px solid var(--color-success)' }}>
-           <HStack gap={3} vAlign="center">
-             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--color-success-wash)' }}>
-               <Icon icon={CheckCircleIcon} color="success" size="md" />
-             </div>
-             <VStack gap={1}>
-                <Text type="supporting" weight="bold" style={{ color: "var(--color-success)", textTransform: 'uppercase' }}>เสร็จแล้ววันนี้</Text>
-               <Heading level={3}>{completedCount} <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>งาน</span></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="ok" size="sm" />
+              <Text type="supporting" color="secondary">เสร็จแล้ววันนี้</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              {completedCount}
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </VStack>
+        </Card>
 
-         <Card padding={4} variant="muted" style={{ borderLeft: '4px solid var(--color-warning)' }}>
-           <HStack gap={3} vAlign="center">
-             <div style={{ padding: 12, borderRadius: 8, backgroundColor: 'var(--color-warning-wash)' }}>
-               <Icon icon={WrenchScrewdriverIcon} color="warning" size="md" />
-             </div>
-             <VStack gap={1}>
-                <Text type="supporting" weight="bold" style={{ color: "var(--color-warning)", textTransform: 'uppercase' }}>ช่างที่กำลังปฏิบัติงาน</Text>
-               <Heading level={3}>{activeTechCount} <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>คน</span></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="idle" size="sm" />
+              <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              {activeTechCount}
+              <span className="cmms-kpi-unit">คน</span>
+            </div>
+          </VStack>
+        </Card>
       </Grid>
 
       <Grid columns={3} gap={6}>
@@ -155,20 +167,20 @@ export default function PMCalendarPage() {
              <VStack gap={3}>
                <Heading level={5}>สัญลักษณ์ (Legend)</Heading>
                <HStack gap={2} vAlign="center">
-                 <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-error)' }} />
-                 <Text type="body" size="sm">Overdue (ล่าช้า)</Text>
+                 <AndonLamp status="down" size="sm" />
+                 <Text type="body" size="sm">เลยกำหนด (Overdue)</Text>
                </HStack>
                <HStack gap={2} vAlign="center">
-                 <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-warning)' }} />
-                 <Text type="body" size="sm">In Progress (กำลังทำ)</Text>
+                 <AndonLamp status="warn" size="sm" />
+                 <Text type="body" size="sm">กำลังทำ (In Progress)</Text>
                </HStack>
                <HStack gap={2} vAlign="center">
-                 <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-accent)' }} />
-                 <Text type="body" size="sm">Scheduled (รอทำ)</Text>
+                 <AndonLamp status="idle" size="sm" />
+                 <Text type="body" size="sm">รอทำ (Scheduled)</Text>
                </HStack>
                <HStack gap={2} vAlign="center">
-                 <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: 'var(--color-success)' }} />
-                 <Text type="body" size="sm">Completed (เสร็จสิ้น)</Text>
+                 <AndonLamp status="ok" size="sm" />
+                 <Text type="body" size="sm">เสร็จสิ้น (Completed)</Text>
                </HStack>
              </VStack>
           </Card>
@@ -205,7 +217,10 @@ export default function PMCalendarPage() {
                             {viewAll && <Badge label={t.date} variant="neutral" />}
                             <Text type="body" weight="bold">{t.id}</Text>
                             <Badge label={t.type.charAt(0).toUpperCase() + t.type.slice(1)} variant={freqColors[t.type] || "neutral"} />
-                            <Badge label={t.status} variant={statusDot[t.status]} />
+                            <span className={`cmms-status ${andonOf(t.status)}`}>
+                              <span className="cmms-status-dot" />
+                              {pmStatusLabel[t.status] || t.status}
+                            </span>
                           </HStack>
                           <Heading level={5} style={{ color: 'var(--color-primary)' }}>{t.task}</Heading>
                           <HStack gap={4} vAlign="center">

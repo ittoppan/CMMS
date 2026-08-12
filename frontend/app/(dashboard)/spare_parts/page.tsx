@@ -47,6 +47,7 @@ import {
   CubeIcon,
 } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
+import AndonLamp from "@/components/AndonLamp";
 
 // ─── Styles (จาก template: bleed tab bar + list ไปจนถึงขอบ) ─────────────────
 const tabsRow: CSSProperties = {
@@ -83,10 +84,10 @@ function getStockStatus(item: SparePart): "ok" | "low" | "out" {
   return "ok";
 }
 
-const stockBadge: Record<string, { label: string; variant: "success" | "warning" | "error" }> = {
-  ok: { label: "ปกติ", variant: "success" },
-  low: { label: "ใกล้หมด", variant: "warning" },
-  out: { label: "หมด", variant: "error" },
+const stockBadge: Record<string, { label: string; andon: "ok" | "warn" | "down" }> = {
+  ok: { label: "ปกติ", andon: "ok" },
+  low: { label: "ใกล้หมด", andon: "warn" },
+  out: { label: "หมด", andon: "down" },
 };
 
 const PAGE_SIZE = 15;
@@ -135,10 +136,16 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
             <Text type="body" weight="bold">{kpis.total}</Text>
           </MetadataListItem>
           <MetadataListItem label="ใกล้หมด (Min Stock)">
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-warning)" }}>{kpis.lowCount}</Text>
+            <HStack gap={2} vAlign="center">
+              <AndonLamp status="warn" size="sm" />
+              <Text type="body" weight="bold" style={{ color: "var(--cmms-warning)" }}>{kpis.lowCount}</Text>
+            </HStack>
           </MetadataListItem>
           <MetadataListItem label="หมดคลัง (Out of Stock)">
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-danger)" }}>{kpis.outCount}</Text>
+            <HStack gap={2} vAlign="center">
+              <AndonLamp status="down" size="sm" />
+              <Text type="body" weight="bold" style={{ color: "var(--cmms-danger)" }}>{kpis.outCount}</Text>
+            </HStack>
           </MetadataListItem>
           <MetadataListItem label="มูลค่าคลังรวม">
             <Text type="body" weight="bold">฿{kpis.totalValue.toLocaleString()}</Text>
@@ -255,11 +262,11 @@ function ItemsCard({
             value={sageTypeFilter}
             onChange={setSageTypeFilter}
             options={[
-              { value: "", label: "📦 ทุกประเภทสต็อก Sage 300" },
-              { value: "Spare Parts", label: "⚙️ อะไหล่ซ่อมบำรุง" },
-              { value: "Raw Materials", label: "📦 วัตถุดิบการผลิต" },
-              { value: "Consumables", label: "🧪 วัสดุสิ้นเปลือง" },
-              { value: "Tools", label: "🔧 เครื่องมือช่าง" },
+              { value: "", label: "ทุกประเภทสต็อก Sage 300" },
+              { value: "Spare Parts", label: "อะไหล่ซ่อมบำรุง" },
+              { value: "Raw Materials", label: "วัตถุดิบการผลิต" },
+              { value: "Consumables", label: "วัสดุสิ้นเปลือง" },
+              { value: "Tools", label: "เครื่องมือช่าง" },
             ]}
           />
         </HStack>
@@ -286,7 +293,10 @@ function ItemsCard({
                         <Badge label={item.code} variant="neutral" />
                         <Badge label={item.sageItemNo} variant="info" />
                         <Badge label={item.sageCategory || "Spare Parts"} variant="success" />
-                        <Badge label={badge.label} variant={badge.variant} />
+                        <span className={`cmms-status ${badge.andon}`}>
+                          <span className="cmms-status-dot" />
+                          {badge.label}
+                        </span>
                       </HStack>
                       <HStack gap={1} vAlign="center">
                         <Text type="supporting" color="secondary">ที่เก็บ: {item.location || "-"}</Text>
@@ -309,10 +319,9 @@ function ItemsCard({
                           alignItems: "center",
                           justifyContent: "center",
                           color: "var(--cmms-text-muted)",
-                          fontSize: 16,
                         }}
                       >
-                        ⚙️
+                        <Icon icon={CubeIcon} size="sm" />
                       </div>
                     )
                   }
@@ -632,9 +641,9 @@ export default function SparePartsPage() {
                     <TabMenu
                       label="เพิ่มเติม"
                       options={[
-                        { value: "sage_sync", label: "⚙️ ตั้งค่าการดึง Sage 300" },
-                        { value: "issue_center", label: "🛒 ศูนย์เบิก-จ่าย" },
-                        { value: "optimization", label: "🤖 AI คำนวณ EOQ และสต็อกค้าง" },
+                        { value: "sage_sync", label: "ตั้งค่าการดึง Sage 300" },
+                        { value: "issue_center", label: "ศูนย์เบิก-จ่าย" },
+                        { value: "optimization", label: "AI คำนวณ EOQ และสต็อกค้าง" },
                       ]}
                     />
                   </TabList>
