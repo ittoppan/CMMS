@@ -16,10 +16,12 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+# server.js (standalone) อ่าน static จาก __dirname\.next\static และ public จาก __dirname\public
+# (__dirname = .next\standalone) — ห้าม copy ไป subfolder อื่น ไม่งั้น chunks/manifest/logo 404
 $frontendDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $publicSrc   = Join-Path $frontendDir "public"
 $nextStaticSrc = Join-Path $frontendDir ".next\static"
-$standaloneDir = Join-Path $frontendDir ".next\standalone\frontend"
+$standaloneDir = Join-Path $frontendDir ".next\standalone"
 $standalonePublic = Join-Path $standaloneDir "public"
 $standaloneNextStatic = Join-Path $standaloneDir ".next\static"
 $port = 3001
