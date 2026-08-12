@@ -62,6 +62,7 @@ import {
   PresentationChartLineIcon
 } from "@heroicons/react/24/outline";
 import CountUp from "@/components/CountUp";
+import AndonLamp from "@/components/AndonLamp";
 
 export interface MonthlyRecord {
   monthNum: number;
@@ -99,6 +100,7 @@ function CustomChartTooltip({ active, payload, label }: any) {
 
 export default function DashboardPage() {
   const [recentWO, setRecentWO] = useState<any[]>([]);
+  const [allWOs, setAllWOs] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -199,6 +201,7 @@ export default function DashboardPage() {
       const json = await res.json();
       if (json.status === "success" && json.data) {
         const data = json.data;
+        setAllWOs(data);
         setRecentWO(data.slice(0, 5));
 
         const total = data.length;
@@ -248,11 +251,33 @@ export default function DashboardPage() {
   const drillDownMachines = useMemo(() => {
     if (!selectedDrillDown) return [];
     const m = selectedDrillDown.monthNum;
-    return recentWO.filter((w: any) => {
+    return allWOs.filter((w: any) => {
       const d = w.created_at ? new Date(w.created_at) : null;
       return d && d.getMonth() + 1 === m;
     });
-  }, [selectedDrillDown, recentWO]);
+  }, [selectedDrillDown, allWOs]);
+
+  // ── Andon Board: สถานะเครื่องจักรจาก work orders จริง (แดง > เหลือง > เขียว) ──
+  const plantBoard = useMemo(() => {
+    const map = new Map<string, { status: "ok" | "warn" | "down"; count: number }>();
+    for (const w of allWOs) {
+      const name = w.asset_name || "ไม่ระบุเครื่อง";
+      const cur = map.get(name) || { status: "ok" as const, count: 0 };
+      const s = String(w.status || "").toLowerCase();
+      let st = cur.status;
+      if (s === "overdue" || s === "down" || s === "breakdown") st = "down";
+      else if (st !== "down" && ["in_progress", "open", "pending", "waiting_parts"].includes(s)) st = "warn";
+      map.set(name, { status: st, count: cur.count + 1 });
+    }
+    const order = { down: 0, warn: 1, ok: 2 };
+    const tiles = Array.from(map.entries())
+      .map(([name, v]) => ({ name, ...v }))
+      .sort((a, b) => order[a.status] - order[b.status] || b.count - a.count)
+      .slice(0, 12);
+    const counts = { ok: 0, warn: 0, down: 0 };
+    for (const [, v] of map) counts[v.status]++;
+    return { tiles, counts };
+  }, [allWOs]);
 
   // Process Pareto Data
   const paretoData = useMemo(() => {
@@ -359,15 +384,15 @@ export default function DashboardPage() {
         <LayoutHeader className="mb-8">
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}>
             <VStack gap={2}>
-              <HStack gap={3} vAlign="center">
-                <Heading level={1} className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-                  📊 แผงควบคุมหลัก
-                </Heading>
-                <Badge label="ข้อมูลเรียลไทม์" variant="success" size="sm" />
-              </HStack>
-              <Text type="body" color="secondary">
-                ภาพรวมสถานะการบำรุงรักษาและประสิทธิภาพเครื่องจักรแบบเรียลไทม์
-              </Text>
+              <VStack gap={2}>
+                <Text type="body" size="sm" className="cmms-eyebrow">
+                  Plant Status Board · CMMS-TOPPAN
+                </Text>
+                <Heading level={1}>แผงควบคุมโรงงาน</Heading>
+                <Text type="body" color="secondary">
+                  สถานะเครื่องจักรแบบเรียลไทม์ — ไฟเขียวคือพร้อมเดิน ไฟแดงคือต้องการความสนใจทันที
+                </Text>
+              </VStack>
             </VStack>
 
             <HStack gap={3} vAlign="center" wrap="wrap" className="print:hidden">
@@ -431,6 +456,56 @@ export default function DashboardPage() {
           </HStack>
         </LayoutHeader>
 
+        {/* ── Andon Board: สถานะโรงงาน (ข้อมูลจริงจาก work orders) ── */}
+        <section className="cmms-animate-fadeInUp mb-8">
+          <div className="cmms-andon-board">
+            <div className="relative z-10">
+              <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3} className="mb-4">
+                <VStack gap={1}>
+                  <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.55)" }}>
+                    Andon · สัญญาณสถานะเครื่องจักร
+                  </Text>
+                  <Text type="body" style={{ color: "rgba(255,255,255,0.92)", fontWeight: 600 }}>
+                    สถานะเครื่องจักรจากใบแจ้งซ่อมล่าสุด
+                  </Text>
+                </VStack>
+                <HStack gap={2} wrap="wrap">
+                  <span className="cmms-andon-chip">
+                    <span className="cmms-andon-dot" style={{ background: "#10B981", boxShadow: "0 0 6px rgba(16,185,129,.6)" }} />
+                    พร้อมใช้งาน <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.ok}</span>
+                  </span>
+                  <span className="cmms-andon-chip">
+                    <span className="cmms-andon-dot" style={{ background: "#F59E0B", boxShadow: "0 0 6px rgba(245,158,11,.6)" }} />
+                    ต้องดูแล <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.warn}</span>
+                  </span>
+                  <span className="cmms-andon-chip">
+                    <span className="cmms-andon-dot" style={{ background: "#EF4444", boxShadow: "0 0 6px rgba(239,68,68,.65)" }} />
+                    หยุดทำงาน <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.down}</span>
+                  </span>
+                </HStack>
+              </HStack>
+
+              {plantBoard.tiles.length === 0 ? (
+                <Text type="body" size="sm" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  ยังไม่มีข้อมูลใบแจ้งซ่อม — บอร์ดจะแสดงสถานะเมื่อมีงานเข้ามา
+                </Text>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
+                  {plantBoard.tiles.map((t) => (
+                    <Link key={t.name} href="/repair" className="block" style={{ textDecoration: "none" }}>
+                      <div className="cmms-andon-tile">
+                        <AndonLamp status={t.status} size="sm" />
+                        <span className="cmms-andon-tile-name flex-1">{t.name}</span>
+                        <span className="cmms-andon-tile-count">{t.count} งาน</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Main Dashboard Content */}
         <VStack gap={8}>
           {/* KPI Summary Cards */}
@@ -440,50 +515,62 @@ export default function DashboardPage() {
               สรุปผลการดำเนินงาน
             </Heading>
             <Grid columns={{ minWidth: 280, repeat: "fit" }} gap={4}>
-              <Card elevation="medium" padding={5} className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700/50">
-                <VStack gap={2}>
-                  <Text type="supporting" color="secondary" className="font-medium">งานซ่อมทั้งหมด</Text>
-                  <Heading level={2} className="text-blue-700 dark:text-blue-300">
-                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed + selectedMonthData.breakdown : kpis.total} /> 
-                    <Text type="body" size="sm" className="ml-2">รายการ</Text>
-                  </Heading>
+              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+                <VStack gap={3}>
+                  <HStack vAlign="center" gap={2}>
+                    <AndonLamp status="ok" size="sm" />
+                    <Text type="supporting" color="secondary" className="font-medium">งานซ่อมทั้งหมด</Text>
+                  </HStack>
+                  <div className="cmms-kpi-value">
+                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed + selectedMonthData.breakdown : kpis.total} />
+                    <span className="cmms-kpi-unit">รายการ</span>
+                  </div>
                   <Text type="body" size="sm" color="secondary">ข้อมูลจริงจากฐานข้อมูล MySQL</Text>
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20 border border-emerald-200 dark:border-emerald-700/50">
-                <VStack gap={2}>
-                  <Text type="supporting" color="secondary" className="font-medium">งานซ่อมเสร็จสมบูรณ์</Text>
-                  <Heading level={2} className="text-emerald-700 dark:text-emerald-300">
-                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed : kpis.completed} /> 
-                    <Text type="body" size="sm" className="ml-2">รายการ</Text>
-                  </Heading>
+              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+                <VStack gap={3}>
+                  <HStack vAlign="center" gap={2}>
+                    <AndonLamp status="ok" size="sm" />
+                    <Text type="supporting" color="secondary" className="font-medium">งานซ่อมเสร็จสมบูรณ์</Text>
+                  </HStack>
+                  <div className="cmms-kpi-value">
+                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed : kpis.completed} />
+                    <span className="cmms-kpi-unit">รายการ</span>
+                  </div>
                   <Text type="body" size="sm" className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    ✅ {Math.round(((viewMode === 'monthly' ? selectedMonthData.completed : kpis.completed) / (kpis.total || 1)) * 100)}% สำเร็จ
+                    {Math.round(((viewMode === 'monthly' ? selectedMonthData.completed : kpis.completed) / (kpis.total || 1)) * 100)}% ของงานทั้งหมดเสร็จสมบูรณ์
                   </Text>
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/20 border border-rose-200 dark:border-rose-700/50">
-                <VStack gap={2}>
-                  <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
-                  <Heading level={2} className="text-rose-700 dark:text-rose-300">
-                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.breakdown : yearlyBreakdown} /> 
-                    <Text type="body" size="sm" className="ml-2">ครั้ง</Text>
-                  </Heading>
-                  <Text type="body" size="sm" className="text-rose-600 dark:text-rose-400 font-bold">
+              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+                <VStack gap={3}>
+                  <HStack vAlign="center" gap={2}>
+                    <AndonLamp status="down" size="sm" />
+                    <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
+                  </HStack>
+                  <div className="cmms-kpi-value">
+                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.breakdown : yearlyBreakdown} />
+                    <span className="cmms-kpi-unit">ครั้ง</span>
+                  </div>
+                  <Text type="body" size="sm" color="secondary">
                     {viewMode === 'monthly' ? 'งานแบบ Breakdown' : 'รวมทั้งปี ' + selectedYear}
                   </Text>
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700/50">
-                <VStack gap={2}>
-                  <Text type="supporting" color="secondary" className="font-medium">ค่าใช้จ่ายรวม</Text>
-                  <Heading level={2} className="text-purple-700 dark:text-purple-300">
-                    <CountUp end={Math.round(selectedMonthData.cost * 10000)} /> 
-                    <Text type="body" size="sm" className="ml-2">บาท</Text>
-                  </Heading>
+              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+                <VStack gap={3}>
+                  <HStack vAlign="center" gap={2}>
+                    <AndonLamp status="warn" size="sm" />
+                    <Text type="supporting" color="secondary" className="font-medium">ค่าใช้จ่ายรวม</Text>
+                  </HStack>
+                  <div className="cmms-kpi-value">
+                    <CountUp end={Math.round(selectedMonthData.cost * 10000)} />
+                    <span className="cmms-kpi-unit">บาท</span>
+                  </div>
                   <Text type="body" size="sm" color="secondary">อะไหล่ & ค่าแรง</Text>
                 </VStack>
               </Card>
@@ -509,7 +596,7 @@ export default function DashboardPage() {
                 onClick={() => setActiveTab('live')}
                 className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'live' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
-                🔴 ศูนย์ปฏิบัติการ
+                ศูนย์ปฏิบัติการ
               </button>
             </div>
 
@@ -838,7 +925,7 @@ export default function DashboardPage() {
                   <Card elevation="high" padding={6}>
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
-                        <Heading level={4} className="font-bold">🚦 สถานะเครื่องจักรสำคัญ</Heading>
+                        <Heading level={4} className="font-bold">สถานะเครื่องจักรสำคัญ</Heading>
                         <Link href="/asset_registry">
                           <Text type="body" size="sm" color="primary" className="font-bold hover:underline">ดูแผนผัง →</Text>
                         </Link>
@@ -850,10 +937,7 @@ export default function DashboardPage() {
                           <div key={asset.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-3 transition-colors hover:bg-sky-50 dark:hover:bg-sky-900/10">
                             <HStack hAlign="between" vAlign="center">
                               <Text type="body" size="sm" weight="bold">{asset.id}</Text>
-                              <span className="relative flex h-4 w-4">
-                                {asset.status === 'down' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>}
-                                <span className={`relative inline-flex rounded-full h-4 w-4 ${asset.status === 'normal' ? 'bg-emerald-500' : asset.status === 'warning' ? 'bg-amber-500' : 'bg-rose-500'}`}></span>
-                              </span>
+                              <AndonLamp status={asset.status === 'normal' ? 'ok' : asset.status === 'warning' ? 'warn' : 'down'} size="sm" />
                             </HStack>
                             <Text type="body" size="sm" color="secondary" className="truncate">{asset.name}</Text>
                             <Text type="body" size="sm" className="text-slate-500">
