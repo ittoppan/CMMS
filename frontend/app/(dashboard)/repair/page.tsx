@@ -15,6 +15,7 @@ import { Link } from "@astryxdesign/core/Link";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import CountUp from "react-countup";
+import AndonLamp from "@/components/AndonLamp";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -39,14 +40,6 @@ interface WorkOrder extends Record<string, unknown> {
   date: string;
 }
 
-const statusColors: Record<string, "success" | "warning" | "error" | "accent" | "neutral"> = {
-  Completed: "success", completed: "success",
-  "In Progress": "accent", in_progress: "accent",
-  Open: "warning", open: "warning", pending: "warning",
-  "Waiting Parts": "neutral",
-  Overdue: "error", overdue: "error",
-};
-
 const priorityColors: Record<string, "error" | "warning" | "info" | "neutral"> = {
   Critical: "error", critical: "error",
   High: "warning", high: "warning",
@@ -69,6 +62,15 @@ const priorityLabels: Record<string, string> = {
 };
 
 const PAGE_SIZE = 10;
+
+// สถานะ → ไฟ Andon: เขียว=เสร็จ, เหลือง=ต้องดูแล, แดง(กระพริบ)=เกินกำหนด, เทา=รอดำเนินการ
+const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
+  const v = String(s || "").toLowerCase();
+  if (v === "completed" || v === "closed" || v === "resolved") return "ok";
+  if (v === "in_progress" || v === "waiting_parts" || v === "pending_parts") return "warn";
+  if (v === "overdue") return "down";
+  return "idle";
+};
 
 export default function WorkOrdersPage() {
   const router = useRouter();
@@ -270,7 +272,10 @@ export default function WorkOrdersPage() {
       header: "สถานะ",
       width: proportional(1),
       renderCell: (item: WorkOrder) => (
-        <Badge label={statusLabels[item.status] || item.status} variant={statusColors[item.status] || "neutral"} />
+        <span className={`cmms-status ${andonOf(item.status)}`}>
+          <span className="cmms-status-dot" />
+          {statusLabels[item.status] || item.status}
+        </span>
       ),
     },
     {
@@ -307,8 +312,11 @@ export default function WorkOrdersPage() {
       {/* Header */}
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">
+            Work Order Board · CMMS-TOPPAN
+          </Text>
           <Heading level={2}>ใบสั่งงานซ่อม</Heading>
-          <Text type="body" color="secondary">ระบบจัดการใบสั่งงานซ่อมบำรุง</Text>
+          <Text type="body" color="secondary">สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด</Text>
         </VStack>
         <HStack gap={2} wrap="wrap">
           <Button
@@ -332,37 +340,67 @@ export default function WorkOrdersPage() {
         </HStack>
       </Card>
 
-      {/* KPI Cards */}
+      {/* KPI — มินิบอร์ด Andon: กวาดตาเดียวรู้สถานะงาน */}
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
-            <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="idle" size="sm" />
+              <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.total} />
+              <span className="cmms-kpi-unit">รายการ</span>
+            </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-warning-600">รอดำเนินการ (Open)</Text>
-            <Heading level={2} className="text-warning-600"><CountUp end={stats.open} /> <Text type="body" size="sm">รายการ</Text></Heading>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="warn" size="sm" />
+              <Text type="supporting" color="secondary">รอดำเนินการ (Open)</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.open} />
+              <span className="cmms-kpi-unit">รายการ</span>
+            </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-blue-600">กำลังซ่อม (In Progress)</Text>
-            <Heading level={2} className="text-blue-600"><CountUp end={stats.inprog} /> <Text type="body" size="sm">รายการ</Text></Heading>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="warn" size="sm" />
+              <Text type="supporting" color="secondary">กำลังซ่อม (In Progress)</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.inprog} />
+              <span className="cmms-kpi-unit">รายการ</span>
+            </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-emerald-600">เสร็จสิ้น (Completed)</Text>
-            <Heading level={2} className="text-emerald-600"><CountUp end={stats.done} /> <Text type="body" size="sm">รายการ</Text></Heading>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <AndonLamp status="ok" size="sm" />
+              <Text type="supporting" color="secondary">เสร็จสิ้น (Completed)</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.done} />
+              <span className="cmms-kpi-unit">รายการ</span>
+            </div>
           </VStack>
         </Card>
         {stats.overdue > 0 && (
-          <Card elevation="low" padding={4} className="border-rose-500 bg-rose-50 dark:bg-rose-900/10">
-            <VStack gap={1}>
-              <Text type="supporting" className="text-rose-600">เกินกำหนด</Text>
-              <Heading level={2} className="text-rose-600"><CountUp end={stats.overdue} /> <Text type="body" size="sm">รายการ</Text></Heading>
+          <Card elevation="low" padding={4} className="cmms-kpi-card">
+            <VStack gap={2}>
+              <HStack vAlign="center" gap={2}>
+                <AndonLamp status="down" size="sm" />
+                <Text type="supporting" color="secondary">เกินกำหนด</Text>
+              </HStack>
+              <div className="cmms-kpi-value">
+                <CountUp end={stats.overdue} />
+                <span className="cmms-kpi-unit">รายการ</span>
+              </div>
             </VStack>
           </Card>
         )}
@@ -419,10 +457,10 @@ export default function WorkOrdersPage() {
                   onChange={setPriorityFilter}
                   options={[
                     { value: "", label: "ทุกความเร่งด่วน" },
-                    { value: "critical", label: "🔴 วิกฤต (Critical)" },
-                    { value: "high", label: "🟠 ด่วน (High)" },
-                    { value: "medium", label: "🟡 ปกติ (Medium)" },
-                    { value: "low", label: "🟢 ต่ำ (Low)" },
+                    { value: "critical", label: "วิกฤต (Critical)" },
+                    { value: "high", label: "ด่วน (High)" },
+                    { value: "medium", label: "ปกติ (Medium)" },
+                    { value: "low", label: "ต่ำ (Low)" },
                   ]}
                 />
               </>
