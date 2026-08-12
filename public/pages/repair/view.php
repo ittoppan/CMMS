@@ -208,6 +208,24 @@ renderHeader();
                     <p class="text-sm text-slate-700 mt-0.5 bg-slate-50 p-3 rounded-lg border border-slate-100"><?= nl2br(htmlspecialchars($r['description'])) ?></p>
                 </div>
                 <?php endif; ?>
+
+                <?php if (!empty($attachments)): ?>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-500 uppercase">📸 รูปถ่ายหน้างาน (ก่อน / หลังซ่อม)</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                        <?php foreach ($attachments as $att):
+                            $aPath = htmlspecialchars(ltrim($att['file_path'], '/'));
+                            $aLabel = $att['category'] === 'after_image' ? 'หลังซ่อม' : ($att['category'] === 'failure_image' ? 'ก่อนซ่อม' : 'แนบ');
+                            $aColor = $att['category'] === 'after_image' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600';
+                        ?>
+                        <a href="/<?= $aPath ?>" target="_blank" class="group relative rounded-xl overflow-hidden border border-slate-200">
+                            <img src="/<?= $aPath ?>" alt="<?= htmlspecialchars($att['file_name']) ?>" class="w-full h-28 object-cover group-hover:scale-105 transition-transform" loading="lazy">
+                            <span class="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full <?= $aColor ?>"><?= $aLabel ?></span>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- Machine BOM Fast Spares List Preview -->

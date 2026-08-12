@@ -14,6 +14,7 @@
 
 require_once __DIR__ . '/../src/config/db.php';
 require_once __DIR__ . '/../src/services/NotificationService.php';
+require_once __DIR__ . '/../src/services/WebPushService.php';
 
 $force = in_array('--force', $argv, true);
 
@@ -126,6 +127,57 @@ if ($lowStockOn === '1') {
     }
 } else {
     echo "low stock alert: disabled (low_stock_alert != 1)\n";
+}
+
+// ---------------- 3) Escalation: งาน breakdown/ด่วนที่ค้างเกิน X ชม. ----------------
+$escHours = max(1, (int)settingValue($pdo, 'escalation_hours', '24'));
+$escOn    = settingValue($pdo, 'escalation_alert', '1');
+if ($escOn === '1') {
+    $escaped = $pdo->query("
+        SELECT r.id, r.work_order_no, r.title, r.priority, r.created_at,
+               a.code AS asset_code, a.name AS asset_name,
+               TIMESTAMPDIFF(HOUR, r.created_at, NOW()) AS age_hours,
+               u.full_name AS assigned_name
+        FROM repair r
+        LEFT JOIN asset_registry a ON r.asset_id = a.id
+        LEFT JOIN users u ON r.assigned_to = u.id
+        WHERE r.status NOT IN ('resolved','closed','cancelled','rejected')
+          AND r.priority IN ('high','critical')
+          AND TIMESTAMPDIFF(HOUR, r.created_at, NOW()) >= $escHours
+        ORDER BY r.created_at ASC
+        LIMIT 10
+    ")->fetchAll();
+
+    echo "Breakdown stuck > {$escHours}h: " . count($escaped) . "\n";
+    foreach ($escaped as $e) {
+        $needle = 'ESCALATE-WO' . $e['id'];
+        if (!$force && alreadyAlerted($pdo, $needle)) {
+            echo "  skip (alerted <24h): {$e['work_order_no']}\n";
+            continue;
+        }
+        $code = $e['asset_code'] ?: ($e['asset_name'] ?: '-');
+        $msg = "\n🚨 [ESCALATION] งานด่วนค้างเกิน {$escHours} ชม.\n"
+             . "----------------------------------\n"
+             . "ใบงาน: {$e['work_order_no']}\n"
+             . "หัวข้อ: {$e['title']}\n"
+             . "เครื่องจักร: $code\n"
+             . "ระดับ: " . strtoupper($e['priority']) . "\n"
+             . "ค้างมา: {$e['age_hours']} ชม. (เริ่ม " . date('d/m H:i', strtotime($e['created_at'])) . ")\n"
+             . "ผู้รับผิดชอบ: " . ($e['assigned_name'] ?: 'ยังไม่ assign') . "\n"
+             . "----------------------------------\n"
+             . "🔧 ดูงาน: " . rtrim((string)publicBaseUrl(), '/') . "/pages/repair/view.php?id={$e['id']}";
+        NotificationService::sendLineMessage($msg);
+        $sent++;
+        // Web Push ควบคู่ LINE (เฉพาะคนที่ subscribe — ถ้าไม่มีก็ข้าม)
+        if (settingValue($pdo, 'push_alert_enabled', '1') === '1') {
+            try {
+                WebPushService::sendToUsers($pdo, null, '🚨 งานด่วนค้างเกิน ' . $escHours . ' ชม.', $e['title'] . ' — ' . $code, '/pages/repair/view.php?id=' . $e['id']);
+            } catch (Throwable $ex) {}
+        }
+        echo "  alert ESCALATE: {$e['work_order_no']} (ค้าง {$e['age_hours']}h)\n";
+    }
+} else {
+    echo "escalation alert: disabled (escalation_alert != 1)\n";
 }
 
 echo "== done: {$sent} alert(s) — ตรวจสอบ notification_logs เพื่อยืนยัน ==\n";

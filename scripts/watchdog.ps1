@@ -90,6 +90,27 @@ try {
                 }
             }
         }
+        # 1.3) weekly report (สัปดาห์ละ 1 ครั้ง, ทุกวันจันทร์) — สรุปงานซ่อมบำรุงประจำสัปดาห์
+        $weekFile = Join-Path $logDir "weekly_report.date"
+        $thisWeek = (Get-Date -Format "yyyy") + "-W" + [System.Globalization.ISOWeek]::GetWeekOfYear((Get-Date))
+        $lastWeek = ""
+        if (Test-Path -LiteralPath $weekFile) { $lastWeek = ((Get-Content -LiteralPath $weekFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastWeek -ne $thisWeek) {
+            Write-Log "Weekly report check ($thisWeek)..."
+            $reportScript = Join-Path $root "scripts\weekly_report.php"
+            if ($phpExe -and (Test-Path -LiteralPath $reportScript)) {
+                try {
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    & $phpExe $reportScript 2>&1 | ForEach-Object { Write-Log "  weekly_report: $_" }
+                    Set-Content -LiteralPath $weekFile -Value $thisWeek -Encoding ascii
+                    Write-Log "Weekly report done"
+                } catch {
+                    Write-Log "Weekly report FAILED: $_"
+                }
+            } else {
+                Write-Log "weekly_report.php not found or php missing ($phpExe)"
+            }
+        }
         # 1.2) daily alert check (วันละ 1 ครั้ง) — PM ใกล้กำหนด + สต็อกต่ำ
         $alertDateFile = Join-Path $logDir "alert_check.date"
         $todayStr = Get-Date -Format "yyyy-MM-dd"

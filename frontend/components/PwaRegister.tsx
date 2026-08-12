@@ -51,6 +51,35 @@ export default function PwaRegister() {
         });
     };
 
+    // Web Push: ขอสิทธิ์แจ้งเตือน + subscribe + ลงทะเบียนกับ PHP backend
+    const registerPush = async (reg: ServiceWorkerRegistration) => {
+      try {
+        const vapidResp = await fetch("/api/v1/push_subscribe.php", { credentials: "include" });
+        const vapidJson = (await vapidResp.json()) as { publicKey?: string };
+        if (!vapidJson.publicKey) return;
+
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidJson.publicKey),
+          });
+        }
+        const subJson = sub.toJSON();
+        await fetch("/api/v1/push_subscribe.php", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+            keys: subJson.keys,
+          }),
+        });
+      } catch (err) {
+        console.warn("[PWA] Push subscription failed:", err);
+      }
+    };
+
     // ถ้า load ผ่านไปแล้ว (React mount ช้ากว่า load บน dev) ให้ register ทันที
     if (document.readyState === "complete") {
       register();
@@ -58,8 +87,35 @@ export default function PwaRegister() {
       window.addEventListener("load", register, { once: true });
     }
 
-    return () => window.removeEventListener("load", register);
+    // PWA Web Push: register สำเร็จแล้วค่อย subscribe push
+    const initPush = async () => {
+      if (!("Notification" in window) || !("PushManager" in window)) return;
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm !== "granted") return;
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await registerPush(reg);
+      } catch (err) {
+        console.warn("[PWA] Push init failed:", err);
+      }
+    };
+    const timer = window.setTimeout(initPush, 8000);
+
+    return () => {
+      window.removeEventListener("load", register);
+      window.clearTimeout(timer);
+    };
   }, []);
 
   return null;
+}
+
+/** base64url -> Uint8Array สำหรับ applicationServerKey */
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const base64Str = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64Str);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
 }
