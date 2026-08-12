@@ -12,8 +12,12 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   transpilePackages: ["@astryxdesign/core", "@astryxdesign/theme-neutral"],
-  // Allow ngrok and local IPs for HMR
-  allowedDevOrigins: ["192.168.1.9", "ommatophorous-robert-fortifyingly.ngrok-free.app"],
+  // Allow ngrok, Cloudflare tunnels, and local IPs for HMR
+  allowedDevOrigins: [
+    "192.168.1.9",
+    "ommatophorous-robert-fortifyingly.ngrok-free.app",
+    "*.trycloudflare.com",
+  ],
   async rewrites() {
     return [
       {

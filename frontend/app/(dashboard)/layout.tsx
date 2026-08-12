@@ -47,7 +47,8 @@ import {
   ClipboardDocumentListIcon,
   ServerStackIcon,
   Squares2X2Icon,
-  UserCircleIcon
+  UserCircleIcon,
+  DevicePhoneMobileIcon
 } from "@heroicons/react/24/outline";
 
 // Page title mapping for breadcrumb
@@ -90,6 +91,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings/services": "Service & การรันระบบ",
   "/settings/notifications": "รูปแบบการแจ้งเตือน LINE",
   "/settings/menus": "สิทธิ์เมนูตามบทบาท",
+  "/settings/pwa": "ตั้งค่าไอคอน PWA",
   "/register": "ลงทะเบียนผูกบัญชี LINE",
 };
 
@@ -110,6 +112,7 @@ const SECTION_MAP: Record<string, string> = {
   "/settings": "ตั้งค่า",
   "/settings/notifications": "ตั้งค่า",
   "/settings/menus": "ตั้งค่า",
+  "/settings/pwa": "ตั้งค่า",
   "/settings/services": "ตั้งค่า",
 };
 
@@ -391,6 +394,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label="ตั้งค่าทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
             {canShow("settings") && <SideNavItem label="บริการและสถานะการรันระบบ" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="สิทธิ์เมนูตามบทบาท" icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
+            {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
           </SideNavSection>
           footer={
             <SideNavSection title="บัญชี" isHeaderHidden>

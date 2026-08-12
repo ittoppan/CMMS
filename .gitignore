@@ -6,3 +6,6 @@ vendor/
 # Next.js build artifacts
 frontend/.next/
 frontend/tsconfig.tsbuildinfo
+
+# OpenWork app data (chat attachments, inbox)
+.opencode/openwork/
