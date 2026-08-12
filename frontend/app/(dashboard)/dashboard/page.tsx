@@ -62,8 +62,6 @@ import {
   PresentationChartLineIcon
 } from "@heroicons/react/24/outline";
 import CountUp from "@/components/CountUp";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
 
 export interface MonthlyRecord {
   monthNum: number;
@@ -75,54 +73,9 @@ export interface MonthlyRecord {
   mttr: number;
 }
 
-const lowStock = [
-  { part: "ลูกปืน SKF 6205", qty: 3, reorder: 10, unit: "ชิ้น" },
-  { part: "ซีลน้ำมัน 35x52x7", qty: 5, reorder: 20, unit: "ชิ้น" },
-  { part: "ฟิลเตอร์ไฮดรอลิก", qty: 1, reorder: 5, unit: "ชิ้น" },
-  { part: "สายพาน V A-48", qty: 8, reorder: 15, unit: "ชิ้น" },
-];
-
-const mockCriticalAssets = [
-  { id: "PMP-001", name: "ปั๊มน้ำหล่อเย็นหลัก", status: "normal", lastChecked: "10:30 น." },
-  { id: "CNV-002", name: "สายพานลำเลียงประกอบ B", status: "warning", lastChecked: "09:15 น." },
-  { id: "CNC-004", name: "เครื่องกัด CNC 4", status: "down", lastChecked: "08:45 น." },
-  { id: "CMP-001", name: "เครื่องอัดอากาศ 1", status: "normal", lastChecked: "11:00 น." },
-];
-
-const mockTimeline = [
-  { time: "10:15 น.", user: "ช่างสมชาย", text: "ซ่อมเครื่องปั๊มน้ำเสร็จสิ้น", type: "success" },
-  { time: "09:30 น.", user: "คลังสินค้า", text: "เบิกอะไหล่ ลูกปืนแกน X จำนวน 2 ชิ้น", type: "info" },
-  { time: "08:00 น.", user: "ระบบ", text: "เครื่องตัดเหล็ก #02 แจ้งเหตุขัดข้อง", type: "error" },
-  { time: "07:45 น.", user: "ช่างวิชัย", text: "เริ่มงานตรวจเช็ครายวัน (บำรุงรักษาเชิงป้องกัน)", type: "warning" },
-];
-
-const mockCostBreakdown = [
-  { name: "ค่าอะไหล่", value: 65, color: "#0ea5e9" }, // sky-500
-  { name: "ค่าแรง", value: 25, color: "#10b981" }, // emerald-500
-  { name: "จ้างเหมา", value: 10, color: "#f59e0b" }, // amber-500
-];
-
 // Generate an initials avatar URL (Thai name initials) — no random foreign faces
 const avatarFor = (name: string) =>
   `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=128&bold=true`;
-
-const mockLeaderboard = [
-  { rank: 1, name: "นายสมชาย ใจดี", jobs: 42, mttr: "1.2 ชม.", avatar: avatarFor("สมชาย ใจดี"), color: "bg-amber-100 text-amber-700 border-amber-300" },
-  { rank: 2, name: "นายวิชัย เก่งงาน", jobs: 38, mttr: "1.5 ชม.", avatar: avatarFor("วิชัย เก่งงาน"), color: "bg-slate-100 text-slate-700 border-slate-300" },
-  { rank: 3, name: "นายสมเกียรติ ยอดเยี่ยม", jobs: 35, mttr: "1.8 ชม.", avatar: avatarFor("สมเกียรติ ยอดเยี่ยม"), color: "bg-orange-100 text-orange-800 border-orange-300" },
-];
-
-const mockLiveTrackers = [
-  { name: "ช่างเอ", status: "repairing", task: "ซ่อมปั๊มน้ำ PMP-001", time: "15 นาทีที่แล้ว", avatar: avatarFor("ช่างเอ") },
-  { name: "ช่างบี", status: "waiting", task: "รอเบิกอะไหล่สายพาน V A-48", time: "30 นาทีที่แล้ว", avatar: avatarFor("ช่างบี") },
-  { name: "ช่างซี", status: "idle", task: "สแตนด์บาย (ว่าง)", time: "-", avatar: avatarFor("ช่างซี") },
-];
-
-// Gauge Chart Data for SLA
-const mockSLAData = [
-  { name: "ผ่าน SLA", value: 85, color: "#10b981" }, // 85% within SLA
-  { name: "เกินกำหนด", value: 15, color: "#f43f5e" }
-];
 
 function CustomChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -161,7 +114,9 @@ export default function DashboardPage() {
   const [rcaData, setRcaData] = useState<any[]>([]);
   const [pmComplianceData, setPmComplianceData] = useState<any[]>([]);
   const [deadStock, setDeadStock] = useState({ item_count: 0, total_value: 0 });
-  const [costAnalysis, setCostAnalysis] = useState({ total_wo: 0, total_cost: 0, cost_per_wo: 0 });
+  const [costAnalysis, setCostAnalysis] = useState({ total_wo: 0, total_cost: 0, cost_per_wo: 0, cost_breakdown: [] });
+  const [costBreakdown, setCostBreakdown] = useState<any[]>([]);
+  const [lowStock, setLowStock] = useState<any[]>([]);
   const [esgData, setEsgData] = useState({ total_downtime_minutes: 0, energy_waste_thb: 0 });
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [liveTechTrackers, setLiveTechTrackers] = useState<any[]>([]);
@@ -198,8 +153,7 @@ export default function DashboardPage() {
   // Function to export dashboard to PDF
   const exportToPDF = async () => {
     setIsExporting(true);
-    // html2canvas has issues with modern CSS functions like oklab() used in Tailwind.
-    // Native window.print() is much more robust for generating vector PDFs.
+    // ใช้ window.print() ของเบราว์เซอร์ (รองรับ CSS สมัยใหม่ได้ดีกว่า html2canvas)
     setTimeout(() => {
       window.print();
       setIsExporting(false);
@@ -240,6 +194,7 @@ export default function DashboardPage() {
           setPmComplianceData(json.advanced.pm_compliance || []);
           setDeadStock(json.advanced.dead_stock || { item_count: 0, total_value: 0 });
           setCostAnalysis(json.advanced.cost_analysis || { total_wo: 0, total_cost: 0, cost_per_wo: 0 });
+          setCostBreakdown(json.advanced.cost_analysis?.cost_breakdown || []);
           setEsgData(json.advanced.esg || { total_downtime_minutes: 0, energy_waste_thb: 0 });
           setTopPerformers(json.advanced.top_performers || []);
           
@@ -280,7 +235,18 @@ export default function DashboardPage() {
     }));
   }, [pmComplianceData]);
 
-  // 3. Fetch สรุปตรวจเช็คประจำวัน
+  // 3. Fetch อะไหล่ใกล้หมดสต็อก (ข้อมูลจริงจากตาราง spare_parts)
+  const fetchLowStock = async () => {
+    try {
+      const res = await fetch("/api/v1/index.php?resource=low-stock");
+      const json = await res.json();
+      if (json.status === "success" && Array.isArray(json.data)) {
+        setLowStock(json.data);
+      }
+    } catch (e) { console.error("Failed to fetch low stock", e); }
+  };
+
+  // 4. Fetch สรุปตรวจเช็คประจำวัน
   const fetchInspections = async () => {
     try {
       const res = await fetch("/api/v1/inspections.php?schedules=1");
@@ -302,7 +268,7 @@ export default function DashboardPage() {
   const refreshAll = async () => {
     setLoading(true);
     setError(null);
-    await Promise.all([fetchWorkOrders(), fetchMonthlyAnalytics(selectedYear), fetchInspections()]);
+    await Promise.all([fetchWorkOrders(), fetchMonthlyAnalytics(selectedYear), fetchLowStock(), fetchInspections()]);
     setLoading(false);
   };
 
@@ -322,13 +288,18 @@ export default function DashboardPage() {
     return monthlyData; // All 12 months for yearly view
   }, [viewMode, selectedMonth, monthlyData]);
 
-  // Selected month totals from MySQL
+  // Selected month totals from MySQL (ข้อมูลจริงเท่านั้น — ไม่มีค่า fallback ปลอม)
   const selectedMonthData = useMemo(() => {
     const mIdx = parseInt(selectedMonth, 10);
-    return monthlyData.find(m => m.monthNum === mIdx) || monthlyData[6] || {
-      monthNum: 7, month: "ก.ค.", completed: 64, breakdown: 2, cost: 7.2, mtbf: 354, mttr: 3.6
+    return monthlyData.find(m => m.monthNum === mIdx) || {
+      monthNum: mIdx, month: "-", completed: 0, breakdown: 0, cost: 0, mtbf: 0, mttr: 0
     };
   }, [selectedMonth, monthlyData]);
+
+  // รวมยอด breakdown รายปีจากข้อมูลจริง (สำหรับ KPI มุมมองรายปี)
+  const yearlyBreakdown = useMemo(() =>
+    monthlyData.reduce((sum, m) => sum + (m.breakdown || 0), 0),
+  [monthlyData]);
 
   return (
     <Layout height="fill">
@@ -455,11 +426,11 @@ export default function DashboardPage() {
                 <VStack gap={2}>
                   <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
                   <Heading level={2} className="text-rose-700 dark:text-rose-300">
-                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.breakdown : 46} /> 
+                    <CountUp end={viewMode === 'monthly' ? selectedMonthData.breakdown : yearlyBreakdown} /> 
                     <Text type="body" size="sm" className="ml-2">ครั้ง</Text>
                   </Heading>
                   <Text type="body" size="sm" className="text-rose-600 dark:text-rose-400 font-bold">
-                    ⚠️ ลดลง 15% จากเดือนก่อน
+                    {viewMode === 'monthly' ? 'งานแบบ Breakdown' : 'รวมทั้งปี ' + selectedYear}
                   </Text>
                 </VStack>
               </Card>
@@ -617,26 +588,30 @@ export default function DashboardPage() {
                       </VStack>
                       <Badge label="วิเคราะห์ค่าใช้จ่าย" variant="warning" size="sm" />
                     </HStack>
-                    <ResponsiveContainer width="100%" height={280}>
-                      <PieChart>
-                        <Pie
-                          data={mockCostBreakdown}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={80}
-                          outerRadius={120}
-                          paddingAngle={5}
-                          dataKey="value"
-                          label={({ percent, name }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {mockCostBreakdown.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                        <Legend verticalAlign="bottom" height={48} />
-                      </PieChart>
-                    </ResponsiveContainer>
+                    {costBreakdown.length === 0 ? (
+                      <EmptyState title="ยังไม่มีข้อมูลค่าใช้จ่าย" description="ยังไม่มีค่าใช้จ่ายซ่อมบำรุงบันทึกในปีนี้" />
+                    ) : (
+                      <ResponsiveContainer width="100%" height={280}>
+                        <PieChart>
+                          <Pie
+                            data={costBreakdown}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={80}
+                            outerRadius={120}
+                            paddingAngle={5}
+                            dataKey="value"
+                            label={({ percent, name }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          >
+                            {costBreakdown.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend verticalAlign="bottom" height={48} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    )}
                   </VStack>
                 </Card>
               </VStack>
@@ -718,20 +693,27 @@ export default function DashboardPage() {
                       </HStack>
                       <div className="relative w-full h-64 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden p-4">
                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(var(--cmms-border) 1px, transparent 1px), linear-gradient(90deg, var(--cmms-border) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                        {/* Simplified floor plan visualization */}
-                        <div className="absolute top-1/2 left-10 right-10 h-6 bg-slate-700 rounded flex items-center justify-around">
-                          <div className="w-3 h-3 bg-slate-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-slate-500 rounded-full"></div>
-                          <div className="w-3 h-3 bg-slate-500 rounded-full"></div>
-                        </div>
-                        <div className="absolute top-1/4 left-1/4 flex flex-col items-center">
-                          <div className="w-6 h-6 bg-emerald-500 rounded-full shadow-[0_0_15px_#10b981]"></div>
-                          <span className="text-xs text-slate-300 mt-1 bg-slate-900/80 px-2 rounded">PMP-001</span>
-                        </div>
-                        <div className="absolute bottom-1/4 right-1/4 flex flex-col items-center">
-                          <div className="w-7 h-7 bg-rose-500 rounded-full shadow-[0_0_20px_#f43f5e] animate-pulse border-2 border-white"></div>
-                          <span className="text-xs text-rose-400 mt-1 bg-slate-900/80 px-2 rounded font-bold">CNC-004</span>
-                        </div>
+                        {criticalAssets.length === 0 ? (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Text type="body" size="sm" style={{ color: 'var(--cmms-secondary, #94a3b8)' }}>
+                              ไม่มีเครื่องจักรชำรุด / อยู่ระหว่างซ่อมในขณะนี้
+                            </Text>
+                          </div>
+                        ) : (
+                          criticalAssets.slice(0, 8).map((asset, i) => {
+                            // กระจายตำแหน่งบนแผนผังตามลำดับจริง (ตาราง 4x2)
+                            const col = (i % 4) + 1;
+                            const row = Math.floor(i / 4) + 1;
+                            const left = `${(col * 20) - 6}%`;
+                            const top = `${(row * 40) - 14}%`;
+                            return (
+                              <div key={asset.id || i} className="absolute flex flex-col items-center" style={{ left, top }}>
+                                <div className={`w-6 h-6 rounded-full border-2 border-white ${asset.status === 'down' ? 'bg-rose-500 shadow-[0_0_20px_#f43f5e] animate-pulse' : asset.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500 shadow-[0_0_15px_#10b981]'}`}></div>
+                                <span className="text-xs text-slate-300 mt-1 bg-slate-900/80 px-2 rounded">{asset.id}</span>
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                     </VStack>
                   </Card>
@@ -743,7 +725,9 @@ export default function DashboardPage() {
                         <TrophyIcon className="w-5 h-5 text-amber-500"/> 🏆 ผู้ปฏิบัติงานยอดเยี่ยม
                       </Heading>
                       <VStack gap={4}>
-                        {(topPerformers.length > 0 ? topPerformers : mockLeaderboard).map((tech) => (
+                        {topPerformers.length === 0 ? (
+                          <EmptyState title="ยังไม่มีข้อมูล" description="ยังไม่มีผู้ปฏิบัติงานที่ปิดงานในปีนี้" />
+                        ) : topPerformers.map((tech) => (
                           <div key={tech.rank} className={`flex items-center gap-4 p-4 rounded-xl border ${tech.color} bg-opacity-30`}>
                             <div className="relative w-14 h-14 shrink-0">
                               <img 
@@ -787,7 +771,9 @@ export default function DashboardPage() {
                         <UsersIcon className="w-5 h-5 text-emerald-500"/> 📍 Live Technician Tracker
                       </Heading>
                       <VStack gap={4}>
-                        {(liveTechTrackers.length > 0 ? liveTechTrackers : mockLiveTrackers).map((tech, i) => (
+                        {liveTechTrackers.length === 0 ? (
+                          <EmptyState title="ไม่มีช่างกำลังปฏิบัติงาน" description="ไม่มีงานซ่อมที่กำลังดำเนินการอยู่ตอนนี้" />
+                        ) : liveTechTrackers.map((tech, i) => (
                           <div key={i} className="flex flex-col p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-3">
@@ -816,7 +802,9 @@ export default function DashboardPage() {
                         </Link>
                       </HStack>
                       <Grid columns={2} gap={4}>
-                        {(criticalAssets.length > 0 ? criticalAssets : mockCriticalAssets).map(asset => (
+                        {criticalAssets.length === 0 ? (
+                          <EmptyState title="เครื่องจักรปกติทั้งหมด" description="ไม่มีเครื่องจักรที่อยู่ระหว่างซ่อมหรือชำรุดตอนนี้" />
+                        ) : criticalAssets.map(asset => (
                           <div key={asset.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 flex flex-col gap-3 transition-colors hover:bg-sky-50 dark:hover:bg-sky-900/10">
                             <HStack hAlign="between" vAlign="center">
                               <Text type="body" size="sm" weight="bold">{asset.id}</Text>
@@ -846,7 +834,9 @@ export default function DashboardPage() {
                         <Badge label="เรียลไทม์" variant="primary" size="sm" />
                       </HStack>
                       <div className="relative pl-6 mt-4 space-y-6 before:absolute before:left-6 before:top-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-                        {(liveTimeline.length > 0 ? liveTimeline : mockTimeline).map((item, index) => (
+                        {liveTimeline.length === 0 ? (
+                          <EmptyState title="ยังไม่มีกิจกรรม" description="ยังไม่มีอัปเดตงานซ่อมล่าสุด" />
+                        ) : liveTimeline.map((item, index) => (
                           <div key={index} className="relative flex items-start">
                             <div className="absolute left-0 top-1 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-slate-100 shrink-0 z-10">
                               {item.type === 'success' ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" /> :
@@ -877,15 +867,17 @@ export default function DashboardPage() {
                         </Link>
                       </HStack>
                       <VStack gap={4}>
-                        {lowStock.map((item) => (
-                          <VStack key={item.part} gap={2} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+                        {lowStock.length === 0 ? (
+                          <EmptyState title="สต็อกปกติ" description="ไม่มีอะไหล่ต่ำกว่าจุดสั่งซื้อ" />
+                        ) : lowStock.map((item) => (
+                          <VStack key={item.code} gap={2} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
                             <HStack hAlign="between">
-                              <Text type="body" size="sm" weight="semibold">{item.part}</Text>
+                              <Text type="body" size="sm" weight="semibold">{item.name}</Text>
                               <Text type="body" size="sm" color="secondary">
-                                คงเหลือ <strong className="text-rose-600 dark:text-rose-400">{item.qty}</strong> / {item.reorder} {item.unit}
+                                คงเหลือ <strong className="text-rose-600 dark:text-rose-400">{Number(item.stock_qty)}</strong> / {Number(item.min_stock)} {item.unit}
                               </Text>
                             </HStack>
-                            <ProgressBar label="ระดับสต็อก" isLabelHidden value={(item.qty / item.reorder) * 100} variant={item.qty < 3 ? "error" : "warning"} />
+                            <ProgressBar label="ระดับสต็อก" isLabelHidden value={(Number(item.stock_qty) / Number(item.min_stock)) * 100} variant={Number(item.stock_qty) < 3 ? "error" : "warning"} />
                           </VStack>
                         ))}
                       </VStack>

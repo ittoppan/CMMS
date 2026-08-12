@@ -36,14 +36,6 @@ export interface KanbanItem {
   createdAt: string;
 }
 
-const mockKanbanData: KanbanItem[] = [
-  { id: "kb-1", woNumber: "EN-2607-001", asset: "Flexo Printing Press #1", symptoms: "มอเตอร์สายพานลำเลียงมีเสียงดังผิดปกติ", priority: "High", assignee: "สมศักดิ์ ช่างซ่อม", status: "open", createdAt: "2026-07-31 09:30" },
-  { id: "kb-2", woNumber: "EN-2607-002", asset: "Dry Lamination Machine #3", symptoms: "ชุดควบคุมความร้อนเซนเซอร์เพี้ยน", priority: "Critical", assignee: "สมชาย วิศวกร", status: "in_progress", createdAt: "2026-07-31 10:15" },
-  { id: "kb-3", woNumber: "EN-2607-003", asset: "Air Compressor 75kW", symptoms: "วาล์วระบายน้ำอุดตัน รออะไหล่ซีลยาง", priority: "Medium", assignee: "วิชัย ช่างไฟ", status: "pending", createdAt: "2026-07-30 14:00" },
-  { id: "kb-4", woNumber: "EN-2607-004", asset: "Chain Conveyor Main Line", symptoms: "ตั้งศูนย์สายพานและเปลี่ยนลูกปืนเรียบร้อย", priority: "Low", assignee: "ประเสริฐ ช่างกล", status: "completed", createdAt: "2026-07-29 16:30" },
-  { id: "kb-5", woNumber: "EN-2607-005", asset: "Toyota Forklift 2.5Ton", symptoms: "ระบบไฮดรอลิกรั่วซึม", priority: "High", assignee: "อนันต์ ช่างเครื่อง", status: "in_progress", createdAt: "2026-07-31 11:00" },
-];
-
 const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info" | "neutral"> = {
   Critical: "error",
   High: "warning",
@@ -52,7 +44,7 @@ const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info
 };
 
 export default function RepairKanbanPage() {
-  const [items, setItems] = useState<KanbanItem[]>(mockKanbanData);
+  const [items, setItems] = useState<KanbanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -85,13 +77,13 @@ export default function RepairKanbanPage() {
           return {
             id: `db-wo-${row.id}`,
             dbId: row.id,
-            woNumber: row.work_order_no || `EN-2607-${String(row.id).padStart(3, '0')}`,
+            woNumber: row.work_order_no || `EN-${String(row.id).padStart(3, '0')}`,
             asset: row.asset_name || row.title || "เครื่องจักรไม่ระบุ",
             symptoms: row.description || row.symptoms || "แจ้งซ่อมบำรุงประจำวัน",
             priority: normalizedPriority,
             assignee: row.assigned_name || "ยังไม่จ่ายงาน",
             status: normalizedStatus,
-            createdAt: row.created_at || "2026-07-31"
+            createdAt: row.created_at || "-"
           };
         });
         setItems(fetched);

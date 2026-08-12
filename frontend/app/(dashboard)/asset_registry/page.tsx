@@ -43,14 +43,13 @@ interface AssetRecord extends Record<string, unknown> {
   imageUrl?: string | null;
 }
 
-const mockAssets: AssetRecord[] = [
-  { rawId: 1, id: "1", code: "MC-FX-01", name: "เครื่องพิมพ์เฟล็กโซ 8 สี", category: "เครื่องพิมพ์", location: "อาคาร A โซน 1", criticality: "A", status: "running", installationDate: "2020-03-15", serialNo: "FX-88201-JP" },
-  { rawId: 2, id: "2", code: "MC-LM-03", name: "เครื่องลามิเนตแห้ง #3", category: "เครื่องลามิเนต", location: "อาคาร A โซน 2", criticality: "A", status: "breakdown", installationDate: "2021-06-10", serialNo: "LM-3304-GER" },
-  { rawId: 3, id: "3", code: "MC-CC-01", name: "สายพานลำเลียงโซ่สายหลัก A", category: "สายพานลำเลียง", location: "อาคาร B โซน 1", criticality: "B", status: "maintenance", installationDate: "2019-11-20", serialNo: "CC-1102" },
-  { rawId: 4, id: "4", code: "MC-CP-02", name: "เครื่องอัดอากาศสกรู 75kW", category: "สาธารณูปโภค", location: "ห้องเครื่องอัดอากาศ", criticality: "A", status: "running", installationDate: "2018-01-05", serialNo: "CP-75-02" },
-  { rawId: 5, id: "5", code: "MC-CT-01", name: "หอหล่อเย็น 200 RT", category: "สาธารณูปโภค", location: "ดาดฟ้า", criticality: "B", status: "running", installationDate: "2017-08-12", serialNo: "CT-200-A" },
-  { rawId: 6, id: "6", code: "MC-FK-01", name: "รถโฟล์คลิฟท์ไฟฟ้าโตโยต้า 2.5 ตัน", category: "ยานพาหนะ", location: "คลังสินค้า B", criticality: "C", status: "standby", installationDate: "2022-02-18", serialNo: "FK-TY-992" },
-];
+// แปลงสถานะจริงจาก DB (asset_registry.status enum) เป็นค่าที่ UI ใช้
+const dbStatusToUi: Record<string, string> = {
+  active: "running",
+  under_repair: "maintenance",
+  inactive: "standby",
+  disposed: "standby",
+};
 
 const statusMap: Record<string, { label: string; variant: "success" | "error" | "warning" | "accent" }> = {
   running: { label: "กำลังทำงานปกติ", variant: "success" },
@@ -63,7 +62,7 @@ const PAGE_SIZE = 10;
 
 export default function AssetRegistryPage() {
   const router = useRouter();
-  const [assets, setAssets] = useState<AssetRecord[]>(mockAssets);
+  const [assets, setAssets] = useState<AssetRecord[]>([]);
   const [search, setSearch] = useState("");
   const [criticalityFilter, setCriticalityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -84,12 +83,12 @@ export default function AssetRegistryPage() {
             id: String(row.id),
             code: row.code || `MC-${row.id}`,
             name: row.name || "เครื่องจักรทั่วไป",
-            category: row.category || "General",
-            location: row.location || "โรงงานหลัก",
+            category: row.category || "-",
+            location: row.location || "-",
             criticality: (row.criticality || "B") as "A" | "B" | "C",
-            status: (row.status || "running") as any,
-            installationDate: row.created_at || "2024-01-01",
-            serialNo: row.serial_number || `SN-${row.id}`,
+            status: (dbStatusToUi[row.status] || row.status || "running") as any,
+            installationDate: row.purchase_date || row.created_at?.slice(0, 10) || "-",
+            serialNo: row.serial_number || "-",
             imageUrl: row.image_path || null,
           }));
           setAssets(fetched);

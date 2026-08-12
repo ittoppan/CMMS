@@ -65,9 +65,9 @@ export default function MyTasksPage() {
   const [repairCode, setRepairCode] = useState("R01");
   const [rootCause, setRootCause] = useState("");
   const [solution, setSolution] = useState("");
-  const [afterImg, setAfterImg] = useState("/images/sample_after_repair.jpg");
+  const [afterImg, setAfterImg] = useState("");
   const [afterFile, setAfterFile] = useState<File | null>(null);
-  const [receiverName, setReceiverName] = useState("สมชาย ผู้คุมเครื่อง (Production Supervisor)");
+  const [receiverName, setReceiverName] = useState("");
   const [receiverSignature, setReceiverSignature] = useState("");
   const [closing, setClosing] = useState(false);
 
@@ -77,7 +77,7 @@ export default function MyTasksPage() {
 
   useEffect(() => {
     // 1) เอาผู้ใช้ปัจจุบัน (session) เพื่อกรองเฉพาะงานที่มอบหมายให้ตัวเอง
-    fetch("/api/v1/menu_permissions.php?user=1", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/menu_permissions.php", { headers: { "ngrok-skip-browser-warning": "1" } })
       .then(res => res.json())
       .then(json => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
@@ -92,9 +92,9 @@ export default function MyTasksPage() {
           const mapped: TaskItem[] = rows.map((r: any) => ({
             rawId: r.id,
             id: String(r.id),
-            woNumber: r.work_order_no || `EN-2607-${r.id}`,
-            machine: r.asset_name || "เครื่องพิมพ์ Flexographic",
-            title: r.title || "งานซ่อมบำรุงเครื่องจักร",
+            woNumber: r.work_order_no || `EN-${r.id}`,
+            machine: r.asset_name || "-",
+            title: r.title || "-",
             priority: r.priority || "medium",
             status: (() => {
               const s = String(r.status || "").toLowerCase();
@@ -105,9 +105,9 @@ export default function MyTasksPage() {
             assignedTo: r.assigned_to || null,
             assignedDate: r.created_at || "-",
             estimatedCompletion: r.estimated_completion_date || "-",
-            beforeImg: r.before_image_path || "/images/sample_before_repair.jpg",
-            afterImg: r.after_image_path || "/images/sample_after_repair.jpg",
-            receiverName: r.receiver_name || "สมชาย ผู้คุมเครื่อง (Production Supervisor)",
+            beforeImg: r.before_image_path || "",
+            afterImg: r.after_image_path || "",
+            receiverName: r.receiver_name || "-",
             receiverSignature: r.receiver_signature_path || ""
           }));
           setTasks(mapped);

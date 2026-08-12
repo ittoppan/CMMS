@@ -68,7 +68,7 @@ try {
 
     for ($i = 1; $i <= 12; $i++) {
         $r = $repairMap[$i] ?? ['completed' => 0, 'breakdown' => 0, 'cost' => 0];
-        $m = $mtbfMap[$i] ?? ['mtbf' => 300, 'mttr' => 4.0];
+        $m = $mtbfMap[$i] ?? ['mtbf' => 0, 'mttr' => 0];
 
         $result[] = [
             'monthNum' => $i,
@@ -76,8 +76,8 @@ try {
             'completed' => (int)($r['completed'] ?? 0),
             'breakdown' => (int)($r['breakdown'] ?? 0),
             'cost' => (float)($r['cost'] ?? 0),
-            'mtbf' => (float)($m['mtbf'] ?? 300),
-            'mttr' => (float)($m['mttr'] ?? 4.0),
+            'mtbf' => (float)($m['mtbf'] ?? 0),
+            'mttr' => (float)($m['mttr'] ?? 0),
         ];
     }
 
@@ -104,6 +104,23 @@ try {
     $costStmt->execute([$year]);
     $costData = $costStmt->fetch(PDO::FETCH_ASSOC);
     $costPerWo = $costData['total_wo'] > 0 ? round($costData['total_cost'] / $costData['total_wo'], 2) : 0;
+
+    // 6b. Cost Breakdown by category (ค่าอะไหล่ / ค่าแรง / จ้างเหมา) — ข้อมูลจริงจาก repair
+    $breakdownSql = "SELECT
+                        COALESCE(SUM(cost_parts), 0) AS parts,
+                        COALESCE(SUM(cost_labor), 0) AS labor,
+                        COALESCE(SUM(cost_outsource), 0) AS outsource
+                     FROM repair WHERE YEAR(created_at) = ?";
+    $bdStmt = $pdo->prepare($breakdownSql);
+    $bdStmt->execute([$year]);
+    $bd = $bdStmt->fetch(PDO::FETCH_ASSOC);
+    $costBreakdown = [
+        ['name' => 'ค่าอะไหล่', 'value' => (float)($bd['parts'] ?? 0), 'color' => '#0ea5e9'],
+        ['name' => 'ค่าแรง', 'value' => (float)($bd['labor'] ?? 0), 'color' => '#10b981'],
+        ['name' => 'จ้างเหมา', 'value' => (float)($bd['outsource'] ?? 0), 'color' => '#f59e0b'],
+    ];
+    // ตัดหมวดที่ไม่มีค่าใช้จ่ายออก (ไม่โชว์ 0% ให้เข้าใจผิด)
+    $costBreakdown = array_values(array_filter($costBreakdown, fn($c) => $c['value'] > 0));
 
     // 7. ESG / Energy Waste (Mock based on downtime_minutes)
     $downtimeSql = "SELECT SUM(downtime_minutes) as total_downtime FROM repair WHERE YEAR(created_at) = ?";
@@ -231,7 +248,8 @@ try {
             'cost_analysis' => [
                 'total_wo' => (int)$costData['total_wo'],
                 'total_cost' => (float)$costData['total_cost'],
-                'cost_per_wo' => $costPerWo
+                'cost_per_wo' => $costPerWo,
+                'cost_breakdown' => $costBreakdown
             ],
             'esg' => [
                 'total_downtime_minutes' => (int)$dtData['total_downtime'],

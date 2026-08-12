@@ -48,14 +48,8 @@ const permitTypeLabels: Record<string, string> = {
   "Working at Height": "งานบนที่สูง",
 };
 
-const mockPermits: PermitItem[] = [
-  { id: "WP-2026-041", permitType: "Electrical LOTO", workOrder: "WO-2026-089", location: "Main Substation B", applicant: "สมศักดิ์ รักดี", safetyOfficer: "จป. วิชัย", lotoStatus: "Locked Out", status: "approved", validUntil: "2026-07-30 18:00" },
-  { id: "WP-2026-042", permitType: "Hot Work", workOrder: "WO-2026-092", location: "Building A Roof", applicant: "อนันต์ ปัญญา", safetyOfficer: "จป. วิชัย", lotoStatus: "N/A", status: "pending_safety", validUntil: "2026-07-31 17:00" },
-  { id: "WP-2026-039", permitType: "Confined Space", workOrder: "PM-2026-008", location: "Cooling Tower Sump", applicant: "มานพ คมสัน", safetyOfficer: "จป. วิชัย", lotoStatus: "Locked Out", status: "closed", validUntil: "2026-07-28 17:00" },
-];
-
 export default function WorkPermitPage() {
-  const [permits, setPermits] = useState<PermitItem[]>(mockPermits);
+  const [permits, setPermits] = useState<PermitItem[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { showToast } = useToast();
@@ -76,8 +70,8 @@ export default function WorkPermitPage() {
             permitType: permitTypeLabels[typeMap[row.permit_type]] || permitTypeLabels[typeMap[row.permit_type] || ""] || "งานเสี่ยงอื่นๆ",
             workOrder: row.repair_id ? `WO-${row.repair_id}` : "-",
             location: row.location || "ไม่ระบุ",
-            applicant: row.requester_name || "ช่างเทคนิค",
-            safetyOfficer: "จป. วิชาการ",
+            applicant: row.requester_name || "-",
+            safetyOfficer: row.safety_officer_name || "-",
             lotoStatus: row.loto_electrical || row.loto_pneumatic || row.loto_hydraulic ? "Locked Out" : "N/A",
             status: row.status === "approved" ? "approved" : row.status === "active" ? "approved" : "pending_safety",
             validUntil: row.valid_until || row.created_at || "-"

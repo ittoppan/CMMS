@@ -45,24 +45,24 @@ export default function RepairViewDetailsPage() {
   const [woId, setWoId] = useState<string>("1");
   const [loading, setLoading] = useState(true);
   const [wo, setWo] = useState<WorkOrderDetail>({
-    id: 1,
-    workOrderNo: "EN-2607-001",
-    assetName: "A-PT-01 (เครื่องพิมพ์ 10 สี — Printing)",
-    title: "มอเตอร์สายพานลำเลียงสั่นสะเทือนและมีเสียงดังผิดปกติ",
-    description: "ตลับลูกปืนมอเตอร์ขับลูกหมากแตก ทำให้สายพานลำเลียงสไลด์ไม่ตรงตำแหน่ง",
-    status: "Completed",
-    priority: "high",
-    assignedName: "สมศักดิ์ ช่างซ่อม (ช่างอาวุโส)",
-    receiverName: "สมชาย ผู้คุมเครื่อง (หัวหน้างานผลิต)",
-    beforeImg: "/images/sample_before_repair.jpg",
-    afterImg: "/images/sample_after_repair.jpg",
-    receiverSignature: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='80'><path d='M10 50 Q 50 10 90 50 T 170 40' stroke='%231E293B' stroke-width='3' fill='none'/><text x='20' y='70' font-size='12' fill='%2364748B'>สมชาย (อนุมัติแล้ว)</text></svg>",
-    completedAt: "2026-07-31 14:30:00",
-    rootCause: "ตลับลูกปืน SKF 6205 หมดอายุการใช้งานตามรอบ 5,000 ชม.",
-    solution: "เปลี่ยนตลับลูกปืน SKF 6205 ใหม่ 2 ตัว, อัดจาระบีทนความร้อน และตั้งศูนย์เพลาขับ",
-    costParts: 1250,
-    costLabor: 500,
-    downtimeMinutes: 45
+    id: 0,
+    workOrderNo: "-",
+    assetName: "-",
+    title: "-",
+    description: "-",
+    status: "",
+    priority: "",
+    assignedName: "-",
+    receiverName: "-",
+    beforeImg: "",
+    afterImg: "",
+    receiverSignature: "",
+    completedAt: "-",
+    rootCause: "-",
+    solution: "-",
+    costParts: 0,
+    costLabor: 0,
+    downtimeMinutes: 0
   });
 
   useEffect(() => {
@@ -76,23 +76,23 @@ export default function RepairViewDetailsPage() {
         if (row && row.id) {
           setWo({
             id: row.id,
-            workOrderNo: row.work_order_no || `EN-2607-${row.id}`,
-            assetName: row.asset_name || "เครื่องพิมพ์ Flexographic",
-            title: row.title || "แจ้งซ่อมบำรุงเครื่องจักร",
+            workOrderNo: row.work_order_no || `EN-${row.id}`,
+            assetName: row.asset_name || "-",
+            title: row.title || "-",
             description: row.description || row.failure_report || "-",
-            status: row.status || "Completed",
-            priority: row.priority || "high",
-            assignedName: row.assigned_name || "สมศักดิ์ ช่างซ่อม",
-            receiverName: row.receiver_name || "สมชาย ผู้คุมเครื่อง (หัวหน้างานผลิต)",
-            beforeImg: row.before_image_path || "/images/sample_before_repair.jpg",
-            afterImg: row.after_image_path || "/images/sample_after_repair.jpg",
-            receiverSignature: row.receiver_signature_path || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='80'><path d='M10 50 Q 50 10 90 50 T 170 40' stroke='%231E293B' stroke-width='3' fill='none'/><text x='20' y='70' font-size='12' fill='%2364748B'>สมชาย (อนุมัติแล้ว)</text></svg>",
-            completedAt: row.completed_at || row.updated_at || "2026-07-31 14:30:00",
-            rootCause: row.root_cause || "ตลับลูกปืนหมดอายุการใช้งานตามรอบ",
-            solution: row.solution || row.resolution || "เปลี่ยนตลับลูกปืนใหม่และตั้งศูนย์เพลาขับ",
-            costParts: Number(row.cost_parts || 1250),
-            costLabor: Number(row.cost_labor || 500),
-            downtimeMinutes: Number(row.downtime_minutes || 45)
+            status: row.status || "",
+            priority: row.priority || "",
+            assignedName: row.assigned_name || "-",
+            receiverName: row.receiver_name || "-",
+            beforeImg: row.before_image_path || "",
+            afterImg: row.after_image_path || "",
+            receiverSignature: row.receiver_signature_path || "",
+            completedAt: row.completed_at || row.updated_at || "-",
+            rootCause: row.root_cause || "-",
+            solution: row.solution || row.resolution || "-",
+            costParts: Number(row.cost_parts || 0),
+            costLabor: Number(row.cost_labor || 0),
+            downtimeMinutes: Number(row.downtime_minutes || 0)
           });
         }
       })
@@ -300,12 +300,9 @@ export default function RepairViewDetailsPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: '#FAFFA'
+                    background: '#F8FAFC'
                   }}>
-                    <svg width="180" height="60">
-                      <path d="M10 35 Q 40 10 80 40 T 160 30" stroke="#2563EB" strokeWidth="3" fill="none" />
-                      <text x="15" y="55" fontSize="11" fill="#64748B">ยืนยันลายเซ็นช่างผู้ซ่อมแล้ว</text>
-                    </svg>
+                    <Text type="body" size="sm" color="secondary">ยังไม่มีข้อมูลลายเซ็นในระบบ</Text>
                   </div>
                   <Text type="body" weight="bold">{wo.assignedName}</Text>
                   <Text type="body" size="sm" color="secondary">แผนกซ่อมบำรุง</Text>
@@ -327,13 +324,10 @@ export default function RepairViewDetailsPage() {
                     justifyContent: 'center',
                     background: '#FFFFFF'
                   }}>
-                    {wo.receiverSignature && wo.receiverSignature.startsWith("data:image") ? (
+                    {wo.receiverSignature ? (
                       <img src={wo.receiverSignature} alt="ลายเซ็นผู้รับมอบงาน" style={{ maxHeight: 75 }} />
                     ) : (
-                      <svg width="180" height="60">
-                        <path d="M10 40 Q 50 10 90 45 T 170 30" stroke="#059669" strokeWidth="3" fill="none" />
-                        <text x="20" y="55" fontSize="11" fill="#059669">ผู้รับมอบงานลงนามแล้ว</text>
-                      </svg>
+                      <Text type="body" size="sm" color="secondary">ยังไม่มีลายเซ็นผู้รับมอบงาน</Text>
                     )}
                   </div>
                   <Text type="body" weight="bold">{wo.receiverName}</Text>

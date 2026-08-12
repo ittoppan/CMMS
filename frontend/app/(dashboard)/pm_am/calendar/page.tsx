@@ -18,17 +18,7 @@ import {
   CheckCircleIcon
 } from "@heroicons/react/24/outline";
 
-// Mock data fallback
-const upcomingTasksMock = [
-  { id: "PM-001", asset: "เครื่องพิมพ์ Flexo #1", task: "หล่อลื่นแบริ่งลูกกลิ้ง", date: "2026-07-30", assignee: "สมศักดิ์ รักดี", status: "scheduled", type: "Weekly" },
-  { id: "PM-007", asset: "สายพานลำเลียง C-2", task: "ตรวจสอบความตึงสายพาน", date: "2026-07-30", assignee: "อนันต์ ปัญญา", status: "completed", type: "Monthly" },
-  { id: "PM-013", asset: "Forklift #1", task: "ตรวจสอบระดับน้ำมันไฮดรอลิก", date: "2026-07-30", assignee: "อนันต์ ปัญญา", status: "completed", type: "Daily" },
-  { id: "PM-015", asset: "ปั๊มลม Air Compressor", task: "ถ่ายน้ำออกจากถังพักลม", date: "2026-07-30", assignee: "สมชาย ทองทา", status: "scheduled", type: "Daily" },
-  { id: "PM-008", asset: "Cooling Tower", task: "เติมสารเคมีบำบัดน้ำ", date: "2026-07-31", assignee: "มานพ คมสัน", status: "scheduled", type: "Weekly" },
-  { id: "PM-002", asset: "Compressor #2", task: "ตรวจเช็คระดับน้ำมันหล่อลื่น", date: "2026-08-01", assignee: "อนันต์ ปัญญา", status: "scheduled", type: "Weekly" },
-  { id: "PM-005", asset: "เครื่องพิมพ์ Flexo #2", task: "เปลี่ยนกรองหมึกพิมพ์", date: "2026-08-02", assignee: "วิชัย เลิศศิริ", status: "in-progress", type: "Monthly" },
-  { id: "PM-011", asset: "ปั๊มน้ำดิบ Station", task: "ตรวจสอบซีลปั๊ม", date: "2026-08-03", assignee: "ประสิทธิ์ คำสิงห์", status: "in-progress", type: "Quarterly" },
-];
+const todayStr = new Date().toISOString().slice(0, 10);
 
 const statusDot: Record<string, "success" | "warning" | "error" | "accent"> = {
   scheduled: "accent",
@@ -46,8 +36,8 @@ const freqColors: Record<string, "info" | "warning" | "success" | "neutral" | "b
 };
 
 export default function PMCalendarPage() {
-  const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>("2026-07-30");
-  const [tasks, setTasks] = useState(upcomingTasksMock);
+  const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>(todayStr);
+  const [tasks, setTasks] = useState<any[]>([]);
   const [viewAll, setViewAll] = useState(false);
 
   useEffect(() => {
@@ -59,8 +49,8 @@ export default function PMCalendarPage() {
             id: row.plan_code || `PM-${row.id}`,
             asset: row.title || row.plan_name || "แผนงานซ่อมบำรุง",
             task: row.description || "เช็คสภาพเครื่องตามรอบ",
-            date: row.due_date ? row.due_date.split(" ")[0] : row.next_due_date ? row.next_due_date.split(" ")[0] : "2026-07-30",
-            assignee: row.assigned_to_name || "ทีมช่างซ่อมบำรุง",
+            date: row.due_date ? row.due_date.split(" ")[0] : "",
+            assignee: row.assigned_to_name || "-",
             status: row.status || "scheduled",
             type: row.frequency_type || "monthly",
           }));
@@ -70,10 +60,11 @@ export default function PMCalendarPage() {
       .catch(e => console.error("Fetch PM plans error:", e));
   }, []);
 
-  const tasksForDate = tasks.filter((t) => t.date === selectedDate);
+  const tasksForDate = tasks.filter((t) => t.date && t.date === selectedDate);
   const overdueCount = tasks.filter(t => t.status === "overdue").length;
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const todayCount = tasks.filter(t => t.date === todayStr).length;
+  const todayCount = tasks.filter(t => t.date && t.date === todayStr).length;
+  // จำนวนช่างที่กำลังปฏิบัติงานจริง (จากงานที่สถานะ in-progress)
+  const activeTechCount = new Set(tasks.filter(t => t.status === "in-progress").map((t: any) => t.assignee)).size;
   const completedCount = tasks.filter(t => t.status === "completed" && t.date === todayStr).length;
   // โหมด "ดูแผนทั้งหมด" — เรียงตามวันที่แล้วค่อยตามรหัส
   const allTasksSorted = [...tasks].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id.localeCompare(b.id)));
@@ -141,7 +132,7 @@ export default function PMCalendarPage() {
              </div>
              <VStack gap={1}>
                 <Text type="supporting" weight="bold" style={{ color: "var(--color-warning)", textTransform: 'uppercase' }}>ช่างที่กำลังปฏิบัติงาน</Text>
-               <Heading level={3}>4 <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>คน</span></Heading>
+               <Heading level={3}>{activeTechCount} <span style={{ fontSize: 14, color: 'var(--color-secondary)' }}>คน</span></Heading>
              </VStack>
            </HStack>
          </Card>

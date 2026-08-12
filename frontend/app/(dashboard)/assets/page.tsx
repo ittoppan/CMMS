@@ -15,6 +15,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Link } from "@astryxdesign/core/Link";
 import CountUp from "react-countup";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -30,12 +31,13 @@ interface Asset extends Record<string, unknown> {
   lastPM: string;
 }
 
-const mockAssetsData: Asset[] = [
-  { code: "AST-001", name: "ปั๊มหอยโข่ง P-101", department: "Production", status: "operational", location: "อาคาร A ชั้น 1", lastPM: "2026-07-15" },
-  { code: "AST-002", name: "เครื่องอัดอากาศแบบสกรู C-201", department: "Utilities", status: "operational", location: "ห้องระบบสาธารณูปโภค 2", lastPM: "2026-07-10" },
-  { code: "AST-003", name: "มอเตอร์เหนี่ยวนำ M-301", department: "Production", status: "under-repair", location: "โรงซ่อม เบย์ 3", lastPM: "2026-06-28" },
-  { code: "AST-004", name: "เครื่องแลกเปลี่ยนความร้อนแบบเพลท E-401", department: "Utilities", status: "operational", location: "บริเวณหอหล่อเย็น", lastPM: "2026-07-20" },
-];
+// แปลงสถานะจริงจาก DB (asset_registry.status) เป็นค่าที่ UI ใช้
+const dbStatusToUi: Record<string, Asset["status"]> = {
+  active: "operational",
+  under_repair: "under-repair",
+  inactive: "standby",
+  disposed: "decommissioned",
+};
 
 const statusColorMap: Record<string, "success" | "warning" | "error" | "neutral"> = {
   operational: "success",
@@ -70,7 +72,7 @@ const departments = [
 const statuses = ["All", "operational", "standby", "under-repair", "decommissioned"];
 
 export default function AssetsPage() {
-  const [assets, setAssets] = useState<Asset[]>(mockAssetsData);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
@@ -87,10 +89,10 @@ export default function AssetsPage() {
         const fetched = json.data.map((row: any) => ({
           code: row.code || `AST-${row.id}`,
           name: row.name || "ไม่ระบุ",
-          department: row.category || "Production",
-          status: row.status || "operational",
-          location: "Main Plant",
-          lastPM: "2026-07-01"
+          department: row.department || row.category || "-",
+          status: dbStatusToUi[row.status] || (row.status as Asset["status"]) || "operational",
+          location: row.location || "-",
+          lastPM: row.last_pm || "-"
         }));
         setAssets(fetched);
       }
@@ -219,15 +221,22 @@ export default function AssetsPage() {
             />
           </HStack>
 
-          <Table<Asset>
-            data={paged}
-            columns={columns}
-            idKey="code"
-            density="balanced"
-            dividers="rows"
-            hasHover
-            plugins={{ pagination }}
-          />
+          {!loading && filtered.length === 0 ? (
+            <EmptyState
+              title="ไม่พบเครื่องจักร"
+              description="ลองเปลี่ยนตัวกรอง หรือเพิ่มเครื่องจักรใหม่ในระบบ"
+            />
+          ) : (
+            <Table<Asset>
+              data={paged}
+              columns={columns}
+              idKey="code"
+              density="balanced"
+              dividers="rows"
+              hasHover
+              plugins={{ pagination }}
+            />
+          )}
         </VStack>
       </Card>
     </VStack>

@@ -37,31 +37,24 @@ type TrackWO = Record<string, unknown> & {
   etaDate?: string;
 };
 
-const INITIAL_DATA: TrackWO[] = [
-  { id: "tr-1", woNumber: "EN-2607-001", machine: "A-PT-01 (Flexo Printing)", symptoms: "มอเตอร์มีเสียงดังขณะเดินเครื่อง", status: "pending_eval", requestDate: "2026-07-28 09:30", technician: "Somchai T." },
-  { id: "tr-2", woNumber: "EN-2607-002", machine: "B-SL-01 (Slitting Machine)", symptoms: "ใบมีดตัดไม่ขาด ขอบชิ้นงานไม่เรียบ", status: "pending_assign", requestDate: "2026-07-29 10:15" },
-  { id: "tr-3", woNumber: "EN-2607-003", machine: "U-AC-04 (Chiller Unit)", symptoms: "อุณหภูมิห้องคลังสูงเกินกำหนด 25°C", status: "in_progress", requestDate: "2026-07-28 15:20", technician: "Niti P.", etaDate: "2026-07-30" },
-  { id: "tr-4", woNumber: "EN-2607-004", machine: "C-PK-01 (Packing Line)", symptoms: "สายพานขาด ลำเลียงชิ้นงานไม่ได้", status: "completed", requestDate: "2026-07-25 11:00", technician: "Somchai T." },
-];
-
 export default function RepairTrackingPage() {
   const router = useRouter();
-  const [data, setData] = useState<TrackWO[]>(INITIAL_DATA);
+  const [data, setData] = useState<TrackWO[]>([]);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     fetch("/api/v1/index.php?resource=work-orders")
       .then(res => res.json())
       .then(json => {
-        if (json.status === "success" && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.status === "success" && Array.isArray(json.data)) {
           const mapped: TrackWO[] = json.data.map((row: any, index: number) => ({
             id: `db-wo-${row.id || index}`,
-            woNumber: row.work_order_no || row.wo_number || `EN-2607-${String(row.id || index).padStart(3, '0')}`,
-            machine: row.asset_name || row.asset || `Asset #${row.asset_id || 1}`,
-            symptoms: row.title || row.description || "งานซ่อมบำรุงรักษา",
-            status: row.status === 'completed' || row.status === 'Completed' ? 'completed' : row.status === 'in_progress' || row.status === 'In Progress' ? 'in_progress' : 'pending_assign',
-            requestDate: row.created_at || row.date || new Date().toISOString().slice(0, 10),
-            technician: row.assigned_name || row.assignee || "ช่างประจำวัน"
+            woNumber: row.work_order_no || row.wo_number || `EN-${String(row.id || index).padStart(3, '0')}`,
+            machine: row.asset_name || "-",
+            symptoms: row.title || row.description || "-",
+            status: row.status === 'completed' || row.status === 'Completed' || row.status === 'closed' ? 'completed' : row.status === 'in_progress' || row.status === 'In Progress' ? 'in_progress' : row.status === 'open' || row.status === 'Open' ? 'pending_assign' : row.status === 'waiting_parts' || row.status === 'pending_parts' ? 'pending_accept' : 'pending_assign',
+            requestDate: row.created_at || "-",
+            technician: row.assigned_name || "-"
           }));
           setData(mapped);
           setError(false);
