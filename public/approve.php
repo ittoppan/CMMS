@@ -43,16 +43,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
 <html lang="th" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>1-Click Approval System — CMMS-TOPPAN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; }
+        .card-enter { animation: cmmsApproveIn .32s cubic-bezier(.4,0,.2,1) both; }
+        @keyframes cmmsApproveIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+        /* ปุ่มใหญ่พอดีนิ้ว (มือถือ) */
+        button, a.btn-approve { min-height: 52px; }
     </style>
 </head>
-<body class="h-full flex items-center justify-center p-4 bg-slate-950 text-slate-100">
+<body class="h-full flex items-center justify-center p-4 bg-slate-950 text-slate-100" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
 
 <div class="w-full max-w-lg space-y-6">
 
@@ -65,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
 
     <?php if (!$req): ?>
     <!-- Invalid Token Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center space-y-4">
+    <div class="card-enter bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center space-y-4">
         <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-xl">❌</div>
         <h2 class="text-lg font-bold text-white">ไม่พบข้อมูลคำขออนุมัติ</h2>
         <p class="text-xs text-slate-400">ลิงก์อนุมัติไม่ถูกต้อง หรืออาจถูกยกเลิกแล้ว</p>
@@ -74,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
 
     <?php elseif ($result && $result['success']): ?>
     <!-- Success Result Card -->
-    <div class="bg-slate-900 border <?= $result['new_status'] === 'approved' ? 'border-emerald-500/50' : 'border-rose-500/50' ?> rounded-2xl p-6 shadow-2xl space-y-4">
+    <div class="card-enter bg-slate-900 border <?= $result['new_status'] === 'approved' ? 'border-emerald-500/50' : 'border-rose-500/50' ?> rounded-2xl p-6 shadow-2xl space-y-4">
         <div class="text-center space-y-2">
             <div class="w-16 h-16 rounded-full <?= $result['new_status'] === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400' ?> flex items-center justify-center mx-auto text-3xl">
                 <?= $result['new_status'] === 'approved' ? '✅' : '❌' ?>
@@ -96,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
 
     <?php elseif ($req['status'] !== 'pending'): ?>
     <!-- Already Processed Card -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center space-y-4">
+    <div class="card-enter bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center space-y-4">
         <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl">ℹ️</div>
         <h2 class="text-lg font-bold text-white">คำขอนี้ได้รับการดำเนินการไปแล้ว</h2>
         <p class="text-xs text-amber-300">
@@ -108,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
 
     <?php else: ?>
     <!-- Pending Approval Action Card -->
-    <form method="POST" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+    <form method="POST" class="card-enter bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
         <?= csrfField() ?>
         <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 

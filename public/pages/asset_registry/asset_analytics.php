@@ -113,7 +113,7 @@ renderHeader();
 
     <?php if ($asset): ?>
     <!-- Asset Summary Card -->
-    <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
+    <div class="card cmms-card p-5">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
                 <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-slate-300 shadow-sm">
@@ -135,22 +135,22 @@ renderHeader();
 
     <!-- 4 High Level Metric Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="card cmms-card p-5">
             <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">มูลค่าเบิกอะไหล่สะสม</div>
             <div class="text-2xl font-black text-purple-700 mt-1">฿<?= number_format($totalPartsCost, 2) ?></div>
             <div class="text-[11px] text-slate-400 mt-1">รวม <?= count($issuedParts) ?> รายการอะไหล่</div>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="card cmms-card p-5">
             <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">รวมค่าใช้จ่ายซ่อมบำรุง</div>
             <div class="text-2xl font-black text-indigo-600 mt-1">฿<?= number_format($totalMachineCost, 2) ?></div>
             <div class="text-[11px] text-slate-400 mt-1">ค่าแรง + อะไหล่ + Outsource</div>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="card cmms-card p-5">
             <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">จำนวนครั้งที่เครื่องจักรเสีย</div>
             <div class="text-2xl font-black text-rose-600 mt-1"><?= $totalRepairs ?> ครั้ง</div>
             <div class="text-[11px] text-slate-400 mt-1">ใบสั่งซ่อม F-EN-03 สะสม</div>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="card cmms-card p-5">
             <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">เวลา Downtime สะสม</div>
             <div class="text-2xl font-black text-amber-600 mt-1"><?= number_format($totalDowntime, 1) ?> ชม.</div>
             <div class="text-[11px] text-slate-400 mt-1">ชั่วโมงเครื่องหยุดทำงาน</div>
@@ -199,7 +199,7 @@ renderHeader();
         </div>
 
         <!-- Cost Breakdown Doughnut Chart -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="card cmms-card p-5">
             <h3 class="font-bold text-slate-900 text-sm border-b pb-2">📊 สัดส่วนค่าใช้จ่ายซ่อมบำรุง (Cost Ratio)</h3>
             <div class="relative h-64 flex items-center justify-center">
                 <canvas id="costRatioChart"></canvas>

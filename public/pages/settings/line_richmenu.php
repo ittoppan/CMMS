@@ -21,7 +21,7 @@ renderHeader();
     </div>
 
     <!-- 6 Rich Menu Action Tiles Grid -->
-    <div class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card cmms-card p-6 space-y-4">
         <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">
             <span>🎛️ ปุ่มเมนูลัด 6 ช่องบนหน้าจอ LINE (6-Tile Action Matrix)</span>
             <span class="text-xs text-slate-400">Target Action URLs</span>
@@ -93,7 +93,7 @@ renderHeader();
     </div>
 
     <!-- Instructions Guide -->
-    <div class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+    <div class="card cmms-card p-6 space-y-3">
         <h3 class="font-bold text-slate-900 text-sm border-b pb-2">🛠️ วิธีการนำ URL ไปวางใน LINE Official Account Manager:</h3>
         <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
             <li>เปิดเข้า <a href="https://manager.line.biz/" target="_blank" class="text-indigo-600 font-bold hover:underline">LINE Official Account Manager</a> และเลือกบัญชี <strong>@823cenqj</strong></li>

@@ -143,7 +143,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Generator Form Card -->
-    <form method="POST" class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-6">
+    <form method="POST" class="card cmms-card p-5">
         <input type="hidden" name="generate_batch" value="1">
 
         <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between">

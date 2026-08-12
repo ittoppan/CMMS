@@ -73,7 +73,7 @@ renderHeader();
     </div>
     <?php endif; ?>
 
-    <form method="POST" class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-6">
+    <form method="POST" class="card cmms-card p-6 space-y-6">
         <input type="hidden" name="save_smart_rules" value="1">
 
         <!-- Rule 1: High-Cost Spare Parts Approval Threshold -->

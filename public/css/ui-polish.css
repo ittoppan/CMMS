@@ -14,6 +14,91 @@
    - Print styles + reduced-motion accessibility
    ============================================================ */
 
+/* ============================================================
+   SHARED UX PATTERNS (v2) — ใช้กับทุกหน้าได้ทันที
+   ------------------------------------------------------------
+   .cmms-card          การ์ดทันสมัย (แทน bg-white border-slate-200 shadow-sm)
+   .cmms-stat-card     การ์ด KPI ตัวเลข
+   .cmms-section       กลุ่มเนื้อหา + หัวข้อ (settings ใหญ่)
+   .cmms-fab           ปุ่มลอยเพิ่มรายการ (มือถือ + เดสก์ท็อป)
+   .cmms-action-bar    แถบปุ่มยืนยันติดล่าง (ฟอร์มบนมือถือ)
+   .cmms-stack-table   ตาราง -> การ์ดเรียงซ้อนบนมือถือ (ต้องมี data-label)
+   ============================================================ */
+
+/* ---- การ์ดทันสมัย ---- */
+.cmms-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-container, 14px);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px -4px rgb(0 0 0 / 0.06);
+  transition: border-color .18s var(--ease-standard, ease), box-shadow .18s var(--ease-standard, ease);
+}
+.cmms-card:hover { border-color: color-mix(in srgb, var(--color-accent, #0064e0) 30%, var(--color-border, #e2e8f0)); }
+
+/* ---- การ์ดสถิติ (KPI) ---- */
+.cmms-stat-card { display: flex; flex-direction: column; gap: 2px; }
+.cmms-stat-card .cmms-stat-label { font-size: .72rem; font-weight: 700; letter-spacing: .02em; opacity: .62; text-transform: uppercase; }
+.cmms-stat-card .cmms-stat-value { font-size: 1.55rem; font-weight: 800; line-height: 1.1; color: var(--color-accent, #0064e0); }
+.cmms-stat-card .cmms-stat-hint { font-size: .72rem; opacity: .7; }
+
+/* ---- Section (settings ใหญ่) ---- */
+.cmms-section { scroll-margin-top: 84px; }
+.cmms-section-title {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .82rem; font-weight: 800; letter-spacing: .03em;
+  text-transform: uppercase; color: var(--color-accent, #0064e0);
+  padding-bottom: .5rem; margin-bottom: .5rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--color-accent, #0064e0) 18%, transparent);
+}
+
+/* ---- ปุ่มลอย (FAB) ---- */
+.cmms-fab {
+  position: fixed; right: 18px; bottom: 84px; z-index: 60;
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .8rem 1.15rem; border-radius: 999px;
+  background: var(--color-accent, #0064e0); color: #fff; font-weight: 700;
+  box-shadow: 0 8px 22px -6px color-mix(in srgb, var(--color-accent, #0064e0) 55%, transparent);
+  border: 0; cursor: pointer; text-decoration: none;
+  transition: transform .16s var(--ease-standard, ease), box-shadow .16s var(--ease-standard, ease);
+}
+.cmms-fab:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -6px color-mix(in srgb, var(--color-accent, #0064e0) 65%, transparent); color: #fff; }
+@media (min-width: 768px) { .cmms-fab { bottom: 26px; } }
+
+/* ---- แถบปุ่มติดล่าง (ฟอร์มมือถือ) ---- */
+.cmms-action-bar {
+  position: sticky; bottom: 0; z-index: 50;
+  display: flex; gap: .6rem; align-items: center;
+  padding: .7rem 1rem; margin-top: 1rem;
+  background: color-mix(in srgb, var(--color-surface, #fff) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+.cmms-action-bar .btn, .cmms-action-bar button { flex: 1; min-height: 48px; }
+
+/* ---- ตาราง -> การ์ดซ้อนกันบนมือถือ (ต้องใส่ data-label="หัวข้อ" ใน <td>) ---- */
+@media (max-width: 640px) {
+  .cmms-stack-table thead { display: none; }
+  .cmms-stack-table, .cmms-stack-table tbody, .cmms-stack-table tr, .cmms-stack-table td { display: block; width: 100%; }
+  .cmms-stack-table tr {
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-inner, 10px);
+    padding: .55rem .75rem; margin-bottom: .7rem;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
+  }
+  .cmms-stack-table td {
+    display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+    border: 0 !important; padding: .45rem 0 !important;
+  }
+  .cmms-stack-table td::before {
+    content: attr(data-label);
+    font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em;
+    opacity: .55; flex-shrink: 0;
+  }
+  .cmms-stack-table td[data-hide-label]::before { content: none; }
+  .cmms-stack-table tr > td:last-child { padding-bottom: .35rem !important; }
+}
+
 /* ------------------------------------------------------------
    0. Missing utilities (referenced by pages, not in the build)
    ------------------------------------------------------------ */
@@ -340,6 +425,36 @@ html.dark .theme-icon-sun  { display: block; }
   .main-scroll main > .w-full,
   .main-scroll main > div:first-child { animation: none; }
 }
+
+/* ------------------------------------------------------------
+   9.5 Legacy components: ยกระดับหน้าเก่าให้ดูใหม่ทั้งระบบ
+   ------------------------------------------------------------ */
+
+/* card (daisy-compat) — มุม/เส้น/เงา ทันสมัยขึ้น */
+.card {
+  border-radius: var(--radius-container, 14px);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 14px -6px rgb(0 0 0 / 0.08);
+}
+
+/* ตาราง: zebra + hover + เส้นขอบนุ่มลง */
+.data-table thead th {
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.78;
+  border-bottom-width: 2px !important;
+}
+.data-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--color-accent, #0064e0) 3%, transparent); }
+.data-table tbody tr:hover { background: color-mix(in srgb, var(--color-accent, #0064e0) 7%, transparent); }
+
+/* badge ธรรมดา -> มีสีพื้นหลังเล็กน้อย อ่านง่าย */
+.badge { border-radius: 999px; }
+
+/* ปุ่มแอคชันในตาราง: รวมเป็นกลุ่ม ไม่ติดกัน */
+.table-actions, .btn-group { display: inline-flex; gap: 0.3rem; align-items: center; }
+
+/* form-group / label ปกติ */
+.form-control label, label.font-bold { font-weight: 600; }
 
 /* ------------------------------------------------------------
    10. Mobile refinements

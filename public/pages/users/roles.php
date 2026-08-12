@@ -245,7 +245,7 @@ renderHeader();
         <!-- ═══ TAB 1: Detailed Permission Matrix ═══ -->
         <div id="panel-permissions" class="space-y-4 pt-4">
             <?php foreach ($modules as $mKey => $mod): ?>
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="cmms-card overflow-hidden">
                 <!-- Module Header (Collapsible) -->
                 <button type="button" onclick="toggleModule('mod-<?= $mKey ?>')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-all">
                     <div class="flex items-center gap-3">
@@ -310,7 +310,7 @@ renderHeader();
 
         <!-- ═══ TAB 2: User Role Assignment ═══ -->
         <div id="panel-users" class="pt-4" style="display:none;">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="cmms-card overflow-hidden">
                 <div class="p-4 border-b border-slate-100">
                     <h3 class="font-black text-slate-900 text-sm">👥 กำหนดบทบาทให้พนักงานแต่ละคน</h3>
                     <p class="text-[10px] text-slate-400 mt-0.5">เลือกบทบาทที่เหมาะสมกับตำแหน่งงาน — สิทธิ์จะเปลี่ยนตามบทบาทที่เลือกไว้ในตารางด้านบน</p>
@@ -361,7 +361,7 @@ renderHeader();
         <div id="panel-summary" class="pt-4" style="display:none;">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <?php foreach ($roles as $rKey => $r): ?>
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+                <div class="cmms-card p-5 space-y-3">
                     <div class="text-2xl text-center"><?= $r['icon'] ?></div>
                     <h3 class="font-black text-slate-900 text-sm text-center"><?= $r['label'] ?></h3>
                     <?php

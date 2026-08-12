@@ -336,8 +336,8 @@ renderHeader();
                 </div>
             </div>
 
-            <!-- Bottom Submit Button for Mobile & PC -->
-            <div class="no-print pt-4">
+            <!-- Bottom Submit Button for Mobile & PC (sticky on mobile) -->
+            <div class="no-print cmms-action-bar rounded-xl">
                 <button type="button" onclick="submitChecksheet()" class="w-full btn-primary bg-emerald-600 border-emerald-600 hover:bg-emerald-700 py-3.5 rounded-xl text-base font-black flex items-center justify-center gap-2 shadow-lg">
                     <span>💾 บันทึกผลการตรวจเช็คชีท PM (Submit Inspection Checksheet)</span>
                 </button>

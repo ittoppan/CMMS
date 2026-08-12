@@ -268,30 +268,26 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Quick Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-bold uppercase">คิวคำขอรอสโตร์จ่ายของ</span>
-            <div class="text-2xl font-black text-amber-600 mt-1">
-                <?= count(array_filter($requests, fn($r) => in_array($r['status'], ['Requested', 'Approved']))) ?> รายการ
-            </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="card cmms-card cmms-stat-card p-4">
+            <span class="cmms-stat-label text-amber-600">คิวรอจ่ายของ</span>
+            <span class="cmms-stat-value text-amber-600"><?= count(array_filter($requests, fn($r) => in_array($r['status'], ['Requested', 'Approved']))) ?></span>
+            <span class="cmms-stat-hint">Requested / Approved</span>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-bold uppercase">จ่ายของ & ตัด Sage 300 แล้ว</span>
-            <div class="text-2xl font-black text-emerald-600 mt-1">
-                <?= count(array_filter($requests, fn($r) => $r['status'] === 'Issued')) ?> รายการ
-            </div>
+        <div class="card cmms-card cmms-stat-card p-4">
+            <span class="cmms-stat-label text-emerald-600">จ่ายแล้ว (Sage)</span>
+            <span class="cmms-stat-value text-emerald-600"><?= count(array_filter($requests, fn($r) => $r['status'] === 'Issued')) ?></span>
+            <span class="cmms-stat-hint">ตัดสต็อกแล้ว</span>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-bold uppercase">รายการคืนอะไหล่</span>
-            <div class="text-2xl font-black text-purple-600 mt-1">
-                <?= count(array_filter($requests, fn($r) => $r['status'] === 'Returned')) ?> รายการ
-            </div>
+        <div class="card cmms-card cmms-stat-card p-4">
+            <span class="cmms-stat-label text-purple-600">คืนอะไหล่</span>
+            <span class="cmms-stat-value text-purple-600"><?= count(array_filter($requests, fn($r) => $r['status'] === 'Returned')) ?></span>
+            <span class="cmms-stat-hint">Returned</span>
         </div>
-        <div class="card p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <span class="text-xs text-slate-500 font-bold uppercase">เชื่อมต่อ Sage 300 DSN</span>
-            <div class="text-2xl font-black text-purple-800 font-mono mt-1">
-                <?= htmlspecialchars($dsn) ?>
-            </div>
+        <div class="card cmms-card cmms-stat-card p-4">
+            <span class="cmms-stat-label">Sage 300 DSN</span>
+            <span class="cmms-stat-value text-base font-mono" style="font-size: .95rem; word-break: break-all;"><?= htmlspecialchars($dsn) ?></span>
+            <span class="cmms-stat-hint">การเชื่อมต่อ</span>
         </div>
     </div>
 
@@ -299,7 +295,7 @@ renderHeader();
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Form: จ่ายของด่วนหน้าสโตร์ (Direct Store Counter Issue Form) -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="card cmms-card p-5 space-y-4">
             <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                 <span>⚡ จ่ายของด่วนหน้าสโตร์ (Direct Store Counter Issue)</span>
                 <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Instant Issue</span>
@@ -349,7 +345,7 @@ renderHeader();
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <table class="min-w-full divide-y divide-slate-200 text-sm cmms-stack-table">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">เลขที่ใบเบิก / WO</th>
@@ -364,25 +360,25 @@ renderHeader();
                     <tbody class="divide-y divide-slate-200">
                         <?php foreach ($requests as $rq): ?>
                         <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 font-mono text-xs">
+                            <td class="px-4 py-3 font-mono text-xs" data-label="ใบเบิก / WO">
                                 <span class="font-extrabold text-indigo-600 block">#REQ-<?= $rq['id'] ?></span>
                                 <span class="text-slate-400 block font-bold">#WO-<?= $rq['work_order_id'] ?></span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3" data-hide-label>
                                 <img src="<?= getImageUrl($rq['spare_image'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50" title="<?= htmlspecialchars($rq['spare_name'] ?? 'อะไหล่') ?>">
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3" data-label="เครื่องจักร / อาการเสีย">
                                 <span class="font-bold text-slate-900 block text-xs"><?= htmlspecialchars($rq['asset_code'] ?? '-') ?> - <?= htmlspecialchars($rq['asset_name'] ?? '-') ?></span>
                                 <span class="text-[11px] text-slate-500 block truncate max-w-xs"><?= htmlspecialchars($rq['wo_title'] ?? '-') ?></span>
                                 <?php if (!empty($rq['spare_name'])): ?>
                                 <span class="text-[11px] text-indigo-600 font-bold block mt-0.5">⚙️ อะไหล่: <?= htmlspecialchars($rq['spare_name']) ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-xs text-slate-700 font-medium">
+                            <td class="px-4 py-3 text-xs text-slate-700 font-medium" data-label="ผู้ขอเบิก">
                                 <?= htmlspecialchars($rq['requester_name'] ?? 'ช่างผู้เบิก') ?>
                                 <span class="text-[10px] text-slate-400 block"><?= date('d/m/Y H:i', strtotime($rq['created_at'])) ?></span>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td class="px-4 py-3 text-center" data-label="สถานะ">
                                 <span class="badge <?= match($rq['status']) {
                                     'Requested' => 'badge badge-warning',
                                     'Approved'  => 'badge badge-info',
@@ -394,14 +390,14 @@ renderHeader();
                                     <?= htmlspecialchars($rq['status']) ?>
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-xs">
+                            <td class="px-4 py-3 text-center font-mono text-xs" data-label="เอกสาร Sage">
                                 <?php if (!empty($rq['sage_doc_no'])): ?>
                                 <span class="badge bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px]"><?= htmlspecialchars($rq['sage_doc_no']) ?></span>
                                 <?php else: ?>
                                 <span class="text-slate-400 text-xs italic">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-center space-x-1 text-xs">
+                            <td class="px-4 py-3 text-center space-x-1 text-xs" data-label="การดำเนินการ">
                                 <form method="POST" class="inline-block">
                                     <input type="hidden" name="request_id" value="<?= $rq['id'] ?>">
 

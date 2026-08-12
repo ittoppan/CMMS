@@ -141,7 +141,7 @@ renderHeader();
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Add Spare to BOM Form -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="card cmms-card p-5">
             <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                 <span>➕ เพิ่มผูกอะไหล่ประจำเครื่องนี้</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs">BOM Setup</span>

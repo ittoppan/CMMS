@@ -59,7 +59,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Top Header -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="cmms-card p-5 flex items-center justify-between flex-wrap gap-4">
         <div>
             <div class="flex items-center gap-2">
                 <a href="checklist_templates.php" class="text-sm text-brand-600 hover:underline">&larr; กลับไปรายการเทมเพลตเช็คชีท</a>
@@ -106,7 +106,7 @@ renderHeader();
             <!-- Drag & Drop Sortable Container -->
             <div id="sortable-checklist" class="space-y-3">
                 <?php foreach ($items as $idx => $it): ?>
-                <div draggable="true" data-id="<?= $it['id'] ?>" class="checklist-card bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-indigo-400 transition-all flex items-center justify-between gap-4 cursor-grab active:cursor-grabbing">
+                <div draggable="true" data-id="<?= $it['id'] ?>" class="checklist-card cmms-card p-4 hover:border-indigo-400 transition-all flex items-center justify-between gap-4 cursor-grab active:cursor-grabbing">
                     
                     <div class="flex items-center gap-3">
                         <!-- Drag Handle Icon -->
@@ -136,7 +136,7 @@ renderHeader();
                 <?php endforeach; ?>
 
                 <?php if (empty($items)): ?>
-                <div class="p-8 text-center bg-white rounded-xl border border-dashed border-slate-300 text-slate-500 text-xs">
+                <div class="p-8 text-center cmms-card border border-dashed text-slate-500 text-xs">
                     ยังไม่มีรายการตรวจเช็คในเทมเพลตนี้ กดปุ่ม <strong>"+ เพิ่มรายการตรวจเช็คใหม่"</strong> เพื่อเริ่มต้นสร้าง
                 </div>
                 <?php endif; ?>
@@ -167,7 +167,7 @@ renderHeader();
                     <!-- Simulator Items List -->
                     <div class="space-y-3">
                         <?php foreach ($items as $idx => $it): ?>
-                        <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm space-y-2">
+                        <div class="cmms-card p-3 space-y-2">
                             <div class="flex items-center justify-between">
                                 <span class="font-bold text-slate-900"><?= $idx + 1 ?>. <?= htmlspecialchars($it['item_name']) ?></span>
                                 <span class="text-[10px] text-slate-400 font-bold"><?= htmlspecialchars($it['category'] ?? 'General') ?></span>

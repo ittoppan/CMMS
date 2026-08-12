@@ -215,7 +215,7 @@ renderHeader();
         <div class="lg:col-span-2 space-y-6">
 
             <!-- MODULE 1: Corporate Identity & Legal Info -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>🏷️ 1. ข้อมูลองค์กรและชุดโลโก้ (Corporate Identity & Assets)</span>
                     <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs">Module 1</span>
@@ -285,7 +285,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 2: Color Palette, Fonts & UI Styles -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>🎨 2. โทนสี ฟอนต์ และสไตล์ระบบ (Theme & Typography)</span>
                     <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Module 2</span>
@@ -331,7 +331,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 3: ISO Forms & Report Printing Customization -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>📄 3. แบบฟอร์ม ISO และการพิมพ์รายงาน (ISO Forms Setup)</span>
                     <span class="badge badge badge-warning font-bold text-xs">Module 3</span>
@@ -364,7 +364,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 4: Work Order & Labor Policy -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>⏱️ 4. กฎการซ่อมบำรุงและค่าแรง (Work Order & Labor Policy)</span>
                     <span class="badge badge badge-info font-bold text-xs">Module 4</span>
@@ -390,7 +390,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 5: Spare Parts & Store Policy -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>📦 5. นโยบายเบิกอะไหล่ & ตัด Sage 300 (Store Policy)</span>
                     <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Module 5</span>
@@ -419,7 +419,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 6: Notifications & Audio -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>🔔 6. ระบบแจ้งเตือน & เอฟเฟกต์เสียง (Notifications & Audio)</span>
                     <span class="badge badge badge-success font-bold text-xs">Module 6</span>
@@ -452,7 +452,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 7: Security & Session Policy -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>🛡️ 7. นโยบายความปลอดภัยและเซสชัน (Security Policy)</span>
                     <span class="badge badge badge-error font-bold text-xs">Module 7</span>
@@ -479,7 +479,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 8: Feature Module Toggles -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>🌐 8. การเปิด/ปิด โมดูลระบบ (Module Feature Toggles)</span>
                     <span class="badge bg-cyan-100 text-cyan-800 font-bold text-xs">Module 8</span>
@@ -506,7 +506,7 @@ renderHeader();
             </div>
 
             <!-- MODULE 9: System Defaults & Formats -->
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                     <span>⚙️ 9. ค่าเริ่มต้นระบบและการแสดงผล (System Defaults)</span>
                     <span class="badge bg-slate-100 text-slate-800 font-bold text-xs">Module 9</span>

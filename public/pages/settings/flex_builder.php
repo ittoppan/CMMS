@@ -99,7 +99,7 @@ renderHeader();
         <div class="lg:col-span-2 space-y-6">
 
             <!-- Database Variables Palette -->
-            <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="card cmms-card p-5 space-y-3">
                 <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between border-b pb-2">
                     <span>🗄️ ฟิลด์ข้อมูลจาก Database & รูปภาพ (คลิกเพื่อแทรก):</span>
                     <span class="text-xs text-indigo-600 font-bold">📷 Dynamic Variables</span>
@@ -120,7 +120,7 @@ renderHeader();
             </div>
 
             <!-- Design Controls Form -->
-            <form method="POST" class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <form method="POST" class="card cmms-card p-5 space-y-4">
                 <input type="hidden" name="send_test_flex" value="1">
                 
                 <h3 class="font-bold text-slate-900 text-sm border-b pb-2 flex justify-between">

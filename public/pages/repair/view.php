@@ -188,7 +188,7 @@ renderHeader();
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
-            <div class="card p-6 bg-white border border-slate-200 rounded-xl shadow-sm space-y-4">
+            <div class="card cmms-card p-6 space-y-4">
                 <div class="border-b pb-3 flex justify-between items-center">
                     <div>
                         <span class="font-mono text-xs font-bold text-indigo-600"><?= htmlspecialchars($r['asset_code'] ?? 'MCH-SYS') ?></span>
@@ -211,7 +211,7 @@ renderHeader();
             </div>
 
             <!-- Machine BOM Fast Spares List Preview -->
-            <div class="card p-5 bg-white border border-slate-200 rounded-xl shadow-sm space-y-3">
+            <div class="card cmms-card p-5 space-y-3">
                 <div class="flex justify-between items-center border-b pb-2">
                     <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
                         <span>⚙️ รายการอะไหล่มาตรฐานประจำเครื่องนี้ (Machine BOM Catalog)</span>
@@ -241,7 +241,7 @@ renderHeader();
 
             <!-- Existing Spare Parts Used Table -->
             <?php if ($spareParts): ?>
-            <div class="card p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
+            <div class="card cmms-card p-6">
                 <h2 class="text-lg font-bold text-slate-900 mb-4">รายการอะไหล่ที่เบิกใช้ในงานนี้</h2>
                 <table class="min-w-full text-sm divide-y divide-slate-200">
                     <thead class="bg-slate-50 text-xs text-slate-500 uppercase font-bold">
@@ -264,7 +264,7 @@ renderHeader();
 
         <!-- Sidebar Actions & Info -->
         <div class="space-y-6">
-            <div class="card p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
+            <div class="card cmms-card p-6">
                 <h2 class="text-base font-extrabold text-slate-900 mb-4 border-b pb-2">เปลี่ยนสถานะงานซ่อม</h2>
                 <div class="space-y-2">
                     <?php $actions = $nextStatusMap[$r['status']] ?? []; ?>

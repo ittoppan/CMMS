@@ -209,7 +209,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Category Filter Settings Card -->
-    <div class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card cmms-card p-5">
         <div class="flex items-center justify-between border-b pb-3">
             <div>
                 <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
@@ -278,7 +278,7 @@ renderHeader();
     </div>
 
     <!-- 1-Click Sync Controls Card -->
-    <div class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card cmms-card p-5">
         <div class="flex items-center justify-between flex-wrap gap-4 border-b pb-3">
             <div>
                 <h3 class="font-bold text-slate-900 text-base">⚡ สั่งซิงค์คลังอะไหล่จาก Sage 300 (1-Click Inventory Sync)</h3>

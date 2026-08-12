@@ -79,7 +79,7 @@ renderHeader();
     </div>
 
     <!-- ISO Document List Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card cmms-card p-5 space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
             <h3 class="font-extrabold text-slate-900 text-base">รายการทะเบียนแบบฟอร์ม ISO F-EN ทั้งหมดในระบบ</h3>
             <span class="text-xs text-slate-400 font-mono">Status: <?= count($filesList) ?> files available for HTTP download</span>
