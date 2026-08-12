@@ -25,12 +25,6 @@ const FEATURES = [
   { icon: CubeIcon, text: "บริหารคลังอะไหล่อัจฉริยะ" },
 ];
 
-const DEMO_ACCOUNTS = [
-  { user: "admin", label: "Admin", icon: "👤" },
-  { user: "manager", label: "Manager", icon: "👔" },
-  { user: "tech01", label: "Tech01", icon: "🔧" },
-];
-
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -87,12 +81,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fillDemo = (user: string) => {
-    setUsername(user);
-    setPassword("password");
-    setLoginFailed(false);
   };
 
   return (
@@ -242,27 +230,6 @@ export default function LoginPage() {
             ระบบจะผูกบัญชีให้อัตโนมัติ — ครั้งต่อไปล็อกอินผ่าน LINE ได้ทันที (รับการแจ้งเตือน LINE)
           </Text>
 
-          {/* Demo accounts */}
-          <div style={{
-            padding: 16, borderRadius: 12,
-            background: 'var(--cmms-bg-muted)',
-            border: '1px solid var(--cmms-border)',
-          }}>
-            <Text type="supporting" color="secondary" style={{ marginBottom: 8, display: 'block' }}>
-              บัญชีทดสอบ (รหัสผ่าน: password):
-            </Text>
-            <HStack gap={2} wrap="wrap">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <Button
-                  key={acc.user}
-                  label={`${acc.icon} ${acc.label}`}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => fillDemo(acc.user)}
-                />
-              ))}
-            </HStack>
-          </div>
         </VStack>
       </div>
     </div>
