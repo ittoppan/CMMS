@@ -34,6 +34,7 @@ import {
   MagnifyingGlassIcon,
   ClockIcon,
   ScaleIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
 interface SettingRow {
@@ -192,6 +193,7 @@ const SUB_PAGES = [
 export default function SettingsPage() {
   const router = useRouter();
   const [settings, setSettings] = useState<SettingRow[]>([]);
+  const [defaults, setDefaults] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -294,6 +296,12 @@ export default function SettingsPage() {
       console.error(e);
       setError("ไม่สามารถโหลดการตั้งค่าได้");
     }
+    // โหลดค่าเริ่มต้น (สำหรับปุ่มรีเซ็ต) — ไม่กระทบถ้า fail
+    try {
+      const dres = await fetch("/api/v1/settings.php?defaults=1");
+      const djson = await dres.json();
+      if (djson && typeof djson === "object" && !Array.isArray(djson)) setDefaults(djson);
+    } catch { /* ข้าม */ }
     setLoading(false);
   };
 
@@ -320,6 +328,17 @@ export default function SettingsPage() {
     }
     if (s.length > 220) return s.slice(0, 220) + "…";
     return s === "" ? "(ว่าง)" : s;
+  };
+
+  // รีเซ็ตคีย์เดียวกลับเป็นค่าเริ่มต้น (จาก settings_defaults.php)
+  const handleResetDefault = (row: SettingRow) => {
+    const d = defaults[row.setting_key];
+    if (d === null || d === undefined) return;
+    if (SENSITIVE_KEYS.has(row.setting_key)) {
+      setNewSecrets((f) => ({ ...f, [row.setting_key]: d }));
+    } else {
+      setForm((f) => ({ ...f, [row.setting_key]: d }));
+    }
   };
 
   const handleSave = async () => {
@@ -553,6 +572,8 @@ export default function SettingsPage() {
                 const isReadonly = READONLY_KEYS.has(row.setting_key);
                 const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
                 const isJson = JSON_KEYS.has(row.setting_key);
+                const defaultValue = defaults[row.setting_key];
+                const canReset = defaultValue !== null && defaultValue !== undefined;
                 const dirty = isSensitive
                   ? Boolean(newSecrets[row.setting_key]?.trim())
                   : isDirty(row);
@@ -576,6 +597,23 @@ export default function SettingsPage() {
                       </VStack>
                       {isReadonly && <Badge label="อ่านอย่างเดียว" variant="neutral" />}
                       {isJson && <Badge label="JSON" variant="neutral" />}
+                      {canReset && !isReadonly && (
+                        <button
+                          type="button"
+                          title={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}${String(defaultValue).length > 80 ? "…" : ""}`}
+                          onClick={() => handleResetDefault(row)}
+                          style={{
+                            display: "inline-flex", alignItems: "center", gap: 4,
+                            padding: "4px 8px", border: "1px solid var(--cmms-border)",
+                            borderRadius: 999, background: "var(--cmms-bg-wash)",
+                            cursor: "pointer", color: "var(--cmms-text-secondary)",
+                            fontSize: 11, fontWeight: 600,
+                          }}
+                        >
+                          <Icon icon={ArrowPathIcon} size="xs" />
+                          รีเซ็ตเริ่มต้น
+                        </button>
+                      )}
                     </HStack>
 
                     {isSensitive ? (
