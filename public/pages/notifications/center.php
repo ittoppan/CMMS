@@ -3,12 +3,74 @@ require_once __DIR__ . '/../../../src/includes/layout.php';
 $pageTitle = '📲 In-App & Web Push Notification Center — CMMS-TOPPAN';
 $pdo = getDb();
 
-// Seed sample in-app notifications
-$notifications = [
-    ['title' => '🔴 แจ้งเตือนด่วน: เครื่องสลิตติ้ง A-DL-01 เสีย (Break Down)', 'time' => '10 นาทีที่แล้ว', 'type' => 'urgent', 'read' => false],
-    ['title' => '📋 แผน PM ประจำสัปดาห์: ตรวจสอบมอเตอร์ตู้พิมพ์ 10 สี', 'time' => '1 ชั่วโมงที่แล้ว', 'type' => 'pm', 'read' => true],
-    ['title' => '📦 อะไหล่ต่ำกว่าเกณฑ์: BEARING 6205 2RS (คงเหลือ 2 ชิ้น)', 'time' => '3 ชั่วโมงที่แล้ว', 'type' => 'stock', 'read' => true]
-];
+// สร้างรายการแจ้งเตือนจากข้อมูลจริงในฐานข้อมูล (ไม่ใช่ข้อมูลตัวอย่าง)
+$notifications = [];
+
+// 1) งานซ่อมด่วน/เบรกดาวน์ที่ยังไม่ปิด (เร่งด่วน = สูง)
+try {
+    $urgent = $pdo->query(
+        "SELECT r.work_order_no, r.title, a.name AS asset_name, r.created_at
+         FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id
+         WHERE r.status NOT IN ('completed','Closed','closed','resolved')
+           AND r.priority IN ('urgent','high','Critical','critical')
+         ORDER BY r.created_at DESC LIMIT 5"
+    )->fetchAll();
+    foreach ($urgent as $u) {
+        $notifications[] = [
+            'title' => '🔴 แจ้งเตือนด่วน: ' . ($u['asset_name'] ?? 'เครื่องจักร') . ' — ' . $u['title'],
+            'time'  => 'งาน ' . $u['work_order_no'] . ' ยังไม่ปิด',
+            'type'  => 'urgent',
+            'read'  => false,
+        ];
+    }
+} catch (Exception $e) {}
+
+// 2) อะไหล่ต่ำกว่าเกณฑ์ (stock_qty <= min_stock)
+try {
+    $lowStock = $pdo->query(
+        "SELECT code, name, stock_qty, min_stock FROM spare_parts
+         WHERE min_stock > 0 AND stock_qty <= min_stock
+         ORDER BY (stock_qty / min_stock) ASC LIMIT 5"
+    )->fetchAll();
+    foreach ($lowStock as $s) {
+        $notifications[] = [
+            'title' => '📦 อะไหล่ต่ำกว่าเกณฑ์: ' . $s['name'] . ' (' . $s['code'] . ') คงเหลือ ' . $s['stock_qty'] . ' ชิ้น',
+            'time'  => 'ต่ำกว่าจุดสั่งซื้อ ' . $s['min_stock'],
+            'type'  => 'stock',
+            'read'  => true,
+        ];
+    }
+} catch (Exception $e) {}
+
+// 3) แผน PM ที่ถึงกำหนดหรือเกินกำหนด
+$today = date('Y-m-d');
+try {
+    $pms = $pdo->prepare(
+        "SELECT p.title, a.name AS asset_name, p.due_date, p.status
+         FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id
+         WHERE p.due_date <= ? AND p.status NOT IN ('completed','done')
+         ORDER BY p.due_date ASC LIMIT 5"
+    );
+    $pms->execute([$today]);
+    foreach ($pms->fetchAll() as $p) {
+        $notifications[] = [
+            'title' => '📋 แผน PM: ' . ($p['asset_name'] ?? '') . ' — ' . $p['title'],
+            'time'  => 'กำหนด ' . $p['due_date'] . (($p['due_date'] < $today) ? ' (เกินกำหนด)' : ''),
+            'type'  => 'pm',
+            'read'  => true,
+        ];
+    }
+} catch (Exception $e) {}
+
+// ถ้าไม่มีข้อมูลจริงเลย → แสดงข้อความว่าง (ไม่แสดงข้อมูลปลอม)
+if (empty($notifications)) {
+    $notifications[] = [
+        'title' => 'ไม่มีรายการแจ้งเตือนใหม่ — ทุกอย่างปกติ',
+        'time'  => 'ข้อมูลจากฐานข้อมูลจริง',
+        'type'  => 'none',
+        'read'  => true,
+    ];
+}
 
 renderHeader();
 ?>
@@ -41,11 +103,13 @@ renderHeader();
             <div class="py-3 flex items-center justify-between <?= !$n['read'] ? 'bg-indigo-50/50 p-3 rounded-xl border border-indigo-100' : '' ?>">
                 <div class="space-y-1">
                     <span class="font-bold text-slate-900 text-xs block"><?= htmlspecialchars($n['title']) ?></span>
-                    <span class="text-[10px] text-slate-400 font-mono"><?= $n['time'] ?></span>
+                    <span class="text-[10px] text-slate-400 font-mono"><?= htmlspecialchars($n['time']) ?></span>
                 </div>
+                <?php if ($n['type'] !== 'none'): ?>
                 <span class="badge font-bold text-[10px] <?= !$n['read'] ? 'badge badge-error animate-pulse' : 'bg-slate-100 text-slate-600' ?>">
                     <?= !$n['read'] ? '🔴 ยังไม่ได้อ่าน' : 'อ่านแล้ว' ?>
                 </span>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>

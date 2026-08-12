@@ -136,8 +136,40 @@ export default function DashboardPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([
-    { role: "ai", text: "สวัสดีครับ! ผมคือผู้ช่วย AI ของระบบซ่อมบำรุง วันนี้มีอะไรให้ผมช่วยวิเคราะห์ไหมครับ? (เช่น 'ขอสรุปค่าใช้จ่ายเดือนนี้')" }
+    { role: "ai", text: "สวัสดีครับ! ผมคือผู้ช่วย AI ของระบบซ่อมบำรุง วันนี้มีอะไรให้ผมช่วยวิเคราะห์ไหมครับ? (เช่น 'ขอสรุปค่าใช้จ่ายเดือนนี้', 'PM ทันกำหนดกี่เปอร์เซ็นต์')" }
   ]);
+
+  // ตอบคำถามจากข้อมูลจริงที่โหลดมาแล้ว (ไม่ใช่ข้อความปลอม)
+  const answerFromData = (q: string): string => {
+    const t = q.toLowerCase();
+    const lines: string[] = [];
+    if (/ค่าใช้จ่าย|cost/.test(t)) {
+      const totalCost = costAnalysis.total_cost || 0;
+      lines.push(`💰 ค่าใช้จ่ายซ่อมรวม ${totalCost.toLocaleString()} บาท (${costAnalysis.total_wo || 0} ใบงาน, เฉลี่ย ${(costAnalysis.cost_per_wo || 0).toLocaleString()} บาท/ใบงาน)`);
+    }
+    if (/pm|แผน/.test(t)) {
+      const done = pmComplianceData.find((x: any) => x.status === 'completed')?.count || 0;
+      const total = pmComplianceData.reduce((a: number, x: any) => a + (x.count || 0), 0);
+      lines.push(`📋 PM: เสร็จ ${done} จากทั้งหมด ${total} รายการ (${total ? Math.round((done / total) * 100) : 0}% ทันกำหนด)`);
+    }
+    if (/สต็อก|stock|อะไหล่/.test(t)) {
+      if (lowStock.length > 0) {
+        lines.push(`📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ ${lowStock.length} รายการ: ${lowStock.slice(0, 5).map((s: any) => `${s.name} (เหลือ ${s.stock_qty}/${s.min_stock})`).join(", ")}`);
+      } else {
+        lines.push("📦 ไม่มีอะไหล่ต่ำกว่าจุดสั่งซื้อในขณะนี้");
+      }
+    }
+    if (/งานซ่อม|wo|งาน/.test(t)) {
+      lines.push(`🔧 งานซ่อมทั้งหมด ${kpis.total} รายการ · เสร็จ ${kpis.completed} · กำลังทำ ${kpis.inprogress} · เกินกำหนด ${kpis.overdue}`);
+    }
+    if (/downtime|หยุด|เสีย/.test(t)) {
+      lines.push(`⏱️ Downtime รวม ${esgData.total_downtime_minutes.toLocaleString()} นาที (สูญเสียพลังงานคิดเป็น ${esgData.energy_waste_thb.toLocaleString()} บาท)`);
+    }
+    if (lines.length === 0) {
+      return `📊 ผมช่วยสรุปข้อมูลในระบบได้ เช่น พิมพ์ "ค่าใช้จ่ายเดือนนี้" "PM ทันกำหนด" "สต็อกต่ำ" "งานซ่อม" หรือ "downtime"`;
+    }
+    return lines.join("\n");
+  };
 
   // TV Mode Auto-Refresh
   useEffect(() => {
@@ -211,6 +243,16 @@ export default function DashboardPage() {
       setError("Failed to load monthly analytics. Please try again.");
     }
   };
+
+  // รายการเครื่องจักรในเดือนที่กดเจาะลึก (จากข้อมูล work orders จริง)
+  const drillDownMachines = useMemo(() => {
+    if (!selectedDrillDown) return [];
+    const m = selectedDrillDown.monthNum;
+    return recentWO.filter((w: any) => {
+      const d = w.created_at ? new Date(w.created_at) : null;
+      return d && d.getMonth() + 1 === m;
+    });
+  }, [selectedDrillDown, recentWO]);
 
   // Process Pareto Data
   const paretoData = useMemo(() => {
@@ -967,16 +1009,20 @@ export default function DashboardPage() {
 
               <Text type="body" weight="bold" className="mb-3">รายการเครื่องจักรที่มีปัญหาในเดือนนี้:</Text>
               <VStack gap={3}>
-                {[1, 2, 3].map(i => (
+                {drillDownMachines.length === 0 ? (
+                  <div className="p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-center">
+                    <Text type="body" color="secondary">ไม่มีข้อมูลงานซ่อมของเดือนนี้</Text>
+                  </div>
+                ) : drillDownMachines.map((m, i) => (
                   <div key={i} className="flex justify-between items-center p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <HStack gap={3} vAlign="center">
                       <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 text-xl">⚠️</div>
                       <VStack gap={1}>
-                        <Text type="body" weight="bold">{["Main Cooling Pump", "CNC Machine 4", "Air Compressor"][i-1]}</Text>
-                        <Text type="supporting" color="secondary">ซ่อมโดย: {["ช่างสมชาย", "ช่างวิชัย", "ทีมช่าง A"][i-1]}</Text>
+                        <Text type="body" weight="bold">{m.asset_name || m.title || "งานซ่อม"}</Text>
+                        <Text type="supporting" color="secondary">{m.work_order_no} · ซ่อมโดย: {m.assigned_name || "ยังไม่มอบหมาย"}</Text>
                       </VStack>
                     </HStack>
-                    <Badge label="แก้ไขแล้ว" variant="success" />
+                    <Badge label={m.status || "-"} variant={["completed", "Completed", "closed", "resolved"].includes(m.status) ? "success" : "warning"} />
                   </div>
                 ))}
               </VStack>
@@ -1011,7 +1057,8 @@ export default function DashboardPage() {
                   onChange={(e) => setChatMessage(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && chatMessage.trim()) {
-                      setChatHistory([...chatHistory, { role: 'user', text: chatMessage }, { role: 'ai', text: 'ระบบวิเคราะห์จากข้อมูลพบว่า...' }]);
+                      const q = chatMessage;
+                      setChatHistory([...chatHistory, { role: 'user', text: q }, { role: 'ai', text: answerFromData(q) }]);
                       setChatMessage("");
                     }
                   }}
@@ -1022,7 +1069,8 @@ export default function DashboardPage() {
                   className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shrink-0"
                   onClick={() => {
                     if (chatMessage.trim()) {
-                      setChatHistory([...chatHistory, { role: 'user', text: chatMessage }, { role: 'ai', text: 'ระบบวิเคราะห์จากข้อมูลพบว่า...' }]);
+                      const q = chatMessage;
+                      setChatHistory([...chatHistory, { role: 'user', text: q }, { role: 'ai', text: answerFromData(q) }]);
                       setChatMessage("");
                     }
                   }}
