@@ -59,7 +59,7 @@ const SYSTEM_PAGES: SystemPageOption[] = [
 ];
 
 const COLOR_SWATCHES = [
-  { name: "TOPPAN Indigo", hex: "#4F46E5", bg: "#EEF0F8", text: "#3730A3" },
+  { name: "TOPPAN Blue", hex: "#0068B5", bg: "#EDF3F8", text: "#00508C" },
   { name: "Emerald Maintenance Green", hex: "#059669", bg: "#ECFDF5", text: "#065F46" },
   { name: "Royal Purple Executive", hex: "#7C3AED", bg: "#F5F3FF", text: "#5B21B6" },
   { name: "Safety Amber Orange", hex: "#D97706", bg: "#FFFBEB", text: "#92400E" },
@@ -98,7 +98,7 @@ export default function InteractiveStylePageEditor() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("colors");
 
   // 🎨 Live Style & Color Customization States
-  const [primaryColor, setPrimaryColor] = useState("#4F46E5");
+  const [primaryColor, setPrimaryColor] = useState("#0068B5");
   const [bgColor, setBgColor] = useState("#F8FAFC");
   const [borderRadius, setBorderRadius] = useState("12px");
   const [fontFamily, setFontFamily] = useState("kanit");

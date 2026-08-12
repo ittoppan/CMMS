@@ -56,7 +56,7 @@ export default function QrSheetPage() {
           map[m.code] = await QRCode.toDataURL(url, {
             width: 300,
             margin: 1,
-            color: { dark: "#4F46E5", light: "#FFFFFF" },
+            color: { dark: "#0068B5", light: "#FFFFFF" },
           });
         } catch {
           /* ข้ามเครื่องที่ generate ไม่ได้ */
@@ -74,7 +74,7 @@ export default function QrSheetPage() {
         .qr-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .qr-sheet-card { text-align: center; break-inside: avoid; }
         .qr-sheet-card img { width: 100%; max-width: 170px; }
-        .qr-sheet-note { border-left: 4px solid #4F46E5; border-radius: 0 6px 6px 0; }
+        .qr-sheet-note { border-left: 4px solid #0068B5; border-radius: 0 6px 6px 0; }
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
@@ -85,7 +85,7 @@ export default function QrSheetPage() {
       `}</style>
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}
-        style={{ borderBottom: "3px solid #4F46E5", paddingBottom: 12, marginBottom: 20 }}>
+        style={{ borderBottom: "3px solid #0068B5", paddingBottom: 12, marginBottom: 20 }}>
         <VStack gap={1}>
           <Heading level={2} style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</Heading>
           <Text type="supporting" color="secondary" size="sm">

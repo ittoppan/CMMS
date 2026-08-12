@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4F46E5",
+  themeColor: "#0068B5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -41,7 +41,7 @@ const SPLASH_CSS = `
 #cmms-splash {
   position: fixed; inset: 0; z-index: 9999;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
-  background: linear-gradient(165deg, #312E81 0%, #1E1B4B 60%, #0E1524 100%);
+  background: linear-gradient(165deg, #193264 0%, #12244A 60%, #0B1F4B 100%);
   color: #fff;
   transition: opacity 0.35s ease, visibility 0.35s ease;
 }
