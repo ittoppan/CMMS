@@ -107,8 +107,9 @@ try {
 
         /* ---------- 2. MESSAGE EVENT ---------- */
         if ($evType !== 'message' || ($ev['message']['type'] ?? '') !== 'text') continue;
-        if (empty($groupId)) continue; // เฉพาะข้อความในกลุ่มเท่านั้น
 
+        $isGroup = !empty($groupId);
+        $fromUserId = $ev['source']['userId'] ?? '';
         $text = trim($ev['message']['text'] ?? '');
         if (!$text) continue;
 
@@ -116,8 +117,10 @@ try {
         $isSetGroup = !empty($currentGroup) && $currentGroup === $groupId;
         $reply = null;
 
-        /* --- คำสั่งจัดการกลุ่ม --- */
-        if (preg_match('/^แจ้งเตือนที่นี่/iu', $text)) {
+        /* --- คำสั่งจัดการกลุ่ม (ใช้ได้เฉพาะในกลุ่ม) --- */
+        if (!$isGroup && preg_match('/^(แจ้งเตือนที่นี่|สถานะกลุ่ม|หยุดแจ้งเตือน)/iu', $text)) {
+            $reply = "ℹ️ คำสั่งนี้ใช้ได้เฉพาะในกลุ่ม LINE เท่านั้น\nเพิ่มบอทเข้าห้องกลุ่มช่าง แล้วพิมพ์ \"แจ้งเตือนที่นี่\"";
+        } elseif (preg_match('/^แจ้งเตือนที่นี่/iu', $text)) {
             lwSetSetting($pdo, 'line_maintenance_group_id', $groupId);
             $reply = "✅ ตั้งค่ากลุ่มนี้เป็น **กลุ่มช่าง** เรียบร้อยแล้ว\nตั้งแต่นี้ไป งาน/ตรวจเช็คที่ไม่ผ่าน จะ push มาแจ้งในกลุ่มนี้";
         } elseif (preg_match('/^(สถานะกลุ่ม|เช็คกลุ่ม)/iu', $text)) {
@@ -133,12 +136,66 @@ try {
             } else {
                 $reply = "ℹ️ กลุ่มนี้ไม่ได้ถูกตั้งเป็นกลุ่มช่างอยู่แล้ว ไม่มีการเปลี่ยนแปลง";
             }
+        } elseif (preg_match('/^(pm|พีเอ็ม|แผน pm|pm ครบ|pm เกิน|pm ใกล้)/iu', $text)) {
+            $rows = $pdo->query("
+                SELECT pm.id, pm.title, pm.due_date, pm.status,
+                       a.code AS asset_code, a.name AS asset_name,
+                       DATEDIFF(pm.due_date, CURDATE()) AS days
+                FROM pm_am pm
+                LEFT JOIN asset_registry a ON pm.asset_id = a.id
+                WHERE pm.status NOT IN ('completed','cancelled')
+                ORDER BY pm.due_date ASC
+                LIMIT 10
+            ")->fetchAll();
+            if (empty($rows)) {
+                $reply = "✅ ไม่มีแผน PM ที่ค้างอยู่ — ทุกอย่างเสร็จตามกำหนด";
+            } else {
+                $lines = ["📋 แผน PM ที่ยังไม่เสร็จ (" . count($rows) . " รายการ)"];
+                foreach ($rows as $r) {
+                    $d = (int)$r['days'];
+                    $mark = $d < 0 ? "⏰ เลยกำหนด " . abs($d) . " วัน" : ($d == 0 ? "🔴 ถึงกำหนดวันนี้" : "🟡 อีก {$d} วัน");
+                    $lines[] = "• {$r['asset_code']} {$r['title']} — {$r['due_date']} ({$mark})";
+                }
+                $reply = implode("\n", $lines);
+            }
+        } elseif (preg_match('/^(งานค้าง|ค้าง|งานไม่เสร็จ|open|pending)/iu', $text)) {
+            $total = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status NOT IN ('resolved','closed','cancelled','rejected')")->fetchColumn();
+            $recent = $pdo->query("
+                SELECT r.work_order_no, r.title, r.status, r.priority, a.code AS asset_code
+                FROM repair r
+                LEFT JOIN asset_registry a ON r.asset_id = a.id
+                WHERE r.status NOT IN ('resolved','closed','cancelled','rejected')
+                ORDER BY r.created_at DESC LIMIT 5
+            ")->fetchAll();
+            $lines = ["📊 งานซ่อมที่ยังไม่เสร็จ: {$total} รายการ"];
+            foreach ($recent as $r) {
+                $lines[] = "• {$r['work_order_no']} [{$r['priority']}] {$r['title']} ({$r['asset_code']}) — {$r['status']}";
+            }
+            $reply = implode("\n", $lines);
+        } elseif (preg_match('/^(สต็อกต่ำ|อะไหล่ต่ำ|ของขาด|ของใกล้หมด|low stock)/iu', $text)) {
+            $rows = $pdo->query("
+                SELECT code, name, stock_qty, min_stock, unit FROM spare_parts
+                WHERE stock_qty <= min_stock
+                ORDER BY (stock_qty / NULLIF(min_stock, 0)) ASC LIMIT 10
+            ")->fetchAll();
+            if (empty($rows)) {
+                $reply = "✅ ไม่มีอะไหล่ที่ต่ำกว่าจุดสั่งซื้อ";
+            } else {
+                $lines = ["📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ (" . count($rows) . " รายการ)"];
+                foreach ($rows as $r) {
+                    $lines[] = "• {$r['code']} {$r['name']} — เหลือ {$r['stock_qty']} {$r['unit']} (ขั้นต่ำ {$r['min_stock']})";
+                }
+                $reply = implode("\n", $lines);
+            }
         } elseif (preg_match('/^(help|เมนู|ช่วยเหลือ|สวัสดี|hello|hi)/iu', $text)) {
             $reply = "🙏 ยินดีต้อนรับสู่ CMMS-TPT LINE Bot!\n\n"
                 . "📋 พิมพ์เบอร์งานซ่อม เช่น EN-2608-064 เพื่อดูสถานะ\n"
-                . "🔔 \"แจ้งเตือนที่นี่\" — ตั้งกลุ่มนี้เป็นกลุ่มช่าง\n"
-                . "📌 \"สถานะกลุ่ม\" — เช็คว่ากลุ่มนี้ถูกตั้งไว้แล้วหรือยัง\n"
-                . "🛑 \"หยุดแจ้งเตือน\" — ยกเลิกกลุ่มแจ้งเตือน";
+                . "📊 \"งานค้าง\" — จำนวนงานซ่อมที่ยังไม่เสร็จ\n"
+                . "📋 \"PM\" — แผน PM ที่ค้าง / ใกล้กำหนด\n"
+                . "📦 \"สต็อกต่ำ\" — อะไหล่ต่ำกว่าจุดสั่งซื้อ\n"
+                . "🔔 \"แจ้งเตือนที่นี่\" — ตั้งกลุ่มนี้เป็นกลุ่มช่าง (ในกลุ่ม)\n"
+                . "📌 \"สถานะกลุ่ม\" — เช็คกลุ่มช่าง (ในกลุ่ม)\n"
+                . "🛑 \"หยุดแจ้งเตือน\" — ยกเลิกกลุ่มแจ้งเตือน (ในกลุ่ม)";
         } else {
             /* --- ตรวจสถานะงาน --- */
             $wo = null;
@@ -175,8 +232,8 @@ try {
             }
         }
 
-        /* Auto-capture: ข้อความแรกในกลุ่มที่ยังไม่เคยตั้งค่า */
-        if (empty($currentGroup) && !preg_match('/^(แจ้งเตือนที่นี่|สถานะกลุ่ม|หยุดแจ้งเตือน|help|เมนู|ช่วยเหลือ|สวัสดี|hello|hi)/iu', $text)) {
+        /* Auto-capture: ข้อความแรกในกลุ่ม (ไม่ใช่ 1:1) ที่ยังไม่เคยตั้งค่า */
+        if ($isGroup && empty($currentGroup) && !preg_match('/^(แจ้งเตือนที่นี่|สถานะกลุ่ม|หยุดแจ้งเตือน|help|เมนู|ช่วยเหลือ|สวัสดี|hello|hi)/iu', $text)) {
             lwSetSetting($pdo, 'line_maintenance_group_id', $groupId);
             $reply = "✅ ตั้งค่ากลุ่มนี้เป็น **กลุ่มช่าง** เรียบร้อยแล้ว (รับการแจ้งเตือนงาน)\n\n" . ($reply ? $reply : '');
         }

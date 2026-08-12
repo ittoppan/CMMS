@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/includes/layout.php'; // formatWorkOrderNo()
 
 if (empty($_SESSION['user_id'])) {
     header('Location: /login.php');
