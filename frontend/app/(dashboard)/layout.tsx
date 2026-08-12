@@ -15,6 +15,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
 import ToastProvider from "../../components/ToastProvider";
 import CommandPalette from "../../components/CommandPalette";
+import SideNavScrollControls from "../../components/SideNavScrollControls";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import {
   SquaresPlusIcon,
@@ -443,6 +444,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
           </SideNavSection>
+          {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
+          <SideNavScrollControls pathname={pathname} />
           footer={
             <SideNavSection title="บัญชี" isHeaderHidden>
               <SideNavItem
