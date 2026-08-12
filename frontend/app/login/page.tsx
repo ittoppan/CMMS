@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import ThemeProvider from '../../components/ThemeProvider';
 import { VStack, HStack } from '@astryxdesign/core/Layout';
 import { Text } from '@astryxdesign/core/Text';
 import { TextInput } from '@astryxdesign/core/TextInput';
@@ -26,6 +27,15 @@ const FEATURES = [
 ];
 
 export default function LoginPage() {
+  return (
+    <>
+      <ThemeProvider />
+      <LoginContent />
+    </>
+  );
+}
+
+function LoginContent() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginFailed, setLoginFailed] = useState(false);

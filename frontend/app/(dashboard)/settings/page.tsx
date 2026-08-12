@@ -15,6 +15,7 @@ import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
 import {
   CheckCircleIcon,
   BuildingOffice2Icon,
@@ -356,6 +357,39 @@ export default function SettingsPage() {
     }
   };
 
+  // บันทึกธีม 3 keys ตรงๆ (theme_preset อยู่กลุ่ม general ไม่ติดใน changedRows ของกลุ่ม branding)
+  const handleSaveTheme = async () => {
+    setSaving(true);
+    setError(null);
+    setSaveMessage("");
+    try {
+      const keys = ["theme_preset", "theme_primary_hex", "theme_secondary_hex"];
+      let saved = 0;
+      for (const key of keys) {
+        const row = settings.find((s) => s.setting_key === key);
+        if (!row) continue;
+        const value = form[key] ?? "";
+        const res = await fetch(`/api/v1/settings.php?id=${row.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ setting_value: value }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error || `PUT setting ${key} failed`);
+        }
+        saved++;
+      }
+      setSaveMessage(saved > 0 ? `บันทึกธีม ${saved} รายการสำเร็จ — ทุกหน้าเปลี่ยนสีตามแล้ว` : "ไม่มีรายการธีมให้บันทึก");
+      await fetchSettings();
+      setTimeout(() => setSaveMessage(""), 4000);
+    } catch (e: any) {
+      console.error(e);
+      setError(e.message || "บันทึกธีมไม่สำเร็จ");
+    }
+    setSaving(false);
+  };
+
   const handleSave = async () => {
     setShowDiff(false);
     // ตรวจค่าตัวเลขก่อนบันทึก
@@ -584,6 +618,18 @@ export default function SettingsPage() {
                 {changedRows.length > 0 && ` · ยังไม่บันทึก ${changedRows.length} รายการ`}
               </Text>
             </VStack>
+
+            {!searchRows && activeGroup === "branding" && (
+              <VStack gap={5}>
+                <ThemeSettingsPanel
+                  values={form}
+                  onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                  onSave={handleSaveTheme}
+                  saving={saving}
+                />
+                <div style={{ borderTop: "1px solid var(--cmms-border)" }} />
+              </VStack>
+            )}
 
             {(searchRows ?? currentRows).length === 0 ? (
               <Text type="body" color="secondary">

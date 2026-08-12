@@ -14,6 +14,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
 import ToastProvider from "../../components/ToastProvider";
+import ThemeProvider from "../../components/ThemeProvider";
 import CommandPalette from "../../components/CommandPalette";
 import SideNavScrollControls from "../../components/SideNavScrollControls";
 import MenuSection from "../../components/MenuSection";
@@ -266,6 +267,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
+    <ThemeProvider />
     <SideNavSearchProvider>
     <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
     <AppShell
