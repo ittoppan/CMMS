@@ -5,20 +5,44 @@ require_once __DIR__ . '/../helpers/notification.php'; // publicBaseUrl()
 class NotificationService {
     
     /**
-     * Send LINE Notification (Notify Token or Messaging API)
+     * Send LINE Notification
+     *
+     * ช่องทางหลัก: Messaging API Push (LINE Official Account) — ส่งถึงทุกคนที่ผูก line_user_id
+     * (LINE Notify ปิดบริการแล้วตั้งแต่ มี.ค. 2025 — เหลือไว้เป็น fallback ถ้ายังมี token เก่า)
      */
     public static function sendLineMessage(string $message, ?string $token = null): bool {
         $pdo = getDb();
+
+        // 1) Messaging API (channel access token จาก settings หรือ .env)
+        try {
+            $channelToken = $token ?: ($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_channel_access_token'")->fetchColumn() ?: '');
+            $channelToken = $channelToken ?: (getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: '');
+            if (!empty($channelToken)) {
+                $uids = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
+                if (empty($uids)) {
+                    self::logNotification('LINE', 'NO_RECIPIENT', $message);
+                    return false;
+                }
+                $ok = true;
+                foreach ($uids as $uid) {
+                    $ok = sendLinePushMessage((string)$uid, '🔔 CMMS-TPT แจ้งเตือน', $message) && $ok;
+                }
+                self::logNotification('LINE', $ok ? 'SENT' : 'FAILED', $message);
+                return $ok;
+            }
+        } catch (Exception $e) {}
+
+        // 2) Legacy LINE Notify (token รูป xxxx:yyyy — ถ้ายังมีอยู่)
         if (!$token) {
             try {
                 $token = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_token'")->fetchColumn();
             } catch (Exception $e) {}
         }
-        
+
         $token = $token ?: getenv('LINE_NOTIFY_TOKEN') ?: 'FALLBACK_TOKEN';
-        
+
         if (empty($token) || $token === 'FALLBACK_TOKEN') {
-            // Log notice if token is not yet configured by admin
+            // ยังไม่ได้ตั้งค่า LINE ให้สมบูรณ์ — บันทึก log เพื่อให้ admin ทราบ
             self::logNotification('LINE', 'PENDING_CONFIG', $message);
             return false;
         }
