@@ -176,7 +176,7 @@ renderHeader();
             <button onclick="document.getElementById('smart-req-modal').style.display='flex'" class="h-9 px-3.5 bg-accent hover:bg-accent/90 text-white rounded-md text-xs font-semibold inline-flex items-center gap-2 transition-colors shadow-xs">
                 <span>📦 ขอเบิกอะไหล่ซ่อมเครื่องนี้ (Machine BOM First)</span>
             </button>
-            <a href="print_form.php?id=<?= $id ?>" target="_blank" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">🖨️ พิมพ์ ISO F-EN-03</a>
+            <a href="print.php?id=<?= $id ?>" target="_blank" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">🖨️ พิมพ์ใบสั่งงานซ่อม (F-EN-03)</a>
         </div>
     </div>
 

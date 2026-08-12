@@ -86,6 +86,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/calibration": "สอบเทียบเครื่องมือวัด",
   "/spare_parts": "คลังสต็อกอะไหล่",
   "/spare_parts/issue_center": "ศูนย์เบิก-จ่าย",
+  "/spare_parts/stock_take": "นับสต็อกจริง (Stock Take)",
   "/spare_parts/sage_po": "รับอะไหล่จาก PO",
   "/spare_parts/optimization": "AI EOQ & Dead Stock",
   "/analytics": "Data Warehouse & BI",
@@ -95,6 +96,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/iot/monitor": "IoT Sensor Monitor",
   "/notifications": "ศูนย์แจ้งเตือน",
   "/users": "ผู้ใช้งานระบบ",
+  "/profile": "โปรไฟล์ของฉัน",
   "/settings": "ตั้งค่าระบบ",
   "/settings/services": "Service & การรันระบบ",
   "/settings/notifications": "รูปแบบการแจ้งเตือน LINE",
@@ -314,7 +316,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {/* User chip — แสดงชื่อผู้ใช้จริงจาก session + รูปโปรไฟล์ (avatar) */}
               <div
                 className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-[var(--cmms-bg-muted)] border border-[var(--cmms-border)] cursor-pointer hover:bg-[var(--cmms-bg-wash)] hover:border-[var(--cmms-border-hover)] transition-all"
-                onClick={() => { router.push("/users"); }}
+                onClick={() => { router.push("/profile"); }}
                 title={currentUser?.name || "ผู้ใช้งาน"}
               >
                 {currentUser?.avatar ? (
@@ -405,6 +407,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("spare_parts/sage_po") && <SideNavItem label="รับอะไหล่จาก PO" icon={DocumentCheckIcon} href="/spare_parts/sage_po" isSelected={isSelected("/spare_parts/sage_po")} />}
             {canShow("spare_parts/sage_sync") && <SideNavItem label="ซิงค์สต็อก Sage 300" icon={CircleStackIcon} href="/spare_parts/sage_sync" isSelected={isSelected("/spare_parts/sage_sync")} />}
             {canShow("spare_parts/optimization") && <SideNavItem label="AI EOQ & สต็อกค้าง" icon={SparklesIcon} href="/spare_parts/optimization" isSelected={isSelected("/spare_parts/optimization")} />}
+            {canShow("spare_parts") && <SideNavItem label="นับสต็อกจริง (Stock Take)" icon={ClipboardDocumentCheckIcon} href="/spare_parts/stock_take" isSelected={isSelected("/spare_parts/stock_take")} />}
             {canShow("suppliers") && <SideNavItem label="ผู้ผลิต & คะแนนผู้ขาย" icon={TruckIcon} href="/suppliers" isSelected={isSelected("/suppliers")} />}
           </SideNavSection>
 
