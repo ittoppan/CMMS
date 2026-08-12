@@ -19,6 +19,32 @@ try {
 
     switch ($method) {
         case 'GET':
+            // อะไหล่ที่ใช้ซ่อม: ?parts=1&id=N (รายเดียว -> array) หรือ ?parts=1&ids=1,2,3 (หลาย -> map keyed by repair_id)
+            if (isset($_GET['parts'])) {
+                $ids = [];
+                if (!empty($_GET['ids'])) {
+                    $ids = array_values(array_filter(array_map('intval', explode(',', $_GET['ids']))));
+                } elseif (!empty($_GET['id'])) {
+                    $ids = [(int)$_GET['id']];
+                }
+                if (!$ids) { echo json_encode([]); break; }
+                $in = implode(',', array_fill(0, count($ids), '?'));
+                $stmt = $pdo->prepare("SELECT rsp.repair_id, sp.id AS spare_part_id, sp.code, sp.name, rsp.quantity_used, rsp.unit_price
+                                       FROM repair_spare_parts rsp
+                                       JOIN spare_parts sp ON rsp.spare_part_id = sp.id
+                                       WHERE rsp.repair_id IN ($in)
+                                       ORDER BY rsp.repair_id, sp.code");
+                $stmt->execute($ids);
+                $rows = $stmt->fetchAll();
+                if (count($ids) === 1) {
+                    echo json_encode($rows);
+                } else {
+                    $map = [];
+                    foreach ($rows as $r) { $map[(int)$r['repair_id']][] = $r; }
+                    echo json_encode($map);
+                }
+                break;
+            }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
                 $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id WHERE r.id = ?');

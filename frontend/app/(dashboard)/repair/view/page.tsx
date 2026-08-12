@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import WorkOrderClosureDocument from "../../../../components/WorkOrderClosureDocument";
+import WorkOrderClosureDocument, { WorkOrderPart } from "../../../../components/WorkOrderClosureDocument";
 
 interface WorkOrderDetail {
   id: number;
@@ -41,6 +41,7 @@ export default function RepairViewDetailsPage() {
   const [woId, setWoId] = useState<string>("1");
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [parts, setParts] = useState<WorkOrderPart[]>([]);
   const reportRef = useRef<HTMLDivElement>(null);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
@@ -96,6 +97,21 @@ export default function RepairViewDetailsPage() {
       })
       .catch(e => console.error("Fetch WO error", e))
       .finally(() => setLoading(false));
+
+    // อะไหล่ที่ใช้ซ่อม (สำหรับตารางในเอกสาร F-EN-03)
+    fetch(`/api/v1/repair.php?parts=1&id=${idParam}`)
+      .then(res => res.json())
+      .then(partsJson => {
+        if (Array.isArray(partsJson)) {
+          setParts(partsJson.map((p: any) => ({
+            code: p.code || "",
+            name: p.name || "",
+            quantity_used: Number(p.quantity_used) || 0,
+            unit_price: Number(p.unit_price) || 0,
+          })));
+        }
+      })
+      .catch(e => console.error("Fetch WO parts error", e));
   }, []);
 
   const handlePrint = () => {
@@ -200,6 +216,7 @@ export default function RepairViewDetailsPage() {
             costLabor: wo.costLabor,
             costOutsource: 0,
             downtimeMinutes: wo.downtimeMinutes,
+            parts,
           }}
         />
       </div>
