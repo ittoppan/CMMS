@@ -111,6 +111,7 @@ const SECTION_MAP: Record<string, string> = {
   "/iot": "ความปลอดภัย",
   "/users": "บุคลากร",
   "/notifications": "บุคลากร",
+  "/forms": "เอกสาร & แบบฟอร์ม",
   "/settings": "ตั้งค่า",
   "/settings/notifications": "ตั้งค่า",
   "/settings/menus": "ตั้งค่า",
@@ -392,6 +393,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* 5. ตั้งค่าระบบ */}
           <SideNavSection title="ระบบ & ตั้งค่า">
             {canShow("notifications") && <SideNavItem label="ศูนย์แจ้งเตือน" icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
+            {canShow("forms") && <SideNavItem label="ศูนย์แบบฟอร์ม (F-EN)" icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
             {canShow("settings/notifications") && <SideNavItem label="รูปแบบการแจ้งเตือน LINE" icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
             {canShow("register") && <SideNavItem label="ลงทะเบียนผูกบัญชี LINE" icon={ChatBubbleLeftRightIcon} href="/register" isSelected={isSelected("/register")} />}
             {canShow("users") && <SideNavItem label="ผู้ใช้งานระบบ" icon={UsersIcon} href="/users" isSelected={isSelected("/users")} />}
