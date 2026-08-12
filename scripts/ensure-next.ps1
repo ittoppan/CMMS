@@ -66,12 +66,12 @@ if ($code -eq 200) {
 }
 
 # 2) ยังไม่ตอบ -> สตาร์ทถ้ายังไม่มี process
-$pid = Get-NextPid
-if (-not $pid) {
+$procId = Get-NextPid
+if (-not $procId) {
     Write-Log "Not running — starting..."
     [void](Start-Next)
 } else {
-    Write-Log "Process alive (PID $pid) but not responding — waiting for readiness"
+    Write-Log "Process alive (PID $procId) but not responding — waiting for readiness"
 }
 
 # 3) รอจนกว่าจะตอบ 200
