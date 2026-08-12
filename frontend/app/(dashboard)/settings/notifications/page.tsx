@@ -84,6 +84,8 @@ export default function NotificationsSettingsPage() {
   const [me, setMe] = useState<{ id: number; full_name: string; line_bound: boolean } | null>(null);
   const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string } | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string>("line_tpl_breakdown");
+  const [showJson, setShowJson] = useState(false);
+  const [copied, setCopied] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -175,7 +177,76 @@ export default function NotificationsSettingsPage() {
     setTesting(false);
   };
 
-  const previewTitle = (activeTpl.header_title || "🔔 แจ้งเตือน CMMS-TPT")
+  // ตัวแปรตัวอย่าง — ใช้แทนค่าในพรีวิวและ JSON (ตรงกับฝั่ง server sample)
+  const SAMPLE_VARS: Record<string, string> = {
+    "{work_order_id}": "WO-TEST-1001",
+    "{requisition_no}": "REQ-TEST-001",
+    "{asset_code}": "MCH-01",
+    "{asset_name}": "Press Machine 01",
+    "{title}": "เสียงดังผิดปกติที่มอเตอร์",
+    "{priority}": "CRITICAL",
+    "{status}": "IN_PROGRESS",
+    "{reporter_name}": "อนันต์ พนักงานคุมเครื่องพิมพ์",
+    "{assigned_name}": "สมศักดิ์ ช่างซ่อมบำรุง",
+    "{due_date}": "2026-08-05",
+    "{days_overdue}": "2",
+    "{item_code}": "SUP0010917",
+    "{item_name}": "Bearing 6204",
+    "{qty}": "3",
+    "{min_stock}": "5",
+    "{downtime_hours}": "2.5",
+    "{total_cost}": "4,500",
+    "{items_summary}": "Bearing 6204 x 2",
+    "{requester_name}": "วิชัย ช่างไฟและกลการ",
+    "{total_amount}": "1,250",
+  };
+  const fillVars = (t: string) => {
+    let out = t;
+    for (const [k, v] of Object.entries(SAMPLE_VARS)) out = out.split(k).join(v);
+    return out;
+  };
+
+  // สร้าง Flex Message JSON ต้นฉบับ (ตรงกับ payload ที่ระบบส่งจริง)
+  const flexJson = useMemo(() => {
+    const headerColor = /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8";
+    const headerTitle = fillVars(activeTpl.header_title || "🔔 CMMS-TPT NOTIFICATION");
+    const bodyText = fillVars(activeTpl.body_text || "ข้อความแจ้งเตือนจากระบบ");
+    const btnLabel = fillVars(activeTpl.btn_label || "ดูรายละเอียดในระบบ");
+    const bubble = {
+      type: "bubble",
+      header: {
+        type: "box", layout: "vertical", backgroundColor: headerColor,
+        contents: [{ type: "text", text: headerTitle, color: "#ffffff", weight: "bold", size: "xs", wrap: true }],
+      },
+      body: {
+        type: "box", layout: "vertical",
+        contents: [{ type: "text", text: bodyText, size: "sm", color: "#475569", wrap: true, margin: "md" }],
+      },
+      footer: {
+        type: "box", layout: "vertical",
+        contents: [{
+          type: "button", style: "primary", color: "#06C755",
+          action: { type: "uri", label: btnLabel, uri: "https://line.me/" },
+        }],
+      },
+    };
+    const payload = {
+      type: "flex",
+      altText: `🔔 ${headerTitle}: ${bodyText.slice(0, 40)}`,
+      contents: bubble,
+    };
+    return JSON.stringify(payload, null, 2);
+  }, [activeTpl]);
+
+  const copyJson = async () => {
+    try {
+      await navigator.clipboard.writeText(flexJson);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard ไม่พร้อม — ข้าม */ }
+  };
+
+  const previewTitle = (activeTpl.header_title || "🔔 CMMS-TPT NOTIFICATION")
     .replace(/{work_order_id}/g, "WO-1002")
     .replace(/{requisition_no}/g, "REQ-001")
     .replace(/{item_code}/g, "SUP0010917");
@@ -521,6 +592,44 @@ export default function NotificationsSettingsPage() {
                 </div>
               </div>
             </div>
+
+            <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
+              <HStack gap={2} vAlign="center">
+                <Icon icon={BoltIcon} size="sm" color="primary" />
+                <Text type="body" size="sm" weight="semibold">Flex Message JSON ต้นฉบับ (ที่ระบบส่งจริง)</Text>
+              </HStack>
+              <HStack gap={2}>
+                <Button
+                  label={showJson ? "ซ่อน JSON" : "ดู JSON"}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowJson((v) => !v)}
+                />
+                <Button
+                  label={copied ? "คัดลอกแล้ว ✓" : "คัดลอก JSON"}
+                  variant="secondary"
+                  size="sm"
+                  isDisabled={!showJson}
+                  onClick={copyJson}
+                />
+              </HStack>
+            </HStack>
+
+            {showJson && (
+              <VStack gap={2}>
+                <div style={{
+                  background: "#0f172a", color: "#e2e8f0", borderRadius: 10,
+                  padding: "12px 14px", fontFamily: "'JetBrains Mono', Consolas, monospace",
+                  fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-all",
+                  maxHeight: 320, overflow: "auto", border: "1px solid #334155",
+                }}>
+                  {flexJson}
+                </div>
+                <Text type="body" size="xs" color="secondary">
+                  เป็น payload ตัวเดียวกับที่กด "ยิงทดสอบเข้า LINE" ส่งจริง — ตัวแปรในตัวอย่างถูกแทนค่าด้วยข้อมูลจำลอง
+                </Text>
+              </VStack>
+            )}
 
             <VStack gap={1}>
               <Text type="body" size="sm" weight="semibold">วิธีใช้งานกับ LINE</Text>

@@ -122,7 +122,7 @@ function repairPhotoUrls($repairId, $category = 'failure_image', $limit = 3) {
  *   - ['before' => [url...], 'after' => [url...]]  → แสดงเป็นบล็อกรูปใน Flex พร้อม label ก่อนซ่อม/หลังซ่อม (อย่างละสูงสุด 2 รูป)
  *   - [url, url, ...] (array ธรรมดา)              → backward compat แสดงเป็นรูปแนบ (สูงสุด 4 รูป)
  */
-function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $photos = []) {
+function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $photos = [], $headerColor = '#1d4ed8', $headerText = '🔔 CMMS-TPT NOTIFICATION', $btnLabel = 'ดูรายละเอียดในระบบ') {
     $channelAccessToken = getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: getenv('LINE_CHANNEL_SECRET');
     if (empty($channelAccessToken)) {
         error_log("LINE_CHANNEL_ACCESS_TOKEN is missing in .env");
@@ -170,22 +170,26 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $addPhotoSection($afterUrls, '📸 หลังซ่อม');
     $addPhotoSection($flatUrls, '📎 รูปแนบ');
 
-    $bodyContents = [
-        [
+    $bodyContents = [];
+    // ใส่ title เป็นหัวข้อตัวหนาเฉพาะเมื่อต่างจาก header (กันซ้ำซ้อน ถ้า header ใช้ title เดียวกัน)
+    if ($headerText !== '' && $headerText === $title) {
+        // header แสดง title อยู่แล้ว — body เริ่มด้วยเนื้อหาเลย
+    } else {
+        $bodyContents[] = [
             'type' => 'text',
             'text' => $title,
             'weight' => 'bold',
             'size' => 'md',
             'wrap' => true
-        ],
-        [
-            'type' => 'text',
-            'text' => $message,
-            'size' => 'sm',
-            'color' => '#475569',
-            'wrap' => true,
-            'margin' => 'md'
-        ]
+        ];
+    }
+    $bodyContents[] = [
+        'type' => 'text',
+        'text' => $message,
+        'size' => 'sm',
+        'color' => '#475569',
+        'wrap' => true,
+        'margin' => 'md'
     ];
     foreach ($photoBoxes as $pb) $bodyContents[] = $pb;
 
@@ -200,14 +204,15 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
                     'header' => [
                         'type' => 'box',
                         'layout' => 'vertical',
-                        'backgroundColor' => '#1d4ed8',
+                        'backgroundColor' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)$headerColor) ? $headerColor : '#1d4ed8',
                         'contents' => [
                             [
                                 'type' => 'text',
-                                'text' => '🔔 CMMS-TPT NOTIFICATION',
+                                'text' => $headerText,
                                 'color' => '#ffffff',
                                 'weight' => 'bold',
-                                'size' => 'xs'
+                                'size' => 'xs',
+                                'wrap' => true
                             ]
                         ]
                     ],
@@ -224,7 +229,7 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
                                 'type' => 'button',
                                 'action' => [
                                     'type' => 'uri',
-                                    'label' => 'ดูรายละเอียดในระบบ',
+                                    'label' => $btnLabel,
                                     'uri' => $defaultTapUrl
                                 ],
                                 'style' => 'primary',

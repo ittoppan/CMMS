@@ -161,7 +161,10 @@ try {
             }
 
             if (empty($btnUrl)) $btnUrl = 'https://line.me/';
-            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl);
+            $headerColor = $tpl['header_color'] ?? '#1d4ed8';
+            $headerText  = $tpl['header_title'] ?? '🔔 CMMS-TPT NOTIFICATION';
+            $btnLabel    = $tpl['btn_label'] ?? 'ดูรายละเอียดในระบบ';
+            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl, [], $headerColor, $headerText, $btnLabel);
             if ($ok) {
                 echo json_encode(['success' => true, 'message' => "ส่งข้อความทดสอบ LINE ไปยัง {$target['full_name']} สำเร็จ"]);
             } else {
