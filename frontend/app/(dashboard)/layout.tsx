@@ -17,6 +17,7 @@ import ToastProvider from "../../components/ToastProvider";
 import CommandPalette from "../../components/CommandPalette";
 import SideNavScrollControls from "../../components/SideNavScrollControls";
 import MenuSection from "../../components/MenuSection";
+import { SideNavSearchProvider, SideNavSearchInput } from "../../components/SideNavSearch";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import {
   SquaresPlusIcon,
@@ -265,6 +266,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ToastProvider>
+    <SideNavSearchProvider>
     <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
     <AppShell
       contentPadding={0}
@@ -355,6 +357,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <SideNav
           collapsible
           resizable={{ defaultWidth: 260, minWidth: 200, maxWidth: 340 }}
+          topContent={<SideNavSearchInput />}
           header={
             <SideNavHeading
               heading="CMMS-TOPPAN"
@@ -511,6 +514,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         );
       })}
     </nav>
+    </SideNavSearchProvider>
     </ToastProvider>
   );
 }
