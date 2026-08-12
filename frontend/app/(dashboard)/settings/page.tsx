@@ -7,6 +7,7 @@ import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
+import { Switch } from "@astryxdesign/core/Switch";
 import { Card } from "@astryxdesign/core/Card";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -472,16 +473,18 @@ export default function SettingsPage() {
                         {String(form[row.setting_key] || "")}
                       </div>
                     ) : isBool ? (
-                      <Selector
-                        label={meta.label}
-                        isLabelHidden
-                        value={form[row.setting_key] === "1" ? "1" : "0"}
-                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                        options={[
-                          { value: "1", label: "เปิด (Enabled)" },
-                          { value: "0", label: "ปิด (Disabled)" },
-                        ]}
-                      />
+                      <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+                        <Badge
+                          label={form[row.setting_key] === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                          variant={form[row.setting_key] === "1" ? "info" : "neutral"}
+                        />
+                        <Switch
+                          label={meta.label}
+                          isLabelHidden
+                          value={form[row.setting_key] === "1"}
+                          onChange={(c) => setForm((f) => ({ ...f, [row.setting_key]: c ? "1" : "0" }))}
+                        />
+                      </HStack>
                     ) : (
                       <TextInput
                         label={meta.label}
