@@ -90,6 +90,21 @@ try {
                 }
             }
         }
+        # 1.2) LINE webhook — อัปเดต endpoint อัตโนมัติเมื่อ tunnel URL เปลี่ยน (สคริปต์เช็คเอง)
+        $webhookScript = Join-Path $root "scripts\update_line_webhook.php"
+        if ($phpExe -and (Test-Path -LiteralPath $webhookScript)) {
+            try {
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                $whOut = (& $phpExe $webhookScript 2>&1 | Out-String).Trim()
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Log "LINE webhook update FAILED: $whOut"
+                } elseif ($whOut -match "updated") {
+                    Write-Log "LINE webhook: $whOut"
+                }
+            } catch {
+                Write-Log "LINE webhook script error: $_"
+            }
+        }
         # 1.3) weekly report (สัปดาห์ละ 1 ครั้ง, ทุกวันจันทร์) — สรุปงานซ่อมบำรุงประจำสัปดาห์
         $weekFile = Join-Path $logDir "weekly_report.date"
         # หมายเลขสัปดาห์แบบง่าย (เปลี่ยนทุกสัปดาห์ — ใช้เป็น trigger รายสัปดาห์; ISOWeek ไม่มีใน PS 5.1)
