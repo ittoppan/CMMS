@@ -59,7 +59,7 @@ const SYSTEM_PAGES: SystemPageOption[] = [
 ];
 
 const COLOR_SWATCHES = [
-  { name: "TOPPAN Ocean Blue", hex: "#2563EB", bg: "#EFF6FF", text: "#1E40AF" },
+  { name: "TOPPAN Indigo", hex: "#4F46E5", bg: "#EEF0F8", text: "#3730A3" },
   { name: "Emerald Maintenance Green", hex: "#059669", bg: "#ECFDF5", text: "#065F46" },
   { name: "Royal Purple Executive", hex: "#7C3AED", bg: "#F5F3FF", text: "#5B21B6" },
   { name: "Safety Amber Orange", hex: "#D97706", bg: "#FFFBEB", text: "#92400E" },
@@ -98,7 +98,7 @@ export default function InteractiveStylePageEditor() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("colors");
 
   // 🎨 Live Style & Color Customization States
-  const [primaryColor, setPrimaryColor] = useState("#2563EB");
+  const [primaryColor, setPrimaryColor] = useState("#4F46E5");
   const [bgColor, setBgColor] = useState("#F8FAFC");
   const [borderRadius, setBorderRadius] = useState("12px");
   const [fontFamily, setFontFamily] = useState("kanit");
@@ -284,7 +284,7 @@ export default function InteractiveStylePageEditor() {
                           style={{
                             padding: "10px 12px",
                             borderRadius: 8,
-                            border: bgColor === bgStyle.color ? "3px solid #2563EB" : "1px solid #CBD5E1",
+                            border: bgColor === bgStyle.color ? "3px solid #4F46E5" : "1px solid #CBD5E1",
                             background: bgStyle.color,
                             color: bgStyle.color === "#0F172A" ? "#FFF" : "#0F172A",
                             cursor: "pointer",
@@ -316,7 +316,7 @@ export default function InteractiveStylePageEditor() {
                           style={{
                             padding: 10,
                             borderRadius: opt.id,
-                            border: borderRadius === opt.id ? "3px solid #2563EB" : "1px solid #CBD5E1",
+                            border: borderRadius === opt.id ? "3px solid #4F46E5" : "1px solid #CBD5E1",
                             background: "#FFFFFF",
                             cursor: "pointer",
                             textAlign: "center"
@@ -341,7 +341,7 @@ export default function InteractiveStylePageEditor() {
                           style={{
                             padding: "10px 12px",
                             borderRadius: 8,
-                            border: fontFamily === font.id ? "3px solid #2563EB" : "1px solid #CBD5E1",
+                            border: fontFamily === font.id ? "3px solid #4F46E5" : "1px solid #CBD5E1",
                             background: "#FFFFFF",
                             cursor: "pointer",
                             display: "flex",
