@@ -155,10 +155,13 @@ const DEFAULT_BOTTOM_NAV_ORDER = ["dashboard", "repair/request", "pm_am/calendar
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { canShow, roleName, userFullName, simulated } = useMenuPermission();
+  const { canShow, roleName, userFullName, simulated, bottomNavKeys } = useMenuPermission();
 
-  // Bottom nav มือถือ: เรียงปุ่มตามบทบาท แล้ว filter ด้วยสิทธิ์เมนู (canShow)
-  const bottomNav = (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER)
+  // Bottom nav มือถือ:
+  //  1) ใช้ลำดับปุ่มจาก API (ตั้งค่าในหน้า /settings/menus) ถ้ามี
+  //  2) offline/เก่า -> fallback preset ตามบทบาท
+  // แล้ว filter ด้วยสิทธิ์เมนู (canShow) เสมอ
+  const bottomNav = (bottomNavKeys.length > 0 ? bottomNavKeys : (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER))
     .filter((key) => BOTTOM_NAV_ITEMS[key] && canShow(key))
     .map((key) => BOTTOM_NAV_ITEMS[key]);
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
@@ -425,7 +428,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         type="button"
         className="cmms-mobile-app-bar-btn"
         aria-label="เปิดเมนู"
-        onClick={() => document.querySelector('button[aria-label="Open navigation"]')?.click()}
+        onClick={() => (document.querySelector('button[aria-label="Open navigation"]') as HTMLButtonElement | null)?.click()}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
       </button>

@@ -14,6 +14,7 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/menu_catalog.php';
+require_once __DIR__ . '/../../../src/bottom_nav.php';
 require_once __DIR__ . '/../../../src/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
@@ -22,6 +23,7 @@ try {
     $pdo = getDb();
     $method = $_SERVER['REQUEST_METHOD'];
     $catalog = require __DIR__ . '/../../../src/menu_catalog.php';
+    $validMenuKeys = array_flip(array_column($catalog, 'key')); // menu_key => true
 
     switch ($method) {
         case 'GET':
@@ -77,6 +79,14 @@ try {
                     $perm[$row['menu_key']] = (int)$row['is_granted'];
                 }
 
+                // ปุ่มล่างของบทบาท: อ่านจาก bottom_nav_config (fallback preset)
+                // + filter ให้เหลือเฉพาะปุ่มที่เมนูยังเปิดใช้อยู่ (สิทธิ์ 1)
+                $bottomNav = resolveBottomNavKeys($pdo, $uid, $roleName);
+                $bottomNav = array_values(array_filter(
+                    $bottomNav,
+                    fn($k) => isset($validMenuKeys[$k]) && (($perm[$k] ?? 1) !== 0)
+                ));
+
                 echo json_encode([
                     'user' => [
                         'id'        => (int)($user['id'] ?? 0),
@@ -88,6 +98,7 @@ try {
                         'simulated' => !empty($user['simulated']),
                     ],
                     'permission' => $perm,
+                    'bottom_nav' => $bottomNav,
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             }
@@ -112,10 +123,23 @@ try {
                 }
             }
 
+            // ปุ่มล่างต่อบทบาท (ค่าในตาราง หรือ preset เริ่มต้นถ้ายังไม่ตั้งค่า)
+            $bottomNav = [];
+            foreach ($roles as $r) {
+                $bottomNav[(int)$r['id']] = resolveBottomNavKeys($pdo, (int)$r['id'], strtolower((string)$r['name']));
+            }
+            // pool ของปุ่มที่เลือกได้ (จาก catalog เดียวกับ PWA/PHP)
+            $bottomNavKeys = [];
+            foreach (bottomNavCatalog()['meta'] as $k => $m) {
+                $bottomNavKeys[] = ['key' => $k, 'label' => $m[0]];
+            }
+
             echo json_encode([
-                'menus'       => $catalog,
-                'roles'       => $roles,
-                'permissions' => $permissions,
+                'menus'           => $catalog,
+                'roles'           => $roles,
+                'permissions'     => $permissions,
+                'bottom_nav'      => $bottomNav,     // role_id => [menu_key, ...] เรียงตามลำดับ
+                'bottom_nav_keys' => $bottomNavKeys, // pool ที่ใช้เพิ่มปุ่มได้
             ], JSON_UNESCAPED_UNICODE);
             break;
 
@@ -140,9 +164,6 @@ try {
                 exit;
             }
 
-            $validKeys = [];
-            foreach ($catalog as $m) { $validKeys[$m['key']] = true; }
-
             $pdo->beginTransaction();
             $upsert = $pdo->prepare(
                 "INSERT INTO menu_permissions (role_id, menu_key, is_granted) VALUES (?, ?, ?)
@@ -150,14 +171,42 @@ try {
             );
             $saved = 0;
             foreach ($grants as $key => $val) {
-                if (!isset($validKeys[$key])) continue; // ไม่รู้จักเมนู
+                if (!isset($validMenuKeys[$key])) continue; // ไม่รู้จักเมนู
                 $g = !empty($val) ? 1 : 0;
                 $upsert->execute([$roleId, $key, $g]);
                 $saved++;
             }
+
+            // ปุ่มล่าง (optional): ลบของเดิมแล้ว insert ใหม่ตามลำดับที่ส่งมา
+            // ไม่ส่ง bottom_nav = ไม่แตะการตั้งค่าปุ่มล่างของบทบาทนี้
+            $bnSaved = 0;
+            if (array_key_exists('bottom_nav', $data)) {
+                $bnList = $data['bottom_nav'];
+                if (!is_array($bnList)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'bottom_nav ต้องเป็น array ของ menu_key']);
+                    exit;
+                }
+                $pdo->prepare("DELETE FROM bottom_nav_config WHERE role_id = ?")->execute([$roleId]);
+                $insBn = $pdo->prepare(
+                    "INSERT INTO bottom_nav_config (role_id, menu_key, sort_order) VALUES (?, ?, ?)"
+                );
+                $bnCat = bottomNavCatalog();
+                $order = 0;
+                foreach ($bnList as $k) {
+                    $k = (string)$k;
+                    if (!isset($bnCat['meta'][$k])) continue; // ไม่รู้จักปุ่ม
+                    $insBn->execute([$roleId, $k, $order++]);
+                    $bnSaved++;
+                }
+            }
             $pdo->commit();
 
-            echo json_encode(['success' => true, 'message' => "บันทึกสิทธิ์เมนูของบทบาทสำเร็จ ($saved รายการ)"]);
+            $msg = "บันทึกสิทธิ์เมนูของบทบาทสำเร็จ ($saved รายการ)";
+            if (array_key_exists('bottom_nav', $data)) {
+                $msg .= " และปุ่มล่าง $bnSaved ปุ่ม";
+            }
+            echo json_encode(['success' => true, 'message' => $msg]);
             break;
 
         default:

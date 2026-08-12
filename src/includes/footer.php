@@ -38,43 +38,26 @@ if ($navRoleId && function_exists('getDb')) {
     } catch (Exception $e) { /* ignore */ }
 }
 if (!$navRole) $navRole = strtolower((string)($_SESSION['role_name'] ?? $_SESSION['role'] ?? 'user'));
-$navOrder = [
-    'admin'      => ['dashboard', 'repair/request', 'pm_am/calendar', 'asset_registry', 'settings'],
-    'manager'    => ['dashboard', 'pm_am/checksheet', 'pm_am/calendar', 'repair/my_tasks', 'asset_registry'],
-    'technician' => ['dashboard', 'repair/my_tasks', 'pm_am/checksheet', 'repair/request', 'asset_registry'],
-    'operator'   => ['dashboard', 'repair/request', 'repair/tracking', 'qr-sheet', 'notifications'],
-    'viewer'     => ['dashboard', 'analytics', 'notifications', 'reports/export_excel', 'reports/monthly_pdf'],
-];
-$navKeys = $navOrder[$navRole] ?? ['dashboard', 'repair/request', 'pm_am/calendar', 'asset_registry', 'settings'];
 
-// [href, pattern-active, label, icon]
-$navMeta = [
-    'dashboard'            => ['/',                          '/index.php',        'หน้าหลัก',     'home'],
-    'repair/request'       => ['/pages/repair/',             'repair',            'แจ้งซ่อม',    'wrench'],
-    'repair/my_tasks'      => ['/pages/repair/my_tasks.php', 'my_tasks',          'งานของฉัน',   'clipboard'],
-    'repair/tracking'      => ['/pages/repair/tracking.php', 'tracking',          'ติดตามงาน',   'search'],
-    'pm_am/checksheet'     => ['/pages/pm_am/checksheet.php','checksheet',        'เช็คชีตตามแผน','check'],
-    'pm_am/calendar'       => ['/pages/pm_am/',              'calendar',          'แผน PM',      'calendar'],
-    'asset_registry'       => ['/pages/asset_registry/',     'asset_registry',    'เครื่องจักร', 'factory'],
-    'qr-sheet'             => ['/pages/qr/scanner.php',      'qr',                'สแกน QR',     'qr'],
-    'notifications'        => ['/pages/notifications/center.php', 'notification', 'แจ้งเตือน',   'bell'],
-    'analytics'            => ['/pages/analytics/bi_warehouse.php', 'bi_warehouse', 'คลังข้อมูล', 'chart'],
-    'reports/export_excel' => ['/pages/analytics/',          'analytics',         'ส่งออก Excel','table'],
-    'reports/monthly_pdf'  => ['/pages/analytics/',          'analytics',         'รายงาน PDF',  'doc'],
-    'settings'             => ['/pages/settings/',           'settings',          'ตั้งค่า',      'gear'],
-];
+// ปุ่มล่าง: อ่านจากตาราง bottom_nav_config (ตั้งค่าผ่านหน้า /settings/menus) — fallback preset เริ่มต้น
+require_once __DIR__ . '/../bottom_nav.php';
+$bnCat = bottomNavCatalog();
+$navKeys = resolveBottomNavKeys(function_exists('getDb') ? getDb() : null, $navRoleId, $navRole);
+
+// [href, pattern-active, label, icon] — ใช้ catalog เดียวกับ PWA/API
 $navItems = [];
 foreach ($navKeys as $nk) {
-    if (!$navCan($nk) || !isset($navMeta[$nk])) continue;
-    $navItems[] = $navMeta[$nk];
+    if (!$navCan($nk) || !isset($bnCat['meta'][$nk])) continue;
+    $navItems[] = $bnCat['meta'][$nk];
 }
-if (!$navItems) $navItems = [$navMeta['dashboard']];
+if (!$navItems) $navItems = [$bnCat['meta']['dashboard']];
 ?>
 <!-- ═══════════ MOBILE / LINE LIFF BOTTOM TAB BAR (ตามสิทธิ์) ═══════════ -->
 <nav class="hp-mobile-bottom-nav lg:hidden">
     <?php foreach ($navItems as $nav): ?>
     <?php
-    [$navHref, $navPattern, $navLabel, $navIcon] = $nav;
+    // catalog meta = [label, href_php, pattern_php, icon_php]
+    [$navLabel, $navHref, $navPattern, $navIcon] = $nav;
     $navActive = $navPattern === '/index.php'
         ? ($cs === '/index.php' || $cs === '/')
         : str_contains($cs, $navPattern);

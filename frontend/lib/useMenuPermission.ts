@@ -18,6 +18,8 @@ export function useMenuPermission() {
   const [userFullName, setUserFullName] = useState<string>("");
   const [simulated, setSimulated] = useState(false);
   const [loading, setLoading] = useState(true);
+  // ปุ่มล่างมือถือของบทบาท (เรียงลำดับแล้วจาก API) — ว่าง = ใช้ preset ใน layout
+  const [bottomNavKeys, setBottomNavKeys] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,6 +62,7 @@ export function useMenuPermission() {
           setRoleName(json?.user?.role_name || "");
           setUserFullName(json?.user?.full_name || "");
           setSimulated(Boolean(json?.user?.simulated));
+          if (Array.isArray(json?.bottom_nav)) setBottomNavKeys(json.bottom_nav);
         }
       } catch (e) {
         console.warn("menu permission fallback -> show all:", e);
@@ -78,5 +81,5 @@ export function useMenuPermission() {
     return permission[menuKey] !== 0; // default (ไม่มี key) = เห็น
   };
 
-  return { canShow, roleName, userFullName, simulated, loading };
+  return { canShow, roleName, userFullName, simulated, loading, bottomNavKeys };
 }
