@@ -201,6 +201,9 @@ export default function SettingsPage() {
   const [activeGroup, setActiveGroup] = useState("company");
   const [searchQuery, setSearchQuery] = useState("");
   const [showDiff, setShowDiff] = useState(false);
+  const [showAudit, setShowAudit] = useState(false);
+  const [auditRows, setAuditRows] = useState<{ id: number; user_id: number | null; user_name: string | null; setting_key: string; old_value: string | null; new_value: string | null; created_at: string }[]>([]);
+  const [auditLoading, setAuditLoading] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   // ค่าใหม่ของคีย์ที่เป็นความลับ (ว่าง = ไม่เปลี่ยน)
   const [newSecrets, setNewSecrets] = useState<Record<string, string>>({});
@@ -331,6 +334,18 @@ export default function SettingsPage() {
   };
 
   // รีเซ็ตคีย์เดียวกลับเป็นค่าเริ่มต้น (จาก settings_defaults.php)
+  // เปิดประวัติการแก้ไข + โหลดข้อมูลล่าสุดจาก server
+  const openAudit = async () => {
+    setShowAudit(true);
+    setAuditLoading(true);
+    try {
+      const res = await fetch("/api/v1/settings.php?audit=100");
+      const json = await res.json();
+      if (Array.isArray(json)) setAuditRows(json);
+    } catch { setAuditRows([]); }
+    setAuditLoading(false);
+  };
+
   const handleResetDefault = (row: SettingRow) => {
     const d = defaults[row.setting_key];
     if (d === null || d === undefined) return;
@@ -420,22 +435,31 @@ export default function SettingsPage() {
             จัดการพารามิเตอร์ของระบบ CMMS จากตาราง settings จริง — แก้ไขแล้วบันทึกลงฐานข้อมูลทันที
           </Text>
         </VStack>
-        <VStack gap={1} style={{ minWidth: 280, maxWidth: 420, flex: 1 }}>
-          <HStack gap={2} vAlign="center">
-            <Icon icon={MagnifyingGlassIcon} size="sm" color="secondary" />
-            <TextInput
-              label="ค้นหาการตั้งค่า"
-              isLabelHidden
-              placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
-              value={searchQuery}
-              onChange={setSearchQuery}
-              description={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
-            />
-            {searchQuery && (
-              <Button label="ล้าง" variant="secondary" size="sm" onClick={() => setSearchQuery("")} />
-            )}
-          </HStack>
-        </VStack>
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Button
+            label="ประวัติการแก้ไข"
+            variant="secondary"
+            size="sm"
+            icon={<Icon icon={ClockIcon} size="sm" />}
+            onClick={openAudit}
+          />
+          <VStack gap={1} style={{ minWidth: 280, maxWidth: 420 }}>
+            <HStack gap={2} vAlign="center">
+              <Icon icon={MagnifyingGlassIcon} size="sm" color="secondary" />
+              <TextInput
+                label="ค้นหาการตั้งค่า"
+                isLabelHidden
+                placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+                description={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
+              />
+              {searchQuery && (
+                <Button label="ล้าง" variant="secondary" size="sm" onClick={() => setSearchQuery("")} />
+              )}
+            </HStack>
+          </VStack>
+        </HStack>
       </HStack>
 
       {/* ลิงก์หน้าย่อยตั้งค่า */}
@@ -763,6 +787,66 @@ export default function SettingsPage() {
               isDisabled={diffRows.length === 0}
               onClick={handleSave}
             />
+          </HStack>
+        </VStack>
+      </Dialog>
+
+      {/* ═══ Dialog ประวัติการแก้ไข (audit log) ═══ */}
+      <Dialog isOpen={showAudit} onOpenChange={(open) => { if (!open) setShowAudit(false); }}>
+        <DialogHeader title={`ประวัติการแก้ไขการตั้งค่า (${auditRows.length} รายการ)`} />
+        <VStack gap={4}>
+          <Text type="body" size="sm" color="secondary">
+            บันทึกทุกครั้งที่ค่ามีการเปลี่ยนแปลง — ใคร แก้ key ไหน เมื่อไหร่ จากค่าเดิมเป็นค่าใหม่
+          </Text>
+
+          {auditLoading ? (
+            <HStack hAlign="center" gap={2}>
+              <Spinner size="sm" />
+              <Text type="body" size="sm" color="secondary">กำลังโหลดประวัติ...</Text>
+            </HStack>
+          ) : auditRows.length === 0 ? (
+            <Text type="body" color="secondary">ยังไม่มีประวัติการแก้ไข — บันทึกการตั้งค่าครั้งถัดไปจะปรากฏที่นี่</Text>
+          ) : (
+            <VStack gap={2} style={{ maxHeight: 460, overflow: "auto" }}>
+              {auditRows.map((a) => {
+                const meta = KEY_META[a.setting_key] ?? { label: a.setting_key };
+                const fakeRow = { id: 0, setting_key: a.setting_key } as SettingRow;
+                return (
+                  <Card key={a.id} padding={3}>
+                    <VStack gap={1.5}>
+                      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+                        <HStack gap={2} vAlign="center">
+                          <Text type="body" weight="bold" size="sm">{meta.label}</Text>
+                          {SENSITIVE_KEYS.has(a.setting_key) && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
+                          <Text type="body" size="xs" color="secondary" style={{ fontFamily: "monospace" }}>{a.setting_key}</Text>
+                        </HStack>
+                        <Text type="body" size="xs" color="secondary">
+                          {a.user_name || "ผู้ใช้ระบบ"} · {relativeTime(a.created_at)} ({String(a.created_at).slice(0, 16)})
+                        </Text>
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
+                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid #fecaca", background: "#fef2f2", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "#b91c1c" }}>จาก</Text>
+                          <Text type="body" size="sm" style={{ color: "#7f1d1d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                            {valuePreview(fakeRow, a.old_value ?? "")}
+                          </Text>
+                        </div>
+                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid #bbf7d0", background: "#f0fdf4", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "#15803d" }}>เป็น</Text>
+                          <Text type="body" size="sm" style={{ color: "#14532d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                            {valuePreview(fakeRow, a.new_value ?? "")}
+                          </Text>
+                        </div>
+                      </HStack>
+                    </VStack>
+                  </Card>
+                );
+              })}
+            </VStack>
+          )}
+
+          <HStack hAlign="end">
+            <Button label="ปิด" variant="secondary" onClick={() => setShowAudit(false)} />
           </HStack>
         </VStack>
       </Dialog>

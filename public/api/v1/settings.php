@@ -11,6 +11,14 @@ if (isset($_GET['defaults'])) {
     exit;
 }
 
+// คืนประวัติการแก้ไข (audit log) — ล่าสุด 50 รายการ
+if (isset($_GET['audit'])) {
+    $limit = max(1, min(200, (int)($_GET['audit'] ?? 50)));
+    $rows = getDb()->query("SELECT id, user_id, user_name, setting_key, old_value, new_value, created_at FROM settings_audit_log ORDER BY id DESC LIMIT $limit")->fetchAll();
+    echo json_encode($rows, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 require_once __DIR__ . '/../../../src/csrf.php';
 if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
@@ -60,8 +68,26 @@ try {
             }
             if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
             $values[] = $id;
+            // Audit log: อ่านค่าก่อนแก้เฉพาะ setting_value เท่านั้น
+            $oldRow = $pdo->prepare('SELECT setting_key, setting_value FROM settings WHERE id = ?');
+            $oldRow->execute([$id]);
+            $old = $oldRow->fetch();
             $stmt = $pdo->prepare("UPDATE settings SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // บันทึกประวัติการแก้ไข (เฉพาะตอน setting_value เปลี่ยนจริง)
+            if (isset($data['setting_value']) && $old && $old['setting_value'] !== (string)$data['setting_value']) {
+                try {
+                    $pdo->prepare("INSERT INTO settings_audit_log (user_id, user_name, setting_key, old_value, new_value) VALUES (?, ?, ?, ?, ?)")
+                        ->execute([
+                            (int)($_SESSION['user_id'] ?? 0) ?: null,
+                            mb_substr((string)($_SESSION['user_name'] ?? ''), 0, 150) ?: null,
+                            mb_substr((string)$old['setting_key'], 0, 100),
+                            $old['setting_value'],
+                            (string)$data['setting_value'],
+                        ]);
+                } catch (Exception $e) { /* audit ไม่ควรทำให้บันทึกหลักล้ม */ }
+            }
             echo json_encode(['success' => true]);
             break;
         default:
