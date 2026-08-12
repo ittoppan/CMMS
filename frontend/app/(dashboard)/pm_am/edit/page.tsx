@@ -32,6 +32,8 @@ function EditPMContent() {
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [pmNumber, setPmNumber] = useState("");
+  const [users, setUsers] = useState<any[]>([]);
+  const [assignedTo, setAssignedTo] = useState("");
 
   // New state variables for the new fields
   const [completedAt, setCompletedAt] = useState<ISODate | undefined>(undefined);
@@ -39,6 +41,15 @@ function EditPMContent() {
   const [rescheduleReason, setRescheduleReason] = useState("");
 
   useEffect(() => {
+    // ผู้รับผิดชอบ = ผู้ใช้งานที่ active
+    fetch("/api/v1/index.php?resource=users")
+      .then(res => res.json())
+      .then(json => {
+        const list = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+        setUsers(list.filter((u: any) => u.is_active !== 0 && u.is_active !== "0"));
+      })
+      .catch(() => { /* ignore */ });
+
     if (!pmId) {
       setError("ไม่ระบุหมายเลขแผน PM");
       setLoadingData(false);
@@ -54,6 +65,7 @@ function EditPMContent() {
           setDescription(json.description || "");
           setNotes(json.notes || "");
           setPmNumber(`PM-${String(json.id).padStart(3, '0')}`);
+          setAssignedTo(json.assigned_to ? String(json.assigned_to) : "");
 
           // Set new state variables
           setCompletedAt(json.completed_at || undefined);
@@ -81,6 +93,7 @@ function EditPMContent() {
         title,
         status,
         due_date: dueDate || null,
+        assigned_to: assignedTo ? Number(assignedTo) : null,
         notes,
         // Include new fields in the payload if they are being updated or are relevant
         reschedule_reason: rescheduleReason, // Include reschedule reason
@@ -145,6 +158,14 @@ function EditPMContent() {
               label="ชื่องาน PM"
               value={title}
               onChange={setTitle}  />
+
+            <Selector
+              label="ผู้รับผิดชอบ (ช่าง)"
+              placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..."
+              value={assignedTo}
+              onChange={setAssignedTo}
+              options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
+            />
 
             <Selector
               label="สถานะปัจจุบัน"

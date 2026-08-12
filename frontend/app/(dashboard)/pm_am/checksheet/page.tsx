@@ -64,9 +64,20 @@ export default function PMChecksheetPage() {
   const [assetName, setAssetName] = useState("");
   const [checklist, setChecklist] = useState<CheckItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const { showToast } = useToast();
   // QR scan prefill: ?asset_code= / ?plan_id=
   const qrPrefillRef = useRef<{ assetCode?: string; planId?: string } | null>(null);
+
+  // ผู้ทำรายการ = ผู้ใช้ที่ login จริง (จาก session)
+  useEffect(() => {
+    fetch("/api/v1/menu_permissions.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.user?.id) setCurrentUserId(Number(json.user.id));
+      })
+      .catch(() => { /* offline */ });
+  }, []);
 
   useEffect(() => {
     try {
@@ -207,7 +218,7 @@ export default function PMChecksheetPage() {
           status: "completed",
           completed_at: now,
           last_done_date: now.slice(0, 10),
-          completed_by: 1,
+          completed_by: currentUserId || null,
           checklist: JSON.stringify(
             checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
           ),

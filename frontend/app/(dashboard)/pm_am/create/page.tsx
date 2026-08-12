@@ -20,7 +20,9 @@ export default function PMCreatePage() {
   const router = useRouter();
   
   const [assets, setAssets] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [assetId, setAssetId] = useState("");
+  const [assignedTo, setAssignedTo] = useState("");
   const [title, setTitle] = useState("");
   const [frequency, setFrequency] = useState("monthly");
   const [description, setDescription] = useState("");
@@ -39,11 +41,24 @@ export default function PMCreatePage() {
         }
       })
       .catch(e => console.error("Failed to load assets", e));
+
+    // ผู้รับผิดชอบ = ผู้ใช้งานที่ active (ช่าง/ผู้ดูแล) — ข้อมูลจริงจาก users
+    fetch("/api/v1/index.php?resource=users")
+      .then(res => res.json())
+      .then(json => {
+        const list = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+        setUsers(list.filter((u: any) => u.is_active !== 0 && u.is_active !== "0"));
+      })
+      .catch(e => console.error("Failed to load users", e));
   }, []);
 
   const handleSubmit = async () => {
     if (!title || !assetId) {
       setError("กรุณาระบุชื่อแผนงาน และเลือกเครื่องจักร");
+      return;
+    }
+    if (!assignedTo) {
+      setError("กรุณาเลือกผู้รับผิดชอบ (ช่างที่จะไปทำ PM หน้างาน)");
       return;
     }
     setLoading(true);
@@ -57,6 +72,7 @@ export default function PMCreatePage() {
           title,
           description,
           asset_id: assetId,
+          assigned_to: assignedTo ? Number(assignedTo) : null,
           frequency_type: frequency,
           frequency_interval: 1,
           due_date: dueDate || null,
@@ -116,6 +132,14 @@ export default function PMCreatePage() {
             value={assetId}
             onChange={setAssetId}
             options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
+          />
+
+          <Selector
+            label="ผู้รับผิดชอบ (ช่าง) *"
+            placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..."
+            value={assignedTo}
+            onChange={setAssignedTo}
+            options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
           />
           
           <Selector

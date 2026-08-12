@@ -36,14 +36,17 @@ import {
 interface TaskItem extends Record<string, unknown> {
   rawId: number;
   id: string;
+  kind: "repair" | "pm";
   woNumber: string;
   machine: string;
   title: string;
   priority: "critical" | "high" | "medium" | "low";
   status: "new" | "in_progress" | "pending_parts" | "completed";
   assignedTo?: number | null;
+  assignedToName?: string;
   assignedDate: string;
   estimatedCompletion: string;
+  assetCode?: string;
   beforeImg?: string;
   afterImg?: string;
   receiverName?: string;
@@ -84,32 +87,66 @@ export default function MyTasksPage() {
       })
       .catch(() => { /* offline — กรองไม่ได้ ปล่อยผ่าน */ });
 
-    // 2) โหลดงานซ่อมทั้งหมด แล้วกรองฝั่ง client เฉพาะงานของตัวเอง
-    fetch("/api/v1/repair.php")
-      .then(res => res.json())
-      .then(rows => {
+    // 2) โหลดงานซ่อม + แผน PM (งานของฉัน = งานซ่อม + PM ที่ได้รับมอบหมาย)
+    Promise.all([
+      fetch("/api/v1/repair.php").then(r => r.json()),
+      fetch("/api/v1/index.php?resource=pm-plans").then(r => r.json()),
+    ])
+      .then(([rows, pmJson]) => {
+        const mapped: TaskItem[] = [];
+
+        // 2.1) งานซ่อม
         if (Array.isArray(rows) && rows.length > 0) {
-          const mapped: TaskItem[] = rows.map((r: any) => ({
-            rawId: r.id,
-            id: String(r.id),
-            woNumber: r.work_order_no || `EN-${r.id}`,
-            machine: r.asset_name || "-",
-            title: r.title || "-",
-            priority: r.priority || "medium",
-            status: (() => {
-              const s = String(r.status || "").toLowerCase();
-              if (s === "completed" || s === "resolved" || s === "closed") return "completed";
-              if (s === "in_progress" || s === "waiting_parts" || s === "pending_parts") return "in_progress";
-              return "new";
-            })(),
-            assignedTo: r.assigned_to || null,
-            assignedDate: r.created_at || "-",
-            estimatedCompletion: r.estimated_completion_date || "-",
-            beforeImg: r.before_image_path || "",
-            afterImg: r.after_image_path || "",
-            receiverName: r.receiver_name || "-",
-            receiverSignature: r.receiver_signature_path || ""
-          }));
+          rows.forEach((r: any) => {
+            mapped.push({
+              rawId: r.id,
+              id: `wo-${r.id}`,
+              kind: "repair",
+              woNumber: r.work_order_no || `EN-${r.id}`,
+              machine: r.asset_name || "-",
+              title: r.title || "-",
+              priority: r.priority || "medium",
+              status: (() => {
+                const s = String(r.status || "").toLowerCase();
+                if (s === "completed" || s === "resolved" || s === "closed") return "completed";
+                if (s === "in_progress" || s === "waiting_parts" || s === "pending_parts") return "in_progress";
+                return "new";
+              })(),
+              assignedTo: r.assigned_to || null,
+              assignedToName: r.assigned_name || "-",
+              assignedDate: r.created_at || "-",
+              estimatedCompletion: r.estimated_completion_date || "-",
+              beforeImg: r.before_image_path || "",
+              afterImg: r.after_image_path || "",
+              receiverName: r.receiver_name || "-",
+              receiverSignature: r.receiver_signature_path || ""
+            });
+          });
+        }
+
+        // 2.2) แผน PM (จากตาราง pm_am จริง — แสดงเฉพาะที่ยังไม่เสร็จเป็นหลัก)
+        const pmList = Array.isArray(pmJson) ? pmJson : (Array.isArray(pmJson?.data) ? pmJson.data : []);
+        pmList.forEach((p: any) => {
+          const pStatus = String(p.status || "pending").toLowerCase();
+          const isDone = pStatus === "completed" || pStatus === "skipped";
+          mapped.push({
+            rawId: p.id,
+            id: `pm-${p.id}`,
+            kind: "pm",
+            woNumber: `PM-${String(p.id).padStart(3, "0")}`,
+            machine: p.asset_name || "-",
+            title: p.title || "-",
+            priority: (pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10))) ? "high" : "medium",
+            status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
+            assignedTo: p.assigned_to || null,
+            assignedToName: p.assigned_to_name || "-",
+            assignedDate: p.due_date || "-",
+            estimatedCompletion: p.due_date || "-",
+            assetCode: p.asset_code || "",
+          });
+        });
+
+        if (mapped.length > 0) {
           setTasks(mapped);
           setError(false);
         } else {
@@ -167,25 +204,32 @@ export default function MyTasksPage() {
 
   const handleConfirmClose = async () => {
     if (!selectedTask) return;
+    // ต้องกรอกของจริง — ไม่มีค่าเริ่มต้นปลอม
+    if (!rootCause.trim() || !solution.trim()) {
+      alert("กรุณากรอกสาเหตุของปัญหา และวิธีการแก้ไข ก่อนปิดใบงาน");
+      return;
+    }
+    if (!receiverName.trim() || !receiverSignature) {
+      alert("กรุณากรอกชื่อผู้รับมอบงาน และวาดลายเซ็นผู้รับมอบงาน");
+      return;
+    }
     setClosing(true);
     try {
-      const sigData = receiverSignature || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='80'><path d='M10 40 Q 50 10 90 45 T 170 30' stroke='var(--cmms-success)' stroke-width='3' fill='none'/><text x='20' y='55' font-size='11' fill='var(--cmms-success)'>ผู้รับมอบงานลงนามแล้ว</text></svg>";
-
       await fetch(`/api/v1/repair.php?id=${selectedTask.rawId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "completed",
-          root_cause: rootCause || "ตลับลูกปืนหมดอายุการใช้งานตามรอบ",
-          solution: solution || "เปลี่ยนตลับลูกปืนใหม่และทดสอบเดินเครื่อง",
+          root_cause: rootCause,
+          solution: solution,
           after_image_path: afterImg,
           receiver_name: receiverName,
-          receiver_signature_path: sigData,
+          receiver_signature_path: receiverSignature,
           completed_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
         })
       });
 
-      setTasks(prev => prev.map(t => t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature: sigData } : t));
+      setTasks(prev => prev.map(t => t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature } : t));
       setCloseModalOpen(false);
     } catch (e) {
       console.error("Close WO error", e);
@@ -207,68 +251,125 @@ export default function MyTasksPage() {
   const countInProg = myTasks.filter(t => t.status === "in_progress" || t.status === "pending_parts").length;
   const countDone = myTasks.filter(t => t.status === "completed").length;
 
+  // PM task → ไปหน้าเช็คชีตโดยตรง (prefill แผน + เครื่องจาก QR)
+  const goPM = (task: TaskItem) => {
+    const params = new URLSearchParams({ plan_id: String(task.rawId) });
+    if (task.assetCode) params.set("asset_code", task.assetCode);
+    router.push(`/pm_am/checksheet?${params.toString()}`);
+  };
+
   const columns: TableColumn<TaskItem>[] = [
-    { key: "woNumber", header: "เลขที่ใบงาน", width: proportional(1.2) },
+    {
+      key: "woNumber",
+      header: "เลขที่ใบงาน",
+      width: proportional(1.4),
+      renderCell: (task) => (
+        <HStack gap={2} vAlign="center">
+          {task.kind === "pm" ? (
+            <Badge label="PM" variant="accent" />
+          ) : (
+            <Badge label="ซ่อม" variant="info" />
+          )}
+          <Text type="body" weight="bold">{task.woNumber}</Text>
+        </HStack>
+      ),
+    },
     { key: "machine", header: "เครื่องจักร", width: proportional(2) },
-    { key: "title", header: "หัวข้ออาการเสีย", width: proportional(2.5) },
+    { key: "title", header: "หัวข้องาน", width: proportional(2.5) },
+    {
+      key: "assignedToName",
+      header: "ผู้รับผิดชอบ",
+      width: proportional(1.4),
+      renderCell: (task) => (
+        <Text type="body" size="sm">{task.assignedToName || "-"}</Text>
+      ),
+    },
+    {
+      key: "estimatedCompletion",
+      header: task => (task.kind === "pm" ? "ครบกำหนด" : "กำหนดเสร็จ"),
+      width: proportional(1.2),
+      renderCell: (task) => (
+        <Text type="body" size="sm" color={task.kind === "pm" && task.status === "new" ? "error" : "secondary"}>
+          {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
+        </Text>
+      ),
+    },
     {
       key: "beforeImg",
       header: "รูปก่อน/หลังซ่อม",
       width: proportional(1.5),
-      renderCell: (task) => (
-        <HStack gap={1} vAlign="center">
-          {task.beforeImg && <Badge label="📸 ก่อนซ่อม" variant="error" />}
-          {task.afterImg && <Badge label="📸 หลังซ่อม" variant="success" />}
-        </HStack>
-      )
+      renderCell: (task) =>
+        task.kind === "pm" ? (
+          <Text type="body" size="sm" color="disabled">-</Text>
+        ) : (
+          <HStack gap={1} vAlign="center">
+            {task.beforeImg && <Badge label="📸 ก่อนซ่อม" variant="error" />}
+            {task.afterImg && <Badge label="📸 หลังซ่อม" variant="success" />}
+          </HStack>
+        ),
     },
     {
       key: "actions",
       header: "การดำเนินการ",
       width: proportional(2),
-      renderCell: (task) => (
-        <HStack gap={2} hAlign="end">
-          {task.status === "new" && (
+      renderCell: (task) =>
+        task.kind === "pm" ? (
+          <HStack gap={2} hAlign="end">
+            {task.status === "completed" ? (
+              <Text type="body" size="sm" color="disabled">ทำเสร็จแล้ว</Text>
+            ) : (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Icon icon={CheckCircleIcon} size="xsm" />}
+                onClick={() => goPM(task)}
+                label="ไปทำ PM"
+              />
+            )}
+          </HStack>
+        ) : (
+          <HStack gap={2} hAlign="end">
+            {task.status === "new" && (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Icon icon={PlayIcon} size="xsm" />}
+                onClick={() => handleStartTask(task)}
+                label="เริ่มซ่อม"
+              />
+            )}
+
+            {task.status === "in_progress" && (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<Icon icon={CheckIcon} size="xsm" />}
+                onClick={() => {
+                  setSelectedTask(task);
+                  setCloseModalOpen(true);
+                }}
+                label="ปิดใบงานซ่อม"
+              />
+            )}
+
             <Button
               size="sm"
-              variant="primary"
-              icon={<Icon icon={PlayIcon} size="xsm" />}
-              onClick={() => handleStartTask(task)}
-              label="เริ่มซ่อม"
+              variant="secondary"
+              icon={<Icon icon={EyeIcon} size="xsm" />}
+              onClick={() => router.push(`/repair/view?id=${task.rawId}`)}
+              label="ดูรายละเอียดปิดงาน"
             />
-          )}
-
-          {task.status === "in_progress" && (
-            <Button
-              size="sm"
-              variant="primary"
-              icon={<Icon icon={CheckIcon} size="xsm" />}
-              onClick={() => {
-                setSelectedTask(task);
-                setCloseModalOpen(true);
-              }}
-              label="ปิดใบงานซ่อม"
-            />
-          )}
-
-          <Button
-            size="sm"
-            variant="secondary"
-            icon={<Icon icon={EyeIcon} size="xsm" />}
-            onClick={() => router.push(`/repair/view?id=${task.rawId}`)}
-            label="ดูรายละเอียดปิดงาน"
-          />
-        </HStack>
-      )
-    }
+          </HStack>
+        ),
+    },
   ];
 
   return (
     <VStack gap={6}>
       {/* Header */}
       <VStack gap={1}>
-        <Heading level={2}>งานซ่อมของฉัน</Heading>
-        <Text type="body" color="secondary">รายการใบสั่งงานซ่อมที่ได้รับมอบหมายและบันทึกปิดงานซ่อมบำรุง</Text>
+        <Heading level={2}>งานของฉัน (ซ่อม + PM)</Heading>
+        <Text type="body" color="secondary">งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย</Text>
       </VStack>
 
       {/* Tabs */}
