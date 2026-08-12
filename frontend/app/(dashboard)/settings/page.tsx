@@ -30,6 +30,8 @@ import {
   ServerStackIcon,
   ArrowRightIcon,
   LockClosedIcon,
+  MagnifyingGlassIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 
 interface SettingRow {
@@ -38,6 +40,7 @@ interface SettingRow {
   setting_value: string;
   setting_group: string;
   description: string;
+  updated_at?: string;
 }
 
 const GROUP_META: Record<string, { label: string; icon: any; hint: string }> = {
@@ -192,6 +195,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [activeGroup, setActiveGroup] = useState("company");
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState<Record<string, string>>({});
   // ค่าใหม่ของคีย์ที่เป็นความลับ (ว่าง = ไม่เปลี่ยน)
   const [newSecrets, setNewSecrets] = useState<Record<string, string>>({});
@@ -207,6 +211,43 @@ export default function SettingsPage() {
     () => settings.filter((s) => s.setting_group === activeGroup),
     [settings, activeGroup]
   );
+
+  // ค้นหาข้ามทุกกลุ่ม: ตรงกับ key / ชื่อไทย / ค่า / คำอธิบาย
+  const searchRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return null;
+    return settings.filter((s) => {
+      const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
+      return (
+        s.setting_key.toLowerCase().includes(q) ||
+        String(meta.label).toLowerCase().includes(q) ||
+        String(s.setting_value ?? "").toLowerCase().includes(q) ||
+        String(s.description ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [settings, searchQuery]);
+
+  // คีย์ที่ถูกแก้ไขล่าสุด (top 8 จาก updated_at)
+  const recentRows = useMemo(() => {
+    return settings
+      .filter((s) => s.updated_at)
+      .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))
+      .slice(0, 8);
+  }, [settings]);
+
+  const relativeTime = (iso?: string): string => {
+    if (!iso) return "";
+    const t = new Date(iso.replace(" ", "T"));
+    const diffMs = Date.now() - t.getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "เมื่อสักครู่";
+    if (mins < 60) return `${mins} นาทีที่แล้ว`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs} ชม.ที่แล้ว`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days} วันที่แล้ว`;
+    return iso.slice(0, 10);
+  };
 
   const isDirty = (row: SettingRow) =>
     (settings.find((x) => x.id === row.id)?.setting_value ?? "") !== form[row.setting_key];
@@ -224,12 +265,12 @@ export default function SettingsPage() {
 
   const changedRows = useMemo(
     () =>
-      currentRows.filter((s) => {
+      (searchRows ?? currentRows).filter((s) => {
         if (SENSITIVE_KEYS.has(s.setting_key)) return Boolean(newSecrets[s.setting_key]?.trim());
         return isDirty(s);
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentRows, form, settings, newSecrets]
+    [searchRows, currentRows, form, settings, newSecrets]
   );
 
   const fetchSettings = async () => {
@@ -325,7 +366,7 @@ export default function SettingsPage() {
       )}
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
+        <VStack gap={1} style={{ flex: 1 }}>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่าระบบ (System Settings)</Heading>
             <Badge label={`${settings.length} keys`} variant="info" />
@@ -334,6 +375,22 @@ export default function SettingsPage() {
           <Text type="body" color="secondary">
             จัดการพารามิเตอร์ของระบบ CMMS จากตาราง settings จริง — แก้ไขแล้วบันทึกลงฐานข้อมูลทันที
           </Text>
+        </VStack>
+        <VStack gap={1} style={{ minWidth: 280, maxWidth: 420, flex: 1 }}>
+          <HStack gap={2} vAlign="center">
+            <Icon icon={MagnifyingGlassIcon} size="sm" color="secondary" />
+            <TextInput
+              label="ค้นหาการตั้งค่า"
+              isLabelHidden
+              placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
+              value={searchQuery}
+              onChange={setSearchQuery}
+              description={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
+            />
+            {searchQuery && (
+              <Button label="ล้าง" variant="secondary" size="sm" onClick={() => setSearchQuery("")} />
+            )}
+          </HStack>
         </VStack>
       </HStack>
 
@@ -361,6 +418,44 @@ export default function SettingsPage() {
         ))}
       </Grid>
 
+      {/* คีย์ที่แก้ไขล่าสุด */}
+      {recentRows.length > 0 && (
+        <Card padding={4}>
+          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+            <HStack gap={2} vAlign="center">
+              <Icon icon={ClockIcon} size="sm" color="primary" />
+              <Text type="body" weight="bold">แก้ไขล่าสุด</Text>
+              <Text type="body" size="sm" color="secondary">กดเพื่อไปยังการตั้งค่านั้น</Text>
+            </HStack>
+            <HStack gap={2} wrap="wrap">
+              {recentRows.map((s) => {
+                const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
+                const isActive = !searchQuery.trim() && activeGroup === s.setting_group;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => { setActiveGroup(s.setting_group); setSearchQuery(""); }}
+                    title={`${s.setting_key} · แก้ไข ${relativeTime(s.updated_at)}`}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "5px 11px", border: "1px solid var(--cmms-border)",
+                      borderRadius: 999,
+                      background: isActive ? "var(--cmms-primary-light)" : "var(--cmms-bg-wash)",
+                      color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-primary)",
+                      cursor: "pointer", font: "inherit", fontSize: 12,
+                    }}
+                  >
+                    {meta.label}
+                    <span style={{ fontSize: 10, color: "var(--cmms-text-muted)" }}>{relativeTime(s.updated_at)}</span>
+                  </button>
+                );
+              })}
+            </HStack>
+          </HStack>
+        </Card>
+      )}
+
       <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
         {/* Sidebar group nav */}
         <Card padding={2}>
@@ -374,7 +469,7 @@ export default function SettingsPage() {
                 <button
                   key={g}
                   type="button"
-                  onClick={() => setActiveGroup(g)}
+                  onClick={() => { setActiveGroup(g); setSearchQuery(""); }}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -409,17 +504,25 @@ export default function SettingsPage() {
         <Card padding={5} style={{ gridColumn: "span 2" }}>
           <VStack gap={5}>
             <VStack gap={1}>
-              <Heading level={3}>{(GROUP_META[activeGroup] ?? { label: activeGroup }).label}</Heading>
+              <Heading level={3}>
+                {searchRows
+                  ? `ผลการค้นหา "${searchQuery.trim()}"`
+                  : (GROUP_META[activeGroup] ?? { label: activeGroup }).label}
+              </Heading>
               <Text type="supporting" color="secondary">
-                {(GROUP_META[activeGroup] ?? { hint: "" }).hint} — มี {currentRows.length} รายการ
+                {searchRows
+                  ? `พบ ${searchRows.length} รายการจากทุกกลุ่ม`
+                  : `${(GROUP_META[activeGroup] ?? { hint: "" }).hint} — มี ${currentRows.length} รายการ`}
                 {changedRows.length > 0 && ` · ยังไม่บันทึก ${changedRows.length} รายการ`}
               </Text>
             </VStack>
 
-            {currentRows.length === 0 ? (
-              <Text type="body" color="secondary">ไม่มีรายการตั้งค่าในกลุ่มนี้</Text>
+            {(searchRows ?? currentRows).length === 0 ? (
+              <Text type="body" color="secondary">
+                {searchRows ? `ไม่พบการตั้งค่าที่ตรงกับ "${searchQuery.trim()}"` : "ไม่มีรายการตั้งค่าในกลุ่มนี้"}
+              </Text>
             ) : (
-              currentRows.map((row) => {
+              (searchRows ?? currentRows).map((row) => {
                 const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
                 const isBool = BOOLEAN_KEYS.has(row.setting_key);
                 const isReadonly = READONLY_KEYS.has(row.setting_key);
@@ -436,6 +539,9 @@ export default function SettingsPage() {
                         <HStack gap={2} vAlign="center">
                           {isSensitive && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
                           <Text type="body" weight="semibold">{meta.label}</Text>
+                          {searchRows && (
+                            <Badge label={(GROUP_META[row.setting_group] ?? { label: row.setting_group }).label} variant="neutral" />
+                          )}
                           {dirty && <Badge label="ยังไม่บันทึก" variant="warning" />}
                         </HStack>
                         <Text type="body" size="sm" color="secondary">
