@@ -45,6 +45,18 @@ try {
                 }
                 break;
             }
+            // ไทม์ไลน์การซ่อม: ?activity=1&id=N (จาก repair_activity_log)
+            if (isset($_GET['activity'])) {
+                $rid = (int)($_GET['id'] ?? 0);
+                if (!$rid) { echo json_encode([]); break; }
+                $stmt = $pdo->prepare('SELECT a.id, a.repair_id, a.action, a.description, a.old_value, a.new_value, a.created_at, u.full_name AS user_name
+                                       FROM repair_activity_log a
+                                       LEFT JOIN users u ON a.user_id = u.id
+                                       WHERE a.repair_id = ? ORDER BY a.created_at ASC, a.id ASC');
+                $stmt->execute([$rid]);
+                echo json_encode($stmt->fetchAll());
+                break;
+            }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
                 $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id WHERE r.id = ?');
