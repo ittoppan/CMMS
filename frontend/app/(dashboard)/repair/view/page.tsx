@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -18,7 +18,10 @@ import {
   ClockIcon,
   DocumentCheckIcon,
   BanknotesIcon,
+  DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface WorkOrderDetail {
   id: number;
@@ -44,6 +47,8 @@ interface WorkOrderDetail {
 export default function RepairViewDetailsPage() {
   const [woId, setWoId] = useState<string>("1");
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -104,6 +109,40 @@ export default function RepairViewDetailsPage() {
     window.print();
   };
 
+  const handleDownloadPdf = async () => {
+    if (!reportRef.current || downloading) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      const img = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pw) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+      heightLeft -= ph;
+      while (heightLeft > 0) {
+        position -= ph;
+        pdf.addPage();
+        pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+        heightLeft -= ph;
+      }
+      pdf.save(`F-EN-03-${wo.workOrderNo}.pdf`);
+    } catch (e) {
+      console.error("PDF generation failed:", e);
+      alert('ไม่สามารถสร้าง PDF ได้ในเบราว์เซอร์นี้ — กรุณาใช้ปุ่ม "พิมพ์เอกสารปิดซ่อม" แล้วเลือก "บันทึกเป็น PDF"');
+    }
+    setDownloading(false);
+  };
+
   return (
     <VStack gap={6}>
       {/* Header (Hidden on Print) */}
@@ -128,6 +167,13 @@ export default function RepairViewDetailsPage() {
               onClick={() => (window.location.href = "/repair/tracking")}
             />
             <Button
+              label={downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF (F-EN-03)"}
+              variant="secondary"
+              icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
+              isDisabled={downloading}
+              onClick={handleDownloadPdf}
+            />
+            <Button
               label="🖨️ พิมพ์เอกสารปิดซ่อม"
               variant="primary"
               icon={<Icon icon={PrinterIcon} size="sm" />}
@@ -138,6 +184,7 @@ export default function RepairViewDetailsPage() {
       </div>
 
       {/* Main Closure Document Sheet */}
+      <div ref={reportRef}>
       <Card padding={6} style={{ background: '#FFFFFF', color: '#1E293B' }}>
         <VStack gap={6}>
           {/* Document Header Bar */}
@@ -338,6 +385,7 @@ export default function RepairViewDetailsPage() {
           </VStack>
         </VStack>
       </Card>
+      </div>
 
       {/* Print Stylesheet */}
       <style jsx global>{`
