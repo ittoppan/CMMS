@@ -38,22 +38,22 @@ $lowStock        = (int)$pdo->query("SELECT COUNT(*) FROM spare_parts WHERE stoc
 $totalAssets     = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE status = 'active'")->fetchColumn();
 
 // ─── 2. MTBF, MTTR & Machine Availability Calculations ───
-$breakdownCount  = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn() ?: 1;
-$totalDowntime   = (float)$pdo->query("SELECT SUM(IFNULL(TIMESTAMPDIFF(HOUR, downtime_start, downtime_end), 2)) FROM repair WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn() ?: 12.5;
+$breakdownCount  = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn() ?: 0;
+$totalDowntime   = (float)$pdo->query("SELECT SUM(IFNULL(TIMESTAMPDIFF(HOUR, downtime_start, downtime_end), 0)) FROM repair WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchColumn() ?: 0.0;
 
-$operatingHours  = ($totalAssets ?: 5) * 720;
+$operatingHours  = max(1, $totalAssets) * 720;
 $mtbfHrs         = round($operatingHours / max(1, $breakdownCount), 1);
 $mttrHrs         = round($totalDowntime / max(1, $breakdownCount), 1);
 $availability    = round((($operatingHours - $totalDowntime) / max(1, $operatingHours)) * 100, 2);
 
 // ─── 3. Maintenance Cost & Budget Burn-down ───
-$costParts     = (float)$pdo->query("SELECT SUM(cost_parts) FROM repair")->fetchColumn() ?: 45800.00;
-$costLabor     = (float)$pdo->query("SELECT SUM(cost_labor) FROM repair")->fetchColumn() ?: 28500.00;
+$costParts     = (float)$pdo->query("SELECT SUM(cost_parts) FROM repair")->fetchColumn() ?: 0.0;
+$costLabor     = (float)$pdo->query("SELECT SUM(cost_labor) FROM repair")->fetchColumn() ?: 0.0;
 $totalCostAll  = $costParts + $costLabor;
 
 $currentYear  = (int)date('Y');
 $currentMonth = (int)date('m');
-$monthlyBudget = (float)$pdo->query("SELECT allocated_budget FROM budget_plan WHERE year = $currentYear AND month = $currentMonth LIMIT 1")->fetchColumn() ?: 150000.00;
+$monthlyBudget = (float)$pdo->query("SELECT allocated_budget FROM budget_plan WHERE year = $currentYear AND month = $currentMonth LIMIT 1")->fetchColumn() ?: 0.0;
 $budgetSpendPct = round(($totalCostAll / max(1, $monthlyBudget)) * 100, 1);
 
 // ─── 15-Point Query Computations ───
@@ -452,7 +452,7 @@ renderHeader();
             <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-colors"></div>
                 <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i> AVAILABILITY RATE</span>
-                <div class="text-4xl font-black text-emerald-600 drop-shadow-sm"><span class="count-up"><?= $availabilityRate ?></span>%</div>
+                <div class="text-4xl font-black text-emerald-600 drop-shadow-sm"><span class="count-up"><?= $availability ?></span>%</div>
                 <span class="text-[11px] text-slate-400 font-medium">คำนวณจาก Total Time - Downtime</span>
             </div>
             <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
@@ -633,15 +633,24 @@ renderHeader();
                 <span class="text-[10px] text-slate-400 block">ซ่อมเสร็จในครั้งแรกโดยไม่ถูก Reopen</span>
             </div>
 
+            <?php
+                $lastSync = $sageSyncLogs[0] ?? null;
+                $syncOk = $lastSync && ($lastSync['status'] === 'success' || $lastSync['status'] === 'completed');
+                $syncStatus = $syncOk ? '🟢 ONLINE' : ($lastSync ? '🔴 OFFLINE' : '⚪ NO DATA');
+                $syncColor = $syncOk ? 'text-emerald-600' : 'text-rose-600';
+            ?>
             <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
                 <span class="text-slate-500 font-bold block">14. SAGE 300 DSN HEALTH</span>
-                <span class="text-2xl font-black text-indigo-600">🟢 ONLINE</span>
-                <span class="text-[10px] text-slate-400 block">DSN: TFPT2C / TFPT1C</span>
+                <span class="text-2xl font-black <?= $syncColor ?>"><?= $syncStatus ?></span>
+                <span class="text-[10px] text-slate-400 block"><?= $lastSync ? ('ล่าสุด: ' . htmlspecialchars((string)($lastSync['created_at'] ?? ''))) : 'ยังไม่มีข้อมูล sync' ?></span>
             </div>
 
+            <?php
+                $reconDiff = $lastSync && isset($lastSync['diff_count']) ? (int)$lastSync['diff_count'] : 0;
+            ?>
             <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
                 <span class="text-slate-500 font-bold block">15. RECONCILIATION DIFF</span>
-                <span class="text-2xl font-black text-emerald-600">0 DIFF</span>
+                <span class="text-2xl font-black <?= $reconDiff > 0 ? 'text-rose-600' : 'text-emerald-600' ?>"><?= $reconDiff ?> DIFF</span>
                 <span class="text-[10px] text-slate-400 block">CMMS vs Sage 300 Deductions Match</span>
             </div>
         </div>

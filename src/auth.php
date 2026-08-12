@@ -10,6 +10,8 @@
  * (บางไฟล์มี session_start เองอยู่แล้ว — อย่าซ้ำ)
  */
 
+require_once __DIR__ . '/csrf.php';
+
 function currentUser(?PDO $pdo = null) {
     if (empty($_SESSION['user_id'])) {
         return null;
@@ -22,6 +24,12 @@ function currentUser(?PDO $pdo = null) {
 }
 
 function requireLogin(PDO $pdo, bool $adminOnly = false) {
+    // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
+        enforceCsrf();
+    }
+
     if (empty($_SESSION['user_id'])) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');

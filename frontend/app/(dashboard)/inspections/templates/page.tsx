@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -41,7 +42,7 @@ export default function InspectionTemplatesPage() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   // form สร้าง/แก้ template
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -64,7 +65,7 @@ export default function InspectionTemplatesPage() {
 
   useEffect(() => { fetchTemplates(); }, []);
 
-  const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3500); };
+  const flash = (msg: string) => { showToast("info", msg); };
 
   const resetForm = () => {
     setEditingId(null);
@@ -295,11 +296,6 @@ export default function InspectionTemplatesPage() {
         ))}
       </VStack>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

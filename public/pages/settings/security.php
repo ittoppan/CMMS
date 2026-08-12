@@ -15,8 +15,12 @@ $pdo->exec("
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ");
 
-// Seed initial login log
-$pdo->exec("INSERT INTO login_audit_log (username, ip_address, status, user_agent) VALUES ('admin', '192.168.1.9', 'SUCCESS', 'Mozilla/5.0')");
+// Seed บันทึกเริ่มต้นเฉพาะเมื่อตารางว่าง (ไม่ยิงข้อมูลซ้ำทุกครั้งที่เปิดหน้า)
+$count = (int)$pdo->query("SELECT COUNT(*) FROM login_audit_log")->fetchColumn();
+if ($count === 0) {
+    $seedIp = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+    $pdo->prepare("INSERT INTO login_audit_log (username, ip_address, status, user_agent) VALUES ('system', ?, 'SUCCESS', ?)")->execute([$seedIp, ($_SERVER['HTTP_USER_AGENT'] ?? 'seed')]);
+}
 
 $loginLogs = $pdo->query("SELECT * FROM login_audit_log ORDER BY id DESC LIMIT 15")->fetchAll();
 

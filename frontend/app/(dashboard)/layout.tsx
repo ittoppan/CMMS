@@ -13,6 +13,8 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
+import ToastProvider from "../../components/ToastProvider";
+import CommandPalette from "../../components/CommandPalette";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import {
   SquaresPlusIcon,
@@ -243,7 +245,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pageTitle = getPageTitle(pathname);
 
   return (
-    <>
+    <ToastProvider>
+    <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
     <AppShell
       contentPadding={0}
       variant="surface"
@@ -460,6 +463,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         );
       })}
     </nav>
-    </>
+    </ToastProvider>
   );
 }

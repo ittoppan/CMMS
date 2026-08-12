@@ -35,7 +35,7 @@ if (empty($missingExts)) {
 }
 
 // 4. LINE Integration Callback Check
-$lineCallback = getenv('LINE_CALLBACK_URL') ?: 'https://ommatophorous-robert-fortifyingly.ngrok-free.app/line_callback.php';
+$lineCallback = getenv('LINE_CALLBACK_URL') ?: (function_exists('publicBaseUrl') ? publicBaseUrl() . '/line_callback.php' : '');
 $checks[] = ['name' => 'LINE OAuth Callback URL', 'status' => 'pass', 'detail' => $lineCallback];
 
 // Disk Usage

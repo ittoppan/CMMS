@@ -1,27 +1,30 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 $pdo = getDb();
+requireLogin($pdo); // ป้องกันผู้ไม่ login เข้าดูรายงาน
 
-$month = (int)($_GET['month'] ?? date('m'));
+$month = min(12, max(1, (int)($_GET['month'] ?? date('m'))));
 $year  = (int)($_GET['year'] ?? date('Y'));
+if ($year < 2000 || $year > 2100) $year = (int)date('Y');
 
-// Metrics
+// Metrics — คำนวณจากข้อมูลจริง (ไม่ใช้ค่า fallback จำลอง)
 $totalWO      = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn();
-$breakdownWO  = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month AND priority = 'high'")->fetchColumn() ?: 1;
-$totalAssets  = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE status = 'active'")->fetchColumn() ?: 5;
-$totalDowntime = (float)$pdo->query("SELECT SUM(IFNULL(TIMESTAMPDIFF(HOUR, downtime_start, downtime_end), 2)) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn() ?: 12.5;
+$breakdownWO  = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month AND priority = 'high'")->fetchColumn();
+$totalAssets  = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE status = 'active'")->fetchColumn();
+$totalDowntime = (float)$pdo->query("SELECT SUM(IFNULL(TIMESTAMPDIFF(HOUR, downtime_start, downtime_end), 0)) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn();
 
-$operatingHours = $totalAssets * 720;
+$operatingHours = max(1, $totalAssets) * 720;
 $mtbf = round($operatingHours / max(1, $breakdownWO), 1);
 $mttr = round($totalDowntime / max(1, $breakdownWO), 1);
 $availability = round((($operatingHours - $totalDowntime) / max(1, $operatingHours)) * 100, 2);
 
-$costParts = (float)$pdo->query("SELECT SUM(cost_parts) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn() ?: 45800.00;
-$costLabor = (float)$pdo->query("SELECT SUM(cost_labor) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn() ?: 28500.00;
+$costParts = (float)$pdo->query("SELECT SUM(cost_parts) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn();
+$costLabor = (float)$pdo->query("SELECT SUM(cost_labor) FROM repair WHERE YEAR(created_at) = $year AND MONTH(created_at) = $month")->fetchColumn();
 $totalCost = $costParts + $costLabor;
 
-$monthlyBudget = (float)$pdo->query("SELECT allocated_budget FROM budget_plan WHERE year = $year AND month = $month LIMIT 1")->fetchColumn() ?: 150000.00;
+$monthlyBudget = (float)$pdo->query("SELECT allocated_budget FROM budget_plan WHERE year = $year AND month = $month LIMIT 1")->fetchColumn();
 
 // Top Breakdown Machines
 $topBreakdowns = $pdo->query("

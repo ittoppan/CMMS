@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -46,7 +47,7 @@ export default function InspectionRunPage() {
   const [schedule, setSchedule] = useState<any>(null);
   const [items, setItems] = useState<RunItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
   const [createdRepair, setCreatedRepair] = useState<{ repair_id: number | null; message: string } | null>(null);
   const qrPrefillRef = useRef<{ scheduleId?: string; assetCode?: string } | null>(null);
 
@@ -189,14 +190,13 @@ export default function InspectionRunPage() {
       });
       const json = await res.json();
       if (!json.success) { setError(json.error || "บันทึกไม่สำเร็จ"); setSubmitting(false); return; }
-      setToast(json.message || "บันทึกผลแล้ว");
+      showToast("success", json.message || "บันทึกผลแล้ว");
       setCreatedRepair({ repair_id: json.repair_id, message: json.message });
       if (json.repair_id) {
         setSchedule((s: any) => ({ ...s, status: "completed", result: json.result, fail_count: json.fail_count }));
         setItems((prev) => prev.map((it) => ({ ...it, status: it.status })));
       }
       fetchSchedules();
-      setTimeout(() => setToast(""), 4500);
     } catch (e) {
       console.error(e);
       setError("เกิดข้อผิดพลาดในการบันทึก");
@@ -396,11 +396,6 @@ export default function InspectionRunPage() {
         </div>
       )}
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

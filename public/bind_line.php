@@ -109,6 +109,7 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
     <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
         <h2 class="text-base font-bold text-gray-900">3. กรอก LINE User ID ด้วยตนเอง (ถ้ามี)</h2>
         <form method="POST" class="flex gap-2">
+            <?= csrfField() ?>
             <input type="text" name="line_user_id" value="<?= htmlspecialchars($user['line_user_id'] ?? '') ?>" placeholder="ระบุ LINE User ID (เช่น U1234567...)" class="input input-bordered w-full flex-1">
             <button type="submit" class="btn btn-primary">บันทึก</button>
         </form>

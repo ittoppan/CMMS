@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -48,6 +49,9 @@ try {
             }
             break;
         case 'POST':
+            // POST อนุญาตแบบ anonymous (ฟอร์มสาธารณะ LINE LIFF) แต่ยังต้องผ่าน CSRF check
+            enforceCsrf();
+
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             if (empty($data['work_order_no'])) {
                 $data['work_order_no'] = generateWorkOrderNo($pdo);

@@ -11,6 +11,7 @@
  *  - ถ้า line_user_id นั้นผูกกับ user อื่นอยู่แล้ว -> ปฏิเสธ (กันผูกซ้ำ)
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -47,6 +48,9 @@ try {
             break;
 
         case 'POST':
+            // ลงทะเบียนผูกบัญชี = เปลี่ยนข้อมูลสำคัญ -> ต้องผ่าน CSRF (Origin/Referer เดียวกัน หรือ token)
+            enforceCsrf();
+
             $data = json_decode(file_get_contents('php://input'), true) ?? [];
             $lineUid = isset($data['line_user_id']) ? trim((string)$data['line_user_id']) : '';
             $empCode = isset($data['employee_code']) ? strtoupper(trim((string)$data['employee_code'])) : '';

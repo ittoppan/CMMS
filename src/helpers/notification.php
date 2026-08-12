@@ -15,27 +15,39 @@ function publicBaseUrl() {
     $override = getSettingValue('public_base_url', '');
     if (!empty($override)) return rtrim($override, '/');
 
-    // 2. Cloudflare Tunnel — อ่าน URL ล่าสุดจาก log ของ cloudflared
-    $logPath = 'C:\\cloudflared\\cf_tunnel_err.log';
-    if (file_exists($logPath)) {
+    // 2. env APP_URL (แนะนำให้ตั้งค่าตรงนี้ใน production)
+    $appUrl = getenv('APP_URL');
+    if (!empty($appUrl)) return rtrim($appUrl, '/');
+
+    // 3. Cloudflare Tunnel (dev) — อ่านจาก log ของ cloudflared เฉพาะเมื่อตั้ง CLOUDFLARE_LOG_PATH
+    $logPath = getenv('CLOUDFLARE_LOG_PATH');
+    if (!empty($logPath) && file_exists($logPath)) {
         $log = (string)@file_get_contents($logPath);
         if (preg_match('#https://[a-z0-9\-]+\.trycloudflare\.com#', $log, $m)) return rtrim($m[0], '/');
     }
 
-    // 3. ngrok — อ่านจาก local API (port 4040)
-    $ctx = stream_context_create(['http' => ['timeout' => 2]]);
-    $json = @file_get_contents('http://127.0.0.1:4040/api/tunnels', false, $ctx);
-    if ($json !== false) {
-        $j = json_decode($json, true);
-        foreach (($j['tunnels'] ?? []) as $t) {
-            if (!empty($t['public_url'])) return rtrim($t['public_url'], '/');
+    // 4. ngrok (dev) — อ่านจาก local API (port 4040) เฉพาะเมื่อตั้ง NGROK_ENABLED=1
+    if (getenv('NGROK_ENABLED') === '1') {
+        $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+        $json = @file_get_contents('http://127.0.0.1:4040/api/tunnels', false, $ctx);
+        if ($json !== false) {
+            $j = json_decode($json, true);
+            foreach (($j['tunnels'] ?? []) as $t) {
+                if (!empty($t['public_url'])) return rtrim($t['public_url'], '/');
+            }
         }
     }
 
-    // 4. env LINE_CALLBACK_URL (ตัด .php ต่อท้าย) / fallback เดิม
+    // 5. env LINE_CALLBACK_URL (ตัด .php ต่อท้าย)
     $env = getenv('LINE_CALLBACK_URL');
     if (!empty($env)) return rtrim(preg_replace('#/[^/]*\.php$#', '', rtrim($env, '/')), '/');
-    return 'https://ommatophorous-robert-fortifyingly.ngrok-free.app';
+
+    // 6. fallback สุดท้าย: host ปัจจุบัน (ไม่ใช่ URL tunnel ที่ฝังตายตัว)
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        return $scheme . '://' . $_SERVER['HTTP_HOST'];
+    }
+    return '';
 }
 
 /* ============================================================

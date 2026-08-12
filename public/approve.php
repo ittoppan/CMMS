@@ -1,6 +1,18 @@
 <?php
+// start session ก่อนทุก output (สำหรับ CSRF token ในฟอร์ม)
+if (session_status() === PHP_SESSION_NONE) {
+    @session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
+    session_start();
+}
+
 require_once __DIR__ . '/../src/config/db.php';
 require_once __DIR__ . '/../src/services/ApprovalService.php';
+require_once __DIR__ . '/../src/csrf.php';
+
+// คำขอผ่านฟอร์ม POST ต้องผ่าน CSRF check (การอนุมัติ 1-Click ผ่าน GET token ยังใช้ได้ตามเดิม)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    enforceCsrf();
+}
 
 $token  = trim($_GET['token'] ?? $_POST['token'] ?? '');
 $action = trim($_GET['action'] ?? $_POST['action'] ?? '');
@@ -97,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_action'])) {
     <?php else: ?>
     <!-- Pending Approval Action Card -->
     <form method="POST" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+        <?= csrfField() ?>
         <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
         <div class="border-b border-slate-800 pb-3">

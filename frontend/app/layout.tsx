@@ -70,7 +70,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="th">
+    // suppressHydrationWarning: OpenWork/Electron shell ฉีด attribute
+    // (data-openwork-shell, className) เข้า <html> หลัง SSR — กัน warning ปลอม
+    <html lang="th" suppressHydrationWarning>
       <body>
         <style>{SPLASH_CSS}</style>
         <div id="cmms-splash" aria-hidden="true">

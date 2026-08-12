@@ -38,6 +38,21 @@ if ($appBarTitle === '') {
     <link rel="stylesheet" href="/css/daisy-compat.css?v=<?= time() ?>">
     <link rel="stylesheet" href="/css/app.css?v=<?= time() ?>">
     <link rel="stylesheet" href="/css/mobile-shell.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/ui-polish.css?v=<?= time() ?>">
+
+    <!-- Apply saved/system theme BEFORE first paint (กันหน้าจอกระพริบขาว-ดำ) -->
+    <script>
+        (function() {
+            try {
+                var t = localStorage.getItem('theme');
+                var dark = t ? t === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (dark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script>
         if ('serviceWorker' in navigator) {
@@ -74,6 +89,10 @@ if ($appBarTitle === '') {
                 <img src="<?= getImageUrl($brandLogo, 'asset') ?>" alt="TOPPAN" class="mobile-app-bar-logo">
                 <?php endif; ?>
                 <h1 class="mobile-app-bar-title"><?= htmlspecialchars($appBarTitle) ?></h1>
+                <button type="button" onclick="toggleDarkMode()" aria-label="สลับโหมดมืด/สว่าง" class="mobile-app-bar-btn mobile-app-bar-theme">
+                    <svg class="theme-icon theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </button>
                 <select onchange="location.href='?lang='+this.value;" class="mobile-app-bar-lang" aria-label="ภาษา">
                     <option value="th" <?= ($currentLang ?? 'th') === 'th' ? 'selected' : '' ?>>TH</option>
                     <option value="en" <?= ($currentLang ?? 'th') === 'en' ? 'selected' : '' ?>>EN</option>
@@ -115,6 +134,12 @@ if ($appBarTitle === '') {
                         </div>
                         <?php endif; ?>
                         
+                        <!-- Dark / Light Mode Toggle -->
+                        <button type="button" onclick="toggleDarkMode()" id="theme-toggle" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด/สว่าง" class="p-2 rounded-md text-secondary hover:text-primary hover:bg-muted transition-colors cursor-pointer">
+                            <svg class="theme-icon theme-icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                            <svg class="theme-icon theme-icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        </button>
+
                         <!-- Language Switcher -->
                         <select onchange="location.href='?lang='+this.value;" class="bg-muted border border-border text-primary text-xs rounded-md px-2 py-1 font-medium focus:outline-none cursor-pointer">
                             <option value="th" <?= ($currentLang ?? 'th') === 'th' ? 'selected' : '' ?>>🇹🇭 TH</option>
@@ -162,40 +187,21 @@ if ($appBarTitle === '') {
 
 
 
-<!-- Global Quick Search Overlay Modal -->
-<div id="quick-search-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-md shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-fadeIn">
-        <div class="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="quick-search-input" placeholder="พิมพ์ค้นหาโมดูล รหัสเครื่อง หรือเลขใบสั่งซ่อม..." class="w-full text-sm font-medium focus:outline-none bg-transparent text-slate-800 dark:text-slate-100" onkeyup="if(event.key==='Escape') closeQuickSearch();">
-            <button onclick="closeQuickSearch()" class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-sm text-slate-500 font-bold">ESC</button>
-        </div>
-        
-        <div class="p-3 bg-slate-50 dark:bg-slate-900/50 text-xs font-bold text-slate-400 uppercase tracking-wider">
-            เมนูลัดค้นหาเร็ว (Quick Navigation)
+<!-- Global Quick Search Overlay Modal (Cmd/Ctrl+K) -->
+<div id="quick-search-modal" class="fixed inset-0 z-50 bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="qs-panel bg-surface dark:bg-[#1f1f22] w-full max-w-lg rounded-2xl shadow-high border border-border dark:border-white/10 overflow-hidden">
+        <div class="p-3 border-b border-border dark:border-white/10 flex items-center gap-2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary, #64748b)" stroke-width="2" class="shrink-0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="quick-search-input" placeholder="ค้นหาเมนูหรือฟีเจอร์ (พิมพ์เพื่อกรองทันที)..." autocomplete="off" spellcheck="false" class="w-full text-sm font-medium focus:outline-none bg-transparent text-primary dark:text-slate-100 placeholder:text-disabled">
+            <span class="qs-kbd shrink-0">ESC</span>
         </div>
 
-        <div class="divide-y divide-slate-100 dark:divide-slate-700/50 max-h-64 overflow-y-auto text-xs">
-            <a href="/pages/repair/create.php" class="p-3 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">
-                <span class="flex items-center gap-2">🔧 <strong>สร้างใบแจ้งซ่อมด่วน (F-EN-03)</strong></span>
-                <span class="text-indigo-600 font-bold">เปิดหน้า →</span>
-            </a>
-            <a href="/pages/repair/kanban.php" class="p-3 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">
-                <span class="flex items-center gap-2">📊 <strong>กระดานติดตามงานซ่อม (Kanban Board)</strong></span>
-                <span class="text-indigo-600 font-bold">เปิดหน้า →</span>
-            </a>
-            <a href="/pages/asset_registry/" class="p-3 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">
-                <span class="flex items-center gap-2">🏭 <strong>ทะเบียนทรัพย์สิน / QR Code</strong></span>
-                <span class="text-indigo-600 font-bold">เปิดหน้า →</span>
-            </a>
-            <a href="/pages/pm_am/calendar.php" class="p-3 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">
-                <span class="flex items-center gap-2">📋 <strong>ปฏิทินงาน PM & AM</strong></span>
-                <span class="text-indigo-600 font-bold">เปิดหน้า →</span>
-            </a>
-            <a href="/pages/spare_parts/issue_center.php" class="p-3 flex items-center justify-between hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-medium">
-                <span class="flex items-center gap-2">📦 <strong>Spare Issue Center & Sage 300</strong></span>
-                <span class="text-indigo-600 font-bold">เปิดหน้า →</span>
-            </a>
+        <div id="quick-search-results" class="max-h-72 overflow-y-auto py-1.5"></div>
+
+        <div class="px-4 py-2 border-t border-border dark:border-white/10 text-[10px] text-disabled flex items-center gap-4 font-medium">
+            <span><kbd class="qs-kbd">↑↓</kbd> เลือก</span>
+            <span><kbd class="qs-kbd">↵</kbd> เปิด</span>
+            <span><kbd class="qs-kbd">ESC</kbd> ปิด</span>
         </div>
     </div>
 </div>

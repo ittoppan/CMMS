@@ -6,6 +6,7 @@
  */
 session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -16,9 +17,16 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+// --- CSRF: POST (start/stop tunnel) ต้องผ่านการตรวจ ---
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    enforceCsrf();
+}
+
+// Static URL อ่านจาก env (NGROK_STATIC_URL) — กัน URL ฝังตายตัว
+$STATIC_URL = getenv('NGROK_STATIC_URL') ?: 'https://ommatophorous-robert-fortifyingly.ngrok-free.app';
+
 const NGROK_EXE   = 'C:\ngrok\ngrok.exe';
 const TUNNEL_NAME = 'cmms-tpt';
-const STATIC_URL  = 'https://ommatophorous-robert-fortifyingly.ngrok-free.app';
 const API_PORT    = '4040';
 
 function is_ngrok_running(): bool {
@@ -67,11 +75,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $running = is_ngrok_running();
-    $url = $running ? (get_tunnel_url() ?: STATIC_URL) : null;
+    $url = $running ? (get_tunnel_url() ?: $STATIC_URL) : null;
     echo json_encode([
         'running'      => $running,
         'url'          => $url,
-        'static_url'   => STATIC_URL,
+        'static_url'   => $STATIC_URL,
         'tunnel_name'  => TUNNEL_NAME,
         'reachable'    => $url ? check_reachable($url) : null,
         'exe'          => is_file(NGROK_EXE) ? NGROK_EXE : null,
@@ -85,7 +93,7 @@ if ($method === 'POST') {
 
     if ($action === 'start') {
         if (is_ngrok_running()) {
-            echo json_encode(['success' => true, 'message' => 'ngrok กำลังรันอยู่แล้ว', 'url' => get_tunnel_url() ?: STATIC_URL]);
+            echo json_encode(['success' => true, 'message' => 'ngrok กำลังรันอยู่แล้ว', 'url' => get_tunnel_url() ?: $STATIC_URL]);
             exit;
         }
         if (!is_file(NGROK_EXE)) {
@@ -102,9 +110,9 @@ if ($method === 'POST') {
         $url = get_tunnel_url();
         echo json_encode([
             'success' => $running,
-            'url'     => $running ? ($url ?: STATIC_URL) : null,
-            'static_url' => STATIC_URL,
-            'message' => $running ? 'ngrok เปิดแล้ว: ' . ($url ?: STATIC_URL) : 'เริ่ม ngrok ไม่สำเร็จ (rc=' . $rc . ') ลองเปิดด้วยตัวเอง',
+            'url'     => $running ? ($url ?: $STATIC_URL) : null,
+            'static_url' => $STATIC_URL,
+            'message' => $running ? 'ngrok เปิดแล้ว: ' . ($url ?: $STATIC_URL) : 'เริ่ม ngrok ไม่สำเร็จ (rc=' . $rc . ') ลองเปิดด้วยตัวเอง',
         ]);
         exit;
     }

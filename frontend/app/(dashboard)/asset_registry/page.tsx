@@ -341,7 +341,7 @@ export default function AssetRegistryPage() {
         }
       />
 
-      <Card padding={0} style={{ overflow: 'hidden' }}>
+      <Card padding={0} style={{ overflowX: 'auto' }}>
         {paged.length === 0 ? (
           <EmptyState title="ไม่มีข้อมูล" description="ไม่พบเครื่องจักรในระบบ" icon={<Icon icon={WrenchScrewdriverIcon} size="lg" />} />
         ) : (

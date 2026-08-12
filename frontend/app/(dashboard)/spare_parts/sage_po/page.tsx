@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -40,7 +41,7 @@ export default function SagePOReceiptPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const [poNumber, setPoNumber] = useState("");
   const [items, setItems] = useState<POItem[]>([]);
@@ -130,8 +131,7 @@ export default function SagePOReceiptPage() {
         if (json.success) updated += 1;
       }
       if (updated > 0) {
-        setToast(`รับเข้าคลัง ${updated} รายการ ตาม PO ${poNumber} เรียบร้อยแล้ว`);
-        setTimeout(() => setToast(""), 4000);
+        showToast("success", `รับเข้าคลัง ${updated} รายการ ตาม PO ${poNumber} เรียบร้อยแล้ว`);
         setPoNumber("");
         setItems([]);
         fetchParts();
@@ -290,11 +290,6 @@ export default function SagePOReceiptPage() {
         )}
       </Card>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

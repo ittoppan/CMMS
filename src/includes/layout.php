@@ -1,5 +1,18 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    // Cookie hardening: HttpOnly + SameSite=Lax (ช่วยกัน CSRF + XSS ขโมย session)
+    @session_set_cookie_params([
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+// CSRF: ทุก POST จากหน้า PHP ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
+require_once __DIR__ . '/../csrf.php';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    enforceCsrf();
+}
 
 $envPath = __DIR__ . '/../../.env';
 if (file_exists($envPath)) {
@@ -81,9 +94,10 @@ function getImageUrl(?string $path, string $fallbackType = 'asset'): string {
  * Standard Format: EN-{YY}-{RUNNUMBER} (e.g. EN-26-095)
  */
 function formatWorkOrderNo($repairId, $createdAt = null, $existingWoNo = null): string {
+    // format เดียวกันกับ generateWorkOrderNo() ใน repair.php: EN-{YYMM}-{NNN}
     if (!empty($existingWoNo) && str_starts_with($existingWoNo, 'EN-')) {
         return $existingWoNo;
     }
-    $yr = date('y', strtotime($createdAt ?: 'now'));
-    return 'EN-' . $yr . '-' . str_pad((int)$repairId, 3, '0', STR_PAD_LEFT);
+    $yymm = date('ym', strtotime($createdAt ?: 'now'));
+    return 'EN-' . $yymm . '-' . str_pad((int)$repairId, 3, '0', STR_PAD_LEFT);
 }

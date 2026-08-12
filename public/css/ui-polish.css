@@ -1,0 +1,358 @@
+/* ============================================================
+   CMMS-TOPPAN — Global UX/UI Polish Layer
+   ------------------------------------------------------------
+   Loaded LAST in header.php (after mobile-shell.css) so these
+   rules refine / fix the whole app on every PHP page:
+
+   - Missing utility classes used by pages but absent from the
+     compiled app.css build (shadow-xs, rounded-container,
+     no-scrollbar, backdrop-blur-xs)
+   - Keyboard focus rings, text selection, page transition
+   - Component refinements (cards, tables, empty states, badges)
+   - Dark mode fixes for legacy hardcoded slate/white utilities
+   - Quick-Search modal, toasts, collapsible sidebar groups
+   - Print styles + reduced-motion accessibility
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   0. Missing utilities (referenced by pages, not in the build)
+   ------------------------------------------------------------ */
+.shadow-xs { box-shadow: 0 1px 2px rgb(0 0 0 / 0.05), 0 1px 3px rgb(0 0 0 / 0.04); }
+.rounded-container { border-radius: var(--radius-container, 12px); }
+.backdrop-blur-xs { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+
+/* Hide scrollbars but keep scrolling (dashboard tab rail etc.) */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Page fade-in (feels native, one rule for every page) */
+@keyframes cmmsPageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+.main-scroll main > .w-full,
+.main-scroll main > div:first-child {
+  animation: cmmsPageEnter 0.28s var(--ease-standard, ease) both;
+}
+
+/* ------------------------------------------------------------
+   1. Accessibility: keyboard focus + selection
+   ------------------------------------------------------------ */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent, #0064e0);
+  outline-offset: 2px;
+  border-radius: var(--radius-inner, 4px);
+}
+::selection {
+  background: color-mix(in srgb, var(--color-accent, #0064e0) 22%, transparent);
+  color: var(--color-text-primary, inherit);
+}
+
+/* ------------------------------------------------------------
+   2. Typography & density polish
+   ------------------------------------------------------------ */
+.page-title,
+.page-header h1 {
+  letter-spacing: -0.015em;
+}
+.page-desc { line-height: 1.6; }
+
+/* ------------------------------------------------------------
+   3. Component refinements
+   ------------------------------------------------------------ */
+
+/* Cards: gentle hover lift on interactive-looking cards */
+.card {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-med, 0 4px 16px rgb(0 0 0 / 0.08));
+}
+
+/* Tables: softer row hover + header contrast */
+.data-table thead th {
+  letter-spacing: 0.04em;
+}
+.data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Empty states: friendlier frame */
+.empty-state {
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: var(--radius-container, 12px);
+  margin: 8px;
+}
+.empty-state-title { font-size: 0.95rem; }
+.empty-state-desc { max-width: 340px; line-height: 1.55; }
+
+/* Filter bars: subtle focus-within accent */
+.filter-bar:focus-within {
+  border-color: color-mix(in srgb, var(--color-accent, #0064e0) 45%, var(--color-border, #e2e8f0));
+  box-shadow: 0 0 0 3px var(--color-accent-muted, rgb(0 100 224 / 0.12));
+}
+
+/* Badges: pill shape everywhere for consistency */
+.badge {
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* Buttons: consistent min tap target on touch */
+.btn { min-height: 38px; }
+.btn-sm { min-height: 32px; }
+
+/* Inline action links (ดู / แก้ไข / ลบ) — readable + tappable */
+.action-link { padding: 4px 8px; border-radius: 8px; }
+
+/* ------------------------------------------------------------
+   4. Dark mode fixes for legacy hardcoded utilities
+   ------------------------------------------------------------ */
+html.dark .bg-white,
+html.dark .bg-white\/70,
+html.dark .bg-white\/80 { background-color: var(--color-background-surface, #1f1f22) !important; }
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 { background-color: var(--color-background-muted, #111112) !important; }
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700 { color: var(--color-text-primary, #dfe2e5) !important; }
+html.dark .text-slate-600,
+html.dark .text-slate-500 { color: var(--color-text-secondary, #aaafb5) !important; }
+html.dark .text-slate-400 { color: var(--color-text-disabled, #6f747c) !important; }
+html.dark .border-slate-200,
+html.dark .border-slate-100 { border-color: var(--color-border, #f2f4f619) !important; }
+html.dark .divide-slate-200 > * + *,
+html.dark .divide-slate-100 > * + * { border-color: var(--color-border, #f2f4f619) !important; }
+html.dark .bg-slate-800,
+html.dark .bg-slate-900 { background-color: var(--color-background-body, #111112) !important; }
+
+/* ------------------------------------------------------------
+   5. Quick-Search modal (Cmd/Ctrl+K)
+   ------------------------------------------------------------ */
+#quick-search-modal { display: none; }
+#quick-search-modal.open {
+  display: flex;
+  animation: cmmsModalIn 0.16s ease both;
+}
+@keyframes cmmsModalIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.qs-panel {
+  animation: cmmsQSPop 0.18s var(--ease-standard, ease) both;
+}
+@keyframes cmmsQSPop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.qs-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--color-text-primary, #0f172a);
+  text-decoration: none;
+  transition: background-color 0.12s ease;
+}
+.qs-result:hover,
+.qs-result.active {
+  background-color: var(--color-accent-muted, rgb(0 100 224 / 0.12));
+}
+.qs-result .qs-arrow {
+  opacity: 0;
+  color: var(--color-accent, #0064e0);
+  font-weight: 700;
+  font-size: 11px;
+  transition: opacity 0.12s ease;
+}
+.qs-result:hover .qs-arrow,
+.qs-result.active .qs-arrow { opacity: 1; }
+.qs-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--color-text-disabled, #94a3b8);
+  font-size: 13px;
+}
+.qs-kbd {
+  font-family: var(--font-family-code, ui-monospace, monospace);
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 5px;
+  background: var(--color-background-muted, #f1f5f9);
+  color: var(--color-text-secondary, #475569);
+}
+
+/* ------------------------------------------------------------
+   6. Toasts
+   ------------------------------------------------------------ */
+#toast-container {
+  position: fixed;
+  right: 16px;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: min(360px, calc(100vw - 32px));
+}
+@media (min-width: 1024px) {
+  #toast-container { bottom: 16px; }
+}
+.cmms-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--color-background-popover, #fff);
+  color: var(--color-text-primary, #0f172a);
+  border: 1px solid var(--color-border, #e2e8f0);
+  box-shadow: var(--shadow-med, 0 8px 24px rgb(0 0 0 / 0.12));
+  font-size: 13px;
+  line-height: 1.45;
+  animation: cmmsToastIn 0.28s var(--ease-standard, ease) both;
+}
+@keyframes cmmsToastIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: none; }
+}
+.cmms-toast.leaving { animation: cmmsToastOut 0.22s ease both; }
+@keyframes cmmsToastOut {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(24px); }
+}
+.cmms-toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cmms-toast.success .cmms-toast-icon { background: var(--color-success-muted, rgb(13 134 38 / 0.15)); }
+.cmms-toast.error   .cmms-toast-icon { background: var(--color-error-muted, rgb(227 25 59 / 0.15)); }
+.cmms-toast.info    .cmms-toast-icon { background: var(--color-background-blue, rgb(1 113 227 / 0.2)); }
+.cmms-toast-title { font-weight: 700; font-size: 13px; margin-bottom: 1px; }
+.cmms-toast-msg   { font-size: 12px; color: var(--color-text-secondary, #475569); }
+.cmms-toast-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--color-text-disabled, #94a3b8);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 6px;
+  line-height: 1;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.cmms-toast-close:hover { color: var(--color-text-primary, #0f172a); background: var(--color-background-muted, #f1f5f9); }
+.cmms-toast-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 0 0 14px 14px;
+  background: var(--color-accent, #0064e0);
+  opacity: 0.7;
+}
+.cmms-toast { position: relative; overflow: hidden; }
+
+/* ------------------------------------------------------------
+   6.1 Theme toggle icon swap (moon ⇄ sun)
+   ------------------------------------------------------------ */
+.theme-icon-moon { display: block; }
+.theme-icon-sun  { display: none; }
+html.dark .theme-icon-moon { display: none; }
+html.dark .theme-icon-sun  { display: block; }
+.mobile-app-bar-theme { width: 40px; height: 40px; }
+
+/* ------------------------------------------------------------
+   7. Collapsible sidebar groups
+   ------------------------------------------------------------ */
+.menu-group-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-disabled, #94a3b8);
+  padding: 2px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.menu-group-toggle:hover { color: var(--color-text-primary, #0f172a); }
+.menu-group-toggle svg { transition: transform 0.2s ease; }
+.menu-group.collapsed .menu-group-toggle svg { transform: rotate(-90deg); }
+.menu-group.collapsed > ul { display: none; }
+
+/* ------------------------------------------------------------
+   8. Print styles — reports/forms print cleanly
+   ------------------------------------------------------------ */
+@media print {
+  aside#sidebar,
+  .desktop-topbar,
+  .mobile-app-bar,
+  .hp-mobile-bottom-nav,
+  .cmms-mobile-app-bar,
+  .cmms-mobile-bottom-nav,
+  #quick-search-modal,
+  #toast-container,
+  .btn-print { display: none !important; }
+
+  body { background: #fff !important; }
+  .flex.h-screen { display: block !important; height: auto !important; }
+  .main-scroll { overflow: visible !important; height: auto !important; }
+  .main-scroll main { padding: 0 !important; }
+  .card,
+  .table-wrap { box-shadow: none !important; border-color: #ddd !important; }
+  .data-table tbody tr { page-break-inside: avoid; }
+  a { text-decoration: none !important; color: #000 !important; }
+}
+
+/* ------------------------------------------------------------
+   9. Reduced motion — respect user preference
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .main-scroll main > .w-full,
+  .main-scroll main > div:first-child { animation: none; }
+}
+
+/* ------------------------------------------------------------
+   10. Mobile refinements
+   ------------------------------------------------------------ */
+@media (max-width: 767.98px) {
+  /* Action links & small buttons: easier to tap */
+  .action-link,
+  .btn-sm { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; }
+
+  /* Toast sits above the bottom nav */
+  #toast-container { bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+
+  /* Table cells breathe less on narrow screens */
+  .data-table th,
+  .data-table td { padding: 0.55rem 0.625rem; }
+}

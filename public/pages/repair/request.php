@@ -1,8 +1,17 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 
 $pdo = getDb();
+
+// LIFF App ID — อ่านจาก settings ก่อน (fallback ค่าเดิม)
+$liffId = '2007374280-MpkD0bN8';
+try {
+    $v = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_liff_id'")->fetchColumn();
+    if ($v) $liffId = trim($v);
+} catch (Exception $e) {}
+if ($liffId === '') $liffId = (string)(getenv('LINE_LIFF_ID') ?: '2007374280-MpkD0bN8');
 
 // Fetch assets for datalist
 $dbAssets = $pdo->query("SELECT id, code, name FROM asset_registry ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -17,6 +26,10 @@ try {
 // Handle Form Submission (AJAX POST or Standard POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json; charset=utf-8');
+
+    // ป้องกัน CSRF + จำกัดการยิงฟอร์มสาธารณะ (LINE LIFF)
+    enforceCsrf();
+
     try {
         $fullName     = trim($_POST['fullName'] ?? '');
         $department   = trim($_POST['department'] ?? '');
@@ -573,6 +586,7 @@ $defaultUserFullName = $_SESSION['user_name'] ?? '';
         <!-- Form Panel -->
         <div class="p-6 md:p-8 space-y-8">
             <form id="repairForm" class="space-y-8">
+                <?= csrfField() ?>
                 <input type="hidden" name="formType" value="EN" />
                 <input type="hidden" id="lineUserId" name="lineUserId">
                 <input type="hidden" id="lineDisplayName" name="lineDisplayName">
@@ -909,7 +923,7 @@ $defaultUserFullName = $_SESSION['user_name'] ?? '';
     </div>
 
     <script>
-        const liffId = '2007374280-MpkD0bN8';
+        const liffId = <?= json_encode($liffId) ?>;
         let uploadedFiles = [];
 
         function selectQuickMachine(code) {

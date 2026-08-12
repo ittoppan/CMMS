@@ -940,3 +940,261 @@ html, body {
     font-size: 16px !important;
   }
 }
+
+/* ================================================
+   Global UX Polish v3 (2026-08-12)
+   - Toast กลาง (ToastProvider)
+   - Skeleton loading (loading.tsx)
+   - Keyboard focus ring + text selection
+   - Print + reduced-motion
+   ================================================ */
+
+/* ---- Toast ---- */
+.cmms-toast-container {
+  position: fixed;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: min(360px, calc(100vw - 32px));
+}
+@media (min-width: 1024px) {
+  .cmms-toast-container { bottom: 16px; }
+}
+.cmms-toast {
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--cmms-bg-card, #fff);
+  color: var(--cmms-text-primary, #0f172a);
+  border: 1px solid var(--cmms-border, #e2e8f0);
+  box-shadow: var(--cmms-shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.08));
+  font-size: 13px;
+  line-height: 1.45;
+  animation: cmmsToastIn 0.28s var(--ease-standard, ease) both;
+}
+.cmms-toast.leaving { animation: cmmsToastOut 0.22s ease both; }
+@keyframes cmmsToastIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes cmmsToastOut {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(24px); }
+}
+.cmms-toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cmms-toast.success .cmms-toast-icon { background: var(--cmms-success-light, #d1fae5); }
+.cmms-toast.error   .cmms-toast-icon { background: var(--cmms-danger-light, #fee2e2); }
+.cmms-toast.info    .cmms-toast-icon { background: var(--cmms-primary-light, #dbeafe); }
+.cmms-toast-body { min-width: 0; flex: 1; }
+.cmms-toast-title { font-weight: 700; font-size: 13px; }
+.cmms-toast-msg { font-size: 12px; color: var(--cmms-text-secondary, #475569); margin-top: 1px; }
+.cmms-toast-close {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--cmms-text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 6px;
+  line-height: 1;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.cmms-toast-close:hover { color: var(--cmms-text-primary); background: var(--cmms-bg-muted); }
+.cmms-toast-timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--cmms-primary, #0D4785);
+  opacity: 0.65;
+  animation-name: cmmsToastTimer;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.cmms-toast.success .cmms-toast-timer { background: var(--cmms-success, #059669); }
+.cmms-toast.error .cmms-toast-timer { background: var(--cmms-danger, #dc2626); }
+@keyframes cmmsToastTimer {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ---- Skeleton ---- */
+.cmms-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--cmms-bg-muted, #f1f5f9);
+}
+.cmms-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: cmmsShimmer 1.4s infinite;
+}
+@keyframes cmmsShimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ---- Focus ring (keyboard a11y) ---- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--cmms-primary, #0D4785);
+  outline-offset: 2px;
+  border-radius: var(--cmms-radius-sm, 6px);
+}
+::selection {
+  background: var(--cmms-primary-glow, rgba(13, 71, 133, 0.22));
+}
+
+/* ---- Command Palette (Ctrl+K) ---- */
+.cmms-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 16px 16px;
+  background: rgba(15, 23, 42, 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: cmmsPaletteFade 0.15s ease both;
+}
+.cmms-palette-panel {
+  width: 100%;
+  max-width: 520px;
+  background: var(--cmms-bg-card, #fff);
+  border: 1px solid var(--cmms-border, #e2e8f0);
+  border-radius: 16px;
+  box-shadow: var(--cmms-shadow-xl, 0 20px 25px -5px rgb(0 0 0 / 0.2));
+  overflow: hidden;
+  animation: cmmsPalettePop 0.18s ease both;
+}
+@keyframes cmmsPaletteFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cmmsPalettePop {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.cmms-palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  color: var(--cmms-text-primary, #0f172a);
+  transition: background-color 0.12s ease;
+}
+.cmms-palette-item:hover,
+.cmms-palette-item.active {
+  background: var(--cmms-primary-light, #dbeafe);
+}
+.cmms-palette-arrow {
+  opacity: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cmms-primary, #0D4785);
+  flex-shrink: 0;
+  transition: opacity 0.12s ease;
+}
+.cmms-palette-item:hover .cmms-palette-arrow,
+.cmms-palette-item.active .cmms-palette-arrow { opacity: 1; }
+.cmms-palette-kbd {
+  font-family: var(--font-family-code, ui-monospace, monospace);
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 1px solid var(--cmms-border, #e2e8f0);
+  border-radius: 5px;
+  background: var(--cmms-bg-muted, #f1f5f9);
+  color: var(--cmms-text-muted, #64748b);
+  flex-shrink: 0;
+}
+
+/* ---- Page fade-in (loading skeleton ฯลฯ) ---- */
+.animate-fade-in { animation: cmmsPageEnter 0.3s var(--ease-standard, ease) both; }
+
+/* ---- Route transition (ทุกหน้า) ---- */
+[class*="LayoutContent"] > *:first-child {
+  animation: cmmsPageEnter 0.24s var(--ease-standard, ease) both;
+}
+@keyframes cmmsPageEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- Print ---- */
+@media print {
+  [class*="SideNav"],
+  [class*="TopNav"],
+  .cmms-mobile-app-bar,
+  .cmms-mobile-bottom-nav,
+  .cmms-toast-container {
+    display: none !important;
+  }
+  [class*="AppShell"] { display: block !important; height: auto !important; }
+  [class*="LayoutContent"] > *:first-child { animation: none; }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cmms-skeleton::after { animation: none; }
+  [class*="LayoutContent"] > *:first-child { animation: none; }
+}
+/* ================================================
+   Fix: next-route-announcer (ฉีดโดย Next.js สำหรับ screen reader)
+   style ปกติที่ซ่อน (clip/width/height/overflow) หายไปในบางรุ่น
+   ทำให้ตัวอักษร "N" ลอยโผล่ที่มุมล่างซ้าย — บังคับซ่อนแบบ sr-only
+   ================================================ */
+next-route-announcer {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  visibility: hidden !important;
+}

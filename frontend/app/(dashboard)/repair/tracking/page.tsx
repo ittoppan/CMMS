@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -79,7 +80,7 @@ export default function RepairTrackingPage() {
   const [selectedWo, setSelectedWo] = useState<TrackWO | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-  const [toastOpen, setToastOpen] = useState(false);
+  const { showToast } = useToast();
 
   const handleEvaluate = (wo: TrackWO) => {
     setSelectedWo(wo);
@@ -92,7 +93,7 @@ export default function RepairTrackingPage() {
     if (!selectedWo) return;
     setData(prev => prev.map(w => w.id === selectedWo.id ? { ...w, status: "completed" } : w));
     setEvalModalOpen(false);
-    setToastOpen(true);
+    showToast("success", "บันทึกการประเมินงานเรียบร้อยแล้ว");
   };
 
   const getStatusDisplay = (status: string) => {

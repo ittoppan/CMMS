@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -73,7 +74,7 @@ export default function AssetCriticalityPage() {
   const [selectedMachine, setSelectedMachine] = useState("");
   const [currentRank, setCurrentRank] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const [scores, setScores] = useState<Record<string, string>>({
     productionImpact: "3",
@@ -139,8 +140,7 @@ export default function AssetCriticalityPage() {
       const json = await res.json();
       if (json.success) {
         setCurrentRank(rank);
-        setToast(`บันทึกการจัดเกรดเครื่องจักรเป็นเกรด ${rank} เรียบร้อยแล้ว`);
-        setTimeout(() => setToast(""), 3500);
+        showToast("success", `บันทึกการจัดเกรดเครื่องจักรเป็นเกรด ${rank} เรียบร้อยแล้ว`);
         fetchAssets();
       } else {
         setError(json.error || "ไม่สามารถบันทึกได้");
@@ -276,11 +276,6 @@ export default function AssetCriticalityPage() {
         </VStack>
       </Grid>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

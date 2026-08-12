@@ -1,6 +1,12 @@
 <?php
+// Cookie hardening ก่อน start session
+@session_set_cookie_params([
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../src/csrf.php';
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: /');
@@ -12,6 +18,9 @@ if (file_exists($envPath)) loadEnv($envPath);
 
 $error = $_GET['error'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ป้องกัน login CSRF (session fixation / forced login)
+    enforceCsrf();
+
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -23,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password'])) {
+                // ป้องกัน session fixation: สร้าง session id ใหม่ทุกครั้งที่ login สำเร็จ
+                session_regenerate_id(true);
                 $_SESSION['user_id']   = (int)$user['id'];
                 $_SESSION['user_name'] = $user['full_name'];
                 $_SESSION['role_id']   = (int)$user['role_id'];
@@ -146,13 +157,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <form method="post">
+                        <?= csrfField() ?>
                         <div style="margin-bottom:1rem">
                             <label for="username" style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary,#64748b);margin-bottom:0.375rem">ชื่อผู้ใช้ (Username)</label>
                             <input type="text" name="username" id="username" class="w-full h-10 px-3 bg-muted border border-border rounded-md text-sm text-primary focus:outline-none focus:border-accent transition-colors placeholder:text-disabled" placeholder="กรอกชื่อผู้ใช้ (e.g. admin, tech01)" autocomplete="username" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
                         </div>
                         <div style="margin-bottom:1rem">
                             <label for="password" style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-secondary,#64748b);margin-bottom:0.375rem">รหัสผ่าน (Password)</label>
-                            <input type="password" name="password" id="password" class="w-full h-10 px-3 bg-muted border border-border rounded-md text-sm text-primary focus:outline-none focus:border-accent transition-colors placeholder:text-disabled" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" required>
+                            <div style="position:relative">
+                                <input type="password" name="password" id="password" class="w-full h-10 px-3 pr-10 bg-muted border border-border rounded-md text-sm text-primary focus:outline-none focus:border-accent transition-colors placeholder:text-disabled" placeholder="กรอกรหัสผ่าน" autocomplete="current-password" required>
+                                <button type="button" id="toggle-password" aria-label="แสดง/ซ่อนรหัสผ่าน" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--color-text-secondary,#64748b);cursor:pointer;border-radius:6px" onmouseover="this.style.background='var(--color-background-muted,#f1f5f9)'" onmouseout="this.style.background='transparent'">
+                                    <svg id="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <svg id="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="w-full h-10 bg-accent hover:bg-accent/90 text-white rounded-md flex items-center justify-center gap-2 font-semibold text-xs tracking-wider uppercase transition-colors shadow-xs" style="margin-top:0.5rem">
                             เข้าสู่ระบบ
@@ -183,6 +201,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('password').value = p;
         document.getElementById('username').focus();
     }
+    // แสดง/ซ่อนรหัสผ่าน
+    (function () {
+        var btn = document.getElementById('toggle-password');
+        var pw = document.getElementById('password');
+        if (!btn || !pw) return;
+        btn.addEventListener('click', function () {
+            var show = pw.type === 'password';
+            pw.type = show ? 'text' : 'password';
+            document.getElementById('eye-open').style.display = show ? 'none' : 'block';
+            document.getElementById('eye-closed').style.display = show ? 'block' : 'none';
+            pw.focus();
+        });
+    })();
     document.addEventListener('DOMContentLoaded', () => {
         const params = new URLSearchParams(window.location.search);
         const input = document.getElementById('username');

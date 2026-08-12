@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/NotificationService.php';
+require_once __DIR__ . '/../helpers/notification.php'; // publicBaseUrl()
 
 class ApprovalService {
 
@@ -37,7 +38,12 @@ class ApprovalService {
 
         $requestId = $pdo->lastInsertId();
 
-        $baseUrl = "http://192.168.1.9:8081";
+        // URL สาธารณะจาก settings/env — ไม่ฝัง IP เครื่อง dev
+        $baseUrl = rtrim((string)publicBaseUrl(), '/');
+        if ($baseUrl === '') {
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $baseUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+        }
         $approveUrl = "$baseUrl/approve.php?token=$token&action=approve";
         $rejectUrl  = "$baseUrl/approve.php?token=$token&action=reject";
 

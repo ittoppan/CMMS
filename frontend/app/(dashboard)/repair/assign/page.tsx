@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
@@ -87,7 +88,7 @@ export default function RepairAssignPage() {
   const [selectedWo, setSelectedWo] = useState<AssignWO | null>(null);
   const [selectedTech, setSelectedTech] = useState("");
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -198,8 +199,7 @@ export default function RepairAssignPage() {
       const json = await res.json();
       if (json.success) {
         setAssignOpen(false);
-        setToast(`จ่ายงาน ${selectedWo.woNumber} เรียบร้อยแล้ว`);
-        setTimeout(() => setToast(""), 3500);
+        showToast("success", `จ่ายงาน ${selectedWo.woNumber} เรียบร้อยแล้ว`);
         fetchData();
       } else {
         setError(json.error || "ไม่สามารถบันทึกการจ่ายงานได้");
@@ -411,11 +411,6 @@ export default function RepairAssignPage() {
         </HStack>
       </Dialog>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

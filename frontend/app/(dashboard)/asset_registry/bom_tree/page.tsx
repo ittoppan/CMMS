@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -100,7 +101,7 @@ export default function BOMTreePage() {
   // รายละเอียดชิ้นส่วน (แพนขวา)
   const [selectedPart, setSelectedPart] = useState<BomPart | null>(null);
 
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const loadBom = useCallback(async (assetId: number) => {
     setBomLoading(true);
@@ -230,8 +231,7 @@ export default function BOMTreePage() {
       const res = await fetch(`/api/v1/machine_bom.php?id=${confirmDelete.id}`, { method: "DELETE" });
       const json = await res.json();
       if (json.status === "success" || json.success) {
-        setToast(`ลบชิ้นส่วน ${confirmDelete.part_code || `#${confirmDelete.spare_part_id}`} ออกจาก BOM เรียบร้อยแล้ว`);
-        setTimeout(() => setToast(""), 3500);
+        showToast("success", `ลบชิ้นส่วน ${confirmDelete.part_code || `#${confirmDelete.spare_part_id}`} ออกจาก BOM เรียบร้อยแล้ว`);
         if (selectedAssetId != null) await loadBom(selectedAssetId);
         setConfirmDelete(null);
       } else {
@@ -610,11 +610,6 @@ export default function BOMTreePage() {
         </Dialog>
       )}
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

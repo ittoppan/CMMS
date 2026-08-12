@@ -57,6 +57,44 @@ This document outlines the current status of features and modules within the CMM
   - API `menu_permissions.php`: GET matrix returns `bottom_nav` + `bottom_nav_keys`; GET by role/user returns filtered bottom nav; POST upserts grants + bottom nav in one transaction (optional key = leave unchanged)
   - PWA: `useMenuPermission.ts` exposes `bottomNavKeys`; `layout.tsx` renders API keys first, always filtered by `canShow`; PHP `footer.php` uses the same catalog/resolver (shared config between PWA and PHP)
   - Settings UI (`/settings/menus`): per-role editor (add/remove/reorder) + live phone preview pane; warns when exceeding 5 buttons
+- [x] **Security Hardening (2026-08-12):**
+  - CSRF Protection ทั้งระบบ (`src/csrf.php`): token-based + Origin/Referer check — ครอบคลุมทุก API (POST/PUT/DELETE ผ่าน `requireLogin`), ทุกหน้า PHP ที่ POST (ผ่าน `layout.php`), และฟอร์มสำคัญ (login, approve, bind_line, request)
+  - Login hardening: `session_regenerate_id()` หลัง login สำเร็จ + session cookie HttpOnly/SameSite=Lax
+  - ลบ Telegram Bot Token ที่รั่วออกจาก `AGENTS.md` (ให้ revoke ที่ @BotFather + ลบประวัติ git)
+  - ลบ IP/URL dev ที่ฝังตายตัว (`192.168.1.9`, ngrok URL, `C:\cloudflared` path) — อ่านจาก env/settings แทน (`APP_URL`, `ALLOWED_ORIGINS`, `NGROK_STATIC_URL`, `CLOUDFLARE_LOG_PATH`)
+  - ป้องกันรายงานรั่ว: `export_excel.php` / `monthly_pdf.php` ต้อง login ก่อนเข้าถึง
+- [x] **Bug Fixes & Data Integrity (2026-08-12):**
+  - แก้ `$availabilityRate` undefined variable ใน dashboard (แสดงค่า Availability ได้จริง)
+  - รวมเลขใบงานเป็น format เดียว: `EN-{YYMM}-{NNN}` (เดิม 2 ระบบ `EN-26-095` vs `EN-2608-001`)
+  - ลบค่า fallback จำลองใน dashboard/รายงาน (12.5 ชม., ฿45,800, ฿150,000) — คำนวณจากข้อมูลจริง
+  - `NotificationService::sendEmail()` คืนค่า `$sent` จริง (เดิมคืน true เสมอ)
+  - `logNotification()` ย้ายไปตาราง `notification_logs` (ใหม่) ไม่ปน `sage_sync_log` + migration
+  - แก้ `settings/security.php` ยิง seed ข้อมูลซ้ำทุกครั้งที่เปิดหน้า (seed เฉพาะตารางว่าง)
+- [x] **Automated Backup Script (2026-08-12):**
+  - `scripts/backup.sh`: dump MySQL (mysqldump + gzip) + tar uploads + ลบ backup เก่าอัตโนมัติ (BACKUP_RETENTION_DAYS)
+- [x] **Auto-Restart & Watchdog (2026-08-12):**
+  - `scripts/ensure-next.ps1`: ตรวจว่า Next.js server (:3001) ตอบ 200 หรือไม่ — ถ้าไม่รัน สตาร์ท standalone server + รอ ready (idempotent, ใช้ได้กับ Scheduled Task)
+  - `scripts/watchdog.ps1` + Scheduled Task `CMMS-Watchdog` (รันทุก 1 นาที, SYSTEM): เช็ค :3001 → ลองซ้ำ → restart ผ่าน ensure-next → ยังไม่ขึ้นแจ้งเตือน LINE (ผ่าน `watchdog-notify.php`) + ตรวจ tunnel URL (tunnel-url.txt) restart tunnel ถ้าตาย
+  - `scripts/tunnel-quick.ps1` + Scheduled Task `CMMS-TunnelQuick` (onstart): restart trycloudflare tunnel -> localhost:3001 หลังรีบูต + บันทึก URL ใหม่ลง logs/tunnel-url.txt
+  - `scripts/setup-tunnel.ps1`: ตั้งค่า Cloudflare named tunnel ถาวร (login → create tunnel → config.yml → service) — ต้องมี domain ใน Cloudflare เอง
+  - สคริปต์ทั้งหมด encode UTF-8 with BOM (PowerShell 5.1 อ่านภาษาไทยถูกต้อง)
+- [x] **Report Export Improvements (2026-08-12):**
+  - `export_excel.php`: รองรับ type=repair|spare_parts|assets + กรองช่วงวันที่ + คำนวณข้อมูลจริง
+  - `monthly_pdf.php`: ป้องกันการเข้าถึงโดยไม่ login + ไม่มีค่า fake
+- [x] **Global UX/UI Polish (2026-08-12):**
+  - Quick Search (Ctrl/Cmd+K) ใช้งานได้จริง: กรองเมนู sidebar แบบสด + คีย์บอร์ด (↑↓/↵/ESC) + ไฮไลต์ผลแรก — ดัชนีสร้างจาก sidebar จริง
+  - Dark/Light Mode toggle ใน topbar (desktop + mobile app bar) + เคารพค่า system preference + script ป้องกัน FOUC ใน `<head>`
+  - Sidebar กลุ่มเมนูยุบ-ขยายได้ (accordion) จำสถานะใน localStorage + ครั้งแรกยุบอัตโนมัติยกเว้นกลุ่มที่เปิดอยู่
+  - Toast ใหม่: slide-in + icon + title + progress bar + ปิดเองได้ (แทน `animate-bounce` เดิม)
+  - `public/css/ui-polish.css` (ใหม่): focus-visible ring, selection, page fade-in, card hover, empty state, dark-mode fix สำหรับ utility เก่า (slate/white), print styles, reduced-motion, mobile tap target
+  - เติม utility ที่ใช้แต่หายจาก build: `shadow-xs`, `rounded-container`, `no-scrollbar`, `backdrop-blur-xs`
+  - Login page: ปุ่มแสดง/ซ่อนรหัสผ่าน
+- [x] **PWA Frontend UX/UI Polish (2026-08-12):**
+  - Global boundaries ใน `(dashboard)`: `loading.tsx` (skeleton ทุก navigation), `error.tsx` (error boundary + retry + Error ID), `not-found.tsx`
+  - ระบบ Toast กลาง `components/ToastProvider.tsx` + `useToast()` — migrate 12 หน้าที่ copy-paste toast ซ้ำซ้อน (repair/assign, repair/tracking, inspections ×3, pm_am/checksheet, pm_am/batch_schedule, asset_registry/bom_tree, asset_registry/criticality, spare_parts/issue_center, spare_parts/sage_po, safety/work_permit) — ลบ state + setTimeout + div ฝัง style ออกทั้งหมด
+  - Command Palette (Ctrl/Cmd+K) `components/CommandPalette.tsx` — ค้นหาเมนูแบบสด จัดลำดับตามสิทธิ์ (ใช้ SideNav + bottom nav) + คีย์บอร์ด ↑↓/↵/ESC
+  - `globals.css`: toast styles, skeleton shimmer, focus-visible ring, selection, route transition, print, reduced-motion, palette styles
+  - ทดสอบจริงบน production build (`next build` + `next start`): toast 3 แบบ + auto-dismiss, palette เปิด/กรอง/คีย์บอร์ด/ปิด ผ่านทั้งหมด
 
 ## [ ] Pending/Incomplete Features & Modules
 

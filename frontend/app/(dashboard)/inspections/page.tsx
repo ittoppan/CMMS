@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -40,7 +41,7 @@ export default function InspectionsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -75,7 +76,7 @@ export default function InspectionsPage() {
 
   useEffect(() => { fetchAll(); }, [statusFilter]);
 
-  const flash = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3500); };
+  const flash = (msg: string) => { showToast("info", msg); };
 
   const createSchedule = async () => {
     if (!cf.template_id || !cf.asset_id) { setError("กรุณาเลือก Template และเครื่องจักร"); return; }
@@ -238,11 +239,6 @@ export default function InspectionsPage() {
         </VStack>
       </Card>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -43,7 +44,7 @@ export default function SageIssueCenterPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState("");
+  const { showToast } = useToast();
 
   const [workOrder, setWorkOrder] = useState("");
   const [technician, setTechnician] = useState("");
@@ -160,8 +161,7 @@ export default function SageIssueCenterPage() {
         if (json.success) issued += 1;
       }
       if (issued > 0) {
-        setToast(`เบิก-จ่ายอะไหล่ ${issued} รายการ เรียบร้อยแล้ว (WO: ${workOrders.find((w) => w.value === workOrder)?.label.split(" • ")[0]})`);
-        setTimeout(() => setToast(""), 4000);
+        showToast("success", `เบิก-จ่ายอะไหล่ ${issued} รายการ เรียบร้อยแล้ว (WO: ${workOrders.find((w) => w.value === workOrder)?.label.split(" • ")[0]})`);
         setCart([]);
         fetchData();
       } else {
@@ -348,11 +348,6 @@ export default function SageIssueCenterPage() {
         </VStack>
       </Grid>
 
-      {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "var(--cmms-success)", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-          {toast}
-        </div>
-      )}
     </VStack>
   );
 }

@@ -4,6 +4,12 @@ header('Content-Type: application/json; charset=utf-8');
 session_start();
 if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
+// CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
+require_once __DIR__ . '/../../../src/csrf.php';
+if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
+    enforceCsrf();
+}
+
 try {
     $pdo = getDb();
     $method = $_SERVER['REQUEST_METHOD'];

@@ -164,7 +164,7 @@ function getServiceStatuses(PDO $pdo): array {
             ? "กำลังรัน • {$ngrokUrl}" . ($ngrokPid ? " • PID $ngrokPid" : '')
             : ($ngrokPid ? 'process รันอยู่แต่ยังไม่มี tunnel' : 'หยุดอยู่ — ระบบจะใช้ URL นี้ไม่ได้'),
         'pid' => $ngrokPid,
-        'url' => $ngrokUrl ?: 'https://ommatophorous-robert-fortifyingly.ngrok-free.app',
+        'url' => $ngrokUrl ?: (getenv('NGROK_STATIC_URL') ?: ''),
     ];
 
     $cfHttp = $cfUrl ? httpCheck($cfUrl, 6) : ['reachable' => false, 'http_code' => 0];

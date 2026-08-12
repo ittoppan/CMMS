@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../helpers/notification.php'; // publicBaseUrl()
 
 class NotificationService {
     
@@ -52,8 +53,8 @@ class NotificationService {
         $headers .= "From: CMMS-TOPPAN Notification <noreply@toppan.co.th>" . "\r\n";
 
         $sent = @mail($toEmail, $subject, $htmlBody, $headers);
-        self::logNotification('EMAIL', $sent ? 'SENT' : 'SIMULATED', "To: $toEmail | Subject: $subject");
-        return true;
+        self::logNotification('EMAIL', $sent ? 'SENT' : 'FAILED', "To: $toEmail | Subject: $subject");
+        return $sent; // คืนค่าจริง อย่าปิดบังความล้มเหลว
     }
 
     /**
@@ -66,6 +67,9 @@ class NotificationService {
         $reporter = $woData['reporter_name'] ?? 'ผู้แจ้งซ่อม';
         $problem  = $woData['problem'] ?? 'เครื่องจักรหยุดทำงานด่วน!';
 
+        $base = rtrim((string)publicBaseUrl(), '/');
+        $repairUrl = $base !== '' ? $base . '/pages/repair/' : '/pages/repair/';
+
         // 1. LINE Alert Message
         $lineMsg = "\n🚨 [แจ้งซ่อมเครื่องจักรหยุดทำงาน BREAK DOWN]\n"
                  . "----------------------------------\n"
@@ -75,7 +79,7 @@ class NotificationService {
                  . "อาการเสีย: $problem\n"
                  . "สถานะ: 🔴 หยุดทำงาน (ความสำคัญสูงสุด)\n"
                  . "----------------------------------\n"
-                 . "📲 รับงานซ่อม: http://192.168.1.9:8081/pages/repair/";
+                 . "📲 รับงานซ่อม: $repairUrl";
 
         self::sendLineMessage($lineMsg);
 
@@ -90,7 +94,7 @@ class NotificationService {
                 <p><strong>ผู้แจ้งซ่อม:</strong> $reporter</p>
                 <p><strong>รายละเอียดปัญหา:</strong> $problem</p>
                 <br>
-                <a href='http://192.168.1.9:8081/pages/repair/' style='background-color: #be123c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;'>กดดูรายละเอียดและรับงานซ่อม →</a>
+                <a href='$repairUrl' style='background-color: #be123c; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;'>กดดูรายละเอียดและรับงานซ่อม →</a>
             </div>
         ";
 
@@ -101,13 +105,16 @@ class NotificationService {
      * Trigger ⚠️ Overdue PM Notification
      */
     public static function notifyPMOverdue(string $assetCode, string $title, string $dueDate, int $daysOverdue): void {
+        $base = rtrim((string)publicBaseUrl(), '/');
+        $pmUrl = $base !== '' ? $base . '/pages/pm_am/' : '/pages/pm_am/';
+
         $lineMsg = "\n⚠️ [แจ้งเตือนแผน PM เกินกำหนดชำระ Overdue]\n"
                  . "----------------------------------\n"
                  . "เครื่องจักร: $assetCode\n"
                  . "รายการ: $title\n"
                  . "กำหนดชำระ: $dueDate (เกินมา $daysOverdue วัน)\n"
                  . "----------------------------------\n"
-                 . "📋 ดำเนินการ PM: http://192.168.1.9:8081/pages/pm_am/";
+                 . "📋 ดำเนินการ PM: $pmUrl";
 
         self::sendLineMessage($lineMsg);
     }
@@ -116,27 +123,30 @@ class NotificationService {
      * Trigger 📦 Low Stock Reorder Notification
      */
     public static function notifyLowStock(string $itemCode, string $itemName, float $qty, float $minStock): void {
+        $base = rtrim((string)publicBaseUrl(), '/');
+        $spUrl = $base !== '' ? $base . '/pages/spare_parts/' : '/pages/spare_parts/';
+
         $lineMsg = "\n📦 [แจ้งเตือนสต็อกอะไหล่ต่ำกว่าจุดสั่งซื้อ Reorder Point]\n"
                  . "----------------------------------\n"
                  . "รหัสอะไหล่: $itemCode\n"
                  . "ชื่ออะไหล่: $itemName\n"
                  . "คงเหลือ: $qty (จุดขั้นต่ำ: $minStock)\n"
                  . "----------------------------------\n"
-                 . "🛒 สั่งซื้อเบิกจ่าย: http://192.168.1.9:8081/pages/spare_parts/";
+                 . "🛒 สั่งซื้อเบิกจ่าย: $spUrl";
 
         self::sendLineMessage($lineMsg);
     }
 
     /**
-     * Internal Notification Logger
+     * Internal Notification Logger — เขียนตาราง notification_logs (ไม่ปนกับ sage_sync_log)
      */
     private static function logNotification(string $type, string $status, string $content, ?string $rawResp = null): void {
         try {
             $pdo = getDb();
             $pdo->prepare("
-                INSERT INTO sage_sync_log (sync_type, status, item_code, error_message, created_at)
-                VALUES (?, ?, 'NOTIFY', ?, NOW())
-            ")->execute([$type, $status, mb_substr($content, 0, 255)]);
+                INSERT INTO notification_logs (channel, status, content, raw_response, created_at)
+                VALUES (?, ?, ?, ?, NOW())
+            ")->execute([$type, $status, mb_substr($content, 0, 500), $rawResp ? mb_substr($rawResp, 0, 2000) : null]);
         } catch (Exception $e) {}
     }
 }

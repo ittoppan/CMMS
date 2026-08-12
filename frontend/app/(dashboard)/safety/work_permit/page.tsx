@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -57,7 +58,7 @@ export default function WorkPermitPage() {
   const [permits, setPermits] = useState<PermitItem[]>(mockPermits);
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetch("/api/v1/index.php?resource=work-permits")
@@ -221,14 +222,13 @@ export default function WorkPermitPage() {
             isDisabled={submitting} 
             onClick={() => {
               setSubmitting(true);
-              setTimeout(() => { setSubmitting(false); setModalOpen(false); setToastOpen(true); }, 1200);
+              setTimeout(() => { setSubmitting(false); setModalOpen(false); showToast("success", "ส่งขออนุมัติใบอนุญาตทำงานเรียบร้อยแล้ว"); }, 1200);
             }} 
             icon={<Icon icon={DocumentCheckIcon} size="sm" />}
           />
         </HStack>
       </Dialog>
 
-      {toastOpen && <div style={{ position: "fixed", bottom: 24, right: 24, padding: "12px 20px", backgroundColor: "#10B981", color: "#fff", borderRadius: 8, zIndex: 9999, fontWeight: 600, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>บันทึกข้อมูลเรียบร้อยแล้ว!</div>}
     </VStack>
   );
 }
