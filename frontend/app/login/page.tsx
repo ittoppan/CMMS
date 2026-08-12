@@ -91,7 +91,7 @@ export default function LoginPage() {
         style={{
           position: "relative",
           padding: 48,
-          background: "linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #1E40AF 100%)",
+          background: "linear-gradient(135deg, #0E1524 0%, #312E81 55%, #6D28D9 100%)",
         }}
       >
         {/* Floating shapes */}

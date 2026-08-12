@@ -331,7 +331,7 @@ export default function MenuPermissionsPage() {
                             <div key={r.id} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 4 }}>
                               <input
                                 type="checkbox"
-                                style={{ width: 18, height: 18, cursor: "pointer", accentColor: "var(--cmms-primary, #0D4785)", borderRadius: 4 }}
+                                style={{ width: 18, height: 18, cursor: "pointer", accentColor: "var(--cmms-primary, #4F46E5)", borderRadius: 4 }}
                                 checked={(perms[r.id]?.[m.key] ?? 1) === 1}
                                 onChange={() => toggle(r.id, m.key)}
                                 aria-label={`${r.name}: ${m.label}`}

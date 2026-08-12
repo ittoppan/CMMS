@@ -38,12 +38,39 @@ body {
 }
 
 :root {
+  /* === Theme A: Indigo & Violet (Premium) ===
+     โทนม่วงครามพรีเมียม — accent indigo #4F46E5
+     gradient ฟ้า→ม่วง sidebar เข้มทึบ เหมาะ enterprise */
+  --color-accent: #4F46E5;
+  --color-accent-muted: rgba(79, 70, 229, 0.12);
+  --color-on-accent: #FFFFFF;
+  --color-text-accent: #4338CA;
+  --color-icon-accent: #4F46E5;
+  --color-background-blue: rgba(79, 70, 229, 0.10);
+  --color-border-blue: #4F46E5;
+  --color-icon-blue: #4F46E5;
+  --color-text-blue: #3730A3;
+  --color-background-body: #F5F6FB;
+  --color-background-surface: #FFFFFF;
+  --color-background-card: #FFFFFF;
+  --color-background-muted: #EEF0F8;
+  --color-background-popover: #FFFFFF;
+  --color-text-primary: #0E1524;
+  --color-text-secondary: #475569;
+  --color-text-disabled: #9AA4B8;
+  --color-border: #E3E7F0;
+  --color-border-emphasized: #C7CDE0;
+  --color-neutral: rgba(79, 70, 229, 0.08);
+  --color-shadow: rgba(30, 27, 75, 0.08);
+  --color-skeleton: #E3E7F0;
+  --color-track: #E3E7F0;
+
   /* === Brand Colors (Astryx Theme Tokens) ===
      ค่าทั้งหมดอ้างอิง astryx theme (--color-*) เพื่อให้
      ทั้งระบบตามธีม astryx — เปลี่ยน theme ทีหลัง แค่สลับ
      ไฟล์ theme แล้วทุกหน้าจะเปลี่ยนสีตามอัตโนมัติ */
   --cmms-primary: var(--color-accent);
-  --cmms-primary-hover: var(--color-accent);
+  --cmms-primary-hover: #4338CA;
   --cmms-primary-light: var(--color-background-blue);
   --cmms-primary-glow: var(--color-accent-muted);
 
@@ -60,9 +87,9 @@ body {
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);
   --cmms-bg-card-hover: var(--color-background-muted);
-  --cmms-bg-sidebar: #0F172A;
-  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --cmms-bg-sidebar-active: var(--color-accent-muted);
+  --cmms-bg-sidebar: #0E1524;
+  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --cmms-bg-sidebar-active: linear-gradient(135deg, #4F46E5, #7C3AED);
   --cmms-bg-topnav: var(--color-background-surface);
   --cmms-bg-muted: var(--color-background-muted);
   --cmms-bg-wash: var(--color-background-muted);
@@ -101,7 +128,7 @@ body {
   --cmms-transition-slow: 300ms ease;
 
   /* === Gradients === */
-  --cmms-gradient-primary: linear-gradient(135deg, #2563EB, #7C3AED);
+  --cmms-gradient-primary: linear-gradient(135deg, #4F46E5, #8B5CF6);
   --cmms-gradient-success: linear-gradient(135deg, #059669, #10B981);
   --cmms-gradient-warning: linear-gradient(135deg, #D97706, #F59E0B);
   --cmms-gradient-danger: linear-gradient(135deg, #DC2626, #EF4444);
@@ -145,29 +172,29 @@ html, body {
 /* ================================================
    Astryx Card Overrides
    ================================================ */
-[data-astryx-card], [class*="Card_card"] {
+[data-astryx-card], [class*="Card_card"], .astryx-card {
   border-radius: var(--cmms-radius-lg) !important;
   box-shadow: var(--cmms-shadow) !important;
   border: 1px solid var(--cmms-border) !important;
   transition: box-shadow var(--cmms-transition), transform var(--cmms-transition) !important;
 }
-[data-astryx-card]:hover, [class*="Card_card"]:hover {
+[data-astryx-card]:hover, [class*="Card_card"]:hover, .astryx-card:hover {
   box-shadow: var(--cmms-shadow-md) !important;
 }
 
 /* ================================================
    Astryx Button Overrides
    ================================================ */
-button[class*="Button_primary"], [class*="Button_button"][class*="primary"] {
+button[class*="Button_primary"], [class*="Button_button"][class*="primary"], .astryx-button.primary {
   border-radius: var(--cmms-radius) !important;
   font-weight: 600 !important;
   transition: all var(--cmms-transition) !important;
 }
-button[class*="Button_primary"]:hover {
+button[class*="Button_primary"]:hover, .astryx-button.primary:hover {
   transform: translateY(-1px);
   box-shadow: var(--cmms-shadow-md) !important;
 }
-button[class*="Button_secondary"] {
+button[class*="Button_secondary"], .astryx-button.secondary {
   border-radius: var(--cmms-radius) !important;
   transition: all var(--cmms-transition) !important;
 }
@@ -175,11 +202,13 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx Input Overrides
    ================================================ */
-[class*="TextInput_input"], [class*="Selector_trigger"], [class*="TextArea_textarea"] {
+[class*="TextInput_input"], [class*="Selector_trigger"], [class*="TextArea_textarea"],
+.astryx-text-input input, .astryx-selector [class*="trigger"], .astryx-text-area textarea {
   border-radius: var(--cmms-radius-sm) !important;
   transition: border-color var(--cmms-transition), box-shadow var(--cmms-transition) !important;
 }
-[class*="TextInput_input"]:focus, [class*="TextArea_textarea"]:focus {
+[class*="TextInput_input"]:focus, [class*="TextArea_textarea"]:focus,
+.astryx-text-input input:focus, .astryx-text-area textarea:focus {
   border-color: var(--cmms-border-focus) !important;
   box-shadow: var(--cmms-shadow-focus) !important;
 }
@@ -187,14 +216,14 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx Table Overrides
    ================================================ */
-[class*="Table_table"] {
+[class*="Table_table"], .astryx-base-table {
   border-radius: var(--cmms-radius-lg) !important;
   overflow: hidden;
 }
-[class*="TableRow_row"]:nth-child(even) { background: var(--cmms-bg-muted); }
-[class*="TableRow_row"] { transition: background var(--cmms-transition-fast) !important; }
-[class*="TableRow_row"]:hover { background: var(--cmms-primary-light) !important; }
-[class*="TableHeader"] {
+[class*="TableRow_row"]:nth-child(even), .astryx-base-table tbody tr:nth-child(even) { background: var(--cmms-bg-muted); }
+[class*="TableRow_row"], .astryx-base-table tbody tr { transition: background var(--cmms-transition-fast) !important; }
+[class*="TableRow_row"]:hover, .astryx-base-table tbody tr:hover { background: var(--cmms-primary-light) !important; }
+[class*="TableHeader"], .astryx-table-header-cell {
   font-weight: 600 !important;
   text-transform: uppercase !important;
   font-size: 0.7rem !important;
@@ -205,7 +234,7 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx Badge Overrides
    ================================================ */
-[class*="Badge_badge"] {
+[class*="Badge_badge"], .astryx-badge {
   border-radius: 100px !important;
   font-weight: 600 !important;
   font-size: 0.7rem !important;
@@ -215,7 +244,7 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx Toolbar Overrides
    ================================================ */
-[class*="Toolbar_toolbar"] {
+[class*="Toolbar_toolbar"], .astryx-toolbar {
   border-radius: var(--cmms-radius-lg) !important;
   background: var(--cmms-bg-card) !important;
   box-shadow: var(--cmms-shadow-sm) !important;
@@ -225,7 +254,7 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx Dialog Overrides
    ================================================ */
-[class*="Dialog_dialog"], [class*="Dialog_content"] {
+[class*="Dialog_dialog"], [class*="Dialog_content"], [role="dialog"] {
   border-radius: var(--cmms-radius-xl) !important;
   box-shadow: var(--cmms-shadow-xl) !important;
 }
@@ -233,30 +262,40 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx SideNav Overrides
    ================================================ */
-[class*="SideNav_sideNav"] { background: var(--cmms-bg-sidebar) !important; }
-[class*="SideNavItem_item"] {
+[class*="SideNav_sideNav"], .astryx-side-nav,
+[class*="LayoutPanel_panel"], .astryx-layout-panel {
+  background: var(--cmms-bg-sidebar) !important;
+}
+[class*="SideNavItem_item"], .astryx-side-nav-item {
   border-radius: var(--cmms-radius) !important;
   margin: 1px 8px !important;
   transition: all var(--cmms-transition) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
 }
-[class*="SideNavItem_item"]:hover { background: var(--cmms-bg-sidebar-hover) !important; }
+[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover { color: #FFFFFF !important; }
 [class*="SideNavItem_item"][data-selected="true"],
-[class*="SideNavItem_item"][class*="selected"] {
-  background: var(--cmms-bg-sidebar-active) !important;
-}
-[class*="SideNavSection_title"], [class*="SideNavSection_header"] {
+[class*="SideNavItem_item"][class*="selected"],
+.astryx-side-nav-item.selected { color: #FFFFFF !important; }
+[class*="SideNav_sideNav"] :is(a, span, [class*="SideNavItem_label"], [class*="SideNavItem_icon"], [class*="Badge_badge"]),
+.astryx-side-nav :is(a, span, svg) { color: inherit; }
+[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover { background: var(--cmms-bg-sidebar-hover) !important; }
+[class*="SideNavItem_item"][data-selected="true"],
+[class*="SideNavItem_item"][class*="selected"],
+.astryx-side-nav-item.selected { background: var(--cmms-bg-sidebar-active) !important; }
+[class*="SideNavSection_title"], [class*="SideNavSection_header"], .astryx-side-nav-heading {
   text-transform: uppercase !important;
   font-size: 0.65rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.08em !important;
   opacity: 0.5 !important;
   padding: 0 12px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* ================================================
    Astryx TopNav Overrides
    ================================================ */
-[class*="TopNav_topNav"] {
+[class*="TopNav_topNav"], .astryx-top-nav {
   background: var(--cmms-bg-topnav) !important;
   border-bottom: 1px solid var(--cmms-border) !important;
   box-shadow: var(--cmms-shadow-sm) !important;
@@ -265,8 +304,8 @@ button[class*="Button_secondary"] {
 /* ================================================
    Astryx ProgressBar Overrides
    ================================================ */
-[class*="ProgressBar_track"] { border-radius: 100px !important; height: 6px !important; }
-[class*="ProgressBar_bar"] { border-radius: 100px !important; }
+[class*="ProgressBar_track"], [class*="progress" i] [class*="track"] { border-radius: 100px !important; height: 6px !important; }
+[class*="ProgressBar_bar"], [class*="progress" i] [class*="bar"] { border-radius: 100px !important; }
 
 /* ================================================
    Headings
