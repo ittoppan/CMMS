@@ -90,6 +90,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/spare_parts/sage_po": "รับอะไหล่จาก PO",
   "/spare_parts/optimization": "AI EOQ & Dead Stock",
   "/analytics": "Data Warehouse & BI",
+  "/analytics/kpi": "KPI ผู้บริหาร (Executive Dashboard)",
   "/reports/monthly_pdf": "รายงาน PDF",
   "/reports/export_excel": "Export Excel",
   "/safety/work_permit": "ใบอนุญาต LOTO",
@@ -413,6 +414,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* 5. วิเคราะห์ & รายงาน */}
           <SideNavSection title="วิเคราะห์ & รายงาน">
+            {canShow("analytics") && <SideNavItem label="KPI ผู้บริหาร" icon={ChartBarIcon} href="/analytics/kpi" isSelected={isSelected("/analytics/kpi")} />}
             {canShow("analytics") && <SideNavItem label="คลังข้อมูลและ BI" icon={ChartBarIcon} href="/analytics" isSelected={isSelected("/analytics")} />}
             {canShow("reports") && <SideNavItem label="ศูนย์รวมรายงาน" icon={ChartBarIcon} href="/reports" isSelected={isSelected("/reports")} />}
             {canShow("reports/monthly_pdf") && <SideNavItem label="รายงาน PDF ผู้บริหาร" icon={DocumentArrowDownIcon} href="/reports/monthly_pdf" isSelected={isSelected("/reports/monthly_pdf")} />}
