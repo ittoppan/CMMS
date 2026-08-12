@@ -1,5 +1,8 @@
 # deploy-next.ps1 - Build Next.js PWA, stage standalone output, restart node server, verify.
-# Usage: powershell -ExecutionPolicy Bypass -File deploy-next.ps1 [-SkipBuild] [-Port 3001]
+# Usage: powershell -ExecutionPolicy Bypass -File deploy-next.ps1 [-SkipBuild] [-Prebuilt <dir>] [-Port 3001]
+#   -Prebuilt <dir> : fast-deploy — reuse a prebuilt .next (e.g. from the worktree) instead of
+#                     running `npm run build` on the production box. Cuts the server-down window
+#                     from minutes to seconds. The dir must contain .next\standalone\server.js.
 # Deploys to http://<host>:3001 — the production Next.js server.
 #
 # Why manual staging is required:
@@ -13,7 +16,8 @@
 
 param(
     [int]$Port = 3001,
-    [switch]$SkipBuild
+    [switch]$SkipBuild,
+    [string]$Prebuilt = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -75,13 +79,20 @@ Stop-NextServer
 if (-not $SkipBuild) {
     # 2. clean + build
     Remove-Item -Recurse -Force -LiteralPath (Join-Path $frontend ".next") -ErrorAction SilentlyContinue
-    Write-Host "Building (npm run build)..."
-    Push-Location $frontend
-    try {
-        npm run build
-        if ($LASTEXITCODE -ne 0) { throw "npm run build failed (exit $LASTEXITCODE)" }
-    } finally {
-        Pop-Location
+    $prebuiltServer = Join-Path $Prebuilt ".next\standalone\server.js"
+    if ($Prebuilt -and (Test-Path -LiteralPath $prebuiltServer)) {
+        # fast-deploy: copy the prebuilt bundle (already built in the worktree)
+        Write-Host "Reusing prebuilt .next from $Prebuilt (fast deploy)..."
+        Copy-Item -Recurse -Force -LiteralPath (Join-Path $Prebuilt ".next") -Destination (Join-Path $frontend ".next")
+    } else {
+        Write-Host "Building (npm run build)..."
+        Push-Location $frontend
+        try {
+            npm run build
+            if ($LASTEXITCODE -ne 0) { throw "npm run build failed (exit $LASTEXITCODE)" }
+        } finally {
+            Pop-Location
+        }
     }
 }
 
