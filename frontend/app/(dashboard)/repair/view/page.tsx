@@ -6,11 +6,12 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import {
-  CheckCircleIcon,
   PrinterIcon,
   ArrowLeftIcon,
   DocumentArrowDownIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -42,7 +43,9 @@ export default function RepairViewDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [parts, setParts] = useState<WorkOrderPart[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const pdfRef = useRef<any>(null);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -144,12 +147,30 @@ export default function RepairViewDetailsPage() {
         pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
         heightLeft -= ph;
       }
-      pdf.save(`F-EN-03-${wo.workOrderNo}.pdf`);
+      // เปิดหน้าต่างดูตัวอย่างก่อนดาวน์โหลด (สร้าง blob URL สำหรับแสดงใน iframe)
+      pdfRef.current = pdf;
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
     } catch (e) {
       console.error("PDF generation failed:", e);
       alert('ไม่สามารถสร้าง PDF ได้ในเบราว์เซอร์นี้ — กรุณาใช้ปุ่ม "พิมพ์เอกสารปิดซ่อม" แล้วเลือก "บันทึกเป็น PDF"');
     }
     setDownloading(false);
+  };
+
+  const handleSavePdf = () => {
+    if (pdfRef.current) {
+      pdfRef.current.save(`F-EN-03-${wo.workOrderNo}.pdf`);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    pdfRef.current = null;
   };
 
   return (
@@ -234,6 +255,32 @@ export default function RepairViewDetailsPage() {
           }
         }
       `}</style>
+
+      {/* PDF Preview Dialog */}
+      <Dialog
+        isOpen={!!previewUrl}
+        onOpenChange={(open: boolean) => { if (!open) handleClosePreview(); }}
+      >
+        <DialogHeader title={`ดูตัวอย่าง PDF — ${wo.workOrderNo}`} onOpenChange={() => handleClosePreview()} />
+        <div style={{ padding: 16 }}>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title={`PDF Preview ${wo.workOrderNo}`}
+              style={{ width: "100%", height: "68vh", border: "1px solid #CBD5E1", borderRadius: 8, background: "#FFFFFF" }}
+            />
+          )}
+          <HStack hAlign="end" gap={2} style={{ marginTop: 14 }}>
+            <Button label="ปิด" variant="secondary" onClick={handleClosePreview} />
+            <Button
+              label="ดาวน์โหลดไฟล์ PDF"
+              variant="primary"
+              icon={<Icon icon={ArrowDownTrayIcon} size="sm" />}
+              onClick={handleSavePdf}
+            />
+          </HStack>
+        </div>
+      </Dialog>
     </VStack>
   );
 }
