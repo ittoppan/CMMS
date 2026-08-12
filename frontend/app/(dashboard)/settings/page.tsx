@@ -14,6 +14,7 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import {
   CheckCircleIcon,
   BuildingOffice2Icon,
@@ -32,6 +33,7 @@ import {
   LockClosedIcon,
   MagnifyingGlassIcon,
   ClockIcon,
+  ScaleIcon,
 } from "@heroicons/react/24/outline";
 
 interface SettingRow {
@@ -196,6 +198,7 @@ export default function SettingsPage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [activeGroup, setActiveGroup] = useState("company");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showDiff, setShowDiff] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   // ค่าใหม่ของคีย์ที่เป็นความลับ (ว่าง = ไม่เปลี่ยน)
   const [newSecrets, setNewSecrets] = useState<Record<string, string>>({});
@@ -298,7 +301,29 @@ export default function SettingsPage() {
     fetchSettings();
   }, []);
 
+  // ค่าที่จะบันทึก (หลัง) เทียบกับค่าปัจจุบันใน DB (ก่อน) — สำหรับหน้าต่างเปรียบเทียบ
+  const diffRows = useMemo(() => {
+    return changedRows.map((row) => {
+      const oldVal = settings.find((x) => x.id === row.id)?.setting_value ?? "";
+      const newVal = SENSITIVE_KEYS.has(row.setting_key)
+        ? (newSecrets[row.setting_key]?.trim() || oldVal)
+        : (form[row.setting_key] ?? "");
+      return { row, oldVal, newVal };
+    });
+  }, [changedRows, settings, form, newSecrets]);
+
+  // แสดงค่าสั้นลง + ซ่อนคีย์ลับ (ไม่โชว์ค่าจริง)
+  const valuePreview = (row: SettingRow, value: string): string => {
+    const s = String(value ?? "");
+    if (SENSITIVE_KEYS.has(row.setting_key)) {
+      return s ? `•••••••• (ความยาว ${s.length} ตัวอักษร)` : "(ว่าง)";
+    }
+    if (s.length > 220) return s.slice(0, 220) + "…";
+    return s === "" ? "(ว่าง)" : s;
+  };
+
   const handleSave = async () => {
+    setShowDiff(false);
     // ตรวจค่าตัวเลขก่อนบันทึก
     for (const row of changedRows) {
       if (NUMBER_KEYS.has(row.setting_key)) {
@@ -618,6 +643,13 @@ export default function SettingsPage() {
                 }}
               />
               <Button
+                label={changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
+                variant="secondary"
+                icon={<Icon icon={ScaleIcon} size="sm" />}
+                isDisabled={changedRows.length === 0}
+                onClick={() => setShowDiff(true)}
+              />
+              <Button
                 label={changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
                 variant="primary"
                 isLoading={saving}
@@ -628,6 +660,74 @@ export default function SettingsPage() {
           </VStack>
         </Card>
       </Grid>
+
+      {/* ═══ Dialog เปรียบเทียบก่อนบันทึก ═══ */}
+      <Dialog isOpen={showDiff} onOpenChange={(open) => { if (!open) setShowDiff(false); }}>
+        <DialogHeader title={`เปรียบเทียบก่อนบันทึก (${diffRows.length} รายการ)`} />
+        <VStack gap={4}>
+          <Text type="body" size="sm" color="secondary">
+            ตรวจสอบความแตกต่างระหว่างค่าปัจจุบันในฐานข้อมูล (ซ้าย แดง) กับค่าที่จะบันทึก (ขวา เขียว) ก่อนยืนยัน
+          </Text>
+
+          {diffRows.length === 0 ? (
+            <Text type="body" color="secondary">ไม่มีการเปลี่ยนแปลงที่ต้องบันทึก</Text>
+          ) : (
+            <VStack gap={2} style={{ maxHeight: 420, overflow: "auto" }}>
+              {diffRows.map(({ row, oldVal, newVal }) => {
+                const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
+                const groupLabel = (GROUP_META[row.setting_group] ?? { label: row.setting_group }).label;
+                const changed = oldVal !== newVal;
+                return (
+                  <Card key={row.id} padding={3}>
+                    <VStack gap={1.5}>
+                      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+                        <HStack gap={2} vAlign="center">
+                          {SENSITIVE_KEYS.has(row.setting_key) && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
+                          <Text type="body" weight="bold" size="sm">{meta.label}</Text>
+                          <Badge label={groupLabel} variant="neutral" />
+                        </HStack>
+                        <Text type="body" size="xs" color="secondary" style={{ fontFamily: "monospace" }}>
+                          {row.setting_key}
+                        </Text>
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
+                        {/* ค่าเดิม */}
+                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid #fecaca", background: "#fef2f2", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "#b91c1c" }}>ก่อนแก้</Text>
+                          <Text type="body" size="sm" style={{ color: "#7f1d1d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                            {valuePreview(row, oldVal)}
+                          </Text>
+                        </div>
+                        {/* ค่าใหม่ */}
+                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid #bbf7d0", background: "#f0fdf4", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "#15803d" }}>หลังแก้</Text>
+                          <Text type="body" size="sm" style={{ color: "#14532d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                            {valuePreview(row, newVal)}
+                          </Text>
+                        </div>
+                      </HStack>
+                      {!changed && (
+                        <Text type="body" size="xs" color="secondary">คีย์ลับไม่ได้เปลี่ยน — จะคงค่าเดิม</Text>
+                      )}
+                    </VStack>
+                  </Card>
+                );
+              })}
+            </VStack>
+          )}
+
+          <HStack hAlign="end" wrap="wrap" gap={2}>
+            <Button label="ปิด" variant="secondary" onClick={() => setShowDiff(false)} />
+            <Button
+              label={`ยืนยันและบันทึก (${diffRows.length} รายการ)`}
+              variant="primary"
+              isLoading={saving}
+              isDisabled={diffRows.length === 0}
+              onClick={handleSave}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
     </VStack>
   );
 }
