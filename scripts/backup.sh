@@ -48,14 +48,30 @@ echo "[backup] $(date '+%Y-%m-%d %H:%M:%S') — start (mode=$MODE, retention=${R
 
 # ── 1. Database dump ─────────────────────────────────────────
 if [ "$MODE" = "all" ] || [ "$MODE" = "--db-only" ]; then
-    if command -v mysqldump >/dev/null 2>&1; then
+    # หา mysqldump: PATH -> MYSQLDUMP env -> ตำแหน่งติดตั้ง Windows ทั่วไป
+    MYSQLDUMP="${MYSQLDUMP:-}"
+    if [ -z "$MYSQLDUMP" ] && command -v mysqldump >/dev/null 2>&1; then
+        MYSQLDUMP="$(command -v mysqldump)"
+    fi
+    if [ -z "$MYSQLDUMP" ]; then
+        while IFS= read -r cand; do
+            [ -z "$cand" ] && continue
+            if [ -x "$cand" ]; then MYSQLDUMP="$cand"; break; fi
+        done <<'EOF'
+/c/Program Files/MySQL/MySQL Server 8.0/bin/mysqldump.exe
+/c/Program Files/MySQL/MySQL Server 5.7/bin/mysqldump.exe
+/c/xampp/mysql/bin/mysqldump.exe
+/c/Program Files/MySQL/MySQL Workbench 8.0/mysqldump.exe
+EOF
+    fi
+    if [ -n "$MYSQLDUMP" ]; then
         DB_FILE="$BACKUP_DIR/${APP_NAME}_db_${STAMP}.sql"
         if [ -n "$DB_PASS" ]; then
-            MYSQL_PWD="$DB_PASS" mysqldump -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" \
+            MYSQL_PWD="$DB_PASS" "$MYSQLDUMP" -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" \
                 --single-transaction --routines --triggers --default-character-set=utf8mb4 \
                 "$DB_NAME" > "$DB_FILE"
         else
-            mysqldump -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" \
+            "$MYSQLDUMP" -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" \
                 --single-transaction --routines --triggers --default-character-set=utf8mb4 \
                 "$DB_NAME" > "$DB_FILE"
         fi
@@ -76,8 +92,19 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "--uploads-only" ]; then
     if [ -d "$UPLOADS_DIR" ]; then
         if command -v tar >/dev/null 2>&1; then
             UP_FILE="$BACKUP_DIR/${APP_NAME}_uploads_${STAMP}.tar.gz"
-            tar -czf "$UP_FILE" -C "$(dirname "$UPLOADS_DIR")" "$(basename "$UPLOADS_DIR")"
-            echo "[backup] Uploads: $UP_FILE ($(du -h "$UP_FILE" | cut -f1))"
+            # tar exit 1 = มีไฟล์เปลี่ยน/หายระหว่าง backup (ปกติ) — ไม่ถือว่าล้มเหลว
+            # exit 2 = ข้อผิดพลาดร้ายแรง — ล้มเหลวจริง
+            set +e
+            tar -czf "$UP_FILE" -C "$(dirname "$UPLOADS_DIR")" "$(basename "$UPLOADS_DIR")" 2>>"$BACKUP_DIR/backup_warnings.log"
+            TAR_RC=$?
+            set -e
+            if [ "$TAR_RC" -gt 1 ]; then
+                echo "[backup] ⚠️ tar ล้มเหลว (exit $TAR_RC) — ข้ามการสำรอง uploads"
+                rm -f "$UP_FILE"
+            else
+                echo "[backup] Uploads: $UP_FILE ($(du -h "$UP_FILE" | cut -f1))"
+                [ "$TAR_RC" -eq 1 ] && echo "[backup] (มีไฟล์ที่เปลี่ยนระหว่าง backup — ดู backup_warnings.log)"
+            fi
         elif command -v zip >/dev/null 2>&1; then
             UP_FILE="$BACKUP_DIR/${APP_NAME}_uploads_${STAMP}.zip"
             (cd "$(dirname "$UPLOADS_DIR")" && zip -rq "$UP_FILE" "$(basename "$UPLOADS_DIR")")

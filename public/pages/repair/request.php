@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/helpers/work_order.php';
 
 $pdo = getDb();
 
@@ -92,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         $repairId = $pdo->lastInsertId();
-        $woNo = 'EN-' . date('y') . '-' . str_pad($repairId, 3, '0', STR_PAD_LEFT);
+        $woNo = generateWorkOrderNo($pdo);
         $pdo->prepare("UPDATE repair SET work_order_no = ? WHERE id = ?")->execute([$woNo, $repairId]);
 
         // ✅ แจ้งผู้แจ้งซ่อมผ่าน LINE ว่าได้รับใบแจ้งซ่อมแล้ว (lineUserId มาจาก LIFF — ส่งตรงได้แม้ยังไม่ผูกบัญชี)

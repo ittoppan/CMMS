@@ -2,26 +2,9 @@
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/helpers/work_order.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-
-function generateWorkOrderNo(PDO $pdo): string {
-    $yymm = date('ym'); // e.g. 2607
-    $prefix = "EN-" . $yymm . "-";
-    
-    $stmt = $pdo->prepare("SELECT work_order_no FROM repair WHERE work_order_no LIKE ? ORDER BY work_order_no DESC LIMIT 1");
-    $stmt->execute([$prefix . '%']);
-    $last = $stmt->fetchColumn();
-    
-    if ($last) {
-        $lastSeq = (int)substr($last, -3);
-        $nextSeq = $lastSeq + 1;
-    } else {
-        $nextSeq = 1;
-    }
-    
-    return $prefix . str_pad($nextSeq, 3, '0', STR_PAD_LEFT);
-}
 
 try {
     $pdo = getDb();
