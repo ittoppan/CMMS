@@ -218,7 +218,7 @@ export default function InspectionsPage() {
                       {s.result && <Badge label={RESULT_LABELS[s.result] || s.result} variant={s.result === "pass" ? "success" : "error"} />}
                     </HStack>
                     <Text type="body" size="sm" color="secondary">
-                      🏭 {s.asset_name || `เครื่อง #${s.asset_id}`}{s.asset_code ? ` (${s.asset_code})` : ""}
+                      {s.asset_name || `เครื่อง #${s.asset_id}`}{s.asset_code ? ` (${s.asset_code})` : ""}
                       {s.assignee_name ? ` • 👤 ${s.assignee_name}` : ""}
                       {s.due_date ? ` • ครบกำหนด ${s.due_date}` : ""}
                       {s.completed_at ? ` • เสร็จเมื่อ ${s.completed_at}` : ""}

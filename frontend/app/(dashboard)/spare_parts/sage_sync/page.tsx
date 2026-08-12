@@ -297,7 +297,7 @@ export default function SageSyncConfigPage() {
             <Text type="supporting" color="secondary">ฐานข้อมูล Sage 300 ERP Server</Text>
             <Heading level={3}>{erpDatabase}</Heading>
             <Text type="body" size="sm" color={sageConnected ? "primary" : "error"}>
-              {sageConnected ? "🟢 สถานะการเชื่อมต่อ: ปกติ" : "🔴 สถานะการเชื่อมต่อ: ไม่พร้อม"}
+              {sageConnected ? "สถานะการเชื่อมต่อ: ปกติ" : "สถานะการเชื่อมต่อ: ไม่พร้อม"}
             </Text>
           </VStack>
         </Card>
@@ -330,7 +330,7 @@ export default function SageSyncConfigPage() {
             <VStack gap={1}>
               <HStack gap={2} vAlign="center">
                 <Icon icon={WrenchScrewdriverIcon} size="md" color="primary" />
-                <Heading level={4}>🔧 รูปแบบการดึงข้อมูล</Heading>
+                <Heading level={4}>รูปแบบการดึงข้อมูล</Heading>
               </HStack>
               <Text type="body" size="sm" color="secondary">
                 กำหนดวิธีที่ระบบดึงและนำเข้าข้อมูลจาก Sage 300 — บันทึกแล้วจะใช้กับการซิงค์ครั้งถัดไปทุกครั้ง
@@ -394,7 +394,7 @@ export default function SageSyncConfigPage() {
       <Card padding={5}>
         <VStack gap={4}>
           <VStack gap={1}>
-            <Heading level={4}>⚙️ กำหนดประเภทสต็อกที่ต้องการดึงมาจาก Sage 300 ERP</Heading>
+            <Heading level={4}>กำหนดประเภทสต็อกที่ต้องการดึงมาจาก Sage 300 ERP</Heading>
             <Text type="body" size="sm" color="secondary">
               เลือกประเภทสต็อกในระบบ Sage 300 เพื่อเปิดใช้งานการดึงยอดคงเหลือ จุดสั่งซื้อ (Reorder Point) และราคาต้นทุนอัตโนมัติ — กด "บันทึกรูปแบบการดึง" ด้านบนเพื่อจัดเก็บ
             </Text>
@@ -448,7 +448,7 @@ export default function SageSyncConfigPage() {
       <Card padding={5}>
         <VStack gap={4}>
           <HStack hAlign="between" vAlign="center">
-            <Heading level={4}>📜 ประวัติการซิงค์ข้อมูลกับ Sage 300 ERP</Heading>
+            <Heading level={4}>ประวัติการซิงค์ข้อมูลกับ Sage 300 ERP</Heading>
             <Button label="รีเฟรช" variant="ghost" size="sm" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchData} />
           </HStack>
           {logs.length === 0 ? (

@@ -423,7 +423,7 @@ export default function BOMTreePage() {
                                 <VStack gap={0} style={{ textAlign: "right" }}>
                                   <Text type="body" size="sm">ใช้ {qty} {p.unit || "ชิ้น"}</Text>
                                   <Text type="body" size="sm" style={{ color: low ? "var(--color-error)" : "var(--color-success)", fontWeight: 600 }}>
-                                    คงเหลือ {stock} {p.unit || "ชิ้น"}{low ? " ⚠️" : ""}
+                                    คงเหลือ {stock} {p.unit || "ชิ้น"}{low ? " " : ""}
                                   </Text>
                                 </VStack>
                                 <Button

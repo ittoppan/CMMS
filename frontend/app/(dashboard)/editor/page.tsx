@@ -42,20 +42,20 @@ interface SystemPageOption {
 }
 
 const SYSTEM_PAGES: SystemPageOption[] = [
-  { value: "/dashboard", label: "📊 แดชบอร์ดภาพรวมระบบ", category: "งานซ่อมบำรุง" },
-  { value: "/repair", label: "🔧 รายการใบสั่งงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/repair/request", label: "📝 ฟอร์มแจ้งซ่อมด่วน", category: "งานซ่อมบำรุง" },
-  { value: "/repair/kanban", label: "📌 Kanban Board", category: "งานซ่อมบำรุง" },
-  { value: "/repair/tracking", label: "🔍 ติดตามงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/asset_registry", label: "🏭 ทะเบียนเครื่องจักร (F-EN-01)", category: "แผน PM & เครื่องจักร" },
-  { value: "/asset_registry/bom_tree", label: "🔩 BOM Tree ชิ้นส่วน", category: "แผน PM & เครื่องจักร" },
-  { value: "/spare_parts", label: "⚙️ คลังสต็อกอะไหล่ (Sage 300)", category: "คลังอะไหล่" },
-  { value: "/spare_parts/sage_sync", label: "📦 ตั้งค่าซิงค์ Sage 300", category: "คลังอะไหล่" },
-  { value: "/analytics/predictive", label: "🔮 AI Predictive Maintenance", category: "วิเคราะห์ & รายงาน" },
-  { value: "/reports/export_excel", label: "📥 Export Excel & CSV Center", category: "วิเคราะห์ & รายงาน" },
-  { value: "/safety/work_permit", label: "🛡️ ใบอนุญาตทำงานเสี่ยง LOTO", category: "ความปลอดภัย" },
-  { value: "/users", label: "👥 การจัดการผู้ใช้งานระบบ", category: "บุคลากร" },
-  { value: "/settings", label: "⚙️ ตั้งค่าระบบทั้งหมด", category: "ตั้งค่า" },
+  { value: "/dashboard", label: "แดชบอร์ดภาพรวมระบบ", category: "งานซ่อมบำรุง" },
+  { value: "/repair", label: "รายการใบสั่งงานซ่อม", category: "งานซ่อมบำรุง" },
+  { value: "/repair/request", label: "ฟอร์มแจ้งซ่อมด่วน", category: "งานซ่อมบำรุง" },
+  { value: "/repair/kanban", label: "Kanban Board", category: "งานซ่อมบำรุง" },
+  { value: "/repair/tracking", label: "ติดตามงานซ่อม", category: "งานซ่อมบำรุง" },
+  { value: "/asset_registry", label: "ทะเบียนเครื่องจักร (F-EN-01)", category: "แผน PM & เครื่องจักร" },
+  { value: "/asset_registry/bom_tree", label: "BOM Tree ชิ้นส่วน", category: "แผน PM & เครื่องจักร" },
+  { value: "/spare_parts", label: "คลังสต็อกอะไหล่ (Sage 300)", category: "คลังอะไหล่" },
+  { value: "/spare_parts/sage_sync", label: "ตั้งค่าซิงค์ Sage 300", category: "คลังอะไหล่" },
+  { value: "/analytics/predictive", label: "AI Predictive Maintenance", category: "วิเคราะห์ & รายงาน" },
+  { value: "/reports/export_excel", label: "Export Excel & CSV Center", category: "วิเคราะห์ & รายงาน" },
+  { value: "/safety/work_permit", label: "ใบอนุญาตทำงานเสี่ยง LOTO", category: "ความปลอดภัย" },
+  { value: "/users", label: "การจัดการผู้ใช้งานระบบ", category: "บุคลากร" },
+  { value: "/settings", label: "ตั้งค่าระบบทั้งหมด", category: "ตั้งค่า" },
 ];
 
 const COLOR_SWATCHES = [
@@ -68,17 +68,17 @@ const COLOR_SWATCHES = [
 ];
 
 const BG_STYLES = [
-  { id: "light", label: "⚪ สว่าง Minimal Slate (ค่าเริ่มต้น)", color: "#F8FAFC" },
-  { id: "soft_blue", label: "🔵 ฟ้าซอฟท์ Soft Sky", color: "#F0F9FF" },
-  { id: "warm_cream", label: "📜 ครีม Warm Clean", color: "#FAFAF9" },
-  { id: "dark_mode", label: "🌙 ดำ Sleek Dark Mode", color: "#0F172A" },
+  { id: "light", label: "สว่าง Minimal Slate (ค่าเริ่มต้น)", color: "#F8FAFC" },
+  { id: "soft_blue", label: "ฟ้าซอฟท์ Soft Sky", color: "#F0F9FF" },
+  { id: "warm_cream", label: "ครีม Warm Clean", color: "#FAFAF9" },
+  { id: "dark_mode", label: "ดำ Sleek Dark Mode", color: "#0F172A" },
 ];
 
 const BORDER_RADIUS_OPTIONS = [
-  { id: "0px", label: "📐 เหลี่ยมคม (0px Sharp)" },
+  { id: "0px", label: "เหลี่ยมคม (0px Sharp)" },
   { id: "8px", label: "◽ มนมาตรฐาน (8px Rounded)" },
-  { id: "16px", label: "⏹️ มนโค้งสวยงาม (16px Smooth)" },
-  { id: "24px", label: "💊 โค้งมนเต็มขั้น (24px Pill)" },
+  { id: "16px", label: "⏹ มนโค้งสวยงาม (16px Smooth)" },
+  { id: "24px", label: "โค้งมนเต็มขั้น (24px Pill)" },
 ];
 
 const FONT_OPTIONS = [
@@ -199,7 +199,7 @@ export default function InteractiveStylePageEditor() {
           <HStack gap={3} vAlign="center">
             <Icon icon={CheckCircleIcon} size="md" color="success" />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>
-              ✓ บันทึกโทนสีและสไตล์รูปแบบของหน้า '{selectedRoute}' เข้าฐานข้อมูลเรียบร้อยแล้ว!
+              บันทึกโทนสีและสไตล์รูปแบบของหน้า '{selectedRoute}' เข้าฐานข้อมูลเรียบร้อยแล้ว!
             </Text>
           </HStack>
         </Card>
@@ -213,7 +213,7 @@ export default function InteractiveStylePageEditor() {
             <VStack gap={4} style={{ padding: 16, height: "100%", overflowY: "auto" }}>
               {/* Target Page Selector */}
               <VStack gap={2}>
-                <Text type="body" weight="bold">📍 เลือกหน้าที่จะปรับเปลี่ยนสี & รูปแบบ</Text>
+                <Text type="body" weight="bold">เลือกหน้าที่จะปรับเปลี่ยนสี & รูปแบบ</Text>
                 <Selector
                   label="เลือกหน้า"
                   isLabelHidden
@@ -234,9 +234,9 @@ export default function InteractiveStylePageEditor() {
                 value={sidebarTab}
                 onChange={(v) => setSidebarTab(v as SidebarTab)}
               >
-                <Tab value="colors" label="🎨 สี & จานสี" />
-                <Tab value="formatting" label="📐 รูปแบบ & สไตล์" />
-                <Tab value="text" label="✏️ ข้อความ" />
+                <Tab value="colors" label="สี & จานสี" />
+                <Tab value="formatting" label="รูปแบบ & สไตล์" />
+                <Tab value="text" label="ข้อความ" />
               </TabList>
 
               {/* TAB 1: CLICKABLE COLOR PALETTES */}
@@ -389,14 +389,14 @@ export default function InteractiveStylePageEditor() {
               {/* Publish Action Button */}
               <VStack gap={2}>
                 <Button
-                  label="💾 บันทึกสไตล์ & โทนสี"
+                  label="บันทึกสไตล์ & โทนสี"
                   variant="primary"
                   isLoading={publishing}
                   icon={<Icon icon={CheckCircleIcon} size="sm" />}
                   onClick={handlePublish}
                 />
                 <Button
-                  label="🔗 เปิดดูหน้าจริงแบบเต็มจอ"
+                  label="เปิดดูหน้าจริงแบบเต็มจอ"
                   variant="secondary"
                   icon={<Icon icon={EyeIcon} size="sm" />}
                   onClick={() => (window.location.href = selectedRoute)}

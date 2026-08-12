@@ -256,7 +256,7 @@ export default function InspectionRunPage() {
                   </HStack>
                   <Text type="body" weight="bold">{schedule.template_title}</Text>
                   <Text type="body" size="sm" color="secondary">
-                    🏭 {schedule.asset_name}{schedule.asset_code ? ` (${schedule.asset_code})` : ""}
+                    {schedule.asset_name}{schedule.asset_code ? ` (${schedule.asset_code})` : ""}
                     {schedule.assignee_name ? ` • 👤 ${schedule.assignee_name}` : ""}
                     {schedule.due_date ? ` • ครบกำหนด: ${schedule.due_date}` : ""}
                   </Text>

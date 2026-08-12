@@ -21,7 +21,7 @@ export default function ReportsHubPage() {
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>📊 ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
+            <Heading level={2}>ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
             <Badge label="ISO 9001 / ISO 55000" variant="info" />
           </HStack>
           <Text type="body" color="secondary">รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV</Text>

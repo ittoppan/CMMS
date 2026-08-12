@@ -74,7 +74,7 @@ export default function ExportExcelReportPage() {
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>📥 ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
+            <Heading level={2}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
             <Badge label="รองรับ Excel & Sage 300" variant="success" />
           </HStack>
           <Text type="body" color="secondary">
@@ -99,7 +99,7 @@ export default function ExportExcelReportPage() {
       <Grid columns={{ minWidth: 400, repeat: "fit" }} gap={6}>
         <Card padding={5}>
           <VStack gap={4}>
-            <Heading level={4}>📊 1. เลือกชุดข้อมูลและเงื่อนไขการส่งออก</Heading>
+            <Heading level={4}>1. เลือกชุดข้อมูลและเงื่อนไขการส่งออก</Heading>
             
             <VStack gap={3}>
               <VStack gap={1}>
@@ -110,9 +110,9 @@ export default function ExportExcelReportPage() {
                   value={reportType}
                   onChange={(v) => setReportType(String(v))}
                   options={[
-                    { value: "repair_all", label: "🔧 รายการใบสั่งงานซ่อมบำรุงทั้งหมด" },
-                    { value: "spare_parts", label: "⚙️ ยอดสต็อกและการเบิกจ่ายอะไหล่" },
-                    { value: "assets", label: "🏭 ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01" },
+                    { value: "repair_all", label: "รายการใบสั่งงานซ่อมบำรุงทั้งหมด" },
+                    { value: "spare_parts", label: "ยอดสต็อกและการเบิกจ่ายอะไหล่" },
+                    { value: "assets", label: "ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01" },
                   ]}
                 />
               </VStack>
@@ -167,7 +167,7 @@ export default function ExportExcelReportPage() {
         {/* Right Info Card */}
         <Card padding={5} style={{ background: '#F8FAFC' }}>
           <VStack gap={4}>
-            <Heading level={4}>📌 รูปแบบไฟล์และการนำไปใช้งาน</Heading>
+            <Heading level={4}>รูปแบบไฟล์และการนำไปใช้งาน</Heading>
             <VStack gap={3}>
               <HStack gap={3} vAlign="center">
                 <Icon icon={TableCellsIcon} size="md" color="primary" />

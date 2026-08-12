@@ -305,7 +305,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
               <IconButton
                 label="แก้ไขหน้า"
-                tooltip="✏️ แก้ไขหน้านี้ด้วย Page Editor"
+                tooltip="แก้ไขหน้านี้ด้วย Page Editor"
                 icon={<Icon icon={PencilSquareIcon} size="sm" />}
                 variant="ghost"
                 size="md"

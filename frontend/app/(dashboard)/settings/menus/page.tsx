@@ -512,7 +512,7 @@ export default function MenuPermissionsPage() {
                   {/* status bar */}
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 10, fontWeight: 700, color: "#334155" }}>
                     <span>9:41</span>
-                    <span>📶 🔋</span>
+                    <span>🔋</span>
                   </div>
                   {/* app header */}
                   <div style={{ background: previewColor.fg, padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>
@@ -571,12 +571,12 @@ export default function MenuPermissionsPage() {
               <VStack gap={1}>
                 {previewKeys.length > MAX_BN && (
                   <Text type="body" size="sm" style={{ color: "#b45309", fontWeight: 600 }}>
-                    ⚠️ {previewKeys.length} ปุ่ม — เกินที่แนะนำ ({MAX_BN}) ปุ่มจะเล็กลงบนมือถือจริง
+                    {previewKeys.length} ปุ่ม — เกินที่แนะนำ ({MAX_BN}) ปุ่มจะเล็กลงบนมือถือจริง
                   </Text>
                 )}
                 {previewItems.some((it) => it.hidden) && (
                   <Text type="body" size="sm" style={{ color: "#b45309", fontWeight: 600 }}>
-                    ⚠️ ปุ่มจาง = เมนูถูกปิดสิทธิ์ จะไม่แสดงบนมือถือจริง
+                    ปุ่มจาง = เมนูถูกปิดสิทธิ์ จะไม่แสดงบนมือถือจริง
                   </Text>
                 )}
                 <Text type="body" size="sm" color="secondary">

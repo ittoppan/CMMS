@@ -169,13 +169,13 @@ export default function ScanLandingPage() {
             </VStack>
           ) : asset ? (
             <VStack gap={3} hAlign="center">
-              <Badge label="🔍 สแกนเครื่องจักรสำเร็จ" variant="success" />
+              <Badge label="สแกนเครื่องจักรสำเร็จ" variant="success" />
               <Heading level={2} style={{ margin: 0, letterSpacing: 1 }}>{asset.code}</Heading>
               <Text type="body" color="secondary">{asset.name}</Text>
 
               <HStack gap={4} vAlign="center" wrap="wrap" style={{ justifyContent: "center" }}>
                 {asset.department && (
-                  <Text type="body" size="sm" color="secondary">🏭 {deptName || asset.department}</Text>
+                  <Text type="body" size="sm" color="secondary">{deptName || asset.department}</Text>
                 )}
                 {asset.criticality && (
                   <Text
@@ -184,7 +184,7 @@ export default function ScanLandingPage() {
                     weight="bold"
                     style={{ color: criticalityColor[asset.criticality] || "#64748b" }}
                   >
-                    ⚠️ Criticality: {asset.criticality}
+                    Criticality: {asset.criticality}
                   </Text>
                 )}
               </HStack>
@@ -231,11 +231,11 @@ export default function ScanLandingPage() {
                 </HStack>
               </ClickableCard>
 
-              {/* 🗓️ แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
+              {/* 🗓 แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
               {pmLoading ? null : pmPlans.length > 0 ? (
                 <VStack gap={2} style={{ width: "100%" }}>
                   <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "#f59e0b" }}>
-                    🗓️ แผน PM ที่ต้องทำของเครื่องนี้ ({pmPlans.length})
+                    แผน PM ที่ต้องทำของเครื่องนี้ ({pmPlans.length})
                   </Text>
                   {pmPlans.map((p) => {
                     const overdue = p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10);

@@ -242,7 +242,7 @@ export default function AssetCriticalityPage() {
               <Heading level={4}>มาตรการดูแลตามเกรด {rank}</Heading>
               {rank === "A" && (
                 <VStack gap={2}>
-                  <Text type="body" size="sm" style={{ color: "var(--color-error)" }} weight="semibold">🔴 เครื่องจักรเกรด A (วิกฤต):</Text>
+                  <Text type="body" size="sm" style={{ color: "var(--color-error)" }} weight="semibold">เครื่องจักรเกรด A (วิกฤต):</Text>
                   <Text type="body" size="sm" color="secondary">• ต้องทำ PM เข้มงวด (รายสัปดาห์/รายเดือน)</Text>
                   <Text type="body" size="sm" color="secondary">• สำรองอะไหล่วิกฤต 100%</Text>
                   <Text type="body" size="sm" color="secondary">• ติดตั้ง IoT Sensor เฝ้าระวังตลอด 24 ชม.</Text>
@@ -250,14 +250,14 @@ export default function AssetCriticalityPage() {
               )}
               {rank === "B" && (
                 <VStack gap={2}>
-                  <Text type="body" size="sm" style={{ color: "var(--color-warning)" }} weight="semibold">🟡 เครื่องจักรเกรด B (สำคัญ):</Text>
+                  <Text type="body" size="sm" style={{ color: "var(--color-warning)" }} weight="semibold">เครื่องจักรเกรด B (สำคัญ):</Text>
                   <Text type="body" size="sm" color="secondary">• ทำ PM ตามรอบปกติ (รายเดือน/ราย 3 เดือน)</Text>
                   <Text type="body" size="sm" color="secondary">• สำรองอะไหล่ตามจุดสั่งซื้อขั้นต่ำ</Text>
                 </VStack>
               )}
               {rank === "C" && (
                 <VStack gap={2}>
-                  <Text type="body" size="sm" color="secondary" weight="semibold">⚪ เครื่องจักรเกรด C (รอง):</Text>
+                  <Text type="body" size="sm" color="secondary" weight="semibold">เครื่องจักรเกรด C (รอง):</Text>
                   <Text type="body" size="sm" color="secondary">• สามารถปล่อยใช้งานจนเสียแล้วซ่อม หรือทำ PM รายปี</Text>
                   <Text type="body" size="sm" color="secondary">• ไม่จำเป็นต้องสต็อกอะไหล่ราคาสูง</Text>
                 </VStack>

@@ -126,7 +126,7 @@ export default function WorkPermitPage() {
       width: proportional(1.5),
       renderCell: (item) => (
         item.lotoStatus === 'Locked Out' ? (
-          <Badge label="🔒 ล็อกตัดพลังงานแล้ว" variant="error" />
+          <Badge label="ล็อกตัดพลังงานแล้ว" variant="error" />
         ) : (
           <Badge label="ไม่ใช้ LOTO" variant="neutral" />
         )

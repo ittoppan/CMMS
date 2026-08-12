@@ -299,7 +299,7 @@ export default function RepairAssignPage() {
         <Badge label={`📋 งานที่ยังไม่เสร็จ: ${stats.total}`} variant="neutral" />
         <Badge label={`🟡 รอมอบหมาย: ${stats.unassigned}`} variant="warning" />
         <Badge label={`🔵 มอบหมายแล้ว: ${stats.assigned}`} variant="info" />
-        <Badge label={`🛠️ กำลังซ่อม: ${stats.inprog}`} variant="info" />
+        <Badge label={`🛠 กำลังซ่อม: ${stats.inprog}`} variant="info" />
       </HStack>
 
       {/* Filter Toolbar */}

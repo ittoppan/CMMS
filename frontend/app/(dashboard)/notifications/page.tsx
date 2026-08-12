@@ -112,7 +112,7 @@ export default function NotificationCenterPage() {
             notifications.push({
               id: `sp-${p.id}`,
               type: "stock",
-              title: `⚠️ อะไหล่ต่ำกว่าเกณฑ์ Min Stock: ${p.code}`,
+              title: `⚠ อะไหล่ต่ำกว่าเกณฑ์ Min Stock: ${p.code}`,
               detail: `${p.name} เหลือในคลัง ${p.stock_qty} ${p.unit} (Min: ${p.min_stock})`,
               time: timeAgo(p.last_synced_at || p.updated_at),
               priority: "high",
@@ -241,7 +241,7 @@ export default function NotificationCenterPage() {
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>🔔 ศูนย์แจ้งเตือนระบบ</Heading>
+            <Heading level={2}>ศูนย์แจ้งเตือนระบบ</Heading>
             {unreadCount > 0 && <Badge label={`${unreadCount} ข้อความใหม่`} variant="error" />}
           </HStack>
           <Text type="body" color="secondary">แจ้งเตือนจากข้อมูลจริง: งานซ่อมด่วน อะไหล่ใกล้หมด แผน PM และการสอบเทียบ</Text>
@@ -301,10 +301,10 @@ export default function NotificationCenterPage() {
               onChange={setTypeFilter}
               options={[
                 { value: "all", label: "ทุกประเภท" },
-                { value: "repair", label: "🔧 งานซ่อมบำรุง" },
-                { value: "stock", label: "📦 สต็อกอะไหล่" },
-                { value: "pm", label: "📅 แผน PM" },
-                { value: "calibration", label: "🔧 การสอบเทียบ" },
+                { value: "repair", label: "งานซ่อมบำรุง" },
+                { value: "stock", label: "สต็อกอะไหล่" },
+                { value: "pm", label: "แผน PM" },
+                { value: "calibration", label: "การสอบเทียบ" },
               ]}
             />
           </>
@@ -366,7 +366,7 @@ export default function NotificationCenterPage() {
       <VStack gap={4}>
         <HStack hAlign="between" vAlign="center">
           <VStack gap={1}>
-            <Heading level={3}>📤 ประวัติการส่งแจ้งเตือน</Heading>
+            <Heading level={3}>ประวัติการส่งแจ้งเตือน</Heading>
             <Text type="body" size="sm" color="secondary">บันทึกการส่งจริงจากระบบ (LINE / Web Push) — จากตาราง notification_logs</Text>
           </VStack>
           <Button label="รีเฟรช" variant="secondary" size="sm" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchDeliveryLog} />

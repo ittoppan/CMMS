@@ -320,7 +320,7 @@ export default function KpiDashboardPage() {
             <HStack gap={2} vAlign="center" wrap="wrap">
               <Badge label={`ทันกำหนด ${pmOnTime ?? 0}%`} variant="success" />
               {Number(data?.pm.overdue_pending) > 0 && (
-                <Badge label={`⚠️ มี PM ค้าง ${data?.pm.overdue_pending} รายการ`} variant="warning" />
+                <Badge label={`⚠ มี PM ค้าง ${data?.pm.overdue_pending} รายการ`} variant="warning" />
               )}
             </HStack>
             <HStack gap={2} vAlign="center">

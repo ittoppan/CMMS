@@ -86,7 +86,7 @@ export default function RoleCreatePage() {
         <VStack gap={5} style={{ maxWidth: 640 }}>
           {error && (
             <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-              ⚠️ {error}
+              {error}
             </div>
           )}
 

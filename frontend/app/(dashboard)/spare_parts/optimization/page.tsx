@@ -161,7 +161,7 @@ export default function InventoryOptimizationPage() {
       width: proportional(1),
       renderCell: (item: EOQItem) => (
         <Text type="body" weight="bold">
-          {item.currentStock}{item.needsReorder && " ⚠️"}
+          {item.currentStock}{item.needsReorder && " "}
         </Text>
       ),
     },

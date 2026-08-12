@@ -174,14 +174,14 @@ function EditUserContent() {
           <VStack gap={5}>
             {errorMessage && (
               <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-                ⚠️ {errorMessage}
+                {errorMessage}
               </div>
             )}
 
             {/* Profile Avatar Upload & Selector */}
             <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
               <VStack gap={3}>
-                <Text type="body" weight="bold">🖼️ เปลี่ยนรูปโปรไฟล์</Text>
+                <Text type="body" weight="bold">เปลี่ยนรูปโปรไฟล์</Text>
                 <HStack gap={4} vAlign="center" wrap="wrap">
                   {form.avatar ? (
                     <Avatar name={form.fullName || form.username || "User"} src={form.avatar} size="lg" />
@@ -306,11 +306,11 @@ function EditUserContent() {
                   value={form.role}
                   onChange={(v: string) => update("role", v)}
                   options={[
-                    { value: "technician", label: "👷 ช่างซ่อมบำรุง" },
-                    { value: "engineer", label: "⚙️ วิศวกร" },
-                    { value: "manager", label: "👔 ผู้จัดการ" },
-                    { value: "operator", label: "🕹️ ผู้ควบคุมเครื่องจักร" },
-                    { value: "admin", label: "👑 ผู้ดูแลระบบ" },
+                    { value: "technician", label: "ช่างซ่อมบำรุง" },
+                    { value: "engineer", label: "วิศวกร" },
+                    { value: "manager", label: "ผู้จัดการ" },
+                    { value: "operator", label: "ผู้ควบคุมเครื่องจักร" },
+                    { value: "admin", label: "ผู้ดูแลระบบ" },
                   ]}
                 />
               </Field>
@@ -323,7 +323,7 @@ function EditUserContent() {
                     onChange={(val: boolean) => update("isActive", val)}
                   />
                   <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
-                    {form.isActive ? "🟢 เปิดใช้งาน" : "🔴 ระงับการใช้งาน"}
+                    {form.isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
                   </Text>
                 </HStack>
               </Field>

@@ -99,7 +99,7 @@ export default function SupplierCreatePage() {
         <VStack gap={5} style={{ maxWidth: 640 }}>
           {error && (
             <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-              ⚠️ {error}
+              {error}
             </div>
           )}
 
@@ -185,7 +185,7 @@ export default function SupplierCreatePage() {
                   onChange={setIsActive}
                 />
                 <Text type="body" size="sm" color={isActive ? "primary" : "secondary"}>
-                  {isActive ? "🟢 เปิดใช้งาน" : "🔴 ระงับการใช้งาน"}
+                  {isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
                 </Text>
               </HStack>
             </Field>
