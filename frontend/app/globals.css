@@ -19,6 +19,24 @@
    Premium Light Mode for Manufacturing
    ================================================ */
 
+/* ────────────────────────────────────────────────
+   Layout: SideNav คงที่ + เลื่อนเฉพาะเมนู (ไม่เลื่อนทั้งหน้า)
+   - html/body ต้องมี height:100% ไม่งั้น AppShell height:fill
+     (100%) จะกลายเป็น auto → หน้าเลื่อนทั้งแผงพร้อมเมนู
+   - บังคับ shell = viewport (100vh/100dvh) → พื้นที่เมนู
+     (.astryx-layout-panel) และเนื้อหา (.astryx-layout-content)
+     มี overflow:auto ของ astryx อยู่แล้ว เลื่อนแยกกันอัตโนมัติ
+   ──────────────────────────────────────────────── */
+html,
+body {
+  height: 100%;
+}
+
+.astryx-app-shell {
+  height: 100vh !important;
+  height: 100dvh !important; /* mobile — ปรับตาม URL bar จริง */
+}
+
 :root {
   /* === Brand Colors (Astryx Theme Tokens) ===
      ค่าทั้งหมดอ้างอิง astryx theme (--color-*) เพื่อให้
