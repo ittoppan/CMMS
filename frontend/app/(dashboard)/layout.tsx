@@ -351,6 +351,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("repair/assign") && <SideNavItem label="แจกงานซ่อม" icon={MapIcon} href="/repair/assign" isSelected={isSelected("/repair/assign")} />}
             {canShow("repair/my_tasks") && <SideNavItem label="งานซ่อมของฉัน" icon={ClipboardDocumentCheckIcon} href="/repair/my_tasks" isSelected={isSelected("/repair/my_tasks")} />}
             {canShow("repair/tracking") && <SideNavItem label="ติดตามงานซ่อม" icon={WrenchScrewdriverIcon} href="/repair/tracking" isSelected={isSelected("/repair/tracking")} />}
+            {canShow("repair/workload") && <SideNavItem label="ภาระงานช่าง (Workload)" icon={BoltIcon} href="/repair/workload" isSelected={isSelected("/repair/workload")} />}
             {canShow("repair/kanban") && <SideNavItem label="กระดานคัมบัง" icon={SquaresPlusIcon} href="/repair/kanban" isSelected={isSelected("/repair/kanban")} />}
             {canShow("repair/history") && <SideNavItem label="ประวัติงานซ่อม" icon={ClockIcon} href="/repair/history" isSelected={isSelected("/repair/history")} />}
           </SideNavSection>

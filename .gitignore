@@ -12,3 +12,6 @@ frontend/tsconfig.tsbuildinfo
 
 # OpenWork app data (chat attachments, inbox)
 .opencode/openwork/
+
+# Astryx design-system source (vendored copy — not used at runtime; installed via npm @astryxdesign/*)
+astryx-main/

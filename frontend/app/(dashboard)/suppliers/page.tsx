@@ -31,6 +31,10 @@ interface Supplier extends Record<string, unknown> {
   phone: string;
   email: string;
   status: string;
+  partCount: number;
+  stockValue: number;
+  lowStockRate: number;
+  rating: number;
 }
 
 const badgeVariant: Record<string, "success" | "neutral"> = {
@@ -61,6 +65,10 @@ export default function SuppliersPage() {
           phone: row.phone || "-",
           email: row.email || "-",
           status: row.is_active ? "active" : "inactive",
+          partCount: row.part_count || 0,
+          stockValue: row.stock_value || 0,
+          lowStockRate: row.low_stock_rate || 0,
+          rating: row.rating || 0,
         }));
         setSuppliers(fetched);
       }
@@ -118,6 +126,27 @@ export default function SuppliersPage() {
       ),
     },
     {
+      key: "rating",
+      header: "คะแนน",
+      width: proportional(1),
+      renderCell: (item: Supplier) => (
+        <HStack gap={2} vAlign="center">
+          <Badge
+            variant={item.rating >= 70 ? "success" : item.rating >= 40 ? "warning" : "error"}
+            label={`${item.rating}/100`}
+          />
+        </HStack>
+      ),
+    },
+    {
+      key: "partCount",
+      header: "รายการสินค้า",
+      width: proportional(1),
+      renderCell: (item: Supplier) => (
+        <Text type="body" size="sm">{item.partCount} รายการ{item.lowStockRate > 0 ? ` (ขาด ${Math.round(item.lowStockRate)}%)` : ""}</Text>
+      ),
+    },
+    {
       key: "actions",
       header: "Actions",
       width: proportional(1),
@@ -160,6 +189,34 @@ export default function SuppliersPage() {
           <VStack gap={1}>
             <Text type="supporting" color="secondary">จำนวนผู้ผลิตทั้งหมด (Total Suppliers)</Text>
             <Heading level={2}><CountUp end={totalItems} /> <Text type="body" size="sm">ราย</Text></Heading>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4}>
+          <VStack gap={1}>
+            <Text type="supporting" color="secondary">ผู้ขายคะแนนสูงสุด</Text>
+            <Heading level={2} style={{ fontSize: 18 }}>
+              {suppliers.length > 0
+                ? suppliers.reduce((best, s) => (s.rating > best.rating ? s : best), suppliers[0]).name
+                : "-"}
+            </Heading>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4}>
+          <VStack gap={1}>
+            <Text type="supporting" color="secondary">คะแนนเฉลี่ย (Avg Rating)</Text>
+            <Heading level={2}>
+              {suppliers.length > 0
+                ? Math.round(suppliers.reduce((sum, s) => sum + s.rating, 0) / suppliers.length)
+                : 0}<Text type="body" size="sm">/100</Text>
+            </Heading>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4}>
+          <VStack gap={1}>
+            <Text type="supporting" color="secondary">มูลค่าสต็อกรวม</Text>
+            <Heading level={2} style={{ fontSize: 18 }}>
+              {new Intl.NumberFormat("th-TH", { style: "currency", currency: "THB", maximumFractionDigits: 0 }).format(suppliers.reduce((sum, s) => sum + (s.stockValue || 0), 0))}
+            </Heading>
           </VStack>
         </Card>
       </Grid>

@@ -85,6 +85,13 @@ export default function PMCalendarPage() {
             onClick={() => setViewAll((v) => !v)}
           />
           <Button label="สร้างแผน PM ใหม่" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => window.location.href = '/pm_am/create'} />
+          <Button
+            label="ส่งออก iCal"
+            variant="secondary"
+            size="sm"
+            icon={<Icon icon={CalendarDaysIcon} size="sm" />}
+            onClick={() => window.open('/api/v1/pm_ical.php', '_blank')}
+          />
         </HStack>
       </HStack>
 

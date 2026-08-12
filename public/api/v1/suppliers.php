@@ -24,8 +24,54 @@ try {
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 echo json_encode($row);
             } else {
-                $stmt = $pdo->query('SELECT * FROM suppliers ORDER BY created_at DESC');
-                echo json_encode($stmt->fetchAll());
+                $list = $pdo->query('SELECT * FROM suppliers ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
+
+                // คะแนน/เมตริกผู้ขาย — คำนวณจากข้อมูลจริง (สต็อก + การเบิกจ่าย)
+                $metrics = $pdo->query("
+                    SELECT sp.supplier_id,
+                           COUNT(*)                                              AS part_count,
+                           COALESCE(SUM(sp.stock_qty * sp.unit_price), 0)          AS stock_value,
+                           COALESCE(SUM(CASE WHEN sp.min_stock > 0 AND sp.stock_qty <= sp.min_stock THEN 1 ELSE 0 END), 0) AS low_stock_count,
+                           COALESCE(SUM(CASE WHEN sp.min_stock > 0 AND sp.stock_qty <= sp.min_stock THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0), 0) AS low_stock_rate,
+                           COALESCE(SUM(t.quantity), 0)                           AS consumption_qty
+                    FROM spare_parts sp
+                    LEFT JOIN spare_part_transactions t
+                           ON t.spare_part_id = sp.id
+                          AND t.type IN ('withdrawal','scrap')
+                    WHERE sp.supplier_id IS NOT NULL
+                    GROUP BY sp.supplier_id
+                ")->fetchAll(PDO::FETCH_ASSOC);
+                $byId = [];
+                foreach ($metrics as $m) {
+                    $byId[(int)$m['supplier_id']] = $m;
+                }
+
+                foreach ($list as &$row) {
+                    $id = (int)$row['id'];
+                    $m = $byId[$id] ?? null;
+                    if (!$m) {
+                        $row['part_count'] = 0;
+                        $row['stock_value'] = 0;
+                        $row['low_stock_count'] = 0;
+                        $row['low_stock_rate'] = 0;
+                        $row['consumption_qty'] = 0;
+                        $row['rating'] = 0;
+                        continue;
+                    }
+                    $partCount   = (int)$m['part_count'];
+                    $lowRate     = (float)$m['low_stock_rate'];            // 0-100
+                    $consumption = (float)$m['consumption_qty'];
+                    $row['part_count']      = $partCount;
+                    $row['stock_value']     = (float)$m['stock_value'];
+                    $row['low_stock_count'] = (int)$m['low_stock_count'];
+                    $row['low_stock_rate']  = $lowRate;
+                    $row['consumption_qty'] = $consumption;
+                    // คะแนน 0-100: สต็อกไม่ขาด 60 คะแนน + มีรายการ/ใช้จริง 40 คะแนน
+                    $score = round((100 - $lowRate) * 0.60 + min($partCount, 20) * 2.0 + min($consumption / 10, 8.0));
+                    $row['rating'] = (int)max(0, min(100, $score));
+                }
+                unset($row);
+                echo json_encode($list);
             }
             break;
         case 'POST':

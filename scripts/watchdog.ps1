@@ -134,6 +134,41 @@ try {
                 Write-Log "alert_check.php not found or php missing ($phpExe)"
             }
         }
+
+        # 1.4) ตรวจ Apache :8081 (PHP เว็บหลัก) — Next.js ขึ้นแต่ Apache ตาย = API ทั้งหมดพัง
+        $apacheUrl = "http://127.0.0.1:8081/login.php"
+        if (-not ((Test-Url $apacheUrl) -eq 200)) {
+            Write-Log "WARN Apache :8081 DOWN — retry..."
+            $apacheDown = $true
+            for ($i = 0; $i -lt $ProbeCount; $i++) {
+                Start-Sleep -Seconds $ProbeGapSec
+                if ((Test-Url $apacheUrl) -eq 200) { $apacheDown = $false; break }
+            }
+            if ($apacheDown) {
+                Write-Log "Apache :8081 still DOWN — attempting restart"
+                Send-Alert "⚠️ [CMMS Watchdog] Apache (PHP :8081) ไม่ตอบสนอง — กำลัง restart บริการ Apache2.4..."
+                try {
+                    Restart-Service -Name Apache2.4 -Force -ErrorAction Stop
+                    Start-Sleep -Seconds 5
+                } catch {
+                    Write-Log "Restart-Service Apache2.4 failed: $_"
+                    # fallback: สั่ง restart ผ่าน httpd เอง
+                    try {
+                        & "C:\Apache24\bin\httpd.exe" -k restart 2>&1 | Out-Null
+                        Start-Sleep -Seconds 5
+                    } catch {
+                        Write-Log "httpd -k restart failed: $_"
+                    }
+                }
+                if ((Test-Url $apacheUrl) -eq 200) {
+                    Write-Log "Apache RECOVERED on :8081"
+                    Send-Alert "✅ [CMMS Watchdog] Apache (PHP :8081) กลับมาทำงานแล้ว"
+                } else {
+                    Write-Log "Apache STILL DOWN after restart"
+                    Send-Alert "🔴 [CMMS Watchdog] Apache (PHP :8081) ยังไม่กลับมาหลัง restart — กรุณาตรวจสอบทันที"
+                }
+            }
+        }
         exit 0
     }
 

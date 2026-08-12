@@ -1,8 +1,61 @@
 <?php
 require_once __DIR__ . '/../../../src/includes/layout.php';
 require_once __DIR__ . '/../../../src/helpers/xlsx.php';
+require_once __DIR__ . '/../../../src/services/NotificationService.php';
 $pageTitle = 'รายการสั่งซื้อ (Reorder List) — CMMS-TPT';
 $pdo = getDb();
+
+$flash = null; // ['ok'|'err', message]
+
+// ---- สร้างใบสั่งซื้ออัตโนมัติ (Auto PO) จากรายการที่ต่ำกว่า min_stock ----
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['create_po'])) {
+    try {
+        $pdo->beginTransaction();
+        $sql = "SELECT sp.id, sp.code, sp.name, sp.stock_qty, sp.min_stock, sp.max_stock, sp.unit, sp.unit_price,
+                       sp.supplier_id, su.name AS supplier_name
+                FROM spare_parts sp
+                LEFT JOIN suppliers su ON sp.supplier_id = su.id
+                WHERE sp.min_stock > 0 AND sp.stock_qty <= sp.min_stock
+                ORDER BY su.name, sp.code";
+        $rows = $pdo->query($sql)->fetchAll();
+
+        $bySup = [];
+        foreach ($rows as $r) {
+            $max = (float)$r['max_stock'];
+            $stock = (float)$r['stock_qty'];
+            $suggest = $max > 0 ? max(0, $max - $stock) : max(0, 2 * (float)$r['min_stock'] - $stock);
+            if ($suggest <= 0) continue;
+            $bySup[(int)($r['supplier_id'] ?: 0)][] = [$r, (int)round($suggest)];
+        }
+
+        if (empty($bySup)) {
+            throw new Exception('ไม่มีรายการที่ต้องสั่งซื้อ');
+        }
+
+        $created = 0; $totalItems = 0;
+        $insReq = $pdo->prepare("INSERT INTO requisitions (requested_by, status, created_at) VALUES (?, 'pending', NOW())");
+        $insItem = $pdo->prepare("INSERT INTO requisition_items (requisition_id, spare_part_id, quantity, unit_cost, created_at) VALUES (?, ?, ?, ?, NOW())");
+
+        foreach ($bySup as $supId => $items) {
+            $supName = $items[0][0]['supplier_name'] ?: 'ไม่ระบุผู้จำหน่าย';
+            $insReq->execute([$_SESSION['user_id'] ?? 1]);
+            $reqId = (int)$pdo->lastInsertId();
+            foreach ($items as [$r, $suggest]) {
+                $insItem->execute([$reqId, $r['id'], $suggest, $r['unit_price'] ?: 0]);
+                $totalItems++;
+            }
+            $created++;
+        }
+
+        $pdo->commit();
+        $msg = "สร้างใบสั่งซื้อ (Auto PO) สำเร็จ: {$created} ใบ / {$totalItems} รายการ";
+        NotificationService::sendLineMessage("🛒 [AUTO PO] {$msg} — ส่งฝ่ายจัดซื้อพิจารณา");
+        $flash = ['ok', $msg];
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        $flash = ['err', 'สร้างใบสั่งซื้อไม่สำเร็จ: ' . $e->getMessage()];
+    }
+}
 
 // ---- ดาวน์โหลด Excel ----
 if (isset($_GET['download'])) {
@@ -58,9 +111,18 @@ renderHeader();
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             <a href="index.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">← คลังสต็อก</a>
-            <a href="reorder.php?download=1" class="h-9 px-3.5 bg-accent text-white rounded-md text-xs font-bold inline-flex items-center gap-1.5">📥 ดาวน์โหลด Excel</a>
+            <a href="reorder.php?download=1" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-bold inline-flex items-center gap-1.5">📥 ดาวน์โหลด Excel</a>
+            <form method="post" action="reorder.php" onsubmit="return confirm('สร้างใบสั่งซื้ออัตโนมัติจากรายการทั้งหมด? (จัดกลุ่มตามผู้จำหน่าย)');">
+                <button type="submit" name="create_po" value="1" class="h-9 px-3.5 bg-accent text-white rounded-md text-xs font-bold inline-flex items-center gap-1.5 transition-colors hover:opacity-90">🛒 สร้างใบสั่งซื้อ (Auto PO)</button>
+            </form>
         </div>
     </div>
+
+    <?php if ($flash): ?>
+    <div class="cmms-card px-4 py-3 text-sm font-semibold <?= $flash[0] === 'ok' ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200' ?>">
+        <?= $flash[0] === 'ok' ? '✅' : '❌' ?> <?= htmlspecialchars($flash[1]) ?>
+    </div>
+    <?php endif; ?>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="cmms-card cmms-stat-card"><span class="cmms-stat-label">รายการที่ต้องสั่ง</span><span class="cmms-stat-value"><?= $totalItems ?></span><span class="cmms-stat-hint">ต่ำกว่า min_stock</span></div>

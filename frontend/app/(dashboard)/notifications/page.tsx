@@ -60,6 +60,9 @@ export default function NotificationCenterPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  // ประวัติการส่งแจ้งเตือนจริงจากตาราง notification_logs
+  const [deliveryLogs, setDeliveryLogs] = useState<any[]>([]);
+  const [deliveryStats, setDeliveryStats] = useState<any>({ total: 0, sent: 0, failed: 0, today: 0, by_channel: {}, by_status: {} });
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -177,8 +180,22 @@ export default function NotificationCenterPage() {
     setLoading(false);
   };
 
+  const fetchDeliveryLog = async () => {
+    try {
+      const res = await fetch("/api/v1/notifications_log.php");
+      const json = await res.json();
+      if (json.status === "success") {
+        setDeliveryLogs(json.data || []);
+        setDeliveryStats(json.stats || {});
+      }
+    } catch (e) {
+      console.error("Fetch delivery log error", e);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
+    fetchDeliveryLog();
   }, []);
 
   const markAllRead = () => {
@@ -343,6 +360,88 @@ export default function NotificationCenterPage() {
             );
           })
         )}
+      </VStack>
+
+      {/* ═══════ ประวัติการส่งแจ้งเตือน (จาก notification_logs จริง) ═══════ */}
+      <VStack gap={4}>
+        <HStack hAlign="between" vAlign="center">
+          <VStack gap={1}>
+            <Heading level={3}>📤 ประวัติการส่งแจ้งเตือน</Heading>
+            <Text type="body" size="sm" color="secondary">บันทึกการส่งจริงจากระบบ (LINE / Web Push) — จากตาราง notification_logs</Text>
+          </VStack>
+          <Button label="รีเฟรช" variant="secondary" size="sm" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchDeliveryLog} />
+        </HStack>
+
+        <Grid columns={4} gap={4}>
+          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-info)" }}>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ส่งทั้งหมด</Text>
+              <Heading level={3}>{deliveryStats.total} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+            </VStack>
+          </Card>
+          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-success)" }}>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ส่งสำเร็จ (SENT)</Text>
+              <Heading level={3}>{deliveryStats.sent} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+            </VStack>
+          </Card>
+          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-danger)" }}>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ล้มเหลว / ไม่มีผู้รับ</Text>
+              <Heading level={3}>{deliveryStats.failed} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+            </VStack>
+          </Card>
+          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-warning)" }}>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ส่งวันนี้</Text>
+              <Heading level={3}>{deliveryStats.today} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+            </VStack>
+          </Card>
+        </Grid>
+
+        <Card padding={0} style={{ overflow: "hidden" }}>
+          {deliveryLogs.length === 0 ? (
+            <div style={{ padding: 32, textAlign: "center" }}>
+              <Text type="body" color="secondary">ยังไม่มีประวัติการส่งแจ้งเตือน</Text>
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ textAlign: "left", borderBottom: "1px solid var(--cmms-border)", color: "var(--cmms-text-secondary)" }}>
+                    <th style={{ padding: "10px 14px" }}>ช่องทาง</th>
+                    <th style={{ padding: "10px 14px" }}>สถานะ</th>
+                    <th style={{ padding: "10px 14px" }}>ข้อความ</th>
+                    <th style={{ padding: "10px 14px" }}>เวลา</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deliveryLogs.map((log: any) => {
+                    const ok = log.status === "SENT";
+                    return (
+                      <tr key={log.id} style={{ borderBottom: "1px solid var(--cmms-border)" }}>
+                        <td style={{ padding: "10px 14px" }}>
+                          <Badge label={String(log.channel || "-")} variant={log.channel === "LINE" ? "info" : "accent"} />
+                        </td>
+                        <td style={{ padding: "10px 14px" }}>
+                          <Badge label={String(log.status || "-")} variant={ok ? "success" : "error"} />
+                        </td>
+                        <td style={{ padding: "10px 14px", color: "var(--cmms-text-secondary)", maxWidth: 420 }}>
+                          <div style={{ whiteSpace: "pre-line", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                            {String(log.content || "")}
+                          </div>
+                        </td>
+                        <td style={{ padding: "10px 14px", whiteSpace: "nowrap", color: "var(--cmms-text-muted)" }}>
+                          {String(log.created_at || "-").replace("T", " ").slice(0, 16)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       </VStack>
     </VStack>
   );
