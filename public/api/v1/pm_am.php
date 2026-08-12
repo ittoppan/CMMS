@@ -55,6 +55,51 @@ try {
             $values[] = $id;
             $stmt = $pdo->prepare("UPDATE pm_am SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // 🆕 Auto next-cycle: เมื่อปิดงาน PM (status=completed) → สร้างรอบถัดไปตามความถี่อัตโนมัติ
+            $newStatus = $data['status'] ?? null;
+            if ($newStatus === 'completed') {
+                $parentStmt = $pdo->prepare('SELECT * FROM pm_am WHERE id = ?');
+                $parentStmt->execute([$id]);
+                $parent = $parentStmt->fetch(PDO::FETCH_ASSOC);
+                if ($parent && !empty($parent['frequency_type'])) {
+                    $base = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
+                    $freq = $parent['frequency_type'];
+                    $interval = max(1, (int)($parent['frequency_interval'] ?: 1));
+                    $nextDue = match ($freq) {
+                        'daily'     => date('Y-m-d', strtotime("$base + $interval days")),
+                        'weekly'    => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
+                        'monthly'   => date('Y-m-d', strtotime("$base + $interval months")),
+                        'quarterly' => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
+                        'yearly'    => date('Y-m-d', strtotime("$base + $interval years")),
+                        default     => date('Y-m-d', strtotime("$base + $interval days")), // custom
+                    };
+
+                    // Dedup: มีรอบเดียวกัน (เครื่อง+ชื่อ) ที่ยังค้างอยู่แล้วไหม — กันสร้างซ้ำ
+                    $dup = $pdo->prepare("SELECT COUNT(*) FROM pm_am WHERE asset_id = ? AND title = ? AND status IN ('pending','in_progress')");
+                    $dup->execute([$parent['asset_id'], $parent['title']]);
+                    if ((int)$dup->fetchColumn() === 0) {
+                        $ins = $pdo->prepare(
+                            "INSERT INTO pm_am (asset_id, assigned_to, plan_id, title, description, frequency_type, frequency_interval, due_date, status, department_id, location_id, work_zone_id, created_at)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())"
+                        );
+                        $ins->execute([
+                            $parent['asset_id'],
+                            $parent['assigned_to'],
+                            $parent['plan_id'], // ลิงก์แม่ (ใช้ dedup/ติดตามรอบ)
+                            $parent['title'],
+                            $parent['description'],
+                            $freq,
+                            $interval,
+                            $nextDue,
+                            $parent['department_id'],
+                            $parent['location_id'],
+                            $parent['work_zone_id'],
+                        ]);
+                    }
+                }
+            }
+
             echo json_encode(['success' => true]);
             break;
         case 'DELETE':

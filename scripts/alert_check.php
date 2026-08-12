@@ -45,9 +45,11 @@ echo "== alert_check " . date('Y-m-d H:i:s') . " (alertDays={$alertDays}, lowSto
 
 // ---------------- 1) PM ใกล้กำหนด / เกินกำหนด ----------------
 $pmRows = $pdo->query("
-    SELECT p.title, p.due_date,
+    SELECT p.title, p.due_date, p.assigned_to,
+           u.full_name AS assigned_name, u.line_user_id AS tech_line_id,
            a.name AS asset_name, a.code AS asset_code
     FROM pm_am p
+    LEFT JOIN users u ON p.assigned_to = u.id
     LEFT JOIN asset_registry a ON p.asset_id = a.id
     WHERE p.status = 'pending'
       AND p.due_date IS NOT NULL
@@ -72,17 +74,30 @@ foreach ($pmRows as $r) {
         NotificationService::notifyPMOverdue($code, $r['title'], $r['due_date'], abs($days));
         echo "  alert OVERDUE: {$code} — {$r['title']} (due {$r['due_date']}, เกิน " . abs($days) . " วัน)\n";
     } else {
-        // ใกล้กำหนด (ยังไม่เกิน) — ข้อความแยก
+        // ใกล้กำหนด (ยังไม่เกิน) — ส่งตรงถึงช่างผู้รับผิดชอบ (ถ้ามี line_user_id) หรือ broadcast
         $url = rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/';
+        $who = $r['assigned_name'] ?: 'ไม่ระบุ';
         $msg = "\n⏰ [PM ใกล้กำหนด]\n"
              . "----------------------------------\n"
              . "เครื่องจักร: $code\n"
              . "รายการ: {$r['title']}\n"
-             . "กำหนดชำระ: {$r['due_date']} (อีก $days วัน)\n"
+             . "ผู้รับผิดชอบ: $who\n"
+             . "ครบกำหนด: {$r['due_date']} (อีก $days วัน)\n"
              . "----------------------------------\n"
              . "📋 ดำเนินการ PM: $url";
-        NotificationService::sendLineMessage($msg);
-        echo "  alert DUE-SOON: {$code} — {$r['title']} (due {$r['due_date']}, {$days}d)\n";
+
+        if (!empty($r['tech_line_id'])) {
+            // ส่งตรงถึงช่างคนนั้น (ไม่รบกวนคนอื่น) + บันทึก log
+            $ok = sendLinePushMessage((string)$r['tech_line_id'], '⏰ PM ใกล้กำหนด', $msg);
+            try {
+                $pdo->prepare("INSERT INTO notification_logs (channel, status, content, created_at) VALUES ('LINE', ?, ?, NOW())")
+                    ->execute([$ok ? 'SENT' : 'FAILED', mb_substr($msg, 0, 500)]);
+            } catch (Throwable $e) {}
+            echo "  alert DUE-SOON (ถึงช่าง {$r['assigned_name']}): {$code} — {$r['title']} (due {$r['due_date']}, {$days}d)\n";
+        } else {
+            NotificationService::sendLineMessage($msg);
+            echo "  alert DUE-SOON (broadcast): {$code} — {$r['title']} (due {$r['due_date']}, {$days}d)\n";
+        }
     }
     $sent++;
 }

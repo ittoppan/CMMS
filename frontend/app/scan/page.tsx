@@ -9,6 +9,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Divider } from "@astryxdesign/core/Divider";
 import { ClickableCard } from "@astryxdesign/core/ClickableCard";
 import { Spinner } from "@astryxdesign/core/Spinner";
+import { Button } from "@astryxdesign/core/Button";
 import { Link } from "@astryxdesign/core/Link";
 
 /**
@@ -34,6 +35,9 @@ export default function ScanLandingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deptName, setDeptName] = useState<string>("");
+  // แผน PM ที่รอดำเนินการของเครื่องที่สแกน (จากตาราง pm_am จริง)
+  const [pmPlans, setPmPlans] = useState<any[]>([]);
+  const [pmLoading, setPmLoading] = useState(false);
 
   useEffect(() => {
     try {
@@ -93,6 +97,25 @@ export default function ScanLandingPage() {
       })
       .catch(() => setError("โหลดข้อมูลเครื่องจักรไม่สำเร็จ กรุณาลองใหม่"))
       .finally(() => setLoading(false));
+
+    // โหลดแผน PM ที่รอดำเนินการของเครื่องนี้ด้วย
+    if (assetCode) {
+      setPmLoading(true);
+      API("/api/v1/index.php?resource=pm-plans")
+        .then((r) => r.json())
+        .then((json) => {
+          const list = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+          const done = ["completed", "skipped"];
+          setPmPlans(
+            list.filter((p: any) =>
+              p.asset_code && String(p.asset_code).toUpperCase() === assetCode &&
+              !done.includes(String(p.status || ""))
+            )
+          );
+        })
+        .catch(() => { /* ไม่มี PM = แสดงว่าง */ })
+        .finally(() => setPmLoading(false));
+    }
   }, [assetCode]);
 
   const goRepair = () => {
@@ -207,6 +230,46 @@ export default function ScanLandingPage() {
                   </VStack>
                 </HStack>
               </ClickableCard>
+
+              {/* 🗓️ แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
+              {pmLoading ? null : pmPlans.length > 0 ? (
+                <VStack gap={2} style={{ width: "100%" }}>
+                  <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "#f59e0b" }}>
+                    🗓️ แผน PM ที่ต้องทำของเครื่องนี้ ({pmPlans.length})
+                  </Text>
+                  {pmPlans.map((p) => {
+                    const overdue = p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10);
+                    return (
+                      <Card
+                        key={p.id}
+                        padding={3}
+                        width="100%"
+                        style={{
+                          background: overdue ? "#fef2f2" : "#fffbeb",
+                          border: `1px solid ${overdue ? "#fecaca" : "#fde68a"}`,
+                        }}
+                      >
+                        <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
+                          <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
+                            <Text type="body" weight="bold" size="sm" style={{ lineHeight: 1.4 }}>
+                              {overdue ? "⏰ " : "📅 "}{p.title || `แผน PM #${p.id}`}
+                            </Text>
+                            <Text type="body" size="xs" color="secondary">
+                              ครบกำหนด {p.due_date || "-"}{p.assigned_to_name ? ` · ผู้รับผิดชอบ: ${p.assigned_to_name}` : ""}
+                            </Text>
+                          </VStack>
+                          <Button
+                            label="ทำเช็ค"
+                            size="sm"
+                            variant="primary"
+                            onClick={() => window.location.href = `/pm_am/checksheet?plan_id=${p.id}&asset_code=${encodeURIComponent(assetCode)}`}
+                          />
+                        </HStack>
+                      </Card>
+                    );
+                  })}
+                </VStack>
+              ) : null}
 
               <Text type="body" size="sm" color="secondary">
                 <Link href={`/repair-request?asset_code=${encodeURIComponent(assetCode)}`}>
