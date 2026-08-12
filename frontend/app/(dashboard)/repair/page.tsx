@@ -23,7 +23,11 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
+  DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import WorkOrderClosureDocument, { WorkOrderDocData } from "../../../components/WorkOrderClosureDocument";
 
 interface WorkOrder extends Record<string, unknown> {
   id: string;
@@ -75,6 +79,10 @@ export default function WorkOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [rawMap, setRawMap] = useState<Record<number, any>>({});
+  const [pdfBuilding, setPdfBuilding] = useState(false);
+  const [pdfProgress, setPdfProgress] = useState("");
 
   const fetchWO = async () => {
     setLoading(true);
@@ -93,6 +101,9 @@ export default function WorkOrdersPage() {
           date: row.created_at ? row.created_at.split(" ")[0] : "-"
         }));
         setWorkOrders(fetched);
+        const map: Record<number, any> = {};
+        json.forEach((row: any) => { map[row.id] = row; });
+        setRawMap(map);
       }
     } catch (e) {
       console.error("Failed to fetch WO", e);
@@ -143,7 +154,103 @@ export default function WorkOrdersPage() {
     pageSize: PAGE_SIZE,
   });
 
+  const toggleSelect = (id: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelected((prev) => {
+      if (filtered.length === 0) return prev;
+      if (prev.size === filtered.length) return new Set();
+      return new Set(filtered.map((w) => Number(w.rawId)));
+    });
+  };
+
+  const toDocData = (row: any): WorkOrderDocData => ({
+    id: Number(row.id),
+    workOrderNo: row.work_order_no || `EN-${row.id}`,
+    assetName: row.asset_name || row.title || "-",
+    title: row.title || "-",
+    description: row.description || row.failure_report || "-",
+    status: row.status || "pending",
+    priority: row.priority || "medium",
+    assignedName: row.assigned_name || "-",
+    receiverName: row.receiver_name || "-",
+    beforeImg: row.before_image_path || "",
+    afterImg: row.after_image_path || "",
+    receiverSignature: row.receiver_signature_path || "",
+    completedAt: row.completed_at || row.updated_at || "-",
+    createdDate: row.created_at || "-",
+    rootCause: row.root_cause || "-",
+    solution: row.solution || row.resolution || "-",
+    costParts: Number(row.cost_parts || 0),
+    costLabor: Number(row.cost_labor || 0),
+    costOutsource: Number(row.cost_outsource || 0),
+    downtimeMinutes: Number(row.downtime_minutes || 0),
+  });
+
+  const handleBatchDownload = async () => {
+    const ids = Array.from(selected);
+    if (ids.length === 0 || pdfBuilding) return;
+    setPdfBuilding(true);
+    try {
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      let first = true;
+      for (let i = 0; i < ids.length; i++) {
+        const row = rawMap[ids[i]];
+        const node = row ? document.getElementById(`batch-doc-${row.id}`) : null;
+        if (!row || !node) continue;
+        setPdfProgress(`กำลังสร้าง PDF... ${i + 1}/${ids.length}`);
+        const canvas = await html2canvas(node, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+        });
+        const img = canvas.toDataURL("image/png");
+        if (!first) pdf.addPage();
+        const imgHeight = (canvas.height * pw) / canvas.width;
+        pdf.addImage(img, "PNG", 0, 0, pw, imgHeight);
+        first = false;
+        await new Promise((r) => setTimeout(r, 60));
+      }
+      if (first) {
+        alert("ไม่พบข้อมูลงานที่เลือก — กรุณาลองใหม่");
+      } else {
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+        pdf.save(`F-EN-03-Batch-${date}-${ids.length}wo.pdf`);
+        setSelected(new Set());
+      }
+    } catch (e) {
+      console.error("Batch PDF failed", e);
+      alert("ไม่สามารถสร้าง PDF รวมได้ — กรุณาลองใหม่อีกครั้ง");
+    }
+    setPdfBuilding(false);
+    setPdfProgress("");
+  };
+
   const columns: TableColumn<WorkOrder>[] = [
+    {
+      key: "select",
+      header: "เลือก",
+      width: proportional(0.4),
+      renderCell: (item: WorkOrder) => (
+        <input
+          type="checkbox"
+          aria-label={`เลือกงาน ${item.woNumber}`}
+          checked={selected.has(Number(item.rawId))}
+          onChange={() => toggleSelect(Number(item.rawId))}
+          style={{ width: 16, height: 16, cursor: "pointer" }}
+        />
+      ),
+    },
     { key: "woNumber", header: "เลขที่งาน", width: proportional(1) },
     { key: "asset", header: "เครื่องจักร/อุปกรณ์", width: proportional(2) },
     {
@@ -191,7 +298,15 @@ export default function WorkOrdersPage() {
           <Heading level={2}>ใบสั่งงานซ่อม</Heading>
           <Text type="body" color="secondary">ระบบจัดการใบสั่งงานซ่อมบำรุง</Text>
         </VStack>
-        <HStack gap={2}>
+        <HStack gap={2} wrap="wrap">
+          <Button
+            label={pdfBuilding ? (pdfProgress || "กำลังสร้าง PDF...") : selected.size > 0 ? `ดาวน์โหลด PDF (${selected.size})` : "ดาวน์โหลด PDF"}
+            variant={selected.size > 0 ? "primary" : "secondary"}
+            size="md"
+            isDisabled={pdfBuilding || selected.size === 0}
+            onClick={handleBatchDownload}
+            icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
+          />
           <Button
             label="รีเฟรช"
             variant="secondary"
@@ -248,6 +363,21 @@ export default function WorkOrdersPage() {
             label="ตัวกรองงานซ่อม"
             startContent={
               <>
+                <HStack gap={2} vAlign="center">
+                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
+                    <input
+                      type="checkbox"
+                      aria-label="เลือกทั้งหมดในหน้านี้"
+                      checked={filtered.length > 0 && selected.size === filtered.length}
+                      onChange={toggleAll}
+                      style={{ width: 15, height: 15, cursor: "pointer" }}
+                    />
+                    เลือกทั้งหมด
+                  </label>
+                  {selected.size > 0 && (
+                    <Badge label={`เลือก ${selected.size} รายการ`} variant="info" />
+                  )}
+                </HStack>
                 <TextInput
                   label="ค้นหา"
                   isLabelHidden
@@ -312,6 +442,21 @@ export default function WorkOrdersPage() {
           )}
         </VStack>
       </Card>
+
+      {/* Hidden off-screen document nodes for batch PDF capture */}
+      {selected.size > 0 && (
+        <div style={{ position: "fixed", top: 0, left: -9999, width: 794, pointerEvents: "none" }} aria-hidden="true">
+          {Array.from(selected).map((id) => {
+            const row = rawMap[id];
+            if (!row) return null;
+            return (
+              <div key={id} id={`batch-doc-${id}`} style={{ width: 794 }}>
+                <WorkOrderClosureDocument wo={toDocData(row)} />
+              </div>
+            );
+          })}
+        </div>
+      )}
     </VStack>
   );
 }
