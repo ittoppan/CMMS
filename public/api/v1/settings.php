@@ -1,8 +1,15 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/config/settings_defaults.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+
+// คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI)
+if (isset($_GET['defaults'])) {
+    echo json_encode(settingsDefaultValues(), JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 require_once __DIR__ . '/../../../src/csrf.php';
