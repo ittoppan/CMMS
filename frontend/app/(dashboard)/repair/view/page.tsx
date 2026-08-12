@@ -3,25 +3,18 @@
 import { useState, useEffect, useRef } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
-import { Grid } from "@astryxdesign/core/Grid";
-import { 
+import {
   CheckCircleIcon,
   PrinterIcon,
   ArrowLeftIcon,
-  CameraIcon,
-  UserIcon,
-  WrenchScrewdriverIcon,
-  ClockIcon,
-  DocumentCheckIcon,
-  BanknotesIcon,
   DocumentArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import WorkOrderClosureDocument from "../../../../components/WorkOrderClosureDocument";
 
 interface WorkOrderDetail {
   id: number;
@@ -184,207 +177,31 @@ export default function RepairViewDetailsPage() {
       </div>
 
       {/* Main Closure Document Sheet */}
-      <div ref={reportRef}>
-      <Card padding={6} style={{ background: '#FFFFFF', color: '#1E293B' }}>
-        <VStack gap={6}>
-          {/* Document Header Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0F172A', paddingBottom: 16 }}>
-            <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#475569', letterSpacing: 1 }}>
-                บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด
-              </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0F172A', marginTop: 2 }}>
-                ใบส่งมอบและปิดงานซ่อมบำรุง (F-EN-03)
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#3B82F6' }}>{wo.workOrderNo}</div>
-              <div style={{ fontSize: '0.8rem', color: '#64748B', marginTop: 2 }}>วันที่ปิดงาน: {wo.completedAt}</div>
-            </div>
-          </div>
-
-          {/* Machine & Problem Summary Grid */}
-          <Grid columns={2} gap={4}>
-            <div style={{ background: '#F8FAFC', padding: 16, borderRadius: 10, border: '1px solid #E2E8F0' }}>
-              <VStack gap={2}>
-                <Text type="supporting" color="secondary">เครื่องจักร / อุปกรณ์:</Text>
-                <Text type="body" weight="bold">{wo.assetName}</Text>
-                <Text type="supporting" color="secondary" style={{ marginTop: 6 }}>หัวข้ออาการเสีย:</Text>
-                <Text type="body" weight="semibold">{wo.title}</Text>
-              </VStack>
-            </div>
-
-            <div style={{ background: '#F8FAFC', padding: 16, borderRadius: 10, border: '1px solid #E2E8F0' }}>
-              <VStack gap={2}>
-                <Text type="supporting" color="secondary">ผู้รับผิดชอบงานซ่อม:</Text>
-                <Text type="body" weight="bold" color="primary">{wo.assignedName}</Text>
-                <Text type="supporting" color="secondary" style={{ marginTop: 6 }}>ผู้รับมอบงานซ่อมเสร็จ:</Text>
-                <Text type="body" weight="bold" style={{ color: 'var(--cmms-success)' }}>{wo.receiverName}</Text>
-              </VStack>
-            </div>
-          </Grid>
-
-          {/* 📸 BEFORE & AFTER REPAIR PHOTOS COMPARISON SECTION */}
-          <VStack gap={3}>
-            <HStack gap={2} vAlign="center">
-              <Icon icon={CameraIcon} size="md" color="primary" />
-              <Heading level={4}>📸 รูปถ่ายเปรียบเทียบก่อนซ่อมและหลังซ่อมเสร็จ</Heading>
-            </HStack>
-
-            <Grid columns={2} gap={6}>
-              {/* Before Repair Photo Card */}
-              <div style={{ border: '2px dashed #EF4444', borderRadius: 12, padding: 16, background: '#FEF2F2' }}>
-                <VStack gap={3}>
-                  <HStack hAlign="between" vAlign="center">
-                    <Badge label="🔴 รูปถ่ายก่อนซ่อม / จุดชำรุด" variant="error" />
-                    <Text type="body" size="sm" color="secondary">ภาพถ่าย ณ วันแจ้งซ่อม</Text>
-                  </HStack>
-
-                  <div style={{
-                    width: '100%',
-                    height: 240,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    background: '#CBD5E1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    {wo.beforeImg ? (
-                      <img src={wo.beforeImg} alt="รูปถ่ายก่อนซ่อม" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <VStack gap={1} hAlign="center">
-                        <Icon icon={CameraIcon} size="lg" color="secondary" />
-                        <Text type="body" size="sm" color="secondary">ไม่มีรูปภาพถ่ายก่อนซ่อม</Text>
-                      </VStack>
-                    )}
-                  </div>
-                  <Text type="body" size="sm" color="secondary">
-                    * แสดงจุดชำรุดเดิมก่อนทำการถอดเปลี่ยนอะไหล่และซ่อมแซม
-                  </Text>
-                </VStack>
-              </div>
-
-              {/* After Repair Photo Card */}
-              <div style={{ border: '2px solid #10B981', borderRadius: 12, padding: 16, background: '#ECFDF5' }}>
-                <VStack gap={3}>
-                  <HStack hAlign="between" vAlign="center">
-                    <Badge label="🟢 รูปถ่ายหลังซ่อมเสร็จ" variant="success" />
-                    <Text type="body" size="sm" color="secondary">ภาพถ่ายหลังซ่อมเสร็จสมบูรณ์</Text>
-                  </HStack>
-
-                  <div style={{
-                    width: '100%',
-                    height: 240,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    background: '#CBD5E1',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    {wo.afterImg ? (
-                      <img src={wo.afterImg} alt="รูปถ่ายหลังซ่อม" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <VStack gap={1} hAlign="center">
-                        <Icon icon={CameraIcon} size="lg" color="secondary" />
-                        <Text type="body" size="sm" color="secondary">ไม่มีรูปภาพถ่ายหลังซ่อม</Text>
-                      </VStack>
-                    )}
-                  </div>
-                  <Text type="body" size="sm" style={{ color: 'var(--cmms-success)', fontWeight: 600 }}>
-                    ✓ เครื่องจักรได้รับการซ่อมแซม ทดสอบเดินเครื่อง และพร้อมใช้งาน 100%
-                  </Text>
-                </VStack>
-              </div>
-            </Grid>
-          </VStack>
-
-          {/* Repair Solution & Cost Summary */}
-          <div style={{ background: '#F1F5F9', padding: 20, borderRadius: 12, border: '1px solid #CBD5E1' }}>
-            <VStack gap={3}>
-              <Heading level={4}>🔧 รายละเอียดการซ่อมและสาเหตุของปัญหา</Heading>
-              <Grid columns={2} gap={4}>
-                <VStack gap={1}>
-                  <Text type="body" size="sm" weight="bold">สาเหตุของปัญหา:</Text>
-                  <Text type="body" size="sm">{wo.rootCause}</Text>
-                </VStack>
-
-                <VStack gap={1}>
-                  <Text type="body" size="sm" weight="bold">วิธีการแก้ไข:</Text>
-                  <Text type="body" size="sm">{wo.solution}</Text>
-                </VStack>
-              </Grid>
-
-              <HStack gap={6} style={{ marginTop: 8, paddingTop: 12, borderTop: '1px solid #94A3B8' }}>
-                <Text type="body" size="sm">เวลาซ่อม: <strong>{wo.downtimeMinutes} นาที</strong></Text>
-                <Text type="body" size="sm">ค่าอะไหล่: <strong>฿{wo.costParts.toLocaleString()}</strong></Text>
-                <Text type="body" size="sm">ค่าแรง: <strong>฿{wo.costLabor.toLocaleString()}</strong></Text>
-                <Text type="body" size="sm" weight="bold" color="primary">รวมค่าใช้จ่าย: ฿{(wo.costParts + wo.costLabor).toLocaleString()}</Text>
-              </HStack>
-            </VStack>
-          </div>
-
-          {/* ✍️ SIGNATURES & WORK ACCEPTANCE SECTION */}
-          <VStack gap={3}>
-            <HStack gap={2} vAlign="center">
-              <Icon icon={UserIcon} size="md" color="success" />
-              <Heading level={4}>✍️ การลงนามและตรวจรับมอบงานหลังซ่อมเสร็จ</Heading>
-            </HStack>
-
-            <Grid columns={2} gap={6}>
-              {/* Technician Signature */}
-              <div style={{ border: '1px solid #CBD5E1', borderRadius: 12, padding: 16, textAlign: 'center', background: '#FFFFFF' }}>
-                <VStack gap={2} hAlign="center">
-                  <Text type="body" size="sm" color="secondary">ลายเซ็นช่างผู้ซ่อม</Text>
-                  <div style={{
-                    width: 220,
-                    height: 90,
-                    border: '1px dashed #CBD5E1',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#F8FAFC'
-                  }}>
-                    <Text type="body" size="sm" color="secondary">ยังไม่มีข้อมูลลายเซ็นในระบบ</Text>
-                  </div>
-                  <Text type="body" weight="bold">{wo.assignedName}</Text>
-                  <Text type="body" size="sm" color="secondary">แผนกซ่อมบำรุง</Text>
-                </VStack>
-              </div>
-
-              {/* Receiver / Production Supervisor Signature */}
-              <div style={{ border: '2px solid #10B981', borderRadius: 12, padding: 16, textAlign: 'center', background: '#ECFDF5' }}>
-                <VStack gap={2} hAlign="center">
-                  <Badge label="✓ ตรวจรับมอบงานเสร็จสมบูรณ์" variant="success" />
-                  <Text type="body" size="sm" color="secondary">ลายเซ็นผู้รับมอบงาน</Text>
-                  <div style={{
-                    width: 220,
-                    height: 90,
-                    border: '1px dashed #10B981',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: '#FFFFFF'
-                  }}>
-                    {wo.receiverSignature ? (
-                      <img src={wo.receiverSignature} alt="ลายเซ็นผู้รับมอบงาน" style={{ maxHeight: 75 }} />
-                    ) : (
-                      <Text type="body" size="sm" color="secondary">ยังไม่มีลายเซ็นผู้รับมอบงาน</Text>
-                    )}
-                  </div>
-                  <Text type="body" weight="bold">{wo.receiverName}</Text>
-                  <Text type="body" size="sm" color="secondary">วันที่ตรวจรับ: {wo.completedAt}</Text>
-                </VStack>
-              </div>
-            </Grid>
-          </VStack>
-        </VStack>
-      </Card>
+      <div ref={reportRef} style={{ background: "#FFFFFF" }}>
+        <WorkOrderClosureDocument
+          wo={{
+            id: wo.id,
+            workOrderNo: wo.workOrderNo,
+            assetName: wo.assetName,
+            title: wo.title,
+            description: wo.description,
+            status: wo.status,
+            priority: wo.priority,
+            assignedName: wo.assignedName,
+            receiverName: wo.receiverName,
+            beforeImg: wo.beforeImg,
+            afterImg: wo.afterImg,
+            receiverSignature: wo.receiverSignature,
+            completedAt: wo.completedAt,
+            createdDate: wo.completedAt,
+            rootCause: wo.rootCause,
+            solution: wo.solution,
+            costParts: wo.costParts,
+            costLabor: wo.costLabor,
+            costOutsource: 0,
+            downtimeMinutes: wo.downtimeMinutes,
+          }}
+        />
       </div>
 
       {/* Print Stylesheet */}
