@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
@@ -163,18 +163,19 @@ body {
 /* === Font unification ========================
    Astryx components ใช้ตัวแปร --font-family-body/heading
    (ค่า default เป็น Segoe UI) — ต้อง override ให้เป็น
-   ฟอนต์เดียวกับ body (Inter + Noto Sans Thai)
+   ฟอนต์เดียวกับ body: Roboto (ฟอนต์เว็บ TOPPAN Holdings)
+   สำหรับอักษรละติน + Noto Sans Thai สำหรับภาษาไทย
    เพื่อให้ฟอนต์เหมือนกันทั้งระบบ ========================= */
 :root {
-  --font-family-body: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-heading: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-body: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-code: 'SF Mono', Monaco, Consolas, 'Cascadia Code', monospace;
 }
 
 html, body {
   /* บังคับ light scheme เพื่อให้ astryx light-dark() tokens เลือกค่าสว่างเสมอ */
   color-scheme: light;
-  font-family: 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-family: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
