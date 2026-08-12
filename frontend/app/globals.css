@@ -1406,6 +1406,22 @@ next-route-announcer {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* นับงานแบบตัวเลข Barlow — ใช้บนพื้นขาว */
+.cmms-count-pill {
+  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: center;
+  padding: 2px 9px;
+  border-radius: 99px;
+  color: var(--color-text-primary);
+  background: var(--color-background-muted);
+  border: 1px solid var(--color-border);
+}
+
 .cmms-andon-chip {
   display: inline-flex;
   align-items: center;

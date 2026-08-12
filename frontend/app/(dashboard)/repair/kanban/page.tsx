@@ -23,6 +23,7 @@ import {
   ExclamationTriangleIcon,
   UserIcon
 } from "@heroicons/react/24/outline";
+import AndonLamp from "@/components/AndonLamp";
 
 export interface KanbanItem {
   id: string;
@@ -116,46 +117,47 @@ export default function RepairKanbanPage() {
     });
   }, [items, search, priorityFilter]);
 
+  // หัวคอลัมน์ใช้ไฟ Andon: เหลือง=อยู่ในสายงาน, แดง=ถูกบล็อก (รออะไหล่), เขียว=เสร็จ
   const columnsDef = [
     {
       key: "open" as const,
-      title: "🟡 รอดำเนินการ (To Do)",
-      color: "var(--cmms-warning)",
-      bg: "var(--cmms-warning-wash)",
+      title: "รอดำเนินการ",
+      andon: "warn" as const,
+      tone: "#F59E0B",
       items: filteredItems.filter(i => i.status === "open"),
       nextStatus: "in_progress" as const,
-      nextLabel: "เริ่มซ่อม ➔",
+      nextLabel: "เริ่มซ่อม",
     },
     {
       key: "in_progress" as const,
-      title: "🔵 กำลังซ่อมบำรุง (In Progress)",
-      color: "var(--cmms-primary)",
-      bg: "var(--cmms-primary-wash)",
+      title: "กำลังซ่อมบำรุง",
+      andon: "warn" as const,
+      tone: "#F59E0B",
       items: filteredItems.filter(i => i.status === "in_progress"),
       prevStatus: "open" as const,
       nextStatus: "pending" as const,
-      prevLabel: "⬅️ ย้อนกลับ",
-      nextLabel: "รออะไหล่/ปิดงาน ➔",
+      prevLabel: "ย้อนกลับ",
+      nextLabel: "รออะไหล่ / ปิดงาน",
     },
     {
       key: "pending" as const,
-      title: "🔴 รออะไหล่/ประเมิน",
-      color: "var(--cmms-danger)",
-      bg: "var(--cmms-danger-wash)",
+      title: "รออะไหล่ / ประเมิน",
+      andon: "down" as const,
+      tone: "#EF4444",
       items: filteredItems.filter(i => i.status === "pending"),
       prevStatus: "in_progress" as const,
       nextStatus: "completed" as const,
-      prevLabel: "⬅️ กำลังซ่อม",
-      nextLabel: "เสร็จสิ้น ➔",
+      prevLabel: "กำลังซ่อม",
+      nextLabel: "เสร็จสิ้น",
     },
     {
       key: "completed" as const,
-      title: "🟢 เสร็จสมบูรณ์ (Completed)",
-      color: "var(--cmms-success)",
-      bg: "var(--cmms-success-wash)",
+      title: "เสร็จสมบูรณ์",
+      andon: "ok" as const,
+      tone: "#10B981",
       items: filteredItems.filter(i => i.status === "completed"),
       prevStatus: "in_progress" as const,
-      prevLabel: "⬅️ ย้อนกลับ",
+      prevLabel: "ย้อนกลับ",
     },
   ];
 
@@ -164,8 +166,11 @@ export default function RepairKanbanPage() {
       {/* Header */}
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
-          <Heading level={2}>📌 Kanban Board งานซ่อมบำรุง</Heading>
-          <Text type="body" color="secondary">บอร์ดติดตามสถานะงานซ่อมแบบพกพาตามกระบวนการทำงาน (Work Order Workflow)</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow">
+            Kanban Board · CMMS-TOPPAN
+          </Text>
+          <Heading level={2}>Kanban งานซ่อม</Heading>
+          <Text type="body" color="secondary">บอร์ดติดตามสถานะงานซ่อมตามกระบวนการทำงาน — หัวคอลัมน์เป็นไฟสัญญาณ: เหลือง=อยู่ในสายงาน แดง=รออะไหล่ เขียว=เสร็จ</Text>
         </VStack>
         <HStack gap={2}>
           <Button
@@ -204,10 +209,10 @@ export default function RepairKanbanPage() {
               onChange={setPriorityFilter}
               options={[
                 { value: "all", label: "ทุกความด่วน" },
-                { value: "Critical", label: "🔴 Critical" },
-                { value: "High", label: "🟡 High" },
-                { value: "Medium", label: "🔵 Medium" },
-                { value: "Low", label: "⚪ Low" },
+                { value: "Critical", label: "วิกฤต (Critical)" },
+                { value: "High", label: "สูง (High)" },
+                { value: "Medium", label: "ปานกลาง (Medium)" },
+                { value: "Low", label: "ต่ำ (Low)" },
               ]}
             />
           </>
@@ -221,15 +226,18 @@ export default function RepairKanbanPage() {
             key={col.key}
             padding={4}
             style={{
-              borderTop: `4px solid ${col.color}`,
+              borderTop: `4px solid ${col.tone}`,
               background: 'var(--cmms-bg-card)',
               minHeight: 500,
             }}
           >
             <VStack gap={4}>
               <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--cmms-border)', paddingBottom: 10 }}>
-                <Text type="body" weight="bold" style={{ fontSize: '0.95rem' }}>{col.title}</Text>
-                <Badge label={String(col.items.length)} variant="neutral" />
+                <HStack gap={2} vAlign="center">
+                  <AndonLamp status={col.andon} size="sm" />
+                  <Text type="body" weight="bold" style={{ fontSize: '0.95rem' }}>{col.title}</Text>
+                </HStack>
+                <span className="cmms-count-pill">{col.items.length}</span>
               </HStack>
 
               {loading ? (
@@ -288,6 +296,7 @@ export default function RepairKanbanPage() {
                               label={col.prevLabel}
                               variant="secondary"
                               size="sm"
+                              icon={<Icon icon={ChevronLeftIcon} size="xsm" />}
                               onClick={() => updateStatus(item.id, col.prevStatus)}
                             />
                           ) : <div />}
@@ -297,6 +306,7 @@ export default function RepairKanbanPage() {
                               label={col.nextLabel}
                               variant="primary"
                               size="sm"
+                              icon={<Icon icon={ChevronRightIcon} size="xsm" />}
                               onClick={() => updateStatus(item.id, col.nextStatus)}
                             />
                           )}
