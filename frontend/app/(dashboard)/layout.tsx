@@ -50,6 +50,12 @@ import {
   ServerStackIcon,
   Squares2X2Icon,
   UserCircleIcon,
+  TruckIcon,
+  BeakerIcon,
+  BookOpenIcon,
+  UserGroupIcon,
+  CircleStackIcon,
+  CheckBadgeIcon,
   DevicePhoneMobileIcon
 } from "@heroicons/react/24/outline";
 
@@ -100,23 +106,30 @@ const PAGE_TITLES: Record<string, string> = {
 // Section mapping for breadcrumb
 const SECTION_MAP: Record<string, string> = {
   "/repair": "งานซ่อมบำรุง",
+  "/approval": "การอนุมัติ & เอกสาร",
+  "/forms": "การอนุมัติ & เอกสาร",
   "/pm_am": "แผน PM & เครื่องจักร",
   "/asset_registry": "แผน PM & เครื่องจักร",
+  "/assets": "แผน PM & เครื่องจักร",
   "/equipment_borrowing": "แผน PM & เครื่องจักร",
   "/calibration": "แผน PM & เครื่องจักร",
+  "/mtbf_mttr": "แผน PM & เครื่องจักร",
+  "/inspections": "แผน PM & เครื่องจักร",
   "/spare_parts": "คลังอะไหล่",
+  "/suppliers": "คลังอะไหล่",
   "/analytics": "วิเคราะห์ & รายงาน",
   "/reports": "วิเคราะห์ & รายงาน",
-  "/safety": "ความปลอดภัย",
-  "/iot": "ความปลอดภัย",
+  "/safety": "ความปลอดภัย & IoT",
+  "/iot": "ความปลอดภัย & IoT",
   "/users": "บุคลากร",
-  "/notifications": "บุคลากร",
-  "/forms": "เอกสาร & แบบฟอร์ม",
-  "/settings": "ตั้งค่า",
-  "/settings/notifications": "ตั้งค่า",
-  "/settings/menus": "ตั้งค่า",
-  "/settings/pwa": "ตั้งค่า",
-  "/settings/services": "ตั้งค่า",
+  "/roles": "บุคลากร",
+  "/manuals": "เอกสารคู่มือ",
+  "/notifications": "ระบบ & ตั้งค่า",
+  "/settings": "ระบบ & ตั้งค่า",
+  "/settings/notifications": "ระบบ & ตั้งค่า",
+  "/settings/menus": "ระบบ & ตั้งค่า",
+  "/settings/pwa": "ระบบ & ตั้งค่า",
+  "/settings/services": "ระบบ & ตั้งค่า",
 };
 
 function getSection(pathname: string): string | null {
@@ -348,58 +361,81 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* 1. งานซ่อมบำรุง */}
           <SideNavSection title="งานซ่อมบำรุง">
             {canShow("dashboard") && <SideNavItem label="แดชบอร์ดภาพรวม" icon={HomeIcon} href="/dashboard" isSelected={isSelected("/dashboard")} />}
-            {canShow("repair/request") && <SideNavItem label="ฟอร์มแจ้งซ่อมด่วน" icon={DocumentPlusIcon} href="/repair/request" isSelected={isSelected("/repair/request")} />}
+            {canShow("repair") && <SideNavItem label="ใบสั่งงานซ่อมทั้งหมด" icon={WrenchScrewdriverIcon} href="/repair" isSelected={isSelected("/repair")} />}
+            {canShow("repair/request") && <SideNavItem label="แจ้งซ่อมด่วน" icon={DocumentPlusIcon} href="/repair/request" isSelected={isSelected("/repair/request")} />}
             {canShow("repair/assign") && <SideNavItem label="แจกงานซ่อม" icon={MapIcon} href="/repair/assign" isSelected={isSelected("/repair/assign")} />}
-            {canShow("repair/my_tasks") && <SideNavItem label="งานซ่อมของฉัน" icon={ClipboardDocumentCheckIcon} href="/repair/my_tasks" isSelected={isSelected("/repair/my_tasks")} />}
-            {canShow("repair/tracking") && <SideNavItem label="ติดตามงานซ่อม" icon={WrenchScrewdriverIcon} href="/repair/tracking" isSelected={isSelected("/repair/tracking")} />}
-            {canShow("repair/workload") && <SideNavItem label="ภาระงานช่าง (Workload)" icon={BoltIcon} href="/repair/workload" isSelected={isSelected("/repair/workload")} />}
+            {canShow("repair/my_tasks") && <SideNavItem label="งานของฉัน (ซ่อม + PM)" icon={ClipboardDocumentCheckIcon} href="/repair/my_tasks" isSelected={isSelected("/repair/my_tasks")} />}
+            {canShow("repair/tracking") && <SideNavItem label="ติดตามงานซ่อม" icon={MapIcon} href="/repair/tracking" isSelected={isSelected("/repair/tracking")} />}
+            {canShow("repair/workload") && <SideNavItem label="ภาระงานช่าง" icon={BoltIcon} href="/repair/workload" isSelected={isSelected("/repair/workload")} />}
             {canShow("repair/kanban") && <SideNavItem label="กระดานคัมบัง" icon={SquaresPlusIcon} href="/repair/kanban" isSelected={isSelected("/repair/kanban")} />}
             {canShow("repair/history") && <SideNavItem label="ประวัติงานซ่อม" icon={ClockIcon} href="/repair/history" isSelected={isSelected("/repair/history")} />}
           </SideNavSection>
-          
-          {/* 2. แผน PM & เครื่องจักร */}
-          <SideNavSection title="PM & เครื่องจักร">
+
+          {/* 2. การอนุมัติ & เอกสาร */}
+          <SideNavSection title="การอนุมัติ & เอกสาร">
+            {canShow("approval") && <SideNavItem label="ศูนย์อนุมัติเอกสาร" icon={CheckBadgeIcon} href="/approval" isSelected={isSelected("/approval")} />}
+            {canShow("forms") && <SideNavItem label="ศูนย์แบบฟอร์ม (F-EN)" icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
+            {canShow("manuals") && <SideNavItem label="คู่มือการใช้งาน" icon={BookOpenIcon} href="/manuals" isSelected={isSelected("/manuals")} />}
+          </SideNavSection>
+
+          {/* 3. แผน PM & เครื่องจักร */}
+          <SideNavSection title="แผน PM & เครื่องจักร">
+            {canShow("pm_am") && <SideNavItem label="ตารางแผน PM" icon={CalendarDaysIcon} href="/pm_am" isSelected={isSelected("/pm_am")} />}
             {canShow("pm_am/calendar") && <SideNavItem label="ปฏิทิน PM/AM" icon={CalendarDaysIcon} href="/pm_am/calendar" isSelected={isSelected("/pm_am/calendar")} />}
+            {canShow("pm_am/checksheet") && <SideNavItem label="ทำเช็คชีท PM" icon={ClipboardDocumentCheckIcon} href="/pm_am/checksheet" isSelected={isSelected("/pm_am/checksheet")} />}
             {canShow("pm_am/create") && <SideNavItem label="สร้างแผน PM" icon={DocumentPlusIcon} href="/pm_am/create" isSelected={isSelected("/pm_am/create")} />}
             {canShow("pm_am/batch_schedule") && <SideNavItem label="สร้างแผนแบบกลุ่ม" icon={RectangleGroupIcon} href="/pm_am/batch_schedule" isSelected={isSelected("/pm_am/batch_schedule")} />}
-            {canShow("pm_am/checksheet") && <SideNavItem label="ทำเช็คชีท PM" icon={ClipboardDocumentCheckIcon} href="/pm_am/checksheet" isSelected={isSelected("/pm_am/checksheet")} />}
             {canShow("inspections") && <SideNavItem label="ตรวจเช็ครอบ (Checklist)" icon={ClipboardDocumentListIcon} href="/inspections" isSelected={isSelected("/inspections")} />}
+            {canShow("inspections/run") && <SideNavItem label="ทำเช็คลิสต์ทันที" icon={ClipboardDocumentListIcon} href="/inspections/run" isSelected={isSelected("/inspections/run")} />}
             {canShow("inspections/templates") && <SideNavItem label="จัดการ Template ตรวจ" icon={Squares2X2Icon} href="/inspections/templates" isSelected={isSelected("/inspections/templates")} />}
             {canShow("asset_registry") && <SideNavItem label="ทะเบียนเครื่องจักร" icon={BuildingOffice2Icon} href="/asset_registry" isSelected={isSelected("/asset_registry")} />}
+            {canShow("assets") && <SideNavItem label="ทรัพย์สิน & เครื่องจักร" icon={BuildingOffice2Icon} href="/assets" isSelected={isSelected("/assets")} />}
             {canShow("qr-sheet") && <SideNavItem label="แผ่น QR เครื่องจักร" icon={MapIcon} href="/qr-sheet" isSelected={isSelected("/qr-sheet")} />}
             {canShow("asset_registry/bom_tree") && <SideNavItem label="ผังชิ้นส่วน (BOM)" icon={CubeIcon} href="/asset_registry/bom_tree" isSelected={isSelected("/asset_registry/bom_tree")} />}
             {canShow("asset_registry/criticality") && <SideNavItem label="ลำดับความสำคัญ A/B/C" icon={ScaleIcon} href="/asset_registry/criticality" isSelected={isSelected("/asset_registry/criticality")} />}
             {canShow("equipment_borrowing") && <SideNavItem label="ยืม-คืนอุปกรณ์" icon={ArrowsRightLeftIcon} href="/equipment_borrowing" isSelected={isSelected("/equipment_borrowing")} />}
             {canShow("calibration") && <SideNavItem label="สอบเทียบเครื่องมือวัด" icon={ScaleIcon} href="/calibration" isSelected={isSelected("/calibration")} />}
+            {canShow("mtbf_mttr") && <SideNavItem label="วิเคราะห์ MTBF/MTTR" icon={BeakerIcon} href="/mtbf_mttr" isSelected={isSelected("/mtbf_mttr")} />}
           </SideNavSection>
 
-          {/* 3. คลังอะไหล่ */}
+          {/* 4. คลังอะไหล่ */}
           <SideNavSection title="คลังอะไหล่">
             {canShow("spare_parts") && <SideNavItem label="คลังสต็อกอะไหล่" icon={CubeIcon} href="/spare_parts" isSelected={isSelected("/spare_parts")} />}
             {canShow("spare_parts/issue_center") && <SideNavItem label="ศูนย์เบิก-จ่าย Sage" icon={ShoppingBagIcon} href="/spare_parts/issue_center" isSelected={isSelected("/spare_parts/issue_center")} />}
             {canShow("spare_parts/sage_po") && <SideNavItem label="รับอะไหล่จาก PO" icon={DocumentCheckIcon} href="/spare_parts/sage_po" isSelected={isSelected("/spare_parts/sage_po")} />}
-            {canShow("spare_parts/optimization") && <SideNavItem label="AI คำนวณ EOQ และสต็อกค้าง" icon={SparklesIcon} href="/spare_parts/optimization" isSelected={isSelected("/spare_parts/optimization")} />}
+            {canShow("spare_parts/sage_sync") && <SideNavItem label="ซิงค์สต็อก Sage 300" icon={CircleStackIcon} href="/spare_parts/sage_sync" isSelected={isSelected("/spare_parts/sage_sync")} />}
+            {canShow("spare_parts/optimization") && <SideNavItem label="AI EOQ & สต็อกค้าง" icon={SparklesIcon} href="/spare_parts/optimization" isSelected={isSelected("/spare_parts/optimization")} />}
+            {canShow("suppliers") && <SideNavItem label="ผู้ผลิต & คะแนนผู้ขาย" icon={TruckIcon} href="/suppliers" isSelected={isSelected("/suppliers")} />}
           </SideNavSection>
 
-          {/* 4. วิเคราะห์ & รายงาน */}
+          {/* 5. วิเคราะห์ & รายงาน */}
           <SideNavSection title="วิเคราะห์ & รายงาน">
             {canShow("analytics") && <SideNavItem label="คลังข้อมูลและ BI" icon={ChartBarIcon} href="/analytics" isSelected={isSelected("/analytics")} />}
+            {canShow("reports") && <SideNavItem label="ศูนย์รวมรายงาน" icon={ChartBarIcon} href="/reports" isSelected={isSelected("/reports")} />}
             {canShow("reports/monthly_pdf") && <SideNavItem label="รายงาน PDF ผู้บริหาร" icon={DocumentArrowDownIcon} href="/reports/monthly_pdf" isSelected={isSelected("/reports/monthly_pdf")} />}
             {canShow("reports/export_excel") && <SideNavItem label="ส่งออก Excel / CSV" icon={TableCellsIcon} href="/reports/export_excel" isSelected={isSelected("/reports/export_excel")} />}
+          </SideNavSection>
+
+          {/* 6. ความปลอดภัย & IoT */}
+          <SideNavSection title="ความปลอดภัย & IoT">
             {canShow("safety/work_permit") && <SideNavItem label="ใบอนุญาต LOTO" icon={ShieldCheckIcon} href="/safety/work_permit" isSelected={isSelected("/safety/work_permit")} />}
             {canShow("iot/monitor") && <SideNavItem label="มอนิเตอร์เซนเซอร์ IoT" icon={BoltIcon} href="/iot/monitor" isSelected={isSelected("/iot/monitor")} />}
           </SideNavSection>
 
-          {/* 5. ตั้งค่าระบบ */}
+          {/* 7. บุคลากร */}
+          <SideNavSection title="บุคลากร">
+            {canShow("users") && <SideNavItem label="ผู้ใช้งานระบบ" icon={UsersIcon} href="/users" isSelected={isSelected("/users")} />}
+            {canShow("roles") && <SideNavItem label="บทบาท & สิทธิ์" icon={UserGroupIcon} href="/roles" isSelected={isSelected("/roles")} />}
+            {canShow("register") && <SideNavItem label="ลงทะเบียนผูกบัญชี LINE" icon={ChatBubbleLeftRightIcon} href="/register" isSelected={isSelected("/register")} />}
+          </SideNavSection>
+
+          {/* 8. ระบบ & ตั้งค่า */}
           <SideNavSection title="ระบบ & ตั้งค่า">
             {canShow("notifications") && <SideNavItem label="ศูนย์แจ้งเตือน" icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
-            {canShow("forms") && <SideNavItem label="ศูนย์แบบฟอร์ม (F-EN)" icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
             {canShow("settings/notifications") && <SideNavItem label="รูปแบบการแจ้งเตือน LINE" icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
-            {canShow("register") && <SideNavItem label="ลงทะเบียนผูกบัญชี LINE" icon={ChatBubbleLeftRightIcon} href="/register" isSelected={isSelected("/register")} />}
-            {canShow("users") && <SideNavItem label="ผู้ใช้งานระบบ" icon={UsersIcon} href="/users" isSelected={isSelected("/users")} />}
-            {canShow("settings") && <SideNavItem label="ตั้งค่าทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
-            {canShow("settings") && <SideNavItem label="บริการและสถานะการรันระบบ" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
+            {canShow("settings") && <SideNavItem label="ตั้งค่าระบบทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
             {canShow("settings") && <SideNavItem label="สิทธิ์เมนูตามบทบาท" icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
+            {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
           </SideNavSection>
           footer={
