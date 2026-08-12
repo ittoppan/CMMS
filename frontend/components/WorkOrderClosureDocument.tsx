@@ -21,6 +21,14 @@ export interface WorkOrderDocData {
   costLabor: number;
   costOutsource: number;
   downtimeMinutes: number;
+  parts: WorkOrderPart[];
+}
+
+export interface WorkOrderPart {
+  code: string;
+  name: string;
+  quantity_used: number;
+  unit_price: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -37,6 +45,10 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
   const status = String(wo.status || "").toLowerCase();
   const priority = String(wo.priority || "").toLowerCase();
   const total = (wo.costParts || 0) + (wo.costLabor || 0) + (wo.costOutsource || 0);
+  const partsTotal = (wo.parts || []).reduce(
+    (s, p) => s + (Number(p.quantity_used) || 0) * (Number(p.unit_price) || 0),
+    0
+  );
 
   const statusBg =
     status === "completed" || status === "closed" || status === "resolved" ? "#DCFCE7"
@@ -152,6 +164,49 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           {wo.costOutsource > 0 && <div style={{ fontSize: 13 }}>จ้างภายนอก: <b>฿{(wo.costOutsource || 0).toLocaleString()}</b></div>}
           <div style={{ fontSize: 13, fontWeight: 800, color: "#2563EB" }}>รวมค่าใช้จ่าย: ฿{total.toLocaleString()}</div>
         </div>
+      </div>
+
+      {/* Spare Parts Used */}
+      <div style={{ marginTop: 14 }}>
+        <div style={{ fontWeight: 800, marginBottom: 8 }}>🔩 อะไหล่ที่ใช้ซ่อม</div>
+        {wo.parts && wo.parts.length > 0 ? (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "1px solid #CBD5E1" }}>
+            <thead>
+              <tr style={{ background: "#F1F5F9", textAlign: "left" }}>
+                <th style={{ padding: "8px 10px", border: "1px solid #CBD5E1" }}>รหัส</th>
+                <th style={{ padding: "8px 10px", border: "1px solid #CBD5E1" }}>ชื่ออะไหล่</th>
+                <th style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>จำนวน</th>
+                <th style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>ราคา/หน่วย</th>
+                <th style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>รวม</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(wo.parts || []).map((p, i) => {
+                const qty = Number(p.quantity_used) || 0;
+                const price = Number(p.unit_price) || 0;
+                return (
+                  <tr key={i} style={{ background: i % 2 ? "#F8FAFC" : "#FFFFFF" }}>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", fontFamily: "monospace", fontSize: 12 }}>{p.code || "-"}</td>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1" }}>{p.name || "-"}</td>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>{qty}</td>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>฿{price.toLocaleString()}</td>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right", fontWeight: 700 }}>฿{(qty * price).toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+              {partsTotal > 0 && (
+                <tr style={{ background: "#F1F5F9", fontWeight: 800 }}>
+                  <td colSpan={4} style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>รวมค่าวัสดุ</td>
+                  <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>฿{partsTotal.toLocaleString()}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ fontSize: 13, color: "#64748B", padding: "10px 12px", border: "1px dashed #CBD5E1", borderRadius: 8, background: "#F8FAFC" }}>
+            ไม่มีอะไหล่ที่เบิกใช้ในการซ่อมครั้งนี้
+          </div>
+        )}
       </div>
 
       {/* Signatures */}

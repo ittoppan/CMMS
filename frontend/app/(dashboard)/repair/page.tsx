@@ -27,7 +27,7 @@ import {
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import WorkOrderClosureDocument, { WorkOrderDocData } from "../../../components/WorkOrderClosureDocument";
+import WorkOrderClosureDocument, { WorkOrderDocData, WorkOrderPart } from "../../../components/WorkOrderClosureDocument";
 
 interface WorkOrder extends Record<string, unknown> {
   id: string;
@@ -83,6 +83,7 @@ export default function WorkOrdersPage() {
   const [rawMap, setRawMap] = useState<Record<number, any>>({});
   const [pdfBuilding, setPdfBuilding] = useState(false);
   const [pdfProgress, setPdfProgress] = useState("");
+  const [partsForBatch, setPartsForBatch] = useState<Record<number, WorkOrderPart[]>>({});
 
   const fetchWO = async () => {
     setLoading(true);
@@ -171,7 +172,7 @@ export default function WorkOrdersPage() {
     });
   };
 
-  const toDocData = (row: any): WorkOrderDocData => ({
+  const toDocData = (row: any, parts: WorkOrderPart[] = []): WorkOrderDocData => ({
     id: Number(row.id),
     workOrderNo: row.work_order_no || `EN-${row.id}`,
     assetName: row.asset_name || row.title || "-",
@@ -192,6 +193,7 @@ export default function WorkOrdersPage() {
     costLabor: Number(row.cost_labor || 0),
     costOutsource: Number(row.cost_outsource || 0),
     downtimeMinutes: Number(row.downtime_minutes || 0),
+    parts,
   });
 
   const handleBatchDownload = async () => {
@@ -199,6 +201,15 @@ export default function WorkOrdersPage() {
     if (ids.length === 0 || pdfBuilding) return;
     setPdfBuilding(true);
     try {
+      setPdfProgress("กำลังโหลดข้อมูลอะไหล่...");
+      const partsRes = await fetch(`/api/v1/repair.php?parts=1&ids=${ids.join(",")}`);
+      const partsJson = await partsRes.json();
+      const partsMap: Record<number, WorkOrderPart[]> =
+        partsJson && typeof partsJson === "object" && !Array.isArray(partsJson) ? partsJson : {};
+      setPartsForBatch(partsMap);
+      // รอ React re-render โหนดเอกสารให้มีตารางอะไหล่ก่อน capture
+      await new Promise((r) => setTimeout(r, 200));
+
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
@@ -232,6 +243,7 @@ export default function WorkOrdersPage() {
       console.error("Batch PDF failed", e);
       alert("ไม่สามารถสร้าง PDF รวมได้ — กรุณาลองใหม่อีกครั้ง");
     }
+    setPartsForBatch({});
     setPdfBuilding(false);
     setPdfProgress("");
   };
@@ -451,7 +463,7 @@ export default function WorkOrdersPage() {
             if (!row) return null;
             return (
               <div key={id} id={`batch-doc-${id}`} style={{ width: 794 }}>
-                <WorkOrderClosureDocument wo={toDocData(row)} />
+                <WorkOrderClosureDocument wo={toDocData(row, partsForBatch[id] || [])} />
               </div>
             );
           })}
