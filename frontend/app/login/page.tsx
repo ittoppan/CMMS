@@ -104,23 +104,18 @@ function LoginContent() {
           background: "linear-gradient(135deg, #0E1524 0%, #312E81 55%, #6D28D9 100%)",
         }}
       >
-        {/* Floating shapes */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", zIndex: 0 }}>
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                borderRadius: "50%",
-                opacity: 0.08,
-                background: "#fff",
-                width: [320, 480, 220][i],
-                height: [320, 480, 220][i],
-                top: ["-60px", "40%", "65%"][i],
-                right: ["-80px", "-120px", "10%"][i],
-              }}
-            />
-          ))}
+        {/* QR-code grid — ลายตารางแบบ QR ที่ช่างสแกนบนเครื่องจักร */}
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 0, opacity: 0.32,
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)",
+          backgroundSize: "46px 46px",
+        }} />
+        {/* QR finder marker (มุมขวาบน) */}
+        <div style={{ position: "absolute", top: 36, right: 36, width: 84, height: 84, zIndex: 0, opacity: 0.5 }}>
+          <div style={{ position: "absolute", inset: 0, border: "1px solid rgba(255,255,255,0.4)", borderRadius: 10 }} />
+          <div style={{ position: "absolute", top: 8, left: 8, width: 26, height: 26, border: "1px solid rgba(255,255,255,0.4)", borderRadius: 5 }} />
+          <div style={{ position: "absolute", top: 16, left: 16, width: 10, height: 10, background: "rgba(255,255,255,0.75)", borderRadius: 2 }} />
         </div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
@@ -143,10 +138,31 @@ function LoginContent() {
             ))}
           </div>
 
+          <div style={{
+            fontFamily: "'Barlow Condensed','Inter',sans-serif",
+            fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', marginBottom: 14,
+          }}>
+            CMMS · Enterprise Maintenance
+          </div>
           <h1 style={{ color: '#fff', fontSize: '2.2rem', fontWeight: 800, lineHeight: 1.3, margin: 0 }}>ระบบจัดการ<br />งานซ่อมบำรุง</h1>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 440, margin: '12px 0 0' }}>
             CMMS-TOPPAN — Computerized Maintenance Management System สำหรับ TOPPAN Flexible Packaging (Thailand)
           </p>
+
+          {/* สถานะระบบ — ไฟ Andon */}
+          <div style={{ marginTop: 32, display: 'flex', gap: 22, flexWrap: 'wrap' }}>
+            {[
+              { label: 'ระบบ', color: '#10B981' },
+              { label: 'ฐานข้อมูล', color: '#10B981' },
+              { label: 'LINE แจ้งเตือน', color: '#10B981' },
+            ].map((s) => (
+              <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'rgba(255,255,255,0.72)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: '0 0 8px rgba(16,185,129,0.7)' }} />
+                {s.label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 

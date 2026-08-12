@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
@@ -1254,4 +1254,189 @@ next-route-announcer {
   white-space: nowrap !important;
   border: 0 !important;
   visibility: hidden !important;
+}
+
+/* ================================================
+   Andon Design System — สัญญาณไฟโรงงาน (frontend-design pass)
+   ภาษาไฟ Andon: เขียว = พร้อมใช้งาน, เหลือง = ต้องดูแล,
+   แดง = หยุดทำงาน — มาจากเสาไฟสัญญาณบนเครื่องจักรจริง
+   ================================================ */
+
+/* ── ฟอนต์ตัวเลข/ป้ายแบบเครื่องจักร (Barlow Condensed) ── */
+.cmms-display,
+.cmms-num {
+  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.cmms-eyebrow {
+  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  color: var(--cmms-text-muted);
+}
+
+/* ── เสาไฟสัญญาณ Andon (โคมแดง/เหลือง/เขียว) ── */
+.cmms-andon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 4px;
+  background: rgba(127, 141, 170, 0.14);
+  border-radius: 7px;
+  border: 1px solid rgba(127, 141, 170, 0.14);
+  line-height: 0;
+}
+
+.cmms-andon-lamp {
+  border-radius: 50%;
+  background: rgba(127, 141, 170, 0.28);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cmms-andon.lit-ok .cmms-andon-lamp.ok {
+  background: #10B981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.55);
+}
+.cmms-andon.lit-warn .cmms-andon-lamp.warn {
+  background: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+}
+.cmms-andon.lit-down .cmms-andon-lamp.down {
+  background: #EF4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  animation: cmmsAndonBlink 1.2s ease-in-out infinite;
+}
+
+@keyframes cmmsAndonBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmms-andon.lit-down .cmms-andon-lamp.down {
+    animation: none;
+  }
+}
+
+/* ── บอร์ดสถานะโรงงาน (Andon board) ── */
+.cmms-andon-board {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0B1220 0%, #101A2E 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--cmms-radius-xl);
+  padding: 18px 20px 16px;
+}
+
+/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) */
+.cmms-andon-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: auto, 56px 56px, 56px 56px;
+}
+
+.cmms-andon-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.cmms-andon-tile:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.cmms-andon-tile .cmms-andon-tile-name {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmms-andon-tile .cmms-andon-tile-count {
+  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 1px 7px;
+  border-radius: 99px;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cmms-andon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cmms-andon-chip .cmms-andon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ── การ์ด KPI สไตล์ใหม่ (เงียบ ใช้ไฟ Andon เป็นจุดสีเดียว) ── */
+.cmms-kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.cmms-kpi-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cmms-kpi-accent, var(--color-accent));
+  opacity: 0.85;
+}
+
+.cmms-kpi-value {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif;
+  font-weight: 700;
+  font-size: 2.15rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.cmms-kpi-value .cmms-kpi-unit {
+  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }
