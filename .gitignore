@@ -2,3 +2,7 @@ node_modules/
 vendor/
 .env
 *.log
+
+# Next.js build artifacts
+frontend/.next/
+frontend/tsconfig.tsbuildinfo

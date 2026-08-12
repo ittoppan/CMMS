@@ -50,6 +50,13 @@ This document outlines the current status of features and modules within the CMM
   - Expand `src/services/AICopilotService.php` with more sophisticated AI/ML models for true predictive maintenance, advanced diagnostics, or natural language processing. The current logic is simplistic and could be enhanced.
 - [x] **Full Utilization of New Database Fields:**
   - Integrate and fully utilize `completed_at`, `completed_by`, and `reschedule_reason` fields (added in `database/apply_alter.php`) across the frontend, reporting, and other API endpoints. This includes developing UI for rescheduling and reports using these new fields.
+- [x] **Configurable Mobile Bottom Nav (per Role):**
+  - Database table `bottom_nav_config` (role_id, menu_key, sort_order) with FK cascade + migration file
+  - Central catalog `src/bottom_nav_catalog.php` (13 menu keys: label/href/pattern/icon + default presets for 5 roles)
+  - Resolver `src/bottom_nav.php` (`resolveBottomNavKeys()`: reads table → filters unknown keys → falls back to defaults; DB error → defaults)
+  - API `menu_permissions.php`: GET matrix returns `bottom_nav` + `bottom_nav_keys`; GET by role/user returns filtered bottom nav; POST upserts grants + bottom nav in one transaction (optional key = leave unchanged)
+  - PWA: `useMenuPermission.ts` exposes `bottomNavKeys`; `layout.tsx` renders API keys first, always filtered by `canShow`; PHP `footer.php` uses the same catalog/resolver (shared config between PWA and PHP)
+  - Settings UI (`/settings/menus`): per-role editor (add/remove/reorder) + live phone preview pane; warns when exceeding 5 buttons
 
 ## [ ] Pending/Incomplete Features & Modules
 
