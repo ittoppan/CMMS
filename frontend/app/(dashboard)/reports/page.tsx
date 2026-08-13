@@ -3,40 +3,39 @@
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Grid } from "@astryxdesign/core/Grid";
 import {
   DocumentArrowDownIcon,
   TableCellsIcon,
-  ChartBarIcon,
-  PrinterIcon,
-  DocumentCheckIcon
 } from "@heroicons/react/24/outline";
 
 export default function ReportsHubPage() {
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      {/* Header */}
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
-            <Badge label="ISO 9001 / ISO 55000" variant="info" />
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              ISO 9001 / ISO 55000
+            </span>
           </HStack>
-          <Text type="body" color="secondary">รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV
+          </Text>
         </VStack>
-      </Card>
+      </div>
 
       <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={6}>
-        <Card elevation="low" padding={6} style={{ borderTop: '4px solid var(--cmms-primary)' }}>
+        <Card elevation="low" padding={6} className="cmms-kpi-card blue">
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
-              <div style={{ padding: 12, borderRadius: 10, background: 'var(--cmms-primary-light)', color: 'var(--cmms-primary)' }}>
-                <Icon icon={DocumentArrowDownIcon} size="md" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <DocumentArrowDownIcon className="w-6 h-6" />
               </div>
               <VStack gap={0}>
-                <Heading level={4}>รายงาน PDF สรุปประจำเดือนสำหรับผู้บริหาร</Heading>
+                <Heading level={4} style={{ margin: 0 }}>รายงาน PDF สรุปประจำเดือนสำหรับผู้บริหาร</Heading>
                 <Text type="body" size="sm" color="secondary">รายงานสรุปผลซ่อมบำรุงประจำเดือนสำหรับผู้บริหาร</Text>
               </VStack>
             </HStack>
@@ -45,22 +44,24 @@ export default function ReportsHubPage() {
               สรุปภาพรวม KPI ประสิทธิภาพงานซ่อม MTBF, MTTR, สรุปการใช้อะไหล่ และค่าใช้จ่ายประจำเดือนในรูปแบบ PDF สำเร็จรูป
             </Text>
 
-            <Button
-              label="เปิดศูนย์ออกรายงาน PDF"
-              variant="primary"
+            <button
+              type="button"
               onClick={() => (window.location.href = "/reports/monthly_pdf")}
-            />
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            >
+              เปิดศูนย์ออกรายงาน PDF
+            </button>
           </VStack>
         </Card>
 
-        <Card elevation="low" padding={6} style={{ borderTop: '4px solid var(--cmms-success)' }}>
+        <Card elevation="low" padding={6} className="cmms-kpi-card green">
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
-              <div style={{ padding: 12, borderRadius: 10, background: 'var(--cmms-success-light)', color: 'var(--cmms-success)' }}>
-                <Icon icon={TableCellsIcon} size="md" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <TableCellsIcon className="w-6 h-6" />
               </div>
               <VStack gap={0}>
-                <Heading level={4}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
+                <Heading level={4} style={{ margin: 0 }}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
                 <Text type="body" size="sm" color="secondary">ส่งออกข้อมูลดิบและรายงานวิเคราะห์เป็น CSV</Text>
               </VStack>
             </HStack>
@@ -69,11 +70,13 @@ export default function ReportsHubPage() {
               เลือกชุดข้อมูลใบแจ้งซ่อม รายการอะไหล่ สต็อก ประวัติเครื่องจักร และช่วงเวลาที่ต้องการส่งออกเป็นไฟล์ Excel หรือ CSV
             </Text>
 
-            <Button
-              label="เปิดหน้าส่งออก Excel & CSV"
-              variant="primary"
+            <button
+              type="button"
               onClick={() => (window.location.href = "/reports/export_excel")}
-            />
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            >
+              เปิดหน้าส่งออก Excel & CSV
+            </button>
           </VStack>
         </Card>
       </Grid>
