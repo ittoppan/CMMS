@@ -5,9 +5,7 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
@@ -257,21 +255,25 @@ export default function PMChecksheetPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>ทำรายการ PM (Checksheet)</Heading>
-          <Text type="body" color="secondary">เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ</Text>
+          <Heading level={2} style={{ color: "#fff" }}>ทำรายการ PM (Checksheet)</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ
+          </Text>
         </VStack>
         {plans.length > 0 && (
-          <Button
-            label="ผ่านทั้งหมด (ทุกรายการ)"
-            variant="secondary"
-            icon={<Icon icon={CheckCircleIcon} size="sm" />}
+          <button
+            type="button"
+            disabled={!selectedPlan}
             onClick={handleCheckAll}
-            isDisabled={!selectedPlan}
-          />
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg shadow-emerald-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            ผ่านทั้งหมด (ทุกรายการ)
+          </button>
         )}
-      </HStack>
+      </div>
 
       {/* เลือกแผน */}
       <Card padding={4}>
@@ -354,26 +356,26 @@ export default function PMChecksheetPage() {
                             <button
                               onClick={() => handleStatus(item.id, "pass")}
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6,
-                                backgroundColor: item.status === "pass" ? "var(--color-success)" : "var(--color-surface)",
+                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
+                                background: item.status === "pass" ? "linear-gradient(135deg,#059669,#10B981)" : "var(--color-surface)",
                                 color: item.status === "pass" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "pass" ? "var(--color-success)" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer",
+                                border: `1px solid ${item.status === "pass" ? "transparent" : "var(--color-border)"}`,
+                                fontWeight: 600, cursor: "pointer", boxShadow: item.status === "pass" ? "0 4px 12px rgba(5,150,105,0.3)" : "none",
                               }}
                             >
-                              <Icon icon={CheckCircleIcon} size="sm" /> ผ่าน
+                              <CheckCircleIcon className="w-4 h-4" /> ผ่าน
                             </button>
                             <button
                               onClick={() => handleStatus(item.id, "fail")}
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6,
-                                backgroundColor: item.status === "fail" ? "var(--color-error)" : "var(--color-surface)",
+                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
+                                background: item.status === "fail" ? "linear-gradient(135deg,#DC2626,#EF4444)" : "var(--color-surface)",
                                 color: item.status === "fail" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "fail" ? "var(--color-error)" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer",
+                                border: `1px solid ${item.status === "fail" ? "transparent" : "var(--color-border)"}`,
+                                fontWeight: 600, cursor: "pointer", boxShadow: item.status === "fail" ? "0 4px 12px rgba(220,38,38,0.3)" : "none",
                               }}
                             >
-                              <Icon icon={XCircleIcon} size="sm" /> ไม่ผ่าน
+                              <XCircleIcon className="w-4 h-4" /> ไม่ผ่าน
                             </button>
                           </HStack>
                         )}
@@ -383,7 +385,7 @@ export default function PMChecksheetPage() {
                         <div style={{ marginLeft: 40, padding: 14, backgroundColor: "var(--color-surface)", borderRadius: 8, border: "1px dashed var(--color-error)" }}>
                           <VStack gap={3}>
                             <HStack gap={2} vAlign="center">
-                              <Icon icon={ExclamationTriangleIcon} color="error" size="sm" />
+                              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
                               <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด</Text>
                             </HStack>
                             <FormLayout>
@@ -409,14 +411,15 @@ export default function PMChecksheetPage() {
             <div style={{ padding: 20, backgroundColor: "var(--color-muted)", borderTop: "1px solid var(--color-border)" }}>
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
                 <Text type="body" color="secondary">ตรวจสอบให้ครบทุกข้อก่อนบันทึก</Text>
-                <Button
-                  label={submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
-                  variant="primary"
-                  size="lg"
-                  isDisabled={submitting || !allFilled}
+                <button
+                  type="button"
+                  disabled={submitting || !allFilled}
                   onClick={handleSubmit}
-                  icon={<Icon icon={ClipboardDocumentCheckIcon} size="sm" />}
-                />
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                  {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
+                </button>
               </HStack>
             </div>
           </Card>
