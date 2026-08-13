@@ -5,19 +5,28 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
 import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
+import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
+import CountUp from "react-countup";
 import { useRouter } from "next/navigation";
 import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
+  CheckCircleIcon,
+  WrenchScrewdriverIcon,
+  UserGroupIcon,
+  BuildingOffice2Icon,
+  ClockIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 
 interface HistoryWO extends Record<string, unknown> {
@@ -210,61 +219,143 @@ export default function RepairHistoryPage() {
       )}
 
       {/* Header */}
-      <HStack hAlign="between" vAlign="start">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>ประวัติงานซ่อม</Heading>
-          <Text type="body" color="secondary">รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
+            Repair History · CMMS-TOPPAN
+          </Text>
+          <Heading level={2} style={{ color: "#fff" }}>ประวัติงานซ่อม</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด
+          </Text>
         </VStack>
-        <Button
-          label="รีเฟรช"
-          variant="secondary"
-          size="md"
+        <button
+          type="button"
           onClick={fetchHistory}
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
-        />
-      </HStack>
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
+      </div>
 
-      {/* Stat badges */}
-      <HStack gap={2} wrap="wrap">
-        <Badge label={`📋 งานที่เสร็จสิ้น: ${stats.total} งาน`} variant="success" />
-        <Badge label={`💰 ค่าอะไหล่: ${stats.costParts.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`} variant="neutral" />
-        <Badge label={`👷 ค่าแรง: ${stats.costLabor.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`} variant="info" />
-        <Badge label={`🏭 ค่าจ้างภายนอก: ${stats.costOutsource.toLocaleString("th-TH", { minimumFractionDigits: 2 })}`} variant="warning" />
+      {/* Stat cards */}
+      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
+        <Card elevation="low" padding={4} className="cmms-kpi-card green">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <CheckCircleIcon className="w-5 h-5" />
+              </div>
+              <Text type="supporting" color="secondary">งานที่เสร็จสิ้น</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.total} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4} className="cmms-kpi-card blue">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <WrenchScrewdriverIcon className="w-5 h-5" />
+              </div>
+              <Text type="supporting" color="secondary">ค่าอะไหล่</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.costParts} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <span className="cmms-kpi-unit">บาท</span>
+            </div>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <UserGroupIcon className="w-5 h-5" />
+              </div>
+              <Text type="supporting" color="secondary">ค่าแรง</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.costLabor} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <span className="cmms-kpi-unit">บาท</span>
+            </div>
+          </VStack>
+        </Card>
+        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
+          <VStack gap={2}>
+            <HStack vAlign="center" gap={2}>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <BuildingOffice2Icon className="w-5 h-5" />
+              </div>
+              <Text type="supporting" color="secondary">ค่าจ้างภายนอก</Text>
+            </HStack>
+            <div className="cmms-kpi-value">
+              <CountUp end={stats.costOutsource} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <span className="cmms-kpi-unit">บาท</span>
+            </div>
+          </VStack>
+        </Card>
         {stats.downtime > 0 && (
-          <Badge label={`⏱ เวลาหยุดเครื่องรวม: ${stats.downtime.toLocaleString("th-TH")} นาที`} variant="info" />
+          <Card elevation="low" padding={4} className="cmms-kpi-card red">
+            <VStack gap={2}>
+              <HStack vAlign="center" gap={2}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <ClockIcon className="w-5 h-5" />
+                </div>
+                <Text type="supporting" color="secondary">เวลาหยุดเครื่องรวม</Text>
+              </HStack>
+              <div className="cmms-kpi-value">
+                <CountUp end={stats.downtime} />
+                <span className="cmms-kpi-unit">นาที</span>
+              </div>
+            </VStack>
+          </Card>
         )}
-      </HStack>
+      </Grid>
 
       {/* Filter Toolbar */}
-      <Toolbar
-        label="ตัวกรองประวัติงานซ่อม"
-        startContent={
-          <>
-            <TextInput
-              label="ค้นหา"
-              isLabelHidden
-              placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ..."
-              startIcon={MagnifyingGlassIcon}
-              value={search}
-              onChange={setSearch}
-            />
-            <Selector
-              label="สถานะ"
-              isLabelHidden
-              placeholder="ทุกสถานะ"
-              value={statusFilter}
-              onChange={setStatusFilter}
-              options={[
-                { value: "", label: "ทุกสถานะ" },
-                { value: "completed", label: "เสร็จสิ้น" },
-                { value: "closed", label: "ปิดงาน" },
-                { value: "resolved", label: "แก้ไขแล้ว" },
-                { value: "rejected", label: "ปฏิเสธ" },
-              ]}
-            />
-          </>
-        }
-      />
+      <Card elevation="low" padding={5}>
+        <VStack gap={4}>
+          <HStack gap={2} vAlign="center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClipboardDocumentListIcon className="w-4 h-4" />
+            </div>
+            <Heading level={3} style={{ margin: 0 }}>ประวัติใบสั่งงาน</Heading>
+            <span className="cmms-count-pill">{totalItems} รายการ</span>
+          </HStack>
+          <Toolbar
+            label="ตัวกรองประวัติงานซ่อม"
+            startContent={
+              <>
+                <TextInput
+                  label="ค้นหา"
+                  isLabelHidden
+                  placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ..."
+                  startIcon={MagnifyingGlassIcon}
+                  value={search}
+                  onChange={setSearch}
+                />
+                <Selector
+                  label="สถานะ"
+                  isLabelHidden
+                  placeholder="ทุกสถานะ"
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  options={[
+                    { value: "", label: "ทุกสถานะ" },
+                    { value: "completed", label: "เสร็จสิ้น" },
+                    { value: "closed", label: "ปิดงาน" },
+                    { value: "resolved", label: "แก้ไขแล้ว" },
+                    { value: "rejected", label: "ปฏิเสธ" },
+                  ]}
+                />
+              </>
+            }
+          />
+        </VStack>
+      </Card>
 
       {/* Table */}
       {loading ? (
@@ -279,15 +370,17 @@ export default function RepairHistoryPage() {
           icon={<Icon icon={MagnifyingGlassIcon} size="lg" />}
         />
       ) : (
-        <Table<HistoryWO>
-          data={paged}
-          columns={columns}
-          idKey="id"
-          density="balanced"
-          dividers="rows"
-          hasHover
-          plugins={{ pagination }}
-        />
+        <Card padding={0} style={{ overflow: "hidden" }}>
+          <Table<HistoryWO>
+            data={paged}
+            columns={columns}
+            idKey="id"
+            density="balanced"
+            dividers="rows"
+            hasHover
+            plugins={{ pagination }}
+          />
+        </Card>
       )}
     </VStack>
   );
