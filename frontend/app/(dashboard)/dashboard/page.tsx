@@ -511,15 +511,20 @@ export default function DashboardPage() {
           {/* KPI Summary Cards */}
           <section className="cmms-animate-fadeInUp">
             <Heading level={3} className="mb-4 flex items-center gap-2">
-              <ChartBarIcon className="w-5 h-5 text-indigo-500" />
+              <ChartBarIcon className="w-5 h-5 text-[var(--cmms-primary)]" />
               สรุปผลการดำเนินงาน
             </Heading>
             <Grid columns={{ minWidth: 280, repeat: "fit" }} gap={4}>
-              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+              <Card elevation="medium" padding={5} className="cmms-kpi-card blue">
                 <VStack gap={3}>
-                  <HStack vAlign="center" gap={2}>
+                  <HStack hAlign="between" vAlign="center">
+                    <HStack vAlign="center" gap={2}>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                        <WrenchScrewdriverIcon className="w-5 h-5" />
+                      </div>
+                      <Text type="supporting" color="secondary" className="font-medium">งานซ่อมทั้งหมด</Text>
+                    </HStack>
                     <AndonLamp status="ok" size="sm" />
-                    <Text type="supporting" color="secondary" className="font-medium">งานซ่อมทั้งหมด</Text>
                   </HStack>
                   <div className="cmms-kpi-value">
                     <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed + selectedMonthData.breakdown : kpis.total} />
@@ -529,11 +534,16 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+              <Card elevation="medium" padding={5} className="cmms-kpi-card green">
                 <VStack gap={3}>
-                  <HStack vAlign="center" gap={2}>
+                  <HStack hAlign="between" vAlign="center">
+                    <HStack vAlign="center" gap={2}>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                        <CheckCircleIcon className="w-5 h-5" />
+                      </div>
+                      <Text type="supporting" color="secondary" className="font-medium">งานซ่อมเสร็จสมบูรณ์</Text>
+                    </HStack>
                     <AndonLamp status="ok" size="sm" />
-                    <Text type="supporting" color="secondary" className="font-medium">งานซ่อมเสร็จสมบูรณ์</Text>
                   </HStack>
                   <div className="cmms-kpi-value">
                     <CountUp end={viewMode === 'monthly' ? selectedMonthData.completed : kpis.completed} />
@@ -545,11 +555,16 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+              <Card elevation="medium" padding={5} className="cmms-kpi-card red">
                 <VStack gap={3}>
-                  <HStack vAlign="center" gap={2}>
+                  <HStack hAlign="between" vAlign="center">
+                    <HStack vAlign="center" gap={2}>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+                        <ExclamationTriangleIcon className="w-5 h-5" />
+                      </div>
+                      <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
+                    </HStack>
                     <AndonLamp status="down" size="sm" />
-                    <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
                   </HStack>
                   <div className="cmms-kpi-value">
                     <CountUp end={viewMode === 'monthly' ? selectedMonthData.breakdown : yearlyBreakdown} />
@@ -561,11 +576,16 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card">
+              <Card elevation="medium" padding={5} className="cmms-kpi-card amber">
                 <VStack gap={3}>
-                  <HStack vAlign="center" gap={2}>
+                  <HStack hAlign="between" vAlign="center">
+                    <HStack vAlign="center" gap={2}>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+                        <CurrencyDollarIcon className="w-5 h-5" />
+                      </div>
+                      <Text type="supporting" color="secondary" className="font-medium">ค่าใช้จ่ายรวม</Text>
+                    </HStack>
                     <AndonLamp status="warn" size="sm" />
-                    <Text type="supporting" color="secondary" className="font-medium">ค่าใช้จ่ายรวม</Text>
                   </HStack>
                   <div className="cmms-kpi-value">
                     <CountUp end={Math.round(selectedMonthData.cost * 10000)} />
@@ -582,19 +602,19 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-2 mb-6 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-2xl">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'overview' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'overview' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
                 ภาพรวม
               </button>
               <button
                 onClick={() => setActiveTab('performance')}
-                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'performance' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'performance' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
                 ประสิทธิภาพ
               </button>
               <button
                 onClick={() => setActiveTab('live')}
-                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'live' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'live' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
               >
                 ศูนย์ปฏิบัติการ
               </button>
@@ -751,7 +771,7 @@ export default function DashboardPage() {
               <VStack gap={8}>
                 <VStack gap={3} className="mb-4">
                   <Heading level={3} className="flex items-center gap-2">
-                    <SparklesIcon className="w-6 h-6 text-indigo-500" /> วิเคราะห์ประสิทธิภาพและความน่าเชื่อถือ
+                    <SparklesIcon className="w-6 h-6 text-[var(--cmms-primary)]" /> วิเคราะห์ประสิทธิภาพและความน่าเชื่อถือ
                   </Heading>
                   <Text type="body" color="secondary">วิเคราะห์ความน่าเชื่อถือของเครื่องจักรและการบำรุงรักษาเชิงป้องกัน</Text>
                 </VStack>
@@ -887,7 +907,7 @@ export default function DashboardPage() {
               <VStack gap={8}>
                 <VStack gap={3} className="mb-4">
                   <Heading level={3} className="flex items-center gap-2">
-                    <MapIcon className="w-6 h-6 text-indigo-500" /> Live Operations Center
+                    <MapIcon className="w-6 h-6 text-[var(--cmms-primary)]" /> Live Operations Center
                   </Heading>
                   <Text type="body" color="secondary">ศูนย์ปฏิบัติการติดตามสถานะเครื่องจักรและช่างซ่อมแบบเรียลไทม์</Text>
                 </VStack>
@@ -1069,7 +1089,7 @@ export default function DashboardPage() {
         {selectedDrillDown && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl p-6 max-w-2xl w-full relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#0057A8] to-[#1E88E5]"></div>
               <HStack hAlign="between" vAlign="center" className="mb-6">
                 <VStack gap={1}>
                   <Heading level={3}>เจาะลึกข้อมูลเดือน {selectedDrillDown.month}</Heading>
@@ -1120,7 +1140,7 @@ export default function DashboardPage() {
         <div className={`fixed bottom-6 right-6 z-[120] flex flex-col items-end transition-all duration-300 print:hidden`}>
           {isChatOpen && (
             <div className="mb-4 w-80 h-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex justify-between items-center">
+              <div className="bg-gradient-to-r from-[#0057A8] to-[#1E88E5] p-4 text-white flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CpuChipIcon className="w-5 h-5" />
                   <span className="font-bold">ผู้ช่วย AI ของระบบ</span>
@@ -1130,7 +1150,7 @@ export default function DashboardPage() {
               
               <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-slate-50 dark:bg-slate-950">
                 {chatHistory.map((msg, i) => (
-                  <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'ai' ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 self-start rounded-tl-none shadow-sm' : 'bg-indigo-600 text-white self-end rounded-tr-none shadow-md'}`}>
+                  <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm ${msg.role === 'ai' ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 self-start rounded-tl-none shadow-sm' : 'bg-[var(--cmms-primary)] text-white self-end rounded-tr-none shadow-md'}`}>
                     {msg.text}
                   </div>
                 ))}
@@ -1149,10 +1169,10 @@ export default function DashboardPage() {
                     }
                   }}
                   placeholder="พิมพ์ถาม AI..." 
-                  className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
+                  className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--cmms-primary)] dark:text-white"
                 />
                 <button 
-                  className="w-9 h-9 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shrink-0"
+                  className="w-9 h-9 rounded-full bg-[var(--cmms-primary)] hover:bg-[#004a91] text-white flex items-center justify-center shrink-0"
                   onClick={() => {
                     if (chatMessage.trim()) {
                       const q = chatMessage;
@@ -1169,7 +1189,7 @@ export default function DashboardPage() {
 
           <button 
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-110 ${isChatOpen ? 'bg-rose-500' : 'bg-gradient-to-r from-indigo-600 to-purple-600 animate-bounce'}`}
+            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-110 ${isChatOpen ? 'bg-rose-500' : 'bg-gradient-to-r from-[#0057A8] to-[#1E88E5] animate-bounce'}`}
           >
             {isChatOpen ? <XMarkIcon className="w-6 h-6" /> : <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />}
           </button>
