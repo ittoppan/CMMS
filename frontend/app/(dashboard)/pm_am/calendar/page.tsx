@@ -13,6 +13,10 @@ import {
   PlusIcon,
   ClockIcon,
   CalendarDaysIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  UserGroupIcon,
+  ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 import AndonLamp from "@/components/AndonLamp";
 
@@ -77,83 +81,98 @@ export default function PMCalendarPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      {/* Header */}
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">
-            PM / AM Calendar · CMMS-TOPPAN
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ปฏิทินงานซ่อมบำรุง (PM Calendar)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              PM / AM
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน — ไฟแดงคืองานเลยกำหนด ไฟเหลืองคือต้องทำ
           </Text>
-          <Heading level={2}>ปฏิทินงานซ่อมบำรุง (PM Calendar)</Heading>
-          <Text type="body" color="secondary">ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน — ไฟแดงคืองานเลยกำหนด ไฟเหลืองคือต้องทำ</Text>
         </VStack>
-        <HStack gap={3}>
-          <Button
-            label={viewAll ? "กลับไปดูตามวันที่" : "ดูแผนทั้งหมด"}
-            variant={viewAll ? "primary" : "secondary"}
-            icon={<Icon icon={ClockIcon} size="sm" />}
+        <HStack gap={3} wrap="wrap">
+          <button
+            type="button"
             onClick={() => setViewAll((v) => !v)}
-          />
-          <Button label="สร้างแผน PM ใหม่" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => window.location.href = '/pm_am/create'} />
-          <Button
-            label="ส่งออก iCal"
-            variant="secondary"
-            size="sm"
-            icon={<Icon icon={CalendarDaysIcon} size="sm" />}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border ${
+              viewAll
+                ? "bg-white text-[var(--cmms-primary)] border-white shadow-lg"
+                : "text-white bg-white/10 hover:bg-white/20 border-white/20"
+            }`}
+          >
+            <ClockIcon className="w-4 h-4" />
+            {viewAll ? "กลับไปดูตามวันที่" : "ดูแผนทั้งหมด"}
+          </button>
+          <button
+            type="button"
+            onClick={() => window.location.href = '/pm_am/create'}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          >
+            <PlusIcon className="w-4 h-4" />
+            สร้างแผน PM ใหม่
+          </button>
+          <button
+            type="button"
             onClick={() => window.open('/api/v1/pm_ical.php', '_blank')}
-          />
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+          >
+            <CalendarDaysIcon className="w-4 h-4" />
+            ส่งออก iCal
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       <Grid columns={{ minWidth: 230, repeat: "fit" }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
-              <AndonLamp status="down" size="sm" />
+        <Card padding={4} className="cmms-kpi-card red">
+          <HStack gap={3} vAlign="center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={0}>
               <Text type="supporting" color="secondary">งานเลยกำหนด</Text>
-            </HStack>
-            <div className="cmms-kpi-value">
-              {overdueCount}
-              <span className="cmms-kpi-unit">งาน</span>
-            </div>
-          </VStack>
+              <Heading level={3} style={{ margin: 0 }}>{overdueCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
-              <AndonLamp status="warn" size="sm" />
+        <Card padding={4} className="cmms-kpi-card amber">
+          <HStack gap={3} vAlign="center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CalendarDaysIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={0}>
               <Text type="supporting" color="secondary">แผนงานวันนี้ (Today)</Text>
-            </HStack>
-            <div className="cmms-kpi-value">
-              {todayCount}
-              <span className="cmms-kpi-unit">งาน</span>
-            </div>
-          </VStack>
+              <Heading level={3} style={{ margin: 0 }}>{todayCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
-              <AndonLamp status="ok" size="sm" />
+        <Card padding={4} className="cmms-kpi-card green">
+          <HStack gap={3} vAlign="center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CheckCircleIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={0}>
               <Text type="supporting" color="secondary">เสร็จแล้ววันนี้</Text>
-            </HStack>
-            <div className="cmms-kpi-value">
-              {completedCount}
-              <span className="cmms-kpi-unit">งาน</span>
-            </div>
-          </VStack>
+              <Heading level={3} style={{ margin: 0 }}>{completedCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
-              <AndonLamp status="idle" size="sm" />
-              <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
-            </HStack>
-            <div className="cmms-kpi-value">
-              {activeTechCount}
-              <span className="cmms-kpi-unit">คน</span>
+        <Card padding={4} className="cmms-kpi-card cyan">
+          <HStack gap={3} vAlign="center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <UserGroupIcon className="w-5 h-5" />
             </div>
-          </VStack>
+            <VStack gap={0}>
+              <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
+              <Heading level={3} style={{ margin: 0 }}>{activeTechCount} <span className="cmms-kpi-unit">คน</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 
@@ -190,10 +209,15 @@ export default function PMCalendarPage() {
           <Card padding={5} style={{ height: '100%' }}>
             <VStack gap={4}>
               <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 12 }}>
-                <Heading level={4}>
-                  {viewAll ? "แผน PM ทั้งหมด (ทุกวันที่)" : `รายการ PM ประจำวันที่ ${selectedDate || "ไม่ได้เลือกวันที่"}`}
-                </Heading>
-                <Badge label={`${visibleTasks.length} งาน`} variant="neutral" />
+                <HStack gap={2} vAlign="center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                    <ClipboardDocumentListIcon className="w-4 h-4" />
+                  </div>
+                  <Heading level={4} style={{ margin: 0 }}>
+                    {viewAll ? "แผน PM ทั้งหมด (ทุกวันที่)" : `รายการ PM ประจำวันที่ ${selectedDate || "ไม่ได้เลือกวันที่"}`}
+                  </Heading>
+                </HStack>
+                <span className="cmms-count-pill">{visibleTasks.length} งาน</span>
               </HStack>
               
               {visibleTasks.length === 0 ? (
