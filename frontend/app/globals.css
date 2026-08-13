@@ -108,9 +108,12 @@ body {
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);
   --cmms-bg-card-hover: var(--color-background-muted);
-  --cmms-bg-sidebar: #193264;
-  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --cmms-bg-sidebar-active: linear-gradient(135deg, #193264, #0068B5);
+  --cmms-bg-sidebar: #0F1E3D;
+  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --cmms-bg-sidebar-active: linear-gradient(135deg, #0057A8, #1E88E5);
+  --cmms-sidebar-indicator: #38BDF8;
+  --cmms-sidebar-text: rgba(255, 255, 255, 0.82);
+  --cmms-sidebar-text-strong: #FFFFFF;
   --cmms-bg-topnav: var(--color-background-surface);
   --cmms-bg-muted: var(--color-background-muted);
   --cmms-bg-wash: var(--color-background-muted);
@@ -282,36 +285,97 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 }
 
 /* ================================================
-   Astryx SideNav Overrides
+   Astryx SideNav Overrides — TOPPAN Industrial Blue
    ================================================ */
 [class*="SideNav_sideNav"], .astryx-side-nav,
 [class*="LayoutPanel_panel"], .astryx-layout-panel {
   background: var(--cmms-bg-sidebar) !important;
 }
-[class*="SideNavItem_item"], .astryx-side-nav-item {
-  border-radius: var(--cmms-radius) !important;
-  margin: 1px 8px !important;
-  transition: all var(--cmms-transition) !important;
-  color: rgba(255, 255, 255, 0.82) !important;
+
+/* Brand header — gradient icon tile + breathing room */
+.astryx-side-nav-heading {
+  padding-block: 8px !important;
 }
-[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover { color: #FFFFFF !important; }
+.astryx-side-nav-heading .astryx-navicon {
+  background: linear-gradient(135deg, #0057A8, #1E88E5) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 87, 168, 0.4) !important;
+  color: #FFFFFF !important;
+}
+
+/* Nav items */
+[class*="SideNavItem_item"], .astryx-side-nav-item {
+  position: relative;
+  border-radius: var(--cmms-radius) !important;
+  margin: 2px 10px !important;
+  padding-block: 8px !important;
+  transition: all var(--cmms-transition) !important;
+  color: var(--cmms-sidebar-text) !important;
+  font-weight: 500 !important;
+}
+[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover {
+  color: var(--cmms-sidebar-text-strong) !important;
+  background: var(--cmms-bg-sidebar-hover) !important;
+}
 [class*="SideNavItem_item"][data-selected="true"],
 [class*="SideNavItem_item"][class*="selected"],
-.astryx-side-nav-item.selected { color: #FFFFFF !important; }
+.astryx-side-nav-item.selected {
+  color: #FFFFFF !important;
+  background: var(--cmms-bg-sidebar-active) !important;
+  box-shadow: 0 4px 14px rgba(0, 87, 168, 0.35) !important;
+}
+/* Active left indicator bar */
+[class*="SideNavItem_item"][data-selected="true"]::before,
+[class*="SideNavItem_item"][class*="selected"]::before,
+.astryx-side-nav-item.selected::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 62%;
+  border-radius: 0 3px 3px 0;
+  background: var(--cmms-sidebar-indicator);
+}
 [class*="SideNav_sideNav"] :is(a, span, [class*="SideNavItem_label"], [class*="SideNavItem_icon"], [class*="Badge_badge"]),
 .astryx-side-nav :is(a, span, svg) { color: inherit; }
-[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover { background: var(--cmms-bg-sidebar-hover) !important; }
-[class*="SideNavItem_item"][data-selected="true"],
-[class*="SideNavItem_item"][class*="selected"],
-.astryx-side-nav-item.selected { background: var(--cmms-bg-sidebar-active) !important; }
-[class*="SideNavSection_title"], [class*="SideNavSection_header"], .astryx-side-nav-heading {
+
+/* Section headers — brighter + subtle divider between sections
+   (StyleX คลาสถูก hash ใน production → ใช้โครงสร้างจริงของ Astryx:
+    .astryx-side-nav-section > div:first-child = แถวหัวข้อหมวด) */
+.astryx-side-nav-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  margin-top: 4px !important;
+}
+.astryx-side-nav-section:first-of-type {
+  border-top: none !important;
+  margin-top: 0 !important;
+}
+.astryx-side-nav-section > div:first-child {
+  padding: 14px 14px 6px !important;
+}
+.astryx-side-nav-section > div:first-child span {
   text-transform: uppercase !important;
-  font-size: 0.65rem !important;
+  font-size: 0.66rem !important;
   font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  opacity: 0.5 !important;
-  padding: 0 12px !important;
-  color: rgba(255, 255, 255, 0.6) !important;
+  letter-spacing: 0.1em !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  opacity: 1 !important;
+}
+
+/* SideNav footer — user card zone (element ท้ายสุดของ SideNav) */
+.astryx-side-nav > :last-child {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(0, 0, 0, 0.18) !important;
+  padding-block: 8px !important;
+}
+/* footer item labels — คืนขนาดปกติ (อย่าให้โดน style หัวข้อหมวด) */
+.astryx-side-nav > :last-child .astryx-side-nav-item span {
+  font-size: 0.85rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
 }
 
 /* ================================================
@@ -320,8 +384,24 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 [class*="TopNav_topNav"], .astryx-top-nav {
   background: var(--cmms-bg-topnav) !important;
   border-bottom: 1px solid var(--cmms-border) !important;
-  box-shadow: var(--cmms-shadow-sm) !important;
+  box-shadow: 0 1px 3px rgba(15, 30, 61, 0.06) !important;
 }
+
+/* Breadcrumb pill ใน TopNav */
+.cmms-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--cmms-bg-muted);
+  border: 1px solid var(--cmms-border);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.cmms-breadcrumb .sep { color: var(--cmms-text-muted); }
+.cmms-breadcrumb .crumb { color: var(--cmms-text-muted); }
+.cmms-breadcrumb .current { color: var(--cmms-text-primary); font-weight: 600; }
 
 /* ================================================
    Astryx ProgressBar Overrides
@@ -894,9 +974,9 @@ html, body {
     padding-top: env(safe-area-inset-top);
     padding-left: 4px;
     padding-right: 4px;
-    background: var(--cmms-bg-topnav);
-    border-bottom: 1px solid var(--cmms-border);
-    box-shadow: var(--cmms-shadow-sm);
+    background: linear-gradient(135deg, #0F1E3D, #0057A8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 2px 10px rgba(15, 30, 61, 0.25);
   }
   .cmms-mobile-app-bar-btn {
     display: inline-flex;
@@ -909,16 +989,17 @@ html, body {
     border: none;
     border-radius: 10px;
     background: transparent;
-    color: var(--cmms-text-primary);
+    color: #FFFFFF;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .cmms-mobile-app-bar-btn:active { background: var(--cmms-bg-muted); }
+  .cmms-mobile-app-bar-btn:active { background: rgba(255, 255, 255, 0.15); }
   .cmms-mobile-app-bar-logo {
     height: 28px;
     max-width: 112px;
     object-fit: contain;
     flex-shrink: 0;
+    filter: brightness(0) invert(1); /* logo ขาวบนพื้นน้ำเงินเข้ม */
   }
   .cmms-mobile-app-bar-title {
     flex: 1 1 auto;
@@ -929,7 +1010,7 @@ html, body {
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.01em;
-    color: var(--cmms-text-primary);
+    color: #FFFFFF;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -60,7 +60,15 @@ import {
   UserGroupIcon,
   CircleStackIcon,
   CheckBadgeIcon,
-  DevicePhoneMobileIcon
+  DevicePhoneMobileIcon,
+  UserPlusIcon,
+  CalendarIcon,
+  CogIcon,
+  ArchiveBoxIcon,
+  ChartPieIcon,
+  DocumentTextIcon,
+  PlusIcon,
+  ClipboardIcon
 } from "@heroicons/react/24/outline";
 
 // Page title mapping for breadcrumb
@@ -288,17 +296,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           endContent={
             <HStack gap={2} vAlign="center">
               {/* Breadcrumb */}
-              <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', fontSize: '0.8rem' }}>
+              <div className="cmms-breadcrumb">
                 {section && (
                   <>
-                    <span style={{ margin: '0 4px', color: 'var(--cmms-text-muted)' }}>›</span>
-                    <span style={{ color: 'var(--cmms-text-muted)' }}>{section}</span>
+                    <span className="sep">›</span>
+                    <span className="crumb">{section}</span>
                   </>
                 )}
                 {pageTitle && (
                   <>
-                    <span style={{ margin: '0 4px', color: 'var(--cmms-text-muted)' }}>›</span>
-                    <span style={{ color: 'var(--cmms-text-primary)', fontWeight: 600 }}>{pageTitle}</span>
+                    <span className="sep">›</span>
+                    <span className="current">{pageTitle}</span>
                   </>
                 )}
               </div>
@@ -366,6 +374,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               headingHref="/dashboard"
               icon={<NavIcon icon={<Icon icon={CubeIcon} size="sm" />} />}
             />
+          }
+          footer={
+            <SideNavSection title="บัญชี" isHeaderHidden>
+              <SideNavItem
+                label={currentUser?.name || roleName || "ผู้ใช้งาน"}
+                icon={UserCircleIcon}
+                href="/profile"
+                isSelected={isSelected("/profile")}
+              />
+              <SideNavItem
+                label="ออกจากระบบ"
+                icon={ArrowRightEndOnRectangleIcon}
+                href="/login"
+              />
+            </SideNavSection>
           }
         >
           {/* 1. งานซ่อมบำรุง */}
@@ -452,21 +475,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </MenuSection>
           {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
           <SideNavScrollControls pathname={pathname} />
-          footer={
-            <SideNavSection title="บัญชี" isHeaderHidden>
-              <SideNavItem
-                label={currentUser?.name || roleName || "ผู้ใช้งาน"}
-                icon={UserCircleIcon}
-                href="/users"
-                isSelected={isSelected("/users")}
-              />
-              <SideNavItem
-                label="ออกจากระบบ"
-                icon={ArrowRightEndOnRectangleIcon}
-                href="/login"
-              />
-            </SideNavSection>
-          }
         </SideNav>
       }    >
       <LiffBridge />

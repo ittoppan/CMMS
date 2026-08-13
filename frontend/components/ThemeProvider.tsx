@@ -15,9 +15,9 @@ export const THEME_PRESETS: Record<
 > = {
   toppan: {
     label: "TOPPAN Blue",
-    primary: "#0068B5",
-    gradient: "linear-gradient(135deg, #193264, #0068B5)",
-    sidebar: "#193264",
+    primary: "#0057A8",
+    gradient: "linear-gradient(135deg, #0057A8, #1E88E5)",
+    sidebar: "#0F1E3D",
     body: "#F5F7FA",
   },
   indigo: {

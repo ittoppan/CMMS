@@ -79,7 +79,8 @@ Stop-NextServer
 if (-not $SkipBuild) {
     # 2. clean + build
     Remove-Item -Recurse -Force -LiteralPath (Join-Path $frontend ".next") -ErrorAction SilentlyContinue
-    $prebuiltServer = Join-Path $Prebuilt ".next\standalone\server.js"
+    $prebuiltServer = ""
+    if ($Prebuilt) { $prebuiltServer = Join-Path $Prebuilt ".next\standalone\server.js" }
     if ($Prebuilt -and (Test-Path -LiteralPath $prebuiltServer)) {
         # fast-deploy: copy the prebuilt bundle (already built in the worktree)
         Write-Host "Reusing prebuilt .next from $Prebuilt (fast deploy)..."
