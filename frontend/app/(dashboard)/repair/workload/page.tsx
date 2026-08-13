@@ -155,76 +155,99 @@ export default function WorkloadPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      {/* Header */}
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ภาระงานช่าง (Workload)</Heading>
-            <Badge label="คำนวณจากงานซ่อมจริง" variant="info" />
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ภาระงานช่าง (Workload)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              คำนวณจากงานซ่อมจริง
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             ภาพรวมงานค้าง งานเกินกำหนด และผลงานรายคน เพื่อกระจายงานได้ทั่วถึง
           </Text>
         </VStack>
-        <Button
-          label="รีเฟรช"
-          variant="secondary"
-          size="sm"
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
+        <button
+          type="button"
           onClick={fetchWorkload}
-        />
-      </HStack>
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
+      </div>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
       <Grid columns={5} gap={4}>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-info)" }}>
+        <Card padding={4} className="cmms-kpi-card blue">
           <HStack gap={3} vAlign="center">
-            <Icon icon={UserGroupIcon} size="md" color="info" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <UserGroupIcon className="w-5 h-5" />
+            </div>
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ช่างที่มีงาน</Text>
-              <Heading level={3}>{summary.technicians} คน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{summary.technicians} คน</Heading>
             </VStack>
           </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-warning)" }}>
+        <Card padding={4} className="cmms-kpi-card amber">
           <HStack gap={3} vAlign="center">
-            <Icon icon={ClipboardDocumentListIcon} size="md" color="warning" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClipboardDocumentListIcon className="w-5 h-5" />
+            </div>
             <VStack gap={0}>
               <Text type="supporting" color="secondary">งานค้างทั้งหมด</Text>
-              <Heading level={3}>{summary.total_open} งาน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{summary.total_open} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-danger)" }}>
+        <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <Icon icon={ExclamationTriangleIcon} size="md" color="error" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5" />
+            </div>
             <VStack gap={0}>
               <Text type="supporting" color="secondary">เกินกำหนด</Text>
-              <Heading level={3}>{summary.total_overdue} งาน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{summary.total_overdue} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-danger)" }}>
+        <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <Icon icon={FireIcon} size="md" color="error" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <FireIcon className="w-5 h-5" />
+            </div>
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ด่วน / วิกฤต</Text>
-              <Heading level={3}>{summary.total_urgent} งาน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{summary.total_urgent} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-success)" }}>
+        <Card padding={4} className="cmms-kpi-card green">
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CheckCircleIcon className="w-5 h-5" />
+            </div>
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ปิดงาน 7 วันล่าสุด</Text>
-              <Heading level={3}>{summary.done_7d} งาน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{summary.done_7d} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
       </Grid>
 
       <Card padding={0} style={{ overflow: "hidden" }}>
+        <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
+          <HStack gap={2} vAlign="center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <UserGroupIcon className="w-4 h-4" />
+            </div>
+            <Text type="body" weight="bold">ภาระงานรายช่าง</Text>
+            <span className="cmms-count-pill">{rows.length} ช่าง</span>
+          </HStack>
+        </HStack>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
             <Spinner />
