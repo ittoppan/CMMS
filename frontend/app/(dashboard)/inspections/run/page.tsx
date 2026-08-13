@@ -219,6 +219,7 @@ export default function InspectionRunPage() {
 
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">INSPECTION RUN · CMMS-TOPPAN</Text>
           <Heading level={2}>ทำรายการตรวจเช็ค</Heading>
           <Text type="body" color="secondary">บันทึกผลตรวจรายข้อ — รายการไม่ผ่านจะแจ้งช่างซ่อมทันที</Text>
         </VStack>
@@ -257,7 +258,7 @@ export default function InspectionRunPage() {
                   <Text type="body" weight="bold">{schedule.template_title}</Text>
                   <Text type="body" size="sm" color="secondary">
                     {schedule.asset_name}{schedule.asset_code ? ` (${schedule.asset_code})` : ""}
-                    {schedule.assignee_name ? ` • 👤 ${schedule.assignee_name}` : ""}
+                    {schedule.assignee_name ? ` • ${schedule.assignee_name}` : ""}
                     {schedule.due_date ? ` • ครบกำหนด: ${schedule.due_date}` : ""}
                   </Text>
                 </VStack>

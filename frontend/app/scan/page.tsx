@@ -10,11 +10,12 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { ClickableCard } from "@astryxdesign/core/ClickableCard";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Button } from "@astryxdesign/core/Button";
+import { WrenchScrewdriverIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { Link } from "@astryxdesign/core/Link";
 
 /**
  * หน้า Scan Landing — ปลายทางของ QR บนเครื่องจักร
- * สแกนแล้วโชว์เครื่อง + ให้เลือก: 🔧 แจ้งซ่อมด่วน หรือ 📋 ทำเช็คชีท PM
+ * สแกนแล้วโชว์เครื่อง + ให้เลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM
  * URL: /scan?asset_code=A-PT-01
  */
 type Asset = {
@@ -135,7 +136,7 @@ export default function ScanLandingPage() {
       <div
         style={{
           minHeight: "100dvh",
-          background: "linear-gradient(160deg, #0f172a 0%, #1e293b 55%, #0f172a 100%)",
+          background: "#0f172a",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -154,8 +155,8 @@ export default function ScanLandingPage() {
           ) : error ? (
             <VStack gap={4} hAlign="center">
               <Badge label="QR SCAN" variant="warning" />
-              <Text type="display-1" style={{ fontSize: 40, marginBottom: 0 }}>❓</Text>
-              <Card padding={4} style={{ background: "#fef2f2", border: "1px solid #fecaca", width: "100%" }}>
+              <Text type="display-1" style={{ fontSize: 40, marginBottom: 0 }}>?</Text>
+              <Card padding={4} style={{ background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger)", width: "100%" }}>
                 <Text type="body" className="text-red-700" style={{ textAlign: "center" }}>{error}</Text>
               </Card>
               {assetCode && (
@@ -200,10 +201,10 @@ export default function ScanLandingPage() {
                 onClick={goRepair}
                 padding={5}
                 width="100%"
-                style={{ background: "#ef4444", color: "#ffffff", boxShadow: "0 8px 20px rgba(239,68,68,0.35)" }}
+                style={{ background: "var(--cmms-danger)", color: "#ffffff", boxShadow: "0 8px 20px rgba(239,68,68,0.35)" }}
               >
                 <HStack gap={4} vAlign="center">
-                  <Text type="display-1" style={{ fontSize: 26, margin: 0 }}>🔧</Text>
+                  <WrenchScrewdriverIcon className="w-6 h-6" />
                   <VStack gap={0}>
                     <Text type="body" weight="bold" className="text-white">แจ้งซ่อมด่วน</Text>
                     <Text type="body" size="xs" className="text-white" style={{ opacity: 0.85 }}>
@@ -218,10 +219,10 @@ export default function ScanLandingPage() {
                 onClick={goPM}
                 padding={5}
                 width="100%"
-                style={{ background: "#2563eb", color: "#ffffff", boxShadow: "0 8px 20px rgba(37,99,235,0.35)" }}
+                style={{ background: "var(--cmms-primary)", color: "#ffffff", boxShadow: "0 8px 20px rgba(0,104,181,0.35)" }}
               >
                 <HStack gap={4} vAlign="center">
-                  <Text type="display-1" style={{ fontSize: 26, margin: 0 }}>📋</Text>
+                  <ClipboardDocumentListIcon className="w-6 h-6" />
                   <VStack gap={0}>
                     <Text type="body" weight="bold" className="text-white">ทำเช็คชีท PM</Text>
                     <Text type="body" size="xs" className="text-white" style={{ opacity: 0.85 }}>
@@ -231,7 +232,7 @@ export default function ScanLandingPage() {
                 </HStack>
               </ClickableCard>
 
-              {/* 🗓 แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
+              {/* แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
               {pmLoading ? null : pmPlans.length > 0 ? (
                 <VStack gap={2} style={{ width: "100%" }}>
                   <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "#f59e0b" }}>
@@ -252,7 +253,7 @@ export default function ScanLandingPage() {
                         <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
                           <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
                             <Text type="body" weight="bold" size="sm" style={{ lineHeight: 1.4 }}>
-                              {overdue ? "⏰ " : "📅 "}{p.title || `แผน PM #${p.id}`}
+                              {p.title || `แผน PM #${p.id}`}
                             </Text>
                             <Text type="body" size="xs" color="secondary">
                               ครบกำหนด {p.due_date || "-"}{p.assigned_to_name ? ` · ผู้รับผิดชอบ: ${p.assigned_to_name}` : ""}

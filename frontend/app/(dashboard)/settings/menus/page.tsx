@@ -228,6 +228,7 @@ export default function MenuPermissionsPage() {
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">MENU PERMISSIONS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)</Heading>
             <Badge label={`${menus.length} เมนู × ${roles.length} บทบาท`} variant="info" />
@@ -401,7 +402,7 @@ export default function MenuPermissionsPage() {
                         )}
                       </HStack>
                       <Text type="body" size="sm" color="secondary">
-                        {isPreview ? "กำลังพรีวิว 👈" : "กดเพื่อพรีวิว"}
+                        {isPreview ? "กำลังพรีวิว" : "กดเพื่อพรีวิว"}
                       </Text>
                     </HStack>
 
@@ -512,7 +513,6 @@ export default function MenuPermissionsPage() {
                   {/* status bar */}
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 10, fontWeight: 700, color: "#334155" }}>
                     <span>9:41</span>
-                    <span>🔋</span>
                   </div>
                   {/* app header */}
                   <div style={{ background: previewColor.fg, padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>

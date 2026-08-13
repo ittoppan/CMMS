@@ -240,6 +240,7 @@ export default function NotificationCenterPage() {
       {/* Header */}
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">NOTIFICATION CENTER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ศูนย์แจ้งเตือนระบบ</Heading>
             {unreadCount > 0 && <Badge label={`${unreadCount} ข้อความใหม่`} variant="error" />}

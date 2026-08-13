@@ -97,7 +97,7 @@ export default function InteractiveStylePageEditor() {
   const [viewport, setViewport] = useState<ViewportSize>("desktop");
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>("colors");
 
-  // 🎨 Live Style & Color Customization States
+  // Live Style & Color Customization States
   const [primaryColor, setPrimaryColor] = useState("#0068B5");
   const [bgColor, setBgColor] = useState("#F8FAFC");
   const [borderRadius, setBorderRadius] = useState("12px");

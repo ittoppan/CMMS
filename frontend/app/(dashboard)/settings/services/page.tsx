@@ -142,6 +142,7 @@ export default function SystemServicesPage() {
     <VStack gap={6}>
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SERVICES · CMMS-TOPPAN</Text>
           <Heading level={1}>Service & การรันระบบ</Heading>
           <Text type="body" size="sm" color="secondary">
             เช็คว่า service ตัวไหนรันหรือยัง และรัน/หยุดได้จากที่นี่ (เฉพาะผู้ดูแลระบบ)

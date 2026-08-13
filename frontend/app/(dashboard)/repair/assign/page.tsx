@@ -282,6 +282,7 @@ export default function RepairAssignPage() {
       {/* Header */}
       <HStack hAlign="between" vAlign="start">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">WORK DISPATCH · CMMS-TOPPAN</Text>
           <Heading level={2}>แจกงานซ่อม (Dispatch)</Heading>
           <Text type="body" color="secondary">มอบหมายใบแจ้งซ่อมให้กับช่างซ่อมบำรุงที่เหมาะสม</Text>
         </VStack>
@@ -296,10 +297,10 @@ export default function RepairAssignPage() {
 
       {/* Stat badges */}
       <HStack gap={2} wrap="wrap">
-        <Badge label={`📋 งานที่ยังไม่เสร็จ: ${stats.total}`} variant="neutral" />
-        <Badge label={`🟡 รอมอบหมาย: ${stats.unassigned}`} variant="warning" />
-        <Badge label={`🔵 มอบหมายแล้ว: ${stats.assigned}`} variant="info" />
-        <Badge label={`🛠 กำลังซ่อม: ${stats.inprog}`} variant="info" />
+        <Badge label={`งานที่ยังไม่เสร็จ: ${stats.total}`} variant="neutral" />
+        <Badge label={`รอมอบหมาย: ${stats.unassigned}`} variant="warning" />
+        <Badge label={`มอบหมายแล้ว: ${stats.assigned}`} variant="info" />
+        <Badge label={`กำลังซ่อม: ${stats.inprog}`} variant="info" />
       </HStack>
 
       {/* Filter Toolbar */}

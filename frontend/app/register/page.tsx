@@ -10,6 +10,8 @@ import {
   UserIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
+  LinkIcon,
+  IdentificationIcon,
 } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
 
@@ -160,7 +162,7 @@ export default function RegisterPage() {
         className="min-h-screen"
         style={{
           background:
-            "radial-gradient(1200px 400px at 50% -100px, rgba(37,99,235,0.08), transparent 60%), linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%)",
+            "#f8fafc",
           padding: "20px 16px 0",
         }}
       >
@@ -175,7 +177,7 @@ export default function RegisterPage() {
         >
           <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
             เลขพนักงาน {boundUser.employee_code} · ต่อไปแจ้งซ่อมจะรู้ชื่ออัตโนมัติ
-            {"\n"}และช่างจะได้รับแจ้งเตือนทาง LINE 📲
+            {"\n"}และช่างจะได้รับแจ้งเตือนทาง LINE
           </Text>
         </SuccessDialog>
       </main>
@@ -187,7 +189,7 @@ export default function RegisterPage() {
       className="min-h-screen"
       style={{
         background:
-          "radial-gradient(1200px 400px at 50% -100px, rgba(37,99,235,0.08), transparent 60%), linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%)",
+          "#f8fafc",
         padding: "20px 16px 0",
       }}
     >
@@ -200,7 +202,7 @@ export default function RegisterPage() {
                 height: 48,
                 borderRadius: 14,
                 flexShrink: 0,
-                background: "linear-gradient(135deg, #FEF2F2, #FEE2E2)",
+                background: "var(--cmms-danger-light)",
                 border: "1px solid #FECACA",
                 display: "flex",
                 alignItems: "center",
@@ -208,7 +210,7 @@ export default function RegisterPage() {
                 fontSize: "1.5rem",
               }}
             >
-              🔗
+              <LinkIcon className="w-6 h-6" />
             </div>
             <VStack gap={0} style={{ flex: 1 }}>
               <Heading level={3} style={{ margin: 0 }}>ลงทะเบียนผูกบัญชี LINE</Heading>
@@ -234,7 +236,7 @@ export default function RegisterPage() {
                   width: 44,
                   height: 44,
                   borderRadius: "50%",
-                  background: "var(--cmms-gradient-primary)",
+                  background: "var(--cmms-primary)",
                   color: "#fff",
                   display: "flex",
                   alignItems: "center",
@@ -295,11 +297,11 @@ export default function RegisterPage() {
                     <HStack gap={3} vAlign="center">
                       <div style={{
                         width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-                        background: "linear-gradient(135deg, #FEF2F2, #FEE2E2)",
+                        background: "var(--cmms-danger-light)",
                         border: "1px solid #FECACA",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: 20,
-                      }}>🪪</div>
+                      }}><IdentificationIcon className="w-5 h-5" /></div>
                       <VStack gap={0} style={{ flex: 1 }}>
                         <Text type="body" weight="bold">เลขพนักงาน (Employee Code)</Text>
                         <Text type="body" size="sm" color="secondary">

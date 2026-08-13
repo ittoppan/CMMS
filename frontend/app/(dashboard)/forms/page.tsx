@@ -171,6 +171,7 @@ export default function FormsPage() {
     <VStack gap={6}>
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">FORM CENTER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ศูนย์แบบฟอร์ม (Form Center)</Heading>
             <Badge label={`${forms.length} แบบฟอร์ม`} variant="info" />

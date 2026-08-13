@@ -191,7 +191,7 @@ export default function SageSyncConfigPage() {
       if (!res.ok || json.status !== "success") {
         throw new Error(json?.error || `HTTP ${res.status}`);
       }
-      setSyncMessage(`💾 ${json.message || "บันทึกรูปแบบการดึงสำเร็จ"}`);
+      setSyncMessage(`${json.message || "บันทึกรูปแบบการดึงสำเร็จ"}`);
       setTimeout(() => setSyncMessage(""), 6000);
       await fetchData();
     } catch (e: any) {
@@ -259,6 +259,7 @@ export default function SageSyncConfigPage() {
       {/* Page Header */}
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SAGE SYNC · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2}>ตั้งค่าการดึงสต็อก Sage 300 ERP</Heading>
             <Badge label={sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"} variant={sageConnected ? "success" : "neutral"} />

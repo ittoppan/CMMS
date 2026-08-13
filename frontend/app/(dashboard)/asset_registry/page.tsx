@@ -157,7 +157,7 @@ export default function AssetRegistryPage() {
         if (!raw) {
           return (
             <div style={{ width: 40, height: 40, borderRadius: 6, backgroundColor: "var(--cmms-bg-muted)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-text-muted)", fontSize: 16 }}>
-              🏭
+              —
             </div>
           );
         }
@@ -251,6 +251,7 @@ export default function AssetRegistryPage() {
     <VStack gap={6}>
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ทะเบียนเครื่องจักรและทรัพย์สิน (Asset Registry F-EN-01)</Heading>
             <Badge label="แบบฟอร์มมาตรฐาน ISO" variant="info" />

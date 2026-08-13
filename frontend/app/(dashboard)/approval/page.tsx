@@ -171,6 +171,7 @@ export default function ApprovalCenterPage() {
     <VStack gap={6}>
       <HStack hAlign="between" vAlign="center">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">APPROVAL CENTER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ศูนย์อนุมัติเอกสารและคำขอ</Heading>
             <Badge label="จัดการขั้นตอนการอนุมัติ" variant="info" />

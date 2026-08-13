@@ -305,6 +305,7 @@ export default function NotificationsSettingsPage() {
       {/* Header */}
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">LINE NOTIFICATIONS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่ารูปแบบการแจ้งเตือน LINE</Heading>
             <Badge label={settings.line_notify_enabled === "1" ? "LINE เปิดใช้งาน" : "LINE ปิดใช้งาน"} variant={settings.line_notify_enabled === "1" ? "info" : "neutral"} />

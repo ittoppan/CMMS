@@ -225,6 +225,7 @@ export default function StockTakePage() {
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">STOCK TAKE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>นับสต็อกจริง (Stock Take)</Heading>
             <Badge label={`${rounds.length} รอบ`} variant="info" />

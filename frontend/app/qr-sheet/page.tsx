@@ -87,9 +87,10 @@ export default function QrSheetPage() {
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}
         style={{ borderBottom: "3px solid #0068B5", paddingBottom: 12, marginBottom: 20 }}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">QR SHEET · CMMS-TOPPAN</Text>
           <Heading level={2} style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</Heading>
           <Text type="supporting" color="secondary" size="sm">
-            สแกน QR แล้วเลือก: 🔧 แจ้งซ่อมด่วน หรือ 📋 ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
+            สแกน QR แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
             {" · "}{machines.length} เครื่อง{machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}
           </Text>
         </VStack>
@@ -106,7 +107,7 @@ export default function QrSheetPage() {
 
       <Card padding={4} className="qr-sheet-note" style={{ background: "#f1f5f9", marginBottom: 16 }}>
         <Text type="body" size="sm" style={{ color: "#334155" }}>
-          💡 <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
+          <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
           — พนักงานสแกน QR ด้วย LINE/กล้อง จะได้หน้าเลือก: <b>แจ้งซ่อมด่วน</b> หรือ <b>ทำเช็คชีท PM</b> พร้อมเครื่องถูกต้องทันที
         </Text>
       </Card>

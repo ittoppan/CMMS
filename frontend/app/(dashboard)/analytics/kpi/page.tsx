@@ -105,6 +105,7 @@ export default function KpiDashboardPage() {
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">EXECUTIVE KPI · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>KPI ผู้บริหาร (Executive Dashboard)</Heading>
             <Badge label={`ช่วง ${months} เดือนล่าสุด`} variant="info" />
@@ -320,7 +321,7 @@ export default function KpiDashboardPage() {
             <HStack gap={2} vAlign="center" wrap="wrap">
               <Badge label={`ทันกำหนด ${pmOnTime ?? 0}%`} variant="success" />
               {Number(data?.pm.overdue_pending) > 0 && (
-                <Badge label={`⚠ มี PM ค้าง ${data?.pm.overdue_pending} รายการ`} variant="warning" />
+                <Badge label={`มี PM ค้าง ${data?.pm.overdue_pending} รายการ`} variant="warning" />
               )}
             </HStack>
             <HStack gap={2} vAlign="center">

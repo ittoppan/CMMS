@@ -130,6 +130,7 @@ export default function InspectionsPage() {
 
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">INSPECTION CHECKLIST · CMMS-TOPPAN</Text>
           <Heading level={2}>ตรวจเช็ครอบ (Checklist)</Heading>
           <Text type="body" color="secondary">รอบตรวจตามเครื่อง/สาธารณูปโภค — รายการไม่ผ่านจะสร้างใบแจ้งซ่อมอัตโนมัติ</Text>
         </VStack>
@@ -219,7 +220,7 @@ export default function InspectionsPage() {
                     </HStack>
                     <Text type="body" size="sm" color="secondary">
                       {s.asset_name || `เครื่อง #${s.asset_id}`}{s.asset_code ? ` (${s.asset_code})` : ""}
-                      {s.assignee_name ? ` • 👤 ${s.assignee_name}` : ""}
+                      {s.assignee_name ? ` • ${s.assignee_name}` : ""}
                       {s.due_date ? ` • ครบกำหนด ${s.due_date}` : ""}
                       {s.completed_at ? ` • เสร็จเมื่อ ${s.completed_at}` : ""}
                     </Text>
