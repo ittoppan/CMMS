@@ -11,7 +11,6 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Link } from "@astryxdesign/core/Link";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import CountUp from "react-countup";
@@ -25,6 +24,11 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
   DocumentArrowDownIcon,
+  ClipboardDocumentListIcon,
+  ClockIcon,
+  WrenchScrewdriverIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -310,43 +314,63 @@ export default function WorkOrdersPage() {
       )}
 
       {/* Header */}
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
             Work Order Board · CMMS-TOPPAN
           </Text>
-          <Heading level={2}>ใบสั่งงานซ่อม</Heading>
-          <Text type="body" color="secondary">สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด</Text>
+          <Heading level={2} style={{ color: "#fff" }}>ใบสั่งงานซ่อม</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด
+          </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">
-          <Button
-            label={pdfBuilding ? (pdfProgress || "กำลังสร้าง PDF...") : selected.size > 0 ? `ดาวน์โหลด PDF (${selected.size})` : "ดาวน์โหลด PDF"}
-            variant={selected.size > 0 ? "primary" : "secondary"}
-            size="md"
-            isDisabled={pdfBuilding || selected.size === 0}
+          <button
+            type="button"
+            disabled={pdfBuilding || selected.size === 0}
             onClick={handleBatchDownload}
-            icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
-          />
-          <Button
-            label="รีเฟรช"
-            variant="secondary"
-            size="md"
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              pdfBuilding || selected.size === 0
+                ? "bg-white/10 text-white/40 cursor-not-allowed"
+                : selected.size > 0
+                  ? "bg-white text-[#0057A8] shadow-lg hover:bg-blue-50"
+                  : "bg-white/10 text-white/85 hover:bg-white/20"
+            }`}
+          >
+            <DocumentArrowDownIcon className="w-4 h-4" />
+            {pdfBuilding ? (pdfProgress || "กำลังสร้าง PDF...") : selected.size > 0 ? `ดาวน์โหลด PDF (${selected.size})` : "ดาวน์โหลด PDF"}
+          </button>
+          <button
+            type="button"
             onClick={fetchWO}
-            icon={<Icon icon={ArrowPathIcon} size="sm" />}
-          />
-          <Link href="/repair/create">
-            <Button label="สร้างใบสั่งงาน" variant="primary" size="md" icon={<Icon icon={PlusIcon} size="sm" />} />
-          </Link>
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/repair/create")}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#1E88E5] to-[#42A5F5] hover:from-[#1976D2] hover:to-[#1E88E5] shadow-lg transition-all duration-300"
+          >
+            <PlusIcon className="w-4 h-4" />
+            สร้างใบสั่งงาน
+          </button>
         </HStack>
-      </Card>
+      </div>
 
       {/* KPI — มินิบอร์ด Andon: กวาดตาเดียวรู้สถานะงาน */}
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
+        <Card elevation="low" padding={4} className="cmms-kpi-card blue">
           <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+            <HStack hAlign="between" vAlign="center">
+              <HStack vAlign="center" gap={2}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <ClipboardDocumentListIcon className="w-5 h-5" />
+                </div>
+                <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
+              </HStack>
               <AndonLamp status="idle" size="sm" />
-              <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
             </HStack>
             <div className="cmms-kpi-value">
               <CountUp end={stats.total} />
@@ -354,11 +378,16 @@ export default function WorkOrdersPage() {
             </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
+        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
           <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+            <HStack hAlign="between" vAlign="center">
+              <HStack vAlign="center" gap={2}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <ClockIcon className="w-5 h-5" />
+                </div>
+                <Text type="supporting" color="secondary">รอดำเนินการ (Open)</Text>
+              </HStack>
               <AndonLamp status="warn" size="sm" />
-              <Text type="supporting" color="secondary">รอดำเนินการ (Open)</Text>
             </HStack>
             <div className="cmms-kpi-value">
               <CountUp end={stats.open} />
@@ -366,11 +395,16 @@ export default function WorkOrdersPage() {
             </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
+        <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
           <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+            <HStack hAlign="between" vAlign="center">
+              <HStack vAlign="center" gap={2}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <WrenchScrewdriverIcon className="w-5 h-5" />
+                </div>
+                <Text type="supporting" color="secondary">กำลังซ่อม (In Progress)</Text>
+              </HStack>
               <AndonLamp status="warn" size="sm" />
-              <Text type="supporting" color="secondary">กำลังซ่อม (In Progress)</Text>
             </HStack>
             <div className="cmms-kpi-value">
               <CountUp end={stats.inprog} />
@@ -378,11 +412,16 @@ export default function WorkOrdersPage() {
             </div>
           </VStack>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
+        <Card elevation="low" padding={4} className="cmms-kpi-card green">
           <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+            <HStack hAlign="between" vAlign="center">
+              <HStack vAlign="center" gap={2}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <CheckCircleIcon className="w-5 h-5" />
+                </div>
+                <Text type="supporting" color="secondary">เสร็จสิ้น (Completed)</Text>
+              </HStack>
               <AndonLamp status="ok" size="sm" />
-              <Text type="supporting" color="secondary">เสร็จสิ้น (Completed)</Text>
             </HStack>
             <div className="cmms-kpi-value">
               <CountUp end={stats.done} />
@@ -391,11 +430,16 @@ export default function WorkOrdersPage() {
           </VStack>
         </Card>
         {stats.overdue > 0 && (
-          <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <Card elevation="low" padding={4} className="cmms-kpi-card red">
             <VStack gap={2}>
-              <HStack vAlign="center" gap={2}>
+              <HStack hAlign="between" vAlign="center">
+                <HStack vAlign="center" gap={2}>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+                    <ExclamationTriangleIcon className="w-5 h-5" />
+                  </div>
+                  <Text type="supporting" color="secondary">เกินกำหนด</Text>
+                </HStack>
                 <AndonLamp status="down" size="sm" />
-                <Text type="supporting" color="secondary">เกินกำหนด</Text>
               </HStack>
               <div className="cmms-kpi-value">
                 <CountUp end={stats.overdue} />
@@ -408,6 +452,21 @@ export default function WorkOrdersPage() {
 
       <Card elevation="low" padding={6}>
         <VStack gap={4}>
+          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+            <HStack gap={2} vAlign="center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <ClipboardDocumentListIcon className="w-4 h-4" />
+              </div>
+              <Heading level={3} style={{ margin: 0 }}>รายการงานซ่อม</Heading>
+              <span className="cmms-count-pill">{totalItems} รายการ</span>
+            </HStack>
+            {statusFilter && (
+              <Text type="body" size="sm" color="secondary">
+                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : "เสร็จสิ้น"}
+              </Text>
+            )}
+          </HStack>
+
           {/* Filter Toolbar */}
           <Toolbar
             label="ตัวกรองงานซ่อม"

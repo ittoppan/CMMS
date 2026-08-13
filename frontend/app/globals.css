@@ -1428,6 +1428,47 @@ next-route-announcer {
   }
 }
 
+/* ── Hero header หน้าจอหลัก (Work Order Board, etc.) ── */
+.cmms-page-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0F1E3D 0%, #0057A8 72%, #1E88E5 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--cmms-radius-xl);
+  padding: 24px 28px;
+  box-shadow: 0 10px 30px -12px rgba(0, 87, 168, 0.35);
+}
+
+/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) */
+.cmms-page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: auto, 48px 48px;
+}
+
+/* วงกลมเรืองแสงมุมขวาล่าง */
+.cmms-page-hero::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  bottom: -120px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cmms-page-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* ── บอร์ดสถานะโรงงาน (Andon board) ── */
 .cmms-andon-board {
   position: relative;
