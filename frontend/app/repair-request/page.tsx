@@ -14,12 +14,8 @@ export const metadata: Metadata = {
 export default function RepairRequestPage() {
   return (
     <main
-      className="min-h-screen"
-      style={{
-        background:
-          "radial-gradient(1200px 400px at 50% -100px, rgba(37,99,235,0.08), transparent 60%), linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%)",
-        padding: "20px 16px 0",
-      }}
+      className="min-h-screen cmms-liff-page"
+      style={{ padding: "20px 16px 0" }}
     >
       <LiffBridge />
       <RepairRequestForm />
