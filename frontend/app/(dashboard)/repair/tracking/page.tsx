@@ -166,12 +166,18 @@ export default function RepairTrackingPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      {/* Header */}
+      <div className="cmms-page-hero">
         <VStack gap={1}>
-          <Heading level={2}>ติดตามงานซ่อม (Repair Tracking)</Heading>
-          <Text type="body" color="secondary">ตรวจสอบสถานะงานซ่อมที่คุณได้แจ้งไว้ และประเมินผลความพึงพอใจการซ่อมของช่าง</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
+            Repair Tracking · CMMS-TOPPAN
+          </Text>
+          <Heading level={2} style={{ color: "#fff" }}>ติดตามงานซ่อม (Repair Tracking)</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ตรวจสอบสถานะงานซ่อมที่คุณได้แจ้งไว้ และประเมินผลความพึงพอใจการซ่อมของช่าง
+          </Text>
         </VStack>
-      </HStack>
+      </div>
       
       {error ? (
         <Banner status="error" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
@@ -179,6 +185,15 @@ export default function RepairTrackingPage() {
         <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้" icon={<Icon icon={WrenchScrewdriverIcon} size="lg" />} />
       ) : (
         <Card padding={0} style={{ overflow: 'hidden' }}>
+          <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
+            <HStack gap={2} vAlign="center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <WrenchScrewdriverIcon className="w-4 h-4" />
+              </div>
+              <Text type="body" weight="bold">รายการงานซ่อมที่แจ้งไว้</Text>
+              <span className="cmms-count-pill">{data.length} รายการ</span>
+            </HStack>
+          </HStack>
           <Table<TrackWO>
             data={data}
             columns={columns}
@@ -198,6 +213,7 @@ export default function RepairTrackingPage() {
         >
           <DialogHeader title="ประเมินผลความพึงพอใจงานซ่อม" onOpenChange={setEvalModalOpen} />
           <div style={{ padding: 24 }}>
+            <div style={{ height: 4, borderRadius: 4, background: 'linear-gradient(90deg, #0057A8, #1E88E5)', marginBottom: 16 }} />
             <VStack gap={4}>
               <Card padding={4} style={{ backgroundColor: 'var(--cmms-bg-muted)' }}>
                 <VStack gap={2}>
