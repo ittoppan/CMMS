@@ -17,11 +17,8 @@ import {
   MagnifyingGlassIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
-  WrenchScrewdriverIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  UserIcon
+  UserIcon,
+  InboxIcon,
 } from "@heroicons/react/24/outline";
 import AndonLamp from "@/components/AndonLamp";
 
@@ -42,6 +39,14 @@ const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info
   High: "warning",
   Medium: "info",
   Low: "neutral",
+};
+
+// สีเส้นข้างการ์ดตามความเร่งด่วน
+const priorityTone: Record<KanbanItem["priority"], string> = {
+  Critical: "#EF4444",
+  High: "#F59E0B",
+  Medium: "#0057A8",
+  Low: "#94A3B8",
 };
 
 export default function RepairKanbanPage() {
@@ -164,60 +169,77 @@ export default function RepairKanbanPage() {
   return (
     <VStack gap={6}>
       {/* Header */}
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
             Kanban Board · CMMS-TOPPAN
           </Text>
-          <Heading level={2}>Kanban งานซ่อม</Heading>
-          <Text type="body" color="secondary">บอร์ดติดตามสถานะงานซ่อมตามกระบวนการทำงาน — หัวคอลัมน์เป็นไฟสัญญาณ: เหลือง=อยู่ในสายงาน แดง=รออะไหล่ เขียว=เสร็จ</Text>
+          <Heading level={2} style={{ color: "#fff" }}>Kanban งานซ่อม</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            บอร์ดติดตามสถานะงานซ่อมตามกระบวนการทำงาน — หัวคอลัมน์เป็นไฟสัญญาณ: เหลือง=อยู่ในสายงาน แดง=รออะไหล่ เขียว=เสร็จ
+          </Text>
         </VStack>
-        <HStack gap={2}>
-          <Button
-            label="รีเฟรช"
-            variant="secondary"
-            icon={<Icon icon={ArrowPathIcon} size="sm" />}
+        <HStack gap={2} wrap="wrap">
+          <button
+            type="button"
             onClick={fetchKanban}
-          />
-          <Button
-            label="สร้างใบสั่งงาน"
-            variant="primary"
-            icon={<Icon icon={PlusIcon} size="sm" />}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
+          <button
+            type="button"
             onClick={() => (window.location.href = "/repair/request")}
-          />
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#1E88E5] to-[#42A5F5] hover:from-[#1976D2] hover:to-[#1E88E5] shadow-lg transition-all duration-300"
+          >
+            <PlusIcon className="w-4 h-4" />
+            สร้างใบสั่งงาน
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       {/* Toolbar Filter */}
-      <Toolbar
-        label="ตัวกรอง Kanban"
-        startContent={
-          <>
-            <TextInput
-              label="ค้นหา"
-              isLabelHidden
-              placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง..."
-              startIcon={MagnifyingGlassIcon}
-              value={search}
-              onChange={setSearch}
-            />
-            <Selector
-              label="ความสำคัญ"
-              isLabelHidden
-              placeholder="ทุกระดับความด่วน"
-              value={priorityFilter}
-              onChange={setPriorityFilter}
-              options={[
-                { value: "all", label: "ทุกความด่วน" },
-                { value: "Critical", label: "วิกฤต (Critical)" },
-                { value: "High", label: "สูง (High)" },
-                { value: "Medium", label: "ปานกลาง (Medium)" },
-                { value: "Low", label: "ต่ำ (Low)" },
-              ]}
-            />
-          </>
-        }
-      />
+      <Card elevation="low" padding={5}>
+        <VStack gap={4}>
+          <HStack gap={2} vAlign="center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <MagnifyingGlassIcon className="w-4 h-4" />
+            </div>
+            <Heading level={3} style={{ margin: 0 }}>ตัวกรองบอร์ด</Heading>
+            <span className="cmms-count-pill">{filteredItems.length} งาน</span>
+          </HStack>
+          <Toolbar
+            label="ตัวกรอง Kanban"
+            startContent={
+              <>
+                <TextInput
+                  label="ค้นหา"
+                  isLabelHidden
+                  placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง..."
+                  startIcon={MagnifyingGlassIcon}
+                  value={search}
+                  onChange={setSearch}
+                />
+                <Selector
+                  label="ความสำคัญ"
+                  isLabelHidden
+                  placeholder="ทุกระดับความด่วน"
+                  value={priorityFilter}
+                  onChange={setPriorityFilter}
+                  options={[
+                    { value: "all", label: "ทุกความด่วน" },
+                    { value: "Critical", label: "วิกฤต (Critical)" },
+                    { value: "High", label: "สูง (High)" },
+                    { value: "Medium", label: "ปานกลาง (Medium)" },
+                    { value: "Low", label: "ต่ำ (Low)" },
+                  ]}
+                />
+              </>
+            }
+          />
+        </VStack>
+      </Card>
 
       {/* Board Columns */}
       <Grid columns={{ minWidth: 260, repeat: "fit" }} gap={4}>
@@ -244,10 +266,11 @@ export default function RepairKanbanPage() {
                 <Text type="body" color="secondary" style={{ textAlign: 'center', padding: 20 }}>กำลังโหลด...</Text>
               ) : col.items.length === 0 ? (
                 <div style={{
-                  padding: 24, textAlign: 'center', borderRadius: 8,
+                  padding: 24, textAlign: 'center', borderRadius: 12,
                   border: '1px dashed var(--cmms-border)', color: 'var(--cmms-text-muted)',
-                  fontSize: '0.85rem',
+                  fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                 }}>
+                  <InboxIcon className="w-6 h-6 opacity-50" />
                   ไม่มีงานในสถานะนี้
                 </div>
               ) : (
@@ -258,6 +281,7 @@ export default function RepairKanbanPage() {
                       padding={4}
                       style={{
                         border: '1px solid var(--cmms-border)',
+                        borderLeft: `3px solid ${priorityTone[item.priority] || "#94A3B8"}`,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
                         transition: 'all 0.2s',
                       }}
@@ -286,6 +310,9 @@ export default function RepairKanbanPage() {
                         <HStack hAlign="between" vAlign="center" style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--cmms-border-light)' }}>
                           <Text type="body" size="sm" color="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                             <Icon icon={UserIcon} size="xsm" /> {item.assignee}
+                          </Text>
+                          <Text type="body" size="sm" color="secondary">
+                            {item.createdAt && item.createdAt !== "-" ? item.createdAt.split(" ")[0] : ""}
                           </Text>
                         </HStack>
 
