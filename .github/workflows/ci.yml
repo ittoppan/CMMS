@@ -39,3 +39,20 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+
+  design-audit:
+    name: Design guideline audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Full-scan report (รวม debt ทั้งระบบ)
+        run: python scripts/design-audit.py || true
+      - name: Gate ไฟล์ที่เปลี่ยนใน PR นี้ (strict)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python scripts/design-audit.py --strict --diff "${BASE_SHA:-HEAD~1}"

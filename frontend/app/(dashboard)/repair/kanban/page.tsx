@@ -45,7 +45,7 @@ const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info
 const priorityTone: Record<KanbanItem["priority"], string> = {
   Critical: "#EF4444",
   High: "#F59E0B",
-  Medium: "#0057A8",
+  Medium: "var(--cmms-primary)",
   Low: "#94A3B8",
 };
 

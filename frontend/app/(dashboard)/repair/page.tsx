@@ -333,7 +333,7 @@ export default function WorkOrdersPage() {
               pdfBuilding || selected.size === 0
                 ? "bg-white/10 text-white/40 cursor-not-allowed"
                 : selected.size > 0
-                  ? "bg-white text-[#0057A8] shadow-lg hover:bg-blue-50"
+                  ? "bg-white text-[var(--cmms-primary)] shadow-lg hover:bg-blue-50"
                   : "bg-white/10 text-white/85 hover:bg-white/20"
             }`}
           >

@@ -155,7 +155,7 @@ export default function ProfilePage() {
               {avatarSrc ? (
                 <Avatar name={form.full_name || profile?.username || "User"} src={avatarSrc} size="lg" style={{ width: 96, height: 96, fontSize: 36 }} />
               ) : (
-                <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--cmms-gradient-primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, fontWeight: 800 }}>
+                <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--cmms-primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, fontWeight: 800 }}>
                   {(form.full_name || profile?.username || "U").charAt(0).toUpperCase()}
                 </div>
               )}
