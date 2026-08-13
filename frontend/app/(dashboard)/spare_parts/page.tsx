@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useMediaQuery } from "@astryxdesign/core/hooks";
 import {
   Layout,
-  LayoutHeader,
   LayoutContent,
   LayoutPanel,
   VStack,
@@ -45,6 +44,7 @@ import {
   TrashIcon,
   CheckCircleIcon,
   CubeIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
 import AndonLamp from "@/components/AndonLamp";
@@ -229,8 +229,11 @@ function ItemsCard({
         <HStack vAlign="center" gap={2} wrap="wrap">
           <StackItem size="fill">
             <HStack gap={2} vAlign="center">
-              <Heading level={2}>รายการอะไหล่</Heading>
-              <Badge variant="info" label={`${filtered.length} รายการ`} />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <CubeIcon className="w-4 h-4" />
+              </div>
+              <Heading level={3} style={{ margin: 0 }}>รายการอะไหล่</Heading>
+              <span className="cmms-count-pill">{filtered.length} รายการ</span>
             </HStack>
           </StackItem>
           <HStack gap={2}>
@@ -554,111 +557,113 @@ export default function SparePartsPage() {
         contentWidth={1100}
         defaultHasDividers
         header={
-          <LayoutHeader hasDivider padding={4}>
-            <VStack gap={3}>
-              <HStack gap={4} vAlign="start">
-                <StackItem size="fill">
-                  <VStack gap={0}>
-                    <Link href="/dashboard" color="secondary">
-                      <HStack gap={1} vAlign="center">
-                        <Icon icon={ArrowLeftIcon} size="sm" color="inherit" />
-                        แดชบอร์ดภาพรวม
-                      </HStack>
-                    </Link>
-                    <VStack gap={0}>
-                      <Heading level={1} maxLines={1}>
-                        คลังสต็อกอะไหล่ (เชื่อมต่อ Sage 300 ERP)
-                      </Heading>
-                      <HStack gap={1} vAlign="center" wrap="wrap">
-                        <Text type="body" maxLines={1}>
-                          {kpis.total} รายการในคลัง
-                        </Text>
-                        <HStack gap={1} vAlign="center">
-                          <Bullet />
-                          <Badge label="ซิงค์สดกับ Sage 300" variant="success" />
-                        </HStack>
-                        <HStack gap={1} vAlign="center">
-                          <Bullet />
-                          <Text type="body" maxLines={1}>
-                            ระบบบริหารคลังอะไหล่ที่เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control) สำหรับ TOPPAN
-                          </Text>
-                        </HStack>
-                      </HStack>
-                    </VStack>
+          <div className="cmms-page-hero flex flex-col gap-5">
+            <HStack gap={4} vAlign="start" wrap="wrap">
+              <StackItem size="fill">
+                <VStack gap={0}>
+                  <Link href="/dashboard" style={{ color: "rgba(255,255,255,0.75)" }}>
+                    <HStack gap={1} vAlign="center">
+                      <Icon icon={ArrowLeftIcon} size="sm" color="inherit" />
+                      แดชบอร์ดภาพรวม
+                    </HStack>
+                  </Link>
+                  <VStack gap={1}>
+                    <Heading level={2} style={{ color: "#fff", marginTop: 4 }}>
+                      คลังสต็อกอะไหล่ (เชื่อมต่อ Sage 300 ERP)
+                    </Heading>
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+                        {kpis.total} รายการในคลัง
+                      </span>
+                      <span className="cmms-andon-chip" style={{ background: "rgba(52,211,153,0.18)", color: "#6ee7b7" }}>
+                        ซิงค์สดกับ Sage 300
+                      </span>
+                    </HStack>
+                    <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+                      ระบบบริหารคลังอะไหล่ที่เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control) สำหรับ TOPPAN
+                    </Text>
                   </VStack>
-                </StackItem>
-                {!isNarrow && (
-                  <HStack gap={2}>
-                    <Button
-                      label="ดึงสต็อกจาก Sage"
-                      variant="secondary"
-                      isLoading={syncingSage}
-                      icon={<Icon icon={CircleStackIcon} size="sm" />}
-                      onClick={handleSageSync}
-                    />
-                    <Button
-                      label="เพิ่มรายการ"
-                      variant="primary"
-                      icon={<Icon icon={PlusIcon} size="sm" />}
-                      onClick={() => router.push("/spare_parts/create")}
-                    />
-                  </HStack>
-                )}
-              </HStack>
-
-              {isNarrow && (
-                <HStack gap={2}>
-                  <StackItem size="fill">
-                    <VStack hAlign="stretch">
-                      <Button
-                        label="ดึงสต็อกจาก Sage"
-                        variant="secondary"
-                        isLoading={syncingSage}
-                        icon={<Icon icon={CircleStackIcon} size="sm" />}
-                        onClick={handleSageSync}
-                      />
-                    </VStack>
-                  </StackItem>
-                  <StackItem size="fill">
-                    <VStack hAlign="stretch">
-                      <Button
-                        label="เพิ่มรายการ"
-                        variant="primary"
-                        icon={<Icon icon={PlusIcon} size="sm" />}
-                        onClick={() => router.push("/spare_parts/create")}
-                      />
-                    </VStack>
-                  </StackItem>
+                </VStack>
+              </StackItem>
+              {!isNarrow && (
+                <HStack gap={3}>
+                  <button
+                    type="button"
+                    onClick={handleSageSync}
+                    disabled={syncingSage}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300 disabled:opacity-60"
+                  >
+                    <CircleStackIcon className="w-4 h-4" />
+                    {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/spare_parts/create")}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    เพิ่มรายการ
+                  </button>
                 </HStack>
               )}
+            </HStack>
 
-              <HStack vAlign="center" style={tabsRow}>
+            {isNarrow && (
+              <HStack gap={2}>
                 <StackItem size="fill">
-                  <TabList value={activeTab} onChange={handleTabChange} size="lg">
-                    <Tab value="all" label={`ทั้งหมด (${kpis.total})`} />
-                    <Tab value="low" label={`ใกล้หมด (${kpis.lowCount})`} />
-                    <Tab value="out" label={`หมดคลัง (${kpis.outCount})`} />
-                    <TabMenu
-                      label="เพิ่มเติม"
-                      options={[
-                        { value: "sage_sync", label: "ตั้งค่าการดึง Sage 300" },
-                        { value: "issue_center", label: "ศูนย์เบิก-จ่าย" },
-                        { value: "optimization", label: "AI คำนวณ EOQ และสต็อกค้าง" },
-                      ]}
-                    />
-                  </TabList>
+                  <VStack hAlign="stretch">
+                    <button
+                      type="button"
+                      onClick={handleSageSync}
+                      disabled={syncingSage}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300 disabled:opacity-60"
+                    >
+                      <CircleStackIcon className="w-4 h-4" />
+                      {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
+                    </button>
+                  </VStack>
                 </StackItem>
-                <Button
-                  label={isPanelShown ? "Hide panel" : "Show panel"}
-                  variant="ghost"
-                  size="md"
-                  icon={<Icon icon={ViewColumnsIcon} size="sm" />}
-                  isIconOnly
-                  onClick={togglePanel}
-                />
+                <StackItem size="fill">
+                  <VStack hAlign="stretch">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/spare_parts/create")}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+                    >
+                      <PlusIcon className="w-4 h-4" />
+                      เพิ่มรายการ
+                    </button>
+                  </VStack>
+                </StackItem>
               </HStack>
-            </VStack>
-          </LayoutHeader>
+            )}
+
+            <HStack vAlign="center" style={tabsRow} wrap="wrap">
+              <StackItem size="fill">
+                <TabList value={activeTab} onChange={handleTabChange} size="lg">
+                  <Tab value="all" label={`ทั้งหมด (${kpis.total})`} />
+                  <Tab value="low" label={`ใกล้หมด (${kpis.lowCount})`} />
+                  <Tab value="out" label={`หมดคลัง (${kpis.outCount})`} />
+                  <TabMenu
+                    label="เพิ่มเติม"
+                    options={[
+                      { value: "sage_sync", label: "ตั้งค่าการดึง Sage 300" },
+                      { value: "issue_center", label: "ศูนย์เบิก-จ่าย" },
+                      { value: "optimization", label: "AI คำนวณ EOQ และสต็อกค้าง" },
+                    ]}
+                  />
+                </TabList>
+              </StackItem>
+              <Button
+                label={isPanelShown ? "Hide panel" : "Show panel"}
+                variant="ghost"
+                size="md"
+                icon={<Icon icon={ViewColumnsIcon} size="sm" />}
+                isIconOnly
+                onClick={togglePanel}
+              />
+            </HStack>
+          </div>
         }
         content={
           <LayoutContent role="main">
@@ -669,6 +674,55 @@ export default function SparePartsPage() {
               {syncNotice && (
                 <Banner status="success" title="Success" description={syncNotice} isDismissable={false} />
               )}
+
+              {/* KPI row */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card padding={4} className="cmms-kpi-card blue">
+                  <HStack gap={3} vAlign="center">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                      <CubeIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={0}>
+                      <Text type="supporting" color="secondary">รายการอะไหล่ทั้งหมด</Text>
+                      <Heading level={3} style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                    </VStack>
+                  </HStack>
+                </Card>
+                <Card padding={4} className="cmms-kpi-card amber">
+                  <HStack gap={3} vAlign="center">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={0}>
+                      <Text type="supporting" color="secondary">ใกล้หมด (Min Stock)</Text>
+                      <Heading level={3} style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                    </VStack>
+                  </HStack>
+                </Card>
+                <Card padding={4} className="cmms-kpi-card red">
+                  <HStack gap={3} vAlign="center">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={0}>
+                      <Text type="supporting" color="secondary">หมดคลัง (Out of Stock)</Text>
+                      <Heading level={3} style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                    </VStack>
+                  </HStack>
+                </Card>
+                <Card padding={4} className="cmms-kpi-card green">
+                  <HStack gap={3} vAlign="center">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                      <CheckCircleIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={0}>
+                      <Text type="supporting" color="secondary">มูลค่าคลังรวม</Text>
+                      <Heading level={3} style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
+                    </VStack>
+                  </HStack>
+                </Card>
+              </div>
+
               {loading && parts.length === 0 ? (
                 <Card elevation="low" padding={6}>
                   <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
