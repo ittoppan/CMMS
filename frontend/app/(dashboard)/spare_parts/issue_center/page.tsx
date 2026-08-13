@@ -5,9 +5,7 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -192,9 +190,18 @@ export default function SageIssueCenterPage() {
       width: proportional(1),
       renderCell: (item: CartItem) => (
         <HStack gap={1} vAlign="center">
-          <Button size="sm" variant="ghost" label="−" isDisabled={item.qty <= 1} onClick={() => handleQtyChange(item.id, item.qty - 1)} />
+          <button
+            type="button"
+            disabled={item.qty <= 1}
+            onClick={() => handleQtyChange(item.id, item.qty - 1)}
+            className="w-7 h-7 rounded-lg text-sm font-bold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] disabled:opacity-40 transition-all"
+          >−</button>
           <Text type="body" weight="bold">{item.qty}</Text>
-          <Button size="sm" variant="ghost" label="+" onClick={() => handleQtyChange(item.id, item.qty + 1)} />
+          <button
+            type="button"
+            onClick={() => handleQtyChange(item.id, item.qty + 1)}
+            className="w-7 h-7 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all"
+          >+</button>
         </HStack>
       ),
     },
@@ -217,7 +224,14 @@ export default function SageIssueCenterPage() {
       header: "",
       width: proportional(0.7),
       renderCell: (item: CartItem) => (
-        <Button size="sm" variant="ghost" icon={<Icon icon={TrashIcon} size="sm" />} label="ลบ" onClick={() => handleRemove(item.id)} />
+        <button
+          type="button"
+          onClick={() => handleRemove(item.id)}
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all"
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+          ลบ
+        </button>
       ),
     },
   ];
@@ -235,15 +249,29 @@ export default function SageIssueCenterPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>ศูนย์เบิก-จ่ายอะไหล่ (Issue Center)</Heading>
-          <Text type="body" color="secondary">เบิกจ่ายอะไหล่จากคลังให้กับใบสั่งงานซ่อมและช่างผู้รับผิดชอบ</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ศูนย์เบิก-จ่ายอะไหล่ (Issue Center)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ShoppingBagIcon className="w-3.5 h-3.5" /> {totalQty} รายการในใบเบิก
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            เบิกจ่ายอะไหล่จากคลังให้กับใบสั่งงานซ่อมและช่างผู้รับผิดชอบ
+          </Text>
         </VStack>
-        <Button label="รีเฟรช" variant="secondary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchData} />
-      </HStack>
+        <button
+          type="button"
+          onClick={fetchData}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
+      </div>
 
-      <Grid columns={2} gap={6}>
+      <Grid columns={{ minWidth: 560, max: 2 }} gap={6}>
         {/* คอลัมน์ซ้าย: ฟอร์ม */}
         <VStack gap={4}>
           <Card padding={5}>
@@ -296,13 +324,15 @@ export default function SageIssueCenterPage() {
                     onChange={(v) => setSelectedPart(String(v))}
                   />
                 </div>
-                <Button
-                  label="เพิ่ม"
-                  variant="primary"
-                  isDisabled={!selectedPart}
+                <button
+                  type="button"
+                  disabled={!selectedPart}
                   onClick={handleAddPart}
-                  icon={<Icon icon={PlusIcon} size="sm" />}
-                />
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  เพิ่ม
+                </button>
               </HStack>
             </VStack>
           </Card>
@@ -314,7 +344,7 @@ export default function SageIssueCenterPage() {
             <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderBottom: "1px solid var(--color-border)" }}>
               <HStack hAlign="between" vAlign="center">
                 <HStack gap={2} vAlign="center">
-                  <Icon icon={ShoppingBagIcon} color="accent" />
+                  <ShoppingBagIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
                   <Text type="body" weight="bold">ใบเบิกอะไหล่</Text>
                 </HStack>
                 <Badge label={`${totalQty} รายการ`} variant="info" />
@@ -337,14 +367,15 @@ export default function SageIssueCenterPage() {
             )}
           </Card>
 
-          <Button
-            label={submitting ? "กำลังเบิกจ่าย..." : "ยืนยันการเบิก-จ่ายอะไหล่"}
-            variant="primary"
-            size="lg"
-            isDisabled={submitting || !workOrder || !technician || cart.length === 0}
+          <button
+            type="button"
+            disabled={submitting || !workOrder || !technician || cart.length === 0}
             onClick={handleSubmit}
-            icon={<Icon icon={CheckCircleIcon} size="sm" />}
-          />
+            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            {submitting ? "กำลังเบิกจ่าย..." : "ยืนยันการเบิก-จ่ายอะไหล่"}
+          </button>
         </VStack>
       </Grid>
 
