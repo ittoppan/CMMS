@@ -5,12 +5,10 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
 import { Spinner } from "@astryxdesign/core/Spinner";
@@ -157,14 +155,22 @@ export default function BatchSchedulePage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      {/* Header */}
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</Heading>
-          <Text type="body" color="secondary">กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              กำหนดเช็คชีทเดียว ให้หลายเครื่องพร้อมกัน
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน
+          </Text>
         </VStack>
-      </HStack>
+      </div>
 
-      <Grid columns={2} gap={6}>
+      <Grid columns={{ minWidth: 560, max: 2 }} gap={6}>
         {/* คอลัมน์ซ้าย: ข้อมูลแผน */}
         <VStack gap={4}>
           <Card padding={5}>
@@ -218,9 +224,11 @@ export default function BatchSchedulePage() {
             </FormLayout>
           </Card>
 
-          <Card padding={5} variant="muted">
+          <Card padding={5} className="cmms-kpi-card blue">
             <HStack gap={3} vAlign="start">
-              <Icon icon={RectangleGroupIcon} color="accent" />
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <RectangleGroupIcon className="w-5 h-5" />
+              </div>
               <VStack gap={1}>
                 <Text type="body" weight="semibold">ข้อมูลสรุป</Text>
                 <Text type="body" size="sm" color="secondary">
@@ -298,17 +306,25 @@ export default function BatchSchedulePage() {
       </Grid>
 
       <HStack hAlign="end" gap={3} style={{ paddingTop: 24, borderTop: "1px solid var(--color-border)" }}>
-        <Button label="ล้างฟอร์ม" variant="secondary" onClick={() => {
-          setFormData({ frequency: "monthly", startDate: new Date().toISOString().slice(0, 10), assignee: "", title: "" });
-          setSelectedAssets([]);
-        }} />
-        <Button
-          label={submitting ? "กำลังสร้างแผน..." : "ยืนยันการสร้างแผนแบบกลุ่ม"}
-          variant="primary"
-          isDisabled={submitting || !formData.title.trim() || !formData.startDate || selectedAssets.length === 0}
+        <button
+          type="button"
+          onClick={() => {
+            setFormData({ frequency: "monthly", startDate: new Date().toISOString().slice(0, 10), assignee: "", title: "" });
+            setSelectedAssets([]);
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+        >
+          ล้างฟอร์ม
+        </button>
+        <button
+          type="button"
+          disabled={submitting || !formData.title.trim() || !formData.startDate || selectedAssets.length === 0}
           onClick={handleSubmit}
-          icon={<Icon icon={RectangleGroupIcon} size="sm" />}
-        />
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RectangleGroupIcon className="w-4 h-4" />
+          {submitting ? "กำลังสร้างแผน..." : "ยืนยันการสร้างแผนแบบกลุ่ม"}
+        </button>
       </HStack>
 
     </VStack>
