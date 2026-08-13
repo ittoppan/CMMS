@@ -9,8 +9,6 @@ import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { 
   PlusIcon,
   ArrowLeftIcon,
@@ -99,18 +97,27 @@ export default function CreateSparePartPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>เพิ่มรายการอะไหล่ใหม่</Heading>
-          <Text type="body" color="secondary">บันทึกรหัส ชื่อ หมวดหมู่ ที่เก็บ และจำนวนสต็อกขั้นต่ำ</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>เพิ่มรายการอะไหล่ใหม่</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <CubeIcon className="w-3.5 h-3.5" /> Spare Part
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            บันทึกรหัส ชื่อ หมวดหมู่ ที่เก็บ และจำนวนสต็อกขั้นต่ำ
+          </Text>
         </VStack>
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
-          onClick={() => (router.push("/spare_parts"))}
-        />
-      </HStack>
+        <button
+          type="button"
+          onClick={() => router.push("/spare_parts")}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          ย้อนกลับ
+        </button>
+      </div>
 
       <Card padding={6}>
         <VStack gap={5}>
@@ -242,18 +249,22 @@ export default function CreateSparePartPage() {
       </Card>
 
       <HStack hAlign="end" gap={3}>
-        <Button
-          label="ยกเลิก"
-          variant="secondary"
+        <button
+          type="button"
           onClick={() => (window.location.href = "/spare_parts")}
-        />
-        <Button
-          label="บันทึกอะไหล่ใหม่"
-          variant="primary"
-          isLoading={submitting}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          disabled={submitting}
           onClick={handleSubmit}
-          icon={<Icon icon={PlusIcon} size="sm" />}
-        />
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <PlusIcon className="w-4 h-4" />
+          {submitting ? "กำลังบันทึก..." : "บันทึกอะไหล่ใหม่"}
+        </button>
       </HStack>
     </VStack>
   );
