@@ -367,32 +367,39 @@ export default function MyTasksPage() {
   return (
     <VStack gap={6}>
       {/* Header */}
-      <VStack gap={1}>
-        <Heading level={2}>งานของฉัน (ซ่อม + PM)</Heading>
-        <Text type="body" color="secondary">งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย</Text>
-      </VStack>
+      <div className="cmms-page-hero">
+        <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
+            My Tasks · CMMS-TOPPAN
+          </Text>
+          <Heading level={2} style={{ color: "#fff" }}>งานของฉัน (ซ่อม + PM)</Heading>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย
+          </Text>
+        </VStack>
+      </div>
 
       {/* Tabs */}
-      <HStack gap={2} style={{ borderBottom: '2px solid var(--cmms-border)', paddingBottom: 4 }}>
-        <Button
-          size="sm"
-          variant={activeTab === 'new' ? 'primary' : 'secondary'}
+      <div className="flex flex-wrap gap-2 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-2xl w-fit">
+        <button
           onClick={() => setActiveTab('new')}
-          label={`งานใหม่ (${countNew})`}
-        />
-        <Button
-          size="sm"
-          variant={activeTab === 'in_progress' ? 'primary' : 'secondary'}
+          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'new' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+        >
+          งานใหม่ ({countNew})
+        </button>
+        <button
           onClick={() => setActiveTab('in_progress')}
-          label={`กำลังซ่อม (${countInProg})`}
-        />
-        <Button
-          size="sm"
-          variant={activeTab === 'completed' ? 'primary' : 'secondary'}
+          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'in_progress' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+        >
+          กำลังซ่อม ({countInProg})
+        </button>
+        <button
           onClick={() => setActiveTab('completed')}
-          label={`ซ่อมเสร็จแล้ว (${countDone})`}
-        />
-      </HStack>
+          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'completed' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
+        >
+          ซ่อมเสร็จแล้ว ({countDone})
+        </button>
+      </div>
 
       {/* Table */}
       {error ? (
@@ -401,6 +408,15 @@ export default function MyTasksPage() {
         <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมในสถานะนี้" icon={<Icon icon={WrenchScrewdriverIcon} size="lg" />} />
       ) : (
         <Card padding={0} style={{ overflow: 'hidden' }}>
+          <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
+            <HStack gap={2} vAlign="center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <WrenchScrewdriverIcon className="w-4 h-4" />
+              </div>
+              <Text type="body" weight="bold">รายการงานในสถานะนี้</Text>
+              <span className="cmms-count-pill">{filteredTasks.length} รายการ</span>
+            </HStack>
+          </HStack>
           <Table<TaskItem>
             data={filteredTasks}
             columns={columns}
