@@ -277,6 +277,7 @@ export default function UsersPage() {
       {/* Header */}
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">USER MANAGEMENT · CMMS-TOPPAN</Text>
           <Heading level={2}>ผู้ใช้งานระบบ (User Management)</Heading>
           <Text type="body" color="secondary">จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS</Text>
         </VStack>

@@ -7,6 +7,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Icon } from "@astryxdesign/core/Icon";
+import AndonLamp from "@/components/AndonLamp";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
@@ -244,9 +245,7 @@ export default function RepairHistoryPage() {
         <Card elevation="low" padding={4} className="cmms-kpi-card green">
           <VStack gap={2}>
             <HStack vAlign="center" gap={2}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
-                <CheckCircleIcon className="w-5 h-5" />
-              </div>
+              <AndonLamp status="ok" size="sm" />
               <Text type="supporting" color="secondary">งานที่เสร็จสิ้น</Text>
             </HStack>
             <div className="cmms-kpi-value">
@@ -258,9 +257,7 @@ export default function RepairHistoryPage() {
         <Card elevation="low" padding={4} className="cmms-kpi-card blue">
           <VStack gap={2}>
             <HStack vAlign="center" gap={2}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
-                <WrenchScrewdriverIcon className="w-5 h-5" />
-              </div>
+              <AndonLamp status="idle" size="sm" />
               <Text type="supporting" color="secondary">ค่าอะไหล่</Text>
             </HStack>
             <div className="cmms-kpi-value">
@@ -272,9 +269,7 @@ export default function RepairHistoryPage() {
         <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
           <VStack gap={2}>
             <HStack vAlign="center" gap={2}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
-                <UserGroupIcon className="w-5 h-5" />
-              </div>
+              <AndonLamp status="idle" size="sm" />
               <Text type="supporting" color="secondary">ค่าแรง</Text>
             </HStack>
             <div className="cmms-kpi-value">
@@ -286,9 +281,7 @@ export default function RepairHistoryPage() {
         <Card elevation="low" padding={4} className="cmms-kpi-card amber">
           <VStack gap={2}>
             <HStack vAlign="center" gap={2}>
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
-                <BuildingOffice2Icon className="w-5 h-5" />
-              </div>
+              <AndonLamp status="warn" size="sm" />
               <Text type="supporting" color="secondary">ค่าจ้างภายนอก</Text>
             </HStack>
             <div className="cmms-kpi-value">
@@ -301,9 +294,7 @@ export default function RepairHistoryPage() {
           <Card elevation="low" padding={4} className="cmms-kpi-card red">
             <VStack gap={2}>
               <HStack vAlign="center" gap={2}>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-                  <ClockIcon className="w-5 h-5" />
-                </div>
+                <AndonLamp status="down" size="sm" />
                 <Text type="supporting" color="secondary">เวลาหยุดเครื่องรวม</Text>
               </HStack>
               <div className="cmms-kpi-value">
@@ -319,7 +310,7 @@ export default function RepairHistoryPage() {
       <Card elevation="low" padding={5}>
         <VStack gap={4}>
           <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
               <ClipboardDocumentListIcon className="w-4 h-4" />
             </div>
             <Heading level={3} style={{ margin: 0 }}>ประวัติใบสั่งงาน</Heading>

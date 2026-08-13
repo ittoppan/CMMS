@@ -84,6 +84,7 @@ export default function PMCalendarPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CALENDAR · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>ปฏิทินงานซ่อมบำรุง (PM Calendar)</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -110,7 +111,7 @@ export default function PMCalendarPage() {
           <button
             type="button"
             onClick={() => window.location.href = '/pm_am/create'}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             สร้างแผน PM ใหม่
@@ -129,9 +130,7 @@ export default function PMCalendarPage() {
       <Grid columns={{ minWidth: 230, repeat: "fit" }} gap={4}>
         <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <ExclamationTriangleIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="down" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">งานเลยกำหนด</Text>
               <Heading level={3} style={{ margin: 0 }}>{overdueCount} <span className="cmms-kpi-unit">งาน</span></Heading>
@@ -141,9 +140,7 @@ export default function PMCalendarPage() {
 
         <Card padding={4} className="cmms-kpi-card amber">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <CalendarDaysIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">แผนงานวันนี้ (Today)</Text>
               <Heading level={3} style={{ margin: 0 }}>{todayCount} <span className="cmms-kpi-unit">งาน</span></Heading>
@@ -153,9 +150,7 @@ export default function PMCalendarPage() {
 
         <Card padding={4} className="cmms-kpi-card green">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <CheckCircleIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="ok" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">เสร็จแล้ววันนี้</Text>
               <Heading level={3} style={{ margin: 0 }}>{completedCount} <span className="cmms-kpi-unit">งาน</span></Heading>
@@ -165,9 +160,7 @@ export default function PMCalendarPage() {
 
         <Card padding={4} className="cmms-kpi-card cyan">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <UserGroupIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="idle" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
               <Heading level={3} style={{ margin: 0 }}>{activeTechCount} <span className="cmms-kpi-unit">คน</span></Heading>
@@ -210,7 +203,7 @@ export default function PMCalendarPage() {
             <VStack gap={4}>
               <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 12 }}>
                 <HStack gap={2} vAlign="center">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <div className="w-8 h-8 rounded-lg cmms-icon-tile">
                     <ClipboardDocumentListIcon className="w-4 h-4" />
                   </div>
                   <Heading level={4} style={{ margin: 0 }}>

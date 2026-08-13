@@ -105,6 +105,7 @@ export default function PMCreatePage() {
     <VStack gap={6}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM PLAN · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>สร้างแผนบำรุงรักษาเครื่องจักร</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -185,7 +186,7 @@ export default function PMCreatePage() {
               type="button"
               disabled={loading}
               onClick={handleSubmit}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "กำลังบันทึก..." : "บันทึกแผนงาน"}
             </button>

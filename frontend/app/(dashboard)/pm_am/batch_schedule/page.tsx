@@ -158,6 +158,7 @@ export default function BatchSchedulePage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM SCHEDULER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -226,7 +227,7 @@ export default function BatchSchedulePage() {
 
           <Card padding={5} className="cmms-kpi-card blue">
             <HStack gap={3} vAlign="start">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-10 h-10 rounded-xl cmms-icon-tile">
                 <RectangleGroupIcon className="w-5 h-5" />
               </div>
               <VStack gap={1}>
@@ -320,7 +321,7 @@ export default function BatchSchedulePage() {
           type="button"
           disabled={submitting || !formData.title.trim() || !formData.startDate || selectedAssets.length === 0}
           onClick={handleSubmit}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RectangleGroupIcon className="w-4 h-4" />
           {submitting ? "กำลังสร้างแผน..." : "ยืนยันการสร้างแผนแบบกลุ่ม"}

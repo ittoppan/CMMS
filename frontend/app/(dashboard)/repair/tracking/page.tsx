@@ -187,7 +187,7 @@ export default function RepairTrackingPage() {
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
             <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
                 <WrenchScrewdriverIcon className="w-4 h-4" />
               </div>
               <Text type="body" weight="bold">รายการงานซ่อมที่แจ้งไว้</Text>
@@ -213,7 +213,7 @@ export default function RepairTrackingPage() {
         >
           <DialogHeader title="ประเมินผลความพึงพอใจงานซ่อม" onOpenChange={setEvalModalOpen} />
           <div style={{ padding: 24 }}>
-            <div style={{ height: 4, borderRadius: 4, background: 'linear-gradient(90deg, #0057A8, #1E88E5)', marginBottom: 16 }} />
+            <div style={{ height: 4, borderRadius: 4, background: 'var(--cmms-primary)', marginBottom: 16 }} />
             <VStack gap={4}>
               <Card padding={4} style={{ backgroundColor: 'var(--cmms-bg-muted)' }}>
                 <VStack gap={2}>

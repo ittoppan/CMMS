@@ -519,9 +519,7 @@ export default function DashboardPage() {
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
-                        <WrenchScrewdriverIcon className="w-5 h-5" />
-                      </div>
+                      
                       <Text type="supporting" color="secondary" className="font-medium">งานซ่อมทั้งหมด</Text>
                     </HStack>
                     <AndonLamp status="ok" size="sm" />
@@ -538,9 +536,7 @@ export default function DashboardPage() {
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
-                        <CheckCircleIcon className="w-5 h-5" />
-                      </div>
+                      
                       <Text type="supporting" color="secondary" className="font-medium">งานซ่อมเสร็จสมบูรณ์</Text>
                     </HStack>
                     <AndonLamp status="ok" size="sm" />
@@ -559,9 +555,7 @@ export default function DashboardPage() {
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-                        <ExclamationTriangleIcon className="w-5 h-5" />
-                      </div>
+                      
                       <Text type="supporting" color="secondary" className="font-medium">เครื่องจักรชำรุด</Text>
                     </HStack>
                     <AndonLamp status="down" size="sm" />
@@ -580,9 +574,7 @@ export default function DashboardPage() {
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
-                        <CurrencyDollarIcon className="w-5 h-5" />
-                      </div>
+                      
                       <Text type="supporting" color="secondary" className="font-medium">ค่าใช้จ่ายรวม</Text>
                     </HStack>
                     <AndonLamp status="warn" size="sm" />
@@ -625,7 +617,7 @@ export default function DashboardPage() {
               <VStack gap={8}>
                 {/* Advanced Metrics */}
                 <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={4}>
-                  <Card elevation="medium" padding={6} className="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-900/30 dark:to-cyan-800/20 border border-cyan-200 dark:border-cyan-700/50">
+                  <Card elevation="medium" padding={6} className="cmms-kpi-card cyan">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <CurrencyDollarIcon className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -641,7 +633,7 @@ export default function DashboardPage() {
                     </VStack>
                   </Card>
 
-                  <Card elevation="medium" padding={6} className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 border border-amber-200 dark:border-amber-700/50">
+                  <Card elevation="medium" padding={6} className="cmms-kpi-card amber">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <ArchiveBoxIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -657,7 +649,7 @@ export default function DashboardPage() {
                     </VStack>
                   </Card>
 
-                  <Card elevation="medium" padding={6} className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 border border-green-200 dark:border-green-700/50">
+                  <Card elevation="medium" padding={6} className="cmms-kpi-card green">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <BoltIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -979,7 +971,7 @@ export default function DashboardPage() {
                         <Heading level={4} className="font-bold">⏱ ไทม์ไลน์กิจกรรม (ไลฟ์)</Heading>
                         <Badge label="เรียลไทม์" variant="primary" size="sm" />
                       </HStack>
-                      <div className="relative pl-6 mt-4 space-y-6 before:absolute before:left-6 before:top-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                      <div className="relative pl-6 mt-4 space-y-6 before:absolute before:left-6 before:top-0 before:h-full before:w-0.5 before:bg-slate-300">
                         {liveTimeline.length === 0 ? (
                           <EmptyState title="ยังไม่มีกิจกรรม" description="ยังไม่มีอัปเดตงานซ่อมล่าสุด" />
                         ) : liveTimeline.map((item, index) => (
@@ -1038,7 +1030,7 @@ export default function DashboardPage() {
                       <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-500"/> สรุปการตรวจเช็คประจำวัน
                     </Heading>
                     <Grid columns={{ minWidth: 250, repeat: "fit" }} gap={4}>
-                      <Card elevation="medium" padding={5} className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700/50">
+                      <Card elevation="medium" padding={5} className="cmms-kpi-card cyan">
                         <VStack gap={2}>
                           <Text type="supporting" color="secondary" className="font-medium">ครบกำหนดวันนี้</Text>
                           <Heading level={2} className="text-blue-700 dark:text-blue-300">
@@ -1048,7 +1040,7 @@ export default function DashboardPage() {
                           <Text type="body" size="sm" color="secondary">ยังไม่ได้ทำตรวจ</Text>
                         </VStack>
                       </Card>
-                      <Card elevation="medium" padding={5} className="bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/30 dark:to-rose-800/20 border border-rose-200 dark:border-rose-700/50">
+                      <Card elevation="medium" padding={5} className="cmms-kpi-card red">
                         <VStack gap={2}>
                           <Text type="supporting" className="text-rose-700 dark:text-rose-400 font-medium">เกินกำหนด</Text>
                           <Heading level={2} className="text-rose-700 dark:text-rose-300">
@@ -1060,7 +1052,7 @@ export default function DashboardPage() {
                           </Text>
                         </VStack>
                       </Card>
-                      <Card elevation="medium" padding={5} className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/20 border border-emerald-200 dark:border-emerald-700/50">
+                      <Card elevation="medium" padding={5} className="cmms-kpi-card green">
                         <VStack gap={2}>
                           <Text type="supporting" className="text-emerald-700 dark:text-emerald-400 font-medium">ทำแล้ววันนี้</Text>
                           <Heading level={2} className="text-emerald-700 dark:text-emerald-300">
@@ -1089,7 +1081,7 @@ export default function DashboardPage() {
         {selectedDrillDown && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-2xl p-6 max-w-2xl w-full relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#0057A8] to-[#1E88E5]"></div>
+              <div className="absolute top-0 left-0 w-full h-2 bg-[var(--cmms-primary)]"></div>
               <HStack hAlign="between" vAlign="center" className="mb-6">
                 <VStack gap={1}>
                   <Heading level={3}>เจาะลึกข้อมูลเดือน {selectedDrillDown.month}</Heading>
@@ -1140,7 +1132,7 @@ export default function DashboardPage() {
         <div className={`fixed bottom-6 right-6 z-[120] flex flex-col items-end transition-all duration-300 print:hidden`}>
           {isChatOpen && (
             <div className="mb-4 w-80 h-96 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
-              <div className="bg-gradient-to-r from-[#0057A8] to-[#1E88E5] p-4 text-white flex justify-between items-center">
+              <div className="bg-[var(--cmms-primary)] p-4 text-white flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CpuChipIcon className="w-5 h-5" />
                   <span className="font-bold">ผู้ช่วย AI ของระบบ</span>
@@ -1189,7 +1181,7 @@ export default function DashboardPage() {
 
           <button 
             onClick={() => setIsChatOpen(!isChatOpen)}
-            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-110 ${isChatOpen ? 'bg-rose-500' : 'bg-gradient-to-r from-[#0057A8] to-[#1E88E5] animate-bounce'}`}
+            className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300 hover:scale-110 ${isChatOpen ? 'bg-rose-500' : 'bg-[var(--cmms-primary)]'}`}
           >
             {isChatOpen ? <XMarkIcon className="w-6 h-6" /> : <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />}
           </button>

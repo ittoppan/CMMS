@@ -351,7 +351,7 @@ export default function WorkOrdersPage() {
           <button
             type="button"
             onClick={() => router.push("/repair/create")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#1E88E5] to-[#42A5F5] hover:from-[#1976D2] hover:to-[#1E88E5] shadow-lg transition-all duration-300"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             สร้างใบสั่งงาน
@@ -365,9 +365,7 @@ export default function WorkOrdersPage() {
           <VStack gap={2}>
             <HStack hAlign="between" vAlign="center">
               <HStack vAlign="center" gap={2}>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
-                  <ClipboardDocumentListIcon className="w-5 h-5" />
-                </div>
+                
                 <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
               </HStack>
               <AndonLamp status="idle" size="sm" />
@@ -382,9 +380,7 @@ export default function WorkOrdersPage() {
           <VStack gap={2}>
             <HStack hAlign="between" vAlign="center">
               <HStack vAlign="center" gap={2}>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
-                  <ClockIcon className="w-5 h-5" />
-                </div>
+                
                 <Text type="supporting" color="secondary">รอดำเนินการ (Open)</Text>
               </HStack>
               <AndonLamp status="warn" size="sm" />
@@ -399,9 +395,7 @@ export default function WorkOrdersPage() {
           <VStack gap={2}>
             <HStack hAlign="between" vAlign="center">
               <HStack vAlign="center" gap={2}>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-sky-600 text-white flex items-center justify-center shadow-md shrink-0">
-                  <WrenchScrewdriverIcon className="w-5 h-5" />
-                </div>
+                
                 <Text type="supporting" color="secondary">กำลังซ่อม (In Progress)</Text>
               </HStack>
               <AndonLamp status="warn" size="sm" />
@@ -416,9 +410,7 @@ export default function WorkOrdersPage() {
           <VStack gap={2}>
             <HStack hAlign="between" vAlign="center">
               <HStack vAlign="center" gap={2}>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
-                  <CheckCircleIcon className="w-5 h-5" />
-                </div>
+                
                 <Text type="supporting" color="secondary">เสร็จสิ้น (Completed)</Text>
               </HStack>
               <AndonLamp status="ok" size="sm" />
@@ -434,9 +426,7 @@ export default function WorkOrdersPage() {
             <VStack gap={2}>
               <HStack hAlign="between" vAlign="center">
                 <HStack vAlign="center" gap={2}>
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-                    <ExclamationTriangleIcon className="w-5 h-5" />
-                  </div>
+                  
                   <Text type="supporting" color="secondary">เกินกำหนด</Text>
                 </HStack>
                 <AndonLamp status="down" size="sm" />
@@ -454,7 +444,7 @@ export default function WorkOrdersPage() {
         <VStack gap={4}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
             <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
                 <ClipboardDocumentListIcon className="w-4 h-4" />
               </div>
               <Heading level={3} style={{ margin: 0 }}>รายการงานซ่อม</Heading>

@@ -191,7 +191,7 @@ export default function RepairKanbanPage() {
           <button
             type="button"
             onClick={() => (window.location.href = "/repair/request")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#1E88E5] to-[#42A5F5] hover:from-[#1976D2] hover:to-[#1E88E5] shadow-lg transition-all duration-300"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             สร้างใบสั่งงาน
@@ -203,7 +203,7 @@ export default function RepairKanbanPage() {
       <Card elevation="low" padding={5}>
         <VStack gap={4}>
           <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
               <MagnifyingGlassIcon className="w-4 h-4" />
             </div>
             <Heading level={3} style={{ margin: 0 }}>ตัวกรองบอร์ด</Heading>

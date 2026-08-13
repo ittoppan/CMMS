@@ -7,6 +7,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
+import AndonLamp from "@/components/AndonLamp";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -90,7 +91,7 @@ export default function WorkloadPage() {
           <div
             style={{
               width: 30, height: 30, borderRadius: 999,
-              background: "var(--cmms-gradient-primary)",
+              background: "var(--cmms-primary)",
               color: "#fff", fontWeight: 700, fontSize: 13,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}
@@ -121,7 +122,7 @@ export default function WorkloadPage() {
       width: proportional(1),
       renderCell: (item) =>
         item.overdueCount > 0 ? (
-          <Badge variant="error" label={`⏰ ${item.overdueCount}`} />
+          <Badge variant="error" label={String(item.overdueCount)} />
         ) : (
           <Text type="body" color="disabled">-</Text>
         ),
@@ -132,7 +133,7 @@ export default function WorkloadPage() {
       width: proportional(1),
       renderCell: (item) =>
         item.urgentCount > 0 ? (
-          <Badge variant="error" label={`🔥 ${item.urgentCount}`} />
+          <Badge variant="error" label={String(item.urgentCount)} />
         ) : (
           <Text type="body" color="disabled">-</Text>
         ),
@@ -158,6 +159,7 @@ export default function WorkloadPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>WORKLOAD BOARD · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>ภาระงานช่าง (Workload)</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -183,9 +185,7 @@ export default function WorkloadPage() {
       <Grid columns={5} gap={4}>
         <Card padding={4} className="cmms-kpi-card blue">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <UserGroupIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="idle" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ช่างที่มีงาน</Text>
               <Heading level={3} style={{ margin: 0 }}>{summary.technicians} คน</Heading>
@@ -194,9 +194,7 @@ export default function WorkloadPage() {
         </Card>
         <Card padding={4} className="cmms-kpi-card amber">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <ClipboardDocumentListIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">งานค้างทั้งหมด</Text>
               <Heading level={3} style={{ margin: 0 }}>{summary.total_open} งาน</Heading>
@@ -205,9 +203,7 @@ export default function WorkloadPage() {
         </Card>
         <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <ExclamationTriangleIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="down" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">เกินกำหนด</Text>
               <Heading level={3} style={{ margin: 0 }}>{summary.total_overdue} งาน</Heading>
@@ -216,9 +212,7 @@ export default function WorkloadPage() {
         </Card>
         <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <FireIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ด่วน / วิกฤต</Text>
               <Heading level={3} style={{ margin: 0 }}>{summary.total_urgent} งาน</Heading>
@@ -227,9 +221,7 @@ export default function WorkloadPage() {
         </Card>
         <Card padding={4} className="cmms-kpi-card green">
           <HStack gap={3} vAlign="center">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
-              <CheckCircleIcon className="w-5 h-5" />
-            </div>
+            <AndonLamp status="ok" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ปิดงาน 7 วันล่าสุด</Text>
               <Heading level={3} style={{ margin: 0 }}>{summary.done_7d} งาน</Heading>
@@ -241,7 +233,7 @@ export default function WorkloadPage() {
       <Card padding={0} style={{ overflow: "hidden" }}>
         <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
           <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
               <UserGroupIcon className="w-4 h-4" />
             </div>
             <Text type="body" weight="bold">ภาระงานรายช่าง</Text>

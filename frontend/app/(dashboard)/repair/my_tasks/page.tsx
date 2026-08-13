@@ -410,7 +410,7 @@ export default function MyTasksPage() {
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
             <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
                 <WrenchScrewdriverIcon className="w-4 h-4" />
               </div>
               <Text type="body" weight="bold">รายการงานในสถานะนี้</Text>
@@ -427,7 +427,7 @@ export default function MyTasksPage() {
         </Card>
       )}
 
-      {/* 🟢 CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
+      {/* CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
       {closeModalOpen && (
         <Dialog isOpen onOpenChange={(open) => { if(!open) setCloseModalOpen(false); }}>
           <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
@@ -484,7 +484,7 @@ export default function MyTasksPage() {
                 />
               </Field>
 
-              {/* 📸 AFTER REPAIR IMAGE UPLOAD */}
+              {/* AFTER REPAIR IMAGE UPLOAD */}
               <Field label="แนบรูปถ่ายหลังซ่อมเสร็จ" inputID="afterPhoto">
                 <VStack gap={2}>
                   <FileInput
@@ -511,7 +511,7 @@ export default function MyTasksPage() {
                 </VStack>
               </Field>
 
-              {/* 👤 RECEIVER NAME & ✍ SIGNATURE CANVAS */}
+              {/* RECEIVER NAME & SIGNATURE CANVAS */}
               <Grid columns={2} gap={4}>
                 <Field label="ชื่อผู้รับมอบงานซ่อมเสร็จ *" inputID="recName" isRequired>
                   <TextInput

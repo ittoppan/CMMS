@@ -15,6 +15,7 @@ export default function ReportsHubPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS HUB · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -31,7 +32,7 @@ export default function ReportsHubPage() {
         <Card elevation="low" padding={6} className="cmms-kpi-card blue">
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 rounded-xl cmms-icon-tile">
                 <DocumentArrowDownIcon className="w-6 h-6" />
               </div>
               <VStack gap={0}>
@@ -47,7 +48,7 @@ export default function ReportsHubPage() {
             <button
               type="button"
               onClick={() => (window.location.href = "/reports/monthly_pdf")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >
               เปิดศูนย์ออกรายงาน PDF
             </button>
@@ -57,7 +58,7 @@ export default function ReportsHubPage() {
         <Card elevation="low" padding={6} className="cmms-kpi-card green">
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 rounded-xl cmms-icon-tile green">
                 <TableCellsIcon className="w-6 h-6" />
               </div>
               <VStack gap={0}>
@@ -73,7 +74,7 @@ export default function ReportsHubPage() {
             <button
               type="button"
               onClick={() => (window.location.href = "/reports/export_excel")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >
               เปิดหน้าส่งออก Excel & CSV
             </button>

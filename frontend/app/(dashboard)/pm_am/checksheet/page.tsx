@@ -257,6 +257,7 @@ export default function PMChecksheetPage() {
 
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CHECKSHEET · CMMS-TOPPAN</Text>
           <Heading level={2} style={{ color: "#fff" }}>ทำรายการ PM (Checksheet)</Heading>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ
@@ -267,7 +268,7 @@ export default function PMChecksheetPage() {
             type="button"
             disabled={!selectedPlan}
             onClick={handleCheckAll}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-green-600 shadow-lg shadow-emerald-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-success disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckCircleIcon className="w-4 h-4" />
             ผ่านทั้งหมด (ทุกรายการ)
@@ -357,7 +358,7 @@ export default function PMChecksheetPage() {
                               onClick={() => handleStatus(item.id, "pass")}
                               style={{
                                 display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
-                                background: item.status === "pass" ? "linear-gradient(135deg,#059669,#10B981)" : "var(--color-surface)",
+                                background: item.status === "pass" ? "var(--cmms-success)" : "var(--color-surface)",
                                 color: item.status === "pass" ? "#fff" : "var(--color-secondary)",
                                 border: `1px solid ${item.status === "pass" ? "transparent" : "var(--color-border)"}`,
                                 fontWeight: 600, cursor: "pointer", boxShadow: item.status === "pass" ? "0 4px 12px rgba(5,150,105,0.3)" : "none",
@@ -369,7 +370,7 @@ export default function PMChecksheetPage() {
                               onClick={() => handleStatus(item.id, "fail")}
                               style={{
                                 display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
-                                background: item.status === "fail" ? "linear-gradient(135deg,#DC2626,#EF4444)" : "var(--color-surface)",
+                                background: item.status === "fail" ? "var(--cmms-danger)" : "var(--color-surface)",
                                 color: item.status === "fail" ? "#fff" : "var(--color-secondary)",
                                 border: `1px solid ${item.status === "fail" ? "transparent" : "var(--color-border)"}`,
                                 fontWeight: 600, cursor: "pointer", boxShadow: item.status === "fail" ? "0 4px 12px rgba(220,38,38,0.3)" : "none",
@@ -415,7 +416,7 @@ export default function PMChecksheetPage() {
                   type="button"
                   disabled={submitting || !allFilled}
                   onClick={handleSubmit}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ClipboardDocumentCheckIcon className="w-4 h-4" />
                   {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}

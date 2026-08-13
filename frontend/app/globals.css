@@ -433,11 +433,12 @@ h1, h2, h3, h4 {
 .cmms-kpi-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
 }
-.cmms-kpi-card.blue::before { background: var(--cmms-gradient-primary); }
-.cmms-kpi-card.green::before { background: var(--cmms-gradient-success); }
-.cmms-kpi-card.amber::before { background: var(--cmms-gradient-warning); }
-.cmms-kpi-card.red::before { background: var(--cmms-gradient-danger); }
-.cmms-kpi-card.cyan::before { background: var(--cmms-gradient-info); }
+/* แถบสีหัวการ์ด KPI — ใช้สีทึบ (flat) ตาม guideline ไม่ใช่ gradient */
+.cmms-kpi-card.blue::before { background: var(--cmms-primary); }
+.cmms-kpi-card.green::before { background: var(--cmms-success); }
+.cmms-kpi-card.amber::before { background: var(--cmms-warning); }
+.cmms-kpi-card.red::before { background: var(--cmms-danger); }
+.cmms-kpi-card.cyan::before { background: var(--cmms-info); }
 
 .cmms-kpi-icon {
   width: 44px; height: 44px; border-radius: 12px;
@@ -1679,4 +1680,83 @@ next-route-announcer {
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-secondary);
+}
+
+/* ── ปุ่มหลักแบบ flat (แทน gradient — ตาม guideline §6.3) ── */
+.cmms-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--cmms-primary);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 14px -8px rgba(0, 104, 181, 0.45);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.cmms-btn-primary:hover {
+  background: var(--cmms-primary-hover);
+  box-shadow: none;
+}
+.cmms-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── ปุ่ม action สำเร็จแบบ flat (เช่น บันทึกผลตรวจ) ── */
+.cmms-btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--cmms-success);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 14px -8px rgba(16, 185, 129, 0.45);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.cmms-btn-success:hover {
+  background: #059669;
+  box-shadow: none;
+}
+.cmms-btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── กล่องไอคอนแบบ flat (หัว section บนพื้นขาว — ไม่มี gradient) ── */
+.cmms-icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: var(--cmms-primary-light);
+  color: var(--cmms-primary);
+}
+.cmms-icon-tile.green {
+  background: var(--cmms-success-light);
+  color: var(--cmms-success);
+}
+.cmms-icon-tile.amber {
+  background: var(--cmms-warning-light);
+  color: var(--cmms-warning);
+}
+.cmms-icon-tile.red {
+  background: var(--cmms-danger-light);
+  color: var(--cmms-danger);
+}
+.cmms-icon-tile.cyan {
+  background: var(--cmms-info);
+  color: #fff;
 }
