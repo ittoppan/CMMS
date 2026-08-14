@@ -4,9 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -257,25 +255,27 @@ export default function SageSyncConfigPage() {
   return (
     <VStack gap={6}>
       {/* Page Header */}
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">SAGE SYNC · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAGE SYNC · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2}>ตั้งค่าการดึงสต็อก Sage 300 ERP</Heading>
-            <Badge label={sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"} variant={sageConnected ? "success" : "neutral"} />
+            <Heading level={2} style={{ color: "#fff" }}>ตั้งค่าการดึงสต็อก Sage 300 ERP</Heading>
+            <span className="cmms-andon-chip" style={{ background: sageConnected ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)" }}>
+              <CircleStackIcon className="w-3.5 h-3.5" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             เลือกประเภทสต็อก กำหนดรูปแบบการดึง และซิงค์ข้อมูลกับฐานข้อมูล Sage 300 ERP (Inventory Control Module)
           </Text>
         </VStack>
-        <HStack gap={2}>
-          <Button
-            label="กลับไปยังคลังอะไหล่"
-            variant="secondary"
-            onClick={() => (window.location.href = "/spare_parts")}
-          />
-        </HStack>
-      </HStack>
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/spare_parts")}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          กลับไปยังคลังอะไหล่
+        </button>
+      </div>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
@@ -283,7 +283,7 @@ export default function SageSyncConfigPage() {
       {syncMessage && (
         <Card padding={4} style={{ background: 'var(--cmms-success-bg)', border: '1px solid var(--cmms-success)' }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: 'var(--cmms-success)' }}>
               {syncMessage}
             </Text>
@@ -292,8 +292,8 @@ export default function SageSyncConfigPage() {
       )}
 
       {/* Connection Info Cards */}
-      <Grid columns={3} gap={4}>
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-primary)' }}>
+      <Grid columns={{ minWidth: 280, max: 3 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card blue">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">ฐานข้อมูล Sage 300 ERP Server</Text>
             <Heading level={3}>{erpDatabase}</Heading>
@@ -303,7 +303,7 @@ export default function SageSyncConfigPage() {
           </VStack>
         </Card>
 
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-success)' }}>
+        <Card padding={4} className="cmms-kpi-card green">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">โมดูลที่เชื่อมต่อ</Text>
             <Heading level={3}>Sage 300 I/C v6.8A</Heading>
@@ -311,7 +311,7 @@ export default function SageSyncConfigPage() {
           </VStack>
         </Card>
 
-        <Card padding={4} style={{ borderLeft: '4px solid #8B5CF6' }}>
+        <Card padding={4} className="cmms-kpi-card amber">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">รายการสต็อกที่ซิงค์</Text>
             <Heading level={3}>
@@ -330,7 +330,7 @@ export default function SageSyncConfigPage() {
           <VStack gap={4}>
             <VStack gap={1}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={WrenchScrewdriverIcon} size="md" color="primary" />
+                <WrenchScrewdriverIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <Heading level={4}>รูปแบบการดึงข้อมูล</Heading>
               </HStack>
               <Text type="body" size="sm" color="secondary">
@@ -377,12 +377,14 @@ export default function SageSyncConfigPage() {
             />
 
             <HStack gap={2} wrap="wrap">
-              <Button
-                label="บันทึกรูปแบบการดึง"
-                variant="primary"
-                isLoading={savingConfig}
+              <button
+                type="button"
+                disabled={savingConfig}
                 onClick={handleSaveConfig}
-              />
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingConfig ? "กำลังบันทึก..." : "บันทึกรูปแบบการดึง"}
+              </button>
               <Text type="body" size="sm" color="secondary">
                 หมวดหมู่ที่เปิดใช้งาน: {categories.filter(c => c.enabled).map(c => c.id).join(" · ") || "—"}
               </Text>
@@ -410,7 +412,7 @@ export default function SageSyncConfigPage() {
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack gap={2} vAlign="center">
-                      <Icon icon={CircleStackIcon} size="md" color="primary" />
+                      <CircleStackIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                       <Text type="body" weight="bold">{cat.name}</Text>
                     </HStack>
                     <Badge label={cat.enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={cat.enabled ? "success" : "neutral"} />
@@ -421,20 +423,22 @@ export default function SageSyncConfigPage() {
                   <HStack hAlign="between" vAlign="center" style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--cmms-border)' }}>
                     <Text type="supporting" color="secondary">ข้อมูลในคลัง: <strong>{cat.count.toLocaleString("th-TH")} รายการ</strong></Text>
                     <HStack gap={2}>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        label={cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
+                      <button
+                        type="button"
                         onClick={() => toggleCategory(cat.id)}
-                      />
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        icon={<Icon icon={ArrowPathIcon} size="xsm" />}
-                        isLoading={syncingCat === cat.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+                      >
+                        {cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={syncingCat === cat.id}
                         onClick={() => handleSyncCategory(cat.id)}
-                        label="ดึงข้อมูลทันที"
-                      />
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ArrowPathIcon className={`w-3.5 h-3.5 ${syncingCat === cat.id ? "animate-spin" : ""}`} />
+                        {syncingCat === cat.id ? "กำลังดึง..." : "ดึงข้อมูลทันที"}
+                      </button>
                     </HStack>
                   </HStack>
                 </VStack>
@@ -450,11 +454,18 @@ export default function SageSyncConfigPage() {
         <VStack gap={4}>
           <HStack hAlign="between" vAlign="center">
             <Heading level={4}>ประวัติการซิงค์ข้อมูลกับ Sage 300 ERP</Heading>
-            <Button label="รีเฟรช" variant="ghost" size="sm" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchData} />
+            <button
+              type="button"
+              onClick={fetchData}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+            >
+              <ArrowPathIcon className="w-3.5 h-3.5" />
+              รีเฟรช
+            </button>
           </HStack>
           {logs.length === 0 ? (
             <VStack gap={2} style={{ padding: 32, textAlign: "center" }} hAlign="center">
-              <Icon icon={DocumentCheckIcon} size="md" color="secondary" />
+              <DocumentCheckIcon className="w-6 h-6" style={{ color: "var(--color-secondary)" }} />
               <Text type="body" color="secondary">ยังไม่มีประวัติการซิงค์ — กด "ดึงข้อมูลทันที" เพื่อเริ่มซิงค์</Text>
             </VStack>
           ) : (
