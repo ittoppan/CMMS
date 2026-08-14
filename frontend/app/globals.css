@@ -104,6 +104,15 @@ body {
   --cmms-info: var(--color-text-cyan);
   --cmms-info-light: var(--color-background-cyan);
 
+  /* === Brand Extras (design-system/tokens.css) === */
+  --cmms-blue-bright: #0093FF;
+  --cmms-line-green: #06C755;
+  --tp-navy-dark: #0B1F4B;
+  --cmms-danger-dark: #7f1d1d;
+  --cmms-warning-dark: #b45309;
+  --cmms-success-dark: #15803d;
+  --cmms-success-deep: #14532d;
+
   /* === Surface Colors === */
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);

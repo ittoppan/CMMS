@@ -47,11 +47,11 @@ interface BnKeyItem {
 
 // สีแถวบทบาท (ตามสี badge sidebar เดิม)
 const ROLE_COLOR: Record<string, { bg: string; fg: string }> = {
-  Admin: { bg: "#ffe4e6", fg: "#e11d48" },
-  Manager: { bg: "#fef3c7", fg: "#d97706" },
-  Technician: { bg: "#e0e7ff", fg: "#4f46e5" },
-  Operator: { bg: "#dcfce7", fg: "#16a34a" },
-  Viewer: { bg: "#f1f5f9", fg: "#64748b" },
+  Admin: { bg: "var(--cmms-danger-light)", fg: "var(--cmms-danger)" },
+  Manager: { bg: "var(--cmms-warning-light)", fg: "var(--cmms-warning)" },
+  Technician: { bg: "var(--cmms-primary-light)", fg: "var(--cmms-primary)" },
+  Operator: { bg: "var(--cmms-success-light)", fg: "var(--cmms-success)" },
+  Viewer: { bg: "var(--cmms-bg-muted)", fg: "var(--cmms-text-secondary)" },
 };
 
 // ไอคอนพรีวิวปุ่มล่าง (ตัวเดียวกับ layout.tsx — สำหรับวาดภาพบนหน้าจอมือถือจำลอง)
@@ -198,8 +198,8 @@ export default function MenuPermissionsPage() {
     active: i === 0,
   }));
   const previewColor = previewRole
-    ? (ROLE_COLOR[previewRole.name] || { fg: "#475569", bg: "#f1f5f9" })
-    : { fg: "#475569", bg: "#f1f5f9" };
+    ? (ROLE_COLOR[previewRole.name] || { fg: "var(--cmms-text-secondary)", bg: "var(--cmms-bg-muted)" })
+    : { fg: "var(--cmms-text-secondary)", bg: "var(--cmms-bg-muted)" };
 
   return (
     <VStack gap={6}>
@@ -267,8 +267,8 @@ export default function MenuPermissionsPage() {
                           padding: "3px 10px",
                           borderRadius: 999,
                           whiteSpace: "nowrap",
-                          background: (ROLE_COLOR[r.name] || { bg: "#f1f5f9", fg: "#475569" }).bg,
-                          color: (ROLE_COLOR[r.name] || { fg: "#475569" }).fg,
+                          background: (ROLE_COLOR[r.name] || { bg: "var(--cmms-bg-muted)", fg: "var(--cmms-text-secondary)" }).bg,
+                          color: (ROLE_COLOR[r.name] || { fg: "var(--cmms-text-secondary)" }).fg,
                         }}
                       >
                         {r.name}
@@ -368,7 +368,7 @@ export default function MenuPermissionsPage() {
               </VStack>
 
               {roles.map((r) => {
-                const rc = ROLE_COLOR[r.name] || { bg: "#f1f5f9", fg: "#475569" };
+                const rc = ROLE_COLOR[r.name] || { bg: "var(--cmms-bg-muted)", fg: "var(--cmms-text-secondary)" };
                 const list = bottomNav[r.id] || [];
                 const isPreview = previewRoleId === r.id;
                 const available = bnKeys.filter((b) => !list.includes(b.key));
@@ -398,7 +398,7 @@ export default function MenuPermissionsPage() {
                         </span>
                         <Badge label={`${list.length} ปุ่ม`} variant={list.length > MAX_BN ? "warning" : "neutral"} />
                         {hiddenCount > 0 && (
-                          <Badge label={`${hiddenCount} ปุ่มถูกปิดสิทธิ์`} variant="warning" />
+                          <span className="cmms-status warn"><span className="cmms-status-dot" />{hiddenCount} ปุ่มถูกปิดสิทธิ์</span>
                         )}
                       </HStack>
                       <Text type="body" size="sm" color="secondary">
@@ -416,7 +416,7 @@ export default function MenuPermissionsPage() {
                             title={hidden ? "เมนูนี้ถูกปิดสิทธิ์ → จะไม่แสดงบนมือถือจริง" : bnLabelOf(k)}
                             style={{
                               display: "flex", alignItems: "center", gap: 6,
-                              border: hidden ? "1px dashed #f59e0b" : "1px solid var(--cmms-border)",
+                              border: hidden ? "1px dashed var(--cmms-warning)" : "1px solid var(--cmms-border)",
                               background: "#fff", borderRadius: 999,
                               padding: "5px 8px 5px 10px",
                               opacity: hidden ? 0.75 : 1,
@@ -428,7 +428,7 @@ export default function MenuPermissionsPage() {
                             <span style={{ fontSize: "0.78rem", fontWeight: 600, whiteSpace: "nowrap", color: "var(--cmms-text-primary)" }}>
                               {bnLabelOf(k)}
                             </span>
-                            {hidden && <span style={{ fontSize: "0.62rem", color: "#b45309", fontWeight: 700 }}>ปิดสิทธิ์</span>}
+                            {hidden && <span style={{ fontSize: "0.62rem", color: "var(--cmms-warning-dark)", fontWeight: 700 }}>ปิดสิทธิ์</span>}
                             <div style={{ display: "flex", gap: 1, marginLeft: 2 }} onClick={(e) => e.stopPropagation()}>
                               <button type="button" className="bn-chip-btn" disabled={i === 0} onClick={() => bnMove(r.id, i, -1)} title="เลื่อนซ้าย (ก่อนหน้า)">▲</button>
                               <button type="button" className="bn-chip-btn" disabled={i === list.length - 1} onClick={() => bnMove(r.id, i, 1)} title="เลื่อนขวา (ถัดไป)">▼</button>
@@ -505,13 +505,13 @@ export default function MenuPermissionsPage() {
               </HStack>
 
               {/* กรอบโทรศัพท์ */}
-              <div style={{ background: "#0f172a", borderRadius: 34, padding: 10, boxShadow: "0 20px 40px -12px rgba(15,23,42,.35)", width: 264, margin: "0 auto" }}>
+              <div style={{ background: "var(--cmms-text-primary)", borderRadius: 34, padding: 10, boxShadow: "0 20px 40px -12px rgba(15,23,42,.35)", width: 264, margin: "0 auto" }}>
                 <div style={{
                   background: "#fff", borderRadius: 24, overflow: "hidden",
                   display: "flex", flexDirection: "column", minHeight: 480,
                 }}>
                   {/* status bar */}
-                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 10, fontWeight: 700, color: "#334155" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 10, fontWeight: 700, color: "var(--cmms-text-secondary)" }}>
                     <span>9:41</span>
                   </div>
                   {/* app header */}
@@ -526,18 +526,18 @@ export default function MenuPermissionsPage() {
                     </span>
                   </div>
                   {/* เนื้อหาจำลอง */}
-                  <div style={{ flex: 1, padding: 14, background: "#f1f5f9", display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ height: 12, width: "55%", background: "#e2e8f0", borderRadius: 6 }} />
-                    <div style={{ height: 8, width: "85%", background: "#e2e8f0", borderRadius: 4 }} />
-                    <div style={{ height: 8, width: "70%", background: "#e2e8f0", borderRadius: 4 }} />
-                    <div style={{ height: 56, background: "#fff", borderRadius: 10, marginTop: 4, border: "1px solid #e2e8f0" }} />
-                    <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid #e2e8f0" }} />
-                    <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid #e2e8f0" }} />
+                  <div style={{ flex: 1, padding: 14, background: "var(--cmms-bg-muted)", display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ height: 12, width: "55%", background: "var(--cmms-border)", borderRadius: 6 }} />
+                    <div style={{ height: 8, width: "85%", background: "var(--cmms-border)", borderRadius: 4 }} />
+                    <div style={{ height: 8, width: "70%", background: "var(--cmms-border)", borderRadius: 4 }} />
+                    <div style={{ height: 56, background: "#fff", borderRadius: 10, marginTop: 4, border: "1px solid var(--cmms-border)" }} />
+                    <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid var(--cmms-border)" }} />
+                    <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid var(--cmms-border)" }} />
                   </div>
                   {/* ปุ่มล่างจำลอง (เดียวกับ cmms-mobile-bottom-nav) */}
-                  <div style={{ display: "flex", borderTop: "1px solid #e2e8f0", background: "#fff", padding: "7px 2px 9px" }}>
+                  <div style={{ display: "flex", borderTop: "1px solid var(--cmms-border)", background: "#fff", padding: "7px 2px 9px" }}>
                     {previewItems.length === 0 && (
-                      <div style={{ flex: 1, textAlign: "center", fontSize: 10, color: "#94a3b8", padding: "8px 0" }}>
+                      <div style={{ flex: 1, textAlign: "center", fontSize: 10, color: "var(--cmms-text-secondary)", padding: "8px 0" }}>
                         ยังไม่มีปุ่ม — จะใช้ค่าเริ่มต้นของบทบาท
                       </div>
                     )}
@@ -549,12 +549,12 @@ export default function MenuPermissionsPage() {
                           title={`${it.label}${it.hidden ? " (เมนูถูกปิดสิทธิ์ → ไม่แสดงจริง)" : ""}`}
                           style={{
                             flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                            color: it.hidden ? "#cbd5e1" : it.active ? previewColor.fg : "#94a3b8",
+                            color: it.hidden ? "var(--cmms-border)" : it.active ? previewColor.fg : "var(--cmms-text-secondary)",
                             opacity: it.hidden ? 0.4 : 1,
                             minWidth: 0, padding: "0 2px",
                           }}
                         >
-                          {ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "#e2e8f0" }} />}
+                          {ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />}
                           <span style={{
                             fontSize: 8, fontWeight: 700, whiteSpace: "nowrap",
                             overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
@@ -570,12 +570,12 @@ export default function MenuPermissionsPage() {
 
               <VStack gap={1}>
                 {previewKeys.length > MAX_BN && (
-                  <Text type="body" size="sm" style={{ color: "#b45309", fontWeight: 600 }}>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-warning-dark)", fontWeight: 600 }}>
                     {previewKeys.length} ปุ่ม — เกินที่แนะนำ ({MAX_BN}) ปุ่มจะเล็กลงบนมือถือจริง
                   </Text>
                 )}
                 {previewItems.some((it) => it.hidden) && (
-                  <Text type="body" size="sm" style={{ color: "#b45309", fontWeight: 600 }}>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-warning-dark)", fontWeight: 600 }}>
                     ปุ่มจาง = เมนูถูกปิดสิทธิ์ จะไม่แสดงบนมือถือจริง
                   </Text>
                 )}

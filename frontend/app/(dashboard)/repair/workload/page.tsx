@@ -188,7 +188,7 @@ export default function WorkloadPage() {
             <AndonLamp status="idle" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ช่างที่มีงาน</Text>
-              <Heading level={3} style={{ margin: 0 }}>{summary.technicians} คน</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.technicians} คน</Heading>
             </VStack>
           </HStack>
         </Card>
@@ -197,7 +197,7 @@ export default function WorkloadPage() {
             <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">งานค้างทั้งหมด</Text>
-              <Heading level={3} style={{ margin: 0 }}>{summary.total_open} งาน</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_open} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
@@ -206,7 +206,7 @@ export default function WorkloadPage() {
             <AndonLamp status="down" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">เกินกำหนด</Text>
-              <Heading level={3} style={{ margin: 0 }}>{summary.total_overdue} งาน</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_overdue} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
@@ -215,7 +215,7 @@ export default function WorkloadPage() {
             <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ด่วน / วิกฤต</Text>
-              <Heading level={3} style={{ margin: 0 }}>{summary.total_urgent} งาน</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_urgent} งาน</Heading>
             </VStack>
           </HStack>
         </Card>
@@ -224,7 +224,7 @@ export default function WorkloadPage() {
             <AndonLamp status="ok" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ปิดงาน 7 วันล่าสุด</Text>
-              <Heading level={3} style={{ margin: 0 }}>{summary.done_7d} งาน</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.done_7d} งาน</Heading>
             </VStack>
           </HStack>
         </Card>

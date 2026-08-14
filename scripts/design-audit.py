@@ -50,6 +50,10 @@ EYEBROW_EXEMPT = {
     "frontend/app/repair-request/page.tsx",
     "frontend/app/repair/request/page.tsx",
     "frontend/app/page.tsx",
+    # route alias → approval/page.tsx (มี header จริง)
+    "frontend/app/(dashboard)/approval/center/page.tsx",
+    # LINE Flex editor — หน้าเครื่องมือเต็มจอ (ไม่มีหัวหน้าเพจ)
+    "frontend/app/(dashboard)/editor/page.tsx",
 }
 
 # hex จากยุค Phase gradient (ห้ามใช้เด็ดขาด — FAIL)
@@ -66,14 +70,18 @@ EMOJI_ALLOW = {
 
 # บริบทที่อนุญาตให้มี emoji ได้ (ข้อมูลที่ส่งจริงไป LINE / comment)
 EMOJI_ALLOW_CONTEXT = re.compile(
-    r'("icon":|title:|altText:|template|chatHistory|{/\*|^\s*\*|^\s*//)'
+    r'("icon":|title:|altText:|template|chatHistory|lines\.push\(|line_tpl_|{/\*|^\s*\*|^\s*//)'
 )
 
 # gradient ที่ได้รับอนุญาต (ลายตาราง engineering grid / hero navy ของ login)
-GRADIENT_ALLOW = re.compile(r"(transparent 1px|#0B1F4B)")
+GRADIENT_ALLOW = re.compile(r"(transparent 1px|#0B1F4B|--tp-navy-dark)")
 
 # หน้า/บริบทที่ hex เป็นข้อมูลจริง (editor = ธีม, qr-sheet = print CSS)
-HEX_ALLOW_FILE = {"frontend/app/(dashboard)/editor/page.tsx"}
+HEX_ALLOW_FILE = {
+    "frontend/app/(dashboard)/editor/page.tsx",
+    # LINE Flex JSON + header_color config — hex ต้องเป็นค่าจริงที่ส่งให้ LINE API
+    "frontend/app/(dashboard)/settings/notifications/page.tsx",
+}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -167,6 +175,9 @@ def audit_file(rel):
                     continue
                 # ข้าม hex ภายใน block <style> (print CSS เช่น qr-sheet)
                 if "<style" in "\n".join(lines[max(0, i - 40):i]):
+                    continue
+                # ข้าม hex ที่เป็นตัวอย่างข้อความบอกผู้ใช้ (hint: "เช่น #0068B5")
+                if re.search(r'hint: [\"\u201C].*#', ln):
                     continue
                 issues.append(("hex", "WARN", i, "%s %s" % (h, ln.strip()[:100])))
                 break  # 1 ต่อบรรทัดพอ

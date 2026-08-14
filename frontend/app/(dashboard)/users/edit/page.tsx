@@ -156,6 +156,7 @@ function EditUserContent() {
     <VStack gap={6}>
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">USERS EDIT · CMMS-TOPPAN</Text>
           <Heading level={2}>แก้ไขโปรไฟล์และข้อมูลผู้ใช้</Heading>
           <Text type="body" color="secondary">ปรับปรุงโปรไฟล์ รูปภาพประจำตัว รหัสผ่าน และสิทธิ์การใช้งานในระบบ CMMS</Text>
         </VStack>

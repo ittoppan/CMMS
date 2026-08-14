@@ -233,7 +233,7 @@ export default function BatchSchedulePage() {
               <VStack gap={1}>
                 <Text type="body" weight="semibold">ข้อมูลสรุป</Text>
                 <Text type="body" size="sm" color="secondary">
-                  ระบบจะสร้างแผน PM จำนวน <strong>{selectedAssets.length}</strong> แผน
+                  ระบบจะสร้างแผน PM จำนวน <strong className="cmms-kpi-value">{selectedAssets.length}</strong> แผน
                   (รอบ {formData.frequency}) เริ่มครั้งแรกวันที่ {formData.startDate || "-"}
                 </Text>
               </VStack>

@@ -232,7 +232,7 @@ function ItemsCard({
               <div className="w-8 h-8 rounded-lg cmms-icon-tile">
                 <CubeIcon className="w-4 h-4" />
               </div>
-              <Heading level={3} style={{ margin: 0 }}>รายการอะไหล่</Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>รายการอะไหล่</Heading>
               <span className="cmms-count-pill">{filtered.length} รายการ</span>
             </HStack>
           </StackItem>
@@ -683,7 +683,7 @@ export default function SparePartsPage() {
                     <AndonLamp status="idle" size="sm" />
                     <VStack gap={0}>
                       <Text type="supporting" color="secondary">รายการอะไหล่ทั้งหมด</Text>
-                      <Heading level={3} style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
@@ -692,7 +692,7 @@ export default function SparePartsPage() {
                     <AndonLamp status="warn" size="sm" />
                     <VStack gap={0}>
                       <Text type="supporting" color="secondary">ใกล้หมด (Min Stock)</Text>
-                      <Heading level={3} style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
@@ -701,7 +701,7 @@ export default function SparePartsPage() {
                     <AndonLamp status="down" size="sm" />
                     <VStack gap={0}>
                       <Text type="supporting" color="secondary">หมดคลัง (Out of Stock)</Text>
-                      <Heading level={3} style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
@@ -710,7 +710,7 @@ export default function SparePartsPage() {
                     <AndonLamp status="ok" size="sm" />
                     <VStack gap={0}>
                       <Text type="supporting" color="secondary">มูลค่าคลังรวม</Text>
-                      <Heading level={3} style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
+                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
                     </VStack>
                   </HStack>
                 </Card>

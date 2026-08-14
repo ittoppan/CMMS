@@ -115,6 +115,7 @@ function EditSupplierContent() {
     <VStack gap={6}>
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SUPPLIERS EDIT · CMMS-TOPPAN</Text>
           <Heading level={2}>แก้ไขข้อมูลผู้ผลิต</Heading>
           <Text type="body" color="secondary">ปรับปรุงข้อมูลผู้ผลิตหรือผู้จัดจำหน่ายในระบบ</Text>
         </VStack>

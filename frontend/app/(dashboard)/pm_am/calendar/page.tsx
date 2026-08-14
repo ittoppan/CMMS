@@ -133,7 +133,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="down" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">งานเลยกำหนด</Text>
-              <Heading level={3} style={{ margin: 0 }}>{overdueCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{overdueCount} <span className="cmms-kpi-unit">งาน</span></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -143,7 +143,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="warn" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">แผนงานวันนี้ (Today)</Text>
-              <Heading level={3} style={{ margin: 0 }}>{todayCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{todayCount} <span className="cmms-kpi-unit">งาน</span></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -153,7 +153,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="ok" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">เสร็จแล้ววันนี้</Text>
-              <Heading level={3} style={{ margin: 0 }}>{completedCount} <span className="cmms-kpi-unit">งาน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{completedCount} <span className="cmms-kpi-unit">งาน</span></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -163,7 +163,7 @@ export default function PMCalendarPage() {
             <AndonLamp status="idle" size="sm" />
             <VStack gap={0}>
               <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
-              <Heading level={3} style={{ margin: 0 }}>{activeTechCount} <span className="cmms-kpi-unit">คน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{activeTechCount} <span className="cmms-kpi-unit">คน</span></Heading>
             </VStack>
           </HStack>
         </Card>

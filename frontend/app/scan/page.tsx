@@ -127,7 +127,7 @@ export default function ScanLandingPage() {
   };
 
   const criticalityColor: Record<string, string> = {
-    A: "#dc2626", B: "#d97706", C: "#16a34a",
+    A: "var(--cmms-danger)", B: "var(--cmms-warning)", C: "var(--cmms-success)",
   };
 
   return (
@@ -136,7 +136,7 @@ export default function ScanLandingPage() {
       <div
         style={{
           minHeight: "100dvh",
-          background: "#0f172a",
+          background: "var(--cmms-text-primary)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -154,7 +154,7 @@ export default function ScanLandingPage() {
             </VStack>
           ) : error ? (
             <VStack gap={4} hAlign="center">
-              <Badge label="QR SCAN" variant="warning" />
+              <Badge label="QR SCAN" variant="info" />
               <Text type="display-1" style={{ fontSize: 40, marginBottom: 0 }}>?</Text>
               <Card padding={4} style={{ background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger)", width: "100%" }}>
                 <Text type="body" className="text-red-700" style={{ textAlign: "center" }}>{error}</Text>
@@ -170,7 +170,7 @@ export default function ScanLandingPage() {
             </VStack>
           ) : asset ? (
             <VStack gap={3} hAlign="center">
-              <Badge label="สแกนเครื่องจักรสำเร็จ" variant="success" />
+              <span className="cmms-status ok"><span className="cmms-status-dot" />สแกนเครื่องจักรสำเร็จ</span>
               <Heading level={2} style={{ margin: 0, letterSpacing: 1 }}>{asset.code}</Heading>
               <Text type="body" color="secondary">{asset.name}</Text>
 
@@ -183,7 +183,7 @@ export default function ScanLandingPage() {
                     type="body"
                     size="sm"
                     weight="bold"
-                    style={{ color: criticalityColor[asset.criticality] || "#64748b" }}
+                    style={{ color: criticalityColor[asset.criticality] || "var(--cmms-text-secondary)" }}
                   >
                     Criticality: {asset.criticality}
                   </Text>
@@ -235,7 +235,7 @@ export default function ScanLandingPage() {
               {/* แผน PM ที่ต้องทำของเครื่องนี้ (กดทำได้เลย) */}
               {pmLoading ? null : pmPlans.length > 0 ? (
                 <VStack gap={2} style={{ width: "100%" }}>
-                  <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "#f59e0b" }}>
+                  <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "var(--cmms-warning)" }}>
                     แผน PM ที่ต้องทำของเครื่องนี้ ({pmPlans.length})
                   </Text>
                   {pmPlans.map((p) => {
@@ -246,8 +246,8 @@ export default function ScanLandingPage() {
                         padding={3}
                         width="100%"
                         style={{
-                          background: overdue ? "#fef2f2" : "#fffbeb",
-                          border: `1px solid ${overdue ? "#fecaca" : "#fde68a"}`,
+                          background: overdue ? "var(--cmms-danger-light)" : "var(--cmms-warning-light)",
+                          border: `1px solid ${overdue ? "var(--cmms-danger-light)" : "var(--cmms-warning)"}`,
                         }}
                       >
                         <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">

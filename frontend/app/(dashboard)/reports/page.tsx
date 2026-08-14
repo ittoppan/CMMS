@@ -29,7 +29,7 @@ export default function ReportsHubPage() {
       </div>
 
       <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={6}>
-        <Card elevation="low" padding={6} className="cmms-kpi-card blue">
+        <Card elevation="low" padding={6}>
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
               <div className="w-12 h-12 rounded-xl cmms-icon-tile">
@@ -55,7 +55,7 @@ export default function ReportsHubPage() {
           </VStack>
         </Card>
 
-        <Card elevation="low" padding={6} className="cmms-kpi-card green">
+        <Card elevation="low" padding={6}>
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
               <div className="w-12 h-12 rounded-xl cmms-icon-tile green">

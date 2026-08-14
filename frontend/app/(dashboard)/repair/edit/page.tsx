@@ -103,6 +103,8 @@ function EditWorkOrderContent() {
         <BreadcrumbItem isCurrent>อัปเดตใบแจ้งซ่อม</BreadcrumbItem>
       </Breadcrumbs>
 
+      <Text type="body" size="sm" className="cmms-eyebrow">REPAIR EDIT · CMMS-TOPPAN</Text>
+
       <Heading level={2}>อัปเดตสถานะแจ้งซ่อม</Heading>
 
       <Card padding={6}>

@@ -162,7 +162,7 @@ export default function RegisterPage() {
         className="min-h-screen"
         style={{
           background:
-            "#f8fafc",
+            "var(--cmms-bg-muted)",
           padding: "20px 16px 0",
         }}
       >
@@ -189,7 +189,7 @@ export default function RegisterPage() {
       className="min-h-screen"
       style={{
         background:
-          "#f8fafc",
+          "var(--cmms-bg-muted)",
         padding: "20px 16px 0",
       }}
     >
@@ -203,7 +203,7 @@ export default function RegisterPage() {
                 borderRadius: 14,
                 flexShrink: 0,
                 background: "var(--cmms-danger-light)",
-                border: "1px solid #FECACA",
+                border: "1px solid var(--cmms-danger-light)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -260,7 +260,7 @@ export default function RegisterPage() {
               {liffStatus === "external" && (
                 <div style={{
                   margin: "10px 0 0", padding: "10px 14px", borderRadius: "var(--cmms-radius)",
-                  background: "#eff6ff", border: "1px solid #93c5fd", color: "#1e40af",
+                  background: "var(--cmms-info-light)", border: "1px solid var(--cmms-primary-light)", color: "var(--cmms-primary)",
                   fontSize: "0.8rem", fontWeight: 600, lineHeight: 1.5,
                 }}>
                   ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี
@@ -298,7 +298,7 @@ export default function RegisterPage() {
                       <div style={{
                         width: 44, height: 44, borderRadius: 14, flexShrink: 0,
                         background: "var(--cmms-danger-light)",
-                        border: "1px solid #FECACA",
+                        border: "1px solid var(--cmms-danger-light)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: 20,
                       }}><IdentificationIcon className="w-5 h-5" /></div>
@@ -324,7 +324,7 @@ export default function RegisterPage() {
                   {error && (
                     <div style={{
                       margin: "10px 0 0", padding: "10px 14px", borderRadius: "var(--cmms-radius)",
-                      background: "#fef2f2", border: "1px solid #fca5a5", color: "#b91c1c",
+                      background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger-light)", color: "var(--cmms-danger)",
                       fontSize: "0.8rem", fontWeight: 600, lineHeight: 1.5,
                     }}>
                       {error}

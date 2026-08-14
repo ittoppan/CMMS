@@ -101,7 +101,7 @@ function LoginContent() {
         style={{
           position: "relative",
           padding: 48,
-          background: "linear-gradient(135deg, #0B1F4B 0%, #193264 55%, #0068B5 100%)",
+          background: "linear-gradient(135deg, var(--tp-navy-dark) 0%, var(--cmms-bg-sidebar) 55%, var(--cmms-primary) 100%)",
         }}
       >
         {/* QR-code grid — ลายตารางแบบ QR ที่ช่างสแกนบนเครื่องจักร */}
@@ -153,9 +153,9 @@ function LoginContent() {
           {/* สถานะระบบ — ไฟ Andon */}
           <div style={{ marginTop: 32, display: 'flex', gap: 22, flexWrap: 'wrap' }}>
             {[
-              { label: 'ระบบ', color: '#10B981' },
-              { label: 'ฐานข้อมูล', color: '#10B981' },
-              { label: 'LINE แจ้งเตือน', color: '#10B981' },
+              { label: 'ระบบ', color: 'var(--cmms-success)' },
+              { label: 'ฐานข้อมูล', color: 'var(--cmms-success)' },
+              { label: 'LINE แจ้งเตือน', color: 'var(--cmms-success)' },
             ].map((s) => (
               <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'rgba(255,255,255,0.72)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em' }}>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: '0 0 8px rgba(16,185,129,0.7)' }} />
@@ -246,7 +246,7 @@ function LoginContent() {
             icon={LINE_SVG}
             onClick={() => { window.location.href = "/line_login.php"; }}
             style={{
-              backgroundColor: "#06C755",
+              backgroundColor: "var(--cmms-line-green)",
               color: "#fff",
               border: "none",
             }}

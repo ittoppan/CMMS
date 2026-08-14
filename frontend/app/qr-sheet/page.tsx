@@ -56,7 +56,7 @@ export default function QrSheetPage() {
           map[m.code] = await QRCode.toDataURL(url, {
             width: 300,
             margin: 1,
-            color: { dark: "#0068B5", light: "#FFFFFF" },
+            color: { dark: "var(--cmms-primary)", light: "#FFFFFF" },
           });
         } catch {
           /* ข้ามเครื่องที่ generate ไม่ได้ */
@@ -85,7 +85,7 @@ export default function QrSheetPage() {
       `}</style>
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}
-        style={{ borderBottom: "3px solid #0068B5", paddingBottom: 12, marginBottom: 20 }}>
+        style={{ borderBottom: "3px solid var(--cmms-primary)", paddingBottom: 12, marginBottom: 20 }}>
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow">QR SHEET · CMMS-TOPPAN</Text>
           <Heading level={2} style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</Heading>
@@ -100,13 +100,13 @@ export default function QrSheetPage() {
       </HStack>
 
       {error && (
-        <Card padding={4} className="qr-sheet-note" style={{ background: "#fef2f2", borderLeftColor: "#dc2626", marginBottom: 16 }}>
+        <Card padding={4} className="qr-sheet-note" style={{ background: "var(--cmms-danger-light)", borderLeftColor: "var(--cmms-danger)", marginBottom: 16 }}>
           <Text type="body" className="text-red-700">{error}</Text>
         </Card>
       )}
 
-      <Card padding={4} className="qr-sheet-note" style={{ background: "#f1f5f9", marginBottom: 16 }}>
-        <Text type="body" size="sm" style={{ color: "#334155" }}>
+      <Card padding={4} className="qr-sheet-note" style={{ background: "var(--cmms-bg-muted)", marginBottom: 16 }}>
+        <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>
           <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
           — พนักงานสแกน QR ด้วย LINE/กล้อง จะได้หน้าเลือก: <b>แจ้งซ่อมด่วน</b> หรือ <b>ทำเช็คชีท PM</b> พร้อมเครื่องถูกต้องทันที
         </Text>
@@ -123,7 +123,7 @@ export default function QrSheetPage() {
                   {generating ? <Spinner /> : <Text type="body" size="sm" color="secondary">ไม่พบ QR</Text>}
                 </VStack>
               )}
-              <Text type="body" weight="bold" style={{ color: "#4F46E5", fontSize: 18 }}>{m.code}</Text>
+              <Text type="body" weight="bold" style={{ color: "var(--cmms-primary)", fontSize: 18 }}>{m.code}</Text>
               <Text type="body" size="xs" color="secondary">{m.name}</Text>
               <Text type="body" size="xs" className="tip" style={{ color: "#999" }}>สแกน → แจ้งซ่อมด่วน</Text>
             </VStack>

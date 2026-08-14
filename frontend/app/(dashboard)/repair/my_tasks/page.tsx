@@ -303,8 +303,8 @@ export default function MyTasksPage() {
           <Text type="body" size="sm" color="disabled">-</Text>
         ) : (
           <HStack gap={1} vAlign="center">
-            {task.beforeImg && <Badge label="ก่อนซ่อม" variant="error" />}
-            {task.afterImg && <Badge label="หลังซ่อม" variant="success" />}
+            {task.beforeImg && <Badge label="ก่อนซ่อม" variant="neutral" />}
+            {task.afterImg && <Badge label="หลังซ่อม" variant="neutral" />}
           </HStack>
         ),
     },

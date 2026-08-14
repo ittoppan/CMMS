@@ -184,6 +184,7 @@ export default function PMSchedulePage() {
     <VStack gap={6}>
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">PM AM · CMMS-TOPPAN</Text>
           <Heading level={2}>แผนบำรุงรักษาเชิงป้องกัน (PM)</Heading>
           <Text type="body" color="secondary">แผนซ่อมบำรุงเชิงป้องกัน และตารางตรวจเช็คเครื่องจักร</Text>
         </VStack>

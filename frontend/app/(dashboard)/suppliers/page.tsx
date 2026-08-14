@@ -174,6 +174,7 @@ export default function SuppliersPage() {
     <VStack gap={6}>
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</Text>
           <Heading level={2}>ข้อมูลผู้ผลิต (Suppliers)</Heading>
         </VStack>
         <Button

@@ -137,6 +137,7 @@ export default function PwaSettingsPage() {
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS PWA · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่าไอคอน PWA</Heading>
             <Badge label="Mobile App" variant="info" />

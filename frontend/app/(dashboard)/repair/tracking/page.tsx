@@ -92,10 +92,10 @@ export default function RepairTrackingPage() {
   const getStatusDisplay = (status: string) => {
     switch(status) {
       case 'pending_assign': return <Badge label="รอมอบหมายงาน" variant="neutral" />;
-      case 'pending_accept': return <Badge label="รอช่างรับงาน" variant="warning" />;
+      case 'pending_accept': return <span className="cmms-status warn"><span className="cmms-status-dot" />รอช่างรับงาน</span>;
       case 'in_progress': return <Badge label="กำลังดำเนินการซ่อม" variant="info" />;
-      case 'pending_eval': return <Badge label="รอการประเมินจากผู้แจ้ง" variant="error" />;
-      case 'completed': return <Badge label="เสร็จสมบูรณ์" variant="success" />;
+      case 'pending_eval': return <span className="cmms-status down"><span className="cmms-status-dot" />รอการประเมินจากผู้แจ้ง</span>;
+      case 'completed': return <span className="cmms-status ok"><span className="cmms-status-dot" />เสร็จสมบูรณ์</span>;
       default: return <Badge label={status} variant="neutral" />;
     }
   };

@@ -69,7 +69,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   company_tagline: { label: "คำโปรยระบบ", hint: "ข้อความใต้ชื่อระบบบนหน้าเข้าสู่ระบบ" },
   iso_header_title: { label: "หัวข้อเอกสาร ISO", hint: "ชื่อหัวกระดาษสำหรับเอกสาร ISO" },
   login_welcome_text: { label: "ข้อความต้อนรับหน้าเข้าสู่ระบบ" },
-  theme_primary_hex: { label: "สีหลัก (Primary Hex)", hint: "เช่น #003399" },
+  theme_primary_hex: { label: "สีหลัก (Primary Hex)", hint: "เช่น #0068B5" },
   theme_secondary_hex: { label: "สีรอง (Secondary Hex)" },
   // calibration
   auto_assign_calibration: { label: "มอบหมายงานสอบเทียบอัตโนมัติ" },
@@ -460,10 +460,11 @@ export default function SettingsPage() {
 
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1} style={{ flex: 1 }}>
+          <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่าระบบ (System Settings)</Heading>
             <Badge label={`${settings.length} keys`} variant="info" />
-            {totalDirty > 0 && <Badge label={`${totalDirty} รายการยังไม่บันทึก`} variant="warning" />}
+            {totalDirty > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />{totalDirty} รายการยังไม่บันทึก</span>}
           </HStack>
           <Text type="body" color="secondary">
             จัดการพารามิเตอร์ของระบบ CMMS จากตาราง settings จริง — แก้ไขแล้วบันทึกลงฐานข้อมูลทันที
@@ -658,7 +659,7 @@ export default function SettingsPage() {
                           {searchRows && (
                             <Badge label={(GROUP_META[row.setting_group] ?? { label: row.setting_group }).label} variant="neutral" />
                           )}
-                          {dirty && <Badge label="ยังไม่บันทึก" variant="warning" />}
+                          {dirty && (<span className="cmms-status warn"><span className="cmms-status-dot" />ยังไม่บันทึก</span>)}
                         </HStack>
                         <Text type="body" size="sm" color="secondary">
                           {meta.hint || row.description || row.setting_key}
@@ -800,16 +801,16 @@ export default function SettingsPage() {
                       </HStack>
                       <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
                         {/* ค่าเดิม */}
-                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid #fecaca", background: "#fef2f2", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "#b91c1c" }}>ก่อนแก้</Text>
-                          <Text type="body" size="sm" style={{ color: "#7f1d1d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(row, oldVal)}
                           </Text>
                         </div>
                         {/* ค่าใหม่ */}
-                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid #bbf7d0", background: "#f0fdf4", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "#15803d" }}>หลังแก้</Text>
-                          <Text type="body" size="sm" style={{ color: "#14532d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                        <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(row, newVal)}
                           </Text>
                         </div>
@@ -871,15 +872,15 @@ export default function SettingsPage() {
                         </Text>
                       </HStack>
                       <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
-                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid #fecaca", background: "#fef2f2", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "#b91c1c" }}>จาก</Text>
-                          <Text type="body" size="sm" style={{ color: "#7f1d1d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-danger)" }}>จาก</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(fakeRow, a.old_value ?? "")}
                           </Text>
                         </div>
-                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid #bbf7d0", background: "#f0fdf4", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "#15803d" }}>เป็น</Text>
-                          <Text type="body" size="sm" style={{ color: "#14532d", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                        <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
+                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>เป็น</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(fakeRow, a.new_value ?? "")}
                           </Text>
                         </div>

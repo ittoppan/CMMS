@@ -81,7 +81,7 @@ const priorityVariant = (p: string): "error" | "warning" | "info" | "neutral" =>
 };
 
 // ไทม์ไลน์: กิจกรรม → สีหลอดไฟ + ไอคอน
-const toneColor = { ok: "#10B981", warn: "#F59E0B", down: "#EF4444", idle: "#64748B" } as const;
+const toneColor = { ok: "var(--cmms-success)", warn: "var(--cmms-warning)", down: "var(--cmms-danger)", idle: "var(--cmms-text-secondary)" } as const;
 const actionTone = (action: string): "ok" | "warn" | "down" | "idle" => {
   const a = String(action || "").toLowerCase();
   if (a.includes("closed") || a.includes("complete") || a.includes("resolve")) return "ok";
@@ -433,7 +433,7 @@ export default function RepairViewDetailsPage() {
             <iframe
               src={previewUrl}
               title={`PDF Preview ${wo.workOrderNo}`}
-              style={{ width: "100%", height: "68vh", border: "1px solid #CBD5E1", borderRadius: 8, background: "#FFFFFF" }}
+              style={{ width: "100%", height: "68vh", border: "1px solid var(--cmms-border)", borderRadius: 8, background: "#FFFFFF" }}
             />
           )}
           <HStack hAlign="end" gap={2} style={{ marginTop: 14 }}>

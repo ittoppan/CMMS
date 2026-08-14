@@ -43,10 +43,10 @@ const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info
 
 // สีเส้นข้างการ์ดตามความเร่งด่วน
 const priorityTone: Record<KanbanItem["priority"], string> = {
-  Critical: "#EF4444",
-  High: "#F59E0B",
+  Critical: "var(--cmms-danger)",
+  High: "var(--cmms-warning)",
   Medium: "var(--cmms-primary)",
-  Low: "#94A3B8",
+  Low: "var(--cmms-text-secondary)",
 };
 
 export default function RepairKanbanPage() {
@@ -128,7 +128,7 @@ export default function RepairKanbanPage() {
       key: "open" as const,
       title: "รอดำเนินการ",
       andon: "warn" as const,
-      tone: "#F59E0B",
+      tone: "var(--cmms-warning)",
       items: filteredItems.filter(i => i.status === "open"),
       nextStatus: "in_progress" as const,
       nextLabel: "เริ่มซ่อม",
@@ -137,7 +137,7 @@ export default function RepairKanbanPage() {
       key: "in_progress" as const,
       title: "กำลังซ่อมบำรุง",
       andon: "warn" as const,
-      tone: "#F59E0B",
+      tone: "var(--cmms-warning)",
       items: filteredItems.filter(i => i.status === "in_progress"),
       prevStatus: "open" as const,
       nextStatus: "pending" as const,
@@ -148,7 +148,7 @@ export default function RepairKanbanPage() {
       key: "pending" as const,
       title: "รออะไหล่ / ประเมิน",
       andon: "down" as const,
-      tone: "#EF4444",
+      tone: "var(--cmms-danger)",
       items: filteredItems.filter(i => i.status === "pending"),
       prevStatus: "in_progress" as const,
       nextStatus: "completed" as const,
@@ -159,7 +159,7 @@ export default function RepairKanbanPage() {
       key: "completed" as const,
       title: "เสร็จสมบูรณ์",
       andon: "ok" as const,
-      tone: "#10B981",
+      tone: "var(--cmms-success)",
       items: filteredItems.filter(i => i.status === "completed"),
       prevStatus: "in_progress" as const,
       prevLabel: "ย้อนกลับ",
@@ -281,7 +281,7 @@ export default function RepairKanbanPage() {
                       padding={4}
                       style={{
                         border: '1px solid var(--cmms-border)',
-                        borderLeft: `3px solid ${priorityTone[item.priority] || "#94A3B8"}`,
+                        borderLeft: `3px solid ${priorityTone[item.priority] || "var(--cmms-text-secondary)"}`,
                         boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
                         transition: 'all 0.2s',
                       }}

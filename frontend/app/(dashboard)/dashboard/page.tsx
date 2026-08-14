@@ -168,7 +168,7 @@ export default function DashboardPage() {
       lines.push(`⏱ Downtime รวม ${esgData.total_downtime_minutes.toLocaleString()} นาที (สูญเสียพลังงานคิดเป็น ${esgData.energy_waste_thb.toLocaleString()} บาท)`);
     }
     if (lines.length === 0) {
-      return `📊 ผมช่วยสรุปข้อมูลในระบบได้ เช่น พิมพ์ "ค่าใช้จ่ายเดือนนี้" "PM ทันกำหนด" "สต็อกต่ำ" "งานซ่อม" หรือ "downtime"`;
+      return `ผมช่วยสรุปข้อมูลในระบบได้ เช่น พิมพ์ "ค่าใช้จ่ายเดือนนี้" "PM ทันกำหนด" "สต็อกต่ำ" "งานซ่อม" หรือ "downtime"`;
     }
     return lines.join("\n");
   };
@@ -298,7 +298,7 @@ export default function DashboardPage() {
     return pmComplianceData.map(d => ({
       name: d.status,
       value: d.count,
-      color: d.status === 'completed' ? '#10b981' : d.status === 'pending' ? '#f59e0b' : d.status === 'overdue' ? '#f43f5e' : '#64748b'
+      color: d.status === 'completed' ? 'var(--cmms-success)' : d.status === 'pending' ? 'var(--cmms-warning)' : d.status === 'overdue' ? 'var(--cmms-danger)' : 'var(--cmms-text-secondary)'
     }));
   }, [pmComplianceData]);
 
@@ -471,15 +471,15 @@ export default function DashboardPage() {
                 </VStack>
                 <HStack gap={2} wrap="wrap">
                   <span className="cmms-andon-chip">
-                    <span className="cmms-andon-dot" style={{ background: "#10B981", boxShadow: "0 0 6px rgba(16,185,129,.6)" }} />
+                    <span className="cmms-andon-dot" style={{ background: "var(--cmms-success)", boxShadow: "0 0 6px rgba(16,185,129,.6)" }} />
                     พร้อมใช้งาน <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.ok}</span>
                   </span>
                   <span className="cmms-andon-chip">
-                    <span className="cmms-andon-dot" style={{ background: "#F59E0B", boxShadow: "0 0 6px rgba(245,158,11,.6)" }} />
+                    <span className="cmms-andon-dot" style={{ background: "var(--cmms-warning)", boxShadow: "0 0 6px rgba(245,158,11,.6)" }} />
                     ต้องดูแล <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.warn}</span>
                   </span>
                   <span className="cmms-andon-chip">
-                    <span className="cmms-andon-dot" style={{ background: "#EF4444", boxShadow: "0 0 6px rgba(239,68,68,.65)" }} />
+                    <span className="cmms-andon-dot" style={{ background: "var(--cmms-danger)", boxShadow: "0 0 6px rgba(239,68,68,.65)" }} />
                     หยุดทำงาน <span className="cmms-num" style={{ color: "#fff" }}>{plantBoard.counts.down}</span>
                   </span>
                 </HStack>
@@ -685,9 +685,9 @@ export default function DashboardPage() {
                           <YAxis />
                           <Tooltip content={<CustomChartTooltip />} />
                           <Legend />
-                          <Bar dataKey="completed" name="งานซ่อมเสร็จสมบูรณ์" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="breakdown" name="เครื่องจักรชำรุด" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="cost" name="ค่าใช้จ่าย (หมื่นบาท)" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="completed" name="งานซ่อมเสร็จสมบูรณ์" fill="var(--cmms-info)" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="breakdown" name="เครื่องจักรชำรุด" fill="var(--cmms-danger)" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="cost" name="ค่าใช้จ่าย (หมื่นบาท)" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </VStack>
@@ -707,12 +707,12 @@ export default function DashboardPage() {
                         <LineChart data={displayChartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--cmms-border)" />
                           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                          <YAxis yAxisId="left" orientation="left" stroke="#6366f1" />
-                          <YAxis yAxisId="right" orientation="right" stroke="#f59e0b" />
+                          <YAxis yAxisId="left" orientation="left" stroke="var(--cmms-primary)" />
+                          <YAxis yAxisId="right" orientation="right" stroke="var(--cmms-warning)" />
                           <Tooltip content={<CustomChartTooltip />} />
                           <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="mtbf" name="MTBF (ชั่วโมง)" stroke="#6366f1" strokeWidth={3} dot={{ r: 5 }} />
-                          <Line yAxisId="right" type="monotone" dataKey="mttr" name="MTTR (ชั่วโมง)" stroke="#f59e0b" strokeWidth={3} dot={{ r: 5 }} />
+                          <Line yAxisId="left" type="monotone" dataKey="mtbf" name="MTBF (ชั่วโมง)" stroke="var(--cmms-primary)" strokeWidth={3} dot={{ r: 5 }} />
+                          <Line yAxisId="right" type="monotone" dataKey="mttr" name="MTTR (ชั่วโมง)" stroke="var(--cmms-warning)" strokeWidth={3} dot={{ r: 5 }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </VStack>
@@ -784,8 +784,8 @@ export default function DashboardPage() {
                           <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
                           <Tooltip />
                           <Legend />
-                          <Bar yAxisId="left" dataKey="count" name="จำนวนครั้ง" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                          <Line yAxisId="right" type="monotone" dataKey="cumulativePercent" name="% สะสม" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4 }} />
+                          <Bar yAxisId="left" dataKey="count" name="จำนวนครั้ง" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} />
+                          <Line yAxisId="right" type="monotone" dataKey="cumulativePercent" name="% สะสม" stroke="var(--cmms-danger)" strokeWidth={3} dot={{ r: 4 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </VStack>
@@ -849,7 +849,7 @@ export default function DashboardPage() {
                             const top = `${(row * 40) - 14}%`;
                             return (
                               <div key={asset.id || i} className="absolute flex flex-col items-center" style={{ left, top }}>
-                                <div className={`w-6 h-6 rounded-full border-2 border-white ${asset.status === 'down' ? 'bg-rose-500 shadow-[0_0_20px_#f43f5e] animate-pulse' : asset.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500 shadow-[0_0_15px_#10b981]'}`}></div>
+                                <div className={`w-6 h-6 rounded-full border-2 border-white ${asset.status === 'down' ? 'bg-rose-500 shadow-[0_0_20px_var(--cmms-danger)] animate-pulse' : asset.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500 shadow-[0_0_15px_var(--cmms-success)]'}`}></div>
                                 <span className="text-xs text-slate-300 mt-1 bg-slate-900/80 px-2 rounded">{asset.id}</span>
                               </div>
                             );
@@ -921,8 +921,8 @@ export default function DashboardPage() {
                                 {tech.avatar && <img src={tech.avatar} alt={tech.name} onError={(e) => { e.currentTarget.src = avatarFor(tech.name); }} className="w-8 h-8 rounded-full object-cover" />}
                                 <span className="font-bold text-slate-800 dark:text-white text-lg">{tech.name}</span>
                               </div>
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${tech.status === 'repairing' ? 'bg-emerald-100 text-emerald-700' : tech.status === 'waiting' ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-600'}`}>
-                                {tech.status === 'repairing' ? '🟢 กำลังซ่อม' : tech.status === 'waiting' ? '🟡 รอดำเนินการ' : '⚪ ว่าง'}
+                              <span className={`cmms-status ${tech.status === 'repairing' ? 'ok' : tech.status === 'waiting' ? 'warn' : 'idle'}`}>
+                                <span className="cmms-status-dot" /> {tech.status === 'repairing' ? 'กำลังซ่อม' : tech.status === 'waiting' ? 'รอดำเนินการ' : 'ว่าง'}
                               </span>
                             </div>
                             <div className="text-sm text-slate-600 dark:text-slate-400">{tech.task}</div>
@@ -953,7 +953,7 @@ export default function DashboardPage() {
                             </HStack>
                             <Text type="body" size="sm" color="secondary" className="truncate">{asset.name}</Text>
                             <Text type="body" size="sm" className="text-slate-500">
-                              {asset.status === 'down' ? '⚠ หยุดทำงาน' : `ตรวจสอบล่าสุด: ${asset.lastChecked}`}
+                              {asset.status === 'down' ? 'หยุดทำงาน' : `ตรวจสอบล่าสุด: ${asset.lastChecked}`}
                             </Text>
                           </div>
                         ))}
@@ -1164,7 +1164,7 @@ export default function DashboardPage() {
                   className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--cmms-primary)] dark:text-white"
                 />
                 <button 
-                  className="w-9 h-9 rounded-full bg-[var(--cmms-primary)] hover:bg-[#004a91] text-white flex items-center justify-center shrink-0"
+                  className="w-9 h-9 rounded-full bg-[var(--cmms-primary)] hover:bg-[var(--cmms-primary-hover)] text-white flex items-center justify-center shrink-0"
                   onClick={() => {
                     if (chatMessage.trim()) {
                       const q = chatMessage;

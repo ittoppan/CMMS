@@ -106,6 +106,8 @@ export default function CreateWorkOrderPage() {
         <BreadcrumbItem isCurrent>เปิดใบแจ้งซ่อมใหม่</BreadcrumbItem>
       </Breadcrumbs>
 
+      <Text type="body" size="sm" className="cmms-eyebrow">REPAIR CREATE · CMMS-TOPPAN</Text>
+
       <Heading level={2}>เปิดใบแจ้งซ่อม</Heading>
 
       <Card padding={6}>

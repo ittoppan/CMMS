@@ -305,7 +305,7 @@ export default function PMChecksheetPage() {
                 <VStack gap={1}>
                   <HStack gap={2} vAlign="center">
                     <Badge label={selectedPlan.frequency_type?.toUpperCase()} variant="info" />
-                    <Badge label={selectedPlan.status === "in_progress" ? "กำลังดำเนินการ" : "รอดำเนินการ"} variant="warning" />
+                    <span className="cmms-status warn"><span className="cmms-status-dot" />{selectedPlan.status === "in_progress" ? "กำลังดำเนินการ" : "รอดำเนินการ"}</span>
                   </HStack>
                   <Text type="body" weight="bold">{selectedPlan.title}</Text>
                   <Text type="body" size="sm" color="secondary">เครื่องจักร: {assetName} {selectedPlan.due_date ? `• ครบกำหนด: ${selectedPlan.due_date}` : ""}</Text>
