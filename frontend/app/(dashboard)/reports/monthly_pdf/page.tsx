@@ -4,9 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Spinner } from "@astryxdesign/core/Spinner";
@@ -201,28 +199,48 @@ export default function MonthlyPdfReportPage() {
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
       {/* Header + Controls */}
-      <HStack hAlign="between" vAlign="center" className="print:hidden" wrap="wrap" gap={3}>
+      <div className="cmms-page-hero flex flex-col xl:flex-row xl:items-end justify-between gap-6 print:hidden">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</Heading>
-            <Badge label="พิมพ์เอกสาร A4 (ISO)" variant="info" />
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <PrinterIcon className="w-3.5 h-3.5" /> พิมพ์เอกสาร A4 (ISO)
+            </span>
           </HStack>
-          <Text type="body" color="secondary">รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ
+          </Text>
         </VStack>
-        <HStack gap={3} vAlign="end">
+        <HStack gap={3} vAlign="end" wrap="wrap">
           <Selector label="ปี" isLabelHidden value={String(year)} onChange={(v) => setYear(Number(v))} options={yearOptions} />
           <Selector label="เดือน" isLabelHidden value={String(month)} onChange={(v) => setMonth(Number(v))} options={monthOptions} />
-          <Button label="รีเฟรช" variant="secondary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchData} />
-          <Button
-            label={downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
-            variant="secondary"
-            icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
+          <button
+            type="button"
+            onClick={fetchData}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
+          <button
+            type="button"
+            disabled={downloading}
             onClick={handleDownload}
-            isDisabled={downloading}
-          />
-          <Button label="พิมพ์เอกสาร A4" variant="primary" icon={<Icon icon={PrinterIcon} size="sm" />} onClick={handlePrint} />
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
+          >
+            <DocumentArrowDownIcon className="w-4 h-4" />
+            {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
+          </button>
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          >
+            <PrinterIcon className="w-4 h-4" />
+            พิมพ์เอกสาร A4
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       {/* A4 Printable Document Sheet */}
       <div style={{ maxWidth: 900, margin: "0 auto", width: "100%" }}>
@@ -250,31 +268,31 @@ export default function MonthlyPdfReportPage() {
               <Grid columns={4} gap={4}>
                 <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
-                    <Icon icon={WrenchScrewdriverIcon} size="sm" style={{ color: "#4f46e5" }} />
-                    <Text type="body" size="sm" style={{ color: "#64748b" }}>ใบแจ้งซ่อมเดือนนี้</Text>
+                    <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
+                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ใบแจ้งซ่อมเดือนนี้</Text>
                   </HStack>
                   <Heading level={3} style={{ color: "#0f172a" }}>{fmt(monthTotal)} <span style={{ fontSize: 12 }}>งาน</span></Heading>
                   <Text type="body" size="sm" style={{ color: "#94a3b8" }}>เสร็จ {cur.completed} · แจ้งใหม่ {cur.breakdown}</Text>
                 </div>
                 <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
-                    <Icon icon={CheckCircleIcon} size="sm" style={{ color: "#16a34a" }} />
-                    <Text type="body" size="sm" style={{ color: "#64748b" }}>ปิดงานได้สำเร็จ</Text>
+                    <CheckCircleIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
+                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ปิดงานได้สำเร็จ</Text>
                   </HStack>
                   <Heading level={3} style={{ color: "#16a34a" }}>{closeRate.toFixed(1)}%</Heading>
                 </div>
                 <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
-                    <Icon icon={ClockIcon} size="sm" style={{ color: "#7c3aed" }} />
-                    <Text type="body" size="sm" style={{ color: "#64748b" }}>MTBF เดือนนี้</Text>
+                    <ClockIcon className="w-4 h-4" style={{ color: "var(--cmms-info)" }} />
+                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>MTBF เดือนนี้</Text>
                   </HStack>
                   <Heading level={3} style={{ color: "#7c3aed" }}>{fmt(cur.mtbf)} <span style={{ fontSize: 12 }}>ชม.</span></Heading>
                   <Text type="body" size="sm" style={{ color: "#94a3b8" }}>MTTR {cur.mttr} ชม.</Text>
                 </div>
                 <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
-                    <Icon icon={BanknotesIcon} size="sm" style={{ color: "#f59e0b" }} />
-                    <Text type="body" size="sm" style={{ color: "#64748b" }}>ค่าใช้จ่ายเดือนนี้</Text>
+                    <BanknotesIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />
+                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ค่าใช้จ่ายเดือนนี้</Text>
                   </HStack>
                   <Heading level={3} style={{ color: "#0f172a" }}>฿{fmt(monthCost)}</Heading>
                   <Text type="body" size="sm" style={{ color: "#94a3b8" }}>ทั้งปี ฿{fmt(yearCost)}</Text>
