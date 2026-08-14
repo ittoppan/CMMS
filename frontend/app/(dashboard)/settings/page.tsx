@@ -476,6 +476,14 @@ export default function SettingsPage() {
 
   // บันทึกธีม 3 keys ตรงๆ (theme_preset อยู่กลุ่ม general ไม่ติดใน changedRows ของกลุ่ม branding)
   const handleSaveTheme = async () => {
+    // ตรวจรหัสสี hex ก่อนบันทึกธีม
+    for (const key of ["theme_primary_hex", "theme_secondary_hex"]) {
+      const v = String(form[key] ?? "").trim();
+      if (!/^#[0-9a-fA-F]{6}$/.test(v)) {
+        setError(`${KEY_META[key]?.label || key} ต้องเป็นรหัสสี #RRGGBB เท่านั้น (6 หลัก เริ่มด้วย #)`);
+        return;
+      }
+    }
     setSaving(true);
     setError(null);
     setSaveMessage("");
@@ -515,6 +523,17 @@ export default function SettingsPage() {
         const v = SENSITIVE_KEYS.has(row.setting_key) ? newSecrets[row.setting_key] : form[row.setting_key];
         if (!/^\d+(\.\d+)?$/.test(String(v).trim())) {
           setError(`${KEY_META[row.setting_key]?.label || row.setting_key} ต้องเป็นตัวเลขเท่านั้น`);
+          return;
+        }
+      }
+    }
+
+    // ตรวจรหัสสี hex ก่อนบันทึก (theme_primary_hex / theme_secondary_hex)
+    for (const row of changedRows) {
+      if (COLOR_KEYS.has(row.setting_key)) {
+        const v = String(form[row.setting_key] ?? "").trim();
+        if (!/^#[0-9a-fA-F]{6}$/.test(v)) {
+          setError(`${KEY_META[row.setting_key]?.label || row.setting_key} ต้องเป็นรหัสสี #RRGGBB เท่านั้น (6 หลัก เริ่มด้วย #)`);
           return;
         }
       }
