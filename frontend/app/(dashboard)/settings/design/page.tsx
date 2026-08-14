@@ -69,10 +69,10 @@ const DESIGN_META: Record<string, { label: string; group: string }> = {
 };
 
 const DESIGN_DEFAULTS: Record<string, string> = {
-  design_sidebar_bg: "#0F1E3D",
+  design_sidebar_bg: "", // เว้นว่าง = ใช้สี SideNav จากธีม preset อัตโนมัติ
   design_sidebar_text: "#FFFFFF",
   design_sidebar_indicator: "#38BDF8",
-  design_card_radius: "14px",
+  design_card_radius: "12px",
   design_card_shadow: "0 10px 25px -12px rgba(25, 50, 100, 0.18)",
   design_body_bg: "#F5F7FA",
   design_andon_ok: "#10B981",
@@ -246,7 +246,9 @@ export default function PageDesignerPage() {
       })
     );
     const design: Record<string, string> = {};
-    for (const k of designKeys) design[k] = next[k] ?? "";
+    for (const k of designKeys) {
+      if (next[k]) design[k] = next[k]; // ข้ามค่าว่าง (เช่น sidebar bg = ตาม preset)
+    }
     window.dispatchEvent(new CustomEvent("cmms-design-preview", { detail: design }));
   }, [designKeys]);
 
@@ -309,6 +311,8 @@ export default function PageDesignerPage() {
       for (const key of allKeys) {
         const value = form[key] ?? DESIGN_DEFAULTS[key] ?? "";
         const existing = rows[key];
+        // คีย์ใหม่ที่ยังไม่เคยบันทึก + ค่าว่าง → ข้าม (เช่น sidebar bg ว่าง = ตาม preset)
+        if (!existing && !value) continue;
         if (!existing) {
           const res = await fetch("/api/v1/settings.php", {
             method: "POST",
@@ -360,9 +364,12 @@ export default function PageDesignerPage() {
   };
 
   const handleResetAll = () => {
-    setForm({ ...DESIGN_DEFAULTS });
-    dispatchLive({ ...DESIGN_DEFAULTS });
-    setSaveMsg("คืนค่าเริ่มต้นแล้ว — กดบันทึกเพื่อยืนยันลงฐานข้อมูล");
+    // reset เฉพาะ design keys — ธีม (theme_preset/hex) ปล่อยตามเดิม
+    const next = { ...form };
+    for (const k of designKeys) next[k] = DESIGN_DEFAULTS[k] ?? "";
+    setForm(next);
+    dispatchLive(next);
+    setSaveMsg("คืนค่าเริ่มต้นของส่วนปรับแต่งแล้ว — กดบันทึกเพื่อยืนยันลงฐานข้อมูล");
     setTimeout(() => setSaveMsg(""), 5000);
   };
 
@@ -516,6 +523,9 @@ export default function PageDesignerPage() {
                 value={form.design_sidebar_bg ?? ""}
                 onChange={(v) => setField("design_sidebar_bg", v)}
               />
+              <Text type="body" size="sm" color="secondary">
+                เว้นว่าง = ใช้สี SideNav จากธีมที่เลือกอัตโนมัติ
+              </Text>
               <ColorField
                 label="สีตัวหนังสือเมนู"
                 value={form.design_sidebar_text ?? ""}
@@ -577,7 +587,7 @@ export default function PageDesignerPage() {
                 <Selector
                   label="มุมโค้งการ์ด"
                   isLabelHidden
-                  value={form.design_card_radius ?? "14px"}
+                  value={form.design_card_radius ?? "12px"}
                   onChange={(v) => setField("design_card_radius", String(v))}
                   options={RADIUS_OPTIONS}
                 />
