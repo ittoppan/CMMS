@@ -424,6 +424,38 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 }
 
 /* ================================================
+   Mobile drawer (astryx-mobile-nav) — light theme
+   (desktop sidebar เป็นพื้นน้ำเงินเข้ม → ตัวหนังสือขาว
+    แต่ drawer มือถือเป็นพื้นขาว → ต้องคืนตัวหนังสือสีเข้ม
+    ไม่งั้นขาวทับขาว มองไม่เห็นข้อความ)
+   ================================================ */
+.astryx-mobile-nav .astryx-side-nav-item {
+  color: var(--cmms-text-primary, #0F172A) !important;
+}
+.astryx-mobile-nav .astryx-side-nav-item:hover {
+  color: var(--cmms-text-primary, #0F172A) !important;
+  background: var(--cmms-bg-wash, #F1F5F9) !important;
+}
+.astryx-mobile-nav .astryx-side-nav-item.selected,
+.astryx-mobile-nav .astryx-side-nav-item[data-selected="true"],
+.astryx-mobile-nav .astryx-side-nav-item[class*="selected"] {
+  color: #FFFFFF !important;
+  background: var(--cmms-primary, #0057A8) !important;
+  box-shadow: 0 4px 14px rgba(0, 87, 168, 0.35) !important;
+}
+.astryx-mobile-nav .astryx-side-nav-section {
+  border-top-color: rgba(15, 23, 42, 0.07) !important;
+}
+.astryx-mobile-nav .astryx-side-nav-section > div:first-child span {
+  color: var(--cmms-text-muted, #64748B) !important;
+}
+/* จุด Andon หน้าหัวข้อหมวด — ใช้สีน้ำเงินสด (เห็นชัดบนพื้นขาว) */
+.astryx-mobile-nav .astryx-side-nav-section > div:first-child span[id$="-title"]::before {
+  background: var(--cmms-sidebar-indicator, #38BDF8) !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.55) !important;
+}
+
+/* ================================================
    Astryx TopNav Overrides
    ================================================ */
 [class*="TopNav_topNav"], .astryx-top-nav {
