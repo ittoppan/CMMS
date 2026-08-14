@@ -400,7 +400,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <SideNavHeading
               heading="CMMS-TOPPAN"
               headingHref="/dashboard"
-              icon={<NavIcon icon={<Icon icon={CubeIcon} size="sm" />} />}
+              icon={
+                <NavIcon
+                  icon={
+                    <img
+                      src="/logo.png"
+                      alt="TOPPAN"
+                      style={{ height: 22, width: "auto", objectFit: "contain", display: "block" }}
+                    />
+                  }
+                />
+              }
             />
           }
           footer={

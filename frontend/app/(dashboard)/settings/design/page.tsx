@@ -71,8 +71,8 @@ const DESIGN_META: Record<string, { label: string; group: string }> = {
 
 const DESIGN_DEFAULTS: Record<string, string> = {
   design_sidebar_bg: "", // เว้นว่าง = ใช้สี SideNav จากธีม preset อัตโนมัติ
-  design_sidebar_text: "#FFFFFF",
-  design_sidebar_indicator: "#38BDF8",
+  design_sidebar_text: "", // เว้นว่าง = ใช้สีตัวหนังสือจากธีม (โฉมใหม่: น้ำเงินเข้มบนพื้นขาว)
+  design_sidebar_indicator: "", // เว้นว่าง = ใช้สีตัวชี้ตำแหน่งจากธีม
   design_card_radius: "12px",
   design_card_shadow: "0 10px 25px -12px rgba(25, 50, 100, 0.18)",
   design_body_bg: "#F5F7FA",
