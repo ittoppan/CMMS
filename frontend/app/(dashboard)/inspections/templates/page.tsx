@@ -175,7 +175,7 @@ export default function InspectionTemplatesPage() {
           <button
             type="button"
             onClick={() => { setError(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             สร้าง Template ใหม่
@@ -286,7 +286,7 @@ export default function InspectionTemplatesPage() {
             <button
               type="button"
               onClick={saveTemplate}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >
               <CheckCircleIcon className="w-4 h-4" />
               {editingId ? "บันทึก Template" : "สร้าง Template"}
@@ -313,9 +313,9 @@ export default function InspectionTemplatesPage() {
                 <VStack gap={1}>
                   <HStack gap={2} vAlign="center" wrap="wrap">
                     <Text type="body" weight="bold">{t.title}</Text>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "3px 9px" }}>{t.code}</span>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>{FREQ_LABELS[t.frequency] || t.frequency}</span>
-                    {!t.is_active && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดใช้งาน</span>}
+                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{t.code}</span>
+                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>{FREQ_LABELS[t.frequency] || t.frequency}</span>
+                    {!t.is_active && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดใช้งาน</span>}
                   </HStack>
                   <Text type="body" size="sm" color="secondary">
                     {t.item_count} รายการตรวจ • {t.open_schedules} รอบที่เปิดค้าง{t.category ? ` • ${t.category}` : ""}

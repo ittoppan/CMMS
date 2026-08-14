@@ -287,7 +287,7 @@ export default function KpiDashboardPage() {
             <HStack gap={2} vAlign="center">
               <ClockIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>% งานปิดใน SLA รายเดือน</Heading>
-              <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
+              <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
             </HStack>
             <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer>
@@ -347,7 +347,7 @@ export default function KpiDashboardPage() {
         <button
           type="button"
           onClick={() => fetchData(months)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <ArrowPathIcon className="w-4 h-4" />
           รีเฟรชข้อมูล

@@ -1743,6 +1743,32 @@ next-route-announcer {
   cursor: not-allowed;
 }
 
+/* ── ปุ่มลบ/อันตรายแบบ flat (แทน gradient — ตาม guideline §6.3) ── */
+.cmms-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--cmms-danger);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 14px -8px rgba(225, 29, 72, 0.45);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.cmms-btn-danger:hover {
+  background: var(--cmms-danger-dark);
+  box-shadow: none;
+}
+.cmms-btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── กล่องไอคอนแบบ flat (หัว section บนพื้นขาว — ไม่มี gradient) ── */
 .cmms-icon-tile {
   display: flex;

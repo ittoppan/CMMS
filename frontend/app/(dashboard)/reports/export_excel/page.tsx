@@ -156,7 +156,7 @@ export default function ExportExcelReportPage() {
                 type="button"
                 disabled={exporting}
                 onClick={handleExportCSV}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <ArrowDownTrayIcon className="w-4 h-4" />
                 {exporting ? "กำลังส่งออก..." : "ส่งออกไฟล์ Excel / CSV ทันที"}
@@ -171,7 +171,7 @@ export default function ExportExcelReportPage() {
             <Heading level={4}>รูปแบบไฟล์และการนำไปใช้งาน</Heading>
             <VStack gap={3}>
               <HStack gap={3} vAlign="center">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <div className="w-10 h-10 cmms-icon-tile">
                   <TableCellsIcon className="w-5 h-5" />
                 </div>
                 <VStack gap={0}>
@@ -181,7 +181,7 @@ export default function ExportExcelReportPage() {
               </HStack>
 
               <HStack gap={3} vAlign="center">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <div className="w-10 h-10 cmms-icon-tile green">
                   <CircleStackIcon className="w-5 h-5" />
                 </div>
                 <VStack gap={0}>

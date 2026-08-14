@@ -67,10 +67,10 @@ function normalizeImage(raw?: string | null): string | null {
 }
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
-  active: { background: "rgba(16,185,129,0.12)", color: "#059669" },
-  inactive: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
-  disposed: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
-  under_repair: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
+  active: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
+  inactive: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
+  disposed: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
+  under_repair: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
 };
 
 export default function BOMTreePage() {
@@ -268,7 +268,7 @@ export default function BOMTreePage() {
           type="button"
           disabled={machines.length === 0}
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           เพิ่มชิ้นส่วนเข้า BOM
@@ -350,7 +350,7 @@ export default function BOMTreePage() {
                 <VStack gap={4}>
                   <HStack hAlign="between" vAlign="center" style={{ paddingBottom: 12, borderBottom: "1px solid var(--color-border)" }}>
                     <Heading level={4}>ชิ้นส่วนประกอบของ {machine?.code || "เครื่องจักร"}</Heading>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>{parts.length} ชิ้นส่วน</span>
+                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>{parts.length} ชิ้นส่วน</span>
                   </HStack>
 
                   {bomLoading ? (
@@ -371,7 +371,7 @@ export default function BOMTreePage() {
                           <VStack gap={0}>
                             <HStack gap={2} vAlign="center">
                               <Text type="body" weight="bold">{machine?.code}</Text>
-                              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5" }}>เครื่องจักร</span>
+                              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)" }}>เครื่องจักร</span>
                             </HStack>
                             <Text type="body" size="sm" color="secondary">{machine?.name}</Text>
                           </VStack>
@@ -414,7 +414,7 @@ export default function BOMTreePage() {
                                 <VStack gap={0} style={{ minWidth: 0 }}>
                                   <HStack gap={2} vAlign="center">
                                     <Text type="body" weight="bold">{p.part_code || `SP-${p.spare_part_id}`}</Text>
-                                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>ชิ้นส่วน</span>
+                                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>ชิ้นส่วน</span>
                                   </HStack>
                                   <Text type="body" size="sm" color="secondary" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                     {p.part_name || "ชิ้นส่วนอะไหล่"}
@@ -487,7 +487,7 @@ export default function BOMTreePage() {
                       <button
                         type="button"
                         onClick={() => window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(selectedPart.part_code || "")}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                       >
                         <ShoppingBagIcon className="w-3.5 h-3.5" />
                         เบิกอะไหล่นี้
@@ -590,7 +590,7 @@ export default function BOMTreePage() {
                     type="button"
                     disabled={saving || !selectedSpareId}
                     onClick={handleAddComponent}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
                   >
                     {saving ? "กำลังบันทึก..." : "บันทึกเพิ่มชิ้นส่วน"}
                   </button>
@@ -621,7 +621,7 @@ export default function BOMTreePage() {
                 type="button"
                 disabled={deleting}
                 onClick={confirmDeletePart}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-red-600 shadow-lg shadow-red-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
               >
                 <TrashIcon className="w-4 h-4" />
                 {deleting ? "กำลังลบ..." : "ยืนยันลบ"}

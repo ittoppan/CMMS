@@ -142,7 +142,7 @@ export default function InspectionsPage() {
           <button
             type="button"
             onClick={() => { setShowCreate((v) => !v); setError(null); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             สร้างรอบตรวจ
@@ -154,34 +154,34 @@ export default function InspectionsPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClipboardDocumentCheckIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เปิดค้าง</Text>
-              <Heading level={2}><CountUp end={openCount} /> <Text type="body" size="sm">รอบ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={openCount} /> <Text type="body" size="sm">รอบ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <CalendarDaysIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ครบกำหนดวันนี้</Text>
-              <Heading level={2}><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <ExclamationTriangleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เกินกำหนด</Text>
-              <Heading level={2}><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -210,7 +210,7 @@ export default function InspectionsPage() {
               <button
                 type="button"
                 onClick={createSchedule}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <PlusIcon className="w-4 h-4" />
                 สร้างรอบ
@@ -255,7 +255,7 @@ export default function InspectionsPage() {
                         className="cmms-andon-chip"
                         style={{
                           background: s.status === "completed" ? "rgba(16,185,129,0.12)" : s.status === "in_progress" ? "rgba(30,136,229,0.12)" : s.status === "overdue" ? "rgba(239,68,68,0.12)" : "rgba(245,158,11,0.12)",
-                          color: s.status === "completed" ? "#059669" : s.status === "in_progress" ? "#1E88E5" : s.status === "overdue" ? "#dc2626" : "#d97706",
+                          color: s.status === "completed" ? "var(--cmms-success)" : s.status === "in_progress" ? "var(--cmms-primary)" : s.status === "overdue" ? "var(--cmms-danger)" : "var(--cmms-warning)",
                           fontSize: "0.7rem",
                           padding: "3px 9px",
                         }}
@@ -263,7 +263,7 @@ export default function InspectionsPage() {
                         {STATUS_LABELS[s.status] || s.status}
                       </span>
                       {s.result && (
-                        <span className="cmms-andon-chip" style={{ background: s.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: s.result === "pass" ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+                        <span className="cmms-andon-chip" style={{ background: s.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: s.result === "pass" ? "var(--cmms-success)" : "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
                           {RESULT_LABELS[s.result] || s.result}
                         </span>
                       )}
@@ -277,7 +277,7 @@ export default function InspectionsPage() {
                   </VStack>
                   <HStack gap={2}>
                     {s.status !== "completed" && (
-                      <a href={`/inspections/run?schedule_id=${s.id}`} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300">
+                      <a href={`/inspections/run?schedule_id=${s.id}`} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
                         <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" />
                         ทำเช็ค
                       </a>

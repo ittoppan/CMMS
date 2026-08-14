@@ -46,10 +46,10 @@ const statusLabelMap: Record<string, string> = {
 };
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
-  operational: { background: "rgba(16,185,129,0.12)", color: "#059669" },
-  standby: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  "under-repair": { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
-  decommissioned: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  operational: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
+  standby: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+  "under-repair": { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
+  decommissioned: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
 };
 
 const departmentLabelMap: Record<string, string> = {
@@ -167,7 +167,7 @@ export default function AssetsPage() {
             ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว
           </Text>
         </VStack>
-        <a href="/assets/create" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300">
+        <a href="/assets/create" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary">
           <PlusIcon className="w-4 h-4" />
           เพิ่มเครื่องจักร
         </a>
@@ -176,45 +176,45 @@ export default function AssetsPage() {
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <BuildingOffice2Icon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
-              <Heading level={2}><CountUp end={kpiData.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">พร้อมใช้งาน</Text>
-              <Heading level={2}><CountUp end={kpiData.operational} /> <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.operational} /> <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">กำลังซ่อม</Text>
-              <Heading level={2}><CountUp end={kpiData.underRepair} /> <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.underRepair} /> <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">สแตนด์บาย</Text>
-              <Heading level={2}><CountUp end={kpiData.standby} /> <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.standby} /> <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>

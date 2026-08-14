@@ -131,7 +131,7 @@ export default function ApprovalCenterPage() {
           className="cmms-andon-chip"
           style={{
             background: item.status === 'approved' ? 'rgba(16,185,129,0.12)' : item.status === 'rejected' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-            color: item.status === 'approved' ? '#059669' : item.status === 'rejected' ? '#dc2626' : '#d97706',
+            color: item.status === 'approved' ? 'var(--cmms-success)' : item.status === 'rejected' ? 'var(--cmms-danger)' : 'var(--cmms-warning)',
             fontSize: '0.75rem',
             padding: '4px 10px',
           }}
@@ -151,7 +151,7 @@ export default function ApprovalCenterPage() {
               type="button"
               disabled={processingId !== null && processingId !== item.id}
               onClick={() => handleAction(item, "approve")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-emerald-500 to-green-600 shadow-md hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-success"
             >
               <CheckCircleIcon className="w-3.5 h-3.5" />
               {processingId === item.id ? "กำลัง..." : "อนุมัติ"}
@@ -160,7 +160,7 @@ export default function ApprovalCenterPage() {
               type="button"
               disabled={processingId !== null}
               onClick={() => handleAction(item, "reject")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 shadow-md hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-danger"
             >
               <XCircleIcon className="w-3.5 h-3.5" />
               ปฏิเสธ
@@ -214,36 +214,36 @@ export default function ApprovalCenterPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-warning)' }}>
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">รายการรอการอนุมัติ</Text>
-              <Heading level={3}>{summary.pending} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{summary.pending} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-success)' }}>
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">อนุมัติแล้วทั้งหมด</Text>
-              <Heading level={3}>{summary.approved} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{summary.approved} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-danger)' }}>
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <XCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ปฏิเสธ / ส่งกลับแก้ไข</Text>
-              <Heading level={3}>{summary.rejected} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{summary.rejected} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>

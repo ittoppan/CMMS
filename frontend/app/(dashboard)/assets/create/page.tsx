@@ -69,7 +69,7 @@ export default function CreateAssetPage() {
         </a>
         <button
           type="button"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           บันทึกเครื่องจักร

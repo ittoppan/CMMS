@@ -35,10 +35,10 @@ interface CalibrationRecord extends Record<string, unknown> {
 }
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
-  completed: { background: "rgba(16,185,129,0.12)", color: "#059669" },
-  pending: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  scheduled: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  overdue: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
+  completed: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
+  pending: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+  scheduled: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+  overdue: { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
 };
 
 const statusLabel: Record<string, string> = {
@@ -187,7 +187,7 @@ export default function CalibrationPage() {
         <button
           type="button"
           onClick={() => router.push("/calibration/create")}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           เพิ่มเครื่องมือ / แผนสอบเทียบ
@@ -197,36 +197,36 @@ export default function CalibrationPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <ScaleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องมือวัดทั้งหมด</Text>
-              <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.total} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">รอดำเนินการ</Text>
-              <Heading level={2}><CountUp end={stats.dueSoon} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.dueSoon} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card elevation="low" padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <ExclamationTriangleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เลยกำหนด</Text>
-              <Heading level={2}><CountUp end={stats.overdue} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.overdue} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>

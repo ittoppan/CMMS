@@ -307,7 +307,7 @@ export default function InteractiveStylePageEditor() {
                           }}
                         >
                           <Text type="body" size="sm" weight="bold">{bgStyle.label}</Text>
-                          {bgColor === bgStyle.color && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
+                          {bgColor === bgStyle.color && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
                         </button>
                       ))}
                     </VStack>
@@ -363,7 +363,7 @@ export default function InteractiveStylePageEditor() {
                           }}
                         >
                           <Text type="body" size="sm" weight="bold">{font.label}</Text>
-                          {fontFamily === font.id && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
+                          {fontFamily === font.id && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
                         </button>
                       ))}
                     </VStack>
@@ -405,7 +405,7 @@ export default function InteractiveStylePageEditor() {
                   type="button"
                   disabled={publishing}
                   onClick={handlePublish}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cmms-btn-primary"
                 >
                   <CheckCircleIcon className="w-4 h-4" />
                   {publishing ? "กำลังบันทึก..." : "บันทึกสไตล์ & โทนสี"}
@@ -428,7 +428,7 @@ export default function InteractiveStylePageEditor() {
               {/* Top Viewport Controls Bar */}
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4} style={{ background: "#FFFFFF", padding: 12, borderRadius: 12, border: "1px solid #CBD5E1" }}>
                 <HStack gap={2} vAlign="center">
-                  <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.75rem", padding: "4px 10px" }}>กำลังจำลองสไตล์หน้า: {selectedRoute}</span>
+                  <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.75rem", padding: "4px 10px" }}>กำลังจำลองสไตล์หน้า: {selectedRoute}</span>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <span style={{ fontSize: "0.8rem", color: "#64748B" }}>สีหลัก:</span>
                     <div style={{ width: 16, height: 16, borderRadius: "50%", background: primaryColor }} />

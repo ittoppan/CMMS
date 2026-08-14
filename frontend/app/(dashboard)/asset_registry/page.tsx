@@ -55,16 +55,16 @@ const statusMap: Record<string, { label: string }> = {
 };
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
-  running: { background: "rgba(16,185,129,0.12)", color: "#059669" },
-  breakdown: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
-  maintenance: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  standby: { background: "rgba(30,136,229,0.12)", color: "#1E88E5" },
+  running: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
+  breakdown: { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
+  maintenance: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+  standby: { background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)" },
 };
 
 const criticalityChipStyle: Record<string, React.CSSProperties> = {
-  A: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
-  B: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  C: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  A: { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
+  B: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+  C: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
 };
 
 const PAGE_SIZE = 10;
@@ -292,7 +292,7 @@ export default function AssetRegistryPage() {
           <button
             type="button"
             onClick={() => router.push("/asset_registry/create")}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <PlusIcon className="w-4 h-4" />
             เพิ่มเครื่องจักรใหม่
@@ -307,48 +307,48 @@ export default function AssetRegistryPage() {
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <BuildingOffice2Icon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
-              <Heading level={2}>{assets.length} <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{assets.length} <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เดินเครื่องปกติ</Text>
-              <Heading level={2}>{assets.filter(a => a.status === "running").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.status === "running").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <ExclamationTriangleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องเสีย</Text>
-              <Heading level={2}>{assets.filter(a => a.status === "breakdown").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.status === "breakdown").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <RectangleGroupIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องจักรคลาส A (วิกฤต)</Text>
-              <Heading level={2}>{assets.filter(a => a.criticality === "A").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.criticality === "A").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -443,7 +443,7 @@ export default function AssetRegistryPage() {
                     type="button"
                     disabled={deleting}
                     onClick={handleDelete}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-red-600 shadow-lg shadow-red-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
                   >
                     {deleting ? "กำลังลบ..." : "ลบเครื่องจักร"}
                   </button>

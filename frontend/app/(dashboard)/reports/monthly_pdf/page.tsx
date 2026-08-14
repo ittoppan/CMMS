@@ -201,6 +201,7 @@ export default function MonthlyPdfReportPage() {
       {/* Header + Controls */}
       <div className="cmms-page-hero flex flex-col xl:flex-row xl:items-end justify-between gap-6 print:hidden">
         <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MONTHLY REPORT · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -234,7 +235,7 @@ export default function MonthlyPdfReportPage() {
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <PrinterIcon className="w-4 h-4" />
             พิมพ์เอกสาร A4
@@ -245,77 +246,77 @@ export default function MonthlyPdfReportPage() {
       {/* A4 Printable Document Sheet */}
       <div style={{ maxWidth: 900, margin: "0 auto", width: "100%" }}>
         <div ref={reportRef}>
-          <Card padding={8} style={{ backgroundColor: "white", color: "#1e293b" }}>
+          <Card padding={8} style={{ backgroundColor: "white", color: "var(--tp-navy-dark)" }}>
             <VStack gap={6}>
               {/* Header เอกสาร */}
-              <HStack hAlign="between" vAlign="center" style={{ borderBottom: "2px solid #0f172a", paddingBottom: 16 }}>
+              <HStack hAlign="between" vAlign="center" style={{ borderBottom: "2px solid var(--tp-navy-dark)", paddingBottom: 16 }}>
                 <HStack gap={3} vAlign="center">
-                  <div style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: "#4f46e5", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 20 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: "var(--cmms-primary)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 20 }}>
                     C
                   </div>
                   <VStack gap={0}>
-                    <Text type="body" weight="bold" style={{ fontSize: 18, color: "#0f172a" }}>บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</Text>
-                    <Text type="body" size="sm" style={{ color: "#64748b" }}>รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหาร</Text>
+                    <Text type="body" weight="bold" style={{ fontSize: 18, color: "var(--tp-navy-dark)" }}>บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</Text>
+                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหาร</Text>
                   </VStack>
                 </HStack>
                 <VStack gap={0} hAlign="end">
                   <Badge label={`ประจำเดือน: ${THAI_MONTHS[month - 1]} ${year + 543}`} variant="neutral" />
-                  <Text type="body" size="sm" style={{ color: "#64748b", marginTop: 4 }}>เอกสารเลขที่: {docNo} · พิมพ์เมื่อ {todayStr}</Text>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)", marginTop: 4 }}>เอกสารเลขที่: {docNo} · พิมพ์เมื่อ {todayStr}</Text>
                 </VStack>
               </HStack>
 
               {/* สรุป KPI สำคัญ */}
               <Grid columns={4} gap={4}>
-                <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
                     <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
                     <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ใบแจ้งซ่อมเดือนนี้</Text>
                   </HStack>
-                  <Heading level={3} style={{ color: "#0f172a" }}>{fmt(monthTotal)} <span style={{ fontSize: 12 }}>งาน</span></Heading>
-                  <Text type="body" size="sm" style={{ color: "#94a3b8" }}>เสร็จ {cur.completed} · แจ้งใหม่ {cur.breakdown}</Text>
+                  <Heading level={3} style={{ color: "var(--tp-navy-dark)" }}>{fmt(monthTotal)} <span style={{ fontSize: 12 }}>งาน</span></Heading>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>เสร็จ {cur.completed} · แจ้งใหม่ {cur.breakdown}</Text>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
                     <CheckCircleIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
                     <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ปิดงานได้สำเร็จ</Text>
                   </HStack>
-                  <Heading level={3} style={{ color: "#16a34a" }}>{closeRate.toFixed(1)}%</Heading>
+                  <Heading level={3} style={{ color: "var(--cmms-success)" }}>{closeRate.toFixed(1)}%</Heading>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
                     <ClockIcon className="w-4 h-4" style={{ color: "var(--cmms-info)" }} />
                     <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>MTBF เดือนนี้</Text>
                   </HStack>
-                  <Heading level={3} style={{ color: "#7c3aed" }}>{fmt(cur.mtbf)} <span style={{ fontSize: 12 }}>ชม.</span></Heading>
-                  <Text type="body" size="sm" style={{ color: "#94a3b8" }}>MTTR {cur.mttr} ชม.</Text>
+                  <Heading level={3} style={{ color: "var(--cmms-primary)" }}>{fmt(cur.mtbf)} <span style={{ fontSize: 12 }}>ชม.</span></Heading>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>MTTR {cur.mttr} ชม.</Text>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "#f8fafc", borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
                   <HStack gap={2} hAlign="center">
                     <BanknotesIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />
                     <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ค่าใช้จ่ายเดือนนี้</Text>
                   </HStack>
-                  <Heading level={3} style={{ color: "#0f172a" }}>฿{fmt(monthCost)}</Heading>
-                  <Text type="body" size="sm" style={{ color: "#94a3b8" }}>ทั้งปี ฿{fmt(yearCost)}</Text>
+                  <Heading level={3} style={{ color: "var(--tp-navy-dark)" }}>฿{fmt(monthCost)}</Heading>
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>ทั้งปี ฿{fmt(yearCost)}</Text>
                 </div>
               </Grid>
 
               {/* ตารางสรุปแยกตามประเภท */}
               <VStack gap={3}>
-                <Text type="body" weight="bold" style={{ fontSize: 16, color: "#0f172a" }}>1. สรุปผลการทำ PM และ AM (แผนงานจริง {pmTotal} แผน)</Text>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "1px solid #cbd5e1" }}>
+                <Text type="body" weight="bold" style={{ fontSize: 16, color: "var(--tp-navy-dark)" }}>1. สรุปผลการทำ PM และ AM (แผนงานจริง {pmTotal} แผน)</Text>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "1px solid var(--cmms-border)" }}>
                   <thead>
-                    <tr style={{ backgroundColor: "#f1f5f9", textAlign: "left" }}>
-                      <th style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>ความถี่</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>แผนทั้งหมด</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>ทำสำเร็จแล้ว</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>อัตราสำเร็จ (%)</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>สถานะ</th>
+                    <tr style={{ backgroundColor: "var(--cmms-bg-muted)", textAlign: "left" }}>
+                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>ความถี่</th>
+                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>แผนทั้งหมด</th>
+                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>ทำสำเร็จแล้ว</th>
+                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>อัตราสำเร็จ (%)</th>
+                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>สถานะ</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pmGroups.length === 0 && (
                       <tr>
-                        <td colSpan={5} style={{ padding: "8px 12px", border: "1px solid #cbd5e1", color: "#94a3b8" }}>ยังไม่มีแผน PM/AM</td>
+                        <td colSpan={5} style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: "var(--cmms-text-muted)" }}>ยังไม่มีแผน PM/AM</td>
                       </tr>
                     )}
                     {pmGroups.map((g) => {
@@ -323,30 +324,30 @@ export default function MonthlyPdfReportPage() {
                       const pass = rate >= 95;
                       return (
                         <tr key={g.freq}>
-                          <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{FREQ_LABEL[g.freq] || g.freq}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{g.total}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{g.done}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{rate.toFixed(1)}%</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1", color: pass ? "#16a34a" : "#dc2626", fontWeight: "bold" }}>
+                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{FREQ_LABEL[g.freq] || g.freq}</td>
+                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{g.total}</td>
+                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{g.done}</td>
+                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{rate.toFixed(1)}%</td>
+                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: pass ? "var(--cmms-success)" : "var(--cmms-danger)", fontWeight: "bold" }}>
                             {pass ? "ผ่านเกณฑ์" : "ต้องปรับปรุง"}
                           </td>
                         </tr>
                       );
                     })}
                     {pmGroups.length > 0 && (
-                      <tr style={{ backgroundColor: "#f8fafc", fontWeight: "bold" }}>
-                        <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>รวม</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{pmTotal}</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{pmDone}</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1" }}>{pmRate.toFixed(1)}%</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid #cbd5e1", color: pmRate >= 95 ? "#16a34a" : "#dc2626" }}>
+                      <tr style={{ backgroundColor: "var(--cmms-bg-wash)", fontWeight: "bold" }}>
+                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>รวม</td>
+                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmTotal}</td>
+                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmDone}</td>
+                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmRate.toFixed(1)}%</td>
+                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: pmRate >= 95 ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
                           {pmRate >= 95 ? "ผ่านเกณฑ์" : "ต้องปรับปรุง"}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
-                <Text type="body" size="sm" style={{ color: "#94a3b8" }}>
+                <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
                   หมายเหตุ: อุปกรณ์ที่ลงทะเบียน {assets} เครื่อง · ค่าใช้จ่ายซ่อมรวมทั้งปี (ใบสั่งงานจริง) ฿{fmt(yearCost)} · เกณฑ์ผ่าน ≥ 95%
                 </Text>
               </VStack>
@@ -354,18 +355,18 @@ export default function MonthlyPdfReportPage() {
               {/* ลายเซ็นอนุมัติ */}
               <HStack hAlign="between" style={{ marginTop: 40, paddingTop: 20 }}>
                 <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "#64748b" }}>รายงานโดย (ช่างซ่อมบำรุง)</Text>
-                  <div style={{ borderBottom: "1px solid #94a3b8", width: "100%", height: 30 }} />
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานโดย (ช่างซ่อมบำรุง)</Text>
+                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
                   <Text type="body" size="sm">( {fullName || "ผู้ดูแลระบบ"} )</Text>
                 </VStack>
                 <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "#64748b" }}>ตรวจสอบโดย (วิศวกรซ่อมบำรุง)</Text>
-                  <div style={{ borderBottom: "1px solid #94a3b8", width: "100%", height: 30 }} />
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>ตรวจสอบโดย (วิศวกรซ่อมบำรุง)</Text>
+                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
                   <Text type="body" size="sm">( นายสมศักดิ์ รักดี )</Text>
                 </VStack>
                 <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "#64748b" }}>อนุมัติโดย (ผู้จัดการโรงงาน)</Text>
-                  <div style={{ borderBottom: "1px solid #94a3b8", width: "100%", height: 30 }} />
+                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>อนุมัติโดย (ผู้จัดการโรงงาน)</Text>
+                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
                   <Text type="body" size="sm">( ผจก. ฝ่ายผลิตและวิศวกรรม )</Text>
                 </VStack>
               </HStack>

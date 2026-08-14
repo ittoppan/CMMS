@@ -174,7 +174,7 @@ export default function FormsPage() {
           <button
             type="button"
             onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <ArrowUpTrayIcon className="w-4 h-4" />
             อัปโหลดแบบฟอร์ม
@@ -233,21 +233,21 @@ export default function FormsPage() {
           {filtered.map((f) => (
             <Card key={f.filename} padding={4} elevation="low" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <HStack hAlign="between" vAlign="start" gap={2} wrap="wrap">
-                <span className="cmms-andon-chip" style={{ background: "rgba(124,58,237,0.12)", color: "#7C3AED", fontSize: "0.7rem", padding: "3px 9px" }}>{f.code || "เอกสาร"}</span>
-                {f.rev && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>{f.rev}</span>}
+                <span className="cmms-andon-chip" style={{ background: "rgba(124,58,237,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{f.code || "เอกสาร"}</span>
+                {f.rev && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>{f.rev}</span>}
               </HStack>
               <Text type="body" weight="bold" style={{ lineHeight: 1.4, flex: 1 }}>
                 {f.title}
               </Text>
               <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
                 <HStack gap={2} vAlign="center" wrap="wrap">
-                  <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "#059669", fontSize: "0.7rem", padding: "3px 9px" }}>{extLabel[f.ext] || f.ext.toUpperCase()}</span>
+                  <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)", fontSize: "0.7rem", padding: "3px 9px" }}>{extLabel[f.ext] || f.ext.toUpperCase()}</span>
                   <Text type="body" size="sm" color="disabled">{formatSize(f.size)}</Text>
                 </HStack>
                 <button
                   type="button"
                   onClick={() => download(f)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                 >
                   <DocumentArrowDownIcon className="w-3.5 h-3.5" />
                   ดาวน์โหลด
@@ -348,7 +348,7 @@ export default function FormsPage() {
                 type="button"
                 disabled={upLoading}
                 onClick={handleUpload}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <ArrowUpTrayIcon className="w-4 h-4" />
                 {upLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}

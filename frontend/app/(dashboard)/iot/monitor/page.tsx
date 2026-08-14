@@ -83,7 +83,7 @@ export default function IotMonitorPage() {
               className="cmms-andon-chip"
               style={{
                 background: alarmDevices.length > 0 ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.12)",
-                color: alarmDevices.length > 0 ? "#FCA5A5" : "#fff",
+                color: alarmDevices.length > 0 ? "var(--cmms-danger-light)" : "#fff",
               }}
             >
               <BoltIcon className="w-3.5 h-3.5" />
@@ -146,7 +146,7 @@ export default function IotMonitorPage() {
                   <VStack gap={1}>
                     <HStack gap={2} vAlign="center">
                       <Text type="body" weight="bold">{sensor.id}</Text>
-                      <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>เซนเซอร์ IoT</span>
+                      <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>เซนเซอร์ IoT</span>
                     </HStack>
                     <Heading level={4}>{sensor.assetName}</Heading>
                   </VStack>
@@ -154,7 +154,7 @@ export default function IotMonitorPage() {
                     className="cmms-andon-chip"
                     style={{
                       background: sensor.status === 'alarm' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)',
-                      color: sensor.status === 'alarm' ? '#dc2626' : '#059669',
+                      color: sensor.status === 'alarm' ? 'var(--cmms-danger)' : 'var(--cmms-success)',
                       fontSize: "0.75rem",
                       padding: "4px 10px",
                     }}

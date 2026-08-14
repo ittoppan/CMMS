@@ -132,7 +132,7 @@ export default function MtbfMttrPage() {
       header: "จำนวนครั้งเสีย",
       width: proportional(1),
       renderCell: (item) => (
-        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>
+        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>
           {item.totalFailures} ครั้ง
         </span>
       ),
@@ -182,7 +182,7 @@ export default function MtbfMttrPage() {
         <button
           type="button"
           onClick={() => router.push("/mtbf_mttr/create")}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           บันทึกข้อมูล MTBF/MTTR
@@ -192,36 +192,36 @@ export default function MtbfMttrPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <ChartBarIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">จำนวนบันทึกทั้งหมด</Text>
-              <Heading level={2}>{stats.total} <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{stats.total} <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <BoltIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ค่าเฉลี่ย MTBF</Text>
-              <Heading level={2}>{stats.avgMtbf} <Text type="body" size="sm">ชั่วโมง</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{stats.avgMtbf} <Text type="body" size="sm">ชั่วโมง</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ค่าเฉลี่ย MTTR</Text>
-              <Heading level={2}>{stats.avgMttr} <Text type="body" size="sm">นาที</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{stats.avgMttr} <Text type="body" size="sm">นาที</Text></Heading>
             </VStack>
           </HStack>
         </Card>

@@ -296,7 +296,7 @@ export default function SageSyncConfigPage() {
         <Card padding={4} className="cmms-kpi-card blue">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">ฐานข้อมูล Sage 300 ERP Server</Text>
-            <Heading level={3}>{erpDatabase}</Heading>
+            <Heading level={3} className="cmms-kpi-value">{erpDatabase}</Heading>
             <Text type="body" size="sm" color={sageConnected ? "primary" : "error"}>
               {sageConnected ? "สถานะการเชื่อมต่อ: ปกติ" : "สถานะการเชื่อมต่อ: ไม่พร้อม"}
             </Text>
@@ -306,7 +306,7 @@ export default function SageSyncConfigPage() {
         <Card padding={4} className="cmms-kpi-card green">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">โมดูลที่เชื่อมต่อ</Text>
-            <Heading level={3}>Sage 300 I/C v6.8A</Heading>
+            <Heading level={3} className="cmms-kpi-value">Sage 300 I/C v6.8A</Heading>
             <Text type="body" size="sm" color="secondary">ควบคุมสต็อกและการขอสั่งซื้อ</Text>
           </VStack>
         </Card>
@@ -314,7 +314,7 @@ export default function SageSyncConfigPage() {
         <Card padding={4} className="cmms-kpi-card amber">
           <VStack gap={1}>
             <Text type="supporting" color="secondary">รายการสต็อกที่ซิงค์</Text>
-            <Heading level={3}>
+            <Heading level={3} className="cmms-kpi-value">
               {totalItems.toLocaleString("th-TH")} <span style={{ fontSize: 14 }}>รายการ</span>
             </Heading>
             <Text type="body" size="sm" color="secondary">
@@ -381,7 +381,7 @@ export default function SageSyncConfigPage() {
                 type="button"
                 disabled={savingConfig}
                 onClick={handleSaveConfig}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 {savingConfig ? "กำลังบันทึก..." : "บันทึกรูปแบบการดึง"}
               </button>
@@ -434,7 +434,7 @@ export default function SageSyncConfigPage() {
                         type="button"
                         disabled={syncingCat === cat.id}
                         onClick={() => handleSyncCategory(cat.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                       >
                         <ArrowPathIcon className={`w-3.5 h-3.5 ${syncingCat === cat.id ? "animate-spin" : ""}`} />
                         {syncingCat === cat.id ? "กำลังดึง..." : "ดึงข้อมูลทันที"}

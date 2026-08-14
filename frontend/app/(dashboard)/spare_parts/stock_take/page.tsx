@@ -237,7 +237,7 @@ export default function StockTakePage() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           สร้างรอบนับใหม่
@@ -275,7 +275,7 @@ export default function StockTakePage() {
                     <button
                       type="button"
                       onClick={() => setConfirmComplete(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                     >
                       <CheckCircleIcon className="w-3.5 h-3.5" />
                       ปิดรอบ + ปรับสต็อก
@@ -350,7 +350,7 @@ export default function StockTakePage() {
                           className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                             counted
                               ? "text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)]"
-                              : "text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md shadow-blue-900/20 hover:brightness-110"
+                              : "text-white cmms-btn-primary"
                           }`}
                         >
                           {counted ? "บันทึกแล้ว ✓" : busy ? "กำลังบันทึก..." : "บันทึก"}
@@ -433,7 +433,7 @@ export default function StockTakePage() {
               type="button"
               disabled={busy}
               onClick={createRound}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >{busy ? "กำลังสร้าง..." : "สร้างรอบ"}</button>
           </HStack>
         </VStack>
@@ -456,7 +456,7 @@ export default function StockTakePage() {
               type="button"
               disabled={busy}
               onClick={completeRound}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >{busy ? "กำลังปิด..." : "ยืนยันปิดรอบ"}</button>
           </HStack>
         </VStack>

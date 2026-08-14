@@ -232,7 +232,7 @@ export default function InventoryOptimizationPage() {
         <button
           type="button"
           onClick={fetchData}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-500 shadow-lg shadow-indigo-900/30 hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <ArrowPathIcon className="w-4 h-4" />
           ประมวลผล AI ใหม่
@@ -242,48 +242,48 @@ export default function InventoryOptimizationPage() {
       <Grid columns={{ minWidth: 260, max: 4 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card blue">
           <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-11 h-11 cmms-icon-tile">
               <ScaleIcon className="w-5 h-5" />
             </div>
             <VStack gap={0}>
               <Text type="supporting" weight="bold" color="accent">อะไหล่กลุ่มสำคัญสูง (Class A)</Text>
-              <Heading level={3}>{stats.classA} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{stats.classA} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-11 h-11 cmms-icon-tile red">
               <ExclamationTriangleIcon className="w-5 h-5" />
             </div>
             <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-error)" }}>อะไหล่ค้างคลัง (&gt; 180 วัน)</Text>
-              <Heading level={3}>{stats.deadCount} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (จมทุน {stats.deadValue.toLocaleString("th-TH")} บาท)</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{stats.deadCount} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (จมทุน {stats.deadValue.toLocaleString("th-TH")} บาท)</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card amber">
           <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-11 h-11 cmms-icon-tile amber">
               <ExclamationTriangleIcon className="w-5 h-5" />
             </div>
             <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-warning)" }}>ต่ำกว่า Min Stock</Text>
-              <Heading level={3}>{stats.reorder} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (ต้องสั่งซื้อ)</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{stats.reorder} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (ต้องสั่งซื้อ)</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card green">
           <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-11 h-11 cmms-icon-tile green">
               <SparklesIcon className="w-5 h-5" />
             </div>
             <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-success)" }}>มูลค่าคงคลังรวม</Text>
-              <Heading level={3}>{stats.totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{stats.totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
             </VStack>
           </HStack>
         </Card>

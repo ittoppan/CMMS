@@ -175,48 +175,48 @@ export default function AnalyticsDashboardPage() {
       <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ใบสั่งงานซ่อมทั้งหมด</Text>
-              <Heading level={3}>{workOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{workOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <ExclamationTriangleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">งานที่ยังค้างอยู่</Text>
-              <Heading level={3}>{openOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{openOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">งานเสร็จสมบูรณ์</Text>
-              <Heading level={3}>{completedOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{completedOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <BanknotesIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ค่าใช้จ่ายซ่อมรวม</Text>
-              <Heading level={3}>{totalCost.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>บาท</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{totalCost.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>บาท</span></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -226,48 +226,48 @@ export default function AnalyticsDashboardPage() {
       <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">MTBF เฉลี่ย ({year})</Text>
-              <Heading level={3}>{mtbf} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{mtbf} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">MTTR เฉลี่ย ({year})</Text>
-              <Heading level={3}>{mttr} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{mttr} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องจักรที่ลงทะเบียน</Text>
-              <Heading level={3}>{assets} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>เครื่อง</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{assets} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>เครื่อง</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">แผนงาน PM/AM</Text>
-              <Heading level={3}>{pmPlans} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>แผน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{pmPlans} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>แผน</span></Heading>
             </VStack>
           </HStack>
         </Card>

@@ -108,7 +108,7 @@ export default function WorkPermitPage() {
       header: "ประเภทงานเสี่ยง", 
       width: proportional(2),
       renderCell: (item) => (
-        <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.12)", color: "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+        <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.12)", color: "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
           {permitTypeLabels[item.permitType] || item.permitType}
         </span>
       )
@@ -124,7 +124,7 @@ export default function WorkPermitPage() {
         item.lotoStatus === 'Locked Out' ? (
           <span className="cmms-status ok"><span className="cmms-status-dot" />ล็อกตัดพลังงานแล้ว</span>
         ) : (
-          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>ไม่ใช้ LOTO</span>
+          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ไม่ใช้ LOTO</span>
         )
       )
     },
@@ -138,7 +138,7 @@ export default function WorkPermitPage() {
         ) : item.status === 'pending_safety' ? (
           <span className="cmms-status warn"><span className="cmms-status-dot" />รอ จป. อนุมัติ</span>
         ) : (
-          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดงานแล้ว</span>
+          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดงานแล้ว</span>
         )
       )
     }
@@ -162,7 +162,7 @@ export default function WorkPermitPage() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           ออกใบอนุญาตทำงานเสี่ยงใหม่
@@ -172,36 +172,36 @@ export default function WorkPermitPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
          <Card elevation="low" padding={4} className="cmms-kpi-card">
            <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+             <div className="w-12 h-12 cmms-icon-tile red">
                <LockClosedIcon className="w-6 h-6" />
              </div>
              <VStack gap={1}>
                <Text type="supporting" color="secondary">กำลังล็อกตัดพลังงาน</Text>
-               <Heading level={2}><CountUp end={lockedCount} /> <Text type="body" size="sm">จุด</Text></Heading>
+               <Heading level={2} className="cmms-kpi-value"><CountUp end={lockedCount} /> <Text type="body" size="sm">จุด</Text></Heading>
              </VStack>
            </HStack>
          </Card>
 
          <Card elevation="low" padding={4} className="cmms-kpi-card">
            <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+             <div className="w-12 h-12 cmms-icon-tile amber">
                <ExclamationTriangleIcon className="w-6 h-6" />
              </div>
              <VStack gap={1}>
                <Text type="supporting" color="secondary">รอการอนุมัติจาก จป. วิชาชีพ</Text>
-               <Heading level={2}><CountUp end={pendingCount} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
+               <Heading level={2} className="cmms-kpi-value"><CountUp end={pendingCount} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
              </VStack>
            </HStack>
          </Card>
 
          <Card elevation="low" padding={4} className="cmms-kpi-card">
            <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+             <div className="w-12 h-12 cmms-icon-tile green">
                <DocumentCheckIcon className="w-6 h-6" />
              </div>
              <VStack gap={1}>
                <Text type="supporting" color="secondary">ใบอนุญาตทั้งหมดในระบบ</Text>
-               <Heading level={2}><CountUp end={permits.length} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
+               <Heading level={2} className="cmms-kpi-value"><CountUp end={permits.length} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
              </VStack>
            </HStack>
          </Card>
@@ -298,7 +298,7 @@ export default function WorkPermitPage() {
                 setSubmitting(false);
               }
             }}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <DocumentCheckIcon className="w-4 h-4" />
             {submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"}

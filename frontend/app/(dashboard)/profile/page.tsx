@@ -203,7 +203,7 @@ export default function ProfilePage() {
               className="cmms-andon-chip"
               style={{
                 background: profile?.line_user_id ? "rgba(16,185,129,0.12)" : "rgba(100,116,139,0.12)",
-                color: profile?.line_user_id ? "#059669" : "#64748B",
+                color: profile?.line_user_id ? "var(--cmms-success)" : "var(--cmms-text-muted)",
                 fontSize: "0.75rem",
                 padding: "4px 10px",
               }}
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                   type="button"
                   disabled={saving}
                   onClick={handleSave}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
                 >
                   {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
                 </button>

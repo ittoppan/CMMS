@@ -238,7 +238,7 @@ export default function AssetCriticalityPage() {
                   fontSize: 16,
                   padding: "8px 16px",
                   background: rank === "A" ? "rgba(244,63,94,0.12)" : rank === "B" ? "rgba(245,158,11,0.12)" : "rgba(30,136,229,0.12)",
-                  color: rank === "A" ? "#E11D48" : rank === "B" ? "#D97706" : "#1E88E5",
+                  color: rank === "A" ? "var(--cmms-danger)" : rank === "B" ? "var(--cmms-warning)" : "var(--cmms-primary)",
                 }}
               >
                 ผลการจัดเกรด: เกรด {rank}
@@ -280,7 +280,7 @@ export default function AssetCriticalityPage() {
                 disabled={submitting || !selectedMachine}
                 onClick={handleSave}
                 style={{ marginTop: 16 }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <ScaleIcon className="w-4 h-4" />
                 {submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}

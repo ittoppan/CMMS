@@ -244,7 +244,7 @@ export default function NotificationCenterPage() {
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>ศูนย์แจ้งเตือนระบบ</Heading>
             {unreadCount > 0 && (
-              <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.2)", color: "#FCA5A5" }}>
+              <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.2)", color: "var(--cmms-danger-light)" }}>
                 <span className="cmms-status-dot" /> {unreadCount} ข้อความใหม่
               </span>
             )}
@@ -265,7 +265,7 @@ export default function NotificationCenterPage() {
           <button
             type="button"
             onClick={markAllRead}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
             <CheckCircleIcon className="w-4 h-4" />
             อ่านแล้วทั้งหมด
@@ -277,45 +277,45 @@ export default function NotificationCenterPage() {
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile red">
               <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">แจ้งซ่อมด่วน / สำคัญ</Text>
-              <Heading level={3}>{counts.repair} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{counts.repair} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile amber">
               <CubeIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เตือนอะไหล่ใกล้หมด</Text>
-              <Heading level={3}>{counts.stock} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{counts.stock} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <CalendarDaysIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">แผนงาน PM</Text>
-              <Heading level={3}>{counts.pm} <span style={{ fontSize: 14 }}>แผนงาน</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{counts.pm} <span style={{ fontSize: 14 }}>แผนงาน</span></Heading>
             </VStack>
           </HStack>
         </Card>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile green">
               <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">การสอบเทียบ</Text>
-              <Heading level={3}>{counts.calibration} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+              <Heading level={3} className="cmms-kpi-value">{counts.calibration} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -388,7 +388,7 @@ export default function NotificationCenterPage() {
                           className="cmms-andon-chip"
                           style={{
                             background: item.priority === "critical" ? "rgba(239,68,68,0.12)" : item.priority === "high" ? "rgba(245,158,11,0.12)" : item.priority === "medium" ? "rgba(30,136,229,0.12)" : "rgba(100,116,139,0.12)",
-                            color: item.priority === "critical" ? "#dc2626" : item.priority === "high" ? "#d97706" : item.priority === "medium" ? "#1E88E5" : "#64748B",
+                            color: item.priority === "critical" ? "var(--cmms-danger)" : item.priority === "high" ? "var(--cmms-warning)" : item.priority === "medium" ? "var(--cmms-primary)" : "var(--cmms-text-muted)",
                             fontSize: "0.7rem",
                             padding: "3px 9px",
                           }}
@@ -414,7 +414,7 @@ export default function NotificationCenterPage() {
                     <button
                       type="button"
                       onClick={() => router.push(item.link)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                     >
                       ดูรายละเอียด
                     </button>
@@ -446,45 +446,45 @@ export default function NotificationCenterPage() {
         <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
           <Card padding={4} className="cmms-kpi-card">
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 cmms-icon-tile">
                 <ArrowPathIcon className="w-6 h-6" />
               </div>
               <VStack gap={1}>
                 <Text type="supporting" color="secondary">ส่งทั้งหมด</Text>
-                <Heading level={3}>{deliveryStats.total} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+                <Heading level={3} className="cmms-kpi-value">{deliveryStats.total} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
               </VStack>
             </HStack>
           </Card>
           <Card padding={4} className="cmms-kpi-card">
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 cmms-icon-tile green">
                 <CheckCircleIcon className="w-6 h-6" />
               </div>
               <VStack gap={1}>
                 <Text type="supporting" color="secondary">ส่งสำเร็จ (SENT)</Text>
-                <Heading level={3}>{deliveryStats.sent} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+                <Heading level={3} className="cmms-kpi-value">{deliveryStats.sent} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
               </VStack>
             </HStack>
           </Card>
           <Card padding={4} className="cmms-kpi-card">
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 cmms-icon-tile red">
                 <XCircleIcon className="w-6 h-6" />
               </div>
               <VStack gap={1}>
                 <Text type="supporting" color="secondary">ล้มเหลว / ไม่มีผู้รับ</Text>
-                <Heading level={3}>{deliveryStats.failed} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+                <Heading level={3} className="cmms-kpi-value">{deliveryStats.failed} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
               </VStack>
             </HStack>
           </Card>
           <Card padding={4} className="cmms-kpi-card">
             <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 cmms-icon-tile amber">
                 <ClockIcon className="w-6 h-6" />
               </div>
               <VStack gap={1}>
                 <Text type="supporting" color="secondary">ส่งวันนี้</Text>
-                <Heading level={3}>{deliveryStats.today} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+                <Heading level={3} className="cmms-kpi-value">{deliveryStats.today} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
               </VStack>
             </HStack>
           </Card>
@@ -512,10 +512,10 @@ export default function NotificationCenterPage() {
                     return (
                       <tr key={log.id} style={{ borderBottom: "1px solid var(--cmms-border)" }}>
                         <td style={{ padding: "10px 14px" }}>
-                          <span className="cmms-andon-chip" style={{ background: log.channel === "LINE" ? "rgba(30,136,229,0.12)" : "rgba(124,58,237,0.12)", color: log.channel === "LINE" ? "#1E88E5" : "#7C3AED", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.channel || "-")}</span>
+                          <span className="cmms-andon-chip" style={{ background: log.channel === "LINE" ? "rgba(30,136,229,0.12)" : "rgba(124,58,237,0.12)", color: log.channel === "LINE" ? "var(--cmms-primary)" : "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.channel || "-")}</span>
                         </td>
                         <td style={{ padding: "10px 14px" }}>
-                          <span className="cmms-andon-chip" style={{ background: ok ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: ok ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.status || "-")}</span>
+                          <span className="cmms-andon-chip" style={{ background: ok ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: ok ? "var(--cmms-success)" : "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.status || "-")}</span>
                         </td>
                         <td style={{ padding: "10px 14px", color: "var(--cmms-text-secondary)", maxWidth: 420 }}>
                           <div style={{ whiteSpace: "pre-line", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>

@@ -254,12 +254,12 @@ export default function InspectionRunPage() {
               <HStack gap={6} hAlign="between" wrap="wrap">
                 <VStack gap={1}>
                   <HStack gap={2} vAlign="center" wrap="wrap">
-                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "3px 9px" }}>{schedule.template_code || "CHK"}</span>
-                    <span className="cmms-andon-chip" style={{ background: schedule.status === "completed" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: schedule.status === "completed" ? "#059669" : "#d97706", fontSize: "0.7rem", padding: "3px 9px" }}>
+                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{schedule.template_code || "CHK"}</span>
+                    <span className="cmms-andon-chip" style={{ background: schedule.status === "completed" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: schedule.status === "completed" ? "var(--cmms-success)" : "var(--cmms-warning)", fontSize: "0.7rem", padding: "3px 9px" }}>
                       {schedule.status === "completed" ? "เสร็จสิ้น" : schedule.status === "in_progress" ? "กำลังทำ" : "รอดำเนินการ"}
                     </span>
                     {schedule.result && (
-                      <span className="cmms-andon-chip" style={{ background: schedule.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: schedule.result === "pass" ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+                      <span className="cmms-andon-chip" style={{ background: schedule.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: schedule.result === "pass" ? "var(--cmms-success)" : "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
                         {schedule.result === "pass" ? "ผ่านทุกรายการ" : `ไม่ผ่าน ${schedule.fail_count} รายการ`}
                       </span>
                     )}
@@ -379,7 +379,7 @@ export default function InspectionRunPage() {
                     <HStack gap={2} vAlign="center" wrap="wrap">
                       <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
                       <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>ระบบสร้างใบแจ้งซ่อมอัตโนมัติแล้ว (มีความเสี่ยงเครื่องหยุด)</Text>
-                      <a href="/repair" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300">
+                      <a href="/repair" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
                         ดูใบแจ้งซ่อม →
                       </a>
                     </HStack>
@@ -392,7 +392,7 @@ export default function InspectionRunPage() {
                       type="button"
                       disabled={submitting || !allFilled}
                       onClick={handleSubmit}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
                     >
                       <ClipboardDocumentCheckIcon className="w-4 h-4" />
                       {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการตรวจ"}

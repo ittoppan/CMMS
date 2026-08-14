@@ -117,7 +117,7 @@ export default function ManualsPage() {
       header: "ประเภท",
       width: proportional(0.8),
       renderCell: (item) => (
-        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>
+        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>
           {item.fileType.toUpperCase()}
         </span>
       )
@@ -184,7 +184,7 @@ export default function ManualsPage() {
         <button
           type="button"
           onClick={() => router.push("/manuals/create")}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
           อัปโหลดเอกสารใหม่
@@ -194,12 +194,12 @@ export default function ManualsPage() {
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <div className="w-12 h-12 cmms-icon-tile">
               <DocumentTextIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">จำนวนเอกสารทั้งหมด</Text>
-              <Heading level={2}>{data.length} <Text type="body" size="sm">รายการ</Text></Heading>
+              <Heading level={2} className="cmms-kpi-value">{data.length} <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>

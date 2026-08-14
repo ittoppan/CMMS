@@ -177,7 +177,7 @@ export default function SagePOReceiptPage() {
           <button
             type="button"
             onClick={() => handleQtyChange(item.id, item.receivedQty + 1)}
-            className="w-7 h-7 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all"
+            className="w-7 h-7 rounded-lg text-sm font-bold text-white cmms-btn-primary transition-all"
           >+</button>
         </HStack>
       ),
@@ -276,7 +276,7 @@ export default function SagePOReceiptPage() {
                     onChange={(v) => setSelectedPart(String(v))}
                   />
                 </div>
-                <button type="button" disabled={!selectedPart} onClick={handleAddPart} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"><PlusIcon className="w-4 h-4" /> เพิ่ม</button>
+                <button type="button" disabled={!selectedPart} onClick={handleAddPart} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"><PlusIcon className="w-4 h-4" /> เพิ่ม</button>
               </HStack>
             </Field>
           </VStack>
@@ -309,7 +309,7 @@ export default function SagePOReceiptPage() {
                     type="button"
                     disabled={submitting || !poNumber.trim() || items.length === 0}
                     onClick={handleSubmitReceipt}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
                   >
                     <CheckCircleIcon className="w-4 h-4" />
                     {submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
