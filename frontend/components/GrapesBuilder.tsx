@@ -206,6 +206,44 @@ const BLOCKS: Array<{
   },
 ];
 
+/* ── บล็อกไดนามิก — ดึงข้อมูลจริงจากฐานข้อมูลตอนเปิดหน้า (/pages/[slug]) ── */
+const DYNAMIC_BLOCKS: Array<{
+  id: string;
+  label: string;
+  category: string;
+  icon: string;
+  content: string;
+}> = [
+  {
+    id: "dyn-kpi",
+    label: "KPI งานซ่อม (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" fill="rgba(0,104,181,.10)" stroke="${C.primary}"/><circle cx="7" cy="8" r="2.6" fill="${C.ok}"/><rect x="11" y="6" width="9" height="2.4" rx="1.2" fill="${C.primary}"/><rect x="11" y="10" width="6" height="2" rx="1" fill="${C.muted}"/><path d="M4 18h16" stroke="${C.primary}" stroke-width="1.4"/></svg>`,
+    content: `<div data-dynamic="kpi-overview" data-dynamic-label="KPI งานซ่อม" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">KPI งานซ่อม — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">จำนวนงานทั้งหมด / ปิดแล้ว / กำลังทำ / เลยกำหนด — อัปเดตอัตโนมัติเมื่อเปิดหน้า</div></div>`,
+  },
+  {
+    id: "dyn-andon",
+    label: "ไฟ Andon (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><circle cx="7" cy="10" r="3.5" fill="${C.ok}"/><circle cx="12" cy="10" r="3.5" fill="${C.warn}"/><circle cx="17" cy="10" r="3.5" fill="${C.down}"/></svg>`,
+    content: `<div data-dynamic="andon-board" data-dynamic-label="ไฟ Andon" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">หลอดไฟ Andon — ตามสถานะงานจริง</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">นับจากใบสั่งงานซ่อมจริง (ปกติ / เตือน / หยุด)</div></div>`,
+  },
+  {
+    id: "dyn-wo-table",
+    label: "ตารางงานซ่อมล่าสุด (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="${C.primary}" fill="none"/><line x1="3" y1="10" x2="21" y2="10" stroke="${C.primary}"/><line x1="3" y1="15" x2="21" y2="15" stroke="${C.border}"/><line x1="9" y1="5" x2="9" y2="19" stroke="${C.border}"/></svg>`,
+    content: `<div data-dynamic="wo-table" data-dynamic-label="งานซ่อมล่าสุด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">ใบสั่งงานซ่อมล่าสุด 5 ใบ — ข้อมูลจริง</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">เลขใบงาน / เครื่องจักร / สถานะ / ผู้รับผิดชอบ</div></div>`,
+  },
+  {
+    id: "dyn-low-stock",
+    label: "อะไหล่ใกล้หมดสต็อก (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z" stroke="${C.warn}" stroke-width="1.6" fill="rgba(245,158,11,.12)"/><rect x="9" y="10" width="6" height="3" rx="1.5" fill="${C.warn}"/><rect x="10.5" y="15" width="3" height="2" rx="1" fill="${C.warn}"/></svg>`,
+    content: `<div data-dynamic="low-stock" data-dynamic-label="อะไหล่ใกล้หมด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">อะไหล่ใกล้หมดสต็อก — ข้อมูลจริง</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">รายการ stock_qty ≤ min_stock จากตาราง spare_parts</div></div>`,
+  },
+];
+
 interface PageRow {
   id: number;
   slug: string;
@@ -301,7 +339,7 @@ export default function GrapesBuilder() {
           ],
         },
         blockManager: {
-          blocks: BLOCKS.map((b) => ({
+          blocks: [...BLOCKS, ...DYNAMIC_BLOCKS].map((b) => ({
             id: b.id,
             label: b.label,
             category: b.category,

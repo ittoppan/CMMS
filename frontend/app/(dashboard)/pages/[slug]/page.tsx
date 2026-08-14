@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { hydrateDynamicPage } from "@/lib/dynamicPages";
 
 interface CustomPage {
   slug: string;
@@ -19,6 +20,7 @@ export default function CustomPageView() {
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug ?? "";
   const [page, setPage] = useState<CustomPage | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,13 @@ export default function CustomPageView() {
       </VStack>
     );
   }
+
+  // เติมข้อมูลจริงลงบล็อกไดนามิก ([data-dynamic]) หลัง HTML ของหน้า render เสร็จ
+  useEffect(() => {
+    if (page && contentRef.current) {
+      void hydrateDynamicPage(contentRef.current);
+    }
+  }, [page]);
 
   return (
     <VStack gap={4}>
@@ -130,7 +139,7 @@ export default function CustomPageView() {
           }}
         >
           <style dangerouslySetInnerHTML={{ __html: page.css }} />
-          <div dangerouslySetInnerHTML={{ __html: page.html }} />
+          <div ref={contentRef} dangerouslySetInnerHTML={{ __html: page.html }} />
         </div>
       ) : (
         <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>

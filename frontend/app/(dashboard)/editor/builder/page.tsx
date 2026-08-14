@@ -39,7 +39,8 @@ export default function VisualBuilderPage() {
         </HStack>
         <Text type="body" style={{ color: "var(--cmms-text-secondary)", marginTop: 4 }}>
           ลากบล็อกจากซ้ายมือ (การ์ด KPI, ไฟ Andon, ตาราง, ฟอร์ม) ลง canvas ปรับแต่งด้วยแผงสไตล์ทางขวา
-          แล้วกดบันทึก — หน้าใหม่จะเปิดได้ที่ /pages/ชื่อslug ทันที
+          แล้วกดบันทึก — หน้าใหม่จะเปิดได้ที่ /pages/ชื่อslug ทันที — หมวด "ข้อมูลจริง (จากฐานข้อมูล)"
+          จะดึง KPI งานซ่อม, ไฟ Andon และอะไหล่ใกล้หมดจาก DB มาแสดงอัตโนมัติเมื่อเปิดหน้า
         </Text>
       </div>
 
