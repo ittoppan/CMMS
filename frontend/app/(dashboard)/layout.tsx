@@ -117,6 +117,8 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings/menus": "สิทธิ์เมนูตามบทบาท",
   "/settings/pwa": "ตั้งค่าไอคอน PWA",
   "/settings/design": "ปรับแต่งหน้าตาระบบ (Page Designer)",
+  "/editor/builder": "สร้างหน้าเว็บ (Visual Builder)",
+  "/pages": "หน้าเว็บที่สร้างเอง",
   "/register": "ลงทะเบียนผูกบัญชี LINE",
 };
 
@@ -148,6 +150,8 @@ const SECTION_MAP: Record<string, string> = {
   "/settings/pwa": "ระบบ & ตั้งค่า",
   "/settings/services": "ระบบ & ตั้งค่า",
   "/settings/design": "ระบบ & ตั้งค่า",
+  "/pages": "ระบบ & ตั้งค่า",
+  "/editor": "ระบบ & ตั้งค่า",
 };
 
 // รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
@@ -165,6 +169,7 @@ const MENU_HREFS: string[] = [
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
   "/notifications", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design",
+  "/editor/builder", "/pages",
 ];
 
 function getSection(pathname: string): string | null {
@@ -503,7 +508,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </MenuSection>
 
           {/* 8. ระบบ & ตั้งค่า */}
-          <MenuSection title="ระบบ & ตั้งค่า" pathPrefixes={["/notifications", "/settings"]}>
+          <MenuSection title="ระบบ & ตั้งค่า" pathPrefixes={["/notifications", "/settings", "/pages", "/editor"]}>
             {canShow("notifications") && <SideNavItem label="ศูนย์แจ้งเตือน" icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
             {canShow("settings/notifications") && <SideNavItem label="รูปแบบการแจ้งเตือน LINE" icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
             {canShow("settings") && <SideNavItem label="ตั้งค่าระบบทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
@@ -511,6 +516,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
             {canShow("settings") && <SideNavItem label="ปรับแต่งหน้าตาระบบ (Page Designer)" icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
+            {canShow("settings") && <SideNavItem label="สร้างหน้าเว็บ (Visual Builder)" icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
+            {canShow("settings") && <SideNavItem label="หน้าเว็บที่สร้างเอง" icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
           </MenuSection>
           {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
           <SideNavScrollControls pathname={pathname} />

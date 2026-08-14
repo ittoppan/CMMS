@@ -16,6 +16,7 @@
     "@astryxdesign/theme-neutral": "^0.1.9",
     "@heroicons/react": "^2.2.0",
     "@types/qrcode": "^1.5.6",
+    "grapesjs": "^0.23.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "next": "^16.2.10",
