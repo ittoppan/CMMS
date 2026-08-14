@@ -514,7 +514,7 @@ export default function NotificationsSettingsPage() {
                   value={activeTpl.image_after ?? ""}
                   onChange={(v) => setTplField("image_after", v)}
                 />
-                <Text type="body" size="xs" color="secondary">
+                <Text type="body" size="sm" color="secondary">
                   เว้นว่าง = ไม่แสดงรูป (งานซ่อมจริง ระบบดึงรูปจากใบแจ้งซ่อมอัตโนมัติ: ก่อนซ่อม = failure_image, หลังซ่อม = after_image) — ตั้ง URL ตรงนี้เพื่อกำหนดรูปคงที่ หรือดูตัวอย่างตอนยิงทดสอบ
                 </Text>
               </VStack>
@@ -677,7 +677,7 @@ export default function NotificationsSettingsPage() {
                 }}>
                   {flexJson}
                 </div>
-                <Text type="body" size="xs" color="secondary">
+                <Text type="body" size="sm" color="secondary">
                   เป็น payload ตัวเดียวกับที่กด "ยิงทดสอบเข้า LINE" ส่งจริง — ตัวแปรในตัวอย่างถูกแทนค่าด้วยข้อมูลจำลอง
                 </Text>
               </VStack>

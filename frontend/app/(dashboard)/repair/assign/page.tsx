@@ -53,9 +53,9 @@ const priorityColors: Record<string, "error" | "warning" | "info" | "neutral"> =
   low: "neutral", Low: "neutral",
 };
 
-const statusColors: Record<string, "success" | "warning" | "error" | "accent" | "neutral"> = {
+const statusColors: Record<string, "success" | "warning" | "error" | "blue" | "neutral"> = {
   open: "warning", pending: "warning",
-  in_progress: "accent",
+  in_progress: "blue",
   waiting_parts: "neutral", pending_parts: "neutral",
 };
 

@@ -124,8 +124,8 @@ export default function QrSheetPage() {
                 </VStack>
               )}
               <Text type="body" weight="bold" style={{ color: "var(--cmms-primary)", fontSize: 18 }}>{m.code}</Text>
-              <Text type="body" size="xs" color="secondary">{m.name}</Text>
-              <Text type="body" size="xs" className="tip" style={{ color: "#999" }}>สแกน → แจ้งซ่อมด่วน</Text>
+              <Text type="body" size="sm" color="secondary">{m.name}</Text>
+              <Text type="body" size="sm" className="tip" style={{ color: "#999" }}>สแกน → แจ้งซ่อมด่วน</Text>
             </VStack>
           </Card>
         ))}

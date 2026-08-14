@@ -38,10 +38,10 @@ interface PMTask extends Record<string, unknown> {
   status: "pending" | "in_progress" | "completed" | "overdue" | "skipped";
 }
 
-const statusColors: Record<string, "neutral" | "accent" | "warning" | "success" | "error"> = {
+const statusColors: Record<string, "neutral" | "blue" | "warning" | "success" | "error"> = {
   "pending": "neutral",
   "due": "warning",
-  "in_progress": "accent",
+  "in_progress": "blue",
   "completed": "success",
   "overdue": "error",
   "skipped": "warning",

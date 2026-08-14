@@ -178,7 +178,7 @@ export default function RepairRequestForm() {
   const [offlineQueued, setOfflineQueued] = useState(0);
   const [lineBound, setLineBound] = useState<boolean | null>(null); // null=ยังไม่รู้, true/false=สถานะผูก
   // เกตบังคับผูกบัญชี: checking=ตรวจอยู่, bound=ผูกแล้ว (เห็นฟอร์ม), unbound=มี LINE ID แต่ยังไม่ผูก, anonymous=ไม่มี LINE ID เลย
-  const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous">("checking");
+  const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
   const [bindSubmitting, setBindSubmitting] = useState(false);

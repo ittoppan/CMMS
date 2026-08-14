@@ -165,7 +165,7 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
                 </StackItem>
                 <Text type="supporting" color="secondary">{count} รายการ</Text>
               </HStack>
-              <ProgressBar value={count} max={Math.max(...categories.map(([, c]) => c))} isLabelHidden />
+              <ProgressBar label={cat} isLabelHidden value={count} max={Math.max(...categories.map(([, c]) => c))} />
             </VStack>
           ))}
         </VStack>
@@ -348,7 +348,7 @@ function ItemsCard({
                           </Text>
                           <Text type="supporting" color="secondary">/ {item.maxStock} {item.unit}</Text>
                         </HStack>
-                        <ProgressBar value={item.stock} max={item.maxStock} isLabelHidden />
+                        <ProgressBar label={item.name} isLabelHidden value={item.stock} max={item.maxStock} />
                       </VStack>
                       <HStack gap={1}>
                         <Button

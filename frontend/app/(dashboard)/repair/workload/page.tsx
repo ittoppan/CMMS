@@ -23,7 +23,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
-interface TechRow {
+interface TechRow extends Record<string, unknown> {
   id: string;
   name: string;
   openCount: number;
@@ -149,7 +149,7 @@ export default function WorkloadPage() {
       header: "ปิดงาน 7 วันล่าสุด",
       width: proportional(1.2),
       renderCell: (item) => (
-        <Text type="body" color="success">{item.done7dCount} งาน</Text>
+        <Text type="body" style={{ color: "var(--cmms-success)" }}>{item.done7dCount} งาน</Text>
       ),
     },
   ];

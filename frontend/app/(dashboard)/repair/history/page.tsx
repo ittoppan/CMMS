@@ -47,10 +47,10 @@ interface HistoryWO extends Record<string, unknown> {
   downtimeMinutes: number;
 }
 
-const statusColors: Record<string, "success" | "warning" | "error" | "accent" | "neutral"> = {
+const statusColors: Record<string, "success" | "warning" | "error" | "blue" | "neutral"> = {
   completed: "success", closed: "success", resolved: "success",
   rejected: "error",
-  in_progress: "accent", open: "warning",
+  in_progress: "blue", open: "warning",
 };
 
 const statusLabels: Record<string, string> = {
@@ -261,7 +261,7 @@ export default function RepairHistoryPage() {
               <Text type="supporting" color="secondary">ค่าอะไหล่</Text>
             </HStack>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costParts} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <CountUp end={stats.costParts} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </VStack>
@@ -273,7 +273,7 @@ export default function RepairHistoryPage() {
               <Text type="supporting" color="secondary">ค่าแรง</Text>
             </HStack>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costLabor} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <CountUp end={stats.costLabor} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </VStack>
@@ -285,7 +285,7 @@ export default function RepairHistoryPage() {
               <Text type="supporting" color="secondary">ค่าจ้างภายนอก</Text>
             </HStack>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costOutsource} format={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              <CountUp end={stats.costOutsource} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </VStack>

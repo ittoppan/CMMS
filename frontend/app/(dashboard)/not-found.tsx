@@ -19,7 +19,7 @@ export default function DashboardNotFound() {
           color: "var(--cmms-text-muted)",
         }}
       >
-        <Icon icon={MagnifyingGlassIcon} size="xl" />
+        <Icon icon={MagnifyingGlassIcon} size="lg" />
       </div>
 
       <Text type="display-2" weight="bold" style={{ letterSpacing: "-0.03em" }}>

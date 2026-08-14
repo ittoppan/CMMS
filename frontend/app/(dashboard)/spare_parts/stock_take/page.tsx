@@ -319,17 +319,16 @@ export default function StockTakePage() {
                           )}
                         </HStack>
                         <Text type="body" size="sm">{it.name}</Text>
-                        <Text type="body" size="xs" color="secondary">ตำแหน่ง: {it.location || "—"} · หน่วย: {it.unit}</Text>
+                        <Text type="body" size="sm" color="secondary">ตำแหน่ง: {it.location || "—"} · หน่วย: {it.unit}</Text>
                       </VStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
                         <div style={{ textAlign: "right" }}>
-                          <Text type="body" size="xs" color="secondary">ในระบบ</Text>
+                          <Text type="body" size="sm" color="secondary">ในระบบ</Text>
                           <Text type="body" weight="bold">{it.system_qty}</Text>
                         </div>
                         <TextInput
                           label={`นับจริง (${it.code})`}
                           isLabelHidden
-                          type="number"
                           placeholder="จำนวนจริง"
                           value={inputs[it.spare_part_id] ?? ""}
                           onChange={(v) => setInputs((f) => ({ ...f, [it.spare_part_id]: v }))}
@@ -382,7 +381,7 @@ export default function StockTakePage() {
                     <Badge label={STATUS_META[r.status]?.label ?? r.status} variant={STATUS_META[r.status]?.variant ?? "neutral"} />
                     <VStack gap={0}>
                       <Text type="body" weight="bold">{r.code}</Text>
-                      <Text type="body" size="xs" color="secondary">
+                      <Text type="body" size="sm" color="secondary">
                         {r.created_name || "—"} · {String(r.created_at).slice(0, 16)}
                         {r.note ? ` · ${r.note}` : ""}
                       </Text>

@@ -198,23 +198,23 @@ export default function InspectionTemplatesPage() {
               </button>
             )}
           </HStack>
-          <FormLayout columns={2}>
+          <FormLayout direction="horizontal">
             <Field inputID="tpl-code" label="รหัส Template * (เช่น CHK-CCTV-D)">
-              <TextInput id="tpl-code" placeholder="CHK-CCTV-D" value={form.code} onChange={(v) => setForm({ ...form, code: v })} />
+              <TextInput id="tpl-code" label="รหัส Template" isLabelHidden placeholder="CHK-CCTV-D" value={form.code} onChange={(v) => setForm({ ...form, code: v })} />
             </Field>
             <Field inputID="tpl-freq" label="ความถี่ *">
               <Selector label="ความถี่" isLabelHidden value={form.frequency} onChange={(v) => setForm({ ...form, frequency: String(v) })} options={Object.entries(FREQ_LABELS).map(([value, label]) => ({ value, label }))} />
             </Field>
           </FormLayout>
           <Field inputID="tpl-title" label="ชื่อ Template * (เช่น ใบตรวจเช็ค CCTV ประจำวัน)">
-            <TextInput id="tpl-title" placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+            <TextInput id="tpl-title" label="ชื่อ Template" isLabelHidden placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
           </Field>
-          <FormLayout columns={2}>
+          <FormLayout direction="horizontal">
             <Field inputID="tpl-cat" label="หมวดหมู่">
-              <TextInput id="tpl-cat" placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย..." value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
+              <TextInput id="tpl-cat" label="หมวดหมู่" isLabelHidden placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย..." value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
             </Field>
             <Field inputID="tpl-desc" label="คำอธิบาย">
-              <TextInput id="tpl-desc" placeholder="เทียบเอกสาร F-EN-xx..." value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
+              <TextInput id="tpl-desc" label="คำอธิบาย" isLabelHidden placeholder="เทียบเอกสาร F-EN-xx..." value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
             </Field>
           </FormLayout>
 

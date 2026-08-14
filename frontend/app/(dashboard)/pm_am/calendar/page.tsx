@@ -45,7 +45,7 @@ const freqColors: Record<string, "info" | "warning" | "success" | "neutral" | "b
 };
 
 export default function PMCalendarPage() {
-  const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>(todayStr);
+  const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>(todayStr as `${number}${number}${number}${number}-${number}${number}-${number}${number}`);
   const [tasks, setTasks] = useState<any[]>([]);
   const [viewAll, setViewAll] = useState(false);
 
@@ -172,7 +172,7 @@ export default function PMCalendarPage() {
       <Grid columns={3} gap={6}>
         <div style={{ gridColumn: 'span 1' }}>
           <Card padding={4}>
-            <Calendar value={selectedDate} onChange={setSelectedDate} />
+            <Calendar value={selectedDate} onChange={(d) => setSelectedDate(d)} />
           </Card>
           
           <Card padding={4} style={{ marginTop: 16 }}>

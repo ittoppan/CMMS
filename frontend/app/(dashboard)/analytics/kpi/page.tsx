@@ -193,14 +193,14 @@ export default function KpiDashboardPage() {
               <VStack gap={0}>
                 <Text type="body" size="sm" color="secondary">MTBF (ชั่วโมงระหว่างเสีย)</Text>
                 <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mtbf ?? "—"}</div>
-                <Text type="body" size="xs" color="secondary">
+                <Text type="body" size="sm" color="secondary">
                   {data?.mtbf_mttr.latest ? `${data.mtbf_mttr.latest.failures} ครั้ง · Downtime ${data.mtbf_mttr.latest.downtime} นาที` : ""}
                 </Text>
               </VStack>
               <VStack gap={0}>
                 <Text type="body" size="sm" color="secondary">MTTR (นาที/ซ่อม)</Text>
                 <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mttr ?? "—"}</div>
-                <Text type="body" size="xs" color="secondary">ยิ่งต่ำ = กู้เครื่องได้ไว</Text>
+                <Text type="body" size="sm" color="secondary">ยิ่งต่ำ = กู้เครื่องได้ไว</Text>
               </VStack>
             </HStack>
             <div style={{ width: "100%", height: 220 }}>
@@ -237,7 +237,7 @@ export default function KpiDashboardPage() {
                       <Text type="body" size="sm" weight="semibold">{s.label}</Text>
                       <Text type="body" size="sm" color="secondary">{s.cnt} ({s.pct}%)</Text>
                     </HStack>
-                    <ProgressBar value={s.pct} />
+                    <ProgressBar label={s.label} isLabelHidden value={s.pct} />
                   </VStack>
                 ))}
               </VStack>
@@ -335,7 +335,7 @@ export default function KpiDashboardPage() {
             </HStack>
             <HStack gap={2} vAlign="center">
               <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
-              <Text type="body" size="xs" color="secondary">
+              <Text type="body" size="sm" color="secondary">
                 ไปที่หน้า "ภาระงานช่าง" หรือ "ปฏิทิน PM" เพื่อดูรายละเอียดและดำเนินการ
               </Text>
             </HStack>

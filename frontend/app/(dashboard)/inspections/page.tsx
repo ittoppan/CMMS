@@ -192,7 +192,7 @@ export default function InspectionsPage() {
         <Card padding={5} className="cmms-animate-fadeInUp">
           <VStack gap={4}>
             <Heading level={4}>สร้างรอบตรวจใหม่</Heading>
-            <FormLayout columns={2}>
+            <FormLayout direction="horizontal">
               <Field inputID="sc-tpl" label="เทมเพลต *">
                 <Selector label="เทมเพลต" isLabelHidden placeholder="เลือกเทมเพลต..." value={cf.template_id} onChange={(v) => setCf({ ...cf, template_id: String(v) })} options={templates.map((t) => ({ value: String(t.id), label: `${t.title} (${t.code})` }))} />
               </Field>
@@ -203,7 +203,7 @@ export default function InspectionsPage() {
                 <Selector label="ผู้รับผิดชอบ" isLabelHidden placeholder="เลือกผู้รับผิดชอบ..." value={cf.assignee_id} onChange={(v) => setCf({ ...cf, assignee_id: String(v) })} options={users.map((u) => ({ value: String(u.id), label: u.full_name || u.username || `ผู้ใช้ #${u.id}` }))} />
               </Field>
               <Field inputID="sc-due" label="ครบกำหนดวันที่">
-                <TextInput id="sc-due" type="date" value={cf.due_date} onChange={(v) => setCf({ ...cf, due_date: v })} />
+                <TextInput id="sc-due" label="ครบกำหนดวันที่" isLabelHidden value={cf.due_date} onChange={(v) => setCf({ ...cf, due_date: v })} />
               </Field>
             </FormLayout>
             <HStack gap={2}>

@@ -62,7 +62,7 @@ export default function PwaRegister() {
         if (!sub) {
           sub = await reg.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(vapidJson.publicKey),
+            applicationServerKey: urlBase64ToUint8Array(vapidJson.publicKey) as unknown as BufferSource,
           });
         }
         const subJson = sub.toJSON();

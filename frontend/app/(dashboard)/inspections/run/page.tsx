@@ -104,7 +104,7 @@ export default function InspectionRunPage() {
       setSchedule(s);
 
       // results เดิม (ถ้ามี) สำหรับแสดง
-      const old = new Map((s.results || []).map((r: any) => [r.item_id, r]));
+      const old = new Map<string, any>((s.results || []).map((r: any) => [String(r.item_id), r] as [string, any]));
       setItems((s.items || []).map((it: any) => {
         const prev = old.get(it.id);
         const isValue = it.type === "value";

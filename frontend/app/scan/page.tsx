@@ -207,7 +207,7 @@ export default function ScanLandingPage() {
                   <WrenchScrewdriverIcon className="w-6 h-6" />
                   <VStack gap={0}>
                     <Text type="body" weight="bold" className="text-white">แจ้งซ่อมด่วน</Text>
-                    <Text type="body" size="xs" className="text-white" style={{ opacity: 0.85 }}>
+                    <Text type="body" size="sm" className="text-white" style={{ opacity: 0.85 }}>
                       เครื่องเสีย / หยุดทำงาน — ส่งใบแจ้งซ่อมทันที
                     </Text>
                   </VStack>
@@ -225,7 +225,7 @@ export default function ScanLandingPage() {
                   <ClipboardDocumentListIcon className="w-6 h-6" />
                   <VStack gap={0}>
                     <Text type="body" weight="bold" className="text-white">ทำเช็คชีท PM</Text>
-                    <Text type="body" size="xs" className="text-white" style={{ opacity: 0.85 }}>
+                    <Text type="body" size="sm" className="text-white" style={{ opacity: 0.85 }}>
                       บำรุงเชิงป้องกัน — ทำตามแผน PM ของเครื่องนี้
                     </Text>
                   </VStack>
@@ -255,7 +255,7 @@ export default function ScanLandingPage() {
                             <Text type="body" weight="bold" size="sm" style={{ lineHeight: 1.4 }}>
                               {p.title || `แผน PM #${p.id}`}
                             </Text>
-                            <Text type="body" size="xs" color="secondary">
+                            <Text type="body" size="sm" color="secondary">
                               ครบกำหนด {p.due_date || "-"}{p.assigned_to_name ? ` · ผู้รับผิดชอบ: ${p.assigned_to_name}` : ""}
                             </Text>
                           </VStack>

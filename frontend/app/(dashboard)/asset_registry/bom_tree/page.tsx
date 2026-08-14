@@ -150,8 +150,8 @@ export default function BOMTreePage() {
             : [];
           setMachines(list);
 
-          const sp = Array.isArray(spareJson) && spareJson.status === "success"
-            ? spareJson.data || []
+          const sp = (spareJson as any)?.status === "success"
+            ? (spareJson as any)?.data || []
             : Array.isArray(spareJson)
               ? spareJson
               : [];

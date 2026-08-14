@@ -22,7 +22,7 @@ import {
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
 
-interface SyncLog {
+interface SyncLog extends Record<string, unknown> {
   id: number | string;
   sync_type: string;
   status: string;
@@ -297,7 +297,7 @@ export default function SageSyncConfigPage() {
           <VStack gap={1}>
             <Text type="supporting" color="secondary">ฐานข้อมูล Sage 300 ERP Server</Text>
             <Heading level={3} className="cmms-kpi-value">{erpDatabase}</Heading>
-            <Text type="body" size="sm" color={sageConnected ? "primary" : "error"}>
+            <Text type="body" size="sm" style={{ color: sageConnected ? "var(--cmms-primary)" : "var(--cmms-danger)" }}>
               {sageConnected ? "สถานะการเชื่อมต่อ: ปกติ" : "สถานะการเชื่อมต่อ: ไม่พร้อม"}
             </Text>
           </VStack>

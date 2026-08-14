@@ -250,7 +250,7 @@ export default function WorkPermitPage() {
                    <HStack gap={2} vAlign="center"><CheckboxInput label="ติดป้ายเตือนอันตราย (Danger Tagout) ระบุชื่อช่าง" value={form.loto_pneumatic} onChange={(v) => setForm({ ...form, loto_pneumatic: Boolean(v) })} /></HStack>
                    <HStack gap={2} vAlign="center"><CheckboxInput label="วัดแรงดันไฟฟ้าด้วย Multimeter เพื่อยืนยัน Zero Energy State" value={form.loto_hydraulic} onChange={(v) => setForm({ ...form, loto_hydraulic: Boolean(v) })} /></HStack>
                 </VStack>
-                {formError && <Text type="body" size="sm" color="error">{formError}</Text>}
+                {formError && <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>{formError}</Text>}
              </VStack>
            </FormLayout>
         </div>

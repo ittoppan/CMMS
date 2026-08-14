@@ -62,7 +62,7 @@ export default function RegisterPage() {
           if (cancelled) return;
           if (uid) {
             setLineUserId(uid);
-            if (q.get("name")) setLineName(q.get("name"));
+            if (q.get("name")) setLineName(q.get("name") ?? "");
             setLiffStatus("ready");
             const r = await apiFetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`);
             const j = await r.json().catch(() => ({}));
@@ -105,7 +105,7 @@ export default function RegisterPage() {
           // (flow: /line_login.php → callback → redirect กลับมาพร้อม ?uid=&name=)
           if (uid) {
             setLineUserId(uid);
-            if (q.get("name")) setLineName(q.get("name"));
+            if (q.get("name")) setLineName(q.get("name") ?? "");
             setLiffStatus("ready");
             const r = await apiFetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`);
             const j = await r.json().catch(() => ({}));

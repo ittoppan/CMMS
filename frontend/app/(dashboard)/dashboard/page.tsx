@@ -449,7 +449,7 @@ export default function DashboardPage() {
                   onClick={refreshAll}
                   icon={<Icon icon={ArrowPathIcon} size="sm" />}
                   size="sm"
-                  title="รีเฟรชข้อมูล"
+                 
                 />
               </HStack>
             </HStack>
@@ -515,7 +515,7 @@ export default function DashboardPage() {
               สรุปผลการดำเนินงาน
             </Heading>
             <Grid columns={{ minWidth: 280, repeat: "fit" }} gap={4}>
-              <Card elevation="medium" padding={5} className="cmms-kpi-card blue">
+              <Card elevation="med" padding={5} className="cmms-kpi-card blue">
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
@@ -532,7 +532,7 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card green">
+              <Card elevation="med" padding={5} className="cmms-kpi-card green">
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
@@ -551,7 +551,7 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card red">
+              <Card elevation="med" padding={5} className="cmms-kpi-card red">
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
@@ -570,7 +570,7 @@ export default function DashboardPage() {
                 </VStack>
               </Card>
 
-              <Card elevation="medium" padding={5} className="cmms-kpi-card amber">
+              <Card elevation="med" padding={5} className="cmms-kpi-card amber">
                 <VStack gap={3}>
                   <HStack hAlign="between" vAlign="center">
                     <HStack vAlign="center" gap={2}>
@@ -617,7 +617,7 @@ export default function DashboardPage() {
               <VStack gap={8}>
                 {/* Advanced Metrics */}
                 <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={4}>
-                  <Card elevation="medium" padding={6} className="cmms-kpi-card cyan">
+                  <Card elevation="med" padding={6} className="cmms-kpi-card cyan">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <CurrencyDollarIcon className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -633,7 +633,7 @@ export default function DashboardPage() {
                     </VStack>
                   </Card>
 
-                  <Card elevation="medium" padding={6} className="cmms-kpi-card amber">
+                  <Card elevation="med" padding={6} className="cmms-kpi-card amber">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <ArchiveBoxIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -649,7 +649,7 @@ export default function DashboardPage() {
                     </VStack>
                   </Card>
 
-                  <Card elevation="medium" padding={6} className="cmms-kpi-card green">
+                  <Card elevation="med" padding={6} className="cmms-kpi-card green">
                     <VStack gap={3}>
                       <HStack vAlign="center" gap={3}>
                         <BoltIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -676,7 +676,7 @@ export default function DashboardPage() {
                           <Heading level={4} className="font-bold">กราฟเปรียบเทียบปริมาณงานซ่อม ({selectedYear})</Heading>
                           <Text type="body" size="sm" color="secondary">เปรียบเทียบงานซ่อมเสร็จ เครื่องชำรุด และค่าใช้จ่าย</Text>
                         </VStack>
-                        <Badge label={viewMode === 'monthly' ? `6 เดือน` : `12 เดือน`} variant="info" size="sm" />
+                        <Badge label={viewMode === 'monthly' ? `6 เดือน` : `12 เดือน`} variant="info" />
                       </HStack>
                       <ResponsiveContainer width="100%" height={320}>
                         <BarChart data={displayChartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -701,7 +701,7 @@ export default function DashboardPage() {
                           <Heading level={4} className="font-bold">แนวโน้ม MTBF & MTTR ({selectedYear})</Heading>
                           <Text type="body" size="sm" color="secondary">MTBF (เวลาทำงานเฉลี่ยก่อนชำรุด) vs MTTR (เวลาซ่อมเฉลี่ย)</Text>
                         </VStack>
-                        <Badge label="ตัวชี้วัดความน่าเชื่อถือ" variant="error" size="sm" />
+                        <Badge label="ตัวชี้วัดความน่าเชื่อถือ" variant="error" />
                       </HStack>
                       <ResponsiveContainer width="100%" height={320}>
                         <LineChart data={displayChartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -727,7 +727,7 @@ export default function DashboardPage() {
                         <Heading level={4} className="font-bold">สัดส่วนค่าใช้จ่ายซ่อมบำรุง ({selectedYear})</Heading>
                         <Text type="body" size="sm" color="secondary">แยกตามหมวดหมู่: ค่าอะไหล่, ค่าแรง, จ้างเหมา</Text>
                       </VStack>
-                      <Badge label="วิเคราะห์ค่าใช้จ่าย" variant="warning" size="sm" />
+                      <Badge label="วิเคราะห์ค่าใช้จ่าย" variant="warning" />
                     </HStack>
                     {costBreakdown.length === 0 ? (
                       <EmptyState title="ยังไม่มีข้อมูลค่าใช้จ่าย" description="ยังไม่มีค่าใช้จ่ายซ่อมบำรุงบันทึกในปีนี้" />
@@ -742,7 +742,7 @@ export default function DashboardPage() {
                             outerRadius={120}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ percent, name }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            label={({ percent, name }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                           >
                             {costBreakdown.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -774,7 +774,7 @@ export default function DashboardPage() {
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
                         <Heading level={4} className="font-bold flex items-center gap-2">การวิเคราะห์สาเหตุรากของปัญหา (Pareto 80/20)</Heading>
-                        <Badge label="การวิเคราะห์ RCA" variant="warning" size="sm" />
+                        <Badge label="การวิเคราะห์ RCA" variant="warning" />
                       </HStack>
                       <ResponsiveContainer width="100%" height={300}>
                         <ComposedChart data={paretoData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
@@ -807,7 +807,7 @@ export default function DashboardPage() {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                           >
                             {pmChartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -830,7 +830,7 @@ export default function DashboardPage() {
                         <Heading level={4} className="text-white font-bold flex items-center gap-2">
                           <MapIcon className="w-5 h-5 text-cyan-400"/> แผนผังโรงงานแบบเรียลไทม์
                         </Heading>
-                        <Badge label="จำลองเครื่องจักรดิจิทัล" variant="info" size="sm" />
+                        <Badge label="จำลองเครื่องจักรดิจิทัล" variant="info" />
                       </HStack>
                       <div className="relative w-full h-64 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden p-4">
                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(var(--cmms-border) 1px, transparent 1px), linear-gradient(90deg, var(--cmms-border) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
@@ -969,7 +969,7 @@ export default function DashboardPage() {
                     <VStack gap={4}>
                       <HStack hAlign="between" vAlign="center">
                         <Heading level={4} className="font-bold">⏱ ไทม์ไลน์กิจกรรม (ไลฟ์)</Heading>
-                        <Badge label="เรียลไทม์" variant="primary" size="sm" />
+                        <Badge label="เรียลไทม์" variant="info" />
                       </HStack>
                       <div className="relative pl-6 mt-4 space-y-6 before:absolute before:left-6 before:top-0 before:h-full before:w-0.5 before:bg-slate-300">
                         {liveTimeline.length === 0 ? (
@@ -1030,7 +1030,7 @@ export default function DashboardPage() {
                       <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-500"/> สรุปการตรวจเช็คประจำวัน
                     </Heading>
                     <Grid columns={{ minWidth: 250, repeat: "fit" }} gap={4}>
-                      <Card elevation="medium" padding={5} className="cmms-kpi-card cyan">
+                      <Card elevation="med" padding={5} className="cmms-kpi-card cyan">
                         <VStack gap={2}>
                           <Text type="supporting" color="secondary" className="font-medium">ครบกำหนดวันนี้</Text>
                           <Heading level={2} className="text-blue-700 dark:text-blue-300">
@@ -1040,7 +1040,7 @@ export default function DashboardPage() {
                           <Text type="body" size="sm" color="secondary">ยังไม่ได้ทำตรวจ</Text>
                         </VStack>
                       </Card>
-                      <Card elevation="medium" padding={5} className="cmms-kpi-card red">
+                      <Card elevation="med" padding={5} className="cmms-kpi-card red">
                         <VStack gap={2}>
                           <Text type="supporting" className="text-rose-700 dark:text-rose-400 font-medium">เกินกำหนด</Text>
                           <Heading level={2} className="text-rose-700 dark:text-rose-300">
@@ -1052,7 +1052,7 @@ export default function DashboardPage() {
                           </Text>
                         </VStack>
                       </Card>
-                      <Card elevation="medium" padding={5} className="cmms-kpi-card green">
+                      <Card elevation="med" padding={5} className="cmms-kpi-card green">
                         <VStack gap={2}>
                           <Text type="supporting" className="text-emerald-700 dark:text-emerald-400 font-medium">ทำแล้ววันนี้</Text>
                           <Heading level={2} className="text-emerald-700 dark:text-emerald-300">

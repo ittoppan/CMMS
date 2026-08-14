@@ -35,7 +35,7 @@ export default function DashboardError({
           color: "var(--cmms-danger)",
         }}
       >
-        <Icon icon={ExclamationTriangleIcon} size="xl" />
+        <Icon icon={ExclamationTriangleIcon} size="lg" />
       </div>
 
       <Heading level={2}>เกิดข้อผิดพลาดในการแสดงหน้านี้</Heading>

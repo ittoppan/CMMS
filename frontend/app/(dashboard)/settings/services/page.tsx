@@ -149,14 +149,12 @@ export default function SystemServicesPage() {
           </Text>
         </VStack>
         <HStack gap={2}>
-          <Badge color={allRunning ? "success" : "warning"}>
-            {allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"}
-          </Badge>
+          <Badge label={allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"} variant={allRunning ? "success" : "warning"} />
           <Button
             label={loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
             variant="secondary"
             onClick={() => fetchStatus()}
-            disabled={loading}
+            isDisabled={loading}
           />
         </HStack>
       </HStack>

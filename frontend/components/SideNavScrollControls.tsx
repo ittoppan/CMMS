@@ -71,7 +71,7 @@ export default function SideNavScrollControls({ pathname }: { pathname: string }
     panel?.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     const ro = panel ? new ResizeObserver(update) : null;
-    ro?.observe(panel);
+    if (panel && ro) ro.observe(panel);
     const iv = setInterval(update, 2500); // safety: เมนูโหลดหลังสุด (permission async)
     return () => {
       clearTimeout(t1);

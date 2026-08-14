@@ -824,7 +824,7 @@ export default function SettingsPage() {
                             fontSize: 11, fontWeight: 600,
                           }}
                         >
-                          <Icon icon={ArrowPathIcon} size="xs" />
+                          <Icon icon={ArrowPathIcon} size="sm" />
                           รีเซ็ตเริ่มต้น
                         </button>
                       )}
@@ -990,28 +990,28 @@ export default function SettingsPage() {
                           <Text type="body" weight="bold" size="sm">{meta.label}</Text>
                           <Badge label={groupLabel} variant="neutral" />
                         </HStack>
-                        <Text type="body" size="xs" color="secondary" style={{ fontFamily: "monospace" }}>
+                        <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>
                           {row.setting_key}
                         </Text>
                       </HStack>
                       <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
                         {/* ค่าเดิม */}
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</Text>
+                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(row, oldVal)}
                           </Text>
                         </div>
                         {/* ค่าใหม่ */}
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</Text>
+                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(row, newVal)}
                           </Text>
                         </div>
                       </HStack>
                       {!changed && (
-                        <Text type="body" size="xs" color="secondary">คีย์ลับไม่ได้เปลี่ยน — จะคงค่าเดิม</Text>
+                        <Text type="body" size="sm" color="secondary">คีย์ลับไม่ได้เปลี่ยน — จะคงค่าเดิม</Text>
                       )}
                     </VStack>
                   </Card>
@@ -1060,21 +1060,21 @@ export default function SettingsPage() {
                         <HStack gap={2} vAlign="center">
                           <Text type="body" weight="bold" size="sm">{meta.label}</Text>
                           {SENSITIVE_KEYS.has(a.setting_key) && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
-                          <Text type="body" size="xs" color="secondary" style={{ fontFamily: "monospace" }}>{a.setting_key}</Text>
+                          <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>{a.setting_key}</Text>
                         </HStack>
-                        <Text type="body" size="xs" color="secondary">
+                        <Text type="body" size="sm" color="secondary">
                           {a.user_name || "ผู้ใช้ระบบ"} · {relativeTime(a.created_at)} ({String(a.created_at).slice(0, 16)})
                         </Text>
                       </HStack>
                       <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
                         <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-danger)" }}>จาก</Text>
+                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>จาก</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(fakeRow, a.old_value ?? "")}
                           </Text>
                         </div>
                         <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="xs" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>เป็น</Text>
+                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>เป็น</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(fakeRow, a.new_value ?? "")}
                           </Text>

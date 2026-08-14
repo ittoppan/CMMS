@@ -266,7 +266,7 @@ export default function MyTasksPage() {
       renderCell: (task) => (
         <HStack gap={2} vAlign="center">
           {task.kind === "pm" ? (
-            <Badge label="PM" variant="accent" />
+            <Badge label="PM" variant="blue" />
           ) : (
             <Badge label="ซ่อม" variant="info" />
           )}
@@ -286,10 +286,10 @@ export default function MyTasksPage() {
     },
     {
       key: "estimatedCompletion",
-      header: task => (task.kind === "pm" ? "ครบกำหนด" : "กำหนดเสร็จ"),
+      header: "กำหนดเสร็จ",
       width: proportional(1.2),
       renderCell: (task) => (
-        <Text type="body" size="sm" color={task.kind === "pm" && task.status === "new" ? "error" : "secondary"}>
+        <Text type="body" size="sm" style={{ color: task.kind === "pm" && task.status === "new" ? "var(--cmms-danger)" : undefined }}>
           {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
         </Text>
       ),

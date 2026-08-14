@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >
-                {uploading ? <Spinner size="xs" /> : <CameraIcon className="w-4 h-4" />}
+                {uploading ? <Spinner size="sm" /> : <CameraIcon className="w-4 h-4" />}
               </button>
               <input
                 ref={fileRef}

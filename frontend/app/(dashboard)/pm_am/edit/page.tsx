@@ -204,14 +204,14 @@ function EditPMContent() {
               <TextInput
                 label="วันที่เสร็จสิ้น"
                 value={completedAt.split('T')[0]} // Display only the date part
-                readOnly
+                isDisabled
               />
             )}
             {status === "completed" && completedBy && (
               <TextInput
                 label="ผู้ดำเนินการ"
                 value={completedBy}
-                readOnly
+                isDisabled
               />
             )}
 

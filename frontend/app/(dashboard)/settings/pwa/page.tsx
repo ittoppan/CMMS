@@ -166,7 +166,7 @@ export default function PwaSettingsPage() {
               {status?.icons[192] && (
                 <VStack gap={1} hAlign="center">
                   <img
-                    src={iconSrc(status.icons[192])}
+                    src={iconSrc(status.icons[192]) ?? undefined}
                     alt="icon 192"
                     width={96}
                     height={96}
@@ -178,7 +178,7 @@ export default function PwaSettingsPage() {
               {status?.icons[512] && (
                 <VStack gap={1} hAlign="center">
                   <img
-                    src={iconSrc(status.icons[512])}
+                    src={iconSrc(status.icons[512]) ?? undefined}
                     alt="icon 512"
                     width={128}
                     height={128}
