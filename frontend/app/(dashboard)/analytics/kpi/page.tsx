@@ -4,14 +4,11 @@ import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Grid } from "@astryxdesign/core/Grid";
 import AndonLamp from "@/components/AndonLamp";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Button } from "@astryxdesign/core/Button";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import {
   BarChart, Bar, ComposedChart, LineChart, Line, XAxis, YAxis,
@@ -104,14 +101,16 @@ export default function KpiDashboardPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">EXECUTIVE KPI · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>KPI ผู้บริหาร (Executive Dashboard)</Heading>
-            <Badge label={`ช่วง ${months} เดือนล่าสุด`} variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EXECUTIVE KPI · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>KPI ผู้บริหาร (Executive Dashboard)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ChartBarIcon className="w-3.5 h-3.5" /> ช่วง {months} เดือนล่าสุด
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             MTTR/MTBF · %PM ทันกำหนด · %งานปิดใน SLA · ค่าใช้จ่ายซ่อม — ข้อมูลจากฐานข้อมูลจริง
           </Text>
         </VStack>
@@ -122,7 +121,7 @@ export default function KpiDashboardPage() {
           options={[{ value: "3", label: "3 เดือน" }, { value: "6", label: "6 เดือน" }, { value: "12", label: "12 เดือน" }]}
           style={{ minWidth: 150 }}
         />
-      </HStack>
+      </div>
 
       {/* ═══ การ์ด KPI หลัก ═══ */}
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={4}>
@@ -187,7 +186,7 @@ export default function KpiDashboardPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={BoltIcon} size="md" color="primary" />
+              <BoltIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>MTBF / MTTR (ล่าสุด)</Heading>
             </HStack>
             <HStack gap={4} wrap="wrap">
@@ -225,7 +224,7 @@ export default function KpiDashboardPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={ChartBarIcon} size="md" color="primary" />
+              <ChartBarIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>สถานะงานปัจจุบัน</Heading>
             </HStack>
             {statusRows.length === 0 ? (
@@ -259,7 +258,7 @@ export default function KpiDashboardPage() {
       <Card padding={5}>
         <VStack gap={4}>
           <HStack gap={2} vAlign="center">
-            <Icon icon={BanknotesIcon} size="md" color="primary" />
+            <BanknotesIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
             <Heading level={3}>ค่าใช้จ่ายซ่อมรายเดือน</Heading>
             <Text type="body" size="sm" color="secondary">(ค่าอะไหล่ + ค่าแรง + ค่าจ้างภายนอก)</Text>
           </HStack>
@@ -286,9 +285,9 @@ export default function KpiDashboardPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={ClockIcon} size="md" color="primary" />
+              <ClockIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>% งานปิดใน SLA รายเดือน</Heading>
-              <Badge label="เป้า ≤120 นาที" variant="neutral" />
+              <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
             </HStack>
             <div style={{ width: "100%", height: 200 }}>
               <ResponsiveContainer>
@@ -307,7 +306,7 @@ export default function KpiDashboardPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={CalendarDaysIcon} size="md" color="primary" />
+              <CalendarDaysIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>แผน PM</Heading>
             </HStack>
             <VStack gap={2}>
@@ -335,7 +334,7 @@ export default function KpiDashboardPage() {
               )}
             </HStack>
             <HStack gap={2} vAlign="center">
-              <Icon icon={ExclamationTriangleIcon} size="sm" color="secondary" />
+              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
               <Text type="body" size="xs" color="secondary">
                 ไปที่หน้า "ภาระงานช่าง" หรือ "ปฏิทิน PM" เพื่อดูรายละเอียดและดำเนินการ
               </Text>
@@ -345,13 +344,14 @@ export default function KpiDashboardPage() {
       </Grid>
 
       <HStack hAlign="center">
-        <Button
-          label="รีเฟรชข้อมูล"
-          variant="secondary"
-          size="sm"
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
+        <button
+          type="button"
           onClick={() => fetchData(months)}
-        />
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรชข้อมูล
+        </button>
       </HStack>
     </VStack>
   );
