@@ -4,9 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -20,6 +17,9 @@ import {
   CalendarDaysIcon,
   MagnifyingGlassIcon,
   ArrowPathIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 
 interface NotificationItem {
@@ -238,46 +238,86 @@ export default function NotificationCenterPage() {
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
       {/* Header */}
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">NOTIFICATION CENTER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ศูนย์แจ้งเตือนระบบ</Heading>
-            {unreadCount > 0 && <Badge label={`${unreadCount} ข้อความใหม่`} variant="error" />}
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>NOTIFICATION CENTER · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ศูนย์แจ้งเตือนระบบ</Heading>
+            {unreadCount > 0 && (
+              <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.2)", color: "#FCA5A5" }}>
+                <span className="cmms-status-dot" /> {unreadCount} ข้อความใหม่
+              </span>
+            )}
           </HStack>
-          <Text type="body" color="secondary">แจ้งเตือนจากข้อมูลจริง: งานซ่อมด่วน อะไหล่ใกล้หมด แผน PM และการสอบเทียบ</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            แจ้งเตือนจากข้อมูลจริง: งานซ่อมด่วน อะไหล่ใกล้หมด แผน PM และการสอบเทียบ
+          </Text>
         </VStack>
-        <HStack gap={2}>
-          <Button label="รีเฟรช" variant="secondary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchNotifications} />
-          <Button label="อ่านแล้วทั้งหมด" variant="primary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={markAllRead} />
+        <HStack gap={2} wrap="wrap">
+          <button
+            type="button"
+            onClick={fetchNotifications}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
+          <button
+            type="button"
+            onClick={markAllRead}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            อ่านแล้วทั้งหมด
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       {/* KPI Cards */}
-      <Grid columns={4} gap={4}>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-danger)" }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">แจ้งซ่อมด่วน / สำคัญ</Text>
-            <Heading level={3}>{counts.repair} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-          </VStack>
+      <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <WrenchScrewdriverIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">แจ้งซ่อมด่วน / สำคัญ</Text>
+              <Heading level={3}>{counts.repair} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-warning)" }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">เตือนอะไหล่ใกล้หมด</Text>
-            <Heading level={3}>{counts.stock} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-          </VStack>
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CubeIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เตือนอะไหล่ใกล้หมด</Text>
+              <Heading level={3}>{counts.stock} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-info)" }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">แผนงาน PM</Text>
-            <Heading level={3}>{counts.pm} <span style={{ fontSize: 14 }}>แผนงาน</span></Heading>
-          </VStack>
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CalendarDaysIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">แผนงาน PM</Text>
+              <Heading level={3}>{counts.pm} <span style={{ fontSize: 14 }}>แผนงาน</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-success)" }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">การสอบเทียบ</Text>
-            <Heading level={3}>{counts.calibration} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-          </VStack>
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <WrenchScrewdriverIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">การสอบเทียบ</Text>
+              <Heading level={3}>{counts.calibration} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 
@@ -338,23 +378,46 @@ export default function NotificationCenterPage() {
                 <HStack hAlign="between" vAlign="start" wrap="wrap" gap={3}>
                   <HStack gap={3} vAlign="start">
                     <div style={{ padding: 10, borderRadius: 8, background: item.priority === "critical" ? "var(--cmms-danger-light)" : "var(--cmms-bg-muted)", color: item.priority === "critical" ? "var(--cmms-danger)" : "var(--cmms-text-primary)" }}>
-                      <Icon icon={typeIcons[item.type]} size="md" />
+                      {(() => { const IconComp = typeIcons[item.type]; return <IconComp className="w-6 h-6" />; })()}
                     </div>
                     <VStack gap={1}>
                       <HStack gap={2} vAlign="center" wrap="wrap">
                         <Text type="body" weight="bold" style={{ fontSize: "1rem" }}>{item.title}</Text>
-                        {!isRead && <Badge label="ใหม่" variant="error" />}
-                        <Badge label={item.priority.toUpperCase()} variant={item.priority === "critical" ? "error" : item.priority === "high" ? "warning" : item.priority === "medium" ? "info" : "neutral"} />
+                        {!isRead && <span className="cmms-status down"><span className="cmms-status-dot" />ใหม่</span>}
+                        <span
+                          className="cmms-andon-chip"
+                          style={{
+                            background: item.priority === "critical" ? "rgba(239,68,68,0.12)" : item.priority === "high" ? "rgba(245,158,11,0.12)" : item.priority === "medium" ? "rgba(30,136,229,0.12)" : "rgba(100,116,139,0.12)",
+                            color: item.priority === "critical" ? "#dc2626" : item.priority === "high" ? "#d97706" : item.priority === "medium" ? "#1E88E5" : "#64748B",
+                            fontSize: "0.7rem",
+                            padding: "3px 9px",
+                          }}
+                        >
+                          {item.priority.toUpperCase()}
+                        </span>
                       </HStack>
                       <Text type="body" color="secondary">{item.detail}</Text>
                       <Text type="body" size="sm" color="disabled">{item.time}</Text>
                     </VStack>
                   </HStack>
-                  <HStack gap={2}>
+                  <HStack gap={2} wrap="wrap">
                     {!isRead && (
-                      <Button label="อ่านแล้ว" variant="secondary" size="sm" onClick={() => markRead(item.id)} />
+                      <button
+                        type="button"
+                        onClick={() => markRead(item.id)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                      >
+                        <CheckCircleIcon className="w-3.5 h-3.5" />
+                        อ่านแล้ว
+                      </button>
                     )}
-                    <Button label="ดูรายละเอียด" variant="primary" size="sm" onClick={() => router.push(item.link)} />
+                    <button
+                      type="button"
+                      onClick={() => router.push(item.link)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300"
+                    >
+                      ดูรายละเอียด
+                    </button>
                   </HStack>
                 </HStack>
               </Card>
@@ -365,38 +428,65 @@ export default function NotificationCenterPage() {
 
       {/* ═══════ ประวัติการส่งแจ้งเตือน (จาก notification_logs จริง) ═══════ */}
       <VStack gap={4}>
-        <HStack hAlign="between" vAlign="center">
+        <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
           <VStack gap={1}>
             <Heading level={3}>ประวัติการส่งแจ้งเตือน</Heading>
             <Text type="body" size="sm" color="secondary">บันทึกการส่งจริงจากระบบ (LINE / Web Push) — จากตาราง notification_logs</Text>
           </VStack>
-          <Button label="รีเฟรช" variant="secondary" size="sm" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchDeliveryLog} />
+          <button
+            type="button"
+            onClick={fetchDeliveryLog}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-3.5 h-3.5" />
+            รีเฟรช
+          </button>
         </HStack>
 
-        <Grid columns={4} gap={4}>
-          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-info)" }}>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ส่งทั้งหมด</Text>
-              <Heading level={3}>{deliveryStats.total} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
-            </VStack>
+        <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
+          <Card padding={4} className="cmms-kpi-card">
+            <HStack gap={3} vAlign="center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <ArrowPathIcon className="w-6 h-6" />
+              </div>
+              <VStack gap={1}>
+                <Text type="supporting" color="secondary">ส่งทั้งหมด</Text>
+                <Heading level={3}>{deliveryStats.total} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+              </VStack>
+            </HStack>
           </Card>
-          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-success)" }}>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ส่งสำเร็จ (SENT)</Text>
-              <Heading level={3}>{deliveryStats.sent} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
-            </VStack>
+          <Card padding={4} className="cmms-kpi-card">
+            <HStack gap={3} vAlign="center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+                <CheckCircleIcon className="w-6 h-6" />
+              </div>
+              <VStack gap={1}>
+                <Text type="supporting" color="secondary">ส่งสำเร็จ (SENT)</Text>
+                <Heading level={3}>{deliveryStats.sent} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+              </VStack>
+            </HStack>
           </Card>
-          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-danger)" }}>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ล้มเหลว / ไม่มีผู้รับ</Text>
-              <Heading level={3}>{deliveryStats.failed} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
-            </VStack>
+          <Card padding={4} className="cmms-kpi-card">
+            <HStack gap={3} vAlign="center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+                <XCircleIcon className="w-6 h-6" />
+              </div>
+              <VStack gap={1}>
+                <Text type="supporting" color="secondary">ล้มเหลว / ไม่มีผู้รับ</Text>
+                <Heading level={3}>{deliveryStats.failed} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+              </VStack>
+            </HStack>
           </Card>
-          <Card padding={4} style={{ borderLeft: "4px solid var(--cmms-warning)" }}>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ส่งวันนี้</Text>
-              <Heading level={3}>{deliveryStats.today} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
-            </VStack>
+          <Card padding={4} className="cmms-kpi-card">
+            <HStack gap={3} vAlign="center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+                <ClockIcon className="w-6 h-6" />
+              </div>
+              <VStack gap={1}>
+                <Text type="supporting" color="secondary">ส่งวันนี้</Text>
+                <Heading level={3}>{deliveryStats.today} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
+              </VStack>
+            </HStack>
           </Card>
         </Grid>
 
@@ -422,10 +512,10 @@ export default function NotificationCenterPage() {
                     return (
                       <tr key={log.id} style={{ borderBottom: "1px solid var(--cmms-border)" }}>
                         <td style={{ padding: "10px 14px" }}>
-                          <Badge label={String(log.channel || "-")} variant={log.channel === "LINE" ? "info" : "accent"} />
+                          <span className="cmms-andon-chip" style={{ background: log.channel === "LINE" ? "rgba(30,136,229,0.12)" : "rgba(124,58,237,0.12)", color: log.channel === "LINE" ? "#1E88E5" : "#7C3AED", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.channel || "-")}</span>
                         </td>
                         <td style={{ padding: "10px 14px" }}>
-                          <Badge label={String(log.status || "-")} variant={ok ? "success" : "error"} />
+                          <span className="cmms-andon-chip" style={{ background: ok ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: ok ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>{String(log.status || "-")}</span>
                         </td>
                         <td style={{ padding: "10px 14px", color: "var(--cmms-text-secondary)", maxWidth: 420 }}>
                           <div style={{ whiteSpace: "pre-line", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
