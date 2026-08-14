@@ -6,10 +6,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Button } from "@astryxdesign/core/Button";
-import { IconButton } from "@astryxdesign/core/IconButton";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -20,7 +16,10 @@ import {
   ScaleIcon,
   MagnifyingGlassIcon,
   PencilSquareIcon,
-  TrashIcon
+  TrashIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 interface CalibrationRecord extends Record<string, unknown> {
@@ -35,11 +34,18 @@ interface CalibrationRecord extends Record<string, unknown> {
   status: string;
 }
 
-const statusConfig: Record<string, { variant: "success" | "warning" | "error" | "neutral"; label: string }> = {
-  completed: { variant: "success", label: "ปกติ" },
-  pending: { variant: "warning", label: "รอดำเนินการ" },
-  scheduled: { variant: "warning", label: "รอเข้าตาราง" },
-  overdue: { variant: "error", label: "หมดอายุแล้ว" },
+const statusChipStyle: Record<string, React.CSSProperties> = {
+  completed: { background: "rgba(16,185,129,0.12)", color: "#059669" },
+  pending: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
+  scheduled: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
+  overdue: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
+};
+
+const statusLabel: Record<string, string> = {
+  completed: "ปกติ",
+  pending: "รอดำเนินการ",
+  scheduled: "รอเข้าตาราง",
+  overdue: "หมดอายุแล้ว",
 };
 
 export default function CalibrationPage() {
@@ -129,8 +135,11 @@ export default function CalibrationPage() {
       header: "สถานะ",
       width: proportional(1.5),
       renderCell: (item) => {
-        const conf = statusConfig[item.status] || { variant: "neutral", label: item.status };
-        return <Badge label={conf.label} variant={conf.variant} />;
+        return (
+          <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.pending}>
+            {statusLabel[item.status] || item.status}
+          </span>
+        );
       },
     },
     {
@@ -139,19 +148,22 @@ export default function CalibrationPage() {
       width: proportional(1.5),
       renderCell: (item) => (
         <HStack gap={2}>
-          <Button
-            size="sm"
-            variant="secondary"
+          <button
+            type="button"
             onClick={() => router.push(`/calibration/edit?id=${item.rawId}`)}
-            label="แก้ไข"
-          />
-          <IconButton
-            size="sm"
-            variant="destructive"
-            label="ลบเครื่องมือวัด"
-            icon={<Icon icon={TrashIcon} size="sm" />}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <PencilSquareIcon className="w-3.5 h-3.5" />
+            แก้ไข
+          </button>
+          <button
+            type="button"
             onClick={() => handleDelete(item.rawId)}
-          />
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+          >
+            <TrashIcon className="w-3.5 h-3.5" />
+            ลบ
+          </button>
         </HStack>
       ),
     },
@@ -159,37 +171,64 @@ export default function CalibrationPage() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ทะเบียนสอบเทียบเครื่องมือวัด</Heading>
-            <Badge label="ควบคุมคุณภาพ" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>CALIBRATION · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ทะเบียนสอบเทียบเครื่องมือวัด</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ScaleIcon className="w-3.5 h-3.5" /> ควบคุมคุณภาพ
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ติดตามรอบการสอบเทียบของเครื่องมือวัดในโรงงานทั้งหมด</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ติดตามรอบการสอบเทียบของเครื่องมือวัดในโรงงานทั้งหมด
+          </Text>
         </VStack>
-        <Button label="เพิ่มเครื่องมือ / แผนสอบเทียบ" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => router.push("/calibration/create")} />
-      </Card>
+        <button
+          type="button"
+          onClick={() => router.push("/calibration/create")}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <PlusIcon className="w-4 h-4" />
+          เพิ่มเครื่องมือ / แผนสอบเทียบ
+        </button>
+      </div>
 
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">เครื่องมือวัดทั้งหมด</Text>
-            <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
-          </VStack>
-        </Card>
-        
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-warning-600">รอดำเนินการ</Text>
-            <Heading level={2} className="text-warning-600"><CountUp end={stats.dueSoon} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
-          </VStack>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ScaleIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เครื่องมือวัดทั้งหมด</Text>
+              <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
 
-        <Card elevation="low" padding={4} className={stats.overdue > 0 ? "border-rose-500 bg-rose-50 dark:bg-rose-900/10" : ""}>
-          <VStack gap={1}>
-            <Text type="supporting" className={stats.overdue > 0 ? "text-rose-600" : "text-emerald-600"}>เลยกำหนด</Text>
-            <Heading level={2} className={stats.overdue > 0 ? "text-rose-600" : "text-emerald-600"}><CountUp end={stats.overdue} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClockIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">รอดำเนินการ</Text>
+              <Heading level={2}><CountUp end={stats.dueSoon} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+            </VStack>
+          </HStack>
+        </Card>
+
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เลยกำหนด</Text>
+              <Heading level={2}><CountUp end={stats.overdue} /> <Text type="body" size="sm">เครื่อง</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 
@@ -200,7 +239,7 @@ export default function CalibrationPage() {
                 label="ค้นหา"
                 isLabelHidden
                 placeholder="ค้นหาชื่อเครื่องมือ, รหัส หรือใบเซอร์..."
-                startIcon={<Icon icon={MagnifyingGlassIcon} />}
+                startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                 value={search}
                 onChange={setSearch}
                 style={{ width: 350 }}
