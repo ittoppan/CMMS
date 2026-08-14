@@ -5,9 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
@@ -165,15 +162,20 @@ export default function AssetCriticalityPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ประเมินลำดับความสำคัญของเครื่องจักร</Heading>
-            <Badge label="เมทริกซ์ความเสี่ยง" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY CRITICALITY · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ประเมินลำดับความสำคัญของเครื่องจักร</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ScaleIcon className="w-3.5 h-3.5" /> เมทริกซ์ความเสี่ยง
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ
+          </Text>
         </VStack>
-      </HStack>
+      </div>
 
       <Grid columns={3} gap={6}>
         {/* คอลัมน์ซ้าย: ฟอร์มประเมิน */}
@@ -223,14 +225,24 @@ export default function AssetCriticalityPage() {
             }}
           >
             <VStack gap={3} hAlign="center">
-              <Icon icon={CalculatorIcon} size="lg" color={rank === "A" ? "error" : rank === "B" ? "warning" : "accent"} />
+              <CalculatorIcon className="w-8 h-8" style={{ color: rank === "A" ? "var(--color-error)" : rank === "B" ? "var(--color-warning)" : "var(--color-primary)" }} />
               <VStack gap={0}>
                 <Text type="supporting" weight="bold" style={{ textTransform: "uppercase" }}>คะแนนประเมินรวม</Text>
                 <Heading level={1} style={{ fontSize: 42 }}>
                   {totalScore} <span style={{ fontSize: 18, color: "var(--color-secondary)" }}>/ 30</span>
                 </Heading>
               </VStack>
-              <Badge label={`ผลการจัดเกรด: เกรด ${rank}`} variant={rank === "A" ? "error" : rank === "B" ? "warning" : "info"} style={{ fontSize: 16, padding: "8px 16px" }} />
+              <span
+                className="cmms-andon-chip"
+                style={{
+                  fontSize: 16,
+                  padding: "8px 16px",
+                  background: rank === "A" ? "rgba(244,63,94,0.12)" : rank === "B" ? "rgba(245,158,11,0.12)" : "rgba(30,136,229,0.12)",
+                  color: rank === "A" ? "#E11D48" : rank === "B" ? "#D97706" : "#1E88E5",
+                }}
+              >
+                ผลการจัดเกรด: เกรด {rank}
+              </span>
               {currentRank && currentRank !== rank && (
                 <Text type="body" size="sm" color="secondary">(ปัจจุบัน: เกรด {currentRank} — ยังไม่บันทึก)</Text>
               )}
@@ -263,14 +275,16 @@ export default function AssetCriticalityPage() {
                 </VStack>
               )}
 
-              <Button
-                label={submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}
-                variant="primary"
-                isDisabled={submitting || !selectedMachine}
+              <button
+                type="button"
+                disabled={submitting || !selectedMachine}
                 onClick={handleSave}
                 style={{ marginTop: 16 }}
-                icon={<Icon icon={ScaleIcon} size="sm" />}
-              />
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+              >
+                <ScaleIcon className="w-4 h-4" />
+                {submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}
+              </button>
             </VStack>
           </Card>
         </VStack>
