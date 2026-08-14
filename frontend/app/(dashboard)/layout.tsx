@@ -61,6 +61,7 @@ import {
   CircleStackIcon,
   CheckBadgeIcon,
   DevicePhoneMobileIcon,
+  PaintBrushIcon,
   UserPlusIcon,
   CalendarIcon,
   CogIcon,
@@ -115,6 +116,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings/notifications": "รูปแบบการแจ้งเตือน LINE",
   "/settings/menus": "สิทธิ์เมนูตามบทบาท",
   "/settings/pwa": "ตั้งค่าไอคอน PWA",
+  "/settings/design": "ปรับแต่งหน้าตาระบบ (Page Designer)",
   "/register": "ลงทะเบียนผูกบัญชี LINE",
 };
 
@@ -145,6 +147,7 @@ const SECTION_MAP: Record<string, string> = {
   "/settings/menus": "ระบบ & ตั้งค่า",
   "/settings/pwa": "ระบบ & ตั้งค่า",
   "/settings/services": "ระบบ & ตั้งค่า",
+  "/settings/design": "ระบบ & ตั้งค่า",
 };
 
 // รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
@@ -161,7 +164,7 @@ const MENU_HREFS: string[] = [
   "/analytics/kpi", "/analytics", "/reports", "/reports/monthly_pdf", "/reports/export_excel",
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
-  "/notifications", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa",
+  "/notifications", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design",
 ];
 
 function getSection(pathname: string): string | null {
@@ -497,6 +500,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label="สิทธิ์เมนูตามบทบาท" icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
             {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
+            {canShow("settings") && <SideNavItem label="ปรับแต่งหน้าตาระบบ (Page Designer)" icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
           </MenuSection>
           {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
           <SideNavScrollControls pathname={pathname} />

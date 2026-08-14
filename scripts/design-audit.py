@@ -86,7 +86,9 @@ GRADIENT_ALLOW = re.compile(r"(transparent 1px|#0B1F4B|--tp-navy-dark)")
 
 # หน้า/บริบทที่ hex เป็นข้อมูลจริง (editor = ธีม, qr-sheet = print CSS)
 HEX_ALLOW_FILE = {
+    # หน้า theme/design editor — hex เป็นค่าข้อมูลที่ผู้ใช้ปรับแต่งจริง
     "frontend/app/(dashboard)/editor/page.tsx",
+    "frontend/app/(dashboard)/settings/design/page.tsx",
     # LINE Flex JSON + header_color config — hex ต้องเป็นค่าจริงที่ส่งให้ LINE API
     "frontend/app/(dashboard)/settings/notifications/page.tsx",
 }

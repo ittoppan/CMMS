@@ -306,6 +306,7 @@ const SUB_PAGES = [
   { href: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE", desc: "เทมเพลตข้อความ LINE + Web Push", icon: ChatBubbleLeftRightIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
+  { href: "/settings/design", label: "ปรับแต่งหน้าตาระบบ (Page Designer)", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
 ];
 
 export default function SettingsPage() {

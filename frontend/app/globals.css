@@ -187,7 +187,8 @@ body {
 html, body {
   /* บังคับ light scheme เพื่อให้ astryx light-dark() tokens เลือกค่าสว่างเสมอ */
   color-scheme: light;
-  font-family: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-family: var(--cmms-font-family, 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif) !important;
+  font-size: var(--cmms-font-size-base, 16px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -1507,15 +1508,15 @@ next-route-announcer {
 }
 
 .cmms-andon.lit-ok .cmms-andon-lamp.ok {
-  background: #10B981;
+  background: var(--cmms-andon-ok, #10B981);
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.55);
 }
 .cmms-andon.lit-warn .cmms-andon-lamp.warn {
-  background: #F59E0B;
+  background: var(--cmms-andon-warn, #F59E0B);
   box-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
 }
 .cmms-andon.lit-down .cmms-andon-lamp.down {
-  background: #EF4444;
+  background: var(--cmms-andon-down, #EF4444);
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
   animation: cmmsAndonBlink 1.2s ease-in-out infinite;
 }
@@ -1862,4 +1863,54 @@ next-route-announcer {
 .cmms-icon-tile.cyan {
   background: var(--cmms-info);
   color: #fff;
+}
+
+/* ================================================
+   Page Designer (settings/design) — design tokens
+   เปลี่ยนค่าได้จากหน้า /settings/design -> save ลง DB
+   -> ThemeProvider อ่านมา apply เป็น CSS vars ทั่วระบบ
+   ================================================ */
+:root {
+  --cmms-font-family: 'Noto Sans Thai', 'Sarabun', 'Roboto', 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  --cmms-font-size-base: 16px;
+  --cmms-andon-ok: #10B981;
+  --cmms-andon-warn: #F59E0B;
+  --cmms-andon-down: #EF4444;
+}
+
+/* ── Live preview mockups (ใช้เฉพาะหน้า /settings/design) ── */
+.cmms-design-grad {
+  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #1E88E5));
+  border-radius: var(--cmms-radius-lg);
+}
+.cmms-design-sidenav {
+  background: var(--cmms-bg-sidebar);
+  border-radius: var(--cmms-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.cmms-design-sidenav-item {
+  color: var(--cmms-sidebar-text);
+  border-radius: 8px;
+}
+.cmms-design-sidenav-item.selected {
+  background: var(--cmms-bg-sidebar-active);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(0, 87, 168, 0.35);
+}
+.cmms-design-sidenav-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cmms-sidebar-indicator);
+  box-shadow: 0 0 8px var(--cmms-sidebar-indicator);
+}
+.cmms-design-kpi {
+  border-radius: var(--cmms-radius-lg);
+  box-shadow: var(--cmms-shadow-md);
+  background: var(--cmms-bg-card);
+  border: 1px solid var(--cmms-border);
+}
+.cmms-design-login-hero {
+  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #1E88E5));
+  border-radius: var(--cmms-radius-lg);
 }

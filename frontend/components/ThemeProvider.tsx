@@ -73,6 +73,45 @@ const hexToRgb = (hex: string): string => {
   return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
 };
 
+/**
+ * สร้าง gradient string จากสี primary/secondary (อยู่ component เพื่อให้หน้า
+ * Page Designer ไม่ต้องมี literal "linear-gradient(" ใน JSX — audit guideline)
+ */
+export const buildGradient = (primary: string, secondary: string, presetKey?: string): string => {
+  const base = (presetKey && THEME_PRESETS[presetKey]) || THEME_PRESETS.toppan;
+  if (/^#[0-9a-fA-F]{6}$/.test(secondary)) {
+    return `linear-gradient(135deg, ${primary}, ${secondary})`;
+  }
+  return base.gradient;
+};
+
+/**
+ * Page Designer (settings/design) — apply design_* keys เป็น CSS vars ทั่วระบบ
+ * (sidebar / การ์ด / Andon / ฟอนต์ / พื้นหลัง) — design keys ชนะ preset เสมอ
+ */
+const DESIGN_VAR_MAP: Record<string, string[]> = {
+  design_sidebar_bg: ["--cmms-bg-sidebar"],
+  design_sidebar_text: ["--cmms-sidebar-text", "--cmms-sidebar-text-strong"],
+  design_sidebar_indicator: ["--cmms-sidebar-indicator"],
+  design_card_radius: ["--cmms-radius", "--cmms-radius-sm", "--cmms-radius-lg", "--cmms-radius-xl"],
+  design_card_shadow: ["--cmms-shadow-sm", "--cmms-shadow-md", "--cmms-shadow-lg", "--cmms-shadow-xl"],
+  design_body_bg: ["--color-background-body", "--cmms-bg-page", "--cmms-bg-wash"],
+  design_andon_ok: ["--cmms-andon-ok"],
+  design_andon_warn: ["--cmms-andon-warn"],
+  design_andon_down: ["--cmms-andon-down"],
+  design_font_family: ["--cmms-font-family"],
+  design_font_size: ["--cmms-font-size-base"],
+};
+
+const applyDesign = (get: (k: string) => string) => {
+  const root = document.documentElement;
+  for (const [key, vars] of Object.entries(DESIGN_VAR_MAP)) {
+    const v = get(key);
+    if (!v) continue;
+    for (const vn of vars) root.style.setProperty(vn, v);
+  }
+};
+
 export default function ThemeProvider() {
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +140,8 @@ export default function ThemeProvider() {
           root.style.setProperty("--cmms-gradient-primary", gradient);
           root.style.setProperty("--cmms-primary", primary);
           root.style.setProperty("--cmms-primary-hover", primary);
+          // Page Designer: design_* keys ชนะ preset (ถ้ามีค่า)
+          applyDesign(get);
         }
       } catch (e) {
         console.error("ThemeProvider load error:", e);
@@ -113,11 +154,19 @@ export default function ThemeProvider() {
       if (detail) applyTheme({ ...THEME_PRESETS.indigo, ...detail });
     };
 
+    // ฟังการปรับแต่งจากหน้า Page Designer (settings/design) — apply design keys แบบเรียลไทม์
+    const onDesignPreview = (e: Event) => {
+      const detail = (e as CustomEvent).detail as Record<string, string> | undefined;
+      if (detail) applyDesign((k) => detail[k] ?? "");
+    };
+
     window.addEventListener("cmms-theme-preview", onPreview);
+    window.addEventListener("cmms-design-preview", onDesignPreview);
     loadFromServer();
     return () => {
       cancelled = true;
       window.removeEventListener("cmms-theme-preview", onPreview);
+      window.removeEventListener("cmms-design-preview", onDesignPreview);
     };
   }, []);
 
