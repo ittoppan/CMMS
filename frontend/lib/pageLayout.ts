@@ -12,6 +12,8 @@ export interface PageLayoutSection {
   id: string;
   label: string;
   desc: string;
+  /** ส่วนหัวที่ติดกับโครงสร้างหน้า (เช่น hero ของหน้า Layout header) — กันการลากย้าย */
+  pinned?: boolean;
 }
 
 export interface PageLayoutItem {
@@ -146,11 +148,51 @@ export const DASHBOARD_SECTIONS: PageLayoutSection[] = [
   { id: "tabs", label: "แท็บภาพรวม / ประสิทธิภาพ / ปฏิบัติการ", desc: "เนื้อหาหลักทั้ง 3 แท็บ" },
 ];
 
+// ── โมเดล section เฉพาะหน้า (หน้านี้ใช้ config ได้จริง = wired) ──
+export const REPAIR_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ดาวน์โหลด PDF + สร้างใบสั่งงาน" },
+  { id: "kpi", label: "การ์ดสรุปตัวเลข (KPI)", desc: "มินิบอร์ด Andon งานซ่อม/ค้าง/เสร็จ/เกินกำหนด" },
+  { id: "content", label: "รายการงานซ่อม", desc: "ตารางงาน + ตัวกรอง + เลือกหลายใบทำ PDF" },
+];
+
+export const SPARE_PARTS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + แท็บ", desc: "ส่วนหัว + แท็บทั้งหมด/ใกล้หมด/หมดคลัง", pinned: true },
+  { id: "kpi", label: "การ์ดสรุปคลัง (KPI)", desc: "ทั้งหมด/ใกล้หมด/หมดคลัง/มูลค่ารวม" },
+  { id: "content", label: "รายการอะไหล่", desc: "รายการ + ค้นหา + ตัวกรองประเภท Sage" },
+];
+
+export const KPI_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + เลือกช่วง", desc: "ส่วนหัว + เลือก 3/6/12 เดือน" },
+  { id: "kpi", label: "การ์ด KPI หลัก", desc: "งานซ่อม/SLA/ค่าใช้จ่าย/PM ทันกำหนด" },
+  { id: "charts", label: "MTBF / MTTR + สถานะงาน", desc: "กราฟ MTBF/MTTR + สถานะงานปัจจุบัน" },
+  { id: "cost", label: "ค่าใช้จ่ายซ่อมรายเดือน", desc: "กราฟแท่งค่าใช้จ่ายรายเดือน" },
+  { id: "sla_pm", label: "SLA + แผน PM รายละเอียด", desc: "%ปิดใน SLA รายเดือน + สถานะ PM" },
+  { id: "actions", label: "ปุ่มรีเฟรชข้อมูล", desc: "ปุ่มรีเฟรชท้ายหน้า" },
+];
+
+export const USERS_SECTIONS: PageLayoutSection[] = [
+  { id: "header", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + เพิ่มผู้ใช้/รีเฟรช" },
+  { id: "stats", label: "การ์ดสรุปผู้ใช้", desc: "ทั้งหมด/ใช้งาน/ระงับการใช้งาน" },
+  { id: "content", label: "ตารางผู้ใช้", desc: "ค้นหา + กรองบทบาท + ตารางจัดการ" },
+];
+
+export const SETTINGS_SECTIONS: PageLayoutSection[] = [
+  { id: "header", label: "หัวข้อหน้า + ค้นหา", desc: "ชื่อหน้า + ปุ่มประวัติ + ช่องค้นหา" },
+  { id: "subpages", label: "ลิงก์หน้าย่อยตั้งค่า", desc: "การ์ดลิงก์ไปหน้าย่อย 7 หน้า" },
+  { id: "recent", label: "คีย์ที่แก้ไขล่าสุด", desc: "ชิปคีย์ที่เพิ่งถูกแก้ไข" },
+  { id: "grid", label: "กลุ่มการตั้งค่า + ฟอร์ม", desc: "เมนูกลุ่มซ้าย + ฟอร์มแก้ไขค่า" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
 > = {
   "/dashboard": { sections: DASHBOARD_SECTIONS, wired: true },
+  "/repair": { sections: REPAIR_SECTIONS, wired: true },
+  "/spare_parts": { sections: SPARE_PARTS_SECTIONS, wired: true },
+  "/analytics/kpi": { sections: KPI_SECTIONS, wired: true },
+  "/users": { sections: USERS_SECTIONS, wired: true },
+  "/settings": { sections: SETTINGS_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>

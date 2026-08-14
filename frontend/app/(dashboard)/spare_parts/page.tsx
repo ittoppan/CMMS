@@ -48,6 +48,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
 import AndonLamp from "@/components/AndonLamp";
+import { usePageLayout } from "@/lib/pageLayout";
 
 // ─── Styles (จาก template: bleed tab bar + list ไปจนถึงขอบ) ─────────────────
 const tabsRow: CSSProperties = {
@@ -413,6 +414,13 @@ export default function SparePartsPage() {
   const [showSidePanel, setShowSidePanel] = useState(true);
   const [isPanelDialogOpen, setPanelDialogOpen] = useState(false);
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (hero เป็นส่วนหัวคงที่)
+  const layout = usePageLayout("/spare_parts", ["hero", "kpi", "content"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   const fetchParts = async () => {
     setLoading(true);
     setError("");
@@ -552,11 +560,8 @@ export default function SparePartsPage() {
 
   return (
     <>
-      <Layout
-        height="fill"
-        contentWidth={1100}
-        defaultHasDividers
-        header={
+      <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={layoutStyle("hero")}>
           <div className="cmms-page-hero flex flex-col gap-5">
             <HStack gap={4} vAlign="start" wrap="wrap">
               <StackItem size="fill">
@@ -665,19 +670,20 @@ export default function SparePartsPage() {
               />
             </HStack>
           </div>
-        }
-        content={
-          <LayoutContent role="main">
-            <VStack gap={4}>
-              {error && (
-                <Banner status="error" title="Error" description={error} isDismissable={false} />
-              )}
-              {syncNotice && (
-                <Banner status="success" title="Success" description={syncNotice} isDismissable={false} />
-              )}
+        </div>
 
-              {/* KPI row */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div style={{ display: "flex", gap: 24, alignItems: "start", width: "100%" }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+            {error && (
+              <Banner status="error" title="Error" description={error} isDismissable={false} />
+            )}
+            {syncNotice && (
+              <Banner status="success" title="Success" description={syncNotice} isDismissable={false} />
+            )}
+
+            {/* KPI row */}
+            <div style={layoutStyle("kpi")}>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card padding={4} className="cmms-kpi-card blue">
                   <HStack gap={3} vAlign="center">
                     <AndonLamp status="idle" size="sm" />
@@ -715,7 +721,9 @@ export default function SparePartsPage() {
                   </HStack>
                 </Card>
               </div>
+            </div>
 
+            <div style={layoutStyle("content")}>
               {loading && parts.length === 0 ? (
                 <Card elevation="low" padding={6}>
                   <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
@@ -734,11 +742,16 @@ export default function SparePartsPage() {
                   onDelete={setDeleteTarget}
                 />
               )}
-            </VStack>
-          </LayoutContent>
-        }
-        end={!isNarrow && showSidePanel ? <RightPanel parts={parts} /> : undefined}
-      />
+            </div>
+          </div>
+
+          {!isNarrow && showSidePanel && (
+            <div style={{ width: 320, flexShrink: 0 }}>
+              <RightPanel parts={parts} />
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Mobile: side panel เป็น fullscreen dialog */}
       <Dialog
