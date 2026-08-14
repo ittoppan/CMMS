@@ -128,27 +128,27 @@ try {
             }
         }
         # 1.2) daily alert check (วันละ 1 ครั้ง) — PM ใกล้กำหนด + สต็อกต่ำ
-        $alertDateFile = Join-Path $logDir "alert_check.date"
-        $todayStr = Get-Date -Format "yyyy-MM-dd"
-        $lastCheck = ""
-        if (Test-Path -LiteralPath $alertDateFile) { $lastCheck = ((Get-Content -LiteralPath $alertDateFile -Raw) -replace "[\r\n]", "").Trim() }
-        if ($lastCheck -ne $todayStr) {
-            Write-Log "Daily alert check ($todayStr)..."
-            $checkScript = Join-Path $root "scripts\alert_check.php"
-            if ($phpExe -and (Test-Path -LiteralPath $checkScript)) {
-                try {
-                    # อ่าน output ของ php เป็น UTF-8 (กันตัวหนังสือไทยเพี้ยนใน log)
-                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-                    & $phpExe $checkScript 2>&1 | ForEach-Object { Write-Log "  alert_check: $_" }
-                    Set-Content -LiteralPath $alertDateFile -Value $todayStr -Encoding ascii
-                    Write-Log "Daily alert check done"
-                } catch {
-                    Write-Log "Daily alert check FAILED: $_"
-                }
-            } else {
-                Write-Log "alert_check.php not found or php missing ($phpExe)"
-            }
-        }
+#         $alertDateFile = Join-Path $logDir "alert_check.date"
+#         $todayStr = Get-Date -Format "yyyy-MM-dd"
+#         $lastCheck = ""
+#         if (Test-Path -LiteralPath $alertDateFile) { $lastCheck = ((Get-Content -LiteralPath $alertDateFile -Raw) -replace "[\r\n]", "").Trim() }
+#         if ($lastCheck -ne $todayStr) {
+#             Write-Log "Daily alert check ($todayStr)..."
+#             $checkScript = Join-Path $root "scripts\alert_check.php"
+#             if ($phpExe -and (Test-Path -LiteralPath $checkScript)) {
+#                 try {
+#                     # อ่าน output ของ php เป็น UTF-8 (กันตัวหนังสือไทยเพี้ยนใน log)
+#                     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+#                     & $phpExe $checkScript 2>&1 | ForEach-Object { Write-Log "  alert_check: $_" }
+#                     Set-Content -LiteralPath $alertDateFile -Value $todayStr -Encoding ascii
+#                     Write-Log "Daily alert check done"
+#                 } catch {
+#                     Write-Log "Daily alert check FAILED: $_"
+#                 }
+#             } else {
+#                 Write-Log "alert_check.php not found or php missing ($phpExe)"
+#             }
+#         }
 
         # 1.4) ตรวจ Apache :8081 (PHP เว็บหลัก) — Next.js ขึ้นแต่ Apache ตาย = API ทั้งหมดพัง
         $apacheUrl = "http://127.0.0.1:8081/login.php"

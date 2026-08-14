@@ -5,9 +5,7 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -169,9 +167,18 @@ export default function SagePOReceiptPage() {
       width: proportional(1.2),
       renderCell: (item: POItem) => (
         <HStack gap={1} vAlign="center">
-          <Button size="sm" variant="ghost" label="−" isDisabled={item.receivedQty <= 1} onClick={() => handleQtyChange(item.id, item.receivedQty - 1)} />
+          <button
+            type="button"
+            disabled={item.receivedQty <= 1}
+            onClick={() => handleQtyChange(item.id, item.receivedQty - 1)}
+            className="w-7 h-7 rounded-lg text-sm font-bold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] disabled:opacity-40 transition-all"
+          >−</button>
           <Text type="body" weight="bold">{item.receivedQty}</Text>
-          <Button size="sm" variant="ghost" label="+" onClick={() => handleQtyChange(item.id, item.receivedQty + 1)} />
+          <button
+            type="button"
+            onClick={() => handleQtyChange(item.id, item.receivedQty + 1)}
+            className="w-7 h-7 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all"
+          >+</button>
         </HStack>
       ),
     },
@@ -186,7 +193,14 @@ export default function SagePOReceiptPage() {
       header: "",
       width: proportional(0.7),
       renderCell: (item: POItem) => (
-        <Button size="sm" variant="ghost" icon={<Icon icon={TrashIcon} size="sm" />} label="ลบ" onClick={() => handleRemove(item.id)} />
+        <button
+          type="button"
+          onClick={() => handleRemove(item.id)}
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all"
+        >
+          <TrashIcon className="w-3.5 h-3.5" />
+          ลบ
+        </button>
       ),
     },
   ];
@@ -204,13 +218,28 @@ export default function SagePOReceiptPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>รับอะไหล่จาก PO (Sage PO Receipt)</Heading>
-          <Text type="body" color="secondary">บันทึกการรับเข้าคลังเมื่ออะไหล่ตามใบสั่งซื้อมาถึง</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS SAGE PO · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>รับอะไหล่จาก PO (Sage PO Receipt)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <DocumentCheckIcon className="w-3.5 h-3.5" /> {items.length} รายการ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            บันทึกการรับเข้าคลังเมื่ออะไหล่ตามใบสั่งซื้อมาถึง
+          </Text>
         </VStack>
-        <Button label="รีเฟรช" variant="secondary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchParts} />
-      </HStack>
+        <button
+          type="button"
+          onClick={fetchParts}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
+      </div>
 
       <Card padding={5}>
         <Heading level={4} style={{ marginBottom: 16 }}>ข้อมูลใบสั่งซื้อ (PO)</Heading>
@@ -247,7 +276,7 @@ export default function SagePOReceiptPage() {
                     onChange={(v) => setSelectedPart(String(v))}
                   />
                 </div>
-                <Button label="เพิ่ม" variant="primary" isDisabled={!selectedPart} onClick={handleAddPart} icon={<Icon icon={PlusIcon} size="sm" />} />
+                <button type="button" disabled={!selectedPart} onClick={handleAddPart} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"><PlusIcon className="w-4 h-4" /> เพิ่ม</button>
               </HStack>
             </Field>
           </VStack>
@@ -258,7 +287,7 @@ export default function SagePOReceiptPage() {
         <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderBottom: "1px solid var(--color-border)" }}>
           <HStack hAlign="between" vAlign="center">
             <HStack gap={2} vAlign="center">
-              <Icon icon={DocumentCheckIcon} color="accent" />
+              <DocumentCheckIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
               <Text type="body" weight="bold">รายการรับเข้า{poNumber ? ` — ${poNumber}` : ""}</Text>
             </HStack>
             <Badge label={`${items.length} รายการ`} variant="info" />
@@ -276,13 +305,15 @@ export default function SagePOReceiptPage() {
                 <Text type="body" color="secondary">มูลค่า PO รวม</Text>
                 <HStack gap={3} vAlign="center">
                   <Heading level={3}>{totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
-                  <Button
-                    label={submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
-                    variant="primary"
-                    isDisabled={submitting || !poNumber.trim() || items.length === 0}
+                  <button
+                    type="button"
+                    disabled={submitting || !poNumber.trim() || items.length === 0}
                     onClick={handleSubmitReceipt}
-                    icon={<Icon icon={CheckCircleIcon} size="sm" />}
-                  />
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <CheckCircleIcon className="w-4 h-4" />
+                    {submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
+                  </button>
                 </HStack>
               </HStack>
             </div>

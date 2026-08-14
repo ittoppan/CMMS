@@ -4,9 +4,6 @@ import { useState } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Selector } from "@astryxdesign/core/Selector";
 import { 
@@ -71,23 +68,26 @@ export default function ExportExcelReportPage() {
   return (
     <VStack gap={6}>
       {/* Header */}
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
-            <Badge label="รองรับ Excel & Sage 300" variant="success" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS EXPORT EXCEL · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <TableCellsIcon className="w-3.5 h-3.5" /> รองรับ Excel & Sage 300
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน
           </Text>
         </VStack>
-      </HStack>
+      </div>
 
       {/* Alert Notice */}
       {successMsg && (
         <Card padding={4} style={{ background: 'var(--cmms-success-bg)', border: '1px solid var(--cmms-success)' }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: 'var(--cmms-success)' }}>
               {successMsg}
             </Text>
@@ -152,25 +152,28 @@ export default function ExportExcelReportPage() {
             </VStack>
 
             <HStack hAlign="end" gap={2} style={{ marginTop: 8 }}>
-              <Button
-                label="ส่งออกไฟล์ Excel / CSV ทันที"
-                variant="primary"
-                size="lg"
-                isLoading={exporting}
-                icon={<Icon icon={ArrowDownTrayIcon} size="sm" />}
+              <button
+                type="button"
+                disabled={exporting}
                 onClick={handleExportCSV}
-              />
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowDownTrayIcon className="w-4 h-4" />
+                {exporting ? "กำลังส่งออก..." : "ส่งออกไฟล์ Excel / CSV ทันที"}
+              </button>
             </HStack>
           </VStack>
         </Card>
 
         {/* Right Info Card */}
-        <Card padding={5} style={{ background: '#F8FAFC' }}>
+        <Card padding={5} style={{ background: 'var(--cmms-bg-muted)' }}>
           <VStack gap={4}>
             <Heading level={4}>รูปแบบไฟล์และการนำไปใช้งาน</Heading>
             <VStack gap={3}>
               <HStack gap={3} vAlign="center">
-                <Icon icon={TableCellsIcon} size="md" color="primary" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <TableCellsIcon className="w-5 h-5" />
+                </div>
                 <VStack gap={0}>
                   <Text type="body" weight="bold">รองรับ Microsoft Excel 100%</Text>
                   <Text type="body" size="sm" color="secondary">ไฟล์ UTF-8 BOM แสดงภาษาไทยสมบูรณ์ สระไม่จม</Text>
@@ -178,7 +181,9 @@ export default function ExportExcelReportPage() {
               </HStack>
 
               <HStack gap={3} vAlign="center">
-                <Icon icon={CircleStackIcon} size="md" color="success" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+                  <CircleStackIcon className="w-5 h-5" />
+                </div>
                 <VStack gap={0}>
                   <Text type="body" weight="bold">นำเข้า Sage 300 ERP ได้ทันที</Text>
                   <Text type="body" size="sm" color="secondary">ฟอร์แมตมาตรฐานสำหรับนำเข้า I/C Stock Journal</Text>

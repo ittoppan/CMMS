@@ -16,9 +16,6 @@ import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Divider } from "@astryxdesign/core/Divider";
 import { TabList, Tab } from "@astryxdesign/core/TabList";
 import {
@@ -193,11 +190,27 @@ export default function InteractiveStylePageEditor() {
 
   return (
     <VStack gap={4} style={{ height: "calc(100vh - 120px)", minHeight: 650 }}>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>STYLE EDITOR · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>สตูดิโอปรับแต่งสไตล์ & โทนสีหน้าเว็บ</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <PaintBrushIcon className="w-3.5 h-3.5" /> Live Preview
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            เลือกหน้า เปลี่ยนสีหลัก พื้นหลัง มุมมน และฟอนต์ แล้วบันทึกลงฐานข้อมูล — ดูตัวอย่างแบบเรียลไทม์ก่อนเผยแพร่
+          </Text>
+        </VStack>
+      </div>
+
       {/* Header Notification Banner */}
       {saveSuccess && (
         <Card padding={3} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>
               บันทึกโทนสีและสไตล์รูปแบบของหน้า '{selectedRoute}' เข้าฐานข้อมูลเรียบร้อยแล้ว!
             </Text>
@@ -294,7 +307,7 @@ export default function InteractiveStylePageEditor() {
                           }}
                         >
                           <Text type="body" size="sm" weight="bold">{bgStyle.label}</Text>
-                          {bgColor === bgStyle.color && <Badge label="เลือกอยู่" variant="info" />}
+                          {bgColor === bgStyle.color && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
                         </button>
                       ))}
                     </VStack>
@@ -350,7 +363,7 @@ export default function InteractiveStylePageEditor() {
                           }}
                         >
                           <Text type="body" size="sm" weight="bold">{font.label}</Text>
-                          {fontFamily === font.id && <Badge label="เลือกอยู่" variant="success" />}
+                          {fontFamily === font.id && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
                         </button>
                       ))}
                     </VStack>
@@ -388,19 +401,23 @@ export default function InteractiveStylePageEditor() {
 
               {/* Publish Action Button */}
               <VStack gap={2}>
-                <Button
-                  label="บันทึกสไตล์ & โทนสี"
-                  variant="primary"
-                  isLoading={publishing}
-                  icon={<Icon icon={CheckCircleIcon} size="sm" />}
+                <button
+                  type="button"
+                  disabled={publishing}
                   onClick={handlePublish}
-                />
-                <Button
-                  label="เปิดดูหน้าจริงแบบเต็มจอ"
-                  variant="secondary"
-                  icon={<Icon icon={EyeIcon} size="sm" />}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircleIcon className="w-4 h-4" />
+                  {publishing ? "กำลังบันทึก..." : "บันทึกสไตล์ & โทนสี"}
+                </button>
+                <button
+                  type="button"
                   onClick={() => (window.location.href = selectedRoute)}
-                />
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+                >
+                  <EyeIcon className="w-4 h-4" />
+                  เปิดดูหน้าจริงแบบเต็มจอ
+                </button>
               </VStack>
             </VStack>
           </LayoutPanel>
@@ -411,7 +428,7 @@ export default function InteractiveStylePageEditor() {
               {/* Top Viewport Controls Bar */}
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4} style={{ background: "#FFFFFF", padding: 12, borderRadius: 12, border: "1px solid #CBD5E1" }}>
                 <HStack gap={2} vAlign="center">
-                  <Badge label={`กำลังจำลองสไตล์หน้า: ${selectedRoute}`} variant="info" />
+                  <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.75rem", padding: "4px 10px" }}>กำลังจำลองสไตล์หน้า: {selectedRoute}</span>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                     <span style={{ fontSize: "0.8rem", color: "#64748B" }}>สีหลัก:</span>
                     <div style={{ width: 16, height: 16, borderRadius: "50%", background: primaryColor }} />
@@ -431,7 +448,7 @@ export default function InteractiveStylePageEditor() {
                       fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
                     }}
                   >
-                    <Icon icon={ComputerDesktopIcon} size="xsm" /> Desktop
+                    <ComputerDesktopIcon className="w-4 h-4" /> Desktop
                   </button>
                   <button
                     type="button"
@@ -443,7 +460,7 @@ export default function InteractiveStylePageEditor() {
                       fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
                     }}
                   >
-                    <Icon icon={DeviceTabletIcon} size="xsm" /> Tablet
+                    <DeviceTabletIcon className="w-4 h-4" /> Tablet
                   </button>
                   <button
                     type="button"
@@ -455,7 +472,7 @@ export default function InteractiveStylePageEditor() {
                       fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
                     }}
                   >
-                    <Icon icon={DevicePhoneMobileIcon} size="xsm" /> Mobile
+                    <DevicePhoneMobileIcon className="w-4 h-4" /> Mobile
                   </button>
                 </HStack>
               </HStack>

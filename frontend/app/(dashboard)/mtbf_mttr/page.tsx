@@ -6,10 +6,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Button } from "@astryxdesign/core/Button";
-import { IconButton } from "@astryxdesign/core/IconButton";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -20,7 +16,8 @@ import {
   TrashIcon,
   ChartBarIcon,
   BoltIcon,
-  ClockIcon
+  ClockIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
 interface MtbfRecord extends Record<string, unknown> {
@@ -135,7 +132,9 @@ export default function MtbfMttrPage() {
       header: "จำนวนครั้งเสีย",
       width: proportional(1),
       renderCell: (item) => (
-        <Badge label={`${item.totalFailures} ครั้ง`} variant="neutral" />
+        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>
+          {item.totalFailures} ครั้ง
+        </span>
       ),
     },
     {
@@ -144,19 +143,22 @@ export default function MtbfMttrPage() {
       width: proportional(1.5),
       renderCell: (item) => (
         <HStack gap={2}>
-          <Button
-            size="sm"
-            variant="secondary"
+          <button
+            type="button"
             onClick={() => router.push(`/mtbf_mttr/edit?id=${item.rawId}`)}
-            label="แก้ไข"
-          />
-          <IconButton
-            size="sm"
-            variant="destructive"
-            label="ลบข้อมูล MTBF"
-            icon={<Icon icon={TrashIcon} size="sm" />}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <PencilSquareIcon className="w-3.5 h-3.5" />
+            แก้ไข
+          </button>
+          <button
+            type="button"
             onClick={() => handleDelete(item.rawId)}
-          />
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+          >
+            <TrashIcon className="w-3.5 h-3.5" />
+            ลบ
+          </button>
         </HStack>
       ),
     },
@@ -164,45 +166,62 @@ export default function MtbfMttrPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>รายงานดัชนีชี้วัด MTBF & MTTR (Reliability KPI)</Heading>
-            <Badge label="ระบบ CMMS" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MTBF MTTR · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>รายงานดัชนีชี้วัด MTBF & MTTR (Reliability KPI)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ChartBarIcon className="w-3.5 h-3.5" /> ระบบ CMMS
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ติดตามค่าระยะเวลาเฉลี่ยก่อนการชำรุด (MTBF) และระยะเวลาเฉลี่ยในการซ่อม (MTTR)</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ติดตามค่าระยะเวลาเฉลี่ยก่อนการชำรุด (MTBF) และระยะเวลาเฉลี่ยในการซ่อม (MTTR)
+          </Text>
         </VStack>
-        <Button label="บันทึกข้อมูล MTBF/MTTR" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => router.push("/mtbf_mttr/create")} />
-      </HStack>
+        <button
+          type="button"
+          onClick={() => router.push("/mtbf_mttr/create")}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <PlusIcon className="w-4 h-4" />
+          บันทึกข้อมูล MTBF/MTTR
+        </button>
+      </div>
 
-      <Grid columns={3} gap={4}>
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-primary)' }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">จำนวนบันทึกทั้งหมด</Text>
-            <Heading level={3}>{stats.total} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-          </VStack>
-        </Card>
-
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-success)' }}>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 10, borderRadius: 8, background: 'var(--color-success-wash)' }}>
-              <Icon icon={BoltIcon} color="success" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ChartBarIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
-              <Text type="supporting" color="secondary">ค่าเฉลี่ย MTBF</Text>
-              <Heading level={3}>{stats.avgMtbf} <span style={{ fontSize: 14 }}>ชั่วโมง</span></Heading>
+              <Text type="supporting" color="secondary">จำนวนบันทึกทั้งหมด</Text>
+              <Heading level={2}>{stats.total} <Text type="body" size="sm">รายการ</Text></Heading>
             </VStack>
           </HStack>
         </Card>
 
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-warning)' }}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 10, borderRadius: 8, background: 'var(--color-warning-wash)' }}>
-              <Icon icon={ClockIcon} color="warning" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <BoltIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ค่าเฉลี่ย MTBF</Text>
+              <Heading level={2}>{stats.avgMtbf} <Text type="body" size="sm">ชั่วโมง</Text></Heading>
+            </VStack>
+          </HStack>
+        </Card>
+
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ค่าเฉลี่ย MTTR</Text>
-              <Heading level={3}>{stats.avgMttr} <span style={{ fontSize: 14 }}>นาที</span></Heading>
+              <Heading level={2}>{stats.avgMttr} <Text type="body" size="sm">นาที</Text></Heading>
             </VStack>
           </HStack>
         </Card>
@@ -215,7 +234,7 @@ export default function MtbfMttrPage() {
                 label="ค้นหา"
                 isLabelHidden
                 placeholder="ค้นหาเครื่องจักร, รหัส หรือรอบเดือน..."
-                startIcon={<Icon icon={MagnifyingGlassIcon} />}
+                startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                 value={search}
                 onChange={setSearch}
                 style={{ width: 350 }}

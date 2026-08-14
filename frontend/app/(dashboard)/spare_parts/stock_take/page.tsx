@@ -4,10 +4,8 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
@@ -223,24 +221,28 @@ export default function StockTakePage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">STOCK TAKE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>นับสต็อกจริง (Stock Take)</Heading>
-            <Badge label={`${rounds.length} รอบ`} variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>STOCK TAKE · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>นับสต็อกจริง (Stock Take)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> {rounds.length} รอบ
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             สร้างรอบนับ → กรอกจำนวนที่พบจริงบนมือถือ → ปิดรอบเพื่อปรับ stock_qty ตามจริง
           </Text>
         </VStack>
-        <Button
-          label="สร้างรอบนับใหม่"
-          variant="primary"
-          icon={<Icon icon={PlusIcon} size="sm" />}
+        <button
+          type="button"
           onClick={() => setShowCreate(true)}
-        />
-      </HStack>
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <PlusIcon className="w-4 h-4" />
+          สร้างรอบนับใหม่
+        </button>
+      </div>
 
       {activeId && round ? (
         /* ═══════ รายละเอียดรอบที่กำลังนับ ═══════ */
@@ -248,7 +250,7 @@ export default function StockTakePage() {
           <Card padding={4}>
             <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
               <HStack gap={3} vAlign="center">
-                <Icon icon={ClipboardDocumentCheckIcon} size="md" color="primary" />
+                <ClipboardDocumentCheckIcon className="w-6 h-6" style={{ color: "var(--color-primary, var(--cmms-primary))" }} />
                 <VStack gap={0}>
                   <Heading level={3}>{round.code}</Heading>
                   <Text type="body" size="sm" color="secondary">
@@ -258,17 +260,26 @@ export default function StockTakePage() {
                 </VStack>
               </HStack>
               <HStack gap={2} wrap="wrap">
-                <Button label="← กลับรายการ" variant="secondary" size="sm" onClick={() => { setActiveId(null); setRound(null); }} />
+                <button
+                  type="button"
+                  onClick={() => { setActiveId(null); setRound(null); }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+                >← กลับรายการ</button>
                 {round.status === "draft" && (
                   <>
-                    <Button label="ยกเลิกรอบ" variant="secondary" size="sm" onClick={cancelRound} />
-                    <Button
-                      label="ปิดรอบ + ปรับสต็อก"
-                      variant="primary"
-                      size="sm"
-                      icon={<Icon icon={CheckCircleIcon} size="sm" />}
+                    <button
+                      type="button"
+                      onClick={cancelRound}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all duration-300"
+                    >ยกเลิกรอบ</button>
+                    <button
+                      type="button"
                       onClick={() => setConfirmComplete(true)}
-                    />
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300"
+                    >
+                      <CheckCircleIcon className="w-3.5 h-3.5" />
+                      ปิดรอบ + ปรับสต็อก
+                    </button>
                   </>
                 )}
               </HStack>
@@ -277,7 +288,7 @@ export default function StockTakePage() {
 
           <Card padding={4}>
             <HStack gap={2} vAlign="center" wrap="wrap">
-              <Icon icon={MagnifyingGlassIcon} size="sm" color="secondary" />
+              <MagnifyingGlassIcon className="w-4 h-4 shrink-0" style={{ color: "var(--color-secondary)" }} />
               <TextInput
                 label="ค้นหาอะไหล่"
                 isLabelHidden
@@ -332,13 +343,18 @@ export default function StockTakePage() {
                           onChange={(v) => setNotes((f) => ({ ...f, [it.spare_part_id]: v }))}
                           style={{ width: 140 }}
                         />
-                        <Button
-                          label={counted ? "บันทึกแล้ว ✓" : "บันทึก"}
-                          variant={counted ? "secondary" : "primary"}
-                          size="sm"
-                          isLoading={busy}
+                        <button
+                          type="button"
+                          disabled={busy}
                           onClick={() => saveItem(it)}
-                        />
+                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            counted
+                              ? "text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)]"
+                              : "text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md shadow-blue-900/20 hover:brightness-110"
+                          }`}
+                        >
+                          {counted ? "บันทึกแล้ว ✓" : busy ? "กำลังบันทึก..." : "บันทึก"}
+                        </button>
                       </HStack>
                     </HStack>
                   </Card>
@@ -353,7 +369,7 @@ export default function StockTakePage() {
           {rounds.length === 0 ? (
             <Card padding={6}>
               <VStack gap={2} hAlign="center" style={{ textAlign: "center" }}>
-                <Icon icon={ClipboardDocumentCheckIcon} size="lg" color="secondary" />
+                <ClipboardDocumentCheckIcon className="w-10 h-10 mx-auto" style={{ color: "var(--color-secondary)" }} />
                 <Heading level={3}>ยังไม่มีรอบนับสต็อก</Heading>
                 <Text type="body" color="secondary">กด "สร้างรอบนับใหม่" เพื่อเริ่มนับสต็อกครั้งแรก</Text>
               </VStack>
@@ -374,17 +390,18 @@ export default function StockTakePage() {
                   </HStack>
                   <HStack gap={2} vAlign="center">
                     <Badge label={`นับ ${r.counted_items}/${r.total_items}`} variant="neutral" />
-                    {Number(r.diff_items) > 0 && <Badge label={`ต่าง ${r.diff_items} รายการ`} variant="warning" />}
+                    {Number(r.diff_items) > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />ต่าง {r.diff_items} รายการ</span>}
                     {r.status === "draft" && (
-                      <Button
-                        label="ลบ"
-                        variant="secondary"
-                        size="sm"
-                        icon={<Icon icon={TrashIcon} size="sm" />}
+                      <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); deleteRound(r.id); }}
-                      />
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                        ลบ
+                      </button>
                     )}
-                    <Icon icon={ChevronRightIcon} size="sm" color="disabled" />
+                    <ChevronRightIcon className="w-4 h-4" style={{ color: "var(--color-disabled, var(--color-border))" }} />
                   </HStack>
                 </HStack>
               </Card>
@@ -407,8 +424,17 @@ export default function StockTakePage() {
             placeholder="เช่น นับสต็อกสิ้นเดือน ก.ค."
           />
           <HStack hAlign="end" gap={2}>
-            <Button label="ยกเลิก" variant="secondary" onClick={() => setShowCreate(false)} />
-            <Button label="สร้างรอบ" variant="primary" isLoading={busy} onClick={createRound} />
+            <button
+              type="button"
+              onClick={() => setShowCreate(false)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+            >ยกเลิก</button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={createRound}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >{busy ? "กำลังสร้าง..." : "สร้างรอบ"}</button>
           </HStack>
         </VStack>
       </Dialog>
@@ -421,8 +447,17 @@ export default function StockTakePage() {
             ระบบจะปรับ stock_qty ของอะไหล่ที่กรอกจำนวนจริง (ต่างจากระบบ {items.filter((i) => i.diff !== null && i.diff !== 0).length} รายการ) ลงฐานข้อมูลทันที — ทำแล้วแก้กลับไม่ได้ ยืนยัน?
           </Text>
           <HStack hAlign="end" gap={2}>
-            <Button label="ยังไม่ปิด" variant="secondary" onClick={() => setConfirmComplete(false)} />
-            <Button label="ยืนยันปิดรอบ" variant="primary" isLoading={busy} onClick={completeRound} />
+            <button
+              type="button"
+              onClick={() => setConfirmComplete(false)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+            >ยังไม่ปิด</button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={completeRound}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >{busy ? "กำลังปิด..." : "ยืนยันปิดรอบ"}</button>
           </HStack>
         </VStack>
       </Dialog>

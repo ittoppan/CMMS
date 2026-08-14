@@ -4,9 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -187,7 +185,7 @@ export default function InventoryOptimizationPage() {
       width: proportional(1.2),
       renderCell: (item: EOQItem) =>
         item.deadStockDays >= 180 ? (
-          <Badge label={`${item.deadStockDays} วัน`} variant="error" icon={<Icon icon={ExclamationTriangleIcon} size="sm" />} />
+          <span className="cmms-status down"><span className="cmms-status-dot" />{item.deadStockDays} วัน</span>
         ) : (
           <Text type="body" size="sm">{item.deadStockDays} วัน</Text>
         ),
@@ -198,7 +196,7 @@ export default function InventoryOptimizationPage() {
       width: proportional(3),
       renderCell: (item: EOQItem) => (
         <HStack gap={2} vAlign="start">
-          <Icon icon={LightBulbIcon} size="sm" color="warning" style={{ marginTop: 2 }} />
+          <LightBulbIcon className="w-4 h-4 shrink-0" style={{ color: "var(--color-warning)", marginTop: 2 }} />
           <Text type="body" size="sm">{item.aiRecommendation}</Text>
         </HStack>
       ),
@@ -218,60 +216,72 @@ export default function InventoryOptimizationPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>AI วิเคราะห์คลังอะไหล่ (Inventory Optimization & Dead Stock)</Heading>
-            <Badge label="ขับเคลื่อนด้วย AI" variant="info" icon={<Icon icon={SparklesIcon} size="sm" />} />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>AI วิเคราะห์คลังอะไหล่</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <SparklesIcon className="w-3.5 h-3.5" /> ขับเคลื่อนด้วย AI
+            </span>
           </HStack>
-          <Text type="body" color="secondary">คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)
+          </Text>
         </VStack>
-        <Button label="ประมวลผล AI ใหม่" variant="primary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchData} />
-      </HStack>
+        <button
+          type="button"
+          onClick={fetchData}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-violet-600 to-indigo-500 shadow-lg shadow-indigo-900/30 hover:brightness-110 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          ประมวลผล AI ใหม่
+        </button>
+      </div>
 
-      <Grid columns={4} gap={4}>
-        <Card padding={4} variant="muted">
+      <Grid columns={{ minWidth: 260, max: 4 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card blue">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--color-accent-wash)" }}>
-              <Icon icon={ScaleIcon} color="accent" size="md" />
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ScaleIcon className="w-5 h-5" />
             </div>
-            <VStack gap={1}>
+            <VStack gap={0}>
               <Text type="supporting" weight="bold" color="accent">อะไหล่กลุ่มสำคัญสูง (Class A)</Text>
               <Heading level={3}>{stats.classA} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
-        <Card padding={4} variant="muted" style={{ borderLeft: "4px solid var(--color-error)" }}>
+        <Card padding={4} className="cmms-kpi-card red">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--color-error-wash)" }}>
-              <Icon icon={ExclamationTriangleIcon} color="error" size="md" />
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5" />
             </div>
-            <VStack gap={1}>
+            <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-error)" }}>อะไหล่ค้างคลัง (&gt; 180 วัน)</Text>
               <Heading level={3}>{stats.deadCount} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (จมทุน {stats.deadValue.toLocaleString("th-TH")} บาท)</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
-        <Card padding={4} variant="muted">
+        <Card padding={4} className="cmms-kpi-card amber">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--color-warning-wash)" }}>
-              <Icon icon={ExclamationTriangleIcon} color="warning" size="md" />
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-5 h-5" />
             </div>
-            <VStack gap={1}>
+            <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-warning)" }}>ต่ำกว่า Min Stock</Text>
               <Heading level={3}>{stats.reorder} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (ต้องสั่งซื้อ)</span></Heading>
             </VStack>
           </HStack>
         </Card>
 
-        <Card padding={4} variant="muted">
+        <Card padding={4} className="cmms-kpi-card green">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--color-success-wash)" }}>
-              <Icon icon={SparklesIcon} color="success" size="md" />
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <SparklesIcon className="w-5 h-5" />
             </div>
-            <VStack gap={1}>
+            <VStack gap={0}>
               <Text type="supporting" weight="bold" style={{ color: "var(--color-success)" }}>มูลค่าคงคลังรวม</Text>
               <Heading level={3}>{stats.totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
             </VStack>

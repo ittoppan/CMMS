@@ -4,9 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Spinner } from "@astryxdesign/core/Spinner";
@@ -31,9 +28,9 @@ interface MonthlyStat {
 }
 
 const MONTH_COLORS = [
-  "#2563eb", "#16a34a", "#f59e0b", "#dc2626",
-  "#7c3aed", "#0891b2", "#db2777", "#65a30d",
-  "#ea580c", "#0284c7", "#4f46e5", "#ca8a04",
+  "var(--cmms-primary)", "var(--cmms-success)", "var(--cmms-warning)", "var(--cmms-danger)",
+  "var(--cmms-info)", "var(--cmms-info)", "var(--cmms-danger)", "var(--cmms-success)",
+  "var(--cmms-warning)", "var(--cmms-info)", "var(--cmms-primary)", "var(--cmms-warning)",
 ];
 
 export default function AnalyticsDashboardPage() {
@@ -142,15 +139,20 @@ export default function AnalyticsDashboardPage() {
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
       {/* Header */}
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>วิเคราะห์ประสิทธิภาพการซ่อมบำรุง</Heading>
-            <Badge label="ข้อมูลจริง" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ANALYTICS · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>วิเคราะห์ประสิทธิภาพการซ่อมบำรุง</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <CheckCircleIcon className="w-3.5 h-3.5" /> ข้อมูลจริง
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ติดตาม MTBF, MTTR, งานซ่อม และค่าใช้จ่ายรายเดือนของโรงงาน</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ติดตาม MTBF, MTTR, งานซ่อม และค่าใช้จ่ายรายเดือนของโรงงาน
+          </Text>
         </VStack>
-        <HStack gap={2}>
+        <HStack gap={2} wrap="wrap">
           <Selector
             label="ปี"
             isLabelHidden
@@ -158,16 +160,23 @@ export default function AnalyticsDashboardPage() {
             onChange={(v) => setYear(Number(v))}
             options={months}
           />
-          <Button label="รีเฟรช" variant="secondary" icon={<Icon icon={ArrowPathIcon} size="sm" />} onClick={fetchAnalytics} />
+          <button
+            type="button"
+            onClick={fetchAnalytics}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       {/* KPI Cards */}
-      <Grid columns={4} gap={4}>
-        <Card padding={4}>
+      <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-primary-wash)" }}>
-              <Icon icon={WrenchScrewdriverIcon} color="primary" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ใบสั่งงานซ่อมทั้งหมด</Text>
@@ -176,10 +185,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-danger-wash)" }}>
-              <Icon icon={ExclamationTriangleIcon} color="error" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">งานที่ยังค้างอยู่</Text>
@@ -188,10 +197,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-success-wash)" }}>
-              <Icon icon={CheckCircleIcon} color="success" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">งานเสร็จสมบูรณ์</Text>
@@ -200,10 +209,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-warning-wash)" }}>
-              <Icon icon={BanknotesIcon} color="warning" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <BanknotesIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">ค่าใช้จ่ายซ่อมรวม</Text>
@@ -214,11 +223,11 @@ export default function AnalyticsDashboardPage() {
       </Grid>
 
       {/* Second row of KPIs */}
-      <Grid columns={4} gap={4}>
-        <Card padding={4}>
+      <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-info-wash)" }}>
-              <Icon icon={ClockIcon} color="blue" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">MTBF เฉลี่ย ({year})</Text>
@@ -227,10 +236,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-warning-wash)" }}>
-              <Icon icon={ClockIcon} color="warning" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClockIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">MTTR เฉลี่ย ({year})</Text>
@@ -239,10 +248,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-success-wash)" }}>
-              <Icon icon={WrenchScrewdriverIcon} color="success" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+              <WrenchScrewdriverIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">เครื่องจักรที่ลงทะเบียน</Text>
@@ -251,10 +260,10 @@ export default function AnalyticsDashboardPage() {
           </HStack>
         </Card>
 
-        <Card padding={4}>
+        <Card padding={4} className="cmms-kpi-card">
           <HStack gap={3} vAlign="center">
-            <div style={{ padding: 12, borderRadius: 8, backgroundColor: "var(--cmms-info-wash)" }}>
-              <Icon icon={CheckCircleIcon} color="blue" size="md" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CheckCircleIcon className="w-6 h-6" />
             </div>
             <VStack gap={1}>
               <Text type="supporting" color="secondary">แผนงาน PM/AM</Text>

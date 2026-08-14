@@ -5,13 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
 import { DateInput } from "@astryxdesign/core/DateInput";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, WrenchIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
@@ -140,12 +139,25 @@ function EditBorrowingContent() {
 
   return (
     <VStack gap={6}>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EQUIPMENT BORROWING EDIT · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>แก้ไขรายการยืม-คืนอุปกรณ์</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <WrenchIcon className="w-3.5 h-3.5" /> รายการยืม
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            แก้ไขรายละเอียดการยืม-คืน — วันที่ สภาพอุปกรณ์ และสถานะ
+          </Text>
+        </VStack>
+      </div>
+
       <Breadcrumbs>
-        <BreadcrumbItem href="/equipment_borrowing" startIcon={<HomeIcon />}>การยืม-คืนเครื่องมือ</BreadcrumbItem>
+        <BreadcrumbItem href="/equipment_borrowing" startIcon={<HomeIcon className="w-4 h-4" />}>การยืม-คืนเครื่องมือ</BreadcrumbItem>
         <BreadcrumbItem isCurrent>แก้ไขรายการยืม</BreadcrumbItem>
       </Breadcrumbs>
-
-      <Heading level={2}>แก้ไขรายการยืม-คืนอุปกรณ์</Heading>
 
       <Card padding={6}>
         {loadingData ? (
@@ -245,8 +257,22 @@ function EditBorrowingContent() {
             />
 
             <HStack gap={3} hAlign="end">
-              <Button label="ยกเลิก" variant="secondary" onClick={() => router.push("/equipment_borrowing")} />
-              <Button label="บันทึกข้อมูล" variant="primary" onClick={handleSubmit} isLoading={submitting} />
+              <button
+                type="button"
+                onClick={() => router.push("/equipment_borrowing")}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleSubmit}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+              >
+                <PencilSquareIcon className="w-4 h-4" />
+                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              </button>
             </HStack>
           </VStack>
         )}

@@ -4,9 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -77,22 +74,35 @@ export default function IotMonitorPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>มอนิเตอร์เซนเซอร์ IoT</Heading>
-            <Badge label={loading ? "กำลังโหลด..." : sensors.length > 0 ? `เชื่อมต่อ ${sensors.length} ตัว` : "ไม่มีอุปกรณ์"} variant={alarmDevices.length > 0 ? "error" : "success"} icon={<Icon icon={BoltIcon} size="sm" />} />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>IOT MONITOR · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>มอนิเตอร์เซนเซอร์ IoT</Heading>
+            <span
+              className="cmms-andon-chip"
+              style={{
+                background: alarmDevices.length > 0 ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.12)",
+                color: alarmDevices.length > 0 ? "#FCA5A5" : "#fff",
+              }}
+            >
+              <BoltIcon className="w-3.5 h-3.5" />
+              {loading ? "กำลังโหลด..." : sensors.length > 0 ? `เชื่อมต่อ ${sensors.length} ตัว` : "ไม่มีอุปกรณ์"}
+            </span>
           </HStack>
-          <Text type="body" color="secondary">แสดงสถานะเซนเซอร์ IoT จากฐานข้อมูล (อัปเดตทุก 30 วินาที)</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            แสดงสถานะเซนเซอร์ IoT จากฐานข้อมูล (อัปเดตทุก 30 วินาที)
+          </Text>
         </VStack>
-        <Button
-          label="รีเฟรช"
-          variant="secondary"
-          size="sm"
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
+        <button
+          type="button"
           onClick={fetchDevices}
-        />
-      </HStack>
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
+      </div>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
@@ -101,7 +111,7 @@ export default function IotMonitorPage() {
         <Card padding={4} style={{ backgroundColor: 'var(--color-error-wash)', border: '1px solid var(--color-error)' }}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
             <HStack gap={3} vAlign="center">
-              <Icon icon={ExclamationTriangleIcon} color="error" size="md" />
+              <ExclamationTriangleIcon className="w-5 h-5" style={{ color: "var(--color-error)" }} />
               <VStack gap={0}>
                 <Text type="body" weight="bold" style={{ color: "var(--color-error)" }}>
                   ตรวจพบ {alarmDevices.length} อุปกรณ์สถานะแจ้งเตือน (Alarm)
@@ -124,26 +134,33 @@ export default function IotMonitorPage() {
           <EmptyState
             title="ยังไม่มีอุปกรณ์ IoT ในระบบ"
             description="เมื่อมีการลงทะเบียนเซนเซอร์และบันทึกข้อมูลจริง อุปกรณ์จะแสดงที่นี่"
-            icon={<Icon icon={CpuChipIcon} size="lg" />}
+            icon={<CpuChipIcon className="w-8 h-8" />}
           />
         </Card>
       ) : (
-        <Grid columns={2} gap={6}>
+        <Grid columns={{ minWidth: 340, max: 2 }} gap={6}>
           {sensors.map((sensor) => (
             <Card key={sensor.id} padding={5} style={{ borderLeft: `4px solid ${sensor.status === 'alarm' ? 'var(--color-error)' : 'var(--color-success)'}` }}>
               <VStack gap={4}>
-                <HStack hAlign="between" vAlign="start">
+                <HStack hAlign="between" vAlign="start" wrap="wrap">
                   <VStack gap={1}>
                     <HStack gap={2} vAlign="center">
                       <Text type="body" weight="bold">{sensor.id}</Text>
-                      <Badge label="เซนเซอร์ IoT" variant="neutral" />
+                      <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>เซนเซอร์ IoT</span>
                     </HStack>
                     <Heading level={4}>{sensor.assetName}</Heading>
                   </VStack>
-                  <Badge
-                    variant={sensor.status === 'alarm' ? 'error' : 'success'}
-                    label={sensor.status === 'alarm' ? 'แจ้งเตือน (Alarm)' : 'ออนไลน์'}
-                  />
+                  <span
+                    className="cmms-andon-chip"
+                    style={{
+                      background: sensor.status === 'alarm' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.12)',
+                      color: sensor.status === 'alarm' ? '#dc2626' : '#059669',
+                      fontSize: "0.75rem",
+                      padding: "4px 10px",
+                    }}
+                  >
+                    {sensor.status === 'alarm' ? 'แจ้งเตือน (Alarm)' : 'ออนไลน์'}
+                  </span>
                 </HStack>
 
                 <HStack hAlign="between" vAlign="end" style={{ padding: 16, backgroundColor: 'var(--color-surface)', borderRadius: 8, border: '1px solid var(--color-border)' }}>

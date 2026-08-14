@@ -6,10 +6,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Button } from "@astryxdesign/core/Button";
-import { IconButton } from "@astryxdesign/core/IconButton";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -19,7 +15,9 @@ import {
   MagnifyingGlassIcon,
   DocumentArrowDownIcon,
   TrashIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  BookOpenIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
 interface ManualRecord extends Record<string, unknown> {
@@ -104,7 +102,7 @@ export default function ManualsPage() {
       width: proportional(2.5),
       renderCell: (item) => (
         <HStack gap={2} vAlign="center">
-          <Icon icon={DocumentTextIcon} size="sm" color="secondary" />
+          <DocumentTextIcon className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
           <VStack gap={0}>
             <Text type="body" weight="medium">{item.title}</Text>
             <Text type="supporting" color="secondary" maxLines={1}>{item.description}</Text>
@@ -118,7 +116,11 @@ export default function ManualsPage() {
       key: "fileType",
       header: "ประเภท",
       width: proportional(0.8),
-      renderCell: (item) => <Badge label={item.fileType.toUpperCase()} variant="neutral" />
+      renderCell: (item) => (
+        <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>
+          {item.fileType.toUpperCase()}
+        </span>
+      )
     },
     {
       key: "actions",
@@ -127,29 +129,38 @@ export default function ManualsPage() {
       renderCell: (item) => (
         <HStack gap={2}>
           {item.filePath ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 window.open(item.filePath, '_blank');
               }}
-              label="ดาวน์โหลด"
-            />
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+              ดาวน์โหลด
+            </button>
           ) : (
-            <Button size="sm" variant="secondary" label="แก้ไข" onClick={() => router.push(`/manuals/edit?id=${item.rawId}`)} />
+            <button
+              type="button"
+              onClick={() => router.push(`/manuals/edit?id=${item.rawId}`)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <PencilSquareIcon className="w-3.5 h-3.5" />
+              แก้ไข
+            </button>
           )}
-          <IconButton
-            size="sm"
-            variant="destructive"
-            label="ลบเอกสาร"
-            icon={<Icon icon={TrashIcon} size="sm" />}
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleDelete(item.rawId);
             }}
-          />
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+          >
+            <TrashIcon className="w-3.5 h-3.5" />
+            ลบ
+          </button>
         </HStack>
       ),
     },
@@ -157,23 +168,40 @@ export default function ManualsPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)</Heading>
-            <Badge label="ฐานความรู้" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MANUALS · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>คลังคู่มือและมาตรฐานการทำงาน (Manuals & SOP)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <BookOpenIcon className="w-3.5 h-3.5" /> ฐานความรู้
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ระบบจัดการเอกสารคู่มือเครื่องจักร และขั้นตอนการปฏิบัติงานมาตรฐาน</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ระบบจัดการเอกสารคู่มือเครื่องจักร และขั้นตอนการปฏิบัติงานมาตรฐาน
+          </Text>
         </VStack>
-        <Button label="อัปโหลดเอกสารใหม่" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => router.push("/manuals/create")} />
-      </HStack>
+        <button
+          type="button"
+          onClick={() => router.push("/manuals/create")}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <PlusIcon className="w-4 h-4" />
+          อัปโหลดเอกสารใหม่
+        </button>
+      </div>
 
-      <Grid columns={3} gap={4}>
-        <Card padding={4} style={{ borderLeft: '4px solid var(--cmms-primary)' }}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">จำนวนเอกสารทั้งหมด</Text>
-            <Heading level={3}>{data.length} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-          </VStack>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
+        <Card padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <DocumentTextIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">จำนวนเอกสารทั้งหมด</Text>
+              <Heading level={2}>{data.length} <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 
@@ -184,7 +212,7 @@ export default function ManualsPage() {
                 label="ค้นหา"
                 isLabelHidden
                 placeholder="ค้นหาชื่อเอกสาร, รหัส หรือเครื่องจักร..."
-                startIcon={<Icon icon={MagnifyingGlassIcon} />}
+                startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                 value={search}
                 onChange={setSearch}
                 style={{ width: 350 }}

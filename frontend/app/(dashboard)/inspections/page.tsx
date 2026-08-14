@@ -6,31 +6,24 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Link } from "@astryxdesign/core/Link";
 import CountUp from "react-countup";
 import {
   PlusIcon,
   ClipboardDocumentCheckIcon,
   TrashIcon,
   CalendarDaysIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "รอดำเนินการ", in_progress: "กำลังทำ", completed: "เสร็จสิ้น",
   overdue: "เกินกำหนด", skipped: "ข้าม",
-};
-const STATUS_VARIANTS: Record<string, any> = {
-  pending: "warning", in_progress: "info", completed: "success",
-  overdue: "error", skipped: "secondary",
 };
 const RESULT_LABELS: Record<string, string> = { pass: "ผ่าน", fail: "ไม่ผ่าน" };
 
@@ -128,39 +121,69 @@ export default function InspectionsPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">INSPECTION CHECKLIST · CMMS-TOPPAN</Text>
-          <Heading level={2}>ตรวจเช็ครอบ (Checklist)</Heading>
-          <Text type="body" color="secondary">รอบตรวจตามเครื่อง/สาธารณูปโภค — รายการไม่ผ่านจะสร้างใบแจ้งซ่อมอัตโนมัติ</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION CHECKLIST · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ตรวจเช็ครอบ (Checklist)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            รอบตรวจตามเครื่อง/สาธารณูปโภค — ตรวจเช็คเสร็จแล้วบันทึกผลได้ทันที
+          </Text>
         </VStack>
-        <HStack gap={2}>
-          <Link href="/inspections/templates">
-            <Button label="จัดการ Template" variant="secondary" icon={<Icon icon={ClipboardDocumentCheckIcon} size="sm" />} />
-          </Link>
-          <Button label="สร้างรอบตรวจ" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => { setShowCreate((v) => !v); setError(null); }} />
+        <HStack gap={2} wrap="wrap">
+          <a href="/inspections/templates" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
+            <ClipboardDocumentCheckIcon className="w-4 h-4" />
+            จัดการ Template
+          </a>
+          <button
+            type="button"
+            onClick={() => { setShowCreate((v) => !v); setError(null); }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          >
+            <PlusIcon className="w-4 h-4" />
+            สร้างรอบตรวจ
+          </button>
         </HStack>
-      </Card>
+      </div>
 
       {/* สรุปด่วน */}
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">เปิดค้าง</Text>
-            <Heading level={2} className={openCount > 0 ? "text-warning-600" : "text-emerald-600"}><CountUp end={openCount} /> <Text type="body" size="sm">รอบ</Text></Heading>
-          </VStack>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClipboardDocumentCheckIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เปิดค้าง</Text>
+              <Heading level={2}><CountUp end={openCount} /> <Text type="body" size="sm">รอบ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-blue-600">ครบกำหนดวันนี้</Text>
-            <Heading level={2} className="text-blue-600"><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CalendarDaysIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">ครบกำหนดวันนี้</Text>
+              <Heading level={2}><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4} className="border-rose-500 bg-rose-50 dark:bg-rose-900/10">
-          <VStack gap={1}>
-            <Text type="supporting" className="text-rose-600">เกินกำหนด</Text>
-            <Heading level={2} className="text-rose-600"><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ExclamationTriangleIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เกินกำหนด</Text>
+              <Heading level={2}><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 
@@ -184,8 +207,21 @@ export default function InspectionsPage() {
               </Field>
             </FormLayout>
             <HStack gap={2}>
-              <Button label="สร้างรอบ" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={createSchedule} />
-              <Button label="ยกเลิก" variant="secondary" onClick={() => setShowCreate(false)} />
+              <button
+                type="button"
+                onClick={createSchedule}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300"
+              >
+                <PlusIcon className="w-4 h-4" />
+                สร้างรอบ
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCreate(false)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
             </HStack>
           </VStack>
         </Card>
@@ -203,7 +239,7 @@ export default function InspectionsPage() {
 
           {schedules.length === 0 && (
             <VStack gap={2} style={{ padding: 24, textAlign: "center" }}>
-              <Icon icon={CalendarDaysIcon} size="lg" />
+              <CalendarDaysIcon className="w-8 h-8" style={{ color: "var(--cmms-secondary)" }} />
               <Text type="body" color="secondary">ยังไม่มีรอบตรวจ — กด "สร้างรอบตรวจ" เพื่อเริ่ม</Text>
             </VStack>
           )}
@@ -215,8 +251,22 @@ export default function InspectionsPage() {
                   <VStack gap={1} style={{ flex: 1, minWidth: 260 }}>
                     <HStack gap={2} vAlign="center" wrap="wrap">
                       <Text type="body" weight="bold">{s.template_title || `Template #${s.template_id}`}</Text>
-                      <Badge label={STATUS_LABELS[s.status] || s.status} variant={STATUS_VARIANTS[s.status] || "secondary"} />
-                      {s.result && <Badge label={RESULT_LABELS[s.result] || s.result} variant={s.result === "pass" ? "success" : "error"} />}
+                      <span
+                        className="cmms-andon-chip"
+                        style={{
+                          background: s.status === "completed" ? "rgba(16,185,129,0.12)" : s.status === "in_progress" ? "rgba(30,136,229,0.12)" : s.status === "overdue" ? "rgba(239,68,68,0.12)" : "rgba(245,158,11,0.12)",
+                          color: s.status === "completed" ? "#059669" : s.status === "in_progress" ? "#1E88E5" : s.status === "overdue" ? "#dc2626" : "#d97706",
+                          fontSize: "0.7rem",
+                          padding: "3px 9px",
+                        }}
+                      >
+                        {STATUS_LABELS[s.status] || s.status}
+                      </span>
+                      {s.result && (
+                        <span className="cmms-andon-chip" style={{ background: s.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: s.result === "pass" ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+                          {RESULT_LABELS[s.result] || s.result}
+                        </span>
+                      )}
                     </HStack>
                     <Text type="body" size="sm" color="secondary">
                       {s.asset_name || `เครื่อง #${s.asset_id}`}{s.asset_code ? ` (${s.asset_code})` : ""}
@@ -227,11 +277,19 @@ export default function InspectionsPage() {
                   </VStack>
                   <HStack gap={2}>
                     {s.status !== "completed" && (
-                      <Link href={`/inspections/run?schedule_id=${s.id}`}>
-                        <Button label="ทำเช็ค" variant="primary" size="sm" icon={<Icon icon={ClipboardDocumentCheckIcon} size="sm" />} />
-                      </Link>
+                      <a href={`/inspections/run?schedule_id=${s.id}`} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300">
+                        <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" />
+                        ทำเช็ค
+                      </a>
                     )}
-                    <Button label="" variant="ghost" size="sm" icon={<Icon icon={TrashIcon} size="sm" color="error" />} onClick={() => deleteSchedule(s)} />
+                    <button
+                      type="button"
+                      title="ลบรอบ"
+                      onClick={() => deleteSchedule(s)}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
                   </HStack>
                 </HStack>
               </div>

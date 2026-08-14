@@ -5,12 +5,8 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Table, proportional, pixel, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Badge } from "@astryxdesign/core/Badge";
-import { IconButton } from "@astryxdesign/core/IconButton";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Link } from "@astryxdesign/core/Link";
@@ -20,6 +16,9 @@ import {
   PlusIcon,
   MagnifyingGlassIcon,
   BuildingOffice2Icon,
+  CheckCircleIcon,
+  WrenchScrewdriverIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 
 interface Asset extends Record<string, unknown> {
@@ -39,18 +38,18 @@ const dbStatusToUi: Record<string, Asset["status"]> = {
   disposed: "decommissioned",
 };
 
-const statusColorMap: Record<string, "success" | "warning" | "error" | "neutral"> = {
-  operational: "success",
-  standby: "warning",
-  "under-repair": "error",
-  decommissioned: "neutral",
-};
-
 const statusLabelMap: Record<string, string> = {
   operational: "พร้อมใช้งาน",
   standby: "สแตนด์บาย",
   "under-repair": "กำลังซ่อม",
   decommissioned: "เลิกใช้งาน",
+};
+
+const statusChipStyle: Record<string, React.CSSProperties> = {
+  operational: { background: "rgba(16,185,129,0.12)", color: "#059669" },
+  standby: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
+  "under-repair": { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
+  decommissioned: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
 };
 
 const departmentLabelMap: Record<string, string> = {
@@ -144,7 +143,9 @@ export default function AssetsPage() {
       header: "สถานะ",
       width: proportional(1),
       renderCell: (item: Asset) => (
-        <Badge label={statusLabelMap[item.status] || item.status} variant={statusColorMap[item.status] || "neutral"} />
+        <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.decommissioned}>
+          {statusLabelMap[item.status] || item.status}
+        </span>
       ),
     },
     { key: "location", header: "สถานที่ติดตั้ง", width: proportional(2) },
@@ -153,40 +154,69 @@ export default function AssetsPage() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>ทะเบียนเครื่องจักรและทรัพย์สิน</Heading>
-          <Text type="body" color="secondary">ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSETS · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ทะเบียนเครื่องจักรและทรัพย์สิน</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <BuildingOffice2Icon className="w-3.5 h-3.5" /> ทะเบียน {kpiData.total} รายการ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว
+          </Text>
         </VStack>
-        <Link href="/assets/create">
-          <Button label="เพิ่มเครื่องจักร" size="md" icon={<Icon icon={PlusIcon} size="sm" />} />
-        </Link>
-      </Card>
+        <a href="/assets/create" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300">
+          <PlusIcon className="w-4 h-4" />
+          เพิ่มเครื่องจักร
+        </a>
+      </div>
 
-      <Grid columns={{ minWidth: 240, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
-            <Heading level={2}><CountUp end={kpiData.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+      <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <BuildingOffice2Icon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
+              <Heading level={2}><CountUp end={kpiData.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-emerald-600">พร้อมใช้งาน</Text>
-            <Heading level={2} className="text-emerald-600"><CountUp end={kpiData.operational} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <CheckCircleIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">พร้อมใช้งาน</Text>
+              <Heading level={2}><CountUp end={kpiData.operational} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-rose-600">กำลังซ่อม</Text>
-            <Heading level={2} className="text-rose-600"><CountUp end={kpiData.underRepair} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <WrenchScrewdriverIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">กำลังซ่อม</Text>
+              <Heading level={2}><CountUp end={kpiData.underRepair} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-amber-600">สแตนด์บาย</Text>
-            <Heading level={2} className="text-amber-600"><CountUp end={kpiData.standby} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+              <ClockIcon className="w-6 h-6" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">สแตนด์บาย</Text>
+              <Heading level={2}><CountUp end={kpiData.standby} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
       </Grid>
 

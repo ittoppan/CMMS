@@ -6,9 +6,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
@@ -69,11 +66,11 @@ function normalizeImage(raw?: string | null): string | null {
   return "/" + cleaned;
 }
 
-const statusVariant: Record<string, "success" | "warning" | "info" | "neutral"> = {
-  active: "success",
-  inactive: "neutral",
-  disposed: "neutral",
-  under_repair: "warning",
+const statusChipStyle: Record<string, React.CSSProperties> = {
+  active: { background: "rgba(16,185,129,0.12)", color: "#059669" },
+  inactive: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  disposed: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  under_repair: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
 };
 
 export default function BOMTreePage() {
@@ -254,22 +251,29 @@ export default function BOMTreePage() {
       )}
 
       {/* Header */}
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)</Heading>
-            <Badge label="รายการชิ้นส่วนประกอบ" variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY BOM TREE · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <RectangleGroupIcon className="w-3.5 h-3.5" /> รายการชิ้นส่วนประกอบ
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง
+          </Text>
         </VStack>
-        <Button
-          label="เพิ่มชิ้นส่วนเข้า BOM"
-          variant="primary"
-          icon={<Icon icon={PlusIcon} size="sm" />}
-          isDisabled={machines.length === 0}
+        <button
+          type="button"
+          disabled={machines.length === 0}
           onClick={() => setModalOpen(true)}
-        />
-      </HStack>
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <PlusIcon className="w-4 h-4" />
+          เพิ่มชิ้นส่วนเข้า BOM
+        </button>
+      </div>
 
       {loading ? (
         <HStack hAlign="center" vAlign="center" style={{ padding: 60 }}>
@@ -280,7 +284,7 @@ export default function BOMTreePage() {
         <EmptyState
           title="ยังไม่มีเครื่องจักรในระบบ"
           description="เพิ่มเครื่องจักรที่ทะเบียนเครื่องจักรก่อน แล้วกลับมาสร้าง BOM Tree"
-          icon={<Icon icon={BuildingOffice2Icon} size="lg" />}
+          icon={<BuildingOffice2Icon className="w-6 h-6" />}
         />
       ) : (
         <>
@@ -313,20 +317,22 @@ export default function BOMTreePage() {
                     />
                   ) : (
                     <div style={{ width: 56, height: 56, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--color-muted)" }}>
-                      <Icon icon={BuildingOffice2Icon} size="md" color="secondary" />
+                      <BuildingOffice2Icon className="w-6 h-6" style={{ color: "var(--color-text-secondary)" }} />
                     </div>
                   )}
                   <VStack gap={1}>
                     <HStack gap={2} vAlign="center">
                       <Text type="body" weight="bold">{machine.code}</Text>
-                      <Badge label={machine.status || "active"} variant={statusVariant[machine.status || ""] || "neutral"} />
+                      <span className="cmms-andon-chip" style={statusChipStyle[machine.status || ""] || statusChipStyle.active}>
+                        {machine.status || "active"}
+                      </span>
                     </HStack>
                     <Text type="body" size="sm" color="secondary">{machine.name}</Text>
                     <HStack gap={4}>
                       {machine.category && <Text type="body" size="sm" color="secondary">หมวด: {machine.category}</Text>}
                       {machine.location && (
                         <HStack gap={1} vAlign="center">
-                          <Icon icon={MapPinIcon} size="xsm" color="secondary" />
+                          <MapPinIcon className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
                           <Text type="body" size="sm" color="secondary">{machine.location}</Text>
                         </HStack>
                       )}
@@ -344,7 +350,7 @@ export default function BOMTreePage() {
                 <VStack gap={4}>
                   <HStack hAlign="between" vAlign="center" style={{ paddingBottom: 12, borderBottom: "1px solid var(--color-border)" }}>
                     <Heading level={4}>ชิ้นส่วนประกอบของ {machine?.code || "เครื่องจักร"}</Heading>
-                    <Badge label={`${parts.length} ชิ้นส่วน`} variant="neutral" />
+                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>{parts.length} ชิ้นส่วน</span>
                   </HStack>
 
                   {bomLoading ? (
@@ -353,7 +359,7 @@ export default function BOMTreePage() {
                     </HStack>
                   ) : parts.length === 0 ? (
                     <VStack gap={3} hAlign="center" vAlign="center" style={{ padding: 40 }}>
-                      <Icon icon={CubeIcon} size="lg" color="secondary" />
+                      <CubeIcon className="w-6 h-6" style={{ color: "var(--color-text-secondary)" }} />
                       <Text type="body" color="secondary">ยังไม่มีชิ้นส่วนใน BOM ของเครื่องนี้ — กด "เพิ่มชิ้นส่วนเข้า BOM" เพื่อเริ่มต้น</Text>
                     </VStack>
                   ) : (
@@ -361,11 +367,11 @@ export default function BOMTreePage() {
                       {/* Root node: เครื่องจักร */}
                       <div style={{ padding: "12px 16px", borderRadius: 8, border: "1px solid var(--color-primary)", backgroundColor: "var(--color-accent-wash)" }}>
                         <HStack gap={3} vAlign="center">
-                          <Icon icon={RectangleGroupIcon} size="sm" color="accent" />
+                          <RectangleGroupIcon className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
                           <VStack gap={0}>
                             <HStack gap={2} vAlign="center">
                               <Text type="body" weight="bold">{machine?.code}</Text>
-                              <Badge label="เครื่องจักร" variant="info" />
+                              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5" }}>เครื่องจักร</span>
                             </HStack>
                             <Text type="body" size="sm" color="secondary">{machine?.name}</Text>
                           </VStack>
@@ -402,13 +408,13 @@ export default function BOMTreePage() {
                                   />
                                 ) : (
                                   <div style={{ width: 44, height: 44, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--color-muted)", flexShrink: 0 }}>
-                                    <Icon icon={PhotoIcon} size="sm" color="secondary" />
+                                    <PhotoIcon className="w-5 h-5" style={{ color: "var(--color-text-secondary)" }} />
                                   </div>
                                 )}
                                 <VStack gap={0} style={{ minWidth: 0 }}>
                                   <HStack gap={2} vAlign="center">
                                     <Text type="body" weight="bold">{p.part_code || `SP-${p.spare_part_id}`}</Text>
-                                    <Badge label="ชิ้นส่วน" variant="success" />
+                                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B" }}>ชิ้นส่วน</span>
                                   </HStack>
                                   <Text type="body" size="sm" color="secondary" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                     {p.part_name || "ชิ้นส่วนอะไหล่"}
@@ -426,20 +432,22 @@ export default function BOMTreePage() {
                                     คงเหลือ {stock} {p.unit || "ชิ้น"}{low ? " " : ""}
                                   </Text>
                                 </VStack>
-                                <Button
-                                  label="เบิก"
-                                  variant="secondary"
-                                  size="sm"
-                                  icon={<Icon icon={ShoppingBagIcon} size="xsm" />}
+                                <button
+                                  type="button"
                                   onClick={(e) => { e.stopPropagation(); window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(p.part_code || "")}`; }}
-                                />
-                                <Button
-                                  label="ลบ"
-                                  variant="secondary"
-                                  size="sm"
-                                  icon={<Icon icon={TrashIcon} size="xsm" />}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                                >
+                                  <ShoppingBagIcon className="w-3.5 h-3.5" />
+                                  เบิก
+                                </button>
+                                <button
+                                  type="button"
                                   onClick={(e) => { e.stopPropagation(); setConfirmDelete(p); }}
-                                />
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                                >
+                                  <TrashIcon className="w-3.5 h-3.5" />
+                                  ลบ
+                                </button>
                               </HStack>
                             </HStack>
                           </div>
@@ -476,25 +484,27 @@ export default function BOMTreePage() {
                       {selectedPart.remarks && <HStack hAlign="between"><Text type="body" size="sm" color="secondary">หมายเหตุ</Text><Text type="body" size="sm" weight="semibold">{selectedPart.remarks}</Text></HStack>}
                     </VStack>
                     <HStack hAlign="between" gap={2}>
-                      <Button
-                        label="เบิกอะไหล่นี้"
-                        variant="primary"
-                        size="sm"
-                        icon={<Icon icon={ShoppingBagIcon} size="xsm" />}
+                      <button
+                        type="button"
                         onClick={() => window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(selectedPart.part_code || "")}`}
-                      />
-                      <Button
-                        label="ลบออกจาก BOM"
-                        variant="secondary"
-                        size="sm"
-                        icon={<Icon icon={TrashIcon} size="xsm" />}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] hover:brightness-110 transition-all duration-300"
+                      >
+                        <ShoppingBagIcon className="w-3.5 h-3.5" />
+                        เบิกอะไหล่นี้
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setConfirmDelete(selectedPart)}
-                      />
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                        ลบออกจาก BOM
+                      </button>
                     </HStack>
                   </VStack>
                 ) : (
                   <VStack gap={3} hAlign="center" vAlign="center" style={{ padding: 30, opacity: 0.6 }}>
-                    <Icon icon={CogIcon} size="lg" />
+                    <CogIcon className="w-6 h-6" />
                     <Text type="body" color="secondary">คลิกชิ้นส่วนเพื่อดูรายละเอียด</Text>
                   </VStack>
                 )}
@@ -511,7 +521,7 @@ export default function BOMTreePage() {
           <VStack gap={4} style={{ padding: 24 }}>
             {successMsg ? (
               <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
-                <Icon icon={CheckCircleIcon} size="md" />
+                <CheckCircleIcon className="w-5 h-5" />
                 <Text type="body" weight="bold">{successMsg}</Text>
               </HStack>
             ) : (
@@ -569,18 +579,21 @@ export default function BOMTreePage() {
                 </VStack>
 
                 <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                  <Button
-                    label="ยกเลิก"
-                    variant="secondary"
+                  <button
+                    type="button"
                     onClick={() => setModalOpen(false)}
-                  />
-                  <Button
-                    label="บันทึกเพิ่มชิ้นส่วน"
-                    variant="primary"
-                    isLoading={saving}
-                    isDisabled={!selectedSpareId}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving || !selectedSpareId}
                     onClick={handleAddComponent}
-                  />
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+                  >
+                    {saving ? "กำลังบันทึก..." : "บันทึกเพิ่มชิ้นส่วน"}
+                  </button>
                 </HStack>
               </>
             )}
@@ -597,14 +610,22 @@ export default function BOMTreePage() {
               ต้องการลบชิ้นส่วน <strong>{confirmDelete.part_name || "ชิ้นส่วนอะไหล่"}</strong> (รหัส {confirmDelete.part_code || `SP-${confirmDelete.spare_part_id}`}) ออกจาก BOM ของ {machine?.code || "เครื่องจักรนี้"} หรือไม่?
             </Text>
             <HStack hAlign="end" gap={2}>
-              <Button label="ยกเลิก" variant="secondary" onClick={() => setConfirmDelete(null)} />
-              <Button
-                label="ยืนยันลบ"
-                variant="primary"
-                isLoading={deleting}
-                icon={<Icon icon={TrashIcon} size="xsm" />}
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(null)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
                 onClick={confirmDeletePart}
-              />
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-rose-500 to-red-600 shadow-lg shadow-red-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+              >
+                <TrashIcon className="w-4 h-4" />
+                {deleting ? "กำลังลบ..." : "ยืนยันลบ"}
+              </button>
             </HStack>
           </VStack>
         </Dialog>

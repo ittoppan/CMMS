@@ -9,8 +9,6 @@ import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { 
   PlusIcon,
   ArrowLeftIcon,
@@ -97,18 +95,28 @@ export default function CreateAssetPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Heading level={2}>ลงทะเบียนเครื่องจักรใหม่</Heading>
-          <Text type="body" color="secondary">บันทึกประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY CREATE · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ลงทะเบียนเครื่องจักรใหม่</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <BuildingOffice2Icon className="w-3.5 h-3.5" /> F-EN-01
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            บันทึกประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)
+          </Text>
         </VStack>
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
-          onClick={() => (router.push("/asset_registry"))}
-        />
-      </HStack>
+        <button
+          type="button"
+          onClick={() => router.push("/asset_registry")}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          ย้อนกลับ
+        </button>
+      </div>
 
       <Card padding={6}>
         <VStack gap={5}>
@@ -242,18 +250,22 @@ export default function CreateAssetPage() {
       </Card>
 
       <HStack hAlign="end" gap={3}>
-        <Button
-          label="ยกเลิก"
-          variant="secondary"
+        <button
+          type="button"
           onClick={() => (window.location.href = "/asset_registry")}
-        />
-        <Button
-          label="บันทึกเครื่องจักร"
-          variant="primary"
-          isLoading={submitting}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          disabled={submitting}
           onClick={handleSubmit}
-          icon={<Icon icon={PlusIcon} size="sm" />}
-        />
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-60"
+        >
+          <PlusIcon className="w-4 h-4" />
+          {submitting ? "กำลังบันทึก..." : "บันทึกเครื่องจักร"}
+        </button>
       </HStack>
     </VStack>
   );

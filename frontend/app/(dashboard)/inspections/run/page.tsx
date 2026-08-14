@@ -5,8 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
@@ -14,8 +12,6 @@ import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Link } from "@astryxdesign/core/Link";
 import {
   ClipboardDocumentCheckIcon,
   CheckCircleIcon,
@@ -217,13 +213,20 @@ export default function InspectionRunPage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">INSPECTION RUN · CMMS-TOPPAN</Text>
-          <Heading level={2}>ทำรายการตรวจเช็ค</Heading>
-          <Text type="body" color="secondary">บันทึกผลตรวจรายข้อ — รายการไม่ผ่านจะแจ้งช่างซ่อมทันที</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION RUN · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ทำรายการตรวจเช็ค</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> รายการไม่ผ่าน → แจ้งช่างซ่อมทันที
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            บันทึกผลตรวจรายข้อ — ตรวจค่า ผ่าน/ไม่ผ่าน และเพิ่มหมายเหตุตามจริง
+          </Text>
         </VStack>
-      </HStack>
+      </div>
 
       <Card padding={4}>
         <Field inputID="run-sel" label="เลือกรอบตรวจ *" isRequired>
@@ -251,9 +254,15 @@ export default function InspectionRunPage() {
               <HStack gap={6} hAlign="between" wrap="wrap">
                 <VStack gap={1}>
                   <HStack gap={2} vAlign="center" wrap="wrap">
-                    <Badge label={schedule.template_code || "CHK"} variant="info" />
-                    <Badge label={schedule.status === "completed" ? "เสร็จสิ้น" : schedule.status === "in_progress" ? "กำลังทำ" : "รอดำเนินการ"} variant={schedule.status === "completed" ? "success" : "warning"} />
-                    {schedule.result && <Badge label={schedule.result === "pass" ? "ผ่านทุกรายการ" : `ไม่ผ่าน ${schedule.fail_count} รายการ`} variant={schedule.result === "pass" ? "success" : "error"} />}
+                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "#1E88E5", fontSize: "0.7rem", padding: "3px 9px" }}>{schedule.template_code || "CHK"}</span>
+                    <span className="cmms-andon-chip" style={{ background: schedule.status === "completed" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: schedule.status === "completed" ? "#059669" : "#d97706", fontSize: "0.7rem", padding: "3px 9px" }}>
+                      {schedule.status === "completed" ? "เสร็จสิ้น" : schedule.status === "in_progress" ? "กำลังทำ" : "รอดำเนินการ"}
+                    </span>
+                    {schedule.result && (
+                      <span className="cmms-andon-chip" style={{ background: schedule.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: schedule.result === "pass" ? "#059669" : "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+                        {schedule.result === "pass" ? "ผ่านทุกรายการ" : `ไม่ผ่าน ${schedule.fail_count} รายการ`}
+                      </span>
+                    )}
                   </HStack>
                   <Text type="body" weight="bold">{schedule.template_title}</Text>
                   <Text type="body" size="sm" color="secondary">
@@ -319,7 +328,7 @@ export default function InspectionRunPage() {
                                 fontWeight: 600, cursor: "pointer",
                               }}
                             >
-                              <Icon icon={CheckCircleIcon} size="sm" /> ผ่าน
+                              <CheckCircleIcon className="w-4 h-4" /> ผ่าน
                             </button>
                             <button
                               onClick={() => handleStatus(index, "fail")}
@@ -331,7 +340,7 @@ export default function InspectionRunPage() {
                                 fontWeight: 600, cursor: "pointer",
                               }}
                             >
-                              <Icon icon={XCircleIcon} size="sm" /> ไม่ผ่าน
+                              <XCircleIcon className="w-4 h-4" /> ไม่ผ่าน
                             </button>
                           </HStack>
                         )}
@@ -341,7 +350,7 @@ export default function InspectionRunPage() {
                         <div style={{ marginLeft: 40, padding: 14, backgroundColor: "var(--color-surface)", borderRadius: 8, border: "1px dashed var(--color-error)" }}>
                           <VStack gap={3}>
                             <HStack gap={2} vAlign="center">
-                              <Icon icon={ExclamationTriangleIcon} color="error" size="sm" />
+                              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
                               <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด (จำเป็น)</Text>
                             </HStack>
                             <FormLayout>
@@ -367,28 +376,29 @@ export default function InspectionRunPage() {
               <VStack gap={3}>
                 {createdRepair && createdRepair.repair_id && (
                   <div style={{ padding: 14, borderRadius: 8, backgroundColor: "var(--color-error-wash)", border: "1px solid var(--color-error)" }}>
-                    <HStack gap={2} vAlign="center">
-                      <Icon icon={WrenchScrewdriverIcon} color="error" size="sm" />
+                    <HStack gap={2} vAlign="center" wrap="wrap">
+                      <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
                       <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>ระบบสร้างใบแจ้งซ่อมอัตโนมัติแล้ว (มีความเสี่ยงเครื่องหยุด)</Text>
-                      <Link href="/repair">
-                        <Button label="ดูใบแจ้งซ่อม →" variant="primary" size="sm" />
-                      </Link>
+                      <a href="/repair" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300">
+                        ดูใบแจ้งซ่อม →
+                      </a>
                     </HStack>
                   </div>
                 )}
                 <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
                   <Text type="body" color="secondary">ตรวจให้ครบทุกข้อก่อนบันทึก — ข้อที่ไม่ผ่านต้องมีสาเหตุ</Text>
                   {schedule.status !== "completed" ? (
-                    <Button
-                      label={submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการตรวจ"}
-                      variant="primary"
-                      size="lg"
-                      isDisabled={submitting || !allFilled}
+                    <button
+                      type="button"
+                      disabled={submitting || !allFilled}
                       onClick={handleSubmit}
-                      icon={<Icon icon={ClipboardDocumentCheckIcon} size="sm" />}
-                    />
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                      {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการตรวจ"}
+                    </button>
                   ) : (
-                    <Badge label="บันทึกผลแล้ว" variant="success" />
+                    <span className="cmms-status ok"><span className="cmms-status-dot" />บันทึกผลแล้ว</span>
                   )}
                 </HStack>
               </VStack>
