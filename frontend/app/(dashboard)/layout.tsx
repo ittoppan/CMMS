@@ -147,6 +147,23 @@ const SECTION_MAP: Record<string, string> = {
   "/settings/services": "ระบบ & ตั้งค่า",
 };
 
+// รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
+// (อยู่ /settings/notifications → highlight เฉพาะ /settings/notifications ไม่ highlight /settings)
+const MENU_HREFS: string[] = [
+  "/dashboard",
+  "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
+  "/approval", "/forms", "/manuals",
+  "/pm_am", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
+  "/inspections", "/inspections/run", "/inspections/templates",
+  "/asset_registry", "/assets", "/qr-sheet", "/asset_registry/bom_tree", "/asset_registry/criticality",
+  "/equipment_borrowing", "/calibration", "/mtbf_mttr",
+  "/spare_parts", "/spare_parts/issue_center", "/spare_parts/sage_po", "/spare_parts/sage_sync", "/spare_parts/optimization", "/spare_parts/stock_take", "/suppliers",
+  "/analytics/kpi", "/analytics", "/reports", "/reports/monthly_pdf", "/reports/export_excel",
+  "/safety/work_permit", "/iot/monitor",
+  "/users", "/roles", "/register",
+  "/notifications", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa",
+];
+
 function getSection(pathname: string): string | null {
   for (const [prefix, section] of Object.entries(SECTION_MAP)) {
     if (pathname.startsWith(prefix)) return section;
@@ -265,9 +282,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [userFullName, simulated, roleName]);
 
+  // เมนูทั้งหมดใน SideNav — ใช้หา "เมนูที่ตรงสุด" (deepest match)
+  // กัน highlight พร้อมกัน 2 รายการ เช่น อยู่ /settings/notifications → ต้องไม่ highlight /settings ด้วย
   const isSelected = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+    if (pathname === href) return true;
+    if (href === "/" || !pathname.startsWith(href + "/")) return false;
+    // href เป็น prefix ของ pathname → selected เฉพาะเมื่อไม่มีเมนูอื่นที่ลึกกว่าตรงกับ pathname
+    const deeper = MENU_HREFS.some(
+      (h) => h.length > href.length && (pathname === h || pathname.startsWith(h + "/"))
+    );
+    return !deeper;
   };
 
   const section = getSection(pathname);

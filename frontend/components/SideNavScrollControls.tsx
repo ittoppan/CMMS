@@ -73,15 +73,35 @@ export default function SideNavScrollControls({ pathname }: { pathname: string }
     const ro = panel ? new ResizeObserver(update) : null;
     if (panel && ro) ro.observe(panel);
     const iv = setInterval(update, 2500); // safety: เมนูโหลดหลังสุด (permission async)
+
+    // เลื่อนไปเมนูปัจจุบันอัตโนมัติ 1 ครั้งตอนเปิดหน้า
+    // (เฉพาะเมนูยาวพอจะเลื่อน + เมนูปัจจุบันหลุดจอ — เช่น กดลิงก์จากหน้าแรกมาหน้าลึก)
+    const t2 = setTimeout(() => {
+      const p = document.querySelector<HTMLElement>(".astryx-layout-panel");
+      if (!p || p.scrollHeight <= p.clientHeight) return;
+      const link = p.querySelector<HTMLAnchorElement>(
+        `a[aria-current="page"], a[href="${CSS.escape(pathname)}"]`
+      );
+      if (!link) return;
+      const r = p.getBoundingClientRect();
+      const lr = link.getBoundingClientRect();
+      const visible = lr.top >= r.top && lr.bottom <= r.bottom;
+      if (!visible) {
+        const target = Math.max(0, link.offsetTop - p.clientHeight / 2 + link.offsetHeight / 2);
+        p.scrollTo({ top: target, behavior: "smooth" });
+      }
+    }, 600);
+
     return () => {
       clearTimeout(t1);
+      clearTimeout(t2);
       clearInterval(iv);
       cancelAnimationFrame(raf);
       panel?.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       ro?.disconnect();
     };
-  }, [update]);
+  }, [update, pathname]);
 
   const scrollByStep = (dir: 1 | -1) => {
     const panel = document.querySelector<HTMLElement>(".astryx-layout-panel");

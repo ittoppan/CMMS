@@ -362,15 +362,51 @@ button[class*="Button_secondary"], .astryx-button.secondary {
   margin-top: 0 !important;
 }
 .astryx-side-nav-section > div:first-child {
-  padding: 14px 14px 6px !important;
+  padding: 16px 14px 6px !important;
 }
 .astryx-side-nav-section > div:first-child span {
   text-transform: uppercase !important;
-  font-size: 0.66rem !important;
+  font-size: 0.68rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.1em !important;
   color: rgba(255, 255, 255, 0.72) !important;
   opacity: 1 !important;
+}
+/* จุด Andon เล็ก ๆ หน้าหัวข้อหมวด — สีเดียวกับ indicator เมนู active */
+.astryx-side-nav-section > div:first-child span[id$="-title"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.astryx-side-nav-section > div:first-child span[id$="-title"]::before {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--cmms-sidebar-indicator, #60A5FA);
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.65);
+  flex-shrink: 0;
+}
+/* Scrollbar บาง ๆ ริม sidebar (Windows/Chromium) */
+.astryx-layout-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.astryx-layout-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+.astryx-layout-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+.astryx-layout-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+/* ช่องค้นหาเมนู: focus ring + เปลี่ยนเป็นพื้นขาว */
+.astryx-side-nav input[aria-label="ค้นหาเมนูใน SideNav"]:focus {
+  border-color: var(--cmms-primary, #0D4785) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(0, 87, 168, 0.18) !important;
 }
 
 /* SideNav footer — user card zone (element ท้ายสุดของ SideNav) */
