@@ -49,6 +49,19 @@ while read -r local_ref local_oid remote_ref remote_oid; do
   fi
 done
 
+# ── TypeScript check: บล็อกเฉพาะ error ใหม่ (เทียบ baseline) ──
+TSC_CHECK="$REPO_ROOT/scripts/tsc-check.sh"
+if [ -f "$TSC_CHECK" ]; then
+  echo ""
+  echo "[pre-push] tsc --noEmit (error ใหม่เทียบ frontend/tsc-baseline.txt)"
+  if ! bash "$TSC_CHECK"; then
+    echo "[pre-push] ❌ BLOCKED: มี TypeScript error ใหม่ — แก้ก่อน push"
+    FAILED=1
+  fi
+else
+  echo "[pre-push] ⚠️ ไม่พบ scripts/tsc-check.sh — ข้ามการตรวจ TypeScript"
+fi
+
 if [ "$FAILED" -ne 0 ]; then
   echo ""
   echo "[pre-push] 🚫 push ถูกยกเลิก — แก้ให้ audit ผ่าน แล้ว push ใหม่"

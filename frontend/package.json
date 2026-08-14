@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs",
-    "design:audit": "python ../scripts/design-audit.py"
+    "design:audit": "python ../scripts/design-audit.py",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@astryxdesign/cli": "^0.1.9",

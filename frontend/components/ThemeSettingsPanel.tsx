@@ -30,7 +30,7 @@ function HexStatus({ value }: { value: string }) {
   if (!v) return null;
   const ok = /^#[0-9a-fA-F]{6}$/.test(v);
   return (
-    <Text type="body" size="xs" style={{ color: ok ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
+    <Text type="body" size="sm" style={{ color: ok ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
       {ok ? "✓ รหัสสีถูกต้อง" : "✕ ต้องเป็น #RRGGBB (6 หลัก)"}
     </Text>
   );

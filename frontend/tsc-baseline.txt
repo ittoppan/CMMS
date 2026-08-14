@@ -1,0 +1,130 @@
+.next/dev/types/validator.ts(737,39): error TS2307: Cannot find module '../../../app/ui-test/page.js' or its corresponding type declarations.
+app/(dashboard)/analytics/kpi/page.tsx(196,35): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/analytics/kpi/page.tsx(203,35): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/analytics/kpi/page.tsx(240,22): error TS2741: Property 'label' is missing in type '{ value: number; }' but required in type 'ProgressBarProps'.
+app/(dashboard)/analytics/kpi/page.tsx(338,33): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/asset_registry/bom_tree/page.tsx(153,60): error TS2339: Property 'status' does not exist on type 'any[]'.
+app/(dashboard)/asset_registry/bom_tree/page.tsx(154,25): error TS2339: Property 'data' does not exist on type 'any[]'.
+app/(dashboard)/dashboard/page.tsx(452,19): error TS2322: Type '{ label: string; variant: "secondary"; onClick: () => Promise<void>; icon: Element; size: "sm"; title: string; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & ButtonProps'.
+app/(dashboard)/dashboard/page.tsx(518,21): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(535,21): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(554,21): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(573,21): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(620,25): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(636,25): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(652,25): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(679,103): error TS2322: Type '{ label: string; variant: "info"; size: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/dashboard/page.tsx(704,81): error TS2322: Type '{ label: string; variant: "error"; size: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/dashboard/page.tsx(730,76): error TS2322: Type '{ label: string; variant: "warning"; size: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/dashboard/page.tsx(745,71): error TS18048: 'percent' is possibly 'undefined'.
+app/(dashboard)/dashboard/page.tsx(777,75): error TS2322: Type '{ label: string; variant: "warning"; size: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/dashboard/page.tsx(810,71): error TS18048: 'percent' is possibly 'undefined'.
+app/(dashboard)/dashboard/page.tsx(833,79): error TS2322: Type '{ label: string; variant: "info"; size: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/dashboard/page.tsx(972,50): error TS2322: Type '"primary"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+app/(dashboard)/dashboard/page.tsx(1033,29): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(1043,29): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/dashboard/page.tsx(1055,29): error TS2322: Type '"medium"' is not assignable to type 'Elevation | undefined'.
+app/(dashboard)/error.tsx(38,46): error TS2322: Type '"xl"' is not assignable to type '"sm" | "xsm" | "lg" | "md" | undefined'.
+app/(dashboard)/inspections/page.tsx(195,25): error TS2322: Type '{ children: Element[]; columns: number; }' is not assignable to type 'IntrinsicAttributes & FormLayoutProps'.
+  Property 'columns' does not exist on type 'IntrinsicAttributes & FormLayoutProps'.
+app/(dashboard)/inspections/page.tsx(206,40): error TS2322: Type '"date"' is not assignable to type 'TextInputType | undefined'.
+app/(dashboard)/inspections/run/page.tsx(111,27): error TS2339: Property 'value' does not exist on type '{}'.
+app/(dashboard)/inspections/run/page.tsx(128,25): error TS2339: Property 'status' does not exist on type '{}'.
+app/(dashboard)/inspections/run/page.tsx(130,23): error TS2339: Property 'note' does not exist on type '{}'.
+app/(dashboard)/inspections/templates/page.tsx(201,23): error TS2322: Type '{ children: Element[]; columns: number; }' is not assignable to type 'IntrinsicAttributes & FormLayoutProps'.
+  Property 'columns' does not exist on type 'IntrinsicAttributes & FormLayoutProps'.
+app/(dashboard)/inspections/templates/page.tsx(203,16): error TS2741: Property 'label' is missing in type '{ id: string; placeholder: string; value: string; onChange: (v: string) => void; }' but required in type 'TextInputProps'.
+app/(dashboard)/inspections/templates/page.tsx(210,14): error TS2741: Property 'label' is missing in type '{ id: string; placeholder: string; value: string; onChange: (v: string) => void; }' but required in type 'TextInputProps'.
+app/(dashboard)/inspections/templates/page.tsx(212,23): error TS2322: Type '{ children: Element[]; columns: number; }' is not assignable to type 'IntrinsicAttributes & FormLayoutProps'.
+  Property 'columns' does not exist on type 'IntrinsicAttributes & FormLayoutProps'.
+app/(dashboard)/inspections/templates/page.tsx(214,16): error TS2741: Property 'label' is missing in type '{ id: string; placeholder: string; value: string; onChange: (v: string) => void; }' but required in type 'TextInputProps'.
+app/(dashboard)/inspections/templates/page.tsx(217,16): error TS2741: Property 'label' is missing in type '{ id: string; placeholder: string; value: string; onChange: (v: string) => void; }' but required in type 'TextInputProps'.
+app/(dashboard)/not-found.tsx(22,42): error TS2322: Type '"xl"' is not assignable to type '"sm" | "xsm" | "lg" | "md" | undefined'.
+app/(dashboard)/pm_am/calendar/page.tsx(48,142): error TS2345: Argument of type 'string' is not assignable to parameter of type '`${number}${number}${number}${number}-${number}${number}-${number}${number}` | (() => `${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined) | undefined'.
+app/(dashboard)/pm_am/edit/page.tsx(207,17): error TS2322: Type '{ label: string; value: string; readOnly: true; }' is not assignable to type 'IntrinsicAttributes & TextInputProps'.
+  Property 'readOnly' does not exist on type 'IntrinsicAttributes & TextInputProps'.
+app/(dashboard)/pm_am/edit/page.tsx(214,17): error TS2322: Type '{ label: string; value: string; readOnly: true; }' is not assignable to type 'IntrinsicAttributes & TextInputProps'.
+  Property 'readOnly' does not exist on type 'IntrinsicAttributes & TextInputProps'.
+app/(dashboard)/pm_am/page.tsx(156,65): error TS2322: Type '"accent" | "warning" | "error" | "success" | "neutral"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+  Type '"accent"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+app/(dashboard)/profile/page.tsx(183,39): error TS2322: Type '"xs"' is not assignable to type '"sm" | "lg" | "xl" | "md" | undefined'.
+app/(dashboard)/repair/assign/page.tsx(253,87): error TS2322: Type '"accent" | "warning" | "error" | "success" | "neutral"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+  Type '"accent"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+app/(dashboard)/repair/history/page.tsx(172,65): error TS2322: Type '"accent" | "warning" | "error" | "success" | "neutral"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+  Type '"accent"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+app/(dashboard)/repair/history/page.tsx(264,46): error TS2322: Type '{ end: number; format: (n: any) => any; }' is not assignable to type 'IntrinsicAttributes & CountUpProps'.
+  Property 'format' does not exist on type 'IntrinsicAttributes & CountUpProps'.
+app/(dashboard)/repair/history/page.tsx(264,55): error TS7006: Parameter 'n' implicitly has an 'any' type.
+app/(dashboard)/repair/history/page.tsx(276,46): error TS2322: Type '{ end: number; format: (n: any) => any; }' is not assignable to type 'IntrinsicAttributes & CountUpProps'.
+  Property 'format' does not exist on type 'IntrinsicAttributes & CountUpProps'.
+app/(dashboard)/repair/history/page.tsx(276,55): error TS7006: Parameter 'n' implicitly has an 'any' type.
+app/(dashboard)/repair/history/page.tsx(288,50): error TS2322: Type '{ end: number; format: (n: any) => any; }' is not assignable to type 'IntrinsicAttributes & CountUpProps'.
+  Property 'format' does not exist on type 'IntrinsicAttributes & CountUpProps'.
+app/(dashboard)/repair/history/page.tsx(288,59): error TS7006: Parameter 'n' implicitly has an 'any' type.
+app/(dashboard)/repair/my_tasks/page.tsx(269,31): error TS2322: Type '"accent"' is not assignable to type 'keyof BadgeVariantMap | undefined'.
+app/(dashboard)/repair/my_tasks/page.tsx(289,15): error TS7006: Parameter 'task' implicitly has an 'any' type.
+app/(dashboard)/repair/my_tasks/page.tsx(289,15): error TS2322: Type '(task: any) => "ครบกำหนด" | "กำหนดเสร็จ"' is not assignable to type 'ReactNode'.
+app/(dashboard)/repair/my_tasks/page.tsx(292,37): error TS2322: Type '"secondary" | "error"' is not assignable to type 'TextColor | undefined'.
+  Type '"error"' is not assignable to type 'TextColor | undefined'.
+app/(dashboard)/repair/workload/page.tsx(84,30): error TS2344: Type 'TechRow' does not satisfy the constraint 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'TechRow'.
+app/(dashboard)/repair/workload/page.tsx(152,27): error TS2322: Type '"success"' is not assignable to type 'TextColor | undefined'.
+app/(dashboard)/repair/workload/page.tsx(254,18): error TS2344: Type 'TechRow' does not satisfy the constraint 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'TechRow'.
+app/(dashboard)/safety/work_permit/page.tsx(253,59): error TS2322: Type '"error"' is not assignable to type 'TextColor | undefined'.
+app/(dashboard)/settings/notifications/page.tsx(517,35): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/notifications/page.tsx(680,35): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(827,54): error TS2322: Type '"xs"' is not assignable to type '"sm" | "xsm" | "lg" | "md" | undefined'.
+app/(dashboard)/settings/page.tsx(993,43): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1000,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1007,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1014,43): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1063,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1065,43): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1071,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/page.tsx(1077,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/settings/pwa/page.tsx(169,21): error TS2322: Type 'string | null' is not assignable to type 'string | Blob | undefined'.
+  Type 'null' is not assignable to type 'string | Blob | undefined'.
+app/(dashboard)/settings/pwa/page.tsx(181,21): error TS2322: Type 'string | null' is not assignable to type 'string | Blob | undefined'.
+  Type 'null' is not assignable to type 'string | Blob | undefined'.
+app/(dashboard)/settings/services/page.tsx(152,12): error TS2322: Type '{ children: string; color: string; }' is not assignable to type 'IntrinsicAttributes & BadgeProps'.
+  Property 'children' does not exist on type 'IntrinsicAttributes & BadgeProps'.
+app/(dashboard)/settings/services/page.tsx(159,13): error TS2322: Type '{ label: string; variant: "secondary"; onClick: () => Promise<void>; disabled: boolean; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+  Property 'disabled' does not exist on type 'IntrinsicAttributes & ButtonProps'. Did you mean 'isDisabled'?
+app/(dashboard)/spare_parts/page.tsx(168,16): error TS2741: Property 'label' is missing in type '{ value: number; max: number; isLabelHidden: true; }' but required in type 'ProgressBarProps'.
+app/(dashboard)/spare_parts/page.tsx(351,26): error TS2741: Property 'label' is missing in type '{ value: number; max: number; isLabelHidden: true; }' but required in type 'ProgressBarProps'.
+app/(dashboard)/spare_parts/sage_sync/page.tsx(207,30): error TS2344: Type 'SyncLog' does not satisfy the constraint 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'SyncLog'.
+app/(dashboard)/spare_parts/sage_sync/page.tsx(300,41): error TS2322: Type '"primary" | "error"' is not assignable to type 'TextColor | undefined'.
+  Type '"error"' is not assignable to type 'TextColor | undefined'.
+app/(dashboard)/spare_parts/sage_sync/page.tsx(472,20): error TS2344: Type 'SyncLog' does not satisfy the constraint 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'SyncLog'.
+app/(dashboard)/spare_parts/stock_take/page.tsx(322,43): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/spare_parts/stock_take/page.tsx(326,45): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/(dashboard)/spare_parts/stock_take/page.tsx(332,27): error TS2322: Type '"number"' is not assignable to type 'TextInputType | undefined'.
+app/(dashboard)/spare_parts/stock_take/page.tsx(385,41): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/qr-sheet/page.tsx(127,33): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/qr-sheet/page.tsx(128,33): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/register/page.tsx(65,44): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+app/register/page.tsx(108,44): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+app/scan/page.tsx(210,39): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/scan/page.tsx(228,39): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+app/scan/page.tsx(258,47): error TS2322: Type '"xs"' is not assignable to type 'TextSize | undefined'.
+components/PwaRegister.tsx(65,13): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'string | BufferSource | null | undefined'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+components/RepairRequestForm.tsx(314,31): error TS2345: Argument of type '"webchoice"' is not assignable to parameter of type 'SetStateAction<"anonymous" | "checking" | "bound" | "unbound">'.
+components/RepairRequestForm.tsx(317,40): error TS2345: Argument of type '"webchoice"' is not assignable to parameter of type 'SetStateAction<"anonymous" | "checking" | "bound" | "unbound">'.
+components/RepairRequestForm.tsx(623,12): error TS2367: This comparison appears to be unintentional because the types '"anonymous" | "checking" | "unbound"' and '"webchoice"' have no overlap.
+components/SideNavScrollControls.tsx(74,17): error TS2345: Argument of type 'HTMLElement | null' is not assignable to parameter of type 'Element'.
+  Type 'null' is not assignable to type 'Element'.

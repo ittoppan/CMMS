@@ -903,11 +903,11 @@ export default function SettingsPage() {
                           />
                         </HStack>
                         {hexValue === "" ? (
-                          <Text type="body" size="xs" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
+                          <Text type="body" size="sm" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
                         ) : hexValid ? (
-                          <Text type="body" size="xs" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
                         ) : (
-                          <Text type="body" size="xs" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
+                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
                         )}
                       </VStack>
                     ) : isTextarea ? (
