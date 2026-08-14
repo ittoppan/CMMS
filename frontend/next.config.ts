@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@astryxdesign/core", "@astryxdesign/theme-neutral"],
   // Allow ngrok, Cloudflare tunnels, and local IPs for HMR
   allowedDevOrigins: [
+    "127.0.0.1",
+    "localhost",
     "192.168.1.9",
     "ommatophorous-robert-fortifyingly.ngrok-free.app",
     "*.trycloudflare.com",

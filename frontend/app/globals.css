@@ -15,7 +15,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* TOPPAN brand palette: remap Tailwind indigo/purple utilities → TOPPAN Blue family
-   (ครอบทุกหน้าที่ใช้ indigo-*/purple-* ให้เป็นน้ำเงินแบรนด์เดียวกัน) */
+   (ครอบทุกหน้าที่ใช้ indigo-* / purple-* ให้เป็นน้ำเงินแบรนด์เดียวกัน) */
 @theme {
   --color-indigo-100: #E6F0FA;
   --color-indigo-200: #C2DDF2;
