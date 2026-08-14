@@ -1,14 +1,19 @@
-/* CMMS-TPT Service Worker — PWA full-app shell v6
+/* CMMS-TPT Service Worker — PWA full-app shell v7
  * กลยุทธ์:
  *  - Navigation: network-first → cache → offline.html → synthesized offline page (ไม่คืน undefined เด็ดขาด)
  *  - API (GET /api/v1/*): network-first + cache fallback
  *  - Static assets (/_next/static, /icons): cache-first
  *  - Install: precache แบบ per-URL (URL หนึ่งพัง ไม่ล้มทั้งชุด)
  *  ทุก respondWith คืน Response เสมอ — ป้องกัน "Failed to convert value to 'Response'"
+ *
+ * ⚠️ เมื่อ deploy UI ใหม่ ให้ bump SW_VERSION (v7 → v8 ...) หนึ่งบรรทัดเดียว:
+ *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
+ *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SHELL_CACHE = "cmms-tpt-shell-v6";
-const ASSET_CACHE = "cmms-tpt-assets-v6";
-const API_CACHE = "cmms-tpt-api-v6";
+const SW_VERSION = "v7";
+const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
+const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
+const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
 
 const PRECACHE_URLS = [
   "/",
