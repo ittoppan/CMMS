@@ -21,6 +21,7 @@ import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Icon } from "@astryxdesign/core/Icon";
 import { THEME_PRESETS, buildGradient } from "../../../../components/ThemeProvider";
 import AndonLamp from "../../../../components/AndonLamp";
+import { ALL_PAGES, isWired } from "../../../../lib/pageLayout";
 import {
   SwatchIcon,
   Bars3Icon,
@@ -123,21 +124,6 @@ const FONT_SIZE_OPTIONS = [
   { label: "ปกติ (16px)", value: "16px" },
   { label: "ใหญ่ (17px)", value: "17px" },
   { label: "ใหญ่พิเศษ (18px)", value: "18px" },
-];
-
-const SYSTEM_PAGES: { value: string; label: string; category: string }[] = [
-  { value: "/dashboard", label: "แดชบอร์ดภาพรวมระบบ", category: "งานซ่อมบำรุง" },
-  { value: "/repair", label: "รายการใบสั่งงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/repair/request", label: "ฟอร์มแจ้งซ่อมด่วน", category: "งานซ่อมบำรุง" },
-  { value: "/repair/kanban", label: "กระดานคัมบัง", category: "งานซ่อมบำรุง" },
-  { value: "/repair/tracking", label: "ติดตามงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/pm_am/calendar", label: "ปฏิทินแผน PM/AM", category: "แผน PM & เครื่องจักร" },
-  { value: "/asset_registry", label: "ทะเบียนเครื่องจักร", category: "แผน PM & เครื่องจักร" },
-  { value: "/spare_parts", label: "คลังสต็อกอะไหล่", category: "คลังอะไหล่" },
-  { value: "/spare_parts/issue_center", label: "ศูนย์เบิก-จ่ายอะไหล่", category: "คลังอะไหล่" },
-  { value: "/analytics/kpi", label: "KPI ผู้บริหาร", category: "วิเคราะห์ & รายงาน" },
-  { value: "/users", label: "การจัดการผู้ใช้งาน", category: "บุคลากร" },
-  { value: "/settings", label: "ตั้งค่าระบบทั้งหมด", category: "ตั้งค่า" },
 ];
 
 const isHex6 = (v: string) => /^#[0-9a-fA-F]{6}$/.test(String(v).trim());
@@ -736,32 +722,37 @@ export default function PageDesignerPage() {
       {activeSection === "pages" && (
         <>
           <SectionTitle
-            eyebrow="PAGE STUDIO"
+            eyebrow="PAGE STUDIO · ทุกหน้าในระบบ"
             title="สตูดิโอปรับแต่งรายหน้า"
-            desc="เลือกหน้าเพื่อปรับสี สไตล์ และข้อความเฉพาะหน้านั้น ๆ — เปิดตัวแก้ไขแบบเต็มจอ"
+            desc="ครบทุกหน้าในระบบ — เปิดสตูดิโอเพื่อปรับสี สไตล์ ข้อความ และจัดวาง Layout (ลาก-วาง) เฉพาะหน้านั้น"
           />
           <Card padding={4}>
             <VStack gap={3}>
-              {Array.from(new Set(SYSTEM_PAGES.map((p) => p.category))).map((cat) => (
+              {Array.from(new Set(ALL_PAGES.map((p) => p.category))).map((cat) => (
                 <VStack key={cat} gap={1}>
                   <Text type="body" size="sm" className="cmms-eyebrow">
                     {cat}
                   </Text>
                   <List density="balanced" hasDividers={false}>
-                    {SYSTEM_PAGES.filter((p) => p.category === cat).map((p) => (
+                    {ALL_PAGES.filter((p) => p.category === cat).map((p) => (
                       <ListItem
                         key={p.value}
                         label={p.label}
                         description={p.value}
                         startContent={<Icon icon={WindowIcon} />}
                         endContent={
-                          <Button
-                            label="เปิดสตูดิโอ"
-                            size="sm"
-                            variant="secondary"
-                            icon={<Icon icon={PencilSquareIcon} size="sm" />}
-                            onClick={() => router.push(`/editor?page=${encodeURIComponent(p.value)}`)}
-                          />
+                          <HStack gap={2}>
+                            {isWired(p.value) && (
+                              <Badge label="มีผลกับหน้าแล้ว" variant="success" />
+                            )}
+                            <Button
+                              label="เปิดสตูดิโอ"
+                              size="sm"
+                              variant="secondary"
+                              icon={<Icon icon={PencilSquareIcon} size="sm" />}
+                              onClick={() => router.push(`/editor?page=${encodeURIComponent(p.value)}`)}
+                            />
+                          </HStack>
                         }
                       />
                     ))}

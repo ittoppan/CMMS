@@ -63,6 +63,7 @@ import {
 } from "@heroicons/react/24/outline";
 import CountUp from "@/components/CountUp";
 import AndonLamp from "@/components/AndonLamp";
+import { usePageLayout } from "@/lib/pageLayout";
 
 export interface MonthlyRecord {
   monthNum: number;
@@ -368,6 +369,13 @@ export default function DashboardPage() {
     monthlyData.reduce((sum, m) => sum + (m.breakdown || 0), 0),
   [monthlyData]);
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config ที่บันทึก (default = เรียงเดิม)
+  const layout = usePageLayout("/dashboard", ["header", "andon", "kpi", "tabs"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   return (
     <Layout height="fill">
       <LayoutContent padding={6} className={isTvMode ? "fixed inset-0 z-[100] w-screen h-screen overflow-y-auto bg-slate-50 dark:bg-slate-900 p-8" : ""}>
@@ -380,8 +388,10 @@ export default function DashboardPage() {
           </button>
         )}
         
+        {/* Layout wrapper — เรียง/ซ่อน section ตาม config (Page Designer → จัดวาง Layout) */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 32, width: "100%" }}>
         {/* Header Section */}
-        <LayoutHeader className="mb-8">
+        <LayoutHeader className="mb-8" style={layoutStyle("header")}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}>
             <VStack gap={2}>
               <VStack gap={2}>
@@ -457,7 +467,7 @@ export default function DashboardPage() {
         </LayoutHeader>
 
         {/* ── Andon Board: สถานะโรงงาน (ข้อมูลจริงจาก work orders) ── */}
-        <section className="cmms-animate-fadeInUp mb-8">
+        <section className="cmms-animate-fadeInUp mb-8" style={layoutStyle("andon")}>
           <div className="cmms-andon-board">
             <div className="relative z-10">
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3} className="mb-4">
@@ -507,9 +517,8 @@ export default function DashboardPage() {
         </section>
 
         {/* Main Dashboard Content */}
-        <VStack gap={8}>
           {/* KPI Summary Cards */}
-          <section className="cmms-animate-fadeInUp">
+          <section className="cmms-animate-fadeInUp" style={layoutStyle("kpi")}>
             <Heading level={3} className="mb-4 flex items-center gap-2">
               <ChartBarIcon className="w-5 h-5 text-[var(--cmms-primary)]" />
               สรุปผลการดำเนินงาน
@@ -590,7 +599,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Tab Navigation */}
-          <section className="cmms-animate-fadeInUp">
+          <section className="cmms-animate-fadeInUp" style={layoutStyle("tabs")}>
             <div className="flex flex-wrap gap-2 mb-6 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-2xl">
               <button
                 onClick={() => setActiveTab('overview')}
@@ -1075,7 +1084,7 @@ export default function DashboardPage() {
               </VStack>
             )}
           </section>
-        </VStack>
+        </div>
 
         {/* Drill-down Modal */}
         {selectedDrillDown && (

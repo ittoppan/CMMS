@@ -18,6 +18,7 @@ import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Divider } from "@astryxdesign/core/Divider";
 import { TabList, Tab } from "@astryxdesign/core/TabList";
+import { Badge } from "@astryxdesign/core/Badge";
 import {
   PencilSquareIcon,
   CheckCircleIcon,
@@ -30,30 +31,15 @@ import {
   SwatchIcon,
   Square2StackIcon,
   AdjustmentsVerticalIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-
-interface SystemPageOption {
-  value: string;
-  label: string;
-  category: string;
-}
-
-const SYSTEM_PAGES: SystemPageOption[] = [
-  { value: "/dashboard", label: "แดชบอร์ดภาพรวมระบบ", category: "งานซ่อมบำรุง" },
-  { value: "/repair", label: "รายการใบสั่งงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/repair/request", label: "ฟอร์มแจ้งซ่อมด่วน", category: "งานซ่อมบำรุง" },
-  { value: "/repair/kanban", label: "Kanban Board", category: "งานซ่อมบำรุง" },
-  { value: "/repair/tracking", label: "ติดตามงานซ่อม", category: "งานซ่อมบำรุง" },
-  { value: "/asset_registry", label: "ทะเบียนเครื่องจักร (F-EN-01)", category: "แผน PM & เครื่องจักร" },
-  { value: "/asset_registry/bom_tree", label: "BOM Tree ชิ้นส่วน", category: "แผน PM & เครื่องจักร" },
-  { value: "/spare_parts", label: "คลังสต็อกอะไหล่ (Sage 300)", category: "คลังอะไหล่" },
-  { value: "/spare_parts/sage_sync", label: "ตั้งค่าซิงค์ Sage 300", category: "คลังอะไหล่" },
-  { value: "/analytics/predictive", label: "AI Predictive Maintenance", category: "วิเคราะห์ & รายงาน" },
-  { value: "/reports/export_excel", label: "Export Excel & CSV Center", category: "วิเคราะห์ & รายงาน" },
-  { value: "/safety/work_permit", label: "ใบอนุญาตทำงานเสี่ยง LOTO", category: "ความปลอดภัย" },
-  { value: "/users", label: "การจัดการผู้ใช้งานระบบ", category: "บุคลากร" },
-  { value: "/settings", label: "ตั้งค่าระบบทั้งหมด", category: "ตั้งค่า" },
-];
+import LayoutDndEditor from "../../../components/LayoutDndEditor";
+import {
+  ALL_PAGES,
+  sectionsFor,
+  isWired,
+} from "../../../lib/pageLayout";
+import type { PageLayoutItem } from "../../../lib/pageLayout";
 
 const COLOR_SWATCHES = [
   { name: "TOPPAN Blue", hex: "#0068B5", bg: "#EDF3F8", text: "#00508C" },
@@ -86,7 +72,7 @@ const FONT_OPTIONS = [
 ];
 
 type ViewportSize = "desktop" | "tablet" | "phone";
-type SidebarTab = "colors" | "formatting" | "text" | "banner";
+type SidebarTab = "colors" | "formatting" | "text" | "banner" | "layout";
 
 export default function InteractiveStylePageEditor() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -108,6 +94,7 @@ export default function InteractiveStylePageEditor() {
   const [bannerNotice, setBannerNotice] = useState("");
   const [bannerColor, setBannerColor] = useState("info");
 
+  const [layoutItems, setLayoutItems] = useState<PageLayoutItem[]>([]);
   const [publishing, setPublishing] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -116,14 +103,14 @@ export default function InteractiveStylePageEditor() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const targetPage = params.get("page");
-    if (targetPage && SYSTEM_PAGES.some(p => p.value === targetPage)) {
+    if (targetPage && ALL_PAGES.some(p => p.value === targetPage)) {
       setSelectedRoute(targetPage);
     }
   }, []);
 
   // Fetch Page Config & Colors from MySQL
   useEffect(() => {
-    const matched = SYSTEM_PAGES.find(p => p.value === selectedRoute);
+    const matched = ALL_PAGES.find(p => p.value === selectedRoute);
     if (matched) {
       setCustomTitle(matched.label);
       setCustomSubtitle(`ปรับแต่งรูปแบบสไตล์และสีหน้า ${matched.label}`);
@@ -141,6 +128,10 @@ export default function InteractiveStylePageEditor() {
           if (json.blocks.customSubtitle) setCustomSubtitle(json.blocks.customSubtitle);
           if (json.blocks.badgeTag) setBadgeTag(json.blocks.badgeTag);
           if (json.blocks.bannerNotice) setBannerNotice(json.blocks.bannerNotice);
+          if (Array.isArray(json.blocks.layout)) setLayoutItems(json.blocks.layout);
+        } else {
+          // ยังไม่เคยบันทึก — ใช้โมเดล section มาตรฐานของหน้า
+          setLayoutItems(sectionsFor(selectedRoute).map(s => ({ id: s.id, enabled: true })));
         }
       })
       .catch(e => console.error("Fetch page config error", e));
@@ -166,6 +157,7 @@ export default function InteractiveStylePageEditor() {
             badgeTag,
             bannerNotice,
             bannerColor,
+            layout: layoutItems,
             updatedAt: new Date().toISOString()
           }
         })
@@ -232,9 +224,9 @@ export default function InteractiveStylePageEditor() {
                   isLabelHidden
                   value={selectedRoute}
                   onChange={(v) => setSelectedRoute(String(v))}
-                  options={SYSTEM_PAGES.map(p => ({
+                  options={ALL_PAGES.map(p => ({
                     value: p.value,
-                    label: `${p.label} (${p.value})`
+                    label: `${p.category} · ${p.label}`
                   }))}
                 />
               </VStack>
@@ -250,6 +242,7 @@ export default function InteractiveStylePageEditor() {
                 <Tab value="colors" label="สี & จานสี" />
                 <Tab value="formatting" label="รูปแบบ & สไตล์" />
                 <Tab value="text" label="ข้อความ" />
+                <Tab value="layout" label="จัดวาง Layout" />
               </TabList>
 
               {/* TAB 1: CLICKABLE COLOR PALETTES */}
@@ -394,6 +387,32 @@ export default function InteractiveStylePageEditor() {
                       onChange={setCustomSubtitle}
                     />
                   </VStack>
+                </VStack>
+              )}
+
+              {/* TAB 4: LAYOUT (Drag & Drop) */}
+              {sidebarTab === "layout" && (
+                <VStack gap={4}>
+                  <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+                    <VStack gap={0}>
+                      <Text type="body" size="sm" weight="semibold">
+                        จัดเรียง Layout หน้า (ลาก-วาง)
+                      </Text>
+                      <Text type="body" size="sm" color="secondary">
+                        ลาก section ขึ้น/ลง หรือกดปุ่มตาเพื่อซ่อน
+                      </Text>
+                    </VStack>
+                    {isWired(selectedRoute) ? (
+                      <Badge label="มีผลกับหน้าแล้ว" variant="info" />
+                    ) : (
+                      <Badge label="พร้อมใช้ (เชื่อมหน้านี้ในรอบถัดไป)" variant="neutral" />
+                    )}
+                  </HStack>
+                  <LayoutDndEditor
+                    sections={sectionsFor(selectedRoute)}
+                    value={layoutItems}
+                    onChange={setLayoutItems}
+                  />
                 </VStack>
               )}
 
