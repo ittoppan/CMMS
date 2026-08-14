@@ -117,12 +117,12 @@ body {
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);
   --cmms-bg-card-hover: var(--color-background-muted);
-  --cmms-bg-sidebar: #0F1E3D;
-  --cmms-bg-sidebar-hover: rgba(255, 255, 255, 0.07);
-  --cmms-bg-sidebar-active: linear-gradient(135deg, #0057A8, #1E88E5);
-  --cmms-sidebar-indicator: #38BDF8;
-  --cmms-sidebar-text: rgba(255, 255, 255, 0.82);
-  --cmms-sidebar-text-strong: #FFFFFF;
+  --cmms-bg-sidebar: #FFFFFF;
+  --cmms-bg-sidebar-hover: #F1F5F9;
+  --cmms-bg-sidebar-active: #0057A8;
+  --cmms-sidebar-indicator: #0057A8;
+  --cmms-sidebar-text: #475569;
+  --cmms-sidebar-text-strong: #0B1F4B;
   --cmms-bg-topnav: var(--color-background-surface);
   --cmms-bg-muted: var(--color-background-muted);
   --cmms-bg-wash: var(--color-background-muted);
@@ -295,28 +295,34 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 }
 
 /* ================================================
-   Astryx SideNav Overrides — TOPPAN Industrial Blue
+   Astryx SideNav Overrides — Light Operator Console
+   โฉมใหม่: พื้นขาว + ตัวหนังสือน้ำเงินเข้ม + หลอดไฟ Andon
+   ติดสว่างท้ายเมนู active (แทนแถบซ้ายเดิม) + หัวข้อหมวด
+   แบบ tag plate — ตรงข้ามกับโฉมเดิมพื้นน้ำเงินเข้มโดยสิ้นเชิง
    ================================================ */
 [class*="SideNav_sideNav"], .astryx-side-nav,
 [class*="LayoutPanel_panel"], .astryx-layout-panel {
   background: var(--cmms-bg-sidebar) !important;
+  border-right: 1px solid var(--cmms-border) !important;
 }
 
-/* Brand header — gradient icon tile + breathing room */
+/* Brand header — โลโก้ + คำว่า CMMS-TOPPAN สีน้ำเงินเข้ม */
 .astryx-side-nav-heading {
-  padding-block: 8px !important;
+  padding-block: 10px !important;
+  color: var(--cmms-sidebar-text-strong) !important;
 }
 .astryx-side-nav-heading .astryx-navicon {
-  background: linear-gradient(135deg, #0057A8, #1E88E5) !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--cmms-border) !important;
   border-radius: 10px !important;
-  box-shadow: 0 4px 12px rgba(0, 87, 168, 0.4) !important;
-  color: #FFFFFF !important;
+  box-shadow: var(--cmms-shadow-sm) !important;
+  color: var(--cmms-primary, #0057A8) !important;
 }
 
-/* Nav items */
+/* Nav items — ตัวหนังสือเทาน้ำเงิน, hover พื้นฟ้าอ่อน */
 [class*="SideNavItem_item"], .astryx-side-nav-item {
   position: relative;
-  border-radius: var(--cmms-radius) !important;
+  border-radius: 8px !important;
   margin: 2px 10px !important;
   padding-block: 8px !important;
   transition: all var(--cmms-transition) !important;
@@ -332,30 +338,29 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 .astryx-side-nav-item.selected {
   color: #FFFFFF !important;
   background: var(--cmms-bg-sidebar-active) !important;
-  box-shadow: 0 4px 14px rgba(0, 87, 168, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(0, 87, 168, 0.28) !important;
 }
-/* Active left indicator bar */
-[class*="SideNavItem_item"][data-selected="true"]::before,
-[class*="SideNavItem_item"][class*="selected"]::before,
-.astryx-side-nav-item.selected::before {
+/* Signature: หลอดไฟ Andon ติดสว่างท้ายเมนู active */
+[class*="SideNavItem_item"][data-selected="true"]::after,
+[class*="SideNavItem_item"][class*="selected"]::after,
+.astryx-side-nav-item.selected::after {
   content: "";
   position: absolute;
-  left: -10px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 3px;
-  height: 62%;
-  border-radius: 0 3px 3px 0;
-  background: var(--cmms-sidebar-indicator);
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #BAE6FD;
+  box-shadow: 0 0 10px 2px rgba(186, 230, 253, 0.9);
 }
 [class*="SideNav_sideNav"] :is(a, span, [class*="SideNavItem_label"], [class*="SideNavItem_icon"], [class*="Badge_badge"]),
 .astryx-side-nav :is(a, span, svg) { color: inherit; }
 
-/* Section headers — brighter + subtle divider between sections
-   (StyleX คลาสถูก hash ใน production → ใช้โครงสร้างจริงของ Astryx:
-    .astryx-side-nav-section > div:first-child = แถวหัวข้อหมวด) */
+/* Section headers — ตัวเล็กตัวพิมพ์ใหญ่ + จุด Andon นำหน้า (tag plate) */
 .astryx-side-nav-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid var(--cmms-border) !important;
   margin-top: 4px !important;
 }
 .astryx-side-nav-section:first-of-type {
@@ -369,11 +374,10 @@ button[class*="Button_secondary"], .astryx-button.secondary {
   text-transform: uppercase !important;
   font-size: 0.68rem !important;
   font-weight: 700 !important;
-  letter-spacing: 0.1em !important;
-  color: rgba(255, 255, 255, 0.72) !important;
+  letter-spacing: 0.12em !important;
+  color: #64748B !important;
   opacity: 1 !important;
 }
-/* จุด Andon เล็ก ๆ หน้าหัวข้อหมวด — สีเดียวกับ indicator เมนู active */
 .astryx-side-nav-section > div:first-child span[id$="-title"] {
   display: inline-flex !important;
   align-items: center !important;
@@ -385,8 +389,8 @@ button[class*="Button_secondary"], .astryx-button.secondary {
   width: 5px;
   height: 5px;
   border-radius: 999px;
-  background: var(--cmms-sidebar-indicator, #60A5FA);
-  box-shadow: 0 0 8px rgba(96, 165, 250, 0.65);
+  background: var(--cmms-sidebar-indicator, #0057A8);
+  box-shadow: 0 0 6px rgba(0, 87, 168, 0.45);
   flex-shrink: 0;
 }
 /* Scrollbar บาง ๆ ริม sidebar (Windows/Chromium) */
@@ -397,23 +401,23 @@ button[class*="Button_secondary"], .astryx-button.secondary {
   background: transparent;
 }
 .astryx-layout-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(100, 116, 139, 0.35);
   border-radius: 999px;
 }
 .astryx-layout-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(100, 116, 139, 0.55);
 }
-/* ช่องค้นหาเมนู: focus ring + เปลี่ยนเป็นพื้นขาว */
+/* ช่องค้นหาเมนู: focus ring น้ำเงินแบรนด์ */
 .astryx-side-nav input[aria-label="ค้นหาเมนูใน SideNav"]:focus {
-  border-color: var(--cmms-primary, #0D4785) !important;
+  border-color: var(--cmms-primary, #0057A8) !important;
   background: #FFFFFF !important;
-  box-shadow: 0 0 0 3px rgba(0, 87, 168, 0.18) !important;
+  box-shadow: 0 0 0 3px rgba(0, 87, 168, 0.16) !important;
 }
 
 /* SideNav footer — user card zone (element ท้ายสุดของ SideNav) */
 .astryx-side-nav > :last-child {
-  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background: rgba(0, 0, 0, 0.18) !important;
+  border-top: 1px solid var(--cmms-border) !important;
+  background: #F8FAFC !important;
   padding-block: 8px !important;
 }
 /* footer item labels — คืนขนาดปกติ (อย่าให้โดน style หัวข้อหมวด) */
@@ -426,34 +430,31 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 
 /* ================================================
    Mobile drawer (astryx-mobile-nav) — light theme
-   (desktop sidebar เป็นพื้นน้ำเงินเข้ม → ตัวหนังสือขาว
-    แต่ drawer มือถือเป็นพื้นขาว → ต้องคืนตัวหนังสือสีเข้ม
-    ไม่งั้นขาวทับขาว มองไม่เห็นข้อความ)
+   (โฉมใหม่ = light ทั้ง desktop และมือถือ — สไตล์เดียวกัน)
    ================================================ */
 .astryx-mobile-nav .astryx-side-nav-item {
-  color: var(--cmms-text-primary, #0F172A) !important;
+  color: var(--cmms-sidebar-text, #475569) !important;
 }
 .astryx-mobile-nav .astryx-side-nav-item:hover {
-  color: var(--cmms-text-primary, #0F172A) !important;
-  background: var(--cmms-bg-wash, #F1F5F9) !important;
+  color: var(--cmms-sidebar-text-strong, #0B1F4B) !important;
+  background: var(--cmms-bg-sidebar-hover, #F1F5F9) !important;
 }
 .astryx-mobile-nav .astryx-side-nav-item.selected,
 .astryx-mobile-nav .astryx-side-nav-item[data-selected="true"],
 .astryx-mobile-nav .astryx-side-nav-item[class*="selected"] {
   color: #FFFFFF !important;
-  background: var(--cmms-primary, #0057A8) !important;
-  box-shadow: 0 4px 14px rgba(0, 87, 168, 0.35) !important;
+  background: var(--cmms-bg-sidebar-active, #0057A8) !important;
+  box-shadow: 0 2px 10px rgba(0, 87, 168, 0.28) !important;
 }
 .astryx-mobile-nav .astryx-side-nav-section {
-  border-top-color: rgba(15, 23, 42, 0.07) !important;
+  border-top-color: var(--cmms-border) !important;
 }
 .astryx-mobile-nav .astryx-side-nav-section > div:first-child span {
-  color: var(--cmms-text-muted, #64748B) !important;
+  color: #64748B !important;
 }
-/* จุด Andon หน้าหัวข้อหมวด — ใช้สีน้ำเงินสด (เห็นชัดบนพื้นขาว) */
 .astryx-mobile-nav .astryx-side-nav-section > div:first-child span[id$="-title"]::before {
-  background: var(--cmms-sidebar-indicator, #38BDF8) !important;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.55) !important;
+  background: var(--cmms-sidebar-indicator, #0057A8) !important;
+  box-shadow: 0 0 6px rgba(0, 87, 168, 0.45) !important;
 }
 
 /* ================================================
@@ -1078,9 +1079,10 @@ html, body {
     padding-top: env(safe-area-inset-top);
     padding-left: 4px;
     padding-right: 4px;
-    background: linear-gradient(135deg, #0F1E3D, #0057A8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 2px 10px rgba(15, 30, 61, 0.25);
+    /* โฉมใหม่: แถบหัว light ตาม SideNav (เดิมเป็น gradient น้ำเงินเข้ม) */
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--cmms-border);
+    box-shadow: 0 1px 3px rgba(15, 30, 61, 0.08);
   }
   .cmms-mobile-app-bar-btn {
     display: inline-flex;
@@ -1093,17 +1095,17 @@ html, body {
     border: none;
     border-radius: 10px;
     background: transparent;
-    color: #FFFFFF;
+    color: var(--cmms-sidebar-text-strong, #0B1F4B);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .cmms-mobile-app-bar-btn:active { background: rgba(255, 255, 255, 0.15); }
+  .cmms-mobile-app-bar-btn:active { background: var(--cmms-bg-sidebar-hover, #F1F5F9); }
   .cmms-mobile-app-bar-logo {
     height: 28px;
     max-width: 112px;
     object-fit: contain;
     flex-shrink: 0;
-    filter: brightness(0) invert(1); /* logo ขาวบนพื้นน้ำเงินเข้ม */
+    filter: none; /* โฉมใหม่: โลโก้สีจริงบนพื้นขาว (เดิม invert เป็นขาว) */
   }
   .cmms-mobile-app-bar-title {
     flex: 1 1 auto;
@@ -1114,7 +1116,7 @@ html, body {
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.01em;
-    color: #FFFFFF;
+    color: var(--cmms-sidebar-text-strong, #0B1F4B);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1886,7 +1888,7 @@ next-route-announcer {
 .cmms-design-sidenav {
   background: var(--cmms-bg-sidebar);
   border-radius: var(--cmms-radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--cmms-border);
 }
 .cmms-design-sidenav-item {
   color: var(--cmms-sidebar-text);

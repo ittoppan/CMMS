@@ -17,28 +17,28 @@ export const THEME_PRESETS: Record<
     label: "TOPPAN Blue",
     primary: "#0057A8",
     gradient: "linear-gradient(135deg, #0057A8, #1E88E5)",
-    sidebar: "#0F1E3D",
+    sidebar: "#FFFFFF",
     body: "#F5F7FA",
   },
   indigo: {
     label: "Indigo & Violet",
     primary: "#4F46E5",
     gradient: "linear-gradient(135deg, #4F46E5, #8B5CF6)",
-    sidebar: "#0E1524",
+    sidebar: "#FDFDFF",
     body: "#F5F6FB",
   },
   emerald: {
     label: "Emerald & Teal",
     primary: "#059669",
     gradient: "linear-gradient(135deg, #0D9488, #10B981)",
-    sidebar: "#052E22",
+    sidebar: "#F6FCF9",
     body: "#F4F8F6",
   },
   amber: {
     label: "Amber & Slate",
     primary: "#D97706",
     gradient: "linear-gradient(135deg, #EA580C, #F59E0B)",
-    sidebar: "#1C1917",
+    sidebar: "#FDFAF4",
     body: "#FAF7F2",
   },
 };
@@ -54,7 +54,8 @@ const applyTheme = (theme: { primary: string; gradient: string; sidebar: string;
   root.style.setProperty("--color-background-body", theme.body);
   root.style.setProperty("--color-background-muted", `${theme.body}E6`);
   root.style.setProperty("--cmms-bg-sidebar", theme.sidebar);
-  root.style.setProperty("--cmms-bg-sidebar-active", theme.gradient);
+  // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
+  root.style.setProperty("--cmms-bg-sidebar-active", theme.primary);
   root.style.setProperty("--cmms-gradient-primary", theme.gradient);
   root.style.setProperty("--cmms-primary", theme.primary);
   root.style.setProperty("--cmms-primary-hover", theme.primary);
@@ -136,7 +137,8 @@ export default function ThemeProvider() {
           // sidebar/body ใช้ของ preset เสมอ (ผู้ใช้เลือกผ่าน swatch)
           const root = document.documentElement;
           root.style.setProperty("--cmms-bg-sidebar", base.sidebar);
-          root.style.setProperty("--cmms-bg-sidebar-active", gradient);
+          // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
+          root.style.setProperty("--cmms-bg-sidebar-active", primary);
           root.style.setProperty("--cmms-gradient-primary", gradient);
           root.style.setProperty("--cmms-primary", primary);
           root.style.setProperty("--cmms-primary-hover", primary);

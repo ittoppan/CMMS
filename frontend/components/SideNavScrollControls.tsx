@@ -249,7 +249,16 @@ export default function SideNavScrollControls({ pathname }: { pathname: string }
             whiteSpace: "nowrap",
           }}
         >
-          <span style={{ fontSize: 12 }}>📍</span>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: "#7DD3FC",
+              boxShadow: "0 0 8px rgba(125, 211, 252, 0.9)",
+              flexShrink: 0,
+            }}
+          />
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: 140 }}>{active.label}</span>
         </button>
       )}
