@@ -6,7 +6,15 @@ session_start();
 
 try {
     $pdo = getDb();
-    requireLogin($pdo, true); // page editor = งานดูแลระบบ → admin เท่านั้น
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    // GET = ทุกคนที่ล็อกอินอ่าน layout ได้ (เป็นค่ากลางของระบบ ไม่ใช่ต่อผู้ใช้)
+    // POST = เฉพาะ admin ที่แก้ไข layout ได้ (CSRF ตรวจใน requireLogin)
+    if ($method !== 'GET') {
+        requireLogin($pdo, true); // page editor = งานดูแลระบบ → admin เท่านั้น
+    } else {
+        requireLogin($pdo);
+    }
 
     // Ensure page_layouts table exists in MySQL
     $pdo->exec("CREATE TABLE IF NOT EXISTS page_layouts (
@@ -17,8 +25,6 @@ try {
         updated_by INT DEFAULT 1,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    $method = $_SERVER['REQUEST_METHOD'];
 
     if ($method === 'GET') {
         $route = $_GET['route'] ?? '/dashboard';
