@@ -4,9 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Grid } from "@astryxdesign/core/Grid";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -41,15 +38,6 @@ const extLabel: Record<string, string> = {
   pdf: "PDF",
   docx: "Word",
   ods: "OpenOffice",
-};
-
-const extColor: Record<string, "success" | "info" | "warning" | "neutral" | "accent"> = {
-  xls: "success",
-  xlsx: "success",
-  xlsm: "success",
-  pdf: "error",
-  docx: "info",
-  ods: "neutral",
 };
 
 function formatSize(bytes: number): string {
@@ -169,34 +157,38 @@ export default function FormsPage() {
 
   return (
     <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">FORM CENTER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ศูนย์แบบฟอร์ม (Form Center)</Heading>
-            <Badge label={`${forms.length} แบบฟอร์ม`} variant="info" />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>FORM CENTER · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ศูนย์แบบฟอร์ม (Form Center)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <DocumentTextIcon className="w-3.5 h-3.5" /> {forms.length} แบบฟอร์ม
+            </span>
           </HStack>
-          <Text type="body" color="secondary">
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             แบบฟอร์มมาตรฐานของฝ่ายวิศวกรรม (F-EN / F-SF) — ดาวน์โหลดเพื่อพิมพ์ใช้หน้างานได้ทันที
           </Text>
         </VStack>
-        <HStack gap={2}>
-          <Button
-            label="อัปโหลดแบบฟอร์ม"
-            variant="primary"
-            size="sm"
-            icon={<Icon icon={ArrowUpTrayIcon} size="sm" />}
+        <HStack gap={2} wrap="wrap">
+          <button
+            type="button"
             onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}
-          />
-          <Button
-            label="รีเฟรช"
-            variant="secondary"
-            size="sm"
-            icon={<Icon icon={ArrowPathIcon} size="sm" />}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            อัปโหลดแบบฟอร์ม
+          </button>
+          <button
+            type="button"
             onClick={fetchForms}
-          />
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
         </HStack>
-      </HStack>
+      </div>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
@@ -232,7 +224,7 @@ export default function FormsPage() {
       ) : filtered.length === 0 ? (
         <Card padding={6}>
           <VStack gap={2} hAlign="center">
-            <Icon icon={DocumentTextIcon} size="lg" color="disabled" />
+            <DocumentTextIcon className="w-8 h-8" style={{ color: "var(--cmms-disabled)" }} />
             <Text type="body" color="secondary">ไม่พบแบบฟอร์มที่ค้นหา</Text>
           </VStack>
         </Card>
@@ -240,25 +232,26 @@ export default function FormsPage() {
         <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={4}>
           {filtered.map((f) => (
             <Card key={f.filename} padding={4} elevation="low" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <HStack hAlign="between" vAlign="start" gap={2}>
-                <Badge label={f.code || "เอกสาร"} variant="accent" />
-                {f.rev && <Badge label={f.rev} variant="neutral" />}
+              <HStack hAlign="between" vAlign="start" gap={2} wrap="wrap">
+                <span className="cmms-andon-chip" style={{ background: "rgba(124,58,237,0.12)", color: "#7C3AED", fontSize: "0.7rem", padding: "3px 9px" }}>{f.code || "เอกสาร"}</span>
+                {f.rev && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>{f.rev}</span>}
               </HStack>
               <Text type="body" weight="bold" style={{ lineHeight: 1.4, flex: 1 }}>
                 {f.title}
               </Text>
               <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
-                <HStack gap={2} vAlign="center">
-                  <Badge label={extLabel[f.ext] || f.ext.toUpperCase()} variant={extColor[f.ext] || "neutral"} />
+                <HStack gap={2} vAlign="center" wrap="wrap">
+                  <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "#059669", fontSize: "0.7rem", padding: "3px 9px" }}>{extLabel[f.ext] || f.ext.toUpperCase()}</span>
                   <Text type="body" size="sm" color="disabled">{formatSize(f.size)}</Text>
                 </HStack>
-                <Button
-                  label="ดาวน์โหลด"
-                  size="sm"
-                  variant="secondary"
-                  icon={<Icon icon={DocumentArrowDownIcon} size="xsm" />}
+                <button
+                  type="button"
                   onClick={() => download(f)}
-                />
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-md hover:brightness-110 transition-all duration-300"
+                >
+                  <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+                  ดาวน์โหลด
+                </button>
               </HStack>
             </Card>
           ))}
@@ -344,14 +337,22 @@ export default function FormsPage() {
             )}
 
             <HStack hAlign="end" gap={2}>
-              <Button label="ยกเลิก" variant="secondary" onClick={() => setUploadOpen(false)} />
-              <Button
-                label="อัปโหลด"
-                variant="primary"
-                isLoading={upLoading}
-                icon={<Icon icon={ArrowUpTrayIcon} size="sm" />}
+              <button
+                type="button"
+                onClick={() => setUploadOpen(false)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={upLoading}
                 onClick={handleUpload}
-              />
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowUpTrayIcon className="w-4 h-4" />
+                {upLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
+              </button>
             </HStack>
           </VStack>
         </Dialog>
