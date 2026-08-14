@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+import sys
+# บังคับ UTF-8 สำหรับ stdout/stderr — กัน UnicodeEncodeError (cp1252) ตอนรันผ่าน hook/CI บน Windows
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 """
 CMMS-TPT — Design Guideline Audit
 =================================
