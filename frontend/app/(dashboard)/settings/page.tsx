@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
+import { TextArea } from "@astryxdesign/core/TextArea";
 import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Switch } from "@astryxdesign/core/Switch";
@@ -184,6 +185,18 @@ const BOOLEAN_KEYS = new Set([
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
 
+// คีย์ที่เป็นข้อความยาวหลายบรรทัด — แสดงเป็นช่องพิมพ์ใหญ่ (textarea)
+const TEXTAREA_KEYS = new Set([
+  "company_address", "iso_footer_note", "iso_header_title",
+  "login_welcome_text", "login_notice_text", "company_tagline",
+]);
+
+// คีย์ที่เป็นสี hex — แสดงเป็น color picker + ช่องพิมพ์ hex
+const COLOR_KEYS = new Set(["theme_primary_hex", "theme_secondary_hex"]);
+
+// คีย์ที่เป็นอีเมล
+const EMAIL_KEYS = new Set(["smtp_from_email"]);
+
 // คีย์ที่เป็นตัวเลือกจำกัด (dropdown) — ค่าในลิสต์เดียวกับหน้า PHP เก่า
 const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
   date_format: [
@@ -268,6 +281,14 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "week", label: "รายสัปดาห์ (Week)" },
     { value: "day", label: "รายวัน (Day)" },
     { value: "agenda", label: "รายการ (Agenda)" },
+  ],
+  currency_symbol: [
+    { value: "฿", label: "บาท (฿)" },
+    { value: "$", label: "ดอลลาร์สหรัฐ ($)" },
+    { value: "€", label: "ยูโร (€)" },
+    { value: "£", label: "ปอนด์ (£)" },
+    { value: "¥", label: "เยน (¥)" },
+    { value: "RM", label: "ริงกิตมาเลเซีย (RM)" },
   ],
   timezone: [
     { value: "Asia/Bangkok", label: "Asia/Bangkok (ไทย, UTC+7)" },
@@ -740,6 +761,9 @@ export default function SettingsPage() {
                 const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
                 const isJson = JSON_KEYS.has(row.setting_key);
                 const selectOptions = SELECT_OPTIONS[row.setting_key];
+                const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
+                const isColor = COLOR_KEYS.has(row.setting_key);
+                const isEmail = EMAIL_KEYS.has(row.setting_key);
                 const defaultValue = defaults[row.setting_key];
                 const canReset = defaultValue !== null && defaultValue !== undefined;
                 const dirty = isSensitive
@@ -832,10 +856,42 @@ export default function SettingsPage() {
                         options={selectOptions}
                         onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
                       />
+                    ) : isColor ? (
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <input
+                          type="color"
+                          aria-label={`${meta.label} — เลือกสี`}
+                          value={/^#([0-9a-fA-F]{6})$/.test(String(form[row.setting_key] ?? "")) ? String(form[row.setting_key]) : "#" + "000000"}
+                          onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
+                          style={{
+                            width: 42, height: 34, padding: 2, cursor: "pointer",
+                            border: "1px solid var(--cmms-border)", borderRadius: "var(--cmms-radius)",
+                            background: "var(--cmms-bg-wash)",
+                          }}
+                        />
+                        <TextInput
+                          label={meta.label}
+                          isLabelHidden
+                          placeholder="#RRGGBB"
+                          value={String(form[row.setting_key] ?? "").toUpperCase()}
+                          onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                          style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
+                        />
+                      </HStack>
+                    ) : isTextarea ? (
+                      <TextArea
+                        label={meta.label}
+                        isLabelHidden
+                        value={form[row.setting_key] ?? ""}
+                        isDisabled={isReadonly}
+                        rows={row.setting_key === "company_address" ? 3 : 2}
+                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                      />
                     ) : (
                       <TextInput
                         label={meta.label}
                         isLabelHidden
+                        type={isEmail ? "email" : "text"}
                         value={form[row.setting_key] ?? ""}
                         isDisabled={isReadonly}
                         onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
