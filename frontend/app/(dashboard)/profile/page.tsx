@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -142,10 +139,22 @@ export default function ProfilePage() {
     <VStack gap={6}>
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
-      <HStack gap={3} vAlign="center">
-        <Heading level={2}>โปรไฟล์ของฉัน</Heading>
-        <Badge label={profile ? `ผู้ใช้: ${profile.username}` : ""} variant="info" />
-      </HStack>
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <VStack gap={1}>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PROFILE · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>โปรไฟล์ของฉัน</Heading>
+            {profile && (
+              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+                <UserCircleIcon className="w-3.5 h-3.5" /> ผู้ใช้: {profile.username}
+              </span>
+            )}
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            จัดการข้อมูลส่วนตัว เปลี่ยนรูปโปรไฟล์ รหัสผ่าน และการผูกบัญชี LINE สำหรับการแจ้งเตือน
+          </Text>
+        </VStack>
+      </div>
 
       <Grid columns={{ minWidth: 300 }} gap={6} style={{ alignItems: "start" }}>
         {/* ═══ การ์ดซ้าย: รูป + ข้อมูลหลัก + LINE ═══ */}
@@ -171,7 +180,7 @@ export default function ProfilePage() {
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}
               >
-                {uploading ? <Spinner size="xs" /> : <Icon icon={CameraIcon} size="sm" />}
+                {uploading ? <Spinner size="xs" /> : <CameraIcon className="w-4 h-4" />}
               </button>
               <input
                 ref={fileRef}
@@ -190,27 +199,35 @@ export default function ProfilePage() {
               </Text>
             </VStack>
 
-            <Badge
-              label={profile?.line_user_id ? "ผูกบัญชี LINE แล้ว" : "ยังไม่ผูกบัญชี LINE"}
-              variant={profile?.line_user_id ? "success" : "neutral"}
-            />
+            <span
+              className="cmms-andon-chip"
+              style={{
+                background: profile?.line_user_id ? "rgba(16,185,129,0.12)" : "rgba(100,116,139,0.12)",
+                color: profile?.line_user_id ? "#059669" : "#64748B",
+                fontSize: "0.75rem",
+                padding: "4px 10px",
+              }}
+            >
+              {profile?.line_user_id ? "ผูกบัญชี LINE แล้ว" : "ยังไม่ผูกบัญชี LINE"}
+            </span>
             {!profile?.line_user_id && (
-              <Button
-                label="ผูกบัญชี LINE"
-                variant="secondary"
-                size="sm"
-                icon={<Icon icon={LinkIcon} size="sm" />}
+              <button
+                type="button"
                 onClick={() => router.push("/register")}
-              />
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                ผูกบัญชี LINE
+              </button>
             )}
 
             <VStack gap={1} style={{ width: "100%", textAlign: "left" }}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={IdentificationIcon} size="sm" color="secondary" />
+                <IdentificationIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
                 <Text type="body" size="sm" color="secondary">สมาชิกตั้งแต่: {profile?.created_at ? String(profile.created_at).slice(0, 10) : "—"}</Text>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <Icon icon={ShieldCheckIcon} size="sm" color="secondary" />
+                <ShieldCheckIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
                 <Text type="body" size="sm" color="secondary">บทบาท: {profile?.role || "—"}</Text>
               </HStack>
             </VStack>
@@ -222,7 +239,7 @@ export default function ProfilePage() {
           <Card padding={5}>
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={UserCircleIcon} size="md" color="primary" />
+                <UserCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <Heading level={3}>ข้อมูลส่วนตัว</Heading>
               </HStack>
 
@@ -249,7 +266,14 @@ export default function ProfilePage() {
               />
 
               <HStack hAlign="end">
-                <Button label="บันทึกข้อมูล" variant="primary" isLoading={saving} onClick={handleSave} />
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={handleSave}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                </button>
               </HStack>
             </VStack>
           </Card>
@@ -257,7 +281,7 @@ export default function ProfilePage() {
           <Card padding={5}>
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={KeyIcon} size="md" color="primary" />
+                <KeyIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <Heading level={3}>เปลี่ยนรหัสผ่าน</Heading>
               </HStack>
               <Text type="body" size="sm" color="secondary">
@@ -286,11 +310,17 @@ export default function ProfilePage() {
 
           <Card padding={4}>
             <HStack gap={2} vAlign="center" wrap="wrap">
-              <Icon icon={ChatBubbleLeftRightIcon} size="sm" color="primary" />
+              <ChatBubbleLeftRightIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
               <Text type="body" size="sm" color="secondary">
                 ต้องการรับการแจ้งเตือนทาง LINE หรือไม่? ไปที่หน้า
               </Text>
-              <Button label="ลงทะเบียนผูกบัญชี LINE" variant="secondary" size="sm" onClick={() => router.push("/register")} />
+              <button
+                type="button"
+                onClick={() => router.push("/register")}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ลงทะเบียนผูกบัญชี LINE
+              </button>
             </HStack>
           </Card>
         </VStack>
