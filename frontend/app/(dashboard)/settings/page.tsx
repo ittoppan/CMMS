@@ -126,6 +126,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   line_channel_secret: { label: "LINE Channel Secret", hint: "คีย์ลับ LINE OA" },
   line_liff_id: { label: "LINE LIFF ID" },
   line_maintenance_group_id: { label: "LINE Group (ซ่อมบำรุง)" },
+  line_webhook_url: { label: "LINE Webhook URL", hint: "URL ที่ LINE ส่ง event เข้ามา (อัปเดตอัตโนมัติตาม tunnel)" },
   line_tpl_breakdown: { label: "เทมเพลต LINE — งานเสีย", hint: "JSON — จัดการในหน้ารูปแบบการแจ้งเตือน LINE" },
   line_tpl_completed: { label: "เทมเพลต LINE — งานเสร็จ" },
   line_tpl_low_stock: { label: "เทมเพลต LINE — สต็อกต่ำ" },
@@ -182,6 +183,101 @@ const BOOLEAN_KEYS = new Set([
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
+
+// คีย์ที่เป็นตัวเลือกจำกัด (dropdown) — ค่าในลิสต์เดียวกับหน้า PHP เก่า
+const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  date_format: [
+    { value: "d/m/Y", label: "DD/MM/YYYY (25/07/2026)" },
+    { value: "Y-m-d", label: "YYYY-MM-DD (2026-07-25)" },
+    { value: "d-m-Y", label: "DD-MM-YYYY (25-07-2026)" },
+    { value: "m/d/Y", label: "MM/DD/YYYY (07/25/2026)" },
+  ],
+  system_mode: [
+    { value: "online", label: "ออนไลน์ปกติ (Online)" },
+    { value: "maintenance", label: "ปิดปรับปรุงระบบ (Maintenance)" },
+  ],
+  theme_font_family: [
+    { value: "Sarabun", label: "Sarabun (ทางการ ISO — แนะนำ)" },
+    { value: "Prompt", label: "Prompt (โมเดิร์นทันสมัย)" },
+    { value: "Kanit", label: "Kanit (กลมมนหนาเด่น)" },
+  ],
+  border_radius_style: [
+    { value: "rounded-xl", label: "Rounded Modern (12px)" },
+    { value: "rounded-md", label: "Minimal Sharp (6px)" },
+    { value: "rounded-2xl", label: "Pill Curved (20px)" },
+  ],
+  sidebar_style: [
+    { value: "dark_slate", label: "Cruip Dark Slate (เข้ม)" },
+    { value: "midnight_navy", label: "Midnight Navy (น้ำเงินเข้ม)" },
+    { value: "pure_light", label: "Pure White Light (ขาว)" },
+  ],
+  topbar_style: [
+    { value: "clean_white", label: "สะอาดขาว (Clean White)" },
+    { value: "dark_slate", label: "เข้ม Slate (Dark)" },
+  ],
+  logo_position: [
+    { value: "both", label: "ทั้งมุมซ้าย & มุมขวา (แนะนำ)" },
+    { value: "header_only", label: "มุมขวาบน (Header Corner)" },
+    { value: "sidebar_only", label: "มุมซ้ายบน (Sidebar Only)" },
+  ],
+  login_card_position: [
+    { value: "center", label: "กลางจอ (Center)" },
+    { value: "left", label: "ซ้าย (Left)" },
+    { value: "right", label: "ขวา (Right)" },
+  ],
+  notification_sound: [
+    { value: "chime", label: "Chime Bell (นุ่มนวล)" },
+    { value: "pop", label: "Pop Alert" },
+    { value: "mute", label: "ปิดเสียง (Mute)" },
+  ],
+  smtp_encryption: [
+    { value: "none", label: "ไม่เข้ารหัส (None)" },
+    { value: "tls", label: "TLS (แนะนำ)" },
+    { value: "ssl", label: "SSL" },
+  ],
+  session_timeout_mins: [
+    { value: "30", label: "30 นาที" },
+    { value: "60", label: "60 นาที (แนะนำ)" },
+    { value: "120", label: "120 นาที" },
+  ],
+  max_login_attempts: [
+    { value: "3", label: "3 ครั้ง" },
+    { value: "5", label: "5 ครั้ง (แนะนำ)" },
+    { value: "10", label: "10 ครั้ง" },
+  ],
+  default_repair_priority: [
+    { value: "low", label: "ต่ำ (Low)" },
+    { value: "medium", label: "ปานกลาง (Medium)" },
+    { value: "high", label: "ด่วน (High)" },
+    { value: "critical", label: "วิกฤต (ต้องซ่อมทันที)" },
+  ],
+  default_pm_frequency: [
+    { value: "daily", label: "รายวัน (Daily)" },
+    { value: "weekly", label: "รายสัปดาห์ (Weekly)" },
+    { value: "monthly", label: "รายเดือน (Monthly — แนะนำ)" },
+    { value: "quarterly", label: "รายไตรมาส (Quarterly)" },
+    { value: "yearly", label: "รายปี (Yearly)" },
+  ],
+  spare_approval_level: [
+    { value: "1", label: "ระดับ 1 — หัวหน้าช่าง" },
+    { value: "2", label: "ระดับ 2 — หัวหน้าแผนก" },
+    { value: "3", label: "ระดับ 3 — ผู้จัดการ" },
+  ],
+  calendar_view_default: [
+    { value: "month", label: "รายเดือน (Month)" },
+    { value: "week", label: "รายสัปดาห์ (Week)" },
+    { value: "day", label: "รายวัน (Day)" },
+    { value: "agenda", label: "รายการ (Agenda)" },
+  ],
+  timezone: [
+    { value: "Asia/Bangkok", label: "Asia/Bangkok (ไทย, UTC+7)" },
+    { value: "Asia/Tokyo", label: "Asia/Tokyo (ญี่ปุ่น, UTC+9)" },
+    { value: "Asia/Singapore", label: "Asia/Singapore (UTC+8)" },
+    { value: "Asia/Ho_Chi_Minh", label: "Asia/Ho_Chi_Minh (เวียดนาม, UTC+7)" },
+    { value: "Asia/Jakarta", label: "Asia/Jakarta (อินโดนีเซีย, UTC+7)" },
+    { value: "Etc/UTC", label: "UTC (เวลาสากล)" },
+  ],
+};
 
 // ลิงก์หน้าย่อยตั้งค่า
 const SUB_PAGES = [
@@ -643,6 +739,7 @@ export default function SettingsPage() {
                 const isReadonly = READONLY_KEYS.has(row.setting_key);
                 const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
                 const isJson = JSON_KEYS.has(row.setting_key);
+                const selectOptions = SELECT_OPTIONS[row.setting_key];
                 const defaultValue = defaults[row.setting_key];
                 const canReset = defaultValue !== null && defaultValue !== undefined;
                 const dirty = isSensitive
@@ -725,6 +822,16 @@ export default function SettingsPage() {
                           onChange={(c) => setForm((f) => ({ ...f, [row.setting_key]: c ? "1" : "0" }))}
                         />
                       </HStack>
+                    ) : selectOptions ? (
+                      <Selector
+                        label={meta.label}
+                        isLabelHidden
+                        value={form[row.setting_key] ?? ""}
+                        isDisabled={isReadonly}
+                        placeholder="เลือกค่า..."
+                        options={selectOptions}
+                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
+                      />
                     ) : (
                       <TextInput
                         label={meta.label}
