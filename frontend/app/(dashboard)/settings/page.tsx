@@ -783,6 +783,9 @@ export default function SettingsPage() {
                 const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
                 const isColor = COLOR_KEYS.has(row.setting_key);
                 const isEmail = EMAIL_KEYS.has(row.setting_key);
+                // real-time ตรวจรหัสสี hex (#RRGGBB)
+                const hexValue = String(form[row.setting_key] ?? "").trim();
+                const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
                 const defaultValue = defaults[row.setting_key];
                 const canReset = defaultValue !== null && defaultValue !== undefined;
                 const dirty = isSensitive
@@ -876,27 +879,37 @@ export default function SettingsPage() {
                         onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
                       />
                     ) : isColor ? (
-                      <HStack gap={2} vAlign="center" wrap="wrap">
-                        <input
-                          type="color"
-                          aria-label={`${meta.label} — เลือกสี`}
-                          value={/^#([0-9a-fA-F]{6})$/.test(String(form[row.setting_key] ?? "")) ? String(form[row.setting_key]) : "#" + "000000"}
-                          onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
-                          style={{
-                            width: 42, height: 34, padding: 2, cursor: "pointer",
-                            border: "1px solid var(--cmms-border)", borderRadius: "var(--cmms-radius)",
-                            background: "var(--cmms-bg-wash)",
-                          }}
-                        />
-                        <TextInput
-                          label={meta.label}
-                          isLabelHidden
-                          placeholder="#RRGGBB"
-                          value={String(form[row.setting_key] ?? "").toUpperCase()}
-                          onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                          style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
-                        />
-                      </HStack>
+                      <VStack gap={1}>
+                        <HStack gap={2} vAlign="center" wrap="wrap">
+                          <input
+                            type="color"
+                            aria-label={`${meta.label} — เลือกสี`}
+                            value={/^#([0-9a-fA-F]{6})$/.test(hexValue) ? hexValue : "#" + "000000"}
+                            onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
+                            style={{
+                              width: 42, height: 34, padding: 2, cursor: "pointer",
+                              border: "1px solid var(--cmms-border)", borderRadius: "var(--cmms-radius)",
+                              background: "var(--cmms-bg-wash)",
+                            }}
+                          />
+                          <TextInput
+                            label={meta.label}
+                            isLabelHidden
+                            placeholder="#RRGGBB"
+                            value={String(form[row.setting_key] ?? "").toUpperCase()}
+                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                            status={hexValue === "" ? undefined : { type: hexValid ? "success" : "error" }}
+                            style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
+                          />
+                        </HStack>
+                        {hexValue === "" ? (
+                          <Text type="body" size="xs" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
+                        ) : hexValid ? (
+                          <Text type="body" size="xs" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
+                        ) : (
+                          <Text type="body" size="xs" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
+                        )}
+                      </VStack>
                     ) : isTextarea ? (
                       <TextArea
                         label={meta.label}

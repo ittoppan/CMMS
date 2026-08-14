@@ -24,6 +24,18 @@ const hexToRgb = (hex: string): string => {
 
 const isHex = (v: string) => /^#[0-9a-fA-F]{3,8}$/.test(v);
 
+// สถานะรหัสสีแบบเรียลไทม์ (#RRGGBB 6 หลักเต็ม)
+function HexStatus({ value }: { value: string }) {
+  const v = (value || "").trim();
+  if (!v) return null;
+  const ok = /^#[0-9a-fA-F]{6}$/.test(v);
+  return (
+    <Text type="body" size="xs" style={{ color: ok ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
+      {ok ? "✓ รหัสสีถูกต้อง" : "✕ ต้องเป็น #RRGGBB (6 หลัก)"}
+    </Text>
+  );
+}
+
 export default function ThemeSettingsPanel({ values, onChange, onSave, saving }: Props) {
   const [previewKey, setPreviewKey] = useState<string | null>(null);
 
@@ -138,6 +150,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
               style={{ width: 110, padding: "6px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", font: "inherit", fontSize: 13 }}
             />
           </HStack>
+          <HexStatus value={values.theme_primary_hex ?? ""} />
         </VStack>
         <VStack gap={1}>
           <Text type="body" size="sm" weight="semibold">สีรอง (Gradient ปลาย)</Text>
@@ -160,6 +173,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
               style={{ width: 110, padding: "6px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", font: "inherit", fontSize: 13 }}
             />
           </HStack>
+          <HexStatus value={values.theme_secondary_hex ?? ""} />
         </VStack>
         <Button
           label={saving ? "กำลังบันทึก..." : "บันทึกธีมลงฐานข้อมูล"}
