@@ -17,6 +17,7 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
+import { usePageLayout } from "@/lib/pageLayout";
 import {
   CheckCircleIcon,
   BuildingOffice2Icon,
@@ -571,6 +572,13 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (default = เรียงเดิม)
+  const layout = usePageLayout("/settings", ["header", "subpages", "recent", "grid"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   if (loading) {
     return (
       <HStack hAlign="center" style={{ padding: 60 }}>
@@ -583,7 +591,7 @@ export default function SettingsPage() {
   const totalDirty = Object.values(groupDirtyCount).reduce((a, b) => a + b, 0);
 
   return (
-    <VStack gap={6}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
 
       {saveMessage && (
@@ -595,6 +603,7 @@ export default function SettingsPage() {
         </Card>
       )}
 
+      <div style={layoutStyle("header")}>
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1} style={{ flex: 1 }}>
           <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS · CMMS-TOPPAN</Text>
@@ -633,8 +642,10 @@ export default function SettingsPage() {
           </VStack>
         </HStack>
       </HStack>
+      </div>
 
       {/* ลิงก์หน้าย่อยตั้งค่า */}
+      <div style={layoutStyle("subpages")}>
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={3}>
         {SUB_PAGES.map((p) => (
           <Card
@@ -657,8 +668,10 @@ export default function SettingsPage() {
           </Card>
         ))}
       </Grid>
+      </div>
 
       {/* คีย์ที่แก้ไขล่าสุด */}
+      <div style={layoutStyle("recent")}>
       {recentRows.length > 0 && (
         <Card padding={4}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
@@ -695,7 +708,9 @@ export default function SettingsPage() {
           </HStack>
         </Card>
       )}
+      </div>
 
+      <div style={layoutStyle("grid")}>
       <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
         {/* Sidebar group nav */}
         <Card padding={2}>
@@ -965,6 +980,7 @@ export default function SettingsPage() {
           </VStack>
         </Card>
       </Grid>
+      </div>
 
       {/* ═══ Dialog เปรียบเทียบก่อนบันทึก ═══ */}
       <Dialog isOpen={showDiff} onOpenChange={(open) => { if (!open) setShowDiff(false); }}>
@@ -1093,6 +1109,6 @@ export default function SettingsPage() {
           </HStack>
         </VStack>
       </Dialog>
-    </VStack>
+    </div>
   );
 }

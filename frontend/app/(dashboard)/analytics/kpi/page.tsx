@@ -6,6 +6,7 @@ import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import AndonLamp from "@/components/AndonLamp";
+import { usePageLayout } from "@/lib/pageLayout";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -88,6 +89,13 @@ export default function KpiDashboardPage() {
       pct: data && data.headline.total > 0 ? Math.round((s.cnt / data.headline.total) * 100) : 0,
     }));
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (default = เรียงเดิม)
+  const layout = usePageLayout("/analytics/kpi", ["hero", "kpi", "charts", "cost", "sla_pm", "actions"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   if (loading && !data) {
     return (
       <HStack hAlign="center" style={{ padding: 60 }}>
@@ -98,9 +106,10 @@ export default function KpiDashboardPage() {
   }
 
   return (
-    <VStack gap={6}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
+      <div style={layoutStyle("hero")}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EXECUTIVE KPI · CMMS-TOPPAN</Text>
@@ -122,8 +131,10 @@ export default function KpiDashboardPage() {
           style={{ minWidth: 150 }}
         />
       </div>
+      </div>
 
       {/* ═══ การ์ด KPI หลัก ═══ */}
+      <div style={layoutStyle("kpi")}>
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={4}>
         <Card elevation="low" padding={4} className="cmms-kpi-card blue">
           <VStack gap={2}>
@@ -180,8 +191,10 @@ export default function KpiDashboardPage() {
           </VStack>
         </Card>
       </Grid>
+      </div>
 
       {/* ═══ MTBF / MTTR ═══ */}
+      <div style={layoutStyle("charts")}>
       <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
         <Card padding={5}>
           <VStack gap={4}>
@@ -253,8 +266,10 @@ export default function KpiDashboardPage() {
           </VStack>
         </Card>
       </Grid>
+      </div>
 
       {/* ═══ ค่าใช้จ่ายรายเดือน ═══ */}
+      <div style={layoutStyle("cost")}>
       <Card padding={5}>
         <VStack gap={4}>
           <HStack gap={2} vAlign="center">
@@ -279,8 +294,10 @@ export default function KpiDashboardPage() {
           </div>
         </VStack>
       </Card>
+      </div>
 
       {/* ═══ SLA + PM รายละเอียด ═══ */}
+      <div style={layoutStyle("sla_pm")}>
       <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
         <Card padding={5}>
           <VStack gap={4}>
@@ -342,7 +359,9 @@ export default function KpiDashboardPage() {
           </VStack>
         </Card>
       </Grid>
+      </div>
 
+      <div style={layoutStyle("actions")}>
       <HStack hAlign="center">
         <button
           type="button"
@@ -353,6 +372,7 @@ export default function KpiDashboardPage() {
           รีเฟรชข้อมูล
         </button>
       </HStack>
-    </VStack>
+      </div>
+    </div>
   );
 }

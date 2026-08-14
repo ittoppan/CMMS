@@ -64,11 +64,12 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
       <VStack gap={2}>
         {full.map((item, i) => {
           const meta = label(item.id);
+          const pinned = Boolean(meta?.pinned);
           const isOver = overIndex === i && dragIndex !== null && dragIndex !== i;
           return (
             <div
               key={item.id}
-              draggable
+              draggable={!pinned}
               onDragStart={(e) => {
                 setDragIndex(i);
                 e.dataTransfer.effectAllowed = "move";
@@ -155,6 +156,9 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
                     {meta.desc}
                   </Text>
                 )}
+                {pinned && (
+                  <Badge label="ส่วนหัวคงที่" variant="neutral" />
+                )}
               </div>
 
               {/* Toggle แสดง/ซ่อน */}
@@ -177,7 +181,7 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
                   variant="ghost"
                   size="sm"
                   isIconOnly
-                  isDisabled={i === 0}
+                  isDisabled={pinned || i === 0}
                   onClick={() => move(i, i - 1)}
                 />
                 <Button
@@ -186,7 +190,7 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
                   variant="ghost"
                   size="sm"
                   isIconOnly
-                  isDisabled={i === full.length - 1}
+                  isDisabled={pinned || i === full.length - 1}
                   onClick={() => move(i, i + 1)}
                 />
               </HStack>
@@ -199,7 +203,8 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
 
       <Text type="body" size="sm" color="secondary">
         ลากแถวเพื่อจัดลำดับ หรือใช้ปุ่มลูกศร — สลับตาเพื่อซ่อน section นั้นจากหน้า
-        (การซ่อน/เรียงลำดับมีผลกับหน้าที่เชื่อมต่อแล้ว — ดูป้าย "มีผลกับหน้าแล้ว")
+        (การซ่อน/เรียงลำดับมีผลกับหน้าที่เชื่อมต่อแล้ว — ดูป้าย "มีผลกับหน้าแล้ว" ·
+        ส่วนหัวคงที่ = ย้ายไม่ได้แต่ซ่อนได้)
       </Text>
     </VStack>
   );

@@ -21,6 +21,7 @@ import { Spinner } from "@astryxdesign/core/Spinner";
 import { Link } from "@astryxdesign/core/Link";
 import { Avatar } from "@astryxdesign/core/Avatar";
 import CountUp from "react-countup";
+import { usePageLayout } from "@/lib/pageLayout";
 import {
   PlusIcon,
   ArrowPathIcon,
@@ -272,9 +273,17 @@ export default function UsersPage() {
     },
   ];
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (default = เรียงเดิม)
+  const layout = usePageLayout("/users", ["header", "stats", "content"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   return (
-    <VStack gap={6}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {/* Header */}
+      <div style={layoutStyle("header")}>
       <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow">USER MANAGEMENT · CMMS-TOPPAN</Text>
@@ -299,12 +308,14 @@ export default function UsersPage() {
           </Link>
         </HStack>
       </Card>
+      </div>
 
       {error && (
         <Banner status="error" title="Error" description={error} isDismissable={false} />
       )}
 
       {/* Stat badges -> KPI Grid */}
+      <div style={layoutStyle("stats")}>
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
         <Card elevation="low" padding={4}>
           <VStack gap={1}>
@@ -327,7 +338,9 @@ export default function UsersPage() {
           </VStack>
         </Card>
       </Grid>
+      </div>
 
+      <div style={layoutStyle("content")}>
       <Card elevation="low" padding={6}>
         <VStack gap={4}>
           {/* Filter Toolbar */}
@@ -376,6 +389,7 @@ export default function UsersPage() {
           )}
         </VStack>
       </Card>
+      </div>
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
@@ -418,6 +432,6 @@ export default function UsersPage() {
           </div>
         </Dialog>
       )}
-    </VStack>
+    </div>
   );
 }

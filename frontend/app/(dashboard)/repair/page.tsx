@@ -15,6 +15,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
+import { usePageLayout } from "@/lib/pageLayout";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -307,13 +308,21 @@ export default function WorkOrdersPage() {
     },
   ];
 
+  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (default = เรียงเดิม)
+  const layout = usePageLayout("/repair", ["hero", "kpi", "content"]);
+  const layoutStyle = (id: string) => ({
+    order: layout.orderOf(id),
+    display: layout.isHidden(id) ? ("none" as const) : undefined,
+  });
+
   return (
-    <VStack gap={6}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {error && (
         <Banner status="error" title="Error" description={error} isDismissable={false} />
       )}
 
       {/* Header */}
+      <div style={layoutStyle("hero")}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
@@ -358,8 +367,10 @@ export default function WorkOrdersPage() {
           </button>
         </HStack>
       </div>
+      </div>
 
       {/* KPI — มินิบอร์ด Andon: กวาดตาเดียวรู้สถานะงาน */}
+      <div style={layoutStyle("kpi")}>
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
         <Card elevation="low" padding={4} className="cmms-kpi-card blue">
           <VStack gap={2}>
@@ -439,7 +450,9 @@ export default function WorkOrdersPage() {
           </Card>
         )}
       </Grid>
+      </div>
 
+      <div style={layoutStyle("content")}>
       <Card elevation="low" padding={6}>
         <VStack gap={4}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
@@ -541,6 +554,7 @@ export default function WorkOrdersPage() {
           )}
         </VStack>
       </Card>
+      </div>
 
       {/* Hidden off-screen document nodes for batch PDF capture */}
       {selected.size > 0 && (
@@ -556,6 +570,6 @@ export default function WorkOrdersPage() {
           })}
         </div>
       )}
-    </VStack>
+    </div>
   );
 }
