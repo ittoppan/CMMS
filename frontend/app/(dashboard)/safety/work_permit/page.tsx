@@ -5,9 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -111,10 +108,9 @@ export default function WorkPermitPage() {
       header: "ประเภทงานเสี่ยง", 
       width: proportional(2),
       renderCell: (item) => (
-        <Badge 
-          label={permitTypeLabels[item.permitType] || item.permitType} 
-          variant={'error'} 
-        />
+        <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.12)", color: "#dc2626", fontSize: "0.7rem", padding: "3px 9px" }}>
+          {permitTypeLabels[item.permitType] || item.permitType}
+        </span>
       )
     },
     { key: "workOrder", header: "อ้างอิง WO/PM", width: proportional(1.5) },
@@ -126,9 +122,9 @@ export default function WorkPermitPage() {
       width: proportional(1.5),
       renderCell: (item) => (
         item.lotoStatus === 'Locked Out' ? (
-          <Badge label="ล็อกตัดพลังงานแล้ว" variant="error" />
+          <span className="cmms-status ok"><span className="cmms-status-dot" />ล็อกตัดพลังงานแล้ว</span>
         ) : (
-          <Badge label="ไม่ใช้ LOTO" variant="neutral" />
+          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>ไม่ใช้ LOTO</span>
         )
       )
     },
@@ -138,11 +134,11 @@ export default function WorkPermitPage() {
       width: proportional(1.5),
       renderCell: (item) => (
         item.status === 'approved' ? (
-          <Badge label="อนุมัติแล้ว" variant="success" />
+          <span className="cmms-status ok"><span className="cmms-status-dot" />อนุมัติแล้ว</span>
         ) : item.status === 'pending_safety' ? (
-          <Badge label="รอ จป. อนุมัติ" variant="warning" />
+          <span className="cmms-status warn"><span className="cmms-status-dot" />รอ จป. อนุมัติ</span>
         ) : (
-          <Badge label="ปิดงานแล้ว" variant="neutral" />
+          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "#64748B", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดงานแล้ว</span>
         )
       )
     }
@@ -150,37 +146,64 @@ export default function WorkPermitPage() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO (Work Permit & Lockout/Tagout)</Heading>
-            <Badge label="ความปลอดภัยและอาชีวอนามัย" variant="error" icon={<Icon icon={ShieldCheckIcon} size="sm" />} />
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAFETY WORK PERMIT · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <ShieldCheckIcon className="w-3.5 h-3.5" /> ความปลอดภัยและอาชีวอนามัย
+            </span>
           </HStack>
-          <Text type="body" color="secondary">ควบคุมความปลอดภัยสำหรับงานซ่อมบำรุงในพื้นที่เสี่ยงอันตรายสูง</Text>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ควบคุมความปลอดภัยสำหรับงานซ่อมบำรุงในพื้นที่เสี่ยงอันตรายสูง (Work Permit & Lockout/Tagout)
+          </Text>
         </VStack>
-        <Button label="ออกใบอนุญาตทำงานเสี่ยงใหม่" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} onClick={() => setModalOpen(true)} />
-      </Card>
+        <button
+          type="button"
+          onClick={() => setModalOpen(true)}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:shadow-xl hover:brightness-110 transition-all duration-300"
+        >
+          <PlusIcon className="w-4 h-4" />
+          ออกใบอนุญาตทำงานเสี่ยงใหม่
+        </button>
+      </div>
 
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-         <Card elevation="low" padding={4} className="border-rose-500 bg-rose-50 dark:bg-rose-900/10">
-           <VStack gap={1}>
-             <Text type="supporting" className="text-rose-600">กำลังล็อกตัดพลังงาน</Text>
-             <Heading level={2} className="text-rose-600"><CountUp end={lockedCount} /> <Text type="body" size="sm">จุด</Text></Heading>
-           </VStack>
+      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
+         <Card elevation="low" padding={4} className="cmms-kpi-card">
+           <HStack gap={3} vAlign="center">
+             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white flex items-center justify-center shadow-md shrink-0">
+               <LockClosedIcon className="w-6 h-6" />
+             </div>
+             <VStack gap={1}>
+               <Text type="supporting" color="secondary">กำลังล็อกตัดพลังงาน</Text>
+               <Heading level={2}><CountUp end={lockedCount} /> <Text type="body" size="sm">จุด</Text></Heading>
+             </VStack>
+           </HStack>
          </Card>
 
-         <Card elevation="low" padding={4}>
-           <VStack gap={1}>
-             <Text type="supporting" className="text-warning-600">รอการอนุมัติจาก จป. วิชาชีพ</Text>
-             <Heading level={2} className="text-warning-600"><CountUp end={pendingCount} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
-           </VStack>
+         <Card elevation="low" padding={4} className="cmms-kpi-card">
+           <HStack gap={3} vAlign="center">
+             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md shrink-0">
+               <ExclamationTriangleIcon className="w-6 h-6" />
+             </div>
+             <VStack gap={1}>
+               <Text type="supporting" color="secondary">รอการอนุมัติจาก จป. วิชาชีพ</Text>
+               <Heading level={2}><CountUp end={pendingCount} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
+             </VStack>
+           </HStack>
          </Card>
 
-         <Card elevation="low" padding={4}>
-           <VStack gap={1}>
-             <Text type="supporting" className="text-emerald-600">ใบอนุญาตทั้งหมดในระบบ</Text>
-             <Heading level={2} className="text-emerald-600"><CountUp end={permits.length} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
-           </VStack>
+         <Card elevation="low" padding={4} className="cmms-kpi-card">
+           <HStack gap={3} vAlign="center">
+             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-700 text-white flex items-center justify-center shadow-md shrink-0">
+               <DocumentCheckIcon className="w-6 h-6" />
+             </div>
+             <VStack gap={1}>
+               <Text type="supporting" color="secondary">ใบอนุญาตทั้งหมดในระบบ</Text>
+               <Heading level={2}><CountUp end={permits.length} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
+             </VStack>
+           </HStack>
          </Card>
       </Grid>
 
@@ -232,11 +255,16 @@ export default function WorkPermitPage() {
            </FormLayout>
         </div>
         <HStack hAlign="end" gap={3} style={{ paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
-          <Button label="ยกเลิก" variant="secondary" onClick={() => setModalOpen(false)} />
-          <Button 
-            label={submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"} 
-            variant="primary" 
-            isDisabled={submitting} 
+          <button
+            type="button"
+            onClick={() => setModalOpen(false)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            disabled={submitting}
             onClick={async () => {
               if (!form.location.trim()) {
                 setFormError("กรุณาระบุสถานที่ปฏิบัติงาน");
@@ -269,9 +297,12 @@ export default function WorkPermitPage() {
               } finally {
                 setSubmitting(false);
               }
-            }} 
-            icon={<Icon icon={DocumentCheckIcon} size="sm" />}
-          />
+            }}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#0057A8] to-[#1E88E5] shadow-lg shadow-blue-900/30 hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <DocumentCheckIcon className="w-4 h-4" />
+            {submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"}
+          </button>
         </HStack>
       </Dialog>
 
