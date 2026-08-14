@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // จับ type error ใน next build ด้วย (tsc --noEmit ผ่าน 0 error แล้ว — ล้าง 96 จุด)
   typescript: {
-    // TODO: Remove after all Astryx prop-name fixes are complete
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   output: "standalone",
   turbopack: {
