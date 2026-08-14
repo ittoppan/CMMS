@@ -1,22 +1,23 @@
-/* CMMS-TPT Service Worker — PWA full-app shell v7
+/* CMMS-TPT Service Worker — PWA full-app shell v8
  * กลยุทธ์:
- *  - Navigation: network-first → cache → offline.html → synthesized offline page (ไม่คืน undefined เด็ดขาด)
+ *  - Navigation (HTML): network-only → offline.html → synthesized offline page
+ *    (ไม่คืนหน้า HTML เก่าจาก cache เด็ดขาด — กันเห็นหน้าเก่าหลัง deploy)
  *  - API (GET /api/v1/*): network-first + cache fallback
- *  - Static assets (/_next/static, /icons): cache-first
+ *  - Static assets (/_next/static, /icons): stale-while-revalidate
+ *    (มี cache → เสิร์ฟทันที + อัปเดตจาก network ในพื้นหลัง / ไม่มี → โหลด network)
  *  - Install: precache แบบ per-URL (URL หนึ่งพัง ไม่ล้มทั้งชุด)
  *  ทุก respondWith คืน Response เสมอ — ป้องกัน "Failed to convert value to 'Response'"
  *
- * ⚠️ เมื่อ deploy UI ใหม่ ให้ bump SW_VERSION (v7 → v8 ...) หนึ่งบรรทัดเดียว:
+ * ⚠️ เมื่อ deploy UI ใหม่ ให้ bump SW_VERSION (v8 → v9 ...) หนึ่งบรรทัดเดียว:
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v7";
+const SW_VERSION = "v8";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
 
 const PRECACHE_URLS = [
-  "/",
   "/offline.html",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -102,37 +103,38 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2) Static assets — cache-first (โหลดเร็ว + offline)
+  // 2) Static assets — stale-while-revalidate (โหลดเร็ว + อัปเดต cache ในพื้นหลัง)
   if (url.pathname.startsWith("/_next/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
+      caches.match(request).then((cached) => {
+        if (cached) {
+          // มี cache → เสิร์ฟทันที + ดึง version ใหม่จาก network อัปเดต cache (พื้นหลัง)
           fetch(request)
             .then((response) => {
-              cachePut(ASSET_CACHE, request, response.clone());
-              return response;
+              if (response && response.ok) cachePut(ASSET_CACHE, request, response.clone());
             })
-            .catch(() => Response.error())
-      )
+            .catch(() => {});
+          return cached;
+        }
+        // ไม่มี cache → โหลดจาก network ตามปกติ + เก็บ cache
+        return fetch(request)
+          .then((response) => {
+            cachePut(ASSET_CACHE, request, response.clone());
+            return response;
+          })
+          .catch(() => Response.error());
+      })
     );
     return;
   }
 
-  // 3) Navigation / pages — network-first แล้ว cache เฉพาะหน้าที่ ok (ไม่ cache หน้า login/session)
+  // 3) Navigation / pages — network-only (ไม่คืน HTML เก่าจาก cache — กันเห็นหน้าเก่าหลัง deploy)
+  //    offline → แสดงหน้า offline (ไม่ใช่หน้าเก่า)
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          cachePut(SHELL_CACHE, request, response.clone());
-          return response;
-        })
-        .catch(() =>
-          caches
-            .match(request)
-            .then((cached) => cached || caches.match("/offline.html"))
-            .then((res) => res || offlineFallback())
-        )
+      fetch(request).catch(() =>
+        caches.match("/offline.html").then((res) => res || offlineFallback())
+      )
     );
     return;
   }
