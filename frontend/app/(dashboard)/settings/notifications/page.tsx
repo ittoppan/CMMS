@@ -35,6 +35,8 @@ interface TemplateDef {
   body_text: string;
   btn_label: string;
   enabled: string;
+  image_before?: string;
+  image_after?: string;
 }
 
 const TEMPLATE_ORDER = [
@@ -108,7 +110,7 @@ export default function NotificationsSettingsPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const activeTpl = templates[activeTemplate] ?? {
-    header_color: "#1d4ed8", header_title: "", body_text: "", btn_label: "เปิดดูในระบบ", enabled: "1",
+    header_color: "#1d4ed8", header_title: "", body_text: "", btn_label: "เปิดดูในระบบ", enabled: "1", image_before: "", image_after: "",
   };
 
   const setTplField = (key: string, value: string) => {
@@ -206,12 +208,28 @@ export default function NotificationsSettingsPage() {
     return out;
   };
 
+  // ป้ายชื่อรูปก่อน/หลังซ่อม (ตัวแปรกลาง — ตรงกับ label ฝั่ง server)
+  const templatePhotoLabels = { before: "📸 ก่อนซ่อม", after: "📸 หลังซ่อม" };
+
   // สร้าง Flex Message JSON ต้นฉบับ (ตรงกับ payload ที่ระบบส่งจริง)
   const flexJson = useMemo(() => {
     const headerColor = /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8";
     const headerTitle = fillVars(activeTpl.header_title || "CMMS-TPT NOTIFICATION");
     const bodyText = fillVars(activeTpl.body_text || "ข้อความแจ้งเตือนจากระบบ");
     const btnLabel = fillVars(activeTpl.btn_label || "ดูรายละเอียดในระบบ");
+    // บล็อกรูปก่อน/หลังซ่อม — ตรงกับ payload ฝั่ง server (label น้ำเงิน + รูป full width 4:3)
+    const bodyContents: any[] = [{ type: "text", text: bodyText, size: "sm", color: "#475569", wrap: true, margin: "md" }];
+    const addPhotoBlock = (url: string, label: string) => {
+      if (!url) return;
+      bodyContents.push({ type: "text", text: label, size: "xs", weight: "bold", color: "#1d4ed8", margin: "lg" });
+      bodyContents.push({
+        type: "image", url, size: "full", aspectRatio: "4:3", aspectMode: "cover", margin: "xs",
+        action: { type: "uri", uri: "https://line.me/" },
+      });
+    };
+    addPhotoBlock(activeTpl.image_before || "", templatePhotoLabels.before);
+    addPhotoBlock(activeTpl.image_after || "", templatePhotoLabels.after);
+
     const bubble = {
       type: "bubble",
       header: {
@@ -220,7 +238,7 @@ export default function NotificationsSettingsPage() {
       },
       body: {
         type: "box", layout: "vertical",
-        contents: [{ type: "text", text: bodyText, size: "sm", color: "#475569", wrap: true, margin: "md" }],
+        contents: bodyContents,
       },
       footer: {
         type: "box", layout: "vertical",
@@ -481,6 +499,26 @@ export default function NotificationsSettingsPage() {
                 />
               </VStack>
 
+              {/* รูปก่อน/หลังซ่อมใน Flex */}
+              <VStack gap={2}>
+                <Text type="body" size="sm" weight="semibold">รูปภาพก่อน/หลังซ่อม (แสดงในข้อความ Flex):</Text>
+                <TextInput
+                  label="รูปก่อนซ่อม (URL)"
+                  placeholder="https://.../failure.jpg"
+                  value={activeTpl.image_before ?? ""}
+                  onChange={(v) => setTplField("image_before", v)}
+                />
+                <TextInput
+                  label="รูปหลังซ่อม (URL)"
+                  placeholder="https://.../after.jpg"
+                  value={activeTpl.image_after ?? ""}
+                  onChange={(v) => setTplField("image_after", v)}
+                />
+                <Text type="body" size="xs" color="secondary">
+                  เว้นว่าง = ไม่แสดงรูป (งานซ่อมจริง ระบบดึงรูปจากใบแจ้งซ่อมอัตโนมัติ: ก่อนซ่อม = failure_image, หลังซ่อม = after_image) — ตั้ง URL ตรงนี้เพื่อกำหนดรูปคงที่ หรือดูตัวอย่างตอนยิงทดสอบ
+                </Text>
+              </VStack>
+
               <TextInput
                 label="ข้อความบนปุ่มกด (Button Label)"
                 value={activeTpl.btn_label ?? "เปิดดูในระบบ"}
@@ -574,6 +612,19 @@ export default function NotificationsSettingsPage() {
                   <div style={{ padding: "10px 12px", fontSize: 11.5, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
                     {previewBody || "ข้อความแจ้งเตือนจากระบบ"}
                   </div>
+                  {/* รูปก่อน/หลังซ่อม */}
+                  {activeTpl.image_before && (
+                    <div style={{ padding: "0 12px" }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, color: "#1d4ed8", margin: "8px 0 4px" }}>{templatePhotoLabels.before}</div>
+                      <img src={activeTpl.image_before} alt="รูปก่อนซ่อม" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 8, display: "block" }} />
+                    </div>
+                  )}
+                  {activeTpl.image_after && (
+                    <div style={{ padding: "0 12px" }}>
+                      <div style={{ fontSize: 10, fontWeight: 800, color: "#1d4ed8", margin: "8px 0 4px" }}>{templatePhotoLabels.after}</div>
+                      <img src={activeTpl.image_after} alt="รูปหลังซ่อม" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 8, display: "block" }} />
+                    </div>
+                  )}
                   {/* Footer button */}
                   <div style={{ padding: "8px 12px 10px", borderTop: "1px solid #f1f5f9", background: "#f8fafc" }}>
                     <div

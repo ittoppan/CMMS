@@ -34,7 +34,7 @@ try {
             $tplRows = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'line_tpl_%'")->fetchAll();
             $templates = [];
             foreach ($tplRows as $r) {
-                $templates[$r['setting_key']] = json_decode($r['setting_value'], true) ?: ['header_color' => '#1d4ed8', 'header_title' => '', 'body_text' => '', 'btn_label' => 'เปิดดูในระบบ', 'enabled' => '1'];
+                $templates[$r['setting_key']] = json_decode($r['setting_value'], true) ?: ['header_color' => '#1d4ed8', 'header_title' => '', 'body_text' => '', 'btn_label' => 'เปิดดูในระบบ', 'enabled' => '1', 'image_before' => '', 'image_after' => ''];
             }
 
             // 3) Current user LINE binding status
@@ -44,11 +44,11 @@ try {
 
             // 4) Default templates if none saved
             $defaults = [
-                'line_tpl_breakdown' => ['header_color' => '#dc2626', 'header_title' => '🚨 แจ้งซ่อมด่วน #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nอาการเสีย: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้แจ้งซ่อม: {reporter_name}", 'btn_label' => '⚡ รับงานซ่อมด่วน', 'enabled' => '1'],
-                'line_tpl_pm_overdue' => ['header_color' => '#d97706', 'header_title' => '📋 แผน PM เกินกำหนด #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code}\nรายการ: {title}\nกำหนดชำระ: {due_date} (เกินมา {days_overdue} วัน)", 'btn_label' => '📝 เปิดเช็คชีท PM', 'enabled' => '1'],
-                'line_tpl_low_stock' => ['header_color' => '#7c3aed', 'header_title' => '📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ', 'body_text' => "รหัสอะไหล่: {item_code}\nชื่ออะไหล่: {item_name}\nคงเหลือ: {qty} (ขั้นต่ำ: {min_stock})", 'btn_label' => '🛒 สั่งซื้อ/เบิกจ่าย', 'enabled' => '1'],
-                'line_tpl_completed' => ['header_color' => '#16a34a', 'header_title' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nDowntime: {downtime_hours} ชม.\nค่าซ่อมรวม: {total_cost} บาท\nช่างผู้ปิดงาน: {assigned_name}", 'btn_label' => '📊 ประเมินผลงาน', 'enabled' => '1'],
-                'line_tpl_sage_approval' => ['header_color' => '#7c3aed', 'header_title' => '📦 ขออนุมัติเบิกอะไหล่ #{requisition_no}', 'body_text' => "รายการ: {items_summary}\nผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_amount} บาท", 'btn_label' => '✔ อนุมัติการเบิก', 'enabled' => '1'],
+                'line_tpl_breakdown' => ['header_color' => '#dc2626', 'header_title' => '🚨 แจ้งซ่อมด่วน #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nอาการเสีย: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้แจ้งซ่อม: {reporter_name}", 'btn_label' => '⚡ รับงานซ่อมด่วน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_pm_overdue' => ['header_color' => '#d97706', 'header_title' => '📋 แผน PM เกินกำหนด #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code}\nรายการ: {title}\nกำหนดชำระ: {due_date} (เกินมา {days_overdue} วัน)", 'btn_label' => '📝 เปิดเช็คชีท PM', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_low_stock' => ['header_color' => '#7c3aed', 'header_title' => '📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ', 'body_text' => "รหัสอะไหล่: {item_code}\nชื่ออะไหล่: {item_name}\nคงเหลือ: {qty} (ขั้นต่ำ: {min_stock})", 'btn_label' => '🛒 สั่งซื้อ/เบิกจ่าย', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_completed' => ['header_color' => '#16a34a', 'header_title' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nDowntime: {downtime_hours} ชม.\nค่าซ่อมรวม: {total_cost} บาท\nช่างผู้ปิดงาน: {assigned_name}", 'btn_label' => '📊 ประเมินผลงาน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_sage_approval' => ['header_color' => '#7c3aed', 'header_title' => '📦 ขออนุมัติเบิกอะไหล่ #{requisition_no}', 'body_text' => "รายการ: {items_summary}\nผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_amount} บาท", 'btn_label' => '✔ อนุมัติการเบิก', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
             ];
             foreach ($defaults as $k => $d) {
                 if (!isset($templates[$k])) $templates[$k] = $d;
@@ -100,6 +100,8 @@ try {
                     'header_title' => mb_substr($tpl['header_title'] ?? '', 0, 200),
                     'body_text' => mb_substr($tpl['body_text'] ?? '', 0, 2000),
                     'btn_label' => mb_substr($tpl['btn_label'] ?? 'เปิดดูในระบบ', 0, 100),
+                    'image_before' => mb_substr(trim($tpl['image_before'] ?? ''), 0, 500),
+                    'image_after' => mb_substr(trim($tpl['image_after'] ?? ''), 0, 500),
                     'enabled' => (($tpl['enabled'] ?? '1') === '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
                 ];
                 $upsert->execute([$k, json_encode($clean, JSON_UNESCAPED_UNICODE), 'Notification template: ' . str_replace('line_tpl_', '', $k)]);
@@ -164,7 +166,22 @@ try {
             $headerColor = $tpl['header_color'] ?? '#1d4ed8';
             $headerText  = $tpl['header_title'] ?? '🔔 CMMS-TPT NOTIFICATION';
             $btnLabel    = $tpl['btn_label'] ?? 'ดูรายละเอียดในระบบ';
-            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl, [], $headerColor, $headerText, $btnLabel);
+
+            // รูปก่อน/หลังซ่อมจาก template — ถ้าไม่ได้ตั้ง URL ไว้ ใช้รูปตัวอย่างให้เห็นเลย์เอาต์ตอนทดสอบ
+            $imgBefore = trim($tpl['image_before'] ?? '');
+            $imgAfter  = trim($tpl['image_after'] ?? '');
+            if ($imgBefore !== '' || $imgAfter !== '') {
+                $photos = [
+                    'before' => $imgBefore !== '' ? [$imgBefore] : [],
+                    'after'  => $imgAfter !== '' ? [$imgAfter] : [],
+                ];
+            } else {
+                $photos = [
+                    'before' => ['https://picsum.photos/seed/cmms-before/400/300'],
+                    'after'  => ['https://picsum.photos/seed/cmms-after/400/300'],
+                ];
+            }
+            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl, $photos, $headerColor, $headerText, $btnLabel);
             if ($ok) {
                 echo json_encode(['success' => true, 'message' => "ส่งข้อความทดสอบ LINE ไปยัง {$target['full_name']} สำเร็จ"]);
             } else {
