@@ -58,7 +58,7 @@ jobs:
         run: python scripts/design-audit.py --strict --diff "${BASE_SHA:-HEAD~1}"
 
   tsc-check:
-    name: TypeScript check (error ใหม่เทียบ baseline)
+    name: TypeScript check (บังคับ 0 error)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -72,5 +72,5 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: npm ci
         run: npm ci
-      - name: tsc --noEmit (บล็อกเฉพาะ error ใหม่)
+      - name: tsc --noEmit (บังคับ 0 error)
         run: bash ../scripts/tsc-check.sh

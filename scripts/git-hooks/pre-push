@@ -49,13 +49,13 @@ while read -r local_ref local_oid remote_ref remote_oid; do
   fi
 done
 
-# ── TypeScript check: บล็อกเฉพาะ error ใหม่ (เทียบ baseline) ──
+# ── TypeScript check: บังคับ 0 error (ล้าง debt ครบแล้ว ไม่มี baseline) ──
 TSC_CHECK="$REPO_ROOT/scripts/tsc-check.sh"
 if [ -f "$TSC_CHECK" ]; then
   echo ""
-  echo "[pre-push] tsc --noEmit (error ใหม่เทียบ frontend/tsc-baseline.txt)"
+  echo "[pre-push] tsc --noEmit (บังคับ 0 error)"
   if ! bash "$TSC_CHECK"; then
-    echo "[pre-push] ❌ BLOCKED: มี TypeScript error ใหม่ — แก้ก่อน push"
+    echo "[pre-push] ❌ BLOCKED: มี TypeScript error — แก้ให้ครบ 0 ก่อน push"
     FAILED=1
   fi
 else
