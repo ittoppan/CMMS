@@ -42,7 +42,7 @@ function Test-Url([string]$url) {
 }
 
 function Send-Alert([string]$message) {
-    if (-not $phpExe) { Write-Log "LINE alert skipped (php not found): $message"; return }
+    if (-not $phpExe) { Write-Log "alert skipped (php not found): $message"; return }
     if (Test-Path -LiteralPath $notifyScript) {
         try {
             # ส่งผ่านไฟล์ชั่วคราวเพื่อไม่ให้ข้อความพังเพราะ quoting ใน cmd
@@ -50,7 +50,7 @@ function Send-Alert([string]$message) {
             $tmpMsg = Join-Path $env:TEMP "cmms-watchdog-msg.txt"
             [System.IO.File]::WriteAllText($tmpMsg, $message, (New-Object System.Text.UTF8Encoding $false))
             & $phpExe $notifyScript $tmpMsg | Out-Null
-            Write-Log "LINE alert sent: $($message.Split("`n")[0])"
+            Write-Log "alert sent: $($message.Split("`n")[0])"
             Remove-Item -LiteralPath $tmpMsg -Force -ErrorAction SilentlyContinue
         } catch {
             Write-Log "LINE alert FAILED: $_"
@@ -76,43 +76,33 @@ try {
     # 1) ปกติ -> จบ
     if ((Test-Url "http://127.0.0.1:$Port/login") -eq 200) {
         # 1.1) ตรวจ tunnel เพิ่ม (ถ้ามี tunnel-url.txt) - เว็บ local ดี แต่คนนอกเข้าไม่ได้ก็พังเหมือนกัน
-        #      กันสแปมแจ้งเตือน: restart tunnel อยางมากทุก 30 นาที + แจ้งเตือนเฉพาะเมื่อ URL เปลี่ยน
-        #      หรือหางจากครั้งลาสุดเกิน 60 นาที (state เก็บที่ logs	unnel-alert.state)
+        #      ไม่ restart cloudflared อัตโนมัติ (restart = URL เปลี่ยน = ลิงก์ภายนอกใช้ไม่ได้)
+        #      แจ้งเตือนเฉพาะเมื่อ URL เปลี่ยน หรือห่างจากครั้งลาสุดเกิน 60 นาที (state: logs	unnel-alert.state)
         $urlFile  = Join-Path $logDir "tunnel-url.txt"
         $stateFile = Join-Path $logDir "tunnel-alert.state"
         if (Test-Path -LiteralPath $urlFile) {
             $tunnelUrl = ((Get-Content -LiteralPath $urlFile -Raw) -split "\s+")[0]
             if ($tunnelUrl -match "^https://") {
                 if (-not ((Test-Url "$tunnelUrl/login") -eq 200)) {
-                    Write-Log "WARN tunnel URL ลง ($tunnelUrl)"
-                    # --- อ่าน state: lastRestart|lastAlert|lastAlertUrl (unix ts) ---
-                    $lastRestart = 0; $lastAlert = 0; $lastAlertUrl = ""
+                    Write-Log "WARN tunnel URL ลง ($tunnelUrl) - ไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก)"
+                    # --- อ่าน state: lastAlert|lastAlertUrl (unix ts) ---
+                    $lastAlert = 0; $lastAlertUrl = ""
                     $firstRun = -not (Test-Path -LiteralPath $stateFile)
                     if (-not $firstRun) {
                         $raw = (Get-Content -LiteralPath $stateFile -Raw).Trim()
                         if ($raw -ne '') {
                             $parts = $raw.Split('|')
-                            if ($parts.Count -ge 3) {
-                                $lastRestart  = [long]$parts[0]
-                                $lastAlert    = [long]$parts[1]
-                                $lastAlertUrl = [string]$parts[2]
+                            if ($parts.Count -ge 2) {
+                                $lastAlert    = [long]$parts[0]
+                                $lastAlertUrl = [string]$parts[1]
                             }
                         }
                     }
                     $now = [long]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
-                    $restartGap = 1800   # restart อย่างมากทุก 30 นาที
                     $alertGap   = 3600   # แจ้งเตือนซ้ำอย่างมากทุก 60 นาที
 
-                    if (($now - $lastRestart) -ge $restartGap) {
-                        Write-Log "restart tunnel (throttled ${restartGap}s)"
-                        $tq = Join-Path $root (Join-Path 'scripts' 'tunnel-quick.ps1')
-                        & powershell -NoProfile -ExecutionPolicy Bypass -File $tq | Out-Null
-                        Start-Sleep -Seconds 5
-                        $lastRestart = $now
-                    } else {
-                        Write-Log "tunnel restart skipped (last attempt $($now - $lastRestart)s ago)"
-                    }
-
+                    # ไม่ restart cloudflared อัตโนมัติ - restart แต่ละครั้งได้ URL ใหม่
+                    # ทำให้ลิงก์/QR/webhook ภายนอกใช้ไม่ได้ (ผู้ใช้งดเลิก auto-restart)
                     $newUrl = ((Get-Content -LiteralPath $urlFile -Raw) -split "\s+")[0]
                     if ($firstRun) {
                         # บันทึก baseline ก่อน ยังไม่แจ้งเตือนทันทีหลัง deploy
@@ -124,11 +114,11 @@ try {
                         if ($urlChanged) {
                             Send-Alert "🔄 [CMMS Watchdog] tunnel URL เปลี่ยน: $newUrl"
                         } else {
-                            Send-Alert "⚠️ [CMMS Watchdog] tunnel ยังลงอยู่ ($newUrl) - ตรวจสอบเครือข่าย/Cloudflare (แจ้งเตือน 1 ครั้ง/ชม.)"
+                            Send-Alert "⚠️ [CMMS Watchdog] tunnel ยังลงอยู่ ($newUrl) - ระบบไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก) - รัน scripts	unnel-quick.ps1 ด้วยตนเองเมื่อต้องการ (แจ้ง 1 ครั้ง/ชม.)"
                         }
                         $lastAlert = $now; $lastAlertUrl = $newUrl
                     }
-                    try { Set-Content -LiteralPath $stateFile -Value "$lastRestart|$lastAlert|$lastAlertUrl" -Encoding ascii } catch {}
+                    try { Set-Content -LiteralPath $stateFile -Value "$lastAlert|$lastAlertUrl" -Encoding ascii } catch {}
                 } elseif (Test-Path -LiteralPath $stateFile) {
                     # tunnel กลับมาปกติ - ล้าง state เพื่อเริ่มนับใหม่
                     try { Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue } catch {}
