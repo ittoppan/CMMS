@@ -101,6 +101,18 @@ class NotificationService {
     }
 
     /**
+     * ตรวจว่าเทมแพลต LINE ถูกเปิดใช้งานหรือไม่ (ใช้ gate การส่งจากสคริปต์ที่ส่งข้อความตรง)
+     */
+    public static function isLineTemplateEnabled(string $tplKey): bool {
+        try {
+            $tpl = getLineTemplate($tplKey);
+            return ($tpl['enabled'] ?? '0') === '1';
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
      * Trigger 🔴 Breakdown Alarm Notification
      */
     public static function notifyBreakdown(array $woData): void {

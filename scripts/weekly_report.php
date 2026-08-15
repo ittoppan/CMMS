@@ -75,11 +75,19 @@ $msg .= "----------------------------------\n"
       . "📋 ดูรายละเอียด: " . rtrim((string)publicBaseUrl(), '/') . "/pages/repair/";
 
 $sent = 0;
+$weeklyLine = '1';
 try {
-    NotificationService::sendLineMessage($msg);
-    $sent++;
-} catch (Throwable $e) {
-    echo "LINE failed: {$e->getMessage()}\n";
+    $weeklyLine = (string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_weekly_report'")->fetchColumn();
+} catch (Throwable $e) {}
+if ($weeklyLine === '1') {
+    try {
+        NotificationService::sendLineMessage($msg);
+        $sent++;
+    } catch (Throwable $e) {
+        echo "LINE failed: {$e->getMessage()}\n";
+    }
+} else {
+    echo "weekly LINE report disabled (line_weekly_report != 1)\n";
 }
 
 // Web Push broadcast (เฉพาะคนที่ subscribe — ถ้าไม่มีก็ข้าม)
