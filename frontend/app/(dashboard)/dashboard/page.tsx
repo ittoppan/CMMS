@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
+import { normalizeRepairStatus, isRepairDone, isRepairOverdue } from "@/lib/repair-status";
 import { VStack, HStack, Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -208,11 +209,14 @@ export default function DashboardPage() {
         setRecentWO(data.slice(0, 5));
 
         const total = data.length;
-        const completed = data.filter((w: any) => ["completed", "Completed", "closed", "resolved"].includes(w.status)).length;
-        const inprogress = data.filter((w: any) => ["in_progress", "In Progress", "waiting_parts", "pending_parts"].includes(w.status)).length;
-        const open = data.filter((w: any) => ["open", "Open", "pending"].includes(w.status)).length;
-        const overdue = data.filter((w: any) => w.status === "Overdue" || w.status === "overdue").length;
-        setKpis({ total, completed, inprogress: inprogress + open, overdue });
+        // ใช้ชุดสถานะกลาง (lib/repair-status.ts) — alias/สี/การนับตรงกับหน้ารายการงานซ่อม
+        const completed = data.filter((w: any) => isRepairDone(w.status)).length;
+        const active = data.filter((w: any) => {
+          const k = normalizeRepairStatus(w.status);
+          return k === "open" || k === "in_progress" || k === "waiting_parts";
+        }).length;
+        const overdue = data.filter((w: any) => isRepairOverdue(w.estimated_completion_date, w.status)).length;
+        setKpis({ total, completed, inprogress: active, overdue });
       }
     } catch (e) {
       console.error("Failed to fetch WO", e);
@@ -266,10 +270,12 @@ export default function DashboardPage() {
     for (const w of allWOs) {
       const name = w.asset_name || "ไม่ระบุเครื่อง";
       const cur = map.get(name) || { status: "ok" as const, count: 0 };
-      const s = String(w.status || "").toLowerCase();
+      // ชุดสถานะกลาง: เกินกำหนด(จริง) = แดง, ยังไม่จบงาน = เหลือง, เสร็จ = เขียว
+      const isOverdue = isRepairOverdue(w.estimated_completion_date, w.status);
+      const raw = String(w.status || "").toLowerCase();
       let st = cur.status;
-      if (s === "overdue" || s === "down" || s === "breakdown") st = "down";
-      else if (st !== "down" && ["in_progress", "open", "pending", "waiting_parts"].includes(s)) st = "warn";
+      if (isOverdue || raw === "down" || raw === "breakdown") st = "down";
+      else if (st !== "down" && !isRepairDone(w.status)) st = "warn";
       map.set(name, { status: st, count: cur.count + 1 });
     }
     const order = { down: 0, warn: 1, ok: 2 };
