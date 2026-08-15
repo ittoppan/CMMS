@@ -512,6 +512,12 @@ export default function PMChecksheetPage() {
                   </HStack>
                   <Text type="body" weight="bold">{selectedPlan.title}</Text>
                   <Text type="body" size="sm" color="secondary">เครื่องจักร: {assetName} {selectedPlan.due_date ? `• ครบกำหนด: ${selectedPlan.due_date}` : ""}</Text>
+                  {!!Number(selectedPlan.is_outsource) && (
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)", width: "fit-content" }}>
+                      งานภายนอก · {selectedPlan.outsource_by || "ไม่ระบุบริษัท"}
+                      {Number(selectedPlan.cost_outsource) > 0 ? ` · ${Number(selectedPlan.cost_outsource).toLocaleString("th-TH")} บาท` : ""}
+                    </span>
+                  )}
                 </VStack>
                 <VStack gap={1} hAlign="end">
                   <Text type="body" size="sm" color="secondary" weight="semibold">ความก้าวหน้า</Text>
@@ -653,7 +659,7 @@ export default function PMChecksheetPage() {
                 inspectorSignature: inspectorSig,
                 operatorSignature: operatorSig,
                 operatorName,
-                inspectorName: currentUserName,
+                inspectorName: !!Number(selectedPlan.is_outsource) ? (selectedPlan.outsource_by || "บริษัทภายนอก") : currentUserName,
                 doneAt: new Date().toLocaleDateString("th-TH"),
                 notes: "",
               }}
@@ -668,7 +674,7 @@ export default function PMChecksheetPage() {
           <DialogHeader title={`ลงนามยืนยันการทำ PM: ${selectedPlan.title}`} />
           <VStack gap={4} style={{ padding: 24 }}>
             <Grid columns={2} gap={4}>
-              <Field label={`ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`} inputID="inspectorSigCanvas">
+              <Field label={!!Number(selectedPlan.is_outsource) ? `ลายเซ็นผู้ตรวจเช็ค (บริษัทภายนอก: ${selectedPlan.outsource_by || "-"}) *` : `ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`} inputID="inspectorSigCanvas">
                 <VStack gap={1}>
                   {renderSigCanvas("inspector")}
                   <HStack hAlign="between" vAlign="center">
