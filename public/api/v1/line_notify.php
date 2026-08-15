@@ -107,14 +107,30 @@ try {
             $tplKeys = ['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval'];
             foreach (($data['templates'] ?? []) as $k => $tpl) {
                 if (!in_array($k, $tplKeys, true)) continue;
+                $hex6 = function ($v, $f) { return preg_match('/^#[0-9a-fA-F]{6}$/', (string)$v) ? (string)$v : $f; };
                 $clean = [
-                    'header_color' => preg_match('/^#[0-9a-fA-F]{6}$/', $tpl['header_color'] ?? '') ? $tpl['header_color'] : '#1d4ed8',
-                    'header_title' => mb_substr($tpl['header_title'] ?? '', 0, 200),
-                    'body_text' => mb_substr($tpl['body_text'] ?? '', 0, 2000),
-                    'btn_label' => mb_substr($tpl['btn_label'] ?? 'เปิดดูในระบบ', 0, 100),
-                    'image_before' => mb_substr(trim($tpl['image_before'] ?? ''), 0, 500),
-                    'image_after' => mb_substr(trim($tpl['image_after'] ?? ''), 0, 500),
-                    'enabled' => (($tpl['enabled'] ?? '1') === '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
+                    'header_color'      => $hex6($tpl['header_color'] ?? '', '#1d4ed8'),
+                    'header_title'      => mb_substr($tpl['header_title'] ?? '', 0, 200),
+                    'header_subtitle'   => mb_substr($tpl['header_subtitle'] ?? '', 0, 200),
+                    'header_text_color' => $hex6($tpl['header_text_color'] ?? '', '#ffffff'),
+                    'header_align'      => in_array($tpl['header_align'] ?? 'start', ['start', 'center', 'end'], true) ? $tpl['header_align'] : 'start',
+                    'hero_image'        => mb_substr(trim($tpl['hero_image'] ?? ''), 0, 500),
+                    'hero_ratio'        => in_array($tpl['hero_ratio'] ?? '4:3', ['1.91:1', '16:9', '4:3', '1:1'], true) ? $tpl['hero_ratio'] : '4:3',
+                    'body_text'         => mb_substr($tpl['body_text'] ?? '', 0, 2000),
+                    'body_color'        => $hex6($tpl['body_color'] ?? '', '#475569'),
+                    'body_size'         => in_array($tpl['body_size'] ?? 'sm', ['xs', 'sm', 'md'], true) ? $tpl['body_size'] : 'sm',
+                    'btn_label'         => mb_substr($tpl['btn_label'] ?? 'เปิดดูในระบบ', 0, 100),
+                    'btn_color'         => $hex6($tpl['btn_color'] ?? '', '#06C755'),
+                    'btn_text_color'    => $hex6($tpl['btn_text_color'] ?? '', '#ffffff'),
+                    'btn_style'         => in_array($tpl['btn_style'] ?? 'primary', ['primary', 'secondary', 'link'], true) ? $tpl['btn_style'] : 'primary',
+                    'btn2_label'        => mb_substr($tpl['btn2_label'] ?? '', 0, 100),
+                    'btn2_url'          => mb_substr(trim($tpl['btn2_url'] ?? ''), 0, 500),
+                    'image_before'      => mb_substr(trim($tpl['image_before'] ?? ''), 0, 500),
+                    'image_after'       => mb_substr(trim($tpl['image_after'] ?? ''), 0, 500),
+                    'container_bg'      => $hex6($tpl['container_bg'] ?? '', '#ffffff'),
+                    'border_color'      => $hex6($tpl['border_color'] ?? '', '#e2e8f0'),
+                    'corner_radius'     => in_array($tpl['corner_radius'] ?? 'lg', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $tpl['corner_radius'] : 'lg',
+                    'enabled'           => (($tpl['enabled'] ?? '1') === '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
                 ];
                 $upsert->execute([$k, json_encode($clean, JSON_UNESCAPED_UNICODE), 'Notification template: ' . str_replace('line_tpl_', '', $k)]);
                 $count++;

@@ -37,6 +37,22 @@ interface TemplateDef {
   enabled: string;
   image_before?: string;
   image_after?: string;
+  // ── Flex แบบละเอียด (v2) ──
+  header_subtitle?: string;
+  header_text_color?: string;
+  header_align?: "start" | "center" | "end";
+  hero_image?: string;
+  hero_ratio?: "1.91:1" | "16:9" | "4:3" | "1:1";
+  body_color?: string;
+  body_size?: "xs" | "sm" | "md";
+  btn_color?: string;
+  btn_text_color?: string;
+  btn_style?: "primary" | "secondary" | "link";
+  btn2_label?: string;
+  btn2_url?: string;
+  container_bg?: string;
+  border_color?: string;
+  corner_radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const TEMPLATE_ORDER = [
@@ -125,6 +141,8 @@ export default function NotificationsSettingsPage() {
   const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string; telegram_bot_token_set: boolean; telegram_chat_id_set: boolean } | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string>("line_tpl_breakdown");
   const [showJson, setShowJson] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const toggleSection = (k: string) => setOpenSections((s) => ({ ...s, [k]: !s[k] }));
   const [copied, setCopied] = useState(false);
   const bodyRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -840,6 +858,163 @@ export default function NotificationsSettingsPage() {
                 value={activeTpl.btn_label ?? "เปิดดูในระบบ"}
                 onChange={(v) => setTplField("btn_label", v)}
               />
+
+              {/* ── Flex แบบละเอียด (v2) — ส่วนหัว/hero/เนื้อหา/ปุ่ม/กรอบ ── */}
+              <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 14 }}>
+                <Text type="body" size="sm" weight="semibold" style={{ marginBottom: 10 }}>
+                  ปรับแต่งขั้นสูง (Flex รายละเอียด)
+                </Text>
+
+                {/* Header */}
+                <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, marginBottom: 10, overflow: "hidden" }}>
+                  <button type="button" onClick={() => toggleSection("header")}
+                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--cmms-bg-wash)", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}>
+                    <span>หัวข้อ (Header)</span><span style={{ fontSize: 12, color: "var(--cmms-text-muted)" }}>{openSections.header ? "▲ ซ่อน" : "▼ เปิด"}</span>
+                  </button>
+                  {openSections.header && (
+                    <VStack gap={3} style={{ padding: 14 }}>
+                      <TextInput label="หัวข้อรอง (Subtitle)" placeholder="เช่น หมายเลขเครื่อง / แผนก" value={activeTpl.header_subtitle ?? ""} onChange={(v) => setTplField("header_subtitle", v)} />
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีตัวอักษร:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.header_text_color ?? "") ? activeTpl.header_text_color! : "#ffffff"} onChange={(e) => setTplField("header_text_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรหัวข้อ" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.header_text_color ?? "#ffffff"} onChange={(v) => setTplField("header_text_color", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">จัดตำแหน่ง:</Text>
+                        {(["start", "center", "end"] as const).map((a) => (
+                          <button key={a} type="button" onClick={() => setTplField("header_align", a)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.header_align ?? "start") === a ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.header_align ?? "start") === a ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {a === "start" ? "ซ้าย" : a === "center" ? "กลาง" : "ขวา"}
+                          </button>
+                        ))}
+                      </HStack>
+                    </VStack>
+                  )}
+                </div>
+
+                {/* Hero image */}
+                <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, marginBottom: 10, overflow: "hidden" }}>
+                  <button type="button" onClick={() => toggleSection("hero")}
+                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--cmms-bg-wash)", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}>
+                    <span>รูปใหญ่บนสุด (Hero Image)</span><span style={{ fontSize: 12, color: "var(--cmms-text-muted)" }}>{openSections.hero ? "▲ ซ่อน" : "▼ เปิด"}</span>
+                  </button>
+                  {openSections.hero && (
+                    <VStack gap={3} style={{ padding: 14 }}>
+                      <TextInput label="URL รูป Hero" placeholder="https://.../hero.jpg" value={activeTpl.hero_image ?? ""} onChange={(v) => setTplField("hero_image", v)} />
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">สัดส่วน:</Text>
+                        {(["1.91:1", "16:9", "4:3", "1:1"] as const).map((r) => (
+                          <button key={r} type="button" onClick={() => setTplField("hero_ratio", r)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.hero_ratio ?? "4:3") === r ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.hero_ratio ?? "4:3") === r ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {r}
+                          </button>
+                        ))}
+                      </HStack>
+                      <Text type="body" size="sm" color="secondary">รูป Hero อยู่ระหว่างแถบหัวข้อกับเนื้อหา (ต่างจากรูปก่อน/หลังซ่อมที่อยู่ในเนื้อหา)</Text>
+                    </VStack>
+                  )}
+                </div>
+
+                {/* Body style */}
+                <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, marginBottom: 10, overflow: "hidden" }}>
+                  <button type="button" onClick={() => toggleSection("body")}
+                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--cmms-bg-wash)", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}>
+                    <span>สไตล์เนื้อหา (Body)</span><span style={{ fontSize: 12, color: "var(--cmms-text-muted)" }}>{openSections.body ? "▲ ซ่อน" : "▼ เปิด"}</span>
+                  </button>
+                  {openSections.body && (
+                    <VStack gap={3} style={{ padding: 14 }}>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีตัวอักษร:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.body_color ?? "") ? activeTpl.body_color! : "#475569"} onChange={(e) => setTplField("body_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรเนื้อหา" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.body_color ?? "#475569"} onChange={(v) => setTplField("body_color", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ขนาดตัวอักษร:</Text>
+                        {(["xs", "sm", "md"] as const).map((s) => (
+                          <button key={s} type="button" onClick={() => setTplField("body_size", s)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_size ?? "sm") === s ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_size ?? "sm") === s ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {s === "xs" ? "เล็ก" : s === "sm" ? "ปกติ" : "ใหญ่"}
+                          </button>
+                        ))}
+                      </HStack>
+                    </VStack>
+                  )}
+                </div>
+
+                {/* Footer buttons */}
+                <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, marginBottom: 10, overflow: "hidden" }}>
+                  <button type="button" onClick={() => toggleSection("footer")}
+                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--cmms-bg-wash)", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}>
+                    <span>ปุ่มกด (Footer)</span><span style={{ fontSize: 12, color: "var(--cmms-text-muted)" }}>{openSections.footer ? "▲ ซ่อน" : "▼ เปิด"}</span>
+                  </button>
+                  {openSections.footer && (
+                    <VStack gap={3} style={{ padding: 14 }}>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">สไตล์ปุ่ม:</Text>
+                        {(["primary", "secondary", "link"] as const).map((st) => (
+                          <button key={st} type="button" onClick={() => setTplField("btn_style", st)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.btn_style ?? "primary") === st ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.btn_style ?? "primary") === st ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {st === "primary" ? "ปุ่มทึบ" : st === "secondary" ? "ขอบเส้น" : "ลิงก์"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีปุ่ม:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.btn_color ?? "") ? activeTpl.btn_color! : "#06C755"} onChange={(e) => setTplField("btn_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีปุ่ม" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.btn_color ?? "#06C755"} onChange={(v) => setTplField("btn_color", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีตัวอักษรปุ่ม:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.btn_text_color ?? "") ? activeTpl.btn_text_color! : "#ffffff"} onChange={(e) => setTplField("btn_text_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรปุ่ม" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.btn_text_color ?? "#ffffff"} onChange={(v) => setTplField("btn_text_color", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <div style={{ borderTop: "1px dashed var(--cmms-border)", paddingTop: 10 }}>
+                        <Text type="body" size="sm" weight="semibold" style={{ marginBottom: 8 }}>ปุ่มที่ 2 (ไม่บังคับ)</Text>
+                        <HStack gap={2} wrap="wrap">
+                          <TextInput label="ข้อความปุ่มที่ 2" placeholder="เว้นว่าง = ไม่แสดง" value={activeTpl.btn2_label ?? ""} onChange={(v) => setTplField("btn2_label", v)} style={{ flex: 1, minWidth: 160 }} />
+                          <TextInput label="URL ปุ่มที่ 2" placeholder="https://..." value={activeTpl.btn2_url ?? ""} onChange={(v) => setTplField("btn2_url", v)} style={{ flex: 1, minWidth: 160 }} />
+                        </HStack>
+                      </div>
+                    </VStack>
+                  )}
+                </div>
+
+                {/* Container */}
+                <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, overflow: "hidden" }}>
+                  <button type="button" onClick={() => toggleSection("container")}
+                    style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "var(--cmms-bg-wash)", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem", textAlign: "left" }}>
+                    <span>กรอบการ์ด (Container)</span><span style={{ fontSize: 12, color: "var(--cmms-text-muted)" }}>{openSections.container ? "▲ ซ่อน" : "▼ เปิด"}</span>
+                  </button>
+                  {openSections.container && (
+                    <VStack gap={3} style={{ padding: 14 }}>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">พื้นหลังการ์ด:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.container_bg ?? "") ? activeTpl.container_bg! : "#ffffff"} onChange={(e) => setTplField("container_bg", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="พื้นหลังการ์ด" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.container_bg ?? "#ffffff"} onChange={(v) => setTplField("container_bg", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีขอบ:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.border_color ?? "") ? activeTpl.border_color! : "#e2e8f0"} onChange={(e) => setTplField("border_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีขอบการ์ด" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.border_color ?? "#e2e8f0"} onChange={(v) => setTplField("border_color", v)} style={{ width: 110 }} />
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">มุมโค้ง:</Text>
+                        {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((r) => (
+                          <button key={r} type="button" onClick={() => setTplField("corner_radius", r)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.corner_radius ?? "lg") === r ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.corner_radius ?? "lg") === r ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {r === "none" ? "เหลี่ยม" : r === "xs" ? "มุมน้อย" : r === "sm" ? "เล็ก" : r === "md" ? "กลาง" : r === "lg" ? "ใหญ่" : "วงรี"}
+                          </button>
+                        ))}
+                      </HStack>
+                    </VStack>
+                  )}
+                </div>
+              </div>
                 </>
               )}
 
@@ -947,19 +1122,27 @@ export default function NotificationsSettingsPage() {
                 {/* Chat bubble */}
                 <div
                   style={{
-                    background: "#ffffff",
-                    borderRadius: 12,
+                    background: activeTpl.container_bg || "#ffffff",
+                    border: "1px solid " + (activeTpl.border_color || "#e2e8f0"),
+                    borderRadius: activeTpl.corner_radius === "none" ? 0 : activeTpl.corner_radius === "xs" ? 4 : activeTpl.corner_radius === "sm" ? 8 : activeTpl.corner_radius === "md" ? 12 : activeTpl.corner_radius === "xl" ? 28 : 16,
                     overflow: "hidden",
                     maxWidth: 280,
                     boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
                   }}
                 >
                   {/* Header */}
-                  <div style={{ background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8", color: "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: 12 }}>
+                  <div style={{ background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8", color: activeTpl.header_text_color || "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: 12, textAlign: activeTpl.header_align || "start" }}>
                     {previewTitle || "แจ้งเตือน CMMS-TPT"}
+                    {(activeTpl.header_subtitle || "").trim() !== "" && (
+                      <div style={{ fontWeight: 600, fontSize: 9.5, opacity: 0.75, marginTop: 3 }}>{activeTpl.header_subtitle}</div>
+                    )}
                   </div>
+                  {/* Hero image */}
+                  {(activeTpl.hero_image || "").trim() !== "" && (
+                    <img src={activeTpl.hero_image} alt="hero" style={{ width: "100%", aspectRatio: activeTpl.hero_ratio || "4:3", objectFit: "cover", display: "block" }} />
+                  )}
                   {/* Body */}
-                  <div style={{ padding: "10px 12px", fontSize: 11.5, color: "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                  <div style={{ padding: "10px 12px", fontSize: activeTpl.body_size === "xs" ? 10.5 : activeTpl.body_size === "md" ? 13 : 11.5, color: activeTpl.body_color || "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
                     {previewBody || "ข้อความแจ้งเตือนจากระบบ"}
                   </div>
                   {/* รูปก่อน/หลังซ่อม */}
@@ -979,17 +1162,35 @@ export default function NotificationsSettingsPage() {
                   <div style={{ padding: "8px 12px 10px", borderTop: "1px solid #f1f5f9", background: "#f8fafc" }}>
                     <div
                       style={{
-                        background: "#06C755",
-                        color: "#ffffff",
+                        background: (activeTpl.btn_style || "primary") === "primary" ? (activeTpl.btn_color || "#06C755") : "transparent",
+                        color: (activeTpl.btn_style || "primary") === "primary" ? (activeTpl.btn_text_color || "#ffffff") : (activeTpl.btn_color || "#06C755"),
                         textAlign: "center",
                         fontWeight: 800,
                         fontSize: 11,
                         padding: "8px 0",
                         borderRadius: 8,
+                        border: (activeTpl.btn_style || "primary") === "secondary" ? "1px solid " + (activeTpl.btn_color || "#06C755") : "none",
+                        textDecoration: (activeTpl.btn_style || "primary") === "link" ? "underline" : "none",
                       }}
                     >
                       {activeTpl.btn_label || "เปิดดูในระบบ"}
                     </div>
+                    {(activeTpl.btn2_label || "").trim() !== "" && (
+                      <div
+                        style={{
+                          marginTop: 6,
+                          textAlign: "center",
+                          fontWeight: 700,
+                          fontSize: 11,
+                          color: activeTpl.btn_color || "#06C755",
+                          border: "1px solid " + (activeTpl.btn_color || "#06C755"),
+                          padding: "7px 0",
+                          borderRadius: 8,
+                        }}
+                      >
+                        {activeTpl.btn2_label}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

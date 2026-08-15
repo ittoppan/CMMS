@@ -122,7 +122,7 @@ function repairPhotoUrls($repairId, $category = 'failure_image', $limit = 3) {
  *   - ['before' => [url...], 'after' => [url...]]  → แสดงเป็นบล็อกรูปใน Flex พร้อม label ก่อนซ่อม/หลังซ่อม (อย่างละสูงสุด 2 รูป)
  *   - [url, url, ...] (array ธรรมดา)              → backward compat แสดงเป็นรูปแนบ (สูงสุด 4 รูป)
  */
-function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $photos = [], $headerColor = '#1d4ed8', $headerText = '🔔 CMMS-TPT NOTIFICATION', $btnLabel = 'ดูรายละเอียดในระบบ') {
+function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $photos = [], $headerColor = '#1d4ed8', $headerText = '🔔 CMMS-TPT NOTIFICATION', $btnLabel = 'ดูรายละเอียดในระบบ', $opts = []) {
     $channelAccessToken = getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: getenv('LINE_CHANNEL_SECRET');
     if (empty($channelAccessToken)) {
         error_log("LINE_CHANNEL_ACCESS_TOKEN is missing in .env");
@@ -186,12 +186,89 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $bodyContents[] = [
         'type' => 'text',
         'text' => $message,
-        'size' => 'sm',
-        'color' => '#475569',
+        'size' => $opts['body_size'] ?? 'sm',
+        'color' => $opts['body_color'] ?? '#475569',
         'wrap' => true,
         'margin' => 'md'
     ];
     foreach ($photoBoxes as $pb) $bodyContents[] = $pb;
+
+    // ── สไตล์ละเอียด (จากหน้า /settings/notifications) — backward compatible ──
+    $headerTextColor = $opts['header_text_color'] ?? '#ffffff';
+    $headerAlign     = $opts['header_align'] ?? 'start';
+    $headerSubtitle  = (string)($opts['header_subtitle'] ?? '');
+    $headerContents  = [
+        [
+            'type' => 'text',
+            'text' => $headerText,
+            'color' => $headerTextColor,
+            'weight' => 'bold',
+            'size' => 'xs',
+            'wrap' => true,
+            'align' => $headerAlign
+        ]
+    ];
+    if ($headerSubtitle !== '') {
+        $headerContents[] = [
+            'type' => 'text',
+            'text' => $headerSubtitle,
+            'color' => $headerTextColor,
+            'size' => 'xxs',
+            'wrap' => true,
+            'margin' => 'xs',
+            'align' => $headerAlign,
+            'opacity' => 0.75
+        ];
+    }
+
+    // ปุ่มใน footer: 1 ปุ่มหลัก + (ถ้าตั้ง) ปุ่มที่ 2
+    $footerButtons = [];
+    $btnStyle   = $opts['btn_style'] ?? 'primary';
+    $btnColor   = $opts['btn_color'] ?? '#06C755';
+    $btnTxtColor = $opts['btn_text_color'] ?? '#ffffff';
+    $footerButtons[] = [
+        'type' => 'button',
+        'action' => ['type' => 'uri', 'label' => $btnLabel, 'uri' => $defaultTapUrl],
+        'style' => $btnStyle,
+        'color' => $btnStyle === 'link' ? $btnColor : ($btnStyle === 'secondary' ? $btnTxtColor : $btnColor),
+    ];
+    $btn2Label = (string)($opts['btn2_label'] ?? '');
+    if ($btn2Label !== '') {
+        $btn2Url = trim((string)($opts['btn2_url'] ?? '')) ?: $defaultTapUrl;
+        $footerButtons[] = [
+            'type' => 'button',
+            'action' => ['type' => 'uri', 'label' => $btn2Label, 'uri' => $btn2Url],
+            'style' => 'secondary',
+            'color' => $btnColor,
+            'margin' => 'sm'
+        ];
+    }
+
+    $bubble = [
+        'type' => 'bubble',
+        'backgroundColor' => $opts['container_bg'] ?? '#ffffff',
+        'borderColor'     => $opts['border_color'] ?? '#e2e8f0',
+        'cornerRadius'    => $opts['corner_radius'] ?? 'lg',
+        'header' => [
+            'type' => 'box',
+            'layout' => 'vertical',
+            'backgroundColor' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)$headerColor) ? $headerColor : '#1d4ed8',
+            'contents' => $headerContents
+        ],
+    ];
+    $heroImage = trim((string)($opts['hero_image'] ?? ''));
+    if ($heroImage !== '') {
+        $bubble['hero'] = [
+            'type' => 'image',
+            'url' => $heroImage,
+            'size' => 'full',
+            'aspectRatio' => $opts['hero_ratio'] ?? '4:3',
+            'aspectMode' => 'cover',
+            'action' => ['type' => 'uri', 'uri' => $defaultTapUrl]
+        ];
+    }
+    $bubble['body'] = ['type' => 'box', 'layout' => 'vertical', 'contents' => $bodyContents];
+    $bubble['footer'] = ['type' => 'box', 'layout' => 'vertical', 'contents' => $footerButtons];
 
     $flexPayload = [
         'to' => $lineUserId,
@@ -199,45 +276,7 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
             [
                 'type' => 'flex',
                 'altText' => "🔔 $title: $message",
-                'contents' => [
-                    'type' => 'bubble',
-                    'header' => [
-                        'type' => 'box',
-                        'layout' => 'vertical',
-                        'backgroundColor' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)$headerColor) ? $headerColor : '#1d4ed8',
-                        'contents' => [
-                            [
-                                'type' => 'text',
-                                'text' => $headerText,
-                                'color' => '#ffffff',
-                                'weight' => 'bold',
-                                'size' => 'xs',
-                                'wrap' => true
-                            ]
-                        ]
-                    ],
-                    'body' => [
-                        'type' => 'box',
-                        'layout' => 'vertical',
-                        'contents' => $bodyContents
-                    ],
-                    'footer' => [
-                        'type' => 'box',
-                        'layout' => 'vertical',
-                        'contents' => [
-                            [
-                                'type' => 'button',
-                                'action' => [
-                                    'type' => 'uri',
-                                    'label' => $btnLabel,
-                                    'uri' => $defaultTapUrl
-                                ],
-                                'style' => 'primary',
-                                'color' => '#06C755'
-                            ]
-                        ]
-                    ]
-                ]
+                'contents' => $bubble
             ]
         ]
     ];
@@ -317,14 +356,31 @@ function getLineTemplate($tplKey) {
     ];
     $raw = getSettingValue($tplKey, '');
     $tpl = $raw !== '' ? (json_decode($raw, true) ?: []) : [];
+    $hex6 = function ($v, $fallback) { return preg_match('/^#[0-9a-fA-F]{6}$/', (string)$v) ? (string)$v : $fallback; };
+    $pick = function ($key, $fallback) use ($tpl, $d) { return $tpl[$key] ?? $d[$key] ?? $fallback; };
     return [
-        'header_color' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)($tpl['header_color'] ?? '')) ? $tpl['header_color'] : $d['header_color'],
-        'header_title' => (string)($tpl['header_title'] ?? $d['header_title']),
-        'body_text'    => (string)($tpl['body_text'] ?? $d['body_text']),
-        'btn_label'    => (string)($tpl['btn_label'] ?? $d['btn_label']),
-        'image_before' => trim((string)($tpl['image_before'] ?? $d['image_before'] ?? '')),
-        'image_after'  => trim((string)($tpl['image_after'] ?? $d['image_after'] ?? '')),
-        'enabled'      => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
+        'header_color'      => $hex6($pick('header_color', $d['header_color'] ?? '#1d4ed8'), $d['header_color'] ?? '#1d4ed8'),
+        'header_title'      => (string)($tpl['header_title'] ?? $d['header_title']),
+        'header_subtitle'   => (string)$pick('header_subtitle', ''),
+        'header_text_color' => $hex6($pick('header_text_color', '#ffffff'), '#ffffff'),
+        'header_align'      => in_array($pick('header_align', 'start'), ['start', 'center', 'end'], true) ? $pick('header_align', 'start') : 'start',
+        'hero_image'        => trim((string)$pick('hero_image', '')),
+        'hero_ratio'        => in_array($pick('hero_ratio', '4:3'), ['1.91:1', '16:9', '4:3', '1:1'], true) ? $pick('hero_ratio', '4:3') : '4:3',
+        'body_text'         => (string)($tpl['body_text'] ?? $d['body_text']),
+        'body_color'        => $hex6($pick('body_color', '#475569'), '#475569'),
+        'body_size'         => in_array($pick('body_size', 'sm'), ['xs', 'sm', 'md'], true) ? $pick('body_size', 'sm') : 'sm',
+        'btn_label'         => (string)($tpl['btn_label'] ?? $d['btn_label']),
+        'btn_color'         => $hex6($pick('btn_color', '#06C755'), '#06C755'),
+        'btn_text_color'    => $hex6($pick('btn_text_color', '#ffffff'), '#ffffff'),
+        'btn_style'         => in_array($pick('btn_style', 'primary'), ['primary', 'secondary', 'link'], true) ? $pick('btn_style', 'primary') : 'primary',
+        'btn2_label'        => (string)$pick('btn2_label', ''),
+        'btn2_url'          => trim((string)$pick('btn2_url', '')),
+        'image_before'      => trim((string)($tpl['image_before'] ?? $d['image_before'] ?? '')),
+        'image_after'       => trim((string)($tpl['image_after'] ?? $d['image_after'] ?? '')),
+        'container_bg'      => $hex6($pick('container_bg', '#ffffff'), '#ffffff'),
+        'border_color'      => $hex6($pick('border_color', '#e2e8f0'), '#e2e8f0'),
+        'corner_radius'     => in_array($pick('corner_radius', 'lg'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('corner_radius', 'lg') : 'lg',
+        'enabled'           => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
     ];
 }
 
@@ -351,7 +407,24 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         if ($tpl['image_before'] !== '') $photos['before'] = [$tpl['image_before']];
         if ($tpl['image_after']  !== '') $photos['after']  = [$tpl['image_after']];
     }
-    return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel);
+    $opts = [
+        'header_text_color' => $tpl['header_text_color'],
+        'header_subtitle'   => $tpl['header_subtitle'],
+        'header_align'      => $tpl['header_align'],
+        'hero_image'        => $tpl['hero_image'],
+        'hero_ratio'        => $tpl['hero_ratio'],
+        'body_color'        => $tpl['body_color'],
+        'body_size'         => $tpl['body_size'],
+        'btn_color'         => $tpl['btn_color'],
+        'btn_text_color'    => $tpl['btn_text_color'],
+        'btn_style'         => $tpl['btn_style'],
+        'btn2_label'        => $tpl['btn2_label'],
+        'btn2_url'          => $tpl['btn2_url'],
+        'container_bg'      => $tpl['container_bg'],
+        'border_color'      => $tpl['border_color'],
+        'corner_radius'     => $tpl['corner_radius'],
+    ];
+    return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel, $opts);
 }
 
 /* ============================================================
