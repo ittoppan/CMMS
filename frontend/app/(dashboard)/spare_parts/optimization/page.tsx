@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -147,7 +146,18 @@ export default function InventoryOptimizationPage() {
         <VStack gap={0}>
           <HStack gap={2} vAlign="center">
             <Text type="body" weight="semibold">{item.code}</Text>
-            <Badge label={`Class ${item.abcClass}`} variant={item.abcClass === "A" ? "error" : item.abcClass === "B" ? "warning" : "neutral"} />
+            <span
+              className="cmms-andon-chip"
+              style={
+                item.abcClass === "A"
+                  ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }
+                  : item.abcClass === "B"
+                    ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+                    : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }
+              }
+            >
+              Class {item.abcClass}
+            </span>
           </HStack>
           <Text type="body" size="sm" color="secondary">{item.name}</Text>
         </VStack>

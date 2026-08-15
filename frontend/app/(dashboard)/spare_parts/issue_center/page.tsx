@@ -5,7 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -348,7 +347,9 @@ export default function SageIssueCenterPage() {
                   <ShoppingBagIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
                   <Text type="body" weight="bold">ใบเบิกอะไหล่</Text>
                 </HStack>
-                <Badge label={`${totalQty} รายการ`} variant="info" />
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                  {totalQty} รายการ
+                </span>
               </HStack>
             </div>
             {cart.length === 0 ? (

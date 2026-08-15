@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -222,17 +221,27 @@ export default function SageSyncConfigPage() {
       key: "sync_type",
       header: "ประเภท",
       width: proportional(1.2),
-      renderCell: (item) => <Badge label={item.sync_type || "SAGE_SYNC"} variant="info" />,
+      renderCell: (item) => (
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+          {item.sync_type || "SAGE_SYNC"}
+        </span>
+      ),
     },
     {
       key: "status",
       header: "สถานะ",
       width: proportional(1.2),
       renderCell: (item) => (
-        <Badge
-          variant={String(item.status).toUpperCase() === "SUCCESS" ? "success" : "warning"}
-          label={String(item.status).toUpperCase() === "SUCCESS" ? "สำเร็จ" : item.status || "ไม่ทราบ"}
-        />
+        <span
+          className="cmms-andon-chip"
+          style={
+            String(item.status).toUpperCase() === "SUCCESS"
+              ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+              : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+          }
+        >
+          {String(item.status).toUpperCase() === "SUCCESS" ? "สำเร็จ" : item.status || "ไม่ทราบ"}
+        </span>
       ),
     },
     {
@@ -415,7 +424,16 @@ export default function SageSyncConfigPage() {
                       <CircleStackIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                       <Text type="body" weight="bold">{cat.name}</Text>
                     </HStack>
-                    <Badge label={cat.enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={cat.enabled ? "success" : "neutral"} />
+                    <span
+                      className="cmms-andon-chip"
+                      style={
+                        cat.enabled
+                          ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                          : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }
+                      }
+                    >
+                      {cat.enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                    </span>
                   </HStack>
 
                   <Text type="body" size="sm" color="secondary">{cat.desc}</Text>

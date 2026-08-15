@@ -5,7 +5,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
@@ -46,10 +45,10 @@ interface TakeItem {
   diff: number | null;
 }
 
-const STATUS_META: Record<string, { label: string; variant: "info" | "success" | "neutral" }> = {
-  draft: { label: "กำลังนับ", variant: "info" },
-  completed: { label: "ปิดรอบแล้ว", variant: "success" },
-  cancelled: { label: "ยกเลิก", variant: "neutral" },
+const STATUS_META: Record<string, { label: string; style: React.CSSProperties }> = {
+  draft: { label: "กำลังนับ", style: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" } },
+  completed: { label: "ปิดรอบแล้ว", style: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" } },
+  cancelled: { label: "ยกเลิก", style: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" } },
 };
 
 export default function StockTakePage() {
@@ -315,7 +314,16 @@ export default function StockTakePage() {
                         <HStack gap={2} vAlign="center">
                           <Text type="body" weight="bold" size="sm">{it.code}</Text>
                           {diff !== null && diff !== 0 && (
-                            <Badge label={diff > 0 ? `เกิน ${diff} ${it.unit}` : `ขาด ${Math.abs(diff)} ${it.unit}`} variant={diff > 0 ? "info" : "warning"} />
+                            <span
+                              className="cmms-andon-chip"
+                              style={
+                                diff > 0
+                                  ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+                                  : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+                              }
+                            >
+                              {diff > 0 ? `เกิน ${diff} ${it.unit}` : `ขาด ${Math.abs(diff)} ${it.unit}`}
+                            </span>
                           )}
                         </HStack>
                         <Text type="body" size="sm">{it.name}</Text>
@@ -378,7 +386,9 @@ export default function StockTakePage() {
               <Card key={r.id} padding={4} style={{ cursor: "pointer" }} onClick={() => openRound(r.id)}>
                 <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
                   <HStack gap={3} vAlign="center">
-                    <Badge label={STATUS_META[r.status]?.label ?? r.status} variant={STATUS_META[r.status]?.variant ?? "neutral"} />
+                    <span className="cmms-andon-chip" style={STATUS_META[r.status]?.style ?? { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                      {STATUS_META[r.status]?.label ?? r.status}
+                    </span>
                     <VStack gap={0}>
                       <Text type="body" weight="bold">{r.code}</Text>
                       <Text type="body" size="sm" color="secondary">
@@ -388,7 +398,9 @@ export default function StockTakePage() {
                     </VStack>
                   </HStack>
                   <HStack gap={2} vAlign="center">
-                    <Badge label={`นับ ${r.counted_items}/${r.total_items}`} variant="neutral" />
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                      นับ {r.counted_items}/{r.total_items}
+                    </span>
                     {Number(r.diff_items) > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />ต่าง {r.diff_items} รายการ</span>}
                     {r.status === "draft" && (
                       <button
