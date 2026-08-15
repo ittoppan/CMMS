@@ -328,7 +328,38 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
+    // เขียนประวัติการส่ง LINE (ใคร / เมื่อไหร่ / เทมเพลตไหน) — ดูได้ที่ /notifications/history
+    logLineSend(
+        $lineUserId,
+        (string)($opts['tpl_key'] ?? ''),
+        $httpCode === 200 ? 'SENT' : 'FAILED',
+        $title . ': ' . $message,
+        $response
+    );
     return ($httpCode === 200);
+}
+
+/**
+ * เขียน log การส่ง LINE ลง notification_logs (recipient + template)
+ * - recipient: line_user_id (U...) หรือ group id (C...) — หน้า history join users แสดงชื่อ
+ * - template: ชื่อเทมเพลต line_tpl_* (ว่าง = ข้อความทั่วไป)
+ */
+function logLineSend($recipient, $template = '', $status = 'SENT', $content = '', $raw = null) {
+    try {
+        $pdo = getDb();
+        $pdo->prepare(
+            "INSERT INTO notification_logs (channel, status, recipient, template, content, raw_response, created_at)
+             VALUES ('LINE', ?, ?, ?, ?, ?, NOW())"
+        )->execute([
+            $status,
+            mb_substr((string)$recipient, 0, 100),
+            mb_substr((string)$template, 0, 60),
+            mb_substr((string)$content, 0, 500),
+            $raw !== null ? mb_substr((string)$raw, 0, 2000) : null,
+        ]);
+    } catch (Exception $e) {
+        error_log('[line] logLineSend failed: ' . $e->getMessage());
+    }
 }
 
 /* ============================================================
@@ -506,6 +537,7 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         'corner_radius'     => $tpl['corner_radius'],
         'bubble_direction'  => $tpl['bubble_direction'],
         'bubble_size'       => $tpl['bubble_size'],
+        'tpl_key'           => $tplKey,
     ];
     return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel, $opts);
 }

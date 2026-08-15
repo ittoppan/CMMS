@@ -109,6 +109,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/safety/work_permit": "ใบอนุญาต LOTO",
   "/iot/monitor": "IoT Sensor Monitor",
   "/notifications": "ศูนย์แจ้งเตือน",
+  "/notifications/history": "ประวัติการส่ง LINE",
   "/users": "ผู้ใช้งานระบบ",
   "/profile": "โปรไฟล์ของฉัน",
   "/settings": "ตั้งค่าระบบ",
@@ -145,6 +146,7 @@ const SECTION_MAP: Record<string, string> = {
   "/roles": "บุคลากร",
   "/manuals": "เอกสารคู่มือ",
   "/notifications": "ระบบ & ตั้งค่า",
+  "/notifications/history": "ระบบ & ตั้งค่า",
   "/settings": "ระบบ & ตั้งค่า",
   "/settings/notifications": "ระบบ & ตั้งค่า",
   "/settings/menus": "ระบบ & ตั้งค่า",
@@ -169,7 +171,7 @@ const MENU_HREFS: string[] = [
   "/analytics/kpi", "/analytics", "/reports", "/reports/monthly_pdf", "/reports/export_excel",
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
-  "/notifications", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design",
+  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design",
   "/editor/builder", "/pages",
 ];
 
@@ -512,6 +514,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* 8. ระบบ & ตั้งค่า */}
           <MenuSection title="ระบบ & ตั้งค่า" pathPrefixes={["/notifications", "/settings", "/pages", "/editor"]}>
             {canShow("notifications") && <SideNavItem label="ศูนย์แจ้งเตือน" icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
+            {canShow("notifications/history") && <SideNavItem label="ประวัติการส่ง LINE" icon={ClipboardDocumentListIcon} href="/notifications/history" isSelected={isSelected("/notifications/history")} />}
             {canShow("settings/notifications") && <SideNavItem label="รูปแบบการแจ้งเตือน LINE" icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
             {canShow("settings") && <SideNavItem label="ตั้งค่าระบบทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
             {canShow("settings") && <SideNavItem label="สิทธิ์เมนูตามบทบาท" icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
