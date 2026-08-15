@@ -3,9 +3,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
@@ -45,11 +42,15 @@ interface WorkOrder extends Record<string, unknown> {
   date: string;
 }
 
-const priorityColors: Record<string, "error" | "warning" | "info" | "neutral"> = {
-  Critical: "error", critical: "error",
-  High: "warning", high: "warning",
-  Medium: "info", medium: "info",
-  Low: "neutral", low: "neutral",
+const priorityColors: Record<string, React.CSSProperties> = {
+  Critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  High: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  high: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  Medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  Low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 const statusLabels: Record<string, string> = {
@@ -288,7 +289,9 @@ export default function WorkOrdersPage() {
       header: "ความเร่งด่วน",
       width: proportional(1),
       renderCell: (item: WorkOrder) => (
-        <Badge label={priorityLabels[item.priority] || item.priority} variant={priorityColors[item.priority] || "neutral"} />
+        <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          {priorityLabels[item.priority] || item.priority}
+        </span>
       ),
     },
     { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1) },
@@ -298,12 +301,13 @@ export default function WorkOrdersPage() {
       header: "การจัดการ",
       width: proportional(1.2),
       renderCell: (item: WorkOrder) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          label="อัปเดตสถานะ"
+        <button
+          type="button"
           onClick={() => router.push(`/repair/edit?id=${item.rawId || item.id}`)}
-        />
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        >
+          อัปเดตสถานะ
+        </button>
       ),
     },
   ];
@@ -487,7 +491,9 @@ export default function WorkOrdersPage() {
                     เลือกทั้งหมด
                   </label>
                   {selected.size > 0 && (
-                    <Badge label={`เลือก ${selected.size} รายการ`} variant="info" />
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                      เลือก {selected.size} รายการ
+                    </span>
                   )}
                 </HStack>
                 <TextInput
@@ -539,7 +545,7 @@ export default function WorkOrdersPage() {
             <EmptyState
               title="ไม่พบงานซ่อม"
               description="ลองเปลี่ยนตัวกรองหรือสร้างใบสั่งงานใหม่"
-              icon={<Icon icon={MagnifyingGlassIcon} size="lg" />}
+              icon={<MagnifyingGlassIcon className="w-6 h-6" />}
             />
           ) : (
             <Table<WorkOrder>

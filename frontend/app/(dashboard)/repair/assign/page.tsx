@@ -4,10 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Avatar } from "@astryxdesign/core/Avatar";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
@@ -46,17 +43,23 @@ interface Technician {
   avatar?: string | null;
 }
 
-const priorityColors: Record<string, "error" | "warning" | "info" | "neutral"> = {
-  critical: "error", Critical: "error",
-  high: "warning", High: "warning",
-  medium: "info", Medium: "info",
-  low: "neutral", Low: "neutral",
+const priorityColors: Record<string, React.CSSProperties> = {
+  critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  Critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  high: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  High: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  Medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  Low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
-const statusColors: Record<string, "success" | "warning" | "error" | "blue" | "neutral"> = {
-  open: "warning", pending: "warning",
-  in_progress: "blue",
-  waiting_parts: "neutral", pending_parts: "neutral",
+const statusColors: Record<string, React.CSSProperties> = {
+  open: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  pending: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  in_progress: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  waiting_parts: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  pending_parts: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 // สถานะที่ยังรอจ่ายงาน / ทำงานอยู่ (ยังไม่เสร็จ)
@@ -225,7 +228,9 @@ export default function RepairAssignPage() {
       header: "ความด่วน",
       width: proportional(0.9),
       renderCell: (row: AssignWO) => (
-        <Badge label={row.priority} variant={priorityColors[row.priority] || "neutral"} />
+        <span className="cmms-andon-chip" style={priorityColors[row.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          {row.priority}
+        </span>
       ),
     },
     {
@@ -246,11 +251,13 @@ export default function RepairAssignPage() {
       width: proportional(1.5),
       renderCell: (row: AssignWO) => {
         if (!row.assigneeId) {
-          return <Badge label="รอมอบหมายงาน" variant="neutral" />;
+          return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>รอมอบหมายงาน</span>;
         }
         return (
           <HStack gap={2} vAlign="center">
-            <Badge label={row.status === "in_progress" ? "กำลังซ่อม" : "มอบหมายแล้ว"} variant={statusColors[row.status] || "neutral"} />
+            <span className="cmms-andon-chip" style={statusColors[row.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+              {row.status === "in_progress" ? "กำลังซ่อม" : "มอบหมายแล้ว"}
+            </span>
             <Avatar name={row.assignee} src={row.assigneeAvatar || undefined} size="sm" tooltip={row.assignee} />
             <Text type="body" size="sm">{row.assignee}</Text>
           </HStack>
@@ -262,13 +269,18 @@ export default function RepairAssignPage() {
       header: "การจัดการ",
       width: proportional(1),
       renderCell: (row: AssignWO) => (
-        <Button
-          size="sm"
-          variant={!row.assigneeId ? "primary" : "secondary"}
-          icon={<Icon icon={!row.assigneeId ? UserPlusIcon : ArrowPathIcon} size="sm" />}
-          label={!row.assigneeId ? "จ่ายงาน" : "เปลี่ยนช่าง"}
+        <button
+          type="button"
           onClick={() => handleAssignClick(row)}
-        />
+          className={
+            row.assigneeId
+              ? "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              : "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+          }
+        >
+          {row.assigneeId ? <ArrowPathIcon className="w-3.5 h-3.5" /> : <UserPlusIcon className="w-3.5 h-3.5" />}
+          {row.assigneeId ? "เปลี่ยนช่าง" : "จ่ายงาน"}
+        </button>
       ),
     },
   ];
@@ -286,21 +298,28 @@ export default function RepairAssignPage() {
           <Heading level={2}>แจกงานซ่อม (Dispatch)</Heading>
           <Text type="body" color="secondary">มอบหมายใบแจ้งซ่อมให้กับช่างซ่อมบำรุงที่เหมาะสม</Text>
         </VStack>
-        <Button
-          label="รีเฟรช"
-          variant="secondary"
-          size="md"
+        <button
+          type="button"
           onClick={fetchData}
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
-        />
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          รีเฟรช
+        </button>
       </HStack>
 
       {/* Stat badges */}
       <HStack gap={2} wrap="wrap">
-        <Badge label={`งานที่ยังไม่เสร็จ: ${stats.total}`} variant="neutral" />
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          งานที่ยังไม่เสร็จ: {stats.total}
+        </span>
         <span className="cmms-status warn"><span className="cmms-status-dot" />รอมอบหมาย: {stats.unassigned}</span>
-        <Badge label={`มอบหมายแล้ว: ${stats.assigned}`} variant="info" />
-        <Badge label={`กำลังซ่อม: ${stats.inprog}`} variant="info" />
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+          มอบหมายแล้ว: {stats.assigned}
+        </span>
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+          กำลังซ่อม: {stats.inprog}
+        </span>
       </HStack>
 
       {/* Filter Toolbar */}
@@ -343,7 +362,7 @@ export default function RepairAssignPage() {
         <EmptyState
           title="ไม่มีงานที่ต้องจ่าย"
           description="งานซ่อมทั้งหมดมอบหมายครบแล้ว หรือลองเปลี่ยนตัวกรอง"
-          icon={<Icon icon={MagnifyingGlassIcon} size="lg" />}
+          icon={<MagnifyingGlassIcon className="w-6 h-6" />}
         />
       ) : (
         <Table<AssignWO>
@@ -401,14 +420,22 @@ export default function RepairAssignPage() {
           </VStack>
         </div>
         <HStack hAlign="end" gap={3} style={{ paddingTop: 16, borderTop: "1px solid var(--color-border)" }}>
-          <Button label="ยกเลิก" variant="secondary" onClick={() => setAssignOpen(false)} />
-          <Button
-            label={saving ? "กำลังบันทึก..." : "ยืนยันการจ่ายงาน"}
-            variant="primary"
-            isDisabled={!selectedTech || saving}
+          <button
+            type="button"
+            onClick={() => setAssignOpen(false)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            disabled={!selectedTech || saving}
             onClick={submitAssign}
-            icon={<Icon icon={CheckCircleIcon} size="sm" />}
-          />
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            {saving ? "กำลังบันทึก..." : "ยืนยันการจ่ายงาน"}
+          </button>
         </HStack>
       </Dialog>
 

@@ -3,9 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import {
@@ -73,11 +70,14 @@ const statusLabel = (s: string) => statusLabels[String(s || "").toLowerCase()] |
 
 const priorityLabels: Record<string, string> = { critical: "วิกฤต", high: "สูง", medium: "ปานกลาง", low: "ต่ำ" };
 const priorityLabel = (p: string) => priorityLabels[String(p || "").toLowerCase()] || p || "—";
-const priorityVariant = (p: string): "error" | "warning" | "info" | "neutral" => {
-  const m: Record<string, "error" | "warning" | "info" | "neutral"> = {
-    critical: "error", high: "warning", medium: "info", low: "neutral",
+const priorityVariant = (p: string): React.CSSProperties => {
+  const m: Record<string, React.CSSProperties> = {
+    critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+    high: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+    medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+    low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
   };
-  return m[String(p || "").toLowerCase()] || "neutral";
+  return m[String(p || "").toLowerCase()] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" };
 };
 
 // ไทม์ไลน์: กิจกรรม → สีหลอดไฟ + ไอคอน
@@ -255,25 +255,31 @@ export default function RepairViewDetailsPage() {
             <Heading level={2}>ใบสั่งงานซ่อม</Heading>
           </VStack>
           <HStack gap={2} wrap="wrap">
-            <Button
-              label="กลับ"
-              variant="secondary"
-              icon={<Icon icon={ArrowLeftIcon} size="sm" />}
+            <button
+              type="button"
               onClick={() => (window.location.href = "/repair/tracking")}
-            />
-            <Button
-              label={downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF (F-EN-03)"}
-              variant="secondary"
-              icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
-              isDisabled={downloading}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              กลับ
+            </button>
+            <button
+              type="button"
+              disabled={downloading}
               onClick={handleDownloadPdf}
-            />
-            <Button
-              label="พิมพ์เอกสารปิดซ่อม"
-              variant="primary"
-              icon={<Icon icon={PrinterIcon} size="sm" />}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <DocumentArrowDownIcon className="w-4 h-4" />
+              {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF (F-EN-03)"}
+            </button>
+            <button
+              type="button"
               onClick={handlePrint}
-            />
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+            >
+              <PrinterIcon className="w-4 h-4" />
+              พิมพ์เอกสารปิดซ่อม
+            </button>
           </HStack>
         </HStack>
 
@@ -299,7 +305,9 @@ export default function RepairViewDetailsPage() {
                 </VStack>
               </HStack>
               <VStack gap={2} hAlign="end">
-                <Badge label={`ความเร่งด่วน: ${priorityLabel(wo.priority)}`} variant={priorityVariant(wo.priority)} />
+                <span className="cmms-andon-chip" style={priorityVariant(wo.priority)}>
+                  ความเร่งด่วน: {priorityLabel(wo.priority)}
+                </span>
               </VStack>
             </HStack>
 
@@ -437,13 +445,21 @@ export default function RepairViewDetailsPage() {
             />
           )}
           <HStack hAlign="end" gap={2} style={{ marginTop: 14 }}>
-            <Button label="ปิด" variant="secondary" onClick={handleClosePreview} />
-            <Button
-              label="ดาวน์โหลดไฟล์ PDF"
-              variant="primary"
-              icon={<Icon icon={ArrowDownTrayIcon} size="sm" />}
+            <button
+              type="button"
+              onClick={handleClosePreview}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ปิด
+            </button>
+            <button
+              type="button"
               onClick={handleSavePdf}
-            />
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              ดาวน์โหลดไฟล์ PDF
+            </button>
           </HStack>
         </div>
       </Dialog>

@@ -3,10 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
 import AndonLamp from "@/components/AndonLamp";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -47,10 +44,13 @@ interface HistoryWO extends Record<string, unknown> {
   downtimeMinutes: number;
 }
 
-const statusColors: Record<string, "success" | "warning" | "error" | "blue" | "neutral"> = {
-  completed: "success", closed: "success", resolved: "success",
-  rejected: "error",
-  in_progress: "blue", open: "warning",
+const statusColors: Record<string, React.CSSProperties> = {
+  completed: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  closed: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  resolved: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  rejected: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  in_progress: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  open: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
 };
 
 const statusLabels: Record<string, string> = {
@@ -169,7 +169,9 @@ export default function RepairHistoryPage() {
       header: "สถานะ",
       width: proportional(1),
       renderCell: (item: HistoryWO) => (
-        <Badge label={statusLabels[item.status] || item.status} variant={statusColors[item.status] || "neutral"} />
+        <span className="cmms-andon-chip" style={statusColors[item.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          {statusLabels[item.status] || item.status}
+        </span>
       ),
     },
     { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1) },
@@ -203,12 +205,13 @@ export default function RepairHistoryPage() {
       header: "การจัดการ",
       width: proportional(1),
       renderCell: (item: HistoryWO) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          label="ดูรายละเอียด"
+        <button
+          type="button"
           onClick={() => router.push(`/repair/edit?id=${item.rawId}`)}
-        />
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        >
+          ดูรายละเอียด
+        </button>
       ),
     },
   ];
@@ -358,7 +361,7 @@ export default function RepairHistoryPage() {
         <EmptyState
           title="ไม่พบประวัติงานซ่อม"
           description="ลองเปลี่ยนตัวกรองหรือค้นหาด้วยคำอื่น"
-          icon={<Icon icon={MagnifyingGlassIcon} size="lg" />}
+          icon={<MagnifyingGlassIcon className="w-6 h-6" />}
         />
       ) : (
         <Card padding={0} style={{ overflow: "hidden" }}>

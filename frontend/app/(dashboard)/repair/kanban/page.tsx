@@ -4,10 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -34,11 +31,11 @@ export interface KanbanItem {
   createdAt: string;
 }
 
-const priorityColors: Record<KanbanItem["priority"], "error" | "warning" | "info" | "neutral"> = {
-  Critical: "error",
-  High: "warning",
-  Medium: "info",
-  Low: "neutral",
+const priorityColors: Record<KanbanItem["priority"], React.CSSProperties> = {
+  Critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  High: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  Medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  Low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 // สีเส้นข้างการ์ดตามความเร่งด่วน
@@ -291,10 +288,9 @@ export default function RepairKanbanPage() {
                           <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>
                             {item.woNumber}
                           </Text>
-                          <Badge
-                            label={item.priority}
-                            variant={priorityColors[item.priority] || "neutral"}
-                          />
+                          <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                            {item.priority}
+                          </span>
                         </HStack>
 
                         <Text type="body" weight="semibold" style={{ fontSize: '0.95rem' }}>
@@ -309,7 +305,7 @@ export default function RepairKanbanPage() {
 
                         <HStack hAlign="between" vAlign="center" style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--cmms-border-light)' }}>
                           <Text type="body" size="sm" color="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <Icon icon={UserIcon} size="xsm" /> {item.assignee}
+                            <UserIcon className="w-3.5 h-3.5" /> {item.assignee}
                           </Text>
                           <Text type="body" size="sm" color="secondary">
                             {item.createdAt && item.createdAt !== "-" ? item.createdAt.split(" ")[0] : ""}
@@ -319,23 +315,25 @@ export default function RepairKanbanPage() {
                         {/* Interactive Move Action Buttons */}
                         <HStack hAlign="between" gap={1} style={{ marginTop: 8 }}>
                           {col.prevStatus ? (
-                            <Button
-                              label={col.prevLabel}
-                              variant="secondary"
-                              size="sm"
-                              icon={<Icon icon={ChevronLeftIcon} size="xsm" />}
+                            <button
+                              type="button"
                               onClick={() => updateStatus(item.id, col.prevStatus)}
-                            />
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                            >
+                              <ChevronLeftIcon className="w-3.5 h-3.5" />
+                              {col.prevLabel}
+                            </button>
                           ) : <div />}
 
                           {col.nextStatus && (
-                            <Button
-                              label={col.nextLabel}
-                              variant="primary"
-                              size="sm"
-                              icon={<Icon icon={ChevronRightIcon} size="xsm" />}
+                            <button
+                              type="button"
                               onClick={() => updateStatus(item.id, col.nextStatus)}
-                            />
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+                            >
+                              <ChevronRightIcon className="w-3.5 h-3.5" />
+                              {col.nextLabel}
+                            </button>
                           )}
                         </HStack>
                       </VStack>

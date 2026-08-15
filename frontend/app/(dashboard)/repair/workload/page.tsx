@@ -4,9 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import AndonLamp from "@/components/AndonLamp";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
@@ -107,7 +104,9 @@ export default function WorkloadPage() {
       header: "งานค้าง (เปิด)",
       width: proportional(1),
       renderCell: (item) => (
-        <Badge variant={item.openCount > 0 ? "warning" : "success"} label={String(item.openCount)} />
+        <span className="cmms-andon-chip" style={item.openCount > 0 ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" } : { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
+          {item.openCount}
+        </span>
       ),
     },
     {
@@ -122,7 +121,7 @@ export default function WorkloadPage() {
       width: proportional(1),
       renderCell: (item) =>
         item.overdueCount > 0 ? (
-          <Badge variant="error" label={String(item.overdueCount)} />
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>{item.overdueCount}</span>
         ) : (
           <Text type="body" color="disabled">-</Text>
         ),
@@ -133,7 +132,7 @@ export default function WorkloadPage() {
       width: proportional(1),
       renderCell: (item) =>
         item.urgentCount > 0 ? (
-          <Badge variant="error" label={String(item.urgentCount)} />
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>{item.urgentCount}</span>
         ) : (
           <Text type="body" color="disabled">-</Text>
         ),
@@ -248,7 +247,7 @@ export default function WorkloadPage() {
           <EmptyState
             title="ยังไม่มีข้อมูลภาระงาน"
             description="เมื่อมีงานซ่อมที่มอบหมายให้ช่าง จะแสดงภาพรวมที่นี่"
-            icon={<Icon icon={UserGroupIcon} size="lg" />}
+            icon={<UserGroupIcon className="w-6 h-6" />}
           />
         ) : (
           <Table<TechRow> data={rows} columns={columns} idKey="id" density="balanced" dividers="rows" />

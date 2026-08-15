@@ -5,9 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
@@ -91,12 +88,12 @@ export default function RepairTrackingPage() {
 
   const getStatusDisplay = (status: string) => {
     switch(status) {
-      case 'pending_assign': return <Badge label="รอมอบหมายงาน" variant="neutral" />;
+      case 'pending_assign': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>รอมอบหมายงาน</span>;
       case 'pending_accept': return <span className="cmms-status warn"><span className="cmms-status-dot" />รอช่างรับงาน</span>;
-      case 'in_progress': return <Badge label="กำลังดำเนินการซ่อม" variant="info" />;
+      case 'in_progress': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>กำลังดำเนินการซ่อม</span>;
       case 'pending_eval': return <span className="cmms-status down"><span className="cmms-status-dot" />รอการประเมินจากผู้แจ้ง</span>;
       case 'completed': return <span className="cmms-status ok"><span className="cmms-status-dot" />เสร็จสมบูรณ์</span>;
-      default: return <Badge label={status} variant="neutral" />;
+      default: return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{status}</span>;
     }
   };
 
@@ -144,20 +141,22 @@ export default function RepairTrackingPage() {
       renderCell: (item: TrackWO) => (
         <HStack gap={2} hAlign="end">
           {item.status === 'pending_eval' ? (
-            <Button 
-              size="sm" 
-              variant="primary" 
-              icon={<Icon icon={StarIcon} size="sm" />}
+            <button
+              type="button"
               onClick={() => handleEvaluate(item)}
-              label="ประเมินผล"
-            />
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+            >
+              <StarIcon className="w-3.5 h-3.5" />
+              ประเมินผล
+            </button>
           ) : (
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              label="ดูรายละเอียด"
+            <button
+              type="button"
               onClick={() => router.push(`/repair/view?id=${item.id}`)}
-            />
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ดูรายละเอียด
+            </button>
           )}
         </HStack>
       ),
@@ -182,7 +181,7 @@ export default function RepairTrackingPage() {
       {error ? (
         <Banner status="error" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
       ) : data.length === 0 ? (
-        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้" icon={<Icon icon={WrenchScrewdriverIcon} size="lg" />} />
+        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้" icon={<WrenchScrewdriverIcon className="w-6 h-6" />} />
       ) : (
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
@@ -243,11 +242,11 @@ export default function RepairTrackingPage() {
                       onClick={() => setRating(star)}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
                     >
-                      <Icon 
-                        icon={star <= rating ? StarSolidIcon : StarIcon} 
-                        size="md"
-                        style={{ color: star <= rating ? 'var(--cmms-warning)' : 'var(--cmms-text-muted)' }}
-                      />
+                      {star <= rating ? (
+                        <StarSolidIcon className="w-5 h-5" style={{ color: 'var(--cmms-warning)' }} />
+                      ) : (
+                        <StarIcon className="w-5 h-5" style={{ color: 'var(--cmms-text-muted)' }} />
+                      )}
                     </button>
                   ))}
                 </HStack>
@@ -266,16 +265,20 @@ export default function RepairTrackingPage() {
               </VStack>
 
               <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                <Button 
-                  label="ยกเลิก" 
-                  variant="secondary" 
+                <button
+                  type="button"
                   onClick={() => setEvalModalOpen(false)}
-                />
-                <Button 
-                  label="บันทึกการประเมิน" 
-                  variant="primary" 
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
                   onClick={submitEvaluation}
-                />
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+                >
+                  บันทึกการประเมิน
+                </button>
               </HStack>
             </VStack>
           </div>

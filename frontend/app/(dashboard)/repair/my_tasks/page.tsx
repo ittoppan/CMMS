@@ -4,9 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
@@ -266,9 +263,9 @@ export default function MyTasksPage() {
       renderCell: (task) => (
         <HStack gap={2} vAlign="center">
           {task.kind === "pm" ? (
-            <Badge label="PM" variant="blue" />
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>PM</span>
           ) : (
-            <Badge label="ซ่อม" variant="info" />
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>ซ่อม</span>
           )}
           <Text type="body" weight="bold">{task.woNumber}</Text>
         </HStack>
@@ -303,8 +300,8 @@ export default function MyTasksPage() {
           <Text type="body" size="sm" color="disabled">-</Text>
         ) : (
           <HStack gap={1} vAlign="center">
-            {task.beforeImg && <Badge label="ก่อนซ่อม" variant="neutral" />}
-            {task.afterImg && <Badge label="หลังซ่อม" variant="neutral" />}
+            {task.beforeImg && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>ก่อนซ่อม</span>}
+            {task.afterImg && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>หลังซ่อม</span>}
           </HStack>
         ),
     },
@@ -318,47 +315,51 @@ export default function MyTasksPage() {
             {task.status === "completed" ? (
               <Text type="body" size="sm" color="disabled">ทำเสร็จแล้ว</Text>
             ) : (
-              <Button
-                size="sm"
-                variant="primary"
-                icon={<Icon icon={CheckCircleIcon} size="xsm" />}
+              <button
+                type="button"
                 onClick={() => goPM(task)}
-                label="ไปทำ PM"
-              />
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+              >
+                <CheckCircleIcon className="w-3.5 h-3.5" />
+                ไปทำ PM
+              </button>
             )}
           </HStack>
         ) : (
           <HStack gap={2} hAlign="end">
             {task.status === "new" && (
-              <Button
-                size="sm"
-                variant="primary"
-                icon={<Icon icon={PlayIcon} size="xsm" />}
+              <button
+                type="button"
                 onClick={() => handleStartTask(task)}
-                label="เริ่มซ่อม"
-              />
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+              >
+                <PlayIcon className="w-3.5 h-3.5" />
+                เริ่มซ่อม
+              </button>
             )}
 
             {task.status === "in_progress" && (
-              <Button
-                size="sm"
-                variant="primary"
-                icon={<Icon icon={CheckIcon} size="xsm" />}
+              <button
+                type="button"
                 onClick={() => {
                   setSelectedTask(task);
                   setCloseModalOpen(true);
                 }}
-                label="ปิดใบงานซ่อม"
-              />
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+              >
+                <CheckIcon className="w-3.5 h-3.5" />
+                ปิดใบงานซ่อม
+              </button>
             )}
 
-            <Button
-              size="sm"
-              variant="secondary"
-              icon={<Icon icon={EyeIcon} size="xsm" />}
+            <button
+              type="button"
               onClick={() => router.push(`/repair/view?id=${task.rawId}`)}
-              label="ดูรายละเอียดปิดงาน"
-            />
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <EyeIcon className="w-3.5 h-3.5" />
+              ดูรายละเอียดปิดงาน
+            </button>
           </HStack>
         ),
     },
@@ -405,7 +406,7 @@ export default function MyTasksPage() {
       {error ? (
         <Banner status="error" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
       ) : filteredTasks.length === 0 ? (
-        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมในสถานะนี้" icon={<Icon icon={WrenchScrewdriverIcon} size="lg" />} />
+        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมในสถานะนี้" icon={<WrenchScrewdriverIcon className="w-6 h-6" />} />
       ) : (
         <Card padding={0} style={{ overflow: 'hidden' }}>
           <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
@@ -545,13 +546,13 @@ export default function MyTasksPage() {
                     />
                     <HStack hAlign="between" vAlign="center">
                       <Text type="body" size="sm" color="secondary">ใช้เมาส์หรือนิ้วเซ็นชื่อลงในช่อง</Text>
-                      <Button
-                        variant="ghost"
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={clearSignature}
-                        label="ล้างลายเซ็น"
-                        style={{ color: 'var(--cmms-danger)' }}
-                      />
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                      >
+                        ล้างลายเซ็น
+                      </button>
                     </HStack>
                   </VStack>
                 </Field>
@@ -559,18 +560,22 @@ export default function MyTasksPage() {
             </FormLayout>
 
             <HStack hAlign="end" gap={2} style={{ marginTop: 16 }}>
-              <Button
-                label="ยกเลิก"
-                variant="secondary"
+              <button
+                type="button"
                 onClick={() => setCloseModalOpen(false)}
-              />
-              <Button
-                label="ยืนยันปิดใบงานซ่อม"
-                variant="primary"
-                isLoading={closing}
-                icon={<Icon icon={CheckCircleIcon} size="sm" />}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={closing}
                 onClick={handleConfirmClose}
-              />
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircleIcon className="w-4 h-4" />
+                {closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}
+              </button>
             </HStack>
           </VStack>
         </Dialog>
