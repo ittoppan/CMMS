@@ -20,9 +20,13 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import PMChecksheetDocument from "@/components/PMChecksheetDocument";
 
 interface CheckItem {
   id: string;
@@ -68,6 +72,8 @@ export default function PMChecksheetPage() {
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [pending, setPending] = useState(0);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const reportRef = useRef<HTMLDivElement | null>(null);
   const { showToast } = useToast();
 
   // ── ลายเซ็นยืนยัน: ผู้ตรวจเช็ค (ช่าง) + ผู้ควบคุมเครื่อง ──
@@ -271,6 +277,41 @@ export default function PMChecksheetPage() {
   const handleSubmit = () => {
     if (!selectedPlan) return;
     setSigModalOpen(true);
+  };
+
+  // ดาวน์โหลดใบตรวจเช็ค PM เป็น PDF (เช็กลิสต์ + ผล + ลายเซ็น 2 ช่อง)
+  const handleDownloadPdf = async () => {
+    if (!reportRef.current || pdfBusy || !selectedPlan) return;
+    setPdfBusy(true);
+    try {
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+      const img = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const imgHeight = (canvas.height * pw) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+      heightLeft -= ph;
+      while (heightLeft > 0) {
+        position -= ph;
+        pdf.addPage();
+        pdf.addImage(img, "PNG", 0, position, pw, imgHeight);
+        heightLeft -= ph;
+      }
+      pdf.save(`PM-CHECKSHEET-${selectedPlan.id}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      showToast("success", "ดาวน์โหลดใบตรวจเช็ค PM เรียบร้อย");
+    } catch (e) {
+      console.error(e);
+      showToast("error", "ไม่สามารถสร้าง PDF ได้ในเบราว์เซอร์นี้ — ลองใช้ปุ่มพิมพ์ของเบราว์เซอร์แทน");
+    }
+    setPdfBusy(false);
   };
 
   const confirmSave = async () => {
@@ -574,18 +615,50 @@ export default function PMChecksheetPage() {
             <div style={{ padding: 20, backgroundColor: "var(--color-muted)", borderTop: "1px solid var(--color-border)" }}>
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
                 <Text type="body" color="secondary">ตรวจสอบให้ครบทุกข้อก่อนบันทึก</Text>
-                <button
-                  type="button"
-                  disabled={submitting || !allFilled}
-                  onClick={handleSubmit}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ClipboardDocumentCheckIcon className="w-4 h-4" />
-                  {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
-                </button>
+                <HStack gap={2} wrap="wrap">
+                  <button
+                    type="button"
+                    disabled={pdfBusy}
+                    onClick={handleDownloadPdf}
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-success disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    {pdfBusy ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF ใบตรวจเช็ค"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={submitting || !allFilled}
+                    onClick={handleSubmit}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                    {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
+                  </button>
+                </HStack>
               </HStack>
             </div>
           </Card>
+
+          {/* เอกสาร PDF ซ่อนไว้นอกจอ (capture ด้วย html2canvas) */}
+          <div ref={reportRef} style={{ position: "absolute", left: -9999, top: 0, width: 794, zIndex: -1 }}>
+            <PMChecksheetDocument
+              data={{
+                id: selectedPlan.id,
+                title: selectedPlan.title || "ไม่ระบุ",
+                assetName: assetName || "ไม่ระบุ",
+                frequency: selectedPlan.frequency_type || "monthly",
+                dueDate: selectedPlan.due_date || "-",
+                assignee: selectedPlan.assigned_name || "-",
+                checklist,
+                inspectorSignature: inspectorSig,
+                operatorSignature: operatorSig,
+                operatorName,
+                inspectorName: currentUserName,
+                doneAt: new Date().toLocaleDateString("th-TH"),
+                notes: "",
+              }}
+            />
+          </div>
         </div>
       )}
 
