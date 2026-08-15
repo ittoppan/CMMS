@@ -32,6 +32,7 @@ export interface KanbanItem {
   status: "open" | "in_progress" | "pending" | "completed";
   overdue: boolean;
   createdAt: string;
+  team: { user_id: number; role: string; full_name: string; status?: string; accepted_at?: string }[];
 }
 
 const priorityColors: Record<KanbanItem["priority"], React.CSSProperties> = {
@@ -92,7 +93,8 @@ export default function RepairKanbanPage() {
             assignee: row.assigned_name || "ยังไม่จ่ายงาน",
             status: normalizedStatus,
             overdue: isRepairOverdue(row.estimated_completion_date, row.status),
-            createdAt: row.created_at || "-"
+            createdAt: row.created_at || "-",
+            team: Array.isArray(row.team) ? row.team : []
           };
         });
         setItems(fetched);
@@ -318,6 +320,42 @@ export default function RepairKanbanPage() {
                             {item.createdAt && item.createdAt !== "-" ? item.createdAt.split(" ")[0] : ""}
                           </Text>
                         </HStack>
+
+                        {/* สถานะรับงานต่อคน — ใครรับแล้ว/ใครยังไม่รับ */}
+                        {item.team.length > 0 && (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                            {item.team.map((m) => {
+                              const accepted = m.status === "accepted";
+                              const declined = m.status === "declined";
+                              return (
+                                <span
+                                  key={m.user_id}
+                                  className="cmms-andon-chip"
+                                  style={{
+                                    background: declined ? "var(--cmms-danger-light)" : accepted ? "var(--cmms-success-light)" : "var(--cmms-warning-light)",
+                                    color: declined ? "var(--cmms-danger-dark)" : accepted ? "var(--cmms-success-dark)" : "var(--cmms-warning-dark)",
+                                    fontSize: "0.68rem",
+                                    padding: "2px 7px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      display: "inline-block",
+                                      width: 6,
+                                      height: 6,
+                                      borderRadius: "50%",
+                                      background: declined ? "var(--cmms-danger)" : accepted ? "var(--cmms-success)" : "var(--cmms-warning)",
+                                    }}
+                                  />
+                                  {m.full_name || "?"}{declined ? " ปฏิเสธ" : accepted ? "" : " ยังไม่รับ"}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
 
                         {/* Interactive Move Action Buttons */}
                         <HStack hAlign="between" gap={1} style={{ marginTop: 8 }}>
