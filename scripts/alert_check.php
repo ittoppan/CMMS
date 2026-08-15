@@ -86,8 +86,11 @@ foreach ($pmRows as $r) {
              . "----------------------------------\n"
              . "📋 ดำเนินการ PM: $url";
 
-        if (!empty($r['tech_line_id'])) {
-            // ส่งตรงถึงช่างคนนั้น (ไม่รบกวนคนอื่น) + บันทึก log
+        $pmTplOn = NotificationService::isLineTemplateEnabled('line_tpl_pm_overdue');
+        if (!$pmTplOn) {
+            echo "  skip LINE (pm_overdue template disabled): {$code} - {$r['title']}
+";
+        } elseif (!empty($r['tech_line_id'])) {
             $ok = sendLinePushMessage((string)$r['tech_line_id'], '⏰ PM ใกล้กำหนด', $msg);
             try {
                 $pdo->prepare("INSERT INTO notification_logs (channel, status, content, created_at) VALUES ('LINE', ?, ?, NOW())")
@@ -134,9 +137,14 @@ if ($lowStockOn === '1') {
              . "\n----------------------------------\n"
              . "🛒 จัดการสต็อก: " . rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/';
 
-        NotificationService::sendLineMessage($msg);
-        $sent++;
-        echo "alert LOW STOCK: {$lowCount} items (แสดง 15 อันดับแรก)\n";
+        if (NotificationService::isLineTemplateEnabled('line_tpl_low_stock')) {
+            NotificationService::sendLineMessage($msg);
+            $sent++;
+            echo "alert LOW STOCK: {$lowCount} items (แสดง 15 อันดับแรก)\n";
+        } else {
+            echo "skip LOW STOCK LINE (low_stock template disabled)
+";
+        }
     } else {
         echo "low stock: {$lowCount} items — skip (" . ($force ? 'force' : 'already alerted <24h') . ")\n";
     }
@@ -181,8 +189,13 @@ if ($escOn === '1') {
              . "ผู้รับผิดชอบ: " . ($e['assigned_name'] ?: 'ยังไม่ assign') . "\n"
              . "----------------------------------\n"
              . "🔧 ดูงาน: " . rtrim((string)publicBaseUrl(), '/') . "/pages/repair/view.php?id={$e['id']}";
-        NotificationService::sendLineMessage($msg);
-        $sent++;
+        if (NotificationService::isLineTemplateEnabled('line_tpl_breakdown')) {
+            NotificationService::sendLineMessage($msg);
+            $sent++;
+        } else {
+            echo "  skip LINE (breakdown template disabled): {$e['work_order_no']}
+";
+        }
         // Web Push ควบคู่ LINE (เฉพาะคนที่ subscribe — ถ้าไม่มีก็ข้าม)
         if (settingValue($pdo, 'push_alert_enabled', '1') === '1') {
             try {

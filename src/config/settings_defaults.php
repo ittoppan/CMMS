@@ -71,6 +71,8 @@ function settingsDefaultValues(): array {
 
         // ── notification ──
         'line_notify_enabled'   => '1',
+        'line_system_alerts'   => '0',  // ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE - default ปิด (กัน LINE เต็ม)
+        'line_weekly_report'   => '1',  // ส่งรายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์) เข้า LINE
         'email_notify_enabled'  => '0',
         'low_stock_alert'       => '1',
         'maintenance_alert_days'=> '7',

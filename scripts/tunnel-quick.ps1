@@ -36,9 +36,13 @@ foreach ($p in $old) {
 }
 Start-Sleep -Seconds 2
 
+# ตัด log เก่าทิ้งก่อนสตาร์ท - กัน Select-String ดึง URL ค้างจากรอบก่อน
+$logFile = Join-Path $logDir "cloudflared.log"
+if (Test-Path -LiteralPath $logFile) { Set-Content -LiteralPath $logFile -Value "" -Encoding utf8 }
+
 # สตาร์ทใหม่ (background) — บันทึก URL ผ่าน log file
 $logFile = Join-Path $logDir "cloudflared.log"
-$p = Start-Process -FilePath $cfExe -ArgumentList "tunnel --url http://localhost:$Port --logfile `"$logFile`"" -WindowStyle Hidden -PassThru
+$p = Start-Process -FilePath $cfExe -ArgumentList "tunnel --url http://127.0.0.1:$Port --protocol http2 --no-autoupdate --logfile `"$logFile`"" -WindowStyle Hidden -PassThru
 Write-Log "started cloudflared PID $($p.Id) -> localhost:$Port"
 
 # รอ URL โผล่ใน log (trycloudflare พิมพ์ URL หลัง ready ~5-10 วิ)

@@ -609,6 +609,37 @@ export default function NotificationsSettingsPage() {
             </VStack>
           </Card>
 
+          {/* LINE event toggles: ระบบ/process + รายงานประจำสัปดาห์ */}
+          <Card padding={5}>
+            <VStack gap={4}>
+              <HStack gap={2} vAlign="center">
+                <Icon icon={BoltIcon} size="md" color="primary" />
+                <VStack gap={0}>
+                  <Heading level={3}>เหตุการณ์ที่ส่งเข้า LINE</Heading>
+                  <Text type="supporting" color="secondary">สวิตช์ควบคุมเหตุการณ์ที่ระบบส่งข้อความเข้า LINE (แยกจาก Telegram แอดมิน)</Text>
+                </VStack>
+              </HStack>
+
+              <Switch
+                label="การแจ้งเตือนระบบ / กระบวนการ (watchdog)"
+                value={(settings.line_system_alerts ?? "0") === "1"}
+                onChange={(c) => setSettingField("line_system_alerts", c ? "1" : "0")}
+              />
+              <Text type="body" size="sm" color="secondary">
+                สถานะ server/tunnel และเหตุการณ์จาก watchdog — แนะนำปิดไว้ (ค่าเริ่มต้น) กันข้อความเต็มใน LINE; เหตุการณ์ระบบจะแจ้งผ่าน Telegram แอดมินแทน
+              </Text>
+
+              <Switch
+                label="รายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์)"
+                value={(settings.line_weekly_report ?? "1") === "1"}
+                onChange={(c) => setSettingField("line_weekly_report", c ? "1" : "0")}
+              />
+              <Text type="body" size="sm" color="secondary">
+                สรุปงานซ่อม / PM / สต็อกประจำสัปดาห์ (weekly_report.php) — เปิด/ปิดได้ตามต้องการ
+              </Text>
+            </VStack>
+          </Card>
+
           {/* Template editor */}
           <Card padding={5}>
             <VStack gap={4}>

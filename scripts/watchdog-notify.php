@@ -29,11 +29,20 @@ if ($message === '') {
     exit(2);
 }
 
+// ส่งเข้า LINE เฉพาะเมื่อตั้งค่า line_system_alerts=1 (default = ปิด - กัน LINE เต็มด้วยข้อความระบบ)
+// ช่องทางหลักของการแจ้งเตือนระบบ/process คือ Telegram (telegramAdminAlert ด้านล่าง)
+$sysAlertsOn = '0';
 try {
-    $ok = NotificationService::sendLineMessage($message);
-} catch (Throwable $e) {
-    fwrite(STDERR, "sendLineMessage threw: " . $e->getMessage() . "\n");
-    exit(1);
+    $sysAlertsOn = (string)getSettingValue('line_system_alerts', '0');
+} catch (Throwable $e) {}
+$ok = true;
+if ($sysAlertsOn === '1') {
+    try {
+        $ok = NotificationService::sendLineMessage($message);
+    } catch (Throwable $e) {
+        fwrite(STDERR, "sendLineMessage threw: " . $e->getMessage() . "\n");
+        exit(1);
+    }
 }
 
 // แจ้งเตือนแอดมินผ่าน Telegram ด้วย (สถานะระบบ/กระบวนการ)
