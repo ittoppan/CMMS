@@ -45,6 +45,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.history": { th: "ประวัติงานซ่อม", en: "Repair History" },
   "menu.approval": { th: "ศูนย์อนุมัติเอกสาร", en: "Approval Center" },
   "menu.forms": { th: "ศูนย์แบบฟอร์ม (F-EN)", en: "Forms Center (F-EN)" },
+  "menu.forms_designer": { th: "ออกแบบแบบฟอร์มดิจิทัล", en: "Form Designer" },
   "menu.manuals": { th: "คู่มือการใช้งาน", en: "User Manuals" },
   "menu.pm_am": { th: "ตารางแผน PM", en: "PM Schedule" },
   "menu.pm_calendar": { th: "ปฏิทิน PM/AM", en: "PM/AM Calendar" },
@@ -486,6 +487,14 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "pm_am/checksheet": {
     th: { eyebrow: "PM CHECKSHEET · CMMS-TOPPAN", title: "ทำรายการ PM (Checksheet)", desc: "เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ" },
     en: { eyebrow: "PM CHECKSHEET · CMMS-TOPPAN", title: "Run PM (Checksheet)", desc: "Pick a PM plan and record the inspection results" },
+  },
+  "forms/designer": {
+    th: { eyebrow: "FORM DESIGNER · CMMS-TOPPAN", title: "ออกแบบแบบฟอร์มดิจิทัล", desc: "ลาก-วางสร้างแบบฟอร์ม F-EN ผูกข้อมูลจริงจากฐานข้อมูล แล้วพิมพ์เป็น PDF" },
+    en: { eyebrow: "FORM DESIGNER · CMMS-TOPPAN", title: "Digital Form Designer", desc: "Drag and drop F-EN forms, bind live database data, and print to PDF" },
+  },
+  "forms/run": {
+    th: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "กรอกแบบฟอร์ม", desc: "กรอกข้อมูลแบบฟอร์มดิจิทัล — ฟิลด์ที่ผูกฐานข้อมูลเลือกค่าจริง แล้วพิมพ์เป็น PDF" },
+    en: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "Fill Form", desc: "Complete the digital form — database-bound fields load live options, then print to PDF" },
   },
 };
 

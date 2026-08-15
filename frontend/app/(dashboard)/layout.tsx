@@ -401,6 +401,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <MenuSection title={t("nav.approval_docs")} pathPrefixes={["/approval", "/forms", "/manuals"]}>
             {canShow("approval") && <SideNavItem label={t("menu.approval")} icon={CheckBadgeIcon} href="/approval" isSelected={isSelected("/approval")} />}
             {canShow("forms") && <SideNavItem label={t("menu.forms")} icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
+            {canShow("forms/designer") && <SideNavItem label={t("menu.forms_designer")} icon={DocumentTextIcon} href="/forms/designer" isSelected={isSelected("/forms/designer")} />}
             {canShow("manuals") && <SideNavItem label={t("menu.manuals")} icon={BookOpenIcon} href="/manuals" isSelected={isSelected("/manuals")} />}
           </MenuSection>
 

@@ -1916,3 +1916,160 @@ next-route-announcer {
   background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #1E88E5));
   border-radius: var(--cmms-radius-lg);
 }
+
+/* ═══════ formBuilder stage (ออกแบบแบบฟอร์มดิจิทัล) ═══════ */
+.cmms-formbuilder-stage .form-wrap.form-builder {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.cmms-formbuilder-stage .frmb.stage-wrap {
+  flex: 1;
+  min-height: 320px;
+  padding: 14px;
+  border: 1.5px dashed var(--cmms-border);
+  border-radius: 12px;
+  background: var(--cmms-bg-wash);
+  list-style: none;
+  margin: 0;
+}
+.cmms-formbuilder-stage .frmb.stage-wrap.empty::before {
+  content: attr(data-content);
+  display: block;
+  padding: 60px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--cmms-text-muted);
+}
+.cmms-formbuilder-stage .cb-wrap {
+  width: 190px;
+  flex-shrink: 0;
+  border: 1px solid var(--cmms-border);
+  border-radius: 12px;
+  padding: 10px;
+  background: #fff;
+}
+.cmms-formbuilder-stage .cb-wrap li {
+  list-style: none;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border: 1px solid var(--cmms-border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cmms-text-primary);
+  background: var(--cmms-bg-wash);
+  cursor: grab;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.cmms-formbuilder-stage .cb-wrap li:hover {
+  border-color: var(--cmms-border-focus);
+  background: #fff;
+}
+.cmms-formbuilder-stage .frmb .form-field {
+  position: relative;
+  padding: 14px 14px 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--cmms-border);
+  border-radius: 10px;
+  background: #fff;
+  list-style: none;
+}
+.cmms-formbuilder-stage .frmb .form-field:hover {
+  border-color: var(--cmms-border-hover);
+}
+.cmms-formbuilder-stage .form-field .field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cmms-text-primary);
+  margin-bottom: 6px;
+}
+.cmms-formbuilder-stage .form-field .required-asterisk {
+  color: var(--cmms-accent-danger);
+}
+.cmms-formbuilder-stage .form-field .field-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.cmms-formbuilder-stage .form-field:hover .field-actions {
+  opacity: 1;
+}
+.cmms-formbuilder-stage .field-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--cmms-text-muted);
+  background: var(--cmms-bg-wash);
+  text-decoration: none;
+}
+.cmms-formbuilder-stage .field-actions .btn:hover {
+  color: var(--cmms-text-primary);
+  background: var(--cmms-border);
+}
+.cmms-formbuilder-stage .prev-holder {
+  margin-top: 8px;
+}
+.cmms-formbuilder-stage .prev-holder input,
+.cmms-formbuilder-stage .prev-holder select,
+.cmms-formbuilder-stage .prev-holder textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid var(--cmms-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--cmms-text-primary);
+  background: #fff;
+}
+.cmms-formbuilder-stage .frm-holder .form-elements {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--cmms-border);
+}
+.cmms-formbuilder-stage .form-elements .form-group {
+  margin-bottom: 10px;
+}
+.cmms-formbuilder-stage .form-elements label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cmms-text-secondary);
+  margin-bottom: 4px;
+}
+.cmms-formbuilder-stage .form-elements input[type="text"],
+.cmms-formbuilder-stage .form-elements input[type="number"],
+.cmms-formbuilder-stage .form-elements textarea,
+.cmms-formbuilder-stage .form-elements select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 9px;
+  border: 1px solid var(--cmms-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--cmms-text-primary);
+  background: #fff;
+}
+.cmms-formbuilder-stage .form-elements .close-field {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--cmms-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cmms-formbuilder-stage .form-elements .option-selected,
+.cmms-formbuilder-stage .form-elements .option-attr {
+  width: auto;
+  display: inline-block;
+  margin-right: 6px;
+}

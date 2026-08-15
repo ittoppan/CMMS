@@ -20,6 +20,9 @@ import {
   DocumentTextIcon,
   ArrowPathIcon,
   ArrowUpTrayIcon,
+  PlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 
 interface FormItem {
@@ -63,6 +66,43 @@ export default function FormsPage() {
   const [upLoading, setUpLoading] = useState(false);
   const [upMsg, setUpMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
+  // แบบฟอร์มดิจิทัล (ออกแบบด้วย formBuilder)
+  const [digitals, setDigitals] = useState<
+    { id: number; code: string; title: string; rev: string; description: string; updated_at: string; submission_count: number }[]
+  >([]);
+  const [digitalsLoading, setDigitalsLoading] = useState(true);
+  const [canDesign, setCanDesign] = useState(false);
+
+  const fetchDigitals = async () => {
+    setDigitalsLoading(true);
+    try {
+      const res = await fetch("/api/v1/form_templates.php", { credentials: "include" });
+      const json = await res.json();
+      if (json.status === "success") {
+        setDigitals(json.data || []);
+        setCanDesign(!!json.can_design);
+      }
+    } catch (e) {
+      console.error("Fetch digital forms error", e);
+    } finally {
+      setDigitalsLoading(false);
+    }
+  };
+
+  const deleteDigital = async (id: number) => {
+    if (!window.confirm("ลบแบบฟอร์มดิจิทัลนี้และผลการกรอกทั้งหมด?")) return;
+    try {
+      const res = await fetch(`/api/v1/form_templates.php?id=${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (json.status === "success") fetchDigitals();
+    } catch (e) {
+      console.error("Delete digital form error", e);
+    }
+  };
+
   const fetchForms = async () => {
     setLoading(true);
     setError(null);
@@ -84,6 +124,7 @@ export default function FormsPage() {
 
   useEffect(() => {
     fetchForms();
+    fetchDigitals();
   }, []);
 
   const extOptions = useMemo(() => {
@@ -189,6 +230,79 @@ export default function FormsPage() {
           </button>
         </HStack>
       </div>
+
+      {/* ═══ แบบฟอร์มดิจิทัล (formBuilder) ═══ */}
+      <Card padding={5}>
+        <VStack gap={4}>
+          <HStack hAlign="between" vAlign="center" gap={3} wrap="wrap">
+            <VStack gap={0.5}>
+              <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "var(--cmms-text-muted)" }}>
+                DIGITAL FORMS · FORM BUILDER
+              </Text>
+              <Heading level={4}>แบบฟอร์มดิจิทัล (ออกแบบ + กรอก + PDF)</Heading>
+              <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
+                สร้างแบบฟอร์มด้วยลาก-วาง ผูกข้อมูลจากฐานข้อมูล แล้วพิมพ์เป็น PDF — ตรง "ออกแบบแบบฟอร์ม"
+              </Text>
+            </VStack>
+            {canDesign && (
+              <a href="/forms/designer">
+                <button type="button" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary">
+                  <PlusIcon className="w-4 h-4" />
+                  ออกแบบแบบฟอร์มใหม่
+                </button>
+              </a>
+            )}
+          </HStack>
+
+          {digitalsLoading ? (
+            <div style={{ display: "flex", justifyContent: "center", padding: 24 }}>
+              <Spinner />
+            </div>
+          ) : digitals.length === 0 ? (
+            <div style={{ padding: "20px 8px" }}>
+              <Text type="body" color="secondary">ยังไม่มีแบบฟอร์มดิจิทัล — กด "ออกแบบแบบฟอร์มใหม่" เพื่อสร้าง (เฉพาะผู้ดูแลระบบ)</Text>
+            </div>
+          ) : (
+            <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={4}>
+              {digitals.map((d) => (
+                <Card key={d.id} padding={4} elevation="low" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <HStack hAlign="between" vAlign="start" gap={2} wrap="wrap">
+                    <span className="cmms-andon-chip" style={{ background: "rgba(0,87,168,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{d.code}</span>
+                    <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)", fontSize: "0.7rem", padding: "3px 9px" }}>{d.submission_count} ครั้ง</span>
+                  </HStack>
+                  <Text type="body" weight="bold" style={{ lineHeight: 1.4, flex: 1 }}>
+                    {d.title}
+                  </Text>
+                  <Text type="body" size="sm" color="disabled">
+                    {d.rev} · แก้ไขล่าสุด {d.updated_at ? d.updated_at.slice(0, 10) : "-"}
+                  </Text>
+                  <HStack gap={2} wrap="wrap">
+                    <a href={`/forms/run/${d.id}`} className="flex-1">
+                      <button type="button" className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
+                        <DocumentTextIcon className="w-3.5 h-3.5" />
+                        กรอกแบบฟอร์ม
+                      </button>
+                    </a>
+                    {canDesign && (
+                      <a href="/forms/designer">
+                        <button type="button" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--cmms-border)] hover:bg-[var(--cmms-bg-wash)] transition-colors">
+                          <PencilSquareIcon className="w-3.5 h-3.5" />
+                          แก้ไข
+                        </button>
+                      </a>
+                    )}
+                    {canDesign && (
+                      <button type="button" onClick={() => deleteDigital(d.id)} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--cmms-border)] hover:bg-[var(--cmms-bg-wash)] transition-colors" aria-label="ลบแบบฟอร์ม">
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </HStack>
+                </Card>
+              ))}
+            </Grid>
+          )}
+        </VStack>
+      </Card>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 

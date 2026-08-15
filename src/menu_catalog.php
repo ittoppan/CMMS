@@ -47,6 +47,12 @@ return [
     ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาต LOTO',          'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
 
+    // ---- 4.5 การอนุมัติ & เอกสาร ----
+    ['key' => 'approval',                  'href' => '/approval',                  'label' => 'ศูนย์อนุมัติเอกสาร',     'section' => 'การอนุมัติ & เอกสาร'],
+    ['key' => 'forms',                     'href' => '/forms',                     'label' => 'ศูนย์แบบฟอร์ม (F-EN)',   'section' => 'การอนุมัติ & เอกสาร'],
+    ['key' => 'forms/designer',            'href' => '/forms/designer',            'label' => 'ออกแบบแบบฟอร์มดิจิทัล', 'section' => 'การอนุมัติ & เอกสาร'],
+    ['key' => 'manuals',                   'href' => '/manuals',                   'label' => 'คู่มือการใช้งาน',       'section' => 'การอนุมัติ & เอกสาร'],
+
     // ---- 5. ระบบ & ตั้งค่า ----
     ['key' => 'notifications',             'href' => '/notifications',             'label' => 'ศูนย์แจ้งเตือน',         'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'settings/notifications',    'href' => '/settings/notifications',    'label' => 'รูปแบบการแจ้งเตือน LINE','section' => 'ระบบ & ตั้งค่า'],
