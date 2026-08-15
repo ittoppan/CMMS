@@ -35,7 +35,15 @@ const C = {
 const FONT = "'Noto Sans Thai', 'Sarabun', 'Inter', sans-serif";
 const FONT_DISPLAY = "'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif";
 
-type DynamicType = "kpi-overview" | "andon-board" | "wo-table" | "low-stock" | "pm-table";
+type DynamicType =
+  | "kpi-overview"
+  | "andon-board"
+  | "wo-table"
+  | "low-stock"
+  | "pm-table"
+  | "calibration-board"
+  | "borrow-overdue"
+  | "work-permit";
 
 const DONE = ["completed", "closed", "resolved"];
 const ACTIVE = ["in_progress", "open", "pending", "waiting_parts", "pending_parts"];
@@ -70,6 +78,38 @@ interface PmTask {
   due_date?: string;
   last_done_date?: string;
   frequency_type?: string;
+}
+
+interface CalibrationRecord {
+  id?: number | string;
+  asset_name?: string;
+  calibration_type?: string;
+  calibration_date?: string;
+  next_calibration_date?: string;
+  certificate_number?: string;
+  status?: string;
+}
+
+interface BorrowRecord {
+  id?: number | string;
+  asset_name?: string;
+  borrower_name?: string;
+  borrow_date?: string;
+  expected_return_date?: string;
+  actual_return_date?: string;
+  status?: string;
+}
+
+interface WorkPermit {
+  id?: number | string;
+  permit_no?: string;
+  permit_type?: string;
+  location?: string;
+  requester_name?: string;
+  safety_officer_name?: string;
+  status?: string;
+  valid_until?: string;
+  created_at?: string;
 }
 
 function normStatus(s: unknown): string {
@@ -237,6 +277,138 @@ function pmTable(pms: PmTask[]): string {
   );
 }
 
+function calibrationBoard(recs: CalibrationRecord[]): string {
+  // นับสถานะเทียบวันนี้: หมดอายุ (next < วันนี้) / ใกล้หมดอายุ (ภายใน 30 วัน) / ปกติ
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const in30 = new Date(today.getTime() + 30 * 86400000);
+  let overdue = 0;
+  let dueSoon = 0;
+  let ok = 0;
+  for (const r of recs) {
+    const s = normStatus(r.status);
+    if (s === "completed") { ok += 1; continue; }
+    if (r.next_calibration_date) {
+      const d = new Date(String(r.next_calibration_date).slice(0, 10));
+      if (!isNaN(d.getTime())) {
+        if (d < today) { overdue += 1; continue; }
+        if (d <= in30) { dueSoon += 1; continue; }
+      }
+    }
+    ok += 1;
+  }
+  const summary = (dot: string, glow: string, label: string, n: number, hint: string, dark: string) =>
+    `<div style="flex:1;min-width:150px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;font-family:${FONT}">` +
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:${dot};box-shadow:0 0 0 4px ${glow};display:inline-block"></span><span style="font-size:12px;color:${C.text2}">${label}</span></div>` +
+    `<div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;line-height:1;color:${C.text}">${n}</div>` +
+    `<div style="margin-top:6px;font-size:11px;color:${dark}">${hint}</div>` +
+    `</div>`;
+
+  const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
+  let body = "";
+  const rows = recs.slice(0, 8);
+  if (rows.length === 0) {
+    body = `<tr><td colspan="5" style="padding:20px 12px;text-align:center;color:${C.muted}">ยังไม่มีข้อมูลสอบเทียบในระบบ — เพิ่มที่เมนู "สอบเทียบเครื่องมือวัด"</td></tr>`;
+  } else {
+    for (const r of rows) {
+      const next = r.next_calibration_date ? String(r.next_calibration_date).slice(0, 10) : "-";
+      let chipColor = C.okDark, chipBg = "rgba(16,185,129,.12)", chipLabel = "ปกติ";
+      if (r.next_calibration_date) {
+        const d = new Date(String(r.next_calibration_date).slice(0, 10));
+        if (!isNaN(d.getTime()) && d < today) { chipColor = C.downDark; chipBg = "rgba(239,68,68,.12)"; chipLabel = "หมดอายุ"; }
+        else if (!isNaN(d.getTime()) && d <= in30) { chipColor = C.warnDark; chipBg = "rgba(245,158,11,.15)"; chipLabel = "ใกล้หมดอายุ"; }
+      }
+      body +=
+        `<tr style="border-bottom:1px solid ${C.border}">` +
+        `<td style="padding:10px 12px;font-weight:600;color:${C.text}">${r.asset_name || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${r.calibration_type || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${next}</td>` +
+        `<td style="padding:10px 12px"><span style="display:inline-block;font-size:12px;font-weight:600;color:${chipColor};background:${chipBg};border-radius:100px;padding:3px 10px">${chipLabel}</span></td>` +
+        `<td style="padding:10px 12px;color:${C.muted}">${r.certificate_number || "-"}</td>` +
+        `</tr>`;
+    }
+  }
+  return (
+    `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">` +
+    summary(C.down, "rgba(239,68,68,.15)", "หมดอายุแล้ว", overdue, "ต้องสอบเทียบด่วน", C.downDark) +
+    summary(C.warn, "rgba(245,158,11,.18)", "ใกล้หมดอายุ (30 วัน)", dueSoon, "วางแผนสอบเทียบ", C.warnDark) +
+    summary(C.ok, "rgba(16,185,129,.15)", "อยู่ในระยะปกติ", ok, "สอบเทียบแล้วตามรอบ", C.okDark) +
+    `</div>` +
+    `<table style="width:100%;border-collapse:collapse;font-family:${FONT};font-size:13px;background:${C.card};border-radius:${C.radius};overflow:hidden">` +
+    `<thead><tr style="background:${C.primary};color:#fff;text-align:left">${head("เครื่องมือวัด")}${head("ประเภท")}${head("ครบกำหนด")}${head("สถานะ")}${head("ใบเซอร์")}</tr></thead>` +
+    `<tbody>${body}</tbody>` +
+    `</table>`
+  );
+}
+
+function borrowOverdueTable(recs: BorrowRecord[]): string {
+  // เฉพาะรายการที่ยังไม่คืน: เกินกำหนด (expected < วันนี้) / กำลังยืม / เกินกำหนดทั้งหมด
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const active = recs.filter((r) => normStatus(r.status) !== "returned");
+  const overdue = active.filter((r) => r.expected_return_date && new Date(String(r.expected_return_date).slice(0, 10)) < today).length;
+
+  const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
+  let body = "";
+  if (active.length === 0) {
+    body = `<tr><td colspan="5" style="padding:20px 12px;text-align:center;color:${C.muted}">ไม่มีรายการยืมค้าง — ทุกรายการคืนครบแล้ว</td></tr>`;
+  } else {
+    for (const r of active.slice(0, 8)) {
+      const exp = r.expected_return_date ? String(r.expected_return_date).slice(0, 10) : "-";
+      const isOver = r.expected_return_date ? new Date(String(r.expected_return_date).slice(0, 10)) < today : false;
+      body +=
+        `<tr style="border-bottom:1px solid ${C.border}">` +
+        `<td style="padding:10px 12px;font-weight:600;color:${C.text}">${r.asset_name || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${r.borrower_name || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${exp}</td>` +
+        `<td style="padding:10px 12px"><span style="display:inline-block;font-size:12px;font-weight:600;color:${isOver ? C.downDark : C.warnDark};background:${isOver ? "rgba(239,68,68,.12)" : "rgba(245,158,11,.15)"};border-radius:100px;padding:3px 10px">${isOver ? "เกินกำหนด" : "กำลังยืม"}</span></td>` +
+        `</tr>`;
+    }
+  }
+  return (
+    `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">` +
+    `<div style="flex:1;min-width:150px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;font-family:${FONT}"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:${C.down};box-shadow:0 0 0 4px rgba(239,68,68,.15);display:inline-block"></span><span style="font-size:12px;color:${C.text2}">เกินกำหนดคืน</span></div><div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;line-height:1;color:${C.text}">${overdue}</div><div style="margin-top:6px;font-size:11px;color:${C.downDark}">ติดตามผู้ยืมให้คืน</div></div>` +
+    `<div style="flex:1;min-width:150px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;font-family:${FONT}"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:${C.warn};box-shadow:0 0 0 4px rgba(245,158,11,.18);display:inline-block"></span><span style="font-size:12px;color:${C.text2}">ยังไม่คืน (ทั้งหมด)</span></div><div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;line-height:1;color:${C.text}">${active.length}</div><div style="margin-top:6px;font-size:11px;color:${C.warnDark}">รายการยืมค้างอยู่</div></div>` +
+    `</div>` +
+    `<table style="width:100%;border-collapse:collapse;font-family:${FONT};font-size:13px;background:${C.card};border-radius:${C.radius};overflow:hidden">` +
+    `<thead><tr style="background:${C.primary};color:#fff;text-align:left">${head("อุปกรณ์")}${head("ผู้ยืม")}${head("กำหนดคืน")}${head("สถานะ")}</tr></thead>` +
+    `<tbody>${body}</tbody>` +
+    `</table>`
+  );
+}
+
+function workPermitTable(permits: WorkPermit[]): string {
+  // ใบอนุญาตทำงานที่ยังไม่ปิด (pending / approved / active)
+  const active = permits.filter((p) => normStatus(p.status) !== "closed" && normStatus(p.status) !== "cancelled" && normStatus(p.status) !== "completed");
+  const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
+  let body = "";
+  if (active.length === 0) {
+    body = `<tr><td colspan="5" style="padding:20px 12px;text-align:center;color:${C.muted}">ไม่มีใบอนุญาตทำงานค้าง — ทุกรายการปิดเรียบร้อย</td></tr>`;
+  } else {
+    for (const p of active.slice(0, 8)) {
+      const s = normStatus(p.status);
+      let chipColor = C.primaryText, chipBg = "rgba(0,104,181,.12)", chipLabel = "รอตรวจสอบ";
+      if (s === "approved" || s === "active") { chipColor = C.okDark; chipBg = "rgba(16,185,129,.12)"; chipLabel = "อนุมัติแล้ว"; }
+      else if (s === "rejected") { chipColor = C.downDark; chipBg = "rgba(239,68,68,.12)"; chipLabel = "ไม่อนุมัติ"; }
+      const valid = p.valid_until ? String(p.valid_until).slice(0, 10) : "-";
+      body +=
+        `<tr style="border-bottom:1px solid ${C.border}">` +
+        `<td style="padding:10px 12px;font-weight:600;color:${C.text}">${p.permit_no || `WP-${p.id ?? ""}`}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${p.permit_type || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${p.location || "-"}</td>` +
+        `<td style="padding:10px 12px">${chipLabel === "รอตรวจสอบ" ? `<span style="display:inline-block;font-size:12px;font-weight:600;color:${chipColor};background:${chipBg};border-radius:100px;padding:3px 10px">${chipLabel}</span>` : `<span style="display:inline-block;font-size:12px;font-weight:600;color:${chipColor};background:${chipBg};border-radius:100px;padding:3px 10px">${chipLabel}</span>`}</td>` +
+        `<td style="padding:10px 12px;color:${C.muted}">${valid}</td>` +
+        `</tr>`;
+    }
+  }
+  return (
+    `<table style="width:100%;border-collapse:collapse;font-family:${FONT};font-size:13px;background:${C.card};border-radius:${C.radius};overflow:hidden">` +
+    `<thead><tr style="background:${C.primary};color:#fff;text-align:left">${head("เลขใบอนุญาต")}${head("ประเภทงาน")}${head("สถานที่")}${head("สถานะ")}${head("หมดอายุ")}</tr></thead>` +
+    `<tbody>${body}</tbody>` +
+    `</table>`
+  );
+}
+
 function lowStockTable(parts: LowStockPart[]): string {
   const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
   let body = "";
@@ -263,7 +435,15 @@ function lowStockTable(parts: LowStockPart[]): string {
   );
 }
 
-function renderByType(type: DynamicType, wo: WorkOrder[], parts: LowStockPart[], pms: PmTask[]): string {
+function renderByType(
+  type: DynamicType,
+  wo: WorkOrder[],
+  parts: LowStockPart[],
+  pms: PmTask[],
+  cals: CalibrationRecord[],
+  borrows: BorrowRecord[],
+  permits: WorkPermit[],
+): string {
   switch (type) {
     case "kpi-overview":
       return kpiCards(wo);
@@ -275,6 +455,12 @@ function renderByType(type: DynamicType, wo: WorkOrder[], parts: LowStockPart[],
       return lowStockTable(parts);
     case "pm-table":
       return pmTable(pms);
+    case "calibration-board":
+      return calibrationBoard(cals);
+    case "borrow-overdue":
+      return borrowOverdueTable(borrows);
+    case "work-permit":
+      return workPermitTable(permits);
     default:
       return `<div style="font-family:${FONT};font-size:13px;color:${C.muted}">ไม่รู้จักบล็อกไดนามิก: ${type}</div>`;
   }
@@ -295,6 +481,9 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
   const needWo = types.has("kpi-overview") || types.has("andon-board") || types.has("wo-table");
   const needStock = types.has("low-stock");
   const needPm = types.has("pm-table");
+  const needCal = types.has("calibration-board");
+  const needBorrow = types.has("borrow-overdue");
+  const needPermit = types.has("work-permit");
 
   els.forEach((el) => {
     el.innerHTML = loadingHtml(el.getAttribute("data-dynamic-label") || "");
@@ -303,6 +492,9 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
   let wo: WorkOrder[] = [];
   let parts: LowStockPart[] = [];
   let pms: PmTask[] = [];
+  let cals: CalibrationRecord[] = [];
+  let borrows: BorrowRecord[] = [];
+  let permits: WorkPermit[] = [];
 
   try {
     if (needWo) {
@@ -329,13 +521,37 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
       const json = await res.json();
       if (Array.isArray(json)) pms = json as PmTask[];
     }
+    if (needCal) {
+      const res = await fetch("/api/v1/calibration.php", {
+        headers: { "ngrok-skip-browser-warning": "1" },
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (Array.isArray(json)) cals = json as CalibrationRecord[];
+    }
+    if (needBorrow) {
+      const res = await fetch("/api/v1/equipment_borrowing.php", {
+        headers: { "ngrok-skip-browser-warning": "1" },
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (Array.isArray(json)) borrows = json as BorrowRecord[];
+    }
+    if (needPermit) {
+      const res = await fetch("/api/v1/index.php?resource=work-permits", {
+        headers: { "ngrok-skip-browser-warning": "1" },
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (json?.status === "success" && Array.isArray(json.data)) permits = json.data as WorkPermit[];
+    }
   } catch {
     /* แสดง empty state ด้านล่าง */
   }
 
   els.forEach((el) => {
     const type = (el.getAttribute("data-dynamic") || "").trim() as DynamicType;
-    el.innerHTML = renderByType(type, wo, parts, pms);
+    el.innerHTML = renderByType(type, wo, parts, pms, cals, borrows, permits);
     // ขอบ dashed (เครื่องหมาย "บล็อกไดนามิก" ใน canvas) → การ์ดปกติตอนแสดงจริง
     el.style.border = `1px solid ${C.border}`;
   });

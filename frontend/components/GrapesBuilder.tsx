@@ -363,6 +363,32 @@ const TEMPLATES: Array<{
 </div>
 `,
   },
+  {
+    id: "tpl-safety",
+    name: "ศูนย์ความปลอดภัย",
+    desc: "กระดานความปลอดภัย: ใบอนุญาตทำงานค้าง + สอบเทียบเครื่องมือ + ยืมคืนเกินกำหนด (ข้อมูลจริงจาก DB)",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z" stroke="${C.primary}" stroke-width="1.7" fill="rgba(0,104,181,.10)"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="${C.ok}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    title: "ศูนย์ความปลอดภัย",
+    slug: "safety-center",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · SAFETY CENTER</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">ศูนย์ความปลอดภัย</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">ภาพรวมงานเสี่ยง ใบอนุญาตทำงาน การสอบเทียบเครื่องมือ และการยืม-คืนอุปกรณ์ — อัปเดตจากฐานข้อมูลแบบเรียลไทม์</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">ใบอนุญาตทำงานค้าง (ข้อมูลจริง)</h2>
+<div data-dynamic="work-permit" data-dynamic-label="ใบอนุญาตทำงาน" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">ใบอนุญาตทำงานที่ยังไม่ปิด — ข้อมูลจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">สถานะสอบเทียบเครื่องมือวัด (ข้อมูลจริง)</h2>
+<div data-dynamic="calibration-board" data-dynamic-label="สถานะสอบเทียบ" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">สอบเทียบเครื่องมือวัด — ข้อมูลจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">การยืม-คืนอุปกรณ์ค้าง (ข้อมูลจริง)</h2>
+<div data-dynamic="borrow-overdue" data-dynamic-label="ยืมคืนเกินกำหนด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">รายการยืม-คืนที่ยังไม่คืน — ข้อมูลจริง</div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+  <a href="/safety/work_permit" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ขอใบอนุญาตทำงาน</div><div style="font-size:12px;color:${C.muted};margin-top:2px">งานเสี่ยงสูง / LOTO</div></a>
+  <a href="/calibration" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ทะเบียนสอบเทียบ</div><div style="font-size:12px;color:${C.muted};margin-top:2px">จัดการรอบสอบเทียบ</div></a>
+  <a href="/equipment_borrowing" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ยืม-คืนอุปกรณ์</div><div style="font-size:12px;color:${C.muted};margin-top:2px">เครื่องมือช่างและอุปกรณ์พิเศษ</div></a>
+</div>
+`,
+  },
 ];
 
 /* ── บล็อกไดนามิก — ดึงข้อมูลจริงจากฐานข้อมูลตอนเปิดหน้า (/pages/[slug]) ── */
@@ -407,6 +433,27 @@ const DYNAMIC_BLOCKS: Array<{
     category: "ข้อมูลจริง (จากฐานข้อมูล)",
     icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="${C.primary}" fill="rgba(0,104,181,.08)"/><path d="M3 9h18" stroke="${C.primary}"/><path d="M7 13h4M7 16h7" stroke="${C.warn}" stroke-width="1.6" stroke-linecap="round"/><rect x="14" y="13" width="5" height="5" rx="2.5" stroke="${C.down}" stroke-width="1.5" fill="none"/></svg>`,
     content: `<div data-dynamic="pm-table" data-dynamic-label="งาน PM/AM" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">งาน PM/AM — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">เกินกำหนด / ใกล้กำหนด 7 วัน / เสร็จแล้ว — เทียบ due_date กับวันนี้</div></div>`,
+  },
+  {
+    id: "dyn-calibration",
+    label: "สถานะสอบเทียบเครื่องมือ (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><path d="M4 19l4-4m3-3l3-3" stroke="${C.primary}" stroke-width="1.6" stroke-linecap="round"/><rect x="3" y="5" width="18" height="14" rx="3" fill="rgba(0,104,181,.08)" stroke="${C.primary}"/><path d="M5 15h4M11 15h4" stroke="${C.warn}" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    content: `<div data-dynamic="calibration-board" data-dynamic-label="สถานะสอบเทียบ" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">สถานะสอบเทียบเครื่องมือวัด — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">หมดอายุ / ใกล้หมดอายุ 30 วัน / ปกติ — เทียบ next_calibration_date กับวันนี้</div></div>`,
+  },
+  {
+    id: "dyn-borrow",
+    label: "รายการยืมคืนเกินกำหนด (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><path d="M6 3v4M18 3v4" stroke="${C.primary}" stroke-width="1.6" stroke-linecap="round"/><rect x="4" y="5" width="16" height="16" rx="3" fill="rgba(0,104,181,.08)" stroke="${C.primary}"/><path d="M4 10h16" stroke="${C.primary}"/><path d="M8 16l3 3 5-6" stroke="${C.warn}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    content: `<div data-dynamic="borrow-overdue" data-dynamic-label="ยืมคืนเกินกำหนด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">รายการยืม-คืนอุปกรณ์ — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">รายการยังไม่คืน + เกินกำหนด เทียบ expected_return_date กับวันนี้</div></div>`,
+  },
+  {
+    id: "dyn-work-permit",
+    label: "ใบอนุญาตทำงานค้าง (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z" stroke="${C.down}" stroke-width="1.6" fill="rgba(239,68,68,.10)"/><path d="M9 12h6M12 9v6" stroke="${C.down}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+    content: `<div data-dynamic="work-permit" data-dynamic-label="ใบอนุญาตทำงาน" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">ใบอนุญาตทำงาน (Work Permit) — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">รายการค้าง: รอตรวจสอบ / อนุมัติแล้ว — ยังไม่ปิดงาน</div></div>`,
   },
 ];
 
