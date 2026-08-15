@@ -13,12 +13,9 @@ import {
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Divider } from "@astryxdesign/core/Divider";
-import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Icon } from "@astryxdesign/core/Icon";
 import { THEME_PRESETS, buildGradient } from "../../../../components/ThemeProvider";
 import AndonLamp from "../../../../components/AndonLamp";
 import { ALL_PAGES, isWired } from "../../../../lib/pageLayout";
@@ -385,10 +382,10 @@ export default function PageDesignerPage() {
             key={s.id}
             label={s.label}
             description={s.desc}
-            startContent={<Icon icon={s.icon} />}
+            startContent={<s.icon className="w-5 h-5" />}
             endContent={
               isNarrow ? (
-                <Icon icon={ChevronRightIcon} size="sm" color="secondary" />
+                <ChevronRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
               ) : undefined
             }
             isSelected={!isNarrow && activeSection === s.id}
@@ -710,8 +707,12 @@ export default function PageDesignerPage() {
                   ทั้งหัวข้อ เนื้อหา และป้ายกำกับต่าง ๆ ทั่วทั้งระบบ
                 </Text>
                 <HStack gap={2} wrap="wrap">
-                  <Badge label="ป้ายสถานะ" variant="info" />
-                  <Badge label="หมายเลข 12345" variant="neutral" />
+                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                    ป้ายสถานะ
+                  </span>
+                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                    หมายเลข 12345
+                  </span>
                 </HStack>
               </VStack>
             </Card>
@@ -739,19 +740,22 @@ export default function PageDesignerPage() {
                         key={p.value}
                         label={p.label}
                         description={p.value}
-                        startContent={<Icon icon={WindowIcon} />}
+                        startContent={<WindowIcon className="w-5 h-5" />}
                         endContent={
                           <HStack gap={2}>
                             {isWired(p.value) && (
-                              <Badge label="มีผลกับหน้าแล้ว" variant="success" />
+                              <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
+                                มีผลกับหน้าแล้ว
+                              </span>
                             )}
-                            <Button
-                              label="เปิดสตูดิโอ"
-                              size="sm"
-                              variant="secondary"
-                              icon={<Icon icon={PencilSquareIcon} size="sm" />}
+                            <button
+                              type="button"
                               onClick={() => router.push(`/editor?page=${encodeURIComponent(p.value)}`)}
-                            />
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                            >
+                              <PencilSquareIcon className="w-3.5 h-3.5" />
+                              เปิดสตูดิโอ
+                            </button>
                           </HStack>
                         }
                       />
@@ -794,7 +798,11 @@ export default function PageDesignerPage() {
                   หมวดการปรับแต่ง
                 </Text>
               </VStack>
-              {dirtyCount > 0 && <Badge label={`แก้ ${dirtyCount} รายการ`} variant="warning" />}
+              {dirtyCount > 0 && (
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+                  แก้ {dirtyCount} รายการ
+                </span>
+              )}
             </HStack>
             <Divider />
             <VStack gap={1}>
@@ -803,8 +811,8 @@ export default function PageDesignerPage() {
                   key={s.id}
                   label={s.label}
                   description={s.desc}
-                  startContent={<Icon icon={s.icon} />}
-                  endContent={<Icon icon={ChevronRightIcon} size="sm" color="secondary" />}
+                  startContent={<s.icon className="w-5 h-5" />}
+                  endContent={<ChevronRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />}
                   onClick={() => {
                     setActiveSection(s.id);
                     setMobileView("detail");
@@ -835,20 +843,27 @@ export default function PageDesignerPage() {
             </Text>
           </VStack>
           <HStack gap={2} wrap="wrap">
-            {dirtyCount > 0 && <Badge label={`มีการแก้ไข ${dirtyCount} รายการ`} variant="warning" />}
-            <Button
-              label="คืนค่าเริ่มต้น"
-              variant="ghost"
-              icon={<Icon icon={ArrowPathIcon} size="sm" />}
+            {dirtyCount > 0 && (
+              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+                มีการแก้ไข {dirtyCount} รายการ
+              </span>
+            )}
+            <button
+              type="button"
               onClick={handleResetAll}
-            />
-            <Button
-              label={saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
-              variant="primary"
-              isLoading={saving}
-              isDisabled={saving}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            >
+              <ArrowPathIcon className="w-4 h-4" />
+              คืนค่าเริ่มต้น
+            </button>
+            <button
+              type="button"
+              disabled={saving}
               onClick={handleSave}
-            />
+              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
+            </button>
           </HStack>
         </HStack>
       </div>
@@ -899,14 +914,14 @@ export default function PageDesignerPage() {
                     gap={2}
                     startContent={
                       <>
-                        <Button
-                          label="Back to Page Designer"
-                          variant="ghost"
-                          size="sm"
-                          isIconOnly
-                          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
+                        <button
+                          type="button"
                           onClick={() => setMobileView("nav")}
-                        />
+                          aria-label="Back to Page Designer"
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                        >
+                          <ArrowLeftIcon className="w-4 h-4" />
+                        </button>
                         <Heading level={2}>{section.label}</Heading>
                       </>
                     }

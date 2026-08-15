@@ -6,12 +6,9 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Switch } from "@astryxdesign/core/Switch";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -597,7 +594,7 @@ export default function SettingsPage() {
       {saveMessage && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
           </HStack>
         </Card>
@@ -609,7 +606,9 @@ export default function SettingsPage() {
           <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่าระบบ (System Settings)</Heading>
-            <Badge label={`${settings.length} keys`} variant="info" />
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              {settings.length} keys
+            </span>
             {totalDirty > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />{totalDirty} รายการยังไม่บันทึก</span>}
           </HStack>
           <Text type="body" color="secondary">
@@ -617,16 +616,17 @@ export default function SettingsPage() {
           </Text>
         </VStack>
         <HStack gap={2} vAlign="center" wrap="wrap">
-          <Button
-            label="ประวัติการแก้ไข"
-            variant="secondary"
-            size="sm"
-            icon={<Icon icon={ClockIcon} size="sm" />}
+          <button
+            type="button"
             onClick={openAudit}
-          />
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <ClockIcon className="w-4 h-4" />
+            ประวัติการแก้ไข
+          </button>
           <VStack gap={1} style={{ minWidth: 280, maxWidth: 420 }}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={MagnifyingGlassIcon} size="sm" color="secondary" />
+              <MagnifyingGlassIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
               <TextInput
                 label="ค้นหาการตั้งค่า"
                 isLabelHidden
@@ -636,7 +636,13 @@ export default function SettingsPage() {
                 description={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
               />
               {searchQuery && (
-                <Button label="ล้าง" variant="secondary" size="sm" onClick={() => setSearchQuery("")} />
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                >
+                  ล้าง
+                </button>
               )}
             </HStack>
           </VStack>
@@ -657,13 +663,13 @@ export default function SettingsPage() {
           >
             <HStack gap={3} vAlign="center">
               <div style={{ padding: 10, borderRadius: 8, background: "var(--cmms-primary-wash)", color: "var(--cmms-primary)" }}>
-                <Icon icon={p.icon} size="md" />
+                <p.icon className="w-5 h-5" />
               </div>
               <VStack gap={0} style={{ flex: 1 }}>
                 <Text type="body" weight="bold" size="sm">{p.label}</Text>
                 <Text type="body" size="sm" color="secondary">{p.desc}</Text>
               </VStack>
-              <Icon icon={ArrowRightIcon} size="sm" color="disabled" />
+              <ArrowRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-disabled)" }} />
             </HStack>
           </Card>
         ))}
@@ -676,7 +682,7 @@ export default function SettingsPage() {
         <Card padding={4}>
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={ClockIcon} size="sm" color="primary" />
+              <ClockIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
               <Text type="body" weight="bold">แก้ไขล่าสุด</Text>
               <Text type="body" size="sm" color="secondary">กดเพื่อไปยังการตั้งค่านั้น</Text>
             </HStack>
@@ -740,7 +746,7 @@ export default function SettingsPage() {
                     font: "inherit",
                   }}
                 >
-                  <Icon icon={meta.icon} size="md" color={isActive ? "primary" : "secondary"} />
+                  <meta.icon className="w-5 h-5" style={{ color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-secondary)" }} />
                   <Text type="body" weight={isActive ? "bold" : "normal"}>{meta.label}</Text>
                   {dirty > 0 ? (
                     <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, background: "var(--cmms-warning)", color: "#fff", borderRadius: 999, padding: "2px 8px" }}>
@@ -813,10 +819,12 @@ export default function SettingsPage() {
                     <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                       <VStack gap={0}>
                         <HStack gap={2} vAlign="center">
-                          {isSensitive && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
+                          {isSensitive && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
                           <Text type="body" weight="semibold">{meta.label}</Text>
                           {searchRows && (
-                            <Badge label={(GROUP_META[row.setting_group] ?? { label: row.setting_group }).label} variant="neutral" />
+                            <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                              {(GROUP_META[row.setting_group] ?? { label: row.setting_group }).label}
+                            </span>
                           )}
                           {dirty && (<span className="cmms-status warn"><span className="cmms-status-dot" />ยังไม่บันทึก</span>)}
                         </HStack>
@@ -825,8 +833,16 @@ export default function SettingsPage() {
                           {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
                         </Text>
                       </VStack>
-                      {isReadonly && <Badge label="อ่านอย่างเดียว" variant="neutral" />}
-                      {isJson && <Badge label="JSON" variant="neutral" />}
+                      {isReadonly && (
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                          อ่านอย่างเดียว
+                        </span>
+                      )}
+                      {isJson && (
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                          JSON
+                        </span>
+                      )}
                       {canReset && !isReadonly && (
                         <button
                           type="button"
@@ -840,7 +856,7 @@ export default function SettingsPage() {
                             fontSize: 11, fontWeight: 600,
                           }}
                         >
-                          <Icon icon={ArrowPathIcon} size="sm" />
+                          <ArrowPathIcon className="w-3.5 h-3.5" />
                           รีเซ็ตเริ่มต้น
                         </button>
                       )}
@@ -873,10 +889,14 @@ export default function SettingsPage() {
                       </div>
                     ) : isBool ? (
                       <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-                        <Badge
-                          label={form[row.setting_key] === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
-                          variant={form[row.setting_key] === "1" ? "info" : "neutral"}
-                        />
+                        <span
+                          className="cmms-andon-chip"
+                          style={form[row.setting_key] === "1"
+                            ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+                            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                        >
+                          {form[row.setting_key] === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                        </span>
                         <Switch
                           label={meta.label}
                           isLabelHidden
@@ -951,31 +971,36 @@ export default function SettingsPage() {
             )}
 
             <HStack hAlign="end" wrap="wrap" gap={2}>
-              <Button
-                label="รีเซ็ตการแก้ไข"
-                variant="secondary"
-                isDisabled={changedRows.length === 0}
+              <button
+                type="button"
+                disabled={changedRows.length === 0}
                 onClick={() => {
                   const next: Record<string, string> = {};
                   settings.forEach((s) => { next[s.setting_key] = s.setting_value ?? ""; });
                   setForm(next);
                   setNewSecrets({});
                 }}
-              />
-              <Button
-                label={changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
-                variant="secondary"
-                icon={<Icon icon={ScaleIcon} size="sm" />}
-                isDisabled={changedRows.length === 0}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                รีเซ็ตการแก้ไข
+              </button>
+              <button
+                type="button"
+                disabled={changedRows.length === 0}
                 onClick={() => setShowDiff(true)}
-              />
-              <Button
-                label={changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
-                variant="primary"
-                isLoading={saving}
-                isDisabled={changedRows.length === 0}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ScaleIcon className="w-4 h-4" />
+                {changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
+              </button>
+              <button
+                type="button"
+                disabled={changedRows.length === 0}
                 onClick={handleSave}
-              />
+                className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? "กำลังบันทึก..." : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
+              </button>
             </HStack>
           </VStack>
         </Card>
@@ -1003,9 +1028,11 @@ export default function SettingsPage() {
                     <VStack gap={1.5}>
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
-                          {SENSITIVE_KEYS.has(row.setting_key) && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
+                          {SENSITIVE_KEYS.has(row.setting_key) && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
                           <Text type="body" weight="bold" size="sm">{meta.label}</Text>
-                          <Badge label={groupLabel} variant="neutral" />
+                          <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                            {groupLabel}
+                          </span>
                         </HStack>
                         <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>
                           {row.setting_key}
@@ -1038,14 +1065,21 @@ export default function SettingsPage() {
           )}
 
           <HStack hAlign="end" wrap="wrap" gap={2}>
-            <Button label="ปิด" variant="secondary" onClick={() => setShowDiff(false)} />
-            <Button
-              label={`ยืนยันและบันทึก (${diffRows.length} รายการ)`}
-              variant="primary"
-              isLoading={saving}
-              isDisabled={diffRows.length === 0}
+            <button
+              type="button"
+              onClick={() => setShowDiff(false)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ปิด
+            </button>
+            <button
+              type="button"
+              disabled={diffRows.length === 0}
               onClick={handleSave}
-            />
+              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? "กำลังบันทึก..." : `ยืนยันและบันทึก (${diffRows.length} รายการ)`}
+            </button>
           </HStack>
         </VStack>
       </Dialog>
@@ -1076,7 +1110,7 @@ export default function SettingsPage() {
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
                           <Text type="body" weight="bold" size="sm">{meta.label}</Text>
-                          {SENSITIVE_KEYS.has(a.setting_key) && <Icon icon={LockClosedIcon} size="sm" color="warning" />}
+                          {SENSITIVE_KEYS.has(a.setting_key) && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
                           <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>{a.setting_key}</Text>
                         </HStack>
                         <Text type="body" size="sm" color="secondary">
@@ -1105,7 +1139,13 @@ export default function SettingsPage() {
           )}
 
           <HStack hAlign="end">
-            <Button label="ปิด" variant="secondary" onClick={() => setShowAudit(false)} />
+            <button
+              type="button"
+              onClick={() => setShowAudit(false)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ปิด
+            </button>
           </HStack>
         </VStack>
       </Dialog>

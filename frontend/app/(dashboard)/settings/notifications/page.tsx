@@ -5,12 +5,9 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
-import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Switch } from "@astryxdesign/core/Switch";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -338,7 +335,14 @@ export default function NotificationsSettingsPage() {
               <Text type="body" size="sm" className="cmms-eyebrow">TELEGRAM ALERTS · ADMIN CONSOLE</Text>
               <HStack gap={3} vAlign="center">
                 <Heading level={2}>แจ้งเตือนแอดมินระบบผ่าน Telegram</Heading>
-                <Badge label={settings.telegram_enabled === "1" ? "Telegram เปิดใช้งาน" : "Telegram ปิดใช้งาน"} variant={settings.telegram_enabled === "1" ? "success" : "neutral"} />
+                <span
+                  className="cmms-andon-chip"
+                  style={settings.telegram_enabled === "1"
+                    ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                    : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                >
+                  {settings.telegram_enabled === "1" ? "Telegram เปิดใช้งาน" : "Telegram ปิดใช้งาน"}
+                </span>
               </HStack>
               <Text type="body" color="secondary">
                 ระบบแจ้งเตือนไปยังแอดมินเมื่อมีเหตุการณ์สำคัญ: งานซ่อมด่วน CRITICAL, การตั้งค่าการแจ้งเตือนถูกแก้ไข, และสถานะระบบ
@@ -350,19 +354,19 @@ export default function NotificationsSettingsPage() {
           <Card padding={4}>
             <HStack gap={5} wrap="wrap">
               <HStack gap={2} vAlign="center">
-                <Icon icon={ShieldCheckIcon} size="sm" color={(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "success" : "error"} />
+                <ShieldCheckIcon className="w-4 h-4" style={{ color: (settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
                 <Text type="body" size="sm" weight="semibold">
                   Bot Token: {(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "พร้อม" : "ยังไม่ตั้ง (กรอกด้านล่างหรือใส่ .env)"}
                 </Text>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <Icon icon={UsersIcon} size="sm" color={(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "success" : "secondary"} />
+                <UsersIcon className="w-4 h-4" style={{ color: (settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "var(--cmms-success)" : "var(--cmms-text-secondary)" }} />
                 <Text type="body" size="sm" weight="semibold">
                   Chat ID: {(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "ตั้งค่าแล้ว" : "ยังไม่ตั้ง — ใส่ Chat ID ปลายทาง (เช่น กลุ่มแอดมิน)"}
                 </Text>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <Icon icon={BoltIcon} size="sm" color="secondary" />
+                <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
                 <Text type="body" size="sm" weight="semibold">
                   วิธีหา Chat ID: ส่งข้อความให้บอท แล้วเรียก https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates
                 </Text>
@@ -376,7 +380,7 @@ export default function NotificationsSettingsPage() {
               <Card padding={5}>
                 <VStack gap={4}>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={ChatBubbleLeftRightIcon} size="md" color="primary" />
+                    <ChatBubbleLeftRightIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                     <VStack gap={0}>
                       <Heading level={3}>การเชื่อมต่อ Telegram Bot</Heading>
                       <Text type="supporting" color="secondary">สร้างบอทที่ @BotFather แล้ววาง Token + Chat ID ที่นี่</Text>
@@ -404,20 +408,23 @@ export default function NotificationsSettingsPage() {
                   />
 
                   <HStack gap={2} wrap="wrap">
-                    <Button
-                      label={tgTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Telegram"}
-                      variant="primary"
-                      icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                      isLoading={tgTesting}
+                    <button
+                      type="button"
+                      disabled={tgTesting}
                       onClick={handleTelegramTest}
-                    />
-                    <Button
-                      label={hasChanges ? "บันทึกการตั้งค่า" : "บันทึกการตั้งค่า"}
-                      variant="secondary"
-                      isLoading={saving}
-                      isDisabled={!hasChanges}
+                      className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <PaperAirplaneIcon className="w-4 h-4" />
+                      {tgTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Telegram"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving || !hasChanges}
                       onClick={handleSave}
-                    />
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+                    </button>
                   </HStack>
 
                   {tgTestResult && (
@@ -437,15 +444,15 @@ export default function NotificationsSettingsPage() {
                 <VStack gap={3}>
                   <Heading level={3}>เหตุการณ์ที่แจ้งเตือนแอดมินอัตโนมัติ</Heading>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="error" />
+                    <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-danger)" }} />
                     <Text type="body" size="sm"><strong>งานซ่อมด่วน CRITICAL / เครื่องหยุด</strong> — ส่งทันทีเมื่อมีใบแจ้งซ่อมฉุกเฉิน (พร้อมลิงก์ใบงาน)</Text>
                   </HStack>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="primary" />
+                    <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
                     <Text type="body" size="sm"><strong>การตั้งค่าการแจ้งเตือนถูกแก้ไข</strong> — ทุกครั้งที่มีผู้ใช้บันทึก LINE/Telegram settings (กันคนอื่นมาแก้โดยไม่รู้ตัว)</Text>
                   </HStack>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="success" />
+                    <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
                     <Text type="body" size="sm"><strong>สถานะระบบ / deploy</strong> — รายงานจาก watchdog และสคริปต์อัตโนมัติ</Text>
                   </HStack>
                 </VStack>
@@ -456,7 +463,7 @@ export default function NotificationsSettingsPage() {
             <Card padding={5}>
               <VStack gap={4}>
                 <HStack gap={2} vAlign="center">
-                  <Icon icon={EyeIcon} size="md" color="primary" />
+                  <EyeIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                   <Heading level={3}>ตัวอย่างข้อความบนแอป Telegram</Heading>
                 </HStack>
                 <div
@@ -511,7 +518,7 @@ export default function NotificationsSettingsPage() {
       {saveMessage && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
           </HStack>
         </Card>
@@ -523,25 +530,37 @@ export default function NotificationsSettingsPage() {
           <Text type="body" size="sm" className="cmms-eyebrow">LINE NOTIFICATIONS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่ารูปแบบการแจ้งเตือน LINE</Heading>
-            <Badge label={settings.line_notify_enabled === "1" ? "LINE เปิดใช้งาน" : "LINE ปิดใช้งาน"} variant={settings.line_notify_enabled === "1" ? "info" : "neutral"} />
+            <span
+              className="cmms-andon-chip"
+              style={settings.line_notify_enabled === "1"
+                ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+                : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+            >
+              {settings.line_notify_enabled === "1" ? "LINE เปิดใช้งาน" : "LINE ปิดใช้งาน"}
+            </span>
           </HStack>
           <Text type="body" color="secondary">
             กำหนดรูปแบบ Flex Message ที่ระบบส่งเข้า LINE — ใช้ได้กับ LIFF บนมือถือ และ Messaging API Push
           </Text>
         </VStack>
         <HStack gap={2}>
-          <Badge
-            label={me?.line_bound ? `ผูก LINE: ${me.full_name}` : "ยังไม่ผูกบัญชี LINE"}
-            variant={me?.line_bound ? "info" : "neutral"}
-          />
+          <span
+            className="cmms-andon-chip"
+            style={me?.line_bound
+              ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+              : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+          >
+            {me?.line_bound ? `ผูก LINE: ${me.full_name}` : "ยังไม่ผูกบัญชี LINE"}
+          </span>
           {!me?.line_bound && (
-            <Button
-              label="ผูกบัญชี LINE"
-              variant="secondary"
-              size="sm"
-              icon={<Icon icon={LinkIcon} size="sm" />}
+            <button
+              type="button"
               onClick={() => window.open("http://192.168.1.9:8081/bind_line.php", "_blank")}
-            />
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <LinkIcon className="w-3.5 h-3.5" />
+              ผูกบัญชี LINE
+            </button>
           )}
         </HStack>
       </HStack>
@@ -550,25 +569,25 @@ export default function NotificationsSettingsPage() {
       <Card padding={4}>
         <HStack gap={5} wrap="wrap">
           <HStack gap={2} vAlign="center">
-            <Icon icon={ShieldCheckIcon} size="sm" color={envInfo?.channel_token_set ? "success" : "error"} />
+            <ShieldCheckIcon className="w-4 h-4" style={{ color: envInfo?.channel_token_set ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
             <Text type="body" size="sm" weight="semibold">
               Channel Token: {envInfo?.channel_token_set ? "พร้อมใน .env" : "ไม่พบ"}
             </Text>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={BoltIcon} size="sm" color={envInfo?.channel_secret_set ? "success" : "error"} />
+            <BoltIcon className="w-4 h-4" style={{ color: envInfo?.channel_secret_set ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
             <Text type="body" size="sm" weight="semibold">
               Channel Secret: {envInfo?.channel_secret_set ? "พร้อม" : "ไม่พบ (LINE Login จะไม่ทำงาน)"}
             </Text>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={EyeIcon} size="sm" color="secondary" />
+            <EyeIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
             <Text type="body" size="sm" weight="semibold">
               LIFF ID: {envInfo?.liff_id_env || settings.line_liff_id || "— (ตั้งได้ด้านล่าง)"}
             </Text>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={UsersIcon} size="sm" color={settings.line_maintenance_group_id ? "success" : "secondary"} />
+            <UsersIcon className="w-4 h-4" style={{ color: settings.line_maintenance_group_id ? "var(--cmms-success)" : "var(--cmms-text-secondary)" }} />
             <Text type="body" size="sm" weight="semibold">
               กลุ่มช่าง: {settings.line_maintenance_group_id ? "ตั้งค่าแล้ว (" + settings.line_maintenance_group_id + ")" : "ยังไม่ตั้ง — เพิ่มบอทเข้าห้อง LINE แล้วพิมพ์ \"แจ้งเตือนที่นี่\""}
             </Text>
@@ -583,7 +602,7 @@ export default function NotificationsSettingsPage() {
           <Card padding={5}>
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={ChatBubbleLeftRightIcon} size="md" color="primary" />
+                <ChatBubbleLeftRightIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <VStack gap={0}>
                   <Heading level={3}>การเชื่อมต่อ LINE Messenger</Heading>
                   <Text type="supporting" color="secondary">Token / LIFF / Callback — บันทึกลงตาราง settings</Text>
@@ -613,7 +632,7 @@ export default function NotificationsSettingsPage() {
           <Card padding={5}>
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <Icon icon={PaintBrushIcon} size="md" color="primary" />
+                <PaintBrushIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <VStack gap={0}>
                   <Heading level={3}>รูปแบบข้อความแจ้งเตือน (Flex Template)</Heading>
                   <Text type="supporting" color="secondary">เลือกเหตุการณ์ แล้วแก้ไขการ์ดด้านขวา (พรีวิวอัตโนมัติ)</Text>
@@ -631,7 +650,14 @@ export default function NotificationsSettingsPage() {
               />
 
               <HStack gap={2} vAlign="center" wrap="wrap">
-                <Badge label={activeTpl.enabled === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={activeTpl.enabled === "1" ? "info" : "neutral"} />
+                <span
+                  className="cmms-andon-chip"
+                  style={activeTpl.enabled === "1"
+                    ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+                    : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                >
+                  {activeTpl.enabled === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                </span>
                 <Switch
                   label="ส่งการแจ้งเตือนเหตุการณ์นี้"
                   value={activeTpl.enabled === "1"}
@@ -641,7 +667,7 @@ export default function NotificationsSettingsPage() {
 
               <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
                 <HStack gap={2} vAlign="center">
-                  <Icon icon={BoltIcon} size="sm" color="success" />
+                  <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
                   <Text type="body" size="sm">
                     <strong>ส่งอัตโนมัติเมื่อ:</strong> {TEMPLATE_META[activeTemplate].wired}
                   </Text>
@@ -731,20 +757,23 @@ export default function NotificationsSettingsPage() {
               />
 
               <HStack hAlign="end" gap={2} wrap="wrap">
-                <Button
-                  label={testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
-                  variant="primary"
-                  icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                  isLoading={testing}
+                <button
+                  type="button"
+                  disabled={testing}
                   onClick={handleTestSend}
-                />
-                <Button
-                  label={hasChanges ? `บันทึก (${hasChanges ? "มีการแก้ไข" : ""})` : "บันทึกการตั้งค่า"}
-                  variant="secondary"
-                  isLoading={saving}
-                  isDisabled={!hasChanges}
+                  className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PaperAirplaneIcon className="w-4 h-4" />
+                  {testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
+                </button>
+                <button
+                  type="button"
+                  disabled={saving || !hasChanges}
                   onClick={handleSave}
-                />
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+                </button>
               </HStack>
 
               {testResult && (
@@ -767,7 +796,7 @@ export default function NotificationsSettingsPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={2} vAlign="center">
-              <Icon icon={EyeIcon} size="md" color="primary" />
+              <EyeIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>พรีวิวบนแอป LINE มือถือ</Heading>
             </HStack>
 
@@ -880,23 +909,25 @@ export default function NotificationsSettingsPage() {
 
             <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
               <HStack gap={2} vAlign="center">
-                <Icon icon={BoltIcon} size="sm" color="primary" />
+                <BoltIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
                 <Text type="body" size="sm" weight="semibold">Flex Message JSON ต้นฉบับ (ที่ระบบส่งจริง)</Text>
               </HStack>
               <HStack gap={2}>
-                <Button
-                  label={showJson ? "ซ่อน JSON" : "ดู JSON"}
-                  variant="secondary"
-                  size="sm"
+                <button
+                  type="button"
                   onClick={() => setShowJson((v) => !v)}
-                />
-                <Button
-                  label={copied ? "คัดลอกแล้ว ✓" : "คัดลอก JSON"}
-                  variant="secondary"
-                  size="sm"
-                  isDisabled={!showJson}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                >
+                  {showJson ? "ซ่อน JSON" : "ดู JSON"}
+                </button>
+                <button
+                  type="button"
+                  disabled={!showJson}
                   onClick={copyJson}
-                />
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {copied ? "คัดลอกแล้ว ✓" : "คัดลอก JSON"}
+                </button>
               </HStack>
             </HStack>
 

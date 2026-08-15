@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 
@@ -22,11 +20,18 @@ interface ServiceInfo {
   url: string;
 }
 
-const STATUS_META: Record<string, { label: string; variant: "success" | "neutral" | "warning" }> = {
-  running: { label: "รันอยู่", variant: "success" },
-  stopped: { label: "หยุดอยู่", variant: "neutral" },
-  warning: { label: "มีปัญหา", variant: "warning" },
-  unknown: { label: "ไม่ทราบ", variant: "neutral" },
+const STATUS_CHIP_STYLE: Record<string, React.CSSProperties> = {
+  running: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  stopped: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  warning: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  unknown: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  running: "รันอยู่",
+  stopped: "หยุดอยู่",
+  warning: "มีปัญหา",
+  unknown: "ไม่ทราบ",
 };
 
 function LinkRow({
@@ -48,17 +53,17 @@ function LinkRow({
           {value || "—"}
         </Text>
       </VStack>
-      <Button
-        label={copied ? "คัดลอกแล้ว ✓" : "คัดลอก"}
-        variant="secondary"
-        isDisabled={!value}
+      <button
+        type="button"
+        disabled={!value}
         onClick={onCopy}
-      />
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {copied ? "คัดลอกแล้ว ✓" : "คัดลอก"}
+      </button>
     </HStack>
   );
-}
-
-export default function SystemServicesPage() {
+}export default function SystemServicesPage() {
   const [services, setServices] = useState<ServiceInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -149,13 +154,22 @@ export default function SystemServicesPage() {
           </Text>
         </VStack>
         <HStack gap={2}>
-          <Badge label={allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"} variant={allRunning ? "success" : "warning"} />
-          <Button
-            label={loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
-            variant="secondary"
+          <span
+            className="cmms-andon-chip"
+            style={allRunning
+              ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+              : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
+          >
+            {allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"}
+          </span>
+          <button
+            type="button"
+            disabled={loading}
             onClick={() => fetchStatus()}
-            isDisabled={loading}
-          />
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
+          </button>
         </HStack>
       </HStack>
 
@@ -171,7 +185,6 @@ export default function SystemServicesPage() {
           </Text>
 
           {services.map((s) => {
-            const meta = STATUS_META[s.status] ?? STATUS_META.unknown;
             const isBusy = busyKey === s.key;
             return (
               <Card key={s.key} padding={5}>
@@ -181,7 +194,9 @@ export default function SystemServicesPage() {
                     <VStack gap={1}>
                       <HStack gap={2} vAlign="center">
                         <Heading level={3} style={{ margin: 0 }}>{s.name}</Heading>
-                        <Badge variant={meta.variant} label={meta.label} />
+                        <span className="cmms-andon-chip" style={STATUS_CHIP_STYLE[s.status] || STATUS_CHIP_STYLE.unknown}>
+                          {STATUS_LABEL[s.status] || s.status}
+                        </span>
                         {isBusy && <Spinner size="sm" />}
                       </HStack>
                       <Text type="body" size="sm" color="secondary">{s.desc}</Text>
@@ -195,19 +210,23 @@ export default function SystemServicesPage() {
                   </HStack>
                   <HStack gap={2}>
                     {!s.running ? (
-                      <Button
-                        label="▶ รัน"
-                        variant="primary"
-                        isDisabled={isBusy}
+                      <button
+                        type="button"
+                        disabled={isBusy}
                         onClick={() => runAction(s.key, "start")}
-                      />
+                        className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ▶ รัน
+                      </button>
                     ) : (
-                      <Button
-                        label="⏹ หยุด"
-                        variant="destructive"
-                        isDisabled={isBusy || s.key === "line"}
+                      <button
+                        type="button"
+                        disabled={isBusy || s.key === "line"}
                         onClick={() => runAction(s.key, "stop")}
-                      />
+                        className="cmms-btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        ⏹ หยุด
+                      </button>
                     )}
                   </HStack>
                 </HStack>

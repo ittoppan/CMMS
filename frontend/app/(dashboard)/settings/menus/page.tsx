@@ -3,10 +3,7 @@
 import { useState, useEffect, useMemo, type ComponentType } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import {
@@ -220,7 +217,7 @@ export default function MenuPermissionsPage() {
       {saveMsg && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMsg}</Text>
           </HStack>
         </Card>
@@ -231,13 +228,22 @@ export default function MenuPermissionsPage() {
           <Text type="body" size="sm" className="cmms-eyebrow">MENU PERMISSIONS · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)</Heading>
-            <Badge label={`${menus.length} เมนู × ${roles.length} บทบาท`} variant="info" />
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+              {menus.length} เมนู × {roles.length} บทบาท
+            </span>
           </HStack>
           <Text type="body" color="secondary">
             เลือกว่าแต่ละบทบาทเห็นเมนูใดในแอป และปุ่มล่างมือถือแบบไหน — พรีวิวทางขวาจะอัปเดตสดทุกครั้งที่แก้
           </Text>
         </VStack>
-        <Button label={`บันทึกการตั้งค่า`} variant="primary" isLoading={saving} onClick={handleSave} />
+        <button
+          type="button"
+          disabled={saving}
+          onClick={handleSave}
+          className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+        </button>
       </HStack>
 
       <div className="bn-config-grid">
@@ -346,12 +352,14 @@ export default function MenuPermissionsPage() {
               </div>
 
               <HStack hAlign="end">
-                <Button
-                  label={saving ? "กำลังบันทึก..." : "บันทึกสิทธิ์เมนูทั้งหมด"}
-                  variant="primary"
-                  isLoading={saving}
+                <button
+                  type="button"
+                  disabled={saving}
                   onClick={handleSave}
-                />
+                  className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? "กำลังบันทึก..." : "บันทึกสิทธิ์เมนูทั้งหมด"}
+                </button>
               </HStack>
             </VStack>
           </Card>
@@ -396,7 +404,14 @@ export default function MenuPermissionsPage() {
                         >
                           {r.name}
                         </span>
-                        <Badge label={`${list.length} ปุ่ม`} variant={list.length > MAX_BN ? "warning" : "neutral"} />
+                        <span
+                          className="cmms-andon-chip"
+                          style={list.length > MAX_BN
+                            ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+                            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                        >
+                          {list.length} ปุ่ม
+                        </span>
                         {hiddenCount > 0 && (
                           <span className="cmms-status warn"><span className="cmms-status-dot" />{hiddenCount} ปุ่มถูกปิดสิทธิ์</span>
                         )}

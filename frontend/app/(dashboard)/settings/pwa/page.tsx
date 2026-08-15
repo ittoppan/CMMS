@@ -3,10 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -127,7 +124,7 @@ export default function PwaSettingsPage() {
       {success && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
+            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
             <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>
               {success}
             </Text>
@@ -140,7 +137,9 @@ export default function PwaSettingsPage() {
           <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS PWA · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center">
             <Heading level={2}>ตั้งค่าไอคอน PWA</Heading>
-            <Badge label="Mobile App" variant="info" />
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+              Mobile App
+            </span>
           </HStack>
           <Text type="body" color="secondary">
             เปลี่ยนไอคอนแอปพลิเคชันบนหน้าจอมือถือ (ติดตั้งจากเบราว์เซอร์) — อัปเดตให้ทั้ง PWA และเว็บ PHP พร้อมกัน
@@ -154,7 +153,7 @@ export default function PwaSettingsPage() {
           <VStack gap={5}>
             <VStack gap={1}>
               <HStack gap={3} vAlign="center">
-                <Icon icon={PhotoIcon} size="md" color="primary" />
+                <PhotoIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <Heading level={3}>ไอคอนปัจจุบัน</Heading>
               </HStack>
               <Text type="supporting" color="secondary">
@@ -188,8 +187,12 @@ export default function PwaSettingsPage() {
                 </VStack>
               )}
               <VStack gap={1}>
-                <Badge label={`SW Frontend ${status?.sw.frontend ?? "-"}`} variant="neutral" />
-                <Badge label={`SW PHP ${status?.sw.php ?? "-"}`} variant="neutral" />
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                  SW Frontend {status?.sw.frontend ?? "-"}
+                </span>
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                  SW PHP {status?.sw.php ?? "-"}
+                </span>
                 <Text type="body" size="sm" color="secondary">
                   cache version — อัปเดตอัตโนมัติทุกครั้งที่เปลี่ยนไอคอน
                 </Text>
@@ -198,7 +201,7 @@ export default function PwaSettingsPage() {
 
             <VStack gap={2} style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 20 }}>
               <HStack gap={3} vAlign="center">
-                <Icon icon={ArrowPathIcon} size="md" color="primary" />
+                <ArrowPathIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
                 <Heading level={3}>เปลี่ยนไอคอนใหม่</Heading>
               </HStack>
 
@@ -229,7 +232,7 @@ export default function PwaSettingsPage() {
                   onChange={(e) => handleFile(e.target.files?.[0])}
                 />
                 <VStack gap={1} hAlign="center">
-                  <Icon icon={PhotoIcon} size="lg" color="secondary" />
+                  <PhotoIcon className="w-6 h-6" style={{ color: "var(--cmms-text-secondary)" }} />
                   <Text type="body" weight="semibold">
                     {selectedName || "ลากไฟล์ภาพมาวาง หรือคลิกเพื่อเลือก"}
                   </Text>
@@ -256,24 +259,27 @@ export default function PwaSettingsPage() {
                   </HStack>
                 )}
                 <HStack hAlign="end" gap={3} style={{ marginLeft: "auto" }}>
-                  <Button
-                    label="ยกเลิก"
-                    variant="secondary"
-                    isDisabled={!preview || saving}
+                  <button
+                    type="button"
+                    disabled={!preview || saving}
                     onClick={() => {
                       setPreview((old) => { if (old) URL.revokeObjectURL(old); return null; });
                       setSelectedName("");
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
-                  />
-                  <Button
-                    label="บันทึกไอคอนใหม่"
-                    variant="primary"
-                    icon={<Icon icon={ArrowPathIcon} size="sm" />}
-                    isLoading={saving}
-                    isDisabled={!preview}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!preview}
                     onClick={handleUpload}
-                  />
+                    className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowPathIcon className="w-4 h-4" />
+                    {saving ? "กำลังบันทึก..." : "บันทึกไอคอนใหม่"}
+                  </button>
                 </HStack>
               </HStack>
             </VStack>
@@ -284,7 +290,7 @@ export default function PwaSettingsPage() {
         <Card padding={5}>
           <VStack gap={4}>
             <HStack gap={3} vAlign="center">
-              <Icon icon={DevicePhoneMobileIcon} size="md" color="primary" />
+              <DevicePhoneMobileIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
               <Heading level={3}>วิธีดูผลลัพธ์</Heading>
             </HStack>
             <VStack gap={2}>
@@ -303,7 +309,7 @@ export default function PwaSettingsPage() {
             <VStack gap={2}>
               <Text type="body" weight="semibold">คำแนะนำ</Text>
               <div style={{ fontSize: "0.875rem", color: "var(--color-secondary)" }}>
-                <Icon icon={ExclamationTriangleIcon} size="xsm" />
+                <ExclamationTriangleIcon className="w-3.5 h-3.5" />
                 {" "}ใช้ภาพจัตุรัส และเว้นขอบปลอดภัย ~20% สำหรับ maskable icon เพื่อไม่ให้โดน crop ตอนติดตั้งแอป
               </div>
             </VStack>
