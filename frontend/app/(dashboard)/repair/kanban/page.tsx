@@ -57,6 +57,47 @@ export default function RepairKanbanPage() {
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
+  // ── ย้ายงานระหว่างคอลัมน์ (ลากวาง + ปุ่ม) — บันทึกลง DB จริง ──
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [moveMsg, setMoveMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  // สถานะคอลัมน์ Kanban → ค่าใน DB (ตามชุดกลาง repair-status.ts)
+  const KANBAN_TO_DB: Record<KanbanItem["status"], string> = {
+    open: "open",
+    in_progress: "in_progress",
+    pending: "waiting_parts",
+    completed: "completed",
+  };
+
+  const persistStatus = async (item: KanbanItem, newStatus: KanbanItem["status"]) => {
+    if (item.status === newStatus || savingId) return;
+    const prevStatus = item.status;
+    // optimistic update ก่อน — ย้ายการ์ดทันที
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
+    setSavingId(item.id);
+    setMoveMsg(null);
+    try {
+      const res = await fetch(`/api/v1/repair.php?id=${item.dbId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: KANBAN_TO_DB[newStatus] }),
+      });
+      const json = await res.json();
+      if (!res.ok || (!json.success && !json.message)) throw new Error(json.error || "บันทึกไม่สำเร็จ");
+      setMoveMsg({ kind: "ok", text: `ย้าย ${item.woNumber} ไป "${columnsDef.find(c => c.key === newStatus)?.title ?? newStatus}" สำเร็จ` });
+      fetchKanban(); // ดึงใหม่ — ดึง completed_at/เวลาจริงจาก DB
+    } catch (e) {
+      console.error(e);
+      // ย้อนกลับถ้าบันทึกไม่สำเร็จ
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: prevStatus } : i));
+      setMoveMsg({ kind: "err", text: `บันทึกสถานะ ${item.woNumber} ไม่สำเร็จ — ลองอีกครั้ง` });
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   const fetchKanban = async () => {
     setLoading(true);
     try {
@@ -109,10 +150,7 @@ export default function RepairKanbanPage() {
     fetchKanban();
   }, []);
 
-  // Change status of item
-  const updateStatus = (itemId: string, newStatus: KanbanItem["status"]) => {
-    setItems(prev => prev.map(item => item.id === itemId ? { ...item, status: newStatus } : item));
-  };
+
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -255,14 +293,35 @@ export default function RepairKanbanPage() {
             }}
           >
             <VStack gap={4}>
-              <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--cmms-border)', paddingBottom: 10 }}>
-                <HStack gap={2} vAlign="center">
-                  <AndonLamp status={col.andon} size="sm" />
-                  <Text type="body" weight="bold" style={{ fontSize: '0.95rem' }}>{col.title}</Text>
-                </HStack>
-                <span className="cmms-count-pill">{col.items.length}</span>
-              </HStack>
+              <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--cmms-border)', paddingBottom: 10 }}>            <HStack gap={2} vAlign="center">
+              <AndonLamp status={col.andon} size="sm" />
+              <Text type="body" weight="bold" style={{ fontSize: '0.95rem' }}>{col.title}</Text>
+            </HStack>
+            <span className="cmms-count-pill">{col.items.length}</span>
+          </HStack>
 
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragOverKey(col.key); }}
+            onDragLeave={() => setDragOverKey(prev => prev === col.key ? null : prev)}
+            onDrop={(e) => {
+              e.preventDefault();
+              const id = dragId;
+              setDragId(null);
+              setDragOverKey(null);
+              if (!id) return;
+              const item = items.find(i => i.id === id);
+              if (item && item.status !== col.key) persistStatus(item, col.key);
+            }}
+            style={{
+              flex: 1,
+              borderRadius: 12,
+              outline: dragOverKey === col.key ? '2px dashed var(--cmms-primary)' : 'none',
+              outlineOffset: 2,
+              background: dragOverKey === col.key ? 'var(--cmms-primary-wash)' : 'transparent',
+              minHeight: 120,
+              transition: 'background 120ms ease',
+            }}
+          >
               {loading ? (
                 <Text type="body" color="secondary" style={{ textAlign: 'center', padding: 20 }}>กำลังโหลด...</Text>
               ) : col.items.length === 0 ? (
@@ -280,10 +339,15 @@ export default function RepairKanbanPage() {
                     <Card
                       key={item.id}
                       padding={4}
+                      draggable={!savingId}
+                      onDragStart={(e) => { setDragId(item.id); e.dataTransfer.effectAllowed = "move"; }}
+                      onDragEnd={() => { setDragId(null); setDragOverKey(null); }}
                       style={{
                         border: '1px solid var(--cmms-border)',
                         borderLeft: `3px solid ${priorityTone[item.priority] || "var(--cmms-text-secondary)"}`,
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+                        boxShadow: dragId === item.id ? '0 6px 16px rgba(0,0,0,0.12)' : '0 2px 4px rgba(0,0,0,0.04)',
+                        opacity: dragId === item.id ? 0.55 : 1,
+                        cursor: savingId ? 'wait' : 'grab',
                         transition: 'all 0.2s',
                       }}
                     >
@@ -362,22 +426,24 @@ export default function RepairKanbanPage() {
                           {col.prevStatus ? (
                             <button
                               type="button"
-                              onClick={() => updateStatus(item.id, col.prevStatus)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                              disabled={savingId === item.id}
+                              onClick={() => persistStatus(item, col.prevStatus!)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                             >
                               <ChevronLeftIcon className="w-3.5 h-3.5" />
-                              {col.prevLabel}
+                              {savingId === item.id ? "กำลังบันทึก..." : col.prevLabel}
                             </button>
                           ) : <div />}
 
                           {col.nextStatus && (
                             <button
                               type="button"
-                              onClick={() => updateStatus(item.id, col.nextStatus)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+                              disabled={savingId === item.id}
+                              onClick={() => persistStatus(item, col.nextStatus!)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <ChevronRightIcon className="w-3.5 h-3.5" />
-                              {col.nextLabel}
+                              {savingId === item.id ? "กำลังบันทึก..." : col.nextLabel}
                             </button>
                           )}
                         </HStack>
@@ -386,10 +452,19 @@ export default function RepairKanbanPage() {
                   ))}
                 </VStack>
               )}
-            </VStack>
+            </div>
+          </VStack>
           </Card>
         ))}
       </Grid>
+
+      {/* ผลการย้ายงาน */}
+      {moveMsg && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, border: `1px solid ${moveMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)"}`, background: moveMsg.kind === "ok" ? "var(--cmms-success-light)" : "var(--cmms-danger-light)", color: moveMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)", fontSize: "0.85rem", fontWeight: 600 }}>
+          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: moveMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+          {moveMsg.text}
+        </div>
+      )}
     </VStack>
   );
 }
