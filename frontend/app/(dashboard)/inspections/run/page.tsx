@@ -19,6 +19,7 @@ import {
   ExclamationTriangleIcon,
   WrenchScrewdriverIcon,
 } from "@heroicons/react/24/outline";
+import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
 interface RunItem {
   item_id: number | null;
@@ -43,9 +44,16 @@ export default function InspectionRunPage() {
   const [schedule, setSchedule] = useState<any>(null);
   const [items, setItems] = useState<RunItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [pending, setPending] = useState(0);
   const { showToast } = useToast();
   const [createdRepair, setCreatedRepair] = useState<{ repair_id: number | null; message: string } | null>(null);
   const qrPrefillRef = useRef<{ scheduleId?: string; assetCode?: string } | null>(null);
+
+  useEffect(() => {
+    setPending(pendingCount());
+    const off = subscribeOnline(() => setPending(pendingCount()));
+    return off;
+  }, []);
 
   useEffect(() => {
     try {
@@ -176,13 +184,22 @@ export default function InspectionRunPage() {
     }
     setSubmitting(true);
     setError(null);
+    const body = {
+      items: items.map((it) => ({ item_id: it.item_id, task: it.task, type: it.type, status: it.status === "fail" ? "fail" : "pass", value: it.value, note: it.note })),
+    };
     try {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ kind: "inspection", label: `ตรวจเช็ค: ${schedule.title || schedule.id}`, url: `/api/v1/inspections.php?action=submit&schedule=${schedule.id}`, method: "POST", body });
+        setPending(pendingCount());
+        setSubmitting(false);
+        showToast("success", "บันทึกผลตรวจไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์");
+        fetchSchedules();
+        return;
+      }
       const res = await fetch(`/api/v1/inspections.php?action=submit&schedule=${schedule.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((it) => ({ item_id: it.item_id, task: it.task, type: it.type, status: it.status === "fail" ? "fail" : "pass", value: it.value, note: it.note })),
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (!json.success) { setError(json.error || "บันทึกไม่สำเร็จ"); setSubmitting(false); return; }
@@ -195,7 +212,11 @@ export default function InspectionRunPage() {
       fetchSchedules();
     } catch (e) {
       console.error(e);
-      setError("เกิดข้อผิดพลาดในการบันทึก");
+      // เน็ตหลุดระหว่างส่ง → เก็บในเครื่อง รอส่งอัตโนมัติ
+      enqueue({ kind: "inspection", label: `ตรวจเช็ค: ${schedule.title || schedule.id}`, url: `/api/v1/inspections.php?action=submit&schedule=${schedule.id}`, method: "POST", body });
+      setPending(pendingCount());
+      showToast("success", "บันทึกผลตรวจไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์");
+      fetchSchedules();
     }
     setSubmitting(false);
   };
@@ -216,6 +237,20 @@ export default function InspectionRunPage() {
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION RUN · CMMS-TOPPAN</Text>
+
+          {pending > 0 && (
+            <div
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "10px 14px", borderRadius: 8,
+                background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)",
+                fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
+              }}
+            >
+              <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+              มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
+            </div>
+          )}
           <HStack gap={3} vAlign="center" wrap="wrap">
             <Heading level={2} style={{ color: "#fff" }}>ทำรายการตรวจเช็ค</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>

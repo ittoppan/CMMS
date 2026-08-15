@@ -13,6 +13,7 @@ import { DateInput } from "@astryxdesign/core/DateInput";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { HomeIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -31,6 +32,14 @@ export default function CreateWorkOrderPage() {
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [woNumber, setWoNumber] = useState("");
+  const [queuedOffline, setQueuedOffline] = useState(false);
+  const [pending, setPending] = useState(0);
+
+  useEffect(() => {
+    setPending(pendingCount());
+    const off = subscribeOnline(() => setPending(pendingCount()));
+    return off;
+  }, []);
 
   useEffect(() => {
     fetch("/api/v1/asset_registry.php")
@@ -60,18 +69,26 @@ export default function CreateWorkOrderPage() {
     setError("");
 
     try {
+      const body = {
+        title,
+        description,
+        asset_id: assetId || null,
+        priority,
+        department_id: department === "mechanical" ? 1 : department === "electrical" ? 2 : null,
+        estimated_completion_date: dueDate ? `${dueDate} 23:59:59` : null,
+        status: "open"
+      };
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ kind: "repair", label: `แจ้งซ่อม: ${title}`, url: "/api/v1/repair.php", method: "POST", body });
+        setQueuedOffline(true);
+        setPending(pendingCount());
+        setLoading(false);
+        return;
+      }
       const res = await fetch("/api/v1/repair.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          asset_id: assetId || null,
-          priority,
-          department_id: department === "mechanical" ? 1 : department === "electrical" ? 2 : null,
-          estimated_completion_date: dueDate ? `${dueDate} 23:59:59` : null,
-          status: "open"
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (json.success || json.id) {
@@ -81,7 +98,24 @@ export default function CreateWorkOrderPage() {
         setError(json.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      // เน็ตหลุดระหว่างส่ง → เก็บในเครื่อง รอส่งอัตโนมัติเมื่อกลับมาออนไลน์
+      enqueue({
+        kind: "repair",
+        label: `แจ้งซ่อม: ${title}`,
+        url: "/api/v1/repair.php",
+        method: "POST",
+        body: {
+          title,
+          description,
+          asset_id: assetId || null,
+          priority,
+          department_id: department === "mechanical" ? 1 : department === "electrical" ? 2 : null,
+          estimated_completion_date: dueDate ? `${dueDate} 23:59:59` : null,
+          status: "open"
+        },
+      });
+      setQueuedOffline(true);
+      setPending(pendingCount());
     } finally {
       setLoading(false);
     }
@@ -99,6 +133,21 @@ export default function CreateWorkOrderPage() {
     );
   }
 
+  if (queuedOffline) {
+    return (
+      <SuccessDialog
+        title="บันทึกในเครื่องแล้ว (ออฟไลน์)"
+        message={<>
+          ระบบยังออนไลน์ไม่ถึง จึงเก็บใบแจ้งซ่อม <strong>“{title}”</strong> ไว้ในเครื่องแล้ว
+          <br />จะส่งให้อัตโนมัติทันทีที่กลับมาออนไลน์ (เหลือค้างส่ง {pending} รายการ)
+        </>}
+        primaryLabel="กลับไปหน้ารวมใบแจ้งซ่อม"
+        onPrimary={() => router.push("/repair")}
+        onBackdrop={() => router.push("/repair")}
+      />
+    );
+  }
+
   return (
     <VStack gap={6}>
       <Breadcrumbs>
@@ -109,6 +158,20 @@ export default function CreateWorkOrderPage() {
       <Text type="body" size="sm" className="cmms-eyebrow">REPAIR CREATE · CMMS-TOPPAN</Text>
 
       <Heading level={2}>เปิดใบแจ้งซ่อม</Heading>
+
+      {pending > 0 && (
+        <div
+          style={{
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "10px 14px", borderRadius: 8,
+            background: "var(--cmms-warning-light, #FEF3C7)", color: "var(--cmms-warning-strong, #B45309)",
+            fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
+          }}
+        >
+          <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+          มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
+        </div>
+      )}
 
       <Card padding={6}>
         <VStack gap={5} style={{ maxWidth: 640 }}>

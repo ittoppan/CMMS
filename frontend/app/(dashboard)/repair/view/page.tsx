@@ -25,6 +25,14 @@ import html2canvas from "html2canvas";
 import WorkOrderClosureDocument, { WorkOrderPart } from "../../../../components/WorkOrderClosureDocument";
 import AndonLamp from "@/components/AndonLamp";
 
+interface PartRow {
+  spare_part_id: number;
+  code: string;
+  name: string;
+  quantity_used: number;
+  unit_price: number;
+}
+
 interface WorkOrderDetail {
   id: number;
   workOrderNo: string;
@@ -108,6 +116,14 @@ export default function RepairViewDetailsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<any>(null);
+  // ── เบิกอะไหล่จากใบซ่อม (Feature: ใบเบิก + ตัดสต็อก) ──
+  const [catalog, setCatalog] = useState<any[]>([]);
+  const [partRows, setPartRows] = useState<PartRow[]>([]);
+  const [newPartId, setNewPartId] = useState("");
+  const [newQty, setNewQty] = useState("1");
+  const [partsSaving, setPartsSaving] = useState(false);
+  const [partsMsg, setPartsMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [deductStock, setDeductStock] = useState(true);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -165,12 +181,20 @@ export default function RepairViewDetailsPage() {
       .catch(e => console.error("Fetch WO error", e))
       .finally(() => setLoading(false));
 
-    // อะไหล่ที่ใช้ซ่อม (สำหรับตารางในเอกสาร F-EN-03)
+    // อะไหล่ที่ใช้ซ่อม (สำหรับตารางในเอกสาร F-EN-03 + ใบเบิก)
     fetch(`/api/v1/repair.php?parts=1&id=${idParam}`)
       .then(res => res.json())
       .then(partsJson => {
         if (Array.isArray(partsJson)) {
-          setParts(partsJson.map((p: any) => ({
+          const mapped = partsJson.map((p: any) => ({
+            code: p.code || "",
+            name: p.name || "",
+            quantity_used: Number(p.quantity_used) || 0,
+            unit_price: Number(p.unit_price) || 0,
+          }));
+          setParts(mapped);
+          setPartRows(partsJson.map((p: any) => ({
+            spare_part_id: Number(p.spare_part_id) || 0,
             code: p.code || "",
             name: p.name || "",
             quantity_used: Number(p.quantity_used) || 0,
@@ -179,6 +203,23 @@ export default function RepairViewDetailsPage() {
         }
       })
       .catch(e => console.error("Fetch WO parts error", e));
+
+    // รายการอะไหล่ในคลัง (สำหรับเลือกเบิก)
+    fetch("/api/v1/spare_parts.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+      .then(res => res.json())
+      .then((list: any[]) => { if (Array.isArray(list)) setCatalog(list); })
+      .catch(e => console.error("Fetch spare catalog error", e));
+
+    // ตรวจว่าตัดสต็อกอัตโนมัติเปิดอยู่หรือไม่
+    fetch("/api/v1/settings.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+      .then(res => res.json())
+      .then((rows: any[]) => {
+        if (Array.isArray(rows)) {
+          const row = rows.find((x) => x.setting_key === "spare_deduct_stock");
+          if (row) setDeductStock(String(row.setting_value) === "1");
+        }
+      })
+      .catch(() => { /* default true */ });
 
     // ไทม์ไลน์การซ่อม (repair_activity_log)
     fetch(`/api/v1/repair.php?activity=1&id=${idParam}`)
@@ -242,6 +283,59 @@ export default function RepairViewDetailsPage() {
     setPreviewUrl(null);
     pdfRef.current = null;
   };
+
+  // ── เบิกอะไหล่จากใบซ่อม ──
+  const addPart = () => {
+    const spId = Number(newPartId);
+    if (!spId) { setPartsMsg({ kind: "err", text: "กรุณาเลือกอะไหล่ก่อนเพิ่ม" }); return; }
+    const qty = Math.max(1, Number(newQty) || 1);
+    const sp = catalog.find((c) => Number(c.id) === spId);
+    if (!sp) return;
+    const existing = partRows.find((r) => r.spare_part_id === spId);
+    if (existing) {
+      setPartRows(partRows.map((r) => (r.spare_part_id === spId ? { ...r, quantity_used: r.quantity_used + qty } : r)));
+    } else {
+      setPartRows([...partRows, {
+        spare_part_id: spId,
+        code: sp.code || "",
+        name: sp.name || "",
+        quantity_used: qty,
+        unit_price: Number(sp.unit_price) || 0,
+      }]);
+    }
+    setNewPartId("");
+    setNewQty("1");
+    setPartsMsg(null);
+  };
+
+  const removePart = (spId: number) => setPartRows(partRows.filter((r) => r.spare_part_id !== spId));
+
+  const saveParts = async () => {
+    setPartsSaving(true);
+    setPartsMsg(null);
+    try {
+      const res = await fetch(`/api/v1/repair.php?id=${woId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          spare_parts: partRows.map((r) => ({ spare_part_id: r.spare_part_id, quantity_used: r.quantity_used, unit_price: r.unit_price })),
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setParts(partRows.map((r) => ({ code: r.code, name: r.name, quantity_used: r.quantity_used, unit_price: r.unit_price })));
+        setPartsMsg({ kind: "ok", text: deductStock ? "บันทึกรายการอะไหล่แล้ว — สต็อกถูกตัดอัตโนมัติแล้ว" : "บันทึกรายการอะไหล่แล้ว (ไม่ตัดสต็อก — ปิดการตั้งค่า spare_deduct_stock)" });
+      } else {
+        setPartsMsg({ kind: "err", text: json.error || "บันทึกรายการอะไหล่ไม่สำเร็จ" });
+      }
+    } catch (e) {
+      console.error(e);
+      setPartsMsg({ kind: "err", text: "ไม่สามารถบันทึกรายการอะไหล่ได้ (เน็ตหลุด?) — ลองอีกครั้ง" });
+    }
+    setPartsSaving(false);
+  };
+
+  const partsTotal = partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0);
 
   return (
     <VStack gap={6}>
@@ -375,6 +469,109 @@ export default function RepairViewDetailsPage() {
                 })}
               </div>
             )}
+          </VStack>
+        </Card>
+
+        {/* ── เบิกอะไหล่ที่ใช้ซ่อม (ใบเบิก + ตัดสต็อก) ── */}
+        <Card elevation="low" padding={6} className="mb-6">
+          <VStack gap={4}>
+            <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+              <VStack gap={1}>
+                <Text type="body" size="sm" className="cmms-eyebrow">SPARE PARTS USED · F-EN-03</Text>
+                <Heading level={4}>อะไหล่ที่ใช้ซ่อม (ใบเบิก)</Heading>
+              </VStack>
+              <Text type="body" size="sm" color="secondary">รวม {partsTotal.toLocaleString()} บาท · {deductStock ? "ตัดสต็อกอัตโนมัติ" : "ไม่ตัดสต็อก (ปิดการตั้งค่า)"}</Text>
+            </HStack>
+
+            {partsMsg && (
+              <div
+                style={{
+                  padding: "10px 14px", borderRadius: 8, fontSize: "0.85rem", fontWeight: 600,
+                  background: partsMsg.kind === "ok" ? "var(--cmms-success-light, #D1FAE5)" : "var(--cmms-danger-light, #FEE2E2)",
+                  color: partsMsg.kind === "ok" ? "var(--cmms-success, #059669)" : "var(--cmms-danger, #DC2626)",
+                }}
+              >
+                {partsMsg.text}
+              </div>
+            )}
+
+            {/* รายการที่เลือกแล้ว */}
+            {partRows.length === 0 ? (
+              <Text type="body" size="sm" color="secondary">ยังไม่มีอะไหล่ในใบเบิก — เลือกจากคลังด้านล่าง</Text>
+            ) : (
+              <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, overflow: "hidden" }}>
+                <table style={{ width: "100%", fontSize: "0.85rem" }}>
+                  <thead>
+                    <tr style={{ background: "var(--cmms-bg-wash)", textAlign: "left" }}>
+                      <th style={{ padding: "8px 12px" }}>รหัส</th>
+                      <th style={{ padding: "8px 12px" }}>ชื่ออะไหล่</th>
+                      <th style={{ padding: "8px 12px" }}>จำนวน</th>
+                      <th style={{ padding: "8px 12px" }}>ราคา/หน่วย</th>
+                      <th style={{ padding: "8px 12px" }}>รวม</th>
+                      <th style={{ padding: "8px 12px" }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {partRows.map((r) => (
+                      <tr key={r.spare_part_id} style={{ borderTop: "1px solid var(--cmms-border)" }}>
+                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>{r.code}</td>
+                        <td style={{ padding: "8px 12px" }}>{r.name}</td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <input
+                            type="number"
+                            min={1}
+                            value={r.quantity_used}
+                            onChange={(e) =>
+                              setPartRows(partRows.map((x) => (x.spare_part_id === r.spare_part_id ? { ...x, quantity_used: Math.max(1, Number(e.target.value) || 1) } : x)))
+                            }
+                            style={{ width: 70, padding: "4px 8px", borderRadius: 6, border: "1px solid var(--cmms-border)", fontSize: "0.85rem" }}
+                          />
+                        </td>
+                        <td style={{ padding: "8px 12px" }}>{(r.unit_price || 0).toLocaleString()}</td>
+                        <td style={{ padding: "8px 12px", fontWeight: 600 }}>{(r.quantity_used * (r.unit_price || 0)).toLocaleString()}</td>
+                        <td style={{ padding: "8px 12px", textAlign: "right" }}>
+                          <button
+                            onClick={() => removePart(r.spare_part_id)}
+                            style={{ color: "var(--cmms-danger)", background: "none", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem" }}
+                          >
+                            ลบ
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* เพิ่มอะไหล่จากคลัง */}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              <select
+                value={newPartId}
+                onChange={(e) => setNewPartId(e.target.value)}
+                style={{ flex: 1, minWidth: 220, padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)", fontSize: "0.85rem" }}
+              >
+                <option value="">— เลือกอะไหล่จากคลัง —</option>
+                {catalog.map((sp) => (
+                  <option key={sp.id} value={String(sp.id)}>
+                    {sp.code} — {sp.name} (คงเหลือ {Number(sp.stock_qty ?? 0)})
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                min={1}
+                value={newQty}
+                onChange={(e) => setNewQty(e.target.value)}
+                style={{ width: 80, padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: "0.85rem" }}
+                aria-label="จำนวนที่เบิก"
+              />
+              <Button label="เพิ่ม" variant="secondary" onClick={addPart} />
+            </div>
+
+            <HStack hAlign="end">
+              <Button label={partsSaving ? "กำลังบันทึก..." : "บันทึกรายการอะไหล่"} variant="primary" onClick={saveParts} isDisabled={partsSaving || partRows.length === 0} />
+            </HStack>
           </VStack>
         </Card>
       </div>

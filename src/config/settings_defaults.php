@@ -73,6 +73,7 @@ function settingsDefaultValues(): array {
         'line_notify_enabled'   => '1',
         'line_system_alerts'   => '0',  // ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE - default ปิด (กัน LINE เต็ม)
         'line_weekly_report'   => '1',  // ส่งรายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์) เข้า LINE
+        'line_group_enabled'   => '1',  // ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (line_maintenance_group_id) - default เปิด
         'email_notify_enabled'  => '0',
         'low_stock_alert'       => '1',
         'maintenance_alert_days'=> '7',
@@ -103,9 +104,13 @@ function settingsDefaultValues(): array {
         'default_repair_priority' => 'medium',
         'require_approval_repair' => '0',
 
+        // ── andon_board ──
+        'andon_refresh_sec'     => '30',  // ความถี่รีเฟรชจอ Andon TV (วินาที) - default 30
+
         // ── spare ──
         'spare_approval_level'  => '1',
         'spare_require_approval'=> '1',
+        'spare_deduct_stock'    => '1',  // ตัดสต็อกอัตโนมัติเมื่อเบิกอะไหล่จากใบซ่อม - default เปิด
 
         // ── ERP ──
         'sage_sync_config'          => '{"mode":"full","overwrite":true,"fields":["name","unit","unit_price","stock_qty","min_stock","max_stock","location"],"enabled_categories":["Spare Parts","Raw Materials","Consumables","Tools"]}',

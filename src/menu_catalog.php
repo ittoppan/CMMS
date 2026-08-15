@@ -41,6 +41,7 @@ return [
 
     // ---- 4. วิเคราะห์ & รายงาน ----
     ['key' => 'analytics',                 'href' => '/analytics',                 'label' => 'Data Warehouse & BI',    'section' => 'วิเคราะห์ & รายงาน'],
+    ['key' => 'andon-board',               'href' => '/andon-board',               'label' => 'จอ Andon TV (โรงงาน)',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/monthly_pdf',       'href' => '/reports/monthly_pdf',       'label' => 'รายงาน PDF ผู้บริหาร',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/export_excel',      'href' => '/reports/export_excel',      'label' => 'Export Excel / CSV',     'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาต LOTO',          'section' => 'วิเคราะห์ & รายงาน'],

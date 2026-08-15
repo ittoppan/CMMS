@@ -637,6 +637,15 @@ export default function NotificationsSettingsPage() {
               <Text type="body" size="sm" color="secondary">
                 สรุปงานซ่อม / PM / สต็อกประจำสัปดาห์ (weekly_report.php) — เปิด/ปิดได้ตามต้องการ
               </Text>
+
+              <Switch
+                label="ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง"
+                value={(settings.line_group_enabled ?? "1") === "1"}
+                onChange={(c) => setSettingField("line_group_enabled", c ? "1" : "0")}
+              />
+              <Text type="body" size="sm" color="secondary">
+                เมื่องานซ่อมใหม่เข้าหรือปิดงาน → push ข้อความเข้ากลุ่ม LINE (line_maintenance_group_id) — ปิดแล้วจะส่งเฉพาะถึงตัวช่างที่รับผิดชอบเท่านั้น
+              </Text>
             </VStack>
           </Card>
 

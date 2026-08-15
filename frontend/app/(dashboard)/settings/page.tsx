@@ -128,6 +128,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   line_channel_secret: { label: "LINE Channel Secret", hint: "คีย์ลับ LINE OA" },
   line_liff_id: { label: "LINE LIFF ID" },
   line_maintenance_group_id: { label: "LINE Group (ซ่อมบำรุง)" },
+  line_group_enabled: { label: "ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง", hint: "เมื่องานซ่อมใหม่เข้า → push เข้ากลุ่ม LINE ที่ตั้งไว้ (0=ปิด,1=เปิด)" },
   line_webhook_url: { label: "LINE Webhook URL", hint: "URL ที่ LINE ส่ง event เข้ามา (อัปเดตอัตโนมัติตาม tunnel)" },
   line_tpl_breakdown: { label: "เทมเพลต LINE — งานเสีย", hint: "JSON — จัดการในหน้ารูปแบบการแจ้งเตือน LINE" },
   line_tpl_completed: { label: "เทมเพลต LINE — งานเสร็จ" },
@@ -156,6 +157,9 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   // spare
   spare_approval_level: { label: "ระดับการอนุมัติเบิกอะไหล่" },
   spare_require_approval: { label: "เบิกอะไหล่ต้องผ่านการอนุมัติ" },
+  spare_deduct_stock: { label: "ตัดสต็อกอัตโนมัติเมื่อเบิกอะไหล่จากใบซ่อม", hint: "เมื่อเพิ่มอะไหล่ในใบซ่อม → หัก stock_qty อัตโนมัติ (0=ปิด,1=เปิด)" },
+  // andon board
+  andon_refresh_sec: { label: "จอ Andon TV — รีเฟรชอัตโนมัติ (วินาที)", hint: "ความถี่ที่จอ Andon TV ดึงข้อมูลใหม่ (15–120 วิ)" },
 };
 
 // คีย์ที่เป็นความลับ — แสดงเป็นจุด ต้องป้อนค่าใหม่เพื่อเปลี่ยน (ไม่โชว์ค่าจริง)
@@ -182,6 +186,7 @@ const BOOLEAN_KEYS = new Set([
   "line_notify_enabled", "low_stock_alert", "org_chart_enabled", "qr_code_enabled",
   "require_root_cause", "auto_assign_pm", "auto_assign_repair", "require_approval_repair",
   "spare_require_approval", "escalation_alert", "push_alert_enabled", "smtp_enabled",
+  "line_group_enabled", "spare_deduct_stock",
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
@@ -276,6 +281,12 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "1", label: "ระดับ 1 — หัวหน้าช่าง" },
     { value: "2", label: "ระดับ 2 — หัวหน้าแผนก" },
     { value: "3", label: "ระดับ 3 — ผู้จัดการ" },
+  ],
+  andon_refresh_sec: [
+    { value: "15", label: "15 วินาที (เรียลไทม์)" },
+    { value: "30", label: "30 วินาที (แนะนำ)" },
+    { value: "60", label: "60 วินาที" },
+    { value: "120", label: "120 วินาที (ประหยัดโหลด)" },
   ],
   calendar_view_default: [
     { value: "month", label: "รายเดือน (Month)" },
