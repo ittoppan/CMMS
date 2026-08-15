@@ -206,6 +206,101 @@ const BLOCKS: Array<{
   },
 ];
 
+/* ── เทมเพลตหน้าเริ่มต้น — กดใช้ได้ในคลิกเดียว ── */
+const TEMPLATES: Array<{
+  id: string;
+  name: string;
+  desc: string;
+  icon: string;
+  title: string;
+  slug: string;
+  html: string;
+}> = [
+  {
+    id: "tpl-kpi",
+    name: "หน้า KPI ผู้บริหาร",
+    desc: "กระดานข้อมูลสด: KPI + ไฟ Andon + งานซ่อมล่าสุด + อะไหล่ต่ำสต็อก (ข้อมูลจริงจาก DB)",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" fill="rgba(0,104,181,.10)" stroke="${C.primary}"/><path d="M6 15l3-4 2.5 2 3.5-5 3 3" stroke="${C.primary}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    title: "ศูนย์ปฏิบัติการซ่อมบำรุง",
+    slug: "ops-board",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · EXECUTIVE BOARD</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">ศูนย์ปฏิบัติการซ่อมบำรุง</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">ภาพรวมสถานะงานซ่อมแบบเรียลไทม์จากฐานข้อมูล — เหมาะสำหรับจอ TV ในโรงงาน</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">KPI งานซ่อม (ข้อมูลจริง)</h2>
+<div data-dynamic="kpi-overview" data-dynamic-label="KPI งานซ่อม" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">KPI งานซ่อม — ข้อมูลจริงจากฐานข้อมูล</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">สถานะเครื่องจักร (ข้อมูลจริง)</h2>
+<div data-dynamic="andon-board" data-dynamic-label="ไฟ Andon" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">หลอดไฟ Andon — ตามสถานะงานจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">ใบสั่งงานซ่อมล่าสุด</h2>
+<div data-dynamic="wo-table" data-dynamic-label="งานซ่อมล่าสุด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">ใบสั่งงานซ่อมล่าสุด 5 ใบ — ข้อมูลจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">อะไหล่ใกล้หมดสต็อก</h2>
+<div data-dynamic="low-stock" data-dynamic-label="อะไหล่ใกล้หมด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">อะไหล่ใกล้หมดสต็อก — ข้อมูลจริง</div></div>
+`,
+  },
+  {
+    id: "tpl-repair",
+    name: "หน้าแจ้งซ่อม",
+    desc: "แนะนำขั้นตอนแจ้งซ่อม + ปุ่มลิงก์ไปฟอร์มจริง — ให้พนักงานรู้วิธีใช้งาน",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7z" stroke="${C.primary}" stroke-width="1.7" fill="none" stroke-linejoin="round"/></svg>`,
+    title: "วิธีแจ้งซ่อมด่วน",
+    slug: "repair-guide",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · QUICK GUIDE</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">แจ้งซ่อมด่วนใน 3 ขั้นตอน</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">เครื่องจักรเสีย? แจ้งอาการให้ระบบจัดช่างไปซ่อมโดยเร็วที่สุด</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 12px">ขั้นตอนการแจ้งซ่อม</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <div style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;color:${C.primary};line-height:1">01</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">แจ้งอาการ</div><div style="font-size:13px;color:${C.text2};line-height:1.6">กรอกเครื่องจักร อาการเสีย และความเร่งด่วนในฟอร์มแจ้งซ่อม</div></div>
+  <div style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;color:${C.primary};line-height:1">02</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">ระบบจัดช่าง</div><div style="font-size:13px;color:${C.text2};line-height:1.6">หัวหน้าช่างรับงานและมอบหมายผู้รับผิดชอบโดยอัตโนมัติ</div></div>
+  <div style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;color:${C.primary};line-height:1">03</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">ติดตามสถานะ</div><div style="font-size:13px;color:${C.text2};line-height:1.6">ดูความคืบหน้าในหน้าติดตามงานซ่อมและรับแจ้งเตือน LINE</div></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+  <a href="/repair/request" style="display:inline-block;background:${C.primary};color:#fff;font-family:${FONT};font-size:14px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:8px">ไปที่ฟอร์มแจ้งซ่อมด่วน</a>
+  <a href="/repair/my_tasks" style="display:inline-block;background:${C.card};color:${C.primary};font-family:${FONT};font-size:14px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:8px;border:1px solid ${C.border}">ติดตามงานของฉัน</a>
+</div>
+<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25);border-radius:${C.radius};padding:14px;font-family:${FONT};margin-top:16px">
+  <span style="flex:none;width:18px;height:18px;border-radius:50%;background:${C.down};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">!</span>
+  <div style="font-size:13px;color:${C.downDark}">กรณีเครื่องจักรหยุดการผลิต (Down) ให้โทรแจ้งหัวหน้ากะทันที แล้วค่อยบันทึกใบแจ้งซ่อมในระบบ</div>
+</div>
+`,
+  },
+  {
+    id: "tpl-announce",
+    name: "หน้ารวมประกาศ",
+    desc: "ประชาสัมพันธ์ข่าวสาร + ลิงก์เอกสาร/แบบฟอร์ม F-EN สำหรับพนักงาน",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M3 8l9-4 9 4v9l-9 4-9-4V8z" stroke="${C.primary}" stroke-width="1.7" fill="rgba(0,104,181,.10)"/><path d="M3 8l9 4 9-4M12 12v9" stroke="${C.primary}" stroke-width="1.7" fill="none"/></svg>`,
+    title: "ข่าวประชาสัมพันธ์",
+    slug: "announcements",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · NEWS</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">ข่าวประชาสัมพันธ์</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">ประกาศและข่าวสารล่าสุดของแผนกซ่อมบำรุง</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 12px">ประกาศล่าสุด</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <div style="flex:1;min-width:240px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-size:12px;color:${C.muted};font-family:${FONT_DISPLAY};letter-spacing:.08em">15 ส.ค. 2026</div><div style="font-size:15px;font-weight:700;color:${C.text};margin:6px 0">ปิดซ่อมบำรุงประจำเดือน</div><div style="font-size:13px;color:${C.text2};line-height:1.6">เครื่องจักรสาย A จะหยุดเดินเครื่องเพื่อทำ PM ประจำเดือนวันที่ 25 ส.ค. — วางแผนงานล่วงหน้า</div></div>
+  <div style="flex:1;min-width:240px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-size:12px;color:${C.muted};font-family:${FONT_DISPLAY};letter-spacing:.08em">1 ส.ค. 2026</div><div style="font-size:15px;font-weight:700;color:${C.text};margin:6px 0">อบรมการใช้งานระบบใหม่</div><div style="font-size:13px;color:${C.text2};line-height:1.6">ทีมช่างทุกคนต้องเข้ารับการอบรมแอป CMMS บนมือถือภายในสัปดาห์หน้า</div></div>
+  <div style="flex:1;min-width:240px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-size:12px;color:${C.muted};font-family:${FONT_DISPLAY};letter-spacing:.08em">20 ก.ค. 2026</div><div style="font-size:15px;font-weight:700;color:${C.text};margin:6px 0">ปรับปรุงห้องเก็บอะไหล่</div><div style="font-size:13px;color:${C.text2};line-height:1.6">ย้ายชั้นวางอะไหล่ใหม่ เสร็จภายในสิ้นเดือน — เบิกอะไหล่ผ่านระบบ Sage ตามปกติ</div></div>
+</div>
+<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(0,104,181,.10);border:1px solid rgba(0,104,181,.25);border-radius:${C.radius};padding:14px;font-family:${FONT};margin-top:16px">
+  <span style="flex:none;width:18px;height:18px;border-radius:50%;background:${C.primary};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">i</span>
+  <div style="font-size:13px;color:${C.primaryText}">ประกาศจากฝ่าย IT: กรุณาอัปเดตแอป CMMS เป็นเวอร์ชันล่าสุดเพื่อรับการแจ้งเตือน LINE</div>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:22px 0 12px">เอกสารและแบบฟอร์ม</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <a href="/forms" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ศูนย์แบบฟอร์ม F-EN</div><div style="font-size:12px;color:${C.muted};margin-top:2px">ใบแจ้งซ่อม ใบ PM เอกสารตรวจเช็ค</div></a>
+  <a href="/manuals" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">คู่มือการใช้งาน</div><div style="font-size:12px;color:${C.muted};margin-top:2px">วิธีใช้ระบบ CMMS ฉบับพนักงาน</div></a>
+  <a href="/qr-sheet" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">สแกน QR เครื่องจักร</div><div style="font-size:12px;color:${C.muted};margin-top:2px">ตรวจเช็คเครื่องจักรหน้างาน</div></a>
+</div>
+`,
+  },
+];
+
 /* ── บล็อกไดนามิก — ดึงข้อมูลจริงจากฐานข้อมูลตอนเปิดหน้า (/pages/[slug]) ── */
 const DYNAMIC_BLOCKS: Array<{
   id: string;
@@ -467,6 +562,20 @@ export default function GrapesBuilder() {
     setMsg(null);
   };
 
+  // เทมเพลตเริ่มต้น — โหลดลง canvas พร้อมตั้งชื่อ/slug ให้ (ยังไม่บันทึก — กดบันทึกเมื่อพอใจ)
+  const applyTemplate = (t: (typeof TEMPLATES)[number]) => {
+    const ed = editorRef.current;
+    if (!ed) return;
+    ed.setComponents(t.html);
+    ed.setStyle("");
+    setTitle(t.title);
+    setSlug(t.slug);
+    setMsg({
+      kind: "ok",
+      text: `โหลดเทมเพลต "${t.name}" แล้ว — ปรับแต่งได้ตามต้องการ แล้วกด "บันทึกหน้า" เพื่อเผยแพร่ (slug: ${t.slug})`,
+    });
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {/* ── แถบบันทึก / เลือกหน้า ── */}
@@ -571,6 +680,70 @@ export default function GrapesBuilder() {
           }}
         >
           {msg.text}
+        </div>
+      )}
+
+      {/* ── เทมเพลตหน้าเริ่มต้น — กดใช้ได้ในคลิกเดียว ── */}
+      {ready && (
+        <div
+          style={{
+            background: "var(--cmms-bg-card, #FFFFFF)",
+            border: "1px solid var(--cmms-border, #E4E8EE)",
+            borderRadius: 12,
+            padding: "12px 14px",
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--cmms-text-secondary, #475569)", marginBottom: 8 }}>
+            เทมเพลตหน้าเริ่มต้น — กดเพื่อโหลดลง canvas (ยังไม่บันทึก)
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => applyTemplate(t)}
+                disabled={busy}
+                title={t.desc}
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  alignItems: "center",
+                  textAlign: "left",
+                  background: "var(--cmms-bg-muted, #EEF1F6)",
+                  border: "1px solid var(--cmms-border, #E4E8EE)",
+                  borderRadius: 10,
+                  padding: "10px 14px",
+                  cursor: "pointer",
+                  minWidth: 220,
+                  flex: "1 1 220px",
+                  fontFamily: "inherit",
+                }}
+              >
+                <span
+                  style={{
+                    flex: "none",
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    background: "var(--cmms-bg-card, #FFFFFF)",
+                    border: "1px solid var(--cmms-border, #E4E8EE)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  dangerouslySetInnerHTML={{ __html: t.icon }}
+                />
+                <span>
+                  <span style={{ display: "block", fontSize: 14, fontWeight: 700, color: "var(--cmms-text-primary, #22262E)" }}>
+                    {t.name}
+                  </span>
+                  <span style={{ display: "block", fontSize: 12, color: "var(--cmms-text-muted, #9AA4B8)", lineHeight: 1.5 }}>
+                    {t.desc}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
