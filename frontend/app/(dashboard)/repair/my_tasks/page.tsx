@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
+import AndonLamp from "@/components/AndonLamp";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -29,6 +31,8 @@ import {
   PencilIcon,
   TrashIcon,
   WrenchScrewdriverIcon,
+  ClockIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
 interface TaskItem extends Record<string, unknown> {
@@ -40,6 +44,7 @@ interface TaskItem extends Record<string, unknown> {
   title: string;
   priority: "critical" | "high" | "medium" | "low";
   status: "new" | "in_progress" | "pending_parts" | "completed";
+  overdue: boolean;
   assignedTo?: number | null;
   assignedToName?: string;
   teamIds?: number[];
@@ -109,9 +114,11 @@ export default function MyTasksPage() {
               status: (() => {
                 const s = String(r.status || "").toLowerCase();
                 if (s === "completed" || s === "resolved" || s === "closed") return "completed";
-                if (s === "in_progress" || s === "waiting_parts" || s === "pending_parts") return "in_progress";
+                if (s === "in_progress") return "in_progress";
+                if (s === "waiting_parts" || s === "pending_parts") return "pending_parts";
                 return "new";
               })(),
+              overdue: isRepairOverdue(r.estimated_completion_date, r.status),
               assignedTo: r.assigned_to || null,
               assignedToName: r.assigned_name || "-",
               teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
@@ -139,6 +146,7 @@ export default function MyTasksPage() {
             title: p.title || "-",
             priority: (pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10))) ? "high" : "medium",
             status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
+            overdue: isRepairOverdue(p.due_date, p.status),
             assignedTo: p.assigned_to || null,
             assignedToName: p.assigned_to_name || "-",
             teamIds: Array.isArray(p.team_ids) ? p.team_ids.map((t: any) => Number(t)) : [],
@@ -195,12 +203,35 @@ export default function MyTasksPage() {
   };
 
   const handleStartTask = (task: TaskItem) => {
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
     fetch(`/api/v1/repair.php?id=${task.rawId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress", actual_start_at: new Date().toISOString().slice(0, 19).replace('T', ' ') })
+      body: JSON.stringify({ status: "in_progress", actual_start_at: now, acknowledged_at: now })
     }).then(() => {
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress" } : t));
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t));
+    });
+  };
+
+  // ตั้งสถานะ "รออะไหล่" — งานยังค้าง ไฟเหลือง จนกว่าจะมีอะไหล่
+  const handleWaitParts = (task: TaskItem) => {
+    fetch(`/api/v1/repair.php?id=${task.rawId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "waiting_parts" })
+    }).then(() => {
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "pending_parts" } : t));
+    });
+  };
+
+  // อะไหล่มาถึงแล้ว — กลับมาซ่อมต่อ
+  const handleResumeTask = (task: TaskItem) => {
+    fetch(`/api/v1/repair.php?id=${task.rawId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "in_progress" })
+    }).then(() => {
+      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t));
     });
   };
 
@@ -282,6 +313,25 @@ export default function MyTasksPage() {
     { key: "machine", header: t("tbl.asset"), width: proportional(2) },
     { key: "title", header: t("tbl.subject"), width: proportional(2.5) },
     {
+      key: "status",
+      header: t("tbl.status"),
+      width: proportional(1.4),
+      renderCell: (task) => {
+        const k =
+          task.kind === "pm"
+            ? task.status === "completed" ? "completed" : task.status === "in_progress" ? "in_progress" : "open"
+            : task.status === "new" ? "open" : task.status === "pending_parts" ? "waiting_parts" : task.status;
+        return (
+          <HStack gap={1.5} vAlign="center">
+            <AndonLamp status={repairStatusAndon(k, task.overdue)} size="sm" />
+            <Text type="body" size="sm" weight="semibold" style={{ color: task.overdue ? "var(--cmms-danger)" : undefined }}>
+              {task.overdue ? "เกินกำหนด" : repairStatusLabel(k)}
+            </Text>
+          </HStack>
+        );
+      },
+    },
+    {
       key: "assignedToName",
       header: t("tbl.assignee"),
       width: proportional(1.4),
@@ -299,7 +349,7 @@ export default function MyTasksPage() {
       header: "กำหนดเสร็จ",
       width: proportional(1.2),
       renderCell: (task) => (
-        <Text type="body" size="sm" style={{ color: task.kind === "pm" && task.status === "new" ? "var(--cmms-danger)" : undefined }}>
+        <Text type="body" size="sm" style={{ color: task.overdue ? "var(--cmms-danger)" : undefined }}>
           {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
         </Text>
       ),
@@ -352,17 +402,51 @@ export default function MyTasksPage() {
             )}
 
             {task.status === "in_progress" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedTask(task);
-                  setCloseModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-              >
-                <CheckIcon className="w-3.5 h-3.5" />
-                ปิดใบงานซ่อม
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleWaitParts(task)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 transition-all duration-300"
+                >
+                  <ClockIcon className="w-3.5 h-3.5" />
+                  รออะไหล่
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setCloseModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+                >
+                  <CheckIcon className="w-3.5 h-3.5" />
+                  ปิดใบงานซ่อม
+                </button>
+              </>
+            )}
+
+            {task.status === "pending_parts" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleResumeTask(task)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 transition-all duration-300"
+                >
+                  <ArrowPathIcon className="w-3.5 h-3.5" />
+                  กลับมาซ่อมต่อ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setCloseModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
+                >
+                  <CheckIcon className="w-3.5 h-3.5" />
+                  ปิดใบงานซ่อม
+                </button>
+              </>
             )}
 
             <button

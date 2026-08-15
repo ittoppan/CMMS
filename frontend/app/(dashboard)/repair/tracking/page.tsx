@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { normalizeRepairStatus, isRepairOverdue } from "@/lib/repair-status";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -29,7 +30,8 @@ type TrackWO = Record<string, unknown> & {
   woNumber: string;
   machine: string;
   symptoms: string;
-  status: "pending_assign" | "pending_accept" | "in_progress" | "pending_eval" | "completed";
+  status: "pending_assign" | "pending_accept" | "in_progress" | "pending_parts" | "pending_eval" | "completed";
+  overdue: boolean;
   requestDate: string;
   technician?: string;
   etaDate?: string;
@@ -51,7 +53,14 @@ export default function RepairTrackingPage() {
             woNumber: row.work_order_no || row.wo_number || `EN-${String(row.id || index).padStart(3, '0')}`,
             machine: row.asset_name || "-",
             symptoms: row.title || row.description || "-",
-            status: row.status === 'completed' || row.status === 'Completed' || row.status === 'closed' ? 'completed' : row.status === 'in_progress' || row.status === 'In Progress' ? 'in_progress' : row.status === 'open' || row.status === 'Open' ? 'pending_assign' : row.status === 'waiting_parts' || row.status === 'pending_parts' ? 'pending_accept' : 'pending_assign',
+            status: (() => {
+              const k = normalizeRepairStatus(row.status);
+              if (k === "completed" || k === "closed") return "completed";
+              if (k === "waiting_parts") return "pending_parts";
+              if (k === "in_progress") return "in_progress";
+              return "pending_assign";
+            })(),
+            overdue: isRepairOverdue(row.estimated_completion_date, row.status),
             requestDate: row.created_at || "-",
             technician: row.assigned_name || "-"
           }));
@@ -88,14 +97,19 @@ export default function RepairTrackingPage() {
     showToast("success", "บันทึกการประเมินงานเรียบร้อยแล้ว");
   };
 
-  const getStatusDisplay = (status: string) => {
-    switch(status) {
+  const getStatusDisplay = (wo: TrackWO) => {
+    // เกินกำหนด (กำหนดเสร็จผ่านไปแล้ว ยังไม่จบ) → ไฟแดง สำคัญสุดเสมอ
+    if (wo.overdue) {
+      return <span className="cmms-status down"><span className="cmms-status-dot" />เกินกำหนด</span>;
+    }
+    switch(wo.status) {
       case 'pending_assign': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>รอมอบหมายงาน</span>;
       case 'pending_accept': return <span className="cmms-status warn"><span className="cmms-status-dot" />รอช่างรับงาน</span>;
       case 'in_progress': return <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>กำลังดำเนินการซ่อม</span>;
+      case 'pending_parts': return <span className="cmms-status warn"><span className="cmms-status-dot" />รออะไหล่</span>;
       case 'pending_eval': return <span className="cmms-status down"><span className="cmms-status-dot" />รอการประเมินจากผู้แจ้ง</span>;
       case 'completed': return <span className="cmms-status ok"><span className="cmms-status-dot" />เสร็จสมบูรณ์</span>;
-      default: return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{status}</span>;
+      default: return <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{wo.status}</span>;
     }
   };
 
@@ -122,7 +136,7 @@ export default function RepairTrackingPage() {
       key: "status",
       header: t("tbl.repair_status"),
       width: proportional(2),
-      renderCell: (item: TrackWO) => getStatusDisplay(item.status),
+      renderCell: (item: TrackWO) => getStatusDisplay(item),
     },
     {
       key: "technician",

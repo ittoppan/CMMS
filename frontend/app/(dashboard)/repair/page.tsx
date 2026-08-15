@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { isRepairOverdue } from "@/lib/repair-status";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -41,6 +42,7 @@ interface WorkOrder extends Record<string, unknown> {
   priority: string;
   assignee: string;
   date: string;
+  overdue: boolean;
 }
 
 const priorityColors: Record<string, React.CSSProperties> = {
@@ -109,7 +111,8 @@ export default function WorkOrdersPage() {
           status: row.status || "pending",
           priority: row.priority || "Medium",
           assignee: row.assigned_name || row.assigned_to || "ยังไม่มอบหมาย",
-          date: row.created_at ? row.created_at.split(" ")[0] : "-"
+          date: row.created_at ? row.created_at.split(" ")[0] : "-",
+          overdue: isRepairOverdue(row.estimated_completion_date, row.status)
         }));
         setWorkOrders(fetched);
         const map: Record<number, any> = {};
@@ -151,7 +154,7 @@ export default function WorkOrdersPage() {
     const open = workOrders.filter(w => ["open", "Open", "pending", "Overdue", "overdue"].includes(w.status)).length;
     const inprog = workOrders.filter(w => ["in_progress", "In Progress", "waiting_parts", "pending_parts"].includes(w.status)).length;
     const done = workOrders.filter(w => ["completed", "Completed", "closed", "resolved"].includes(w.status)).length;
-    const overdue = workOrders.filter(w => w.status === "Overdue" || w.status === "overdue").length;
+    const overdue = workOrders.filter(w => w.overdue).length;
     return { total, open, inprog, done, overdue };
   }, [workOrders]);
 
@@ -280,9 +283,9 @@ export default function WorkOrdersPage() {
       header: t("tbl.status"),
       width: proportional(1),
       renderCell: (item: WorkOrder) => (
-        <span className={`cmms-status ${andonOf(item.status)}`}>
+        <span className={`cmms-status ${item.overdue ? "down" : andonOf(item.status)}`}>
           <span className="cmms-status-dot" />
-          {statusText(item.status, item.status)}
+          {item.overdue ? "เกินกำหนด" : statusText(item.status, item.status)}
         </span>
       ),
     },
