@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -112,12 +112,12 @@ export default function MtbfMttrPage() {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   const columns: TableColumn<MtbfRecord>[] = [
-    { key: "id", header: "รหัส", width: proportional(1) },
-    { key: "assetName", header: "เครื่องจักร/อุปกรณ์", width: proportional(2) },
-    { key: "period", header: "รอบเดือน", width: proportional(1.2) },
+    { key: "id", header: t("tbl.code"), width: proportional(1) },
+    { key: "assetName", header: t("tbl.asset_full"), width: proportional(2) },
+    { key: "period", header: t("tbl.period"), width: proportional(1.2) },
     {
       key: "mtbfHours",
-      header: "MTBF (ชม.)",
+      header: t("tbl.mtbf_h"),
       width: proportional(1),
       renderCell: (item) => (
         <Text type="body" weight="semibold">{item.mtbfHours.toFixed(1)}</Text>
@@ -125,13 +125,13 @@ export default function MtbfMttrPage() {
     },
     {
       key: "mttrMinutes",
-      header: "MTTR (นาที)",
+      header: t("tbl.mttr_min"),
       width: proportional(1),
       renderCell: (item) => <Text type="body">{item.mttrMinutes.toFixed(0)}</Text>,
     },
     {
       key: "totalFailures",
-      header: "จำนวนครั้งเสีย",
+      header: t("tbl.failure_count"),
       width: proportional(1),
       renderCell: (item) => (
         <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>
@@ -141,7 +141,7 @@ export default function MtbfMttrPage() {
     },
     {
       key: "actions",
-      header: "จัดการ",
+      header: t("tbl.actions"),
       width: proportional(1.5),
       renderCell: (item) => (
         <HStack gap={2}>
@@ -158,9 +158,7 @@ export default function MtbfMttrPage() {
             onClick={() => handleDelete(item.rawId)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
           >
-            <TrashIcon className="w-3.5 h-3.5" />
-            ลบ
-          </button>
+            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
         </HStack>
       ),
     },

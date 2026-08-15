@@ -218,6 +218,95 @@ const DICT: Record<string, { th: string; en: string }> = {
   "common.menu_not_found": { th: "ไม่พบเมนูที่ค้นหา", en: "No menu matches your search" },
 };
 
+// ── หัวคอลัมน์ตาราง (table headers) ──
+const _tbl: Record<string, { th: string; en: string }> = {
+  select: { th: "เลือก", en: "Select" },
+  line_id: { th: "LINE ID", en: "LINE ID" },
+  work_order_no: { th: "เลขที่ใบงาน", en: "Work Order No." },
+  wo_no_short: { th: "เลขที่งาน", en: "Job No." },
+  pm_no: { th: "เลขที่ PM", en: "PM No." },
+  asset: { th: "เครื่องจักร", en: "Machine" },
+  asset_full: { th: "เครื่องจักร/อุปกรณ์", en: "Machine / Equipment" },
+  asset_code_serial: { th: "รหัสเครื่องจักร / Serial No.", en: "Machine Code / Serial No." },
+  asset_location: { th: "ชื่อเครื่องจักร / ตำแหน่งติดตั้ง", en: "Machine / Location" },
+  title: { th: "ชื่องาน", en: "Task" },
+  subject: { th: "หัวข้องาน", en: "Subject" },
+  issue_desc: { th: "อาการเสีย / รายละเอียด", en: "Issue / Details" },
+  root_cause: { th: "สาเหตุ / แนวทางแก้ไข", en: "Cause / Solution" },
+  status: { th: "สถานะ", en: "Status" },
+  repair_status: { th: "สถานะงานซ่อม", en: "Repair Status" },
+  asset_status: { th: "สถานะเครื่องจักร", en: "Machine Status" },
+  status_assignee: { th: "สถานะ / ผู้รับผิดชอบ", en: "Status / Assignee" },
+  assignee: { th: "ผู้รับผิดชอบ", en: "Assignee" },
+  tech_assignee: { th: "ช่างผู้รับผิดชอบ", en: "Technician" },
+  tech_assignee_full: { th: "ช่าง / ผู้รับผิดชอบ", en: "Technician / Assignee" },
+  request_date: { th: "วันที่แจ้ง", en: "Request Date" },
+  completed_date: { th: "วันที่เสร็จ", en: "Completed Date" },
+  due_date: { th: "วันครบกำหนด", en: "Due Date" },
+  due_in_7d: { th: "ครบกำหนด 7 วัน", en: "Due in 7 days" },
+  overdue: { th: "เกินกำหนด", en: "Overdue" },
+  closed_7d: { th: "ปิดงาน 7 วันล่าสุด", en: "Closed (last 7d)" },
+  priority: { th: "ความเร่งด่วน", en: "Priority" },
+  urgent: { th: "ด่วน/วิกฤต", en: "Urgent / Critical" },
+  criticality: { th: "ระดับความสำคัญ", en: "Criticality" },
+  frequency: { th: "รอบ/ความถี่", en: "Frequency" },
+  period: { th: "รอบเดือน", en: "Period" },
+  qty: { th: "จำนวน", en: "Qty" },
+  unit_price: { th: "ราคา/หน่วย", en: "Unit Price" },
+  total: { th: "รวม", en: "Total" },
+  cost: { th: "ค่าใช้จ่าย", en: "Cost" },
+  image: { th: "รูป", en: "Image" },
+  before_after: { th: "รูปก่อน/หลังซ่อม", en: "Before / After" },
+  code: { th: "รหัส", en: "Code" },
+  spare_item: { th: "รหัส / รายการอะไหล่", en: "Code / Spare Part" },
+  employee_code: { th: "รหัสพนักงาน", en: "Employee Code" },
+  instrument_code: { th: "รหัสเครื่องมือ", en: "Instrument Code" },
+  instrument: { th: "ชื่อเครื่องมือวัด", en: "Instrument" },
+  cert_no: { th: "เลขใบเซอร์", en: "Cert No." },
+  last_cal: { th: "สอบเทียบล่าสุด", en: "Last Calibration" },
+  type: { th: "ประเภท", en: "Type" },
+  full_name: { th: "ชื่อ-นามสกุล", en: "Full Name" },
+  username: { th: "ชื่อผู้ใช้", en: "Username" },
+  role: { th: "บทบาท", en: "Role" },
+  phone: { th: "โทรศัพท์", en: "Phone" },
+  email: { th: "อีเมล", en: "Email" },
+  actions: { th: "จัดการ", en: "Actions" },
+  processing: { th: "การดำเนินการ", en: "Processing" },
+  in_progress_h: { th: "กำลังทำ", en: "In Progress" },
+  open_jobs: { th: "งานค้าง (เปิด)", en: "Open Jobs" },
+  failure_count: { th: "จำนวนครั้งเสีย", en: "Failures" },
+  mtbf_h: { th: "MTBF (ชม.)", en: "MTBF (hrs)" },
+  mttr_min: { th: "MTTR (นาที)", en: "MTTR (min)" },
+};
+for (const k in _tbl) { DICT["tbl." + k] = _tbl[k]; }
+
+// ── ปุ่มเพิ่มเติม ──
+DICT["action.download_pdf"] = { th: "ดาวน์โหลด PDF", en: "Download PDF" };
+DICT["action.building_pdf"] = { th: "กำลังสร้าง PDF...", en: "Building PDF..." };
+DICT["action.update_status"] = { th: "อัปเดตสถานะ", en: "Update Status" };
+DICT["action.select_all_page"] = { th: "เลือกทั้งหมดในหน้า", en: "Select all on page" };
+DICT["action.download_pdf_fen03"] = { th: "ดาวน์โหลด PDF (F-EN-03)", en: "Download PDF (F-EN-03)" };
+DICT["action.print_closure_doc"] = { th: "พิมพ์เอกสารปิดซ่อม", en: "Print Closure Document" };
+DICT["action.create_wo"] = { th: "สร้างใบสั่งงาน", en: "Create Work Order" };
+DICT["action.create_pm"] = { th: "สร้างแผน PM ใหม่", en: "Create PM Plan" };
+DICT["action.search_hint_full"] = { th: "ค้นหาเลขงาน, เครื่องจักรฯ...", en: "Search job no., machine..." };
+DICT["action.filter_all_status"] = { th: "ทุกสถานะ", en: "All Statuses" };
+DICT["action.filter_all_priority"] = { th: "ทุกความเร่งด่วน", en: "All Priorities" };
+
+// ── สถานะเพิ่มเติม (normalize ตัวพิมพ์/ช่องว่างด้วย statusText) ──
+DICT["status.waiting_parts"] = { th: "รออะไหล่", en: "Waiting for Parts" };
+DICT["status.pending_parts"] = { th: "รออะไหล่", en: "Waiting for Parts" };
+DICT["status.assigned"] = { th: "มอบหมายแล้ว", en: "Assigned" };
+DICT["status.started"] = { th: "เริ่มแล้ว", en: "Started" };
+DICT["status.expired"] = { th: "หมดอายุ", en: "Expired" };
+
+// ── ความเร่งด่วน (priority) ──
+DICT["priority.critical"] = { th: "วิกฤต", en: "Critical" };
+DICT["priority.high"] = { th: "สูง", en: "High" };
+DICT["priority.medium"] = { th: "ปานกลาง", en: "Medium" };
+DICT["priority.low"] = { th: "ต่ำ", en: "Low" };
+
+// ════════════════
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
@@ -387,6 +476,23 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     en: { eyebrow: "REPORTS HUB · CMMS-TOPPAN", title: "Reports Center & Data Export", desc: "Monthly maintenance summary PDF for executives and Excel/CSV export" },
   },
 };
+
+// ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════
+/** แปลสถานะ (รองรับตัวพิมพ์ใหญ่/เว้นวรรค: "In Progress" → in_progress) */
+export function statusText(s: string | undefined | null, fallback = "—"): string {
+  if (!s) return fallback;
+  const norm = String(s).trim().toLowerCase().replace(/\s+/g, "_");
+  const v = t("status." + norm);
+  return v === "status." + norm ? (String(s) || fallback) : v;
+}
+
+/** แปลความเร่งด่วน (critical/high/medium/low) */
+export function priorityText(s: string | undefined | null, fallback = "—"): string {
+  if (!s) return fallback;
+  const norm = String(s).trim().toLowerCase().replace(/\s+/g, "_");
+  const v = t("priority." + norm);
+  return v === "priority." + norm ? (String(s) || fallback) : v;
+}
 
 // ════════════════ state + helpers ════════════════
 const STORAGE_KEY = "cmms_lang";

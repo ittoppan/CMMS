@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -196,23 +196,23 @@ export default function PMSchedulePage() {
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
   const columns: TableColumn<PMTask>[] = [
-    { key: "id", header: "เลขที่ PM", width: proportional(1) },
-    { key: "asset", header: "เครื่องจักร/อุปกรณ์", width: proportional(2) },
-    { key: "task", header: "ชื่องาน", width: proportional(2) },
+    { key: "id", header: t("tbl.pm_no"), width: proportional(1) },
+    { key: "asset", header: t("tbl.asset_full"), width: proportional(2) },
+    { key: "task", header: t("tbl.title"), width: proportional(2) },
     {
       key: "frequency",
-      header: "รอบ/ความถี่",
+      header: t("tbl.frequency"),
       width: proportional(1),
       renderCell: (item) => (
         <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {freqLabels[item.frequency] || item.frequency}
+          {t("freq." + (item.frequency || ""))}
         </span>
       ),
     },
-    { key: "nextDue", header: "วันครบกำหนด", width: proportional(1.5) },
+    { key: "nextDue", header: t("tbl.due_date"), width: proportional(1.5) },
     {
       key: "assignee",
-      header: "ผู้รับผิดชอบ",
+      header: t("tbl.assignee"),
       width: proportional(1.5),
       renderCell: (item) => (
         <HStack gap={2} vAlign="center" wrap="wrap">
@@ -227,12 +227,12 @@ export default function PMSchedulePage() {
     },
     {
       key: "status",
-      header: "สถานะ",
+      header: t("tbl.status"),
       width: proportional(1),
       renderCell: (item) => (
         <VStack gap={1}>
           <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.pending}>
-            {statusLabels[item.status] || item.status}
+            {statusText(item.status, item.status)}
           </span>
           {deferBadge(item)}
         </VStack>
@@ -240,7 +240,7 @@ export default function PMSchedulePage() {
     },
     {
       key: "actions",
-      header: "จัดการ",
+      header: t("tbl.actions"),
       width: proportional(2),
       renderCell: (item) => (
         <HStack gap={2}>
@@ -264,17 +264,13 @@ export default function PMSchedulePage() {
             onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
           >
-            <PencilSquareIcon className="w-3.5 h-3.5" />
-            อัปเดต
-          </button>
+            <PencilSquareIcon className="w-3.5 h-3.5" />{t("action.update")}</button>
           <button
             type="button"
             onClick={() => handleDelete(item.rawId)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
           >
-            <TrashIcon className="w-3.5 h-3.5" />
-            ลบ
-          </button>
+            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
         </HStack>
       ),
     },
@@ -301,13 +297,9 @@ export default function PMSchedulePage() {
             onClick={() => router.push("/pm_am/calendar")}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
           >
-            <CalendarIcon className="w-4 h-4" />
-            มุมมองปฏิทิน
-          </button>
+            <CalendarIcon className="w-4 h-4" />{t("action.open_calendar")}</button>
           <a href="/pm_am/create" className="cmms-btn-primary">
-            <PlusIcon className="w-4 h-4" />
-            สร้างแผน PM ใหม่
-          </a>
+            <PlusIcon className="w-4 h-4" />{t("action.create_pm")}</a>
         </HStack>
       </div>
 
@@ -380,8 +372,8 @@ export default function PMSchedulePage() {
                   setPage(1);
                 }}
               >
-                {TABS.map((t) => (
-                  <Tab key={t} value={t} label={t === "All" ? "ทั้งหมด" : (freqLabels[t] || t)} />
+                {TABS.map((tabKey) => (
+                  <Tab key={tabKey} value={tabKey} label={tabKey === "All" ? t("common.all") : t("freq." + tabKey)} />
                 ))}
               </TabList>
             </HStack>} />

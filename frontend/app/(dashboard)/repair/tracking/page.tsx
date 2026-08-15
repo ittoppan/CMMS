@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -102,43 +102,43 @@ export default function RepairTrackingPage() {
   const columns: TableColumn<TrackWO>[] = [
     {
       key: "woNumber",
-      header: "เลขที่ใบงาน",
+      header: t("tbl.work_order_no"),
       width: proportional(1.5),
       renderCell: (item: TrackWO) => <strong>{item.woNumber}</strong>,
     },
     {
       key: "machine",
-      header: "เครื่องจักร / อุปกรณ์",
+      header: t("tbl.asset_full"),
       width: proportional(2.5),
       renderCell: (item: TrackWO) => <Text type="body">{item.machine}</Text>,
     },
     {
       key: "symptoms",
-      header: "อาการเสีย / รายละเอียด",
+      header: t("tbl.issue_desc"),
       width: proportional(3),
       renderCell: (item: TrackWO) => <Text type="body">{item.symptoms}</Text>,
     },
     {
       key: "status",
-      header: "สถานะงานซ่อม",
+      header: t("tbl.repair_status"),
       width: proportional(2),
       renderCell: (item: TrackWO) => getStatusDisplay(item.status),
     },
     {
       key: "technician",
-      header: "ช่างผู้รับผิดชอบ",
+      header: t("tbl.tech_assignee"),
       width: proportional(1.5),
       renderCell: (item: TrackWO) => <Text type="body">{item.technician || "-"}</Text>,
     },
     {
       key: "requestDate",
-      header: "วันที่แจ้ง",
+      header: t("tbl.request_date"),
       width: proportional(1.5),
       renderCell: (item: TrackWO) => <Text type="body" color="secondary">{item.requestDate}</Text>,
     },
     {
       key: "actions",
-      header: "การจัดการ",
+      header: t("tbl.actions"),
       width: proportional(1.5),
       renderCell: (item: TrackWO) => (
         <HStack gap={2} hAlign="end">

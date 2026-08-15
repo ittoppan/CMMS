@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -224,7 +224,7 @@ export default function RepairAssignPage() {
   const columns: TableColumn<AssignWO>[] = [
     {
       key: "woNumber",
-      header: "เลขที่ใบงาน",
+      header: t("tbl.work_order_no"),
       width: proportional(1.2),
       renderCell: (row: AssignWO) => (
         <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>{row.woNumber}</Text>
@@ -232,7 +232,7 @@ export default function RepairAssignPage() {
     },
     {
       key: "priority",
-      header: "ความด่วน",
+      header: t("tbl.priority"),
       width: proportional(0.9),
       renderCell: (row: AssignWO) => (
         <span className="cmms-andon-chip" style={priorityColors[row.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
@@ -242,7 +242,7 @@ export default function RepairAssignPage() {
     },
     {
       key: "asset",
-      header: "เครื่องจักร",
+      header: t("tbl.asset"),
       width: proportional(1.6),
       renderCell: (row: AssignWO) => (
         <VStack gap={0}>
@@ -251,10 +251,10 @@ export default function RepairAssignPage() {
         </VStack>
       ),
     },
-    { key: "requestDate", header: "วันที่แจ้ง", width: proportional(1) },
+    { key: "requestDate", header: t("tbl.request_date"), width: proportional(1) },
     {
       key: "status",
-      header: "สถานะ / ผู้รับผิดชอบ",
+      header: t("tbl.status_assignee"),
       width: proportional(1.5),
       renderCell: (row: AssignWO) => {
         if (!row.assigneeId) {
@@ -278,7 +278,7 @@ export default function RepairAssignPage() {
     },
     {
       key: "actions",
-      header: "การจัดการ",
+      header: t("tbl.actions"),
       width: proportional(1),
       renderCell: (row: AssignWO) => (
         <button
@@ -315,9 +315,7 @@ export default function RepairAssignPage() {
           onClick={fetchData}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
         >
-          <ArrowPathIcon className="w-4 h-4" />
-          รีเฟรช
-        </button>
+          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
       </HStack>
 
       {/* Stat badges */}
@@ -354,7 +352,7 @@ export default function RepairAssignPage() {
               value={statusFilter}
               onChange={setStatusFilter}
               options={[
-                { value: "", label: "ทุกสถานะ" },
+                { value: "", label: t("action.filter_all_status") },
                 { value: "open", label: "รอมอบหมาย / รอดำเนินการ" },
                 { value: "in_progress", label: "กำลังซ่อม" },
                 { value: "waiting_parts", label: "รออะไหล่" },

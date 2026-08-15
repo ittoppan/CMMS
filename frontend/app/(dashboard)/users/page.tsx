@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -180,10 +180,10 @@ export default function UsersPage() {
   });
 
   const columns: TableColumn<User>[] = [
-    { key: "username", header: "ชื่อผู้ใช้", width: proportional(1) },
+    { key: "username", header: t("tbl.username"), width: proportional(1) },
     {
       key: "employeeCode",
-      header: "รหัสพนักงาน",
+      header: t("tbl.employee_code"),
       width: proportional(1),
       renderCell: (item: User) => (
         <Text type="body" weight="semibold" className="font-mono">
@@ -193,7 +193,7 @@ export default function UsersPage() {
     },
     {
       key: "fullName",
-      header: "ชื่อ-นามสกุล",
+      header: t("tbl.full_name"),
       width: proportional(2),
       renderCell: (item: User) => {
         const nameStr = (item.fullName && item.fullName !== '-') ? item.fullName : (item.username && item.username !== '-' ? item.username : "User");
@@ -210,11 +210,11 @@ export default function UsersPage() {
         );
       },
     },
-    { key: "email", header: "อีเมล", width: proportional(1.5) },
-    { key: "phone", header: "โทรศัพท์", width: proportional(1) },
+    { key: "email", header: t("tbl.email"), width: proportional(1.5) },
+    { key: "phone", header: t("tbl.phone"), width: proportional(1) },
     {
       key: "lineUserId",
-      header: "LINE ID",
+      header: t("tbl.line_id"),
       width: proportional(1.4),
       renderCell: (item: User) => (
         <Text type="body" size="sm" color={item.lineUserId ? "primary" : "secondary"}>
@@ -226,7 +226,7 @@ export default function UsersPage() {
     },
     {
       key: "role",
-      header: "บทบาท",
+      header: t("tbl.role"),
       width: proportional(1),
       renderCell: (item: User) => (
         <span className="cmms-andon-chip" style={roleChipStyle[item.role] || roleChipStyle.viewer}>
@@ -236,7 +236,7 @@ export default function UsersPage() {
     },
     {
       key: "isActive",
-      header: "สถานะ",
+      header: t("tbl.status"),
       width: proportional(0.8),
       renderCell: (item: User) => (
         <span
@@ -251,7 +251,7 @@ export default function UsersPage() {
     },
     {
       key: "actions",
-      header: "จัดการ",
+      header: t("tbl.actions"),
       width: proportional(1.2),
       renderCell: (item: User) => (
         <HStack gap={1}>
@@ -268,9 +268,7 @@ export default function UsersPage() {
             onClick={() => setDeleteTarget(item)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
           >
-            <TrashIcon className="w-3.5 h-3.5" />
-            ลบ
-          </button>
+            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
         </HStack>
       ),
     },
@@ -306,9 +304,7 @@ export default function UsersPage() {
             onClick={fetchUsers}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
           >
-            <ArrowPathIcon className="w-4 h-4" />
-            รีเฟรช
-          </button>
+            <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
           <a href="/users/create" className="cmms-btn-primary">
             <PlusIcon className="w-4 h-4" />
             เพิ่มผู้ใช้ใหม่

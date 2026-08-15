@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -235,7 +235,7 @@ export default function InspectionsPage() {
           <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
             <Heading level={4}>รอบตรวจทั้งหมด ({schedules.length})</Heading>
             <div style={{ width: 220 }}>
-              <Selector label="สถานะ" isLabelHidden placeholder="ทุกสถานะ" value={statusFilter} onChange={(v) => setStatusFilter(String(v))} options={[{ value: "", label: "ทุกสถานะ" }, { value: "pending", label: "รอดำเนินการ" }, { value: "in_progress", label: "กำลังทำ" }, { value: "completed", label: "เสร็จสิ้น" }, { value: "overdue", label: "เกินกำหนด" }]} />
+              <Selector label="สถานะ" isLabelHidden placeholder="ทุกสถานะ" value={statusFilter} onChange={(v) => setStatusFilter(String(v))} options={[{ value: "", label: t("action.filter_all_status") }, { value: "pending", label: "รอดำเนินการ" }, { value: "in_progress", label: "กำลังทำ" }, { value: "completed", label: "เสร็จสิ้น" }, { value: "overdue", label: "เกินกำหนด" }]} />
             </div>
           </HStack>
 

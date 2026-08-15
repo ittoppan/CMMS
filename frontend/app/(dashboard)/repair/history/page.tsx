@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -147,7 +148,7 @@ export default function RepairHistoryPage() {
   const columns: TableColumn<HistoryWO>[] = [
     {
       key: "woNumber",
-      header: "เลขที่งาน",
+      header: t("tbl.wo_no_short"),
       width: proportional(1.2),
       renderCell: (item: HistoryWO) => (
         <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>{item.woNumber}</Text>
@@ -155,7 +156,7 @@ export default function RepairHistoryPage() {
     },
     {
       key: "asset",
-      header: "เครื่องจักร / อุปกรณ์",
+      header: t("tbl.asset_full"),
       width: proportional(2),
       renderCell: (item: HistoryWO) => (
         <VStack gap={0}>
@@ -166,20 +167,20 @@ export default function RepairHistoryPage() {
     },
     {
       key: "status",
-      header: "สถานะ",
+      header: t("tbl.status"),
       width: proportional(1),
       renderCell: (item: HistoryWO) => (
         <span className="cmms-andon-chip" style={statusColors[item.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {statusLabels[item.status] || item.status}
+          {statusText(item.status, item.status)}
         </span>
       ),
     },
-    { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1) },
-    { key: "requestDate", header: "วันที่แจ้ง", width: proportional(1) },
-    { key: "completedDate", header: "วันที่เสร็จ", width: proportional(1) },
+    { key: "assignee", header: t("tbl.assignee"), width: proportional(1) },
+    { key: "requestDate", header: t("tbl.request_date"), width: proportional(1) },
+    { key: "completedDate", header: t("tbl.completed_date"), width: proportional(1) },
     {
       key: "rootCause",
-      header: "สาเหตุ / แนวทางแก้ไข",
+      header: t("tbl.root_cause"),
       width: proportional(2.2),
       renderCell: (item: HistoryWO) => (
         <Text type="body" size="sm" color="secondary" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -189,7 +190,7 @@ export default function RepairHistoryPage() {
     },
     {
       key: "cost",
-      header: "ค่าใช้จ่าย",
+      header: t("tbl.cost"),
       width: proportional(1),
       renderCell: (item: HistoryWO) => {
         const total = item.costParts + item.costLabor + item.costOutsource;
@@ -202,7 +203,7 @@ export default function RepairHistoryPage() {
     },
     {
       key: "actions",
-      header: "การจัดการ",
+      header: t("tbl.actions"),
       width: proportional(1),
       renderCell: (item: HistoryWO) => (
         <button
@@ -238,9 +239,7 @@ export default function RepairHistoryPage() {
           onClick={fetchHistory}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
         >
-          <ArrowPathIcon className="w-4 h-4" />
-          รีเฟรช
-        </button>
+          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
       </div>
 
       {/* Stat cards */}
@@ -338,7 +337,7 @@ export default function RepairHistoryPage() {
                   value={statusFilter}
                   onChange={setStatusFilter}
                   options={[
-                    { value: "", label: "ทุกสถานะ" },
+                    { value: "", label: t("action.filter_all_status") },
                     { value: "completed", label: "เสร็จสิ้น" },
                     { value: "closed", label: "ปิดงาน" },
                     { value: "resolved", label: "แก้ไขแล้ว" },

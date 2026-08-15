@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -161,7 +161,7 @@ export default function AssetRegistryPage() {
   const columns: TableColumn<AssetRecord>[] = [
     {
       key: "image",
-      header: "รูป",
+      header: t("tbl.image"),
       width: proportional(0.7),
       renderCell: (item) => {
         const raw = item.imageUrl;
@@ -186,7 +186,7 @@ export default function AssetRegistryPage() {
     },
     { 
       key: "code", 
-      header: "รหัสเครื่องจักร / Serial No.", 
+      header: t("tbl.asset_code_serial"), 
       width: proportional(2),
       renderCell: (item) => (
         <VStack gap={0}>
@@ -197,7 +197,7 @@ export default function AssetRegistryPage() {
     },
     {
       key: "name",
-      header: "ชื่อเครื่องจักร / ตำแหน่งติดตั้ง",
+      header: t("tbl.asset_location"),
       width: proportional(3),
       renderCell: (item) => (
         <VStack gap={0}>
@@ -208,7 +208,7 @@ export default function AssetRegistryPage() {
     },
     {
       key: "criticality",
-      header: "ระดับความสำคัญ",
+      header: t("tbl.criticality"),
       width: proportional(1.2),
       renderCell: (item) => (
         <span className="cmms-andon-chip" style={criticalityChipStyle[item.criticality] || criticalityChipStyle.C}>
@@ -218,7 +218,7 @@ export default function AssetRegistryPage() {
     },
     {
       key: "status",
-      header: "สถานะเครื่องจักร",
+      header: t("tbl.asset_status"),
       width: proportional(1.8),
       renderCell: (item) => {
         const label = statusMap[item.status]?.label || item.status;
@@ -231,7 +231,7 @@ export default function AssetRegistryPage() {
     },
     {
       key: "actions",
-      header: "การจัดการ",
+      header: t("tbl.actions"),
       width: proportional(2.5),
       renderCell: (item) => (
         <HStack gap={1} wrap="wrap">
@@ -256,9 +256,7 @@ export default function AssetRegistryPage() {
             onClick={() => setDeleteTarget(item)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
           >
-            <TrashIcon className="w-3.5 h-3.5" />
-            ลบ
-          </button>
+            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
         </HStack>
       )
     }

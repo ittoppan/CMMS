@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -83,7 +83,7 @@ export default function WorkloadPage() {
   const columns: TableColumn<TechRow>[] = [
     {
       key: "name",
-      header: "ช่าง / ผู้รับผิดชอบ",
+      header: t("tbl.tech_assignee_full"),
       width: proportional(2),
       renderCell: (item) => (
         <HStack gap={2} vAlign="center">
@@ -103,7 +103,7 @@ export default function WorkloadPage() {
     },
     {
       key: "openCount",
-      header: "งานค้าง (เปิด)",
+      header: t("tbl.open_jobs"),
       width: proportional(1),
       renderCell: (item) => (
         <span className="cmms-andon-chip" style={item.openCount > 0 ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" } : { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
@@ -113,13 +113,13 @@ export default function WorkloadPage() {
     },
     {
       key: "activeCount",
-      header: "กำลังทำ",
+      header: t("tbl.in_progress_h"),
       width: proportional(1),
       renderCell: (item) => <Text type="body">{item.activeCount}</Text>,
     },
     {
       key: "overdueCount",
-      header: "เกินกำหนด",
+      header: t("tbl.overdue"),
       width: proportional(1),
       renderCell: (item) =>
         item.overdueCount > 0 ? (
@@ -130,7 +130,7 @@ export default function WorkloadPage() {
     },
     {
       key: "urgentCount",
-      header: "ด่วน/วิกฤต",
+      header: t("tbl.urgent"),
       width: proportional(1),
       renderCell: (item) =>
         item.urgentCount > 0 ? (
@@ -141,13 +141,13 @@ export default function WorkloadPage() {
     },
     {
       key: "due7dCount",
-      header: "ครบกำหนด 7 วัน",
+      header: t("tbl.due_in_7d"),
       width: proportional(1.2),
       renderCell: (item) => <Text type="body">{item.due7dCount} งาน</Text>,
     },
     {
       key: "done7dCount",
-      header: "ปิดงาน 7 วันล่าสุด",
+      header: t("tbl.closed_7d"),
       width: proportional(1.2),
       renderCell: (item) => (
         <Text type="body" style={{ color: "var(--cmms-success)" }}>{item.done7dCount} งาน</Text>
@@ -176,9 +176,7 @@ export default function WorkloadPage() {
           onClick={fetchWorkload}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
         >
-          <ArrowPathIcon className="w-4 h-4" />
-          รีเฟรช
-        </button>
+          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
       </div>
 
       {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}

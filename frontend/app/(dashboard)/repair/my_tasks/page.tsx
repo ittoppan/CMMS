@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -266,7 +266,7 @@ export default function MyTasksPage() {
   const columns: TableColumn<TaskItem>[] = [
     {
       key: "woNumber",
-      header: "เลขที่ใบงาน",
+      header: t("tbl.work_order_no"),
       width: proportional(1.4),
       renderCell: (task) => (
         <HStack gap={2} vAlign="center">
@@ -279,11 +279,11 @@ export default function MyTasksPage() {
         </HStack>
       ),
     },
-    { key: "machine", header: "เครื่องจักร", width: proportional(2) },
-    { key: "title", header: "หัวข้องาน", width: proportional(2.5) },
+    { key: "machine", header: t("tbl.asset"), width: proportional(2) },
+    { key: "title", header: t("tbl.subject"), width: proportional(2.5) },
     {
       key: "assignedToName",
-      header: "ผู้รับผิดชอบ",
+      header: t("tbl.assignee"),
       width: proportional(1.4),
       renderCell: (task) => (
         <HStack gap={2} vAlign="center" wrap="wrap">
@@ -306,7 +306,7 @@ export default function MyTasksPage() {
     },
     {
       key: "beforeImg",
-      header: "รูปก่อน/หลังซ่อม",
+      header: t("tbl.before_after"),
       width: proportional(1.5),
       renderCell: (task) =>
         task.kind === "pm" ? (
@@ -320,7 +320,7 @@ export default function MyTasksPage() {
     },
     {
       key: "actions",
-      header: "การดำเนินการ",
+      header: t("tbl.processing"),
       width: proportional(2),
       renderCell: (task) =>
         task.kind === "pm" ? (

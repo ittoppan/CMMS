@@ -4,7 +4,7 @@
 // (Layout + LayoutHeader + TabList + Items list + Side Panel + mobile dialog)
 
 import { useState, useEffect, useMemo } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "@astryxdesign/core/hooks";
 import {
@@ -328,7 +328,7 @@ function ItemsCard({
                     onChange={toggleSelectAll}
                     style={{ width: 16, height: 16, accentColor: "var(--cmms-primary)", cursor: "pointer" }}
                   />
-                  เลือกทั้งหมดในหน้า
+                  {t("action.select_all_page")}
                 </label>
               )}
             </HStack>

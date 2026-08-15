@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -112,9 +112,7 @@ export default function PMCalendarPage() {
             onClick={() => window.location.href = '/pm_am/create'}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
-            <PlusIcon className="w-4 h-4" />
-            สร้างแผน PM ใหม่
-          </button>
+            <PlusIcon className="w-4 h-4" />{t("action.create_pm")}</button>
           <button
             type="button"
             onClick={() => window.open('/api/v1/pm_ical.php', '_blank')}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -261,7 +261,7 @@ export default function WorkOrdersPage() {
   const columns: TableColumn<WorkOrder>[] = [
     {
       key: "select",
-      header: "เลือก",
+      header: t("tbl.select"),
       width: proportional(0.4),
       renderCell: (item: WorkOrder) => (
         <input
@@ -273,34 +273,34 @@ export default function WorkOrdersPage() {
         />
       ),
     },
-    { key: "woNumber", header: "เลขที่งาน", width: proportional(1) },
-    { key: "asset", header: "เครื่องจักร/อุปกรณ์", width: proportional(2) },
+    { key: "woNumber", header: t("tbl.wo_no_short"), width: proportional(1) },
+    { key: "asset", header: t("tbl.asset_full"), width: proportional(2) },
     {
       key: "status",
-      header: "สถานะ",
+      header: t("tbl.status"),
       width: proportional(1),
       renderCell: (item: WorkOrder) => (
         <span className={`cmms-status ${andonOf(item.status)}`}>
           <span className="cmms-status-dot" />
-          {statusLabels[item.status] || item.status}
+          {statusText(item.status, item.status)}
         </span>
       ),
     },
     {
       key: "priority",
-      header: "ความเร่งด่วน",
+      header: t("tbl.priority"),
       width: proportional(1),
       renderCell: (item: WorkOrder) => (
         <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {priorityLabels[item.priority] || item.priority}
+          {priorityText(item.priority, item.priority)}
         </span>
       ),
     },
-    { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1) },
-    { key: "date", header: "วันที่แจ้ง", width: proportional(1) },
+    { key: "assignee", header: t("tbl.assignee"), width: proportional(1) },
+    { key: "date", header: t("tbl.request_date"), width: proportional(1) },
     {
       key: "actions",
-      header: "การจัดการ",
+      header: t("tbl.actions"),
       width: proportional(1.2),
       renderCell: (item: WorkOrder) => (
         <button
@@ -353,24 +353,20 @@ export default function WorkOrdersPage() {
             }`}
           >
             <DocumentArrowDownIcon className="w-4 h-4" />
-            {pdfBuilding ? (pdfProgress || "กำลังสร้าง PDF...") : selected.size > 0 ? `ดาวน์โหลด PDF (${selected.size})` : "ดาวน์โหลด PDF"}
+            {pdfBuilding ? (pdfProgress || t("action.building_pdf")) : selected.size > 0 ? `${t("action.download_pdf")} (${selected.size})` : t("action.download_pdf")}
           </button>
           <button
             type="button"
             onClick={fetchWO}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
           >
-            <ArrowPathIcon className="w-4 h-4" />
-            รีเฟรช
-          </button>
+            <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
           <button
             type="button"
             onClick={() => router.push("/repair/create")}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white cmms-btn-primary"
           >
-            <PlusIcon className="w-4 h-4" />
-            สร้างใบสั่งงาน
-          </button>
+            <PlusIcon className="w-4 h-4" />{t("action.create_wo")}</button>
         </HStack>
       </div>
       </div>
@@ -485,13 +481,11 @@ export default function WorkOrdersPage() {
                   <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
                     <input
                       type="checkbox"
-                      aria-label="เลือกทั้งหมดในหน้านี้"
+                      aria-label={t("action.select_all_page")}
                       checked={filtered.length > 0 && selected.size === filtered.length}
                       onChange={toggleAll}
                       style={{ width: 15, height: 15, cursor: "pointer" }}
-                    />
-                    เลือกทั้งหมด
-                  </label>
+                    />{t("action.select_all")}</label>
                   {selected.size > 0 && (
                     <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
                       เลือก {selected.size} รายการ
@@ -513,7 +507,7 @@ export default function WorkOrdersPage() {
                   value={statusFilter}
                   onChange={setStatusFilter}
                   options={[
-                    { value: "", label: "ทุกสถานะ" },
+                    { value: "", label: t("action.filter_all_status") },
                     { value: "open", label: "งานใหม่ (Open)" },
                     { value: "in_progress", label: "กำลังซ่อม" },
                     { value: "completed", label: "เสร็จสิ้น" },
@@ -526,7 +520,7 @@ export default function WorkOrdersPage() {
                   value={priorityFilter}
                   onChange={setPriorityFilter}
                   options={[
-                    { value: "", label: "ทุกความเร่งด่วน" },
+                    { value: "", label: t("action.filter_all_priority") },
                     { value: "critical", label: "วิกฤต (Critical)" },
                     { value: "high", label: "ด่วน (High)" },
                     { value: "medium", label: "ปกติ (Medium)" },

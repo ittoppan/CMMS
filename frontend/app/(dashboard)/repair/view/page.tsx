@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { t, statusText, priorityText } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -81,10 +82,10 @@ const statusLabels: Record<string, string> = {
   in_progress: "กำลังซ่อม", waiting_parts: "รออะไหล่", pending_parts: "รออะไหล่", acknowledged: "รับงานแล้ว",
   open: "รอดำเนินการ", pending: "รอดำเนินการ", overdue: "เกินกำหนด", rejected: "ตีกลับ",
 };
-const statusLabel = (s: string) => statusLabels[String(s || "").toLowerCase()] || s || "—";
+const statusLabel = (s: string) => statusText(s, s || "—");
 
 const priorityLabels: Record<string, string> = { critical: "วิกฤต", high: "สูง", medium: "ปานกลาง", low: "ต่ำ" };
-const priorityLabel = (p: string) => priorityLabels[String(p || "").toLowerCase()] || p || "—";
+const priorityLabel = (p: string) => priorityText(p, p || "—");
 const priorityVariant = (p: string): "error" | "warning" | "info" | "neutral" => {
   const m: Record<string, "error" | "warning" | "info" | "neutral"> = {
     critical: "error", high: "warning", medium: "info", low: "neutral",
@@ -368,14 +369,14 @@ export default function RepairViewDetailsPage() {
               onClick={() => (window.location.href = "/repair/tracking")}
             />
             <Button
-              label={downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF (F-EN-03)"}
+              label={downloading ? t("action.building_pdf") : t("action.download_pdf_fen03")}
               variant="secondary"
               icon={<Icon icon={DocumentArrowDownIcon} size="sm" />}
               isDisabled={downloading}
               onClick={handleDownloadPdf}
             />
             <Button
-              label="พิมพ์เอกสารปิดซ่อม"
+              label={t("action.print_closure_doc")}
               variant="primary"
               icon={<Icon icon={PrinterIcon} size="sm" />}
               onClick={handlePrint}
@@ -603,9 +604,7 @@ export default function RepairViewDetailsPage() {
                           <button
                             onClick={() => removePart(r.spare_part_id)}
                             style={{ color: "var(--cmms-danger)", background: "none", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8rem" }}
-                          >
-                            ลบ
-                          </button>
+                          >{t("action.delete")}</button>
                         </td>
                       </tr>
                     ))}

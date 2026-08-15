@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { usePageHero } from "@/lib/i18n";
+import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -176,7 +176,7 @@ export default function SageIssueCenterPage() {
   const columns: TableColumn<CartItem>[] = [
     {
       key: "code",
-      header: "รหัส / รายการอะไหล่",
+      header: t("tbl.spare_item"),
       width: proportional(2),
       renderCell: (item: CartItem) => (
         <VStack gap={0}>
@@ -187,7 +187,7 @@ export default function SageIssueCenterPage() {
     },
     {
       key: "qty",
-      header: "จำนวน",
+      header: t("tbl.qty"),
       width: proportional(1),
       renderCell: (item: CartItem) => (
         <HStack gap={1} vAlign="center">
@@ -208,13 +208,13 @@ export default function SageIssueCenterPage() {
     },
     {
       key: "unitPrice",
-      header: "ราคา/หน่วย",
+      header: t("tbl.unit_price"),
       width: proportional(1),
       renderCell: (item: CartItem) => <Text type="body">{item.unitPrice.toLocaleString("th-TH")}</Text>,
     },
     {
       key: "total",
-      header: "รวม",
+      header: t("tbl.total"),
       width: proportional(1),
       renderCell: (item: CartItem) => (
         <Text type="body" weight="semibold">{(item.qty * item.unitPrice).toLocaleString("th-TH")}</Text>
@@ -230,9 +230,7 @@ export default function SageIssueCenterPage() {
           onClick={() => handleRemove(item.id)}
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all"
         >
-          <TrashIcon className="w-3.5 h-3.5" />
-          ลบ
-        </button>
+          <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
       ),
     },
   ];
@@ -268,9 +266,7 @@ export default function SageIssueCenterPage() {
           onClick={fetchData}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
-          <ArrowPathIcon className="w-4 h-4" />
-          รีเฟรช
-        </button>
+          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
       </div>
 
       <Grid columns={{ minWidth: 560, max: 2 }} gap={6}>
