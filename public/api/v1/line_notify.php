@@ -50,7 +50,7 @@ try {
                 'line_tpl_completed' => ['header_color' => '#16a34a', 'header_title' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nDowntime: {downtime_hours} ชม.\nค่าซ่อมรวม: {total_cost} บาท\nช่างผู้ปิดงาน: {assigned_name}", 'btn_label' => '📊 ประเมินผลงาน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
                 'line_tpl_sage_approval' => ['header_color' => '#7c3aed', 'header_title' => '📦 ขออนุมัติเบิกอะไหล่ #{requisition_no}', 'body_text' => "รายการ: {items_summary}\nผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_amount} บาท", 'btn_label' => '✔ อนุมัติการเบิก', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
                 'line_tpl_work_assign' => ['header_color' => '#0891b2', 'header_title' => '🔧 งานถูกมอบหมายให้คุณ #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nงาน: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้มอบหมาย: {assigner_name}", 'btn_label' => '📋 ดูรายละเอียดงาน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
-                'line_tpl_spare_request' => ['header_color' => '#b45309', 'header_title' => '🧰 ขอเบิกอะไหล่ #{work_order_id} รออนุมัติ', 'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท\nกดปุ่มด้านล่างเพื่อตรวจสอบ/อนุมัติ", 'btn_label' => '📦 ตรวจสอบการเบิก', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_spare_request' => ['header_color' => '#b45309', 'header_title' => '🧰 ขอเบิกอะไหล่ #{work_order_id} รออนุมัติ', 'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท\nกดปุ่มด้านล่างเพื่อตรวจสอบ/อนุมัติ", 'btn_label' => '✅ อนุมัติการเบิก', 'btn2_label' => '❌ ไม่อนุมัติ', 'btn_postback' => '1', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
             ];
             foreach ($defaults as $k => $d) {
                 if (!isset($templates[$k])) $templates[$k] = $d;
@@ -141,6 +141,7 @@ try {
                     'btn_height'        => in_array($tpl['btn_height'] ?? 'md', ['sm', 'md', 'lg'], true) ? $tpl['btn_height'] : 'md',
                     'btn2_label'        => mb_substr($tpl['btn2_label'] ?? '', 0, 100),
                     'btn2_url'          => mb_substr(trim($tpl['btn2_url'] ?? ''), 0, 500),
+                    'btn_postback'      => (($tpl['btn_postback'] ?? '0') === '1' || ($tpl['btn_postback'] ?? '0') === true) ? '1' : '0',
                     'image_before'      => mb_substr(trim($tpl['image_before'] ?? ''), 0, 500),
                     'image_after'       => mb_substr(trim($tpl['image_after'] ?? ''), 0, 500),
                     'container_bg'      => $hex6($tpl['container_bg'] ?? '', '#ffffff'),

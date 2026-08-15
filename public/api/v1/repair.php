@@ -111,6 +111,7 @@ try {
                     if (!empty($r['cost_parts'])) {
                         $pdo->prepare('UPDATE repair SET cost_parts = ? WHERE id = ?')->execute([$r['cost_parts'], $newId]);
                     }
+                    $pdo->prepare("UPDATE repair SET spare_approval_status = 'pending', spare_approved_by = NULL, spare_approved_at = NULL WHERE id = ?")->execute([$newId]);
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
                 }
@@ -226,6 +227,7 @@ try {
                     if (!empty($r['cost_parts'])) {
                         $pdo->prepare('UPDATE repair SET cost_parts = ? WHERE id = ?')->execute([$r['cost_parts'], $id]);
                     }
+                    $pdo->prepare("UPDATE repair SET spare_approval_status = 'pending', spare_approved_by = NULL, spare_approved_at = NULL WHERE id = ?")->execute([$id]);
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
                 }

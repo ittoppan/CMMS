@@ -53,6 +53,9 @@ interface WorkOrderDetail {
   costParts: number;
   costLabor: number;
   downtimeMinutes: number;
+  spareApprovalStatus: string;
+  spareApprovedBy: string;
+  spareApprovedAt: string;
 }
 
 interface Activity {
@@ -143,7 +146,10 @@ export default function RepairViewDetailsPage() {
     solution: "-",
     costParts: 0,
     costLabor: 0,
-    downtimeMinutes: 0
+    downtimeMinutes: 0,
+    spareApprovalStatus: "none",
+    spareApprovedBy: "",
+    spareApprovedAt: ""
   });
 
   useEffect(() => {
@@ -174,7 +180,10 @@ export default function RepairViewDetailsPage() {
             solution: row.solution || row.resolution || "-",
             costParts: Number(row.cost_parts || 0),
             costLabor: Number(row.cost_labor || 0),
-            downtimeMinutes: Number(row.downtime_minutes || 0)
+            downtimeMinutes: Number(row.downtime_minutes || 0),
+            spareApprovalStatus: String(row.spare_approval_status || "none"),
+            spareApprovedBy: String(row.spare_approved_by || ""),
+            spareApprovedAt: String(row.spare_approved_at || "")
           });
         }
       })
@@ -480,7 +489,24 @@ export default function RepairViewDetailsPage() {
                 <Text type="body" size="sm" className="cmms-eyebrow">SPARE PARTS USED · F-EN-03</Text>
                 <Heading level={4}>อะไหล่ที่ใช้ซ่อม (ใบเบิก)</Heading>
               </VStack>
-              <Text type="body" size="sm" color="secondary">รวม {partsTotal.toLocaleString()} บาท · {deductStock ? "ตัดสต็อกอัตโนมัติ" : "ไม่ตัดสต็อก (ปิดการตั้งค่า)"}</Text>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                {wo.spareApprovalStatus === "approved" && (
+                  <span style={{ background: "var(--cmms-success-light, #D1FAE5)", color: "var(--cmms-success, #059669)", padding: "4px 10px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 700 }}>
+                    ✅ อนุมัติแล้ว{wo.spareApprovedBy ? ` โดย ${wo.spareApprovedBy}` : ""}{wo.spareApprovedAt ? ` · ${String(wo.spareApprovedAt).slice(0, 10)}` : ""}
+                  </span>
+                )}
+                {wo.spareApprovalStatus === "rejected" && (
+                  <span style={{ background: "var(--cmms-danger-light, #FEE2E2)", color: "var(--cmms-danger, #DC2626)", padding: "4px 10px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 700 }}>
+                    ❌ ไม่อนุมัติ{wo.spareApprovedBy ? ` โดย ${wo.spareApprovedBy}` : ""}{wo.spareApprovedAt ? ` · ${String(wo.spareApprovedAt).slice(0, 10)}` : ""}
+                  </span>
+                )}
+                {wo.spareApprovalStatus === "pending" && (
+                  <span style={{ background: "var(--cmms-warning-light, #FEF3C7)",                    color: "var(--cmms-warning-dark)", padding: "4px 10px", borderRadius: 999, fontSize: "0.75rem", fontWeight: 700 }}>
+                    ⏳ รอหัวหน้าอนุมัติ (กดปุ่มใน LINE)
+                  </span>
+                )}
+                <Text type="body" size="sm" color="secondary">รวม {partsTotal.toLocaleString()} บาท · {deductStock ? "ตัดสต็อกอัตโนมัติ" : "ไม่ตัดสต็อก (ปิดการตั้งค่า)"}</Text>
+              </HStack>
             </HStack>
 
             {partsMsg && (
