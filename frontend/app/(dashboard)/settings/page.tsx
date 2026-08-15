@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
+import { setUserLang } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -841,6 +842,7 @@ export default function SettingsPage() {
                 const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
                 const isColor = COLOR_KEYS.has(row.setting_key);
                 const isEmail = EMAIL_KEYS.has(row.setting_key);
+                const isLang = row.setting_key === "lang_default";
                 // real-time ตรวจรหัสสี hex (#RRGGBB)
                 const hexValue = String(form[row.setting_key] ?? "").trim();
                 const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
@@ -939,6 +941,41 @@ export default function SettingsPage() {
                           value={form[row.setting_key] === "1"}
                           onChange={(c) => setForm((f) => ({ ...f, [row.setting_key]: c ? "1" : "0" }))}
                         />
+                      </HStack>
+                    ) : isLang ? (
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        {[
+                          { value: "th", label: "ไทย (Thai)", short: "ไทย" },
+                          { value: "en", label: "English", short: "EN" },
+                        ].map((opt) => {
+                          const active = (form[row.setting_key] ?? "th") === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              title={opt.label}
+                              onClick={() => {
+                                setForm((f) => ({ ...f, [row.setting_key]: opt.value }));
+                                setUserLang(opt.value as "th" | "en");
+                              }}
+                              style={{
+                                display: "inline-flex", alignItems: "center", gap: 6,
+                                padding: "7px 16px", borderRadius: 10,
+                                border: active ? "1px solid var(--cmms-primary)" : "1px solid var(--cmms-border)",
+                                background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
+                                color: active ? "#fff" : "var(--cmms-text-secondary)",
+                                fontSize: 13, fontWeight: 700, cursor: "pointer",
+                                transition: "all 150ms ease",
+                              }}
+                            >
+                              {opt.short}
+                              <span style={{ fontWeight: 500, opacity: 0.85 }}>{opt.label}</span>
+                            </button>
+                          );
+                        })}
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                          สลับทั้งระบบทันที — บันทึกเพื่อเป็นค่าเริ่มต้นผู้ใช้ใหม่
+                        </span>
                       </HStack>
                     ) : selectOptions ? (
                       <Selector
