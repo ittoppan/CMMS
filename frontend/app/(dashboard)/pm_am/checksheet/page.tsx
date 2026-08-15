@@ -5,7 +5,6 @@ import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
@@ -304,7 +303,9 @@ export default function PMChecksheetPage() {
               <HStack gap={6} hAlign="between" wrap="wrap">
                 <VStack gap={1}>
                   <HStack gap={2} vAlign="center">
-                    <Badge label={selectedPlan.frequency_type?.toUpperCase()} variant="info" />
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                      {selectedPlan.frequency_type?.toUpperCase()}
+                    </span>
                     <span className="cmms-status warn"><span className="cmms-status-dot" />{selectedPlan.status === "in_progress" ? "กำลังดำเนินการ" : "รอดำเนินการ"}</span>
                   </HStack>
                   <Text type="body" weight="bold">{selectedPlan.title}</Text>

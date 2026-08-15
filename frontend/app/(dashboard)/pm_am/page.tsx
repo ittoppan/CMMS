@@ -9,13 +9,8 @@ import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
 import CountUp from "react-countup";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Link } from "@astryxdesign/core/Link";
-import { IconButton } from "@astryxdesign/core/IconButton";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Pagination } from "@astryxdesign/core/Pagination";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { TabList, Tab } from "@astryxdesign/core/TabList";
 import { 
@@ -24,7 +19,10 @@ import {
   PlusIcon,
   DocumentCheckIcon,
   ListBulletIcon,
-  TrashIcon
+  TrashIcon,
+  PencilSquareIcon,
+  WrenchScrewdriverIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 
 interface PMTask extends Record<string, unknown> {
@@ -38,13 +36,13 @@ interface PMTask extends Record<string, unknown> {
   status: "pending" | "in_progress" | "completed" | "overdue" | "skipped";
 }
 
-const statusColors: Record<string, "neutral" | "blue" | "warning" | "success" | "error"> = {
-  "pending": "neutral",
-  "due": "warning",
-  "in_progress": "blue",
-  "completed": "success",
-  "overdue": "error",
-  "skipped": "warning",
+const statusChipStyle: Record<string, React.CSSProperties> = {
+  pending: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  due: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  in_progress: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  completed: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  overdue: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  skipped: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
 };
 
 const statusLabels: Record<string, string> = {
@@ -144,7 +142,11 @@ export default function PMSchedulePage() {
       key: "frequency",
       header: "รอบ/ความถี่",
       width: proportional(1),
-      renderCell: (item) => <Badge label={freqLabels[item.frequency] || item.frequency} variant="neutral" />,
+      renderCell: (item) => (
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          {freqLabels[item.frequency] || item.frequency}
+        </span>
+      ),
     },
     { key: "nextDue", header: "วันครบกำหนด", width: proportional(1.5) },
     { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1.5) },
@@ -153,7 +155,9 @@ export default function PMSchedulePage() {
       header: "สถานะ",
       width: proportional(1),
       renderCell: (item) => (
-        <Badge label={statusLabels[item.status] || item.status} variant={statusColors[item.status] || "neutral"} />
+        <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.pending}>
+          {statusLabels[item.status] || item.status}
+        </span>
       ),
     },
     {
@@ -162,19 +166,22 @@ export default function PMSchedulePage() {
       width: proportional(2),
       renderCell: (item) => (
         <HStack gap={2}>
-          <Button
-            size="sm"
-            variant="secondary"
-            label="อัปเดต"
+          <button
+            type="button"
             onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
-          />
-          <IconButton
-            size="sm"
-            variant="destructive"
-            label="ลบแผน PM"
-            icon={<Icon icon={TrashIcon} size="sm" />}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <PencilSquareIcon className="w-3.5 h-3.5" />
+            อัปเดต
+          </button>
+          <button
+            type="button"
             onClick={() => handleDelete(item.rawId)}
-          />
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+          >
+            <TrashIcon className="w-3.5 h-3.5" />
+            ลบ
+          </button>
         </HStack>
       ),
     },
@@ -182,45 +189,80 @@ export default function PMSchedulePage() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">PM AM · CMMS-TOPPAN</Text>
-          <Heading level={2}>แผนบำรุงรักษาเชิงป้องกัน (PM)</Heading>
-          <Text type="body" color="secondary">แผนซ่อมบำรุงเชิงป้องกัน และตารางตรวจเช็คเครื่องจักร</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM AM · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>แผนบำรุงรักษาเชิงป้องกัน (PM)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <WrenchScrewdriverIcon className="w-3.5 h-3.5" /> แผน {stats.total} รายการ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            แผนซ่อมบำรุงเชิงป้องกัน และตารางตรวจเช็คเครื่องจักร
+          </Text>
         </VStack>
         <HStack gap={2}>
-          <Button label="มุมมองปฏิทิน" variant="secondary" icon={<Icon icon={CalendarIcon} size="sm" />} onClick={() => router.push("/pm_am/calendar")} />
-          <Link href="/pm_am/create">
-            <Button label="สร้างแผน PM ใหม่" variant="primary" icon={<Icon icon={PlusIcon} size="sm" />} />
-          </Link>
+          <button
+            type="button"
+            onClick={() => router.push("/pm_am/calendar")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <CalendarIcon className="w-4 h-4" />
+            มุมมองปฏิทิน
+          </button>
+          <a href="/pm_am/create" className="cmms-btn-primary">
+            <PlusIcon className="w-4 h-4" />
+            สร้างแผน PM ใหม่
+          </a>
         </HStack>
-      </Card>
+      </div>
 
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">แผนบำรุงรักษาทั้งหมด</Text>
-            <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="cmms-icon-tile">
+              <ListBulletIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">แผนบำรุงรักษาทั้งหมด</Text>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-blue-600">รอตรวจเช็ค</Text>
-            <Heading level={2} className="text-blue-600"><CountUp end={stats.dueThisWeek} /> <Text type="body" size="sm">รายการ</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="cmms-icon-tile cmms-icon-tile--blue">
+              <ClipboardDocumentCheckIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">รอตรวจเช็ค</Text>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.dueThisWeek} /> <Text type="body" size="sm">รายการ</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-emerald-600">อัตราการปฏิบัติตามแผน</Text>
-            <Heading level={2} className="text-emerald-600"><CountUp end={stats.complianceRate} /> <Text type="body" size="sm">%</Text></Heading>
-          </VStack>
+        <Card elevation="low" padding={4} className="cmms-kpi-card">
+          <HStack gap={3} vAlign="center">
+            <div className="cmms-icon-tile cmms-icon-tile--green">
+              <DocumentCheckIcon className="w-5 h-5" />
+            </div>
+            <VStack gap={1}>
+              <Text type="supporting" color="secondary">อัตราการปฏิบัติตามแผน</Text>
+              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.complianceRate} /> <Text type="body" size="sm">%</Text></Heading>
+            </VStack>
+          </HStack>
         </Card>
         {stats.overdue > 0 && (
-          <Card elevation="low" padding={4} className="border-rose-500 bg-rose-50 dark:bg-rose-900/10">
-            <VStack gap={1}>
-              <Text type="supporting" className="text-rose-600">เลยกำหนด</Text>
-              <Heading level={2} className="text-rose-600"><CountUp end={stats.overdue} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
+          <Card elevation="low" padding={4} className="cmms-kpi-card">
+            <HStack gap={3} vAlign="center">
+              <div className="cmms-icon-tile cmms-icon-tile--red">
+                <TrashIcon className="w-5 h-5" />
+              </div>
+              <VStack gap={1}>
+                <Text type="supporting" color="secondary">เลยกำหนด</Text>
+                <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.overdue} /> <Text type="body" size="sm">รายการ</Text></Heading>
+              </VStack>
+            </HStack>
           </Card>
         )}
       </Grid>

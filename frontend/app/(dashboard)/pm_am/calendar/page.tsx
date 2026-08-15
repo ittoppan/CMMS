@@ -4,19 +4,16 @@ import { useState, useEffect } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
 import { Calendar } from "@astryxdesign/core/Calendar";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import {
   PlusIcon,
   ClockIcon,
   CalendarDaysIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  UserGroupIcon,
   ClipboardDocumentListIcon,
+  PlayIcon,
+  DocumentCheckIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import AndonLamp from "@/components/AndonLamp";
 
@@ -36,12 +33,12 @@ const pmStatusLabel: Record<string, string> = {
   "in-progress": "กำลังทำ", in_progress: "กำลังทำ",
 };
 
-const freqColors: Record<string, "info" | "warning" | "success" | "neutral" | "blue"> = {
-  daily: "info",
-  weekly: "warning",
-  monthly: "success",
-  quarterly: "blue",
-  yearly: "neutral",
+const freqChipStyle: Record<string, React.CSSProperties> = {
+  daily: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  weekly: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  monthly: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  quarterly: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  yearly: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 export default function PMCalendarPage() {
@@ -215,7 +212,7 @@ export default function PMCalendarPage() {
               
               {visibleTasks.length === 0 ? (
                 <VStack gap={4} hAlign="center" vAlign="center" style={{ minHeight: 300, opacity: 0.5 }}>
-                  <Icon icon={CalendarDaysIcon} size="lg" />
+                  <CalendarDaysIcon className="w-6 h-6" />
                   <Text type="body">{viewAll ? "ยังไม่มีแผน PM ในระบบ" : "ไม่มีแผน PM สำหรับวันนี้"}</Text>
                 </VStack>
               ) : (
@@ -231,9 +228,15 @@ export default function PMCalendarPage() {
                       <HStack hAlign="between" vAlign="start">
                         <VStack gap={2}>
                           <HStack gap={3} vAlign="center">
-                            {viewAll && <Badge label={t.date} variant="neutral" />}
+                            {viewAll && (
+                              <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                                {t.date}
+                              </span>
+                            )}
                             <Text type="body" weight="bold">{t.id}</Text>
-                            <Badge label={t.type.charAt(0).toUpperCase() + t.type.slice(1)} variant={freqColors[t.type] || "neutral"} />
+                            <span className="cmms-andon-chip" style={freqChipStyle[t.type] || freqChipStyle.monthly}>
+                              {t.type.charAt(0).toUpperCase() + t.type.slice(1)}
+                            </span>
                             <span className={`cmms-status ${andonOf(t.status)}`}>
                               <span className="cmms-status-dot" />
                               {pmStatusLabel[t.status] || t.status}
@@ -251,9 +254,34 @@ export default function PMCalendarPage() {
                         </VStack>
                         
                         <div>
-                           {t.status === 'scheduled' && <Button label="เริ่มงาน" variant="primary" size="sm" />}
-                           {t.status === 'in-progress' && <Button label="ทำเช็คชีท" variant="secondary" size="sm" onClick={() => window.location.href = '/pm_am/checksheet'} />}
-                           {t.status === 'completed' && <Button label="ดูผลตรวจ" variant="ghost" size="sm" />}
+                          {t.status === "scheduled" && (
+                            <button
+                              type="button"
+                              className="cmms-btn-primary cmms-btn-primary--sm"
+                            >
+                              <PlayIcon className="w-3.5 h-3.5" />
+                              เริ่มงาน
+                            </button>
+                          )}
+                          {t.status === "in-progress" && (
+                            <button
+                              type="button"
+                              onClick={() => (window.location.href = "/pm_am/checksheet")}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                            >
+                              <DocumentCheckIcon className="w-3.5 h-3.5" />
+                              ทำเช็คชีท
+                            </button>
+                          )}
+                          {t.status === "completed" && (
+                            <button
+                              type="button"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                            >
+                              <EyeIcon className="w-3.5 h-3.5" />
+                              ดูผลตรวจ
+                            </button>
+                          )}
                         </div>
                       </HStack>
                     </div>
