@@ -104,6 +104,18 @@ try {
             $newId = (int)$pdo->lastInsertId();
             echo json_encode(['success' => true, 'id' => $newId, 'work_order_no' => $data['work_order_no']]);
 
+            // ---- อะไหล่ที่ใช้ซ่อม (ใบเบิกจากใบซ่อม) — ตัดสต็อก + ผูก repair_spare_parts ----
+            if (!empty($data['spare_parts']) && is_array($data['spare_parts'])) {
+                try {
+                    $r = saveRepairSpareParts($pdo, $newId, $data['spare_parts']);
+                    if (!empty($r['cost_parts'])) {
+                        $pdo->prepare('UPDATE repair SET cost_parts = ? WHERE id = ?')->execute([$r['cost_parts'], $newId]);
+                    }
+                } catch (Exception $e) {
+                    error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
+                }
+            }
+
             // ---- LINE แจ้งเตือนงานใหม่เข้า (non-blocking — fail เงียบไม่พังการ submit) ----
             try {
                 $q = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'");
@@ -134,17 +146,18 @@ try {
 
                     // เป้าหมาย: กลุ่ม LINE (ถ้าตั้ง) + ช่างที่ถูกมอบหมาย หรือ LINE-bound users ทั้งหมด (fallback)
                     $targets = [];
+                    $grpEnabled = getSettingValue('line_group_enabled', '1');
                     $grp = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'");
                     $grp->execute();
                     $gid = $grp->fetchColumn();
-                    if ($gid) $targets[] = (string)$gid;
+                    if ($gid && $grpEnabled === '1') $targets[] = (string)$gid;
 
                     if (!empty($data['assigned_to'])) {
                         $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
                         $st->execute([(int)$data['assigned_to']]);
                         $lid = $st->fetchColumn();
                         if ($lid) $targets[] = (string)$lid;
-                    } elseif (!$gid) {
+                    } elseif (!$gid || $grpEnabled !== '1') {
                         $st = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''");
                         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $lid) $targets[] = (string)$lid;
                     }
@@ -182,6 +195,18 @@ try {
             $values[] = $id;
             $stmt = $pdo->prepare("UPDATE repair SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // ---- อะไหล่ที่ใช้ซ่อม (ใบเบิกจากใบซ่อม) — แทนที่รายการ + ตัดสต็อก + คำนวณต้นทุนรวม ----
+            if (isset($data['spare_parts']) && is_array($data['spare_parts'])) {
+                try {
+                    $r = saveRepairSpareParts($pdo, $id, $data['spare_parts'], true);
+                    if (!empty($r['cost_parts'])) {
+                        $pdo->prepare('UPDATE repair SET cost_parts = ? WHERE id = ?')->execute([$r['cost_parts'], $id]);
+                    }
+                } catch (Exception $e) {
+                    error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
+                }
+            }
             echo json_encode(['success' => true]);
 
             // ---- LINE แจ้งเตือนเมื่อปิดงานซ่อม (completed) — ใช้เทมเพลต line_tpl_completed ----
@@ -219,7 +244,7 @@ try {
                             if ($lid) $targets[] = (string)$lid;
                         }
                         $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
-                        if ($grp) $targets[] = (string)$grp;
+                        if ($grp && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$grp;
                         $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
                         foreach (array_unique($targets) as $tid) {
                             sendLineTemplatePush($tid, 'line_tpl_completed', $cv, $detailUrl, $photos);

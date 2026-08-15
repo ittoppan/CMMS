@@ -138,6 +138,7 @@ const SECTION_MAP: Record<string, string> = {
   "/suppliers": "คลังอะไหล่",
   "/analytics": "วิเคราะห์ & รายงาน",
   "/reports": "วิเคราะห์ & รายงาน",
+  "/andon-board": "วิเคราะห์ & รายงาน",
   "/safety": "ความปลอดภัย & IoT",
   "/iot": "ความปลอดภัย & IoT",
   "/users": "บุคลากร",
@@ -492,6 +493,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("reports") && <SideNavItem label="ศูนย์รวมรายงาน" icon={ChartBarIcon} href="/reports" isSelected={isSelected("/reports")} />}
             {canShow("reports/monthly_pdf") && <SideNavItem label="รายงาน PDF ผู้บริหาร" icon={DocumentArrowDownIcon} href="/reports/monthly_pdf" isSelected={isSelected("/reports/monthly_pdf")} />}
             {canShow("reports/export_excel") && <SideNavItem label="ส่งออก Excel / CSV" icon={TableCellsIcon} href="/reports/export_excel" isSelected={isSelected("/reports/export_excel")} />}
+            {canShow("andon-board") && <SideNavItem label="จอ Andon TV (โรงงาน)" icon={BoltIcon} href="/andon-board" isSelected={isSelected("/andon-board")} />}
           </MenuSection>
 
           {/* 6. ความปลอดภัย & IoT */}

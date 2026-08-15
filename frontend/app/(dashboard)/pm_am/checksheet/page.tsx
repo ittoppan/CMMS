@@ -19,6 +19,7 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
 interface CheckItem {
   id: string;
@@ -62,7 +63,14 @@ export default function PMChecksheetPage() {
   const [checklist, setChecklist] = useState<CheckItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [pending, setPending] = useState(0);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    setPending(pendingCount());
+    const off = subscribeOnline(() => setPending(pendingCount()));
+    return off;
+  }, []);
   // QR scan prefill: ?asset_code= / ?plan_id=
   const qrPrefillRef = useRef<{ assetCode?: string; planId?: string } | null>(null);
 
@@ -208,19 +216,31 @@ export default function PMChecksheetPage() {
     try {
       const now = new Date().toISOString().slice(0, 19).replace("T", " ");
       const failCount = checklist.filter((i) => i.status === "fail").length;
+      const body = {
+        status: "completed",
+        completed_at: now,
+        last_done_date: now.slice(0, 10),
+        completed_by: currentUserId || null,
+        checklist: JSON.stringify(
+          checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
+        ),
+        notes: failCount > 0 ? `พบรายการไม่ผ่าน ${failCount} รายการ` : "ผ่านทุกรายการ",
+      };
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        enqueue({ kind: "pm_checksheet", label: `เช็คชีท PM: ${selectedPlan.title}`, url: `/api/v1/pm_am.php?id=${selectedPlan.id}`, method: "PUT", body });
+        setPending(pendingCount());
+        setSubmitting(false);
+        showToast("success", `บันทึกผล PM “${selectedPlan.title}” ไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์`);
+        setSelectedPlanId("");
+        setSelectedPlan(null);
+        setChecklist([]);
+        setAssetName("");
+        return;
+      }
       const res = await fetch(`/api/v1/pm_am.php?id=${selectedPlan.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: "completed",
-          completed_at: now,
-          last_done_date: now.slice(0, 10),
-          completed_by: currentUserId || null,
-          checklist: JSON.stringify(
-            checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
-          ),
-          notes: failCount > 0 ? `พบรายการไม่ผ่าน ${failCount} รายการ` : "ผ่านทุกรายการ",
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json();
       if (json.success) {
@@ -236,7 +256,29 @@ export default function PMChecksheetPage() {
       }
     } catch (e) {
       console.error(e);
-      setError("เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่");
+      // เน็ตหลุดระหว่างส่ง → เก็บในเครื่อง รอส่งอัตโนมัติ
+      enqueue({
+        kind: "pm_checksheet",
+        label: `เช็คชีท PM: ${selectedPlan.title}`,
+        url: `/api/v1/pm_am.php?id=${selectedPlan.id}`,
+        method: "PUT",
+        body: {
+          status: "completed",
+          completed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+          last_done_date: new Date().toISOString().slice(0, 10),
+          completed_by: currentUserId || null,
+          checklist: JSON.stringify(
+            checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
+          ),
+          notes: checklist.filter((i) => i.status === "fail").length > 0 ? `พบรายการไม่ผ่าน ${checklist.filter((i) => i.status === "fail").length} รายการ` : "ผ่านทุกรายการ",
+        },
+      });
+      setPending(pendingCount());
+      showToast("success", `บันทึกผล PM “${selectedPlan.title}” ไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์`);
+      setSelectedPlanId("");
+      setSelectedPlan(null);
+      setChecklist([]);
+      setAssetName("");
     }
     setSubmitting(false);
   };
@@ -258,6 +300,20 @@ export default function PMChecksheetPage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CHECKSHEET · CMMS-TOPPAN</Text>
           <Heading level={2} style={{ color: "#fff" }}>ทำรายการ PM (Checksheet)</Heading>
+
+          {pending > 0 && (
+            <div
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "10px 14px", borderRadius: 8,
+                background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)",
+                fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
+              }}
+            >
+              <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+              มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
+            </div>
+          )}
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
             เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ
           </Text>
