@@ -56,6 +56,7 @@ interface WorkOrderDetail {
   spareApprovalStatus: string;
   spareApprovedBy: string;
   spareApprovedAt: string;
+  team: { user_id: number; role: string; full_name: string }[];
 }
 
 interface Activity {
@@ -149,7 +150,8 @@ export default function RepairViewDetailsPage() {
     downtimeMinutes: 0,
     spareApprovalStatus: "none",
     spareApprovedBy: "",
-    spareApprovedAt: ""
+    spareApprovedAt: "",
+    team: []
   });
 
   useEffect(() => {
@@ -183,7 +185,8 @@ export default function RepairViewDetailsPage() {
             downtimeMinutes: Number(row.downtime_minutes || 0),
             spareApprovalStatus: String(row.spare_approval_status || "none"),
             spareApprovedBy: String(row.spare_approved_by || ""),
-            spareApprovedAt: String(row.spare_approved_at || "")
+            spareApprovedAt: String(row.spare_approved_at || ""),
+            team: Array.isArray(row.team) ? row.team : []
           });
         }
       })
@@ -432,6 +435,47 @@ export default function RepairViewDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* ── ทีมซ่อม (ผู้รับผิดชอบหลายคน) ── */}
+        <Card elevation="low" padding={5} className="mb-6">
+          <VStack gap={3}>
+            <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+              <VStack gap={0}>
+                <Heading level={4}>ทีมซ่อม</Heading>
+                <Text type="body" size="sm" color="secondary">ผู้รับผิดชอบหลัก (หัวหน้าชุด) + สมาชิกในทีม — ใครในทีมก็ปิดงานได้</Text>
+              </VStack>
+              {wo.team.length > 0 && (
+                <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>
+                  {wo.team.length} คน
+                </span>
+              )}
+            </HStack>
+            {wo.team.length === 0 ? (
+              <Text type="body" color="secondary">ยังไม่มีการมอบหมายทีมซ่อม — ไปที่หน้า "แจกงานซ่อม" เพื่อเลือกทีม</Text>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 }}>
+                {wo.team.map((m) => (
+                  <div
+                    key={m.user_id}
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 12, border: "1px solid var(--cmms-border)", background: m.role === "lead" ? "var(--cmms-primary-wash)" : "var(--cmms-bg-card)" }}
+                  >
+                    <div
+                      style={{ width: 32, height: 32, borderRadius: "50%", background: m.role === "lead" ? "var(--cmms-primary)" : "var(--cmms-bg-muted)", color: m.role === "lead" ? "#fff" : "var(--cmms-text-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13 }}
+                    >
+                      {(m.full_name || "?").charAt(0)}
+                    </div>
+                    <VStack gap={0}>
+                      <Text type="body" size="sm" weight="bold">{m.full_name || "-"}</Text>
+                      <Text type="body" color="secondary" style={{ fontSize: 11 }}>
+                        {m.role === "lead" ? "หัวหน้าชุด" : "สมาชิกทีม"}
+                      </Text>
+                    </VStack>
+                  </div>
+                ))}
+              </div>
+            )}
+          </VStack>
+        </Card>
 
         {/* ── ไทม์ไลน์การซ่อม (จาก repair_activity_log) ── */}
         <Card elevation="low" padding={6} className="mb-6">

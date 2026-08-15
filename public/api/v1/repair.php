@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/helpers/assignees.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -64,10 +65,14 @@ try {
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
-                echo json_encode($row);
+                $single = [$row];
+                attachWorkTeams($single, 'repair');
+                echo json_encode($single[0]);
             } else {
                 $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id ORDER BY r.created_at DESC');
-                echo json_encode($stmt->fetchAll());
+                $rows = $stmt->fetchAll();
+                attachWorkTeams($rows, 'repair');
+                echo json_encode($rows);
             }
             break;
         case 'POST':
@@ -142,6 +147,37 @@ try {
                 }
             }
 
+            // ---- ผู้รับผิดชอบหลายคน (ทีมซ่อม) — assigned_to = หัวหน้าชุด, team_ids = ทุกคน ----
+            if ((isset($data['team_ids']) && is_array($data['team_ids'])) || !empty($data['assigned_to'])) {
+                try {
+                    $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : [];
+                    $leadId = (int)($data['assigned_to'] ?? 0);
+                    $cu = currentUser($pdo);
+                    $res = setWorkAssignees($pdo, 'repair', $newId, $teamIds, $leadId, $cu['id'] ?? null);
+                    if (getSettingValue('line_notify_enabled', '0') === '1' && !empty($res['added'])) {
+                        $q = $pdo->prepare("SELECT r.work_order_no, a.code AS asset_code, a.name AS asset_name, r.title
+                                            FROM repair r LEFT JOIN asset_registry a ON a.id = r.asset_id WHERE r.id = ?");
+                        $q->execute([$newId]);
+                        $rw = $q->fetch(PDO::FETCH_ASSOC);
+                        if ($rw) {
+                            $vars = [
+                                '{work_order_id}' => (string)($rw['work_order_no'] ?? ''),
+                                '{asset_code}' => (string)($rw['asset_code'] ?? '-'),
+                                '{asset_name}' => (string)($rw['asset_name'] ?? ''),
+                                '{title}' => mb_substr((string)($rw['title'] ?? ''), 0, 200),
+                                '{priority}' => strtoupper((string)($data['priority'] ?? 'NORMAL')),
+                                '{status}' => (string)($data['status'] ?? 'open'),
+                                '{assigner_name}' => (string)($cu['full_name'] ?? '-'),
+                            ];
+                            foreach ($res['added'] as $uid) {
+                                lineNotifyAssigned((int)$uid, $vars, publicBaseUrl() . '/repair/view?id=' . $newId);
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log('[repair.php] team save failed: ' . $e->getMessage());
+                }
+            }
             // ---- LINE แจ้งเตือนงานใหม่เข้า (non-blocking — fail เงียบไม่พังการ submit) ----
             try {
                 $q = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'");
@@ -249,18 +285,26 @@ try {
                     $row = $q->fetch(PDO::FETCH_ASSOC);
                     if ($row) {
                         $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
-                        // 1) งานถูกมอบหมาย → แจ้งช่างผู้รับ (เฉพาะเมื่อเปลี่ยนผู้รับ)
-                        if (isset($data['assigned_to']) && (int)$data['assigned_to'] > 0 && (int)$data['assigned_to'] !== $oldAssignedTo) {
+                        // 1) งานถูกมอบหมาย → บันทึกทีม (lead + ทีม) + แจ้ง LINE ถึงผู้ถูกเพิ่มทุกคน
+                        $teamChanged = (isset($data['team_ids']) && is_array($data['team_ids'])) || (isset($data['assigned_to']) && (int)$data['assigned_to'] !== $oldAssignedTo);
+                        if ($teamChanged) {
+                            // ถ้าไม่ได้ส่ง team_ids มาด้วย (แก้หัวหน้าชุดเฉย ๆ) → รักษาทีมเดิมไว้
+                            $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'repair', $id));
                             $cu = currentUser($pdo);
-                            lineNotifyAssigned((int)$data['assigned_to'], [
-                                '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
-                                '{asset_code}' => (string)($row['asset_code'] ?? '-'),
-                                '{asset_name}' => (string)($row['asset_name'] ?? ''),
-                                '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
-                                '{priority}' => (string)($row['priority'] ?? ''),
-                                '{status}' => (string)($row['status'] ?? ''),
-                                '{assigner_name}' => (string)($cu['full_name'] ?? '-'),
-                            ], $detailUrl);
+                            $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
+                            if (!empty($res['added'])) {
+                                foreach ($res['added'] as $uid) {
+                                    lineNotifyAssigned((int)$uid, [
+                                        '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
+                                        '{asset_code}' => (string)($row['asset_code'] ?? '-'),
+                                        '{asset_name}' => (string)($row['asset_name'] ?? ''),
+                                        '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                                        '{priority}' => (string)($row['priority'] ?? ''),
+                                        '{status}' => (string)($row['status'] ?? ''),
+                                        '{assigner_name}' => (string)($cu['full_name'] ?? '-'),
+                                    ], $detailUrl);
+                                }
+                            }
                         }
                         // 2) เบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ
                         if (isset($data['spare_parts']) && is_array($data['spare_parts']) && !empty($data['spare_parts'])) {

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/helpers/assignees.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
@@ -22,10 +23,14 @@ try {
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
-                echo json_encode($row);
+                $single = [$row];
+                attachWorkTeams($single, 'pm_am');
+                echo json_encode($single[0]);
             } else {
                 $stmt = $pdo->query('SELECT p.*, a.name AS asset_name, u.full_name AS assigned_name FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id ORDER BY p.created_at DESC');
-                echo json_encode($stmt->fetchAll());
+                $rows = $stmt->fetchAll();
+                attachWorkTeams($rows, 'pm_am');
+                echo json_encode($rows);
             }
             break;
         case 'POST':
@@ -39,7 +44,14 @@ try {
             $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
             $stmt = $pdo->prepare("INSERT INTO pm_am (" . implode(',', $cols) . ") VALUES ($placeholders)");
             $stmt->execute($vals);
-            echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+            $pmNewId = (int)$pdo->lastInsertId();
+            // ---- ทีมผู้รับผิดชอบหลายคน (assigned_to = หัวหน้าชุด, team_ids = ทุกคน) ----
+            if ((isset($data['team_ids']) && is_array($data['team_ids'])) || !empty($data['assigned_to'])) {
+                $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : [];
+                $leadId = (int)($data['assigned_to'] ?? 0);
+                setWorkAssignees($pdo, 'pm_am', $pmNewId, $teamIds, $leadId, (int)($_SESSION['user_id'] ?? 0) ?: null);
+            }
+            echo json_encode(['success' => true, 'id' => $pmNewId]);
             break;
         case 'PUT':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -53,8 +65,22 @@ try {
             }
             if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
             $values[] = $id;
+            $qOld = $pdo->prepare('SELECT assigned_to FROM pm_am WHERE id = ?');
+            $qOld->execute([$id]);
+            $oldAssignedTo = (int)($qOld->fetchColumn() ?: 0);
             $stmt = $pdo->prepare("UPDATE pm_am SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+            // ---- ทีมผู้รับผิดชอบหลายคน ----
+            if (isset($data['team_ids']) && is_array($data['team_ids'])) {
+                // ส่งรายการทีมเต็ม → แทนที่ทั้งหมด
+                $teamIds = $data['team_ids'];
+                $leadId = (int)($data['assigned_to'] ?? $oldAssignedTo);
+                setWorkAssignees($pdo, 'pm_am', $id, $teamIds, $leadId, (int)($_SESSION['user_id'] ?? 0) ?: null);
+            } elseif (isset($data['assigned_to']) && (int)$data['assigned_to'] !== $oldAssignedTo) {
+                // เปลี่ยนหัวหน้าชุดเฉย ๆ → รักษาทีมเดิม แต่อัปเดต lead
+                $curTeam = array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'pm_am', $id));
+                setWorkAssignees($pdo, 'pm_am', $id, $curTeam, (int)$data['assigned_to'], (int)($_SESSION['user_id'] ?? 0) ?: null);
+            }
 
             // 🆕 Auto next-cycle: เมื่อปิดงาน PM (status=completed) → สร้างรอบถัดไปตามความถี่อัตโนมัติ
             $newStatus = $data['status'] ?? null;
@@ -96,6 +122,13 @@ try {
                             $parent['location_id'],
                             $parent['work_zone_id'],
                         ]);
+                        // คัดลอกทีมผู้รับผิดชอบไปรอบถัดไปด้วย
+                        $newPmId = (int)$pdo->lastInsertId();
+                        $cpTeam = $pdo->prepare(
+                            "INSERT IGNORE INTO work_assignees (ref_type, ref_id, user_id, role, assigned_by, created_at)
+                             SELECT 'pm_am', ?, user_id, role, assigned_by, NOW() FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?"
+                        );
+                        $cpTeam->execute([$newPmId, $id]);
                     }
                 }
             }
@@ -107,6 +140,7 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM pm_am WHERE id = ?');
             $stmt->execute([$id]);
+            $pdo->prepare("DELETE FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?")->execute([$id]);
             if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
             echo json_encode(['success' => true, 'message' => 'Deleted']);
             break;

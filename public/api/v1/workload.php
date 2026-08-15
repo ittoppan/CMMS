@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/assignees.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -13,18 +14,23 @@ try {
 
     $techs = $pdo->query("
         SELECT u.id AS user_id, u.full_name,
-               SUM(CASE WHEN {$openCond} THEN 1 ELSE 0 END)                                        AS open_count,
-               SUM(CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
-                         AND r.estimated_completion_date < NOW() THEN 1 ELSE 0 END)                 AS overdue_count,
-               SUM(CASE WHEN r.status IN ('In Progress','in_progress','open') THEN 1 ELSE 0 END)    AS active_count,
-               SUM(CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
+               COUNT(DISTINCT CASE WHEN {$openCond} THEN r.id END)                                       AS open_count,
+               COUNT(DISTINCT CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
+                         AND r.estimated_completion_date < NOW() THEN r.id END)                          AS overdue_count,
+               COUNT(DISTINCT CASE WHEN r.status IN ('In Progress','in_progress','open') THEN r.id END)  AS active_count,
+               COUNT(DISTINCT CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
                          AND r.estimated_completion_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
-                         THEN 1 ELSE 0 END)                                                          AS due_7d_count,
-               SUM(CASE WHEN r.status IN ('completed','closed','resolved')
-                         AND r.updated_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END)      AS done_7d_count,
-               SUM(CASE WHEN {$openCond} AND r.priority IN ('high','critical') THEN 1 ELSE 0 END)   AS urgent_count
+                         THEN r.id END)                                                                  AS due_7d_count,
+               COUNT(DISTINCT CASE WHEN r.status IN ('completed','closed','resolved')
+                         AND r.updated_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN r.id END)              AS done_7d_count,
+               COUNT(DISTINCT CASE WHEN {$openCond} AND r.priority IN ('high','critical') THEN r.id END) AS urgent_count
         FROM users u
-        LEFT JOIN repair r ON r.assigned_to = u.id
+        LEFT JOIN (
+            SELECT ref_id AS rid, user_id FROM work_assignees WHERE ref_type = 'repair'
+            UNION
+            SELECT id AS rid, assigned_to AS user_id FROM repair WHERE assigned_to IS NOT NULL AND assigned_to > 0
+        ) wa ON wa.user_id = u.id
+        LEFT JOIN repair r ON r.id = wa.rid
         WHERE u.is_active = 1
         GROUP BY u.id, u.full_name
         HAVING open_count > 0 OR done_7d_count > 0
