@@ -539,25 +539,27 @@ export default function GrapesBuilder() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const save = async () => {
+  // บันทึกหน้า — openAfter=true จะเปิด /pages/slug ในแท็บใหม่หลังบันทึกสำเร็จ
+  // รับ title/slug แบบ explicit (t/s) สำหรับ "สร้างเลย" ที่ยังไม่ได้ setState ทันที
+  const doSave = async (openAfter: boolean, t?: string, s?: string): Promise<boolean> => {
     const ed = editorRef.current;
-    if (!ed) return;
-    const s = slug.trim();
-    const t = title.trim();
-    if (!s || !t) {
+    if (!ed) return false;
+    const sl = (s ?? slug).trim();
+    const ttl = (t ?? title).trim();
+    if (!sl || !ttl) {
       setMsg({ kind: "err", text: "กรอกชื่อหน้า (title) และ slug (ภาษาอังกฤษตัวเล็ก) ก่อนบันทึก" });
-      return;
+      return false;
     }
-    if (!/^[a-z0-9_-]+$/.test(s)) {
+    if (!/^[a-z0-9_-]+$/.test(sl)) {
       setMsg({ kind: "err", text: "slug ต้องเป็น a-z / 0-9 / _ / - เท่านั้น (ไม่เว้นวรรค)" });
-      return;
+      return false;
     }
     const html = ed.getHtml();
     const css = ed.getCss();
     const js = ed.getJs();
     if (!html || !css) {
       setMsg({ kind: "err", text: "canvas ยังว่าง — ลากบล็อกจากซ้ายมือลงไปก่อนบันทึก" });
-      return;
+      return false;
     }
     setBusy(true);
     setMsg(null);
@@ -565,17 +567,36 @@ export default function GrapesBuilder() {
       const res = await fetch("/api/v1/custom_pages.php", {
         method: "POST",
         headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" },
-        body: JSON.stringify({ slug: s, title: t, html, css, js }),
+        body: JSON.stringify({ slug: sl, title: ttl, html, css, js }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "บันทึกไม่สำเร็จ");
-      setMsg({ kind: "ok", text: json?.message || "บันทึกเรียบร้อยแล้ว" });
+      setMsg({
+        kind: "ok",
+        text: openAfter ? `สร้างหน้า "${ttl}" เรียบร้อย — เปิดดูในแท็บใหม่ (/pages/${sl})` : json?.message || "บันทึกเรียบร้อยแล้ว",
+      });
       refreshList();
+      if (openAfter) window.open(`/pages/${encodeURIComponent(sl)}`, "_blank", "noopener");
+      return true;
     } catch (e) {
       setMsg({ kind: "err", text: e instanceof Error ? e.message : "บันทึกไม่สำเร็จ" });
+      return false;
     } finally {
       setBusy(false);
     }
+  };
+
+  const save = () => doSave(false);
+
+  // "สร้างเลย" — โหลดเทมเพลตลง canvas + บันทึก + เปิดดูทันทีในแท็บใหม่ (ไม่ต้องกดบันทึกเอง)
+  const createFromTemplate = (t: (typeof TEMPLATES)[number]) => {
+    const ed = editorRef.current;
+    if (!ed || busy) return;
+    ed.setComponents(t.html);
+    ed.setStyle("");
+    setTitle(t.title);
+    setSlug(t.slug);
+    doSave(true, t.title, t.slug);
   };
 
   const loadPage = async (row: PageRow) => {
@@ -765,54 +786,85 @@ export default function GrapesBuilder() {
           }}
         >
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--cmms-text-secondary, #475569)", marginBottom: 8 }}>
-            เทมเพลตหน้าเริ่มต้น — กดเพื่อโหลดลง canvas (ยังไม่บันทึก)
+            เทมเพลตหน้าเริ่มต้น — กดการ์ด = โหลดลง canvas ปรับแต่งก่อน · กด "สร้างเลย" = บันทึก + เปิดดูทันที
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {TEMPLATES.map((t) => (
-              <button
+              <div
                 key={t.id}
-                type="button"
-                onClick={() => applyTemplate(t)}
-                disabled={busy}
-                title={t.desc}
                 style={{
                   display: "flex",
-                  gap: 10,
-                  alignItems: "center",
-                  textAlign: "left",
+                  flexDirection: "column",
+                  gap: 8,
                   background: "var(--cmms-bg-muted, #EEF1F6)",
                   border: "1px solid var(--cmms-border, #E4E8EE)",
                   borderRadius: 10,
                   padding: "10px 14px",
-                  cursor: "pointer",
                   minWidth: 220,
                   flex: "1 1 220px",
-                  fontFamily: "inherit",
                 }}
               >
-                <span
+                <button
+                  type="button"
+                  onClick={() => applyTemplate(t)}
+                  disabled={busy}
+                  title={t.desc}
                   style={{
-                    flex: "none",
-                    width: 44,
-                    height: 44,
-                    borderRadius: 10,
-                    background: "var(--cmms-bg-card, #FFFFFF)",
-                    border: "1px solid var(--cmms-border, #E4E8EE)",
                     display: "flex",
+                    gap: 10,
                     alignItems: "center",
-                    justifyContent: "center",
+                    textAlign: "left",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    width: "100%",
+                    fontFamily: "inherit",
                   }}
-                  dangerouslySetInnerHTML={{ __html: t.icon }}
-                />
-                <span>
-                  <span style={{ display: "block", fontSize: 14, fontWeight: 700, color: "var(--cmms-text-primary, #22262E)" }}>
-                    {t.name}
+                >
+                  <span
+                    style={{
+                      flex: "none",
+                      width: 44,
+                      height: 44,
+                      borderRadius: 10,
+                      background: "var(--cmms-bg-card, #FFFFFF)",
+                      border: "1px solid var(--cmms-border, #E4E8EE)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: t.icon }}
+                  />
+                  <span>
+                    <span style={{ display: "block", fontSize: 14, fontWeight: 700, color: "var(--cmms-text-primary, #22262E)" }}>
+                      {t.name}
+                    </span>
+                    <span style={{ display: "block", fontSize: 12, color: "var(--cmms-text-muted, #9AA4B8)", lineHeight: 1.5 }}>
+                      {t.desc}
+                    </span>
                   </span>
-                  <span style={{ display: "block", fontSize: 12, color: "var(--cmms-text-muted, #9AA4B8)", lineHeight: 1.5 }}>
-                    {t.desc}
-                  </span>
-                </span>
-              </button>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => createFromTemplate(t)}
+                  disabled={busy}
+                  style={{
+                    width: "100%",
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#FFFFFF",
+                    background: "var(--cmms-primary, #0068B5)",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "8px 0",
+                    cursor: "pointer",
+                  }}
+                >
+                  {busy ? "กำลังสร้าง..." : "สร้างเลย"}
+                </button>
+              </div>
             ))}
           </div>
         </div>
