@@ -27,6 +27,7 @@ function EditWorkOrderContent() {
   const [status, setStatus] = useState("open");
   const [description, setDescription] = useState("");
   const [woNumber, setWoNumber] = useState("");
+  const [contaminateChecking, setContaminateChecking] = useState("not_checked");
 
   useEffect(() => {
     if (!woId) {
@@ -43,6 +44,7 @@ function EditWorkOrderContent() {
           setStatus(json.status || "open");
           setDescription(json.description || "");
           setWoNumber(json.work_order_no || `WO-${json.id}`);
+          setContaminateChecking(json.contaminate_checking || "not_checked");
         } else {
           setError("ไม่พบข้อมูลใบแจ้งซ่อม");
         }
@@ -68,6 +70,7 @@ function EditWorkOrderContent() {
           description,
           priority,
           status,
+          contaminate_checking: contaminateChecking,
         }),
       });
       const json = await res.json();
@@ -131,6 +134,19 @@ function EditWorkOrderContent() {
                 { value: "in_progress", label: "กำลังซ่อม" },
                 { value: "pending", label: "รออะไหล่ / รอประเมิน" },
                 { value: "completed", label: "ซ่อมเสร็จแล้ว" },
+              ]}
+            />
+
+            <Selector
+              label="ตรวจสอบการปนเปื้อนหลังงานเสร็จ"
+              placeholder="เลือกผลการตรวจ"
+              value={contaminateChecking}
+              onChange={setContaminateChecking}
+              options={[
+                { value: "not_checked", label: "ยังไม่ตรวจ" },
+                { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
+                { value: "contaminated", label: "พบการปนเปื้อน" },
+                { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
               ]}
             />
 
