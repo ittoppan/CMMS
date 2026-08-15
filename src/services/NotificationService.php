@@ -20,14 +20,14 @@ class NotificationService {
             if (!empty($channelToken)) {
                 $uids = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
                 if (empty($uids)) {
-                    self::logNotification('LINE', 'NO_RECIPIENT', $message);
+                    self::logNotification('LINE', 'NO_RECIPIENT', $message, null, '', 'LINE_GENERIC');
                     return false;
                 }
                 $ok = true;
                 foreach ($uids as $uid) {
+                    // แต่ละคน log ไว้ใน sendLinePushMessage (recipient + template) ดูที่ /notifications/history
                     $ok = sendLinePushMessage((string)$uid, '🔔 CMMS-TPT แจ้งเตือน', $message) && $ok;
                 }
-                self::logNotification('LINE', $ok ? 'SENT' : 'FAILED', $message);
                 return $ok;
             }
         } catch (Exception $e) {}
@@ -39,11 +39,9 @@ class NotificationService {
             } catch (Exception $e) {}
         }
 
-        $token = $token ?: getenv('LINE_NOTIFY_TOKEN') ?: 'FALLBACK_TOKEN';
-
-        if (empty($token) || $token === 'FALLBACK_TOKEN') {
+        $token = $token ?: getenv('LINE_NOTIFY_TOKEN') ?: 'FALLBACK_TOKEN';            if (empty($token) || $token === 'FALLBACK_TOKEN') {
             // ยังไม่ได้ตั้งค่า LINE ให้สมบูรณ์ — บันทึก log เพื่อให้ admin ทราบ
-            self::logNotification('LINE', 'PENDING_CONFIG', $message);
+            self::logNotification('LINE', 'PENDING_CONFIG', $message, null, '', 'LINE_GENERIC');
             return false;
         }
 
@@ -89,7 +87,7 @@ class NotificationService {
             $pdo = getDb();
             $uids = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
             if (empty($uids)) {
-                self::logNotification('LINE', 'NO_RECIPIENT', "tpl=$tplKey " . implode(' | ', $vars));
+                self::logNotification('LINE', 'NO_RECIPIENT', "tpl=$tplKey " . implode(' | ', $vars), null, '', $tplKey);
                 return;
             }
             foreach ($uids as $uid) {
@@ -191,13 +189,20 @@ class NotificationService {
     /**
      * Internal Notification Logger — เขียนตาราง notification_logs (ไม่ปนกับ sage_sync_log)
      */
-    private static function logNotification(string $type, string $status, string $content, ?string $rawResp = null): void {
+    private static function logNotification(string $type, string $status, string $content, ?string $rawResp = null, string $recipient = '', string $template = ''): void {
         try {
             $pdo = getDb();
             $pdo->prepare("
-                INSERT INTO notification_logs (channel, status, content, raw_response, created_at)
-                VALUES (?, ?, ?, ?, NOW())
-            ")->execute([$type, $status, mb_substr($content, 0, 500), $rawResp ? mb_substr($rawResp, 0, 2000) : null]);
+                INSERT INTO notification_logs (channel, status, recipient, template, content, raw_response, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())
+            ")->execute([
+                $type,
+                $status,
+                $recipient !== '' ? mb_substr($recipient, 0, 100) : null,
+                $template !== '' ? mb_substr($template, 0, 60) : null,
+                mb_substr($content, 0, 500),
+                $rawResp ? mb_substr($rawResp, 0, 2000) : null,
+            ]);
         } catch (Exception $e) {}
     }
 }
