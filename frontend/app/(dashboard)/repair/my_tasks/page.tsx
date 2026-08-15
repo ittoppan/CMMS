@@ -44,6 +44,7 @@ interface TaskItem extends Record<string, unknown> {
   status: "new" | "in_progress" | "pending_parts" | "completed";
   assignedTo?: number | null;
   assignedToName?: string;
+  teamIds?: number[];
   assignedDate: string;
   estimatedCompletion: string;
   assetCode?: string;
@@ -114,6 +115,7 @@ export default function MyTasksPage() {
               })(),
               assignedTo: r.assigned_to || null,
               assignedToName: r.assigned_name || "-",
+              teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
               assignedDate: r.created_at || "-",
               estimatedCompletion: r.estimated_completion_date || "-",
               beforeImg: r.before_image_path || "",
@@ -140,6 +142,7 @@ export default function MyTasksPage() {
             status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
             assignedTo: p.assigned_to || null,
             assignedToName: p.assigned_to_name || "-",
+            teamIds: Array.isArray(p.team_ids) ? p.team_ids.map((t: any) => Number(t)) : [],
             assignedDate: p.due_date || "-",
             estimatedCompletion: p.due_date || "-",
             assetCode: p.asset_code || "",
@@ -240,7 +243,10 @@ export default function MyTasksPage() {
 
   // งานของฉัน = งานที่ถูกมอบหมายให้ผู้ใช้ที่ login อยู่เท่านั้น
   // (ถ้ายังโหลด user id ไม่ทัน → แสดงทั้งหมดก่อน แล้ว filter ทันทีที่รู้ค่า)
-  const myTasks = currentUserId === null ? tasks : tasks.filter(t => t.assignedTo === currentUserId);
+  // งานของฉัน = งานที่เราเป็นหัวหน้าชุด หรือเป็นสมาชิกในทีม (รับผิดชอบหลายคนต่อ 1 งาน)
+  const myTasks = currentUserId === null
+    ? tasks
+    : tasks.filter(t => t.assignedTo === currentUserId || (t.teamIds || []).includes(currentUserId));
   const filteredTasks = myTasks.filter(t => {
     if (activeTab === "new") return t.status === "new";
     if (activeTab === "in_progress") return t.status === "in_progress" || t.status === "pending_parts";
@@ -281,7 +287,12 @@ export default function MyTasksPage() {
       header: "ผู้รับผิดชอบ",
       width: proportional(1.4),
       renderCell: (task) => (
-        <Text type="body" size="sm">{task.assignedToName || "-"}</Text>
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Text type="body" size="sm">{task.assignedToName || "-"}</Text>
+          {currentUserId !== null && task.assignedTo !== currentUserId && (task.teamIds || []).includes(currentUserId) && (
+            <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>สมาชิกทีม</span>
+          )}
+        </HStack>
       ),
     },
     {

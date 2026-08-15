@@ -35,6 +35,7 @@ interface AssignWO extends Record<string, unknown> {
   status: string;
   assignee: string;
   assigneeId: number | null;
+  teamIds: number[];
   assigneeAvatar?: string | null;
   requestDate: string;
   description: string;
@@ -87,6 +88,7 @@ export default function RepairAssignPage() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [selectedWo, setSelectedWo] = useState<AssignWO | null>(null);
   const [selectedTech, setSelectedTech] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
 
@@ -113,6 +115,7 @@ export default function RepairAssignPage() {
             status: row.status || "open",
             assignee: row.assigned_name || "ยังไม่มอบหมาย",
             assigneeId: row.assigned_to || null,
+            teamIds: Array.isArray(row.team_ids) ? row.team_ids.map((t: any) => Number(t)) : [],
             requestDate: row.created_at ? row.created_at.split(" ")[0] : "-",
             description: row.description || row.failure_report || row.symptoms || "",
           }));
@@ -179,6 +182,7 @@ export default function RepairAssignPage() {
   const handleAssignClick = (wo: AssignWO) => {
     setSelectedWo(wo);
     setSelectedTech(wo.assigneeId ? String(wo.assigneeId) : "");
+    setSelectedTeam((wo.teamIds || []).filter((id) => id !== wo.assigneeId));
     setAssignOpen(true);
   };
 
@@ -191,6 +195,7 @@ export default function RepairAssignPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           assigned_to: Number(selectedTech),
+          team_ids: [Number(selectedTech), ...selectedTeam],
           status: "in_progress",
           acknowledged_at: new Date().toISOString().slice(0, 19).replace("T", " "),
           actual_start_at: new Date().toISOString().slice(0, 19).replace("T", " "),
@@ -253,6 +258,11 @@ export default function RepairAssignPage() {
             <Badge label={row.status === "in_progress" ? "กำลังซ่อม" : "มอบหมายแล้ว"} variant={statusColors[row.status] || "neutral"} />
             <Avatar name={row.assignee} src={row.assigneeAvatar || undefined} size="sm" tooltip={row.assignee} />
             <Text type="body" size="sm">{row.assignee}</Text>
+            {(row.teamIds || []).length > 1 && (
+              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>
+                +{(row.teamIds || []).length - 1} ทีม
+              </span>
+            )}
           </HStack>
         );
       },
@@ -378,25 +388,42 @@ export default function RepairAssignPage() {
               )}
             </VStack>
             <VStack gap={1}>
-              <Text type="body" weight="bold">เลือกช่างซ่อมบำรุง *</Text>
-              {(() => {
-                const sel = technicians.find((t) => t.value === selectedTech);
-                return sel ? (
-                  <HStack gap={2} vAlign="center" style={{ marginBottom: 4 }}>
-                    <Avatar name={sel.label.split(" (")[0]} src={sel.avatar || undefined} size="sm" />
-                    <Text type="body" size="sm" weight="semibold">{sel.label.split(" (")[0]}</Text>
-                    <Text type="body" size="sm" color="secondary">{sel.label.includes("(") ? `(${sel.label.split(" (")[1]}` : ""}</Text>
-                  </HStack>
-                ) : null;
-              })()}
+              <Text type="body" weight="bold">หัวหน้าชุด (ผู้รับผิดชอบหลัก) *</Text>
               <Selector
-                label="เลือกช่าง"
+                label="เลือกหัวหน้าชุด"
                 isLabelHidden
-                placeholder="เลือกช่าง..."
+                placeholder="เลือกหัวหน้าชุด..."
                 options={technicians}
                 value={selectedTech}
                 onChange={(v) => setSelectedTech(String(v))}
               />
+            </VStack>
+            <VStack gap={1}>
+              <Text type="body" weight="bold">ทีมซ่อมร่วม (เลือกเพิ่มได้หลายคน)</Text>
+              <Text type="body" size="sm" color="secondary">ช่างในทีมจะเห็นงานนี้ใน "งานของฉัน" และรับ LINE แจ้งเตือนด้วย</Text>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 6, maxHeight: 200, overflowY: "auto", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 8 }}>
+                {technicians
+                  .filter((t) => t.value !== selectedTech)
+                  .map((t) => {
+                    const tid = Number(t.value);
+                    const checked = selectedTeam.includes(tid);
+                    return (
+                      <label key={t.value} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 8, cursor: "pointer", background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() =>
+                            setSelectedTeam((prev) =>
+                              checked ? prev.filter((x) => x !== tid) : [...prev, tid]
+                            )
+                          }
+                        />
+                        <Avatar name={t.label.split(" (")[0]} src={t.avatar || undefined} size="sm" />
+                        <Text type="body" size="sm" weight={checked ? "semibold" : undefined}>{t.label.split(" (")[0]}</Text>
+                      </label>
+                    );
+                  })}
+              </div>
             </VStack>
           </VStack>
         </div>

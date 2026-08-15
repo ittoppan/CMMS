@@ -4,6 +4,7 @@ header('Access-Control-Allow-Origin: *');
 
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/assignees.php';
 session_start();
 
 $resource = $_GET['resource'] ?? 'work-orders';
@@ -80,6 +81,7 @@ try {
              LEFT JOIN asset_registry a ON p.asset_id = a.id
              ORDER BY p.id DESC"
         )->fetchAll(PDO::FETCH_ASSOC);
+        attachWorkTeams($data, 'pm_am');
         echo json_encode(['status' => 'success', 'code' => 200, 'count' => count($data), 'data' => $data], JSON_UNESCAPED_UNICODE);
     } elseif ($resource === 'borrowing') {
         $data = $pdo->query("SELECT * FROM equipment_borrowing ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);

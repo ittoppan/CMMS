@@ -20,6 +20,7 @@ export default function PMCreatePage() {
   const [users, setUsers] = useState<any[]>([]);
   const [assetId, setAssetId] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
+  const [teamMembers, setTeamMembers] = useState<number[]>([]);
   const [title, setTitle] = useState("");
   const [frequency, setFrequency] = useState("monthly");
   const [description, setDescription] = useState("");
@@ -70,6 +71,7 @@ export default function PMCreatePage() {
           description,
           asset_id: assetId,
           assigned_to: assignedTo ? Number(assignedTo) : null,
+          team_ids: teamMembers,
           frequency_type: frequency,
           frequency_interval: 1,
           due_date: dueDate || null,
@@ -146,6 +148,25 @@ export default function PMCreatePage() {
             onChange={setAssignedTo}
             options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
           />
+
+          <VStack gap={1}>
+            <Text type="body" weight="bold">ทีมผู้ปฏิบัติงาน (เลือกเพิ่มได้หลายคน)</Text>
+            <Text type="body" size="sm" color="secondary">ช่างที่เลือกจะเห็นงาน PM นี้ใน "งานของฉัน" — ไม่บังคับ</Text>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 6, maxHeight: 180, overflowY: "auto", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 8 }}>
+              {users
+                .filter(u => String(u.id) !== assignedTo)
+                .map(u => {
+                  const tid = Number(u.id);
+                  const checked = teamMembers.includes(tid);
+                  return (
+                    <label key={u.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 8, cursor: "pointer", background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
+                      <input type="checkbox" checked={checked} onChange={() => setTeamMembers(prev => checked ? prev.filter(x => x !== tid) : [...prev, tid])} />
+                      <Text type="body" size="sm" weight={checked ? "semibold" : undefined}>{u.full_name || u.username || `#${u.id}`}</Text>
+                    </label>
+                  );
+                })}
+            </div>
+          </VStack>
           
           <Selector
             label="รอบความถี่ *"

@@ -35,6 +35,7 @@ interface PMTask extends Record<string, unknown> {
   frequency: string;
   nextDue: string;
   assignee: string;
+  teamNames: string[];
   status: "pending" | "in_progress" | "completed" | "overdue" | "skipped";
 }
 
@@ -90,6 +91,7 @@ export default function PMSchedulePage() {
           frequency: row.frequency_type || "monthly",
           nextDue: row.due_date || "-",
           assignee: row.assigned_name || row.assigned_to || "-",
+          teamNames: Array.isArray(row.team) ? row.team.map((m: any) => m.full_name || "") : [],
           status: row.status || "pending",
         }));
         setTasks(fetched);
@@ -147,7 +149,21 @@ export default function PMSchedulePage() {
       renderCell: (item) => <Badge label={freqLabels[item.frequency] || item.frequency} variant="neutral" />,
     },
     { key: "nextDue", header: "วันครบกำหนด", width: proportional(1.5) },
-    { key: "assignee", header: "ผู้รับผิดชอบ", width: proportional(1.5) },
+    {
+      key: "assignee",
+      header: "ผู้รับผิดชอบ",
+      width: proportional(1.5),
+      renderCell: (item) => (
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Text type="body" size="sm">{item.assignee}</Text>
+          {item.teamNames.length > 1 && (
+            <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>
+              +{item.teamNames.length - 1} ทีม
+            </span>
+          )}
+        </HStack>
+      ),
+    },
     {
       key: "status",
       header: "สถานะ",
