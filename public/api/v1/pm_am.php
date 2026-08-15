@@ -35,7 +35,7 @@ try {
             break;
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at'];
+            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at', 'inspector_signature', 'operator_signature', 'operator_name', 'reviewer_signature', 'signed_at'];
             $cols = []; $vals = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $cols[] = $col; $vals[] = $data[$col]; }
@@ -58,7 +58,7 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
-            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at'];
+            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at', 'inspector_signature', 'operator_signature', 'operator_name', 'reviewer_signature', 'signed_at'];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }

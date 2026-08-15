@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
+import { Grid } from "@astryxdesign/core/Grid";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -10,6 +11,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { useRouter } from "next/navigation";
@@ -68,6 +70,16 @@ export default function PMChecksheetPage() {
   const [pending, setPending] = useState(0);
   const { showToast } = useToast();
 
+  // ── ลายเซ็นยืนยัน: ผู้ตรวจเช็ค (ช่าง) + ผู้ควบคุมเครื่อง ──
+  const [sigModalOpen, setSigModalOpen] = useState(false);
+  const [inspectorSig, setInspectorSig] = useState<string>("");
+  const [operatorSig, setOperatorSig] = useState<string>("");
+  const [operatorName, setOperatorName] = useState<string>("");
+  const [currentUserName, setCurrentUserName] = useState<string>("");
+  const inspectorCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const operatorCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawingSigRef = useRef<"inspector" | "operator" | null>(null);
+
   useEffect(() => {
     setPending(pendingCount());
     const off = subscribeOnline(() => setPending(pendingCount()));
@@ -82,6 +94,7 @@ export default function PMChecksheetPage() {
       .then((res) => res.json())
       .then((json) => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
+        if (json?.user?.full_name) setCurrentUserName(String(json.user.full_name));
       })
       .catch(() => { /* offline */ });
   }, []);
@@ -207,12 +220,69 @@ export default function PMChecksheetPage() {
     setChecklist((prev) => prev.map((item) => (item.id === id ? { ...item, note } : item)));
   };
 
+  // ── วาดลายเซ็นบน canvas (เมาส์/นิ้ว) — แยกช่องผู้ตรวจเช็คกับผู้ควบคุมเครื่อง ──
+  const startSig = (which: "inspector" | "operator") => (e: any) => {
+    drawingSigRef.current = which;
+    drawSig(e);
+  };
+  const stopSig = () => {
+    const which = drawingSigRef.current;
+    drawingSigRef.current = null;
+    if (!which) return;
+    const canvas = which === "inspector" ? inspectorCanvasRef.current : operatorCanvasRef.current;
+    if (canvas) {
+      const dataUrl = canvas.toDataURL();
+      if (which === "inspector") setInspectorSig(dataUrl);
+      else setOperatorSig(dataUrl);
+    }
+  };
+  const drawSig = (e: any) => {
+    const which = drawingSigRef.current;
+    if (!which) return;
+    const canvas = which === "inspector" ? inspectorCanvasRef.current : operatorCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "var(--cmms-text-primary)";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+  const clearSig = (which: "inspector" | "operator") => {
+    const canvas = which === "inspector" ? inspectorCanvasRef.current : operatorCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (which === "inspector") setInspectorSig("");
+    else setOperatorSig("");
+  };
+
   const allFilled =
     checklist.length > 0 &&
     checklist.every((item) => (item.type === "value" ? item.value.trim() !== "" : item.status !== null));
 
-  const handleSubmit = async () => {
+  // กด "บันทึกผลการทำ PM" → เปิดช่องเซ็นลายเซ็นก่อน แล้วค่อยบันทึกจริง
+  const handleSubmit = () => {
     if (!selectedPlan) return;
+    setSigModalOpen(true);
+  };
+
+  const confirmSave = async () => {
+    if (!selectedPlan) return;
+    if (!inspectorSig.trim() || !operatorSig.trim()) {
+      showToast("error", "กรุณาเซ็นครบทั้ง 2 ช่องก่อนบันทึก (ผู้ตรวจเช็ค และ ผู้ควบคุมเครื่อง)");
+      return;
+    }
+    if (!operatorName.trim()) {
+      showToast("error", "กรุณากรอกชื่อผู้ควบคุมเครื่อง");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -223,6 +293,10 @@ export default function PMChecksheetPage() {
         completed_at: now,
         last_done_date: now.slice(0, 10),
         completed_by: currentUserId || null,
+        inspector_signature: inspectorSig,
+        operator_signature: operatorSig,
+        operator_name: operatorName.trim(),
+        signed_at: now,
         checklist: JSON.stringify(
           checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
         ),
@@ -232,6 +306,7 @@ export default function PMChecksheetPage() {
         enqueue({ kind: "pm_checksheet", label: `เช็คชีท PM: ${selectedPlan.title}`, url: `/api/v1/pm_am.php?id=${selectedPlan.id}`, method: "PUT", body });
         setPending(pendingCount());
         setSubmitting(false);
+        setSigModalOpen(false);
         showToast("success", `บันทึกผล PM “${selectedPlan.title}” ไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์`);
         setSelectedPlanId("");
         setSelectedPlan(null);
@@ -247,6 +322,7 @@ export default function PMChecksheetPage() {
       const json = await res.json();
       if (json.success) {
         showToast("success", `บันทึกผลการทำ PM ${selectedPlan.title} เรียบร้อยแล้ว`);
+        setSigModalOpen(false);
         // รีเซ็ตฟอร์ม
         setSelectedPlanId("");
         setSelectedPlan(null);
@@ -269,6 +345,10 @@ export default function PMChecksheetPage() {
           completed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
           last_done_date: new Date().toISOString().slice(0, 10),
           completed_by: currentUserId || null,
+          inspector_signature: inspectorSig,
+          operator_signature: operatorSig,
+          operator_name: operatorName.trim(),
+          signed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
           checklist: JSON.stringify(
             checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
           ),
@@ -276,6 +356,7 @@ export default function PMChecksheetPage() {
         },
       });
       setPending(pendingCount());
+      setSigModalOpen(false);
       showToast("success", `บันทึกผล PM “${selectedPlan.title}” ไว้ในเครื่องแล้ว — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์`);
       setSelectedPlanId("");
       setSelectedPlan(null);
@@ -284,6 +365,28 @@ export default function PMChecksheetPage() {
     }
     setSubmitting(false);
   };
+
+  const renderSigCanvas = (which: "inspector" | "operator") => (
+    <canvas
+      ref={which === "inspector" ? inspectorCanvasRef : operatorCanvasRef}
+      width={280}
+      height={90}
+      onMouseDown={startSig(which)}
+      onMouseUp={stopSig}
+      onMouseMove={drawSig}
+      onTouchStart={startSig(which)}
+      onTouchEnd={stopSig}
+      onTouchMove={drawSig}
+      style={{
+        border: "2px dashed var(--cmms-primary)",
+        borderRadius: 8,
+        background: "#FFFFFF",
+        cursor: "crosshair",
+        touchAction: "none",
+        width: "100%",
+      }}
+    />
+  );
 
   if (loading) {
     return (
@@ -486,6 +589,88 @@ export default function PMChecksheetPage() {
         </div>
       )}
 
+      {/* ── ลายเซ็นยืนยันการทำ PM: ผู้ตรวจเช็ค + ผู้ควบคุมเครื่อง ── */}
+      {sigModalOpen && selectedPlan && (
+        <Dialog isOpen onOpenChange={(open) => { if (!open && !submitting) setSigModalOpen(false); }}>
+          <DialogHeader title={`ลงนามยืนยันการทำ PM: ${selectedPlan.title}`} />
+          <VStack gap={4} style={{ padding: 24 }}>
+            <Grid columns={2} gap={4}>
+              <Field label={`ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`} inputID="inspectorSigCanvas">
+                <VStack gap={1}>
+                  {renderSigCanvas("inspector")}
+                  <HStack hAlign="between" vAlign="center">
+                    <Text type="body" size="sm" color="secondary">วาดด้วยเมาส์/นิ้ว</Text>
+                    <button type="button" onClick={() => clearSig("inspector")} className="text-xs text-slate-500 underline">ล้าง</button>
+                  </HStack>
+                </VStack>
+              </Field>
+
+              <Field label="ลายเซ็นผู้ควบคุมเครื่อง *" inputID="operatorSigCanvas">
+                <VStack gap={1}>
+                  {renderSigCanvas("operator")}
+                  <HStack hAlign="between" vAlign="center">
+                    <Text type="body" size="sm" color="secondary">วาดด้วยเมาส์/นิ้ว</Text>
+                    <button type="button" onClick={() => clearSig("operator")} className="text-xs text-slate-500 underline">ล้าง</button>
+                  </HStack>
+                  <TextInput
+                    label="ชื่อผู้ควบคุมเครื่อง"
+                    isLabelHidden
+                    placeholder="กรอกชื่อผู้ควบคุมเครื่อง..."
+                    value={operatorName}
+                    onChange={setOperatorName}
+                  />
+                </VStack>
+              </Field>
+            </Grid>
+
+            {(!inspectorSig.trim() || !operatorSig.trim() || !operatorName.trim()) && (
+              <HStack gap={2} vAlign="center">
+                <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--cmms-danger)" }} />
+                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-danger)" }}>
+                  กรุณาเซ็นครบทั้ง 2 ช่อง และกรอกชื่อผู้ควบคุมเครื่อง ก่อนบันทึกผล
+                </Text>
+              </HStack>
+            )}
+
+            {inspectorSig.trim() && operatorSig.trim() && (
+              <HStack gap={3} vAlign="center">
+                {inspectorSig && (
+                  <VStack gap={1}>
+                    <Text type="body" size="sm" color="secondary">ผู้ตรวจเช็ค</Text>
+                    <img src={inspectorSig} alt="ลายเซ็นผู้ตรวจเช็ค" style={{ height: 44, background: "#fff", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                  </VStack>
+                )}
+                {operatorSig && (
+                  <VStack gap={1}>
+                    <Text type="body" size="sm" color="secondary">ผู้ควบคุมเครื่อง ({operatorName || "-"})</Text>
+                    <img src={operatorSig} alt="ลายเซ็นผู้ควบคุมเครื่อง" style={{ height: 44, background: "#fff", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                  </VStack>
+                )}
+              </HStack>
+            )}
+
+            <HStack hAlign="end" gap={2}>
+              <button
+                type="button"
+                onClick={() => setSigModalOpen(false)}
+                disabled={submitting}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={confirmSave}
+                disabled={submitting}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                {submitting ? "กำลังบันทึก..." : "ยืนยันและบันทึกผล PM"}
+              </button>
+            </HStack>
+          </VStack>
+        </Dialog>
+      )}
     </VStack>
   );
 }
