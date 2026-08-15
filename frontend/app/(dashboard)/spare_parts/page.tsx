@@ -45,6 +45,7 @@ import {
   CheckCircleIcon,
   CubeIcon,
   ExclamationTriangleIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
 import AndonLamp from "@/components/AndonLamp";
@@ -209,6 +210,7 @@ function ItemsCard({
   setPage,
   onEdit,
   onDelete,
+  onRefresh,
 }: {
   parts: SparePart[];
   filtered: SparePart[];
@@ -220,9 +222,93 @@ function ItemsCard({
   setPage: (v: number) => void;
   onEdit: (item: SparePart) => void;
   onDelete: (item: SparePart) => void;
+  onRefresh: () => void;
 }) {
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const isNarrow = useMediaQuery("(max-width: 1024px)");
+
+  // ── Batch image upload state ──
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchFiles, setBatchFiles] = useState<Record<number, { file: File; preview: string } | null>>({});
+  const [batchUploading, setBatchUploading] = useState(false);
+  const [batchMsg, setBatchMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const selectedParts = parts.filter((p) => selectedIds.has(p.rawId));
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    const pageIds = paged.map((p) => p.rawId);
+    if (pageIds.length === 0) return;
+    const allSelected = pageIds.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      pageIds.forEach((id) => (allSelected ? next.delete(id) : next.add(id)));
+      return next;
+    });
+  };
+
+  const pickFile = (id: number, file: File | null) => {
+    setBatchFiles((prev) => {
+      if (prev[id]) URL.revokeObjectURL(prev[id]!.preview);
+      return { ...prev, [id]: file ? { file, preview: URL.createObjectURL(file) } : null };
+    });
+  };
+
+  const uploadBatch = async () => {
+    const targets = selectedParts.filter((p) => batchFiles[p.rawId]);
+    if (targets.length === 0) {
+      setBatchMsg({ kind: "err", text: "กรุณาเลือกไฟล์รูปอย่างน้อย 1 รายการ" });
+      return;
+    }
+    setBatchUploading(true);
+    setBatchMsg(null);
+    let okCount = 0;
+    const fails: string[] = [];
+    for (const p of targets) {
+      const chosen = batchFiles[p.rawId];
+      if (!chosen) continue;
+      try {
+        const fd = new FormData();
+        fd.append("folder", "spares");
+        fd.append("file", chosen.file);
+        const upRes = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
+        const upJson = await upRes.json();
+        if (!upJson.url) throw new Error(upJson.error || "อัปโหลดไม่สำเร็จ");
+        const putRes = await fetch(`/api/v1/spare_parts.php?id=${p.rawId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_url: upJson.url }),
+        });
+        const putJson = await putRes.json();
+        if (!putJson.success && putJson.message !== "Updated") throw new Error("บันทึกไม่สำเร็จ");
+        okCount++;
+      } catch (e) {
+        console.error(e);
+        fails.push(p.code);
+      }
+    }
+    setBatchUploading(false);
+    if (fails.length === 0) {
+      setBatchMsg({ kind: "ok", text: `อัปโหลดรูปสำเร็จ ${okCount} รายการ` });
+      setBatchFiles({});
+      setSelectedIds(new Set());
+      setSelectMode(false);
+      setBatchOpen(false);
+      onRefresh();
+      setTimeout(() => setBatchMsg(null), 4000);
+    } else {
+      setBatchMsg({ kind: "err", text: `สำเร็จ ${okCount} รายการ · ล้มเหลว: ${fails.join(", ")}` });
+    }
+  };
 
   return (
     <Section>
@@ -235,9 +321,50 @@ function ItemsCard({
               </div>
               <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>รายการอะไหล่</Heading>
               <span className="cmms-count-pill">{filtered.length} รายการ</span>
+              {selectMode && (
+                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: "var(--cmms-text-secondary)" }}>
+                  <input
+                    type="checkbox"
+                    checked={paged.length > 0 && paged.every((p) => selectedIds.has(p.rawId))}
+                    onChange={toggleSelectAll}
+                    style={{ width: 16, height: 16, accentColor: "var(--cmms-primary)", cursor: "pointer" }}
+                  />
+                  เลือกทั้งหมดในหน้า
+                </label>
+              )}
             </HStack>
           </StackItem>
           <HStack gap={2}>
+            {selectMode ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  icon={<Icon icon={PhotoIcon} size="sm" />}
+                  label={selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน..."}
+                  isDisabled={selectedIds.size === 0 || batchUploading}
+                  onClick={() => setBatchOpen(true)}
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  label="ยกเลิก"
+                  isDisabled={batchUploading}
+                  onClick={() => {
+                    setSelectMode(false);
+                    setSelectedIds(new Set());
+                  }}
+                />
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="secondary"
+                icon={<Icon icon={PhotoIcon} size="sm" />}
+                label="อัปโหลดรูปหลายรายการ"
+                onClick={() => setSelectMode(true)}
+              />
+            )}
             <Button
               label="เพิ่มรายการอะไหล่"
               variant="secondary"
@@ -310,24 +437,34 @@ function ItemsCard({
                     </VStack>
                   }
                   startContent={
-                    thumb ? (
-                      <Thumbnail src={thumb} alt={item.name} label={item.name} />
-                    ) : (
-                      <div
-                        style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 6,
-                          backgroundColor: "var(--cmms-bg-muted)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "var(--cmms-text-muted)",
-                        }}
-                      >
-                        <Icon icon={CubeIcon} size="sm" />
-                      </div>
-                    )
+                    <HStack gap={2} vAlign="center">
+                      {selectMode && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(item.rawId)}
+                          onChange={() => toggleSelect(item.rawId)}
+                          style={{ width: 18, height: 18, accentColor: "var(--cmms-primary)", cursor: "pointer" }}
+                        />
+                      )}
+                      {thumb ? (
+                        <Thumbnail src={thumb} alt={item.name} label={item.name} />
+                      ) : (
+                        <div
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 6,
+                            backgroundColor: "var(--cmms-bg-muted)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "var(--cmms-text-muted)",
+                          }}
+                        >
+                          <Icon icon={CubeIcon} size="sm" />
+                        </div>
+                      )}
+                    </HStack>
                   }
                   endContent={
                     <VStack gap={1} hAlign="end">
@@ -371,7 +508,7 @@ function ItemsCard({
                       </HStack>
                     </VStack>
                   }
-                  onClick={() => onEdit(item)}
+                  onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
                 />
               );
             })}
@@ -388,6 +525,72 @@ function ItemsCard({
           />
         )}
       </VStack>
+
+      {/* Batch upload dialog */}
+      <Dialog isOpen={batchOpen} onOpenChange={setBatchOpen}>
+        <DialogHeader title={`อัปโหลดรูปอะไหล่ (${selectedParts.length} รายการ)`} onOpenChange={setBatchOpen} />
+        <VStack gap={4} style={{ padding: 24 }}>
+          {batchMsg && (
+            <Banner
+              status={batchMsg.kind === "ok" ? "success" : "error"}
+              title={batchMsg.kind === "ok" ? "สำเร็จ" : "มีข้อผิดพลาด"}
+              description={batchMsg.text}
+              isDismissable={false}
+            />
+          )}
+          <Text type="body" size="sm" color="secondary">
+            เลือกไฟล์รูปให้แต่ละรายการ (png/jpg/gif/webp/svg สูงสุด 6 MB ต่อไฟล์) แล้วกดอัปโหลดทั้งหมด
+          </Text>
+          {selectedParts.map((p) => {
+            const thumb = partThumbSrc(p);
+            const chosen = batchFiles[p.rawId];
+            return (
+              <HStack key={p.rawId} gap={3} vAlign="center" wrap="wrap" style={{ padding: 10, border: "1px solid var(--cmms-border)", borderRadius: 10 }}>
+                {thumb ? (
+                  <Thumbnail src={thumb} alt={p.name} label={p.name} />
+                ) : (
+                  <div style={{ width: 40, height: 40, borderRadius: 6, background: "var(--cmms-bg-muted)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-text-muted)" }}>
+                    <Icon icon={CubeIcon} size="sm" />
+                  </div>
+                )}
+                <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
+                  <Text type="body" size="sm" weight="bold">{p.code}</Text>
+                  <Text type="body" size="sm" color="secondary">{p.name}</Text>
+                </VStack>
+                <label style={{ cursor: "pointer" }}>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                    style={{ display: "none" }}
+                    onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
+                  />
+                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
+                    {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
+                  </span>
+                </label>
+                {chosen && (
+                  <>
+                    <img src={chosen.preview} alt="preview" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover" }} />
+                    <Text type="body" size="sm" color="secondary" style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {chosen.file.name}
+                    </Text>
+                  </>
+                )}
+              </HStack>
+            );
+          })}
+          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
+            <Button label="ยกเลิก" variant="secondary" isDisabled={batchUploading} onClick={() => setBatchOpen(false)} />
+            <Button
+              label={batchUploading ? "กำลังอัปโหลด..." : "อัปโหลดทั้งหมด"}
+              variant="primary"
+              isLoading={batchUploading}
+              isDisabled={batchUploading || selectedParts.filter((p) => batchFiles[p.rawId]).length === 0}
+              onClick={uploadBatch}
+            />
+          </HStack>
+        </VStack>
+      </Dialog>
     </Section>
   );
 }
@@ -740,6 +943,7 @@ export default function SparePartsPage() {
                   setPage={setPage}
                   onEdit={handleEdit}
                   onDelete={setDeleteTarget}
+                  onRefresh={fetchParts}
                 />
               )}
             </div>
