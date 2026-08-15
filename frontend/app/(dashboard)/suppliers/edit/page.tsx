@@ -5,15 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { Switch } from "@astryxdesign/core/Switch";
-import { HomeIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, TruckIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
 
 function EditSupplierContent() {
@@ -113,19 +111,28 @@ function EditSupplierContent() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">SUPPLIERS EDIT · CMMS-TOPPAN</Text>
-          <Heading level={2}>แก้ไขข้อมูลผู้ผลิต</Heading>
-          <Text type="body" color="secondary">ปรับปรุงข้อมูลผู้ผลิตหรือผู้จัดจำหน่ายในระบบ</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SUPPLIERS EDIT · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลผู้ผลิต</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <TruckIcon className="w-3.5 h-3.5" /> Supplier
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ปรับปรุงข้อมูลผู้ผลิตหรือผู้จัดจำหน่ายในระบบ
+          </Text>
         </VStack>
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
-          onClick={() => (router.push("/suppliers"))}
-        />
-      </Card>
+        <button
+          type="button"
+          onClick={() => router.push("/suppliers")}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <HomeIcon className="w-4 h-4" />
+          ย้อนกลับ
+        </button>
+      </div>
 
       <Card elevation="low" padding={6}>
         {loadingData ? (
@@ -220,8 +227,22 @@ function EditSupplierContent() {
             </FormLayout>
 
             <HStack gap={3} hAlign="end">
-              <Button label="ยกเลิก" variant="secondary" onClick={() => router.push("/suppliers")} />
-              <Button label="บันทึกข้อมูล" variant="primary" onClick={handleSubmit} isLoading={submitting} />
+              <button
+                type="button"
+                onClick={() => router.push("/suppliers")}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleSubmit}
+                className="cmms-btn-primary"
+              >
+                <PencilSquareIcon className="w-4 h-4" />
+                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              </button>
             </HStack>
           </VStack>
         )}
