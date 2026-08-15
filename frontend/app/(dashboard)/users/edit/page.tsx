@@ -10,8 +10,6 @@ import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Switch } from "@astryxdesign/core/Switch";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Avatar } from "@astryxdesign/core/Avatar";
 import { 
   PencilSquareIcon,
@@ -154,19 +152,28 @@ function EditUserContent() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">USERS EDIT · CMMS-TOPPAN</Text>
-          <Heading level={2}>แก้ไขโปรไฟล์และข้อมูลผู้ใช้</Heading>
-          <Text type="body" color="secondary">ปรับปรุงโปรไฟล์ รูปภาพประจำตัว รหัสผ่าน และสิทธิ์การใช้งานในระบบ CMMS</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS EDIT · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>แก้ไขโปรไฟล์และข้อมูลผู้ใช้</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <PencilSquareIcon className="w-3.5 h-3.5" /> ผู้ใช้งานระบบ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            ปรับปรุงโปรไฟล์ รูปภาพประจำตัว รหัสผ่าน และสิทธิ์การใช้งานในระบบ CMMS
+          </Text>
         </VStack>
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
-          onClick={() => (router.push("/users"))}
-        />
-      </Card>
+        <button
+          type="button"
+          onClick={() => router.push("/users")}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          ย้อนกลับ
+        </button>
+      </div>
 
       <Card elevation="low" padding={6}>
         {loading ? (
@@ -214,7 +221,7 @@ function EditUserContent() {
                         padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
                         fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
                       }}>
-                        <Icon icon={PhotoIcon} size="xsm" /> อัปโหลดรูปภาพ...
+                        <PhotoIcon className="w-4 h-4" /> อัปโหลดรูปภาพ...
                         <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
                       </label>
                     </HStack>
@@ -335,18 +342,22 @@ function EditUserContent() {
 
       {!loading && (
         <HStack hAlign="end" gap={3}>
-          <Button
-            label="ยกเลิก"
-            variant="secondary"
+          <button
+            type="button"
             onClick={() => (window.location.href = "/users")}
-          />
-          <Button
-            label="บันทึกการแก้ไข"
-            variant="primary"
-            isLoading={submitting}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            disabled={submitting}
             onClick={handleSubmit}
-            icon={<Icon icon={PencilSquareIcon} size="sm" />}
-          />
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0068B5] hover:brightness-110 transition-all duration-300 shadow-sm disabled:opacity-60"
+          >
+            <PencilSquareIcon className="w-4 h-4" />
+            {submitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+          </button>
         </HStack>
       )}
     </VStack>

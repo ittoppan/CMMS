@@ -6,9 +6,6 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
@@ -18,7 +15,6 @@ import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Spinner } from "@astryxdesign/core/Spinner";
-import { Link } from "@astryxdesign/core/Link";
 import { Avatar } from "@astryxdesign/core/Avatar";
 import CountUp from "react-countup";
 import { usePageLayout } from "@/lib/pageLayout";
@@ -48,13 +44,13 @@ interface User extends Record<string, unknown> {
   updatedAt: string;
 }
 
-const roleColors: Record<string, "error" | "warning" | "info" | "success" | "neutral"> = {
-  admin: "error",
-  manager: "warning",
-  supervisor: "info",
-  technician: "success",
-  operator: "neutral",
-  viewer: "neutral",
+const roleChipStyle: Record<string, React.CSSProperties> = {
+  admin: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
+  manager: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
+  supervisor: { background: "rgba(30,136,229,0.12)", color: "#1E88E5" },
+  technician: { background: "rgba(16,185,129,0.12)", color: "#059669" },
+  operator: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  viewer: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
 };
 
 const roleLabels: Record<string, string> = {
@@ -231,10 +227,9 @@ export default function UsersPage() {
       header: "บทบาท",
       width: proportional(1),
       renderCell: (item: User) => (
-        <Badge
-          label={roleLabels[item.role] || item.role}
-          variant={roleColors[item.role] || "neutral"}
-        />
+        <span className="cmms-andon-chip" style={roleChipStyle[item.role] || roleChipStyle.viewer}>
+          {roleLabels[item.role] || item.role}
+        </span>
       ),
     },
     {
@@ -242,10 +237,14 @@ export default function UsersPage() {
       header: "สถานะ",
       width: proportional(0.8),
       renderCell: (item: User) => (
-        <Badge
-          variant={item.isActive ? "success" : "neutral"}
-          label={item.isActive ? "ใช้งาน" : "ปิดใช้งาน"}
-        />
+        <span
+          className="cmms-andon-chip"
+          style={item.isActive
+            ? { background: "rgba(16,185,129,0.12)", color: "#059669" }
+            : { background: "rgba(100,116,139,0.12)", color: "#64748B" }}
+        >
+          {item.isActive ? "ใช้งาน" : "ปิดใช้งาน"}
+        </span>
       ),
     },
     {
@@ -254,20 +253,22 @@ export default function UsersPage() {
       width: proportional(1.2),
       renderCell: (item: User) => (
         <HStack gap={1}>
-          <Button
-            label="แก้ไข"
-            variant="secondary"
-            size="sm"
-            icon={<Icon icon={PencilSquareIcon} size="sm" />}
+          <button
+            type="button"
             onClick={() => router.push(`/users/edit?id=${item.rawId}`)}
-          />
-          <Button
-            label="ลบ"
-            variant="destructive"
-            size="sm"
-            icon={<Icon icon={TrashIcon} size="sm" />}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+          >
+            <PencilSquareIcon className="w-3.5 h-3.5" />
+            แก้ไข
+          </button>
+          <button
+            type="button"
             onClick={() => setDeleteTarget(item)}
-          />
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+          >
+            <TrashIcon className="w-3.5 h-3.5" />
+            ลบ
+          </button>
         </HStack>
       ),
     },
@@ -284,30 +285,34 @@ export default function UsersPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {/* Header */}
       <div style={layoutStyle("header")}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">USER MANAGEMENT · CMMS-TOPPAN</Text>
-          <Heading level={2}>ผู้ใช้งานระบบ (User Management)</Heading>
-          <Text type="body" color="secondary">จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USER MANAGEMENT · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>ผู้ใช้งานระบบ (User Management)</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <UsersIcon className="w-3.5 h-3.5" /> ผู้ใช้ {stats.total} คน
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS
+          </Text>
         </VStack>
         <HStack gap={2}>
-          <Button
-            label="รีเฟรช"
-            variant="secondary"
-            size="md"
+          <button
+            type="button"
             onClick={fetchUsers}
-            icon={<Icon icon={ArrowPathIcon} size="sm" />}
-          />
-          <Link href="/users/create">
-            <Button
-              label="เพิ่มผู้ใช้ใหม่"
-              variant="primary"
-              size="md"
-              icon={<Icon icon={PlusIcon} size="sm" />}
-            />
-          </Link>
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          >
+            <ArrowPathIcon className="w-4 h-4" />
+            รีเฟรช
+          </button>
+          <a href="/users/create" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0068B5] hover:brightness-110 transition-all duration-300 shadow-sm">
+            <PlusIcon className="w-4 h-4" />
+            เพิ่มผู้ใช้ใหม่
+          </a>
         </HStack>
-      </Card>
+      </div>
       </div>
 
       {error && (
@@ -352,7 +357,7 @@ export default function UsersPage() {
                   label="ค้นหา"
                   isLabelHidden
                   placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
-                  startIcon={<Icon icon={MagnifyingGlassIcon} />}
+                  startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                   value={search}
                   onChange={setSearch}
                   style={{ width: 350 }}
@@ -375,7 +380,7 @@ export default function UsersPage() {
               <Spinner />
             </div>
           ) : paged.length === 0 ? (
-            <EmptyState title="ไม่พบผู้ใช้" description="ลองเปลี่ยนตัวกรองหรือเพิ่มผู้ใช้ใหม่" icon={<Icon icon={UsersIcon} size="lg" />} />
+            <EmptyState title="ไม่พบผู้ใช้" description="ลองเปลี่ยนตัวกรองหรือเพิ่มผู้ใช้ใหม่" icon={<UsersIcon className="w-6 h-6" />} />
           ) : (
             <Table<User>
               data={paged}
@@ -408,23 +413,27 @@ export default function UsersPage() {
               ) : (
                 <>
                   <HStack gap={3} vAlign="center">
-                    <Icon icon={ExclamationTriangleIcon} size="md" color="error" />
+                    <ExclamationTriangleIcon className="w-5 h-5" style={{ color: "var(--cmms-danger)" }} />
                     <Text type="body">
                       คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ <strong>{deleteTarget.fullName} ({deleteTarget.username})</strong>? การดำเนินการนี้ไม่สามารถยกเลิกได้
                     </Text>
                   </HStack>
                   <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                    <Button
-                      label="ยกเลิก"
-                      variant="secondary"
+                    <button
+                      type="button"
                       onClick={() => setDeleteTarget(null)}
-                    />
-                    <Button
-                      label="ยืนยันลบผู้ใช้"
-                      variant="destructive"
-                      isLoading={deleting}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="button"
+                      disabled={deleting}
                       onClick={handleDelete}
-                    />
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#E11D48] hover:brightness-110 transition-all duration-300 shadow-sm disabled:opacity-60"
+                    >
+                      {deleting ? "กำลังลบ..." : "ยืนยันลบผู้ใช้"}
+                    </button>
                   </HStack>
                 </>
               )}

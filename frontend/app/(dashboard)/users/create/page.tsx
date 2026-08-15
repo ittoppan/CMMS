@@ -10,8 +10,6 @@ import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Switch } from "@astryxdesign/core/Switch";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Avatar } from "@astryxdesign/core/Avatar";
 import { 
   UserPlusIcon,
@@ -122,19 +120,28 @@ export default function CreateUserPage() {
 
   return (
     <VStack gap={6}>
-      <Card elevation="low" padding={6} className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">USERS CREATE · CMMS-TOPPAN</Text>
-          <Heading level={2}>สร้างบัญชีผู้ใช้ใหม่</Heading>
-          <Text type="body" color="secondary">เพิ่มข้อมูลพนักงาน กำหนดบทบาท สิทธิ์ และอัปโหลดรูปโปรไฟล์</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS CREATE · CMMS-TOPPAN</Text>
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Heading level={2} style={{ color: "#fff" }}>สร้างบัญชีผู้ใช้ใหม่</Heading>
+            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <UserPlusIcon className="w-3.5 h-3.5" /> ผู้ใช้งานระบบ
+            </span>
+          </HStack>
+          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+            เพิ่มข้อมูลพนักงาน กำหนดบทบาท สิทธิ์ และอัปโหลดรูปโปรไฟล์
+          </Text>
         </VStack>
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          icon={<Icon icon={ArrowLeftIcon} size="sm" />}
-          onClick={() => (router.push("/users"))}
-        />
-      </Card>
+        <button
+          type="button"
+          onClick={() => router.push("/users")}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          ย้อนกลับ
+        </button>
+      </div>
 
       <Card elevation="low" padding={6}>
         <VStack gap={5}>
@@ -179,7 +186,7 @@ export default function CreateUserPage() {
                       padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
                       fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
                     }}>
-                      <Icon icon={PhotoIcon} size="xsm" /> อัปโหลดรูปภาพ...
+                      <PhotoIcon className="w-4 h-4" /> อัปโหลดรูปภาพ...
                       <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
                     </label>
                   </HStack>
@@ -304,18 +311,22 @@ export default function CreateUserPage() {
       </Card>
 
       <HStack hAlign="end" gap={3}>
-        <Button
-          label="ยกเลิก"
-          variant="secondary"
+        <button
+          type="button"
           onClick={() => (window.location.href = "/users")}
-        />
-        <Button
-          label="สร้างผู้ใช้ใหม่"
-          variant="primary"
-          isLoading={submitting}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          disabled={submitting}
           onClick={handleSubmit}
-          icon={<Icon icon={UserPlusIcon} size="sm" />}
-        />
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0068B5] hover:brightness-110 transition-all duration-300 shadow-sm disabled:opacity-60"
+        >
+          <UserPlusIcon className="w-4 h-4" />
+          {submitting ? "กำลังสร้าง..." : "สร้างผู้ใช้ใหม่"}
+        </button>
       </HStack>
     </VStack>
   );
