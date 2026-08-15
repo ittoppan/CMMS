@@ -131,9 +131,38 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
 
     $url = 'https://api.line.me/v2/bot/message/push';
 
-    // Normalize รูป: รองรับทั้งแบบมี label (before/after) และ array ธรรมดา
-    $beforeUrls = []; $afterUrls = []; $flatUrls = [];
-    if (array_key_exists('before', $photos) || array_key_exists('after', $photos)) {
+    // Normalize รูป: รองรับ 1) items (รูป+ชื่อทีละรายการ เช่น ใบเบิกอะไหล่) 2) before/after 3) array ธรรมดา
+    $beforeUrls = []; $afterUrls = []; $flatUrls = []; $spareItemRows = [];
+    if (isset($photos['items']) && is_array($photos['items'])) {
+        // แต่ละรายการ = แถวแนวนอน [รูปเล็ก] [ชื่อ + จำนวน]
+        foreach (array_slice($photos['items'], 0, 8) as $it) {
+            $itName = (string)($it['name'] ?? '');
+            $itUrl  = trim((string)($it['url'] ?? ''));
+            if ($itName === '' && $itUrl === '') continue;
+            $rowContents = [];
+            if ($itUrl !== '') {
+                $rowContents[] = [
+                    'type' => 'image',
+                    'url' => $itUrl,
+                    'size' => 'sm',
+                    'aspectRatio' => '1:1',
+                    'aspectMode' => 'cover',
+                    'flex' => 2,
+                    'action' => ['type' => 'uri', 'uri' => $defaultTapUrl],
+                ];
+            }
+            $rowContents[] = [
+                'type' => 'box',
+                'layout' => 'vertical',
+                'flex' => 5,
+                'justifyContent' => 'center',
+                'contents' => [
+                    ['type' => 'text', 'text' => $itName, 'size' => 'xs', 'weight' => 'bold', 'wrap' => true, 'color' => '#1e293b'],
+                ],
+            ];
+            $spareItemRows[] = ['type' => 'box', 'layout' => 'horizontal', 'margin' => 'md', 'spacing' => 'sm', 'contents' => $rowContents];
+        }
+    } elseif (array_key_exists('before', $photos) || array_key_exists('after', $photos)) {
         $beforeUrls = array_values(array_filter(array_slice((array)($photos['before'] ?? []), 0, 2)));
         $afterUrls  = array_values(array_filter(array_slice((array)($photos['after'] ?? []), 0, 2)));
     } else {
@@ -197,6 +226,11 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         $bodyContents[] = ['type' => 'separator', 'margin' => 'md'];
     }
     foreach ($photoBoxes as $pb) $bodyContents[] = $pb;
+    // แถวรูป+ชื่อทีละรายการ (ใบเบิกอะไหล่) — ต่อท้ายเนื้อหา
+    if ($spareItemRows) {
+        $bodyContents[] = ['type' => 'text', 'text' => 'รายการที่ขอเบิก', 'size' => 'xs', 'weight' => 'bold', 'color' => '#b45309', 'margin' => 'lg'];
+        foreach ($spareItemRows as $ir) $bodyContents[] = $ir;
+    }
 
     // ── สไตล์ละเอียด (จากหน้า /settings/notifications) — backward compatible ──
     $headerTextColor = $opts['header_text_color'] ?? '#ffffff';
