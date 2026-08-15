@@ -69,8 +69,15 @@ try {
                 attachWorkTeams($single, 'repair');
                 echo json_encode($single[0]);
             } else {
-                $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id ORDER BY r.created_at DESC');
-                $rows = $stmt->fetchAll();
+                // กรองตามเครื่อง: ?asset_code=A-PT-01 (ใช้หน้า scan — ประวัติซ่อมต่อเครื่อง)
+                if (!empty($_GET['asset_code'])) {
+                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id WHERE a.code = ? ORDER BY r.created_at DESC');
+                    $stmt->execute([(string)$_GET['asset_code']]);
+                    $rows = $stmt->fetchAll();
+                } else {
+                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id ORDER BY r.created_at DESC');
+                    $rows = $stmt->fetchAll();
+                }
                 attachWorkTeams($rows, 'repair');
                 echo json_encode($rows);
             }

@@ -273,10 +273,12 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         $postbackRid = (int)($pq['id'] ?? 0);
     }
     $isPostback = $postbackRid > 0 && ($opts['btn_postback'] ?? '0') == '1';
+    // prefix ของ postback data (ค่าเริ่มต้น spare — อนุมัติเบิกอะไหล่; ใช้ pm_defer สำหรับเลื่อนกำหนด PM)
+    $postbackPrefix = preg_match('/^[a-z0-9_]+$/', (string)($opts['postback_prefix'] ?? '')) ? $opts['postback_prefix'] : 'spare';
     $footerButtons[] = [
         'type' => 'button',
         'action' => $isPostback
-            ? ['type' => 'postback', 'data' => 'spare_approve=' . $postbackRid, 'label' => $btnLabel]
+            ? ['type' => 'postback', 'data' => $postbackPrefix . '_approve=' . $postbackRid, 'label' => $btnLabel]
             : ['type' => 'uri', 'label' => $btnLabel, 'uri' => $defaultTapUrl],
         'style' => $btnStyle,
         'color' => $btnStyle === 'link' ? $btnColor : ($btnStyle === 'secondary' ? $btnTxtColor : $btnColor),
@@ -288,7 +290,7 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         $footerButtons[] = [
             'type' => 'button',
             'action' => $isPostback
-                ? ['type' => 'postback', 'data' => 'spare_reject=' . $postbackRid, 'label' => $btn2Label]
+                ? ['type' => 'postback', 'data' => $postbackPrefix . '_reject=' . $postbackRid, 'label' => $btn2Label]
                 : ['type' => 'uri', 'label' => $btn2Label, 'uri' => $btn2Url],
             'style' => 'secondary',
             'color' => $btnColor,
@@ -608,6 +610,47 @@ function lineNotifySpareRequest(array $vars = [], $targetUrl = '', array $photos
     $sent = 0;
     foreach (array_unique($targets) as $tid) {
         if (sendLineTemplatePush($tid, 'line_tpl_spare_request', $vars, $targetUrl, $photos)) $sent++;
+    }
+    return $sent;
+}
+
+/**
+ * ส่ง LINE ขอเลื่อนกำหนด PM ให้หัวหน้า/แอดมินอนุมัติ (pm_defer postback)
+ * เงื่อนไข: line_notify_enabled=1 และ pm_deferral_enabled=1
+ */
+function notifyPmDeferral($pmId, array $vars = [], $targetUrl = '') {
+    if (getSettingValue('line_notify_enabled', '0') !== '1') return 0;
+    if (getSettingValue('pm_deferral_enabled', '1') !== '1') return 0;
+    $pdo = getDb();
+    $st = $pdo->query("SELECT line_user_id FROM users WHERE role_id IN (1,2) AND is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''");
+    $targets = $st->fetchAll(PDO::FETCH_COLUMN);
+    if (empty($targets)) {
+        $gid = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
+        if ($gid && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$gid;
+    }
+    $sent = 0;
+    $title = (string)($vars['title'] ?? 'แผน PM');
+    $body  = (string)($vars['body'] ?? '');
+    $url   = $targetUrl !== '' ? $targetUrl : rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/?id=' . (int)$pmId;
+    foreach (array_unique($targets) as $tid) {
+        $ok = sendLinePushMessage(
+            (string)$tid,
+            "📋 ขอเลื่อนกำหนด PM #{$pmId}",
+            $body,
+            $url,
+            [],
+            '#d97706',
+            "📋 ขออนุมัติเลื่อนกำหนด PM #{$pmId}",
+            '✅ อนุมัติเลื่อนกำหนด',
+            [
+                'btn2_label'     => '❌ ไม่อนุมัติ',
+                'btn_postback'   => '1',
+                'postback_prefix'=> 'pm_defer',
+                'tpl_key'        => 'line_tpl_pm_deferral',
+                'body_wrap'      => '1',
+            ]
+        );
+        if ($ok) $sent++;
     }
     return $sent;
 }

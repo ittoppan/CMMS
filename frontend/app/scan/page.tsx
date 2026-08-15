@@ -39,6 +39,9 @@ export default function ScanLandingPage() {
   // แผน PM ที่รอดำเนินการของเครื่องที่สแกน (จากตาราง pm_am จริง)
   const [pmPlans, setPmPlans] = useState<any[]>([]);
   const [pmLoading, setPmLoading] = useState(false);
+  // ประวัติการซ่อมล่าสุดของเครื่องนี้ (จาก repair จริง — ต้องล็อกอิน ไม่งั้นซ่อน)
+  const [repairHistory, setRepairHistory] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     try {
@@ -116,6 +119,17 @@ export default function ScanLandingPage() {
         })
         .catch(() => { /* ไม่มี PM = แสดงว่าง */ })
         .finally(() => setPmLoading(false));
+
+      // ประวัติการซ่อมของเครื่องนี้ (ล่าสุด 5 ใบ) — ถ้าไม่ล็อกอิน (401) จะซ่อนหัวข้อ
+      setHistoryLoading(true);
+      API(`/api/v1/repair.php?asset_code=${encodeURIComponent(assetCode)}`)
+        .then((r) => {
+          if (!r.ok) throw new Error("unauthorized");
+          return r.json();
+        })
+        .then((rows: any[]) => setRepairHistory(Array.isArray(rows) ? rows.slice(0, 5) : []))
+        .catch(() => setRepairHistory([]))
+        .finally(() => setHistoryLoading(false));
     }
   }, [assetCode]);
 
@@ -271,6 +285,47 @@ export default function ScanLandingPage() {
                   })}
                 </VStack>
               ) : null}
+
+              {/* ประวัติการซ่อมล่าสุดของเครื่องนี้ (จากใบซ่อมจริง) */}
+              {!historyLoading && repairHistory.length > 0 && (
+                <VStack gap={2} style={{ width: "100%" }}>
+                  <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start" }}>
+                    ประวัติการซ่อมล่าสุด ({repairHistory.length})
+                  </Text>
+                  {repairHistory.map((h) => (
+                    <Card
+                      key={h.id}
+                      padding={3}
+                      width="100%"
+                      style={{ border: "1px solid var(--cmms-border)" }}
+                    >
+                      <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
+                        <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
+                          <Text type="body" weight="bold" size="sm" style={{ lineHeight: 1.4 }}>
+                            {h.work_order_no || `ใบซ่อม #${h.id}`}
+                          </Text>
+                          <Text type="body" size="sm" color="secondary">
+                            {h.title || h.issue_description || "-"}
+                          </Text>
+                        </VStack>
+                        <span
+                          className="cmms-andon-chip"
+                          style={{
+                            background:
+                              String(h.status || "") === "completed" ? "var(--cmms-success)" :
+                              String(h.status || "") === "in_progress" ? "var(--cmms-primary)" :
+                              String(h.status || "") === "open" ? "var(--cmms-warning)" :
+                              String(h.status || "") === "rejected" ? "var(--cmms-danger)" : "var(--cmms-bg-muted)",
+                            color: String(h.status || "") === "completed" || String(h.status || "") === "in_progress" || String(h.status || "") === "rejected" ? "#ffffff" : "var(--cmms-text-secondary)",
+                          }}
+                        >
+                          {String(h.status || "-")}
+                        </span>
+                      </HStack>
+                    </Card>
+                  ))}
+                </VStack>
+              )}
 
               <Text type="body" size="sm" color="secondary">
                 <Link href={`/repair-request?asset_code=${encodeURIComponent(assetCode)}`}>

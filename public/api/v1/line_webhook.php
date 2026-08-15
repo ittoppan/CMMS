@@ -164,6 +164,44 @@ try {
                 }
                 continue;
             }
+            /* ---- ขอเลื่อนกำหนด PM: pm_defer_approve=<id> / pm_defer_reject=<id> ---- */
+            if (preg_match('/^pm_defer_(approve|reject)=(\d+)$/', $pdata, $dm)) {
+                $decision = $dm[1] === 'approve' ? 'approved' : 'rejected';
+                $pmid = (int)$dm[2];
+                // สิทธิ์: เฉพาะ Admin/Manager (role_id 1,2) ที่ผูก LINE
+                $u = $pdo->prepare("SELECT id, full_name, role_id FROM users WHERE line_user_id = ? AND is_active = 1");
+                $u->execute([$userId]);
+                $approver = $u->fetch();
+                if (!$approver || (int)$approver['role_id'] > 2) {
+                    lwReply($replyToken, "⚠️ เฉพาะหัวหน้า/แอดมินเท่านั้นที่พิจารณาการเลื่อนกำหนด PM ได้", $token);
+                    continue;
+                }
+                $q = $pdo->prepare("SELECT title, due_date, reschedule_to, reschedule_reason, deferral_status, assigned_to FROM pm_am WHERE id = ?");
+                $q->execute([$pmid]);
+                $pm = $q->fetch();
+                if (!$pm) {
+                    lwReply($replyToken, "❌ ไม่พบแผน PM #{$pmid} ในระบบ", $token);
+                    continue;
+                }
+                $upd = $pdo->prepare("UPDATE pm_am SET deferral_status = ?, deferral_approved_by = ?, deferral_approved_at = NOW(), due_date = IF(? = 'approved', reschedule_to, due_date) WHERE id = ? AND deferral_status = 'pending'");
+                $upd->execute([$decision, $approver['full_name'], $decision, $pmid]);
+                if ($upd->rowCount() === 0) {
+                    lwReply($replyToken, "ℹ️ การเลื่อนกำหนดของ {$pm['title']} ถูกพิจารณาไปแล้ว (สถานะ: " . ($pm['deferral_status'] ?: 'none') . ")", $token);
+                    continue;
+                }
+                $verb = $decision === 'approved' ? 'อนุมัติ' : 'ไม่อนุมัติ';
+                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเลื่อนกำหนด PM \"{$pm['title']}\"" . ($decision === 'approved' ? " เป็น {$pm['reschedule_to']}" : '') . nl . "ผู้พิจารณา: {$approver['full_name']}", $token);
+                // แจ้งผู้ขอเลื่อน (ถ้าผูก LINE)
+                if (!empty($pm['assigned_to'])) {
+                    $tech = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
+                    $tech->execute([(int)$pm['assigned_to']]);
+                    $techLid = $tech->fetchColumn();
+                    if ($techLid) {
+                        lwPush($techLid, ($decision === 'approved' ? "✅ " : "❌ ") . "การเลื่อนกำหนด PM \"{$pm['title']}\" ถูก{$verb}โดย {$approver['full_name']} — ดูรายละเอียดในระบบ CMMS", $token);
+                    }
+                }
+                continue;
+            }
             continue;
         }
 

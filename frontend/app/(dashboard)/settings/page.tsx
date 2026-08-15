@@ -94,7 +94,14 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   escalation_alert: { label: "เปิดการแจ้งเตือนงานด่วนค้าง (Escalation)" },
   escalation_hours: { label: "งานค้างเกินกี่ชั่วโมงถึงแจ้งเตือน", hint: "ค่าเริ่มต้น 24 ชม." },
   // data retention
+  lang_default: { label: "ภาษาหลักของระบบ", hint: "ไทย / English — ใช้เป็นค่าเริ่มต้นของหน้า UI (ฐานภาษา)" },
   log_retention_enabled: { label: "ลบ notification_logs อัตโนมัติ", hint: "เปิดแล้วระบบจะลบประวัติการแจ้งเตือนที่เก่ากว่าที่กำหนดทุกวัน (ผ่าน watchdog)" },
+  // daily summary
+  daily_summary_enabled: { label: "สรุปสถานะประจำวันเข้า LINE", hint: "ส่งสรุปทุกเช้า: งานค้าง/ใหม่/เสร็จ, PM วันนี้ + ค้างเกิน, สต็อกต่ำ" },
+  // auto requisition
+  auto_req_low_stock: { label: "สร้างใบขอซื้ออัตโนมัติเมื่อสต็อกต่ำ", hint: "รันวันละครั้งผ่าน watchdog: รวมอะไหล่ที่ต่ำกว่า min stock เป็นใบขอซื้อ 1 ใบ + แจ้ง LINE หัวหน้า" },
+  // pm deferral
+  pm_deferral_enabled: { label: "อนุญาตเลื่อนกำหนด PM", hint: "ช่างขอเลื่อนกำหนดพร้อมเหตุผล → หัวหน้าอนุมัติผ่าน LINE ก่อนกำหนดจะเปลี่ยน" },
   log_retention_days: { label: "เก็บประวัติการแจ้งเตือนไว้กี่วัน", hint: "รายการที่เก่ากว่านี้จะถูกลบอัตโนมัติวันละครั้ง" },
   iso_footer_note: { label: "ข้อความท้ายเอกสาร ISO" },
   iso_form_code_prefix: { label: "รหัสนำหน้าแบบฟอร์ม ISO" },
@@ -188,6 +195,7 @@ const BOOLEAN_KEYS = new Set([
   "require_root_cause", "auto_assign_pm", "auto_assign_repair", "require_approval_repair",
   "spare_require_approval", "escalation_alert", "push_alert_enabled", "smtp_enabled",
   "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
+  "daily_summary_enabled", "auto_req_low_stock", "pm_deferral_enabled",
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
@@ -220,6 +228,10 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "Sarabun", label: "Sarabun (ทางการ ISO — แนะนำ)" },
     { value: "Prompt", label: "Prompt (โมเดิร์นทันสมัย)" },
     { value: "Kanit", label: "Kanit (กลมมนหนาเด่น)" },
+  ],
+  lang_default: [
+    { value: "th", label: "ไทย (Thai)" },
+    { value: "en", label: "English" },
   ],
   log_retention_days: [
     { value: "30", label: "30 วัน (1 เดือน)" },

@@ -4,6 +4,12 @@ require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
+require_once __DIR__ . '/../../../src/csrf.php';
+// CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
+if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
+    enforceCsrf();
+}
+
 
 /**
  * Sage 300 Sync API — v2 (configurable pull mode)

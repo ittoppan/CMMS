@@ -183,28 +183,63 @@ try {
             }
         }
         # 1.2) daily alert check (วันละ 1 ครั้ง) — PM ใกล้กำหนด + สต็อกต่ำ
-#         $alertDateFile = Join-Path $logDir "alert_check.date"
-#         $todayStr = Get-Date -Format "yyyy-MM-dd"
-#         $lastCheck = ""
-#         if (Test-Path -LiteralPath $alertDateFile) { $lastCheck = ((Get-Content -LiteralPath $alertDateFile -Raw) -replace "[\r\n]", "").Trim() }
-#         if ($lastCheck -ne $todayStr) {
-#             Write-Log "Daily alert check ($todayStr)..."
-#             $checkScript = Join-Path $root "scripts\alert_check.php"
-#             if ($phpExe -and (Test-Path -LiteralPath $checkScript)) {
-#                 try {
-#                     # อ่าน output ของ php เป็น UTF-8 (กันตัวหนังสือไทยเพี้ยนใน log)
-#                     [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-#                     & $phpExe $checkScript 2>&1 | ForEach-Object { Write-Log "  alert_check: $_" }
-#                     Set-Content -LiteralPath $alertDateFile -Value $todayStr -Encoding ascii
-#                     Write-Log "Daily alert check done"
-#                 } catch {
-#                     Write-Log "Daily alert check FAILED: $_"
-#                 }
-#             } else {
-#                 Write-Log "alert_check.php not found or php missing ($phpExe)"
-#             }
-#         }
+        $alertDateFile = Join-Path $logDir "alert_check.date"
+        $todayStr = Get-Date -Format "yyyy-MM-dd"
+        $lastCheck = ""
+        if (Test-Path -LiteralPath $alertDateFile) { $lastCheck = ((Get-Content -LiteralPath $alertDateFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastCheck -ne $todayStr) {
+            Write-Log "Daily alert check ($todayStr)..."
+            $checkScript = Join-Path $root "scripts\alert_check.php"
+            if ($phpExe -and (Test-Path -LiteralPath $checkScript)) {
+                try {
+                    # อ่าน output ของ php เป็น UTF-8 (กันตัวหนังสือไทยเพี้ยนใน log)
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    & $phpExe $checkScript 2>&1 | ForEach-Object { Write-Log "  alert_check: $_" }
+                    Set-Content -LiteralPath $alertDateFile -Value $todayStr -Encoding ascii
+                    Write-Log "Daily alert check done"
+                } catch {
+                    Write-Log "Daily alert check FAILED: $_"
+                }
+            } else {
+                Write-Log "alert_check.php not found or php missing ($phpExe)"
+            }
+        }
 
+
+        # 1.3) daily summary (วันละ 1 ครั้ง) - สรุปสถานะประจำวันเข้า LINE
+        $dailyFile = Join-Path $logDir "daily_summary.date"
+        $lastDaily = ""
+        if (Test-Path -LiteralPath $dailyFile) { $lastDaily = ((Get-Content -LiteralPath $dailyFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastDaily -ne $todayStr) {
+            $dailyScript = Join-Path $root "scripts\daily_summary.php"
+            if ($phpExe -and (Test-Path -LiteralPath $dailyScript)) {
+                try {
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    $dailyOut = (& $phpExe $dailyScript 2>&1 | Out-String).Trim()
+                    Write-Log "daily summary: $dailyOut"
+                    Set-Content -LiteralPath $dailyFile -Value $todayStr -Encoding ascii
+                } catch {
+                    Write-Log "daily summary FAILED: $_"
+                }
+            }
+        }
+        # 1.3b) auto requisition (วันละ 1 ครั้ง) - ใบขอซื้อจากสต็อกต่ำ
+        $reqFile = Join-Path $logDir "auto_requisition.date"
+        $lastReq = ""
+        if (Test-Path -LiteralPath $reqFile) { $lastReq = ((Get-Content -LiteralPath $reqFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastReq -ne $todayStr) {
+            $reqScript = Join-Path $root "scripts\auto_requisition.php"
+            if ($phpExe -and (Test-Path -LiteralPath $reqScript)) {
+                try {
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    $reqOut = (& $phpExe $reqScript 2>&1 | Out-String).Trim()
+                    Write-Log "auto requisition: $reqOut"
+                    Set-Content -LiteralPath $reqFile -Value $todayStr -Encoding ascii
+                } catch {
+                    Write-Log "auto requisition FAILED: $_"
+                }
+            }
+        }
         # 1.4) ตรวจ Apache :8081 (PHP เว็บหลัก) — Next.js ขึ้นแต่ Apache ตาย = API ทั้งหมดพัง
         $apacheUrl = "http://127.0.0.1:8081/login.php"
         if (-not ((Test-Url $apacheUrl) -eq 200)) {
