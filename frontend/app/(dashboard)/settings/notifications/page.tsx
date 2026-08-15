@@ -45,14 +45,50 @@ const TEMPLATE_ORDER = [
   "line_tpl_low_stock",
   "line_tpl_completed",
   "line_tpl_sage_approval",
+  "line_pm_due_soon",
+  "line_weekly_report",
+  "line_system_alerts",
 ] as const;
 
-const TEMPLATE_META: Record<string, { label: string; icon: string; hint: string; wired: string }> = {
+interface TplMeta {
+  label: string;
+  icon: string;
+  hint: string;
+  wired: string;
+  plain?: boolean;
+  toggleType?: "setting" | "template";
+  toggleKey?: string;
+  sample?: string;
+}
+
+const TEMPLATE_META: Record<string, TplMeta> = {
   line_tpl_breakdown: { label: "แจ้งซ่อมด่วน (Breakdown)", icon: "🚨", hint: "ส่งเมื่อมีใบแจ้งซ่อมฉุกเฉิน / เครื่องหยุดทำงาน", wired: "ใบแจ้งซ่อมใหม่ทุกใบ + งาน CRITICAL (repair.php)" },
   line_tpl_pm_overdue: { label: "แผน PM เกินกำหนด", icon: "📋", hint: "ส่งเมื่อแผน PM ยังไม่เสร็จเกินกำหนดชำระ", wired: "สคริปต์ alert_check.php รายวัน" },
   line_tpl_low_stock: { label: "สต็อกต่ำกว่าจุดสั่งซื้อ", icon: "📦", hint: "ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock", wired: "สคริปต์ alert_check.php รายวัน (summary)" },
   line_tpl_completed: { label: "งานซ่อมเสร็จเรียบร้อย", icon: "✅", hint: "ส่งเมื่อปิดใบสั่งงานซ่อมสำเร็จ", wired: "ปิดงานซ่อม (สถานะ completed) — repair.php" },
   line_tpl_sage_approval: { label: "ขออนุมัติเบิก Sage", icon: "📑", hint: "ส่งเมื่อมีการขออนุมัติเบิกอะไหล่ผ่าน Sage 300", wired: "คำขออนุมัติเบิกอะไหล่ (ApprovalService)" },
+  // ── เหตุการณ์ที่ส่งข้อความธรรมดา (ไม่มี Flex template — เปิด/ปิดได้) ──
+  line_pm_due_soon: {
+    label: "PM ใกล้กำหนด (เตือนช่าง)", icon: "⏰",
+    hint: "ส่งข้อความเตือนถึงช่างผู้รับผิดชอบก่อนถึงกำหนดชำระ (ตาม maintenance_alert_days)",
+    wired: "สคริปต์ alert_check.php รายวัน — ข้อความธรรมดา",
+    plain: true, toggleType: "template", toggleKey: "line_tpl_pm_overdue",
+    sample: "⏰ PM ใกล้กำหนด\nเครื่องจักร: MC-001 - เครื่องพิมพ์ 4 สี\nรายการ: หล่อลื่นแกนหลัก\nกำหนดชำระ: 2026-08-20 (เหลือ 3 วัน)\nผู้รับผิดชอบ: นายช่าง A",
+  },
+  line_weekly_report: {
+    label: "รายงานสรุปประจำสัปดาห์", icon: "📊",
+    hint: "สรุปงานซ่อม / PM / สต็อกประจำสัปดาห์ (ทุกวันจันทร์) — ข้อความธรรมดา",
+    wired: "สคริปต์ weekly_report.php (ทุกวันจันทร์)",
+    plain: true, toggleType: "setting", toggleKey: "line_weekly_report",
+    sample: "📊 สรุป CMMS-TPT ประจำสัปดาห์\nงานซ่อม: เปิดใหม่ 5 / ปิด 3\nPM: เสร็จ 7 / ค้าง 1\nอะไหล่ต่ำสต็อก: 12 รายการ",
+  },
+  line_system_alerts: {
+    label: "การแจ้งเตือนระบบ / process", icon: "🔧",
+    hint: "สถานะ server / tunnel / watchdog — แนะนำปิดไว้ (ค่าเริ่มต้น) กันข้อความเต็ม LINE; เหตุการณ์ระบบแจ้งผ่าน Telegram แอดมินแทน",
+    wired: "สคริปต์ watchdog-notify.php",
+    plain: true, toggleType: "setting", toggleKey: "line_system_alerts",
+    sample: "🔧 CMMS Watchdog\ntunnel URL เปลี่ยนเป็น ...\nเวลา: 2026-08-15 09:00",
+  },
 };
 
 const VARIABLES = [
@@ -122,6 +158,25 @@ export default function NotificationsSettingsPage() {
 
   const setSettingField = (key: string, value: string) => {
     setSettings((s) => ({ ...s, [key]: value }));
+  };
+
+  // ── เหตุการณ์ข้อความธรรมดา (ไม่มี Flex template) ──
+  const tplMeta = TEMPLATE_META[activeTemplate];
+  const isPlain = tplMeta?.plain === true;
+  const plainOn = isPlain
+    ? tplMeta.toggleType === "template"
+      ? (templates[tplMeta.toggleKey ?? ""]?.enabled ?? "1") === "1"
+      : (settings[tplMeta.toggleKey ?? ""] ?? "1") === "1"
+    : activeTpl.enabled === "1";
+  const setPlainToggle = (on: boolean) => {
+    const v = on ? "1" : "0";
+    if (!tplMeta) return;
+    if (tplMeta.toggleType === "template") {
+      const k = tplMeta.toggleKey ?? "";
+      setTemplates((t) => ({ ...t, [k]: { ...(t[k] ?? activeTpl), enabled: v } }));
+    } else {
+      setSettingField(tplMeta.toggleKey ?? "", v);
+    }
   };
 
   const insertVar = (v: string) => {
@@ -671,11 +726,11 @@ export default function NotificationsSettingsPage() {
               />
 
               <HStack gap={2} vAlign="center" wrap="wrap">
-                <Badge label={activeTpl.enabled === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={activeTpl.enabled === "1" ? "info" : "neutral"} />
+                <Badge label={plainOn ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={plainOn ? "info" : "neutral"} />
                 <Switch
                   label="ส่งการแจ้งเตือนเหตุการณ์นี้"
-                  value={activeTpl.enabled === "1"}
-                  onChange={(c) => setTplField("enabled", c ? "1" : "0")}
+                  value={plainOn}
+                  onChange={(c) => (isPlain ? setPlainToggle(c) : setTplField("enabled", c ? "1" : "0"))}
                 />
               </HStack>
 
@@ -689,6 +744,22 @@ export default function NotificationsSettingsPage() {
                 <Text type="body" size="sm" color="secondary" style={{ marginTop: 4 }}>{TEMPLATE_META[activeTemplate].hint}</Text>
               </Card>
 
+              {isPlain ? (
+                <>
+                  <Card padding={4} style={{ background: "var(--cmms-info-light, #EFF6FF)", border: "1px solid var(--cmms-border)" }}>
+                    <VStack gap={2}>
+                      <Text type="body" size="sm" weight="semibold">เหตุการณ์นี้ส่งเป็นข้อความธรรมดา (ไม่ใช่ Flex Template)</Text>
+                      <Text type="body" size="sm" color="secondary">
+                        ระบบสร้างข้อความให้อัตโนมัติ — เปิด/ปิดได้จากสวิตช์ด้านบน แต่ไม่สามารถปรับรูปแบบ/สี/รูปภาพได้ (ต่างจาก 5 เหตุการณ์แรกที่ปรับ Flex ได้)
+                      </Text>
+                      <div style={{ background: "#FFFFFF", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: "12px 14px", fontSize: "0.82rem", whiteSpace: "pre-wrap", color: "#334155", lineHeight: 1.6, fontFamily: "var(--cmms-font-body)" }}>
+                        {tplMeta.sample || "ข้อความตัวอย่างจากระบบ"}
+                      </div>
+                    </VStack>
+                  </Card>
+                </>
+              ) : (
+                <>
               <TextInput
                 label="หัวข้อการ์ด (Header Title)"
                 value={activeTpl.header_title ?? ""}
@@ -769,15 +840,19 @@ export default function NotificationsSettingsPage() {
                 value={activeTpl.btn_label ?? "เปิดดูในระบบ"}
                 onChange={(v) => setTplField("btn_label", v)}
               />
+                </>
+              )}
 
               <HStack hAlign="end" gap={2} wrap="wrap">
-                <Button
-                  label={testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
-                  variant="primary"
-                  icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                  isLoading={testing}
-                  onClick={handleTestSend}
-                />
+                {!isPlain && (
+                  <Button
+                    label={testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
+                    variant="primary"
+                    icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
+                    isLoading={testing}
+                    onClick={handleTestSend}
+                  />
+                )}
                 <Button
                   label={hasChanges ? `บันทึก (${hasChanges ? "มีการแก้ไข" : ""})` : "บันทึกการตั้งค่า"}
                   variant="secondary"
@@ -811,6 +886,8 @@ export default function NotificationsSettingsPage() {
               <Heading level={3}>พรีวิวบนแอป LINE มือถือ</Heading>
             </HStack>
 
+            {!isPlain && (
+            <>
             <div
               style={{
                 background: "#1e293b",
@@ -954,6 +1031,46 @@ export default function NotificationsSettingsPage() {
                   เป็น payload ตัวเดียวกับที่กด "ยิงทดสอบเข้า LINE" ส่งจริง — ตัวแปรในตัวอย่างถูกแทนค่าด้วยข้อมูลจำลอง
                 </Text>
               </VStack>
+            )}
+            </>
+            )}
+
+            {isPlain && (
+              <div
+                style={{
+                  background: "#1e293b",
+                  borderRadius: 28,
+                  padding: "18px 12px 26px",
+                  maxWidth: 340,
+                  margin: "0 auto",
+                  width: "100%",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+                  position: "relative",
+                  opacity: plainOn ? 1 : 0.45,
+                }}
+              >
+                {!plainOn && (
+                  <div style={{ position: "absolute", inset: 0, zIndex: 5, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ background: "#dc2626", color: "#ffffff", fontWeight: 800, fontSize: 12, padding: "8px 14px", borderRadius: 999, boxShadow: "0 6px 16px rgba(0,0,0,0.4)" }}>
+                      ปิดใช้งานอยู่ — ระบบจะไม่ส่งการแจ้งเตือนนี้
+                    </div>
+                  </div>
+                )}
+                <div style={{ textAlign: "center", marginBottom: 14 }}>
+                  <div style={{ width: 70, height: 6, background: "#475569", borderRadius: 999, margin: "0 auto 10px" }} />
+                </div>
+                <div style={{ background: "#8cabd9", borderRadius: 14, padding: 14, minHeight: 380, display: "flex", flexDirection: "column" }}>
+                  <div style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.85)", fontWeight: 700, marginBottom: 10 }}>
+                    CMMS-TOPPAN · ข้อความธรรมดา · {new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                  <div style={{ background: "#ffffff", borderRadius: 12, padding: "12px 14px", maxWidth: 280, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", fontSize: 12, color: "#334155", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                    {tplMeta.sample || "ข้อความตัวอย่างจากระบบ"}
+                  </div>
+                  <Text type="body" size="sm" color="secondary" style={{ marginTop: 14, fontSize: 11, textAlign: "center" }}>
+                    ข้อความจริงสร้างอัตโนมัติจากข้อมูลของระบบ — ตัวอย่างด้านบนเท่านั้น
+                  </Text>
+                </div>
+              </div>
             )}
 
             <VStack gap={1}>
