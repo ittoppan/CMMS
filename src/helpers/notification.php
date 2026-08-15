@@ -562,7 +562,7 @@ function lineNotifyAssigned($assigneeUserId, array $vars = [], $targetUrl = '') 
  * - ถ้าไม่มีใครผูก LINE → ส่งเข้ากลุ่ม LINE ช่าง (ถ้าตั้งไว้)
  * @return int จำนวนที่ส่งสำเร็จ
  */
-function lineNotifySpareRequest(array $vars = [], $targetUrl = '') {
+function lineNotifySpareRequest(array $vars = [], $targetUrl = '', array $photos = []) {
     if (getSettingValue('line_notify_enabled', '0') !== '1') return 0;
     $pdo = getDb();
     $st = $pdo->query("SELECT line_user_id FROM users WHERE role_id IN (1,2) AND is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''");
@@ -573,7 +573,7 @@ function lineNotifySpareRequest(array $vars = [], $targetUrl = '') {
     }
     $sent = 0;
     foreach (array_unique($targets) as $tid) {
-        if (sendLineTemplatePush($tid, 'line_tpl_spare_request', $vars, $targetUrl)) $sent++;
+        if (sendLineTemplatePush($tid, 'line_tpl_spare_request', $vars, $targetUrl, $photos)) $sent++;
     }
     return $sent;
 }

@@ -120,18 +120,23 @@ try {
             if (!empty($data['spare_parts']) && is_array($data['spare_parts']) && getSettingValue('line_notify_enabled', '0') === '1') {
                 try {
                     $sumParts = [];
+                    $sparePhotos = [];
                     $gCode = $pdo->prepare('SELECT code FROM spare_parts WHERE id = ?');
+                    $gImg = $pdo->prepare('SELECT image_url FROM spare_parts WHERE id = ?');
                     foreach ($data['spare_parts'] as $sp) {
                         $gCode->execute([(int)($sp['spare_part_id'] ?? 0)]);
                         $cd = $gCode->fetchColumn();
                         if ($cd) $sumParts[] = $cd . ' x ' . (float)($sp['quantity_used'] ?? 0);
+                        $gImg->execute([(int)($sp['spare_part_id'] ?? 0)]);
+                        $iu = (string)$gImg->fetchColumn();
+                        if ($iu !== '') $sparePhotos[] = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
                     }
                     lineNotifySpareRequest([
                         '{work_order_id}' => (string)($data['work_order_no'] ?? ''),
                         '{items_summary}' => implode(', ', $sumParts),
                         '{requester_name}' => (string)($data['receiver_name'] ?? '-'),
                         '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
-                    ], publicBaseUrl() . '/repair/view?id=' . $newId);
+                    ], publicBaseUrl() . '/repair/view?id=' . $newId, $sparePhotos);
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_request notify failed: ' . $e->getMessage());
                 }
@@ -260,18 +265,23 @@ try {
                         // 2) เบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ
                         if (isset($data['spare_parts']) && is_array($data['spare_parts']) && !empty($data['spare_parts'])) {
                             $sumParts = [];
+                            $sparePhotos = [];
                             $gCode = $pdo->prepare('SELECT code FROM spare_parts WHERE id = ?');
+                            $gImg = $pdo->prepare('SELECT image_url FROM spare_parts WHERE id = ?');
                             foreach ($data['spare_parts'] as $sp) {
                                 $gCode->execute([(int)($sp['spare_part_id'] ?? 0)]);
                                 $cd = $gCode->fetchColumn();
                                 if ($cd) $sumParts[] = $cd . ' x ' . (float)($sp['quantity_used'] ?? 0);
+                                $gImg->execute([(int)($sp['spare_part_id'] ?? 0)]);
+                                $iu = (string)$gImg->fetchColumn();
+                                if ($iu !== '') $sparePhotos[] = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
                             }
                             lineNotifySpareRequest([
                                 '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
                                 '{items_summary}' => implode(', ', $sumParts),
                                 '{requester_name}' => (string)($row['assigned_name'] ?? '-'),
                                 '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
-                            ], $detailUrl);
+                            ], $detailUrl, $sparePhotos);
                         }
                     }
                 }
