@@ -53,12 +53,15 @@ interface WorkOrderDetail {
   solution: string;
   costParts: number;
   costLabor: number;
+  costOutsource: number;
   downtimeMinutes: number;
   spareApprovalStatus: string;
   spareApprovedBy: string;
   spareApprovedAt: string;
   contaminateChecking?: string;
   outsourceBy?: string;
+  actualStartAt?: string;
+  repairTimeMinutes?: number;
   team: { user_id: number; role: string; full_name: string; status?: string; accepted_at?: string }[];
 }
 
@@ -150,6 +153,7 @@ export default function RepairViewDetailsPage() {
     solution: "-",
     costParts: 0,
     costLabor: 0,
+    costOutsource: 0,
     downtimeMinutes: 0,
     spareApprovalStatus: "none",
     spareApprovedBy: "",
@@ -185,12 +189,15 @@ export default function RepairViewDetailsPage() {
             solution: row.solution || row.resolution || "-",
             costParts: Number(row.cost_parts || 0),
             costLabor: Number(row.cost_labor || 0),
+            costOutsource: Number(row.cost_outsource || 0),
             downtimeMinutes: Number(row.downtime_minutes || 0),
             spareApprovalStatus: String(row.spare_approval_status || "none"),
             spareApprovedBy: String(row.spare_approved_by || ""),
             spareApprovedAt: String(row.spare_approved_at || ""),
             contaminateChecking: String(row.contaminate_checking || "not_checked"),
             outsourceBy: String(row.outsource_by || ""),
+            actualStartAt: String(row.actual_start_at || ""),
+            repairTimeMinutes: Number(row.repair_time_minutes || 0),
             team: Array.isArray(row.team) ? row.team : []
           });
         }
@@ -686,10 +693,12 @@ export default function RepairViewDetailsPage() {
             solution: wo.solution,
             costParts: wo.costParts,
             costLabor: wo.costLabor,
-            costOutsource: 0,
+            costOutsource: wo.costOutsource || 0,
             downtimeMinutes: wo.downtimeMinutes,
             contaminateChecking: wo.contaminateChecking,
             outsourceBy: wo.outsourceBy,
+            actualStartAt: wo.actualStartAt,
+            repairTimeMinutes: wo.repairTimeMinutes,
             parts,
           }}
         />
