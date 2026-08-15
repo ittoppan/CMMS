@@ -15,3 +15,6 @@ frontend/tsconfig.tsbuildinfo
 
 # Astryx design-system source (vendored copy — not used at runtime; installed via npm @astryxdesign/*)
 astryx-main/
+
+# Freebuff worktrees (internal)
+.freebuff/

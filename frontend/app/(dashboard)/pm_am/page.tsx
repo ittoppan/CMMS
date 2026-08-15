@@ -13,6 +13,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Link } from "@astryxdesign/core/Link";
 import { IconButton } from "@astryxdesign/core/IconButton";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Pagination } from "@astryxdesign/core/Pagination";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -37,6 +38,8 @@ interface PMTask extends Record<string, unknown> {
   assignee: string;
   teamNames: string[];
   status: "pending" | "in_progress" | "completed" | "overdue" | "skipped";
+  deferralStatus?: string;
+  rescheduleTo?: string;
 }
 
 const statusColors: Record<string, "neutral" | "blue" | "warning" | "success" | "error"> = {
@@ -93,6 +96,8 @@ export default function PMSchedulePage() {
           assignee: row.assigned_name || row.assigned_to || "-",
           teamNames: Array.isArray(row.team) ? row.team.map((m: any) => m.full_name || "") : [],
           status: row.status || "pending",
+          deferralStatus: row.deferral_status || "",
+          rescheduleTo: row.reschedule_to || "",
         }));
         setTasks(fetched);
       }
@@ -105,6 +110,56 @@ export default function PMSchedulePage() {
   };
 
   useEffect(() => { fetchPMs(); }, []);
+
+  const [deferTarget, setDeferTarget] = useState<PMTask | null>(null);
+  const [deferReason, setDeferReason] = useState("");
+  const [deferDate, setDeferDate] = useState("");
+  const [deferSaving, setDeferSaving] = useState(false);
+  const [deferMsg, setDeferMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const submitDeferral = async () => {
+    if (!deferTarget) return;
+    if (!deferDate || !deferReason.trim()) {
+      setDeferMsg({ kind: "err", text: "กรุณากรอกเหตุผลและวันที่ใหม่" });
+      return;
+    }
+    setDeferSaving(true);
+    setDeferMsg(null);
+    try {
+      const res = await fetch(`/api/v1/pm_am.php?id=${deferTarget.rawId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deferral_status: "pending",
+          reschedule_to: deferDate,
+          reschedule_reason: deferReason.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || "บันทึกไม่สำเร็จ");
+      setDeferMsg({ kind: "ok", text: "ส่งคำขอเลื่อนกำหนดแล้ว — รอหัวหน้าอนุมัติ (แจ้งผ่าน LINE)" });
+      setDeferTarget(null);
+      setDeferReason("");
+      setDeferDate("");
+      fetchPMs();
+    } catch (e) {
+      console.error(e);
+      setDeferMsg({ kind: "err", text: "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่" });
+    } finally {
+      setDeferSaving(false);
+    }
+  };
+
+  const deferBadge = (item: PMTask) => {
+    if (!item.deferralStatus) return null;
+    if (item.deferralStatus === "pending") {
+      return <span className="cmms-status warn"><span className="cmms-status-dot" />รออนุมัติเลื่อน</span>;
+    }
+    if (item.deferralStatus === "approved") {
+      return <span className="cmms-status ok"><span className="cmms-status-dot" />เลื่อนไป {item.rescheduleTo || "-"}</span>;
+    }
+    return <span className="cmms-status down"><span className="cmms-status-dot" />ไม่อนุมัติเลื่อน</span>;
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm("ยืนยันการลบแผน PM นี้หรือไม่?")) return;
@@ -169,7 +224,10 @@ export default function PMSchedulePage() {
       header: "สถานะ",
       width: proportional(1),
       renderCell: (item) => (
-        <Badge label={statusLabels[item.status] || item.status} variant={statusColors[item.status] || "neutral"} />
+        <VStack gap={1}>
+          <Badge label={statusLabels[item.status] || item.status} variant={statusColors[item.status] || "neutral"} />
+          {deferBadge(item)}
+        </VStack>
       ),
     },
     {
@@ -178,6 +236,19 @@ export default function PMSchedulePage() {
       width: proportional(2),
       renderCell: (item) => (
         <HStack gap={2}>
+          {item.status !== "completed" && item.deferralStatus !== "pending" && (
+            <Button
+              size="sm"
+              variant="secondary"
+              label="เลื่อนกำหนด"
+              onClick={() => {
+                setDeferTarget(item);
+                setDeferMsg(null);
+                setDeferReason("");
+                setDeferDate("");
+              }}
+            />
+          )}
           <Button
             size="sm"
             variant="secondary"
@@ -284,6 +355,50 @@ export default function PMSchedulePage() {
           )}
         </VStack>
       </Card>
+
+      {/* Dialog: เลื่อนกำหนด PM (ต้องอนุมัติโดยหัวหน้า) */}
+      <Dialog isOpen={!!deferTarget} onOpenChange={(o) => !o && setDeferTarget(null)}>
+        <DialogHeader title={deferTarget ? `เลื่อนกำหนด PM ${deferTarget.id}` : "เลื่อนกำหนด PM"} onOpenChange={() => setDeferTarget(null)} />
+        <VStack gap={4} style={{ padding: 24 }}>
+          {deferMsg && (
+            <Card padding={3} style={{ background: deferMsg.kind === "ok" ? "var(--cmms-success-light)" : "var(--cmms-danger-light)", border: `1px solid ${deferMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)"}` }}>
+              <Text type="body" size="sm">{deferMsg.text}</Text>
+            </Card>
+          )}
+          {deferTarget && (
+            <VStack gap={2}>
+              <Text type="body" size="sm" color="secondary">เครื่องจักร: {deferTarget.asset} · กำหนดเดิม: {deferTarget.nextDue}</Text>
+              <VStack gap={1}>
+                <Text type="body" size="sm" weight="semibold">วันที่ใหม่</Text>
+                <input
+                  type="date"
+                  value={deferDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setDeferDate(e.target.value)}
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
+                />
+              </VStack>
+              <VStack gap={1}>
+                <Text type="body" size="sm" weight="semibold">เหตุผลที่เลื่อน</Text>
+                <textarea
+                  value={deferReason}
+                  onChange={(e) => setDeferReason(e.target.value)}
+                  rows={3}
+                  placeholder="เช่น รออะไหล่ / ติดงานด่วน / เครื่องเดินอยู่ ไม่สามารถหยุดได้"
+                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box" }}
+                />
+              </VStack>
+              <Text type="body" size="sm" color="secondary">
+                เมื่อส่งคำขอ ระบบจะแจ้งเตือนหัวหน้า/แอดมินผ่าน LINE เพื่ออนุมัติ — กำหนดจะเปลี่ยนเมื่อได้รับการอนุมัติเท่านั้น
+              </Text>
+            </VStack>
+          )}
+          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
+            <Button label="ยกเลิก" variant="secondary" isDisabled={deferSaving} onClick={() => setDeferTarget(null)} />
+            <Button label="ส่งคำขอเลื่อนกำหนด" variant="primary" isLoading={deferSaving} onClick={submitDeferral} />
+          </HStack>
+        </VStack>
+      </Dialog>
     </VStack>
   );
 }

@@ -66,6 +66,7 @@ function settingsDefaultValues(): array {
         'timezone'              => 'Asia/Bangkok',
         'topbar_style'          => 'clean_white',
         'work_hours_per_day'    => '8',
+        'lang_default'          => 'th',  // ภาษาหลักของระบบ: th (ไทย) / en (English) — ฐาน i18n
         'auto_assign_calibration' => '0',
         'calibration_alert_days'  => '30',
 
@@ -73,6 +74,7 @@ function settingsDefaultValues(): array {
         'line_notify_enabled'   => '1',
         'line_system_alerts'   => '0',  // ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE - default ปิด (กัน LINE เต็ม)
         'line_weekly_report'   => '1',  // ส่งรายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์) เข้า LINE
+        'daily_summary_enabled' => '1',  // ส่งสรุปสถานะประจำวัน (ทุกเช้า) เข้า LINE
         'line_group_enabled'   => '1',  // ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (line_maintenance_group_id) - default เปิด
         'email_notify_enabled'  => '0',
         'low_stock_alert'       => '1',
@@ -103,6 +105,7 @@ function settingsDefaultValues(): array {
         'default_pm_frequency'  => 'monthly',
         'pm_lead_days'          => '7',
         'pm_reminder_days'      => '3',
+        'pm_deferral_enabled'   => '1',  // อนุญาตเลื่อนกำหนด PM พร้อมเหตุผล + อนุมัติหัวหน้า
 
         // ── repair ──
         'auto_assign_repair'    => '0',
@@ -115,6 +118,7 @@ function settingsDefaultValues(): array {
         // ── spare ──
         'spare_approval_level'  => '1',
         'spare_require_approval'=> '1',
+        'auto_req_low_stock'   => '0',   // สร้างใบขอซื้ออัตโนมัติเมื่อสต็อกต่ำกว่า min (รันวันละครั้ง) - default ปิด
         'spare_deduct_stock'    => '1',  // ตัดสต็อกอัตโนมัติเมื่อเบิกอะไหล่จากใบซ่อม - default เปิด
 
         // ── ERP ──

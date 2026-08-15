@@ -35,7 +35,7 @@ try {
             break;
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason'];
+            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at'];
             $cols = []; $vals = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $cols[] = $col; $vals[] = $data[$col]; }
@@ -58,7 +58,7 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
-            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason'];
+            $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at'];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
@@ -80,6 +80,26 @@ try {
                 // เปลี่ยนหัวหน้าชุดเฉย ๆ → รักษาทีมเดิม แต่อัปเดต lead
                 $curTeam = array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'pm_am', $id));
                 setWorkAssignees($pdo, 'pm_am', $id, $curTeam, (int)$data['assigned_to'], (int)($_SESSION['user_id'] ?? 0) ?: null);
+            }
+
+            // 🆕 ขอเลื่อนกำหนด (deferral) → ส่ง LINE ให้หัวหน้า/แอดมินอนุมัติ
+            if (($data['deferral_status'] ?? '') === 'pending' && !empty($data['reschedule_to'])) {
+                require_once __DIR__ . '/../../../src/helpers/notification.php';
+                $q = $pdo->prepare('SELECT pm.id, pm.title, pm.due_date, pm.reschedule_to, pm.reschedule_reason, a.code AS asset_code, a.name AS asset_name FROM pm_am pm LEFT JOIN asset_registry a ON pm.asset_id = a.id WHERE pm.id = ?');
+                $q->execute([$id]);
+                $pm = $q->fetch(PDO::FETCH_ASSOC);
+                if ($pm) {
+                    $reqName = '';
+                    $reqId = (int)($data['deferral_requested_by'] ?? ($_SESSION['user_id'] ?? 0));
+                    if ($reqId) { $u = $pdo->prepare('SELECT full_name FROM users WHERE id = ?'); $u->execute([$reqId]); $reqName = (string)$u->fetchColumn(); }
+                    $body = "เครื่องจักร: {$pm['asset_code']} - {$pm['asset_name']}\n"
+                          . "รายการ: {$pm['title']}\n"
+                          . "กำหนดเดิม: {$pm['due_date']} → กำหนดใหม่: {$pm['reschedule_to']}\n"
+                          . "เหตุผล: " . (string)($pm['reschedule_reason'] ?: '-')
+                          . ($reqName !== '' ? "\nผู้ขอ: {$reqName}" : '')
+                          . "\n\nกดปุ่มด้านล่างเพื่ออนุมัติ/ไม่อนุมัติ";
+                    notifyPmDeferral($id, ['title' => $pm['title'], 'body' => $body], rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/?id=' . $id);
+                }
             }
 
             // 🆕 Auto next-cycle: เมื่อปิดงาน PM (status=completed) → สร้างรอบถัดไปตามความถี่อัตโนมัติ
