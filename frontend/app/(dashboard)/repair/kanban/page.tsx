@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t } from "@/lib/i18n";
+import { normalizeRepairStatus, repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -29,6 +30,7 @@ export interface KanbanItem {
   priority: "Critical" | "High" | "Medium" | "Low";
   assignee: string;
   status: "open" | "in_progress" | "pending" | "completed";
+  overdue: boolean;
   createdAt: string;
 }
 
@@ -62,13 +64,14 @@ export default function RepairKanbanPage() {
       if (json.status === "success" && Array.isArray(json.data) && json.data.length > 0) {
         const fetched: KanbanItem[] = json.data.map((row: any) => {
           let normalizedStatus: KanbanItem["status"] = "open";
-          const rawStatus = String(row.status || "").toLowerCase();
-          if (rawStatus.includes("complete") || rawStatus.includes("closed")) {
+          // ใช้สถานะกลางเดียวกับหน้ารายการ (lib/repair-status.ts) — alias/สี/คำแปลตรงกัน
+          const k = normalizeRepairStatus(row.status);
+          if (k === "completed" || k === "closed") {
             normalizedStatus = "completed";
-          } else if (rawStatus.includes("progress") || rawStatus.includes("assigned")) {
-            normalizedStatus = "in_progress";
-          } else if (rawStatus.includes("pending") || rawStatus.includes("wait")) {
+          } else if (k === "waiting_parts") {
             normalizedStatus = "pending";
+          } else if (k === "in_progress") {
+            normalizedStatus = "in_progress";
           } else {
             normalizedStatus = "open";
           }
@@ -88,6 +91,7 @@ export default function RepairKanbanPage() {
             priority: normalizedPriority,
             assignee: row.assigned_name || "ยังไม่จ่ายงาน",
             status: normalizedStatus,
+            overdue: isRepairOverdue(row.estimated_completion_date, row.status),
             createdAt: row.created_at || "-"
           };
         });
@@ -121,21 +125,21 @@ export default function RepairKanbanPage() {
     });
   }, [items, search, priorityFilter]);
 
-  // หัวคอลัมน์ใช้ไฟ Andon: เหลือง=อยู่ในสายงาน, แดง=ถูกบล็อก (รออะไหล่), เขียว=เสร็จ
+  // หัวคอลัมน์ใช้ไฟ Andon จากสถานะกลาง (repair-status.ts) — สี/ชื่อตรงกับหน้ารายการ
   const columnsDef = [
     {
       key: "open" as const,
-      title: "รอดำเนินการ",
-      andon: "warn" as const,
-      tone: "var(--cmms-warning)",
+      title: repairStatusLabel("open"),
+      andon: repairStatusAndon("open"),
+      tone: "var(--cmms-text-muted)",
       items: filteredItems.filter(i => i.status === "open"),
       nextStatus: "in_progress" as const,
       nextLabel: "เริ่มซ่อม",
     },
     {
       key: "in_progress" as const,
-      title: "กำลังซ่อมบำรุง",
-      andon: "warn" as const,
+      title: repairStatusLabel("in_progress"),
+      andon: repairStatusAndon("in_progress"),
       tone: "var(--cmms-warning)",
       items: filteredItems.filter(i => i.status === "in_progress"),
       prevStatus: "open" as const,
@@ -145,9 +149,9 @@ export default function RepairKanbanPage() {
     },
     {
       key: "pending" as const,
-      title: "รออะไหล่ / ประเมิน",
-      andon: "down" as const,
-      tone: "var(--cmms-danger)",
+      title: repairStatusLabel("waiting_parts"),
+      andon: repairStatusAndon("waiting_parts"),
+      tone: "var(--cmms-warning)",
       items: filteredItems.filter(i => i.status === "pending"),
       prevStatus: "in_progress" as const,
       nextStatus: "completed" as const,
@@ -156,8 +160,8 @@ export default function RepairKanbanPage() {
     },
     {
       key: "completed" as const,
-      title: "เสร็จสมบูรณ์",
-      andon: "ok" as const,
+      title: repairStatusLabel("completed"),
+      andon: repairStatusAndon("completed"),
       tone: "var(--cmms-success)",
       items: filteredItems.filter(i => i.status === "completed"),
       prevStatus: "in_progress" as const,
@@ -282,10 +286,15 @@ export default function RepairKanbanPage() {
                       }}
                     >
                       <VStack gap={2}>
-                        <HStack hAlign="between" vAlign="center">
-                          <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>
-                            {item.woNumber}
-                          </Text>
+                        <HStack hAlign="between" vAlign="center" wrap="wrap" gap={1}>
+                          <HStack gap={1.5} vAlign="center">
+                            <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>
+                              {item.woNumber}
+                            </Text>
+                            {item.overdue && (
+                              <span className="cmms-status down"><span className="cmms-status-dot" />เกินกำหนด</span>
+                            )}
+                          </HStack>
                           <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {item.priority}
                           </span>
