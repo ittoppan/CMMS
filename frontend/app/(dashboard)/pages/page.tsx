@@ -17,11 +17,13 @@ interface PageRow {
 
 export default function CustomPagesListPage() {
   const [pages, setPages] = useState<PageRow[] | null>(null);
-  const { canShow } = useMenuPermission();
+  const { canShow, loading: permLoading } = useMenuPermission();
   const canBuild = canShow("editor/builder");
+  const canViewPages = canShow("pages");
 
   useEffect(() => {
     let cancelled = false;
+    if (!canViewPages) return;
     (async () => {
       try {
         const res = await fetch("/api/v1/custom_pages.php", {
@@ -31,6 +33,8 @@ export default function CustomPagesListPage() {
         const json = await res.json();
         if (!cancelled && json?.status === "success" && Array.isArray(json.pages)) {
           setPages(json.pages);
+        } else if (!cancelled && res.status === 403) {
+          setPages([]);
         }
       } catch {
         if (!cancelled) setPages([]);
@@ -39,7 +43,45 @@ export default function CustomPagesListPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [canViewPages]);
+
+  if (permLoading) {
+    return (
+      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
+        <Text type="body" className="cmms-eyebrow">
+          CUSTOM PAGES · GRAPESJS
+        </Text>
+        <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>
+          กำลังตรวจสอบสิทธิ์การเข้าถึง...
+        </Text>
+      </VStack>
+    );
+  }
+
+  // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" (pages)
+  if (!canViewPages) {
+    return (
+      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
+        <Text type="body" className="cmms-eyebrow">
+          CUSTOM PAGES · GRAPESJS
+        </Text>
+        <Text type="body" style={{ color: "var(--cmms-text-secondary)" }}>
+          ไม่มีสิทธิ์เข้าถึงหน้านี้ — กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"
+        </Text>
+        <a
+          href="/dashboard"
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: "var(--cmms-primary)",
+            textDecoration: "none",
+          }}
+        >
+          กลับไปหน้าแรก
+        </a>
+      </VStack>
+    );
+  }
 
   return (
     <VStack gap={4}>

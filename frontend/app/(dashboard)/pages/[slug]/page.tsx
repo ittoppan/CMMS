@@ -18,8 +18,9 @@ interface CustomPage {
 
 export default function CustomPageView() {
   const params = useParams<{ slug: string }>();
-  const { canShow } = useMenuPermission();
+  const { canShow, loading: permLoading } = useMenuPermission();
   const canBuild = canShow("editor/builder");
+  const canViewPages = canShow("pages");
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug ?? "";
   const [page, setPage] = useState<CustomPage | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export default function CustomPageView() {
 
   useEffect(() => {
     let cancelled = false;
-    if (!slug) return;
+    if (!slug || !canViewPages) return;
     (async () => {
       try {
         const res = await fetch(`/api/v1/custom_pages.php?slug=${encodeURIComponent(slug)}`, {
@@ -36,10 +37,12 @@ export default function CustomPageView() {
         });
         const json = await res.json();
         if (cancelled) return;
-        if (json?.status === "success" && json.page) {
+        if (res.status === 403) {
+          setError(json?.error || "ไม่มีสิทธิ์เข้าถึงหน้านี้");
+        } else if (json?.status === "success" && json.page) {
           setPage(json.page);
         } else {
-          setError(json?.message || "ไม่พบหน้านี้");
+          setError(json?.message || json?.error || "ไม่พบหน้านี้");
         }
       } catch {
         if (!cancelled) setError("โหลดหน้าไม่สำเร็จ — ลองใหม่ภายหลัง");
@@ -48,7 +51,45 @@ export default function CustomPageView() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, canViewPages]);
+
+  if (permLoading) {
+    return (
+      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
+        <Text type="body" className="cmms-eyebrow">
+          CUSTOM PAGE · GRAPESJS
+        </Text>
+        <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>
+          กำลังตรวจสอบสิทธิ์การเข้าถึง...
+        </Text>
+      </VStack>
+    );
+  }
+
+  // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" (pages) — ลิงก์ตรงไม่มีสิทธิ์เปิดดูไม่ได้
+  if (!canViewPages) {
+    return (
+      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
+        <Text type="body" className="cmms-eyebrow">
+          CUSTOM PAGE · GRAPESJS
+        </Text>
+        <Text type="body" style={{ color: "var(--cmms-text-secondary)" }}>
+          ไม่มีสิทธิ์เข้าถึงหน้านี้ — กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"
+        </Text>
+        <a
+          href="/dashboard"
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: "var(--cmms-primary)",
+            textDecoration: "none",
+          }}
+        >
+          กลับไปหน้าแรก
+        </a>
+      </VStack>
+    );
+  }
 
   if (error) {
     return (

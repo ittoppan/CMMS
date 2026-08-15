@@ -12,13 +12,30 @@ require_once __DIR__ . '/../../../src/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
+/**
+ * ตรวจสิทธิ์เมนูตามบทบาท (menu_permissions) — default (ไม่มีแถว) = อนุญาต, admin เห็นหมด
+ */
+function userHasMenuPermission(PDO $pdo, int $roleId, string $menuKey): bool {
+    if ($roleId === 1) return true; // Admin เห็นทุกเมนู
+    $stmt = $pdo->prepare("SELECT is_granted FROM menu_permissions WHERE role_id = ? AND menu_key = ?");
+    $stmt->execute([$roleId, $menuKey]);
+    $v = $stmt->fetchColumn();
+    return $v === false || (int)$v === 1;
+}
+
 try {
     $pdo = getDb();
     $method = $_SERVER['REQUEST_METHOD'];
 
-    // GET = ทุกคนที่ล็อกอินดูได้ / POST + DELETE = admin เท่านั้น (enforceCsrf ภายใน requireLogin)
+    // GET = ทุกคนที่ล็อกอินดูได้ (แต่ต้องมีสิทธิ์เมนู 'pages' ตามบทบาท) / POST + DELETE = admin เท่านั้น (enforceCsrf ภายใน requireLogin)
     if ($method === 'GET') {
-        requireLogin($pdo);
+        $user = requireLogin($pdo);
+        // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" — บล็อกลิงก์ตรงแม้ไม่มีเมนู
+        if (!userHasMenuPermission($pdo, (int)$user['role_id'], 'pages')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'forbidden', 'error' => 'ไม่มีสิทธิ์เข้าถึงหน้านี้ — กรุณาติดต่อผู้ดูแลระบบ (สิทธิ์เมนู: หน้าเว็บที่สร้างเอง)']);
+            exit;
+        }
     } else {
         requireLogin($pdo, true);
     }
