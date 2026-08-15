@@ -363,6 +363,20 @@ function lineTemplateDefaults() {
             'btn_label' => '✔ อนุมัติการเบิก',
             'enabled' => '1', 'image_before' => '', 'image_after' => '',
         ],
+        'line_tpl_work_assign' => [
+            'header_color' => '#0891b2',
+            'header_title' => '🔧 งานถูกมอบหมายให้คุณ #{work_order_id}',
+            'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nงาน: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้มอบหมาย: {assigner_name}",
+            'btn_label' => '📋 ดูรายละเอียดงาน',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+        'line_tpl_spare_request' => [
+            'header_color' => '#b45309',
+            'header_title' => '🧰 ขอเบิกอะไหล่ #{work_order_id} รออนุมัติ',
+            'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท\nกดปุ่มด้านล่างเพื่อตรวจสอบ/อนุมัติ",
+            'btn_label' => '📦 ตรวจสอบการเบิก',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
     ];
 }
 
@@ -479,6 +493,42 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         'bubble_size'       => $tpl['bubble_size'],
     ];
     return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel, $opts);
+}
+
+/**
+ * ส่ง LINE งานถูกมอบหมายถึงช่างผู้รับ (line_tpl_work_assign) — เฉพาะผู้ใช้ที่ผูก LINE แล้ว
+ * @return bool ส่งสำเร็จหรือไม่
+ */
+function lineNotifyAssigned($assigneeUserId, array $vars = [], $targetUrl = '') {
+    if (getSettingValue('line_notify_enabled', '0') !== '1') return false;
+    $pdo = getDb();
+    $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
+    $st->execute([(int)$assigneeUserId]);
+    $lid = $st->fetchColumn();
+    if (!$lid) return false;
+    return sendLineTemplatePush((string)$lid, 'line_tpl_work_assign', $vars, $targetUrl);
+}
+
+/**
+ * ส่ง LINE ขอเบิกอะไหล่ให้หัวหน้า/แอดมินอนุมัติ (line_tpl_spare_request)
+ * - เป้าหมาย: ผู้ใช้ role Admin/Manager (role_id 1,2) ที่ผูก LINE แล้ว
+ * - ถ้าไม่มีใครผูก LINE → ส่งเข้ากลุ่ม LINE ช่าง (ถ้าตั้งไว้)
+ * @return int จำนวนที่ส่งสำเร็จ
+ */
+function lineNotifySpareRequest(array $vars = [], $targetUrl = '') {
+    if (getSettingValue('line_notify_enabled', '0') !== '1') return 0;
+    $pdo = getDb();
+    $st = $pdo->query("SELECT line_user_id FROM users WHERE role_id IN (1,2) AND is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''");
+    $targets = $st->fetchAll(PDO::FETCH_COLUMN);
+    if (empty($targets)) {
+        $gid = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
+        if ($gid && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$gid;
+    }
+    $sent = 0;
+    foreach (array_unique($targets) as $tid) {
+        if (sendLineTemplatePush($tid, 'line_tpl_spare_request', $vars, $targetUrl)) $sent++;
+    }
+    return $sent;
 }
 
 /* ============================================================

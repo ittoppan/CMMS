@@ -73,6 +73,8 @@ interface TemplateDef {
 
 const TEMPLATE_ORDER = [
   "line_tpl_breakdown",
+  "line_tpl_work_assign",
+  "line_tpl_spare_request",
   "line_tpl_pm_overdue",
   "line_tpl_low_stock",
   "line_tpl_completed",
@@ -99,6 +101,8 @@ const TEMPLATE_META: Record<string, TplMeta> = {
   line_tpl_low_stock: { label: "สต็อกต่ำกว่าจุดสั่งซื้อ", icon: "📦", hint: "ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock", wired: "สคริปต์ alert_check.php รายวัน (summary)" },
   line_tpl_completed: { label: "งานซ่อมเสร็จเรียบร้อย", icon: "✅", hint: "ส่งเมื่อปิดใบสั่งงานซ่อมสำเร็จ", wired: "ปิดงานซ่อม (สถานะ completed) — repair.php" },
   line_tpl_sage_approval: { label: "ขออนุมัติเบิก Sage", icon: "📑", hint: "ส่งเมื่อมีการขออนุมัติเบิกอะไหล่ผ่าน Sage 300", wired: "คำขออนุมัติเบิกอะไหล่ (ApprovalService)" },
+  line_tpl_work_assign: { label: "งานถูกมอบหมาย (แจ้งช่างผู้รับ)", icon: "🔧", hint: "ส่งถึงช่างผู้รับงานเมื่อหัวหน้ามอบหมาย/เปลี่ยนผู้รับผิดชอบใบสั่งงาน", wired: "มอบหมายงาน (เปลี่ยน assigned_to) — repair.php PUT → LINE ถึงช่างผู้รับโดยตรง" },
+  line_tpl_spare_request: { label: "ขอเบิกอะไหล่ (แจ้งหัวหน้าอนุมัติ)", icon: "🧰", hint: "ส่งถึงหัวหน้า/แอดมินเมื่อช่างบันทึกเบิกอะไหล่ในใบซ่อม เพื่ออนุมัติ", wired: "บันทึกอะไหล่ในใบซ่อม (repair_spare_parts) — repair.php POST/PUT → LINE ถึง Admin/Manager" },
   // ── เหตุการณ์ที่ส่งข้อความธรรมดา (ไม่มี Flex template — เปิด/ปิดได้) ──
   line_pm_due_soon: {
     label: "PM ใกล้กำหนด (เตือนช่าง)", icon: "⏰",
@@ -125,7 +129,7 @@ const TEMPLATE_META: Record<string, TplMeta> = {
 
 const VARIABLES = [
   "{work_order_id}", "{asset_code}", "{asset_name}", "{title}", "{priority}", "{status}",
-  "{reporter_name}", "{assigned_name}", "{due_date}", "{days_overdue}", "{item_code}",
+  "{reporter_name}", "{assigned_name}", "{assigner_name}", "{due_date}", "{days_overdue}", "{item_code}",
   "{item_name}", "{qty}", "{min_stock}", "{downtime_hours}", "{total_cost}",
   "{requisition_no}", "{items_summary}", "{requester_name}", "{total_amount}",
 ];
@@ -310,6 +314,7 @@ export default function NotificationsSettingsPage() {
     "{total_cost}": "4,500",
     "{items_summary}": "Bearing 6204 x 2",
     "{requester_name}": "วิชัย ช่างไฟและกลการ",
+    "{assigner_name}": "สมชาย วิศวกรซ่อมบำรุง",
     "{total_amount}": "1,250",
   };
   const fillVars = (t: string) => {
@@ -434,6 +439,7 @@ export default function NotificationsSettingsPage() {
     .replace(/{total_cost}/g, "4,500")
     .replace(/{items_summary}/g, "Bearing 6204 x 2")
     .replace(/{requester_name}/g, "วิชัย ช่างไฟและกลการ")
+    .replace(/{assigner_name}/g, "สมชาย วิศวกรซ่อมบำรุง")
     .replace(/{total_amount}/g, "1,250");
 
   if (loading) {

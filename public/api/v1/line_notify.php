@@ -49,6 +49,8 @@ try {
                 'line_tpl_low_stock' => ['header_color' => '#7c3aed', 'header_title' => '📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ', 'body_text' => "รหัสอะไหล่: {item_code}\nชื่ออะไหล่: {item_name}\nคงเหลือ: {qty} (ขั้นต่ำ: {min_stock})", 'btn_label' => '🛒 สั่งซื้อ/เบิกจ่าย', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
                 'line_tpl_completed' => ['header_color' => '#16a34a', 'header_title' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nDowntime: {downtime_hours} ชม.\nค่าซ่อมรวม: {total_cost} บาท\nช่างผู้ปิดงาน: {assigned_name}", 'btn_label' => '📊 ประเมินผลงาน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
                 'line_tpl_sage_approval' => ['header_color' => '#7c3aed', 'header_title' => '📦 ขออนุมัติเบิกอะไหล่ #{requisition_no}', 'body_text' => "รายการ: {items_summary}\nผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_amount} บาท", 'btn_label' => '✔ อนุมัติการเบิก', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_work_assign' => ['header_color' => '#0891b2', 'header_title' => '🔧 งานถูกมอบหมายให้คุณ #{work_order_id}', 'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nงาน: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้มอบหมาย: {assigner_name}", 'btn_label' => '📋 ดูรายละเอียดงาน', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
+                'line_tpl_spare_request' => ['header_color' => '#b45309', 'header_title' => '🧰 ขอเบิกอะไหล่ #{work_order_id} รออนุมัติ', 'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท\nกดปุ่มด้านล่างเพื่อตรวจสอบ/อนุมัติ", 'btn_label' => '📦 ตรวจสอบการเบิก', 'enabled' => '1', 'image_before' => '', 'image_after' => ''],
             ];
             foreach ($defaults as $k => $d) {
                 if (!isset($templates[$k])) $templates[$k] = $d;
@@ -56,7 +58,7 @@ try {
 
             // order templates
             $ordered = [];
-            foreach (['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval'] as $k) {
+            foreach (['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval','line_tpl_work_assign','line_tpl_spare_request'] as $k) {
                 if (isset($templates[$k])) $ordered[$k] = $templates[$k];
             }
 
@@ -73,7 +75,7 @@ try {
                     'telegram_chat_id_set' => !empty(getenv('TELEGRAM_CHAT_ID')),
                 ],
                 'help' => [
-                    'variables' => ['{work_order_id}','{asset_code}','{asset_name}','{title}','{priority}','{status}','{reporter_name}','{assigned_name}','{due_date}','{days_overdue}','{item_code}','{item_name}','{qty}','{min_stock}','{downtime_hours}','{total_cost}','{requisition_no}','{items_summary}','{requester_name}','{total_amount}'],
+                    'variables' => ['{work_order_id}','{asset_code}','{asset_name}','{title}','{priority}','{status}','{reporter_name}','{assigned_name}','{assigner_name}','{due_date}','{days_overdue}','{item_code}','{item_name}','{qty}','{min_stock}','{downtime_hours}','{total_cost}','{requisition_no}','{items_summary}','{requester_name}','{total_amount}'],
                 ],
             ]);
             break;
@@ -104,7 +106,7 @@ try {
                 } catch (Exception $e) {}
             }
 
-            $tplKeys = ['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval'];
+            $tplKeys = ['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval','line_tpl_work_assign','line_tpl_spare_request'];
             foreach (($data['templates'] ?? []) as $k => $tpl) {
                 if (!in_array($k, $tplKeys, true)) continue;
                 $hex6 = function ($v, $f) { return preg_match('/^#[0-9a-fA-F]{6}$/', (string)$v) ? (string)$v : $f; };
