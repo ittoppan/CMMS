@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairOverdue } from "@/lib/repair-status";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
@@ -29,6 +29,7 @@ import {
   WrenchScrewdriverIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -96,6 +97,8 @@ export default function WorkOrdersPage() {
   const [pdfBuilding, setPdfBuilding] = useState(false);
   const [pdfProgress, setPdfProgress] = useState("");
   const [partsForBatch, setPartsForBatch] = useState<Record<number, WorkOrderPart[]>>({});
+  const [excelBuilding, setExcelBuilding] = useState(false);
+  const deptMapRef = useRef<Record<number, string>>({});
 
   const fetchWO = async () => {
     setLoading(true);
@@ -263,6 +266,114 @@ export default function WorkOrdersPage() {
     setPdfProgress("");
   };
 
+  // ── ส่งออก F-EN-03 (MT_JOB) เป็น Excel — ดึงข้อมูลจริงจากตาราง repair ──
+  const contamLabel: Record<string, string> = {
+    not_checked: "ยังไม่ตรวจ",
+    clean: "ไม่พบการปนเปื้อน (ผ่าน)",
+    contaminated: "พบการปนเปื้อน",
+    not_applicable: "ไม่เกี่ยวข้องกับงานนี้",
+  };
+  const fmtDate = (v: string | null | undefined) => (v ? String(v).slice(0, 10) : "");
+  const fmtTime = (v: string | null | undefined) => (v ? String(v).slice(11, 16) : "");
+
+  const handleExportExcel = async () => {
+    const ids = selected.size > 0 ? Array.from(selected) : filtered.map((w: any) => Number(w.rawId));
+    if (ids.length === 0 || excelBuilding) return;
+    setExcelBuilding(true);
+    try {
+      // ชื่อแผนก (cache ครั้งแรก)
+      if (Object.keys(deptMapRef.current).length === 0) {
+        try {
+          const dRes = await fetch("/api/v1/departments.php", { headers: { "ngrok-skip-browser-warning": "1" } });
+          const dJson = await dRes.json();
+          if (Array.isArray(dJson)) dJson.forEach((d: any) => { if (d && d.id) deptMapRef.current[Number(d.id)] = d.name; });
+        } catch { /* ไม่มีชื่อแผนกก็ออกได้ */ }
+      }
+      // อะไหล่ที่ใช้ซ่อม (map: repair_id → รายการ)
+      let partsByRow: Record<number, WorkOrderPart[]> = {};
+      try {
+        const pRes = await fetch(`/api/v1/repair.php?parts=1&ids=${ids.join(",")}`);
+        const pJson = await pRes.json();
+        if (pJson && typeof pJson === "object" && !Array.isArray(pJson)) partsByRow = pJson;
+      } catch { /* ไม่มีอะไหล่ */ }
+
+      // 31 คอลัมน์ตามฟอร์ม F-EN-03 (MT_JOB)
+      const header = [
+        "ITEMS / รายการ", "MT_JOB NO. / เลขที่เอกสาร", "JOB STATUS / สถานะ", "DEPARTMENT / แผนก",
+        "REQUESTOR / ชื่อผู้แจ้ง", "REQUEST DATE / วันที่แจ้ง", "REQUEST TIME / เวลาแจ้ง", "JOB TYPE / ประเภทงาน",
+        "JOB DESCRIPTION / ลักษณะงาน", "MACHINE STATUS / สถานะเครื่องจักร", "MACHINE NAME / ชื่อเครื่องจักร",
+        "PROBLEM DESCRIPTION / รายละเอียดของปัญหา", "ROOT CAUSE / สาเหตุของปัญหา", "MAINTENANCE DESCRIPTION / รายละเอียดการซ่อม",
+        "MAINTENANCE NOTE / บันทึกการซ่อม", "MTN. ACTION / การดำเนินการ", "SPARE PARTS USED / อะไหล่ที่เปลี่ยน",
+        "Q'TY. / จำนวน", "CONTAMINATE CHECKING / ตรวจสอบการปนเปื้อน", "CORRECTIVE ACTION / มาตรการป้องกัน",
+        "MAKER BY / ผู้ปฏิบัติงาน", "OUTSOURCE BY / ภายนอก (โดย)", "START DATE / วันที่ซ่อม", "START TIME / เวลาซ่อม",
+        "FINISH DATE / วันที่เสร็จ", "FINISH TIME / เวลาเสร็จ", "MTN. TIME / เวลาซ่อม", "BD.TIME / เวลาหยุด",
+        "CHECKED BY / ผู้ตรวจรับ", "RESPONSIBLE / ผู้รับผิดชอบ", "REMARK / หมายเหตุ",
+      ];
+      const esc = (v: any) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const headHtml = `<tr>${header.map((h) => `<th>${esc(h)}</th>`).join("")}</tr>`;
+      const bodyHtml = ids
+        .map((id, idx) => {
+          const r = rawMap[id];
+          if (!r) return "";
+          const fr = String(r.failure_report || "");
+          const jobType = (fr.match(/JobType:\s*([^|]+)/) || [])[1]?.trim() || r.source_type || "";
+          const jobDesc = (fr.match(/JobDescription:\s*([^|]+)/) || [])[1]?.trim() || "";
+          const parts = partsByRow[id] || [];
+          const cells = [
+            idx + 1,
+            r.work_order_no || `EN-${r.id}`,
+            statusText(r.status, r.status),
+            deptMapRef.current[Number(r.department_id)] || "",
+            r.receiver_name || "",
+            fmtDate(r.created_at),
+            fmtTime(r.created_at),
+            jobType,
+            jobDesc,
+            r.machine_status || "",
+            r.asset_name || "",
+            r.description || r.failure_report || "",
+            r.root_cause || "",
+            r.solution || r.resolution || "",
+            r.notes || "",
+            r.diagnosis || "",
+            parts.map((p) => `${p.code || "-"} x ${Number(p.quantity_used) || 0}`).join(", "),
+            parts.map((p) => Number(p.quantity_used) || 0).join(", "),
+            contamLabel[r.contaminate_checking] || "ยังไม่ตรวจ",
+            r.rca_category || "",
+            r.assigned_name || "",
+            r.outsource_by || "",
+            fmtDate(r.actual_start_at),
+            fmtTime(r.actual_start_at),
+            fmtDate(r.completed_at),
+            fmtTime(r.completed_at),
+            r.repair_time_minutes ? `${r.repair_time_minutes} นาที` : "",
+            r.downtime_minutes ? `${r.downtime_minutes} นาที` : "",
+            r.receiver_name || "",
+            r.assigned_name || "",
+            r.notes || "",
+          ].map((v) => `<td>${esc(v)}</td>`).join("");
+          return `<tr>${cells}</tr>`;
+        })
+        .join("");
+
+      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"/></head><body><table border="1">${headHtml}${bodyHtml}</table></body></html>`;
+      const blob = new Blob(["\ufeff" + html], { type: "application/vnd.ms-excel;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `F-EN-03_MT_JOB_${new Date().toISOString().slice(0, 10)}.xls`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Export F-EN-03 failed", e);
+      alert("ไม่สามารถส่งออก F-EN-03 ได้ — กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setExcelBuilding(false);
+    }
+  };
+
   const columns: TableColumn<WorkOrder>[] = [
     {
       key: "select",
@@ -359,6 +470,20 @@ export default function WorkOrdersPage() {
           >
             <DocumentArrowDownIcon className="w-4 h-4" />
             {pdfBuilding ? (pdfProgress || t("action.building_pdf")) : selected.size > 0 ? `${t("action.download_pdf")} (${selected.size})` : t("action.download_pdf")}
+          </button>
+          <button
+            type="button"
+            disabled={excelBuilding || filtered.length === 0}
+            onClick={handleExportExcel}
+            title={selected.size > 0 ? `ส่งออก ${selected.size} รายการที่เลือก` : "ส่งออกรายการที่กรองทั้งหมด"}
+            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              excelBuilding || filtered.length === 0
+                ? "bg-white/10 text-white/40 cursor-not-allowed"
+                : "bg-emerald-500 text-white shadow-lg hover:bg-emerald-600"
+            }`}
+          >
+            <TableCellsIcon className="w-4 h-4" />
+            {excelBuilding ? "กำลังสร้าง Excel..." : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
           </button>
           <button
             type="button"
