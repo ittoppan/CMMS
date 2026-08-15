@@ -26,6 +26,7 @@ import {
   WrenchScrewdriverIcon,
   ClipboardDocumentCheckIcon,
   CalendarDaysIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 
 interface PMTask extends Record<string, unknown> {
@@ -118,6 +119,29 @@ export default function PMSchedulePage() {
   const [deferDate, setDeferDate] = useState("");
   const [deferSaving, setDeferSaving] = useState(false);
   const [deferMsg, setDeferMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  // ── ดูผลการทำ PM ที่เสร็จแล้ว (ตรวจเช็ค + ลายเซ็น ย้อนหลัง) ──
+  const [detailTarget, setDetailTarget] = useState<PMTask | null>(null);
+  const [detailData, setDetailData] = useState<any | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailErr, setDetailErr] = useState("");
+
+  const openDetail = async (item: PMTask) => {
+    setDetailTarget(item);
+    setDetailData(null);
+    setDetailErr("");
+    setDetailLoading(true);
+    try {
+      const res = await fetch(`/api/v1/pm_am.php?id=${item.rawId}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "load failed");
+      setDetailData(json);
+    } catch (e) {
+      setDetailErr("ไม่สามารถโหลดผลการทำ PM ได้ — ลองใหม่อีกครั้ง");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
 
   const submitDeferral = async () => {
     if (!deferTarget) return;
@@ -244,6 +268,16 @@ export default function PMSchedulePage() {
       width: proportional(2),
       renderCell: (item) => (
         <HStack gap={2}>
+          {item.status === "completed" && (
+            <button
+              type="button"
+              onClick={() => openDetail(item)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all duration-300"
+            >
+              <EyeIcon className="w-3.5 h-3.5" />
+              ดูผล
+            </button>
+          )}
           {item.status !== "completed" && item.deferralStatus !== "pending" && (
             <button
               type="button"
@@ -449,6 +483,119 @@ export default function PMSchedulePage() {
               className="cmms-btn-primary inline-flex items-center gap-1.5"
             >
               {deferSaving ? "กำลังส่ง..." : "ส่งคำขอเลื่อนกำหนด"}
+            </button>
+          </HStack>
+        </VStack>
+      </Dialog>
+
+      {/* Dialog: ดูผลการทำ PM ที่เสร็จแล้ว (ตรวจเช็ค + ลายเซ็น ย้อนหลัง) */}
+      <Dialog isOpen={!!detailTarget} onOpenChange={(o) => !o && setDetailTarget(null)}>
+        <DialogHeader title={detailTarget ? `ผลการทำ PM ${detailTarget.id}` : "ผลการทำ PM"} onOpenChange={() => setDetailTarget(null)} />
+        <VStack gap={4} style={{ padding: 24, maxWidth: 640 }}>
+          {detailErr && (
+            <Card padding={3} style={{ background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger)" }}>
+              <Text type="body" size="sm">{detailErr}</Text>
+            </Card>
+          )}
+          {detailLoading && <div style={{ padding: 40, textAlign: "center" }}>กำลังโหลดผลการทำ PM...</div>}
+          {detailData && !detailLoading && (
+            <VStack gap={4}>
+              {/* ข้อมูลแผน */}
+              <VStack gap={2}>
+                <Text type="body" weight="bold">{detailData.title || detailTarget?.task}</Text>
+                <Text type="body" size="sm" color="secondary">เครื่องจักร: {detailData.asset_name || "ไม่ระบุ"}</Text>
+                <HStack gap={4} wrap="wrap">
+                  <Text type="body" size="sm" color="secondary">ความถี่: {freqLabels[detailData.frequency_type] || detailData.frequency_type || "-"}</Text>
+                  <Text type="body" size="sm" color="secondary">กำหนด: {detailData.due_date || "-"}</Text>
+                  <Text type="body" size="sm" color="secondary">เสร็จเมื่อ: {(detailData.completed_at || "-").slice(0, 16).replace("T", " ")}</Text>
+                  <Text type="body" size="sm" color="secondary">ลงนามเมื่อ: {(detailData.signed_at || "-").slice(0, 16).replace("T", " ")}</Text>
+                </HStack>
+              </VStack>
+
+              {/* ผลตรวจเช็ค */}
+              <VStack gap={2}>
+                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>ผลตรวจเช็ค ({detailData.checklist ? (typeof detailData.checklist === "string" ? (() => { try { return JSON.parse(detailData.checklist).length; } catch { return 0; } })() : detailData.checklist.length) : 0} รายการ)</Text>
+                {(() => {
+                  const items: any[] = detailData.checklist
+                    ? typeof detailData.checklist === "string"
+                      ? (() => { try { return JSON.parse(detailData.checklist); } catch { return []; } })()
+                      : detailData.checklist
+                    : [];
+                  if (items.length === 0) {
+                    return <Text type="body" size="sm" color="secondary">ไม่มีรายการตรวจเช็คในรอบนี้</Text>;
+                  }
+                  return items.map((item: any, idx: number) => {
+                    const isValue = item.type === "value";
+                    const ok = isValue ? (item.value || "").trim() !== "" : item.status === "pass";
+                    const ng = !isValue && item.status === "fail";
+                    return (
+                      <HStack key={idx} gap={3} vAlign="center" style={{ padding: "8px 10px", borderRadius: 8, background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                        <span
+                          className="cmms-andon-chip"
+                          style={{
+                            background: ng ? "var(--cmms-danger-light)" : ok ? "var(--cmms-success-light)" : "var(--cmms-bg-muted)",
+                            color: ng ? "var(--cmms-danger-dark)" : ok ? "var(--cmms-success-dark)" : "var(--cmms-text-secondary)",
+                          }}
+                        >
+                          {ng ? "ไม่ผ่าน" : ok ? (isValue ? "บันทึกค่า" : "ผ่าน") : "ไม่ได้บันทึก"}
+                        </span>
+                        <VStack gap={0} style={{ flex: 1 }}>
+                          <Text type="body" size="sm">{item.task}</Text>
+                          {isValue && item.value && <Text type="body" size="sm" color="secondary">ค่า: {item.value}</Text>}
+                          {item.note && <Text type="body" size="sm" color="secondary">หมายเหตุ: {item.note}</Text>}
+                        </VStack>
+                      </HStack>
+                    );
+                  });
+                })()}
+              </VStack>
+
+              {/* ลายเซ็นยืนยัน */}
+              <VStack gap={2}>
+                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>ลายเซ็นยืนยัน</Text>
+                <HStack gap={4} wrap="wrap" vAlign="stretch">
+                  {[
+                    { label: "ผู้ตรวจเช็ค", sig: detailData.inspector_signature, sub: "ช่าง/ผู้ปฏิบัติงาน" },
+                    { label: "ผู้ควบคุมเครื่อง", sig: detailData.operator_signature, sub: detailData.operator_name || "ไม่ระบุชื่อ" },
+                  ].map((blk) => {
+                    const src = blk.sig
+                      ? blk.sig.startsWith("data:")
+                        ? blk.sig
+                        : `data:image/png;base64,${blk.sig}`
+                      : "";
+                    return (
+                      <Card key={blk.label} padding={3} style={{ flex: 1, minWidth: 220, border: "1px solid var(--cmms-border)" }}>
+                        <VStack gap={2} vAlign="center" hAlign="center" style={{ minHeight: 130 }}>
+                          {src ? (
+                            <img src={src} alt={`ลายเซ็น ${blk.label}`} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
+                          ) : (
+                            <Text type="body" size="sm" color="secondary">ยังไม่มีลายเซ็น</Text>
+                          )}
+                          <VStack gap={0} hAlign="center">
+                            <Text type="body" size="sm" weight="semibold">{blk.label}</Text>
+                            <Text type="body" size="sm" color="secondary">{blk.sub}</Text>
+                          </VStack>
+                        </VStack>
+                      </Card>
+                    );
+                  })}
+                </HStack>
+              </VStack>
+
+              {detailData.notes && (
+                <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                  <Text type="body" size="sm" color="secondary">หมายเหตุ: {detailData.notes}</Text>
+                </Card>
+              )}
+            </VStack>
+          )}
+          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
+            <button
+              type="button"
+              onClick={() => setDetailTarget(null)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ปิด
             </button>
           </HStack>
         </VStack>
