@@ -17,8 +17,6 @@ import {
   Section,
 } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
 import { TabList, Tab, TabMenu } from "@astryxdesign/core/TabList";
 import { Divider } from "@astryxdesign/core/Divider";
 import { Link } from "@astryxdesign/core/Link";
@@ -26,7 +24,6 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Collapsible } from "@astryxdesign/core/Collapsible";
-import { Icon } from "@astryxdesign/core/Icon";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { Pagination } from "@astryxdesign/core/Pagination";
@@ -45,6 +42,7 @@ import {
   CheckCircleIcon,
   CubeIcon,
   ExclamationTriangleIcon,
+  BanknotesIcon,
   PhotoIcon,
 } from "@heroicons/react/24/outline";
 import type { CSSProperties } from "react";
@@ -178,7 +176,7 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
       <Collapsible trigger={<Heading level={4}>สถานะ Sage 300 Sync</Heading>}>
         <VStack gap={1}>
           <HStack gap={2} vAlign="center">
-            <Icon icon={CircleStackIcon} size="sm" color="secondary" />
+            <CircleStackIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
             <Text type="body">เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control)</Text>
           </HStack>
           <Text type="supporting" color="secondary">
@@ -337,40 +335,45 @@ function ItemsCard({
           <HStack gap={2}>
             {selectMode ? (
               <>
-                <Button
-                  size="sm"
-                  variant="primary"
-                  icon={<Icon icon={PhotoIcon} size="sm" />}
-                  label={selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน..."}
-                  isDisabled={selectedIds.size === 0 || batchUploading}
+                <button
+                  type="button"
                   onClick={() => setBatchOpen(true)}
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  label="ยกเลิก"
-                  isDisabled={batchUploading}
+                  disabled={selectedIds.size === 0 || batchUploading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PhotoIcon className="w-4 h-4" />
+                  {selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน..."}
+                </button>
+                <button
+                  type="button"
                   onClick={() => {
                     setSelectMode(false);
                     setSelectedIds(new Set());
                   }}
-                />
+                  disabled={batchUploading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                >
+                  ยกเลิก
+                </button>
               </>
             ) : (
-              <Button
-                size="sm"
-                variant="secondary"
-                icon={<Icon icon={PhotoIcon} size="sm" />}
-                label="อัปโหลดรูปหลายรายการ"
+              <button
+                type="button"
                 onClick={() => setSelectMode(true)}
-              />
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              >
+                <PhotoIcon className="w-4 h-4" />
+                อัปโหลดรูปหลายรายการ
+              </button>
             )}
-            <Button
-              label="เพิ่มรายการอะไหล่"
-              variant="secondary"
-              icon={<Icon icon={PlusIcon} size="sm" />}
+            <button
+              type="button"
               onClick={() => onEdit({} as SparePart)}
-            />
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              <PlusIcon className="w-4 h-4" />
+              เพิ่มรายการอะไหล่
+            </button>
           </HStack>
         </HStack>
 
@@ -406,7 +409,7 @@ function ItemsCard({
           <EmptyState
             title="ไม่มีข้อมูล"
             description="ไม่พบรายการอะไหล่ในคลัง (ลองปรับตัวกรอง)"
-            icon={<Icon icon={CubeIcon} size="lg" />}
+            icon={<CubeIcon className="w-6 h-6" />}
           />
         ) : (
           <List density="spacious" hasDividers style={itemsList}>
@@ -421,9 +424,9 @@ function ItemsCard({
                   description={
                     <VStack gap={0}>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Badge label={item.code} variant="neutral" />
-                        <Badge label={item.sageItemNo} variant="info" />
-                        <Badge label={item.sageCategory || "Spare Parts"} variant="success" />
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{item.code}</span>
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{item.sageItemNo}</span>
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>{item.sageCategory || "Spare Parts"}</span>
                         <span className={`cmms-status ${badge.andon}`}>
                           <span className="cmms-status-dot" />
                           {badge.label}
@@ -461,7 +464,7 @@ function ItemsCard({
                             color: "var(--cmms-text-muted)",
                           }}
                         >
-                          <Icon icon={CubeIcon} size="sm" />
+                          <CubeIcon className="w-4 h-4" />
                         </div>
                       )}
                     </HStack>
@@ -489,22 +492,24 @@ function ItemsCard({
                         <ProgressBar label={item.name} isLabelHidden value={item.stock} max={item.maxStock} />
                       </VStack>
                       <HStack gap={1}>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          isIconOnly
-                          label="แก้ไข"
-                          icon={<Icon icon={PencilSquareIcon} size="sm" />}
+                        <button
+                          type="button"
                           onClick={() => onEdit(item)}
-                        />
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          isIconOnly
-                          label="ลบ"
-                          icon={<Icon icon={TrashIcon} size="sm" />}
+                          aria-label="แก้ไข"
+                          title="แก้ไข"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                        >
+                          <PencilSquareIcon className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => onDelete(item)}
-                        />
+                          aria-label="ลบ"
+                          title="ลบ"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                        >
+                          <TrashIcon className="w-3.5 h-3.5" />
+                        </button>
                       </HStack>
                     </VStack>
                   }
@@ -550,7 +555,7 @@ function ItemsCard({
                   <Thumbnail src={thumb} alt={p.name} label={p.name} />
                 ) : (
                   <div style={{ width: 40, height: 40, borderRadius: 6, background: "var(--cmms-bg-muted)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-text-muted)" }}>
-                    <Icon icon={CubeIcon} size="sm" />
+                    <CubeIcon className="w-4 h-4" />
                   </div>
                 )}
                 <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
@@ -564,7 +569,7 @@ function ItemsCard({
                     style={{ display: "none" }}
                     onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
                   />
-                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300">
                     {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
                   </span>
                 </label>
@@ -580,14 +585,22 @@ function ItemsCard({
             );
           })}
           <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
-            <Button label="ยกเลิก" variant="secondary" isDisabled={batchUploading} onClick={() => setBatchOpen(false)} />
-            <Button
-              label={batchUploading ? "กำลังอัปโหลด..." : "อัปโหลดทั้งหมด"}
-              variant="primary"
-              isLoading={batchUploading}
-              isDisabled={batchUploading || selectedParts.filter((p) => batchFiles[p.rawId]).length === 0}
+            <button
+              type="button"
+              disabled={batchUploading}
+              onClick={() => setBatchOpen(false)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              disabled={batchUploading || selectedParts.filter((p) => batchFiles[p.rawId]).length === 0}
               onClick={uploadBatch}
-            />
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {batchUploading ? "กำลังอัปโหลด..." : "อัปโหลดทั้งหมด"}
+            </button>
           </HStack>
         </VStack>
       </Dialog>
@@ -771,7 +784,7 @@ export default function SparePartsPage() {
                 <VStack gap={0}>
                   <Link href="/dashboard" style={{ color: "rgba(255,255,255,0.75)" }}>
                     <HStack gap={1} vAlign="center">
-                      <Icon icon={ArrowLeftIcon} size="sm" color="inherit" />
+                      <ArrowLeftIcon className="w-4 h-4" />
                       แดชบอร์ดภาพรวม
                     </HStack>
                   </Link>
@@ -863,14 +876,15 @@ export default function SparePartsPage() {
                   />
                 </TabList>
               </StackItem>
-              <Button
-                label={isPanelShown ? "Hide panel" : "Show panel"}
-                variant="ghost"
-                size="md"
-                icon={<Icon icon={ViewColumnsIcon} size="sm" />}
-                isIconOnly
+              <button
+                type="button"
                 onClick={togglePanel}
-              />
+                aria-label={isPanelShown ? "Hide panel" : "Show panel"}
+                title={isPanelShown ? "Hide panel" : "Show panel"}
+                className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+              >
+                <ViewColumnsIcon className="w-4 h-4" />
+              </button>
             </HStack>
           </div>
         </div>
@@ -889,37 +903,45 @@ export default function SparePartsPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card padding={4} className="cmms-kpi-card blue">
                   <HStack gap={3} vAlign="center">
-                    <AndonLamp status="idle" size="sm" />
-                    <VStack gap={0}>
+                    <div className="cmms-icon-tile">
+                      <CubeIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={1}>
                       <Text type="supporting" color="secondary">รายการอะไหล่ทั้งหมด</Text>
-                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
                 <Card padding={4} className="cmms-kpi-card amber">
                   <HStack gap={3} vAlign="center">
-                    <AndonLamp status="warn" size="sm" />
-                    <VStack gap={0}>
+                    <div className="cmms-icon-tile cmms-icon-tile--amber">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={1}>
                       <Text type="supporting" color="secondary">ใกล้หมด (Min Stock)</Text>
-                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
                 <Card padding={4} className="cmms-kpi-card red">
                   <HStack gap={3} vAlign="center">
-                    <AndonLamp status="down" size="sm" />
-                    <VStack gap={0}>
+                    <div className="cmms-icon-tile cmms-icon-tile--red">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={1}>
                       <Text type="supporting" color="secondary">หมดคลัง (Out of Stock)</Text>
-                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
+                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
                     </VStack>
                   </HStack>
                 </Card>
                 <Card padding={4} className="cmms-kpi-card green">
                   <HStack gap={3} vAlign="center">
-                    <AndonLamp status="ok" size="sm" />
-                    <VStack gap={0}>
+                    <div className="cmms-icon-tile cmms-icon-tile--green">
+                      <BanknotesIcon className="w-5 h-5" />
+                    </div>
+                    <VStack gap={1}>
                       <Text type="supporting" color="secondary">มูลค่าคลังรวม</Text>
-                      <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
+                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
                     </VStack>
                   </HStack>
                 </Card>
@@ -982,7 +1004,7 @@ export default function SparePartsPage() {
           <VStack gap={4} style={{ padding: 24 }}>
             {deleteSuccess ? (
               <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
-                <Icon icon={CheckCircleIcon} size="md" />
+                <CheckCircleIcon className="w-5 h-5" />
                 <Text type="body" weight="bold">ลบรายการอะไหล่สำเร็จแล้ว</Text>
               </HStack>
             ) : (
@@ -998,8 +1020,21 @@ export default function SparePartsPage() {
                   การลบนี้จะทำการลบข้อมูลจาก MySQL Database และไม่สามารถย้อนคืนได้
                 </Text>
                 <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                  <Button label="ยกเลิก" variant="secondary" onClick={() => setDeleteTarget(null)} />
-                  <Button label="ลบรายการ" variant="destructive" isLoading={deleting} onClick={handleDelete} />
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(null)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deleting}
+                    onClick={handleDelete}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
+                  >
+                    {deleting ? "กำลังลบ..." : "ลบรายการ"}
+                  </button>
                 </HStack>
               </>
             )}
