@@ -18,6 +18,13 @@ try {
     switch ($method) {
         case 'GET':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            // รายการเอกสารแนบของแผน PM (ใบแจ้งหนี้/ใบเสนอราคา)
+            if (isset($_GET['attachments']) && $id) {
+                $stmt = $pdo->prepare('SELECT a.*, u.full_name AS uploaded_name FROM pm_am_attachments a LEFT JOIN users u ON a.uploaded_by = u.id WHERE a.pm_am_id = ? ORDER BY a.created_at DESC');
+                $stmt->execute([$id]);
+                echo json_encode($stmt->fetchAll());
+                exit;
+            }
             if ($id) {
                 $stmt = $pdo->prepare('SELECT p.*, a.name AS asset_name, u.full_name AS assigned_name FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id WHERE p.id = ?');
                 $stmt->execute([$id]);
@@ -58,6 +65,19 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // เพิ่มเอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) — { attach_file: {file_url, file_name, file_type, file_size} }
+            if (isset($data['attach_file']) && is_array($data['attach_file'])) {
+                $af = $data['attach_file'];
+                $url = trim((string)($af['file_url'] ?? ''));
+                if ($url === '') { http_response_code(400); echo json_encode(['error' => 'Missing file_url']); exit; }
+                $exists = $pdo->prepare('SELECT id FROM pm_am WHERE id = ?');
+                $exists->execute([$id]);
+                if (!$exists->fetchColumn()) { http_response_code(404); echo json_encode(['error' => 'PM not found']); exit; }
+                $ins = $pdo->prepare('INSERT INTO pm_am_attachments (pm_am_id, file_name, file_path, file_type, file_size, uploaded_by) VALUES (?,?,?,?,?,?)');
+                $ins->execute([$id, (string)($af['file_name'] ?? basename($url)), $url, isset($af['file_type']) ? (string)$af['file_type'] : null, isset($af['file_size']) ? (int)$af['file_size'] : null, (int)($_SESSION['user_id'] ?? 0) ?: null]);
+                echo json_encode(['success' => true, 'attachment_id' => (int)$pdo->lastInsertId()]);
+                exit;
+            }
             // ช่างกด "รับงาน" — ทำงานก่อนเช็คฟิลด์อื่น (ส่งมาแค่ assignee_accept ตัวเดียวก็ได้)
             $accepted = false;
             if (!empty($data['assignee_accept'])) {
@@ -168,11 +188,27 @@ try {
             echo json_encode(['success' => true]);
             break;
         case 'DELETE':
+            // ลบเอกสารแนบรายการเดียว
+            if (isset($_GET['attachment_id'])) {
+                $attId = (int)$_GET['attachment_id'];
+                $stmt = $pdo->prepare('SELECT file_path FROM pm_am_attachments WHERE id = ?');
+                $stmt->execute([$attId]);
+                $path = (string)$stmt->fetchColumn();
+                if ($path !== '') {
+                    $pdo->prepare('DELETE FROM pm_am_attachments WHERE id = ?')->execute([$attId]);
+                    $full = __DIR__ . '/../../../public' . $path;
+                    if (is_file($full)) { @unlink($full); }
+                    echo json_encode(['success' => true, 'message' => 'Attachment deleted']);
+                    exit;
+                }
+                http_response_code(404); echo json_encode(['error' => 'Not found']); exit;
+            }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $stmt = $pdo->prepare('DELETE FROM pm_am WHERE id = ?');
             $stmt->execute([$id]);
             $pdo->prepare("DELETE FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?")->execute([$id]);
+            $pdo->prepare('DELETE FROM pm_am_attachments WHERE pm_am_id = ?')->execute([$id]);
             if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
             echo json_encode(['success' => true, 'message' => 'Deleted']);
             break;

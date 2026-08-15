@@ -36,6 +36,11 @@ function EditPMContent() {
   const [outsourceBy, setOutsourceBy] = useState("");
   const [costOutsource, setCostOutsource] = useState("");
 
+  // ── เอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) ──
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [attUploading, setAttUploading] = useState(false);
+  const [attMsg, setAttMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
   // New state variables for the new fields
   const [completedAt, setCompletedAt] = useState<ISODate | undefined>(undefined);
   const [completedBy, setCompletedBy] = useState("");
@@ -75,6 +80,12 @@ function EditPMContent() {
           setCompletedAt(json.completed_at || undefined);
           setCompletedBy(json.completed_by_name || ""); // Assuming API returns name, adjust if it's an ID
           setRescheduleReason(json.reschedule_reason || "");
+
+          // โหลดเอกสารแนบ
+          fetch(`/api/v1/pm_am.php?attachments=1&id=${pmId}`)
+            .then(res => res.json())
+            .then(list => { if (Array.isArray(list)) setAttachments(list); })
+            .catch(() => { /* ignore */ });
         } else {
           setError("ไม่พบข้อมูลแผน PM");
         }
@@ -82,6 +93,54 @@ function EditPMContent() {
       .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
       .finally(() => setLoadingData(false));
   }, [pmId]);
+
+  const uploadAttachments = async (files: FileList | null) => {
+    if (!pmId || !files || files.length === 0) return;
+    setAttUploading(true);
+    setAttMsg(null);
+    let okCount = 0;
+    const fails: string[] = [];
+    for (const file of Array.from(files)) {
+      try {
+        const fd = new FormData();
+        fd.append("folder", "pm_am");
+        fd.append("file", file);
+        const upRes = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
+        const upJson = await upRes.json();
+        if (!upJson.url) throw new Error(upJson.error || "อัปโหลดไม่สำเร็จ");
+        const regRes = await fetch(`/api/v1/pm_am.php?id=${pmId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ attach_file: { file_url: upJson.url, file_name: file.name, file_type: file.type, file_size: file.size } }),
+        });
+        const regJson = await regRes.json();
+        if (!regJson.success) throw new Error(regJson.error || "บันทึกไม่สำเร็จ");
+        okCount++;
+      } catch (e) {
+        console.error(e);
+        fails.push(file.name);
+      }
+    }
+    const listRes = await fetch(`/api/v1/pm_am.php?attachments=1&id=${pmId}`);
+    const list = await listRes.json();
+    if (Array.isArray(list)) setAttachments(list);
+    setAttUploading(false);
+    setAttMsg(fails.length === 0
+      ? { kind: "ok", text: `อัปโหลดเอกสารสำเร็จ ${okCount} ไฟล์` }
+      : { kind: "err", text: `อัปโหลดไม่สำเร็จ ${fails.length} ไฟล์: ${fails.join(", ")}` });
+  };
+
+  const deleteAttachment = async (attId: number) => {
+    if (!window.confirm("ลบเอกสารแนบนี้?")) return;
+    const res = await fetch(`/api/v1/pm_am.php?attachment_id=${attId}`, { method: "DELETE" });
+    const json = await res.json();
+    if (json.success) {
+      setAttachments(prev => prev.filter(a => a.id !== attId));
+      setAttMsg({ kind: "ok", text: "ลบเอกสารแล้ว" });
+    } else {
+      setAttMsg({ kind: "err", text: json.error || "ลบไม่สำเร็จ" });
+    }
+  };
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -212,6 +271,50 @@ function EditPMContent() {
                 </VStack>
               </VStack>
             )}
+
+            {/* ── เอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) ── */}
+            <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px dashed var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+              <VStack gap={1}>
+                <Text type="body" size="sm" weight="semibold">เอกสารแนบ (ใบแจ้งหนี้ / ใบเสนอราคา)</Text>
+                <Text type="body" size="sm" color="secondary">รองรับ pdf / xls / xlsx / doc / docx / csv / txt สูงสุด 6 MB ต่อไฟล์</Text>
+              </VStack>
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.txt"
+                disabled={attUploading}
+                onChange={(e) => uploadAttachments(e.target.files)}
+                style={{ fontSize: 13, color: "var(--cmms-text-secondary)" }}
+              />
+              {attMsg && (
+                <Text type="body" size="sm" style={{ color: attMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)" }}>{attMsg.text}</Text>
+              )}
+              {attUploading && <Text type="body" size="sm" color="secondary">กำลังอัปโหลด...</Text>}
+              {attachments.length > 0 && (
+                <VStack gap={2}>
+                  {attachments.map(a => (
+                    <HStack key={a.id} gap={2} vAlign="center" wrap="wrap" style={{ padding: "8px 12px", borderRadius: 8, background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)" }}>
+                      <a
+                        href={a.file_path}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ fontSize: 13, fontWeight: 600, color: "var(--cmms-primary)", textDecoration: "none", wordBreak: "break-all" }}
+                      >
+                        {a.file_name}
+                      </a>
+                      <Text type="body" size="sm" color="secondary">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB</Text>
+                      <button
+                        type="button"
+                        onClick={() => deleteAttachment(a.id)}
+                        style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--cmms-danger)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                      >
+                        ลบ
+                      </button>
+                    </HStack>
+                  ))}
+                </VStack>
+              )}
+            </VStack>
 
             <Selector
               label="สถานะปัจจุบัน"
