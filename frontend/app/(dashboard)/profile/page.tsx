@@ -20,6 +20,7 @@ import {
   ShieldCheckIcon,
   IdentificationIcon,
   LanguageIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useLang, setUserLang } from "../../../lib/i18n";
 
@@ -46,6 +47,7 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingAvatar, setDeletingAvatar] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -104,6 +106,27 @@ export default function ProfilePage() {
       showToast("error", e.message || "อัปโหลดรูปไม่สำเร็จ");
     }
     setUploading(false);
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!avatarSrc || deletingAvatar) return;
+    if (!window.confirm("ลบรูปโปรไฟล์? ระบบจะแสดงตัวอักษรย่อแทน")) return;
+    setDeletingAvatar(true);
+    try {
+      const res = await fetch("/api/v1/profile.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_path: null }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "ลบรูปไม่สำเร็จ");
+      window.dispatchEvent(new Event("cmms:profile-updated"));
+      await fetchProfile();
+      showToast("success", "ลบรูปโปรไฟล์แล้ว — แสดงตัวอักษรย่อแทน");
+    } catch (e: any) {
+      showToast("error", e.message || "ลบรูปไม่สำเร็จ");
+    }
+    setDeletingAvatar(false);
   };
 
   const handleLangChange = async (next: "th" | "en") => {
@@ -211,6 +234,22 @@ export default function ProfilePage() {
               >
                 {uploading ? <Spinner size="sm" /> : <CameraIcon className="w-4 h-4" />}
               </button>
+              {avatarSrc && !uploading && (
+                <button
+                  type="button"
+                  title="ลบรูปโปรไฟล์"
+                  onClick={handleDeleteAvatar}
+                  style={{
+                    position: "absolute", bottom: 0, left: 0,
+                    width: 30, height: 30, borderRadius: "50%",
+                    background: "var(--cmms-danger)", color: "#fff",
+                    border: "2px solid #fff", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {deletingAvatar ? <Spinner size="sm" /> : <TrashIcon className="w-4 h-4" />}
+                </button>
+              )}
               <input
                 ref={fileRef}
                 type="file"

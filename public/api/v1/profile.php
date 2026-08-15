@@ -111,13 +111,27 @@ try {
         }
         if (array_key_exists('avatar_path', $data)) {
             $p = trim((string)$data['avatar_path']);
-            if ($p !== '' && !preg_match('#^/uploads/avatars/[A-Za-z0-9_.-]+$#', $p)) {
-                http_response_code(400);
-                echo json_encode(['error' => 'avatar_path ไม่ถูกต้อง']);
-                exit;
+            if ($p === '') {
+                // ลบรูปโปรไฟล์: เคลียร์ทั้ง avatar (base64) และ avatar_path → แสดงตัวอักษรย่อแทน
+                $old = $pdo->prepare('SELECT avatar_path FROM users WHERE id = ?');
+                $old->execute([$userId]);
+                $oldPath = (string)$old->fetchColumn();
+                // ลบไฟล์เฉพาะผู้ใช้ (avatar_u*) — ไฟล์ default กลาง (user_male/female.jpg) เก็บไว้
+                if ($oldPath !== '' && str_starts_with($oldPath, '/uploads/avatars/avatar_u')) {
+                    $oldFile = __DIR__ . '/../..' . $oldPath;
+                    if (is_file($oldFile)) @unlink($oldFile);
+                }
+                $fields[] = 'avatar_path = NULL';
+                $fields[] = 'avatar = NULL';
+            } else {
+                if (!preg_match('#^/uploads/avatars/[A-Za-z0-9_.-]+$#', $p)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'avatar_path ไม่ถูกต้อง']);
+                    exit;
+                }
+                $fields[] = 'avatar_path = ?'; $values[] = $p;
+                $fields[] = 'avatar = ?';      $values[] = null;
             }
-            $fields[] = 'avatar_path = ?'; $values[] = $p;
-            $fields[] = 'avatar = ?';      $values[] = null;
         }
 
         // เปลี่ยนรหัสผ่าน: ต้องยืนยันรหัสเดิม + รหัสใหม่ 2 ครั้งตรงกัน
