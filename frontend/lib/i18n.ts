@@ -510,9 +510,9 @@ export function setUserLang(lang: Lang) {
   listeners.forEach((fn) => fn());
 }
 
-/** ตั้งค่าเริ่มต้นจาก settings API (lang_default) — เรียก 1 ครั้งตอน app mount */
+/** ตั้งค่าเริ่มต้นจาก settings API (lang_default) — สำหรับผู้ที่ยังไม่ล็อกอิน */
 export async function applySystemLang(): Promise<void> {
-  if (typeof window === "undefined" || getUserLang()) return;
+  if (typeof window === "undefined") return;
   try {
     const res = await fetch("/api/v1/settings.php");
     if (!res.ok) return;
@@ -521,6 +521,18 @@ export async function applySystemLang(): Promise<void> {
     const row = rows.find((r) => r?.setting_key === "lang_default");
     if (row?.setting_value === "en") setUserLang("en");
   } catch { /* ค่าเริ่มต้น th */ }
+}
+
+/** ภาษาประจำตัวจาก users.lang (บัญชี) — มีชัยเหนือ localStorage เฉพาะเครื่อง เรียกตอนล็อกอินแล้ว */
+export async function applyUserLang(): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const res = await fetch("/api/v1/profile.php");
+    if (!res.ok) return; // 401 = ยังไม่ล็อกอิน → ปล่อย localStorage/ค่าตั้งค่า
+    const json = await res.json();
+    const lang: string | undefined = json?.user?.lang;
+    if (lang === "en" || lang === "th") setUserLang(lang);
+  } catch { /* offline — ใช้ค่าเดิม */ }
 }
 
 export function currentLang(): Lang {

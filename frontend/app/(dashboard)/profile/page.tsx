@@ -19,7 +19,9 @@ import {
   KeyIcon,
   ShieldCheckIcon,
   IdentificationIcon,
+  LanguageIcon,
 } from "@heroicons/react/24/outline";
+import { useLang, setUserLang } from "../../../lib/i18n";
 
 interface Profile {
   id: number;
@@ -33,6 +35,7 @@ interface Profile {
   avatar: string | null;
   avatar_path: string | null;
   line_user_id: string | null;
+  lang: string;
   created_at: string;
 }
 
@@ -48,6 +51,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", position: "" });
   const [pw, setPw] = useState({ current_password: "", new_password: "", confirm_password: "" });
+  const [langSaving, setLangSaving] = useState(false);
+  const lang = useLang();
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -97,6 +102,28 @@ export default function ProfilePage() {
       showToast("error", e.message || "อัปโหลดรูปไม่สำเร็จ");
     }
     setUploading(false);
+  };
+
+  const handleLangChange = async (next: "th" | "en") => {
+    // สลับ UI ทันที (session นี้)
+    setUserLang(next);
+    if ((profile?.lang ?? "th") === next) return;
+    setLangSaving(true);
+    try {
+      const res = await fetch("/api/v1/profile.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lang: next }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "บันทึกภาษาไม่สำเร็จ");
+      setProfile((p) => (p ? { ...p, lang: next } : p));
+      showToast("success", "บันทึกภาษาประจำตัวแล้ว — จะใช้กับบัญชีนี้ทุกเครื่อง");
+    } catch (e: any) {
+      setUserLang(lang); // คืนค่าก่อนหน้า ถ้าบันทึกไม่สำเร็จ
+      showToast("error", e.message || "บันทึกภาษาไม่สำเร็จ");
+    }
+    setLangSaving(false);
   };
 
   const handleSave = async () => {
@@ -274,6 +301,51 @@ export default function ProfilePage() {
                 >
                   {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
                 </button>
+              </HStack>
+            </VStack>
+          </Card>
+
+          <Card padding={5}>
+            <VStack gap={4}>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                <LanguageIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
+                <Heading level={3}>ภาษาประจำตัว</Heading>
+                {langSaving && <Spinner size="sm" />}
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                  บันทึกไว้ที่บัญชีของคุณ — ใช้เหมือนกันทุกเครื่อง
+                </span>
+              </HStack>
+              <Text type="body" size="sm" color="secondary">
+                เลือกภาษาที่ใช้แสดงผลในระบบ ระบบจะจำไว้ให้ตามบัญชีผู้ใช้ (ไม่ขึ้นกับเครื่อง/เบราว์เซอร์)
+              </Text>
+              <HStack gap={2} vAlign="center" wrap="wrap">
+                {[
+                  { value: "th", short: "ไทย", label: "ไทย (Thai)" },
+                  { value: "en", short: "EN", label: "English" },
+                ].map((opt) => {
+                  const active = (profile?.lang ?? lang) === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      title={opt.label}
+                      disabled={langSaving}
+                      onClick={() => handleLangChange(opt.value as "th" | "en")}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 6,
+                        padding: "8px 18px", borderRadius: 10,
+                        border: active ? "1px solid var(--cmms-primary)" : "1px solid var(--cmms-border)",
+                        background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
+                        color: active ? "#fff" : "var(--cmms-text-secondary)",
+                        fontSize: 13, fontWeight: 700, cursor: "pointer",
+                        transition: "all 150ms ease",
+                      }}
+                    >
+                      {opt.short}
+                      <span style={{ fontWeight: 500, opacity: 0.85 }}>{opt.label}</span>
+                    </button>
+                  );
+                })}
               </HStack>
             </VStack>
           </Card>

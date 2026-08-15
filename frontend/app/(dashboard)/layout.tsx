@@ -20,7 +20,7 @@ import SideNavScrollControls from "../../components/SideNavScrollControls";
 import MenuSection from "../../components/MenuSection";
 import { SideNavSearchProvider, SideNavSearchInput } from "../../components/SideNavSearch";
 import { useMenuPermission } from "../../lib/useMenuPermission";
-import { t, useLang, setUserLang, tPage, tSection } from "../../lib/i18n";
+import { t, useLang, setUserLang, tPage, tSection, applyUserLang } from "../../lib/i18n";
 import {
   SquaresPlusIcon,
   HomeIcon,
@@ -201,6 +201,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     loadProfile();
+    // ภาษาประจำตัวจาก users.lang — ตามบัญชีผู้ใช้ข้ามเครื่อง/ข้ามเบราว์เซอร์
+    applyUserLang();
     // หลังแก้ไขโปรไฟล์ (อัปโหลดรูปใหม่) → รีเฟรชรูปมุมขวาบนทันที
     const onProfileUpdated = () => loadProfile();
     window.addEventListener("cmms:profile-updated", onProfileUpdated);

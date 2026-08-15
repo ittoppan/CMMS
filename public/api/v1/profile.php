@@ -28,7 +28,7 @@ try {
     // ---------- GET: โปรไฟล์ปัจจุบัน ----------
     if ($method === 'GET') {
         $stmt = $pdo->prepare('SELECT id, username, email, full_name, phone, role, position, employee_code,
-                                      avatar, avatar_path, line_user_id, created_at
+                                      avatar, avatar_path, line_user_id, lang, created_at
                                FROM users WHERE id = ?');
         $stmt->execute([$userId]);
         $u = $stmt->fetch();
@@ -98,6 +98,16 @@ try {
                 $fields[] = "$col = ?";
                 $values[] = mb_substr(trim((string)$data[$col]), 0, $max);
             }
+        }
+        // ภาษาประจำตัว (th/en) — บันทึกลง users.lang เพื่อให้ตามบัญชีผู้ใช้ข้ามเครื่อง
+        if (array_key_exists('lang', $data)) {
+            $lang = trim((string)$data['lang']);
+            if (!in_array($lang, ['th', 'en'], true)) {
+                http_response_code(400);
+                echo json_encode(['error' => 'lang ต้องเป็น th หรือ en']);
+                exit;
+            }
+            $fields[] = 'lang = ?'; $values[] = $lang;
         }
         if (array_key_exists('avatar_path', $data)) {
             $p = trim((string)$data['avatar_path']);
