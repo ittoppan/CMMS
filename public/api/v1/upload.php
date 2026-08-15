@@ -46,7 +46,18 @@ try {
         'image/gif'  => 'gif',
         'image/webp' => 'webp',
         'image/svg+xml' => 'svg',
+        // เอกสาร (ใบแจ้งหนี้ / ใบเสนอราคา / ใบส่งของ)
+        'application/pdf'  => 'pdf',
+        'application/vnd.ms-excel' => 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+        'text/csv' => 'csv',
+        'text/plain' => 'txt',
+        'application/vnd.ms-powerpoint' => 'ppt',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
     ];
+    $imageExts = ['png', 'jpg', 'gif', 'webp', 'svg'];
 
     $binary = null;
     $mime = null;
@@ -63,7 +74,7 @@ try {
         finfo_close($finfo);
         if (!isset($mimeExtMap[$mime])) {
             http_response_code(415);
-            echo json_encode(['error' => 'ประเภทไฟล์ไม่รองรับ (รองรับ png/jpg/gif/webp/svg)']);
+            echo json_encode(['error' => 'ประเภทไฟล์ไม่รองรับ (รองรับ png/jpg/gif/webp/svg/pdf/xls/xlsx/doc/docx/csv/txt)']);
             exit;
         }
         $binary = file_get_contents($_FILES['file']['tmp_name']);
@@ -110,8 +121,8 @@ try {
 
     $ext = $mimeExtMap[$mime] ?? 'png';
 
-    // ตรวจว่าเป็นรูปจริง (ยกเว้น svg — ตรวจแค่ tag คร่าว ๆ)
-    if ($ext !== 'svg') {
+    // ตรวจว่าเป็นรูปจริงเฉพาะไฟล์รูป (ยกเว้น svg — ตรวจแค่ tag คร่าว ๆ)
+    if (in_array($ext, $imageExts, true) && $ext !== 'svg') {
         $img = @imagecreatefromstring($binary);
         if ($img === false) {
             http_response_code(415);

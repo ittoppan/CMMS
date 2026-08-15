@@ -132,6 +132,7 @@ export default function PMSchedulePage() {
   const [detailData, setDetailData] = useState<any | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailErr, setDetailErr] = useState("");
+  const [detailAtts, setDetailAtts] = useState<any[]>([]);
 
   const openDetail = async (item: PMTask) => {
     setDetailTarget(item);
@@ -143,6 +144,9 @@ export default function PMSchedulePage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "load failed");
       setDetailData(json);
+      const attRes = await fetch(`/api/v1/pm_am.php?attachments=1&id=${item.rawId}`);
+      const attJson = await attRes.json();
+      setDetailAtts(Array.isArray(attJson) ? attJson : []);
     } catch (e) {
       setDetailErr("ไม่สามารถโหลดผลการทำ PM ได้ — ลองใหม่อีกครั้ง");
     } finally {
@@ -635,6 +639,26 @@ export default function PMSchedulePage() {
                 <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
                   <Text type="body" size="sm" color="secondary">หมายเหตุ: {detailData.notes}</Text>
                 </Card>
+              )}
+
+              {/* เอกสารแนบ */}
+              {detailAtts.length > 0 && (
+                <VStack gap={2}>
+                  <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>เอกสารแนบ ({detailAtts.length})</Text>
+                  {detailAtts.map(a => (
+                    <HStack key={a.id} gap={3} vAlign="center" wrap="wrap" style={{ padding: "8px 12px", borderRadius: 8, background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                      <a
+                        href={a.file_path}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ fontSize: 13, fontWeight: 600, color: "var(--cmms-primary)", textDecoration: "none", wordBreak: "break-all" }}
+                      >
+                        {a.file_name}
+                      </a>
+                      <Text type="body" size="sm" color="secondary">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB{a.uploaded_name ? ` · ${a.uploaded_name}` : ""}</Text>
+                    </HStack>
+                  ))}
+                </VStack>
               )}
             </VStack>
           )}
