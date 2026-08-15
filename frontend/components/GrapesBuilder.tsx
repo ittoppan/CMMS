@@ -269,6 +269,70 @@ const TEMPLATES: Array<{
 `,
   },
   {
+    id: "tpl-pmam",
+    name: "หน้าแผน PM/AM",
+    desc: "ศูนย์แผนซ่อมบำรุงเชิงป้องกัน: สรุปสถานะ PM จริง + ขั้นตอน + ลิงก์ปฏิทิน/เช็คชีท",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><rect x="3" y="4" width="18" height="17" rx="3" fill="rgba(0,104,181,.10)" stroke="${C.primary}"/><path d="M3 9h18" stroke="${C.primary}"/><circle cx="8" cy="15" r="2.4" fill="${C.ok}"/><path d="M13 14.5h5M13 17h5" stroke="${C.warn}" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+    title: "ศูนย์แผนงาน PM/AM",
+    slug: "pm-center",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · PM / AM CENTER</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">ศูนย์แผนงาน PM/AM</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">วางแผนซ่อมบำรุงเชิงป้องกัน ตรวจเช็คตามรอบ และติดตามผลให้ตรงกำหนด</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 12px">ขั้นตอนการทำงาน PM</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <div style="flex:1;min-width:190px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:26px;font-weight:700;color:${C.primary};line-height:1">01</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">สร้างแผน</div><div style="font-size:13px;color:${C.text2};line-height:1.6">กำหนดเครื่องจักร + รายการตรวจ + ความถี่ (รายวัน/สัปดาห์/เดือน)</div></div>
+  <div style="flex:1;min-width:190px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:26px;font-weight:700;color:${C.primary};line-height:1">02</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">สแกน QR หน้างาน</div><div style="font-size:13px;color:${C.text2};line-height:1.6">สแกน QR ที่เครื่องจักรเพื่อเปิดเช็คชีทของรอบนั้นทันที</div></div>
+  <div style="flex:1;min-width:190px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:26px;font-weight:700;color:${C.primary};line-height:1">03</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">ทำเช็คชีท</div><div style="font-size:13px;color:${C.text2};line-height:1.6">บันทึกผลตรวจ + ลงชื่อรับรองบนมือถือ (ออฟไลน์ได้)</div></div>
+  <div style="flex:1;min-width:190px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px"><div style="font-family:${FONT_DISPLAY};font-size:26px;font-weight:700;color:${C.primary};line-height:1">04</div><div style="font-size:14px;font-weight:700;color:${C.text};margin:6px 0 4px">ติดตามผล</div><div style="font-size:13px;color:${C.text2};line-height:1.6">ดูแผนเกินกำหนดในหน้า KPI และรับแจ้งเตือน LINE อัตโนมัติ</div></div>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">สถานะแผน PM/AM (ข้อมูลจริง)</h2>
+<div data-dynamic="pm-table" data-dynamic-label="งาน PM/AM" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">งาน PM/AM — ข้อมูลจริงจากฐานข้อมูล</div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+  <a href="/pm_am" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ตารางแผน PM</div><div style="font-size:12px;color:${C.muted};margin-top:2px">ดู/แก้ไขแผนทั้งหมด</div></a>
+  <a href="/pm_am/calendar" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ปฏิทิน PM/AM</div><div style="font-size:12px;color:${C.muted};margin-top:2px">กำหนดการรายเดือน</div></a>
+  <a href="/pm_am/checksheet" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ทำเช็คชีท PM</div><div style="font-size:12px;color:${C.muted};margin-top:2px">เริ่มตรวจรอบนี้</div></a>
+  <a href="/pm_am/create" style="flex:1;min-width:180px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">สร้างแผนใหม่</div><div style="font-size:12px;color:${C.muted};margin-top:2px">เพิ่มรายการ PM/AM</div></a>
+</div>
+<div style="display:flex;gap:10px;align-items:flex-start;background:rgba(245,158,11,.10);border:1px solid rgba(245,158,11,.25);border-radius:${C.radius};padding:14px;font-family:${FONT};margin-top:16px">
+  <span style="flex:none;width:18px;height:18px;border-radius:50%;background:${C.warn};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px">!</span>
+  <div style="font-size:13px;color:${C.warnDark}">แผน PM ที่เกินกำหนดจะถูกนับเข้า KPI "%PM ทันกำหนด" — ควรปิดงานให้ครบก่อนสิ้นเดือนเพื่อรักษา compliance</div>
+</div>
+`,
+  },
+  {
+    id: "tpl-reports",
+    name: "หน้ารายงานผู้บริหาร",
+    desc: "กระดานรายงานผู้บริหาร: KPI + Andon + งานล่าสุด + อะไหล่ต่ำสต็อก + ลิงก์รายงาน PDF/Excel",
+    icon: `<svg viewBox="0 0 24 24" width="30" height="30" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" fill="rgba(0,104,181,.10)" stroke="${C.primary}"/><path d="M7 16l3-4 2.5 2.5L17 9" stroke="${C.primary}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6v2M10 6v2M13 6v2" stroke="${C.muted}" stroke-width="1.4"/></svg>`,
+    title: "รายงานผู้บริหาร",
+    slug: "executive-report",
+    html: `
+<div style="background:${C.primary};border-radius:14px;padding:28px 24px;color:#fff;font-family:${FONT}">
+  <div style="font-family:${FONT_DISPLAY};font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-bottom:6px">CMMS-TOPPAN · EXECUTIVE REPORT</div>
+  <h2 style="margin:0;font-size:26px;font-weight:700;line-height:1.2;font-family:${FONT_DISPLAY}">รายงานผู้บริหาร</h2>
+  <p style="margin:8px 0 0;font-size:14px;opacity:.85">ภาพรวมสมรรถนะการซ่อมบำรุง: KPI, MTTR/MTBF, ค่าใช้จ่าย และสต็อกอะไหล่</p>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">KPI งานซ่อม (ข้อมูลจริง)</h2>
+<div data-dynamic="kpi-overview" data-dynamic-label="KPI งานซ่อม" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">KPI งานซ่อม — ข้อมูลจริงจากฐานข้อมูล</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">สถานะเครื่องจักร (ข้อมูลจริง)</h2>
+<div data-dynamic="andon-board" data-dynamic-label="ไฟ Andon" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">หลอดไฟ Andon — ตามสถานะงานจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">วิเคราะห์รายงานตามหัวข้อ</h2>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <a href="/analytics/kpi" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">KPI ผู้บริหาร</div><div style="font-size:12px;color:${C.muted};margin-top:3px">MTTR / MTBF · %PM ทันกำหนด · %ปิดงานใน SLA</div></a>
+  <a href="/reports" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ศูนย์รวมรายงาน</div><div style="font-size:12px;color:${C.muted};margin-top:3px">ค่าใช้จ่ายซ่อมรายเดือน · ความถี่ Breakdown</div></a>
+  <a href="/reports/pdf" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">รายงาน PDF ผู้บริหาร</div><div style="font-size:12px;color:${C.muted};margin-top:3px">ดาวน์โหลดสรุปประจำเดือน</div></a>
+  <a href="/reports/export" style="flex:1;min-width:200px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:16px;text-decoration:none"><div style="font-size:14px;font-weight:700;color:${C.primary}">ส่งออก Excel / CSV</div><div style="font-size:12px;color:${C.muted};margin-top:3px">ดึงข้อมูลดิบไปวิเคราะห์ต่อ</div></a>
+</div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">ใบสั่งงานซ่อมล่าสุด (ข้อมูลจริง)</h2>
+<div data-dynamic="wo-table" data-dynamic-label="งานซ่อมล่าสุด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">ใบสั่งงานซ่อมล่าสุด 5 ใบ — ข้อมูลจริง</div></div>
+<h2 style="font-family:${FONT_DISPLAY};font-size:20px;font-weight:700;color:${C.text};margin:18px 0 10px">อะไหล่ใกล้หมดสต็อก (ข้อมูลจริง)</h2>
+<div data-dynamic="low-stock" data-dynamic-label="อะไหล่ใกล้หมด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">อะไหล่ใกล้หมดสต็อก — ข้อมูลจริง</div></div>
+`,
+  },
+  {
     id: "tpl-announce",
     name: "หน้ารวมประกาศ",
     desc: "ประชาสัมพันธ์ข่าวสาร + ลิงก์เอกสาร/แบบฟอร์ม F-EN สำหรับพนักงาน",
@@ -336,6 +400,13 @@ const DYNAMIC_BLOCKS: Array<{
     category: "ข้อมูลจริง (จากฐานข้อมูล)",
     icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z" stroke="${C.warn}" stroke-width="1.6" fill="rgba(245,158,11,.12)"/><rect x="9" y="10" width="6" height="3" rx="1.5" fill="${C.warn}"/><rect x="10.5" y="15" width="3" height="2" rx="1" fill="${C.warn}"/></svg>`,
     content: `<div data-dynamic="low-stock" data-dynamic-label="อะไหล่ใกล้หมด" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">อะไหล่ใกล้หมดสต็อก — ข้อมูลจริง</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">รายการ stock_qty ≤ min_stock จากตาราง spare_parts</div></div>`,
+  },
+  {
+    id: "dyn-pm-table",
+    label: "ตารางงาน PM/AM (ข้อมูลจริง)",
+    category: "ข้อมูลจริง (จากฐานข้อมูล)",
+    icon: `<svg viewBox="0 0 24 24" width="36" height="36" fill="none"><rect x="3" y="4" width="18" height="17" rx="2" stroke="${C.primary}" fill="rgba(0,104,181,.08)"/><path d="M3 9h18" stroke="${C.primary}"/><path d="M7 13h4M7 16h7" stroke="${C.warn}" stroke-width="1.6" stroke-linecap="round"/><rect x="14" y="13" width="5" height="5" rx="2.5" stroke="${C.down}" stroke-width="1.5" fill="none"/></svg>`,
+    content: `<div data-dynamic="pm-table" data-dynamic-label="งาน PM/AM" style="background:${C.card};border:1px dashed ${C.primary};border-radius:${C.radius};padding:18px"><div style="font-family:${FONT};font-size:13px;color:${C.primaryText};font-weight:600">งาน PM/AM — ข้อมูลจริงจากฐานข้อมูล</div><div style="font-family:${FONT};font-size:12px;color:${C.muted};margin-top:4px">เกินกำหนด / ใกล้กำหนด 7 วัน / เสร็จแล้ว — เทียบ due_date กับวันนี้</div></div>`,
   },
 ];
 

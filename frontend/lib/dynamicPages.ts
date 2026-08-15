@@ -13,10 +13,12 @@
  *   andon-board   — หลอดไฟ Andon ตามสถานะจริง (ปกติ/เตือน/หยุด)
  *   wo-table      — ตารางงานซ่อมล่าสุด 5 ใบ
  *   low-stock     — ตารางอะไหล่ใกล้หมดสต็อก (stock_qty <= min_stock)
+ *   pm-table      — งาน PM/AM เกินกำหนด + ใกล้กำหนด + เสร็จแล้ว (due_date เทียบวันนี้)
  */
 
 const C = {
   primary: "#0068B5",
+  primaryText: "#00508C",
   card: "#FFFFFF",
   text: "#22262E",
   text2: "#475569",
@@ -33,7 +35,7 @@ const C = {
 const FONT = "'Noto Sans Thai', 'Sarabun', 'Inter', sans-serif";
 const FONT_DISPLAY = "'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif";
 
-type DynamicType = "kpi-overview" | "andon-board" | "wo-table" | "low-stock";
+type DynamicType = "kpi-overview" | "andon-board" | "wo-table" | "low-stock" | "pm-table";
 
 const DONE = ["completed", "closed", "resolved"];
 const ACTIVE = ["in_progress", "open", "pending", "waiting_parts", "pending_parts"];
@@ -57,6 +59,17 @@ interface LowStockPart {
   stock_qty?: number | string;
   min_stock?: number | string;
   location?: string;
+}
+
+interface PmTask {
+  id?: number | string;
+  title?: string;
+  asset_name?: string;
+  assigned_name?: string;
+  status?: string;
+  due_date?: string;
+  last_done_date?: string;
+  frequency_type?: string;
 }
 
 function normStatus(s: unknown): string {
@@ -154,6 +167,76 @@ function woTable(wo: WorkOrder[]): string {
   );
 }
 
+function pmTable(pms: PmTask[]): string {
+  // นับสถานะเทียบวันนี้: เกินกำหนด / ใกล้กำหนด (7 วัน) / เสร็จแล้ว / รอตามกำหนด
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const in7 = new Date(today.getTime() + 7 * 86400000);
+  let overdue = 0;
+  let dueSoon = 0;
+  let done = 0;
+  let waiting = 0;
+  for (const p of pms) {
+    const s = normStatus(p.status);
+    if (s === "completed" || s === "done" || s === "closed") { done += 1; continue; }
+    if (p.due_date) {
+      const d = new Date(String(p.due_date).slice(0, 10));
+      if (!isNaN(d.getTime())) {
+        if (d < today) { overdue += 1; continue; }
+        if (d <= in7) { dueSoon += 1; continue; }
+      }
+    }
+    waiting += 1;
+  }
+
+  const summary = (dot: string, glow: string, label: string, n: number, hint: string, dark: string) =>
+    `<div style="flex:1;min-width:150px;background:${C.card};border:1px solid ${C.border};border-radius:${C.radius};padding:14px;font-family:${FONT}">` +
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:10px;height:10px;border-radius:50%;background:${dot};box-shadow:0 0 0 4px ${glow};display:inline-block"></span><span style="font-size:12px;color:${C.text2}">${label}</span></div>` +
+    `<div style="font-family:${FONT_DISPLAY};font-size:28px;font-weight:700;line-height:1;color:${C.text}">${n}</div>` +
+    `<div style="margin-top:6px;font-size:11px;color:${dark}">${hint}</div>` +
+    `</div>`;
+
+  const chip = (s: string) => {
+    const n = normStatus(s);
+    if (n === "completed" || n === "done" || n === "closed") return `<span style="display:inline-block;font-size:12px;font-weight:600;color:${C.okDark};background:rgba(16,185,129,.12);border-radius:100px;padding:3px 10px">เสร็จแล้ว</span>`;
+    if (n === "overdue") return `<span style="display:inline-block;font-size:12px;font-weight:600;color:${C.downDark};background:rgba(239,68,68,.12);border-radius:100px;padding:3px 10px">เกินกำหนด</span>`;
+    if (n === "completed_late") return `<span style="display:inline-block;font-size:12px;font-weight:600;color:${C.warnDark};background:rgba(245,158,11,.15);border-radius:100px;padding:3px 10px">ทำล่าช้า</span>`;
+    return `<span style="display:inline-block;font-size:12px;font-weight:600;color:${C.primaryText};background:rgba(0,104,181,.12);border-radius:100px;padding:3px 10px">ตามกำหนด</span>`;
+  };
+
+  const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
+  let body = "";
+  const rows = pms.slice(0, 8);
+  if (rows.length === 0) {
+    body = `<tr><td colspan="5" style="padding:20px 12px;text-align:center;color:${C.muted}">ยังไม่มีแผน PM/AM ในระบบ — สร้างแผนที่เมนู "สร้างแผน PM" เพื่อให้ตารางนี้แสดงข้อมูลจริง</td></tr>`;
+  } else {
+    for (const p of rows) {
+      const due = p.due_date ? String(p.due_date).slice(0, 10) : "-";
+      body +=
+        `<tr style="border-bottom:1px solid ${C.border}">` +
+        `<td style="padding:10px 12px;font-weight:600;color:${C.text}">${p.title || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${p.asset_name || "-"}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${due}</td>` +
+        `<td style="padding:10px 12px">${chip(p.status ?? "")}</td>` +
+        `<td style="padding:10px 12px;color:${C.text2}">${p.assigned_name || "ยังไม่จัดผู้รับผิดชอบ"}</td>` +
+        `</tr>`;
+    }
+  }
+
+  return (
+    `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">` +
+    summary(C.down, "rgba(239,68,68,.15)", "เกินกำหนด", overdue, "ต้องดำเนินการด่วน", C.downDark) +
+    summary(C.warn, "rgba(245,158,11,.18)", "ใกล้กำหนด (7 วัน)", dueSoon, "ถึงกำหนดเร็ว ๆ นี้", C.warnDark) +
+    summary(C.ok, "rgba(16,185,129,.15)", "เสร็จแล้ว", done, "ดำเนินการครบแล้ว", C.okDark) +
+    summary(C.primary, "rgba(0,104,181,.12)", "รอตามกำหนด", waiting, "อยู่ในรอบที่ยังไม่ถึงกำหนด", C.text2) +
+    `</div>` +
+    `<table style="width:100%;border-collapse:collapse;font-family:${FONT};font-size:13px;background:${C.card};border-radius:${C.radius};overflow:hidden">` +
+    `<thead><tr style="background:${C.primary};color:#fff;text-align:left">${head("รายการ")}${head("เครื่องจักร")}${head("กำหนดชำระ")}${head("สถานะ")}${head("ผู้รับผิดชอบ")}</tr></thead>` +
+    `<tbody>${body}</tbody>` +
+    `</table>`
+  );
+}
+
 function lowStockTable(parts: LowStockPart[]): string {
   const head = (label: string) => `<th style="padding:10px 12px;text-align:left">${label}</th>`;
   let body = "";
@@ -180,7 +263,7 @@ function lowStockTable(parts: LowStockPart[]): string {
   );
 }
 
-function renderByType(type: DynamicType, wo: WorkOrder[], parts: LowStockPart[]): string {
+function renderByType(type: DynamicType, wo: WorkOrder[], parts: LowStockPart[], pms: PmTask[]): string {
   switch (type) {
     case "kpi-overview":
       return kpiCards(wo);
@@ -190,6 +273,8 @@ function renderByType(type: DynamicType, wo: WorkOrder[], parts: LowStockPart[])
       return woTable(wo);
     case "low-stock":
       return lowStockTable(parts);
+    case "pm-table":
+      return pmTable(pms);
     default:
       return `<div style="font-family:${FONT};font-size:13px;color:${C.muted}">ไม่รู้จักบล็อกไดนามิก: ${type}</div>`;
   }
@@ -209,6 +294,7 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
   const types = new Set(els.map((el) => (el.getAttribute("data-dynamic") || "").trim()));
   const needWo = types.has("kpi-overview") || types.has("andon-board") || types.has("wo-table");
   const needStock = types.has("low-stock");
+  const needPm = types.has("pm-table");
 
   els.forEach((el) => {
     el.innerHTML = loadingHtml(el.getAttribute("data-dynamic-label") || "");
@@ -216,6 +302,7 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
 
   let wo: WorkOrder[] = [];
   let parts: LowStockPart[] = [];
+  let pms: PmTask[] = [];
 
   try {
     if (needWo) {
@@ -234,13 +321,21 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
       const json = await res.json();
       if (json?.status === "success" && Array.isArray(json.data)) parts = json.data as LowStockPart[];
     }
+    if (needPm) {
+      const res = await fetch("/api/v1/pm_am.php", {
+        headers: { "ngrok-skip-browser-warning": "1" },
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (Array.isArray(json)) pms = json as PmTask[];
+    }
   } catch {
     /* แสดง empty state ด้านล่าง */
   }
 
   els.forEach((el) => {
     const type = (el.getAttribute("data-dynamic") || "").trim() as DynamicType;
-    el.innerHTML = renderByType(type, wo, parts);
+    el.innerHTML = renderByType(type, wo, parts, pms);
     // ขอบ dashed (เครื่องหมาย "บล็อกไดนามิก" ใน canvas) → การ์ดปกติตอนแสดงจริง
     el.style.border = `1px solid ${C.border}`;
   });
