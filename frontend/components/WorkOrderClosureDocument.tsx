@@ -23,6 +23,8 @@ export interface WorkOrderDocData {
   downtimeMinutes: number;
   contaminateChecking?: string;
   outsourceBy?: string;
+  actualStartAt?: string;
+  repairTimeMinutes?: number;
   parts: WorkOrderPart[];
 }
 
@@ -123,6 +125,39 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
         </div>
       </div>
 
+      {/* F-EN-03: MAKER BY / OUTSOURCE BY / START / FINISH / MTN TIME / BD TIME */}
+      {(() => {
+        const fmtDT = (s?: string) =>
+          s ? String(s).slice(0, 16).replace("T", " ") : "-";
+        let mtn = "-";
+        if (wo.repairTimeMinutes && Number(wo.repairTimeMinutes) > 0) {
+          mtn = `${Number(wo.repairTimeMinutes)} นาที`;
+        } else if (wo.actualStartAt && wo.completedAt) {
+          const a = new Date(String(wo.actualStartAt).replace(" ", "T"));
+          const b = new Date(String(wo.completedAt).replace(" ", "T"));
+          const mins = Math.round((b.getTime() - a.getTime()) / 60000);
+          if (mins >= 0) mtn = `${mins} นาที`;
+        }
+        const cells = [
+          { label: "MAKER BY / ผู้ปฏิบัติงาน", value: wo.assignedName || "-" },
+          { label: "OUTSOURCE BY / ผู้รับเหมา", value: wo.outsourceBy || "—", accent: !!wo.outsourceBy },
+          { label: "START DATE / TIME", value: fmtDT(wo.actualStartAt) },
+          { label: "FINISH DATE / TIME", value: fmtDT(wo.completedAt) },
+          { label: "MTN. TIME / เวลาซ่อม", value: mtn },
+          { label: "BD. TIME / เวลาหยุด", value: wo.downtimeMinutes > 0 ? `${wo.downtimeMinutes} นาที` : "-" },
+        ];
+        return (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
+            {cells.map((c) => (
+              <div key={c.label} style={{ background: "#F8FAFC", padding: "10px 12px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                <div style={{ fontSize: 11, color: "#64748B" }}>{c.label}</div>
+                <div style={{ fontWeight: 700, marginTop: 2, color: c.accent ? "#D97706" : "#334155" }}>{c.value}</div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Before / After Photos */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 14 }}>
         <div style={{ border: "2px dashed #EF4444", borderRadius: 12, padding: 12, background: "#FEF2F2" }}>
@@ -190,7 +225,10 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
         </div>
         <div style={{ background: "#F8FAFC", padding: 14, borderRadius: 10, border: "1px solid #E2E8F0" }}>
           <div style={{ fontSize: 12, color: "#64748B" }}>OUTSOURCE BY / ผู้รับเหมาภายนอก</div>
-          <div style={{ fontWeight: 700, marginTop: 4, color: "#334155" }}>{wo.outsourceBy || "—"}</div>
+          <div style={{ fontWeight: 700, marginTop: 4, color: wo.outsourceBy ? "#D97706" : "#334155" }}>
+            {wo.outsourceBy || "—"}
+            {wo.outsourceBy && wo.costOutsource > 0 ? ` · ฿${Number(wo.costOutsource).toLocaleString()}` : ""}
+          </div>
         </div>
       </div>
 

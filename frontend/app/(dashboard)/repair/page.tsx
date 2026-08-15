@@ -211,6 +211,8 @@ export default function WorkOrdersPage() {
     downtimeMinutes: Number(row.downtime_minutes || 0),
     contaminateChecking: row.contaminate_checking || "not_checked",
     outsourceBy: row.outsource_by || "",
+    actualStartAt: row.actual_start_at || "",
+    repairTimeMinutes: Number(row.repair_time_minutes || 0),
     parts,
   });
 
