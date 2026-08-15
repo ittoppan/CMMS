@@ -516,8 +516,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
             {canShow("settings") && <SideNavItem label="ปรับแต่งหน้าตาระบบ (Page Designer)" icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
-            {canShow("settings") && <SideNavItem label="สร้างหน้าเว็บ (Visual Builder)" icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
-            {canShow("settings") && <SideNavItem label="หน้าเว็บที่สร้างเอง" icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
+            {canShow("editor/builder") && <SideNavItem label="สร้างหน้าเว็บ (Visual Builder)" icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
+            {canShow("pages") && <SideNavItem label="หน้าเว็บที่สร้างเอง" icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
           </MenuSection>
           {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
           <SideNavScrollControls pathname={pathname} />

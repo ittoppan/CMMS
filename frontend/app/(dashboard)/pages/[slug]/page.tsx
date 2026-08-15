@@ -6,6 +6,7 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { hydrateDynamicPage } from "@/lib/dynamicPages";
+import { useMenuPermission } from "@/lib/useMenuPermission";
 
 interface CustomPage {
   slug: string;
@@ -17,6 +18,8 @@ interface CustomPage {
 
 export default function CustomPageView() {
   const params = useParams<{ slug: string }>();
+  const { canShow } = useMenuPermission();
+  const canBuild = canShow("editor/builder");
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug ?? "";
   const [page, setPage] = useState<CustomPage | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -111,20 +114,22 @@ export default function CustomPageView() {
           >
             <ArrowLeftIcon className="w-4 h-4" /> รายการหน้า
           </a>
-          <a
-            href={`/editor/builder?slug=${encodeURIComponent(page.slug)}`}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 4,
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--cmms-primary)",
-              textDecoration: "none",
-            }}
-          >
-            <PencilSquareIcon className="w-4 h-4" /> แก้ไขด้วย Builder
-          </a>
+          {canBuild && (
+            <a
+              href={`/editor/builder?slug=${encodeURIComponent(page.slug)}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--cmms-primary)",
+                textDecoration: "none",
+              }}
+            >
+              <PencilSquareIcon className="w-4 h-4" /> แก้ไขด้วย Builder
+            </a>
+          )}
         </HStack>
       )}
 

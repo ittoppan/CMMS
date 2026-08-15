@@ -52,4 +52,6 @@ return [
     ['key' => 'register',                  'href' => '/register',                  'label' => 'ลงทะเบียนผูกบัญชี LINE', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'users',                     'href' => '/users',                     'label' => 'ผู้ใช้งานระบบ',          'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'settings',                  'href' => '/settings',                  'label' => 'ตั้งค่าทั้งหมด',          'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'editor/builder',            'href' => '/editor/builder',            'label' => 'สร้างหน้าเว็บ (Visual Builder)', 'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'pages',                     'href' => '/pages',                     'label' => 'หน้าเว็บที่สร้างเอง',    'section' => 'ระบบ & ตั้งค่า'],
 ];
