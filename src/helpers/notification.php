@@ -188,9 +188,14 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         'text' => $message,
         'size' => $opts['body_size'] ?? 'sm',
         'color' => $opts['body_color'] ?? '#475569',
-        'wrap' => true,
+        'weight' => $opts['body_weight'] ?? 'regular',
+        'align' => $opts['body_align'] ?? 'start',
+        'wrap' => (($opts['body_wrap'] ?? '1') == '1') ? true : false,
         'margin' => 'md'
     ];
+    if (($opts['body_separator'] ?? '0') == '1') {
+        $bodyContents[] = ['type' => 'separator', 'margin' => 'md'];
+    }
     foreach ($photoBoxes as $pb) $bodyContents[] = $pb;
 
     // ── สไตล์ละเอียด (จากหน้า /settings/notifications) — backward compatible ──
@@ -202,8 +207,8 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
             'type' => 'text',
             'text' => $headerText,
             'color' => $headerTextColor,
-            'weight' => 'bold',
-            'size' => 'xs',
+            'weight' => $opts['header_weight'] ?? 'bold',
+            'size' => $opts['header_size'] ?? 'xs',
             'wrap' => true,
             'align' => $headerAlign
         ]
@@ -226,11 +231,13 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $btnStyle   = $opts['btn_style'] ?? 'primary';
     $btnColor   = $opts['btn_color'] ?? '#06C755';
     $btnTxtColor = $opts['btn_text_color'] ?? '#ffffff';
+    $btnHeight = in_array($opts['btn_height'] ?? 'md', ['sm', 'md', 'lg'], true) ? ($opts['btn_height'] ?? 'md') : 'md';
     $footerButtons[] = [
         'type' => 'button',
         'action' => ['type' => 'uri', 'label' => $btnLabel, 'uri' => $defaultTapUrl],
         'style' => $btnStyle,
         'color' => $btnStyle === 'link' ? $btnColor : ($btnStyle === 'secondary' ? $btnTxtColor : $btnColor),
+        'height' => $btnHeight,
     ];
     $btn2Label = (string)($opts['btn2_label'] ?? '');
     if ($btn2Label !== '') {
@@ -240,7 +247,8 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
             'action' => ['type' => 'uri', 'label' => $btn2Label, 'uri' => $btn2Url],
             'style' => 'secondary',
             'color' => $btnColor,
-            'margin' => 'sm'
+            'margin' => 'sm',
+            'height' => $btnHeight,
         ];
     }
 
@@ -249,25 +257,39 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         'backgroundColor' => $opts['container_bg'] ?? '#ffffff',
         'borderColor'     => $opts['border_color'] ?? '#e2e8f0',
         'cornerRadius'    => $opts['corner_radius'] ?? 'lg',
-        'header' => [
-            'type' => 'box',
-            'layout' => 'vertical',
-            'backgroundColor' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)$headerColor) ? $headerColor : '#1d4ed8',
-            'contents' => $headerContents
-        ],
+    ];
+    $bubbleDirection = ($opts['bubble_direction'] ?? 'ltr') === 'rtl' ? 'rtl' : 'ltr';
+    if ($bubbleDirection !== 'ltr') $bubble['direction'] = $bubbleDirection;
+    $bubbleSize = (string)($opts['bubble_size'] ?? '');
+    if ($bubbleSize !== '') $bubble['size'] = $bubbleSize;
+    $bubble['header'] = [
+        'type' => 'box',
+        'layout' => 'vertical',
+        'backgroundColor' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)$headerColor) ? $headerColor : '#1d4ed8',
+        'paddingAll' => in_array($opts['header_padding'] ?? 'md', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? ($opts['header_padding'] ?? 'md') : 'md',
+        'contents' => $headerContents
     ];
     $heroImage = trim((string)($opts['hero_image'] ?? ''));
     if ($heroImage !== '') {
         $bubble['hero'] = [
             'type' => 'image',
             'url' => $heroImage,
-            'size' => 'full',
+            'size' => in_array($opts['hero_size'] ?? 'full', ['full', 'xxs', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl', '3xl', '4xl', '5xl'], true) ? ($opts['hero_size'] ?? 'full') : 'full',
             'aspectRatio' => $opts['hero_ratio'] ?? '4:3',
-            'aspectMode' => 'cover',
+            'aspectMode' => ($opts['hero_mode'] ?? 'cover') === 'fit' ? 'fit' : 'cover',
             'action' => ['type' => 'uri', 'uri' => $defaultTapUrl]
         ];
     }
-    $bubble['body'] = ['type' => 'box', 'layout' => 'vertical', 'contents' => $bodyContents];
+    $bodyBox = ['type' => 'box', 'layout' => 'vertical', 'contents' => $bodyContents];
+    $bodyPadding = in_array($opts['body_padding'] ?? 'md', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? ($opts['body_padding'] ?? 'md') : 'md';
+    if ($bodyPadding !== 'md') $bodyBox['paddingAll'] = $bodyPadding;
+    $bodySpacing = in_array($opts['body_spacing'] ?? 'none', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? ($opts['body_spacing'] ?? 'none') : 'none';
+    if ($bodySpacing !== 'none') $bodyBox['spacing'] = $bodySpacing;
+    $bodyBg = trim((string)($opts['body_background'] ?? ''));
+    if ($bodyBg !== '' && preg_match('/^#[0-9a-fA-F]{6}$/', $bodyBg)) $bodyBox['backgroundColor'] = $bodyBg;
+    $bodyJustify = in_array($opts['body_justify'] ?? 'flex-start', ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'], true) ? ($opts['body_justify'] ?? 'flex-start') : 'flex-start';
+    if ($bodyJustify !== 'flex-start') $bodyBox['justifyContent'] = $bodyJustify;
+    $bubble['body'] = $bodyBox;
     $bubble['footer'] = ['type' => 'box', 'layout' => 'vertical', 'contents' => $footerButtons];
 
     $flexPayload = [
@@ -364,15 +386,29 @@ function getLineTemplate($tplKey) {
         'header_subtitle'   => (string)$pick('header_subtitle', ''),
         'header_text_color' => $hex6($pick('header_text_color', '#ffffff'), '#ffffff'),
         'header_align'      => in_array($pick('header_align', 'start'), ['start', 'center', 'end'], true) ? $pick('header_align', 'start') : 'start',
+        'header_size'       => in_array($pick('header_size', 'xs'), ['xxs', 'xs', 'sm', 'md'], true) ? $pick('header_size', 'xs') : 'xs',
+        'header_weight'     => in_array($pick('header_weight', 'bold'), ['regular', 'bold'], true) ? $pick('header_weight', 'bold') : 'bold',
+        'header_padding'    => in_array($pick('header_padding', 'md'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('header_padding', 'md') : 'md',
         'hero_image'        => trim((string)$pick('hero_image', '')),
         'hero_ratio'        => in_array($pick('hero_ratio', '4:3'), ['1.91:1', '16:9', '4:3', '1:1'], true) ? $pick('hero_ratio', '4:3') : '4:3',
+        'hero_size'         => in_array($pick('hero_size', 'full'), ['full', 'xxs', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl', '3xl', '4xl', '5xl'], true) ? $pick('hero_size', 'full') : 'full',
+        'hero_mode'         => in_array($pick('hero_mode', 'cover'), ['cover', 'fit'], true) ? $pick('hero_mode', 'cover') : 'cover',
         'body_text'         => (string)($tpl['body_text'] ?? $d['body_text']),
         'body_color'        => $hex6($pick('body_color', '#475569'), '#475569'),
         'body_size'         => in_array($pick('body_size', 'sm'), ['xs', 'sm', 'md'], true) ? $pick('body_size', 'sm') : 'sm',
+        'body_weight'       => in_array($pick('body_weight', 'regular'), ['regular', 'bold'], true) ? $pick('body_weight', 'regular') : 'regular',
+        'body_align'        => in_array($pick('body_align', 'start'), ['start', 'center', 'end'], true) ? $pick('body_align', 'start') : 'start',
+        'body_wrap'         => (($pick('body_wrap', '1') == '1' || $pick('body_wrap', '1') === true)) ? '1' : '0',
+        'body_spacing'      => in_array($pick('body_spacing', 'none'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('body_spacing', 'none') : 'none',
+        'body_padding'      => in_array($pick('body_padding', 'md'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('body_padding', 'md') : 'md',
+        'body_background'   => ($pick('body_background', '') !== '' && preg_match('/^#[0-9a-fA-F]{6}$/', (string)$pick('body_background', ''))) ? (string)$pick('body_background', '') : '',
+        'body_justify'      => in_array($pick('body_justify', 'flex-start'), ['flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'], true) ? $pick('body_justify', 'flex-start') : 'flex-start',
+        'body_separator'    => (($pick('body_separator', '0') == '1' || $pick('body_separator', '0') === true)) ? '1' : '0',
         'btn_label'         => (string)($tpl['btn_label'] ?? $d['btn_label']),
         'btn_color'         => $hex6($pick('btn_color', '#06C755'), '#06C755'),
         'btn_text_color'    => $hex6($pick('btn_text_color', '#ffffff'), '#ffffff'),
         'btn_style'         => in_array($pick('btn_style', 'primary'), ['primary', 'secondary', 'link'], true) ? $pick('btn_style', 'primary') : 'primary',
+        'btn_height'        => in_array($pick('btn_height', 'md'), ['sm', 'md', 'lg'], true) ? $pick('btn_height', 'md') : 'md',
         'btn2_label'        => (string)$pick('btn2_label', ''),
         'btn2_url'          => trim((string)$pick('btn2_url', '')),
         'image_before'      => trim((string)($tpl['image_before'] ?? $d['image_before'] ?? '')),
@@ -380,6 +416,8 @@ function getLineTemplate($tplKey) {
         'container_bg'      => $hex6($pick('container_bg', '#ffffff'), '#ffffff'),
         'border_color'      => $hex6($pick('border_color', '#e2e8f0'), '#e2e8f0'),
         'corner_radius'     => in_array($pick('corner_radius', 'lg'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('corner_radius', 'lg') : 'lg',
+        'bubble_direction'  => in_array($pick('bubble_direction', 'ltr'), ['ltr', 'rtl'], true) ? $pick('bubble_direction', 'ltr') : 'ltr',
+        'bubble_size'       => in_array($pick('bubble_size', ''), ['', 'nano', 'micro', 'deci', 'hecto', 'kilo', 'mega', 'giga'], true) ? $pick('bubble_size', '') : '',
         'enabled'           => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
     ];
 }
@@ -411,18 +449,34 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         'header_text_color' => $tpl['header_text_color'],
         'header_subtitle'   => $tpl['header_subtitle'],
         'header_align'      => $tpl['header_align'],
+        'header_size'       => $tpl['header_size'],
+        'header_weight'     => $tpl['header_weight'],
+        'header_padding'    => $tpl['header_padding'],
         'hero_image'        => $tpl['hero_image'],
         'hero_ratio'        => $tpl['hero_ratio'],
+        'hero_size'         => $tpl['hero_size'],
+        'hero_mode'         => $tpl['hero_mode'],
         'body_color'        => $tpl['body_color'],
         'body_size'         => $tpl['body_size'],
+        'body_weight'       => $tpl['body_weight'],
+        'body_align'        => $tpl['body_align'],
+        'body_wrap'         => $tpl['body_wrap'],
+        'body_spacing'      => $tpl['body_spacing'],
+        'body_padding'      => $tpl['body_padding'],
+        'body_background'   => $tpl['body_background'],
+        'body_justify'      => $tpl['body_justify'],
+        'body_separator'    => $tpl['body_separator'],
         'btn_color'         => $tpl['btn_color'],
         'btn_text_color'    => $tpl['btn_text_color'],
         'btn_style'         => $tpl['btn_style'],
+        'btn_height'        => $tpl['btn_height'],
         'btn2_label'        => $tpl['btn2_label'],
         'btn2_url'          => $tpl['btn2_url'],
         'container_bg'      => $tpl['container_bg'],
         'border_color'      => $tpl['border_color'],
         'corner_radius'     => $tpl['corner_radius'],
+        'bubble_direction'  => $tpl['bubble_direction'],
+        'bubble_size'       => $tpl['bubble_size'],
     ];
     return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel, $opts);
 }

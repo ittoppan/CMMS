@@ -41,18 +41,34 @@ interface TemplateDef {
   header_subtitle?: string;
   header_text_color?: string;
   header_align?: "start" | "center" | "end";
+  header_size?: "xxs" | "xs" | "sm" | "md";
+  header_weight?: "regular" | "bold";
+  header_padding?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
   hero_image?: string;
   hero_ratio?: "1.91:1" | "16:9" | "4:3" | "1:1";
+  hero_size?: "full" | "xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl" | "3xl" | "4xl" | "5xl";
+  hero_mode?: "cover" | "fit";
   body_color?: string;
   body_size?: "xs" | "sm" | "md";
+  body_weight?: "regular" | "bold";
+  body_align?: "start" | "center" | "end";
+  body_wrap?: string;
+  body_spacing?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  body_padding?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  body_background?: string;
+  body_justify?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around" | "space-evenly";
+  body_separator?: string;
   btn_color?: string;
   btn_text_color?: string;
   btn_style?: "primary" | "secondary" | "link";
+  btn_height?: "sm" | "md" | "lg";
   btn2_label?: string;
   btn2_url?: string;
   container_bg?: string;
   border_color?: string;
   corner_radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
+  bubble_direction?: "ltr" | "rtl";
+  bubble_size?: "" | "nano" | "micro" | "deci" | "hecto" | "kilo" | "mega" | "giga";
 }
 
 const TEMPLATE_ORDER = [
@@ -312,7 +328,14 @@ export default function NotificationsSettingsPage() {
     const bodyText = fillVars(activeTpl.body_text || "ข้อความแจ้งเตือนจากระบบ");
     const btnLabel = fillVars(activeTpl.btn_label || "ดูรายละเอียดในระบบ");
     // บล็อกรูปก่อน/หลังซ่อม — ตรงกับ payload ฝั่ง server (label น้ำเงิน + รูป full width 4:3)
-    const bodyContents: any[] = [{ type: "text", text: bodyText, size: "sm", color: "#475569", wrap: true, margin: "md" }];
+    const bodyContents: any[] = [
+      {
+        type: "text", text: bodyText, size: activeTpl.body_size ?? "sm", color: activeTpl.body_color ?? "#475569",
+        weight: activeTpl.body_weight ?? "regular", align: activeTpl.body_align ?? "start",
+        wrap: (activeTpl.body_wrap ?? "1") === "1", margin: "md",
+      },
+    ];
+    if ((activeTpl.body_separator ?? "0") === "1") bodyContents.push({ type: "separator", margin: "md" });
     const addPhotoBlock = (url: string, label: string) => {
       if (!url) return;
       bodyContents.push({ type: "text", text: label, size: "xs", weight: "bold", color: "#1d4ed8", margin: "lg" });
@@ -324,11 +347,19 @@ export default function NotificationsSettingsPage() {
     addPhotoBlock(activeTpl.image_before || "", templatePhotoLabels.before);
     addPhotoBlock(activeTpl.image_after || "", templatePhotoLabels.after);
 
-    const bubble = {
+    const bubble: any = {
       type: "bubble",
+      backgroundColor: activeTpl.container_bg ?? "#ffffff",
+      borderColor: activeTpl.border_color ?? "#e2e8f0",
+      cornerRadius: activeTpl.corner_radius ?? "lg",
       header: {
         type: "box", layout: "vertical", backgroundColor: headerColor,
-        contents: [{ type: "text", text: headerTitle, color: "#ffffff", weight: "bold", size: "xs", wrap: true }],
+        paddingAll: activeTpl.header_padding ?? "md",
+        contents: [{
+          type: "text", text: headerTitle, color: activeTpl.header_text_color ?? "#ffffff",
+          weight: activeTpl.header_weight ?? "bold", size: activeTpl.header_size ?? "xs",
+          wrap: true, align: activeTpl.header_align ?? "start",
+        }],
       },
       body: {
         type: "box", layout: "vertical",
@@ -337,11 +368,26 @@ export default function NotificationsSettingsPage() {
       footer: {
         type: "box", layout: "vertical",
         contents: [{
-          type: "button", style: "primary", color: "#06C755",
+          type: "button", style: activeTpl.btn_style ?? "primary", color: "#06C755",
+          height: activeTpl.btn_height ?? "md",
           action: { type: "uri", label: btnLabel, uri: "https://line.me/" },
         }],
       },
     };
+    if ((activeTpl.bubble_direction ?? "ltr") === "rtl") bubble.direction = "rtl";
+    if (activeTpl.bubble_size) bubble.size = activeTpl.bubble_size;
+    if ((activeTpl.hero_image || "").trim() !== "") {
+      bubble.hero = {
+        type: "image", url: activeTpl.hero_image, size: activeTpl.hero_size ?? "full",
+        aspectRatio: activeTpl.hero_ratio ?? "4:3", aspectMode: activeTpl.hero_mode ?? "cover",
+        action: { type: "uri", uri: "https://line.me/" },
+      };
+    }
+    const bodyBox: any = bubble.body;
+    if ((activeTpl.body_padding ?? "md") !== "md") bodyBox.paddingAll = activeTpl.body_padding;
+    if ((activeTpl.body_spacing ?? "none") !== "none") bodyBox.spacing = activeTpl.body_spacing;
+    if (/^#[0-9a-fA-F]{6}$/.test(activeTpl.body_background || "")) bodyBox.backgroundColor = activeTpl.body_background;
+    if ((activeTpl.body_justify ?? "flex-start") !== "flex-start") bodyBox.justifyContent = activeTpl.body_justify;
     const payload = {
       type: "flex",
       altText: `🔔 ${headerTitle}: ${bodyText.slice(0, 40)}`,
@@ -357,6 +403,14 @@ export default function NotificationsSettingsPage() {
       setTimeout(() => setCopied(false), 1500);
     } catch { /* clipboard ไม่พร้อม — ข้าม */ }
   };
+
+  // ── แผนที่ค่า LINE keyword → px สำหรับพรีวิวมือถือ ──
+  const sizePx = (k: string | undefined, def: number) =>
+    ({ xxs: 8, xs: 10, sm: 12, md: 14, lg: 16, xl: 18, xxl: 22, "3xl": 26, "4xl": 32, "5xl": 40 } as Record<string, number>)[k ?? ""] ?? def;
+  const padPx = (k: string | undefined, def: number) =>
+    ({ none: 0, xs: 2, sm: 4, md: 8, lg: 12, xl: 16 } as Record<string, number>)[k ?? ""] ?? def;
+  const heroW = (k: string | undefined) =>
+    ({ full: "100%", xxl: "88%", xl: "72%", lg: "58%", md: "46%", sm: "36%" } as Record<string, string>)[k ?? "full"] ?? "100%";
 
   const previewTitle = (activeTpl.header_title || "CMMS-TPT NOTIFICATION")
     .replace(/{work_order_id}/g, "WO-1002")
@@ -889,6 +943,36 @@ export default function NotificationsSettingsPage() {
                           </button>
                         ))}
                       </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ขนาดตัวอักษร:</Text>
+                        {(["xxs", "xs", "sm", "md"] as const).map((s) => (
+                          <button key={s} type="button" onClick={() => setTplField("header_size", s)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.header_size ?? "xs") === s ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.header_size ?? "xs") === s ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {s === "xxs" ? "เล็กมาก" : s === "xs" ? "เล็ก" : s === "sm" ? "ปกติ" : "ใหญ่"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">น้ำหนักตัวอักษร:</Text>
+                        {(["regular", "bold"] as const).map((w) => (
+                          <button key={w} type="button" onClick={() => setTplField("header_weight", w)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.header_weight ?? "bold") === w ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.header_weight ?? "bold") === w ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {w === "bold" ? "ตัวหนา" : "ปกติ"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ระยะห่างใน (Padding):</Text>
+                        {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
+                          <button key={p} type="button" onClick={() => setTplField("header_padding", p)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.header_padding ?? "md") === p ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.header_padding ?? "md") === p ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {p === "none" ? "0" : p === "xs" ? "เล็กมาก" : p === "sm" ? "เล็ก" : p === "md" ? "กลาง" : p === "lg" ? "ใหญ่" : "ใหญ่มาก"}
+                          </button>
+                        ))}
+                      </HStack>
                     </VStack>
                   )}
                 </div>
@@ -909,6 +993,26 @@ export default function NotificationsSettingsPage() {
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
                               background: (activeTpl.hero_ratio ?? "4:3") === r ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.hero_ratio ?? "4:3") === r ? "#fff" : "var(--cmms-text-secondary)" }}>
                             {r}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ขนาดรูป:</Text>
+                        {(["full", "xxl", "xl", "lg", "md", "sm"] as const).map((s) => (
+                          <button key={s} type="button" onClick={() => setTplField("hero_size", s)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.hero_size ?? "full") === s ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.hero_size ?? "full") === s ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {s === "full" ? "เต็มความกว้าง" : s === "xxl" ? "XXL" : s === "xl" ? "XL" : s === "lg" ? "L" : s === "md" ? "M" : "S"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ลักษณะแสดง:</Text>
+                        {(["cover", "fit"] as const).map((m) => (
+                          <button key={m} type="button" onClick={() => setTplField("hero_mode", m)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.hero_mode ?? "cover") === m ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.hero_mode ?? "cover") === m ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {m === "cover" ? "เติมเต็ม (cover)" : "พอดีกรอบ (fit)"}
                           </button>
                         ))}
                       </HStack>
@@ -940,6 +1044,82 @@ export default function NotificationsSettingsPage() {
                           </button>
                         ))}
                       </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">น้ำหนักตัวอักษร:</Text>
+                        {(["regular", "bold"] as const).map((w) => (
+                          <button key={w} type="button" onClick={() => setTplField("body_weight", w)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_weight ?? "regular") === w ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_weight ?? "regular") === w ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {w === "bold" ? "ตัวหนา" : "ปกติ"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">จัดตำแหน่ง:</Text>
+                        {(["start", "center", "end"] as const).map((a) => (
+                          <button key={a} type="button" onClick={() => setTplField("body_align", a)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_align ?? "start") === a ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_align ?? "start") === a ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {a === "start" ? "ซ้าย" : a === "center" ? "กลาง" : "ขวา"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">จัดเรียงตามแนวแกน (Justify):</Text>
+                        {(["flex-start", "center", "flex-end", "space-between"] as const).map((j) => (
+                          <button key={j} type="button" onClick={() => setTplField("body_justify", j)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_justify ?? "flex-start") === j ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_justify ?? "flex-start") === j ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {j === "flex-start" ? "บนสุด" : j === "center" ? "กลาง" : j === "flex-end" ? "ล่างสุด" : "กระจาย"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ระยะห่างระหว่างบรรทัด (Spacing):</Text>
+                        {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
+                          <button key={p} type="button" onClick={() => setTplField("body_spacing", p)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_spacing ?? "none") === p ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_spacing ?? "none") === p ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {p === "none" ? "0" : p === "xs" ? "เล็กมาก" : p === "sm" ? "เล็ก" : p === "md" ? "กลาง" : p === "lg" ? "ใหญ่" : "ใหญ่มาก"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ระยะห่างใน (Padding):</Text>
+                        {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
+                          <button key={p} type="button" onClick={() => setTplField("body_padding", p)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_padding ?? "md") === p ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_padding ?? "md") === p ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {p === "none" ? "0" : p === "xs" ? "เล็กมาก" : p === "sm" ? "เล็ก" : p === "md" ? "กลาง" : p === "lg" ? "ใหญ่" : "ใหญ่มาก"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} wrap="wrap" vAlign="center">
+                        <Text type="body" size="sm" weight="semibold">สีพื้นหลังเนื้อหา:</Text>
+                        <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.body_background ?? "") ? activeTpl.body_background! : "#ffffff"} onChange={(e) => setTplField("body_background", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีพื้นหลังเนื้อหา" />
+                        <TextInput isLabelHidden label="Hex" value={activeTpl.body_background ?? ""} onChange={(v) => setTplField("body_background", v)} style={{ width: 110 }} />
+                        <button type="button" onClick={() => setTplField("body_background", "")} style={{ padding: "4px 10px", borderRadius: 8, fontSize: "0.75rem", border: "1px solid var(--cmms-border)", cursor: "pointer", background: "var(--cmms-bg-wash)" }}>ล้าง</button>
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ตัดบรรทัดอัตโนมัติ (Wrap):</Text>
+                        {(["1", "0"] as const).map((w) => (
+                          <button key={w} type="button" onClick={() => setTplField("body_wrap", w)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_wrap ?? "1") === w ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_wrap ?? "1") === w ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {w === "1" ? "เปิด (ตัดบรรทัด)" : "ปิด (ตัด 1 บรรทัด)"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">เส้นคั่นใต้เนื้อหา (Separator):</Text>
+                        {(["1", "0"] as const).map((w) => (
+                          <button key={w} type="button" onClick={() => setTplField("body_separator", w)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.body_separator ?? "0") === w ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.body_separator ?? "0") === w ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {w === "1" ? "แสดงเส้นคั่น" : "ไม่แสดง"}
+                          </button>
+                        ))}
+                      </HStack>
                     </VStack>
                   )}
                 </div>
@@ -959,6 +1139,16 @@ export default function NotificationsSettingsPage() {
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
                               background: (activeTpl.btn_style ?? "primary") === st ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.btn_style ?? "primary") === st ? "#fff" : "var(--cmms-text-secondary)" }}>
                             {st === "primary" ? "ปุ่มทึบ" : st === "secondary" ? "ขอบเส้น" : "ลิงก์"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ความสูงปุ่ม:</Text>
+                        {(["sm", "md", "lg"] as const).map((h) => (
+                          <button key={h} type="button" onClick={() => setTplField("btn_height", h)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.btn_height ?? "md") === h ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.btn_height ?? "md") === h ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {h === "sm" ? "เตี้ย" : h === "md" ? "ปกติ" : "สูง"}
                           </button>
                         ))}
                       </HStack>
@@ -1008,6 +1198,26 @@ export default function NotificationsSettingsPage() {
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
                               background: (activeTpl.corner_radius ?? "lg") === r ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.corner_radius ?? "lg") === r ? "#fff" : "var(--cmms-text-secondary)" }}>
                             {r === "none" ? "เหลี่ยม" : r === "xs" ? "มุมน้อย" : r === "sm" ? "เล็ก" : r === "md" ? "กลาง" : r === "lg" ? "ใหญ่" : "วงรี"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ทิศทางข้อความ:</Text>
+                        {(["ltr", "rtl"] as const).map((d) => (
+                          <button key={d} type="button" onClick={() => setTplField("bubble_direction", d)}
+                            style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.bubble_direction ?? "ltr") === d ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.bubble_direction ?? "ltr") === d ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {d === "ltr" ? "ซ้าย→ขวา (ไทย/อังกฤษ)" : "ขวา→ซ้าย (อารบิก)"}
+                          </button>
+                        ))}
+                      </HStack>
+                      <HStack gap={2} vAlign="center" wrap="wrap">
+                        <Text type="body" size="sm" weight="semibold">ขนาดการ์ด (Bubble Size):</Text>
+                        {(["", "nano", "micro", "deci", "hecto", "kilo", "mega"] as const).map((s) => (
+                          <button key={s} type="button" onClick={() => setTplField("bubble_size", s)}
+                            style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
+                              background: (activeTpl.bubble_size ?? "") === s ? "var(--cmms-primary)" : "var(--cmms-bg-wash)", color: (activeTpl.bubble_size ?? "") === s ? "#fff" : "var(--cmms-text-secondary)" }}>
+                            {s === "" ? "อัตโนมัติ" : s === "nano" ? "จิ๋ว" : s === "micro" ? "เล็กมาก" : s === "deci" ? "เล็ก" : s === "hecto" ? "กลาง" : s === "kilo" ? "ใหญ่" : "ใหญ่สุด"}
                           </button>
                         ))}
                       </HStack>
@@ -1126,25 +1336,49 @@ export default function NotificationsSettingsPage() {
                     border: "1px solid " + (activeTpl.border_color || "#e2e8f0"),
                     borderRadius: activeTpl.corner_radius === "none" ? 0 : activeTpl.corner_radius === "xs" ? 4 : activeTpl.corner_radius === "sm" ? 8 : activeTpl.corner_radius === "md" ? 12 : activeTpl.corner_radius === "xl" ? 28 : 16,
                     overflow: "hidden",
-                    maxWidth: 280,
+                    maxWidth: ({ nano: 160, micro: 180, deci: 200, hecto: 240, kilo: 280, mega: 320 } as Record<string, number>)[activeTpl.bubble_size ?? ""] ?? 280,
                     boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
                   }}
                 >
                   {/* Header */}
-                  <div style={{ background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8", color: activeTpl.header_text_color || "#ffffff", padding: "10px 12px", fontWeight: 800, fontSize: 12, textAlign: activeTpl.header_align || "start" }}>
+                  <div style={{
+                    background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8",
+                    color: activeTpl.header_text_color || "#ffffff",
+                    padding: `${padPx(activeTpl.header_padding, 8)}px 12px`,
+                    fontWeight: (activeTpl.header_weight ?? "bold") === "bold" ? 800 : 500,
+                    fontSize: sizePx(activeTpl.header_size, 10),
+                    textAlign: activeTpl.header_align || "start",
+                    direction: (activeTpl.bubble_direction ?? "ltr") === "rtl" ? "rtl" : "ltr",
+                  }}>
                     {previewTitle || "แจ้งเตือน CMMS-TPT"}
                     {(activeTpl.header_subtitle || "").trim() !== "" && (
-                      <div style={{ fontWeight: 600, fontSize: 9.5, opacity: 0.75, marginTop: 3 }}>{activeTpl.header_subtitle}</div>
+                      <div style={{ fontWeight: 600, fontSize: sizePx(activeTpl.header_size, 10) - 2, opacity: 0.75, marginTop: 3 }}>{activeTpl.header_subtitle}</div>
                     )}
                   </div>
                   {/* Hero image */}
                   {(activeTpl.hero_image || "").trim() !== "" && (
-                    <img src={activeTpl.hero_image} alt="hero" style={{ width: "100%", aspectRatio: activeTpl.hero_ratio || "4:3", objectFit: "cover", display: "block" }} />
+                    <div style={{ textAlign: "center" }}>                        <img src={activeTpl.hero_image} alt="hero" style={{ width: heroW(activeTpl.hero_size), aspectRatio: activeTpl.hero_ratio || "4:3", objectFit: (activeTpl.hero_mode === "fit" ? "contain" : "cover") as "contain" | "cover", display: "block" }} />
+                    </div>
                   )}
                   {/* Body */}
-                  <div style={{ padding: "10px 12px", fontSize: activeTpl.body_size === "xs" ? 10.5 : activeTpl.body_size === "md" ? 13 : 11.5, color: activeTpl.body_color || "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
+                  <div style={{
+                    padding: `${padPx(activeTpl.body_padding, 8)}px 12px`,
+                    fontSize: sizePx(activeTpl.body_size, 12),
+                    color: activeTpl.body_color || "#334155",
+                    fontWeight: (activeTpl.body_weight ?? "regular") === "bold" ? 700 : 400,
+                    textAlign: activeTpl.body_align === "center" ? "center" : activeTpl.body_align === "end" ? "right" : "left",
+                    lineHeight: 1.6,
+                    whiteSpace: (activeTpl.body_wrap ?? "1") === "1" ? "pre-wrap" : "nowrap",
+                    overflow: (activeTpl.body_wrap ?? "1") === "1" ? "visible" : "hidden",
+                    textOverflow: (activeTpl.body_wrap ?? "1") === "1" ? "clip" : "ellipsis",
+                    background: /^#[0-9a-fA-F]{6}$/.test(activeTpl.body_background || "") ? activeTpl.body_background : "transparent",
+                  }}>
                     {previewBody || "ข้อความแจ้งเตือนจากระบบ"}
                   </div>
+                  {/* Separator */}
+                  {(activeTpl.body_separator ?? "0") === "1" && (
+                    <div style={{ borderTop: "1px solid #e2e8f0", margin: `0 ${padPx(activeTpl.body_padding, 8)}px` }} />
+                  )}
                   {/* รูปก่อน/หลังซ่อม */}
                   {activeTpl.image_before && (
                     <div style={{ padding: "0 12px" }}>
@@ -1167,7 +1401,7 @@ export default function NotificationsSettingsPage() {
                         textAlign: "center",
                         fontWeight: 800,
                         fontSize: 11,
-                        padding: "8px 0",
+                        padding: `${activeTpl.btn_height === "sm" ? 5 : activeTpl.btn_height === "lg" ? 12 : 8}px 0`,
                         borderRadius: 8,
                         border: (activeTpl.btn_style || "primary") === "secondary" ? "1px solid " + (activeTpl.btn_color || "#06C755") : "none",
                         textDecoration: (activeTpl.btn_style || "primary") === "link" ? "underline" : "none",
@@ -1184,7 +1418,7 @@ export default function NotificationsSettingsPage() {
                           fontSize: 11,
                           color: activeTpl.btn_color || "#06C755",
                           border: "1px solid " + (activeTpl.btn_color || "#06C755"),
-                          padding: "7px 0",
+                          padding: `${activeTpl.btn_height === "sm" ? 4 : activeTpl.btn_height === "lg" ? 11 : 7}px 0`,
                           borderRadius: 8,
                         }}
                       >
