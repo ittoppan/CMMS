@@ -41,6 +41,9 @@ interface PMTask extends Record<string, unknown> {
   status: "pending" | "in_progress" | "completed" | "overdue" | "skipped";
   deferralStatus?: string;
   rescheduleTo?: string;
+  isOutsource?: boolean;
+  outsourceBy?: string;
+  costOutsource?: number;
 }
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
@@ -76,6 +79,7 @@ export default function PMSchedulePage() {
   const hero = usePageHero("pm_am");
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
+  const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [tasks, setTasks] = useState<PMTask[]>([]);
@@ -100,6 +104,9 @@ export default function PMSchedulePage() {
           status: row.status || "pending",
           deferralStatus: row.deferral_status || "",
           rescheduleTo: row.reschedule_to || "",
+          isOutsource: !!Number(row.is_outsource),
+          outsourceBy: row.outsource_by || "",
+          costOutsource: Number(row.cost_outsource) || 0,
         }));
         setTasks(fetched);
       }
@@ -209,11 +216,12 @@ export default function PMSchedulePage() {
   const filtered = useMemo(() => {
     return tasks.filter((t) => {
       const matchTab = activeTab === "All" || t.frequency === activeTab;
+      const matchOut = outsourceFilter === "all" || (outsourceFilter === "out" ? !!t.isOutsource : !t.isOutsource);
       const q = search.toLowerCase();
       const matchSearch = !q || t.id.toLowerCase().includes(q) || t.asset.toLowerCase().includes(q) || t.task.toLowerCase().includes(q);
-      return matchTab && matchSearch;
+      return matchTab && matchOut && matchSearch;
     });
-  }, [search, activeTab, tasks]);
+  }, [search, activeTab, outsourceFilter, tasks]);
 
   const totalItems = filtered.length;
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -222,7 +230,21 @@ export default function PMSchedulePage() {
   const columns: TableColumn<PMTask>[] = [
     { key: "id", header: t("tbl.pm_no"), width: proportional(1) },
     { key: "asset", header: t("tbl.asset_full"), width: proportional(2) },
-    { key: "task", header: t("tbl.title"), width: proportional(2) },
+    {
+      key: "task",
+      header: t("tbl.title"),
+      width: proportional(2),
+      renderCell: (item) => (
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Text type="body" size="sm">{item.task}</Text>
+          {item.isOutsource && (
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+              ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
+            </span>
+          )}
+        </HStack>
+      ),
+    },
     {
       key: "frequency",
       header: t("tbl.frequency"),
@@ -398,6 +420,27 @@ export default function PMSchedulePage() {
                 onChange={setSearch}
                 style={{ width: 300 }}
               />
+              <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
+                {([
+                  { v: "all", label: "ทั้งหมด" },
+                  { v: "in", label: "งานใน" },
+                  { v: "out", label: "งานภายนอก" },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.v}
+                    type="button"
+                    onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
+                    style={{
+                      padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                      background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
+                      color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                      boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </HStack>
               <div style={{ flex: 1 }} />
               <TabList
                 value={activeTab}
@@ -510,6 +553,12 @@ export default function PMSchedulePage() {
                   <Text type="body" size="sm" color="secondary">เสร็จเมื่อ: {(detailData.completed_at || "-").slice(0, 16).replace("T", " ")}</Text>
                   <Text type="body" size="sm" color="secondary">ลงนามเมื่อ: {(detailData.signed_at || "-").slice(0, 16).replace("T", " ")}</Text>
                 </HStack>
+                {!!Number(detailData.is_outsource) && (
+                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)", width: "fit-content" }}>
+                    งานภายนอก · {detailData.outsource_by || "ไม่ระบุบริษัท"}
+                    {Number(detailData.cost_outsource) > 0 ? ` · ค่าใช้จ่าย ${Number(detailData.cost_outsource).toLocaleString("th-TH")} บาท` : ""}
+                  </span>
+                )}
               </VStack>
 
               {/* ผลตรวจเช็ค */}

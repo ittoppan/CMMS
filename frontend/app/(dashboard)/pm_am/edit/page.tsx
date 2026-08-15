@@ -8,6 +8,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea"; // Ensure TextArea is imported
 import { Selector } from "@astryxdesign/core/Selector";
+import { Switch } from "@astryxdesign/core/Switch";
 import { DateInput } from "@astryxdesign/core/DateInput";
 import SuccessDialog from "@/components/SuccessDialog";
 
@@ -31,6 +32,9 @@ function EditPMContent() {
   const [pmNumber, setPmNumber] = useState("");
   const [users, setUsers] = useState<any[]>([]);
   const [assignedTo, setAssignedTo] = useState("");
+  const [isOutsource, setIsOutsource] = useState(false);
+  const [outsourceBy, setOutsourceBy] = useState("");
+  const [costOutsource, setCostOutsource] = useState("");
 
   // New state variables for the new fields
   const [completedAt, setCompletedAt] = useState<ISODate | undefined>(undefined);
@@ -63,6 +67,9 @@ function EditPMContent() {
           setNotes(json.notes || "");
           setPmNumber(`PM-${String(json.id).padStart(3, '0')}`);
           setAssignedTo(json.assigned_to ? String(json.assigned_to) : "");
+          setIsOutsource(!!Number(json.is_outsource));
+          setOutsourceBy(json.outsource_by || "");
+          setCostOutsource(json.cost_outsource ? String(json.cost_outsource) : "");
 
           // Set new state variables
           setCompletedAt(json.completed_at || undefined);
@@ -92,6 +99,9 @@ function EditPMContent() {
         due_date: dueDate || null,
         assigned_to: assignedTo ? Number(assignedTo) : null,
         notes,
+        is_outsource: isOutsource ? 1 : 0,
+        outsource_by: isOutsource && outsourceBy.trim() ? outsourceBy.trim() : null,
+        cost_outsource: isOutsource ? (Number(costOutsource) || 0) : 0,
         // Include new fields in the payload if they are being updated or are relevant
         reschedule_reason: rescheduleReason, // Include reschedule reason
         // completed_at and completed_by are typically set by a completion action,
@@ -171,6 +181,37 @@ function EditPMContent() {
               onChange={setAssignedTo}
               options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
             />
+
+            <HStack gap={3} vAlign="center" wrap="wrap">
+              <Switch
+                label="งานภายนอก (Outsource)"
+                value={isOutsource}
+                onChange={setIsOutsource}
+              />
+              <Text type="body" size="sm" color="secondary">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM</Text>
+            </HStack>
+
+            {isOutsource && (
+              <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+                <TextInput
+                  label="ชื่อบริษัท/ผู้รับเหมา *"
+                  placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+                  value={outsourceBy}
+                  onChange={setOutsourceBy}
+                />
+                <VStack gap={1}>
+                  <Text type="body" size="sm" weight="semibold">ค่าใช้จ่าย (บาท)</Text>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="เช่น 25000"
+                    value={costOutsource}
+                    onChange={(e) => setCostOutsource(e.target.value)}
+                    style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--cmms-bg-card)" }}
+                  />
+                </VStack>
+              </VStack>
+            )}
 
             <Selector
               label="สถานะปัจจุบัน"
