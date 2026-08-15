@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -65,6 +66,7 @@ const roleLabels: Record<string, string> = {
 const PAGE_SIZE = 10;
 
 export default function UsersPage() {
+  const hero = usePageHero("users");
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,15 +289,15 @@ export default function UsersPage() {
       <div style={layoutStyle("header")}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USER MANAGEMENT · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ผู้ใช้งานระบบ (User Management)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <UsersIcon className="w-3.5 h-3.5" /> ผู้ใช้ {stats.total} คน
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2}>

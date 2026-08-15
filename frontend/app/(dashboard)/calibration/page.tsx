@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -49,6 +50,7 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function CalibrationPage() {
+  const hero = usePageHero("calibration");
   const router = useRouter();
   const [data, setData] = useState<CalibrationRecord[]>([]);
   const [search, setSearch] = useState("");
@@ -173,15 +175,15 @@ export default function CalibrationPage() {
     <VStack gap={6}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>CALIBRATION · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ทะเบียนสอบเทียบเครื่องมือวัด</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ScaleIcon className="w-3.5 h-3.5" /> ควบคุมคุณภาพ
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ติดตามรอบการสอบเทียบของเครื่องมือวัดในโรงงานทั้งหมด
+            {hero.desc}
           </Text>
         </VStack>
         <button

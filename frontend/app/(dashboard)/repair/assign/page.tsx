@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -78,6 +79,7 @@ function normalizeAvatar(avatar?: string | null, avatarPath?: string | null): st
 }
 
 export default function RepairAssignPage() {
+  const hero = usePageHero("repair/assign");
   const router = useRouter();
   const [workOrders, setWorkOrders] = useState<AssignWO[]>([]);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
@@ -304,9 +306,9 @@ export default function RepairAssignPage() {
       {/* Header */}
       <HStack hAlign="between" vAlign="start">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">WORK DISPATCH · CMMS-TOPPAN</Text>
-          <Heading level={2}>แจกงานซ่อม (Dispatch)</Heading>
-          <Text type="body" color="secondary">มอบหมายใบแจ้งซ่อมให้กับช่างซ่อมบำรุงที่เหมาะสม</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow">{hero.eyebrow}</Text>
+          <Heading level={2}>{hero.title}</Heading>
+          <Text type="body" color="secondary">{hero.desc}</Text>
         </VStack>
         <button
           type="button"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -70,6 +71,7 @@ const criticalityChipStyle: Record<string, React.CSSProperties> = {
 const PAGE_SIZE = 10;
 
 export default function AssetRegistryPage() {
+  const hero = usePageHero("asset_registry");
   const router = useRouter();
   const [assets, setAssets] = useState<AssetRecord[]>([]);
   const [search, setSearch] = useState("");
@@ -266,9 +268,9 @@ export default function AssetRegistryPage() {
     <VStack gap={6}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ทะเบียนเครื่องจักรและทรัพย์สิน</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <BuildingOffice2Icon className="w-3.5 h-3.5" /> ทะเบียน {assets.length} เครื่อง
             </span>
@@ -277,7 +279,7 @@ export default function AssetRegistryPage() {
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ฐานข้อมูลเครื่องจักร อุปกรณ์ และสายการผลิตทั้งหมดของโรงงาน TOPPAN
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">

@@ -20,6 +20,7 @@ import SideNavScrollControls from "../../components/SideNavScrollControls";
 import MenuSection from "../../components/MenuSection";
 import { SideNavSearchProvider, SideNavSearchInput } from "../../components/SideNavSearch";
 import { useMenuPermission } from "../../lib/useMenuPermission";
+import { t, useLang, setUserLang, tPage, tSection } from "../../lib/i18n";
 import {
   SquaresPlusIcon,
   HomeIcon,
@@ -73,89 +74,6 @@ import {
 } from "@heroicons/react/24/outline";
 
 // Page title mapping for breadcrumb
-const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "แดชบอร์ดภาพรวม",
-  "/repair": "ใบสั่งงานซ่อม",
-  "/repair/request": "ฟอร์มแจ้งซ่อมด่วน",
-  "/repair/assign": "แจกงานซ่อม",
-  "/repair/my_tasks": "งานซ่อมของฉัน",
-  "/repair/tracking": "ติดตามงานซ่อม",
-  "/repair/kanban": "Kanban Board",
-  "/repair/history": "ประวัติงานซ่อม",
-  "/repair/create": "สร้างใบสั่งงาน",
-  "/pm_am/calendar": "ปฏิทิน PM/AM",
-  "/pm_am/create": "สร้างแผน PM",
-  "/pm_am/batch_schedule": "สร้างแผนแบบกลุ่ม",
-  "/pm_am/checksheet": "ทำเช็คชีท PM",
-  "/inspections": "ตรวจเช็ครอบ",
-  "/inspections/templates": "จัดการ Template ตรวจ",
-  "/inspections/run": "ทำรายการตรวจเช็ค",
-  "/pm_am/history": "ประวัติงาน PM/AM",
-  "/asset_registry": "ทะเบียนเครื่องจักร",
-  "/qr-sheet": "QR Sheet เครื่องจักร",
-  "/asset_registry/bom_tree": "BOM Tree ชิ้นส่วน",
-  "/asset_registry/criticality": "ลำดับความสำคัญ A/B/C",
-  "/equipment_borrowing": "ยืม-คืนอุปกรณ์ช่าง",
-  "/calibration": "สอบเทียบเครื่องมือวัด",
-  "/spare_parts": "คลังสต็อกอะไหล่",
-  "/spare_parts/issue_center": "ศูนย์เบิก-จ่าย",
-  "/spare_parts/stock_take": "นับสต็อกจริง (Stock Take)",
-  "/spare_parts/sage_po": "รับอะไหล่จาก PO",
-  "/spare_parts/optimization": "AI EOQ & Dead Stock",
-  "/analytics": "Data Warehouse & BI",
-  "/analytics/kpi": "KPI ผู้บริหาร (Executive Dashboard)",
-  "/reports/monthly_pdf": "รายงาน PDF",
-  "/reports/export_excel": "Export Excel",
-  "/safety/work_permit": "ใบอนุญาต LOTO",
-  "/iot/monitor": "IoT Sensor Monitor",
-  "/notifications": "ศูนย์แจ้งเตือน",
-  "/notifications/history": "ประวัติการส่ง LINE",
-  "/users": "ผู้ใช้งานระบบ",
-  "/profile": "โปรไฟล์ของฉัน",
-  "/settings": "ตั้งค่าระบบ",
-  "/settings/services": "Service & การรันระบบ",
-  "/settings/notifications": "รูปแบบการแจ้งเตือน LINE",
-  "/settings/menus": "สิทธิ์เมนูตามบทบาท",
-  "/settings/pwa": "ตั้งค่าไอคอน PWA",
-  "/settings/design": "ปรับแต่งหน้าตาระบบ (Page Designer)",
-  "/editor/builder": "สร้างหน้าเว็บ (Visual Builder)",
-  "/pages": "หน้าเว็บที่สร้างเอง",
-  "/register": "ลงทะเบียนผูกบัญชี LINE",
-};
-
-// Section mapping for breadcrumb
-const SECTION_MAP: Record<string, string> = {
-  "/repair": "งานซ่อมบำรุง",
-  "/approval": "การอนุมัติ & เอกสาร",
-  "/forms": "การอนุมัติ & เอกสาร",
-  "/pm_am": "แผน PM & เครื่องจักร",
-  "/asset_registry": "แผน PM & เครื่องจักร",
-  "/assets": "แผน PM & เครื่องจักร",
-  "/equipment_borrowing": "แผน PM & เครื่องจักร",
-  "/calibration": "แผน PM & เครื่องจักร",
-  "/mtbf_mttr": "แผน PM & เครื่องจักร",
-  "/inspections": "แผน PM & เครื่องจักร",
-  "/spare_parts": "คลังอะไหล่",
-  "/suppliers": "คลังอะไหล่",
-  "/analytics": "วิเคราะห์ & รายงาน",
-  "/reports": "วิเคราะห์ & รายงาน",
-  "/andon-board": "วิเคราะห์ & รายงาน",
-  "/safety": "ความปลอดภัย & IoT",
-  "/iot": "ความปลอดภัย & IoT",
-  "/users": "บุคลากร",
-  "/roles": "บุคลากร",
-  "/manuals": "เอกสารคู่มือ",
-  "/notifications": "ระบบ & ตั้งค่า",
-  "/notifications/history": "ระบบ & ตั้งค่า",
-  "/settings": "ระบบ & ตั้งค่า",
-  "/settings/notifications": "ระบบ & ตั้งค่า",
-  "/settings/menus": "ระบบ & ตั้งค่า",
-  "/settings/pwa": "ระบบ & ตั้งค่า",
-  "/settings/services": "ระบบ & ตั้งค่า",
-  "/settings/design": "ระบบ & ตั้งค่า",
-  "/pages": "ระบบ & ตั้งค่า",
-  "/editor": "ระบบ & ตั้งค่า",
-};
 
 // รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
 // (อยู่ /settings/notifications → highlight เฉพาะ /settings/notifications ไม่ highlight /settings)
@@ -176,14 +94,12 @@ const MENU_HREFS: string[] = [
 ];
 
 function getSection(pathname: string): string | null {
-  for (const [prefix, section] of Object.entries(SECTION_MAP)) {
-    if (pathname.startsWith(prefix)) return section;
-  }
-  return null;
+  const s = tSection(pathname);
+  return s || null;
 }
 
 function getPageTitle(pathname: string): string {
-  return PAGE_TITLES[pathname] || pathname.split("/").pop() || "";
+  return tPage(pathname);
 }
 
 // ═══════════ เมนู bottom nav มือถือ: ปุ่มเปลี่ยนตามสิทธิ์แต่ละบทบาท (role-based) ═══════════
@@ -204,6 +120,23 @@ const BOTTOM_NAV_ITEMS: Record<string, { label: string; href: string; icon: Reac
   settings:              { label: "ตั้งค่า",      href: "/settings",           icon: Cog6ToothIcon },
 };
 
+// key -> i18n dictionary key (แปล label ปุ่มล่างมือถือ)
+const BOTTOM_NAV_T_KEYS: Record<string, string> = {
+  dashboard: "bottom.dashboard",
+  "repair/my_tasks": "bottom.my_tasks",
+  "repair/request": "bottom.repair_request",
+  "repair/tracking": "bottom.tracking",
+  "pm_am/checksheet": "bottom.checksheet",
+  "pm_am/calendar": "bottom.pm_calendar",
+  asset_registry: "bottom.asset_registry",
+  "qr-sheet": "bottom.qr_sheet",
+  analytics: "bottom.analytics",
+  notifications: "bottom.notifications",
+  "reports/export_excel": "bottom.reports_excel",
+  "reports/monthly_pdf": "bottom.reports_pdf",
+  settings: "bottom.settings",
+};
+
 // ลำดับปุ่มล่างตามบทบาท (roleName มาจาก permission API) แล้ว filter ด้วย canShow
 const BOTTOM_NAV_ROLE_ORDER: Record<string, string[]> = {
   Admin:      ["dashboard", "repair/request", "pm_am/calendar", "asset_registry", "settings"],
@@ -217,6 +150,7 @@ const DEFAULT_BOTTOM_NAV_ORDER = ["dashboard", "repair/request", "pm_am/calendar
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const lang = useLang();
   const { canShow, roleName, userFullName, simulated, bottomNavKeys } = useMenuPermission();
 
   // Bottom nav มือถือ:
@@ -225,7 +159,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // แล้ว filter ด้วยสิทธิ์เมนู (canShow) เสมอ
   const bottomNav = (bottomNavKeys.length > 0 ? bottomNavKeys : (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER))
     .filter((key) => BOTTOM_NAV_ITEMS[key] && canShow(key))
-    .map((key) => BOTTOM_NAV_ITEMS[key]);
+    .map((key) => ({ ...BOTTOM_NAV_ITEMS[key], label: t(BOTTOM_NAV_T_KEYS[key] || key) }));
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
 
   // Auth guard: ถ้า session ไม่ถูกต้อง (401) → ไปหน้า login
@@ -348,8 +282,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
 
               <IconButton
-                label="แก้ไขหน้า"
-                tooltip="แก้ไขหน้านี้ด้วย Page Editor"
+                label={t("action.edit_page")}
+                tooltip={t("action.edit_page")}
                 icon={<Icon icon={PencilSquareIcon} size="sm" />}
                 variant="ghost"
                 size="md"
@@ -357,12 +291,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               />
 
               <IconButton
-                label="แจ้งเตือน"
-                tooltip="แจ้งเตือน"
+                label={t("action.notifications")}
+                tooltip={t("action.notifications")}
                 icon={<Icon icon={BellAlertIcon} size="sm" />}
                 variant="ghost"
                 size="md"
               />
+
+              {/* สลับภาษา TH/EN — เก็บใน localStorage + อัปเดตทั้ง UI ทันที */}
+              <button
+                type="button"
+                onClick={() => setUserLang(lang === "th" ? "en" : "th")}
+                title={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
+                aria-label={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
+                className="inline-flex items-center justify-center min-w-[34px] h-[34px] px-2 rounded-full border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] text-[0.72rem] font-extrabold tracking-wider text-[var(--cmms-text-secondary)] hover:bg-[var(--cmms-bg-muted)] hover:border-[var(--cmms-border-hover)] transition-all cursor-pointer select-none"
+              >
+                {lang === "th" ? "EN" : "TH"}
+              </button>
 
               {/* User chip — แสดงชื่อผู้ใช้จริงจาก session + รูปโปรไฟล์ (avatar) */}
               <div
@@ -388,8 +333,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
 
               <IconButton
-                label="ออกจากระบบ"
-                tooltip="ออกจากระบบ"
+                label={t("menu.logout")}
+                tooltip={t("menu.logout")}
                 icon={<Icon icon={ArrowRightEndOnRectangleIcon} size="sm" />}
                 variant="ghost"
                 size="md"
@@ -422,7 +367,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             />
           }
           footer={
-            <SideNavSection title="บัญชี" isHeaderHidden>
+            <SideNavSection title={t("nav.account")} isHeaderHidden>
               <SideNavItem
                 label={currentUser?.name || roleName || "ผู้ใช้งาน"}
                 icon={UserCircleIcon}
@@ -430,7 +375,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 isSelected={isSelected("/profile")}
               />
               <SideNavItem
-                label="ออกจากระบบ"
+                label={t("menu.logout")}
                 icon={ArrowRightEndOnRectangleIcon}
                 href="/login"
               />
@@ -438,91 +383,91 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }
         >
           {/* 1. งานซ่อมบำรุง */}
-          <MenuSection title="งานซ่อมบำรุง" pathPrefixes={["/repair", "/dashboard"]}>
-            {canShow("dashboard") && <SideNavItem label="แดชบอร์ดภาพรวม" icon={HomeIcon} href="/dashboard" isSelected={isSelected("/dashboard")} />}
-            {canShow("repair") && <SideNavItem label="ใบสั่งงานซ่อมทั้งหมด" icon={WrenchScrewdriverIcon} href="/repair" isSelected={isSelected("/repair")} />}
-            {canShow("repair/request") && <SideNavItem label="แจ้งซ่อมด่วน" icon={DocumentPlusIcon} href="/repair/request" isSelected={isSelected("/repair/request")} />}
-            {canShow("repair/assign") && <SideNavItem label="แจกงานซ่อม" icon={MapIcon} href="/repair/assign" isSelected={isSelected("/repair/assign")} />}
-            {canShow("repair/my_tasks") && <SideNavItem label="งานของฉัน (ซ่อม + PM)" icon={ClipboardDocumentCheckIcon} href="/repair/my_tasks" isSelected={isSelected("/repair/my_tasks")} />}
-            {canShow("repair/tracking") && <SideNavItem label="ติดตามงานซ่อม" icon={MapIcon} href="/repair/tracking" isSelected={isSelected("/repair/tracking")} />}
-            {canShow("repair/workload") && <SideNavItem label="ภาระงานช่าง" icon={BoltIcon} href="/repair/workload" isSelected={isSelected("/repair/workload")} />}
-            {canShow("repair/kanban") && <SideNavItem label="กระดานคัมบัง" icon={SquaresPlusIcon} href="/repair/kanban" isSelected={isSelected("/repair/kanban")} />}
-            {canShow("repair/history") && <SideNavItem label="ประวัติงานซ่อม" icon={ClockIcon} href="/repair/history" isSelected={isSelected("/repair/history")} />}
+          <MenuSection title={t("nav.work_orders")} pathPrefixes={["/repair", "/dashboard"]}>
+            {canShow("dashboard") && <SideNavItem label={t("menu.dashboard")} icon={HomeIcon} href="/dashboard" isSelected={isSelected("/dashboard")} />}
+            {canShow("repair") && <SideNavItem label={t("menu.repairs")} icon={WrenchScrewdriverIcon} href="/repair" isSelected={isSelected("/repair")} />}
+            {canShow("repair/request") && <SideNavItem label={t("menu.repair_request")} icon={DocumentPlusIcon} href="/repair/request" isSelected={isSelected("/repair/request")} />}
+            {canShow("repair/assign") && <SideNavItem label={t("menu.repair_assign")} icon={MapIcon} href="/repair/assign" isSelected={isSelected("/repair/assign")} />}
+            {canShow("repair/my_tasks") && <SideNavItem label={t("menu.my_tasks")} icon={ClipboardDocumentCheckIcon} href="/repair/my_tasks" isSelected={isSelected("/repair/my_tasks")} />}
+            {canShow("repair/tracking") && <SideNavItem label={t("menu.tracking")} icon={MapIcon} href="/repair/tracking" isSelected={isSelected("/repair/tracking")} />}
+            {canShow("repair/workload") && <SideNavItem label={t("menu.workload")} icon={BoltIcon} href="/repair/workload" isSelected={isSelected("/repair/workload")} />}
+            {canShow("repair/kanban") && <SideNavItem label={t("menu.kanban")} icon={SquaresPlusIcon} href="/repair/kanban" isSelected={isSelected("/repair/kanban")} />}
+            {canShow("repair/history") && <SideNavItem label={t("menu.history")} icon={ClockIcon} href="/repair/history" isSelected={isSelected("/repair/history")} />}
           </MenuSection>
 
           {/* 2. การอนุมัติ & เอกสาร */}
-          <MenuSection title="การอนุมัติ & เอกสาร" pathPrefixes={["/approval", "/forms", "/manuals"]}>
-            {canShow("approval") && <SideNavItem label="ศูนย์อนุมัติเอกสาร" icon={CheckBadgeIcon} href="/approval" isSelected={isSelected("/approval")} />}
-            {canShow("forms") && <SideNavItem label="ศูนย์แบบฟอร์ม (F-EN)" icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
-            {canShow("manuals") && <SideNavItem label="คู่มือการใช้งาน" icon={BookOpenIcon} href="/manuals" isSelected={isSelected("/manuals")} />}
+          <MenuSection title={t("nav.approval_docs")} pathPrefixes={["/approval", "/forms", "/manuals"]}>
+            {canShow("approval") && <SideNavItem label={t("menu.approval")} icon={CheckBadgeIcon} href="/approval" isSelected={isSelected("/approval")} />}
+            {canShow("forms") && <SideNavItem label={t("menu.forms")} icon={DocumentArrowDownIcon} href="/forms" isSelected={isSelected("/forms")} />}
+            {canShow("manuals") && <SideNavItem label={t("menu.manuals")} icon={BookOpenIcon} href="/manuals" isSelected={isSelected("/manuals")} />}
           </MenuSection>
 
           {/* 3. แผน PM & เครื่องจักร */}
-          <MenuSection title="แผน PM & เครื่องจักร" pathPrefixes={["/pm_am", "/asset_registry", "/assets", "/equipment_borrowing", "/calibration", "/mtbf_mttr", "/inspections"]}>
-            {canShow("pm_am") && <SideNavItem label="ตารางแผน PM" icon={CalendarDaysIcon} href="/pm_am" isSelected={isSelected("/pm_am")} />}
-            {canShow("pm_am/calendar") && <SideNavItem label="ปฏิทิน PM/AM" icon={CalendarDaysIcon} href="/pm_am/calendar" isSelected={isSelected("/pm_am/calendar")} />}
-            {canShow("pm_am/checksheet") && <SideNavItem label="ทำเช็คชีท PM" icon={ClipboardDocumentCheckIcon} href="/pm_am/checksheet" isSelected={isSelected("/pm_am/checksheet")} />}
-            {canShow("pm_am/create") && <SideNavItem label="สร้างแผน PM" icon={DocumentPlusIcon} href="/pm_am/create" isSelected={isSelected("/pm_am/create")} />}
-            {canShow("pm_am/batch_schedule") && <SideNavItem label="สร้างแผนแบบกลุ่ม" icon={RectangleGroupIcon} href="/pm_am/batch_schedule" isSelected={isSelected("/pm_am/batch_schedule")} />}
-            {canShow("inspections") && <SideNavItem label="ตรวจเช็ครอบ (Checklist)" icon={ClipboardDocumentListIcon} href="/inspections" isSelected={isSelected("/inspections")} />}
-            {canShow("inspections/run") && <SideNavItem label="ทำเช็คลิสต์ทันที" icon={ClipboardDocumentListIcon} href="/inspections/run" isSelected={isSelected("/inspections/run")} />}
-            {canShow("inspections/templates") && <SideNavItem label="จัดการ Template ตรวจ" icon={Squares2X2Icon} href="/inspections/templates" isSelected={isSelected("/inspections/templates")} />}
-            {canShow("asset_registry") && <SideNavItem label="ทะเบียนเครื่องจักร" icon={BuildingOffice2Icon} href="/asset_registry" isSelected={isSelected("/asset_registry")} />}
-            {canShow("assets") && <SideNavItem label="ทรัพย์สิน & เครื่องจักร" icon={BuildingOffice2Icon} href="/assets" isSelected={isSelected("/assets")} />}
-            {canShow("qr-sheet") && <SideNavItem label="แผ่น QR เครื่องจักร" icon={MapIcon} href="/qr-sheet" isSelected={isSelected("/qr-sheet")} />}
-            {canShow("asset_registry/bom_tree") && <SideNavItem label="ผังชิ้นส่วน (BOM)" icon={CubeIcon} href="/asset_registry/bom_tree" isSelected={isSelected("/asset_registry/bom_tree")} />}
-            {canShow("asset_registry/criticality") && <SideNavItem label="ลำดับความสำคัญ A/B/C" icon={ScaleIcon} href="/asset_registry/criticality" isSelected={isSelected("/asset_registry/criticality")} />}
-            {canShow("equipment_borrowing") && <SideNavItem label="ยืม-คืนอุปกรณ์" icon={ArrowsRightLeftIcon} href="/equipment_borrowing" isSelected={isSelected("/equipment_borrowing")} />}
-            {canShow("calibration") && <SideNavItem label="สอบเทียบเครื่องมือวัด" icon={ScaleIcon} href="/calibration" isSelected={isSelected("/calibration")} />}
-            {canShow("mtbf_mttr") && <SideNavItem label="วิเคราะห์ MTBF/MTTR" icon={BeakerIcon} href="/mtbf_mttr" isSelected={isSelected("/mtbf_mttr")} />}
+          <MenuSection title={t("nav.pm_machines")} pathPrefixes={["/pm_am", "/asset_registry", "/assets", "/equipment_borrowing", "/calibration", "/mtbf_mttr", "/inspections"]}>
+            {canShow("pm_am") && <SideNavItem label={t("menu.pm_am")} icon={CalendarDaysIcon} href="/pm_am" isSelected={isSelected("/pm_am")} />}
+            {canShow("pm_am/calendar") && <SideNavItem label={t("menu.pm_calendar")} icon={CalendarDaysIcon} href="/pm_am/calendar" isSelected={isSelected("/pm_am/calendar")} />}
+            {canShow("pm_am/checksheet") && <SideNavItem label={t("menu.pm_checksheet")} icon={ClipboardDocumentCheckIcon} href="/pm_am/checksheet" isSelected={isSelected("/pm_am/checksheet")} />}
+            {canShow("pm_am/create") && <SideNavItem label={t("menu.pm_create")} icon={DocumentPlusIcon} href="/pm_am/create" isSelected={isSelected("/pm_am/create")} />}
+            {canShow("pm_am/batch_schedule") && <SideNavItem label={t("menu.pm_batch")} icon={RectangleGroupIcon} href="/pm_am/batch_schedule" isSelected={isSelected("/pm_am/batch_schedule")} />}
+            {canShow("inspections") && <SideNavItem label={t("menu.inspections")} icon={ClipboardDocumentListIcon} href="/inspections" isSelected={isSelected("/inspections")} />}
+            {canShow("inspections/run") && <SideNavItem label={t("menu.inspections_run")} icon={ClipboardDocumentListIcon} href="/inspections/run" isSelected={isSelected("/inspections/run")} />}
+            {canShow("inspections/templates") && <SideNavItem label={t("menu.inspections_templates")} icon={Squares2X2Icon} href="/inspections/templates" isSelected={isSelected("/inspections/templates")} />}
+            {canShow("asset_registry") && <SideNavItem label={t("menu.asset_registry")} icon={BuildingOffice2Icon} href="/asset_registry" isSelected={isSelected("/asset_registry")} />}
+            {canShow("assets") && <SideNavItem label={t("menu.assets")} icon={BuildingOffice2Icon} href="/assets" isSelected={isSelected("/assets")} />}
+            {canShow("qr-sheet") && <SideNavItem label={t("menu.qr_sheet")} icon={MapIcon} href="/qr-sheet" isSelected={isSelected("/qr-sheet")} />}
+            {canShow("asset_registry/bom_tree") && <SideNavItem label={t("menu.bom_tree")} icon={CubeIcon} href="/asset_registry/bom_tree" isSelected={isSelected("/asset_registry/bom_tree")} />}
+            {canShow("asset_registry/criticality") && <SideNavItem label={t("menu.criticality")} icon={ScaleIcon} href="/asset_registry/criticality" isSelected={isSelected("/asset_registry/criticality")} />}
+            {canShow("equipment_borrowing") && <SideNavItem label={t("menu.equipment_borrowing")} icon={ArrowsRightLeftIcon} href="/equipment_borrowing" isSelected={isSelected("/equipment_borrowing")} />}
+            {canShow("calibration") && <SideNavItem label={t("menu.calibration")} icon={ScaleIcon} href="/calibration" isSelected={isSelected("/calibration")} />}
+            {canShow("mtbf_mttr") && <SideNavItem label={t("menu.mtbf_mttr")} icon={BeakerIcon} href="/mtbf_mttr" isSelected={isSelected("/mtbf_mttr")} />}
           </MenuSection>
 
           {/* 4. คลังอะไหล่ */}
-          <MenuSection title="คลังอะไหล่" pathPrefixes={["/spare_parts", "/suppliers"]}>
-            {canShow("spare_parts") && <SideNavItem label="คลังสต็อกอะไหล่" icon={CubeIcon} href="/spare_parts" isSelected={isSelected("/spare_parts")} />}
-            {canShow("spare_parts/issue_center") && <SideNavItem label="ศูนย์เบิก-จ่าย Sage" icon={ShoppingBagIcon} href="/spare_parts/issue_center" isSelected={isSelected("/spare_parts/issue_center")} />}
-            {canShow("spare_parts/sage_po") && <SideNavItem label="รับอะไหล่จาก PO" icon={DocumentCheckIcon} href="/spare_parts/sage_po" isSelected={isSelected("/spare_parts/sage_po")} />}
-            {canShow("spare_parts/sage_sync") && <SideNavItem label="ซิงค์สต็อก Sage 300" icon={CircleStackIcon} href="/spare_parts/sage_sync" isSelected={isSelected("/spare_parts/sage_sync")} />}
-            {canShow("spare_parts/optimization") && <SideNavItem label="AI EOQ & สต็อกค้าง" icon={SparklesIcon} href="/spare_parts/optimization" isSelected={isSelected("/spare_parts/optimization")} />}
-            {canShow("spare_parts") && <SideNavItem label="นับสต็อกจริง (Stock Take)" icon={ClipboardDocumentCheckIcon} href="/spare_parts/stock_take" isSelected={isSelected("/spare_parts/stock_take")} />}
-            {canShow("suppliers") && <SideNavItem label="ผู้ผลิต & คะแนนผู้ขาย" icon={TruckIcon} href="/suppliers" isSelected={isSelected("/suppliers")} />}
+          <MenuSection title={t("nav.spare_parts")} pathPrefixes={["/spare_parts", "/suppliers"]}>
+            {canShow("spare_parts") && <SideNavItem label={t("menu.spare_parts")} icon={CubeIcon} href="/spare_parts" isSelected={isSelected("/spare_parts")} />}
+            {canShow("spare_parts/issue_center") && <SideNavItem label={t("menu.issue_center")} icon={ShoppingBagIcon} href="/spare_parts/issue_center" isSelected={isSelected("/spare_parts/issue_center")} />}
+            {canShow("spare_parts/sage_po") && <SideNavItem label={t("menu.sage_po")} icon={DocumentCheckIcon} href="/spare_parts/sage_po" isSelected={isSelected("/spare_parts/sage_po")} />}
+            {canShow("spare_parts/sage_sync") && <SideNavItem label={t("menu.sage_sync")} icon={CircleStackIcon} href="/spare_parts/sage_sync" isSelected={isSelected("/spare_parts/sage_sync")} />}
+            {canShow("spare_parts/optimization") && <SideNavItem label={t("menu.optimization")} icon={SparklesIcon} href="/spare_parts/optimization" isSelected={isSelected("/spare_parts/optimization")} />}
+            {canShow("spare_parts") && <SideNavItem label={t("menu.stock_take")} icon={ClipboardDocumentCheckIcon} href="/spare_parts/stock_take" isSelected={isSelected("/spare_parts/stock_take")} />}
+            {canShow("suppliers") && <SideNavItem label={t("menu.suppliers")} icon={TruckIcon} href="/suppliers" isSelected={isSelected("/suppliers")} />}
           </MenuSection>
 
           {/* 5. วิเคราะห์ & รายงาน */}
-          <MenuSection title="วิเคราะห์ & รายงาน" pathPrefixes={["/analytics", "/reports"]}>
-            {canShow("analytics") && <SideNavItem label="KPI ผู้บริหาร" icon={ChartBarIcon} href="/analytics/kpi" isSelected={isSelected("/analytics/kpi")} />}
-            {canShow("analytics") && <SideNavItem label="คลังข้อมูลและ BI" icon={ChartBarIcon} href="/analytics" isSelected={isSelected("/analytics")} />}
-            {canShow("reports") && <SideNavItem label="ศูนย์รวมรายงาน" icon={ChartBarIcon} href="/reports" isSelected={isSelected("/reports")} />}
-            {canShow("reports/monthly_pdf") && <SideNavItem label="รายงาน PDF ผู้บริหาร" icon={DocumentArrowDownIcon} href="/reports/monthly_pdf" isSelected={isSelected("/reports/monthly_pdf")} />}
-            {canShow("reports/export_excel") && <SideNavItem label="ส่งออก Excel / CSV" icon={TableCellsIcon} href="/reports/export_excel" isSelected={isSelected("/reports/export_excel")} />}
-            {canShow("andon-board") && <SideNavItem label="จอ Andon TV (โรงงาน)" icon={BoltIcon} href="/andon-board" isSelected={isSelected("/andon-board")} />}
+          <MenuSection title={t("nav.analytics_reports")} pathPrefixes={["/analytics", "/reports"]}>
+            {canShow("analytics") && <SideNavItem label={t("menu.analytics_kpi")} icon={ChartBarIcon} href="/analytics/kpi" isSelected={isSelected("/analytics/kpi")} />}
+            {canShow("analytics") && <SideNavItem label={t("menu.analytics_bi")} icon={ChartBarIcon} href="/analytics" isSelected={isSelected("/analytics")} />}
+            {canShow("reports") && <SideNavItem label={t("menu.reports")} icon={ChartBarIcon} href="/reports" isSelected={isSelected("/reports")} />}
+            {canShow("reports/monthly_pdf") && <SideNavItem label={t("menu.reports_pdf")} icon={DocumentArrowDownIcon} href="/reports/monthly_pdf" isSelected={isSelected("/reports/monthly_pdf")} />}
+            {canShow("reports/export_excel") && <SideNavItem label={t("menu.reports_excel")} icon={TableCellsIcon} href="/reports/export_excel" isSelected={isSelected("/reports/export_excel")} />}
+            {canShow("andon-board") && <SideNavItem label={t("menu.andon_board")} icon={BoltIcon} href="/andon-board" isSelected={isSelected("/andon-board")} />}
           </MenuSection>
 
           {/* 6. ความปลอดภัย & IoT */}
-          <MenuSection title="ความปลอดภัย & IoT" pathPrefixes={["/safety", "/iot"]}>
-            {canShow("safety/work_permit") && <SideNavItem label="ใบอนุญาต LOTO" icon={ShieldCheckIcon} href="/safety/work_permit" isSelected={isSelected("/safety/work_permit")} />}
-            {canShow("iot/monitor") && <SideNavItem label="มอนิเตอร์เซนเซอร์ IoT" icon={BoltIcon} href="/iot/monitor" isSelected={isSelected("/iot/monitor")} />}
+          <MenuSection title={t("nav.safety_iot")} pathPrefixes={["/safety", "/iot"]}>
+            {canShow("safety/work_permit") && <SideNavItem label={t("menu.loto")} icon={ShieldCheckIcon} href="/safety/work_permit" isSelected={isSelected("/safety/work_permit")} />}
+            {canShow("iot/monitor") && <SideNavItem label={t("menu.iot_monitor")} icon={BoltIcon} href="/iot/monitor" isSelected={isSelected("/iot/monitor")} />}
           </MenuSection>
 
           {/* 7. บุคลากร */}
-          <MenuSection title="บุคลากร" pathPrefixes={["/users", "/roles", "/register"]}>
-            {canShow("users") && <SideNavItem label="ผู้ใช้งานระบบ" icon={UsersIcon} href="/users" isSelected={isSelected("/users")} />}
-            {canShow("roles") && <SideNavItem label="บทบาท & สิทธิ์" icon={UserGroupIcon} href="/roles" isSelected={isSelected("/roles")} />}
-            {canShow("register") && <SideNavItem label="ลงทะเบียนผูกบัญชี LINE" icon={ChatBubbleLeftRightIcon} href="/register" isSelected={isSelected("/register")} />}
+          <MenuSection title={t("nav.people")} pathPrefixes={["/users", "/roles", "/register"]}>
+            {canShow("users") && <SideNavItem label={t("menu.users")} icon={UsersIcon} href="/users" isSelected={isSelected("/users")} />}
+            {canShow("roles") && <SideNavItem label={t("menu.roles")} icon={UserGroupIcon} href="/roles" isSelected={isSelected("/roles")} />}
+            {canShow("register") && <SideNavItem label={t("menu.register")} icon={ChatBubbleLeftRightIcon} href="/register" isSelected={isSelected("/register")} />}
           </MenuSection>
 
           {/* 8. ระบบ & ตั้งค่า */}
-          <MenuSection title="ระบบ & ตั้งค่า" pathPrefixes={["/notifications", "/settings", "/pages", "/editor"]}>
-            {canShow("notifications") && <SideNavItem label="ศูนย์แจ้งเตือน" icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
-            {canShow("notifications/history") && <SideNavItem label="ประวัติการส่ง LINE" icon={ClipboardDocumentListIcon} href="/notifications/history" isSelected={isSelected("/notifications/history")} />}
-            {canShow("settings/notifications") && <SideNavItem label="รูปแบบการแจ้งเตือน LINE" icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
-            {canShow("settings") && <SideNavItem label="ตั้งค่าระบบทั้งหมด" icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
-            {canShow("settings") && <SideNavItem label="สิทธิ์เมนูตามบทบาท" icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
-            {canShow("settings") && <SideNavItem label="บริการและสถานะการรัน" icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
-            {canShow("settings") && <SideNavItem label="ไอคอน PWA (Mobile App)" icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
-            {canShow("settings") && <SideNavItem label="ปรับแต่งหน้าตาระบบ (Page Designer)" icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
-            {canShow("editor/builder") && <SideNavItem label="สร้างหน้าเว็บ (Visual Builder)" icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
-            {canShow("pages") && <SideNavItem label="หน้าเว็บที่สร้างเอง" icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
+          <MenuSection title={t("nav.system")} pathPrefixes={["/notifications", "/settings", "/pages", "/editor"]}>
+            {canShow("notifications") && <SideNavItem label={t("menu.notifications")} icon={BellAlertIcon} href="/notifications" isSelected={isSelected("/notifications")} />}
+            {canShow("notifications/history") && <SideNavItem label={t("menu.notifications_history")} icon={ClipboardDocumentListIcon} href="/notifications/history" isSelected={isSelected("/notifications/history")} />}
+            {canShow("settings/notifications") && <SideNavItem label={t("menu.settings_notifications")} icon={ChatBubbleLeftRightIcon} href="/settings/notifications" isSelected={isSelected("/settings/notifications")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings")} icon={Cog6ToothIcon} href="/settings" isSelected={isSelected("/settings")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings_menus")} icon={ShieldCheckIcon} href="/settings/menus" isSelected={isSelected("/settings/menus")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings_services")} icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings_pwa")} icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings_design")} icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
+            {canShow("editor/builder") && <SideNavItem label={t("menu.builder")} icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
+            {canShow("pages") && <SideNavItem label={t("menu.pages")} icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
           </MenuSection>
           {/* ปุ่มเลื่อนเร็ว + ตัวชี้ตำแหน่งเมนูปัจจุบัน */}
           <SideNavScrollControls pathname={pathname} />

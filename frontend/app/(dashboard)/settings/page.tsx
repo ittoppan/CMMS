@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
@@ -342,6 +343,7 @@ const SUB_PAGES = [
 ];
 
 export default function SettingsPage() {
+  const hero = usePageHero("settings");
   const router = useRouter();
   const [settings, setSettings] = useState<SettingRow[]>([]);
   const [defaults, setDefaults] = useState<Record<string, string | null>>({});
@@ -637,16 +639,16 @@ export default function SettingsPage() {
       <div style={layoutStyle("header")}>
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1} style={{ flex: 1 }}>
-          <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow">{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>ตั้งค่าระบบ (System Settings)</Heading>
+            <Heading level={2}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               {settings.length} keys
             </span>
             {totalDirty > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />{totalDirty} รายการยังไม่บันทึก</span>}
           </HStack>
           <Text type="body" color="secondary">
-            จัดการพารามิเตอร์ของระบบ CMMS จากตาราง settings จริง — แก้ไขแล้วบันทึกลงฐานข้อมูลทันที
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2} vAlign="center" wrap="wrap">

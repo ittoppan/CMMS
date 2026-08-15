@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -45,6 +46,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function KpiDashboardPage() {
+  const hero = usePageHero("analytics/kpi");
   const [months, setMonths] = useState(12);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -112,15 +114,15 @@ export default function KpiDashboardPage() {
       <div style={layoutStyle("hero")}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EXECUTIVE KPI · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>KPI ผู้บริหาร (Executive Dashboard)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ChartBarIcon className="w-3.5 h-3.5" /> ช่วง {months} เดือนล่าสุด
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            MTTR/MTBF · %PM ทันกำหนด · %งานปิดใน SLA · ค่าใช้จ่ายซ่อม — ข้อมูลจากฐานข้อมูลจริง
+            {hero.desc}
           </Text>
         </VStack>
         <Selector

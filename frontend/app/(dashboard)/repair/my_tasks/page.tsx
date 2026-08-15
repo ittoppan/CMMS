@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -52,6 +53,7 @@ interface TaskItem extends Record<string, unknown> {
 }
 
 export default function MyTasksPage() {
+  const hero = usePageHero("repair/my_tasks");
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"new" | "in_progress" | "completed">("new");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -382,11 +384,11 @@ export default function MyTasksPage() {
       <div className="cmms-page-hero">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            My Tasks · CMMS-TOPPAN
+            {hero.eyebrow}
           </Text>
-          <Heading level={2} style={{ color: "#fff" }}>งานของฉัน (ซ่อม + PM)</Heading>
+          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย
+            {hero.desc}
           </Text>
         </VStack>
       </div>

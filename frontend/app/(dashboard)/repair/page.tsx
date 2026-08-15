@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -79,6 +80,7 @@ const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
 };
 
 export default function WorkOrdersPage() {
+  const hero = usePageHero("repair");
   const router = useRouter();
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -330,11 +332,11 @@ export default function WorkOrdersPage() {
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Work Order Board · CMMS-TOPPAN
+            {hero.eyebrow}
           </Text>
-          <Heading level={2} style={{ color: "#fff" }}>ใบสั่งงานซ่อม</Heading>
+          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">

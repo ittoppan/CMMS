@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { t } from "../lib/i18n";
 import { usePathname } from "next/navigation";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -79,7 +80,7 @@ export function SideNavSearchInput() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="ค้นหาเมนู..."
+          placeholder={t("action.search_menu")}
           aria-label="ค้นหาเมนูใน SideNav"
           style={{
             width: "100%",
@@ -100,7 +101,7 @@ export function SideNavSearchInput() {
         {query && (
           <button
             type="button"
-            aria-label="ล้างการค้นหา"
+            aria-label={t("action.clear_search")}
             onClick={() => setQuery("")}
             style={{
               position: "absolute",
@@ -127,7 +128,7 @@ export function SideNavSearchInput() {
           role="status"
           style={{ fontSize: 12, color: "var(--cmms-text-muted, #64748B)", padding: "6px 2px 0", textAlign: "center" }}
         >
-          ไม่พบเมนูที่ค้นหา
+          {t("common.menu_not_found")}
         </div>
       )}
     </div>

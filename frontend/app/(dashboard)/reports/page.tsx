@@ -1,6 +1,7 @@
 "use client";
 
 import { VStack, HStack } from "@astryxdesign/core/Layout";
+import { usePageHero } from "@/lib/i18n";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -10,20 +11,21 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function ReportsHubPage() {
+  const hero = usePageHero("reports");
   return (
     <VStack gap={6}>
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS HUB · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ศูนย์รวมรายงาน & การส่งออกข้อมูล</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               ISO 9001 / ISO 55000
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV
+            {hero.desc}
           </Text>
         </VStack>
       </div>

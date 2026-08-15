@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -71,6 +72,7 @@ const PAGE_SIZE = 10;
 const TABS = ["All", "daily", "weekly", "monthly", "yearly"];
 
 export default function PMSchedulePage() {
+  const hero = usePageHero("pm_am");
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("All");
   const [search, setSearch] = useState("");
@@ -282,15 +284,15 @@ export default function PMSchedulePage() {
     <VStack gap={6}>
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM AM · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แผนบำรุงรักษาเชิงป้องกัน (PM)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <WrenchScrewdriverIcon className="w-3.5 h-3.5" /> แผน {stats.total} รายการ
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แผนซ่อมบำรุงเชิงป้องกัน และตารางตรวจเช็คเครื่องจักร
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2}>

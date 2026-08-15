@@ -4,6 +4,7 @@
 // (Layout + LayoutHeader + TabList + Items list + Side Panel + mobile dialog)
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "@astryxdesign/core/hooks";
 import {
@@ -610,6 +611,7 @@ function ItemsCard({
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function SparePartsPage() {
+  const hero = usePageHero("spare_parts");
   const router = useRouter();
   const [parts, setParts] = useState<SparePart[]>([]);
   const [loading, setLoading] = useState(true);
@@ -789,9 +791,9 @@ export default function SparePartsPage() {
                     </HStack>
                   </Link>
                   <VStack gap={1}>
-                    <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS · CMMS-TOPPAN</Text>
+                    <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
                     <Heading level={2} style={{ color: "#fff", marginTop: 4 }}>
-                      คลังสต็อกอะไหล่ (เชื่อมต่อ Sage 300 ERP)
+                      {hero.title}
                     </Heading>
                     <HStack gap={2} vAlign="center" wrap="wrap">
                       <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
@@ -802,7 +804,7 @@ export default function SparePartsPage() {
                       </span>
                     </HStack>
                     <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-                      ระบบบริหารคลังอะไหล่ที่เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control) สำหรับ TOPPAN
+                      {hero.desc}
                     </Text>
                   </VStack>
                 </VStack>

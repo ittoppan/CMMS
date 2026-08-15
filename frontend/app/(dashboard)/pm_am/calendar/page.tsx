@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -42,6 +43,7 @@ const freqChipStyle: Record<string, React.CSSProperties> = {
 };
 
 export default function PMCalendarPage() {
+  const hero = usePageHero("pm_am/calendar");
   const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>(todayStr as `${number}${number}${number}${number}-${number}${number}-${number}${number}`);
   const [tasks, setTasks] = useState<any[]>([]);
   const [viewAll, setViewAll] = useState(false);
@@ -81,15 +83,15 @@ export default function PMCalendarPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CALENDAR · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ปฏิทินงานซ่อมบำรุง (PM Calendar)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               PM / AM
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน — ไฟแดงคืองานเลยกำหนด ไฟเหลืองคือต้องทำ
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={3} wrap="wrap">

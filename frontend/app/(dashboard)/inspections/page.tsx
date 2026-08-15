@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -28,6 +29,7 @@ const STATUS_LABELS: Record<string, string> = {
 const RESULT_LABELS: Record<string, string> = { pass: "ผ่าน", fail: "ไม่ผ่าน" };
 
 export default function InspectionsPage() {
+  const hero = usePageHero("inspections");
   const [schedules, setSchedules] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [assets, setAssets] = useState<any[]>([]);
@@ -123,15 +125,15 @@ export default function InspectionsPage() {
 
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION CHECKLIST · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ตรวจเช็ครอบ (Checklist)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            รอบตรวจตามเครื่อง/สาธารณูปโภค — ตรวจเช็คเสร็จแล้วบันทึกผลได้ทันที
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">

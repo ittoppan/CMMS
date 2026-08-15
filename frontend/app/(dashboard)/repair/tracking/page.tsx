@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -35,6 +36,7 @@ type TrackWO = Record<string, unknown> & {
 };
 
 export default function RepairTrackingPage() {
+  const hero = usePageHero("repair/tracking");
   const router = useRouter();
   const [data, setData] = useState<TrackWO[]>([]);
   const [error, setError] = useState<boolean>(false);
@@ -169,11 +171,11 @@ export default function RepairTrackingPage() {
       <div className="cmms-page-hero">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Repair Tracking · CMMS-TOPPAN
+            {hero.eyebrow}
           </Text>
-          <Heading level={2} style={{ color: "#fff" }}>ติดตามงานซ่อม (Repair Tracking)</Heading>
+          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ตรวจสอบสถานะงานซ่อมที่คุณได้แจ้งไว้ และประเมินผลความพึงพอใจการซ่อมของช่าง
+            {hero.desc}
           </Text>
         </VStack>
       </div>

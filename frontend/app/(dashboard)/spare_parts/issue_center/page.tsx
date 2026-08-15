@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -35,6 +36,7 @@ interface CartItem extends Record<string, unknown> {
 }
 
 export default function SageIssueCenterPage() {
+  const hero = usePageHero("spare_parts/issue_center");
   const [workOrders, setWorkOrders] = useState<{ value: string; label: string }[]>([]);
   const [users, setUsers] = useState<{ value: string; label: string }[]>([]);
   const [parts, setParts] = useState<any[]>([]);
@@ -250,15 +252,15 @@ export default function SageIssueCenterPage() {
 
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ISSUE CENTER · CMMS-TOPPAN</Text>
+          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ศูนย์เบิก-จ่ายอะไหล่ (Issue Center)</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ShoppingBagIcon className="w-3.5 h-3.5" /> {totalQty} รายการในใบเบิก
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เบิกจ่ายอะไหล่จากคลังให้กับใบสั่งงานซ่อมและช่างผู้รับผิดชอบ
+            {hero.desc}
           </Text>
         </VStack>
         <button

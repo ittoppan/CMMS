@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -47,6 +48,7 @@ const priorityTone: Record<KanbanItem["priority"], string> = {
 };
 
 export default function RepairKanbanPage() {
+  const hero = usePageHero("repair/kanban");
   const [items, setItems] = useState<KanbanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -169,11 +171,11 @@ export default function RepairKanbanPage() {
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Kanban Board · CMMS-TOPPAN
+            {hero.eyebrow}
           </Text>
-          <Heading level={2} style={{ color: "#fff" }}>Kanban งานซ่อม</Heading>
+          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            บอร์ดติดตามสถานะงานซ่อมตามกระบวนการทำงาน — หัวคอลัมน์เป็นไฟสัญญาณ: เหลือง=อยู่ในสายงาน แดง=รออะไหล่ เขียว=เสร็จ
+            {hero.desc}
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">

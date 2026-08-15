@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { SideNavSection } from "@astryxdesign/core/SideNav";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useSideNavSearch } from "./SideNavSearch";
+import { t } from "../lib/i18n";
 
 /**
  * หมวดเมนู (Section) ที่:
@@ -80,8 +81,8 @@ export default function MenuSection({
         searching ? undefined : (
           <button
             type="button"
-            aria-label={collapsed ? `ขยายหมวด ${title}` : `ย่อหมวด ${title}`}
-            title={collapsed ? "ขยายหมวด" : "ย่อหมวด"}
+            aria-label={collapsed ? `${t("nav.expand_section")} ${title}` : `${t("nav.collapse_section")} ${title}`}
+            title={collapsed ? t("nav.expand_section") : t("nav.collapse_section")}
             onClick={toggle}
             style={{
               display: "flex",

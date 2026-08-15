@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack, Layout, LayoutContent, LayoutHeader } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -100,6 +101,7 @@ function CustomChartTooltip({ active, payload, label }: any) {
 }
 
 export default function DashboardPage() {
+  const hero = usePageHero("dashboard");
   const [recentWO, setRecentWO] = useState<any[]>([]);
   const [allWOs, setAllWOs] = useState<any[]>([]);
   const [monthlyData, setMonthlyData] = useState<MonthlyRecord[]>([]);
@@ -396,11 +398,11 @@ export default function DashboardPage() {
             <VStack gap={2}>
               <VStack gap={2}>
                 <Text type="body" size="sm" className="cmms-eyebrow">
-                  Plant Status Board · CMMS-TOPPAN
+                  {hero.eyebrow}
                 </Text>
-                <Heading level={1}>แผงควบคุมโรงงาน</Heading>
+                <Heading level={1}>{hero.title}</Heading>
                 <Text type="body" color="secondary">
-                  สถานะเครื่องจักรแบบเรียลไทม์ — ไฟเขียวคือพร้อมเดิน ไฟแดงคือต้องการความสนใจทันที
+                  {hero.desc}
                 </Text>
               </VStack>
             </VStack>
