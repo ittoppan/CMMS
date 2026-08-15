@@ -322,7 +322,7 @@ export default function CreateUserPage() {
           type="button"
           disabled={submitting}
           onClick={handleSubmit}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0068B5] hover:brightness-110 transition-all duration-300 shadow-sm disabled:opacity-60"
+          className="cmms-btn-primary"
         >
           <UserPlusIcon className="w-4 h-4" />
           {submitting ? "กำลังสร้าง..." : "สร้างผู้ใช้ใหม่"}

@@ -45,12 +45,12 @@ interface User extends Record<string, unknown> {
 }
 
 const roleChipStyle: Record<string, React.CSSProperties> = {
-  admin: { background: "rgba(244,63,94,0.12)", color: "#E11D48" },
-  manager: { background: "rgba(245,158,11,0.12)", color: "#D97706" },
-  supervisor: { background: "rgba(30,136,229,0.12)", color: "#1E88E5" },
-  technician: { background: "rgba(16,185,129,0.12)", color: "#059669" },
-  operator: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
-  viewer: { background: "rgba(100,116,139,0.12)", color: "#64748B" },
+  admin: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  manager: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  supervisor: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  technician: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  operator: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+  viewer: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 const roleLabels: Record<string, string> = {
@@ -240,8 +240,8 @@ export default function UsersPage() {
         <span
           className="cmms-andon-chip"
           style={item.isActive
-            ? { background: "rgba(16,185,129,0.12)", color: "#059669" }
-            : { background: "rgba(100,116,139,0.12)", color: "#64748B" }}
+            ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
         >
           {item.isActive ? "ใช้งาน" : "ปิดใช้งาน"}
         </span>
@@ -307,7 +307,7 @@ export default function UsersPage() {
             <ArrowPathIcon className="w-4 h-4" />
             รีเฟรช
           </button>
-          <a href="/users/create" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#0068B5] hover:brightness-110 transition-all duration-300 shadow-sm">
+          <a href="/users/create" className="cmms-btn-primary">
             <PlusIcon className="w-4 h-4" />
             เพิ่มผู้ใช้ใหม่
           </a>
@@ -430,7 +430,7 @@ export default function UsersPage() {
                       type="button"
                       disabled={deleting}
                       onClick={handleDelete}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#E11D48] hover:brightness-110 transition-all duration-300 shadow-sm disabled:opacity-60"
+                      className="cmms-btn-danger"
                     >
                       {deleting ? "กำลังลบ..." : "ยืนยันลบผู้ใช้"}
                     </button>
