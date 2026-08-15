@@ -6,15 +6,18 @@ session_start();
 
 /**
  * Resolve a real avatar URL, skipping generic placeholder files.
- * Priority: real avatar_path > data-URI avatar > ui-avatars initials fallback.
+ * Priority: data-URI avatar (base64 ที่อัปโหลดใหม่) > real avatar_path > ui-avatars initials fallback.
+ * (ลำดับเดียวกับ topbar layout.tsx — avatar ชนะเสมอ)
  */
 function resolveAvatarUrl($avatarPath, $avatar, $name) {
+    // ลำดับเดียวกับ topbar (layout.tsx): avatar (base64 ที่อัปโหลดใหม่) ก่อน แล้วค่อย avatar_path
+    // — avatar_path อาจเป็นรูป default กลาง (user_male/female.jpg) ที่ไม่ใช่รูปเฉพาะคน
     $genericPlaceholders = ['uploads/avatars/user_male.jpg', 'uploads/avatars/user_female.jpg'];
-    if (!empty($avatarPath) && !in_array(trim($avatarPath, '/'), $genericPlaceholders)) {
-        return '/' . ltrim($avatarPath, '/');
-    }
     if (!empty($avatar) && strpos($avatar, 'data:') === 0) {
         return $avatar;
+    }
+    if (!empty($avatarPath) && !in_array(trim($avatarPath, '/'), $genericPlaceholders)) {
+        return '/' . ltrim($avatarPath, '/');
     }
     return 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=random';
 }
@@ -158,7 +161,7 @@ try {
     }
 
     // 9. Live Technician Tracker
-    $liveTechSql = "SELECT u.full_name as name, u.avatar_path, r.status, r.title as task, 
+    $liveTechSql = "SELECT u.full_name as name, u.avatar, u.avatar_path, r.status, r.title as task, 
                     TIMESTAMPDIFF(MINUTE, r.updated_at, NOW()) as minutes_ago 
                     FROM repair r 
                     JOIN users u ON r.assigned_to = u.id 
@@ -172,7 +175,7 @@ try {
             'status' => $t['status'] === 'in_progress' ? 'repairing' : 'waiting',
             'task' => $t['task'],
             'time' => $t['minutes_ago'] . ' นาทีที่แล้ว',
-            'avatar' => resolveAvatarUrl($t['avatar_path'], null, $t['name'])
+            'avatar' => resolveAvatarUrl($t['avatar_path'], $t['avatar'] ?? null, $t['name'])
         ];
     }, $liveTechData);
 
