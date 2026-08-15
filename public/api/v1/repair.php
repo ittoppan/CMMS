@@ -115,6 +115,26 @@ try {
                     error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
                 }
             }
+            // ---- LINE แจ้งขอเบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ (ถ้ามีรายการ) ----
+            if (!empty($data['spare_parts']) && is_array($data['spare_parts']) && getSettingValue('line_notify_enabled', '0') === '1') {
+                try {
+                    $sumParts = [];
+                    $gCode = $pdo->prepare('SELECT code FROM spare_parts WHERE id = ?');
+                    foreach ($data['spare_parts'] as $sp) {
+                        $gCode->execute([(int)($sp['spare_part_id'] ?? 0)]);
+                        $cd = $gCode->fetchColumn();
+                        if ($cd) $sumParts[] = $cd . ' x ' . (float)($sp['quantity_used'] ?? 0);
+                    }
+                    lineNotifySpareRequest([
+                        '{work_order_id}' => (string)($data['work_order_no'] ?? ''),
+                        '{items_summary}' => implode(', ', $sumParts),
+                        '{requester_name}' => (string)($data['receiver_name'] ?? '-'),
+                        '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
+                    ], publicBaseUrl() . '/repair/view?id=' . $newId);
+                } catch (Exception $e) {
+                    error_log('[repair.php] spare_request notify failed: ' . $e->getMessage());
+                }
+            }
 
             // ---- LINE แจ้งเตือนงานใหม่เข้า (non-blocking — fail เงียบไม่พังการ submit) ----
             try {
@@ -193,6 +213,9 @@ try {
             }
             if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
             $values[] = $id;
+            $qOld = $pdo->prepare('SELECT assigned_to FROM repair WHERE id = ?');
+            $qOld->execute([$id]);
+            $oldAssignedTo = (int)($qOld->fetchColumn() ?: 0);
             $stmt = $pdo->prepare("UPDATE repair SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
 
@@ -206,6 +229,52 @@ try {
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
                 }
+            }
+            // ---- LINE แจ้งเตือน: งานถูกมอบหมาย → ช่างผู้รับ + ขอเบิกอะไหล่ → หัวหน้าอนุมัติ ----
+            try {
+                if (getSettingValue('line_notify_enabled', '0') === '1') {
+                    $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
+                                        FROM repair r
+                                        LEFT JOIN asset_registry a ON a.id = r.asset_id
+                                        LEFT JOIN users u ON u.id = r.assigned_to
+                                        WHERE r.id = ?");
+                    $q->execute([$id]);
+                    $row = $q->fetch(PDO::FETCH_ASSOC);
+                    if ($row) {
+                        $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
+                        // 1) งานถูกมอบหมาย → แจ้งช่างผู้รับ (เฉพาะเมื่อเปลี่ยนผู้รับ)
+                        if (isset($data['assigned_to']) && (int)$data['assigned_to'] > 0 && (int)$data['assigned_to'] !== $oldAssignedTo) {
+                            $cu = currentUser($pdo);
+                            lineNotifyAssigned((int)$data['assigned_to'], [
+                                '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
+                                '{asset_code}' => (string)($row['asset_code'] ?? '-'),
+                                '{asset_name}' => (string)($row['asset_name'] ?? ''),
+                                '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                                '{priority}' => (string)($row['priority'] ?? ''),
+                                '{status}' => (string)($row['status'] ?? ''),
+                                '{assigner_name}' => (string)($cu['full_name'] ?? '-'),
+                            ], $detailUrl);
+                        }
+                        // 2) เบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ
+                        if (isset($data['spare_parts']) && is_array($data['spare_parts']) && !empty($data['spare_parts'])) {
+                            $sumParts = [];
+                            $gCode = $pdo->prepare('SELECT code FROM spare_parts WHERE id = ?');
+                            foreach ($data['spare_parts'] as $sp) {
+                                $gCode->execute([(int)($sp['spare_part_id'] ?? 0)]);
+                                $cd = $gCode->fetchColumn();
+                                if ($cd) $sumParts[] = $cd . ' x ' . (float)($sp['quantity_used'] ?? 0);
+                            }
+                            lineNotifySpareRequest([
+                                '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
+                                '{items_summary}' => implode(', ', $sumParts),
+                                '{requester_name}' => (string)($row['assigned_name'] ?? '-'),
+                                '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
+                            ], $detailUrl);
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("[repair.php] LINE assign/spare notify failed: " . $e->getMessage());
             }
             echo json_encode(['success' => true]);
 
