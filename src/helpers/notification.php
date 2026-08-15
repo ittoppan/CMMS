@@ -232,9 +232,18 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $btnColor   = $opts['btn_color'] ?? '#06C755';
     $btnTxtColor = $opts['btn_text_color'] ?? '#ffffff';
     $btnHeight = in_array($opts['btn_height'] ?? 'md', ['sm', 'md', 'lg'], true) ? ($opts['btn_height'] ?? 'md') : 'md';
+    // โหมดปุ่มกด: 'postback' (อนุมัติผ่าน LINE — ดึง repair id จาก targetUrl) หรือ 'uri' (ลิงก์เปิดหน้า)
+    $postbackRid = 0;
+    if (($opts['btn_postback'] ?? '0') == '1') {
+        parse_str((string)parse_url((string)$defaultTapUrl, PHP_URL_QUERY), $pq);
+        $postbackRid = (int)($pq['id'] ?? 0);
+    }
+    $isPostback = $postbackRid > 0 && ($opts['btn_postback'] ?? '0') == '1';
     $footerButtons[] = [
         'type' => 'button',
-        'action' => ['type' => 'uri', 'label' => $btnLabel, 'uri' => $defaultTapUrl],
+        'action' => $isPostback
+            ? ['type' => 'postback', 'data' => 'spare_approve=' . $postbackRid, 'label' => $btnLabel]
+            : ['type' => 'uri', 'label' => $btnLabel, 'uri' => $defaultTapUrl],
         'style' => $btnStyle,
         'color' => $btnStyle === 'link' ? $btnColor : ($btnStyle === 'secondary' ? $btnTxtColor : $btnColor),
         'height' => $btnHeight,
@@ -244,7 +253,9 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         $btn2Url = trim((string)($opts['btn2_url'] ?? '')) ?: $defaultTapUrl;
         $footerButtons[] = [
             'type' => 'button',
-            'action' => ['type' => 'uri', 'label' => $btn2Label, 'uri' => $btn2Url],
+            'action' => $isPostback
+                ? ['type' => 'postback', 'data' => 'spare_reject=' . $postbackRid, 'label' => $btn2Label]
+                : ['type' => 'uri', 'label' => $btn2Label, 'uri' => $btn2Url],
             'style' => 'secondary',
             'color' => $btnColor,
             'margin' => 'sm',
@@ -373,8 +384,10 @@ function lineTemplateDefaults() {
         'line_tpl_spare_request' => [
             'header_color' => '#b45309',
             'header_title' => '🧰 ขอเบิกอะไหล่ #{work_order_id} รออนุมัติ',
-            'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท\nกดปุ่มด้านล่างเพื่อตรวจสอบ/อนุมัติ",
-            'btn_label' => '📦 ตรวจสอบการเบิก',
+            'body_text' => "รายการ: {items_summary}\nช่างผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_cost} บาท",
+            'btn_label' => '✅ อนุมัติการเบิก',
+            'btn2_label' => '❌ ไม่อนุมัติ',
+            'btn_postback' => '1',
             'enabled' => '1', 'image_before' => '', 'image_after' => '',
         ],
     ];
@@ -425,6 +438,7 @@ function getLineTemplate($tplKey) {
         'btn_height'        => in_array($pick('btn_height', 'md'), ['sm', 'md', 'lg'], true) ? $pick('btn_height', 'md') : 'md',
         'btn2_label'        => (string)$pick('btn2_label', ''),
         'btn2_url'          => trim((string)$pick('btn2_url', '')),
+        'btn_postback'      => (($pick('btn_postback', $d['btn_postback'] ?? '0') == '1' || $pick('btn_postback', $d['btn_postback'] ?? '0') === true)) ? '1' : '0',
         'image_before'      => trim((string)($tpl['image_before'] ?? $d['image_before'] ?? '')),
         'image_after'       => trim((string)($tpl['image_after'] ?? $d['image_after'] ?? '')),
         'container_bg'      => $hex6($pick('container_bg', '#ffffff'), '#ffffff'),
@@ -486,6 +500,7 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         'btn_height'        => $tpl['btn_height'],
         'btn2_label'        => $tpl['btn2_label'],
         'btn2_url'          => $tpl['btn2_url'],
+        'btn_postback'      => $tpl['btn_postback'],
         'container_bg'      => $tpl['container_bg'],
         'border_color'      => $tpl['border_color'],
         'corner_radius'     => $tpl['corner_radius'],

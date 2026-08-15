@@ -79,6 +79,22 @@ function lwReply($replyToken, $text, $token) {
     return true;
 }
 
+/**
+ * ส่งข้อความ push ถึงผู้ใช้ (ไม่ต้อง replyToken — ใช้กับแจ้งช่างผู้ขอหลังอนุมัติ)
+ */
+function lwPush($to, $text, $token) {
+    if (empty($to)) return false;
+    $ch = curl_init('https://api.line.me/v2/bot/message/push');
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['to' => $to, 'messages' => [['type' => 'text', 'text' => $text]]], JSON_UNESCAPED_UNICODE));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Authorization: Bearer ' . $token]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_exec($ch);
+    curl_close($ch);
+    return true;
+}
+
 try {
     $pdo = getDb();
     $token = getenv('LINE_CHANNEL_ACCESS_TOKEN');
@@ -101,6 +117,52 @@ try {
                 lwReply($replyToken, "👋 สวัสดีครับ! บอท CMMS-TPT\n\n" . ($same
                     ? "✅ กลุ่มนี้ถูกตั้งเป็นกลุ่มช่างอยู่แล้ว — พร้อมรับการแจ้งเตือน"
                     : "ℹ️ ระบบมีกลุ่มช่างตั้งไว้อยู่แล้ว\nพิมพ์ \"แจ้งเตือนที่นี่\" เพื่อเปลี่ยนมาใช้กลุ่มนี้"), $token);
+            }
+            continue;
+        }
+
+        /* ---------- 3. POSTBACK EVENT: อนุมัติ/ไม่อนุมัติเบิกอะไหล่ ---------- */
+        if ($evType === 'postback') {
+            $pdata  = (string)($ev['postback']['data'] ?? '');
+            $userId = (string)($ev['source']['userId'] ?? '');
+            if (preg_match('/^spare_(approve|reject)=(\d+)$/', $pdata, $pm)) {
+                $decision = $pm[1] === 'approve' ? 'approved' : 'rejected';
+                $rid = (int)$pm[2];
+                // สิทธิ์: เฉพาะ Admin/Manager (role_id 1,2) ที่ผูก LINE
+                $u = $pdo->prepare("SELECT id, full_name, role_id FROM users WHERE line_user_id = ? AND is_active = 1");
+                $u->execute([$userId]);
+                $approver = $u->fetch();
+                if (!$approver || (int)$approver['role_id'] > 2) {
+                    lwReply($replyToken, "⚠️ เฉพาะหัวหน้า/แอดมินเท่านั้นที่อนุมัติการเบิกอะไหล่ได้", $token);
+                    continue;
+                }
+                $q = $pdo->prepare("SELECT work_order_no, title, assigned_to FROM repair WHERE id = ?");
+                $q->execute([$rid]);
+                $row = $q->fetch();
+                if (!$row) {
+                    lwReply($replyToken, "❌ ไม่พบใบสั่งงาน #{$rid} ในระบบ", $token);
+                    continue;
+                }
+                $upd = $pdo->prepare("UPDATE repair SET spare_approval_status = ?, spare_approved_by = ?, spare_approved_at = NOW() WHERE id = ? AND spare_approval_status IN ('pending','none')");
+                $upd->execute([$decision, $approver['full_name'], $rid]);
+                if ($upd->rowCount() === 0) {
+                    $st = $pdo->prepare("SELECT spare_approval_status FROM repair WHERE id = ?");
+                    $st->execute([$rid]);
+                    lwReply($replyToken, "ℹ️ ใบสั่งงาน {$row['work_order_no']} ถูกพิจารณาไปแล้ว (สถานะ: " . ($st->fetchColumn() ?: 'none') . ")", $token);
+                    continue;
+                }
+                $verb = $decision === 'approved' ? "อนุมัติ" : "ไม่อนุมัติ";
+                lwReply($replyToken, ($decision === 'approved' ? "✅ " : "❌ ") . "{$verb}การเบิกอะไหล่ของ {$row['work_order_no']} เรียบร้อยแล้ว" . nl . "ผู้พิจารณา: {$approver['full_name']}", $token);
+                // แจ้งช่างผู้ขอเบิก (ถ้าผูก LINE)
+                if (!empty($row['assigned_to'])) {
+                    $tech = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
+                    $tech->execute([(int)$row['assigned_to']]);
+                    $techLid = $tech->fetchColumn();
+                    if ($techLid) {
+                        lwPush($techLid, ($decision === 'approved' ? "✅ " : "❌ ") . "การเบิกอะไหล่ของ {$row['work_order_no']} ถูก{$verb}โดย {$approver['full_name']} — ดูรายละเอียดได้ในระบบ CMMS", $token);
+                    }
+                }
+                continue;
             }
             continue;
         }
