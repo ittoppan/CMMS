@@ -48,6 +48,7 @@ interface TaskItem extends Record<string, unknown> {
   assignedTo?: number | null;
   assignedToName?: string;
   teamIds?: number[];
+  team?: { user_id: number; status?: string }[];
   assignedDate: string;
   estimatedCompletion: string;
   assetCode?: string;
@@ -122,6 +123,7 @@ export default function MyTasksPage() {
               assignedTo: r.assigned_to || null,
               assignedToName: r.assigned_name || "-",
               teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
+              team: Array.isArray(r.team) ? r.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
               assignedDate: r.created_at || "-",
               estimatedCompletion: r.estimated_completion_date || "-",
               beforeImg: r.before_image_path || "",
@@ -150,6 +152,7 @@ export default function MyTasksPage() {
             assignedTo: p.assigned_to || null,
             assignedToName: p.assigned_to_name || "-",
             teamIds: Array.isArray(p.team_ids) ? p.team_ids.map((t: any) => Number(t)) : [],
+            team: Array.isArray(p.team) ? p.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
             assignedDate: p.due_date || "-",
             estimatedCompletion: p.due_date || "-",
             assetCode: p.asset_code || "",
@@ -211,6 +214,29 @@ export default function MyTasksPage() {
     }).then(() => {
       setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t));
     });
+  };
+
+  // ช่างกด "รับงาน" — อัปเดตสถานะต่อคน (ใครรับแล้ว/ยังไม่รับ) — งานซ่อม + PM ใช้ endpoint เดียวกัน
+  const handleAcceptTask = (task: TaskItem) => {
+    const endpoint = task.kind === "repair" ? "/api/v1/repair.php" : "/api/v1/pm_am.php";
+    fetch(`${endpoint}?id=${task.rawId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ assignee_accept: true }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && currentUserId !== null) {
+          setTasks((prev) =>
+            prev.map((t) =>
+              t.id === task.id
+                ? { ...t, team: [...(t.team || []).filter((m) => m.user_id !== currentUserId), { user_id: currentUserId, status: "accepted" }] }
+                : t
+            )
+          );
+        }
+      })
+      .catch(() => { /* offline */ });
   };
 
   // ตั้งสถานะ "รออะไหล่" — งานยังค้าง ไฟเหลือง จนกว่าจะมีอะไหล่
@@ -390,6 +416,17 @@ export default function MyTasksPage() {
           </HStack>
         ) : (
           <HStack gap={2} hAlign="end">
+            {task.status === "new" && currentUserId !== null && (task.assignedTo === currentUserId || (task.teamIds || []).includes(currentUserId)) && !task.team?.some((m) => m.user_id === currentUserId && m.status === "accepted") && (
+              <button
+                type="button"
+                onClick={() => handleAcceptTask(task)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition-all duration-300"
+              >
+                <CheckCircleIcon className="w-3.5 h-3.5" />
+                รับงาน
+              </button>
+            )}
+
             {task.status === "new" && (
               <button
                 type="button"

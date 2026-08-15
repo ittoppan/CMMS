@@ -257,12 +257,24 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // ช่างกด "รับงาน" — ทำงานก่อนเช็คฟิลด์อื่น (ส่งมาแค่ assignee_accept ตัวเดียวก็ได้)
+            $accepted = false;
+            if (!empty($data['assignee_accept'])) {
+                $cu = currentUser($pdo);
+                if ($cu && $cu['id']) {
+                    acceptWorkAssignment($pdo, 'repair', $id, (int)$cu['id']);
+                    $accepted = true;
+                }
+            }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'cost_parts', 'cost_labor', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at'];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
             }
-            if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
+            if (empty($fields)) {
+                if ($accepted) { echo json_encode(['success' => true, 'accepted' => true]); exit; }
+                http_response_code(400); echo json_encode(['error' => 'No data']); exit;
+            }
             $values[] = $id;
             $qOld = $pdo->prepare('SELECT assigned_to FROM repair WHERE id = ?');
             $qOld->execute([$id]);

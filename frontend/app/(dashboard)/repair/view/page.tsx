@@ -57,7 +57,7 @@ interface WorkOrderDetail {
   spareApprovalStatus: string;
   spareApprovedBy: string;
   spareApprovedAt: string;
-  team: { user_id: number; role: string; full_name: string }[];
+  team: { user_id: number; role: string; full_name: string; status?: string; accepted_at?: string }[];
 }
 
 interface Activity {
@@ -465,11 +465,26 @@ export default function RepairViewDetailsPage() {
                     >
                       {(m.full_name || "?").charAt(0)}
                     </div>
-                    <VStack gap={0}>
+                    <VStack gap={1}>
                       <Text type="body" size="sm" weight="bold">{m.full_name || "-"}</Text>
                       <Text type="body" color="secondary" style={{ fontSize: 11 }}>
                         {m.role === "lead" ? "หัวหน้าชุด" : "สมาชิกทีม"}
                       </Text>
+                      {m.status === "accepted" ? (
+                        <HStack gap={1} vAlign="center">
+                          <span className="cmms-status-dot ok" style={{ display: "inline-block", width: 7, height: 7 }} />
+                          <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-success)", fontSize: 11 }}>
+                            รับงานแล้ว{m.accepted_at ? ` · ${String(m.accepted_at).slice(11, 16)} น.` : ""}
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <HStack gap={1} vAlign="center">
+                          <span className="cmms-status-dot warn" style={{ display: "inline-block", width: 7, height: 7 }} />
+                          <Text type="body" size="sm" color="secondary" style={{ fontSize: 11 }}>
+                            ยังไม่รับงาน
+                          </Text>
+                        </HStack>
+                      )}
                     </VStack>
                   </div>
                 ))}

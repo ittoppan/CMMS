@@ -10,7 +10,7 @@
 /** ดึงทีมผู้รับผิดชอบของงาน (พร้อมชื่อ) */
 function getWorkAssignees($pdo, $refType, $refId): array {
     $st = $pdo->prepare(
-        "SELECT wa.user_id, wa.role, wa.assigned_by, wa.created_at, u.full_name
+        "SELECT wa.user_id, wa.role, wa.status, wa.accepted_at, wa.assigned_by, wa.created_at, u.full_name
          FROM work_assignees wa
          JOIN users u ON u.id = wa.user_id
          WHERE wa.ref_type = ? AND wa.ref_id = ?
@@ -73,7 +73,7 @@ function attachWorkTeams(&$rows, string $refType): void {
     $ids = array_map('intval', array_column($rows, 'id'));
     $in  = implode(',', $ids);
     $all = $pdo->query(
-        "SELECT wa.ref_id, wa.user_id, wa.role, u.full_name
+        "SELECT wa.ref_id, wa.user_id, wa.role, wa.status, wa.accepted_at, u.full_name
          FROM work_assignees wa
          JOIN users u ON u.id = wa.user_id
          WHERE wa.ref_type = " . $pdo->quote($refType) . " AND wa.ref_id IN ($in)
@@ -93,6 +93,20 @@ function attachWorkTeams(&$rows, string $refType): void {
         }
     }
     unset($r);
+}
+
+/**
+ * ช่างกด "รับงาน" — อัปเดตสถานะต่อคนในตารางกลาง (work_assignees.status)
+ * หัวหน้าชุด/สมาชิกทีมแต่ละคนรับงานเอง → ทุกคนเห็นว่าใครรับแล้ว/ยังไม่รับ
+ * @return bool มีแถวที่อัปเดตหรือไม่ (คนนี้ต้องเป็นสมาชิกทีมของงาน)
+ */
+function acceptWorkAssignment($pdo, $refType, $refId, $userId): bool {
+    $st = $pdo->prepare(
+        "UPDATE work_assignees SET status = 'accepted', accepted_at = NOW()
+         WHERE ref_type = ? AND ref_id = ? AND user_id = ? AND status != 'accepted'"
+    );
+    $st->execute([$refType, (int)$refId, (int)$userId]);
+    return $st->rowCount() > 0;
 }
 
 /** คืนชื่อหัวหน้าชุดจากทีม (ใช้แทน assigned_name ถ้าคอลัมน์ join ว่าง) */

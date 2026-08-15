@@ -58,12 +58,24 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // ช่างกด "รับงาน" — ทำงานก่อนเช็คฟิลด์อื่น (ส่งมาแค่ assignee_accept ตัวเดียวก็ได้)
+            $accepted = false;
+            if (!empty($data['assignee_accept'])) {
+                $cu = currentUser($pdo);
+                if ($cu && $cu['id']) {
+                    acceptWorkAssignment($pdo, 'pm_am', $id, (int)$cu['id']);
+                    $accepted = true;
+                }
+            }
             $allowed = ['asset_id', 'assigned_to', 'title', 'description', 'frequency_type', 'frequency_interval', 'due_date', 'last_done_date', 'status', 'checklist', 'notes', 'plan_id', 'department_id', 'location_id', 'work_zone_id', 'work_instruction_file', 'completed_at', 'completed_by', 'reschedule_reason', 'reschedule_to', 'deferral_status', 'deferral_requested_by', 'deferral_requested_at', 'inspector_signature', 'operator_signature', 'operator_name', 'reviewer_signature', 'signed_at'];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
             }
-            if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
+            if (empty($fields)) {
+                if ($accepted) { echo json_encode(['success' => true, 'accepted' => true]); exit; }
+                http_response_code(400); echo json_encode(['error' => 'No data']); exit;
+            }
             $values[] = $id;
             $qOld = $pdo->prepare('SELECT assigned_to FROM pm_am WHERE id = ?');
             $qOld->execute([$id]);
