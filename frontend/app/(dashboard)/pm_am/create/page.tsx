@@ -6,6 +6,7 @@ import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { TextInput } from "@astryxdesign/core/TextInput";
+import { Switch } from "@astryxdesign/core/Switch";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Selector } from "@astryxdesign/core/Selector";
 import { DateInput } from "@astryxdesign/core/DateInput";
@@ -23,6 +24,9 @@ export default function PMCreatePage() {
   const [teamMembers, setTeamMembers] = useState<number[]>([]);
   const [title, setTitle] = useState("");
   const [frequency, setFrequency] = useState("monthly");
+  const [isOutsource, setIsOutsource] = useState(false);
+  const [outsourceBy, setOutsourceBy] = useState("");
+  const [costOutsource, setCostOutsource] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<ISODate | undefined>(undefined);
 
@@ -75,7 +79,10 @@ export default function PMCreatePage() {
           frequency_type: frequency,
           frequency_interval: 1,
           due_date: dueDate || null,
-          status: "pending"
+          status: "pending",
+          is_outsource: isOutsource ? 1 : 0,
+          outsource_by: isOutsource && outsourceBy.trim() ? outsourceBy.trim() : null,
+          cost_outsource: isOutsource ? (Number(costOutsource) || 0) : 0
         }),
       });
       const json = await res.json();
@@ -181,6 +188,37 @@ export default function PMCreatePage() {
               { value: "yearly", label: "รายปี" },
             ]}
           />
+
+          <HStack gap={3} vAlign="center" wrap="wrap">
+            <Switch
+              label="งานภายนอก (Outsource)"
+              value={isOutsource}
+              onChange={setIsOutsource}
+            />
+            <Text type="body" size="sm" color="secondary">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM (เช่น ผู้ผลิตเครื่องจักร)</Text>
+          </HStack>
+
+          {isOutsource && (
+            <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+              <TextInput
+                label="ชื่อบริษัท/ผู้รับเหมา *"
+                placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+                value={outsourceBy}
+                onChange={setOutsourceBy}
+              />
+              <VStack gap={1}>
+                <Text type="body" size="sm" weight="semibold">ค่าใช้จ่าย (บาท)</Text>
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="เช่น 25000"
+                  value={costOutsource}
+                  onChange={(e) => setCostOutsource(e.target.value)}
+                  style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--cmms-bg-card)" }}
+                />
+              </VStack>
+            </VStack>
+          )}
           
           <TextArea
             label="รายละเอียดวิธีตรวจเช็ค"
