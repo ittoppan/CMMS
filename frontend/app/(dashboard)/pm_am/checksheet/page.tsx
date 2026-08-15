@@ -20,6 +20,7 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
+import { tliff, useLiffLang } from "@/lib/i18n-liff";
 
 interface CheckItem {
   id: string;
@@ -52,6 +53,7 @@ function defaultChecklist(frequencyType: string): CheckItem[] {
 }
 
 export default function PMChecksheetPage() {
+  useLiffLang(); // re-render ตามภาษาที่สลับ
   const router = useRouter();
   const [plans, setPlans] = useState<{ value: string; label: string; raw: any }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -299,7 +301,7 @@ export default function PMChecksheetPage() {
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CHECKSHEET · CMMS-TOPPAN</Text>
-          <Heading level={2} style={{ color: "#fff" }}>ทำรายการ PM (Checksheet)</Heading>
+          <Heading level={2} style={{ color: "#fff" }}>{tliff("liff.checksheet_title")}</Heading>
 
           {pending > 0 && (
             <div
@@ -311,11 +313,11 @@ export default function PMChecksheetPage() {
               }}
             >
               <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
-              มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
+              {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
             </div>
           )}
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ
+            {tliff("liff.checksheet_desc")}
           </Text>
         </VStack>
         {plans.length > 0 && (
@@ -326,7 +328,7 @@ export default function PMChecksheetPage() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-success disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CheckCircleIcon className="w-4 h-4" />
-            ผ่านทั้งหมด (ทุกรายการ)
+            {tliff("liff.checksheet_check_all")}
           </button>
         )}
       </div>

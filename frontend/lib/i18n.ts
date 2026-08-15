@@ -475,6 +475,18 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     th: { eyebrow: "REPORTS HUB · CMMS-TOPPAN", title: "ศูนย์รวมรายงาน & การส่งออกข้อมูล", desc: "รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV" },
     en: { eyebrow: "REPORTS HUB · CMMS-TOPPAN", title: "Reports Center & Data Export", desc: "Monthly maintenance summary PDF for executives and Excel/CSV export" },
   },
+  scan: {
+    th: { eyebrow: "MACHINE SCAN · CMMS-TOPPAN", title: "สแกนเครื่องจักร (QR Scan)", desc: "สแกน QR ที่เครื่องจักร แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM" },
+    en: { eyebrow: "MACHINE SCAN · CMMS-TOPPAN", title: "Scan Machine (QR)", desc: "Scan the machine QR then choose: report breakdown or run PM checksheet" },
+  },
+  "repair-request": {
+    th: { eyebrow: "MAINTENANCE JOB REQUEST · F-EN-03", title: "แจ้งซ่อมด่วน", desc: "แจ้งปัญหาการซ่อมบำรุงจาก LINE — ระบบจะแจ้งให้ช่างทราบทันที" },
+    en: { eyebrow: "MAINTENANCE JOB REQUEST · F-EN-03", title: "Quick Repair Request", desc: "Report a maintenance issue from LINE — technicians are notified instantly" },
+  },
+  "pm_am/checksheet": {
+    th: { eyebrow: "PM CHECKSHEET · CMMS-TOPPAN", title: "ทำรายการ PM (Checksheet)", desc: "เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ" },
+    en: { eyebrow: "PM CHECKSHEET · CMMS-TOPPAN", title: "Run PM (Checksheet)", desc: "Pick a PM plan and record the inspection results" },
+  },
 };
 
 // ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════

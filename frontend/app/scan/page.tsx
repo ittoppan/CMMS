@@ -12,6 +12,8 @@ import { Spinner } from "@astryxdesign/core/Spinner";
 import { Button } from "@astryxdesign/core/Button";
 import { WrenchScrewdriverIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { Link } from "@astryxdesign/core/Link";
+import LiffLangToggle from "../../components/LiffLangToggle";
+import { tliff, useLiffLang } from "@/lib/i18n-liff";
 
 /**
  * หน้า Scan Landing — ปลายทางของ QR บนเครื่องจักร
@@ -31,6 +33,7 @@ const API = (url: string, init?: RequestInit) =>
   fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
 
 export default function ScanLandingPage() {
+  useLiffLang(); // re-render ตามภาษาที่สลับ (tliff อ่านค่าตอน render)
   const [assetCode, setAssetCode] = useState("");
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,7 +148,10 @@ export default function ScanLandingPage() {
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen" style={{ position: "relative" }}>
+      <div style={{ position: "fixed", top: 12, right: 12, zIndex: 60 }}>
+        <LiffLangToggle />
+      </div>
       <LiffBridge />
       <div
         style={{
@@ -164,7 +170,7 @@ export default function ScanLandingPage() {
           {loading ? (
             <VStack gap={4} hAlign="center" style={{ padding: "40px 0" }}>
               <Spinner />
-              <Text type="body" color="secondary">กำลังตรวจสอบเครื่องจักร...</Text>
+              <Text type="body" color="secondary">{tliff("liff.scan_loading")}</Text>
             </VStack>
           ) : error ? (
             <VStack gap={4} hAlign="center">
@@ -175,16 +181,16 @@ export default function ScanLandingPage() {
               </Card>
               {assetCode && (
                 <Text type="body" size="sm" color="secondary">
-                  รหัสจาก QR: <Text type="body" size="sm" weight="bold">{assetCode}</Text>
+                  {tliff("liff.scan_qr_code")} <Text type="body" size="sm" weight="bold">{assetCode}</Text>
                 </Text>
               )}
               <Text type="body" size="sm" color="secondary">
-                ต้องการแจ้งซ่อมแม้ไม่พบเครื่อง? <Link href="/repair-request">ไปฟอร์มแจ้งซ่อม →</Link>
+                {tliff("liff.scan_repair_anyway")}<Link href="/repair-request">{tliff("liff.scan_to_form")}</Link>
               </Text>
             </VStack>
           ) : asset ? (
             <VStack gap={3} hAlign="center">
-              <span className="cmms-status ok"><span className="cmms-status-dot" />สแกนเครื่องจักรสำเร็จ</span>
+              <span className="cmms-status ok"><span className="cmms-status-dot" />{tliff("liff.scan_ok")}</span>
               <Heading level={2} style={{ margin: 0, letterSpacing: 1 }}>{asset.code}</Heading>
               <Text type="body" color="secondary">{asset.name}</Text>
 
@@ -207,11 +213,11 @@ export default function ScanLandingPage() {
               <Divider style={{ width: "100%" }} />
 
               <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start" }}>
-                เลือกการทำงานสำหรับเครื่องนี้
+                {tliff("liff.scan_choose_action")}
               </Text>
 
               <ClickableCard
-                label="แจ้งซ่อมด่วน"
+                label={tliff("liff.scan_repair_btn")}
                 onClick={goRepair}
                 padding={5}
                 width="100%"
@@ -220,16 +226,16 @@ export default function ScanLandingPage() {
                 <HStack gap={4} vAlign="center">
                   <WrenchScrewdriverIcon className="w-6 h-6" />
                   <VStack gap={0}>
-                    <Text type="body" weight="bold" className="text-white">แจ้งซ่อมด่วน</Text>
+                    <Text type="body" weight="bold" className="text-white">{tliff("liff.scan_repair_btn")}</Text>
                     <Text type="body" size="sm" className="text-white" style={{ opacity: 0.85 }}>
-                      เครื่องเสีย / หยุดทำงาน — ส่งใบแจ้งซ่อมทันที
+                      {tliff("liff.scan_repair_desc")}
                     </Text>
                   </VStack>
                 </HStack>
               </ClickableCard>
 
               <ClickableCard
-                label="ทำเช็คชีท PM"
+                label={tliff("liff.scan_pm_btn")}
                 onClick={goPM}
                 padding={5}
                 width="100%"
@@ -238,9 +244,9 @@ export default function ScanLandingPage() {
                 <HStack gap={4} vAlign="center">
                   <ClipboardDocumentListIcon className="w-6 h-6" />
                   <VStack gap={0}>
-                    <Text type="body" weight="bold" className="text-white">ทำเช็คชีท PM</Text>
+                    <Text type="body" weight="bold" className="text-white">{tliff("liff.scan_pm_btn")}</Text>
                     <Text type="body" size="sm" className="text-white" style={{ opacity: 0.85 }}>
-                      บำรุงเชิงป้องกัน — ทำตามแผน PM ของเครื่องนี้
+                      {tliff("liff.scan_pm_desc")}
                     </Text>
                   </VStack>
                 </HStack>
@@ -250,7 +256,7 @@ export default function ScanLandingPage() {
               {pmLoading ? null : pmPlans.length > 0 ? (
                 <VStack gap={2} style={{ width: "100%" }}>
                   <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start", color: "var(--cmms-warning)" }}>
-                    แผน PM ที่ต้องทำของเครื่องนี้ ({pmPlans.length})
+                    {tliff("liff.scan_pm_due")} ({pmPlans.length})
                   </Text>
                   {pmPlans.map((p) => {
                     const overdue = p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10);
@@ -270,11 +276,11 @@ export default function ScanLandingPage() {
                               {p.title || `แผน PM #${p.id}`}
                             </Text>
                             <Text type="body" size="sm" color="secondary">
-                              ครบกำหนด {p.due_date || "-"}{p.assigned_to_name ? ` · ผู้รับผิดชอบ: ${p.assigned_to_name}` : ""}
+                              {tliff("liff.scan_due")} {p.due_date || "-"}{p.assigned_to_name ? ` · ${tliff("liff.scan_responsible")}: ${p.assigned_to_name}` : ""}
                             </Text>
                           </VStack>
                           <Button
-                            label="ทำเช็ค"
+                            label={tliff("liff.scan_do_check")}
                             size="sm"
                             variant="primary"
                             onClick={() => window.location.href = `/pm_am/checksheet?plan_id=${p.id}&asset_code=${encodeURIComponent(assetCode)}`}
@@ -290,7 +296,7 @@ export default function ScanLandingPage() {
               {!historyLoading && repairHistory.length > 0 && (
                 <VStack gap={2} style={{ width: "100%" }}>
                   <Text type="supporting" weight="bold" style={{ alignSelf: "flex-start" }}>
-                    ประวัติการซ่อมล่าสุด ({repairHistory.length})
+                    {tliff("liff.scan_history")} ({repairHistory.length})
                   </Text>
                   {repairHistory.map((h) => (
                     <Card
@@ -329,13 +335,13 @@ export default function ScanLandingPage() {
 
               <Text type="body" size="sm" color="secondary">
                 <Link href={`/repair-request?asset_code=${encodeURIComponent(assetCode)}`}>
-                  ข้ามไปฟอร์มแจ้งซ่อมตรงๆ →
+                  {tliff("liff.scan_skip_form")}
                 </Link>
               </Text>
             </VStack>
           ) : (
             <VStack gap={3} hAlign="center" style={{ padding: "40px 0" }}>
-              <Text type="body" color="secondary">ไม่มีข้อมูล</Text>
+              <Text type="body" color="secondary">{tliff("liff.scan_no_data")}</Text>
             </VStack>
           )}
         </Card>

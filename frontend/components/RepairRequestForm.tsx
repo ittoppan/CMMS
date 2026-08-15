@@ -26,6 +26,8 @@ import {
   XMarkIcon,
   PaperClipIcon,
 } from "@heroicons/react/24/outline";
+import LiffLangToggle from "./LiffLangToggle";
+import { tliff, useLiffLang } from "@/lib/i18n-liff";
 
 /* =========================================================
    ฟอร์มแจ้งซ่อม MAINTENANCE JOB REQUEST (F-EN-03)
@@ -80,10 +82,10 @@ const JOB_DESCRIPTIONS = [
 const OFFICES = ["โรงงานอมตะซิตี้ (ระยอง)"];
 
 const STEPS = [
-  { label: "เครื่องจักร", icon: "⚙️" },
-  { label: "รายละเอียดงาน", icon: "📝" },
-  { label: "ผู้แจ้ง & รูป", icon: "🧑‍🔧" },
-  { label: "ยืนยัน", icon: "✅" },
+  { key: "machine", label: "เครื่องจักร", icon: "⚙️" },
+  { key: "details", label: "รายละเอียดงาน", icon: "📝" },
+  { key: "reporter", label: "ผู้แจ้ง & รูป", icon: "🧑‍🔧" },
+  { key: "confirm", label: "ยืนยัน", icon: "✅" },
 ];
 
 /** ย่อรูปให้พอดีกับ LINE แล้วคืน data URI (max 1000px, JPEG 0.72) */
@@ -166,6 +168,7 @@ function queueRemove(id: number): Promise<void> {
 }
 
 export default function RepairRequestForm() {
+  useLiffLang(); // re-render ตามภาษาที่สลับ
   const [step, setStep] = useState(0);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
@@ -553,7 +556,7 @@ export default function RepairRequestForm() {
           <div className="cmms-success-icon">
             <CheckCircleIcon style={{ width: 36, height: 36 }} />
           </div>
-          <Heading level={3} style={{ marginBottom: 8 }}>แจ้งซ่อมสำเร็จ!</Heading>
+          <Heading level={3} style={{ marginBottom: 8 }}>{tliff("liff.repair_success")}</Heading>
           <Text type="body" color="secondary" style={{ marginBottom: 4 }}>
             ใบแจ้งซ่อม (F-EN-03) เลขที่
           </Text>
@@ -580,9 +583,10 @@ export default function RepairRequestForm() {
       <div className="cmms-mobile-page">
         <div className="cmms-page-header">
           <HStack gap={3} vAlign="center">
+            <LiffLangToggle />
             <div className="cmms-header-emoji">🚨</div>
             <VStack gap={0} style={{ flex: 1 }}>
-              <Heading level={3} style={{ margin: 0 }}>แจ้งซ่อมด่วน</Heading>
+              <Heading level={3} style={{ margin: 0 }}>{tliff("liff.repair_header")}</Heading>
               <Text type="body" size="sm" color="secondary">MAINTENANCE JOB REQUEST · F-EN-03</Text>
             </VStack>
           </HStack>
@@ -592,8 +596,8 @@ export default function RepairRequestForm() {
           {bindGate === "checking" && (
             <VStack gap={4} style={{ padding: "8px 0", alignItems: "center", textAlign: "center" }}>
               <div className="cmms-header-emoji" style={{ marginBottom: 4 }}>⏳</div>
-              <Heading level={4} style={{ margin: 0 }}>กำลังตรวจสอบบัญชี LINE…</Heading>
-              <Text type="body" size="sm" color="secondary">รอสักครู่</Text>
+              <Heading level={4} style={{ margin: 0 }}>{tliff("liff.repair_checking")}</Heading>
+              <Text type="body" size="sm" color="secondary">{tliff("liff.repair_wait")}</Text>
             </VStack>
           )}
 
@@ -601,21 +605,19 @@ export default function RepairRequestForm() {
             <VStack gap={4} style={{ alignItems: "stretch" }}>
               <div style={{ textAlign: "center" }}>
                 <div className="cmms-header-emoji" style={{ marginBottom: 8 }}>🔗</div>
-                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>ต้องล็อกอิน LINE ก่อนแจ้งซ่อม</Heading>
+                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>{tliff("liff.repair_need_login")}</Heading>
                 <Text type="body" size="sm" color="secondary">
-                  ระบบบังคับผูกบัญชี LINE กับเลขพนักงานครั้งเดียว
-                  {"\n"}เพื่อให้ช่างรู้ว่าใครแจ้ง และแจ้งเตือนกลับได้ตรงตัว
+                  {tliff("liff.repair_need_login_desc")}
                 </Text>
               </div>
               <Button
-                label="🔗 ล็อกอินด้วย LINE เพื่อผูกบัญชี"
+                label={`🔗 ${tliff("liff.repair_line_login_btn")}`}
                 variant="primary"
                 width="100%"
                 onClick={() => (window.location.href = "/line_login.php")}
               />
               <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
-                หลังจากล็อกอิน LINE แล้วกรอกรหัสพนักงาน (เช่น E01117)
-                {"\n"}ผูกเสร็จกลับมาหน้านี้ แจ้งซ่อมได้เลย
+                {tliff("liff.repair_after_login")}
               </Text>
             </VStack>
           )}
@@ -624,14 +626,13 @@ export default function RepairRequestForm() {
             <VStack gap={4} style={{ alignItems: "stretch" }}>
               <div style={{ textAlign: "center" }}>
                 <div className="cmms-header-emoji" style={{ marginBottom: 8 }}>🔐</div>
-                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>ยืนยันตัวตนก่อนแจ้งซ่อม</Heading>
+                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>{tliff("liff.repair_confirm_identity")}</Heading>
                 <Text type="body" size="sm" color="secondary">
-                  เลือกวิธีเข้าสู่ระบบได้ตามสะดวก
-                  {"\n"}ครั้งแรกผูก LINE กับเลขพนักงานครั้งเดียวจบ
+                  {tliff("liff.repair_confirm_desc")}
                 </Text>
               </div>
               <Button
-                label="👤 เข้าสู่ระบบด้วย User / Password"
+                label={`👤 ${tliff("liff.repair_userpass_btn")}`}
                 variant="primary"
                 width="100%"
                 onClick={() => (window.location.href = "/login?next=/repair/request")}
@@ -698,9 +699,10 @@ export default function RepairRequestForm() {
         <HStack gap={3} vAlign="center">
           <div className="cmms-header-emoji">🚨</div>
           <VStack gap={0} style={{ flex: 1 }}>
-            <Heading level={3} style={{ margin: 0 }}>แจ้งซ่อมด่วน</Heading>
+            <Heading level={3} style={{ margin: 0 }}>{tliff("liff.repair_header")}</Heading>
             <Text type="body" size="sm" color="secondary">MAINTENANCE JOB REQUEST · F-EN-03</Text>
           </VStack>
+          <LiffLangToggle />
           {lineProfile?.pic ? (
             <img src={lineProfile.pic} alt="LINE profile" className="cmms-avatar" />
           ) : (
@@ -715,7 +717,7 @@ export default function RepairRequestForm() {
           <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
             onClick={() => { if (i < step) setStep(i); }}>
             <div className="cmms-step-number">{i < step ? "✓" : s.icon}</div>
-            <span className="cmms-step-label">{s.label}</span>
+            <span className="cmms-step-label">{tliff(`liff.step_${s.key}`)}</span>
           </div>
         ))}
       </div>
