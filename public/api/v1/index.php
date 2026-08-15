@@ -67,6 +67,7 @@ try {
     }
     if ($resource === 'work-orders') {
         $data = $pdo->query("SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id ORDER BY r.id DESC")->fetchAll(PDO::FETCH_ASSOC);
+        attachWorkTeams($data, 'repair');
         echo json_encode(['status' => 'success', 'code' => 200, 'count' => count($data), 'data' => $data], JSON_UNESCAPED_UNICODE);
     } elseif ($resource === 'assets') {
         // join ข้อมูลจริง: วันที่ PM ครั้งล่าสุดจากตาราง pm_am
