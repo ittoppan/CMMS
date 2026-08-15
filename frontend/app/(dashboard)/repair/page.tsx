@@ -206,6 +206,8 @@ export default function WorkOrdersPage() {
     costLabor: Number(row.cost_labor || 0),
     costOutsource: Number(row.cost_outsource || 0),
     downtimeMinutes: Number(row.downtime_minutes || 0),
+    contaminateChecking: row.contaminate_checking || "not_checked",
+    outsourceBy: row.outsource_by || "",
     parts,
   });
 

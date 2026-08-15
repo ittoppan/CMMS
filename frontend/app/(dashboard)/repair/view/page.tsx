@@ -57,6 +57,8 @@ interface WorkOrderDetail {
   spareApprovalStatus: string;
   spareApprovedBy: string;
   spareApprovedAt: string;
+  contaminateChecking?: string;
+  outsourceBy?: string;
   team: { user_id: number; role: string; full_name: string; status?: string; accepted_at?: string }[];
 }
 
@@ -187,6 +189,8 @@ export default function RepairViewDetailsPage() {
             spareApprovalStatus: String(row.spare_approval_status || "none"),
             spareApprovedBy: String(row.spare_approved_by || ""),
             spareApprovedAt: String(row.spare_approved_at || ""),
+            contaminateChecking: String(row.contaminate_checking || "not_checked"),
+            outsourceBy: String(row.outsource_by || ""),
             team: Array.isArray(row.team) ? row.team : []
           });
         }
@@ -684,6 +688,8 @@ export default function RepairViewDetailsPage() {
             costLabor: wo.costLabor,
             costOutsource: 0,
             downtimeMinutes: wo.downtimeMinutes,
+            contaminateChecking: wo.contaminateChecking,
+            outsourceBy: wo.outsourceBy,
             parts,
           }}
         />

@@ -194,6 +194,8 @@ export default function RepairRequestForm() {
     jobDescription: "",
     symptoms: "",
     lotNo: "",
+    contaminateChecking: "not_checked",
+    outsourceBy: "",
     reporterName: "",
     departmentCode: "",
     office: OFFICES[0],
@@ -503,6 +505,8 @@ export default function RepairRequestForm() {
         department_id: dept?.id || selectedAsset?.department_id || null,
         source_type: sourceTypeMap[form.jobDescription] || "breakdown",
         machine_status: MACHINE_STATUS_OPTIONS.find((s) => s.value === form.machineStatus)?.label,
+        contaminate_checking: form.contaminateChecking || "not_checked",
+        outsource_by: form.outsourceBy?.trim() || null,
         priority: priorityMap[form.machineStatus] || "medium",
         status: "pending",
         safety_related: form.safetyRelated ? 1 : 0,
@@ -569,7 +573,7 @@ export default function RepairRequestForm() {
             <Button label="📋 ดูรายการงานซ่อม" variant="primary" width="100%" onClick={() => (window.location.href = "/repair")} />
             <Button label="แจ้งซ่อมอีก" variant="secondary" width="100%" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [] });
+              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [] });
             }} />
           </VStack>
         </div>
@@ -863,6 +867,33 @@ export default function RepairRequestForm() {
                 placeholder="ระบุ Lot No. สินค้าที่กำลังผลิต"
                 value={form.lotNo}
                 onChange={(v: string) => update("lotNo", v)}
+              />
+            </div>
+
+            <div>
+              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>ตรวจสอบการปนเปื้อนหลังงานเสร็จ (Contaminate Checking)</Text>
+              <Selector
+                label="ตรวจสอบการปนเปื้อน"
+                isLabelHidden
+                value={form.contaminateChecking}
+                onChange={(v: string) => update("contaminateChecking", v)}
+                options={[
+                  { value: "not_checked", label: "ยังไม่ตรวจ" },
+                  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
+                  { value: "contaminated", label: "พบการปนเปื้อน" },
+                  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
+                ]}
+              />
+            </div>
+
+            <div>
+              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>ผู้รับเหมาภายนอก (ถ้าจ้างภายนอกทำ)</Text>
+              <TextInput
+                label="ผู้รับเหมาภายนอก"
+                isLabelHidden
+                placeholder="ระบุชื่อบริษัท/ผู้รับเหมาภายนอก (ถ้ามี)"
+                value={form.outsourceBy}
+                onChange={(v: string) => update("outsourceBy", v)}
               />
             </div>
           </VStack>

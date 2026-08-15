@@ -21,6 +21,8 @@ export interface WorkOrderDocData {
   costLabor: number;
   costOutsource: number;
   downtimeMinutes: number;
+  contaminateChecking?: string;
+  outsourceBy?: string;
   parts: WorkOrderPart[];
 }
 
@@ -163,6 +165,32 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ fontSize: 13 }}>ค่าแรง: <b>฿{(wo.costLabor || 0).toLocaleString()}</b></div>
           {wo.costOutsource > 0 && <div style={{ fontSize: 13 }}>จ้างภายนอก: <b>฿{(wo.costOutsource || 0).toLocaleString()}</b></div>}
           <div style={{ fontSize: 13, fontWeight: 800, color: "#2563EB" }}>รวมค่าใช้จ่าย: ฿{total.toLocaleString()}</div>
+        </div>
+      </div>
+
+      {/* F-EN-03: Contaminate Checking + Outsource By */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 14 }}>
+        <div style={{ background: "#F8FAFC", padding: 14, borderRadius: 10, border: "1px solid #E2E8F0" }}>
+          <div style={{ fontSize: 12, color: "#64748B" }}>CONTAMINATE CHECKING / ตรวจสอบการปนเปื้อน</div>
+          <div
+            style={{
+              fontWeight: 700,
+              marginTop: 4,
+              color:
+                wo.contaminateChecking === "contaminated" ? "#DC2626"
+                : wo.contaminateChecking === "clean" ? "#16A34A"
+                : "#334155",
+            }}
+          >
+            {wo.contaminateChecking === "clean" ? "ไม่พบการปนเปื้อน (ผ่าน)"
+              : wo.contaminateChecking === "contaminated" ? "พบการปนเปื้อน"
+              : wo.contaminateChecking === "not_applicable" ? "ไม่เกี่ยวข้องกับงานนี้"
+              : "ยังไม่ตรวจ"}
+          </div>
+        </div>
+        <div style={{ background: "#F8FAFC", padding: 14, borderRadius: 10, border: "1px solid #E2E8F0" }}>
+          <div style={{ fontSize: 12, color: "#64748B" }}>OUTSOURCE BY / ผู้รับเหมาภายนอก</div>
+          <div style={{ fontWeight: 700, marginTop: 4, color: "#334155" }}>{wo.outsourceBy || "—"}</div>
         </div>
       </div>
 
