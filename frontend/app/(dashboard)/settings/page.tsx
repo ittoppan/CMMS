@@ -56,6 +56,7 @@ const GROUP_META: Record<string, { label: string; icon: any; hint: string }> = {
   spare_config: { label: "ตั้งค่าอะไหล่", icon: CubeIcon, hint: "ระดับการอนุมัติเบิกอะไหล่" },
   calibration_config: { label: "ตั้งค่าการสอบเทียบ", icon: WrenchScrewdriverIcon, hint: "การแจ้งเตือนและกำหนดอัตโนมัติการสอบเทียบ" },
   ERP_Integrations: { label: "Sage 300 ERP", icon: CircleStackIcon, hint: "การเชื่อมต่อและซิงค์ข้อมูลกับ Sage 300" },
+  data_retention: { label: "เก็บรักษาข้อมูล", icon: ClockIcon, hint: "นโยบายเก็บรักษา log — ลบ notification_logs เก่าอัตโนมัติ" },
 };
 
 // ชื่อไทยของแต่ละ key (ทำให้หน้าการตั้งค่าใช้งานได้จริง แทนโชว์ key อังกฤษดิบ)
@@ -92,6 +93,9 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   enable_mtbf_analytics: { label: "เปิดใช้งานวิเคราะห์ MTBF/MTTR" },
   escalation_alert: { label: "เปิดการแจ้งเตือนงานด่วนค้าง (Escalation)" },
   escalation_hours: { label: "งานค้างเกินกี่ชั่วโมงถึงแจ้งเตือน", hint: "ค่าเริ่มต้น 24 ชม." },
+  // data retention
+  log_retention_enabled: { label: "ลบ notification_logs อัตโนมัติ", hint: "เปิดแล้วระบบจะลบประวัติการแจ้งเตือนที่เก่ากว่าที่กำหนดทุกวัน (ผ่าน watchdog)" },
+  log_retention_days: { label: "เก็บประวัติการแจ้งเตือนไว้กี่วัน", hint: "รายการที่เก่ากว่านี้จะถูกลบอัตโนมัติวันละครั้ง" },
   iso_footer_note: { label: "ข้อความท้ายเอกสาร ISO" },
   iso_form_code_prefix: { label: "รหัสนำหน้าแบบฟอร์ม ISO" },
   iso_watermark_enabled: { label: "แสดงลายน้ำ ISO บนเอกสาร" },
@@ -183,7 +187,7 @@ const BOOLEAN_KEYS = new Set([
   "line_notify_enabled", "low_stock_alert", "org_chart_enabled", "qr_code_enabled",
   "require_root_cause", "auto_assign_pm", "auto_assign_repair", "require_approval_repair",
   "spare_require_approval", "escalation_alert", "push_alert_enabled", "smtp_enabled",
-  "line_group_enabled", "spare_deduct_stock",
+  "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
@@ -216,6 +220,13 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "Sarabun", label: "Sarabun (ทางการ ISO — แนะนำ)" },
     { value: "Prompt", label: "Prompt (โมเดิร์นทันสมัย)" },
     { value: "Kanit", label: "Kanit (กลมมนหนาเด่น)" },
+  ],
+  log_retention_days: [
+    { value: "30", label: "30 วัน (1 เดือน)" },
+    { value: "60", label: "60 วัน (2 เดือน)" },
+    { value: "90", label: "90 วัน (3 เดือน)" },
+    { value: "180", label: "180 วัน (6 เดือน)" },
+    { value: "365", label: "365 วัน (1 ปี)" },
   ],
   border_radius_style: [
     { value: "rounded-xl", label: "Rounded Modern (12px)" },

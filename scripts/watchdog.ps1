@@ -162,6 +162,26 @@ try {
                 Write-Log "weekly_report.php not found or php missing ($phpExe)"
             }
         }
+        # 1.4) log retention cleanup (วันละ 1 ครั้ง) - ลบ notification_logs เก่าตามนโยบายเก็บรักษา
+        $cleanDateFile = Join-Path $logDir "cleanup_logs.date"
+        $todayStr = Get-Date -Format "yyyy-MM-dd"
+        $lastClean = ""
+        if (Test-Path -LiteralPath $cleanDateFile) { $lastClean = ((Get-Content -LiteralPath $cleanDateFile -Raw) -replace "[\r\n]", "").Trim() }
+        if ($lastClean -ne $todayStr) {
+            $cleanScript = Join-Path $root "scripts\cleanup_logs.php"
+            if ($phpExe -and (Test-Path -LiteralPath $cleanScript)) {
+                try {
+                    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+                    $cleanOut = (& $phpExe $cleanScript 2>&1 | Out-String).Trim()
+                    Write-Log "log cleanup: $cleanOut"
+                    Set-Content -LiteralPath $cleanDateFile -Value $todayStr -Encoding ascii
+                } catch {
+                    Write-Log "log cleanup FAILED: $_"
+                }
+            } else {
+                Write-Log "cleanup_logs.php not found or php missing ($phpExe)"
+            }
+        }
         # 1.2) daily alert check (วันละ 1 ครั้ง) — PM ใกล้กำหนด + สต็อกต่ำ
 #         $alertDateFile = Join-Path $logDir "alert_check.date"
 #         $todayStr = Get-Date -Format "yyyy-MM-dd"

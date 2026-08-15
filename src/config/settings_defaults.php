@@ -78,6 +78,11 @@ function settingsDefaultValues(): array {
         'low_stock_alert'       => '1',
         'maintenance_alert_days'=> '7',
         'telegram_enabled'      => '1',
+
+        // ── log retention (เก็บรักษาข้อมูล log) ──
+        'log_retention_enabled' => '0',   // ลบ notification_logs อัตโนมัติ - default ปิด (กันลบข้อมูลโดยไม่ตั้งใจ)
+        'log_retention_days'    => '90',  // ลบรายการที่เก่ากว่า 90 วัน (30/60/90/180/365)
+
         'telegram_bot_token'    => '',
         'telegram_chat_id'      => '',
         'smtp_enabled'          => '0',
