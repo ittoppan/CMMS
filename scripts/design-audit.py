@@ -78,7 +78,7 @@ EMOJI_ALLOW = {
 
 # บริบทที่อนุญาตให้มี emoji ได้ (ข้อมูลที่ส่งจริงไป LINE / comment)
 EMOJI_ALLOW_CONTEXT = re.compile(
-    r'("icon":|title:|altText:|template|chatHistory|lines\.push\(|line_tpl_|{/\*|^\s*\*|^\s*//)'
+    r'("icon":|icon:|title:|altText:|template|chatHistory|lines\.push\(|line_tpl_|sample:|{/\*|^\s*\*|^\s*//)'
 )
 
 # gradient ที่ได้รับอนุญาต (ลายตาราง engineering grid / hero navy ของ login)
