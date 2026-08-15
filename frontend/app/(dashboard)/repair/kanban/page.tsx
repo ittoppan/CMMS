@@ -56,6 +56,7 @@ export default function RepairKanbanPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [overdueOnly, setOverdueOnly] = useState(false);
 
   // ── ย้ายงานระหว่างคอลัมน์ (ลากวาง + ปุ่ม) — บันทึกลง DB จริง ──
   const [dragId, setDragId] = useState<string | null>(null);
@@ -161,9 +162,10 @@ export default function RepairKanbanPage() {
         item.symptoms.toLowerCase().includes(q) ||
         item.assignee.toLowerCase().includes(q);
       const matchPriority = priorityFilter === "all" || item.priority === priorityFilter;
-      return matchSearch && matchPriority;
+      const matchOverdue = !overdueOnly || item.overdue;
+      return matchSearch && matchPriority && matchOverdue;
     });
-  }, [items, search, priorityFilter]);
+  }, [items, search, priorityFilter, overdueOnly]);
 
   // หัวคอลัมน์ใช้ไฟ Andon จากสถานะกลาง (repair-status.ts) — สี/ชื่อตรงกับหน้ารายการ
   const columnsDef = [
@@ -274,6 +276,18 @@ export default function RepairKanbanPage() {
                     { value: "Low", label: "ต่ำ (Low)" },
                   ]}
                 />
+                <button
+                  type="button"
+                  onClick={() => setOverdueOnly(v => !v)}
+                  title="แสดงเฉพาะงานที่เลยกำหนดเสร็จ"
+                  className={overdueOnly ? "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cmms-andon-chip" : "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"}
+                  style={overdueOnly
+                    ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)", border: "1px solid var(--cmms-danger)" }
+                    : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)", border: "1px solid var(--cmms-border)", cursor: "pointer" }}
+                >
+                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: overdueOnly ? "var(--cmms-danger)" : "var(--cmms-text-muted)" }} />
+                  เกินกำหนดเท่านั้น
+                </button>
               </>
             }
           />

@@ -145,7 +145,7 @@ export default function WorkOrdersPage() {
     return workOrders.filter((wo) => {
       const q = search.toLowerCase();
       const matchSearch = !q || wo.woNumber.toLowerCase().includes(q) || wo.asset.toLowerCase().includes(q) || wo.assignee.toLowerCase().includes(q);
-      const matchStatus = !statusFilter || statusGroup(wo.status) === statusFilter;
+      const matchStatus = !statusFilter || (statusFilter === "overdue" ? wo.overdue : statusGroup(wo.status) === statusFilter);
       const matchPriority = !priorityFilter || wo.priority === priorityFilter;
       return matchSearch && matchStatus && matchPriority;
     });
@@ -568,19 +568,28 @@ export default function WorkOrdersPage() {
         </Card>
         {stats.overdue > 0 && (
           <Card elevation="low" padding={4} className="cmms-kpi-card red">
-            <VStack gap={2}>
-              <HStack hAlign="between" vAlign="center">
-                <HStack vAlign="center" gap={2}>
-                  
-                  <Text type="supporting" color="secondary">เกินกำหนด</Text>
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => setStatusFilter(prev => prev === "overdue" ? "" : "overdue")}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setStatusFilter(prev => prev === "overdue" ? "" : "overdue"); } }}
+              title={statusFilter === "overdue" ? "ยกเลิกกรองงานเกินกำหนด" : "กรองเฉพาะงานเกินกำหนด"}
+              style={{ cursor: "pointer" }}
+            >
+              <VStack gap={2}>
+                <HStack hAlign="between" vAlign="center">
+                  <HStack vAlign="center" gap={2}>
+                    
+                    <Text type="supporting" color="secondary">เกินกำหนด</Text>
+                  </HStack>
+                  <AndonLamp status="down" size="sm" />
                 </HStack>
-                <AndonLamp status="down" size="sm" />
-              </HStack>
-              <div className="cmms-kpi-value">
-                <CountUp end={stats.overdue} />
-                <span className="cmms-kpi-unit">รายการ</span>
-              </div>
-            </VStack>
+                <div className="cmms-kpi-value">
+                  <CountUp end={stats.overdue} />
+                  <span className="cmms-kpi-unit">รายการ</span>
+                </div>
+              </VStack>
+            </div>
           </Card>
         )}
       </Grid>
@@ -599,7 +608,7 @@ export default function WorkOrdersPage() {
             </HStack>
             {statusFilter && (
               <Text type="body" size="sm" color="secondary">
-                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : "เสร็จสิ้น"}
+                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : statusFilter === "overdue" ? "เกินกำหนด" : "เสร็จสิ้น"}
               </Text>
             )}
           </HStack>
@@ -642,6 +651,7 @@ export default function WorkOrdersPage() {
                     { value: "", label: t("action.filter_all_status") },
                     { value: "open", label: "งานใหม่ (Open)" },
                     { value: "in_progress", label: "กำลังซ่อม" },
+                    { value: "overdue", label: "เกินกำหนด (ไฟแดง)" },
                     { value: "completed", label: "เสร็จสิ้น" },
                   ]}
                 />
