@@ -80,6 +80,14 @@ try {
                     $values[] = $data[$col];
                 }
             }
+            // avatar (base64 ใหม่) กับ avatar_path ต้องไม่ขัดกัน — ตั้งตัวหนึ่งให้ล้างอีกตัว
+            // (กันกรณีหน้าจอแสดงรูป default เก่า เช่น user_male.jpg แทนรูปจริงที่อัปโหลด)
+            if (array_key_exists('avatar', $data) && !empty($data['avatar'])) {
+                $fields[] = 'avatar_path = ?'; $values[] = null;
+            }
+            if (array_key_exists('avatar_path', $data) && !empty($data['avatar_path'])) {
+                $fields[] = 'avatar = ?'; $values[] = null;
+            }
             if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'No data provided']); exit; }
             // รหัสพนักงานต้องไม่ซ้ำกับผู้ใช้รายอื่น (กันผูก LINE ผิดคน)
             if (array_key_exists('employee_code', $data) && $data['employee_code'] !== null && trim((string)$data['employee_code']) !== '') {

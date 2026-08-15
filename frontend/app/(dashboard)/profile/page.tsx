@@ -76,7 +76,9 @@ export default function ProfilePage() {
 
   useEffect(() => { fetchProfile(); }, []);
 
-  const avatarSrc = profile?.avatar_path || profile?.avatar || "";
+  // ลำดับเดียวกับ topbar (layout.tsx): avatar (base64 ที่อัปโหลดใหม่) ก่อน แล้วค่อย avatar_path
+  // — avatar_path อาจเป็นรูป default เก่า (เช่น user_male.jpg) ที่ค้างจากการ seed
+  const avatarSrc = profile?.avatar || profile?.avatar_path || "";
 
   const handleAvatarFile = async (file: File) => {
     setUploading(true);
