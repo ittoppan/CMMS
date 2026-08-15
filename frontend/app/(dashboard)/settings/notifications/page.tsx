@@ -47,12 +47,12 @@ const TEMPLATE_ORDER = [
   "line_tpl_sage_approval",
 ] as const;
 
-const TEMPLATE_META: Record<string, { label: string; icon: string; hint: string }> = {
-  line_tpl_breakdown: { label: "แจ้งซ่อมด่วน (Breakdown)", icon: "🚨", hint: "ส่งเมื่อมีใบแจ้งซ่อมฉุกเฉิน / เครื่องหยุดทำงาน" },
-  line_tpl_pm_overdue: { label: "แผน PM เกินกำหนด", icon: "📋", hint: "ส่งเมื่อแผน PM ยังไม่เสร็จเกินกำหนดชำระ" },
-  line_tpl_low_stock: { label: "สต็อกต่ำกว่าจุดสั่งซื้อ", icon: "📦", hint: "ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock" },
-  line_tpl_completed: { label: "งานซ่อมเสร็จเรียบร้อย", icon: "✅", hint: "ส่งเมื่อปิดใบสั่งงานซ่อมสำเร็จ" },
-  line_tpl_sage_approval: { label: "ขออนุมัติเบิก Sage", icon: "📑", hint: "ส่งเมื่อมีการขออนุมัติเบิกอะไหล่ผ่าน Sage 300" },
+const TEMPLATE_META: Record<string, { label: string; icon: string; hint: string; wired: string }> = {
+  line_tpl_breakdown: { label: "แจ้งซ่อมด่วน (Breakdown)", icon: "🚨", hint: "ส่งเมื่อมีใบแจ้งซ่อมฉุกเฉิน / เครื่องหยุดทำงาน", wired: "ใบแจ้งซ่อมใหม่ทุกใบ + งาน CRITICAL (repair.php)" },
+  line_tpl_pm_overdue: { label: "แผน PM เกินกำหนด", icon: "📋", hint: "ส่งเมื่อแผน PM ยังไม่เสร็จเกินกำหนดชำระ", wired: "สคริปต์ alert_check.php รายวัน" },
+  line_tpl_low_stock: { label: "สต็อกต่ำกว่าจุดสั่งซื้อ", icon: "📦", hint: "ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock", wired: "สคริปต์ alert_check.php รายวัน (summary)" },
+  line_tpl_completed: { label: "งานซ่อมเสร็จเรียบร้อย", icon: "✅", hint: "ส่งเมื่อปิดใบสั่งงานซ่อมสำเร็จ", wired: "ปิดงานซ่อม (สถานะ completed) — repair.php" },
+  line_tpl_sage_approval: { label: "ขออนุมัติเบิก Sage", icon: "📑", hint: "ส่งเมื่อมีการขออนุมัติเบิกอะไหล่ผ่าน Sage 300", wired: "คำขออนุมัติเบิกอะไหล่ (ApprovalService)" },
 };
 
 const VARIABLES = [
@@ -79,12 +79,14 @@ export default function NotificationsSettingsPage() {
   const [saveMessage, setSaveMessage] = useState("");
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [tgTesting, setTgTesting] = useState(false);
+  const [tgTestResult, setTgTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [activeChannel, setActiveChannel] = useState<string>("line");
 
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [templates, setTemplates] = useState<Record<string, TemplateDef>>({});
   const [me, setMe] = useState<{ id: number; full_name: string; line_bound: boolean } | null>(null);
-  const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string } | null>(null);
+  const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string; telegram_bot_token_set: boolean; telegram_chat_id_set: boolean } | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string>("line_tpl_breakdown");
   const [showJson, setShowJson] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -101,6 +103,7 @@ export default function NotificationsSettingsPage() {
       setTemplates(json.templates ?? {});
       setMe(json.me ?? null);
       setEnvInfo(json.env ?? null);
+      setTgTestResult(null);
     } catch (e: any) {
       setError(e.message || "ไม่สามารถโหลดข้อมูลการแจ้งเตือน LINE ได้");
     }
@@ -161,6 +164,24 @@ export default function NotificationsSettingsPage() {
     }
     setSaving(false);
   };
+  const handleTelegramTest = async () => {
+    setTgTesting(true);
+    setTgTestResult(null);
+    try {
+      const res = await fetch("/api/v1/line_notify.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telegram_test: true }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "ส่งไม่สำเร็จ");
+      setTgTestResult({ ok: true, msg: json.message ?? "ส่งข้อความทดสอบ Telegram สำเร็จ" });
+    } catch (e: any) {
+      setTgTestResult({ ok: false, msg: e.message || "ส่งข้อความทดสอบ Telegram ไม่สำเร็จ" });
+    }
+    setTgTesting(false);
+  };
+
   const handleTestSend = async () => {
     setTesting(true);
     setTestResult(null);
@@ -305,9 +326,185 @@ export default function NotificationsSettingsPage() {
       <TabList value={activeChannel} onChange={setActiveChannel} hasDivider layout="fill" aria-label="ช่องทางการแจ้งเตือน">
         <Tab value="line" label="LINE Messenger" />
         <Tab value="email" label="อีเมล (Email)" />
+        <Tab value="telegram" label="Telegram (แอดมิน)" />
       </TabList>
 
       {activeChannel === "email" && <EmailNotifySettings />}
+
+      {activeChannel === "telegram" && (
+        <VStack gap={6}>
+          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+            <VStack gap={1}>
+              <Text type="body" size="sm" className="cmms-eyebrow">TELEGRAM ALERTS · ADMIN CONSOLE</Text>
+              <HStack gap={3} vAlign="center">
+                <Heading level={2}>แจ้งเตือนแอดมินระบบผ่าน Telegram</Heading>
+                <Badge label={settings.telegram_enabled === "1" ? "Telegram เปิดใช้งาน" : "Telegram ปิดใช้งาน"} variant={settings.telegram_enabled === "1" ? "success" : "neutral"} />
+              </HStack>
+              <Text type="body" color="secondary">
+                ระบบแจ้งเตือนไปยังแอดมินเมื่อมีเหตุการณ์สำคัญ: งานซ่อมด่วน CRITICAL, การตั้งค่าการแจ้งเตือนถูกแก้ไข, และสถานะระบบ
+              </Text>
+            </VStack>
+          </HStack>
+
+          {/* Telegram status strip */}
+          <Card padding={4}>
+            <HStack gap={5} wrap="wrap">
+              <HStack gap={2} vAlign="center">
+                <Icon icon={ShieldCheckIcon} size="sm" color={(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "success" : "error"} />
+                <Text type="body" size="sm" weight="semibold">
+                  Bot Token: {(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "พร้อม" : "ยังไม่ตั้ง (กรอกด้านล่างหรือใส่ .env)"}
+                </Text>
+              </HStack>
+              <HStack gap={2} vAlign="center">
+                <Icon icon={UsersIcon} size="sm" color={(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "success" : "secondary"} />
+                <Text type="body" size="sm" weight="semibold">
+                  Chat ID: {(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "ตั้งค่าแล้ว" : "ยังไม่ตั้ง — ใส่ Chat ID ปลายทาง (เช่น กลุ่มแอดมิน)"}
+                </Text>
+              </HStack>
+              <HStack gap={2} vAlign="center">
+                <Icon icon={BoltIcon} size="sm" color="secondary" />
+                <Text type="body" size="sm" weight="semibold">
+                  วิธีหา Chat ID: ส่งข้อความให้บอท แล้วเรียก https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates
+                </Text>
+              </HStack>
+            </HStack>
+          </Card>
+
+          <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
+            {/* Left: Telegram settings */}
+            <VStack gap={6}>
+              <Card padding={5}>
+                <VStack gap={4}>
+                  <HStack gap={2} vAlign="center">
+                    <Icon icon={ChatBubbleLeftRightIcon} size="md" color="primary" />
+                    <VStack gap={0}>
+                      <Heading level={3}>การเชื่อมต่อ Telegram Bot</Heading>
+                      <Text type="supporting" color="secondary">สร้างบอทที่ @BotFather แล้ววาง Token + Chat ID ที่นี่</Text>
+                    </VStack>
+                  </HStack>
+
+                  <Switch
+                    label="เปิดใช้งานการแจ้งเตือนแอดมินผ่าน Telegram"
+                    value={settings.telegram_enabled === "1"}
+                    onChange={(c) => setSettingField("telegram_enabled", c ? "1" : "0")}
+                  />
+
+                  <TextInput
+                    label="Bot Token"
+                    type="password"
+                    description="Token จาก @BotFather (รูปแบบ 123456:ABC...)"
+                    value={settings.telegram_bot_token ?? ""}
+                    onChange={(v) => setSettingField("telegram_bot_token", v)}
+                  />
+                  <TextInput
+                    label="Chat ID"
+                    description="Chat ID ที่รับการแจ้งเตือนแอดมิน (เช่น กลุ่มแอดมิน -100xxxxxxxxxx)"
+                    value={settings.telegram_chat_id ?? ""}
+                    onChange={(v) => setSettingField("telegram_chat_id", v)}
+                  />
+
+                  <HStack gap={2} wrap="wrap">
+                    <Button
+                      label={tgTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Telegram"}
+                      variant="primary"
+                      icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
+                      isLoading={tgTesting}
+                      onClick={handleTelegramTest}
+                    />
+                    <Button
+                      label={hasChanges ? "บันทึกการตั้งค่า" : "บันทึกการตั้งค่า"}
+                      variant="secondary"
+                      isLoading={saving}
+                      isDisabled={!hasChanges}
+                      onClick={handleSave}
+                    />
+                  </HStack>
+
+                  {tgTestResult && (
+                    <Card padding={3} style={{
+                      background: tgTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      border: `1px solid ${tgTestResult.ok ? "var(--cmms-success)" : "#f87171"}`,
+                    }}>
+                      <Text type="body" size="sm" weight="bold" style={{ color: tgTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                        {tgTestResult.ok ? "✅ " : ""}{tgTestResult.msg}
+                      </Text>
+                    </Card>
+                  )}
+                </VStack>
+              </Card>
+
+              <Card padding={5}>
+                <VStack gap={3}>
+                  <Heading level={3}>เหตุการณ์ที่แจ้งเตือนแอดมินอัตโนมัติ</Heading>
+                  <HStack gap={2} vAlign="center">
+                    <Icon icon={BoltIcon} size="sm" color="error" />
+                    <Text type="body" size="sm"><strong>งานซ่อมด่วน CRITICAL / เครื่องหยุด</strong> — ส่งทันทีเมื่อมีใบแจ้งซ่อมฉุกเฉิน (พร้อมลิงก์ใบงาน)</Text>
+                  </HStack>
+                  <HStack gap={2} vAlign="center">
+                    <Icon icon={BoltIcon} size="sm" color="primary" />
+                    <Text type="body" size="sm"><strong>การตั้งค่าการแจ้งเตือนถูกแก้ไข</strong> — ทุกครั้งที่มีผู้ใช้บันทึก LINE/Telegram settings (กันคนอื่นมาแก้โดยไม่รู้ตัว)</Text>
+                  </HStack>
+                  <HStack gap={2} vAlign="center">
+                    <Icon icon={BoltIcon} size="sm" color="success" />
+                    <Text type="body" size="sm"><strong>สถานะระบบ / deploy</strong> — รายงานจาก watchdog และสคริปต์อัตโนมัติ</Text>
+                  </HStack>
+                </VStack>
+              </Card>
+            </VStack>
+
+            {/* Right: Telegram preview */}
+            <Card padding={5}>
+              <VStack gap={4}>
+                <HStack gap={2} vAlign="center">
+                  <Icon icon={EyeIcon} size="md" color="primary" />
+                  <Heading level={3}>ตัวอย่างข้อความบนแอป Telegram</Heading>
+                </HStack>
+                <div
+                  style={{
+                    background: "#0b141a",
+                    borderRadius: 28,
+                    padding: "18px 12px 26px",
+                    maxWidth: 340,
+                    margin: "0 auto",
+                    width: "100%",
+                    boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+                  }}
+                >
+                  <div style={{ textAlign: "center", marginBottom: 14 }}>
+                    <div style={{ width: 70, height: 6, background: "#2b3945", borderRadius: 999, margin: "0 auto 10px" }} />
+                  </div>
+                  <div style={{ background: "#17212b", borderRadius: 14, padding: 14, minHeight: 300, display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ textAlign: "center", fontSize: 10, color: "#7d8b99", fontWeight: 700 }}>
+                      CMMS-TOPPAN BOT · แอดมิน · {new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div
+                      style={{
+                        background: "#182533",
+                        borderLeft: "3px solid #e11d48",
+                        borderRadius: 8,
+                        padding: "10px 12px",
+                        maxWidth: 280,
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#ffffff" }}>แจ้งซ่อมด่วน EN-26-001</div>
+                      <div style={{ fontSize: 11.5, color: "#d2dbe3", lineHeight: 1.6, marginTop: 4, whiteSpace: "pre-wrap" }}>
+                        เครื่องจักร MCH-01 Press Machine 01 — เสียงดังผิดปกติที่มอเตอร์
+                        ความเร่งด่วน: CRITICAL
+                      </div>
+                      <div style={{ fontSize: 11, color: "#4da3ff", marginTop: 6 }}>เปิดในระบบ →</div>
+                      <div style={{ fontSize: 9, color: "#7d8b99", marginTop: 4, textAlign: "right" }}>✓✓ อ่านแล้ว</div>
+                    </div>
+                    <Text type="body" size="sm" color="secondary" style={{ marginTop: 4 }}>
+                      รูปแบบเดียวกับที่แอดมินได้รับจริง: หัวข้อตัวหนา + รายละเอียด + ลิงก์เปิดใบงาน
+                    </Text>
+                  </div>
+                </div>
+              </VStack>
+            </Card>
+          </Grid>
+        </VStack>
+      )}
 
       {activeChannel === "line" && (
       <>
@@ -442,7 +639,15 @@ export default function NotificationsSettingsPage() {
                 />
               </HStack>
 
-              <Text type="supporting" color="secondary">{TEMPLATE_META[activeTemplate].hint}</Text>
+              <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                <HStack gap={2} vAlign="center">
+                  <Icon icon={BoltIcon} size="sm" color="success" />
+                  <Text type="body" size="sm">
+                    <strong>ส่งอัตโนมัติเมื่อ:</strong> {TEMPLATE_META[activeTemplate].wired}
+                  </Text>
+                </HStack>
+                <Text type="body" size="sm" color="secondary" style={{ marginTop: 4 }}>{TEMPLATE_META[activeTemplate].hint}</Text>
+              </Card>
 
               <TextInput
                 label="หัวข้อการ์ด (Header Title)"
@@ -575,8 +780,36 @@ export default function NotificationsSettingsPage() {
                 margin: "0 auto",
                 width: "100%",
                 boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+                position: "relative",
+                opacity: activeTpl.enabled === "1" ? 1 : 0.45,
               }}
             >
+              {activeTpl.enabled !== "1" && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    zIndex: 5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: "#dc2626",
+                      color: "#ffffff",
+                      fontWeight: 800,
+                      fontSize: 12,
+                      padding: "8px 14px",
+                      borderRadius: 999,
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.4)",
+                    }}
+                  >
+                    ปิดใช้งานอยู่ — ระบบจะไม่ส่งการแจ้งเตือนนี้
+                  </div>
+                </div>
+              )}
               <div style={{ textAlign: "center", marginBottom: 14 }}>
                 <div style={{ width: 70, height: 6, background: "#475569", borderRadius: 999, margin: "0 auto 10px" }} />
               </div>

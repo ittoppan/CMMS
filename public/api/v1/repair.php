@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
+require_once __DIR__ . '/../../../src/helpers/notification.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -105,7 +106,6 @@ try {
 
             // ---- LINE แจ้งเตือนงานใหม่เข้า (non-blocking — fail เงียบไม่พังการ submit) ----
             try {
-                require_once __DIR__ . '/../../../src/helpers/notification.php';
                 $q = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'");
                 $q->execute();
                 if ($q->fetchColumn() === '1') {
@@ -118,13 +118,19 @@ try {
                     }
                     $wo = $data['work_order_no'] ?? 'EN-????-???';
                     $title = $data['title'] ?? 'งานซ่อมใหม่';
-                    $body = "เครื่องจักร: " . ($assetCode ?: '-') . ($assetName ? " - $assetName" : '') .
-                        "\nอาการ/รายการ: " . mb_substr($data['description'] ?? '-', 0, 120) .
-                        "\nความเร่งด่วน: " . strtoupper((string)($data['priority'] ?? 'NORMAL')) .
-                        " | สถานะเครื่อง: " . ($data['machine_status'] ?? '-') .
-                        "\nผู้แจ้ง: " . ($data['receiver_name'] ?? '-') .
-                        (!empty($data['reporter_phone']) ? " | โทร: {$data['reporter_phone']}" : '');
+                    $priority = strtoupper((string)($data['priority'] ?? 'NORMAL'));
                     $detailUrl = publicBaseUrl() . '/repair/view?id=' . $newId;
+
+                    // ตัวแปรสำหรับเทมเพลต Flex (line_tpl_breakdown จาก /settings/notifications)
+                    $tplVars = [
+                        '{work_order_id}' => $wo,
+                        '{asset_code}' => $assetCode ?: '-',
+                        '{asset_name}' => $assetName ?: '',
+                        '{title}' => mb_substr($title, 0, 200),
+                        '{priority}' => $priority,
+                        '{status}' => (string)($data['status'] ?? 'PENDING'),
+                        '{reporter_name}' => (string)($data['receiver_name'] ?? '-'),
+                    ];
 
                     // เป้าหมาย: กลุ่ม LINE (ถ้าตั้ง) + ช่างที่ถูกมอบหมาย หรือ LINE-bound users ทั้งหมด (fallback)
                     $targets = [];
@@ -145,7 +151,17 @@ try {
 
                     foreach (array_unique($targets) as $tid) {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
-                        sendLinePushMessage($tid, "🚨 งานซ่อมใหม่ {$wo}", $body, $detailUrl, $photos);
+                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
+                    }
+
+                    // แจ้งเตือนแอดมินผ่าน Telegram เมื่อเป็นงานด่วน CRITICAL หรือเครื่องหยุด
+                    if ($priority === 'CRITICAL' || strtolower((string)($data['machine_status'] ?? '')) === 'down') {
+                        telegramAdminAlert(
+                            "แจ้งซ่อมด่วน $wo",
+                            $title . " — เครื่อง: " . ($assetCode ?: '-') . ($assetName ? " $assetName" : '') . " | ความเร่งด่วน: $priority",
+                            $detailUrl,
+                            'ERROR'
+                        );
                     }
                 }
             } catch (Exception $e) {
@@ -167,6 +183,52 @@ try {
             $stmt = $pdo->prepare("UPDATE repair SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
             echo json_encode(['success' => true]);
+
+            // ---- LINE แจ้งเตือนเมื่อปิดงานซ่อม (completed) — ใช้เทมเพลต line_tpl_completed ----
+            try {
+                $isCompleted = (isset($data['status']) && $data['status'] === 'completed') || isset($data['completed_at']);
+                if ($isCompleted && getSettingValue('line_notify_enabled', '0') === '1') {
+                    $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
+                                        FROM repair r
+                                        LEFT JOIN asset_registry a ON a.id = r.asset_id
+                                        LEFT JOIN users u ON u.id = r.assigned_to
+                                        WHERE r.id = ?");
+                    $q->execute([$id]);
+                    $row = $q->fetch(PDO::FETCH_ASSOC);
+                    if ($row) {
+                        $dt = 0.0;
+                        if (!empty($row['downtime_start']) && !empty($row['downtime_end'])) {
+                            $dt = round((strtotime($row['downtime_end']) - strtotime($row['downtime_start'])) / 3600, 1);
+                        }
+                        $totalCost = (float)($row['cost_parts'] ?? 0) + (float)($row['cost_labor'] ?? 0);
+                        $cv = [
+                            '{work_order_id}' => (string)($row['work_order_no'] ?? 'EN-????-???'),
+                            '{asset_code}' => (string)($row['asset_code'] ?? '-'),
+                            '{asset_name}' => (string)($row['asset_name'] ?? ''),
+                            '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                            '{downtime_hours}' => number_format($dt, 1),
+                            '{total_cost}' => number_format($totalCost),
+                            '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
+                        ];
+                        $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
+                        $targets = [];
+                        if (!empty($row['assigned_to'])) {
+                            $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
+                            $st->execute([(int)$row['assigned_to']]);
+                            $lid = $st->fetchColumn();
+                            if ($lid) $targets[] = (string)$lid;
+                        }
+                        $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
+                        if ($grp) $targets[] = (string)$grp;
+                        $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
+                        foreach (array_unique($targets) as $tid) {
+                            sendLineTemplatePush($tid, 'line_tpl_completed', $cv, $detailUrl, $photos);
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("[repair.php] completed LINE notify failed: " . $e->getMessage());
+            }
             break;
         case 'DELETE':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

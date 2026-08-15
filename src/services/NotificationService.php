@@ -82,6 +82,25 @@ class NotificationService {
     }
 
     /**
+     * ส่งเทมเพลต Flex (line_tpl_*) ให้ทุกคนที่ผูก LINE — เคารพปุ่มเปิด/ปิดของเทมเพลต
+     */
+    public static function sendLineTemplateToAll(string $tplKey, array $vars, string $targetUrl = '', array $photos = []): void {
+        try {
+            $pdo = getDb();
+            $uids = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
+            if (empty($uids)) {
+                self::logNotification('LINE', 'NO_RECIPIENT', "tpl=$tplKey " . implode(' | ', $vars));
+                return;
+            }
+            foreach ($uids as $uid) {
+                sendLineTemplatePush((string)$uid, $tplKey, $vars, $targetUrl, $photos);
+            }
+        } catch (Exception $e) {
+            error_log('[NotificationService] sendLineTemplateToAll failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Trigger 🔴 Breakdown Alarm Notification
      */
     public static function notifyBreakdown(array $woData): void {
@@ -94,18 +113,16 @@ class NotificationService {
         $base = rtrim((string)publicBaseUrl(), '/');
         $repairUrl = $base !== '' ? $base . '/pages/repair/' : '/pages/repair/';
 
-        // 1. LINE Alert Message
-        $lineMsg = "\n🚨 [แจ้งซ่อมเครื่องจักรหยุดทำงาน BREAK DOWN]\n"
-                 . "----------------------------------\n"
-                 . "เลขที่ใบสั่งงาน: $woNo\n"
-                 . "เครื่องจักร: $code - $asset\n"
-                 . "ผู้แจ้งซ่อม: $reporter\n"
-                 . "อาการเสีย: $problem\n"
-                 . "สถานะ: 🔴 หยุดทำงาน (ความสำคัญสูงสุด)\n"
-                 . "----------------------------------\n"
-                 . "📲 รับงานซ่อม: $repairUrl";
-
-        self::sendLineMessage($lineMsg);
+        // 1. LINE Alert — ใช้เทมเพลต Flex (line_tpl_breakdown จาก /settings/notifications)
+        self::sendLineTemplateToAll('line_tpl_breakdown', [
+            '{work_order_id}' => $woNo,
+            '{asset_code}' => $code,
+            '{asset_name}' => $asset,
+            '{title}' => $problem,
+            '{priority}' => 'CRITICAL',
+            '{status}' => 'DOWN',
+            '{reporter_name}' => $reporter,
+        ], $repairUrl);
 
         // 2. Email Alert Body
         $emailHtml = "
@@ -132,15 +149,15 @@ class NotificationService {
         $base = rtrim((string)publicBaseUrl(), '/');
         $pmUrl = $base !== '' ? $base . '/pages/pm_am/' : '/pages/pm_am/';
 
-        $lineMsg = "\n⚠️ [แจ้งเตือนแผน PM เกินกำหนดชำระ Overdue]\n"
-                 . "----------------------------------\n"
-                 . "เครื่องจักร: $assetCode\n"
-                 . "รายการ: $title\n"
-                 . "กำหนดชำระ: $dueDate (เกินมา $daysOverdue วัน)\n"
-                 . "----------------------------------\n"
-                 . "📋 ดำเนินการ PM: $pmUrl";
-
-        self::sendLineMessage($lineMsg);
+        // LINE — ใช้เทมเพลต Flex (line_tpl_pm_overdue จาก /settings/notifications)
+        self::sendLineTemplateToAll('line_tpl_pm_overdue', [
+            '{work_order_id}' => '',
+            '{asset_code}' => $assetCode,
+            '{asset_name}' => '',
+            '{title}' => $title,
+            '{due_date}' => $dueDate,
+            '{days_overdue}' => (string)$daysOverdue,
+        ], $pmUrl);
     }
 
     /**
@@ -150,15 +167,13 @@ class NotificationService {
         $base = rtrim((string)publicBaseUrl(), '/');
         $spUrl = $base !== '' ? $base . '/pages/spare_parts/' : '/pages/spare_parts/';
 
-        $lineMsg = "\n📦 [แจ้งเตือนสต็อกอะไหล่ต่ำกว่าจุดสั่งซื้อ Reorder Point]\n"
-                 . "----------------------------------\n"
-                 . "รหัสอะไหล่: $itemCode\n"
-                 . "ชื่ออะไหล่: $itemName\n"
-                 . "คงเหลือ: $qty (จุดขั้นต่ำ: $minStock)\n"
-                 . "----------------------------------\n"
-                 . "🛒 สั่งซื้อเบิกจ่าย: $spUrl";
-
-        self::sendLineMessage($lineMsg);
+        // LINE — ใช้เทมเพลต Flex (line_tpl_low_stock จาก /settings/notifications)
+        self::sendLineTemplateToAll('line_tpl_low_stock', [
+            '{item_code}' => $itemCode,
+            '{item_name}' => $itemName,
+            '{qty}' => rtrim(rtrim(number_format($qty, 2), '0'), '.') ?: '0',
+            '{min_stock}' => rtrim(rtrim(number_format($minStock, 2), '0'), '.') ?: '0',
+        ], $spUrl);
     }
 
     /**

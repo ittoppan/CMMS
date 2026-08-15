@@ -260,6 +260,157 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
 }
 
 /* ============================================================
+ * 2.5 TEMPLATE-DRIVEN LINE PUSH (line_tpl_* จากหน้า /settings/notifications)
+ * — ใช้จริงกับทุกจุดส่ง: งานซ่อมใหม่/ปิดงาน, PM เกินกำหนด, สต็อกต่ำ, อนุมัติ Sage
+ * ============================================================ */
+
+/** ค่าเริ่มต้นของเทมเพลต LINE (ตรงกับ settings_defaults.php) */
+function lineTemplateDefaults() {
+    return [
+        'line_tpl_breakdown' => [
+            'header_color' => '#dc2626',
+            'header_title' => '🚨 แจ้งซ่อมด่วน #{work_order_id}',
+            'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nอาการเสีย: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้แจ้งซ่อม: {reporter_name}",
+            'btn_label' => '⚡ รับงานซ่อมด่วน',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+        'line_tpl_completed' => [
+            'header_color' => '#16a34a',
+            'header_title' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}',
+            'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nDowntime: {downtime_hours} ชม.\nค่าซ่อมรวม: {total_cost} บาท\nช่างผู้ปิดงาน: {assigned_name}",
+            'btn_label' => '📊 ประเมินผลงาน',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+        'line_tpl_low_stock' => [
+            'header_color' => '#7c3aed',
+            'header_title' => '📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ',
+            'body_text' => "รหัสอะไหล่: {item_code}\nชื่ออะไหล่: {item_name}\nคงเหลือ: {qty} (ขั้นต่ำ: {min_stock})",
+            'btn_label' => '🛒 สั่งซื้อ/เบิกจ่าย',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+        'line_tpl_pm_overdue' => [
+            'header_color' => '#d97706',
+            'header_title' => '📋 แผน PM เกินกำหนด #{work_order_id}',
+            'body_text' => "เครื่องจักร: {asset_code}\nรายการ: {title}\nกำหนดชำระ: {due_date} (เกินมา {days_overdue} วัน)",
+            'btn_label' => '📝 เปิดเช็คชีท PM',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+        'line_tpl_sage_approval' => [
+            'header_color' => '#7c3aed',
+            'header_title' => '📦 ขออนุมัติเบิกอะไหล่ #{requisition_no}',
+            'body_text' => "รายการ: {items_summary}\nผู้ขอเบิก: {requester_name}\nรวมมูลค่า: {total_amount} บาท",
+            'btn_label' => '✔ อนุมัติการเบิก',
+            'enabled' => '1', 'image_before' => '', 'image_after' => '',
+        ],
+    ];
+}
+
+/**
+ * อ่านเทมเพลต LINE จาก settings (line_tpl_*) — fallback ค่าเริ่มต้นถ้ายังไม่ได้ตั้ง
+ * @return array{header_color:string,header_title:string,body_text:string,btn_label:string,enabled:string,image_before:string,image_after:string}
+ */
+function getLineTemplate($tplKey) {
+    $d = lineTemplateDefaults()[$tplKey] ?? [
+        'header_color' => '#1d4ed8', 'header_title' => '🔔 CMMS-TPT NOTIFICATION',
+        'body_text' => '', 'btn_label' => 'ดูรายละเอียดในระบบ',
+        'enabled' => '1', 'image_before' => '', 'image_after' => '',
+    ];
+    $raw = getSettingValue($tplKey, '');
+    $tpl = $raw !== '' ? (json_decode($raw, true) ?: []) : [];
+    return [
+        'header_color' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)($tpl['header_color'] ?? '')) ? $tpl['header_color'] : $d['header_color'],
+        'header_title' => (string)($tpl['header_title'] ?? $d['header_title']),
+        'body_text'    => (string)($tpl['body_text'] ?? $d['body_text']),
+        'btn_label'    => (string)($tpl['btn_label'] ?? $d['btn_label']),
+        'image_before' => trim((string)($tpl['image_before'] ?? $d['image_before'] ?? '')),
+        'image_after'  => trim((string)($tpl['image_after'] ?? $d['image_after'] ?? '')),
+        'enabled'      => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
+    ];
+}
+
+/**
+ * ส่ง LINE Push จากเทมเพลต (line_tpl_*) — จุดส่งจริงทั้งหมดต้องใช้ฟังก์ชันนี้
+ * - เคารพปุ่มเปิด/ปิดของเทมเพลต (enabled='0' → ไม่ส่ง)
+ * - $vars: {var} => ค่าจริง · $photos: ['before'=>[],'after'=>[]] หรือ array ธรรมดา
+ * - รูป: ใช้ $photos (จากงานจริง) ก่อน; ถ้าไม่มีและเทมเพลตตั้ง URL ไว้ → ใช้ URL ของเทมเพลต
+ */
+function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl = '', $photos = []) {
+    $tpl = getLineTemplate($tplKey);
+    if ($tpl['enabled'] !== '1') return false;
+
+    // normalize: รองรับทั้ง {key} และ key (substituteVars ใช้ key ไม่มีปีกกา)
+    $norm = [];
+    foreach ($vars as $k => $v) $norm[trim((string)$k, '{}')] = (string)$v;
+
+    $title    = substituteVars($tpl['header_title'], $norm);
+    $body     = substituteVars($tpl['body_text'], $norm);
+    $btnLabel = substituteVars($tpl['btn_label'], $norm);
+
+    if (empty($photos)) {
+        $photos = [];
+        if ($tpl['image_before'] !== '') $photos['before'] = [$tpl['image_before']];
+        if ($tpl['image_after']  !== '') $photos['after']  = [$tpl['image_after']];
+    }
+    return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel);
+}
+
+/* ============================================================
+ * 2.6 TELEGRAM — แจ้งเตือนแอดมินระบบ (bot token + chat id จาก settings หรือ .env)
+ * ============================================================ */
+
+/**
+ * ส่งข้อความ Telegram (sendMessage API) — HTML parse mode
+ * อ่านค่า: settings (telegram_bot_token / telegram_chat_id) → env (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID)
+ * เขียน log ลง notification_logs ช่อง TELEGRAM
+ */
+function sendTelegramMessage($text, $parseMode = 'HTML') {
+    $token  = getSettingValue('telegram_bot_token', '') ?: (getenv('TELEGRAM_BOT_TOKEN') ?: '');
+    $chatId = getSettingValue('telegram_chat_id', '') ?: (getenv('TELEGRAM_CHAT_ID') ?: '');
+    if (empty($token) || empty($chatId)) {
+        error_log('[telegram] TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID missing (settings หรือ .env)');
+        return false;
+    }
+
+    $url = 'https://api.telegram.org/bot' . $token . '/sendMessage';
+    $payload = [
+        'chat_id' => $chatId,
+        'text' => mb_substr((string)$text, 0, 4000),
+        'disable_web_page_preview' => true,
+    ];
+    if ($parseMode === 'HTML') $payload['parse_mode'] = 'HTML';
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $ok = ($httpCode === 200);
+    try {
+        $pdo = getDb();
+        $pdo->prepare("INSERT INTO notification_logs (channel, status, content, raw_response, created_at) VALUES ('TELEGRAM', ?, ?, ?, NOW())")
+            ->execute([$ok ? 'SENT' : 'FAILED', mb_substr((string)$text, 0, 500), $ok ? null : mb_substr((string)$response, 0, 2000)]);
+    } catch (Exception $e) {}
+    return $ok;
+}
+
+/**
+ * แจ้งเตือนแอดมินระบบ (Telegram) — format ข้อความ HTML พร้อม level icon + ลิงก์
+ * เคารพสวิตช์ telegram_enabled (default เปิด)
+ */
+function telegramAdminAlert($title, $message, $url = '', $level = 'INFO') {
+    if (getSettingValue('telegram_enabled', '1') !== '1') return false;
+    $icon = ['INFO' => 'ℹ️', 'WARN' => '⚠️', 'ERROR' => '🚨', 'SUCCESS' => '✅'][$level] ?? 'ℹ️';
+    $lines = ['<b>' . $icon . ' ' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</b>', htmlspecialchars((string)$message, ENT_QUOTES, 'UTF-8')];
+    if (!empty($url)) $lines[] = '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '">🔗 เปิดในระบบ</a>';
+    return sendTelegramMessage(implode("\n", $lines));
+}
+
+/* ============================================================
  * 3. EMAIL — template helpers
  * ============================================================ */
 

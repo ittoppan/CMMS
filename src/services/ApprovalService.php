@@ -147,6 +147,18 @@ class ApprovalService {
             default => '📋 เอกสารขออนุมัติ'
         };
 
+        // ใบขอเบิก Sage → ใช้เทมเพลต Flex (line_tpl_sage_approval จาก /settings/notifications)
+        if ($type === 'requisition' || $type === 'spare_issue') {
+            $itemsSummary = is_array($details) ? implode(', ', array_map(fn($d) => (string)$d, $details)) : (string)$details;
+            NotificationService::sendLineTemplateToAll('line_tpl_sage_approval', [
+                '{requisition_no}' => $docNo,
+                '{items_summary}' => mb_substr($itemsSummary, 0, 200),
+                '{requester_name}' => $requester,
+                '{total_amount}' => '—',
+            ], $approveUrl);
+            return;
+        }
+
         $lineMsg = "\n📩 [คำขออนุมัติด่วน 1-Click Approval]\n"
                  . "----------------------------------\n"
                  . "ประเภท: $typeLabel\n"

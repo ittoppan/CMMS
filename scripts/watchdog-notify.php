@@ -36,4 +36,11 @@ try {
     exit(1);
 }
 
+// แจ้งเตือนแอดมินผ่าน Telegram ด้วย (สถานะระบบ/กระบวนการ)
+try {
+    telegramAdminAlert('สถานะระบบ / กระบวนการ', $message, '', 'WARN');
+} catch (Throwable $e) {
+    // ไม่บล็อก exit code — LINE เป็นช่องทางหลัก
+}
+
 exit($ok ? 0 : 1);

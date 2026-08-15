@@ -22,8 +22,8 @@ try {
 
     switch ($method) {
         case 'GET':
-            // 1) LINE-related settings
-            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_callback_url','line_maintenance_group_id','low_stock_alert','maintenance_alert_days','email_notify_enabled'];
+            // 1) LINE-related settings + Telegram
+            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_callback_url','line_maintenance_group_id','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id'];
             $settings = [];
             $in = implode(',', array_fill(0, count($keys), '?'));
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
@@ -69,6 +69,8 @@ try {
                     'channel_secret_set' => !empty(getenv('LINE_CHANNEL_SECRET')),
                     'channel_id' => getenv('LINE_CHANNEL_ID') ?: getenv('LINE_CLIENT_ID') ?: '',
                     'liff_id_env' => getenv('LINE_LIFF_ID') ?: '',
+                    'telegram_bot_token_set' => !empty(getenv('TELEGRAM_BOT_TOKEN')),
+                    'telegram_chat_id_set' => !empty(getenv('TELEGRAM_CHAT_ID')),
                 ],
                 'help' => [
                     'variables' => ['{work_order_id}','{asset_code}','{asset_name}','{title}','{priority}','{status}','{reporter_name}','{assigned_name}','{due_date}','{days_overdue}','{item_code}','{item_name}','{qty}','{min_stock}','{downtime_hours}','{total_cost}','{requisition_no}','{items_summary}','{requester_name}','{total_amount}'],
@@ -84,12 +86,22 @@ try {
             $upsert = $pdo->prepare("INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?, ?, 'notification', ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
             $count = 0;
 
-            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_callback_url','line_maintenance_group_id','low_stock_alert','maintenance_alert_days','email_notify_enabled'];
+            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_callback_url','line_maintenance_group_id','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id'];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, $allowedSettings, true)) continue;
-                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล'][$k] ?? '';
+                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน'][$k] ?? '';
                 $upsert->execute([$k, (string)$v, $desc]);
                 $count++;
+            }
+
+            // แจ้งเตือนแอดมิน (Telegram) เมื่อมีใครแก้ไขการตั้งค่าการแจ้งเตือน
+            if ($count > 0) {
+                try {
+                    $me = $pdo->prepare("SELECT full_name FROM users WHERE id = ?");
+                    $me->execute([$userId]);
+                    $name = $me->fetchColumn() ?: "User#$userId";
+                    telegramAdminAlert('การตั้งค่าการแจ้งเตือนถูกแก้ไข', "$name บันทึกการตั้งค่า LINE/Telegram จำนวน $count รายการ", publicBaseUrl() . '/settings/notifications', 'INFO');
+                } catch (Exception $e) {}
             }
 
             $tplKeys = ['line_tpl_breakdown','line_tpl_pm_overdue','line_tpl_low_stock','line_tpl_completed','line_tpl_sage_approval'];
@@ -118,6 +130,19 @@ try {
                 $liffUid = mb_substr(trim($data['bind_liff_user_id']), 0, 100);
                 $pdo->prepare("UPDATE users SET line_user_id = ? WHERE id = ?")->execute([$liffUid, $userId]);
                 echo json_encode(['success' => true, 'bound' => true, 'line_user_id' => $liffUid]);
+                exit;
+            }
+
+            // B2) Telegram test send: { telegram_test: true, message? }
+            if (!empty($data['telegram_test'])) {
+                $msg = mb_substr((string)($data['message'] ?? '🧪 ทดสอบการแจ้งเตือนแอดมิน CMMS-TPT — Telegram เชื่อมต่อเรียบร้อย'), 0, 1000);
+                $ok = sendTelegramMessage($msg);
+                if ($ok) {
+                    echo json_encode(['success' => true, 'message' => 'ส่งข้อความทดสอบ Telegram ไปยังแอดมินสำเร็จ']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'ส่ง Telegram ไม่สำเร็จ — ตรวจ Bot Token / Chat ID (ตั้งในหน้า Settings หรือ .env)']);
+                }
                 exit;
             }
 
