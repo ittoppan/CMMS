@@ -89,6 +89,21 @@ const statusLabels: Record<string, string> = {
 };
 const statusLabel = (s: string) => statusText(s, s || "—");
 
+// ผลตรวจการปนเปื้อน (เหมือนหน้า /repair + PDF F-EN-03)
+const contamLabel: Record<string, string> = {
+  not_checked: "ยังไม่ตรวจ",
+  clean: "ไม่พบการปนเปื้อน (ผ่าน)",
+  contaminated: "พบการปนเปื้อน",
+  not_applicable: "ไม่เกี่ยวข้องกับงานนี้",
+};
+const contamTone = (v: string): "ok" | "warn" | "down" | "idle" => {
+  const c = String(v || "").toLowerCase();
+  if (c === "clean") return "ok";
+  if (c === "contaminated") return "down";
+  if (c === "not_applicable") return "idle";
+  return "warn";
+};
+
 const priorityLabels: Record<string, string> = { critical: "วิกฤต", high: "สูง", medium: "ปานกลาง", low: "ต่ำ" };
 const priorityLabel = (p: string) => priorityText(p, p || "—");
 const priorityVariant = (p: string): "error" | "warning" | "info" | "neutral" => {
@@ -422,15 +437,17 @@ export default function RepairViewDetailsPage() {
             </HStack>
 
             {/* ข้อเท็จจริงของใบงาน */}
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2 mt-5">
-              {[
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
+              {([
                 { label: "ผู้แจ้ง", value: wo.receiverName },
                 { label: "ผู้รับผิดชอบ", value: wo.assignedName },
                 { label: "วันที่แจ้ง", value: wo.createdDate },
                 { label: "วันที่ปิด", value: wo.completedAt },
                 { label: "Downtime", value: wo.downtimeMinutes ? `${wo.downtimeMinutes} นาที` : "—" },
-                { label: "ค่าใช้จ่ายรวม", value: `฿${(wo.costParts + wo.costLabor).toLocaleString()}` },
-              ].map((f) => (
+                { label: "ค่าใช้จ่ายรวม", value: `฿${(wo.costParts + wo.costLabor + wo.costOutsource).toLocaleString()}` },
+                { label: "ผลตรวจการปนเปื้อน", value: contamLabel[wo.contaminateChecking || "not_checked"] ?? "ยังไม่ตรวจ", tone: contamTone(wo.contaminateChecking || "") },
+                { label: "ผู้รับเหมาภายนอก", value: wo.outsourceBy || "—", tone: wo.outsourceBy ? "warn" : "idle" },
+              ] as { label: string; value: string; tone?: "ok" | "warn" | "down" | "idle" }[]).map((f) => (
                 <div
                   key={f.label}
                   className="cmms-andon-tile"
@@ -439,7 +456,10 @@ export default function RepairViewDetailsPage() {
                   <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.66rem", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                     {f.label}
                   </span>
-                  <span className="cmms-andon-tile-name" style={{ fontSize: "0.95rem" }}>
+                  <span className="cmms-andon-tile-name" style={{ fontSize: "0.95rem", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    {f.tone && (
+                      <span className={`cmms-status-dot ${f.tone}`} style={{ display: "inline-block", width: 8, height: 8, flexShrink: 0 }} />
+                    )}
                     {f.value}
                   </span>
                 </div>
