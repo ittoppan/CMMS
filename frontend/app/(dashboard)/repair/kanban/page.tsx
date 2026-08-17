@@ -89,11 +89,14 @@ export default function RepairKanbanPage() {
       if (!res.ok || (!json.success && !json.message)) throw new Error(json.error || "บันทึกไม่สำเร็จ");
       setMoveMsg({ kind: "ok", text: `ย้าย ${item.woNumber} ไป "${columnsDef.find(c => c.key === newStatus)?.title ?? newStatus}" สำเร็จ` });
       fetchKanban(); // ดึงใหม่ — ดึง completed_at/เวลาจริงจาก DB
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       // ย้อนกลับถ้าบันทึกไม่สำเร็จ
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: prevStatus } : i));
-      setMoveMsg({ kind: "err", text: `บันทึกสถานะ ${item.woNumber} ไม่สำเร็จ — ลองอีกครั้ง` });
+      const serverMsg = typeof e?.message === "string" && e.message.includes("ปนเปื้อน")
+        ? e.message
+        : `บันทึกสถานะ ${item.woNumber} ไม่สำเร็จ — ลองอีกครั้ง`;
+      setMoveMsg({ kind: "err", text: serverMsg });
     } finally {
       setSavingId(null);
     }

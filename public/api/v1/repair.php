@@ -105,6 +105,16 @@ try {
                 }
             }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'cost_parts', 'cost_labor', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
+            $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
+            if ($closingNow) {
+                $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
+                if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
+                    exit;
+                }
+            }
             $cols = []; $vals = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $cols[] = $col; $vals[] = $data[$col]; }
@@ -274,6 +284,16 @@ try {
             if (empty($fields)) {
                 if ($accepted) { echo json_encode(['success' => true, 'accepted' => true]); exit; }
                 http_response_code(400); echo json_encode(['error' => 'No data']); exit;
+            }
+            // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
+            $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
+            if ($closingNow) {
+                $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
+                if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
+                    exit;
+                }
             }
             $values[] = $id;
             $qOld = $pdo->prepare('SELECT assigned_to FROM repair WHERE id = ?');

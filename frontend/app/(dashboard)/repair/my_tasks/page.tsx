@@ -79,6 +79,8 @@ export default function MyTasksPage() {
   const [receiverName, setReceiverName] = useState("");
   const [receiverSignature, setReceiverSignature] = useState("");
   const [closing, setClosing] = useState(false);
+  // ผลตรวจการปนเปื้อน — บังคับเลือกก่อนปิดใบงาน (โรงงานอาหาร — กันลืมตรวจ)
+  const [contaminateChecking, setContaminateChecking] = useState("");
 
   // Canvas Ref for Signature Pad
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -268,6 +270,11 @@ export default function MyTasksPage() {
       alert("กรุณากรอกสาเหตุของปัญหา และวิธีการแก้ไข ก่อนปิดใบงาน");
       return;
     }
+    // บังคับผลตรวจการปนเปื้อนก่อนปิดงาน (สำคัญกับโรงงานอาหาร)
+    if (!["clean", "contaminated", "not_applicable"].includes(contaminateChecking)) {
+      alert("กรุณาระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม");
+      return;
+    }
     if (!receiverName.trim() || !receiverSignature) {
       alert("กรุณากรอกชื่อผู้รับมอบงาน และวาดลายเซ็นผู้รับมอบงาน");
       return;
@@ -284,6 +291,7 @@ export default function MyTasksPage() {
           after_image_path: afterImg,
           receiver_name: receiverName,
           receiver_signature_path: receiverSignature,
+          contaminate_checking: contaminateChecking,
           completed_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
         })
       });
@@ -452,6 +460,7 @@ export default function MyTasksPage() {
                   type="button"
                   onClick={() => {
                     setSelectedTask(task);
+                    setContaminateChecking("");
                     setCloseModalOpen(true);
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
@@ -476,6 +485,7 @@ export default function MyTasksPage() {
                   type="button"
                   onClick={() => {
                     setSelectedTask(task);
+                    setContaminateChecking("");
                     setCloseModalOpen(true);
                   }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
@@ -616,6 +626,22 @@ export default function MyTasksPage() {
                   value={solution}
                   onChange={setSolution}
                   rows={2}
+                />
+              </Field>
+
+              {/* ผลตรวจการปนเปื้อน — บังคับก่อนปิดงาน (โรงงานอาหาร) */}
+              <Field label="ผลตรวจการปนเปื้อน *" inputID="contamCheck" isRequired>
+                <Selector
+                  label="ผลตรวจการปนเปื้อน"
+                  isLabelHidden
+                  placeholder="เลือกผลตรวจการปนเปื้อน (บังคับ)"
+                  value={contaminateChecking}
+                  onChange={setContaminateChecking}
+                  options={[
+                    { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
+                    { value: "contaminated", label: "พบการปนเปื้อน" },
+                    { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
+                  ]}
                 />
               </Field>
 
