@@ -266,6 +266,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const section = getSection(pathname);
   const pageTitle = getPageTitle(pathname);
 
+  // tab title ต่อหน้า — ใช้ชื่อจาก route map (i18n) หรือ fallback อ่าน heading ของหน้า
+  // (เดิมทุกหน้าใช้ title เดียวกัน "CMMS-TOPPAN — Enterprise Maintenance Suite")
+  // หมายเหตุ: ตั้งแบบ delay 350ms — Next.js ตั้ง document.title จาก metadata ทับทุก client navigation
+  //           ต้องตั้งทีหลัง router ถึงจะชนะ (ถ้าตั้งทันทีจะโดนทับกลับเป็นชื่อเดียวกับ root layout)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (pageTitle) {
+        document.title = `${pageTitle} · CMMS-TOPPAN`;
+        return;
+      }
+      // หน้าไดนามิก (เช่น /repair/view?id=) — อ่าน heading ตัวแรกของหน้า (ข้าม h1 ของ mobile app bar)
+      const h = document.querySelector("h1:not(.cmms-mobile-app-bar-title), h2");
+      const heading = h?.textContent?.trim();
+      if (heading) document.title = `${heading} · CMMS-TOPPAN`;
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- อัปเดตตาม pathname/pageTitle
+  }, [pathname, pageTitle]);
+
   return (
     <ToastProvider>
     <ThemeProvider />

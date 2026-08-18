@@ -33,6 +33,10 @@ const API = (url: string, init?: RequestInit) =>
   fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
 
 export default function ScanLandingPage() {
+  useEffect(() => {
+    const t = setTimeout(() => { document.title = "สแกน QR เครื่องจักร · CMMS-TOPPAN"; }, 350);
+    return () => clearTimeout(t);
+  }, []);
   useLiffLang(); // re-render ตามภาษาที่สลับ (tliff อ่านค่าตอน render)
   const [assetCode, setAssetCode] = useState("");
   const [asset, setAsset] = useState<Asset | null>(null);
