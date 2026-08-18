@@ -718,6 +718,39 @@ h1, h2, h3, h4 {
   box-shadow: var(--cmms-shadow-lg);
 }
 
+/* ================================================
+   Page-load choreography — ใช้กับคลาสโครงสร้างที่ทุกหน้าใช้ร่วมกัน
+   (hero → เนื้อหา → KPI → แถวตาราง) ไม่ต้องแก้ทีละหน้า
+   ================================================ */
+/* หัวข้อหน้าแบบไม่มี hero (edit/create/settings/form) */
+.cmms-eyebrow { animation: cmms-fadeInUp 0.4s ease both; }
+h2.astryx-heading { animation: cmms-fadeInUp 0.4s ease 0.06s both; }
+
+/* Hero: eyebrow → ชื่อเรื่อง → คำอธิบาย → ปุ่ม/แอ็กชัน (เรียงลำดับ) */
+.cmms-page-hero .cmms-eyebrow { animation: cmms-fadeInUp 0.4s ease both; }
+.cmms-page-hero h2 { animation: cmms-fadeInUp 0.4s ease 0.08s both; }
+.cmms-page-hero .astryx-stack > h2 ~ span,
+.cmms-page-hero .astryx-stack > h2 ~ p { animation: cmms-fadeInUp 0.4s ease 0.16s both; }
+.cmms-page-hero > .astryx-stack.horizontal,
+.cmms-page-hero > button { animation: cmms-fadeInUp 0.4s ease 0.22s both; }
+
+/* เนื้อหาหลัง hero ค่อยๆ ปรากฏ (เฟดนุ่มๆ ไม่เลื่อน) */
+.cmms-page-hero ~ * { animation: cmms-fadeIn 0.5s ease 0.15s both; }
+
+/* KPI การ์ด — เลื่อนขึ้นทีละใบ (backwards กันทับ hover lift) */
+.cmms-kpi-card { animation: cmms-fadeInUp 0.45s ease backwards; }
+.cmms-kpi-card:nth-child(2) { animation-delay: 0.06s; }
+.cmms-kpi-card:nth-child(3) { animation-delay: 0.12s; }
+.cmms-kpi-card:nth-child(4) { animation-delay: 0.18s; }
+.cmms-kpi-card:nth-child(5) { animation-delay: 0.24s; }
+.cmms-kpi-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* แถวตาราง — เฟดเข้าสั้นๆ (กรอง/เปลี่ยนหน้าแล้วลื่นขึ้น) */
+.astryx-base-table tbody tr { animation: cmms-fadeIn 0.22s ease both; }
+
+/* ปุ่มหลัก — กดแล้วเด้งเล็กน้อย ให้สัมผัสได้ */
+.cmms-btn-primary:active { transform: scale(0.97); }
+
 /* Accessibility: ปิด animation ทั้งหมดเมื่อผู้ใช้ตั้งค่าลดการเคลื่อนไหว
    (ป้องกัน opacity:0 ค้างจาก stagger delay) */
 @media (prefers-reduced-motion: reduce) {
@@ -735,6 +768,18 @@ h1, h2, h3, h4 {
   }
   .cmms-kpi-card { transition: none; }
   .cmms-kpi-card:hover { transform: none; box-shadow: none; }
+  /* หน้าโหลด choreography — แสดงทันที ไม่มีดีเลย์ */
+  .cmms-eyebrow, h2.astryx-heading,
+  .cmms-page-hero .cmms-eyebrow, .cmms-page-hero h2,
+  .cmms-page-hero .astryx-stack > h2 ~ span, .cmms-page-hero .astryx-stack > h2 ~ p,
+  .cmms-page-hero > .astryx-stack.horizontal, .cmms-page-hero > button,
+  .cmms-page-hero ~ *, .cmms-kpi-card, .astryx-base-table tbody tr {
+    animation: none !important;
+    animation-delay: 0s !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .cmms-btn-primary:active { transform: none; }
 }
 
 /* ================================================
