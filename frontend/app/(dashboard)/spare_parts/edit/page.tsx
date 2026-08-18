@@ -12,6 +12,7 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 function EditSparePartContent() {
   const searchParams = useSearchParams();
@@ -41,7 +42,7 @@ function EditSparePartContent() {
 
   useEffect(() => {
     if (!partId) {
-      setErrorMessage("ไม่ระบุรหัสอะไหล่");
+      setErrorMessage(t("msg.part_id_missing"));
       setLoading(false);
       return;
     }
@@ -52,7 +53,7 @@ function EditSparePartContent() {
           setForm({
             code: row.code || "",
             name: row.name || "",
-            category: row.category || "ทั่วไป",
+            category: row.category || t("form.general"),
             unit: row.unit || "pcs",
             stock_qty: String(row.stock_qty || row.quantity || 0),
             min_stock: String(row.min_stock || 5),
@@ -63,16 +64,16 @@ function EditSparePartContent() {
             image_url: row.image_url || "",
           });
         } else {
-          setErrorMessage("ไม่พบข้อมูลอะไหล่");
+          setErrorMessage(t("msg.part_not_found"));
         }
       })
-      .catch(() => setErrorMessage("เกิดข้อผิดพลาดในการโหลดข้อมูลอะไหล่"))
+      .catch(() => setErrorMessage(t("msg.part_load_error")))
       .finally(() => setLoading(false));
   }, [partId]);
 
   const handleSubmit = async () => {
     if (!form.code || !form.name) {
-      setErrorMessage("กรุณากรอกรหัสอะไหล่ และชื่ออะไหล่");
+      setErrorMessage(t("msg.part_code_name_required"));
       return;
     }
     setSubmitting(true);
@@ -100,10 +101,10 @@ function EditSparePartContent() {
       if (json.success || json.message === "Updated") {
         setSubmitted(true);
       } else {
-        setErrorMessage(json.error || "เกิดข้อผิดพลาดในการบันทึก");
+        setErrorMessage(json.error || t("msg.save_error"));
       }
     } catch {
-      setErrorMessage("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setErrorMessage(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -112,9 +113,9 @@ function EditSparePartContent() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="บันทึกข้อมูลอะไหล่สำเร็จ!"
-        message={<>ข้อมูลอะไหล่ <strong>{form.name}</strong> ถูกอัปเดตเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้าคลังอะไหล่"
+        title={t("msg.part_saved")}
+        message={<>{t("form.part_info")} <strong>{form.name}</strong> {t("msg.updated_successfully")}</>}
+        primaryLabel={t("action.back_to_parts")}
         onPrimary={() => router.push("/spare_parts")}
         onBackdrop={() => router.push("/spare_parts")}
       />
@@ -127,13 +128,13 @@ function EditSparePartContent() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PART REGISTER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขรายการอะไหล่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.parts_edit_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <PencilSquareIcon className="w-3.5 h-3.5" /> {form.code || "Spare Part"}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แก้ไขรหัส ชื่อ หมวดหมู่ ที่เก็บ และจำนวนสต็อกขั้นต่ำ
+            {t("hero.parts_edit_desc")}
           </Text>
         </VStack>
         <button
@@ -142,13 +143,13 @@ function EditSparePartContent() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
       <Card padding={6}>
         {loading ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูลอะไหล่...</Text>
+          <Text type="body" color="secondary">{t("common.loading_parts")}</Text>
         ) : (
           <VStack gap={5}>
             {errorMessage && (
@@ -162,111 +163,111 @@ function EditSparePartContent() {
             )}
 
             <FormLayout>
-              <Field label="รหัสอะไหล่ *" inputID="code" isRequired>
+              <Field label={t("form.part_code_req")} inputID="code" isRequired>
                 <TextInput
-                  label="รหัสอะไหล่"
+                  label={t("form.part_code")}
                   isLabelHidden
                   value={form.code}
                   onChange={(v: string) => update("code", v)}
                 />
               </Field>
 
-              <Field label="ชื่อรายการอะไหล่ *" inputID="name" isRequired>
+              <Field label={t("form.part_name_req")} inputID="name" isRequired>
                 <TextInput
-                  label="ชื่ออะไหล่"
+                  label={t("form.part_name")}
                   isLabelHidden
                   value={form.name}
                   onChange={(v: string) => update("name", v)}
                 />
               </Field>
 
-              <Field label="หมวดหมู่" inputID="category">
+              <Field label={t("field.category")} inputID="category">
                 <Selector
-                  label="หมวดหมู่"
+                  label={t("field.category")}
                   isLabelHidden
                   value={form.category}
                   onChange={(v: string) => update("category", v)}
                   options={[
-                    { value: "ทั่วไป", label: "ทั่วไป" },
-                    { value: "ลูกปืน (Bearings)", label: "ลูกปืน (Bearings)" },
-                    { value: "ซีลและโอริง (Seals)", label: "ซีลและโอริง (Seals & O-Rings)" },
-                    { value: "สายพาน (Belts)", label: "สายพาน (Belts)" },
-                    { value: "ฟิลเตอร์ (Filters)", label: "ฟิลเตอร์ (Filters)" },
-                    { value: "ไฟฟ้า (Electrical)", label: "ไฟฟ้า (Electrical)" },
-                    { value: "ไฮดรอลิก (Hydraulics)", label: "ไฮดรอลิก (Hydraulics)" },
+                    { value: "ทั่วไป", label: t("form.general") },
+                    { value: "ลูกปืน (Bearings)", label: t("form.cat_bearings") },
+                    { value: "ซีลและโอริง (Seals)", label: t("form.cat_seals_orings") },
+                    { value: "สายพาน (Belts)", label: t("form.cat_belts") },
+                    { value: "ฟิลเตอร์ (Filters)", label: t("form.cat_filters") },
+                    { value: "ไฟฟ้า (Electrical)", label: t("form.cat_electrical") },
+                    { value: "ไฮดรอลิก (Hydraulics)", label: t("form.cat_hydraulics") },
                   ]}
                 />
               </Field>
 
-              <Field label="หน่วยนับ" inputID="unit">
+              <Field label={t("field.unit")} inputID="unit">
                 <TextInput
-                  label="หน่วยนับ"
+                  label={t("field.unit")}
                   isLabelHidden
                   value={form.unit}
                   onChange={(v: string) => update("unit", v)}
                 />
               </Field>
 
-              <Field label="จำนวนสต็อกปัจจุบัน" inputID="stock_qty">
+              <Field label={t("form.current_stock_qty")} inputID="stock_qty">
                 <TextInput
-                  label="สต็อกปัจจุบัน"
+                  label={t("form.current_stock")}
                   isLabelHidden
                   value={form.stock_qty}
                   onChange={(v: string) => update("stock_qty", v)}
                 />
               </Field>
 
-              <Field label="จุดสั่งซื้อขั้นต่ำ" inputID="min_stock">
+              <Field label={t("form.reorder_point")} inputID="min_stock">
                 <TextInput
-                  label="จุดสั่งซื้อขั้นต่ำ"
+                  label={t("form.reorder_point")}
                   isLabelHidden
                   value={form.min_stock}
                   onChange={(v: string) => update("min_stock", v)}
                 />
               </Field>
 
-              <Field label="สต็อกสูงสุด" inputID="max_stock">
+              <Field label={t("form.max_stock")} inputID="max_stock">
                 <TextInput
-                  label="สต็อกสูงสุด"
+                  label={t("form.max_stock")}
                   isLabelHidden
                   value={form.max_stock}
                   onChange={(v: string) => update("max_stock", v)}
                 />
               </Field>
 
-              <Field label="สถานที่เก็บ" inputID="location">
+              <Field label={t("field.storage_location")} inputID="location">
                 <TextInput
-                  label="ที่เก็บ"
+                  label={t("field.storage")}
                   isLabelHidden
                   value={form.location}
                   onChange={(v: string) => update("location", v)}
                 />
               </Field>
 
-              <Field label="ราคาต่อหน่วย (บาท)" inputID="unit_price">
+              <Field label={t("form.unit_price_baht")} inputID="unit_price">
                 <TextInput
-                  label="ราคาต่อหน่วย"
+                  label={t("field.unit_price")}
                   isLabelHidden
                   value={form.unit_price}
                   onChange={(v: string) => update("unit_price", v)}
                 />
               </Field>
 
-              <Field label="รายละเอียดเพิ่มเติม" inputID="description">
+              <Field label={t("form.additional_details")} inputID="description">
                 <TextInput
-                  label="รายละเอียด"
+                  label={t("field.description")}
                   isLabelHidden
                   value={form.description}
                   onChange={(v: string) => update("description", v)}
                 />
               </Field>
 
-              <Field label="รูปภาพอะไหล่" inputID="image_url">
+              <Field label={t("form.part_image_upload")} inputID="image_url">
                 <ImageUploadField
                   value={form.image_url || null}
                   onChange={(url) => update("image_url", url || "")}
                   folder="spares"
-                  label="รูปอะไหล่"
+                  label={t("form.part_image")}
                 />
               </Field>
             </FormLayout>
@@ -281,7 +282,7 @@ function EditSparePartContent() {
             onClick={() => (window.location.href = "/spare_parts")}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
           >
-            ยกเลิก
+            {t("action.cancel")}
           </button>
           <button
             type="button"
@@ -290,7 +291,7 @@ function EditSparePartContent() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <PencilSquareIcon className="w-4 h-4" />
-            {submitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+            {submitting ? t("common.saving") : t("action.save_edit")}
           </button>
         </HStack>
       )}
@@ -300,7 +301,7 @@ function EditSparePartContent() {
 
 export default function EditSparePartPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">กำลังโหลด...</Text></div>}>
+    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">{t("common.loading")}</Text></div>}>
       <EditSparePartContent />
     </Suspense>
   );

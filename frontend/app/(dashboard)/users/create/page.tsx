@@ -18,13 +18,14 @@ import {
 } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
 import { compressImage } from "@/lib/imageCompress";
+import { t } from "@/lib/i18n";
 
 const PRESET_AVATARS = [
-  { label: "ช่างซ่อม 1", url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
-  { label: "ช่างซ่อม 2", url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech2" },
-  { label: "วิศวกร 1", url: "https://api.dicebear.com/7.x/bottts/svg?seed=eng1" },
-  { label: "ผู้จัดการ", url: "https://api.dicebear.com/7.x/bottts/svg?seed=manager1" },
-  { label: "ผู้ดูแลระบบ", url: "https://api.dicebear.com/7.x/bottts/svg?seed=admin1" },
+  { label: t("form.avatar_tech1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
+  { label: t("form.avatar_tech2"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech2" },
+  { label: t("form.avatar_engineer1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=eng1" },
+  { label: t("form.manager"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=manager1" },
+  { label: t("form.administrator"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=admin1" },
 ];
 
 export default function CreateUserPage() {
@@ -57,14 +58,14 @@ export default function CreateUserPage() {
         update("avatar", dataUrl);
       } catch (err) {
         console.error("Image compress failed", err);
-        setErrorMessage("ไม่สามารถประมวลผลรูปภาพได้ กรุณาเลือกรูปอื่น");
+        setErrorMessage(t("msg.image_process_error"));
       }
     }
   };
 
   const handleSubmit = async () => {
     if (!form.username || !form.employeeCode || !form.fullName || !form.password) {
-      setErrorMessage("กรุณากรอกชื่อผู้ใช้ รหัสพนักงาน ชื่อ-นามสกุล และรหัสผ่าน (รหัสพนักงานใช้สำหรับผูกบัญชี LINE)");
+      setErrorMessage(t("msg.user_required_fields"));
       return;
     }
     setSubmitting(true);
@@ -92,10 +93,10 @@ export default function CreateUserPage() {
       if (json.success || json.id) {
         setSubmitted(true);
       } else {
-        setErrorMessage(json.error || "เกิดข้อผิดพลาดในการสร้างผู้ใช้");
+        setErrorMessage(json.error || t("msg.user_create_error"));
       }
     } catch {
-      setErrorMessage("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setErrorMessage(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -104,10 +105,10 @@ export default function CreateUserPage() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="สร้างผู้ใช้ใหม่สำเร็จ!"
-        message={<>บัญชีผู้ใช้ <strong>{form.username}</strong> ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้ารายการผู้ใช้"
-        secondaryLabel="เพิ่มผู้ใช้อีก"
+        title={t("msg.user_created")}
+        message={<>{t("form.user_account")} <strong>{form.username}</strong> {t("msg.added_successfully")}</>}
+        primaryLabel={t("action.back_to_users")}
+        secondaryLabel={t("action.add_another_user")}
         onPrimary={() => router.push("/users")}
         onSecondary={() => {
           setSubmitted(false);
@@ -124,13 +125,13 @@ export default function CreateUserPage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS CREATE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>สร้างบัญชีผู้ใช้ใหม่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.users_create_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <UserPlusIcon className="w-3.5 h-3.5" /> ผู้ใช้งานระบบ
+              <UserPlusIcon className="w-3.5 h-3.5" /> {t("menu.users")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เพิ่มข้อมูลพนักงาน กำหนดบทบาท สิทธิ์ และอัปโหลดรูปโปรไฟล์
+            {t("hero.users_create_desc")}
           </Text>
         </VStack>
         <button
@@ -139,7 +140,7 @@ export default function CreateUserPage() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
@@ -154,7 +155,7 @@ export default function CreateUserPage() {
           {/* Profile Picture Upload & Avatar Preview */}
           <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
             <VStack gap={3}>
-              <Text type="body" weight="bold">เลือกหรืออัปโหลดรูปโปรไฟล์</Text>
+              <Text type="body" weight="bold">{t("form.choose_upload_avatar")}</Text>
               <HStack gap={4} vAlign="center" wrap="wrap">
                 {form.avatar ? (
                   <Avatar name={form.fullName || form.username || "User"} src={form.avatar} size="lg" />
@@ -162,7 +163,7 @@ export default function CreateUserPage() {
                   <Avatar name={form.fullName || form.username || "User"} size="lg" />
                 )}
                 <VStack gap={2}>
-                  <Text type="body" size="sm" color="secondary">เลือกรูปประจำตัว หรืออัปโหลดไฟล์รูปภาพใหม่</Text>
+                  <Text type="body" size="sm" color="secondary">{t("form.avatar_hint")}</Text>
                   <HStack gap={2} wrap="wrap">
                     {PRESET_AVATARS.map((av, idx) => (
                       <button
@@ -186,7 +187,7 @@ export default function CreateUserPage() {
                       padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
                       fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
                     }}>
-                      <PhotoIcon className="w-4 h-4" /> อัปโหลดรูปภาพ...
+                      <PhotoIcon className="w-4 h-4" /> {t("common.uploading")}
                       <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
                     </label>
                   </HStack>
@@ -196,113 +197,113 @@ export default function CreateUserPage() {
           </div>
 
           <FormLayout>
-            <Field label="ชื่อผู้ใช้ *" inputID="username" isRequired>
+            <Field label={t("form.username_req")} inputID="username" isRequired>
               <TextInput
-                label="ชื่อผู้ใช้"
+                label={t("field.username")}
                 isLabelHidden
-                placeholder="เช่น somchai.t"
+                placeholder={t("placeholder.username")}
                 value={form.username}
                 onChange={(v: string) => update("username", v)}
               />
             </Field>
 
-              <Field label="ชื่อ-นามสกุล *" inputID="fullName" isRequired>
+              <Field label={t("form.full_name_req")} inputID="fullName" isRequired>
                 <TextInput
-                  label="ชื่อ-นามสกุล"
+                  label={t("field.full_name")}
                   isLabelHidden
-                  placeholder="เช่น สมชาย ใจดี"
+                  placeholder={t("placeholder.full_name")}
                   value={form.fullName}
                   onChange={(v: string) => update("fullName", v)}
                 />
               </Field>
 
-              <Field label="รหัสพนักงาน *" inputID="employeeCode" isRequired>
+              <Field label={t("form.employee_code_req")} inputID="employeeCode" isRequired>
                 <TextInput
-                  label="รหัสพนักงาน"
+                  label={t("field.employee_code")}
                   isLabelHidden
-                  placeholder="เช่น E01117 — ใช้ผูกบัญชี LINE"
+                  placeholder={t("placeholder.employee_code_line")}
                   value={form.employeeCode}
                   onChange={(v: string) => update("employeeCode", v.toUpperCase())}
                 />
               </Field>
 
 
-            <Field label="รหัสผ่าน *" inputID="password" isRequired>
+            <Field label={t("form.password_req")} inputID="password" isRequired>
               <TextInput
-                label="รหัสผ่าน"
+                label={t("field.password")}
                 isLabelHidden
                 type="password"
-                placeholder="กำหนดรหัสผ่าน"
+                placeholder={t("form.set_password")}
                 value={form.password}
                 onChange={(v: string) => update("password", v)}
               />
             </Field>
 
-            <Field label="อีเมล" inputID="email">
+            <Field label={t("field.email")} inputID="email">
               <TextInput
-                label="อีเมล"
+                label={t("field.email")}
                 isLabelHidden
-                placeholder="เช่น somchai@toppan.co.th"
+                placeholder={t("placeholder.email")}
                 value={form.email}
                 onChange={(v: string) => update("email", v)}
               />
             </Field>
 
-            <Field label="เบอร์โทรศัพท์" inputID="phone">
+            <Field label={t("field.phone")} inputID="phone">
               <TextInput
-                label="เบอร์โทรศัพท์"
+                label={t("field.phone")}
                 isLabelHidden
-                placeholder="เช่น 081-234-5678"
+                placeholder={t("placeholder.phone")}
                 value={form.phone}
                 onChange={(v: string) => update("phone", v)}
               />
             </Field>
 
-            <Field label="LINE ID (รหัสผู้ใช้)" inputID="lineUserId">
+            <Field label={t("form.line_id_label")} inputID="lineUserId">
               <TextInput
                 label="LINE ID"
                 isLabelHidden
-                placeholder="เช่น U61f2a48ea934bd4438d0f2cb58aa46a2 — ใช้สำหรับแจ้งเตือน LINE"
+                placeholder={t("placeholder.line_id")}
                 value={form.lineUserId}
                 onChange={(v: string) => update("lineUserId", v)}
               />
             </Field>
 
-            <Field label="ตำแหน่งงาน" inputID="position">
+            <Field label={t("field.position")} inputID="position">
               <TextInput
-                label="ตำแหน่งงาน"
+                label={t("field.position")}
                 isLabelHidden
-                placeholder="เช่น ช่างซ่อมบำรุงอาวุโส"
+                placeholder={t("placeholder.position")}
                 value={form.position}
                 onChange={(v: string) => update("position", v)}
               />
             </Field>
 
-            <Field label="บทบาทการใช้งาน" inputID="role">
+            <Field label={t("form.usage_role")} inputID="role">
               <Selector
-                label="บทบาทการใช้งาน"
+                label={t("form.usage_role")}
                 isLabelHidden
                 value={form.role}
                 onChange={(v: string) => update("role", v)}
                 options={[
-                  { value: "technician", label: "ช่างซ่อมบำรุง" },
-                  { value: "engineer", label: "วิศวกร" },
-                  { value: "manager", label: "ผู้จัดการ" },
-                  { value: "operator", label: "ผู้ควบคุมเครื่องจักร" },
-                  { value: "admin", label: "ผู้ดูแลระบบ" },
+                  { value: "technician", label: t("form.technician") },
+                  { value: "engineer", label: t("field.engineer") },
+                  { value: "manager", label: t("form.manager") },
+                  { value: "operator", label: t("form.machine_operator") },
+                  { value: "admin", label: t("form.administrator") },
                 ]}
               />
             </Field>
 
-            <Field label="สถานะบัญชีผู้ใช้" inputID="isActive">
+            <Field label={t("form.account_status")} inputID="isActive">
               <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
                 <Switch
-                  label="ใช้งานบัญชีนี้"
+                  label={t("form.activate_account")}
                   value={form.isActive}
                   onChange={(val: boolean) => update("isActive", val)}
                 />
                 <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
-                  {form.isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
+                  {form.isActive ? t("form.enabled") : t("form.suspend")}
                 </Text>
               </HStack>
             </Field>
@@ -316,7 +317,7 @@ export default function CreateUserPage() {
           onClick={() => (window.location.href = "/users")}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
         >
-          ยกเลิก
+          {t("action.cancel")}
         </button>
         <button
           type="button"
@@ -325,7 +326,7 @@ export default function CreateUserPage() {
           className="cmms-btn-primary"
         >
           <UserPlusIcon className="w-4 h-4" />
-          {submitting ? "กำลังสร้าง..." : "สร้างผู้ใช้ใหม่"}
+          {submitting ? t("common.creating") : t("form.users_create_short")}
         </button>
       </HStack>
     </VStack>

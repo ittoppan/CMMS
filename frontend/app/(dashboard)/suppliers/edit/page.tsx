@@ -13,6 +13,7 @@ import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { Switch } from "@astryxdesign/core/Switch";
 import { HomeIcon, TruckIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 function EditSupplierContent() {
   const router = useRouter();
@@ -35,7 +36,7 @@ function EditSupplierContent() {
 
   useEffect(() => {
     if (!supplierId) {
-      setError("ไม่ระบุหมายเลข Supplier");
+      setError(t("msg.supplier_id_missing"));
       setLoadingData(false);
       return;
     }
@@ -52,16 +53,16 @@ function EditSupplierContent() {
           setTaxId(json.tax_id || "");
           setIsActive(json.is_active === 1 || json.is_active === "1" || json.is_active === true);
         } else {
-          setError("ไม่พบข้อมูล Supplier");
+          setError(t("msg.supplier_not_found"));
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError(t("msg.load_error")))
       .finally(() => setLoadingData(false));
   }, [supplierId]);
 
   const handleSubmit = async () => {
     if (!name || !code) {
-      setError("กรุณาระบุรหัสผู้ผลิต และชื่อผู้ผลิต");
+      setError(t("msg.manufacturer_code_name_required"));
       return;
     }
     setSubmitting(true);
@@ -88,10 +89,10 @@ function EditSupplierContent() {
       if (json.success || json.message) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+        setError(json.error || t("msg.update_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -100,9 +101,9 @@ function EditSupplierContent() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="อัปเดตข้อมูลสำเร็จ!"
-        message={<>ข้อมูลซัพพลายเออร์ <strong>{name}</strong> ถูกอัปเดตเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้ารายการ"
+        title={t("msg.update_success")}
+        message={<>{t("form.supplier_info")} <strong>{name}</strong> {t("msg.updated_successfully")}</>}
+        primaryLabel={t("action.back_to_list")}
         onPrimary={() => router.push("/suppliers")}
         onBackdrop={() => router.push("/suppliers")}
       />
@@ -115,13 +116,13 @@ function EditSupplierContent() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SUPPLIERS EDIT · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลผู้ผลิต</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.manufacturer_edit_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <TruckIcon className="w-3.5 h-3.5" /> Supplier
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ปรับปรุงข้อมูลผู้ผลิตหรือผู้จัดจำหน่ายในระบบ
+            {t("hero.manufacturer_edit_desc")}
           </Text>
         </VStack>
         <button
@@ -130,13 +131,13 @@ function EditSupplierContent() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <HomeIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
       <Card elevation="low" padding={6}>
         {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
+          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
         ) : (
           <VStack gap={5} style={{ maxWidth: 640 }}>
             {error && (
@@ -147,17 +148,17 @@ function EditSupplierContent() {
 
             <FormLayout>
               <HStack gap={4}>
-                <Field label="รหัสอ้างอิง *" inputID="code" isRequired style={{ flex: 1 }}>
+                <Field label={t("form.reference_code_req")} inputID="code" isRequired style={{ flex: 1 }}>
                   <TextInput 
-                    label="รหัสอ้างอิง"
+                    label={t("form.reference_code")}
                     isLabelHidden
                     value={code}
                     onChange={setCode}
                   />
                 </Field>
-                <Field label="ชื่อบริษัท *" inputID="name" isRequired style={{ flex: 2 }}>
+                <Field label={t("form.company_name_req")} inputID="name" isRequired style={{ flex: 2 }}>
                   <TextInput 
-                    label="ชื่อบริษัท"
+                    label={t("field.company_name")}
                     isLabelHidden
                     value={name}
                     onChange={setName}
@@ -166,17 +167,17 @@ function EditSupplierContent() {
               </HStack>
               
               <HStack gap={4}>
-                <Field label="ผู้ติดต่อ" inputID="contact" style={{ flex: 1 }}>
+                <Field label={t("field.contact_person")} inputID="contact" style={{ flex: 1 }}>
                   <TextInput 
-                    label="ผู้ติดต่อ"
+                    label={t("field.contact_person")}
                     isLabelHidden
                     value={contact}
                     onChange={setContact}
                   />
                 </Field>
-                <Field label="เบอร์โทรศัพท์" inputID="phone" style={{ flex: 1 }}>
+                <Field label={t("field.phone")} inputID="phone" style={{ flex: 1 }}>
                   <TextInput 
-                    label="เบอร์โทรศัพท์"
+                    label={t("field.phone")}
                     isLabelHidden
                     value={phone}
                     onChange={setPhone}
@@ -185,17 +186,17 @@ function EditSupplierContent() {
               </HStack>
 
               <HStack gap={4}>
-                <Field label="อีเมล" inputID="email" style={{ flex: 1 }}>
+                <Field label={t("field.email")} inputID="email" style={{ flex: 1 }}>
                   <TextInput 
-                    label="อีเมล"
+                    label={t("field.email")}
                     isLabelHidden
                     value={email}
                     onChange={setEmail}
                   />
                 </Field>
-                <Field label="เลขประจำตัวผู้เสียภาษี" inputID="taxId" style={{ flex: 1 }}>
+                <Field label={t("field.tax_id")} inputID="taxId" style={{ flex: 1 }}>
                   <TextInput 
-                    label="เลขประจำตัวผู้เสียภาษี"
+                    label={t("field.tax_id")}
                     isLabelHidden
                     value={taxId}
                     onChange={setTaxId}
@@ -203,24 +204,24 @@ function EditSupplierContent() {
                 </Field>
               </HStack>
 
-              <Field label="ที่อยู่" inputID="address">
+              <Field label={t("field.address")} inputID="address">
                 <TextArea
-                  label="ที่อยู่"
+                  label={t("field.address")}
                   isLabelHidden
                   value={address}
                   onChange={setAddress}
                 />
               </Field>
 
-              <Field label="สถานะการใช้งาน" inputID="isActive">
+              <Field label={t("form.usage_status")} inputID="isActive">
                 <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
                   <Switch
-                    label="ใช้งาน"
+                    label={t("field.active")}
                     value={isActive}
                     onChange={setIsActive}
                   />
                   <Text type="body" size="sm" color={isActive ? "primary" : "secondary"}>
-                    {isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
+                    {isActive ? t("form.enabled") : t("form.suspend")}
                   </Text>
                 </HStack>
               </Field>
@@ -232,7 +233,7 @@ function EditSupplierContent() {
                 onClick={() => router.push("/suppliers")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
               >
-                ยกเลิก
+                {t("action.cancel")}
               </button>
               <button
                 type="button"
@@ -241,7 +242,7 @@ function EditSupplierContent() {
                 className="cmms-btn-primary"
               >
                 <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {submitting ? t("common.saving") : t("action.save_data")}
               </button>
             </HStack>
           </VStack>
@@ -253,7 +254,7 @@ function EditSupplierContent() {
 
 export default function EditSupplierPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
       <EditSupplierContent />
     </Suspense>
   );

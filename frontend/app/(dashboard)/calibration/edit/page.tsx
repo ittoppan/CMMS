@@ -11,6 +11,7 @@ import { DateInput } from "@astryxdesign/core/DateInput";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { HomeIcon, ScaleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -45,7 +46,7 @@ function EditCalibrationContent() {
 
   useEffect(() => {
     if (!calId) {
-      setError("ไม่ระบุหมายเลข Calibration");
+      setError(t("msg.calibration_id_missing"));
       setLoadingData(false);
       return;
     }
@@ -60,16 +61,16 @@ function EditCalibrationContent() {
           setCertNo(json.certificate_number || "");
           setStatus(json.status || "pending");
         } else {
-          setError("ไม่พบข้อมูล Calibration");
+          setError(t("msg.calibration_not_found"));
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError(t("msg.load_error")))
       .finally(() => setLoadingData(false));
   }, [calId]);
 
   const handleSubmit = async () => {
     if (!assetId || !calDate || !dueDate) {
-      setError("กรุณาเลือกเครื่องมือ, ระบุวันที่สอบเทียบ และวันครบกำหนด");
+      setError(t("msg.cal_required_fields"));
       return;
     }
     setSubmitting(true);
@@ -94,10 +95,10 @@ function EditCalibrationContent() {
       if (json.success || json.message) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+        setError(json.error || t("msg.update_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -106,9 +107,9 @@ function EditCalibrationContent() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="อัปเดตข้อมูลสำเร็จ!"
-        message="แผนสอบเทียบ ถูกอัปเดตเรียบร้อยแล้ว"
-        primaryLabel="กลับไปหน้ารายการ"
+        title={t("msg.update_success")}
+        message={t("msg.cal_plan_updated")}
+        primaryLabel={t("action.back_to_list")}
         onPrimary={() => router.push("/calibration")}
         onBackdrop={() => router.push("/calibration")}
       />
@@ -121,25 +122,25 @@ function EditCalibrationContent() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>CALIBRATION EDIT · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลการสอบเทียบ</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.cal_edit_full")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ScaleIcon className="w-3.5 h-3.5" /> แผนสอบเทียบ
+              <ScaleIcon className="w-3.5 h-3.5" /> {t("form.calibration_plan")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แก้ไขข้อมูลแผนสอบเทียบ — วันที่ รอบ และสถานะ
+            {t("hero.cal_edit_desc")}
           </Text>
         </VStack>
       </div>
 
       <Breadcrumbs>
-        <BreadcrumbItem href="/calibration" startIcon={<HomeIcon className="w-4 h-4" />}>การสอบเทียบ</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>แก้ไขข้อมูลสอบเทียบ</BreadcrumbItem>
+        <BreadcrumbItem href="/calibration" startIcon={<HomeIcon className="w-4 h-4" />}>{t("form.calibration")}</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>{t("form.cal_edit_title")}</BreadcrumbItem>
       </Breadcrumbs>
 
       <Card padding={6}>
         {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
+          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
         ) : (
           <VStack gap={5} style={{ maxWidth: 640 }}>
             {error && (
@@ -149,49 +150,49 @@ function EditCalibrationContent() {
             )}
 
             <Selector
-              label="เครื่องมือวัด *"
-              placeholder="เลือกเครื่องมือ..."
+              label={t("form.measuring_tool_req")}
+              placeholder={t("placeholder.select_tool")}
               value={assetId}
               onChange={setAssetId}
               options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
             />
             
             <Selector
-              label="ประเภทการสอบเทียบ *"
+              label={t("form.cal_type_req")}
               value={calType}
               onChange={setCalType}
               options={[
-                { value: "Internal", label: "สอบเทียบภายใน" },
-                { value: "External Lab", label: "ส่งสอบเทียบภายนอก" },
+                { value: "Internal", label: t("form.cal_internal") },
+                { value: "External Lab", label: t("form.cal_external") },
               ]}
             />
             
             <HStack gap={4}>
               <DateInput
-                label="วันที่สอบเทียบล่าสุด *"
+                label={t("form.last_cal_date_req")}
                 value={calDate}
                 onChange={setCalDate}
               />
               <DateInput
-                label="วันครบกำหนด *"
+                label={t("form.due_date_req")}
                 value={dueDate}
                 onChange={setDueDate}
               />
             </HStack>
 
-            <TextInput label="เลขใบรับรอง"
-              placeholder="เช่น CERT-2026-001"
+            <TextInput label={t("form.certificate_no")}
+              placeholder={t("placeholder.certificate_no")}
               value={certNo}
               onChange={setCertNo}  />
 
             <Selector
-              label="สถานะ"
+              label={t("field.status")}
               value={status}
               onChange={setStatus}
               options={[
-                { value: "pending", label: "รอดำเนินการ" },
-                { value: "scheduled", label: "รอเข้าตาราง" },
-                { value: "completed", label: "เสร็จสิ้น" }
+                { value: "pending", label: t("status.pending") },
+                { value: "scheduled", label: t("form.pending_schedule") },
+                { value: "completed", label: t("status.completed") }
               ]}
             />
 
@@ -201,7 +202,7 @@ function EditCalibrationContent() {
                 onClick={() => router.push("/calibration")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
               >
-                ยกเลิก
+                {t("action.cancel")}
               </button>
               <button
                 type="button"
@@ -210,7 +211,7 @@ function EditCalibrationContent() {
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {submitting ? t("common.saving") : t("action.save_data")}
               </button>
             </HStack>
           </VStack>
@@ -222,7 +223,7 @@ function EditCalibrationContent() {
 
 export default function EditCalibrationPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
       <EditCalibrationContent />
     </Suspense>
   );

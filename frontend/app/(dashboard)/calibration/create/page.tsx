@@ -11,6 +11,7 @@ import { DateInput } from "@astryxdesign/core/DateInput";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { HomeIcon, ScaleIcon, PlusIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -41,7 +42,7 @@ export default function CalibrationCreatePage() {
 
   const handleSubmit = async () => {
     if (!assetId || !calDate || !dueDate) {
-      setError("กรุณาเลือกเครื่องมือ, ระบุวันที่สอบเทียบ และวันครบกำหนด");
+      setError(t("msg.cal_required_fields"));
       return;
     }
     setLoading(true);
@@ -64,10 +65,10 @@ export default function CalibrationCreatePage() {
       if (json.success || json.id) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการสร้างแผนสอบเทียบ");
+        setError(json.error || t("msg.cal_create_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setLoading(false);
     }
@@ -76,9 +77,9 @@ export default function CalibrationCreatePage() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="ลงทะเบียนเครื่องมือสำเร็จ!"
-        message="แผนสอบเทียบสำหรับเครื่องมือนี้ ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว"
-        primaryLabel="กลับไปหน้ารายการ"
+        title={t("msg.tool_registered")}
+        message={t("msg.cal_plan_added")}
+        primaryLabel={t("action.back_to_list")}
         onPrimary={() => router.push("/calibration")}
         onBackdrop={() => router.push("/calibration")}
       />
@@ -91,20 +92,20 @@ export default function CalibrationCreatePage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>CALIBRATION CREATE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ลงทะเบียนสอบเทียบเครื่องมือวัด</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.cal_register_tool_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ScaleIcon className="w-3.5 h-3.5" /> แผนสอบเทียบใหม่
+              <ScaleIcon className="w-3.5 h-3.5" /> {t("form.cal_plan_new")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            สร้างแผนสอบเทียบใหม่สำหรับเครื่องมือวัด — ระบุประเภท รอบ และเลขใบรับรอง
+            {t("hero.cal_create_desc")}
           </Text>
         </VStack>
       </div>
 
       <Breadcrumbs>
-        <BreadcrumbItem href="/calibration" startIcon={<HomeIcon className="w-4 h-4" />}>การสอบเทียบ</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>ลงทะเบียนสอบเทียบ</BreadcrumbItem>
+        <BreadcrumbItem href="/calibration" startIcon={<HomeIcon className="w-4 h-4" />}>{t("form.calibration")}</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>{t("form.cal_register")}</BreadcrumbItem>
       </Breadcrumbs>
 
       <Card padding={6}>
@@ -116,38 +117,38 @@ export default function CalibrationCreatePage() {
           )}
 
           <Selector
-            label="เครื่องมือวัด *"
-            placeholder="เลือกเครื่องมือ..."
+            label={t("form.measuring_tool_req")}
+            placeholder={t("placeholder.select_tool")}
             value={assetId}
             onChange={setAssetId}
             options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
           />
           
           <Selector
-            label="ประเภทการสอบเทียบ *"
+            label={t("form.cal_type_req")}
             value={calType}
             onChange={setCalType}
             options={[
-              { value: "Internal", label: "สอบเทียบภายใน" },
-              { value: "External Lab", label: "ส่งสอบเทียบภายนอก" },
+              { value: "Internal", label: t("form.cal_internal") },
+              { value: "External Lab", label: t("form.cal_external") },
             ]}
           />
           
           <HStack gap={4}>
             <DateInput
-              label="วันที่สอบเทียบล่าสุด *"
+              label={t("form.last_cal_date_req")}
               value={calDate}
               onChange={setCalDate}
             />
             <DateInput
-              label="วันครบกำหนด *"
+              label={t("form.due_date_req")}
               value={dueDate}
               onChange={setDueDate}
             />
           </HStack>
 
-          <TextInput label="เลขใบรับรอง"
-            placeholder="เช่น CERT-2026-001"
+          <TextInput label={t("form.certificate_no")}
+            placeholder={t("placeholder.certificate_no")}
             value={certNo}
             onChange={setCertNo}  />
 
@@ -157,7 +158,7 @@ export default function CalibrationCreatePage() {
               onClick={() => router.push("/calibration")}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
             >
-              ยกเลิก
+              {t("action.cancel")}
             </button>
             <button
               type="button"
@@ -166,7 +167,7 @@ export default function CalibrationCreatePage() {
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >
               <PlusIcon className="w-4 h-4" />
-              {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              {loading ? t("common.saving") : t("action.save_data")}
             </button>
           </HStack>
         </VStack>

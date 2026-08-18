@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 export default function CreateSparePartPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function CreateSparePartPage() {
 
   const handleSubmit = async () => {
     if (!form.code || !form.name) {
-      setErrorMessage("กรุณากรอกรหัสอะไหล่ และชื่ออะไหล่");
+      setErrorMessage(t("msg.part_code_name_required"));
       return;
     }
     setSubmitting(true);
@@ -69,10 +70,10 @@ export default function CreateSparePartPage() {
       if (json.success || json.id) {
         setSubmitted(true);
       } else {
-        setErrorMessage(json.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูลอะไหล่");
+        setErrorMessage(json.error || t("msg.part_save_error"));
       }
     } catch {
-      setErrorMessage("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setErrorMessage(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -81,10 +82,10 @@ export default function CreateSparePartPage() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="เพิ่มรายการอะไหล่สำเร็จ!"
-        message={<>อะไหล่ <strong>{form.code} - {form.name}</strong> บันทึกเข้าสู่ระบบคลังเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้าคลังอะไหล่"
-        secondaryLabel="เพิ่มอะไหล่อีก"
+        title={t("msg.part_added")}
+        message={<>{t("field.spare_part")} <strong>{form.code} - {form.name}</strong> {t("msg.part_saved_to_stock")}</>}
+        primaryLabel={t("action.back_to_parts")}
+        secondaryLabel={t("action.add_another_part")}
         onPrimary={() => router.push("/spare_parts")}
         onSecondary={() => {
           setSubmitted(false);
@@ -101,13 +102,13 @@ export default function CreateSparePartPage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PART REGISTER · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>เพิ่มรายการอะไหล่ใหม่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.parts_create_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <CubeIcon className="w-3.5 h-3.5" /> Spare Part
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            บันทึกรหัส ชื่อ หมวดหมู่ ที่เก็บ และจำนวนสต็อกขั้นต่ำ
+            {t("hero.parts_create_desc")}
           </Text>
         </VStack>
         <button
@@ -116,7 +117,7 @@ export default function CreateSparePartPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
@@ -133,116 +134,116 @@ export default function CreateSparePartPage() {
           )}
 
           <FormLayout>
-            <Field label="รหัสอะไหล่ *" inputID="code" isRequired>
+            <Field label={t("form.part_code_req")} inputID="code" isRequired>
               <TextInput
-                label="รหัสอะไหล่"
+                label={t("form.part_code")}
                 isLabelHidden
-                placeholder="เช่น SP-BRG-6205, SP-OIL-SEAL"
+                placeholder={t("placeholder.part_code")}
                 value={form.code}
                 onChange={(v: string) => update("code", v)}
               />
             </Field>
 
-            <Field label="ชื่อรายการอะไหล่ *" inputID="name" isRequired>
+            <Field label={t("form.part_name_req")} inputID="name" isRequired>
               <TextInput
-                label="ชื่ออะไหล่"
+                label={t("form.part_name")}
                 isLabelHidden
-                placeholder="เช่น SKF 6205 Bearing แบริ่งลูกกลิ้ง"
+                placeholder={t("placeholder.part_description")}
                 value={form.name}
                 onChange={(v: string) => update("name", v)}
               />
             </Field>
 
-            <Field label="หมวดหมู่" inputID="category">
+            <Field label={t("field.category")} inputID="category">
               <Selector
-                label="หมวดหมู่"
+                label={t("field.category")}
                 isLabelHidden
                 value={form.category}
                 onChange={(v: string) => update("category", v)}
                 options={[
-                  { value: "ทั่วไป", label: "ทั่วไป" },
-                  { value: "ลูกปืน (Bearings)", label: "ลูกปืน (Bearings)" },
-                  { value: "ซีลและโอริง (Seals)", label: "ซีลและโอริง (Seals & O-Rings)" },
-                  { value: "สายพาน (Belts)", label: "สายพาน (Belts)" },
-                  { value: "ฟิลเตอร์ (Filters)", label: "ฟิลเตอร์ (Filters)" },
-                  { value: "ไฟฟ้า (Electrical)", label: "ไฟฟ้า (Electrical)" },
-                  { value: "ไฮดรอลิก (Hydraulics)", label: "ไฮดรอลิก (Hydraulics)" },
+                  { value: "ทั่วไป", label: t("form.general") },
+                  { value: "ลูกปืน (Bearings)", label: t("form.cat_bearings") },
+                  { value: "ซีลและโอริง (Seals)", label: t("form.cat_seals_orings") },
+                  { value: "สายพาน (Belts)", label: t("form.cat_belts") },
+                  { value: "ฟิลเตอร์ (Filters)", label: t("form.cat_filters") },
+                  { value: "ไฟฟ้า (Electrical)", label: t("form.cat_electrical") },
+                  { value: "ไฮดรอลิก (Hydraulics)", label: t("form.cat_hydraulics") },
                 ]}
               />
             </Field>
 
-            <Field label="หน่วยนับ" inputID="unit">
+            <Field label={t("field.unit")} inputID="unit">
               <TextInput
-                label="หน่วยนับ"
+                label={t("field.unit")}
                 isLabelHidden
-                placeholder="เช่น pcs, set, box, roll"
+                placeholder={t("placeholder.unit")}
                 value={form.unit}
                 onChange={(v: string) => update("unit", v)}
               />
             </Field>
 
-            <Field label="จำนวนสต็อกปัจจุบัน" inputID="stock_qty">
+            <Field label={t("form.current_stock_qty")} inputID="stock_qty">
               <TextInput
-                label="สต็อกปัจจุบัน"
+                label={t("form.current_stock")}
                 isLabelHidden
                 value={form.stock_qty}
                 onChange={(v: string) => update("stock_qty", v)}
               />
             </Field>
 
-            <Field label="จุดสั่งซื้อขั้นต่ำ" inputID="min_stock">
+            <Field label={t("form.reorder_point")} inputID="min_stock">
               <TextInput
-                label="จุดสั่งซื้อขั้นต่ำ"
+                label={t("form.reorder_point")}
                 isLabelHidden
                 value={form.min_stock}
                 onChange={(v: string) => update("min_stock", v)}
               />
             </Field>
 
-            <Field label="สต็อกสูงสุด" inputID="max_stock">
+            <Field label={t("form.max_stock")} inputID="max_stock">
               <TextInput
-                label="สต็อกสูงสุด"
+                label={t("form.max_stock")}
                 isLabelHidden
                 value={form.max_stock}
                 onChange={(v: string) => update("max_stock", v)}
               />
             </Field>
 
-            <Field label="สถานที่เก็บ" inputID="location">
+            <Field label={t("field.storage_location")} inputID="location">
               <TextInput
-                label="ที่เก็บ"
+                label={t("field.storage")}
                 isLabelHidden
-                placeholder="เช่น ชั้น A-02, แร็ค 3-B"
+                placeholder={t("placeholder.storage")}
                 value={form.location}
                 onChange={(v: string) => update("location", v)}
               />
             </Field>
 
-            <Field label="ราคาต่อหน่วย (บาท)" inputID="unit_price">
+            <Field label={t("form.unit_price_baht")} inputID="unit_price">
               <TextInput
-                label="ราคาต่อหน่วย"
+                label={t("field.unit_price")}
                 isLabelHidden
                 value={form.unit_price}
                 onChange={(v: string) => update("unit_price", v)}
               />
             </Field>
 
-            <Field label="รายละเอียดเพิ่มเติม" inputID="description">
+            <Field label={t("form.additional_details")} inputID="description">
               <TextInput
-                label="รายละเอียด"
+                label={t("field.description")}
                 isLabelHidden
-                placeholder="รายละเอียดเพิ่มเติม หรือ Specification"
+                placeholder={t("placeholder.specification")}
                 value={form.description}
                 onChange={(v: string) => update("description", v)}
               />
             </Field>
 
-            <Field label="รูปภาพอะไหล่" inputID="image_url">
+            <Field label={t("form.part_image_upload")} inputID="image_url">
               <ImageUploadField
                 value={form.image_url || null}
                 onChange={(url) => update("image_url", url || "")}
                 folder="spares"
-                label="รูปอะไหล่"
+                label={t("form.part_image")}
               />
             </Field>
           </FormLayout>
@@ -255,7 +256,7 @@ export default function CreateSparePartPage() {
           onClick={() => (window.location.href = "/spare_parts")}
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
         >
-          ยกเลิก
+          {t("action.cancel")}
         </button>
         <button
           type="button"
@@ -264,7 +265,7 @@ export default function CreateSparePartPage() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <PlusIcon className="w-4 h-4" />
-          {submitting ? "กำลังบันทึก..." : "บันทึกอะไหล่ใหม่"}
+          {submitting ? t("common.saving") : t("form.parts_save_new")}
         </button>
       </HStack>
     </VStack>

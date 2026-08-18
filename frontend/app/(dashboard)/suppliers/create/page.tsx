@@ -13,6 +13,7 @@ import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { Switch } from "@astryxdesign/core/Switch";
 import { HomeIcon, TruckIcon, PlusIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 export default function SupplierCreatePage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function SupplierCreatePage() {
 
   const handleSubmit = async () => {
     if (!name || !code) {
-      setError("กรุณาระบุรหัสผู้ผลิต และชื่อผู้ผลิต");
+      setError(t("msg.manufacturer_code_name_required"));
       return;
     }
     setLoading(true);
@@ -57,10 +58,10 @@ export default function SupplierCreatePage() {
       if (json.success || json.id) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการสร้าง Supplier");
+        setError(json.error || t("msg.supplier_create_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setLoading(false);
     }
@@ -69,9 +70,9 @@ export default function SupplierCreatePage() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="สร้าง Supplier สำเร็จ!"
-        message={<>ซัพพลายเออร์ <strong>{name}</strong> ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้ารายการ"
+        title={t("msg.supplier_created")}
+        message={<>{t("field.supplier")} <strong>{name}</strong> {t("msg.added_successfully")}</>}
+        primaryLabel={t("action.back_to_list")}
         onPrimary={() => router.push("/suppliers")}
         onBackdrop={() => router.push("/suppliers")}
       />
@@ -84,13 +85,13 @@ export default function SupplierCreatePage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SUPPLIERS CREATE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>เพิ่มข้อมูลผู้ผลิตใหม่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.manufacturer_create_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <TruckIcon className="w-3.5 h-3.5" /> Supplier ใหม่
+              <TruckIcon className="w-3.5 h-3.5" /> {t("form.supplier_new")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เพิ่มข้อมูลผู้ผลิตหรือผู้จัดจำหน่ายรายใหม่เข้าสู่ระบบ
+            {t("hero.manufacturer_create_desc")}
           </Text>
         </VStack>
         <button
@@ -99,7 +100,7 @@ export default function SupplierCreatePage() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <HomeIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
@@ -113,20 +114,20 @@ export default function SupplierCreatePage() {
 
           <FormLayout>
             <HStack gap={4}>
-              <Field label="รหัสอ้างอิง *" inputID="code" isRequired style={{ flex: 1 }}>
+              <Field label={t("form.reference_code_req")} inputID="code" isRequired style={{ flex: 1 }}>
                 <TextInput 
-                  label="รหัสอ้างอิง"
+                  label={t("form.reference_code")}
                   isLabelHidden
-                  placeholder="เช่น SUP-001"
+                  placeholder={t("placeholder.supplier_code")}
                   value={code}
                   onChange={setCode}
                 />
               </Field>
-              <Field label="ชื่อบริษัท *" inputID="name" isRequired style={{ flex: 2 }}>
+              <Field label={t("form.company_name_req")} inputID="name" isRequired style={{ flex: 2 }}>
                 <TextInput 
-                  label="ชื่อบริษัท"
+                  label={t("field.company_name")}
                   isLabelHidden
-                  placeholder="ชื่อบริษัท หรือ ชื่อร้านค้า"
+                  placeholder={t("placeholder.company_name")}
                   value={name}
                   onChange={setName}
                 />
@@ -134,18 +135,18 @@ export default function SupplierCreatePage() {
             </HStack>
             
             <HStack gap={4}>
-              <Field label="ผู้ติดต่อ" inputID="contact" style={{ flex: 1 }}>
+              <Field label={t("field.contact_person")} inputID="contact" style={{ flex: 1 }}>
                 <TextInput 
-                  label="ผู้ติดต่อ"
+                  label={t("field.contact_person")}
                   isLabelHidden
-                  placeholder="ชื่อผู้ติดต่อ"
+                  placeholder={t("form.contact_name")}
                   value={contact}
                   onChange={setContact}
                 />
               </Field>
-              <Field label="เบอร์โทรศัพท์" inputID="phone" style={{ flex: 1 }}>
+              <Field label={t("field.phone")} inputID="phone" style={{ flex: 1 }}>
                 <TextInput 
-                  label="เบอร์โทรศัพท์"
+                  label={t("field.phone")}
                   isLabelHidden
                   placeholder="02-xxx-xxxx"
                   value={phone}
@@ -155,18 +156,18 @@ export default function SupplierCreatePage() {
             </HStack>
 
             <HStack gap={4}>
-              <Field label="อีเมล" inputID="email" style={{ flex: 1 }}>
+              <Field label={t("field.email")} inputID="email" style={{ flex: 1 }}>
                 <TextInput 
-                  label="อีเมล"
+                  label={t("field.email")}
                   isLabelHidden
                   placeholder="contact@company.com"
                   value={email}
                   onChange={setEmail}
                 />
               </Field>
-              <Field label="เลขประจำตัวผู้เสียภาษี" inputID="taxId" style={{ flex: 1 }}>
+              <Field label={t("field.tax_id")} inputID="taxId" style={{ flex: 1 }}>
                 <TextInput 
-                  label="เลขประจำตัวผู้เสียภาษี"
+                  label={t("field.tax_id")}
                   isLabelHidden
                   placeholder="0123456789012"
                   value={taxId}
@@ -175,25 +176,25 @@ export default function SupplierCreatePage() {
               </Field>
             </HStack>
 
-            <Field label="ที่อยู่" inputID="address">
+            <Field label={t("field.address")} inputID="address">
               <TextArea
-                label="ที่อยู่"
+                label={t("field.address")}
                 isLabelHidden
-                placeholder="ที่อยู่สำหรับออกเอกสาร..."
+                placeholder={t("placeholder.doc_address")}
                 value={address}
                 onChange={setAddress}
               />
             </Field>
 
-            <Field label="สถานะการใช้งาน" inputID="isActive">
+            <Field label={t("form.usage_status")} inputID="isActive">
               <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
                 <Switch
-                  label="ใช้งาน"
+                  label={t("field.active")}
                   value={isActive}
                   onChange={setIsActive}
                 />
                 <Text type="body" size="sm" color={isActive ? "primary" : "secondary"}>
-                  {isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
+                  {isActive ? t("form.enabled") : t("form.suspend")}
                 </Text>
               </HStack>
             </Field>
@@ -205,7 +206,7 @@ export default function SupplierCreatePage() {
               onClick={() => router.push("/suppliers")}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
             >
-              ยกเลิก
+              {t("action.cancel")}
             </button>
             <button
               type="button"
@@ -214,7 +215,7 @@ export default function SupplierCreatePage() {
               className="cmms-btn-primary"
             >
               <PlusIcon className="w-4 h-4" />
-              {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+              {loading ? t("common.saving") : t("action.save_data")}
             </button>
           </HStack>
         </VStack>
