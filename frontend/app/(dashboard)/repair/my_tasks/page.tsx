@@ -52,6 +52,7 @@ interface TaskItem extends Record<string, unknown> {
   assignedDate: string;
   estimatedCompletion: string;
   assetCode?: string;
+  outsourceBy?: string;
   beforeImg?: string;
   afterImg?: string;
   receiverName?: string;
@@ -62,6 +63,7 @@ export default function MyTasksPage() {
   const hero = usePageHero("repair/my_tasks");
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"new" | "in_progress" | "completed">("new");
+  const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [error, setError] = useState(false);
@@ -131,7 +133,8 @@ export default function MyTasksPage() {
               beforeImg: r.before_image_path || "",
               afterImg: r.after_image_path || "",
               receiverName: r.receiver_name || "-",
-              receiverSignature: r.receiver_signature_path || ""
+              receiverSignature: r.receiver_signature_path || "",
+              outsourceBy: r.outsource_by || ""
             });
           });
         }
@@ -158,6 +161,7 @@ export default function MyTasksPage() {
             assignedDate: p.due_date || "-",
             estimatedCompletion: p.due_date || "-",
             assetCode: p.asset_code || "",
+            outsourceBy: p.outsource_by || "",
           });
         });
 
@@ -312,9 +316,13 @@ export default function MyTasksPage() {
     ? tasks
     : tasks.filter(t => t.assignedTo === currentUserId || (t.teamIds || []).includes(currentUserId));
   const filteredTasks = myTasks.filter(t => {
-    if (activeTab === "new") return t.status === "new";
-    if (activeTab === "in_progress") return t.status === "in_progress" || t.status === "pending_parts";
-    return t.status === "completed";
+    const matchTab = activeTab === "new"
+      ? t.status === "new"
+      : activeTab === "in_progress"
+        ? t.status === "in_progress" || t.status === "pending_parts"
+        : t.status === "completed";
+    const matchOutsource = outsourceFilter === "all" || (outsourceFilter === "out" ? !!t.outsourceBy : !t.outsourceBy);
+    return matchTab && matchOutsource;
   });
 
   const countNew = myTasks.filter(t => t.status === "new").length;
@@ -345,7 +353,21 @@ export default function MyTasksPage() {
       ),
     },
     { key: "machine", header: t("tbl.asset"), width: proportional(2) },
-    { key: "title", header: t("tbl.subject"), width: proportional(2.5) },
+    {
+      key: "title",
+      header: t("tbl.subject"),
+      width: proportional(2.5),
+      renderCell: (task) => (
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Text type="body" size="sm">{task.title}</Text>
+          {task.outsourceBy && (
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+              ภายนอก{task.outsourceBy ? ` · ${task.outsourceBy}` : ""}
+            </span>
+          )}
+        </HStack>
+      ),
+    },
     {
       key: "status",
       header: t("tbl.status"),
@@ -544,6 +566,27 @@ export default function MyTasksPage() {
         >
           ซ่อมเสร็จแล้ว ({countDone})
         </button>
+        <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
+          {([
+            { v: "all", label: "ทั้งหมด" },
+            { v: "in", label: "งานใน" },
+            { v: "out", label: "งานภายนอก" },
+          ] as const).map((opt) => (
+            <button
+              key={opt.v}
+              type="button"
+              onClick={() => setOutsourceFilter(opt.v)}
+              style={{
+                padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                background: outsourceFilter === opt.v ? "var(--cmms-bg-wash)" : "transparent",
+                color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </HStack>
       </div>
 
       {/* Table */}
