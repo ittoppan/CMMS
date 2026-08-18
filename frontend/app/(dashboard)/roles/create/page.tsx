@@ -12,6 +12,7 @@ import { Field } from "@astryxdesign/core/Field";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { HomeIcon, ShieldCheckIcon, PlusIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 
 export default function RoleCreatePage() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function RoleCreatePage() {
 
   const handleSubmit = async () => {
     if (!name) {
-      setError("กรุณาระบุชื่อบทบาท");
+      setError(t("msg.role_name_required"));
       return;
     }
     setLoading(true);
@@ -44,10 +45,10 @@ export default function RoleCreatePage() {
       if (json.success || json.id) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการสร้าง Role");
+        setError(json.error || t("msg.role_create_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setLoading(false);
     }
@@ -56,9 +57,9 @@ export default function RoleCreatePage() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="สร้างบทบาทสำเร็จ!"
-        message={<>บทบาท <strong>{name}</strong> ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปจัดการสิทธิ์"
+        title={t("msg.role_created")}
+        message={<>{t("field.role")} <strong>{name}</strong> {t("msg.added_successfully")}</>}
+        primaryLabel={t("action.back_to_permissions")}
         onPrimary={() => router.push("/roles")}
         onBackdrop={() => router.push("/roles")}
       />
@@ -71,13 +72,13 @@ export default function RoleCreatePage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ROLES CREATE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>สร้างบทบาทใหม่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.roles_create_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ShieldCheckIcon className="w-3.5 h-3.5" /> Roles & Permissions
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เพิ่มบทบาทใหม่ในระบบเพื่อใช้ในการกำหนดสิทธิ์การเข้าถึงข้อมูล
+            {t("hero.roles_create_desc")}
           </Text>
         </VStack>
         <button
@@ -86,7 +87,7 @@ export default function RoleCreatePage() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <HomeIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
@@ -99,20 +100,20 @@ export default function RoleCreatePage() {
           )}
 
           <FormLayout>
-            <Field label="ชื่อบทบาท *" inputID="name" isRequired>
+            <Field label={t("form.role_name_req")} inputID="name" isRequired>
               <TextInput 
-                label="ชื่อบทบาท"
+                label={t("form.role_name")}
                 isLabelHidden
-                placeholder="เช่น ช่างซ่อมบำรุง, ผู้จัดการ"
+                placeholder={t("placeholder.roles")}
                 value={name}
                 onChange={setName}  />
             </Field>
 
-            <Field label="รายละเอียด" inputID="description">
+            <Field label={t("field.description")} inputID="description">
               <TextArea
-                label="รายละเอียด"
+                label={t("field.description")}
                 isLabelHidden
-                placeholder="คำอธิบายหน้าที่และสิทธิ์เบื้องต้น..."
+                placeholder={t("placeholder.role_description")}
                 value={description}
                 onChange={setDescription}
               />
@@ -125,7 +126,7 @@ export default function RoleCreatePage() {
               onClick={() => router.push("/roles")}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
             >
-              ยกเลิก
+              {t("action.cancel")}
             </button>
             <button
               type="button"
@@ -134,7 +135,7 @@ export default function RoleCreatePage() {
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
             >
               <PlusIcon className="w-4 h-4" />
-              {loading ? "กำลังสร้าง..." : "สร้างบทบาทใหม่"}
+              {loading ? t("common.creating") : t("form.roles_create_title")}
             </button>
           </HStack>
         </VStack>

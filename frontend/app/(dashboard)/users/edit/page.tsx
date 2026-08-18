@@ -18,13 +18,14 @@ import {
 } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
 import { compressImage } from "@/lib/imageCompress";
+import { t } from "@/lib/i18n";
 
 const PRESET_AVATARS = [
-  { label: "ช่างซ่อม 1", url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
-  { label: "ช่างซ่อม 2", url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech2" },
-  { label: "วิศวกร 1", url: "https://api.dicebear.com/7.x/bottts/svg?seed=eng1" },
-  { label: "ผู้จัดการ", url: "https://api.dicebear.com/7.x/bottts/svg?seed=manager1" },
-  { label: "ผู้ดูแลระบบ", url: "https://api.dicebear.com/7.x/bottts/svg?seed=admin1" },
+  { label: t("form.avatar_tech1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
+  { label: t("form.avatar_tech2"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech2" },
+  { label: t("form.avatar_engineer1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=eng1" },
+  { label: t("form.manager"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=manager1" },
+  { label: t("form.administrator"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=admin1" },
 ];
 
 function EditUserContent() {
@@ -62,14 +63,14 @@ function EditUserContent() {
         update("avatar", dataUrl);
       } catch (err) {
         console.error("Image compress failed", err);
-        setErrorMessage("ไม่สามารถประมวลผลรูปภาพได้ กรุณาเลือกรูปอื่น");
+        setErrorMessage(t("msg.image_process_error"));
       }
     }
   };
 
   useEffect(() => {
     if (!userId) {
-      setErrorMessage("ไม่ระบุรหัสผู้ใช้");
+      setErrorMessage(t("msg.user_id_missing"));
       setLoading(false);
       return;
     }
@@ -92,16 +93,16 @@ function EditUserContent() {
             mustChange: user.must_change_password === 1 || user.must_change_password === "1" || user.must_change_password === true,
           });
         } else {
-          setErrorMessage("ไม่พบข้อมูลผู้ใช้");
+          setErrorMessage(t("msg.user_not_found"));
         }
       })
-      .catch(() => setErrorMessage("เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้"))
+      .catch(() => setErrorMessage(t("msg.user_load_error")))
       .finally(() => setLoading(false));
   }, [userId]);
 
   const handleSubmit = async () => {
     if (!form.username || !form.fullName) {
-      setErrorMessage("กรุณากรอกชื่อผู้ใช้ และชื่อ-นามสกุล");
+      setErrorMessage(t("msg.username_fullname_required"));
       return;
     }
     setSubmitting(true);
@@ -132,10 +133,10 @@ function EditUserContent() {
         // แจ้ง layout (มุมขวาบน) ให้รีเฟรชรูปโปรไฟล์ใหม่ทันที
         window.dispatchEvent(new Event("cmms:profile-updated"));
       } else {
-        setErrorMessage(json.error || "เกิดข้อผิดพลาดในการบันทึก");
+        setErrorMessage(json.error || t("msg.save_error"));
       }
     } catch {
-      setErrorMessage("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setErrorMessage(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -144,9 +145,9 @@ function EditUserContent() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="บันทึกข้อมูลผู้ใช้สำเร็จ!"
-        message={<>ข้อมูลบัญชีผู้ใช้ <strong>{form.username}</strong> ถูกอัปเดตเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปหน้ารายการผู้ใช้"
+        title={t("msg.user_saved")}
+        message={<>{t("form.user_account_info")} <strong>{form.username}</strong> {t("msg.updated_successfully")}</>}
+        primaryLabel={t("action.back_to_users")}
         onPrimary={() => router.push("/users")}
         onBackdrop={() => router.push("/users")}
       />
@@ -159,13 +160,13 @@ function EditUserContent() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS EDIT · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขโปรไฟล์และข้อมูลผู้ใช้</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.profile_edit_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <PencilSquareIcon className="w-3.5 h-3.5" /> ผู้ใช้งานระบบ
+              <PencilSquareIcon className="w-3.5 h-3.5" /> {t("menu.users")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ปรับปรุงโปรไฟล์ รูปภาพประจำตัว รหัสผ่าน และสิทธิ์การใช้งานในระบบ CMMS
+            {t("hero.profile_edit_desc")}
           </Text>
         </VStack>
         <button
@@ -174,13 +175,13 @@ function EditUserContent() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <ArrowLeftIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
       <Card elevation="low" padding={6}>
         {loading ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูลผู้ใช้...</Text>
+          <Text type="body" color="secondary">{t("common.loading_users")}</Text>
         ) : (
           <VStack gap={5}>
             {errorMessage && (
@@ -192,7 +193,7 @@ function EditUserContent() {
             {/* Profile Avatar Upload & Selector */}
             <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
               <VStack gap={3}>
-                <Text type="body" weight="bold">เปลี่ยนรูปโปรไฟล์</Text>
+                <Text type="body" weight="bold">{t("action.change_profile_image")}</Text>
                 <HStack gap={4} vAlign="center" wrap="wrap">
                   {form.avatar ? (
                     <Avatar name={form.fullName || form.username || "User"} src={form.avatar} size="lg" />
@@ -200,7 +201,7 @@ function EditUserContent() {
                     <Avatar name={form.fullName || form.username || "User"} size="lg" />
                   )}
                   <VStack gap={2}>
-                    <Text type="body" size="sm" color="secondary">เลือกรูปประจำตัว หรืออัปโหลดไฟล์รูปภาพใหม่</Text>
+                    <Text type="body" size="sm" color="secondary">{t("form.avatar_hint")}</Text>
                     <HStack gap={2} wrap="wrap">
                       {PRESET_AVATARS.map((av, idx) => (
                         <button
@@ -224,7 +225,7 @@ function EditUserContent() {
                         padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
                         fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
                       }}>
-                        <PhotoIcon className="w-4 h-4" /> อัปโหลดรูปภาพ...
+                        <PhotoIcon className="w-4 h-4" /> {t("common.uploading")}
                         <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
                       </label>
                     </HStack>
@@ -234,120 +235,120 @@ function EditUserContent() {
             </div>
 
             <FormLayout>
-              <Field label="ชื่อผู้ใช้ *" inputID="username" isRequired>
+              <Field label={t("form.username_req")} inputID="username" isRequired>
                 <TextInput
-                  label="ชื่อผู้ใช้"
+                  label={t("field.username")}
                   isLabelHidden
                   value={form.username}
                   onChange={(v: string) => update("username", v)}
                 />
               </Field>
 
-              <Field label="ชื่อ-นามสกุล *" inputID="fullName" isRequired>
+              <Field label={t("form.full_name_req")} inputID="fullName" isRequired>
                 <TextInput
-                  label="ชื่อ-นามสกุล"
+                  label={t("field.full_name")}
                   isLabelHidden
                   value={form.fullName}
                   onChange={(v: string) => update("fullName", v)}
                 />
               </Field>
 
-              <Field label="รหัสพนักงาน" inputID="employeeCode">
+              <Field label={t("field.employee_code")} inputID="employeeCode">
                 <TextInput
-                  label="รหัสพนักงาน"
+                  label={t("field.employee_code")}
                   isLabelHidden
-                  placeholder="เช่น E01117"
+                  placeholder={t("placeholder.employee_code")}
                   value={form.employeeCode}
                   onChange={(v: string) => update("employeeCode", v.toUpperCase())}
                 />
               </Field>
 
-              <Field label="รหัสผ่านใหม่ (หากต้องการเปลี่ยน)" inputID="password">
+              <Field label={t("form.new_password_optional")} inputID="password">
                 <TextInput
-                  label="รหัสผ่านใหม่"
+                  label={t("form.new_password")}
                   isLabelHidden
                   type="password"
-                  placeholder="เว้นว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน"
+                  placeholder={t("form.password_blank_hint")}
                   value={form.password}
                   onChange={(v: string) => update("password", v)}
                 />
               </Field>
 
-              <Field label="อีเมล" inputID="email">
+              <Field label={t("field.email")} inputID="email">
                 <TextInput
-                  label="อีเมล"
+                  label={t("field.email")}
                   isLabelHidden
                   value={form.email}
                   onChange={(v: string) => update("email", v)}
                 />
               </Field>
 
-              <Field label="เบอร์โทรศัพท์" inputID="phone">
+              <Field label={t("field.phone")} inputID="phone">
                 <TextInput
-                  label="เบอร์โทรศัพท์"
+                  label={t("field.phone")}
                   isLabelHidden
                   value={form.phone}
                   onChange={(v: string) => update("phone", v)}
                 />
               </Field>
 
-              <Field label="LINE ID (รหัสผู้ใช้)" inputID="lineUserId">
+              <Field label={t("form.line_id_label")} inputID="lineUserId">
                 <TextInput
                   label="LINE ID"
                   isLabelHidden
-                  placeholder="เช่น U61f2a48ea934bd4438d0f2cb58aa46a2 — ใช้สำหรับแจ้งเตือน LINE"
+                  placeholder={t("placeholder.line_id")}
                   value={form.lineUserId}
                   onChange={(v: string) => update("lineUserId", v)}
                 />
               </Field>
 
-              <Field label="ตำแหน่งงาน" inputID="position">
+              <Field label={t("field.position")} inputID="position">
                 <TextInput
-                  label="ตำแหน่งงาน"
+                  label={t("field.position")}
                   isLabelHidden
                   value={form.position}
                   onChange={(v: string) => update("position", v)}
                 />
               </Field>
 
-              <Field label="บทบาทการใช้งาน" inputID="role">
+              <Field label={t("form.usage_role")} inputID="role">
                 <Selector
-                  label="บทบาทการใช้งาน"
+                  label={t("form.usage_role")}
                   isLabelHidden
                   value={form.role}
                   onChange={(v: string) => update("role", v)}
                   options={[
-                    { value: "technician", label: "ช่างซ่อมบำรุง" },
-                    { value: "engineer", label: "วิศวกร" },
-                    { value: "manager", label: "ผู้จัดการ" },
-                    { value: "operator", label: "ผู้ควบคุมเครื่องจักร" },
-                    { value: "admin", label: "ผู้ดูแลระบบ" },
+                    { value: "technician", label: t("form.technician") },
+                    { value: "engineer", label: t("field.engineer") },
+                    { value: "manager", label: t("form.manager") },
+                    { value: "operator", label: t("form.machine_operator") },
+                    { value: "admin", label: t("form.administrator") },
                   ]}
                 />
               </Field>
 
-              <Field label="สถานะบัญชีผู้ใช้" inputID="isActive">
+              <Field label={t("form.account_status")} inputID="isActive">
                 <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
                   <Switch
-                    label="ใช้งานบัญชีนี้"
+                    label={t("form.activate_account")}
                     value={form.isActive}
                     onChange={(val: boolean) => update("isActive", val)}
                   />
                   <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
-                    {form.isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
+                    {form.isActive ? t("form.enabled") : t("form.suspend")}
                   </Text>
                 </HStack>
               </Field>
 
-              <Field label="บังคับเปลี่ยนรหัสผ่านครั้งแรก" inputID="mustChange">
+              <Field label={t("form.force_password_change")} inputID="mustChange">
                 <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
                   <Switch
-                    label="ให้เปลี่ยนรหัสเมื่อล็อกอินครั้งหน้า"
+                    label={t("form.force_password_hint")}
                     value={form.mustChange}
                     onChange={(val: boolean) => update("mustChange", val)}
                   />
                   <Text type="body" size="sm" color={form.mustChange ? "primary" : "secondary"}>
-                    {form.mustChange ? "บังคับ (ต้องเปลี่ยนก่อนใช้งาน)" : "ไม่บังคับ"}
+                    {form.mustChange ? t("form.force_change_hint") : t("form.optional")}
                   </Text>
                 </HStack>
               </Field>
@@ -363,7 +364,7 @@ function EditUserContent() {
             onClick={() => (window.location.href = "/users")}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
           >
-            ยกเลิก
+            {t("action.cancel")}
           </button>
           <button
             type="button"
@@ -372,7 +373,7 @@ function EditUserContent() {
             className="cmms-btn-primary"
           >
             <PencilSquareIcon className="w-4 h-4" />
-            {submitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+            {submitting ? t("common.saving") : t("action.save_edit")}
           </button>
         </HStack>
       )}
@@ -382,7 +383,7 @@ function EditUserContent() {
 
 export default function EditUserPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">กำลังโหลด...</Text></div>}>
+    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">{t("common.loading")}</Text></div>}>
       <EditUserContent />
     </Suspense>
   );

@@ -8,24 +8,25 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
 import { DateInput } from "@astryxdesign/core/DateInput";
 import { PlusIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import { t } from "@/lib/i18n";
 
 const categoryOptions = [
-  { value: "pump", label: "ปั๊ม" },
-  { value: "compressor", label: "คอมเพรสเซอร์" },
-  { value: "motor", label: "มอเตอร์" },
-  { value: "heat-exchanger", label: "เครื่องแลกเปลี่ยนความร้อน" },
-  { value: "boiler", label: "หม้อไอน้ำ" },
-  { value: "conveyor", label: "สายพานลำเลียง" },
-  { value: "machine", label: "เครื่องจักร" },
-  { value: "electrical", label: "อุปกรณ์ไฟฟ้า" },
+  { value: "pump", label: t("field.pump") },
+  { value: "compressor", label: t("field.compressor") },
+  { value: "motor", label: t("field.motor") },
+  { value: "heat-exchanger", label: t("field.heat_exchanger") },
+  { value: "boiler", label: t("field.boiler") },
+  { value: "conveyor", label: t("field.conveyor") },
+  { value: "machine", label: t("field.asset") },
+  { value: "electrical", label: t("form.equipment_electrical") },
 ];
 
 const departmentOptions = [
-  { value: "production", label: "ฝ่ายผลิต" },
-  { value: "utilities", label: "ฝ่ายสาธารณูปโภค" },
-  { value: "fabrication", label: "ฝ่ายประกอบ" },
-  { value: "facility", label: "ฝ่ายอาคาร" },
-  { value: "logistics", label: "ฝ่ายคลังสินค้า" },
+  { value: "production", label: t("form.dept_production") },
+  { value: "utilities", label: t("form.dept_utilities") },
+  { value: "fabrication", label: t("form.dept_assembly") },
+  { value: "facility", label: t("form.dept_building") },
+  { value: "logistics", label: t("form.dept_warehouse") },
 ];
 
 export default function CreateAssetPage() {
@@ -35,44 +36,44 @@ export default function CreateAssetPage() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSETS CREATE · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ลงทะเบียนเครื่องจักรใหม่</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.assets_create_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ClipboardDocumentIcon className="w-3.5 h-3.5" /> ฟอร์มลงทะเบียน
+              <ClipboardDocumentIcon className="w-3.5 h-3.5" /> {t("form.registration_form")}
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            กรอกข้อมูลเครื่องจักร/ทรัพย์สินใหม่เข้าระบบทะเบียน CMMS-TOPPAN
+            {t("hero.assets_create_desc")}
           </Text>
         </VStack>
         <a href="/assets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
           <PlusIcon className="w-4 h-4" />
-          กลับรายการ
+          {t("action.reverse_entry")}
         </a>
       </div>
 
       <Card padding={6}>
         <Grid columns={2} gap={4}>
-          <TextInput label="รหัสทรัพย์สิน *" value="" placeholder="เช่น AST-016"  />
-          <TextInput label="ชื่อทรัพย์สิน *" value="" placeholder="เช่น Centrifugal Pump P-102"  />
-          <Selector label="หมวดหมู่ *" options={categoryOptions} placeholder="เลือกหมวดหมู่" />
-          <Selector label="แผนก *" options={departmentOptions} placeholder="เลือกแผนก" />
-          <TextInput label="สถานที่ติดตั้ง" value="" placeholder="เช่น อาคาร A ชั้น 2"  />
-          <DateInput label="วันที่ติดตั้ง" />
-          <TextInput label="ผู้ผลิต" value="" placeholder="เช่น Grundfos, Siemens"  />
-          <TextInput label="รุ่น" value="" placeholder="เช่น CR 32-3"  />
+          <TextInput label={t("form.asset_code_req")} value="" placeholder={t("placeholder.asset_code")}  />
+          <TextInput label={t("form.asset_name_req")} value="" placeholder={t("placeholder.asset_name")}  />
+          <Selector label={t("form.category_req")} options={categoryOptions} placeholder={t("form.select_category")} />
+          <Selector label={t("form.department_req")} options={departmentOptions} placeholder={t("form.select_department")} />
+          <TextInput label={t("form.install_location")} value="" placeholder={t("placeholder.address")}  />
+          <DateInput label={t("form.install_date")} />
+          <TextInput label={t("field.manufacturer")} value="" placeholder={t("placeholder.manufacturer")}  />
+          <TextInput label={t("field.model")} value="" placeholder={t("placeholder.model")}  />
         </Grid>
       </Card>
 
       <HStack gap={3} hAlign="end">
         <a href="/assets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300">
-          ยกเลิก
+          {t("action.cancel")}
         </a>
         <button
           type="button"
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
         >
           <PlusIcon className="w-4 h-4" />
-          บันทึกเครื่องจักร
+          {t("form.assets_save")}
         </button>
       </HStack>
     </VStack>

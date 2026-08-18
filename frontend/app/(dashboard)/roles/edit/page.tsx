@@ -12,6 +12,7 @@ import { Field } from "@astryxdesign/core/Field";
 import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
 import { ShieldCheckIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import SuccessDialog from "@/components/SuccessDialog";
+import { t } from "@/lib/i18n";
 function EditRoleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ function EditRoleContent() {
 
   useEffect(() => {
     if (!roleId) {
-      setError("ไม่ระบุหมายเลข Role");
+      setError(t("msg.role_id_missing"));
       setLoadingData(false);
       return;
     }
@@ -38,16 +39,16 @@ function EditRoleContent() {
           setName(json.name || "");
           setDescription(json.description || "");
         } else {
-          setError("ไม่พบข้อมูล Role");
+          setError(t("msg.role_not_found"));
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError(t("msg.load_error")))
       .finally(() => setLoadingData(false));
   }, [roleId]);
 
   const handleSubmit = async () => {
     if (!name) {
-      setError("กรุณาระบุชื่อบทบาท");
+      setError(t("msg.role_name_required"));
       return;
     }
     setSubmitting(true);
@@ -68,10 +69,10 @@ function EditRoleContent() {
       if (json.success || json.message) {
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการอัปเดต Role");
+        setError(json.error || t("msg.role_update_error"));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง");
+      setError(t("msg.conn_fail_retry"));
     } finally {
       setSubmitting(false);
     }
@@ -80,9 +81,9 @@ function EditRoleContent() {
   if (submitted) {
     return (
       <SuccessDialog
-        title="อัปเดตบทบาทสำเร็จ!"
-        message={<>บทบาท <strong>{name}</strong> ถูกอัปเดตเรียบร้อยแล้ว</>}
-        primaryLabel="กลับไปจัดการสิทธิ์"
+        title={t("msg.role_updated")}
+        message={<>{t("field.role")} <strong>{name}</strong> {t("msg.updated_successfully")}</>}
+        primaryLabel={t("action.back_to_permissions")}
         onPrimary={() => router.push("/roles")}
         onBackdrop={() => router.push("/roles")}
       />
@@ -95,13 +96,13 @@ function EditRoleContent() {
         <VStack gap={1}>
           <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ROLES EDIT · CMMS-TOPPAN</Text>
           <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลบทบาท</Heading>
+            <Heading level={2} style={{ color: "#fff" }}>{t("form.roles_edit_title")}</Heading>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               <ShieldCheckIcon className="w-3.5 h-3.5" /> Roles & Permissions
             </span>
           </HStack>
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ปรับปรุงข้อมูลบทบาทในระบบเพื่อใช้ในการกำหนดสิทธิ์การเข้าถึงข้อมูล
+            {t("hero.roles_edit_desc")}
           </Text>
         </VStack>
         <button
@@ -110,13 +111,13 @@ function EditRoleContent() {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
           <PencilSquareIcon className="w-4 h-4" />
-          ย้อนกลับ
+          {t("action.back")}
         </button>
       </div>
 
       <Card elevation="low" padding={6}>
         {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
+          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
         ) : (
           <VStack gap={5} style={{ maxWidth: 640 }}>
             {error && (
@@ -126,17 +127,17 @@ function EditRoleContent() {
             )}
 
             <FormLayout>
-              <Field label="ชื่อบทบาท *" inputID="name" isRequired>
+              <Field label={t("form.role_name_req")} inputID="name" isRequired>
                 <TextInput 
-                  label="ชื่อบทบาท"
+                  label={t("form.role_name")}
                   isLabelHidden
                   value={name}
                   onChange={setName}  />
               </Field>
 
-              <Field label="รายละเอียด" inputID="description">
+              <Field label={t("field.description")} inputID="description">
                 <TextArea
-                  label="รายละเอียด"
+                  label={t("field.description")}
                   isLabelHidden
                   value={description}
                   onChange={setDescription}
@@ -150,7 +151,7 @@ function EditRoleContent() {
                 onClick={() => router.push("/roles")}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
               >
-                ยกเลิก
+                {t("action.cancel")}
               </button>
               <button
                 type="button"
@@ -159,7 +160,7 @@ function EditRoleContent() {
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
               >
                 <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                {submitting ? t("common.saving") : t("action.save_data")}
               </button>
             </HStack>
           </VStack>
@@ -171,7 +172,7 @@ function EditRoleContent() {
 
 export default function EditRolePage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
       <EditRoleContent />
     </Suspense>
   );
