@@ -537,6 +537,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </button>
       <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
       <h1 className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</h1>
+      {/* ทางลัดแจ้งซ่อม + badge งานค้างส่ง (offline queue) — มุมขวาบน (เหมือน bottom nav) */}
+      <a
+        href="/repair/request"
+        className="cmms-mobile-app-bar-btn"
+        aria-label={`แจ้งซ่อม${pendingCount > 0 ? ` — มีงานค้างส่ง ${pendingCount} รายการ` : ""}`}
+        title="แจ้งซ่อมด่วน"
+        style={{ textDecoration: "none" }}
+      >
+        <span className="cmms-mobile-nav-icon-wrap">
+          <WrenchScrewdriverIcon className="w-5 h-5" />
+          {pendingCount > 0 && (
+            <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
+              {pendingCount > 99 ? "99+" : pendingCount}
+            </span>
+          )}
+        </span>
+      </a>
     </header>
 
     {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (< 1024px) — ปุ่มตามสิทธิ์บทบาท ═══════════ */}
