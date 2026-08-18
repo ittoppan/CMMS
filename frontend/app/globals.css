@@ -831,6 +831,12 @@ dialog.cmms-dialog-closing[open]::backdrop {
   to   { opacity: 0; }
 }
 
+/* ── เนื้อหายาวเกินความสูง dialog (เช่น ปิดใบงานซ่อม) — ให้เลื่อนได้
+   แทนการถูกตัดทิ้ง (Astryx inner มี overflow:hidden) ── */
+dialog[open] > div {
+  overflow-y: auto;
+}
+
 /* Dropdown (Selector listbox / menu) — ปรับจังหวะเปิดให้กลมกลืนกับ dialog
    (Astryx มี entry animation อยู่แล้ว — เปลี่ยน easing เป็นแบบค่อยๆ ทรงตัว)
    ใช้ longhand เพื่อคง keyframe เดิมของ Astryx ไว้ (ทิศตามตำแหน่ง dropdown) */
