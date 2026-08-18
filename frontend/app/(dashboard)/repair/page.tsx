@@ -44,6 +44,7 @@ interface WorkOrder extends Record<string, unknown> {
   assignee: string;
   date: string;
   overdue: boolean;
+  outsourceBy: string;
 }
 
 const priorityColors: Record<string, React.CSSProperties> = {
@@ -91,6 +92,7 @@ export default function WorkOrdersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
+  const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [rawMap, setRawMap] = useState<Record<number, any>>({});
@@ -115,7 +117,8 @@ export default function WorkOrdersPage() {
           priority: row.priority || "Medium",
           assignee: row.assigned_name || row.assigned_to || "ยังไม่มอบหมาย",
           date: row.created_at ? row.created_at.split(" ")[0] : "-",
-          overdue: isRepairOverdue(row.estimated_completion_date, row.status)
+          overdue: isRepairOverdue(row.estimated_completion_date, row.status),
+          outsourceBy: row.outsource_by || ""
         }));
         setWorkOrders(fetched);
         const map: Record<number, any> = {};
@@ -147,9 +150,10 @@ export default function WorkOrdersPage() {
       const matchSearch = !q || wo.woNumber.toLowerCase().includes(q) || wo.asset.toLowerCase().includes(q) || wo.assignee.toLowerCase().includes(q);
       const matchStatus = !statusFilter || (statusFilter === "overdue" ? wo.overdue : statusGroup(wo.status) === statusFilter);
       const matchPriority = !priorityFilter || wo.priority === priorityFilter;
-      return matchSearch && matchStatus && matchPriority;
+      const matchOutsource = outsourceFilter === "all" || (outsourceFilter === "out" ? !!wo.outsourceBy : !wo.outsourceBy);
+      return matchSearch && matchStatus && matchPriority && matchOutsource;
     });
-  }, [search, statusFilter, priorityFilter, workOrders]);
+  }, [search, statusFilter, priorityFilter, outsourceFilter, workOrders]);
 
   // Compute stats
   const stats = useMemo(() => {
@@ -392,7 +396,21 @@ export default function WorkOrdersPage() {
       ),
     },
     { key: "woNumber", header: t("tbl.wo_no_short"), width: proportional(1) },
-    { key: "asset", header: t("tbl.asset_full"), width: proportional(2) },
+    {
+      key: "asset",
+      header: t("tbl.asset_full"),
+      width: proportional(2),
+      renderCell: (item: WorkOrder) => (
+        <HStack gap={2} vAlign="center" wrap="wrap">
+          <Text type="body" size="sm">{item.asset}</Text>
+          {item.outsourceBy && (
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+              ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
+            </span>
+          )}
+        </HStack>
+      ),
+    },
     {
       key: "status",
       header: t("tbl.status"),
@@ -669,6 +687,27 @@ export default function WorkOrdersPage() {
                     { value: "low", label: "ต่ำ (Low)" },
                   ]}
                 />
+                <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
+                  {([
+                    { v: "all", label: "ทั้งหมด" },
+                    { v: "in", label: "งานใน" },
+                    { v: "out", label: "งานภายนอก" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
+                      style={{
+                        padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                        background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
+                        color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                        boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </HStack>
               </>
             }
           />
