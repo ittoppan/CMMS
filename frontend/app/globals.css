@@ -1393,6 +1393,137 @@ html, body {
   background: transparent;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ตาราง → การ์ดสไลด์บนมือถือ (Card Table View)
+   -----------------------------------------------------------
+   - ใช้ได้ทุกตาราง Astryx (มี data-label ฉีดโดย CardTableLabels)
+   - มือถือ: ซ่อน thead + แต่ละแถวเป็นบัตรการ์ด พร้อมชื่อคอลัมน์
+   - Desktop: ไม่มีผล (ยังเป็นตารางตามเดิม)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+  .astryx-layout-content table.cmms-card-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  /* ลูกของตารางก็ต้องเต็มความกว้างใหม่ (Astryx ตั้ง width ตายตัวตามคอลัมน์) */
+  .astryx-layout-content table.cmms-card-table colgroup,
+  .astryx-layout-content table.cmms-card-table col {
+    display: none;
+  }
+
+  .astryx-layout-content table.cmms-card-table thead {
+    display: none;
+  }
+
+  .astryx-layout-content table.cmms-card-table tbody {
+    display: block;
+  }
+
+  .astryx-layout-content table.cmms-card-table tbody tr {
+    display: block;
+    margin: 0 0 12px 0;
+    padding: 14px 16px;
+    border: 1px solid var(--cmms-border);
+    border-radius: 14px;
+    background: #FFFFFF;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+  }
+
+  .astryx-layout-content table.cmms-card-table tbody tr:hover {
+    background: #FFFFFF;
+  }
+
+  .astryx-layout-content table.cmms-card-table td {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+    box-sizing: border-box;
+    padding: 5px 0;
+    border: none !important;
+    background: transparent !important;
+    text-align: left;
+    white-space: normal;
+  }
+
+  /* ชื่อคอลัมน์เป็นป้ายหัวข้อเหนือค่า */
+  .astryx-layout-content table.cmms-card-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--cmms-text-muted);
+  }
+
+  /* cell แรก (เลขที่ใบงาน/ชื่อ) = หัวการ์ด ชัดเจน ไม่ต้องมีป้าย */
+  .astryx-layout-content table.cmms-card-table td:first-child::before {
+    display: none;
+  }
+  .astryx-layout-content table.cmms-card-table td:first-child {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--cmms-text-primary);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--cmms-border) !important;
+  }
+
+  /* checkbox เลือก → แสดงเป็นช่องเล็กมุมขวาบนของหัวการ์ด (แทนการซ่อน)
+     ใช้ float เพื่อไม่รบกวน flow ของ cell แรก */
+  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) {
+    display: block;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    padding: 0;
+    z-index: 1;
+  }
+  .astryx-layout-content table.cmms-card-table tbody tr {
+    position: relative;
+  }
+  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--cmms-primary);
+  }
+  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"])::before {
+    display: none;
+  }
+  .astryx-layout-content table.cmms-card-table td:first-child {
+    padding-right: 34px;
+  }
+
+  /* cell ว่าง (เช่น คอลัมน์รูปถ่ายที่ไม่มีรูป) → ซ่อน */
+  .astryx-layout-content table.cmms-card-table td:empty {
+    display: none;
+  }
+
+  /* cell ที่มี checkbox (เลือก) → ซ่อน */
+  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) {
+    display: none;
+  }
+
+  /* ปุ่มใน cell action → เต็มความกว้าง กดถนัด */
+  .astryx-layout-content table.cmms-card-table td button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
 /* ================================================
    Mobile Form & Card Redesign (< 768px)
    ================================================ */
