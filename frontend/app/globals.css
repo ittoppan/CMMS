@@ -1351,6 +1351,48 @@ html, body {
   }
 }
 
+/* ── Mobile UX Polish (ระบบ-wide) ──
+   1) แถวฟิลเตอร์/เครื่องมือ (flex แนวนอนที่มี input/select/button หลายตัว)
+      ที่กว้างเกินจอ → ให้ wrap ลงบรรทัดใหม่แทนการถูกตัดทิ้ง
+   2) ตารางกว้าง: แสดง scrollbar บางๆ ตลอดเพื่อบอกว่าเลื่อนแนวนอนได้ */
+@media (max-width: 767.98px) {
+  /* แถวฟิลเตอร์/เครื่องมือ: flex แนวนอนที่มี form control (Field/input/button) หลายตัว
+     ให้ wrap ลงบรรทัดใหม่แทนการถูกตัดทิ้ง (เช่น ฟิลเตอร์ 5 ตัวของหน้ารายงาน) */
+  .astryx-layout-content .astryx-stack.horizontal:has(> :is(input, select, button, label, .astryx-field)),
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) {
+    flex-wrap: wrap;
+  }
+
+  /* ลูกในแถวฟิลเตอร์: ยืด-หดได้ ไม่บังคับความกว้างตายตัว */
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > .astryx-field,
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > input[type="text"],
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > input:not([type]),
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > [class*="TextInput"],
+  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > [class*="Selector"] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* ตัวบ่งชี้เลื่อนแนวนอนของตาราง: scrollbar บางๆ + พื้นหลัง fade ด้านขวา */
+  .astryx-table-scroll-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: var(--cmms-border) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Scrollbar บางๆ สำหรับตารางทุกขนาด (desktop ก็เห็นว่ายังมีคอลัมน์เพิ่ม) */
+.astryx-table-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.astryx-table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: var(--cmms-border);
+  border-radius: 999px;
+}
+.astryx-table-scroll-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* ================================================
    Mobile Form & Card Redesign (< 768px)
    ================================================ */
