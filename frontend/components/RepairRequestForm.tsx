@@ -182,6 +182,8 @@ export default function RepairRequestForm() {
   const [createdWoNo, setCreatedWoNo] = useState<string | null>(null);
   const [offlineQueued, setOfflineQueued] = useState(0);
   const [flushingQueue, setFlushingQueue] = useState(false);
+  // รายการในคิว offline (สำหรับแสดง + ลบทีละรายการ)
+  const [queueItems, setQueueItems] = useState<{ id: number; label: string }[]>([]);
   const [lineBound, setLineBound] = useState<boolean | null>(null); // null=ยังไม่รู้, true/false=สถานะผูก
   // เกตบังคับผูกบัญชี: checking=ตรวจอยู่, bound=ผูกแล้ว (เห็นฟอร์ม), unbound=มี LINE ID แต่ยังไม่ผูก, anonymous=ไม่มี LINE ID เลย
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
@@ -447,6 +449,31 @@ export default function RepairRequestForm() {
 
   const selectedAsset = assets.find((a) => a.code === form.machineCode) || null;
 
+  /* ---- รายการคิว offline — อ่านจาก IndexedDB (แสดงชื่อ + ลบทีละรายการ) ---- */
+  const refreshQueueItems = async () => {
+    try {
+      const items = await queueAll();
+      setQueueItems(
+        items.map((it) => {
+          const p = (it.payload || {}) as Record<string, unknown>;
+          const title = String(p.title || p.description || "").trim();
+          return { id: it.id, label: title ? title.slice(0, 60) : `งานแจ้งซ่อม #${it.id}` };
+        })
+      );
+    } catch { /* offline store ไม่พร้อม */ }
+  };
+
+  // ลบงานที่ค้างส่งทีละรายการ (กันส่งงานที่กรอกผิด)
+  const removeQueuedItem = async (id: number) => {
+    try {
+      await queueRemove(id);
+      setOfflineQueued((n) => Math.max(0, n - 1));
+      setQueueItems((prev) => prev.filter((x) => x.id !== id));
+      // badge bottom nav อัปเดต
+      try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
+    } catch { /* ลบไม่สำเร็จ — ข้าม */ }
+  };
+
   /* ---- Flush offline queue: ส่งงานที่ค้างทั้งหมด (อัตโนมัติเมื่อออนไลน์กลับมา + ปุ่ม "ส่งตอนนี้") ---- */
   const flushQueue = async () => {
     if (!navigator.onLine) return;
@@ -470,6 +497,7 @@ export default function RepairRequestForm() {
         } catch { /* รายการนี้ยังส่งไม่ได้ — ข้ามไปลองรายการถัดไป */ }
       }
     } catch { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ }
+    refreshQueueItems();
     setFlushingQueue(false);
   };
 
@@ -478,6 +506,7 @@ export default function RepairRequestForm() {
     queueAll()
       .then((items) => {
         if (items.length > 0) setOfflineQueued(items.length);
+        refreshQueueItems();
         if (navigator.onLine) flushQueue();
       })
       .catch(() => { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ });
@@ -777,6 +806,40 @@ export default function RepairRequestForm() {
               style={{ flexShrink: 0 }}
             />
           </div>
+
+          {/* รายการค้างส่ง — ลบทีละรายการได้ (กันส่งงานที่กรอกผิด) */}
+          {queueItems.length > 0 && (
+            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+              {queueItems.map((it) => (
+                <div
+                  key={it.id}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    background: "rgba(255,255,255,0.7)", border: "1px solid #f0d9b8",
+                    borderRadius: 8, padding: "6px 10px",
+                  }}
+                >
+                  <span style={{ flex: 1, fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {it.label}
+                  </span>
+                  <button
+                    type="button"
+                    title="ลบงานนี้ออกจากคิว"
+                    aria-label={`ลบ ${it.label}`}
+                    onClick={() => removeQueuedItem(it.id)}
+                    style={{
+                      background: "none", border: "none", cursor: "pointer",
+                      color: "var(--cmms-danger, #DC2626)", fontSize: 14, fontWeight: 800,
+                      padding: "2px 6px", borderRadius: 6, flexShrink: 0, lineHeight: 1,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div style={{ marginTop: 4, opacity: 0.8, fontSize: 12 }}>
             จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์ — หรือกดปุ่มนี้เพื่อส่งทันที
           </div>
