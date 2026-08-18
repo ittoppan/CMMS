@@ -660,7 +660,7 @@ export default function MyTasksPage() {
       )}
 
       {/* CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
-      <AnimatedDialog open={closeModalOpen} onClose={() => setCloseModalOpen(false)}>
+      <AnimatedDialog width="min(720px, 94vw)" open={closeModalOpen} onClose={() => setCloseModalOpen(false)}>
           <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
           <VStack gap={4} style={{ padding: 24 }}>
             <FormLayout>
