@@ -82,6 +82,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   // general
   app_name: { label: "ชื่อระบบ" },
   app_version: { label: "เวอร์ชันระบบ" },
+  animations_enabled: { label: "เปิด animation ของระบบ", hint: "ปิด = ทุกหน้าแสดงผลแบบนิ่ง (ไม่มีการ์ดเลื่อน/เฟด/เด้ง) เหมาะกับเครื่องเก่าหรือพนักงานที่เมารถ — แยกจากค่าตั้งค่า OS" },
   auto_sage_sync: { label: "ซิงค์ Sage อัตโนมัติ" },
   border_radius_style: { label: "รูปแบบมุมโค้ง UI" },
   calendar_view_default: { label: "มุมมองปฏิทินเริ่มต้น" },
@@ -198,6 +199,7 @@ const BOOLEAN_KEYS = new Set([
   "spare_require_approval", "escalation_alert", "push_alert_enabled", "smtp_enabled",
   "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
   "daily_summary_enabled", "auto_req_low_stock", "pm_deferral_enabled",
+  "animations_enabled",
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);
@@ -598,6 +600,10 @@ export default function SettingsPage() {
       setNewSecrets({});
       setSaveMessage(`บันทึกการตั้งค่า ${saved} รายการสำเร็จ`);
       await fetchSettings();
+      // ถ้าสลับ "เปิด animation ของระบบ" → สั่ง ThemeProvider ใช้ทันที (ไม่ต้อง refresh)
+      window.dispatchEvent(new CustomEvent("cmms-anim-setting", {
+        detail: { enabled: (form["animations_enabled"] ?? "1") === "1" },
+      }));
       setTimeout(() => setSaveMessage(""), 4000);
     } catch (e: any) {
       console.error(e);

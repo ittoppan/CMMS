@@ -113,6 +113,18 @@ const applyDesign = (get: (k: string) => string) => {
   }
 };
 
+/**
+ * สวิตช์ "เปิด animation ของระบบ" (settings → animations_enabled)
+ * ผู้ดูแลปิดได้เองแม้ OS ตั้งค่าให้แสดง animation อยู่ — เติมคลาส
+ * cmms-no-anim บน <html> ให้ CSS กัน animation/transition ทั้งระบบ
+ * (แยกจาก prefers-reduced-motion ของ OS ต่างหาก)
+ */
+const applyAnimSetting = (get: (k: string) => string) => {
+  const root = document.documentElement;
+  const enabled = (get("animations_enabled") ?? "1") === "1";
+  root.classList.toggle("cmms-no-anim", !enabled);
+};
+
 export default function ThemeProvider() {
   useEffect(() => {
     let cancelled = false;
@@ -144,6 +156,8 @@ export default function ThemeProvider() {
           root.style.setProperty("--cmms-primary-hover", primary);
           // Page Designer: design_* keys ชนะ preset (ถ้ามีค่า)
           applyDesign(get);
+          // สวิตช์ปิด animation (ผู้ดูแล)
+          applyAnimSetting(get);
         }
       } catch (e) {
         console.error("ThemeProvider load error:", e);
@@ -162,13 +176,21 @@ export default function ThemeProvider() {
       if (detail) applyDesign((k) => detail[k] ?? "");
     };
 
+    // สลับ "เปิด animation ของระบบ" ทันทีจากหน้า settings (ไม่ต้อง refresh)
+    const onAnimSetting = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { enabled?: boolean } | undefined;
+      document.documentElement.classList.toggle("cmms-no-anim", detail?.enabled === false);
+    };
+
     window.addEventListener("cmms-theme-preview", onPreview);
     window.addEventListener("cmms-design-preview", onDesignPreview);
+    window.addEventListener("cmms-anim-setting", onAnimSetting);
     loadFromServer();
     return () => {
       cancelled = true;
       window.removeEventListener("cmms-theme-preview", onPreview);
       window.removeEventListener("cmms-design-preview", onDesignPreview);
+      window.removeEventListener("cmms-anim-setting", onAnimSetting);
     };
   }, []);
 

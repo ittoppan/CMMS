@@ -67,6 +67,7 @@ function settingsDefaultValues(): array {
         'topbar_style'          => 'clean_white',
         'work_hours_per_day'    => '8',
         'lang_default'          => 'th',  // ภาษาหลักของระบบ: th (ไทย) / en (English) — ฐาน i18n
+        'animations_enabled'     => '1',  // เปิด animation UI ทั่วระบบ (0 = ปิดทุกหน้า — ผู้ดูแลเลือกเอง ไม่เกี่ยวกับค่า OS)
         'auto_assign_calibration' => '0',
         'calibration_alert_days'  => '30',
 
