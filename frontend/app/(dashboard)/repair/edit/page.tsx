@@ -28,6 +28,7 @@ function EditWorkOrderContent() {
   const [description, setDescription] = useState("");
   const [woNumber, setWoNumber] = useState("");
   const [contaminateChecking, setContaminateChecking] = useState("not_checked");
+  const [outsourceBy, setOutsourceBy] = useState("");
 
   useEffect(() => {
     if (!woId) {
@@ -45,6 +46,7 @@ function EditWorkOrderContent() {
           setDescription(json.description || "");
           setWoNumber(json.work_order_no || `WO-${json.id}`);
           setContaminateChecking(json.contaminate_checking || "not_checked");
+          setOutsourceBy(json.outsource_by || "");
         } else {
           setError("ไม่พบข้อมูลใบแจ้งซ่อม");
         }
@@ -71,6 +73,7 @@ function EditWorkOrderContent() {
           priority,
           status,
           contaminate_checking: contaminateChecking,
+          outsource_by: outsourceBy,
         }),
       });
       const json = await res.json();
@@ -148,6 +151,13 @@ function EditWorkOrderContent() {
                 { value: "contaminated", label: "พบการปนเปื้อน" },
                 { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
               ]}
+            />
+
+            <TextInput
+              label="ผู้รับเหมาภายนอก (ถ้ามี)"
+              placeholder="ชื่อบริษัทผู้รับเหมา เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+              value={outsourceBy}
+              onChange={setOutsourceBy}
             />
 
             <Selector
