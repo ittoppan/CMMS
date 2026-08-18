@@ -13,6 +13,7 @@ import { Banner } from "@astryxdesign/core/Banner";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
+import { serverResponds } from "@/lib/server-check";
 import {
   PrinterIcon,
   ArrowLeftIcon,
@@ -460,12 +461,15 @@ export default function RepairViewDetailsPage() {
               label="โหลดข้อมูลใหม่"
               variant={onlineBack ? "primary" : "ghost"}
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (!navigator.onLine) {
                   setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
                   return;
                 }
-                window.location.reload();
+                setRetryMsg("กำลังตรวจสอบการเชื่อมต่อ…");
+                const ok = await serverResponds();
+                if (ok) window.location.reload();
+                else setRetryMsg("โหลดไม่สำเร็จ — ลองอีกครั้ง");
               }}
             />
           }

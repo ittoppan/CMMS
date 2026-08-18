@@ -29,6 +29,7 @@ import {
 import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
+import { serverResponds } from "@/lib/server-check";
 
 /* =========================================================
    ฟอร์มแจ้งซ่อม MAINTENANCE JOB REQUEST (F-EN-03)
@@ -819,12 +820,15 @@ export default function RepairRequestForm() {
               label="โหลดข้อมูลใหม่"
               variant={onlineBack ? "primary" : "ghost"}
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (!navigator.onLine) {
                   setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
                   return;
                 }
-                window.location.reload();
+                setRetryMsg("กำลังตรวจสอบการเชื่อมต่อ…");
+                const ok = await serverResponds();
+                if (ok) window.location.reload();
+                else setRetryMsg("โหลดไม่สำเร็จ — ลองอีกครั้ง");
               }}
               style={{ flexShrink: 0 }}
             />
