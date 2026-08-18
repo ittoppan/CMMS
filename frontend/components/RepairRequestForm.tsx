@@ -215,6 +215,8 @@ export default function RepairRequestForm() {
     contaminationRisk: false,
     safetyRelated: false,
     photos: [] as string[],
+    note: "",
+    isUrgent: false,
   });
 
   const update = (key: string, value: string | boolean | string[]) =>
@@ -570,6 +572,8 @@ export default function RepairRequestForm() {
     setSubmitError(null);
     try {
       const priorityMap: Record<string, string> = { breakdown: "critical", wait: "high", running: "medium" };
+      // Override priority to critical if urgent repair is toggled
+      if (form.isUrgent) priorityMap[form.machineStatus] = "critical";
       const sourceTypeMap: Record<string, string> = { Maintenance: "breakdown", PM: "pm", Modify: "modify", Build: "build" };
       const jt = JOB_TYPES.find((j) => j.value === form.jobType);
       const jd = JOB_DESCRIPTIONS.find((j) => j.value === form.jobDescription);
@@ -590,8 +594,10 @@ export default function RepairRequestForm() {
         safety_related: form.safetyRelated ? 1 : 0,
         product_lot_no: form.lotNo,
         before_image_path: form.photos.length > 0 ? form.photos.join("|") : null,
+        notes: form.note || null,
         receiver_name: form.reporterName,
         reporter_phone: form.phone,
+        is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
       };
@@ -653,7 +659,7 @@ export default function RepairRequestForm() {
             <Button label="📋 ดูรายการงานซ่อม" variant="primary" width="100%" onClick={() => (window.location.href = "/repair")} />
             <Button label="แจ้งซ่อมอีก" variant="secondary" width="100%" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [] });
+              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], note: "", isUrgent: false });
             }} />
           </VStack>
         </div>
@@ -1056,6 +1062,18 @@ export default function RepairRequestForm() {
                 onChange={(v: string) => update("outsourceBy", v)}
               />
             </div>
+
+            <div>
+              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>หมายเหตุ (Note)</Text>
+              <TextArea
+                label="หมายเหตุ"
+                isLabelHidden
+                placeholder="บันทึกข้อมูลเพิ่มเติม (ถ้ามี)"
+                value={form.note}
+                onChange={(v: string) => update("note", v)}
+                rows={2}
+              />
+            </div>
           </VStack>
         </Card>
       )}
@@ -1158,6 +1176,27 @@ export default function RepairRequestForm() {
                 </Text>
               </VStack>
             </HStack>
+
+            {/* Urgent Repair Toggle */}
+            <div className={`cmms-contam-box ${form.isUrgent ? "risk" : "safe"}`}>
+              <VStack gap={3}>
+                <HStack gap={2} vAlign="center">
+                  <ExclamationTriangleIcon style={{ width: 18, height: 18 }} />
+                  <Text type="body" weight="bold">แจ้งซ่อมด่วน (Urgent Repair)</Text>
+                </HStack>
+                <HStack gap={3} vAlign="center">
+                  <Switch
+                    label="Urgent Repair"
+                    isLabelHidden
+                    value={form.isUrgent}
+                    onChange={(v: boolean) => update("isUrgent", v)}
+                  />
+                  <Text type="body" size="sm" style={{ color: form.isUrgent ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
+                    {form.isUrgent ? "🚨 แจ้งด่วน — ส่ง LINE + Telegram ทันที" : "ปกติ"}
+                  </Text>
+                </HStack>
+              </VStack>
+            </div>
 
             {/* Photos — หลายไฟล์ + กล้อง */}
             <div>

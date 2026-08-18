@@ -260,11 +260,18 @@ try {
                         sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
                     }
 
-                    // แจ้งเตือนแอดมินผ่าน Telegram เมื่อเป็นงานด่วน CRITICAL หรือเครื่องหยุด
-                    if ($priority === 'CRITICAL' || strtolower((string)($data['machine_status'] ?? '')) === 'down') {
+                    // แจ้งเตือนแอดมินผ่าน Telegram เมื่อเป็นงานด่วน CRITICAL หรือเครื่องหยุด หรือ is_urgent
+                    $isUrgent = !empty($data['is_urgent']) || $priority === 'CRITICAL' || strtolower((string)($data['machine_status'] ?? '')) === 'down';
+                    if ($isUrgent) {
+                        $urgentMsg = "🚨 แจ้งซ่อมด่วน $wo\n" .
+                            "เครื่อง: " . ($assetCode ?: '-') . ($assetName ? " $assetName" : '') . "\n" .
+                            "อาการ: $title\n" .
+                            "ความเร่งด่วน: $priority\n" .
+                            "ผู้แจ้ง: " . (string)($data['receiver_name'] ?? '-') . "\n" .
+                            "สถานะเครื่อง: " . (string)($data['machine_status'] ?? '-');
                         telegramAdminAlert(
                             "แจ้งซ่อมด่วน $wo",
-                            $title . " — เครื่อง: " . ($assetCode ?: '-') . ($assetName ? " $assetName" : '') . " | ความเร่งด่วน: $priority",
+                            $urgentMsg,
                             $detailUrl,
                             'ERROR'
                         );
