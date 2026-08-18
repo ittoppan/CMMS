@@ -122,7 +122,8 @@ const QUEUE_STORE = "submissions";
 function openQueueDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (!("indexedDB" in window)) { reject(new Error("no indexeddb")); return; }
-    const req = indexedDB.open(QUEUE_DB, 1);
+    // เปิดเวอร์ชันล่าสุด (ไม่ระบุ version) — กัน VersionError ถ้า store อื่น (เช่น offline-store.ts) ขยับเวอร์ชันขึ้น
+    const req = indexedDB.open(QUEUE_DB);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(QUEUE_STORE)) {
@@ -180,6 +181,7 @@ export default function RepairRequestForm() {
   const [submitted, setSubmitted] = useState(false);
   const [createdWoNo, setCreatedWoNo] = useState<string | null>(null);
   const [offlineQueued, setOfflineQueued] = useState(0);
+  const [flushingQueue, setFlushingQueue] = useState(false);
   const [lineBound, setLineBound] = useState<boolean | null>(null); // null=ยังไม่รู้, true/false=สถานะผูก
   // เกตบังคับผูกบัญชี: checking=ตรวจอยู่, bound=ผูกแล้ว (เห็นฟอร์ม), unbound=มี LINE ID แต่ยังไม่ผูก, anonymous=ไม่มี LINE ID เลย
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
@@ -445,13 +447,14 @@ export default function RepairRequestForm() {
 
   const selectedAsset = assets.find((a) => a.code === form.machineCode) || null;
 
-  /* ---- Flush offline queue: พอออนไลน์กลับมา → ส่งงานที่ค้างให้อัตโนมัติ ---- */
-  useEffect(() => {
-    const flush = async () => {
-      if (!navigator.onLine) return;
-      try {
-        const items = await queueAll();
-        for (const item of items) {
+  /* ---- Flush offline queue: ส่งงานที่ค้างทั้งหมด (อัตโนมัติเมื่อออนไลน์กลับมา + ปุ่ม "ส่งตอนนี้") ---- */
+  const flushQueue = async () => {
+    if (!navigator.onLine) return;
+    setFlushingQueue(true);
+    try {
+      const items = await queueAll();
+      for (const item of items) {
+        try {
           const res = await apiFetch("/api/v1/repair.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -464,12 +467,22 @@ export default function RepairRequestForm() {
             // badge bottom nav อัปเดต
             try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           }
-        }
-      } catch { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ }
-    };
-    flush();
-    window.addEventListener("online", flush);
-    return () => window.removeEventListener("online", flush);
+        } catch { /* รายการนี้ยังส่งไม่ได้ — ข้ามไปลองรายการถัดไป */ }
+      }
+    } catch { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ }
+    setFlushingQueue(false);
+  };
+
+  useEffect(() => {
+    // นับงานค้างจริงจาก IndexedDB — แสดง banner + ปุ่ม "ส่งตอนนี้" แม้โหลดหน้าใหม่
+    queueAll()
+      .then((items) => {
+        if (items.length > 0) setOfflineQueued(items.length);
+        if (navigator.onLine) flushQueue();
+      })
+      .catch(() => { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ });
+    window.addEventListener("online", flushQueue);
+    return () => window.removeEventListener("online", flushQueue);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // เมื่อเลือกเครื่อง → auto เติมแผนก (ถ้ายังไม่ได้เลือกเอง)
@@ -753,7 +766,20 @@ export default function RepairRequestForm() {
       {/* Offline queue status */}
       {offlineQueued > 0 && (
         <div className="cmms-offline-banner">
-          📴 มีงานแจ้งซ่อมที่ยังไม่ได้ส่ง {offlineQueued} รายการ — จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <span>📴 มีงานแจ้งซ่อมที่ยังไม่ได้ส่ง <b>{offlineQueued}</b> รายการ</span>
+            <Button
+              label={flushingQueue ? "กำลังส่ง..." : "ส่งงานค้างทั้งหมดตอนนี้"}
+              variant="primary"
+              size="sm"
+              isDisabled={flushingQueue || !navigator.onLine}
+              onClick={flushQueue}
+              style={{ flexShrink: 0 }}
+            />
+          </div>
+          <div style={{ marginTop: 4, opacity: 0.8, fontSize: 12 }}>
+            จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์ — หรือกดปุ่มนี้เพื่อส่งทันที
+          </div>
         </div>
       )}
 
