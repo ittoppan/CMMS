@@ -461,6 +461,8 @@ export default function RepairRequestForm() {
           if (json.success || json.id) {
             await queueRemove(item.id);
             setOfflineQueued((n) => Math.max(0, n - 1));
+            // badge bottom nav อัปเดต
+            try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           }
         }
       } catch { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ }
@@ -543,6 +545,8 @@ export default function RepairRequestForm() {
         try {
           await queueAdd(payload);
           setOfflineQueued((n) => n + 1);
+          // badge bottom nav อัปเดต
+          try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           setSubmitted(true);
           setCreatedWoNo("SAVED-OFFLINE");
         } catch {

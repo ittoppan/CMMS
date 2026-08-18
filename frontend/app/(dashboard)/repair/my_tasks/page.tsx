@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
+import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -136,89 +137,107 @@ export default function MyTasksPage() {
       .catch(() => {});
 
     // 2) โหลดงานซ่อม + แผน PM (งานของฉัน = งานซ่อม + PM ที่ได้รับมอบหมาย)
-    Promise.all([
-      fetch("/api/v1/repair.php").then(r => r.json()),
-      fetch("/api/v1/index.php?resource=pm-plans").then(r => r.json()),
-    ])
-      .then(([rows, pmJson]) => {
-        const mapped: TaskItem[] = [];
+    //    สำเร็จ → เก็บ snapshot ลง IndexedDB (offline ใช้ชุดนี้ ไม่พึ่ง SW cache)
+    //    พัง (offline ไม่มี cache) → อ่าน snapshot ล่าสุด
+    const applyRows = (rows: any[], pmJson: any) => {
+      const mapped: TaskItem[] = [];
 
-        // 2.1) งานซ่อม
-        if (Array.isArray(rows) && rows.length > 0) {
-          rows.forEach((r: any) => {
-            mapped.push({
-              rawId: r.id,
-              id: `wo-${r.id}`,
-              kind: "repair",
-              woNumber: r.work_order_no || `EN-${r.id}`,
-              machine: r.asset_name || "-",
-              title: r.title || "-",
-              priority: r.priority || "medium",
-              status: (() => {
-                const s = String(r.status || "").toLowerCase();
-                if (s === "completed" || s === "resolved" || s === "closed") return "completed";
-                if (s === "in_progress") return "in_progress";
-                if (s === "waiting_parts" || s === "pending_parts") return "pending_parts";
-                return "new";
-              })(),
-              overdue: isRepairOverdue(r.estimated_completion_date, r.status),
-              assignedTo: r.assigned_to || null,
-              assignedToName: r.assigned_name || "-",
-              teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
-              team: Array.isArray(r.team) ? r.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
-              assignedDate: r.created_at || "-",
-              estimatedCompletion: r.estimated_completion_date || "-",
-              beforeImg: r.before_image_path || "",
-              afterImg: r.after_image_path || "",
-              receiverName: r.receiver_name || "-",
-              receiverSignature: r.receiver_signature_path || "",
-              outsourceBy: r.outsource_by || "",
-              failureCode: r.failure_code || "",
-              repairCode: r.repair_code || "",
-              costParts: r.cost_parts ? Number(r.cost_parts) : 0,
-              costLabor: r.cost_labor ? Number(r.cost_labor) : 0,
-              costOutsource: r.cost_outsource ? Number(r.cost_outsource) : 0,
-              downtimeMinutes: r.downtime_minutes ? Number(r.downtime_minutes) : 0,
-            });
-          });
-        }
-
-        // 2.2) แผน PM (จากตาราง pm_am จริง — แสดงเฉพาะที่ยังไม่เสร็จเป็นหลัก)
-        const pmList = Array.isArray(pmJson) ? pmJson : (Array.isArray(pmJson?.data) ? pmJson.data : []);
-        pmList.forEach((p: any) => {
-          const pStatus = String(p.status || "pending").toLowerCase();
-          const isDone = pStatus === "completed" || pStatus === "skipped";
+      // 2.1) งานซ่อม
+      if (Array.isArray(rows) && rows.length > 0) {
+        rows.forEach((r: any) => {
           mapped.push({
-            rawId: p.id,
-            id: `pm-${p.id}`,
-            kind: "pm",
-            woNumber: `PM-${String(p.id).padStart(3, "0")}`,
-            machine: p.asset_name || "-",
-            title: p.title || "-",
-            priority: (pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10))) ? "high" : "medium",
-            status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
-            overdue: isRepairOverdue(p.due_date, p.status),
-            assignedTo: p.assigned_to || null,
-            assignedToName: p.assigned_to_name || "-",
-            teamIds: Array.isArray(p.team_ids) ? p.team_ids.map((t: any) => Number(t)) : [],
-            team: Array.isArray(p.team) ? p.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
-            assignedDate: p.due_date || "-",
-            estimatedCompletion: p.due_date || "-",
-            assetCode: p.asset_code || "",
-            outsourceBy: p.outsource_by || "",
+            rawId: r.id,
+            id: `wo-${r.id}`,
+            kind: "repair",
+            woNumber: r.work_order_no || `EN-${r.id}`,
+            machine: r.asset_name || "-",
+            title: r.title || "-",
+            priority: r.priority || "medium",
+            status: (() => {
+              const s = String(r.status || "").toLowerCase();
+              if (s === "completed" || s === "resolved" || s === "closed") return "completed";
+              if (s === "in_progress") return "in_progress";
+              if (s === "waiting_parts" || s === "pending_parts") return "pending_parts";
+              return "new";
+            })(),
+            overdue: isRepairOverdue(r.estimated_completion_date, r.status),
+            assignedTo: r.assigned_to || null,
+            assignedToName: r.assigned_name || "-",
+            teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
+            team: Array.isArray(r.team) ? r.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
+            assignedDate: r.created_at || "-",
+            estimatedCompletion: r.estimated_completion_date || "-",
+            beforeImg: r.before_image_path || "",
+            afterImg: r.after_image_path || "",
+            receiverName: r.receiver_name || "-",
+            receiverSignature: r.receiver_signature_path || "",
+            outsourceBy: r.outsource_by || "",
+            failureCode: r.failure_code || "",
+            repairCode: r.repair_code || "",
+            costParts: r.cost_parts ? Number(r.cost_parts) : 0,
+            costLabor: r.cost_labor ? Number(r.cost_labor) : 0,
+            costOutsource: r.cost_outsource ? Number(r.cost_outsource) : 0,
+            downtimeMinutes: r.downtime_minutes ? Number(r.downtime_minutes) : 0,
           });
         });
+      }
 
-        if (mapped.length > 0) {
-          setTasks(mapped);
-          setError(false);
+      // 2.2) แผน PM (จากตาราง pm_am จริง — แสดงเฉพาะที่ยังไม่เสร็จเป็นหลัก)
+      const pmList = Array.isArray(pmJson) ? pmJson : (Array.isArray(pmJson?.data) ? pmJson.data : []);
+      pmList.forEach((p: any) => {
+        const pStatus = String(p.status || "pending").toLowerCase();
+        const isDone = pStatus === "completed" || pStatus === "skipped";
+        mapped.push({
+          rawId: p.id,
+          id: `pm-${p.id}`,
+          kind: "pm",
+          woNumber: `PM-${String(p.id).padStart(3, "0")}`,
+          machine: p.asset_name || "-",
+          title: p.title || "-",
+          priority: (pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10))) ? "high" : "medium",
+          status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
+          overdue: isRepairOverdue(p.due_date, p.status),
+          assignedTo: p.assigned_to || null,
+          assignedToName: p.assigned_to_name || "-",
+          teamIds: Array.isArray(p.team_ids) ? p.team_ids.map((t: any) => Number(t)) : [],
+          team: Array.isArray(p.team) ? p.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
+          assignedDate: p.due_date || "-",
+          estimatedCompletion: p.due_date || "-",
+          assetCode: p.asset_code || "",
+          outsourceBy: p.outsource_by || "",
+        });
+      });
+
+      if (mapped.length > 0) {
+        setTasks(mapped);
+        setError(false);
+      } else {
+        setError(true);
+      }
+      return mapped;
+    };
+
+    // พยายามโหลดจาก network ก่อน — สำเร็จ: เก็บ snapshot
+    fetch("/api/v1/repair.php")
+      .then((r) => r.json())
+      .then((rows) =>
+        fetch("/api/v1/index.php?resource=pm-plans")
+          .then((r) => r.json())
+          .then((pmJson) => {
+            applyRows(Array.isArray(rows) ? rows : [], pmJson);
+            snapshotSave("my_tasks", { rows: Array.isArray(rows) ? rows : [], pm: pmJson, savedAt: Date.now() });
+          })
+      )
+      .catch(async (e) => {
+        console.error("Fetch tasks error — ลองอ่าน snapshot", e);
+        // offline: อ่าน snapshot ล่าสุดจาก IndexedDB (ไม่พึ่ง SW cache)
+        const snap = await snapshotLoad<{ rows: any[]; pm: any }>("my_tasks");
+        if (snap && Array.isArray(snap.rows) && snap.rows.length > 0) {
+          applyRows(snap.rows, snap.pm);
+          setOffline(true);
         } else {
           setError(true);
         }
-      })
-      .catch(e => {
-        console.error("Fetch tasks error", e);
-        setError(true);
       });
   }, []);
 
