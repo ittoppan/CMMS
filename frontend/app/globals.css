@@ -823,6 +823,20 @@ dialog[open]::backdrop {
 }
 
 /* ================================================
+   สวิตช์ตั้งค่า "ปิด animation" (settings → animations_enabled)
+   ผู้ดูแลเลือกเองได้ (ไม่เกี่ยวกับค่า OS) — ใส่คลาส cmms-no-anim
+   บน <html> โดย ThemeProvider → กัน animation/transition ทั้งระบบ
+   ================================================ */
+html.cmms-no-anim *,
+html.cmms-no-anim *::before,
+html.cmms-no-anim *::after {
+  animation: none !important;
+  animation-delay: 0s !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ================================================
    Success Overlay
    ================================================ */
 .cmms-success-overlay {
