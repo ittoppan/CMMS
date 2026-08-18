@@ -257,7 +257,7 @@ function EditWorkOrderContent() {
         <HStack gap={3} vAlign="center">
           <WrenchScrewdriverIcon className="w-6 h-6" style={{ color: "#fff" }} />
           <VStack gap={0}>
-            <Text type="body" size="sm" style={{ color: "rgba(255,255,255,0.6)" }}>F-EN-03 · บันทึกข้อมูลซ่อม</Text>
+            <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>F-EN-03 · บันทึกข้อมูลซ่อม</Text>
             <Heading level={3} style={{ color: "#fff", margin: 0 }}>
               {woData?.work_order_no || `WO-${woId}`} — {woData?.asset_name || woData?.asset_code || ""}
             </Heading>
