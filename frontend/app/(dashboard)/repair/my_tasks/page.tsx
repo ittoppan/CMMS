@@ -37,6 +37,21 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
+// แสดงเวลา "อัปเดตล่าสุด" แบบไทย (เช่น 18 ส.ค. 69, 11:05 น.)
+function formatTime(ts: number): string {
+  try {
+    return new Date(ts).toLocaleString("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return new Date(ts).toLocaleString();
+  }
+}
+
 interface TaskItem extends Record<string, unknown> {
   rawId: number;
   id: string;
@@ -76,6 +91,7 @@ export default function MyTasksPage() {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [offline, setOffline] = useState(false);
+  const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [etaModalOpen, setEtaModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
@@ -107,8 +123,16 @@ export default function MyTasksPage() {
   const [isDrawing, setIsDrawing] = useState(false);
 
   useEffect(() => {
-    // โหมด offline: แสดง banner (ข้อมูลมาจาก cache ของ Service Worker — ข้อมูลล่าสุดที่โหลดไว้)
-    const updateOffline = () => setOffline(!navigator.onLine);
+    // โหมด offline: แสดง banner + อ่านเวลา "อัปเดตล่าสุด" จาก snapshot
+    // (ข้อมูลอาจมาจาก SW cache หรือ snapshot — เวลาใช้ savedAt จาก snapshot เสมอ)
+    const updateOffline = async () => {
+      const isOff = !navigator.onLine;
+      setOffline(isOff);
+      if (isOff) {
+        const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
+        if (snap?.savedAt) setSnapshotTime(snap.savedAt);
+      }
+    };
     updateOffline();
     window.addEventListener("online", updateOffline);
     window.addEventListener("offline", updateOffline);
@@ -231,10 +255,11 @@ export default function MyTasksPage() {
       .catch(async (e) => {
         console.error("Fetch tasks error — ลองอ่าน snapshot", e);
         // offline: อ่าน snapshot ล่าสุดจาก IndexedDB (ไม่พึ่ง SW cache)
-        const snap = await snapshotLoad<{ rows: any[]; pm: any }>("my_tasks");
+        const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
         if (snap && Array.isArray(snap.rows) && snap.rows.length > 0) {
           applyRows(snap.rows, snap.pm);
           setOffline(true);
+          if (snap.savedAt) setSnapshotTime(snap.savedAt);
         } else {
           setError(true);
         }
@@ -665,11 +690,11 @@ export default function MyTasksPage() {
         </HStack>
       </div>
 
-      {/* Offline banner — ข้อมูลมาจาก cache (Service Worker) */}
+      {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
       {offline && (
         <Banner
           status="warning"
-          title="โหมดออฟไลน์ — แสดงข้อมูลล่าสุดที่โหลดไว้"
+          title={`โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`}
           description="กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น"
         />
       )}
