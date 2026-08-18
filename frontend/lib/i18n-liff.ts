@@ -56,6 +56,13 @@ const LIFF_DICT: Record<string, { th: string; en: string }> = {
   "liff.checksheet_send_done": { th: "ส่งสำเร็จ {ok} รายการ", en: "Sent {ok} item(s)" },
   "liff.checksheet_send_remaining": { th: "ยังเหลือ {n} รายการที่ส่งไม่ได้ — ลองอีกครั้งเมื่อมีเน็ต", en: "{n} item(s) still unsent — retry when online" },
   "liff.checksheet_send_offline": { th: "ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้", en: "No internet yet — retry when connected" },
+  "liff.checksheet_offline_title": { th: "โหมดออฟไลน์ — ยังกรอกเช็คชีทได้ จะบันทึกลงเครื่องแล้วส่งเมื่อกลับมาออนไลน์", en: "Offline mode — you can still fill the checksheet; results are saved on this device and synced when back online" },
+  "liff.checksheet_offline_desc": { th: "ข้อมูลแผน PM มาจากเครื่องของคุณ — งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น", en: "PM plans shown are from this device — changes you make now are saved only when you are back online" },
+  "liff.checksheet_onlineback_title": { th: "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย", en: "Back online — data may be outdated" },
+  "liff.checksheet_onlineback_desc": { th: "กด \"โหลดข้อมูลใหม่\" เพื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์", en: "Tap \"Reload data\" to fetch the latest from the server" },
+  "liff.checksheet_reload_btn": { th: "โหลดข้อมูลใหม่", en: "Reload data" },
+  "liff.checksheet_reload_checking": { th: "กำลังตรวจสอบการเชื่อมต่อ…", en: "Checking connection…" },
+  "liff.checksheet_reload_fail": { th: "โหลดไม่สำเร็จ — ลองอีกครั้ง", en: "Reload failed — try again" },
 };
 
 const STORAGE_KEY = "cmms_lang";

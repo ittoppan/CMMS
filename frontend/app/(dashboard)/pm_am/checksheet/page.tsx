@@ -15,6 +15,7 @@ import { DialogHeader } from "@astryxdesign/core/Dialog";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
 import { useRouter } from "next/navigation";
 import {
   ClipboardDocumentCheckIcon,
@@ -25,6 +26,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { enqueue, pendingCount, subscribeOnline, flushQueue } from "@/lib/offlineQueue";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
+import { serverResponds } from "@/lib/server-check";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import PMChecksheetDocument from "@/components/PMChecksheetDocument";
@@ -90,6 +92,12 @@ export default function PMChecksheetPage() {
   const [flushing, setFlushing] = useState(false);
   const [flushMsg, setFlushMsg] = useState<string | null>(null);
 
+  // banner offline + ปุ่ม "โหลดข้อมูลใหม่" (เหมือน my_tasks / repair/view / repair/request)
+  const [offline, setOffline] = useState(false);
+  const [onlineBack, setOnlineBack] = useState(false);
+  const [retryMsg, setRetryMsg] = useState("");
+  const offlineRef = useRef(false); // ติดตามว่าเคย offline → กลับ online (กัน banner เด้งหาย)
+
   // ปุ่ม "ส่งงานค้างทั้งหมดตอนนี้" — กดเพื่อ flush คิวทันที (กลไกเดียวกับหน้าแจ้งซ่อม)
   const handleSendNow = async () => {
     if (!navigator.onLine) {
@@ -109,6 +117,29 @@ export default function PMChecksheetPage() {
     setPending(pendingCount());
     const off = subscribeOnline(() => setPending(pendingCount()));
     return off;
+  }, []);
+
+  // ติดตามสถานะ offline — เพิ่งกลับมามีเน็ต → คง banner ไว้ (เขียว) ให้กด "โหลดข้อมูลใหม่"
+  useEffect(() => {
+    const update = () => {
+      const isOff = !navigator.onLine;
+      if (isOff) {
+        offlineRef.current = true;
+        setOffline(true);
+        setOnlineBack(false);
+        setRetryMsg("");
+      } else if (offlineRef.current) {
+        setOnlineBack(true);
+        setRetryMsg("");
+      }
+    };
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
   }, []);
   // QR scan prefill: ?asset_code= / ?plan_id=
   const qrPrefillRef = useRef<{ assetCode?: string; planId?: string } | null>(null);
@@ -460,6 +491,41 @@ export default function PMChecksheetPage() {
   return (
     <VStack gap={6}>
       {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+
+      {/* Offline banner — ยังกรอกได้ บันทึกลงเครื่อง แล้วส่งเมื่อกลับมาออนไลน์ */}
+      {(offline || onlineBack) && (
+        <Banner
+          status={onlineBack ? "success" : "warning"}
+          title={
+            onlineBack
+              ? tliff("liff.checksheet_onlineback_title")
+              : tliff("liff.checksheet_offline_title")
+          }
+          description={
+            retryMsg ||
+            (onlineBack
+              ? tliff("liff.checksheet_onlineback_desc")
+              : tliff("liff.checksheet_offline_desc"))
+          }
+          endContent={
+            <Button
+              label={tliff("liff.checksheet_reload_btn")}
+              variant={onlineBack ? "primary" : "ghost"}
+              size="sm"
+              onClick={async () => {
+                if (!navigator.onLine) {
+                  setRetryMsg(tliff("liff.checksheet_send_offline"));
+                  return;
+                }
+                setRetryMsg(tliff("liff.checksheet_reload_checking"));
+                const ok = await serverResponds();
+                if (ok) window.location.reload();
+                else setRetryMsg(tliff("liff.checksheet_reload_fail"));
+              }}
+            />
+          }
+        />
+      )}
 
       <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <VStack gap={1}>
