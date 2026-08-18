@@ -12,21 +12,7 @@ import { DialogHeader } from "@astryxdesign/core/Dialog";
 import { Banner } from "@astryxdesign/core/Banner";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
-
-// แสดงเวลา "อัปเดตล่าสุด" แบบไทย (เช่น 18 ส.ค. 69, 11:05 น.) — เหมือนหน้างานของฉัน
-function formatTime(ts: number): string {
-  try {
-    return new Date(ts).toLocaleString("th-TH", {
-      day: "numeric",
-      month: "short",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return new Date(ts).toLocaleString();
-  }
-}
+import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import {
   PrinterIcon,
   ArrowLeftIcon,
@@ -174,6 +160,12 @@ export default function RepairViewDetailsPage() {
   // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
   const [onlineBack, setOnlineBack] = useState(false);
   const offlineRef = useRef(false);
+  // tick เวลาปัจจุบัน — อัปเดต "กี่นาทีที่แล้ว" บน banner ทุก 30 วิ
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const iv = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(iv);
+  }, []);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -453,7 +445,9 @@ export default function RepairViewDetailsPage() {
           title={
             onlineBack
               ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
-              : `โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`
+              : snapshotTime
+                ? `โหมดออฟไลน์ — ข้อมูล ณ ${formatClockTime(snapshotTime)} — ${formatRelativeTime(snapshotTime, now)}`
+                : "โหมดออฟไลน์ — ข้อมูล ณ ครั้งล่าสุด"
           }
           description={
             retryMsg ||
