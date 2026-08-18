@@ -53,11 +53,11 @@ try {
                 if ($roleId) {
                     $user = ['id' => 0, 'full_name' => 'จำลองบทบาท', 'role_id' => $roleId, 'simulated' => true];
                 } elseif ($lineUid !== '') {
-                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1");
+                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path, must_change_password FROM users WHERE line_user_id = ? AND is_active = 1");
                     $stmt->execute([$lineUid]);
                     $user = $stmt->fetch();
                 } elseif (!empty($_SESSION['user_id'])) {
-                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path FROM users WHERE id = ? AND is_active = 1");
+                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path, must_change_password FROM users WHERE id = ? AND is_active = 1");
                     $stmt->execute([$_SESSION['user_id']]);
                     $user = $stmt->fetch();
                 }
@@ -102,6 +102,8 @@ try {
                         'avatar_path' => $user['avatar_path'] ?? null,
                         'avatar' => $user['avatar'] ?? null,
                         'simulated' => !empty($user['simulated']),
+                        // บังคับเปลี่ยนรหัสครั้งแรก — layout จะ redirect ไป /change-password
+                        'must_change_password' => (int)($user['must_change_password'] ?? 0) === 1,
                     ],
                     'permission' => $perm,
                     'bottom_nav' => $bottomNav,
