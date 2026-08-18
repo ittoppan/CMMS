@@ -660,9 +660,16 @@ export default function MyTasksPage() {
       )}
 
       {/* CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
-      <AnimatedDialog width="min(720px, 94vw)" open={closeModalOpen} onClose={() => setCloseModalOpen(false)}>
+      <AnimatedDialog
+        width="min(720px, 94vw)"
+        maxHeight="92dvh"
+        open={closeModalOpen}
+        onClose={() => setCloseModalOpen(false)}
+        className="cmms-close-work-modal"
+      >
+        <div className="cmms-bottom-sheet-handle" aria-hidden="true" />
           <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
-          <VStack gap={4} style={{ padding: 24 }}>
+          <VStack gap={4} style={{ padding: 24 }} className="cmms-dialog-body">
             <FormLayout>
               <Grid columns={2} gap={4}>
                 <Field label="กลุ่มอาการเสีย (รหัส F)" inputID="fCode">
@@ -849,25 +856,25 @@ export default function MyTasksPage() {
               </Grid>
             </FormLayout>
 
-            <HStack hAlign="end" gap={2} style={{ marginTop: 16 }}>
-              <button
-                type="button"
-                onClick={() => setCloseModalOpen(false)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={closing}
-                onClick={handleConfirmClose}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <CheckCircleIcon className="w-4 h-4" />
-                {closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}
-              </button>
-            </HStack>
           </VStack>
+          <div className="cmms-dialog-footer">
+            <button
+              type="button"
+              onClick={() => setCloseModalOpen(false)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              disabled={closing}
+              onClick={handleConfirmClose}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CheckCircleIcon className="w-4 h-4" />
+              {closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}
+            </button>
+          </div>
         </AnimatedDialog>
     </VStack>
   );
