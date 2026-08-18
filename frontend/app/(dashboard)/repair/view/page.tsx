@@ -35,6 +35,7 @@ interface PartRow {
   spare_part_id: number;
   code: string;
   name: string;
+  image_url?: string;
   quantity_used: number;
   unit_price: number;
 }
@@ -267,6 +268,7 @@ export default function RepairViewDetailsPage() {
             spare_part_id: Number(p.spare_part_id) || 0,
             code: p.code || "",
             name: p.name || "",
+            image_url: p.image_url || "",
             quantity_used: Number(p.quantity_used) || 0,
             unit_price: Number(p.unit_price) || 0,
           })));
@@ -718,6 +720,7 @@ export default function RepairViewDetailsPage() {
                 <table style={{ width: "100%", fontSize: "0.85rem" }}>
                   <thead>
                     <tr style={{ background: "var(--cmms-bg-wash)", textAlign: "left" }}>
+                      <th style={{ padding: "8px 12px" }}>รูป</th>
                       <th style={{ padding: "8px 12px" }}>รหัส</th>
                       <th style={{ padding: "8px 12px" }}>ชื่ออะไหล่</th>
                       <th style={{ padding: "8px 12px" }}>จำนวน</th>
@@ -729,6 +732,17 @@ export default function RepairViewDetailsPage() {
                   <tbody>
                     {partRows.map((r) => (
                       <tr key={r.spare_part_id} style={{ borderTop: "1px solid var(--cmms-border)" }}>
+                        <td style={{ padding: "8px 12px" }}>
+                          <img
+                            src={r.image_url || `/api/v1/spare_image.php?id=${r.spare_part_id}`}
+                            onError={(e) => {
+                              const t = e.currentTarget;
+                              if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${r.spare_part_id}`;
+                            }}
+                            alt={r.code}
+                            style={{ width: 38, height: 38, borderRadius: 8, objectFit: "cover", border: "1px solid var(--cmms-border)" }}
+                          />
+                        </td>
                         <td style={{ padding: "8px 12px", fontWeight: 600 }}>{r.code}</td>
                         <td style={{ padding: "8px 12px" }}>{r.name}</td>
                         <td style={{ padding: "8px 12px" }}>

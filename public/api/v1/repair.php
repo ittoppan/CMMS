@@ -38,7 +38,7 @@ try {
                 }
                 if (!$ids) { echo json_encode([]); break; }
                 $in = implode(',', array_fill(0, count($ids), '?'));
-                $stmt = $pdo->prepare("SELECT rsp.repair_id, sp.id AS spare_part_id, sp.code, sp.name, rsp.quantity_used, rsp.unit_price
+                $stmt = $pdo->prepare("SELECT rsp.repair_id, sp.id AS spare_part_id, sp.code, sp.name, sp.image_url, rsp.quantity_used, rsp.unit_price
                                        FROM repair_spare_parts rsp
                                        JOIN spare_parts sp ON rsp.spare_part_id = sp.id
                                        WHERE rsp.repair_id IN ($in)
@@ -158,7 +158,12 @@ try {
                         $cd = trim((string)($info['code'] ?? ''));
                         if ($cd !== '') $sumParts[] = $cd . ' x ' . $qty;
                         $iu = (string)($info['image_url'] ?? '');
-                        if ($iu !== '') $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
+                        if ($iu !== '') {
+                            $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
+                        } else {
+                            // ไม่มีรูปจริง — ใช้รูป placeholder อัตโนมัติ (รหัสอะไหล่บนพื้นสี)
+                            $iu = publicBaseUrl() . '/api/v1/spare_image.php?id=' . (int)($sp['spare_part_id'] ?? 0);
+                        }
                         $name = $cd !== '' ? $cd . ' x ' . rtrim(rtrim(number_format($qty, 2), '0'), '.') : '';
                         if ($name !== '' || $iu !== '') $spareItems[] = ['name' => $name, 'url' => $iu];
                     }
@@ -366,7 +371,12 @@ try {
                                 $cd = trim((string)($info['code'] ?? ''));
                                 if ($cd !== '') $sumParts[] = $cd . ' x ' . $qty;
                                 $iu = (string)($info['image_url'] ?? '');
-                                if ($iu !== '') $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
+                                if ($iu !== '') {
+                                    $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
+                                } else {
+                                    // ไม่มีรูปจริง — ใช้รูป placeholder อัตโนมัติ (รหัสอะไหล่บนพื้นสี)
+                                    $iu = publicBaseUrl() . '/api/v1/spare_image.php?id=' . (int)($sp['spare_part_id'] ?? 0);
+                                }
                                 $name = $cd !== '' ? $cd . ' x ' . rtrim(rtrim(number_format($qty, 2), '0'), '.') : '';
                                 if ($name !== '' || $iu !== '') $spareItems[] = ['name' => $name, 'url' => $iu];
                             }
