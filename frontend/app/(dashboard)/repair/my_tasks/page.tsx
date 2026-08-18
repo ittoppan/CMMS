@@ -6,6 +6,7 @@ import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/rep
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
+import { serverResponds } from "@/lib/server-check";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -717,12 +718,15 @@ export default function MyTasksPage() {
               label="โหลดข้อมูลใหม่"
               variant={onlineBack ? "primary" : "ghost"}
               size="sm"
-              onClick={() => {
+              onClick={async () => {
                 if (!navigator.onLine) {
                   setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
                   return;
                 }
-                window.location.reload();
+                setRetryMsg("กำลังตรวจสอบการเชื่อมต่อ…");
+                const ok = await serverResponds();
+                if (ok) window.location.reload();
+                else setRetryMsg("โหลดไม่สำเร็จ — ลองอีกครั้ง");
               }}
             />
           }
