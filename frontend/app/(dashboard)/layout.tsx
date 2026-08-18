@@ -14,6 +14,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
 import CardTableLabels from "../../components/CardTableLabels";
+import { offlineQueueCount } from "../../lib/offline-store";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
 import CommandPalette from "../../components/CommandPalette";
@@ -161,6 +162,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     .filter((key) => BOTTOM_NAV_ITEMS[key] && canShow(key))
     .map((key) => ({ ...BOTTOM_NAV_ITEMS[key], label: t(BOTTOM_NAV_T_KEYS[key] || key) }));
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
 
   // Auth guard: ถ้า session ไม่ถูกต้อง (401) → ไปหน้า login
   // (เฉพาะ online — offline ปล่อยผ่าน ให้ใช้ cache ตามกลยุทธ์ SW)
@@ -213,6 +215,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener("cmms:profile-updated", onProfileUpdated);
     return () => window.removeEventListener("cmms:profile-updated", onProfileUpdated);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- รันครั้งเดียวตอน mount
+  }, []);
+
+  // badge งานแจ้งซ่อมค้างส่ง (offline queue) — อัปเดตเมื่อกลับออนไลน์/มี queue ใหม่
+  useEffect(() => {
+    const refresh = () => {
+      offlineQueueCount().then(setPendingCount).catch(() => setPendingCount(0));
+    };
+    refresh();
+    window.addEventListener("online", refresh);
+    window.addEventListener("cmms:offline-queued", refresh);
+    return () => {
+      window.removeEventListener("online", refresh);
+      window.removeEventListener("cmms:offline-queued", refresh);
+    };
   }, []);
 
   // ใช้ชื่อจาก hook (ได้จาก fetch เดียวกับ useMenuPermission — พิสูจน์แล้วว่าทำงาน)
@@ -508,7 +524,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const ItemIcon = item.icon;
         return (
           <a key={item.href} href={item.href} className={`cmms-mobile-nav-item ${isSelected(item.href) ? "active" : ""}`}>
-            <ItemIcon className="w-5 h-5" />
+            <span className="cmms-mobile-nav-icon-wrap">
+              <ItemIcon className="w-5 h-5" />
+              {item.href === "/repair/request" && pendingCount > 0 && (
+                <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
+                  {pendingCount > 99 ? "99+" : pendingCount}
+                </span>
+              )}
+            </span>
             <span>{item.label}</span>
           </a>
         );
