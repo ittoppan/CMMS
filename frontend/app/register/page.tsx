@@ -32,6 +32,10 @@ const apiFetch = (url: string, init?: RequestInit) =>
   fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
 
 export default function RegisterPage() {
+  useEffect(() => {
+    const t = setTimeout(() => { document.title = "ลงทะเบียนผูกบัญชี LINE · CMMS-TOPPAN"; }, 350);
+    return () => clearTimeout(t);
+  }, []);
   const [lineUserId, setLineUserId] = useState("");
   const [lineName, setLineName] = useState("");
   const [linePic, setLinePic] = useState("");

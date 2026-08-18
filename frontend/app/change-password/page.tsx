@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KeyIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 /**
@@ -9,6 +9,10 @@ import { KeyIcon, ShieldCheckIcon, ArrowRightIcon } from "@heroicons/react/24/ou
  * หลังเปลี่ยนสำเร็จ → กลับหน้าแรก ใช้ระบบได้ตามปกติ
  */
 export default function ChangePasswordPage() {
+  useEffect(() => {
+    const t = setTimeout(() => { document.title = "เปลี่ยนรหัสผ่าน · CMMS-TOPPAN"; }, 350);
+    return () => clearTimeout(t);
+  }, []);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
