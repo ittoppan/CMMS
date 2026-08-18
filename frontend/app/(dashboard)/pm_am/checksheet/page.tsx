@@ -23,7 +23,7 @@ import {
   ExclamationTriangleIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
-import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
+import { enqueue, pendingCount, subscribeOnline, flushQueue } from "@/lib/offlineQueue";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -86,6 +86,24 @@ export default function PMChecksheetPage() {
   const inspectorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const operatorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingSigRef = useRef<"inspector" | "operator" | null>(null);
+
+  const [flushing, setFlushing] = useState(false);
+  const [flushMsg, setFlushMsg] = useState<string | null>(null);
+
+  // ปุ่ม "ส่งงานค้างทั้งหมดตอนนี้" — กดเพื่อ flush คิวทันที (กลไกเดียวกับหน้าแจ้งซ่อม)
+  const handleSendNow = async () => {
+    if (!navigator.onLine) {
+      setFlushMsg(tliff("liff.checksheet_send_offline"));
+      return;
+    }
+    setFlushing(true);
+    setFlushMsg(null);
+    const { ok, failed } = await flushQueue();
+    setPending(pendingCount());
+    setFlushing(false);
+    if (ok > 0 && failed === 0) setFlushMsg(tliff("liff.checksheet_send_done").replace("{ok}", String(ok)));
+    else if (failed > 0) setFlushMsg(tliff("liff.checksheet_send_remaining").replace("{n}", String(pendingCount())));
+  };
 
   useEffect(() => {
     setPending(pendingCount());
@@ -451,14 +469,30 @@ export default function PMChecksheetPage() {
           {pending > 0 && (
             <div
               style={{
-                display: "flex", alignItems: "center", gap: 8,
+                display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,
                 padding: "10px 14px", borderRadius: 8,
                 background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)",
-                fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
+                fontSize: "0.85rem", fontWeight: 600, width: "fit-content", maxWidth: "100%",
               }}
             >
-              <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
-              {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+                {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
+                <button
+                  type="button"
+                  disabled={flushing || !navigator.onLine}
+                  onClick={handleSendNow}
+                  style={{
+                    marginLeft: 4,
+                    padding: "6px 12px", borderRadius: 8, border: "none", cursor: flushing ? "wait" : "pointer",
+                    background: "var(--cmms-primary)", color: "var(--cmms-text-on-primary, #fff)", fontSize: "0.78rem", fontWeight: 700,
+                    opacity: flushing || !navigator.onLine ? 0.6 : 1,
+                  }}
+                >
+                  {flushing ? "..." : tliff("liff.checksheet_send_now")}
+                </button>
+              </div>
+              {flushMsg && <div style={{ fontSize: "0.75rem", opacity: 0.85 }}>{flushMsg}</div>}
             </div>
           )}
           <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
