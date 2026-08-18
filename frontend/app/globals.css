@@ -780,6 +780,46 @@ h2.astryx-heading { animation: cmms-fadeInUp 0.4s ease 0.06s both; }
     transform: none !important;
   }
   .cmms-btn-primary:active { transform: none; }
+  /* Modal/Dialog + Dropdown — แสดงทันทีเมื่อผู้ใช้ตั้งค่าลดการเคลื่อนไหว */
+  dialog[open],
+  dialog[open]::backdrop,
+  [role="listbox"],
+  [role="menu"] {
+    animation: none !important;
+    animation-delay: 0s !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ================================================
+   Modal / Dialog + Dropdown — เปิด: scale-in + fade
+   (Astryx Dialog/AlertDialog ทุกหน้า + Selector/Popover)
+   หมายเหตุ: Astryx Dialog unmount ทันทีตอนปิด (ดีไซน์ของตัว
+   component) — animation เน้นตอนเปิดเป็นหลัก
+   ================================================ */
+dialog[open] {
+  animation: cmmsDialogIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+dialog[open]::backdrop {
+  animation: cmmsBackdropIn 0.2s ease-out both;
+}
+@keyframes cmmsDialogIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes cmmsBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Dropdown (Selector listbox / menu) — ปรับจังหวะเปิดให้กลมกลืนกับ dialog
+   (Astryx มี entry animation อยู่แล้ว — เปลี่ยน easing เป็นแบบค่อยๆ ทรงตัว)
+   ใช้ longhand เพื่อคง keyframe เดิมของ Astryx ไว้ (ทิศตามตำแหน่ง dropdown) */
+[role="listbox"],
+[role="menu"] {
+  animation-duration: 0.22s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ================================================
