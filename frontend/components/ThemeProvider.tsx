@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * ThemeProvider — โหลดธีมจากฐานข้อมูล (settings) แล้ว apply เป็น CSS variables
@@ -125,7 +126,40 @@ const applyAnimSetting = (get: (k: string) => string) => {
   root.classList.toggle("cmms-no-anim", !enabled);
 };
 
+/**
+ * Hero เฉพาะหน้า — ใส่ data-hero ตามเส้นทาง (repair/spare_parts/…) ให้ CSS
+ * ธีมสี + ไอคอนลายน้ำเฉพาะหมวด แทนไล่สีน้ำเงินเดียวกันทุกหน้า
+ */
+const HERO_THEMES = new Set([
+  "dashboard", "andon-board", "iot", "repair", "spare_parts", "pm_am",
+  "analytics", "reports", "bi", "leaderboard", "asset_registry", "assets",
+  "users", "profile", "settings", "approval", "loto", "inspections", "calibration",
+]);
+
+const applyHeroTheme = (pathname: string) => {
+  const seg = (pathname || "/dashboard").split("/").filter(Boolean)[0] || "dashboard";
+  const theme = HERO_THEMES.has(seg) ? seg : "";
+  document.querySelectorAll<HTMLElement>(".cmms-page-hero").forEach((el) => {
+    if (theme) el.setAttribute("data-hero", theme);
+    else el.removeAttribute("data-hero");
+  });
+};
+
 export default function ThemeProvider() {
+  const pathname = usePathname();
+
+  // Hero เฉพาะหน้า — รีแท็กทุกครั้งที่เปลี่ยนเส้นทาง (ไคลเอนต์ nav ไม่ต้องโหลดใหม่)
+  // + MutationObserver จัดการ hero ที่ mount ทีหลัง (หน้าบางหน้า render หลังโหลดข้อมูล)
+  useEffect(() => {
+    const tag = () => applyHeroTheme(pathname ?? "");
+    tag();
+    const mo = new MutationObserver(() => {
+      if (document.querySelector(".cmms-page-hero:not([data-hero])")) tag();
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [pathname]);
+
   useEffect(() => {
     let cancelled = false;
 
