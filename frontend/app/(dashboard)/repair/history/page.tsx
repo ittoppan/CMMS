@@ -43,6 +43,7 @@ interface HistoryWO extends Record<string, unknown> {
   costLabor: number;
   costOutsource: number;
   downtimeMinutes: number;
+  outsourceBy: string;
 }
 
 const statusColors: Record<string, React.CSSProperties> = {
@@ -72,6 +73,7 @@ export default function RepairHistoryPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [page, setPage] = useState(1);
 
   const fetchHistory = async () => {
@@ -97,6 +99,7 @@ export default function RepairHistoryPage() {
             costLabor: parseFloat(row.cost_labor) || 0,
             costOutsource: parseFloat(row.cost_outsource) || 0,
             downtimeMinutes: parseInt(row.downtime_minutes) || 0,
+            outsourceBy: row.outsource_by || "",
           }));
         setWorkOrders(fetched);
       }
@@ -121,9 +124,10 @@ export default function RepairHistoryPage() {
         wo.asset.toLowerCase().includes(q) ||
         wo.assignee.toLowerCase().includes(q);
       const matchStatus = !statusFilter || wo.status === statusFilter;
-      return matchSearch && matchStatus;
+      const matchOutsource = outsourceFilter === "all" || (outsourceFilter === "out" ? !!wo.outsourceBy : !wo.outsourceBy);
+      return matchSearch && matchStatus && matchOutsource;
     });
-  }, [search, statusFilter, workOrders]);
+  }, [search, statusFilter, outsourceFilter, workOrders]);
 
   // สถิติรวมของประวัติ
   const stats = useMemo(() => {
@@ -161,7 +165,16 @@ export default function RepairHistoryPage() {
       renderCell: (item: HistoryWO) => (
         <VStack gap={0}>
           <Text type="body" weight="semibold">{item.asset}</Text>
-          {item.title && <Text type="body" size="sm" color="secondary">{item.title}</Text>}
+          {(item.title || item.outsourceBy) && (
+            <HStack gap={2} vAlign="center" wrap="wrap">
+              {item.title && <Text type="body" size="sm" color="secondary">{item.title}</Text>}
+              {item.outsourceBy && (
+                <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+                  ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
+                </span>
+              )}
+            </HStack>
+          )}
         </VStack>
       ),
     },
@@ -344,6 +357,27 @@ export default function RepairHistoryPage() {
                     { value: "rejected", label: "ปฏิเสธ" },
                   ]}
                 />
+                <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
+                  {([
+                    { v: "all", label: "ทั้งหมด" },
+                    { v: "in", label: "งานใน" },
+                    { v: "out", label: "งานภายนอก" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
+                      style={{
+                        padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                        background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
+                        color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                        boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </HStack>
               </>
             }
           />
