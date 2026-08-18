@@ -45,6 +45,7 @@ interface WorkOrder extends Record<string, unknown> {
   date: string;
   overdue: boolean;
   outsourceBy: string;
+  costOutsource: number;
 }
 
 const priorityColors: Record<string, React.CSSProperties> = {
@@ -118,7 +119,8 @@ export default function WorkOrdersPage() {
           assignee: row.assigned_name || row.assigned_to || "ยังไม่มอบหมาย",
           date: row.created_at ? row.created_at.split(" ")[0] : "-",
           overdue: isRepairOverdue(row.estimated_completion_date, row.status),
-          outsourceBy: row.outsource_by || ""
+          outsourceBy: row.outsource_by || "",
+          costOutsource: Number(row.cost_outsource || 0)
         }));
         setWorkOrders(fetched);
         const map: Record<number, any> = {};
@@ -162,7 +164,9 @@ export default function WorkOrdersPage() {
     const inprog = workOrders.filter(w => ["in_progress", "In Progress", "waiting_parts", "pending_parts"].includes(w.status)).length;
     const done = workOrders.filter(w => ["completed", "Completed", "closed", "resolved"].includes(w.status)).length;
     const overdue = workOrders.filter(w => w.overdue).length;
-    return { total, open, inprog, done, overdue };
+    const outsourceCount = workOrders.filter(w => !!w.outsourceBy).length;
+    const outsourceCost = workOrders.reduce((s, w) => s + (w.costOutsource || 0), 0);
+    return { total, open, inprog, done, overdue, outsourceCount, outsourceCost };
   }, [workOrders]);
 
   const totalItems = filtered.length;
@@ -583,6 +587,32 @@ export default function WorkOrdersPage() {
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
           </VStack>
+        </Card>
+        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setOutsourceFilter(prev => prev === "out" ? "all" : "out")}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOutsourceFilter(prev => prev === "out" ? "all" : "out"); } }}
+            title={outsourceFilter === "out" ? "ยกเลิกกรองงานภายนอก" : "กรองเฉพาะงานจ้างภายนอก"}
+            style={{ cursor: "pointer" }}
+          >
+            <VStack gap={2}>
+              <HStack hAlign="between" vAlign="center">
+                <HStack vAlign="center" gap={2}>
+                  <Text type="supporting" color="secondary">จ้างภายนอก (Outsource)</Text>
+                </HStack>
+                <AndonLamp status="warn" size="sm" />
+              </HStack>
+              <div className="cmms-kpi-value">
+                <CountUp end={stats.outsourceCount} />
+                <span className="cmms-kpi-unit">ใบ</span>
+              </div>
+              <Text type="body" size="sm" color="secondary">
+                ฿{stats.outsourceCost.toLocaleString("th-TH")}
+              </Text>
+            </VStack>
+          </div>
         </Card>
         {stats.overdue > 0 && (
           <Card elevation="low" padding={4} className="cmms-kpi-card red">
