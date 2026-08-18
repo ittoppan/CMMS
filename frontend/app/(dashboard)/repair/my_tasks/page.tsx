@@ -5,6 +5,7 @@ import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
+import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
@@ -38,20 +39,6 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
-// แสดงเวลา "อัปเดตล่าสุด" แบบไทย (เช่น 18 ส.ค. 69, 11:05 น.)
-function formatTime(ts: number): string {
-  try {
-    return new Date(ts).toLocaleString("th-TH", {
-      day: "numeric",
-      month: "short",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return new Date(ts).toLocaleString();
-  }
-}
 
 interface TaskItem extends Record<string, unknown> {
   rawId: number;
@@ -97,6 +84,12 @@ export default function MyTasksPage() {
   // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
   const [onlineBack, setOnlineBack] = useState(false);
   const offlineRef = useRef(false);
+  // tick เวลาปัจจุบัน — อัปเดต "กี่นาทีที่แล้ว" บน banner ทุก 30 วิ
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const iv = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(iv);
+  }, []);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [etaModalOpen, setEtaModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
@@ -709,7 +702,9 @@ export default function MyTasksPage() {
           title={
             onlineBack
               ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
-              : `โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`
+              : snapshotTime
+                ? `โหมดออฟไลน์ — ข้อมูล ณ ${formatClockTime(snapshotTime)} — ${formatRelativeTime(snapshotTime, now)}`
+                : "โหมดออฟไลน์ — ข้อมูล ณ ครั้งล่าสุด"
           }
           description={
             retryMsg ||
