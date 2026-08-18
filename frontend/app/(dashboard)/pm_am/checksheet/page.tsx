@@ -27,6 +27,8 @@ import {
 import { enqueue, pendingCount, subscribeOnline, flushQueue } from "@/lib/offlineQueue";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { serverResponds } from "@/lib/server-check";
+import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
+import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import PMChecksheetDocument from "@/components/PMChecksheetDocument";
@@ -97,6 +99,13 @@ export default function PMChecksheetPage() {
   const [onlineBack, setOnlineBack] = useState(false);
   const [retryMsg, setRetryMsg] = useState("");
   const offlineRef = useRef(false); // ติดตามว่าเคย offline → กลับ online (กัน banner เด้งหาย)
+  // เวลา "อัปเดตล่าสุด" จาก snapshot — tick ทุก 30 วิ สำหรับ "กี่นาทีที่แล้ว"
+  const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const iv = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(iv);
+  }, []);
 
   // ปุ่ม "ส่งงานค้างทั้งหมดตอนนี้" — กดเพื่อ flush คิวทันที (กลไกเดียวกับหน้าแจ้งซ่อม)
   const handleSendNow = async () => {
@@ -128,6 +137,10 @@ export default function PMChecksheetPage() {
         setOffline(true);
         setOnlineBack(false);
         setRetryMsg("");
+        // อ่านเวลา "อัปเดตล่าสุด" จาก snapshot (บันทึกตอนโหลดแผนสำเร็จครั้งล่าสุด)
+        snapshotLoad<{ savedAt?: number }>("pm_checksheet").then((s) => {
+          if (s?.savedAt) setSnapshotTime(s.savedAt);
+        });
       } else if (offlineRef.current) {
         setOnlineBack(true);
         setRetryMsg("");
@@ -204,6 +217,8 @@ export default function PMChecksheetPage() {
         if (list.length === 0 && prefill?.assetCode) {
           setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่รอดำเนินการ (pending / in_progress)`);
         }
+        // บันทึกเวลา "อัปเดตล่าสุด" — ใช้แสดงบน banner offline (ข้อมูล ณ ... กี่นาทีที่แล้ว)
+        snapshotSave("pm_checksheet", { savedAt: Date.now() });
       }
     } catch (e) {
       console.error(e);
@@ -499,7 +514,9 @@ export default function PMChecksheetPage() {
           title={
             onlineBack
               ? tliff("liff.checksheet_onlineback_title")
-              : tliff("liff.checksheet_offline_title")
+              : snapshotTime
+                ? `${tliff("liff.checksheet_offline_title_short")} — ข้อมูล ณ ${formatClockTime(snapshotTime)} — ${formatRelativeTime(snapshotTime, now)}`
+                : tliff("liff.checksheet_offline_title")
           }
           description={
             retryMsg ||
