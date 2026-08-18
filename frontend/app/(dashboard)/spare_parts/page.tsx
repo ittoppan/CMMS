@@ -26,7 +26,8 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Collapsible } from "@astryxdesign/core/Collapsible";
 import { Thumbnail } from "@astryxdesign/core/Thumbnail";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { Pagination } from "@astryxdesign/core/Pagination";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -533,7 +534,7 @@ function ItemsCard({
       </VStack>
 
       {/* Batch upload dialog */}
-      <Dialog isOpen={batchOpen} onOpenChange={setBatchOpen}>
+      <AnimatedDialog open={batchOpen} onClose={() => setBatchOpen(false)}>
         <DialogHeader title={`อัปโหลดรูปอะไหล่ (${selectedParts.length} รายการ)`} onOpenChange={setBatchOpen} />
         <VStack gap={4} style={{ padding: 24 }}>
           {batchMsg && (
@@ -604,7 +605,7 @@ function ItemsCard({
             </button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
     </Section>
   );
 }
@@ -982,10 +983,10 @@ export default function SparePartsPage() {
       </div>
 
       {/* Mobile: side panel เป็น fullscreen dialog */}
-      <Dialog
+      <AnimatedDialog
         variant="fullscreen"
-        isOpen={isNarrow && isPanelDialogOpen}
-        onOpenChange={setPanelDialogOpen}
+        open={isNarrow && isPanelDialogOpen}
+        onClose={() => setPanelDialogOpen(false)}
       >
         <Layout
           header={
@@ -997,12 +998,12 @@ export default function SparePartsPage() {
             </LayoutContent>
           }
         />
-      </Dialog>
+      </AnimatedDialog>
 
       {/* Delete Dialog */}
-      {deleteTarget && (
-        <Dialog isOpen={true} onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)}>
+      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
           <DialogHeader title="ยืนยันการลบรายการอะไหล่" onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)} />
+          {deleteTarget && (
           <VStack gap={4} style={{ padding: 24 }}>
             {deleteSuccess ? (
               <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
@@ -1041,8 +1042,8 @@ export default function SparePartsPage() {
               </>
             )}
           </VStack>
-        </Dialog>
-      )}
+          )}
+        </AnimatedDialog>
 
     </>
   );

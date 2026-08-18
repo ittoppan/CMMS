@@ -12,7 +12,8 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
 import { 
@@ -414,9 +415,9 @@ export default function AssetRegistryPage() {
       </Card>
 
       {/* Delete Dialog */}
-      {deleteTarget && (
-        <Dialog isOpen={true} onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)}>
+      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
           <DialogHeader title="ยืนยันการลบข้อมูลเครื่องจักร" onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)} />
+          {deleteTarget && (
           <VStack gap={4} style={{ padding: 24 }}>
             {deleteSuccess ? (
               <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
@@ -451,8 +452,8 @@ export default function AssetRegistryPage() {
               </>
             )}
           </VStack>
-        </Dialog>
-      )}
+          )}
+        </AnimatedDialog>
     </VStack>
   );
 }

@@ -10,7 +10,8 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { Field } from "@astryxdesign/core/Field";
 import { FileInput } from "@astryxdesign/core/FileInput";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
@@ -373,8 +374,7 @@ export default function FormsPage() {
       )}
 
       {/* ═══ Dialog อัปโหลดแบบฟอร์มใหม่ ═══ */}
-      {uploadOpen && (
-        <Dialog isOpen onOpenChange={(open) => { if (!open) setUploadOpen(false); }}>
+      <AnimatedDialog open={uploadOpen} onClose={() => setUploadOpen(false)}>
           <DialogHeader title="อัปโหลดแบบฟอร์มใหม่" />
           <VStack gap={4} style={{ padding: 24 }}>
             <Text type="body" color="secondary">
@@ -469,8 +469,7 @@ export default function FormsPage() {
               </button>
             </HStack>
           </VStack>
-        </Dialog>
-      )}
+        </AnimatedDialog>
     </VStack>
   );
 }

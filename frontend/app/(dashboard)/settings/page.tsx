@@ -14,7 +14,8 @@ import { Card } from "@astryxdesign/core/Card";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Grid } from "@astryxdesign/core/Grid";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
@@ -1087,7 +1088,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ═══ Dialog เปรียบเทียบก่อนบันทึก ═══ */}
-      <Dialog isOpen={showDiff} onOpenChange={(open) => { if (!open) setShowDiff(false); }}>
+      <AnimatedDialog open={showDiff} onClose={() => setShowDiff(false)}>
         <DialogHeader title={`เปรียบเทียบก่อนบันทึก (${diffRows.length} รายการ)`} />
         <VStack gap={4}>
           <Text type="body" size="sm" color="secondary">
@@ -1161,10 +1162,10 @@ export default function SettingsPage() {
             </button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
 
       {/* ═══ Dialog ประวัติการแก้ไข (audit log) ═══ */}
-      <Dialog isOpen={showAudit} onOpenChange={(open) => { if (!open) setShowAudit(false); }}>
+      <AnimatedDialog open={showAudit} onClose={() => setShowAudit(false)}>
         <DialogHeader title={`ประวัติการแก้ไขการตั้งค่า (${auditRows.length} รายการ)`} />
         <VStack gap={4}>
           <Text type="body" size="sm" color="secondary">
@@ -1227,7 +1228,7 @@ export default function SettingsPage() {
             </button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
     </div>
   );
 }

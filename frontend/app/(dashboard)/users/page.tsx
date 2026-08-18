@@ -12,7 +12,8 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Spinner } from "@astryxdesign/core/Spinner";
@@ -395,9 +396,9 @@ export default function UsersPage() {
       </div>
 
       {/* Delete Confirmation Modal */}
-      {deleteTarget && (
-        <Dialog isOpen={true} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
           <DialogHeader title="ยืนยันการลบผู้ใช้" onOpenChange={(open) => { if (!open) setDeleteTarget(null); }} />
+          {deleteTarget && (
           <div style={{ padding: '16px 0' }}>
             <VStack gap={4}>
               {deleteSuccess ? (
@@ -437,8 +438,8 @@ export default function UsersPage() {
               )}
             </VStack>
           </div>
-        </Dialog>
-      )}
+          )}
+        </AnimatedDialog>
     </div>
   );
 }

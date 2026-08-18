@@ -14,7 +14,8 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Pagination } from "@astryxdesign/core/Pagination";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { TabList, Tab } from "@astryxdesign/core/TabList";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { 
   MagnifyingGlassIcon,
   CalendarIcon,
@@ -478,7 +479,7 @@ export default function PMSchedulePage() {
       </Card>
 
       {/* Dialog: เลื่อนกำหนด PM (ต้องอนุมัติโดยหัวหน้า — แจ้งผ่าน LINE) */}
-      <Dialog isOpen={!!deferTarget} onOpenChange={(o) => !o && setDeferTarget(null)}>
+      <AnimatedDialog open={!!deferTarget} onClose={() => setDeferTarget(null)}>
         <DialogHeader title={deferTarget ? `เลื่อนกำหนด PM ${deferTarget.id}` : "เลื่อนกำหนด PM"} onOpenChange={() => setDeferTarget(null)} />
         <VStack gap={4} style={{ padding: 24 }}>
           {deferMsg && (
@@ -533,10 +534,10 @@ export default function PMSchedulePage() {
             </button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
 
       {/* Dialog: ดูผลการทำ PM ที่เสร็จแล้ว (ตรวจเช็ค + ลายเซ็น ย้อนหลัง) */}
-      <Dialog isOpen={!!detailTarget} onOpenChange={(o) => !o && setDetailTarget(null)}>
+      <AnimatedDialog open={!!detailTarget} onClose={() => setDetailTarget(null)}>
         <DialogHeader title={detailTarget ? `ผลการทำ PM ${detailTarget.id}` : "ผลการทำ PM"} onOpenChange={() => setDetailTarget(null)} />
         <VStack gap={4} style={{ padding: 24, maxWidth: 640 }}>
           {detailErr && (
@@ -672,7 +673,7 @@ export default function PMSchedulePage() {
             </button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
     </VStack>
   );
 }

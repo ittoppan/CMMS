@@ -7,7 +7,8 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Card } from "@astryxdesign/core/Card";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { useToast } from "../../../../components/ToastProvider";
 import {
   PlusIcon,
@@ -422,7 +423,7 @@ export default function StockTakePage() {
       )}
 
       {/* ═══ Dialog สร้างรอบ ═══ */}
-      <Dialog isOpen={showCreate} onOpenChange={(open) => { if (!open) setShowCreate(false); }}>
+      <AnimatedDialog open={showCreate} onClose={() => setShowCreate(false)}>
         <DialogHeader title="สร้างรอบนับสต็อกใหม่" />
         <VStack gap={4}>
           <Text type="body" size="sm" color="secondary">
@@ -448,10 +449,10 @@ export default function StockTakePage() {
             >{busy ? "กำลังสร้าง..." : "สร้างรอบ"}</button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
 
       {/* ═══ Dialog ยืนยันปิดรอบ ═══ */}
-      <Dialog isOpen={confirmComplete} onOpenChange={(open) => { if (!open) setConfirmComplete(false); }}>
+      <AnimatedDialog open={confirmComplete} onClose={() => setConfirmComplete(false)}>
         <DialogHeader title="ยืนยันปิดรอบนับสต็อก" />
         <VStack gap={4}>
           <Text type="body" size="sm" color="secondary">
@@ -471,7 +472,7 @@ export default function StockTakePage() {
             >{busy ? "กำลังปิด..." : "ยืนยันปิดรอบ"}</button>
           </HStack>
         </VStack>
-      </Dialog>
+      </AnimatedDialog>
     </VStack>
   );
 }

@@ -11,7 +11,8 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { Banner } from "@astryxdesign/core/Banner";
 import { useRouter } from "next/navigation";
@@ -669,8 +670,7 @@ export default function PMChecksheetPage() {
       )}
 
       {/* ── ลายเซ็นยืนยันการทำ PM: ผู้ตรวจเช็ค + ผู้ควบคุมเครื่อง ── */}
-      {sigModalOpen && selectedPlan && (
-        <Dialog isOpen onOpenChange={(open) => { if (!open && !submitting) setSigModalOpen(false); }}>
+      <AnimatedDialog open={sigModalOpen && !!selectedPlan} onClose={() => { if (!submitting) setSigModalOpen(false); }}>
           <DialogHeader title={`ลงนามยืนยันการทำ PM: ${selectedPlan.title}`} />
           <VStack gap={4} style={{ padding: 24 }}>
             <Grid columns={2} gap={4}>
@@ -748,8 +748,7 @@ export default function PMChecksheetPage() {
               </button>
             </HStack>
           </VStack>
-        </Dialog>
-      )}
+        </AnimatedDialog>
     </VStack>
   );
 }

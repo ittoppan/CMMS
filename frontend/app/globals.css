@@ -795,8 +795,9 @@ h2.astryx-heading { animation: cmms-fadeInUp 0.4s ease 0.06s both; }
 /* ================================================
    Modal / Dialog + Dropdown — เปิด: scale-in + fade
    (Astryx Dialog/AlertDialog ทุกหน้า + Selector/Popover)
-   หมายเหตุ: Astryx Dialog unmount ทันทีตอนปิด (ดีไซน์ของตัว
-   component) — animation เน้นตอนเปิดเป็นหลัก
+   ปิด: scale-out + fade — ผ่าน AnimatedDialog (component เดียว
+   ที่ทุกหน้าใช้) ใส่คลาส cmms-dialog-closing ตอนปิด แล้วค่อย
+   unmount หลัง animation จบ (220ms)
    ================================================ */
 dialog[open] {
   animation: cmmsDialogIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -811,6 +812,23 @@ dialog[open]::backdrop {
 @keyframes cmmsBackdropIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* ── ปิด: scale-out + fade (AnimatedDialog ใส่คลาส cmms-dialog-closing
+   ตอนปิด แล้วค่อย unmount หลัง animation จบ) ── */
+dialog.cmms-dialog-closing[open] {
+  animation: cmmsDialogOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+dialog.cmms-dialog-closing[open]::backdrop {
+  animation: cmmsBackdropOut 0.2s ease forwards;
+}
+@keyframes cmmsDialogOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(10px) scale(0.95); }
+}
+@keyframes cmmsBackdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 /* Dropdown (Selector listbox / menu) — ปรับจังหวะเปิดให้กลมกลืนกับ dialog

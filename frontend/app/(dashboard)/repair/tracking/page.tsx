@@ -9,7 +9,8 @@ import { Heading, Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -221,11 +222,7 @@ export default function RepairTrackingPage() {
       )}
 
       {/* Evaluation Modal */}
-      {evalModalOpen && (
-        <Dialog 
-          isOpen={evalModalOpen} 
-          onOpenChange={setEvalModalOpen}
-        >
+      <AnimatedDialog open={evalModalOpen} onClose={() => setEvalModalOpen(false)}>
           <DialogHeader title="ประเมินผลความพึงพอใจงานซ่อม" onOpenChange={setEvalModalOpen} />
           <div style={{ padding: 24 }}>
             <div style={{ height: 4, borderRadius: 4, background: 'var(--cmms-primary)', marginBottom: 16 }} />
@@ -298,8 +295,7 @@ export default function RepairTrackingPage() {
               </HStack>
             </VStack>
           </div>
-        </Dialog>
-      )}
+        </AnimatedDialog>
     </VStack>
   );
 }
