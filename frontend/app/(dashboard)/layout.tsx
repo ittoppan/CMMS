@@ -15,6 +15,7 @@ import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
 import CardTableLabels from "../../components/CardTableLabels";
 import { offlineQueueCount } from "../../lib/offline-store";
+import { runQueueMigrationOnce } from "../../lib/queue-migration";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
 import CommandPalette from "../../components/CommandPalette";
@@ -222,7 +223,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const refresh = () => {
       offlineQueueCount().then(setPendingCount).catch(() => setPendingCount(0));
     };
-    refresh();
+    // ย้ายงานที่ค้างจาก IndexedDB รุ่นเก่า (VersionError) เข้าคิวปัจจุบัน ก่อนนับ badge
+    runQueueMigrationOnce().finally(refresh);
     window.addEventListener("online", refresh);
     window.addEventListener("cmms:offline-queued", refresh);
     return () => {

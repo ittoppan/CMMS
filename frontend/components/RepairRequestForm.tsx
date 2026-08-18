@@ -28,6 +28,7 @@ import {
 } from "@heroicons/react/24/outline";
 import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
+import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 
 /* =========================================================
    ฟอร์มแจ้งซ่อม MAINTENANCE JOB REQUEST (F-EN-03)
@@ -502,8 +503,11 @@ export default function RepairRequestForm() {
   };
 
   useEffect(() => {
-    // นับงานค้างจริงจาก IndexedDB — แสดง banner + ปุ่ม "ส่งตอนนี้" แม้โหลดหน้าใหม่
-    queueAll()
+    // เปิดให้สั่งย้ายมือจาก DevTools: window.__cmmsMigrateQueues()
+    exposeQueueMigration();
+    // ย้ายงานที่ค้างจาก IndexedDB รุ่นเก่า (VersionError) เข้าคิวปัจจุบัน ก่อนอ่านคิว
+    runQueueMigrationOnce()
+      .then(() => queueAll())
       .then((items) => {
         if (items.length > 0) setOfflineQueued(items.length);
         refreshQueueItems();
