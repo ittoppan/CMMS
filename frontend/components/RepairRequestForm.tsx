@@ -179,6 +179,9 @@ export default function RepairRequestForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [offlineNow, setOfflineNow] = useState(false);
+  // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
+  const [onlineBack, setOnlineBack] = useState(false);
+  const [retryMsg, setRetryMsg] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [createdWoNo, setCreatedWoNo] = useState<string | null>(null);
   const [offlineQueued, setOfflineQueued] = useState(0);
@@ -192,6 +195,7 @@ export default function RepairRequestForm() {
   const [bindError, setBindError] = useState<string | null>(null);
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const offlineRef = useRef(false); // ติดตามว่าเคย offline → กลับ online (กัน banner เด้งหาย)
 
   const [form, setForm] = useState({
     machineCode: "",
@@ -230,8 +234,20 @@ export default function RepairRequestForm() {
   }, []);
 
   // ติดตามสถานะ offline — แสดง banner บอกว่ากรอกได้ แต่จะส่งเมื่อกลับมาออนไลน์
+  // เพิ่งกลับมามีเน็ต → คง banner ไว้ (เขียว) ให้กด "โหลดข้อมูลใหม่" จนกว่าจะ reload จริง
   useEffect(() => {
-    const update = () => setOfflineNow(!navigator.onLine);
+    const update = () => {
+      const isOff = !navigator.onLine;
+      if (isOff) {
+        offlineRef.current = true;
+        setOfflineNow(true);
+        setOnlineBack(false);
+        setRetryMsg("");
+      } else if (offlineRef.current) {
+        setOnlineBack(true);
+        setRetryMsg("");
+      }
+    };
     update();
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
@@ -789,10 +805,33 @@ export default function RepairRequestForm() {
         ))}
       </div>
 
-      {/* Offline status — ยังกรอกได้ จะเก็บ queue ส่งเมื่อกลับมาออนไลน์ */}
-      {offlineNow && (
-        <div className="cmms-offline-banner">
-          📴 ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์
+      {/* Offline status — ยังกรอกได้ จะเก็บ queue ส่งเมื่อกลับมาออนไลน์
+          กลับมามีเน็ตแล้ว → คง banner ไว้ (เขียว) ให้กด "โหลดข้อมูลใหม่" */}
+      {(offlineNow || onlineBack) && (
+        <div className={`cmms-offline-banner${onlineBack ? " success" : ""}`}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+            <span>
+              {onlineBack
+                ? "✅ เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
+                : "📴 ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์"}
+            </span>
+            <Button
+              label="โหลดข้อมูลใหม่"
+              variant={onlineBack ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => {
+                if (!navigator.onLine) {
+                  setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
+                  return;
+                }
+                window.location.reload();
+              }}
+              style={{ flexShrink: 0 }}
+            />
+          </div>
+          {retryMsg && (
+            <div style={{ marginTop: 4, opacity: 0.85, fontSize: 12 }}>{retryMsg}</div>
+          )}
         </div>
       )}
 

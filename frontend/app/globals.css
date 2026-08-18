@@ -547,6 +547,9 @@ h1, h2, h3, h4 {
   background: #fff7ed; border: 1px solid #fdba74; color: #9a3412;
   font-size: 0.8rem; font-weight: 600; line-height: 1.5;
 }
+.cmms-offline-banner.success {
+  background: var(--cmms-success-light); border-color: var(--cmms-success); color: var(--cmms-success-dark);
+}
 .cmms-bind-banner {
   margin: 10px 20px 0; padding: 12px 14px; border-radius: var(--cmms-radius);
   background: linear-gradient(135deg, #06C755 0%, #059e44 100%); color: #fff;
