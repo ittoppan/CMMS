@@ -176,6 +176,7 @@ export default function RepairRequestForm() {
   const [sessionName, setSessionName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [offlineNow, setOfflineNow] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [createdWoNo, setCreatedWoNo] = useState<string | null>(null);
   const [offlineQueued, setOfflineQueued] = useState(0);
@@ -221,6 +222,18 @@ export default function RepairRequestForm() {
       const p = new URLSearchParams(window.location.search).get("asset_code");
       if (p) qrPrefillRef.current = p.trim().toUpperCase();
     } catch { /* ignore */ }
+  }, []);
+
+  // ติดตามสถานะ offline — แสดง banner บอกว่ากรอกได้ แต่จะส่งเมื่อกลับมาออนไลน์
+  useEffect(() => {
+    const update = () => setOfflineNow(!navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => {
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
+    };
   }, []);
 
   /* ---- โหลดเครื่องจักรจริง + แผนก + ผู้ใช้ session + LINE profile ---- */
@@ -725,6 +738,13 @@ export default function RepairRequestForm() {
           </div>
         ))}
       </div>
+
+      {/* Offline status — ยังกรอกได้ จะเก็บ queue ส่งเมื่อกลับมาออนไลน์ */}
+      {offlineNow && (
+        <div className="cmms-offline-banner">
+          📴 ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์
+        </div>
+      )}
 
       {/* Offline queue status */}
       {offlineQueued > 0 && (

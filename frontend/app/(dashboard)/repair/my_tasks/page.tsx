@@ -74,6 +74,7 @@ export default function MyTasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [error, setError] = useState(false);
+  const [offline, setOffline] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [etaModalOpen, setEtaModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
@@ -103,6 +104,18 @@ export default function MyTasksPage() {
   // Canvas Ref for Signature Pad
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    // โหมด offline: แสดง banner (ข้อมูลมาจาก cache ของ Service Worker — ข้อมูลล่าสุดที่โหลดไว้)
+    const updateOffline = () => setOffline(!navigator.onLine);
+    updateOffline();
+    window.addEventListener("online", updateOffline);
+    window.addEventListener("offline", updateOffline);
+    return () => {
+      window.removeEventListener("online", updateOffline);
+      window.removeEventListener("offline", updateOffline);
+    };
+  }, []);
 
   useEffect(() => {
     // 1) เอาผู้ใช้ปัจจุบัน (session) เพื่อกรองเฉพาะงานที่มอบหมายให้ตัวเอง
@@ -632,6 +645,15 @@ export default function MyTasksPage() {
           ))}
         </HStack>
       </div>
+
+      {/* Offline banner — ข้อมูลมาจาก cache (Service Worker) */}
+      {offline && (
+        <Banner
+          status="warning"
+          title="โหมดออฟไลน์ — แสดงข้อมูลล่าสุดที่โหลดไว้"
+          description="กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น"
+        />
+      )}
 
       {/* Table */}
       {error ? (

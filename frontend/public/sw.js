@@ -12,16 +12,37 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v8";
+const SW_VERSION = "v9";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
+const PAGE_CACHE = `cmms-tpt-pages-${SW_VERSION}`;
 
 const PRECACHE_URLS = [
   "/offline.html",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+];
+
+/* ---------- Offline Routes (PWA) ----------
+ * หน้าเหล่านี้เปิดดู/กรอกได้แม้ไม่มีเน็ต:
+ *  - /repair/request (แจ้งซ่อมด่วน — LIFF) — ฟอร์ม + queue submit ออฟไลน์
+ *  - /repair/my_tasks (งานของฉัน) — ดูรายการงานจาก cache
+ * หน้าแรกที่ออนไลน์ จะถูกเก็บ HTML ลง PAGE_CACHE แล้วตอน offline เสิร์ฟจาก cache
+ * (ไม่ได้อยู่ในลิสต์ = network-only เดิม — กันเห็นหน้าเก่าหลัง deploy) */
+const OFFLINE_ROUTES = [
+  "/repair/request",
+  "/repair-request",
+  "/repair/my_tasks",
+];
+
+/* API ที่ precache ตอน install — ฟอร์มแจ้งซ่อมโหลดข้อมูล (เครื่องจักร/แผนก) */
+const PRECACHE_APIS = [
+  "/api/v1/asset_registry.php",
+  "/api/v1/departments.php",
+  "/api/v1/repair.php?reference=codes",
+  "/api/v1/menu_permissions.php",
 ];
 
 /* ---------- Helpers ---------- */
@@ -44,13 +65,18 @@ function offlineFallback() {
   );
 }
 
-/* ---------- Install: precache shell (per-URL — ไม่ล้มทั้งชุด) ---------- */
+/* ---------- Install: precache shell + data APIs (per-URL — ไม่ล้มทั้งชุด) ---------- */
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(SHELL_CACHE);
+      const shell = await caches.open(SHELL_CACHE);
       await Promise.allSettled(
-        PRECACHE_URLS.map((url) => cache.add(url).catch(() => {}))
+        PRECACHE_URLS.map((url) => shell.add(url).catch(() => {}))
+      );
+      // precache API สำหรับหน้า offline (ล้มไม่เป็นไร — ตอนออนไลน์จะ cache เองผ่าน fetch handler)
+      const api = await caches.open(API_CACHE);
+      await Promise.allSettled(
+        PRECACHE_APIS.map((url) => api.add(url).catch(() => {}))
       );
       await self.skipWaiting();
     })()
@@ -72,7 +98,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE)
+            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE && key !== PAGE_CACHE)
             .map((key) => caches.delete(key))
         )
       )
@@ -128,13 +154,31 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3) Navigation / pages — network-only (ไม่คืน HTML เก่าจาก cache — กันเห็นหน้าเก่าหลัง deploy)
-  //    offline → แสดงหน้า offline (ไม่ใช่หน้าเก่า)
+  // 3) Navigation / pages
+  //    - หน้าใน OFFLINE_ROUTES: network-first + cache fallback (เปิดดูได้ตอน offline)
+  //    - หน้าอื่น: network-only (ไม่คืน HTML เก่า — กันเห็นหน้าเก่าหลัง deploy)
   if (request.mode === "navigate") {
+    const isOfflineRoute = OFFLINE_ROUTES.some((r) => url.pathname === r || url.pathname.startsWith(r + "/"));
+    if (!isOfflineRoute) {
+      event.respondWith(
+        fetch(request).catch(() =>
+          caches.match("/offline.html").then((res) => res || offlineFallback())
+        )
+      );
+      return;
+    }
+    // offline route — network-first, เก็บ HTML ลง PAGE_CACHE, offline เสิร์ฟจาก cache
     event.respondWith(
-      fetch(request).catch(() =>
-        caches.match("/offline.html").then((res) => res || offlineFallback())
-      )
+      fetch(request)
+        .then((response) => {
+          cachePut(PAGE_CACHE, request, response.clone());
+          return response;
+        })
+        .catch(() =>
+          caches
+            .match(request, { cacheName: PAGE_CACHE })
+            .then((cached) => cached || caches.match("/offline.html").then((res) => res || offlineFallback()))
+        )
     );
     return;
   }
