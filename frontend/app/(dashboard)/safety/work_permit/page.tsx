@@ -8,7 +8,8 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -218,7 +219,7 @@ export default function WorkPermitPage() {
       </Card>
 
       {/* Modal ออกใบอนุญาต */}
-      <Dialog isOpen={modalOpen} onOpenChange={(open) => setModalOpen(open)}>
+      <AnimatedDialog open={modalOpen} onClose={() => setModalOpen(false)}>
         <DialogHeader title="ออกใบอนุญาตทำงานเสี่ยง" onOpenChange={(open) => setModalOpen(open)} />
         <div style={{ padding: '16px 0' }}>
            <FormLayout>
@@ -304,7 +305,7 @@ export default function WorkPermitPage() {
             {submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"}
           </button>
         </HStack>
-      </Dialog>
+      </AnimatedDialog>
 
     </VStack>
   );

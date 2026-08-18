@@ -8,7 +8,8 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import {
   PrinterIcon,
   ArrowLeftIcon,
@@ -739,9 +740,9 @@ export default function RepairViewDetailsPage() {
       `}</style>
 
       {/* PDF Preview Dialog */}
-      <Dialog
-        isOpen={!!previewUrl}
-        onOpenChange={(open: boolean) => { if (!open) handleClosePreview(); }}
+      <AnimatedDialog
+        open={!!previewUrl}
+        onClose={() => handleClosePreview()}
       >
         <DialogHeader title={`ดูตัวอย่าง PDF — ${wo.workOrderNo}`} onOpenChange={() => handleClosePreview()} />
         <div style={{ padding: 16 }}>
@@ -762,7 +763,7 @@ export default function RepairViewDetailsPage() {
             />
           </HStack>
         </div>
-      </Dialog>
+      </AnimatedDialog>
     </VStack>
   );
 }

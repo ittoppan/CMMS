@@ -11,7 +11,8 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -387,7 +388,7 @@ export default function RepairAssignPage() {
       )}
 
       {/* Assign Dialog */}
-      <Dialog isOpen={assignOpen} onOpenChange={setAssignOpen}>
+      <AnimatedDialog open={assignOpen} onClose={() => setAssignOpen(false)}>
         <DialogHeader
           title={selectedWo?.assigneeId ? "เปลี่ยนผู้รับผิดชอบงานซ่อม" : "มอบหมายงานซ่อม"}
           onOpenChange={setAssignOpen}
@@ -464,7 +465,7 @@ export default function RepairAssignPage() {
             {saving ? "กำลังบันทึก..." : "ยืนยันการจ่ายงาน"}
           </button>
         </HStack>
-      </Dialog>
+      </AnimatedDialog>
 
     </VStack>
   );

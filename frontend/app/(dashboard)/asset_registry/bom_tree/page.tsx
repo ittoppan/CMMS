@@ -8,7 +8,8 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { Spinner } from "@astryxdesign/core/Spinner";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
@@ -515,8 +516,7 @@ export default function BOMTreePage() {
       )}
 
       {/* Modal: เพิ่มชิ้นส่วน */}
-      {modalOpen && (
-        <Dialog isOpen={modalOpen} onOpenChange={(open) => { if (!open) setModalOpen(false); }}>
+      <AnimatedDialog open={modalOpen} onClose={() => setModalOpen(false)}>
           <DialogHeader title={`เพิ่มชิ้นส่วนเข้า BOM: ${machine?.code || ""}`} onOpenChange={(open) => { if (!open) setModalOpen(false); }} />
           <VStack gap={4} style={{ padding: 24 }}>
             {successMsg ? (
@@ -598,13 +598,12 @@ export default function BOMTreePage() {
               </>
             )}
           </VStack>
-        </Dialog>
-      )}
+        </AnimatedDialog>
 
       {/* Dialog ยืนยันการลบ */}
-      {confirmDelete && (
-        <Dialog isOpen={!!confirmDelete} onOpenChange={(open) => { if (!open) setConfirmDelete(null); }}>
+      <AnimatedDialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)}>
           <DialogHeader title="ยืนยันการลบชิ้นส่วน" onOpenChange={(open) => { if (!open) setConfirmDelete(null); }} />
+          {confirmDelete && (
           <VStack gap={4} style={{ padding: 24 }}>
             <Text type="body">
               ต้องการลบชิ้นส่วน <strong>{confirmDelete.part_name || "ชิ้นส่วนอะไหล่"}</strong> (รหัส {confirmDelete.part_code || `SP-${confirmDelete.spare_part_id}`}) ออกจาก BOM ของ {machine?.code || "เครื่องจักรนี้"} หรือไม่?
@@ -628,8 +627,8 @@ export default function BOMTreePage() {
               </button>
             </HStack>
           </VStack>
-        </Dialog>
-      )}
+          )}
+        </AnimatedDialog>
 
     </VStack>
   );

@@ -10,7 +10,8 @@ import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Table, proportional } from "@astryxdesign/core/Table";
 import type { TableColumn } from "@astryxdesign/core/Table";
-import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import AnimatedDialog from "@/components/AnimatedDialog";
 import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Field } from "@astryxdesign/core/Field";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -659,8 +660,7 @@ export default function MyTasksPage() {
       )}
 
       {/* CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
-      {closeModalOpen && (
-        <Dialog isOpen onOpenChange={(open) => { if(!open) setCloseModalOpen(false); }}>
+      <AnimatedDialog open={closeModalOpen} onClose={() => setCloseModalOpen(false)}>
           <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
           <VStack gap={4} style={{ padding: 24 }}>
             <FormLayout>
@@ -868,8 +868,7 @@ export default function MyTasksPage() {
               </button>
             </HStack>
           </VStack>
-        </Dialog>
-      )}
+        </AnimatedDialog>
     </VStack>
   );
 }
