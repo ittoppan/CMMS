@@ -57,6 +57,12 @@ interface TaskItem extends Record<string, unknown> {
   afterImg?: string;
   receiverName?: string;
   receiverSignature?: string;
+  failureCode?: string;
+  repairCode?: string;
+  costParts?: number;
+  costLabor?: number;
+  costOutsource?: number;
+  downtimeMinutes?: number;
 }
 
 export default function MyTasksPage() {
@@ -72,8 +78,11 @@ export default function MyTasksPage() {
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   // Close Work Order Form State
-  const [failureCode, setFailureCode] = useState("F01");
-  const [repairCode, setRepairCode] = useState("R01");
+  const [failureCode, setFailureCode] = useState("");
+  const [repairCode, setRepairCode] = useState("");
+  // รหัส F/R จริงจากตาราง failure_codes / repair_codes (API ?reference=codes)
+  const [failureCodes, setFailureCodes] = useState<{ id: number; code: string; name: string }[]>([]);
+  const [repairCodes, setRepairCodes] = useState<{ id: number; code: string; name: string }[]>([]);
   const [rootCause, setRootCause] = useState("");
   const [solution, setSolution] = useState("");
   const [afterImg, setAfterImg] = useState("");
@@ -83,6 +92,12 @@ export default function MyTasksPage() {
   const [closing, setClosing] = useState(false);
   // ผลตรวจการปนเปื้อน — บังคับเลือกก่อนปิดใบงาน (โรงงานอาหาร — กันลืมตรวจ)
   const [contaminateChecking, setContaminateChecking] = useState("");
+  // ค่าใช้จ่าย/เวลาหยุดเครื่อง/ผู้รับเหมา — กรอกตอนปิดใบงาน (ไปแสดงใน F-EN-03)
+  const [costParts, setCostParts] = useState("");
+  const [costLabor, setCostLabor] = useState("");
+  const [costOutsource, setCostOutsource] = useState("");
+  const [downtimeMinutes, setDowntimeMinutes] = useState("");
+  const [outsourceBy, setOutsourceBy] = useState("");
 
   // Canvas Ref for Signature Pad
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -96,6 +111,15 @@ export default function MyTasksPage() {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
       })
       .catch(() => { /* offline — กรองไม่ได้ ปล่อยผ่าน */ });
+
+    // 1.5) โหลดรหัส F/R จริงจากตาราง failure_codes / repair_codes (dropdown ปิดใบงาน)
+    fetch("/api/v1/repair.php?reference=codes", { headers: { "ngrok-skip-browser-warning": "1" } })
+      .then(r => r.json())
+      .then(j => {
+        if (Array.isArray(j?.failure_codes)) setFailureCodes(j.failure_codes);
+        if (Array.isArray(j?.repair_codes)) setRepairCodes(j.repair_codes);
+      })
+      .catch(() => {});
 
     // 2) โหลดงานซ่อม + แผน PM (งานของฉัน = งานซ่อม + PM ที่ได้รับมอบหมาย)
     Promise.all([
@@ -134,7 +158,13 @@ export default function MyTasksPage() {
               afterImg: r.after_image_path || "",
               receiverName: r.receiver_name || "-",
               receiverSignature: r.receiver_signature_path || "",
-              outsourceBy: r.outsource_by || ""
+              outsourceBy: r.outsource_by || "",
+              failureCode: r.failure_code || "",
+              repairCode: r.repair_code || "",
+              costParts: r.cost_parts ? Number(r.cost_parts) : 0,
+              costLabor: r.cost_labor ? Number(r.cost_labor) : 0,
+              costOutsource: r.cost_outsource ? Number(r.cost_outsource) : 0,
+              downtimeMinutes: r.downtime_minutes ? Number(r.downtime_minutes) : 0,
             });
           });
         }
@@ -267,6 +297,20 @@ export default function MyTasksPage() {
     });
   };
 
+  const openCloseModal = (task: TaskItem) => {
+    setSelectedTask(task);
+    // prefill ค่าเดิมถ้าเคยบันทึกไว้ (เปิดอีกครั้ง = แก้ไขย้อนหลังได้)
+    setFailureCode(task.failureCode || "");
+    setRepairCode(task.repairCode || "");
+    setCostParts(task.costParts ? String(task.costParts) : "");
+    setCostLabor(task.costLabor ? String(task.costLabor) : "");
+    setCostOutsource(task.costOutsource ? String(task.costOutsource) : "");
+    setDowntimeMinutes(task.downtimeMinutes ? String(task.downtimeMinutes) : "");
+    setOutsourceBy(task.outsourceBy || "");
+    setContaminateChecking("");
+    setCloseModalOpen(true);
+  };
+
   const handleConfirmClose = async () => {
     if (!selectedTask) return;
     // ต้องกรอกของจริง — ไม่มีค่าเริ่มต้นปลอม
@@ -296,6 +340,13 @@ export default function MyTasksPage() {
           receiver_name: receiverName,
           receiver_signature_path: receiverSignature,
           contaminate_checking: contaminateChecking,
+          failure_code_id: failureCodes.find(c => c.code === failureCode)?.id || null,
+          repair_code_id: repairCodes.find(c => c.code === repairCode)?.id || null,
+          cost_parts: costParts ? Number(costParts) : null,
+          cost_labor: costLabor ? Number(costLabor) : null,
+          cost_outsource: costOutsource ? Number(costOutsource) : null,
+          downtime_minutes: downtimeMinutes ? Number(downtimeMinutes) : null,
+          outsource_by: outsourceBy.trim() ? outsourceBy.trim() : null,
           completed_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
         })
       });
@@ -480,11 +531,7 @@ export default function MyTasksPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedTask(task);
-                    setContaminateChecking("");
-                    setCloseModalOpen(true);
-                  }}
+                  onClick={() => openCloseModal(task)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                 >
                   <CheckIcon className="w-3.5 h-3.5" />
@@ -505,11 +552,7 @@ export default function MyTasksPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedTask(task);
-                    setContaminateChecking("");
-                    setCloseModalOpen(true);
-                  }}
+                  onClick={() => openCloseModal(task)}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
                 >
                   <CheckIcon className="w-3.5 h-3.5" />
@@ -626,13 +669,10 @@ export default function MyTasksPage() {
                   <Selector
                     label="รหัสอาการเสีย"
                     isLabelHidden
+                    placeholder="เลือกกลุ่มอาการเสีย (รหัส F)"
                     value={failureCode}
                     onChange={setFailureCode}
-                    options={[
-                      { value: "F01", label: "F01 - ไฟฟ้าลัดวงจร/อุปกรณ์เสื่อม" },
-                      { value: "F02", label: "F02 - มอเตอร์ไหม้/เพลาติดขัด" },
-                      { value: "F03", label: "F03 - ตลับลูกปืนแตก/ซีลรั่ว" },
-                    ]}
+                    options={failureCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
                   />
                 </Field>
 
@@ -640,12 +680,10 @@ export default function MyTasksPage() {
                   <Selector
                     label="รหัสการซ่อม"
                     isLabelHidden
+                    placeholder="เลือกกลุ่มงานซ่อม (รหัส R)"
                     value={repairCode}
                     onChange={setRepairCode}
-                    options={[
-                      { value: "R01", label: "R01 - เปลี่ยนอะไหล่ชิ้นใหม่" },
-                      { value: "R02", label: "R02 - ซ่อมแซมและปรับตั้งค่า" },
-                    ]}
+                    options={repairCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
                   />
                 </Field>
               </Grid>
@@ -687,6 +725,55 @@ export default function MyTasksPage() {
                   ]}
                 />
               </Field>
+
+              {/* ค่าใช้จ่าย / เวลาหยุดเครื่อง / ผู้รับเหมา — บันทึกจริง ไปแสดงใน F-EN-03 */}
+              <Grid columns={2} gap={4}>
+                <Field label="ค่าอะไหล่ (บาท)" inputID="costParts">
+                  <TextInput
+                    label="ค่าอะไหล่"
+                    isLabelHidden
+                    placeholder="เช่น 4500"
+                    value={costParts}
+                    onChange={(v) => setCostParts(v.replace(/\D/g, ""))}
+                  />
+                </Field>
+                <Field label="ค่าแรง (บาท)" inputID="costLabor">
+                  <TextInput
+                    label="ค่าแรง"
+                    isLabelHidden
+                    placeholder="เช่น 1200"
+                    value={costLabor}
+                    onChange={(v) => setCostLabor(v.replace(/\D/g, ""))}
+                  />
+                </Field>
+                <Field label="ค่าจ้างภายนอก (บาท)" inputID="costOutsource">
+                  <TextInput
+                    label="ค่าจ้างภายนอก"
+                    isLabelHidden
+                    placeholder="เช่น 15000"
+                    value={costOutsource}
+                    onChange={(v) => setCostOutsource(v.replace(/\D/g, ""))}
+                  />
+                </Field>
+                <Field label="เวลาหยุดเครื่องจักร (นาที)" inputID="downtimeMin">
+                  <TextInput
+                    label="เวลาหยุดเครื่อง"
+                    isLabelHidden
+                    placeholder="เช่น 120"
+                    value={downtimeMinutes}
+                    onChange={(v) => setDowntimeMinutes(v.replace(/\D/g, ""))}
+                  />
+                </Field>
+                <Field label="ผู้รับเหมาภายนอก (ถ้ามี)" inputID="outsourceBy">
+                  <TextInput
+                    label="ผู้รับเหมาภายนอก"
+                    isLabelHidden
+                    placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+                    value={outsourceBy}
+                    onChange={setOutsourceBy}
+                  />
+                </Field>
+              </Grid>
 
               {/* AFTER REPAIR IMAGE UPLOAD */}
               <Field label="แนบรูปถ่ายหลังซ่อมเสร็จ" inputID="afterPhoto">

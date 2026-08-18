@@ -21,6 +21,13 @@ try {
 
     switch ($method) {
         case 'GET':
+            // กลุ่มอ้างอิงรหัส F/R: ?reference=codes -> { failure_codes, repair_codes } (สำหรับ dropdown ปิดใบงาน/แก้ไข)
+            if (isset($_GET['reference']) && $_GET['reference'] === 'codes') {
+                $fCodes = $pdo->query("SELECT id, code, name, category FROM failure_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
+                $rCodes = $pdo->query("SELECT id, code, name, category FROM repair_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
+                echo json_encode(['failure_codes' => $fCodes, 'repair_codes' => $rCodes], JSON_UNESCAPED_UNICODE);
+                break;
+            }
             // อะไหล่ที่ใช้ซ่อม: ?parts=1&id=N (รายเดียว -> array) หรือ ?parts=1&ids=1,2,3 (หลาย -> map keyed by repair_id)
             if (isset($_GET['parts'])) {
                 $ids = [];
@@ -61,7 +68,7 @@ try {
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
-                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id WHERE r.id = ?');
+                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id WHERE r.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
@@ -71,11 +78,11 @@ try {
             } else {
                 // กรองตามเครื่อง: ?asset_code=A-PT-01 (ใช้หน้า scan — ประวัติซ่อมต่อเครื่อง)
                 if (!empty($_GET['asset_code'])) {
-                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id WHERE a.code = ? ORDER BY r.created_at DESC');
+                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id WHERE a.code = ? ORDER BY r.created_at DESC');
                     $stmt->execute([(string)$_GET['asset_code']]);
                     $rows = $stmt->fetchAll();
                 } else {
-                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id ORDER BY r.created_at DESC');
+                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id ORDER BY r.created_at DESC');
                     $rows = $stmt->fetchAll();
                 }
                 attachWorkTeams($rows, 'repair');
@@ -104,7 +111,7 @@ try {
                     exit;
                 }
             }
-            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'cost_parts', 'cost_labor', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
             if ($closingNow) {
@@ -276,7 +283,7 @@ try {
                     $accepted = true;
                 }
             }
-            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'cost_parts', 'cost_labor', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
