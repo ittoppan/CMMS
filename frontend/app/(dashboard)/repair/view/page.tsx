@@ -316,9 +316,16 @@ export default function RepairViewDetailsPage() {
           if (snap.wo) setWo(snap.wo);
         }
       } else if (offlineRef.current) {
-        // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล คง banner ไว้ให้กด "โหลดข้อมูลใหม่"
-        setOnlineBack(true);
-        setRetryMsg("");
+        // เพิ่งกลับมามีเน็ต — โหลดข้อมูลใหม่อัตโนมัติ (เช็คเซิร์ฟเวอร์ก่อน กันวนเงียบๆ)
+        offlineRef.current = false; // กัน reload ซ้ำถ้า event online หลุดซ้ำ
+        const ok = await serverResponds();
+        if (ok) {
+          window.location.reload();
+        } else {
+          // เซิร์ฟเวอร์ยังไม่ตอบ — คง banner เขียวไว้ให้กด "โหลดข้อมูลใหม่" เอง
+          setOnlineBack(true);
+          setRetryMsg("");
+        }
       }
     };
     updateOffline();
