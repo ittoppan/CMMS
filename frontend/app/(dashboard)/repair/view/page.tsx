@@ -170,6 +170,10 @@ export default function RepairViewDetailsPage() {
   // โหมด offline — แสดง banner + เวลา "ข้อมูล ณ" จาก snapshot (IndexedDB)
   const [offline, setOffline] = useState(false);
   const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
+  const [retryMsg, setRetryMsg] = useState("");
+  // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
+  const [onlineBack, setOnlineBack] = useState(false);
+  const offlineRef = useRef(false);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -306,13 +310,20 @@ export default function RepairViewDetailsPage() {
     const idParam = new URLSearchParams(window.location.search).get("id") || "1";
     const updateOffline = async () => {
       const isOff = !navigator.onLine;
-      setOffline(isOff);
       if (isOff) {
+        offlineRef.current = true;
+        setOffline(true);
+        setOnlineBack(false);
+        setRetryMsg("");
         const snap = await snapshotLoad<{ wo: WorkOrderDetail; savedAt?: number }>(`repair_view:${idParam}`);
         if (snap) {
           if (snap.savedAt) setSnapshotTime(snap.savedAt);
           if (snap.wo) setWo(snap.wo);
         }
+      } else if (offlineRef.current) {
+        // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล คง banner ไว้ให้กด "โหลดข้อมูลใหม่"
+        setOnlineBack(true);
+        setRetryMsg("");
       }
     };
     updateOffline();
@@ -438,9 +449,32 @@ export default function RepairViewDetailsPage() {
       {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
       {offline && (
         <Banner
-          status="warning"
-          title={`โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`}
-          description="กำลังแสดงข้อมูลจากเครื่องของคุณ (เปิดดูได้อย่างเดียว) — อัปเดตใหม่เมื่อกลับมาออนไลน์"
+          status={onlineBack ? "success" : "warning"}
+          title={
+            onlineBack
+              ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
+              : `โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`
+          }
+          description={
+            retryMsg ||
+            (onlineBack
+              ? "กด \"โหลดข้อมูลใหม่\" เพื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์"
+              : "กำลังแสดงข้อมูลจากเครื่องของคุณ (เปิดดูได้อย่างเดียว) — อัปเดตใหม่เมื่อกลับมาออนไลน์")
+          }
+          endContent={
+            <Button
+              label="โหลดข้อมูลใหม่"
+              variant={onlineBack ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => {
+                if (!navigator.onLine) {
+                  setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
+                  return;
+                }
+                window.location.reload();
+              }}
+            />
+          }
         />
       )}
 

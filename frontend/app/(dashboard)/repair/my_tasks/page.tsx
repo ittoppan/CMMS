@@ -22,6 +22,7 @@ import { FileInput } from "@astryxdesign/core/FileInput";
 import { Switch } from "@astryxdesign/core/Switch";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
 import { useRouter } from "next/navigation";
 import { 
   CheckCircleIcon,
@@ -92,6 +93,10 @@ export default function MyTasksPage() {
   const [error, setError] = useState(false);
   const [offline, setOffline] = useState(false);
   const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
+  const [retryMsg, setRetryMsg] = useState("");
+  // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
+  const [onlineBack, setOnlineBack] = useState(false);
+  const offlineRef = useRef(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [etaModalOpen, setEtaModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
@@ -127,10 +132,17 @@ export default function MyTasksPage() {
     // (ข้อมูลอาจมาจาก SW cache หรือ snapshot — เวลาใช้ savedAt จาก snapshot เสมอ)
     const updateOffline = async () => {
       const isOff = !navigator.onLine;
-      setOffline(isOff);
       if (isOff) {
+        offlineRef.current = true;
+        setOffline(true);
+        setOnlineBack(false);
+        setRetryMsg("");
         const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
         if (snap?.savedAt) setSnapshotTime(snap.savedAt);
+      } else if (offlineRef.current) {
+        // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล คง banner ไว้ให้กด "โหลดข้อมูลใหม่"
+        setOnlineBack(true);
+        setRetryMsg("");
       }
     };
     updateOffline();
@@ -693,9 +705,32 @@ export default function MyTasksPage() {
       {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
       {offline && (
         <Banner
-          status="warning"
-          title={`โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`}
-          description="กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น"
+          status={onlineBack ? "success" : "warning"}
+          title={
+            onlineBack
+              ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
+              : `โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`
+          }
+          description={
+            retryMsg ||
+            (onlineBack
+              ? "กด \"โหลดข้อมูลใหม่\" เพื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์"
+              : "กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น")
+          }
+          endContent={
+            <Button
+              label="โหลดข้อมูลใหม่"
+              variant={onlineBack ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => {
+                if (!navigator.onLine) {
+                  setRetryMsg("ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้");
+                  return;
+                }
+                window.location.reload();
+              }}
+            />
+          }
         />
       )}
 
