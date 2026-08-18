@@ -13,6 +13,7 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
 import LiffBridge from "../../components/LiffBridge";
+import CardTableLabels from "../../components/CardTableLabels";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
 import CommandPalette from "../../components/CommandPalette";
@@ -466,6 +467,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SideNav>
       }    >
       <LiffBridge />
+      <CardTableLabels />
       <Layout
         height="fill"
         content={
