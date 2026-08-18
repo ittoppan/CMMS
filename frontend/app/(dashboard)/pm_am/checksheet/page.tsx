@@ -671,6 +671,8 @@ export default function PMChecksheetPage() {
 
       {/* ── ลายเซ็นยืนยันการทำ PM: ผู้ตรวจเช็ค + ผู้ควบคุมเครื่อง ── */}
       <AnimatedDialog open={sigModalOpen && !!selectedPlan} onClose={() => { if (!submitting) setSigModalOpen(false); }}>
+        {selectedPlan && (
+          <>
           <DialogHeader title={`ลงนามยืนยันการทำ PM: ${selectedPlan.title}`} />
           <VStack gap={4} style={{ padding: 24 }}>
             <Grid columns={2} gap={4}>
@@ -748,6 +750,8 @@ export default function PMChecksheetPage() {
               </button>
             </HStack>
           </VStack>
+          </>
+        )}
         </AnimatedDialog>
     </VStack>
   );

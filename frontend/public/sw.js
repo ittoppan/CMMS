@@ -12,7 +12,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v10";
+const SW_VERSION = "v11";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -36,6 +36,7 @@ const OFFLINE_ROUTES = [
   "/repair-request",
   "/repair/my_tasks",
   "/repair/view",
+  "/pm_am/checksheet",
 ];
 
 /* API ที่ precache ตอน install — ฟอร์มแจ้งซ่อมโหลดข้อมูล (เครื่องจักร/แผนก) */
@@ -44,6 +45,8 @@ const PRECACHE_APIS = [
   "/api/v1/departments.php",
   "/api/v1/repair.php?reference=codes",
   "/api/v1/menu_permissions.php",
+  "/api/v1/pm_am.php",
+  "/api/v1/index.php?resource=assets",
 ];
 
 /* ---------- Helpers ---------- */
