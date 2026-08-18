@@ -54,7 +54,6 @@ import {
   ClipboardDocumentListIcon,
   ServerStackIcon,
   Squares2X2Icon,
-  UserCircleIcon,
   TruckIcon,
   BeakerIcon,
   BookOpenIcon,
@@ -372,21 +371,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 />
               }
             />
-          }
-          footer={
-            <SideNavSection title={t("nav.account")} isHeaderHidden>
-              <SideNavItem
-                label={currentUser?.name || roleName || "ผู้ใช้งาน"}
-                icon={UserCircleIcon}
-                href="/profile"
-                isSelected={isSelected("/profile")}
-              />
-              <SideNavItem
-                label={t("menu.logout")}
-                icon={ArrowRightEndOnRectangleIcon}
-                href="/login"
-              />
-            </SideNavSection>
           }
         >
           {/* 1. งานซ่อมบำรุง */}
