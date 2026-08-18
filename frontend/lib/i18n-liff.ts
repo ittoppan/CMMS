@@ -51,6 +51,11 @@ const LIFF_DICT: Record<string, { th: string; en: string }> = {
   "liff.checksheet_desc": { th: "เลือกแผน PM แล้วบันทึกผลการตรวจสอบรายการ", en: "Pick a PM plan and record the inspection results" },
   "liff.checksheet_pending": { th: "มี {n} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์", en: "{n} item(s) saved on this device — will sync automatically when back online" },
   "liff.checksheet_check_all": { th: "ผ่านทั้งหมด (ทุกรายการ)", en: "Pass all items" },
+  "liff.checksheet_send_now": { th: "ส่งงานค้างทั้งหมดตอนนี้", en: "Send all pending now" },
+  "liff.checksheet_send_now_hint": { th: "จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์ — หรือกดปุ่มนี้เพื่อส่งทันที", en: "Will sync automatically when back online — or tap this button to send now" },
+  "liff.checksheet_send_done": { th: "ส่งสำเร็จ {ok} รายการ", en: "Sent {ok} item(s)" },
+  "liff.checksheet_send_remaining": { th: "ยังเหลือ {n} รายการที่ส่งไม่ได้ — ลองอีกครั้งเมื่อมีเน็ต", en: "{n} item(s) still unsent — retry when online" },
+  "liff.checksheet_send_offline": { th: "ยังไม่มีอินเทอร์เน็ต — ลองอีกครั้งเมื่อเชื่อมต่อได้", en: "No internet yet — retry when connected" },
 };
 
 const STORAGE_KEY = "cmms_lang";
