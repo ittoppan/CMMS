@@ -9,7 +9,24 @@ import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { DialogHeader } from "@astryxdesign/core/Dialog";
+import { Banner } from "@astryxdesign/core/Banner";
 import AnimatedDialog from "@/components/AnimatedDialog";
+import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
+
+// แสดงเวลา "อัปเดตล่าสุด" แบบไทย (เช่น 18 ส.ค. 69, 11:05 น.) — เหมือนหน้างานของฉัน
+function formatTime(ts: number): string {
+  try {
+    return new Date(ts).toLocaleString("th-TH", {
+      day: "numeric",
+      month: "short",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return new Date(ts).toLocaleString();
+  }
+}
 import {
   PrinterIcon,
   ArrowLeftIcon,
@@ -150,6 +167,9 @@ export default function RepairViewDetailsPage() {
   const [partsSaving, setPartsSaving] = useState(false);
   const [partsMsg, setPartsMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [deductStock, setDeductStock] = useState(true);
+  // โหมด offline — แสดง banner + เวลา "ข้อมูล ณ" จาก snapshot (IndexedDB)
+  const [offline, setOffline] = useState(false);
+  const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
   const [wo, setWo] = useState<WorkOrderDetail>({
     id: 0,
     workOrderNo: "-",
@@ -186,7 +206,7 @@ export default function RepairViewDetailsPage() {
       .then(res => res.json())
       .then(row => {
         if (row && row.id) {
-          setWo({
+          const mapped = {
             id: row.id,
             workOrderNo: row.work_order_no || `EN-${row.id}`,
             assetName: row.asset_name || "-",
@@ -215,10 +235,23 @@ export default function RepairViewDetailsPage() {
             actualStartAt: String(row.actual_start_at || ""),
             repairTimeMinutes: Number(row.repair_time_minutes || 0),
             team: Array.isArray(row.team) ? row.team : []
-          });
+          };
+          setWo(mapped);
+          // offline ใช้ snapshot ล่าสุด — เก็บทุกครั้งที่โหลดสำเร็จ (พร้อมเวลา "ข้อมูล ณ")
+          snapshotSave(`repair_view:${idParam}`, { wo: mapped, savedAt: Date.now() });
         }
       })
-      .catch(e => console.error("Fetch WO error", e))
+      .catch(e => {
+        console.error("Fetch WO error", e);
+        // offline: เปิดจาก snapshot ล่าสุด (ไม่พึ่ง SW cache — ล้างได้เมื่อ SW update)
+        snapshotLoad<{ wo: WorkOrderDetail; savedAt?: number }>(`repair_view:${idParam}`).then(snap => {
+          if (snap?.wo) {
+            setWo(snap.wo);
+            if (snap.savedAt) setSnapshotTime(snap.savedAt);
+            setOffline(true);
+          }
+        });
+      })
       .finally(() => setLoading(false));
 
     // อะไหล่ที่ใช้ซ่อม (สำหรับตารางในเอกสาร F-EN-03 + ใบเบิก)
@@ -266,6 +299,29 @@ export default function RepairViewDetailsPage() {
       .then(res => res.json())
       .then((list: any[]) => { if (Array.isArray(list)) setActivity(list); })
       .catch(e => console.error("Fetch WO activity error", e));
+  }, []);
+
+  // ติดตาม online/offline — แสดง banner + อ่านเวลาสุดท้ายจาก snapshot (เหมือนหน้างานของฉัน)
+  useEffect(() => {
+    const idParam = new URLSearchParams(window.location.search).get("id") || "1";
+    const updateOffline = async () => {
+      const isOff = !navigator.onLine;
+      setOffline(isOff);
+      if (isOff) {
+        const snap = await snapshotLoad<{ wo: WorkOrderDetail; savedAt?: number }>(`repair_view:${idParam}`);
+        if (snap) {
+          if (snap.savedAt) setSnapshotTime(snap.savedAt);
+          if (snap.wo) setWo(snap.wo);
+        }
+      }
+    };
+    updateOffline();
+    window.addEventListener("online", updateOffline);
+    window.addEventListener("offline", updateOffline);
+    return () => {
+      window.removeEventListener("online", updateOffline);
+      window.removeEventListener("offline", updateOffline);
+    };
   }, []);
 
   const handlePrint = () => {
@@ -379,6 +435,15 @@ export default function RepairViewDetailsPage() {
 
   return (
     <VStack gap={6}>
+      {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
+      {offline && (
+        <Banner
+          status="warning"
+          title={`โหมดออฟไลน์ — ข้อมูล ณ ${snapshotTime ? formatTime(snapshotTime) : "ครั้งล่าสุด"}`}
+          description="กำลังแสดงข้อมูลจากเครื่องของคุณ (เปิดดูได้อย่างเดียว) — อัปเดตใหม่เมื่อกลับมาออนไลน์"
+        />
+      )}
+
       {/* Header (Hidden on Print) */}
       <div className="no-print">
         <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3} className="mb-5">
