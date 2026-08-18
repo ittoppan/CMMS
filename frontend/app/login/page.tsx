@@ -80,6 +80,11 @@ function LoginContent() {
       });
       const data = await res.json();
       if (data.success) {
+        // บัญชีที่ตั้งรหัสเริ่มต้น → ต้องเปลี่ยนรหัสก่อนใช้งาน
+        if (data.must_change_password) {
+          window.location.href = "/change-password";
+          return;
+        }
         window.location.href = bindLine ? "/line_login.php" : nextPath ? nextPath : "/";
       } else {
         setLoginFailed(true);

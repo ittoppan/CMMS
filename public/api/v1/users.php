@@ -22,19 +22,19 @@ try {
         case 'GET':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
-                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, created_at, updated_at FROM users WHERE id = ?');
+                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 echo json_encode($row);
             } else {
-                $stmt = $pdo->query('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, created_at, updated_at FROM users ORDER BY created_at DESC');
+                $stmt = $pdo->query('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users ORDER BY created_at DESC');
                 echo json_encode($stmt->fetchAll());
             }
             break;
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang'];
+            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
             $cols = [];
             $vals = [];
             foreach ($allowed as $col) {
@@ -67,7 +67,7 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
-            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang'];
+            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
             $fields = [];
             $values = [];
             foreach ($allowed as $col) {

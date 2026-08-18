@@ -176,6 +176,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return res.json();
       })
       .then((json) => {
+        // บังคับเปลี่ยนรหัสครั้งแรก (admin ตั้งรหัสเริ่มต้นให้) → ไปหน้า change-password
+        if (json?.user?.must_change_password) {
+          router.replace("/change-password");
+          return null;
+        }
         if (json?.user?.full_name) {
           const full = String(json.user.full_name).split("(")[0].trim();
           // รูปโปรไฟล์: avatar (base64 data URL ที่อัปโหลดใหม่) ก่อน แล้วค่อย avatar_path

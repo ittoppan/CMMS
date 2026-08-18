@@ -16,7 +16,7 @@ try {
     }
 
     $pdo = getDb();
-    $stmt = $pdo->prepare('SELECT id, username, password, full_name, role_id FROM users WHERE username = ? AND is_active = 1');
+    $stmt = $pdo->prepare('SELECT id, username, password, full_name, role_id, must_change_password FROM users WHERE username = ? AND is_active = 1');
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
@@ -30,8 +30,9 @@ try {
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['user_name'] = $user['full_name'];
     $_SESSION['role_id']   = $user['role_id'];
+    $_SESSION['must_change_password'] = (int)$user['must_change_password'] === 1;
 
-    echo json_encode(['success' => true, 'user' => [
+    echo json_encode(['success' => true, 'must_change_password' => (int)$user['must_change_password'] === 1, 'user' => [
         'id'       => $user['id'],
         'username' => $user['username'],
         'full_name'=> $user['full_name'],

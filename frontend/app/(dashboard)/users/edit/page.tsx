@@ -49,6 +49,7 @@ function EditUserContent() {
     avatar: PRESET_AVATARS[0].url,
     isActive: true,
     lineUserId: "",
+    mustChange: false,
   });
 
   const update = (key: string, val: any) => setForm(prev => ({ ...prev, [key]: val }));
@@ -88,6 +89,7 @@ function EditUserContent() {
             avatar: user.avatar || user.avatar_path || PRESET_AVATARS[0].url,
             isActive: user.is_active === 1 || user.is_active === "1" || user.is_active === true,
             lineUserId: user.line_user_id || "",
+            mustChange: user.must_change_password === 1 || user.must_change_password === "1" || user.must_change_password === true,
           });
         } else {
           setErrorMessage("ไม่พบข้อมูลผู้ใช้");
@@ -121,6 +123,7 @@ function EditUserContent() {
           avatar: form.avatar,
           is_active: form.isActive ? 1 : 0,
           line_user_id: form.lineUserId || null,
+          must_change_password: form.mustChange ? 1 : 0,
         }),
       });
       const json = await res.json();
@@ -332,6 +335,19 @@ function EditUserContent() {
                   />
                   <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
                     {form.isActive ? "เปิดใช้งาน" : "ระงับการใช้งาน"}
+                  </Text>
+                </HStack>
+              </Field>
+
+              <Field label="บังคับเปลี่ยนรหัสผ่านครั้งแรก" inputID="mustChange">
+                <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
+                  <Switch
+                    label="ให้เปลี่ยนรหัสเมื่อล็อกอินครั้งหน้า"
+                    value={form.mustChange}
+                    onChange={(val: boolean) => update("mustChange", val)}
+                  />
+                  <Text type="body" size="sm" color={form.mustChange ? "primary" : "secondary"}>
+                    {form.mustChange ? "บังคับ (ต้องเปลี่ยนก่อนใช้งาน)" : "ไม่บังคับ"}
                   </Text>
                 </HStack>
               </Field>

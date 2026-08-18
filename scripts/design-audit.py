@@ -52,6 +52,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # หน้า standalone/มือถือ/เครื่องมือ ที่ไม่ต้องมี eyebrow (ตาม guideline §6.1)
 EYEBROW_EXEMPT = {
     "frontend/app/login/page.tsx",
+    "frontend/app/change-password/page.tsx",
     "frontend/app/register/page.tsx",
     "frontend/app/scan/page.tsx",
     "frontend/app/editor/page.tsx",

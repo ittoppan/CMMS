@@ -155,6 +155,8 @@ try {
                 http_response_code(401); echo json_encode(['error' => 'รหัสผ่านเดิมไม่ถูกต้อง']); exit;
             }
             $fields[] = 'password = ?'; $values[] = password_hash($new, PASSWORD_DEFAULT);
+            // เปลี่ยนรหัสสำเร็จ = จบการบังคับเปลี่ยนครั้งแรก
+            $fields[] = 'must_change_password = 0';
         }
 
         if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'ไม่มีข้อมูลที่จะแก้ไข']); exit; }
