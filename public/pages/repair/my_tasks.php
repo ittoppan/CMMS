@@ -56,21 +56,9 @@ foreach ($repairs as $r) {
     if (in_array($r['status'], ['in_progress','waiting_parts','waiting_approval'], true)) $active++;
 }
 
-renderHeader();
+// ═══════════ สร้างเนื้อหาส่วนกลาง (ใช้ทั้งหน้าเต็มและ partial refresh) ═══════════
+ob_start();
 ?>
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="cmms-section flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-semibold text-primary tracking-tight">👷 งานของฉัน</h1>
-            <p class="text-sm text-secondary mt-1">My Tasks — งานซ่อมที่คุณรับผิดชอบ (ไม่รวมงานที่ปิดแล้ว)</p>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
-            <a href="index.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">← งานทั้งหมด</a>
-            <a href="kanban.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">📊 Kanban</a>
-        </div>
-    </div>
-
     <!-- Stat cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="cmms-card cmms-stat-card"><span class="cmms-stat-label">งานค้างทั้งหมด</span><span class="cmms-stat-value"><?= $total ?></span><span class="cmms-stat-hint">ที่ยังไม่ปิด</span></div>
@@ -157,5 +145,85 @@ renderHeader();
         </div>
     </div>
     <?php endif; ?>
+<?php
+$contentHtml = ob_get_clean();
+
+// ═══════════ Partial mode (ใช้กับ auto-refresh — ไม่มี header/footer) ═══════════
+if (isset($_GET['partial'])) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo $contentHtml;
+    exit;
+}
+
+renderHeader();
+?>
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="cmms-section flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-semibold text-primary tracking-tight">👷 งานของฉัน</h1>
+            <p class="text-sm text-secondary mt-1">My Tasks — งานซ่อมที่คุณรับผิดชอบ (ไม่รวมงานที่ปิดแล้ว)</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="index.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">← งานทั้งหมด</a>
+            <a href="kanban.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">📊 Kanban</a>
+        </div>
+    </div>
+
+    <!-- Auto-refresh status bar -->
+    <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-2 text-[11px] text-secondary">
+            <span id="mt-live-dot" class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            <span id="mt-last-updated">อัปเดตล่าสุด —</span>
+        </div>
+        <label class="flex items-center gap-1.5 text-[11px] text-secondary cursor-pointer select-none">
+            <input type="checkbox" id="mt-auto-refresh" checked class="accent-indigo-600 w-3.5 h-3.5">
+            อัปเดตอัตโนมัติทุก 30 วิ
+        </label>
+    </div>
+
+    <div id="my-tasks-content"><?= $contentHtml ?></div>
 </div>
+
+<script>
+(function () {
+    var content = document.getElementById('my-tasks-content');
+    var dot = document.getElementById('mt-live-dot');
+    var stamp = document.getElementById('mt-last-updated');
+    var toggle = document.getElementById('mt-auto-refresh');
+    var lastOk = new Date();
+    var timer = null;
+
+    function fmt(d) {
+        return d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    function setStatus(ok) {
+        if (!dot || !stamp) return;
+        if (ok) {
+            dot.className = 'w-2 h-2 rounded-full bg-emerald-500 inline-block';
+            stamp.textContent = 'อัปเดตล่าสุด ' + fmt(new Date());
+        } else {
+            dot.className = 'w-2 h-2 rounded-full bg-amber-500 inline-block';
+            stamp.textContent = 'ออฟไลน์ — ข้อมูล ณ ' + fmt(lastOk);
+        }
+    }
+    async function refresh() {
+        try {
+            var res = await fetch('my_tasks.php?partial=1', { headers: { 'X-Requested-With': 'fetch' } });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            var html = await res.text();
+            content.innerHTML = html;
+            lastOk = new Date();
+            setStatus(true);
+        } catch (e) {
+            setStatus(false);
+        }
+    }
+    function start() { if (!timer) timer = setInterval(refresh, 30000); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    toggle.addEventListener('change', function () { this.checked ? start() : stop(); });
+    setStatus(true);
+    start();
+})();
+</script>
 <?php renderFooter(); ?>

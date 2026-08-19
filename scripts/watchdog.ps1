@@ -84,7 +84,24 @@ try {
             $tunnelUrl = ((Get-Content -LiteralPath $urlFile -Raw) -split "\s+")[0]
             if ($tunnelUrl -match "^https://") {
                 if (-not ((Test-Url "$tunnelUrl/login") -eq 200)) {
-                    Write-Log "WARN tunnel URL ลง ($tunnelUrl) - ไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก)"
+                    Write-Log "WARN tunnel URL ลง ($tunnelUrl)"
+                    # --- Named tunnel: restart อัตโนมัติได้ (URL ถาวร ไม่กระทบผู้ใช้ภายนอก) ---
+                    $namedCred = "C:\cloudflared\cmms-tpt.json"
+                    $namedCfg  = "C:\cloudflared\config.yml"
+                    if ((Test-Path -LiteralPath $namedCred) -and (Test-Path -LiteralPath $namedCfg)) {
+                        Write-Log "named tunnel detected — auto-restart via tunnel-named.ps1"
+                        & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root "scripts\tunnel-named.ps1") | Out-Null
+                        Start-Sleep -Seconds 8
+                        if ((Test-Url "$tunnelUrl/login") -eq 200) {
+                            Write-Log "named tunnel RECOVERED ($tunnelUrl)"
+                            Send-Alert "✅ [CMMS Watchdog] tunnel กลับมาทำงานแล้ว ($tunnelUrl)"
+                            if (Test-Path -LiteralPath $stateFile) { Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue }
+                        } else {
+                            Write-Log "named tunnel STILL DOWN after restart — alert (throttled 24h)"
+                        }
+                    } else {
+                        Write-Log "quick tunnel (trycloudflare) — ไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก)"
+                    }
                     # --- อ่าน state: lastAlert|lastAlertUrl (unix ts) ---
                     $lastAlert = 0; $lastAlertUrl = ""
                     $firstRun = -not (Test-Path -LiteralPath $stateFile)
@@ -114,7 +131,7 @@ try {
                         if ($urlChanged) {
                             Send-Alert "🔄 [CMMS Watchdog] tunnel URL เปลี่ยน: $newUrl"
                         } else {
-                            Send-Alert "⚠️ [CMMS Watchdog] tunnel ยังลงอยู่ ($newUrl) - ระบบไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก) - รัน scripts	unnel-quick.ps1 ด้วยตนเองเมื่อต้องการ (แจ้ง 1 ครั้ง/ชม.)"
+                            Send-Alert "⚠️ [CMMS Watchdog] tunnel ยังลงอยู่ ($newUrl) - restart อัตโนมัติล้มเหลว (named) หรือต้องรัน tunnel-quick.ps1 ด้วยตนเอง (quick) - แจ้ง 1 ครั้ง/วัน"
                         }
                         $lastAlert = $now; $lastAlertUrl = $newUrl
                     }

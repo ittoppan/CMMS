@@ -80,6 +80,7 @@ $groups = [
         'icon' => 'bell',
         'color' => 'teal',
         'items' => [
+            ['label' => '🔔 ศูนย์รวมการแจ้งเตือน (Notification Center)', 'url' => 'notification_center.php', 'desc' => 'เปิด/ปิดช่องทางแจ้งเตือน, ทดสอบส่งทุกช่องทาง, ดูสถานะ 24 ชม.'],
             ['label' => '🎛️ ศูนย์ตั้งค่าเปิด-ปิดโมดูลระบบ (Master Feature Switcher)', 'url' => 'module_switches.php', 'desc' => 'สวิตช์เปิด-ปิดการใช้งานแต่ละโมดูลและฟีเจอร์ในระบบได้อย่างอิสระ'],
             ['label' => '🧠 ตั้งค่าเงื่อนไข & ราคาอนุมัติ (Smart Rules)', 'url' => 'smart_rules_config.php', 'desc' => 'กำหนดวงเงินอนุมัติเบิกอะไหล่, เกณฑ์ Downtime 5-Why และขีดจำกัด IoT'],
             ['label' => '🟢 ตั้งค่า LINE Notify & 1-Click Approval', 'url' => 'line_config.php', 'desc' => 'กำหนด Token แจ้งเตือน LINE และอนุมัติเอกสารใน 1 สัมผัส'],
