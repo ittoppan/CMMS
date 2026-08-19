@@ -53,6 +53,19 @@ type Dept = { id: number; code: string; name: string };
 
 type LineProfile = { name: string; pic: string; userId: string } | null;
 
+// Dynamic options from API
+interface RepairOption {
+  id: number;
+  option_type: string;
+  option_value: string;
+  option_label: string;
+  option_label_en: string | null;
+  option_emoji: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+// Default machine groups (fallback if API fails)
 const MACHINE_GROUPS = [
   { label: "เครื่องพิมพ์", emoji: "🖨️", prefix: "A-PT" },
   { label: "ลามิเนต", emoji: "🧴", prefix: "A-DL" },
@@ -61,24 +74,32 @@ const MACHINE_GROUPS = [
   { label: "เครื่องทำถุง", emoji: "🛍️", prefix: "A-BM" },
 ];
 
-const MACHINE_STATUS_OPTIONS = [
+// Default options (fallback if API fails)
+const DEFAULT_MACHINE_STATUS = [
   { value: "breakdown", label: "Break Down", th: "เครื่องหยุดทำงาน", emoji: "🔴", color: "var(--cmms-danger)" },
   { value: "wait", label: "Wait for Maintenance", th: "ยังทำงานได้ รอการซ่อม", emoji: "🟡", color: "var(--cmms-warning)" },
   { value: "running", label: "Still working", th: "รอโอกาสหยุดเครื่อง (เร็วๆ นี้)", emoji: "🟢", color: "var(--cmms-success)" },
 ];
 
-const JOB_TYPES = [
+const DEFAULT_JOB_TYPES = [
   { value: "Machinery", label: "เครื่องจักร", en: "Machinery", emoji: "⚙️", desc: "งานเครื่องจักรผลิต" },
   { value: "Equipment Support", label: "อุปกรณ์สนับสนุน", en: "Equipment Support", emoji: "🛠️", desc: "อุปกรณ์ประกอบการผลิต" },
   { value: "Facilities", label: "โครงสร้างพื้นฐาน", en: "Facilities", emoji: "🏭", desc: "อาคาร / สาธารณูปโภค" },
   { value: "Other", label: "อื่นๆ", en: "Other", emoji: "📦", desc: "งานอื่นที่ไม่อยู่หมวดข้างต้น" },
 ];
 
-const JOB_DESCRIPTIONS = [
+const DEFAULT_JOB_DESCRIPTIONS = [
   { value: "Maintenance", label: "ซ่อมบำรุง", en: "Maintenance", emoji: "🔧" },
   { value: "PM", label: "บำรุงเชิงป้องกัน", en: "PM / Preventive", emoji: "📋" },
   { value: "Modify", label: "ปรับปรุง / ดัดแปลง", en: "Modify", emoji: "🔄" },
   { value: "Build", label: "สร้าง / จัดทำใหม่", en: "Build", emoji: "🏗️" },
+];
+
+const DEFAULT_CONTAMINATE_CHECK = [
+  { value: "not_checked", label: "ยังไม่ตรวจ", emoji: "❓" },
+  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)", emoji: "✅" },
+  { value: "contaminated", label: "พบการปนเปื้อน", emoji: "⚠️" },
+  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้", emoji: "➖" },
 ];
 
 const OFFICES = ["โรงงานอมตะซิตี้ (ระยอง)"];
@@ -189,6 +210,15 @@ export default function RepairRequestForm() {
   const [flushingQueue, setFlushingQueue] = useState(false);
   // รายการในคิว offline (สำหรับแสดง + ลบทีละรายการ)
   const [queueItems, setQueueItems] = useState<{ id: number; label: string }[]>([]);
+  
+  // Dynamic options from API
+  const [dynamicOptions, setDynamicOptions] = useState<RepairOption[]>([]);
+  const [machineStatusOptions, setMachineStatusOptions] = useState(DEFAULT_MACHINE_STATUS);
+  const [jobTypeOptions, setJobTypeOptions] = useState(DEFAULT_JOB_TYPES);
+  const [jobDescriptionOptions, setJobDescriptionOptions] = useState(DEFAULT_JOB_DESCRIPTIONS);
+  const [contaminateCheckOptions, setContaminateCheckOptions] = useState(DEFAULT_CONTAMINATE_CHECK);
+  const [rootCauseOptions, setRootCauseOptions] = useState<{ value: string; label: string; emoji?: string }[]>([]);
+  
   const [lineBound, setLineBound] = useState<boolean | null>(null); // null=ยังไม่รู้, true/false=สถานะผูก
   // เกตบังคับผูกบัญชี: checking=ตรวจอยู่, bound=ผูกแล้ว (เห็นฟอร์ม), unbound=มี LINE ID แต่ยังไม่ผูก, anonymous=ไม่มี LINE ID เลย
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
@@ -283,6 +313,67 @@ export default function RepairRequestForm() {
     apiFetch("/api/v1/departments.php")
       .then((r) => r.json())
       .then((rows: Dept[]) => setDepts(Array.isArray(rows) ? rows : []))
+      .catch(() => {});
+
+    // โหลดตัวเลือก dynamic จาก API
+    apiFetch("/api/v1/repair_options.php")
+      .then((r) => r.json())
+      .then((rows: RepairOption[]) => {
+        if (!Array.isArray(rows)) return;
+        setDynamicOptions(rows);
+        
+        // แปลงข้อมูลจาก API เป็นรูปแบบที่ฟอร์มใช้
+        const machineStatus = rows
+          .filter(o => o.option_type === 'machine_status' && o.is_active)
+          .map(o => ({
+            value: o.option_value,
+            label: o.option_label,
+            th: o.option_label,
+            emoji: o.option_emoji || '❓',
+            color: o.option_value === 'breakdown' ? 'var(--cmms-danger)' : 
+                   o.option_value === 'wait' ? 'var(--cmms-warning)' : 'var(--cmms-success)'
+          }));
+        if (machineStatus.length > 0) setMachineStatusOptions(machineStatus);
+        
+        const jobTypes = rows
+          .filter(o => o.option_type === 'job_type' && o.is_active)
+          .map(o => ({
+            value: o.option_value,
+            label: o.option_label,
+            en: o.option_label_en || o.option_label,
+            emoji: o.option_emoji || '📦',
+            desc: o.option_label
+          }));
+        if (jobTypes.length > 0) setJobTypeOptions(jobTypes);
+        
+        const jobDescs = rows
+          .filter(o => o.option_type === 'job_description' && o.is_active)
+          .map(o => ({
+            value: o.option_value,
+            label: o.option_label,
+            en: o.option_label_en || o.option_label,
+            emoji: o.option_emoji || '📋'
+          }));
+        if (jobDescs.length > 0) setJobDescriptionOptions(jobDescs);
+        
+        const contamChecks = rows
+          .filter(o => o.option_type === 'contaminate_check' && o.is_active)
+          .map(o => ({
+            value: o.option_value,
+            label: o.option_label,
+            emoji: o.option_emoji || '❓'
+          }));
+        if (contamChecks.length > 0) setContaminateCheckOptions(contamChecks);
+        
+        const rootCauses = rows
+          .filter(o => o.option_type === 'root_cause' && o.is_active)
+          .map(o => ({
+            value: o.option_value,
+            label: o.option_label,
+            emoji: o.option_emoji || '❓'
+          }));
+        setRootCauseOptions(rootCauses);
+      })
       .catch(() => {});
 
     apiFetch("/api/v1/line_notify.php")
@@ -575,8 +666,8 @@ export default function RepairRequestForm() {
       // Override priority to critical if urgent repair is toggled
       if (form.isUrgent) priorityMap[form.machineStatus] = "critical";
       const sourceTypeMap: Record<string, string> = { Maintenance: "breakdown", PM: "pm", Modify: "modify", Build: "build" };
-      const jt = JOB_TYPES.find((j) => j.value === form.jobType);
-      const jd = JOB_DESCRIPTIONS.find((j) => j.value === form.jobDescription);
+      const jt = jobTypeOptions.find((j) => j.value === form.jobType);
+      const jd = jobDescriptionOptions.find((j) => j.value === form.jobDescription);
       const dept = depts.find((d) => d.code === form.departmentCode);
 
       const payload = {
@@ -586,7 +677,7 @@ export default function RepairRequestForm() {
         asset_id: selectedAsset?.id || null,
         department_id: dept?.id || selectedAsset?.department_id || null,
         source_type: sourceTypeMap[form.jobDescription] || "breakdown",
-        machine_status: MACHINE_STATUS_OPTIONS.find((s) => s.value === form.machineStatus)?.label,
+        machine_status: machineStatusOptions.find((s) => s.value === form.machineStatus)?.label,
         contaminate_checking: form.contaminateChecking || "not_checked",
         outsource_by: form.outsourceBy?.trim() || null,
         priority: priorityMap[form.machineStatus] || "medium",
@@ -652,7 +743,7 @@ export default function RepairRequestForm() {
           </Text>
           <div className="cmms-success-wo">{createdWoNo}</div>
           <Text type="body" size="sm" color="secondary" style={{ textAlign: "center", marginBottom: 20 }}>
-            {selectedAsset?.code} · {MACHINE_STATUS_OPTIONS.find((s) => s.value === form.machineStatus)?.label}
+            {selectedAsset?.code} · {machineStatusOptions.find((s) => s.value === form.machineStatus)?.label}
             {"\n"}{offlineQueued > 0 ? "📴 ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว 📲"}
           </Text>
           <VStack gap={2} style={{ width: "100%" }}>
@@ -957,7 +1048,7 @@ export default function RepairRequestForm() {
             <div>
               <Text type="body" weight="bold" style={{ marginBottom: 10 }}>2. สถานะเครื่องจักร (Machine Status) <span className="cmms-req">*</span></Text>
               <VStack gap={2}>
-                {MACHINE_STATUS_OPTIONS.map((s) => (
+                {machineStatusOptions.map((s) => (
                   <button key={s.value} type="button"
                     className={`cmms-option-row ${form.machineStatus === s.value ? "selected" : ""}`}
                     style={{ ["--opt-color" as any]: s.color }}
@@ -983,7 +1074,7 @@ export default function RepairRequestForm() {
             <div>
               <Text type="body" weight="bold" style={{ marginBottom: 10 }}>Ⓐ ประเภทงาน (Job Type) <span className="cmms-req">*</span></Text>
               <div className="cmms-job-grid">
-                {JOB_TYPES.map((j) => (
+                {jobTypeOptions.map((j) => (
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobType === j.value ? "selected" : ""}`}
                     onClick={() => update("jobType", j.value)}>
@@ -998,7 +1089,7 @@ export default function RepairRequestForm() {
             <div>
               <Text type="body" weight="bold" style={{ marginBottom: 10 }}>Ⓑ ลักษณะงาน (Job Description) <span className="cmms-req">*</span></Text>
               <div className="cmms-job-grid">
-                {JOB_DESCRIPTIONS.map((j) => (
+                {jobDescriptionOptions.map((j) => (
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobDescription === j.value ? "selected" : ""}`}
                     onClick={() => update("jobDescription", j.value)}>
@@ -1242,8 +1333,8 @@ export default function RepairRequestForm() {
 
             <div className="cmms-summary-box">
               <SummaryRow label="เครื่องจักร" value={selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : form.machineCode} />
-              <SummaryRow label="สถานะเครื่อง" value={MACHINE_STATUS_OPTIONS.find((s) => s.value === form.machineStatus)?.label || "—"} />
-              <SummaryRow label="ประเภทงาน" value={`${JOB_TYPES.find((j) => j.value === form.jobType)?.label || "—"} / ${JOB_DESCRIPTIONS.find((j) => j.value === form.jobDescription)?.label || "—"}`} />
+              <SummaryRow label="สถานะเครื่อง" value={machineStatusOptions.find((s) => s.value === form.machineStatus)?.label || "—"} />
+              <SummaryRow label="ประเภทงาน" value={`${jobTypeOptions.find((j) => j.value === form.jobType)?.label || "—"} / ${jobDescriptionOptions.find((j) => j.value === form.jobDescription)?.label || "—"}`} />
               <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${depts.find((d) => d.code === form.departmentCode)?.name || "—"})`} icon={<UserIcon style={{ width: 14, height: 14 }} />} />
               <SummaryRow label="ติดต่อ" value={[form.phone, form.email].filter(Boolean).join(" · ") || "—"} icon={<PhoneIcon style={{ width: 14, height: 14 }} />} />
               <SummaryRow label="สำนักงาน" value={form.office} />

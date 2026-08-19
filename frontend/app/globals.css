@@ -307,16 +307,47 @@ button[class*="Button_secondary"], .astryx-button.secondary {
 }
 
 /* Brand header — โลโก้ + คำว่า CMMS-TOPPAN สีน้ำเงินเข้ม */
-.astryx-side-nav-heading {
-  padding-block: 10px !important;
-  color: var(--cmms-sidebar-text-strong) !important;
+/* Override Astryx SideNavHeading styles - remove all CSS-in-JS classes */
+.astryx-side-nav-heading,
+[class*="astryx-side-nav-heading"] {
+  padding-block: 0 !important;
+  padding-inline: 0 !important;
+  color: inherit !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  gap: 0 !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
 }
-.astryx-side-nav-heading .astryx-navicon {
-  background: #FFFFFF !important;
-  border: 1px solid var(--cmms-border) !important;
-  border-radius: 10px !important;
-  box-shadow: var(--cmms-shadow-sm) !important;
-  color: var(--cmms-primary, #0057A8) !important;
+
+/* Remove all x-prefixed CSS-in-JS classes from sidebar heading */
+.astryx-side-nav-heading .astryx-navicon,
+[class*="astryx-side-nav-heading"] .astryx-navicon {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Override specific x-prefixed classes */
+.x78zum5, .x6s0dn4, .x1txdalj, .xkoleio, .x12gdq22, .x1betex2,
+.x1djylfy, .xt970qd, .x9f619, .x1hl2dhg, .x1heor9g, .x1ypdohk,
+.xh6dtrn, .xc342km, .xng3xce, .xjbqb8w, .xjb2p0i, .x1qlqyl8,
+.x1sodnla, .x1yc453h {
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  min-height: auto !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 /* Nav items — ตัวหนังสือเทาน้ำเงิน, hover พื้นฟ้าอ่อน */

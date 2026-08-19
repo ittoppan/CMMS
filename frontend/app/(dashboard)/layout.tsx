@@ -91,7 +91,7 @@ const MENU_HREFS: string[] = [
   "/analytics/kpi", "/analytics", "/reports", "/reports/monthly_pdf", "/reports/export_excel",
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
-  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design",
+  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options",
   "/editor/builder", "/pages",
 ];
 
@@ -496,6 +496,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {canShow("settings") && <SideNavItem label={t("menu.settings_services")} icon={ServerStackIcon} href="/settings/services" isSelected={isSelected("/settings/services")} />}
             {canShow("settings") && <SideNavItem label={t("menu.settings_pwa")} icon={DevicePhoneMobileIcon} href="/settings/pwa" isSelected={isSelected("/settings/pwa")} />}
             {canShow("settings") && <SideNavItem label={t("menu.settings_design")} icon={PaintBrushIcon} href="/settings/design" isSelected={isSelected("/settings/design")} />}
+            {canShow("settings") && <SideNavItem label={t("menu.settings_repair_options")} icon={WrenchScrewdriverIcon} href="/settings/repair-options" isSelected={isSelected("/settings/repair-options")} />}
             {canShow("editor/builder") && <SideNavItem label={t("menu.builder")} icon={Squares2X2Icon} href="/editor/builder" isSelected={isSelected("/editor/builder")} />}
             {canShow("pages") && <SideNavItem label={t("menu.pages")} icon={DocumentTextIcon} href="/pages" isSelected={isSelected("/pages")} />}
           </MenuSection>

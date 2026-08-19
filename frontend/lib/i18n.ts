@@ -89,6 +89,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.settings_services": { th: "บริการและสถานะการรัน", en: "Services & Status" },
   "menu.settings_pwa": { th: "ไอคอน PWA (Mobile App)", en: "PWA Icons (Mobile App)" },
   "menu.settings_design": { th: "ปรับแต่งหน้าตาระบบ (Page Designer)", en: "Page Designer" },
+  "menu.settings_repair_options": { th: "ตัวเลือกฟอร์มแจ้งซ่อม", en: "Repair Form Options" },
   "menu.builder": { th: "สร้างหน้าเว็บ (Visual Builder)", en: "Visual Page Builder" },
   "menu.pages": { th: "หน้าเว็บที่สร้างเอง", en: "Custom Pages" },
   "menu.profile": { th: "โปรไฟล์", en: "Profile" },

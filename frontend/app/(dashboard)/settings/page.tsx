@@ -38,6 +38,13 @@ import {
   ClockIcon,
   ScaleIcon,
   ArrowPathIcon,
+  DocumentTextIcon,
+  BoltIcon,
+  UsersIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  WrenchIcon,
+  CogIcon,
 } from "@heroicons/react/24/outline";
 
 interface SettingRow {
@@ -49,17 +56,94 @@ interface SettingRow {
   updated_at?: string;
 }
 
-const GROUP_META: Record<string, { label: string; icon: any; hint: string }> = {
-  company: { label: "ข้อมูลบริษัท", icon: BuildingOffice2Icon, hint: "ชื่อบริษัท ที่อยู่ และเลขประจำตัวผู้เสียภาษี" },
-  branding: { label: "แบรนด์ & ธีม", icon: PaintBrushIcon, hint: "ชื่อระบบ คำโปรย และสีธีมหลัก" },
-  general: { label: "การตั้งค่าทั่วไป", icon: Cog6ToothIcon, hint: "รูปแบบวันที่ สกุลเงิน เวลา เวิร์กโฟลว์ และฟีเจอร์" },
-  notification: { label: "การแจ้งเตือน", icon: BellAlertIcon, hint: "LINE, Web Push, SMTP และการแจ้งเตือนสต็อกต่ำ" },
-  repair_config: { label: "ตั้งค่างานซ่อม", icon: WrenchScrewdriverIcon, hint: "ค่าเริ่มต้นการสั่งงานซ่อม" },
-  pm_config: { label: "ตั้งค่า PM/AM", icon: CalendarDaysIcon, hint: "ความถี่และการแจ้งเตือนแผนงาน PM" },
-  spare_config: { label: "ตั้งค่าอะไหล่", icon: CubeIcon, hint: "ระดับการอนุมัติเบิกอะไหล่" },
-  calibration_config: { label: "ตั้งค่าการสอบเทียบ", icon: WrenchScrewdriverIcon, hint: "การแจ้งเตือนและกำหนดอัตโนมัติการสอบเทียบ" },
-  ERP_Integrations: { label: "Sage 300 ERP", icon: CircleStackIcon, hint: "การเชื่อมต่อและซิงค์ข้อมูลกับ Sage 300" },
-  data_retention: { label: "เก็บรักษาข้อมูล", icon: ClockIcon, hint: "นโยบายเก็บรักษา log — ลบ notification_logs เก่าอัตโนมัติ" },
+// ═══════════════════════════════════════════════════════════════════════════════
+// TOPIC-BASED GROUP METADATA - แบ่งการตั้งค่าตามหัวข้อฟังก์ชัน
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface TopicMeta {
+  label: string;
+  icon: any;
+  hint: string;
+  color: string;
+  bgColor: string;
+  groups: string[]; // setting_group ที่อยู่ใน topic นี้
+  link?: string; // ลิงก์ไปยังหน้าย่อย (ถ้ามี)
+}
+
+const TOPICS: Record<string, TopicMeta> = {
+  company: {
+    label: "ข้อมูลบริษัท & แบรนด์",
+    icon: BuildingOffice2Icon,
+    hint: "ชื่อบริษัท ที่อยู่ เลขประจำตัวผู้เสียภาษี โลโก้ และแบรนด์ระบบ",
+    color: "var(--cmms-primary)",
+    bgColor: "var(--cmms-primary-wash)",
+    groups: ["company", "branding"],
+  },
+  repair: {
+    label: "งานซ่อม (Repair)",
+    icon: WrenchScrewdriverIcon,
+    hint: "ตั้งค่าใบแจ้งซ่อม การมอบหมาย สถานะเครื่องจักร Root Cause และ workflow งานซ่อม",
+    color: "var(--cmms-danger)",
+    bgColor: "var(--cmms-danger-bg)",
+    groups: ["repair_config"],
+  },
+  repair_options: {
+    label: "ตัวเลือกฟอร์มแจ้งซ่อม",
+    icon: WrenchScrewdriverIcon,
+    hint: "จัดการตัวเลือก dropdown ในฟอร์มแจ้งซ่อม (Department, Job Type, Machine Status, Root Cause)",
+    color: "var(--cmms-danger)",
+    bgColor: "var(--cmms-danger-bg)",
+    groups: ["repair_options"],
+    link: "/settings/repair-options",
+  },
+  pm: {
+    label: "งาน PM/AM (Preventive Maintenance)",
+    icon: CalendarDaysIcon,
+    hint: "ความถี่ PM การแจ้งเตือนล่วงหน้า การมอบหมายอัตโนมัติ และการเลื่อนกำหนด",
+    color: "var(--cmms-success)",
+    bgColor: "var(--cmms-success-bg)",
+    groups: ["pm_config"],
+  },
+  spare: {
+    label: "อะไหล่ & สต็อก (Spare Parts)",
+    icon: CubeIcon,
+    hint: "ระดับการอนุมัติเบิกอะไหล่ การตัดสต็อกอัตโนมัติ และการขอซื้อ",
+    color: "var(--cmms-warning)",
+    bgColor: "var(--cmms-warning-bg)",
+    groups: ["spare_config"],
+  },
+  notification: {
+    label: "การแจ้งเตือน (Notifications)",
+    icon: BellAlertIcon,
+    hint: "LINE, Email, Web Push, เทมเพลตข้อความ และการแจ้งเตือนสต็อกต่ำ",
+    color: "var(--cmms-primary)",
+    bgColor: "var(--cmms-primary-bg)",
+    groups: ["notification"],
+  },
+  calibration: {
+    label: "การสอบเทียบ (Calibration)",
+    icon: WrenchIcon,
+    hint: "การแจ้งเตือนสอบเทียบล่วงหน้า การมอบหมายอัตโนมัติ",
+    color: "var(--cmms-text-secondary)",
+    bgColor: "var(--cmms-bg-muted)",
+    groups: ["calibration_config"],
+  },
+  erp: {
+    label: "ERP Integration (Sage 300)",
+    icon: CircleStackIcon,
+    hint: "การเชื่อมต่อและซิงค์ข้อมูลกับ Sage 300 ERP",
+    color: "var(--cmms-success)",
+    bgColor: "var(--cmms-success-bg)",
+    groups: ["ERP_Integrations"],
+  },
+  system: {
+    label: "ระบบ & ความปลอดภัย (System)",
+    icon: Cog6ToothIcon,
+    hint: "ตั้งค่าทั่วไป ความปลอดภัย เก็บรักษาข้อมูล และ UI",
+    color: "var(--cmms-text-secondary)",
+    bgColor: "var(--cmms-bg-muted)",
+    groups: ["general", "data_retention"],
+  },
 };
 
 // ชื่อไทยของแต่ละ key (ทำให้หน้าการตั้งค่าใช้งานได้จริง แทนโชว์ key อังกฤษดิบ)
@@ -68,6 +152,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   company_name: { label: "ชื่อบริษัท", hint: "แสดงในเอกสารและรายงาน" },
   company_address: { label: "ที่อยู่บริษัท" },
   company_tax_id: { label: "เลขประจำตัวผู้เสียภาษี" },
+  company_phone: { label: "เบอร์โทรบริษัท" },
   // branding
   company_tagline: { label: "คำโปรยระบบ", hint: "ข้อความใต้ชื่อระบบบนหน้าเข้าสู่ระบบ" },
   iso_header_title: { label: "หัวข้อเอกสาร ISO", hint: "ชื่อหัวกระดาษสำหรับเอกสาร ISO" },
@@ -87,7 +172,6 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   auto_sage_sync: { label: "ซิงค์ Sage อัตโนมัติ" },
   border_radius_style: { label: "รูปแบบมุมโค้ง UI" },
   calendar_view_default: { label: "มุมมองปฏิทินเริ่มต้น" },
-  company_phone: { label: "เบอร์โทรบริษัท" },
   currency_symbol: { label: "สัญลักษณ์สกุลเงิน" },
   date_format: { label: "รูปแบบวันที่" },
   default_warehouse: { label: "คลังเริ่มต้น (Sage)" },
@@ -106,7 +190,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   auto_req_low_stock: { label: "สร้างใบขอซื้ออัตโนมัติเมื่อสต็อกต่ำ", hint: "รันวันละครั้งผ่าน watchdog: รวมอะไหล่ที่ต่ำกว่า min stock เป็นใบขอซื้อ 1 ใบ + แจ้ง LINE หัวหน้า" },
   // pm deferral
   pm_deferral_enabled: { label: "อนุญาตเลื่อนกำหนด PM", hint: "ช่างขอเลื่อนกำหนดพร้อมเหตุผล → หัวหน้าอนุมัติผ่าน LINE ก่อนกำหนดจะเปลี่ยน" },
-  log_retention_days: { label: "เก็บประวัติการแจ้งเตือนไว้กี่วัน", hint: "รายการที่เก่ากว่านี้จะถูกลบอัตโนมัติวันละครั้ง" },
+  log_retention_days: { label: "เก็บประวัติการแจ้งเตือนไว้กี่วัน", hint: "รายการที่เก่ากว่าจะถูกลบอัตโนมัติวันละครั้ง" },
   iso_footer_note: { label: "ข้อความท้ายเอกสาร ISO" },
   iso_form_code_prefix: { label: "รหัสนำหน้าแบบฟอร์ม ISO" },
   iso_watermark_enabled: { label: "แสดงลายน้ำ ISO บนเอกสาร" },
@@ -341,6 +425,7 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
 const SUB_PAGES = [
   { href: "/settings/menus", label: "สิทธิ์เมนูตามบทบาท", desc: "กำหนดเมนูที่แต่ละบทบาทเห็นได้", icon: ShieldCheckIcon },
   { href: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE", desc: "เทมเพลตข้อความ LINE + Web Push", icon: ChatBubbleLeftRightIcon },
+  { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown ในฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
   { href: "/settings/design", label: "ปรับแต่งหน้าตาระบบ (Page Designer)", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
@@ -355,6 +440,7 @@ export default function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [activeTopic, setActiveTopic] = useState<string | null>(null); // null = แสดง topic cards
   const [activeGroup, setActiveGroup] = useState("company");
   const [searchQuery, setSearchQuery] = useState("");
   const [showDiff, setShowDiff] = useState(false);
@@ -362,20 +448,35 @@ export default function SettingsPage() {
   const [auditRows, setAuditRows] = useState<{ id: number; user_id: number | null; user_name: string | null; setting_key: string; old_value: string | null; new_value: string | null; created_at: string }[]>([]);
   const [auditLoading, setAuditLoading] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
-  // ค่าใหม่ของคีย์ที่เป็นความลับ (ว่าง = ไม่เปลี่ยน)
   const [newSecrets, setNewSecrets] = useState<Record<string, string>>({});
   const [secretFilled, setSecretFilled] = useState<Record<string, boolean>>({});
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // COMPUTED VALUES
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  // กลุ่มที่มีข้อมูลจริง
   const groups = useMemo(() => {
-    const order = Object.keys(GROUP_META);
+    const order = Object.keys(TOPICS);
     const present = Array.from(new Set(settings.map((s) => s.setting_group)));
     return order.filter((g) => present.includes(g));
   }, [settings]);
 
-  const currentRows = useMemo(
-    () => settings.filter((s) => s.setting_group === activeGroup),
-    [settings, activeGroup]
-  );
+  // กลุ่มที่อยู่ใน topic ปัจจุบัน
+  const currentTopicGroups = useMemo(() => {
+    if (!activeTopic) return [];
+    const topic = TOPICS[activeTopic];
+    if (!topic) return [];
+    return topic.groups.filter((g) => settings.some((s) => s.setting_group === g));
+  }, [activeTopic, settings]);
+
+  // แถวที่อยู่ในกลุ่มปัจจุบัน (ตาม topic ที่เลือก)
+  const currentRows = useMemo(() => {
+    if (!activeTopic) return [];
+    const topic = TOPICS[activeTopic];
+    if (!topic) return [];
+    return settings.filter((s) => topic.groups.includes(s.setting_group));
+  }, [activeTopic, settings]);
 
   // ค้นหาข้ามทุกกลุ่ม: ตรงกับ key / ชื่อไทย / ค่า / คำอธิบาย
   const searchRows = useMemo(() => {
@@ -428,6 +529,19 @@ export default function SettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings, form, newSecrets]);
 
+  // จำนวนที่แก้ยังไม่บันทึกต่อ topic
+  const topicDirtyCount = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const [topicId, topic] of Object.entries(TOPICS)) {
+      let count = 0;
+      for (const g of topic.groups) {
+        count += groupDirtyCount[g] || 0;
+      }
+      if (count > 0) m[topicId] = count;
+    }
+    return m;
+  }, [groupDirtyCount]);
+
   const changedRows = useMemo(
     () =>
       (searchRows ?? currentRows).filter((s) => {
@@ -437,6 +551,10 @@ export default function SettingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchRows, currentRows, form, settings, newSecrets]
   );
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // DATA FETCHING
+  // ═══════════════════════════════════════════════════════════════════════════════
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -480,7 +598,6 @@ export default function SettingsPage() {
     });
   }, [changedRows, settings, form, newSecrets]);
 
-  // แสดงค่าสั้นลง + ซ่อนคีย์ลับ (ไม่โชว์ค่าจริง)
   const valuePreview = (row: SettingRow, value: string): string => {
     const s = String(value ?? "");
     if (SENSITIVE_KEYS.has(row.setting_key)) {
@@ -490,8 +607,6 @@ export default function SettingsPage() {
     return s === "" ? "(ว่าง)" : s;
   };
 
-  // รีเซ็ตคีย์เดียวกลับเป็นค่าเริ่มต้น (จาก settings_defaults.php)
-  // เปิดประวัติการแก้ไข + โหลดข้อมูลล่าสุดจาก server
   const openAudit = async () => {
     setShowAudit(true);
     setAuditLoading(true);
@@ -513,9 +628,7 @@ export default function SettingsPage() {
     }
   };
 
-  // บันทึกธีม 3 keys ตรงๆ (theme_preset อยู่กลุ่ม general ไม่ติดใน changedRows ของกลุ่ม branding)
   const handleSaveTheme = async () => {
-    // ตรวจรหัสสี hex ก่อนบันทึกธีม
     for (const key of ["theme_primary_hex", "theme_secondary_hex"]) {
       const v = String(form[key] ?? "").trim();
       if (!/^#[0-9a-fA-F]{6}$/.test(v)) {
@@ -556,7 +669,6 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setShowDiff(false);
-    // ตรวจค่าตัวเลขก่อนบันทึก
     for (const row of changedRows) {
       if (NUMBER_KEYS.has(row.setting_key)) {
         const v = SENSITIVE_KEYS.has(row.setting_key) ? newSecrets[row.setting_key] : form[row.setting_key];
@@ -566,8 +678,6 @@ export default function SettingsPage() {
         }
       }
     }
-
-    // ตรวจรหัสสี hex ก่อนบันทึก (theme_primary_hex / theme_secondary_hex)
     for (const row of changedRows) {
       if (COLOR_KEYS.has(row.setting_key)) {
         const v = String(form[row.setting_key] ?? "").trim();
@@ -577,7 +687,6 @@ export default function SettingsPage() {
         }
       }
     }
-
     setSaving(true);
     setSaveMessage("");
     setError(null);
@@ -601,7 +710,6 @@ export default function SettingsPage() {
       setNewSecrets({});
       setSaveMessage(`บันทึกการตั้งค่า ${saved} รายการสำเร็จ`);
       await fetchSettings();
-      // ถ้าสลับ "เปิด animation ของระบบ" → สั่ง ThemeProvider ใช้ทันที (ไม่ต้อง refresh)
       window.dispatchEvent(new CustomEvent("cmms-anim-setting", {
         detail: { enabled: (form["animations_enabled"] ?? "1") === "1" },
       }));
@@ -613,8 +721,8 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
-  // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (default = เรียงเดิม)
-  const layout = usePageLayout("/settings", ["header", "subpages", "recent", "grid"]);
+  // Page Designer
+  const layout = usePageLayout("/settings", ["header", "subpages", "recent", "topicGrid"]);
   const layoutStyle = (id: string) => ({
     order: layout.orderOf(id),
     display: layout.isHidden(id) ? ("none" as const) : undefined,
@@ -644,6 +752,7 @@ export default function SettingsPage() {
         </Card>
       )}
 
+      {/* ═══ HEADER ═══ */}
       <div style={layoutStyle("header")}>
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1} style={{ flex: 1 }}>
@@ -694,7 +803,7 @@ export default function SettingsPage() {
       </HStack>
       </div>
 
-      {/* ลิงก์หน้าย่อยตั้งค่า */}
+      {/* ═══ ลิงก์หน้าย่อยตั้งค่า ═══ */}
       <div style={layoutStyle("subpages")}>
       <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={3}>
         {SUB_PAGES.map((p) => (
@@ -720,7 +829,7 @@ export default function SettingsPage() {
       </Grid>
       </div>
 
-      {/* คีย์ที่แก้ไขล่าสุด */}
+      {/* ═══ คีย์ที่แก้ไขล่าสุด ═══ */}
       <div style={layoutStyle("recent")}>
       {recentRows.length > 0 && (
         <Card padding={4}>
@@ -733,12 +842,14 @@ export default function SettingsPage() {
             <HStack gap={2} wrap="wrap">
               {recentRows.map((s) => {
                 const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
-                const isActive = !searchQuery.trim() && activeGroup === s.setting_group;
+                // หา topic ที่กลุ่มนี้อยู่
+                const topicId = Object.entries(TOPICS).find(([_, t]) => t.groups.includes(s.setting_group))?.[0];
+                const isActive = !searchQuery.trim() && activeTopic === topicId;
                 return (
                   <button
                     key={s.id}
                     type="button"
-                    onClick={() => { setActiveGroup(s.setting_group); setSearchQuery(""); }}
+                    onClick={() => { setActiveTopic(topicId || null); setActiveGroup(s.setting_group); setSearchQuery(""); }}
                     title={`${s.setting_key} · แก้ไข ${relativeTime(s.updated_at)}`}
                     style={{
                       display: "flex", alignItems: "center", gap: 6,
@@ -760,331 +871,466 @@ export default function SettingsPage() {
       )}
       </div>
 
-      <div style={layoutStyle("grid")}>
-      <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
-        {/* Sidebar group nav */}
-        <Card padding={2}>
-          <VStack gap={1}>
-            {groups.map((g) => {
-              const meta = GROUP_META[g] ?? { label: g, icon: Cog6ToothIcon, hint: "" };
-              const count = settings.filter((s) => s.setting_group === g).length;
-              const dirty = groupDirtyCount[g] || 0;
-              const isActive = activeGroup === g;
-              return (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => { setActiveGroup(g); setSearchQuery(""); }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    width: "100%",
-                    padding: "10px 12px",
-                    border: "none",
-                    borderRadius: "var(--cmms-radius)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    background: isActive ? "var(--cmms-primary-light)" : "transparent",
-                    color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-primary)",
-                    font: "inherit",
-                  }}
-                >
-                  <meta.icon className="w-5 h-5" style={{ color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-secondary)" }} />
-                  <Text type="body" weight={isActive ? "bold" : "normal"}>{meta.label}</Text>
-                  {dirty > 0 ? (
-                    <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, background: "var(--cmms-warning)", color: "#fff", borderRadius: 999, padding: "2px 8px" }}>
-                      {dirty}
-                    </span>
-                  ) : (
-                    <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--cmms-text-muted)" }}>{count}</span>
-                  )}
-                </button>
-              );
-            })}
-          </VStack>
-        </Card>
-
-        {/* Form panel */}
-        <Card padding={5} style={{ gridColumn: "span 2" }}>
-          <VStack gap={5}>
-            <VStack gap={1}>
-              <Heading level={3}>
-                {searchRows
-                  ? `ผลการค้นหา "${searchQuery.trim()}"`
-                  : (GROUP_META[activeGroup] ?? { label: activeGroup }).label}
-              </Heading>
-              <Text type="supporting" color="secondary">
-                {searchRows
-                  ? `พบ ${searchRows.length} รายการจากทุกกลุ่ม`
-                  : `${(GROUP_META[activeGroup] ?? { hint: "" }).hint} — มี ${currentRows.length} รายการ`}
-                {changedRows.length > 0 && ` · ยังไม่บันทึก ${changedRows.length} รายการ`}
-              </Text>
-            </VStack>
-
-            {!searchRows && activeGroup === "branding" && (
-              <VStack gap={5}>
-                <ThemeSettingsPanel
-                  values={form}
-                  onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
-                  onSave={handleSaveTheme}
-                  saving={saving}
-                />
-                <div style={{ borderTop: "1px solid var(--cmms-border)" }} />
+      {/* ═══ MAIN CONTENT ═══ */}
+      <div style={layoutStyle("topicGrid")}>
+        {activeTopic === null ? (
+          // ═══════════════════════════════════════════════════════════════════════════
+          // TOPIC CARDS — แสดงการ์ดฟังก์ชันทั้งหมด
+          // ═══════════════════════════════════════════════════════════════════════════
+          <VStack gap={4}>
+            <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+              <VStack gap={0}>
+                <Heading level={3}>เลือกหมวดการตั้งค่า</Heading>
+                <Text type="body" size="sm" color="secondary">
+                  คลิกที่หมวดเพื่อดูและแก้ไขการตั้งค่ารายละเอียด
+                </Text>
               </VStack>
-            )}
+              {totalDirty > 0 && (
+                <button
+                  type="button"
+                  disabled={totalDirty === 0}
+                  onClick={handleSave}
+                  className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? "กำลังบันทึก..." : `บันทึกทั้งหมด (${totalDirty} รายการ)`}
+                </button>
+              )}
+            </HStack>
 
-            {(searchRows ?? currentRows).length === 0 ? (
-              <Text type="body" color="secondary">
-                {searchRows ? `ไม่พบการตั้งค่าที่ตรงกับ "${searchQuery.trim()}"` : "ไม่มีรายการตั้งค่าในกลุ่มนี้"}
-              </Text>
-            ) : (
-              (searchRows ?? currentRows).map((row) => {
-                const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
-                const isBool = BOOLEAN_KEYS.has(row.setting_key);
-                const isReadonly = READONLY_KEYS.has(row.setting_key);
-                const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
-                const isJson = JSON_KEYS.has(row.setting_key);
-                const selectOptions = SELECT_OPTIONS[row.setting_key];
-                const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
-                const isColor = COLOR_KEYS.has(row.setting_key);
-                const isEmail = EMAIL_KEYS.has(row.setting_key);
-                const isLang = row.setting_key === "lang_default";
-                // real-time ตรวจรหัสสี hex (#RRGGBB)
-                const hexValue = String(form[row.setting_key] ?? "").trim();
-                const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
-                const defaultValue = defaults[row.setting_key];
-                const canReset = defaultValue !== null && defaultValue !== undefined;
-                const dirty = isSensitive
-                  ? Boolean(newSecrets[row.setting_key]?.trim())
-                  : isDirty(row);
+            <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={4}>
+              {Object.entries(TOPICS).map(([topicId, topic]) => {
+                const topicSettings = settings.filter((s) => topic.groups.includes(s.setting_group));
+                const dirtyCount = topicDirtyCount[topicId] || 0;
+                const TopicIcon = topic.icon;
 
                 return (
-                  <VStack key={row.id} gap={1}>
-                    <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
-                      <VStack gap={0}>
-                        <HStack gap={2} vAlign="center">
-                          {isSensitive && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
-                          <Text type="body" weight="semibold">{meta.label}</Text>
-                          {searchRows && (
+                  <Card
+                    key={topicId}
+                    padding={5}
+                    elevation="low"
+                    style={{ cursor: "pointer", borderLeft: `4px solid ${topic.color}` }}
+                    onClick={() => {
+                      if (topic.link) {
+                        router.push(topic.link);
+                      } else {
+                        setActiveTopic(topicId);
+                      }
+                    }}
+                  >
+                    <VStack gap={3}>
+                      <HStack gap={3} vAlign="center">
+                        <div style={{
+                          padding: 12, borderRadius: 10,
+                          background: topic.bgColor, color: topic.color,
+                        }}>
+                          <TopicIcon className="w-6 h-6" />
+                        </div>
+                        <VStack gap={0} style={{ flex: 1 }}>
+                          <Text type="body" weight="bold">{topic.label}</Text>
+                          <Text type="body" size="sm" color="secondary">{topic.hint}</Text>
+                        </VStack>
+                      </HStack>
+
+                      <HStack gap={2} wrap="wrap">
+                        <span className="cmms-andon-chip" style={{ background: topic.bgColor, color: topic.color }}>
+                          {topicSettings.length} รายการ
+                        </span>
+                        {dirtyCount > 0 && (
+                          <span className="cmms-status warn">
+                            <span className="cmms-status-dot" />
+                            {dirtyCount} ยังไม่บันทึก
+                          </span>
+                        )}
+                      </HStack>
+
+                      <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 12 }}>
+                        <Text type="body" size="sm" color="secondary">ตัวอย่างการตั้งค่า:</Text>
+                        <VStack gap={1} style={{ marginTop: 8 }}>
+                          {topicSettings.slice(0, 3).map((s) => {
+                            const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
+                            const isBool = BOOLEAN_KEYS.has(s.setting_key);
+                            const value = form[s.setting_key] ?? "";
+                            return (
+                              <HStack key={s.id} gap={2} vAlign="center" wrap="wrap">
+                                <Text type="body" size="sm" weight="semibold">{meta.label}</Text>
+                                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                                  {isBool ? (value === "1" ? "เปิด" : "ปิด") : value || "(ว่าง)"}
+                                </span>
+                              </HStack>
+                            );
+                          })}
+                          {topicSettings.length > 3 && (
+                            <Text type="body" size="sm" color="secondary">
+                              +{topicSettings.length - 3} รายการเพิ่มเติม...
+                            </Text>
+                          )}
+                        </VStack>
+                      </div>
+
+                      <HStack hAlign="end">
+                        <ArrowRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-disabled)" }} />
+                      </HStack>
+                    </VStack>
+                  </Card>
+                );
+              })}
+            </Grid>
+          </VStack>
+        ) : (
+          // ═══════════════════════════════════════════════════════════════════════════
+          // DETAIL VIEW — แสดงการตั้งค่าใน topic ที่เลือก
+          // ═══════════════════════════════════════════════════════════════════════════
+          <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
+            {/* Sidebar: กลุ่มย่อยใน topic */}
+            <Card padding={2}>
+              <VStack gap={2}>
+                {/* ปุ่มกลับ */}
+                <button
+                  type="button"
+                  onClick={() => { setActiveTopic(null); setSearchQuery(""); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    width: "100%", padding: "10px 12px",
+                    border: "none", borderRadius: "var(--cmms-radius)",
+                    cursor: "pointer", textAlign: "left",
+                    background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)",
+                    font: "inherit", fontSize: 13, fontWeight: 600,
+                  }}
+                >
+                  ← กลับไปเลือกหมวด
+                </button>
+
+                {/* ชื่อ topic */}
+                {(() => { const TopicIcon = TOPICS[activeTopic]?.icon; return (
+                <div style={{
+                  padding: "8px 12px", borderRadius: "var(--cmms-radius)",
+                  background: TOPICS[activeTopic]?.bgColor,
+                  color: TOPICS[activeTopic]?.color,
+                }}>
+                  <HStack gap={2} vAlign="center">
+                    {TopicIcon && <TopicIcon className="w-5 h-5" />}
+                    <Text type="body" weight="bold" size="sm">{TOPICS[activeTopic]?.label}</Text>
+                  </HStack>
+                </div>
+                ); })()}
+
+                {/* กลุ่มย่อย */}
+                {currentTopicGroups.map((g) => {
+                  const count = settings.filter((s) => s.setting_group === g).length;
+                  const dirty = groupDirtyCount[g] || 0;
+                  const isActive = activeGroup === g;
+                  const groupLabel = TOPICS[activeTopic]?.groups.length === 1
+                    ? TOPICS[activeTopic]?.label
+                    : g.replace(/_/g, " ");
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setActiveGroup(g)}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        width: "100%", padding: "10px 12px",
+                        border: "none", borderRadius: "var(--cmms-radius)",
+                        cursor: "pointer", textAlign: "left",
+                        background: isActive ? "var(--cmms-primary-light)" : "transparent",
+                        color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-primary)",
+                        font: "inherit",
+                      }}
+                    >
+                      <Text type="body" weight={isActive ? "bold" : "normal"}>{groupLabel}</Text>
+                      {dirty > 0 ? (
+                        <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, background: "var(--cmms-warning)", color: "#fff", borderRadius: 999, padding: "2px 8px" }}>
+                          {dirty}
+                        </span>
+                      ) : (
+                        <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--cmms-text-muted)" }}>{count}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </VStack>
+            </Card>
+
+            {/* Form panel */}
+            <Card padding={5} style={{ gridColumn: "span 2" }}>
+              <VStack gap={5}>
+                <VStack gap={1}>
+                  <Heading level={3}>
+                    {searchRows
+                      ? `ผลการค้นหา "${searchQuery.trim()}"`
+                      : TOPICS[activeTopic]?.label}
+                  </Heading>
+                  <Text type="supporting" color="secondary">
+                    {searchRows
+                      ? `พบ ${searchRows.length} รายการจากทุกกลุ่ม`
+                      : `${TOPICS[activeTopic]?.hint} — มี ${currentRows.length} รายการ`}
+                    {changedRows.length > 0 && ` · ยังไม่บันทึก ${changedRows.length} รายการ`}
+                  </Text>
+                </VStack>
+
+                {!searchRows && activeTopic === "company" && activeGroup === "branding" && (
+                  <VStack gap={5}>
+                    <ThemeSettingsPanel
+                      values={form}
+                      onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+                      onSave={handleSaveTheme}
+                      saving={saving}
+                    />
+                    <div style={{ borderTop: "1px solid var(--cmms-border)" }} />
+                  </VStack>
+                )}
+
+                {(searchRows ?? currentRows).length === 0 ? (
+                  <Text type="body" color="secondary">
+                    {searchRows ? `ไม่พบการตั้งค่าที่ตรงกับ "${searchQuery.trim()}"` : "ไม่มีรายการตั้งค่าในกลุ่มนี้"}
+                  </Text>
+                ) : (
+                  (searchRows ?? currentRows).map((row) => {
+                    const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
+                    const isBool = BOOLEAN_KEYS.has(row.setting_key);
+                    const isReadonly = READONLY_KEYS.has(row.setting_key);
+                    const isSensitive = SENSITIVE_KEYS.has(row.setting_key);
+                    const isJson = JSON_KEYS.has(row.setting_key);
+                    const selectOptions = SELECT_OPTIONS[row.setting_key];
+                    const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
+                    const isColor = COLOR_KEYS.has(row.setting_key);
+                    const isEmail = EMAIL_KEYS.has(row.setting_key);
+                    const isLang = row.setting_key === "lang_default";
+                    const hexValue = String(form[row.setting_key] ?? "").trim();
+                    const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
+                    const defaultValue = defaults[row.setting_key];
+                    const canReset = defaultValue !== null && defaultValue !== undefined;
+                    const dirty = isSensitive
+                      ? Boolean(newSecrets[row.setting_key]?.trim())
+                      : isDirty(row);
+
+                    return (
+                      <VStack key={row.id} gap={1}>
+                        <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
+                          <VStack gap={0}>
+                            <HStack gap={2} vAlign="center">
+                              {isSensitive && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
+                              <Text type="body" weight="semibold">{meta.label}</Text>
+                              {searchRows && (
+                                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                                  {row.setting_group}
+                                </span>
+                              )}
+                              {dirty && (<span className="cmms-status warn"><span className="cmms-status-dot" />ยังไม่บันทึก</span>)}
+                            </HStack>
+                            <Text type="body" size="sm" color="secondary">
+                              {meta.hint || row.description || row.setting_key}
+                              {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
+                            </Text>
+                          </VStack>
+                          {isReadonly && (
                             <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                              {(GROUP_META[row.setting_group] ?? { label: row.setting_group }).label}
+                              อ่านอย่างเดียว
                             </span>
                           )}
-                          {dirty && (<span className="cmms-status warn"><span className="cmms-status-dot" />ยังไม่บันทึก</span>)}
-                        </HStack>
-                        <Text type="body" size="sm" color="secondary">
-                          {meta.hint || row.description || row.setting_key}
-                          {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
-                        </Text>
-                      </VStack>
-                      {isReadonly && (
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                          อ่านอย่างเดียว
-                        </span>
-                      )}
-                      {isJson && (
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                          JSON
-                        </span>
-                      )}
-                      {canReset && !isReadonly && (
-                        <button
-                          type="button"
-                          title={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}${String(defaultValue).length > 80 ? "…" : ""}`}
-                          onClick={() => handleResetDefault(row)}
-                          style={{
-                            display: "inline-flex", alignItems: "center", gap: 4,
-                            padding: "4px 8px", border: "1px solid var(--cmms-border)",
-                            borderRadius: 999, background: "var(--cmms-bg-wash)",
-                            cursor: "pointer", color: "var(--cmms-text-secondary)",
-                            fontSize: 11, fontWeight: 600,
-                          }}
-                        >
-                          <ArrowPathIcon className="w-3.5 h-3.5" />
-                          รีเซ็ตเริ่มต้น
-                        </button>
-                      )}
-                    </HStack>
-
-                    {isSensitive ? (
-                      <VStack gap={1}>
-                        <div style={{ fontSize: 13, color: "var(--cmms-text-muted)", background: "var(--cmms-bg-muted)", padding: "8px 12px", borderRadius: 8, border: "1px dashed var(--cmms-border)" }}>
-                          {String(form[row.setting_key] || "").length > 0
-                            ? `•••••••• (ตั้งค่าแล้ว ความยาว ${String(form[row.setting_key]).length} ตัวอักษร)`
-                            : "ยังไม่ได้ตั้งค่า"}
-                        </div>
-                        <TextInput
-                          label="ป้อนค่าใหม่ (ถ้าต้องการเปลี่ยน)"
-                          isLabelHidden
-                          type={secretFilled[row.setting_key] ? "text" : "password"}
-                          placeholder="เว้นว่าง = ไม่เปลี่ยนค่าเดิม"
-                          value={newSecrets[row.setting_key] ?? ""}
-                          onChange={(v) => setNewSecrets((f) => ({ ...f, [row.setting_key]: v }))}
-                        />
-                      </VStack>
-                    ) : isJson ? (
-                      <div style={{
-                        fontSize: 12, color: "var(--cmms-text-secondary)", background: "var(--cmms-bg-muted)",
-                        padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)",
-                        fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-all",
-                        maxHeight: 90, overflow: "auto",
-                      }}>
-                        {String(form[row.setting_key] || "")}
-                      </div>
-                    ) : isBool ? (
-                      <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
-                        <span
-                          className="cmms-andon-chip"
-                          style={form[row.setting_key] === "1"
-                            ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
-                            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
-                        >
-                          {form[row.setting_key] === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
-                        </span>
-                        <Switch
-                          label={meta.label}
-                          isLabelHidden
-                          value={form[row.setting_key] === "1"}
-                          onChange={(c) => setForm((f) => ({ ...f, [row.setting_key]: c ? "1" : "0" }))}
-                        />
-                      </HStack>
-                    ) : isLang ? (
-                      <HStack gap={2} vAlign="center" wrap="wrap">
-                        {[
-                          { value: "th", label: "ไทย (Thai)", short: "ไทย" },
-                          { value: "en", label: "English", short: "EN" },
-                        ].map((opt) => {
-                          const active = (form[row.setting_key] ?? "th") === opt.value;
-                          return (
+                          {isJson && (
+                            <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                              JSON
+                            </span>
+                          )}
+                          {canReset && !isReadonly && (
                             <button
-                              key={opt.value}
                               type="button"
-                              title={opt.label}
-                              onClick={() => {
-                                setForm((f) => ({ ...f, [row.setting_key]: opt.value }));
-                                setUserLang(opt.value as "th" | "en");
-                              }}
+                              title={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}${String(defaultValue).length > 80 ? "…" : ""}`}
+                              onClick={() => handleResetDefault(row)}
                               style={{
-                                display: "inline-flex", alignItems: "center", gap: 6,
-                                padding: "7px 16px", borderRadius: 10,
-                                border: active ? "1px solid var(--cmms-primary)" : "1px solid var(--cmms-border)",
-                                background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
-                                color: active ? "#fff" : "var(--cmms-text-secondary)",
-                                fontSize: 13, fontWeight: 700, cursor: "pointer",
-                                transition: "all 150ms ease",
+                                display: "inline-flex", alignItems: "center", gap: 4,
+                                padding: "4px 8px", border: "1px solid var(--cmms-border)",
+                                borderRadius: 999, background: "var(--cmms-bg-wash)",
+                                cursor: "pointer", color: "var(--cmms-text-secondary)",
+                                fontSize: 11, fontWeight: 600,
                               }}
                             >
-                              {opt.short}
-                              <span style={{ fontWeight: 500, opacity: 0.85 }}>{opt.label}</span>
+                              <ArrowPathIcon className="w-3.5 h-3.5" />
+                              รีเซ็ตเริ่มต้น
                             </button>
-                          );
-                        })}
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                          สลับทั้งระบบทันที — บันทึกเพื่อเป็นค่าเริ่มต้นผู้ใช้ใหม่
-                        </span>
-                      </HStack>
-                    ) : selectOptions ? (
-                      <Selector
-                        label={meta.label}
-                        isLabelHidden
-                        value={form[row.setting_key] ?? ""}
-                        isDisabled={isReadonly}
-                        placeholder="เลือกค่า..."
-                        options={selectOptions}
-                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
-                      />
-                    ) : isColor ? (
-                      <VStack gap={1}>
-                        <HStack gap={2} vAlign="center" wrap="wrap">
-                          <input
-                            type="color"
-                            aria-label={`${meta.label} — เลือกสี`}
-                            value={/^#([0-9a-fA-F]{6})$/.test(hexValue) ? hexValue : "#" + "000000"}
-                            onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
-                            style={{
-                              width: 42, height: 34, padding: 2, cursor: "pointer",
-                              border: "1px solid var(--cmms-border)", borderRadius: "var(--cmms-radius)",
-                              background: "var(--cmms-bg-wash)",
-                            }}
+                          )}
+                        </HStack>
+
+                        {isSensitive ? (
+                          <VStack gap={1}>
+                            <div style={{ fontSize: 13, color: "var(--cmms-text-muted)", background: "var(--cmms-bg-muted)", padding: "8px 12px", borderRadius: 8, border: "1px dashed var(--cmms-border)" }}>
+                              {String(form[row.setting_key] || "").length > 0
+                                ? `•••••••• (ตั้งค่าแล้ว ความยาว ${String(form[row.setting_key]).length} ตัวอักษร)`
+                                : "ยังไม่ได้ตั้งค่า"}
+                            </div>
+                            <TextInput
+                              label="ป้อนค่าใหม่ (ถ้าต้องการเปลี่ยน)"
+                              isLabelHidden
+                              type={secretFilled[row.setting_key] ? "text" : "password"}
+                              placeholder="เว้นว่าง = ไม่เปลี่ยนค่าเดิม"
+                              value={newSecrets[row.setting_key] ?? ""}
+                              onChange={(v) => setNewSecrets((f) => ({ ...f, [row.setting_key]: v }))}
+                            />
+                          </VStack>
+                        ) : isJson ? (
+                          <div style={{
+                            fontSize: 12, color: "var(--cmms-text-secondary)", background: "var(--cmms-bg-muted)",
+                            padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)",
+                            fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-all",
+                            maxHeight: 90, overflow: "auto",
+                          }}>
+                            {String(form[row.setting_key] || "")}
+                          </div>
+                        ) : isBool ? (
+                          <HStack gap={2} vAlign="center" hAlign="between" wrap="wrap">
+                            <span
+                              className="cmms-andon-chip"
+                              style={form[row.setting_key] === "1"
+                                ? { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }
+                                : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                            >
+                              {form[row.setting_key] === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                            </span>
+                            <Switch
+                              label={meta.label}
+                              isLabelHidden
+                              value={form[row.setting_key] === "1"}
+                              onChange={(c) => setForm((f) => ({ ...f, [row.setting_key]: c ? "1" : "0" }))}
+                            />
+                          </HStack>
+                        ) : isLang ? (
+                          <HStack gap={2} vAlign="center" wrap="wrap">
+                            {[
+                              { value: "th", label: "ไทย (Thai)", short: "ไทย" },
+                              { value: "en", label: "English", short: "EN" },
+                            ].map((opt) => {
+                              const active = (form[row.setting_key] ?? "th") === opt.value;
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  title={opt.label}
+                                  onClick={() => {
+                                    setForm((f) => ({ ...f, [row.setting_key]: opt.value }));
+                                    setUserLang(opt.value as "th" | "en");
+                                  }}
+                                  style={{
+                                    display: "inline-flex", alignItems: "center", gap: 6,
+                                    padding: "7px 16px", borderRadius: 10,
+                                    border: active ? "1px solid var(--cmms-primary)" : "1px solid var(--cmms-border)",
+                                    background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
+                                    color: active ? "#fff" : "var(--cmms-text-secondary)",
+                                    fontSize: 13, fontWeight: 700, cursor: "pointer",
+                                    transition: "all 150ms ease",
+                                  }}
+                                >
+                                  {opt.short}
+                                  <span style={{ fontWeight: 500, opacity: 0.85 }}>{opt.label}</span>
+                                </button>
+                              );
+                            })}
+                            <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                              สลับทั้งระบบทันที — บันทึกเพื่อเป็นค่าเริ่มต้นผู้ใช้ใหม่
+                            </span>
+                          </HStack>
+                        ) : selectOptions ? (
+                          <Selector
+                            label={meta.label}
+                            isLabelHidden
+                            value={form[row.setting_key] ?? ""}
+                            isDisabled={isReadonly}
+                            placeholder="เลือกค่า..."
+                            options={selectOptions}
+                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
                           />
+                        ) : isColor ? (
+                          <VStack gap={1}>
+                            <HStack gap={2} vAlign="center" wrap="wrap">
+                              <input
+                                type="color"
+                                aria-label={`${meta.label} — เลือกสี`}
+                                value={/^#([0-9a-fA-F]{6})$/.test(hexValue) ? hexValue : "#" + "000000"}
+                                onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
+                                style={{
+                                  width: 42, height: 34, padding: 2, cursor: "pointer",
+                                  border: "1px solid var(--cmms-border)", borderRadius: "var(--cmms-radius)",
+                                  background: "var(--cmms-bg-wash)",
+                                }}
+                              />
+                              <TextInput
+                                label={meta.label}
+                                isLabelHidden
+                                placeholder="#RRGGBB"
+                                value={String(form[row.setting_key] ?? "").toUpperCase()}
+                                onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                                status={hexValue === "" ? undefined : { type: hexValid ? "success" : "error" }}
+                                style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
+                              />
+                            </HStack>
+                            {hexValue === "" ? (
+                              <Text type="body" size="sm" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
+                            ) : hexValid ? (
+                              <Text type="body" size="sm" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
+                            ) : (
+                              <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
+                            )}
+                          </VStack>
+                        ) : isTextarea ? (
+                          <TextArea
+                            label={meta.label}
+                            isLabelHidden
+                            value={form[row.setting_key] ?? ""}
+                            isDisabled={isReadonly}
+                            rows={row.setting_key === "company_address" ? 3 : 2}
+                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                          />
+                        ) : (
                           <TextInput
                             label={meta.label}
                             isLabelHidden
-                            placeholder="#RRGGBB"
-                            value={String(form[row.setting_key] ?? "").toUpperCase()}
+                            type={isEmail ? "email" : "text"}
+                            value={form[row.setting_key] ?? ""}
+                            isDisabled={isReadonly}
                             onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                            status={hexValue === "" ? undefined : { type: hexValid ? "success" : "error" }}
-                            style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
                           />
-                        </HStack>
-                        {hexValue === "" ? (
-                          <Text type="body" size="sm" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
-                        ) : hexValid ? (
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
-                        ) : (
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
                         )}
                       </VStack>
-                    ) : isTextarea ? (
-                      <TextArea
-                        label={meta.label}
-                        isLabelHidden
-                        value={form[row.setting_key] ?? ""}
-                        isDisabled={isReadonly}
-                        rows={row.setting_key === "company_address" ? 3 : 2}
-                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                      />
-                    ) : (
-                      <TextInput
-                        label={meta.label}
-                        isLabelHidden
-                        type={isEmail ? "email" : "text"}
-                        value={form[row.setting_key] ?? ""}
-                        isDisabled={isReadonly}
-                        onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                      />
-                    )}
-                  </VStack>
-                );
-              })
-            )}
+                    );
+                  })
+                )}
 
-            <HStack hAlign="end" wrap="wrap" gap={2}>
-              <button
-                type="button"
-                disabled={changedRows.length === 0}
-                onClick={() => {
-                  const next: Record<string, string> = {};
-                  settings.forEach((s) => { next[s.setting_key] = s.setting_value ?? ""; });
-                  setForm(next);
-                  setNewSecrets({});
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                รีเซ็ตการแก้ไข
-              </button>
-              <button
-                type="button"
-                disabled={changedRows.length === 0}
-                onClick={() => setShowDiff(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ScaleIcon className="w-4 h-4" />
-                {changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
-              </button>
-              <button
-                type="button"
-                disabled={changedRows.length === 0}
-                onClick={handleSave}
-                className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? "กำลังบันทึก..." : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
-              </button>
-            </HStack>
-          </VStack>
-        </Card>
-      </Grid>
+                <HStack hAlign="end" wrap="wrap" gap={2}>
+                  <button
+                    type="button"
+                    disabled={changedRows.length === 0}
+                    onClick={() => {
+                      const next: Record<string, string> = {};
+                      settings.forEach((s) => { next[s.setting_key] = s.setting_value ?? ""; });
+                      setForm(next);
+                      setNewSecrets({});
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    รีเซ็ตการแก้ไข
+                  </button>
+                  <button
+                    type="button"
+                    disabled={changedRows.length === 0}
+                    onClick={() => setShowDiff(true)}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ScaleIcon className="w-4 h-4" />
+                    {changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={changedRows.length === 0}
+                    onClick={handleSave}
+                    className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {saving ? "กำลังบันทึก..." : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
+                  </button>
+                </HStack>
+              </VStack>
+            </Card>
+          </Grid>
+        )}
       </div>
 
       {/* ═══ Dialog เปรียบเทียบก่อนบันทึก ═══ */}
@@ -1101,7 +1347,6 @@ export default function SettingsPage() {
             <VStack gap={2} style={{ maxHeight: 420, overflow: "auto" }}>
               {diffRows.map(({ row, oldVal, newVal }) => {
                 const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
-                const groupLabel = (GROUP_META[row.setting_group] ?? { label: row.setting_group }).label;
                 const changed = oldVal !== newVal;
                 return (
                   <Card key={row.id} padding={3}>
@@ -1111,7 +1356,7 @@ export default function SettingsPage() {
                           {SENSITIVE_KEYS.has(row.setting_key) && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
                           <Text type="body" weight="bold" size="sm">{meta.label}</Text>
                           <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                            {groupLabel}
+                            {row.setting_group}
                           </span>
                         </HStack>
                         <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>
@@ -1119,14 +1364,12 @@ export default function SettingsPage() {
                         </Text>
                       </HStack>
                       <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
-                        {/* ค่าเดิม */}
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
                           <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
                             {valuePreview(row, oldVal)}
                           </Text>
                         </div>
-                        {/* ค่าใหม่ */}
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
                           <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</Text>
                           <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
