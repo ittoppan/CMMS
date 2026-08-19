@@ -523,9 +523,10 @@ try {
         $assetIdMap[$key] = (int)$q->fetchColumn();
     }
     foreach ($NEW_ASSETS as $key => [$name, $cat]) {
-        if (isset($assetIdMap[$key])) continue;
+        $normKey = strtoupper(preg_replace('/[^A-Z0-9]/', '', $key));
+        if (isset($assetIdMap[$normKey])) continue;
         $pdo->prepare("INSERT INTO asset_registry (code, name, category) VALUES (?, ?, ?)")->execute([$key, $name, $cat]);
-        $assetIdMap[$key] = (int)$pdo->lastInsertId();
+        $assetIdMap[$normKey] = (int)$pdo->lastInsertId();
         echo "[apply] สร้าง asset: $key — $name\n";
     }
     // 4) map แผนก id
@@ -536,17 +537,20 @@ try {
         $q->execute([$d['code']]);
         $deptIdMap[$g] = (int)$q->fetchColumn();
     }
-    // 5) insert
+    // 5) insert (ข้าม WO ที่มีอยู่แล้ว — รันซ้ำได้ไม่ซ้ำ)
+    $exists = $pdo->prepare("SELECT 1 FROM repair WHERE work_order_no = ?");
     $cols = ['work_order_no','asset_id','department_id','status','source_type','machine_status','contaminate_checking','priority','title','description','failure_report','diagnosis','root_cause','resolution','solution','notes','receiver_name','outsource_by','actual_start_at','completed_at','downtime_start','downtime_end','downtime_minutes','repair_time_minutes','created_at'];
     $ph = rtrim(str_repeat('?,', count($cols)), ',');
     $stmt = $pdo->prepare("INSERT INTO repair (" . implode(',', $cols) . ") VALUES ($ph)");
-    $cnt = 0;
+    $cnt = 0; $skipped = 0;
     foreach ($inserts as $in) {
+        $exists->execute([$in['work_order_no']]);
+        if ($exists->fetchColumn()) { $skipped++; continue; }
         if (str_starts_with($in['asset_id'], 'EXIST:')) {
             $key = strtoupper(preg_replace('/[^A-Z0-9]/', '', substr($in['asset_id'], 6)));
             $assetId = $assetIdMap[$key] ?? 0;
         } else {
-            $assetId = $assetIdMap[substr($in['asset_id'], 4)] ?? 0;
+            $assetId = $assetIdMap[strtoupper(preg_replace('/[^A-Z0-9]/', '', substr($in['asset_id'], 4)))] ?? 0;
         }
         if (!$assetId) { throw new Exception("asset_id ไม่พบสำหรับ {$in['asset_id']} (WO {$in['work_order_no']})"); }
         $deptId = str_starts_with($in['department_id'], 'NEW:') ? $deptIdMap[substr($in['department_id'], 4)] : (int)$in['department_id'];
@@ -561,7 +565,7 @@ try {
         $cnt++;
     }
     $pdo->commit();
-    echo "\n[apply] นำเข้าเรียบร้อย: $cnt รายการ\n";
+    echo "\n[apply] นำเข้าเรียบร้อย: $cnt รายการ (ข้ามที่มีอยู่แล้ว: $skipped)\n";
 } catch (Exception $e) {
     $pdo->rollBack();
     fwrite(STDERR, "[apply] FAILED: " . $e->getMessage() . "\n");
