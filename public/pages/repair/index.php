@@ -50,7 +50,17 @@ $countMap = array_column($counts, 'cnt', 'status');
 $totalRepairs = array_sum($countMap);
 
 // Data
+$perPage = 25;
+$page = max(1, (int)($_GET['page'] ?? 1));
+$offset = ($page - 1) * $perPage;
 try {
+    // นับทั้งหมดก่อน (สำหรับ pagination — นับตามตัวกรองปัจจุบัน)
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id $where");
+    $countStmt->execute($params);
+    $filteredTotal = (int)$countStmt->fetchColumn();
+    $totalPages = max(1, (int)ceil($filteredTotal / $perPage));
+    if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
+
     $stmt = $pdo->prepare("
         SELECT r.*, a.name AS asset_name, a.code AS asset_code,
                u.full_name AS assigned_name, rt.name AS repair_type_name
@@ -59,6 +69,7 @@ try {
         LEFT JOIN users u ON r.assigned_to = u.id
         LEFT JOIN repair_types rt ON r.repair_type_id = rt.id
         $where ORDER BY FIELD(r.priority,'critical','high','medium','low'), r.created_at DESC
+        LIMIT $perPage OFFSET $offset
     ");
     $stmt->execute($params);
     $repairs = $stmt->fetchAll();
@@ -246,5 +257,37 @@ $pbadge = ['low'=>'badge-low','medium'=>'badge-medium','high'=>'badge-high','cri
         </tbody>
     </table>
 </div>
+
+<?php if ($totalPages > 1): ?>
+<!-- Pagination -->
+<div class="flex items-center justify-between flex-wrap gap-3 mt-4">
+    <span class="text-xs text-secondary">แสดง <?= count($repairs) ?> จาก <?= $filteredTotal ?> รายการ (หน้า <?= $page ?>/<?= $totalPages ?>)</span>
+    <div class="flex items-center gap-1.5">
+        <?php
+        $qs = function($p) use ($search, $filterStatus, $filterPriority, $filterAssigned, $filterSafety) {
+            $q = [];
+            if ($search) $q['search'] = $search;
+            if ($filterStatus) $q['status'] = $filterStatus;
+            if ($filterPriority) $q['priority'] = $filterPriority;
+            if ($filterAssigned) $q['assigned_to'] = $filterAssigned;
+            if ($filterSafety) $q['safety_related'] = $filterSafety;
+            $q['page'] = $p;
+            return '?' . http_build_query($q);
+        };
+        $start = max(1, $page - 2);
+        $end = min($totalPages, $page + 2);
+        ?>
+        <?php if ($page > 1): ?>
+        <a href="<?= $qs($page - 1) ?>" class="btn btn-sm btn-ghost">‹ ก่อนหน้า</a>
+        <?php endif; ?>
+        <?php for ($p = $start; $p <= $end; $p++): ?>
+        <a href="<?= $qs($p) ?>" class="btn btn-sm <?= $p === $page ? 'btn-primary' : 'btn-ghost' ?>"><?= $p ?></a>
+        <?php endfor; ?>
+        <?php if ($page < $totalPages): ?>
+        <a href="<?= $qs($page + 1) ?>" class="btn btn-sm btn-ghost">ถัดไป ›</a>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <?php renderFooter(); ?>

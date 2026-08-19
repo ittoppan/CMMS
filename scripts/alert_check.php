@@ -107,13 +107,17 @@ foreach ($pmRows as $r) {
 
 // ---------------- 2) สต็อกต่ำ (summary แบบรวม ไม่ใช่ทีละรายการ) ----------------
 if ($lowStockOn === '1') {
-    $lowCount = (int)$pdo->query('SELECT COUNT(*) FROM spare_parts WHERE stock_qty <= min_stock')->fetchColumn();
+    // นับเฉพาะรายการที่ "เคยมีสต็อกแล้วต่ำลง" (stock_qty > 0) — รายการที่ stock_qty = 0
+    // และไม่เคยมีประวัติเบิก/รับ (spare_part_transactions) คือข้อมูล import ที่ยังไม่ได้กรอกสต็อก
+    // ไม่ควรยิงแจ้งเตือนซ้ำทุกวัน (กันสแปมจากข้อมูล placeholder)
+    $lowCount = (int)$pdo->query('SELECT COUNT(*) FROM spare_parts WHERE stock_qty > 0 AND stock_qty <= min_stock')->fetchColumn();
+    $zeroCount = (int)$pdo->query('SELECT COUNT(*) FROM spare_parts WHERE stock_qty = 0')->fetchColumn();
 
     if ($lowCount > 0 && ($force || !alreadyAlerted($pdo, '[LOW STOCK]'))) {
         $top = $pdo->query("
             SELECT code, name, stock_qty, min_stock, unit
             FROM spare_parts
-            WHERE stock_qty <= min_stock
+            WHERE stock_qty > 0 AND stock_qty <= min_stock
             ORDER BY (stock_qty / NULLIF(min_stock, 0)) ASC, stock_qty ASC
             LIMIT 15
         ")->fetchAll();
@@ -134,16 +138,16 @@ if ($lowStockOn === '1') {
              . "----------------------------------\n"
              . implode("\n", $lines)
              . ($lowCount > 15 ? "\n...และอีก " . ($lowCount - 15) . " รายการ" : '')
+             . ($zeroCount > 0 ? "\n\n⚠️ อีก {$zeroCount} รายการยังไม่เคยบันทึกสต็อก (stock=0) — ตรวจสอบข้อมูล" : '')
              . "\n----------------------------------\n"
              . "🛒 จัดการสต็อก: " . rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/';
 
         if (NotificationService::isLineTemplateEnabled('line_tpl_low_stock')) {
             NotificationService::sendLineMessage($msg);
             $sent++;
-            echo "alert LOW STOCK: {$lowCount} items (แสดง 15 อันดับแรก)\n";
+            echo "alert LOW STOCK: {$lowCount} items (แสดง 15 อันดับแรก, zero-stock {$zeroCount} ไม่นับ)\n";
         } else {
-            echo "skip LOW STOCK LINE (low_stock template disabled)
-";
+            echo "skip LOW STOCK LINE (low_stock template disabled)\n";
         }
     } else {
         echo "low stock: {$lowCount} items — skip (" . ($force ? 'force' : 'already alerted <24h') . ")\n";
@@ -164,8 +168,9 @@ if ($escOn === '1') {
         FROM repair r
         LEFT JOIN asset_registry a ON r.asset_id = a.id
         LEFT JOIN users u ON r.assigned_to = u.id
-        WHERE r.status NOT IN ('resolved','closed','cancelled','rejected')
+        WHERE r.status NOT IN ('resolved','closed','cancelled','rejected','completed')
           AND r.priority IN ('high','critical')
+          AND r.work_order_no NOT LIKE '%DEMO%'
           AND TIMESTAMPDIFF(HOUR, r.created_at, NOW()) >= $escHours
         ORDER BY r.created_at ASC
         LIMIT 10

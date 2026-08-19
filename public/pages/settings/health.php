@@ -38,6 +38,28 @@ if (empty($missingExts)) {
 $lineCallback = getenv('LINE_CALLBACK_URL') ?: (function_exists('publicBaseUrl') ? publicBaseUrl() . '/line_callback.php' : '');
 $checks[] = ['name' => 'LINE OAuth Callback URL', 'status' => 'pass', 'detail' => $lineCallback];
 
+// 5. LINE Push Health (ตรวจความล้มเหลว 24 ชม.ล่าสุด — quota / template ผิด)
+try {
+    $lineFail = $pdo->query("SELECT COUNT(*) FROM notification_logs WHERE channel='LINE' AND status='FAILED' AND created_at > NOW() - INTERVAL 24 HOUR")->fetchColumn();
+    $lineFailRaw = $pdo->query("SELECT raw_response FROM notification_logs WHERE channel='LINE' AND status='FAILED' AND created_at > NOW() - INTERVAL 24 HOUR AND raw_response IS NOT NULL ORDER BY id DESC LIMIT 1")->fetchColumn();
+    if ((int)$lineFail > 0) {
+        $detail = "LINE Push ล้มเหลว {$lineFail} ครั้งใน 24 ชม.";
+        if (stripos((string)$lineFailRaw, 'monthly limit') !== false) {
+            $detail .= ' — ⚠️ ครบโควตาข้อความรายเดือนของ LINE OA (ต้องอัปเกรดแผนหรือลดปริมาณ)';
+            $checks[] = ['name' => 'LINE Push (Messaging API)', 'status' => 'fail', 'detail' => $detail];
+        } elseif (stripos((string)$lineFailRaw, 'invalid') !== false || stripos((string)$lineFailRaw, 'unknown field') !== false) {
+            $detail .= ' — ตรวจเทมเพลต Flex ใน /settings/flex_builder';
+            $checks[] = ['name' => 'LINE Push (Messaging API)', 'status' => 'warn', 'detail' => $detail];
+        } else {
+            $checks[] = ['name' => 'LINE Push (Messaging API)', 'status' => 'warn', 'detail' => $detail];
+        }
+    } else {
+        $checks[] = ['name' => 'LINE Push (Messaging API)', 'status' => 'pass', 'detail' => 'ไม่พบความล้มเหลวใน 24 ชม.ล่าสุด'];
+    }
+} catch (Exception $e) {
+    $checks[] = ['name' => 'LINE Push (Messaging API)', 'status' => 'warn', 'detail' => 'ตรวจสอบไม่ได้: ' . $e->getMessage()];
+}
+
 // Disk Usage
 $freeSpace = round(disk_free_space("C:") / (1024 * 1024 * 1024), 2);
 $totalSpace = round(disk_total_space("C:") / (1024 * 1024 * 1024), 2);

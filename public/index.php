@@ -33,8 +33,8 @@ $pmWeekly    = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE frequency_type
 $pmMonthly   = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE frequency_type = 'monthly'")->fetchColumn();
 $pmAnnual    = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE frequency_type IN ('yearly','annual')")->fetchColumn();
 
-// Inventory & Assets Metrics
-$lowStock        = (int)$pdo->query("SELECT COUNT(*) FROM spare_parts WHERE stock_qty <= min_stock")->fetchColumn();
+// Inventory & Assets Metrics (ไม่นับรายการที่ยังไม่เคยบันทึกสต็อก stock=0 — ข้อมูล import placeholder)
+$lowStock        = (int)$pdo->query("SELECT COUNT(*) FROM spare_parts WHERE stock_qty > 0 AND stock_qty <= min_stock")->fetchColumn();
 $totalAssets     = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE status = 'active'")->fetchColumn();
 
 // ─── 2. MTBF, MTTR & Machine Availability Calculations ───
@@ -126,11 +126,11 @@ $overduePMList = $pdo->query("
     ORDER BY days_overdue DESC LIMIT 6
 ")->fetchAll();
 
-// 2.5 Reorder Point Low Stock Inventory
+// 2.5 Reorder Point Low Stock Inventory (ไม่นับรายการ stock=0 ที่ยังไม่เคยมีสต็อก)
 $reorderStockList = $pdo->query("
     SELECT id, code AS item_code, name AS item_name, category, stock_qty, min_stock, unit_price AS unit_cost
     FROM spare_parts
-    WHERE stock_qty <= min_stock
+    WHERE stock_qty > 0 AND stock_qty <= min_stock
     ORDER BY stock_qty ASC LIMIT 6
 ")->fetchAll();
 

@@ -25,11 +25,11 @@ try {
     }
 } catch (Exception $e) {}
 
-// 2) อะไหล่ต่ำกว่าเกณฑ์ (stock_qty <= min_stock)
+// 2) อะไหล่ต่ำกว่าเกณฑ์ (stock_qty <= min_stock) — ไม่นับรายการที่ยังไม่เคยมีสต็อก (stock=0)
 try {
     $lowStock = $pdo->query(
         "SELECT code, name, stock_qty, min_stock FROM spare_parts
-         WHERE min_stock > 0 AND stock_qty <= min_stock
+         WHERE min_stock > 0 AND stock_qty > 0 AND stock_qty <= min_stock
          ORDER BY (stock_qty / min_stock) ASC LIMIT 5"
     )->fetchAll();
     foreach ($lowStock as $s) {

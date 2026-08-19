@@ -299,11 +299,11 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         ];
     }
 
+    // ⚠️ LINE Flex Bubble: bubble ระดับบนสุดรองรับแค่ type/size/direction/header/hero/body/footer/styles
+    // (backgroundColor/borderColor/cornerRadius ที่ระดับ bubble หรือ styles.container ถูก LINE reject —
+    //  ใช้สีพื้นหลังที่ body box แทน ซึ่งรองรับแน่นอน)
     $bubble = [
         'type' => 'bubble',
-        'backgroundColor' => $opts['container_bg'] ?? '#ffffff',
-        'borderColor'     => $opts['border_color'] ?? '#e2e8f0',
-        'cornerRadius'    => $opts['corner_radius'] ?? 'lg',
     ];
     $bubbleDirection = ($opts['bubble_direction'] ?? 'ltr') === 'rtl' ? 'rtl' : 'ltr';
     if ($bubbleDirection !== 'ltr') $bubble['direction'] = $bubbleDirection;
@@ -328,6 +328,9 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
         ];
     }
     $bodyBox = ['type' => 'box', 'layout' => 'vertical', 'contents' => $bodyContents];
+    // สีพื้นหลังการ์ดรวม — ใส่ที่ body box (bubble/container ไม่รองรับใน API นี้)
+    $containerBg = trim((string)($opts['container_bg'] ?? ''));
+    if ($containerBg !== '' && preg_match('/^#[0-9a-fA-F]{6}$/', $containerBg)) $bodyBox['backgroundColor'] = $containerBg;
     $bodyPadding = in_array($opts['body_padding'] ?? 'md', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? ($opts['body_padding'] ?? 'md') : 'md';
     if ($bodyPadding !== 'md') $bodyBox['paddingAll'] = $bodyPadding;
     $bodySpacing = in_array($opts['body_spacing'] ?? 'none', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? ($opts['body_spacing'] ?? 'none') : 'none';
@@ -339,12 +342,18 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     $bubble['body'] = $bodyBox;
     $bubble['footer'] = ['type' => 'box', 'layout' => 'vertical', 'contents' => $footerButtons];
 
+    // LINE จำกัด altText ≤ 1500 ตัวอักษร (นับแบบ UTF-16 — emoji นับ 2 หน่วย)
+    // ตัดให้สั้นพอเผื่อ emoji กัน error "Length must be between 0 and 1500"
+    $altText = "🔔 $title: $message";
+    if (mb_strlen($altText, 'UTF-8') > 1400) {
+        $altText = mb_substr($altText, 0, 1400, 'UTF-8');
+    }
     $flexPayload = [
         'to' => $lineUserId,
         'messages' => [
             [
                 'type' => 'flex',
-                'altText' => "🔔 $title: $message",
+                'altText' => $altText,
                 'contents' => $bubble
             ]
         ]

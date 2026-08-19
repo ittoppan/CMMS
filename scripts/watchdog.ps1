@@ -99,7 +99,7 @@ try {
                         }
                     }
                     $now = [long]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
-                    $alertGap   = 3600   # แจ้งเตือนซ้ำอย่างมากทุก 60 นาที
+                    $alertGap   = 86400   # แจ้งเตือนซ้ำอย่างมากทุก 24 ชม. (เดิม 1 ชม. = 24 ข้อความ/วัน ถ้า tunnel ลงค้าง)
 
                     # ไม่ restart cloudflared อัตโนมัติ - restart แต่ละครั้งได้ URL ใหม่
                     # ทำให้ลิงก์/QR/webhook ภายนอกใช้ไม่ได้ (ผู้ใช้งดเลิก auto-restart)
@@ -126,15 +126,26 @@ try {
             }
         }
         # 1.2) LINE webhook — อัปเดต endpoint อัตโนมัติเมื่อ tunnel URL เปลี่ยน (สคริปต์เช็คเอง)
+        #      log เฉพาะเมื่อ URL เปลี่ยนจริง หรือ error ครั้งแรกในรอบ 1 ชม. (กัน log สแปมทุกนาที)
         $webhookScript = Join-Path $root "scripts\update_line_webhook.php"
+        $whStateFile = Join-Path $logDir "webhook-error.state"
         if ($phpExe -and (Test-Path -LiteralPath $webhookScript)) {
             try {
                 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
                 $whOut = (& $phpExe $webhookScript 2>&1 | Out-String).Trim()
                 if ($LASTEXITCODE -ne 0) {
-                    Write-Log "LINE webhook update FAILED: $whOut"
+                    $whLastErr = 0
+                    if (Test-Path -LiteralPath $whStateFile) {
+                        $whLastErr = [long]((Get-Content -LiteralPath $whStateFile -Raw).Trim())
+                    }
+                    $whNow = [long]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
+                    if (($whNow - $whLastErr) -ge 3600) {
+                        Write-Log "LINE webhook update FAILED: $whOut"
+                        Set-Content -LiteralPath $whStateFile -Value $whNow -Encoding ascii
+                    }
                 } elseif ($whOut -match "updated") {
                     Write-Log "LINE webhook: $whOut"
+                    Remove-Item -LiteralPath $whStateFile -Force -ErrorAction SilentlyContinue
                 }
             } catch {
                 Write-Log "LINE webhook script error: $_"

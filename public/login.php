@@ -7,6 +7,7 @@
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
 require_once __DIR__ . '/../src/csrf.php';
+$pdo = getDb(); // ใช้ทั้ง POST (login) และ GET (แสดงปุ่มบัญชีทดสอบ)
 
 if (!empty($_SESSION['user_id'])) {
     header('Location: /');
@@ -178,14 +179,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </button>
                     </form>
 
+                    <?php
+                    // ปุ่มบัญชีทดสอบ — แสดงเฉพาะเมื่อเปิด demo_login_enabled (default เปิด; ปิดเมื่อใช้งานจริง)
+                    $demoLogin = '1';
+                    try {
+                        $dl = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'demo_login_enabled'")->fetchColumn();
+                        if ($dl !== false && $dl !== null) $demoLogin = (string)$dl;
+                    } catch (Exception $e) {}
+                    if ($demoLogin === '1'):
+                    // อ่านบัญชีทดสอบจริงจาก DB (กัน username เปลี่ยนแล้วปุ่มพัง)
+                    $demoAccounts = [];
+                    try {
+                        $demoAccounts = $pdo->query("SELECT username, full_name, role_id FROM users WHERE is_active = 1 AND username IN ('E01117','manager','tech01','tech02','operator') ORDER BY role_id LIMIT 4")->fetchAll(PDO::FETCH_ASSOC);
+                    } catch (Exception $e) {}
+                    if (empty($demoAccounts)) {
+                        $demoAccounts = [['username' => 'E01117', 'full_name' => 'Admin'], ['username' => 'manager', 'full_name' => 'Manager'], ['username' => 'tech01', 'full_name' => 'ช่าง']];
+                    }
+                    ?>
                     <div style="margin-top:2rem;padding:1rem;background-color:var(--color-background-muted,#f1f5f9);border:1px solid var(--color-border,#e2e8f0);border-radius:6px">
                         <p style="font-size:0.75rem;color:var(--color-text-secondary,#64748b);margin:0 0 0.5rem;font-weight:500">คลิกเลือกบัญชีทดสอบ (รหัสผ่าน: password):</p>
                         <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
-                            <button type="button" onclick="fillLogin('admin', 'password')" class="px-2.5 py-1 bg-surface border border-border rounded-sm text-xs font-medium text-primary hover:border-accent hover:text-accent transition-colors">👤 admin</button>
-                            <button type="button" onclick="fillLogin('manager', 'password')" class="px-2.5 py-1 bg-surface border border-border rounded-sm text-xs font-medium text-primary hover:border-accent hover:text-accent transition-colors">👔 manager</button>
-                            <button type="button" onclick="fillLogin('tech01', 'password')" class="px-2.5 py-1 bg-surface border border-border rounded-sm text-xs font-medium text-primary hover:border-accent hover:text-accent transition-colors">🔧 tech01</button>
+                            <?php foreach ($demoAccounts as $da): ?>
+                            <button type="button" onclick="fillLogin('<?= htmlspecialchars($da['username'], ENT_QUOTES) ?>', 'password')" class="px-2.5 py-1 bg-surface border border-border rounded-sm text-xs font-medium text-primary hover:border-accent hover:text-accent transition-colors"><?= htmlspecialchars($da['username']) ?></button>
+                            <?php endforeach; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                 </div>
             </div>

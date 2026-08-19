@@ -90,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Module 6: Security & Policy
         saveSettingVal($pdo, 'session_timeout_mins', $_POST['session_timeout_mins'] ?? '60');
         saveSettingVal($pdo, 'max_login_attempts', $_POST['max_login_attempts'] ?? '5');
+        saveSettingVal($pdo, 'demo_login_enabled', $_POST['demo_login_enabled'] ?? '1');
 
         // Module 7: Work Order & Labor Policy
         saveSettingVal($pdo, 'standard_labor_rate', (float)($_POST['standard_labor_rate'] ?? 250.00));
@@ -157,6 +158,7 @@ $notificationSound = getSettingVal($pdo, 'notification_sound', 'chime');
 
 $sessionTimeout = getSettingVal($pdo, 'session_timeout_mins', '60');
 $maxLoginAttempts = getSettingVal($pdo, 'max_login_attempts', '5');
+$demoLoginEnabled = getSettingVal($pdo, 'demo_login_enabled', '1');
 
 $standardLaborRate = getSettingVal($pdo, 'standard_labor_rate', '250.00');
 $workHoursPerDay = getSettingVal($pdo, 'work_hours_per_day', '8.0');
@@ -474,6 +476,14 @@ renderHeader();
                             <option value="5" <?= $maxLoginAttempts === '5' ? 'selected' : '' ?>>5 ครั้ง (แนะนำ)</option>
                             <option value="10" <?= $maxLoginAttempts === '10' ? 'selected' : '' ?>>10 ครั้ง</option>
                         </select>
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-700 block mb-1">ปุ่มบัญชีทดสอบบนหน้า Login (Demo Accounts)</label>
+                        <select name="demo_login_enabled" class="input input-bordered w-full font-bold">
+                            <option value="1" <?= $demoLoginEnabled === '1' ? 'selected' : '' ?>>แสดง (สำหรับทดสอบ)</option>
+                            <option value="0" <?= $demoLoginEnabled === '0' ? 'selected' : '' ?>>ซ่อน (แนะนำเมื่อใช้งานจริง)</option>
+                        </select>
+                        <p class="text-[10px] text-slate-400 mt-1">ปุ่ม admin/manager/tech01 (รหัส default) — ควรซ่อนเมื่อใช้งานจริง</p>
                     </div>
                 </div>
             </div>
