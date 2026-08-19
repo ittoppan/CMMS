@@ -81,7 +81,7 @@ class Sage300Service {
         if (!empty($connObj['success']) && $connObj['driver'] === 'PDO_ODBC') {
             try {
                 $pdoOdbc = $connObj['connection'];
-                $catList = "'" . implode("','", array_map('addslashes', $categories)) . "'";
+                $catList = "'" . implode("','", array_map(function ($c) { return str_replace("'", "''", $c); }, $categories)) . "'";
                 $sql = "
                     SELECT i.ITEMNO AS item_no, 
                            MAX(i.[DESC]) AS description, 
@@ -95,7 +95,10 @@ class Sage300Service {
                     WHERE RTRIM(i.CATEGORY) IN ($catList)
                 ";
                 if (!empty($itemNo)) {
-                    $sql .= " AND i.ITEMNO = " . $pdoOdbc->quote($itemNo);
+                    // ODBC driver บางตัวไม่ support PDO::quote() — escape ด้วยมือ
+                    // ITEMNO เป็น CHAR(30) มี trailing space → ต้อง RTRIM ฝั่งเทียบ
+                    $esc = str_replace("'", "''", trim($itemNo));
+                    $sql .= " AND RTRIM(i.ITEMNO) = '$esc'";
                 }
                 $sql .= " GROUP BY i.ITEMNO ORDER BY i.ITEMNO ASC";
                 
@@ -124,73 +127,10 @@ class Sage300Service {
             }
         }
 
-        // Fallback Catalog matching categories 15400 - 15404
-        $dummyItems = [
-            [
-                'item_no'       => 'BEARING-6205',
-                'description'   => 'Deep Groove Ball Bearing 6205-2RS',
-                'category'      => '15400',
-                'unit'          => 'PCS',
-                'location'      => 'WH-MAIN',
-                'qty_on_hand'   => 25.00,
-                'avg_cost'      => 180.00,
-                'vendor_name'   => 'SKF Thailand Co., Ltd.'
-            ],
-            [
-                'item_no'       => 'OILSEAL-3552',
-                'description'   => 'Rubber Oil Seal 35x52x7 mm',
-                'category'      => '15401',
-                'unit'          => 'PCS',
-                'location'      => 'WH-MAIN',
-                'qty_on_hand'   => 40.00,
-                'avg_cost'      => 65.00,
-                'vendor_name'   => 'NOK Industry'
-            ],
-            [
-                'item_no'       => 'GREASE-EP2',
-                'description'   => 'Lithium EP2 Multi-purpose Grease 400g',
-                'category'      => '15402',
-                'unit'          => 'TUBE',
-                'location'      => 'WH-SUB',
-                'qty_on_hand'   => 15.00,
-                'avg_cost'      => 220.00,
-                'vendor_name'   => 'Shell Thailand'
-            ],
-            [
-                'item_no'       => 'V-BELT-B52',
-                'description'   => 'V-Belt High Power Rubber B-52',
-                'category'      => '15403',
-                'unit'          => 'PCS',
-                'location'      => 'WH-MAIN',
-                'qty_on_hand'   => 30.00,
-                'avg_cost'      => 145.00,
-                'vendor_name'   => 'Bando Belts'
-            ],
-            [
-                'item_no'       => 'AIR-FILTER-02',
-                'description'   => 'Air Compressor Replacement Filter Element',
-                'category'      => '15404',
-                'unit'          => 'SET',
-                'location'      => 'WH-MAIN',
-                'qty_on_hand'   => 8.00,
-                'avg_cost'      => 850.00,
-                'vendor_name'   => 'Atlas Copco'
-            ]
-        ];
-
-        if (!empty($itemNo)) {
-            foreach ($dummyItems as $it) {
-                if ($it['item_no'] === $itemNo) return $it;
-            }
-            return null;
-        }
-
-        // Filter dummy items by allowed categories
-        $filtered = array_values(array_filter($dummyItems, function($it) use ($categories) {
-            return in_array(trim($it['category']), $categories);
-        }));
-
-        return $filtered;
+        // ⚠️ ไม่มี dummy fallback อีกต่อไป — ถ้า ODBC ล้มเหลว คืนค่าว่าง + log ชัดเจน
+        // (เดิมมีข้อมูลปลอม BEARING-6205 ฯลฯ แอบคืนเมื่อเชื่อมต่อไม่ได้ = mock data ปนข้อมูลจริง)
+        error_log("Sage300 getItemMaster: ODBC ไม่พร้อมใช้งาน (driver=" . ($connObj['driver'] ?? 'none') . ") — คืนค่าว่าง ไม่ใช้ข้อมูลจำลอง");
+        return [];
     }
 
     /**
