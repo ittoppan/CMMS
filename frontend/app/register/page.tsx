@@ -29,7 +29,7 @@ declare global {
  */
 
 const apiFetch = (url: string, init?: RequestInit) =>
-  fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
+  fetch(url, { ...init });
 
 export default function RegisterPage() {
   useEffect(() => {

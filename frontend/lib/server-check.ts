@@ -20,7 +20,6 @@ export async function serverResponds(timeoutMs = 5000): Promise<boolean> {
     const res = await fetch(url, {
       cache: "no-store",
       signal: ctrl.signal,
-      headers: { "ngrok-skip-browser-warning": "1" },
     });
     clearTimeout(timer);
     return res.ok;

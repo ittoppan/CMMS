@@ -81,7 +81,6 @@ export async function flushQueue(): Promise<{ ok: number; failed: number }> {
         method: item.method,
         headers: {
           "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "1",
         },
         body: JSON.stringify(item.body),
       });

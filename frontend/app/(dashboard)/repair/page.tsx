@@ -294,7 +294,7 @@ export default function WorkOrdersPage() {
       // ชื่อแผนก (cache ครั้งแรก)
       if (Object.keys(deptMapRef.current).length === 0) {
         try {
-          const dRes = await fetch("/api/v1/departments.php", { headers: { "ngrok-skip-browser-warning": "1" } });
+          const dRes = await fetch("/api/v1/departments.php");
           const dJson = await dRes.json();
           if (Array.isArray(dJson)) dJson.forEach((d: any) => { if (d && d.id) deptMapRef.current[Number(d.id)] = d.name; });
         } catch { /* ไม่มีชื่อแผนกก็ออกได้ */ }

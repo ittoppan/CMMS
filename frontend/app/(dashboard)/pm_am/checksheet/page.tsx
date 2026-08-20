@@ -159,7 +159,7 @@ export default function PMChecksheetPage() {
 
   // ผู้ทำรายการ = ผู้ใช้ที่ login จริง (จาก session)
   useEffect(() => {
-    fetch("/api/v1/menu_permissions.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/menu_permissions.php")
       .then((res) => res.json())
       .then((json) => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
@@ -193,7 +193,7 @@ export default function PMChecksheetPage() {
           list = open.filter((p: any) => String(p.id) === prefill.planId);
         } else if (prefill?.assetCode) {
           try {
-            const assetRes = await fetch("/api/v1/index.php?resource=assets", { headers: { "ngrok-skip-browser-warning": "1" } });
+            const assetRes = await fetch("/api/v1/index.php?resource=assets");
             const assetJson = await assetRes.json();
             const asset = (assetJson.data || []).find((a: any) => a.code === prefill.assetCode);
             if (asset) {
@@ -235,7 +235,7 @@ export default function PMChecksheetPage() {
     setSelectedPlan(plan);
     try {
       // หาชื่อเครื่องจักรจาก assets
-      const assetRes = await fetch("/api/v1/index.php?resource=assets", { headers: { "ngrok-skip-browser-warning": "1" } });
+      const assetRes = await fetch("/api/v1/index.php?resource=assets");
       const assetJson = await assetRes.json();
       const asset = (assetJson.data || []).find((a: any) => a.id === plan.asset_id);
       setAssetName(asset ? `${asset.name}${asset.code ? ` (${asset.code})` : ""}` : "ไม่ระบุ");

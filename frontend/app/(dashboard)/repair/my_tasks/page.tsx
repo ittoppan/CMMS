@@ -150,7 +150,7 @@ export default function MyTasksPage() {
 
   useEffect(() => {
     // 1) เอาผู้ใช้ปัจจุบัน (session) เพื่อกรองเฉพาะงานที่มอบหมายให้ตัวเอง
-    fetch("/api/v1/menu_permissions.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/menu_permissions.php")
       .then(res => res.json())
       .then(json => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
@@ -158,7 +158,7 @@ export default function MyTasksPage() {
       .catch(() => { /* offline — กรองไม่ได้ ปล่อยผ่าน */ });
 
     // 1.5) โหลดรหัส F/R จริงจากตาราง failure_codes / repair_codes (dropdown ปิดใบงาน)
-    fetch("/api/v1/repair.php?reference=codes", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/repair.php?reference=codes")
       .then(r => r.json())
       .then(j => {
         if (Array.isArray(j?.failure_codes)) setFailureCodes(j.failure_codes);

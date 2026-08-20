@@ -488,7 +488,6 @@ export default function GrapesBuilder() {
   const refreshList = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/custom_pages.php", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -613,7 +612,7 @@ export default function GrapesBuilder() {
     try {
       const res = await fetch("/api/v1/custom_pages.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug: sl, title: ttl, html, css, js }),
       });
       const json = await res.json();
@@ -651,7 +650,6 @@ export default function GrapesBuilder() {
     setMsg(null);
     try {
       const res = await fetch(`/api/v1/custom_pages.php?slug=${encodeURIComponent(row.slug)}`, {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -677,7 +675,6 @@ export default function GrapesBuilder() {
     try {
       const res = await fetch(`/api/v1/custom_pages.php?slug=${encodeURIComponent(row.slug)}`, {
         method: "DELETE",
-        headers: { "ngrok-skip-browser-warning": "1" },
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ");

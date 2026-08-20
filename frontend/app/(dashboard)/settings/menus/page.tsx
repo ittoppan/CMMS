@@ -86,9 +86,7 @@ export default function MenuPermissionsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/v1/menu_permissions.php", {
-        headers: { "ngrok-skip-browser-warning": "1" },
-      });
+      const res = await fetch("/api/v1/menu_permissions.php");
       const json = await res.json();
       setMenus(json.menus || []);
       setRoles(json.roles || []);
@@ -154,7 +152,7 @@ export default function MenuPermissionsPage() {
         if (!perms[role.id]) continue;
         const res = await fetch("/api/v1/menu_permissions.php", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1" },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             role_id: role.id,
             grants: perms[role.id],

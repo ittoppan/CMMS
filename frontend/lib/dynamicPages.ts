@@ -499,7 +499,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
   try {
     if (needWo) {
       const res = await fetch("/api/v1/index.php?resource=work-orders", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -507,7 +506,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
     }
     if (needStock) {
       const res = await fetch("/api/v1/index.php?resource=low-stock", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -515,7 +513,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
     }
     if (needPm) {
       const res = await fetch("/api/v1/pm_am.php", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -523,7 +520,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
     }
     if (needCal) {
       const res = await fetch("/api/v1/calibration.php", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -531,7 +527,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
     }
     if (needBorrow) {
       const res = await fetch("/api/v1/equipment_borrowing.php", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();
@@ -539,7 +534,6 @@ export async function hydrateDynamicPage(root: HTMLElement): Promise<void> {
     }
     if (needPermit) {
       const res = await fetch("/api/v1/index.php?resource=work-permits", {
-        headers: { "ngrok-skip-browser-warning": "1" },
         cache: "no-store",
       });
       const json = await res.json();

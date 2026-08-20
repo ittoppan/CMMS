@@ -77,11 +77,11 @@ export default function MonthlyPdfReportPage() {
     setError(null);
     try {
       const [mRes, woRes, aRes, pmRes, meRes] = await Promise.all([
-        fetch(`/api/v1/analytics_monthly.php?year=${year}`, { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/index.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/index.php?resource=assets", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/pm_am.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/menu_permissions.php?user=1", { headers: { "ngrok-skip-browser-warning": "1" } }),
+        fetch(`/api/v1/analytics_monthly.php?year=${year}`),
+        fetch("/api/v1/index.php"),
+        fetch("/api/v1/index.php?resource=assets"),
+        fetch("/api/v1/pm_am.php"),
+        fetch("/api/v1/menu_permissions.php?user=1"),
       ]);
       const mJson = await mRes.json();
       const woJson = await woRes.json();

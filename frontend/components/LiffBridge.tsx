@@ -32,7 +32,7 @@ export default function LiffBridge() {
     async function init() {
       // Fetch configured LIFF ID จาก endpoint สาธารณะ (ไม่ต้อง login — line_notify.php 401 เมื่อไม่มี session)
       try {
-        const res = await fetch("/api/v1/line_register.php?liff_id=1", { headers: { "ngrok-skip-browser-warning": "1" } });
+        const res = await fetch("/api/v1/line_register.php?liff_id=1");
         const json = await res.json();
         if (cancelled) return;
         const id = json?.line_liff_id || "";
@@ -64,9 +64,7 @@ export default function LiffBridge() {
             try {
               // เก็บ LINE user id + เช็คสถานะผูกกับเลขพนักงาน (ผ่าน line_register.php)
               localStorage.setItem("cmms_line_user_id", profile.userId);
-              const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(profile.userId)}`, {
-                headers: { "ngrok-skip-browser-warning": "1" },
-              });
+              const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(profile.userId)}`);
               const json = await res.json().catch(() => ({}));
               if (json?.bound && json?.user) {
                 localStorage.setItem("cmms_line_bound", "1");
@@ -74,9 +72,7 @@ export default function LiffBridge() {
                 // role ของผู้ใช้ (ใช้ filter เมนู PWA ตามบทบาท)
                 if (json.user.role) localStorage.setItem("cmms_line_role", json.user.role);
                 try {
-                  const roleRes = await fetch(`/api/v1/menu_permissions.php?line_user_id=${encodeURIComponent(profile.userId)}`, {
-                    headers: { "ngrok-skip-browser-warning": "1" },
-                  });
+                  const roleRes = await fetch(`/api/v1/menu_permissions.php?line_user_id=${encodeURIComponent(profile.userId)}`);
                   const roleJson = await roleRes.json().catch(() => ({}));
                   if (roleJson?.user) {
                     localStorage.setItem("cmms_line_role_id", String(roleJson.user.role_id || ""));

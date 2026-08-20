@@ -277,13 +277,13 @@ export default function RepairViewDetailsPage() {
       .catch(e => console.error("Fetch WO parts error", e));
 
     // รายการอะไหล่ในคลัง (สำหรับเลือกเบิก)
-    fetch("/api/v1/spare_parts.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/spare_parts.php")
       .then(res => res.json())
       .then((list: any[]) => { if (Array.isArray(list)) setCatalog(list); })
       .catch(e => console.error("Fetch spare catalog error", e));
 
     // ตรวจว่าตัดสต็อกอัตโนมัติเปิดอยู่หรือไม่
-    fetch("/api/v1/settings.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/settings.php")
       .then(res => res.json())
       .then((rows: any[]) => {
         if (Array.isArray(rows)) {

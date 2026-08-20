@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
 
+/* TOPPAN design tokens (single source — design-system/tokens.css) */
+@import "../../design-system/tokens.css";
+
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
@@ -10,8 +13,8 @@
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
 
-/* No dark mode: bind the Tailwind `dark:` variant to a `.dark` class
-   that nothing ever adds, so dark: utilities stay inert forever. */
+/* Dark mode: bind Tailwind `dark:` variant to `.dark` class
+   (next-themes เพิ่ม/ลบคลาสนี้บน <html> ตาม light/dark/system) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* TOPPAN brand palette: remap Tailwind indigo/purple utilities → TOPPAN Blue family
@@ -184,9 +187,14 @@ body {
   --font-family-code: 'SF Mono', Monaco, Consolas, 'Cascadia Code', monospace;
 }
 
-html, body {
-  /* บังคับ light scheme เพื่อให้ astryx light-dark() tokens เลือกค่าสว่างเสมอ */
+/* light เป็นค่าเริ่มต้นบน html; .dark จะ override เป็น dark (body สืบทอด)
+   — แยกจาก rule ล่าง เพราะ `html, body { color-scheme: light }` จะบังคับ body
+     ให้เป็น light เสมอ แม้ .dark จะอยู่บน html */
+html {
   color-scheme: light;
+}
+
+html, body {
   font-family: var(--cmms-font-family, 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif) !important;
   font-size: var(--cmms-font-size-base, 16px);
   -webkit-font-smoothing: antialiased;
@@ -194,6 +202,72 @@ html, body {
   text-rendering: optimizeLegibility;
   color: var(--cmms-text-primary);
   background: var(--cmms-bg-page);
+}
+
+/* ================================================
+   Dark Mode Tokens (next-themes เพิ่ม .dark บน <html>)
+   - สลับ color-scheme → Astryx light-dark() เลือกค่ามืดอัตโนมัติ
+   - override --color-* และ --cmms-* ที่กำหนดตายตัวใน :root
+   ================================================ */
+.dark {
+  color-scheme: dark;
+
+  /* === Astryx color tokens (dark) === */
+  --color-accent-muted: rgba(96, 165, 250, 0.18);
+  --color-text-accent: #6CB2E8;
+  --color-icon-accent: #3E8FCF;
+  --color-background-blue: rgba(0, 104, 181, 0.20);
+  --color-border-blue: #3E8FCF;
+  --color-icon-blue: #3E8FCF;
+  --color-text-blue: #6CB2E8;
+  --color-background-body: #0F172A;
+  --color-background-surface: #1E293B;
+  --color-background-card: #1E293B;
+  --color-background-muted: #243247;
+  --color-background-popover: #1E293B;
+  --color-text-primary: #E6EDF5;
+  --color-text-secondary: #9FB0C3;
+  --color-text-disabled: #64748B;
+  --color-border: #2E3D52;
+  --color-border-emphasized: #3D4E66;
+  --color-neutral: rgba(96, 165, 250, 0.12);
+  --color-shadow: rgba(0, 0, 0, 0.45);
+  --color-skeleton: #2E3D52;
+  --color-track: #2E3D52;
+
+  /* === CMMS tokens (dark) === */
+  --cmms-primary-hover: #1E88E5;
+  --cmms-primary-light: var(--color-background-blue);
+  --cmms-primary-glow: rgba(0, 104, 181, 0.28);
+
+  --cmms-bg-page: var(--color-background-body);
+  --cmms-bg-card: var(--color-background-card);
+  --cmms-bg-card-hover: #2A3A52;
+  --cmms-bg-sidebar: #0F172A;
+  --cmms-bg-sidebar-hover: #1E293B;
+  --cmms-bg-sidebar-active: #0057A8;
+  --cmms-sidebar-indicator: #3E8FCF;
+  --cmms-sidebar-text: #9FB0C3;
+  --cmms-sidebar-text-strong: #E6EDF5;
+  --cmms-bg-topnav: var(--color-background-surface);
+  --cmms-bg-muted: var(--color-background-muted);
+  --cmms-bg-wash: var(--color-background-muted);
+
+  --cmms-text-primary: var(--color-text-primary);
+  --cmms-text-secondary: var(--color-text-secondary);
+  --cmms-text-muted: var(--color-text-disabled);
+  --cmms-text-on-primary: #FFFFFF;
+
+  --cmms-border: var(--color-border);
+  --cmms-border-hover: var(--color-border-emphasized);
+  --cmms-border-focus: #3E8FCF;
+
+  --cmms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --cmms-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --cmms-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --cmms-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --cmms-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+  --cmms-shadow-focus: 0 0 0 3px rgba(0, 104, 181, 0.4);
 }
 
 /* ================================================

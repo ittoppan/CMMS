@@ -673,7 +673,7 @@ export default function NotificationsSettingsPage() {
               variant="secondary"
               size="sm"
               icon={<Icon icon={LinkIcon} size="sm" />}
-              onClick={() => window.open("http://192.168.1.9:8081/bind_line.php", "_blank")}
+              onClick={() => window.open("/bind_line.php", "_blank")}
             />
           )}
         </HStack>

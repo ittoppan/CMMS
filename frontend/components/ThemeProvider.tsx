@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 
 /**
  * ThemeProvider — โหลดธีมจากฐานข้อมูล (settings) แล้ว apply เป็น CSS variables
@@ -44,17 +45,36 @@ export const THEME_PRESETS: Record<
   },
 };
 
+const isDark = () =>
+  typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+
+let lastApplied: { primary: string; gradient: string; sidebar: string; body: string } | null = null;
+
 const applyTheme = (theme: { primary: string; gradient: string; sidebar: string; body: string }) => {
+  lastApplied = theme;
   const root = document.documentElement;
+  const dark = isDark();
   root.style.setProperty("--color-accent", theme.primary);
   root.style.setProperty("--color-accent-muted", `${theme.primary}1F`);
   root.style.setProperty("--color-text-accent", theme.primary);
   root.style.setProperty("--color-icon-accent", theme.primary);
   root.style.setProperty("--color-border-blue", theme.primary);
   root.style.setProperty("--color-icon-blue", theme.primary);
-  root.style.setProperty("--color-background-body", theme.body);
-  root.style.setProperty("--color-background-muted", `${theme.body}E6`);
-  root.style.setProperty("--cmms-bg-sidebar", theme.sidebar);
+  // พื้นหลัง/พื้นผิว light-only — dark mode ต้องลบ inline เพื่อให้ .dark tokens ชนะ
+  if (!dark) {
+    root.style.setProperty("--color-background-body", theme.body);
+    root.style.setProperty("--color-background-muted", `${theme.body}E6`);
+    root.style.setProperty("--cmms-bg-sidebar", theme.sidebar);
+    // ค่าตรงๆ สำหรับของที่ใช้ตัวแปรสี hardcode จาก theme.css ของ astryx
+    root.style.setProperty("--color-background-surface", "#FFFFFF");
+    root.style.setProperty("--color-background-card", "#FFFFFF");
+  } else {
+    root.style.removeProperty("--color-background-body");
+    root.style.removeProperty("--color-background-muted");
+    root.style.removeProperty("--cmms-bg-sidebar");
+    root.style.removeProperty("--color-background-surface");
+    root.style.removeProperty("--color-background-card");
+  }
   // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
   root.style.setProperty("--cmms-bg-sidebar-active", theme.primary);
   root.style.setProperty("--cmms-gradient-primary", theme.gradient);
@@ -62,9 +82,6 @@ const applyTheme = (theme: { primary: string; gradient: string; sidebar: string;
   root.style.setProperty("--cmms-primary-hover", theme.primary);
   root.style.setProperty("--cmms-border-focus", theme.primary);
   root.style.setProperty("--cmms-shadow-focus", `0 0 0 3px ${theme.primary}33`);
-  // ค่าตรงๆ สำหรับของที่ใช้ตัวแปรสี hardcode จาก theme.css ของ astryx
-  root.style.setProperty("--color-background-surface", "#FFFFFF");
-  root.style.setProperty("--color-background-card", "#FFFFFF");
 };
 
 const hexToRgb = (hex: string): string => {
@@ -147,6 +164,12 @@ const applyHeroTheme = (pathname: string) => {
 
 export default function ThemeProvider() {
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
+
+  // สลับ light/dark — re-apply ธีมล่าสุด (พื้นหลัง light-only จะถูกข้ามใน dark)
+  useEffect(() => {
+    if (lastApplied) applyTheme(lastApplied);
+  }, [resolvedTheme]);
 
   // Hero เฉพาะหน้า — รีแท็กทุกครั้งที่เปลี่ยนเส้นทาง (ไคลเอนต์ nav ไม่ต้องโหลดใหม่)
   // + MutationObserver จัดการ hero ที่ mount ทีหลัง (หน้าบางหน้า render หลังโหลดข้อมูล)

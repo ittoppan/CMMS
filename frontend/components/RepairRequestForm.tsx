@@ -252,10 +252,8 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  /* ---- fetch wrapper: ส่ง ngrok-skip-browser-warning เพื่อข้าม interstitial
-     เมื่อเปิดผ่าน ngrok (LIFF) — ไม่มีผลเมื่อเรียกผ่าน localhost ---- */
-  const apiFetch = (url: string, init?: RequestInit) =>
-    fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
+  /* ---- fetch wrapper: รวม init เดิม ---- */
+  const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
 
   /* ---- QR scan prefill: ?asset_code=A-PT-01 เปิดฟอร์มพร้อมเลือกเครื่อง ---- */
   const qrPrefillRef = useRef<string | null>(null);
@@ -391,9 +389,7 @@ export default function RepairRequestForm() {
     };
     const checkBound = async (uid: string): Promise<boolean> => {
       try {
-        const r = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`, {
-          headers: { "ngrok-skip-browser-warning": "1" },
-        });
+        const r = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`);
         const j = await r.json().catch(() => ({}));
         return !!(j?.bound && j?.user);
       } catch {
@@ -457,9 +453,7 @@ export default function RepairRequestForm() {
     const simUid = new URLSearchParams(window.location.search).get("uid");
     if (simUid) {
       try { localStorage.setItem("cmms_line_user_id", simUid); } catch { /* ignore */ }
-      fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(simUid)}`, {
-        headers: { "ngrok-skip-browser-warning": "1" },
-      })
+      fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(simUid)}`)
         .then((r) => r.json())
         .then((j) => {
           if (j?.bound && j?.user) {
@@ -487,9 +481,7 @@ export default function RepairRequestForm() {
             setForm((prev) => ({ ...prev, reporterName: p.displayName || prev.reporterName }));
             // อัปเดตสถานะผูกแบบ real-time
             if (p.userId) {
-              fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(p.userId)}`, {
-                headers: { "ngrok-skip-browser-warning": "1" },
-              })
+              fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(p.userId)}`)
                 .then((r) => r.json())
                 .then((j) => {
                   if (j?.bound && j?.user) {

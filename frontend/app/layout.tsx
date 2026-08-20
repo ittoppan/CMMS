@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import PwaRegister from "../components/PwaRegister";
 import SplashScreen from "../components/SplashScreen";
+import Providers from "../components/Providers";
 
 export const metadata: Metadata = {
   title: "CMMS-TOPPAN — Enterprise Maintenance Suite",
@@ -27,8 +28,7 @@ export const viewport: Viewport = {
   themeColor: "#0068B5",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // a11y: เปิด zoom ได้ (WCAG 1.4.4) — ไม่จำกัด maximumScale/userScalable
   viewportFit: "cover",
 };
 
@@ -85,7 +85,7 @@ export default function RootLayout({
         </div>
         <PwaRegister />
         <SplashScreen />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

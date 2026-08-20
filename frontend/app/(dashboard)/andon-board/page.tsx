@@ -84,10 +84,10 @@ export default function AndonBoardPage() {
   const load = async () => {
     try {
       const [repairRes, pmRes, spareRes, kpiRes] = await Promise.all([
-        fetch("/api/v1/repair.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/pm_am.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/spare_parts.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
-        fetch("/api/v1/kpi_dashboard.php", { headers: { "ngrok-skip-browser-warning": "1" } }),
+        fetch("/api/v1/repair.php"),
+        fetch("/api/v1/pm_am.php"),
+        fetch("/api/v1/spare_parts.php"),
+        fetch("/api/v1/kpi_dashboard.php"),
       ]);
       const [repairJson, pmJson, spareJson, kpiJson] = await Promise.all([
         repairRes.json(), pmRes.json(), spareRes.json(), kpiRes.json(),
@@ -107,7 +107,7 @@ export default function AndonBoardPage() {
 
   useEffect(() => {
     // อ่านความถี่รีเฟรชจาก settings (andon_refresh_sec)
-    fetch("/api/v1/settings.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/settings.php")
       .then((r) => r.json())
       .then((rows: any[]) => {
         if (Array.isArray(rows)) {

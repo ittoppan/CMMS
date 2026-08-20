@@ -29,8 +29,7 @@ type Asset = {
   status?: string;
 };
 
-const API = (url: string, init?: RequestInit) =>
-  fetch(url, { ...init, headers: { "ngrok-skip-browser-warning": "1", ...(init?.headers || {}) } });
+const API = (url: string, init?: RequestInit) => fetch(url, init);
 
 export default function ScanLandingPage() {
   useEffect(() => {

@@ -18,6 +18,7 @@ import { offlineQueueCount } from "../../lib/offline-store";
 import { runQueueMigrationOnce } from "../../lib/queue-migration";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
+import ThemeModeToggle from "../../components/ThemeModeToggle";
 import CommandPalette from "../../components/CommandPalette";
 import SideNavScrollControls from "../../components/SideNavScrollControls";
 import MenuSection from "../../components/MenuSection";
@@ -168,9 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Auth guard: ถ้า session ไม่ถูกต้อง (401) → ไปหน้า login
   // (เฉพาะ online — offline ปล่อยผ่าน ให้ใช้ cache ตามกลยุทธ์ SW)
   const loadProfile = () => {
-    fetch("/api/v1/menu_permissions.php?user=1", {
-      headers: { "ngrok-skip-browser-warning": "1" },
-    })
+    fetch("/api/v1/menu_permissions.php?user=1")
       .then((res) => {
         if (res.status === 401) {
           router.replace("/login");
@@ -341,6 +340,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 variant="ghost"
                 size="md"
               />
+
+              {/* สลับธีม light/dark/system */}
+              <ThemeModeToggle lang={lang} />
 
               {/* สลับภาษา TH/EN — เก็บใน localStorage + อัปเดตทั้ง UI ทันที */}
               <button

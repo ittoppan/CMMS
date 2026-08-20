@@ -33,7 +33,7 @@ export default function QrSheetPage() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    fetch("/api/v1/asset_registry.php", { headers: { "ngrok-skip-browser-warning": "1" } })
+    fetch("/api/v1/asset_registry.php")
       .then((r) => r.json())
       .then((rows: Asset[]) => {
         const list = (Array.isArray(rows) ? rows : [])

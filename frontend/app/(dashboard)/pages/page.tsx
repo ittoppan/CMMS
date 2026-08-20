@@ -27,7 +27,6 @@ export default function CustomPagesListPage() {
     (async () => {
       try {
         const res = await fetch("/api/v1/custom_pages.php", {
-          headers: { "ngrok-skip-browser-warning": "1" },
           cache: "no-store",
         });
         const json = await res.json();

@@ -44,12 +44,12 @@ export function useMenuPermission() {
           url += "user=1";
         }
 
-        let res = await fetch(url, { headers: { "ngrok-skip-browser-warning": "1" } });
+        let res = await fetch(url);
 
         // ถ้า uid ไม่มีใน DB (เช่น ยังไม่ผูก / จำลอง) -> ลอง role_id ที่เก็บไว้ก่อน fallback
         if (!res.ok && roleId) {
           url = `/api/v1/menu_permissions.php?role_id=${encodeURIComponent(roleId)}`;
-          res = await fetch(url, { headers: { "ngrok-skip-browser-warning": "1" } });
+          res = await fetch(url);
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
