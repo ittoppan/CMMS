@@ -35,6 +35,32 @@
   --color-purple-700: #00508C;
   --color-purple-800: #193264;
   --color-purple-900: #12244A;
+
+  /* === UI Kit semantic colors (อ้าง --cmms-* เพื่อ dark mode อัตโนมัติ) ===
+     ใช้กับ components/ui/* — ห้าม hard-code สีใน component */
+  --color-primary: var(--cmms-primary);
+  --color-primary-hover: var(--cmms-primary-hover);
+  --color-primary-light: var(--cmms-primary-light);
+  --color-success: var(--cmms-success);
+  --color-success-light: var(--cmms-success-light);
+  --color-success-dark: var(--cmms-success-dark);
+  --color-warning: var(--cmms-warning);
+  --color-warning-light: var(--cmms-warning-light);
+  --color-warning-dark: var(--cmms-warning-dark);
+  --color-danger: var(--cmms-danger);
+  --color-danger-light: var(--cmms-danger-light);
+  --color-danger-dark: var(--cmms-danger-dark);
+  --color-info: var(--cmms-info);
+  --color-info-light: var(--cmms-info-light);
+  --color-surface: var(--cmms-bg-card);
+  --color-muted: var(--cmms-bg-muted);
+  --color-page: var(--cmms-bg-page);
+  --color-ink: var(--cmms-text-primary);
+  --color-ink-secondary: var(--cmms-text-secondary);
+  --color-ink-muted: var(--cmms-text-muted);
+  --color-line: var(--cmms-border);
+  --color-line-hover: var(--cmms-border-hover);
+  --color-focus: var(--cmms-border-focus);
 }
 
 /* ================================================
@@ -338,6 +364,94 @@ button[class*="Button_secondary"], .astryx-button.secondary {
   font-size: 0.7rem !important;
   letter-spacing: 0.05em !important;
   color: var(--cmms-text-secondary) !important;
+}
+
+/* ================================================
+   UI Kit DataTable (components/ui/table.tsx)
+   - desktop: ตารางปกติ sticky header
+   - mobile: แถวกลายเป็นการ์ด (thead ซ่อน, data-label เป็นป้ายหัวข้อ)
+   ================================================ */
+.cmms-ui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.cmms-ui-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--cmms-bg-card);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cmms-text-secondary);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cmms-border);
+  white-space: nowrap;
+}
+.cmms-ui-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cmms-border);
+  color: var(--cmms-text-primary);
+  vertical-align: middle;
+}
+.cmms-ui-table tbody tr {
+  transition: background var(--cmms-transition-fast);
+}
+.cmms-ui-table tbody tr:hover {
+  background: var(--cmms-primary-light);
+}
+.cmms-ui-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.cmms-ui-table caption {
+  caption-side: top;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cmms-text-secondary);
+  padding: 8px 12px;
+}
+@media (max-width: 640px) {
+  .cmms-ui-table thead {
+    display: none;
+  }
+  .cmms-ui-table tbody tr {
+    display: block;
+    border: 1px solid var(--cmms-border);
+    border-radius: var(--cmms-radius-lg);
+    background: var(--cmms-bg-card);
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    box-shadow: var(--cmms-shadow-sm);
+  }
+  .cmms-ui-table tbody tr:hover {
+    background: var(--cmms-bg-card);
+  }
+  .cmms-ui-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--cmms-border);
+    text-align: right;
+  }
+  .cmms-ui-table tbody td:last-child {
+    border-bottom: none;
+  }
+  .cmms-ui-table tbody td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--cmms-text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
 }
 
 /* ================================================

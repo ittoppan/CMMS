@@ -9,10 +9,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { CheckCircle2, Info, X, XCircle } from "lucide-react";
 
 /**
  * ToastProvider — ระบบแจ้งเตือนชั่วคราว (toast) แบบกลาง
  * ใช้แทนการ copy-paste state + setTimeout + div ในแต่ละหน้า
+ * icon = Lucide (CheckCircle2/Info/XCircle) + aria-live="polite"
  *
  * วิธีใช้:
  *   const { showToast } = useToast();
@@ -36,10 +38,10 @@ interface ToastContextValue {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const TOAST_DURATION = 3500;
-const TOAST_ICONS: Record<ToastType, string> = {
-  success: "✅",
-  error: "❌",
-  info: "ℹ️",
+const TOAST_ICONS: Record<ToastType, typeof Info> = {
+  success: CheckCircle2,
+  error: XCircle,
+  info: Info,
 };
 const TOAST_TITLES: Record<ToastType, string> = {
   success: "สำเร็จ",
@@ -56,6 +58,7 @@ function ToastCard({
 }) {
   const [leaving, setLeaving] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const Icon = TOAST_ICONS[toast.type];
 
   const dismiss = useCallback(() => {
     setLeaving(true);
@@ -74,7 +77,9 @@ function ToastCard({
       className={`cmms-toast ${toast.type} ${leaving ? "leaving" : ""}`}
       role="status"
     >
-      <span className="cmms-toast-icon">{TOAST_ICONS[toast.type]}</span>
+      <span className="cmms-toast-icon">
+        <Icon size={18} strokeWidth={1.75} aria-hidden="true" />
+      </span>
       <div className="cmms-toast-body">
         <div className="cmms-toast-title">{toast.title || TOAST_TITLES[toast.type]}</div>
         {toast.message && <div className="cmms-toast-msg">{toast.message}</div>}
@@ -85,7 +90,7 @@ function ToastCard({
         aria-label="ปิด"
         onClick={dismiss}
       >
-        ✕
+        <X size={14} strokeWidth={2} aria-hidden="true" />
       </button>
       <div className="cmms-toast-timer" style={{ animationDuration: `${TOAST_DURATION}ms` }} />
     </div>

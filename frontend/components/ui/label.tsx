@@ -1,0 +1,23 @@
+"use client";
+
+import { forwardRef, type LabelHTMLAttributes } from "react";
+import { cn } from "@/lib/cn";
+
+/**
+ * Label — ป้ายกำกับ field มาตรฐาน
+ */
+const Label = forwardRef<HTMLLabelElement, LabelHTMLAttributes<HTMLLabelElement>>(
+  ({ className, ...props }, ref) => (
+    <label
+      ref={ref}
+      className={cn(
+        "text-sm font-medium text-[var(--cmms-text-primary)]",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+Label.displayName = "Label";
+
+export { Label };

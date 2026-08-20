@@ -5,38 +5,34 @@ import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairOverdue } from "@/lib/repair-status";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid } from "@astryxdesign/core/Grid";
 import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
 import { useRouter } from "next/navigation";
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
   ArrowPathIcon,
-  DocumentArrowDownIcon,
   ClipboardDocumentListIcon,
-  ClockIcon,
-  WrenchScrewdriverIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
+  DocumentArrowDownIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
   TableCellsIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import WorkOrderClosureDocument, { WorkOrderDocData, WorkOrderPart } from "../../../components/WorkOrderClosureDocument";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { DataTable, type DataTableProps } from "@/components/ui/table";
+import { useToast } from "@/components/ToastProvider";
+import { cn } from "@/lib/cn";
 
 interface WorkOrder extends Record<string, unknown> {
   id: string;
+  rawId?: number;
   woNumber: string;
   asset: string;
   status: string;
@@ -47,17 +43,6 @@ interface WorkOrder extends Record<string, unknown> {
   outsourceBy: string;
   costOutsource: number;
 }
-
-const priorityColors: Record<string, React.CSSProperties> = {
-  Critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
-  critical: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
-  High: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
-  high: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
-  Medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
-  medium: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
-  Low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
-  low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
-};
 
 const statusLabels: Record<string, string> = {
   completed: "เสร็จสิ้น", Completed: "เสร็จสิ้น", closed: "ปิดงาน", resolved: "แก้ไขแล้ว",
@@ -73,8 +58,6 @@ const priorityLabels: Record<string, string> = {
   low: "ต่ำ", Low: "ต่ำ",
 };
 
-const PAGE_SIZE = 10;
-
 // สถานะ → ไฟ Andon: เขียว=เสร็จ, เหลือง=ต้องดูแล, แดง(กระพริบ)=เกินกำหนด, เทา=รอดำเนินการ
 const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
   const v = String(s || "").toLowerCase();
@@ -84,9 +67,28 @@ const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
   return "idle";
 };
 
+// สถานะ → Badge variant (semantic tokens)
+const statusVariant = (s: string, overdue: boolean): "success" | "warning" | "danger" | "neutral" => {
+  if (overdue) return "danger";
+  const v = String(s || "").toLowerCase();
+  if (v === "completed" || v === "closed" || v === "resolved") return "success";
+  if (v === "in_progress" || v === "waiting_parts" || v === "pending_parts") return "warning";
+  return "neutral";
+};
+
+// ความสำคัญ → Badge variant
+const priorityVariant = (p: string): "danger" | "warning" | "primary" | "neutral" => {
+  const v = String(p || "").toLowerCase();
+  if (v === "critical") return "danger";
+  if (v === "high") return "warning";
+  if (v === "medium") return "primary";
+  return "neutral";
+};
+
 export default function WorkOrdersPage() {
   const hero = usePageHero("repair");
   const router = useRouter();
+  const { showToast } = useToast();
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +96,6 @@ export default function WorkOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
-  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [rawMap, setRawMap] = useState<Record<number, any>>({});
   const [pdfBuilding, setPdfBuilding] = useState(false);
@@ -170,14 +171,6 @@ export default function WorkOrdersPage() {
   }, [workOrders]);
 
   const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const pagination = useTablePagination<WorkOrder>({
-    page,
-    onPageChange: setPage,
-    totalItems,
-    pageSize: PAGE_SIZE,
-  });
 
   const toggleSelect = (id: number) => {
     setSelected((prev) => {
@@ -261,15 +254,16 @@ export default function WorkOrdersPage() {
         await new Promise((r) => setTimeout(r, 60));
       }
       if (first) {
-        alert("ไม่พบข้อมูลงานที่เลือก — กรุณาลองใหม่");
+        showToast("error", "ไม่พบข้อมูลงานที่เลือก — กรุณาลองใหม่");
       } else {
         const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
         pdf.save(`F-EN-03-Batch-${date}-${ids.length}wo.pdf`);
         setSelected(new Set());
+        showToast("success", `สร้าง PDF รวม ${ids.length} ใบเรียบร้อย`);
       }
     } catch (e) {
       console.error("Batch PDF failed", e);
-      alert("ไม่สามารถสร้าง PDF รวมได้ — กรุณาลองใหม่อีกครั้ง");
+      showToast("error", "ไม่สามารถสร้าง PDF รวมได้ — กรุณาลองใหม่อีกครั้ง");
     }
     setPartsForBatch({});
     setPdfBuilding(false);
@@ -376,80 +370,75 @@ export default function WorkOrdersPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      showToast("success", `ส่งออก F-EN-03 Excel ${ids.length} รายการเรียบร้อย`);
     } catch (e) {
       console.error("Export F-EN-03 failed", e);
-      alert("ไม่สามารถส่งออก F-EN-03 ได้ — กรุณาลองใหม่อีกครั้ง");
+      showToast("error", "ไม่สามารถส่งออก F-EN-03 ได้ — กรุณาลองใหม่อีกครั้ง");
     } finally {
       setExcelBuilding(false);
     }
   };
 
-  const columns: TableColumn<WorkOrder>[] = [
+  const columns: DataTableProps<WorkOrder>["columns"] = [
     {
-      key: "select",
+      id: "select",
       header: t("tbl.select"),
-      width: proportional(0.4),
-      renderCell: (item: WorkOrder) => (
+      enableSorting: false,
+      cell: ({ row }) => (
         <input
           type="checkbox"
-          aria-label={`เลือกงาน ${item.woNumber}`}
-          checked={selected.has(Number(item.rawId))}
-          onChange={() => toggleSelect(Number(item.rawId))}
-          style={{ width: 16, height: 16, cursor: "pointer" }}
+          aria-label={`เลือกงาน ${row.original.woNumber}`}
+          checked={selected.has(Number(row.original.rawId))}
+          onChange={() => toggleSelect(Number(row.original.rawId))}
+          className="h-4 w-4 cursor-pointer"
         />
       ),
     },
-    { key: "woNumber", header: t("tbl.wo_no_short"), width: proportional(1) },
+    { accessorKey: "woNumber", header: t("tbl.wo_no_short") },
     {
-      key: "asset",
+      accessorKey: "asset",
       header: t("tbl.asset_full"),
-      width: proportional(2),
-      renderCell: (item: WorkOrder) => (
+      cell: ({ row }) => (
         <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{item.asset}</Text>
-          {item.outsourceBy && (
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-              ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
-            </span>
+          <Text type="body" size="sm">{row.original.asset}</Text>
+          {row.original.outsourceBy && (
+            <Badge variant="warning">ภายนอก{row.original.outsourceBy ? ` · ${row.original.outsourceBy}` : ""}</Badge>
           )}
         </HStack>
       ),
     },
     {
-      key: "status",
+      accessorKey: "status",
       header: t("tbl.status"),
-      width: proportional(1),
-      renderCell: (item: WorkOrder) => (
-        <span className={`cmms-status ${item.overdue ? "down" : andonOf(item.status)}`}>
-          <span className="cmms-status-dot" />
-          {item.overdue ? "เกินกำหนด" : statusText(item.status, item.status)}
-        </span>
+      cell: ({ row }) => (
+        <Badge variant={statusVariant(row.original.status, row.original.overdue)} dot>
+          {row.original.overdue ? "เกินกำหนด" : statusText(row.original.status, row.original.status)}
+        </Badge>
       ),
     },
     {
-      key: "priority",
+      accessorKey: "priority",
       header: t("tbl.priority"),
-      width: proportional(1),
-      renderCell: (item: WorkOrder) => (
-        <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {priorityText(item.priority, item.priority)}
-        </span>
+      cell: ({ row }) => (
+        <Badge variant={priorityVariant(row.original.priority)}>
+          {priorityText(row.original.priority, row.original.priority)}
+        </Badge>
       ),
     },
-    { key: "assignee", header: t("tbl.assignee"), width: proportional(1) },
-    { key: "date", header: t("tbl.request_date"), width: proportional(1) },
+    { accessorKey: "assignee", header: t("tbl.assignee") },
+    { accessorKey: "date", header: t("tbl.request_date") },
     {
-      key: "actions",
+      id: "actions",
       header: t("tbl.actions"),
-      width: proportional(1.2),
-      renderCell: (item: WorkOrder) => (
-        <button
-          type="button"
-          onClick={() => router.push(`/repair/edit?id=${item.rawId || item.id}`)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+      enableSorting: false,
+      cell: ({ row }) => (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => router.push(`/repair/edit?id=${row.original.rawId || row.original.id}`)}
         >
           อัปเดตสถานะ
-        </button>
+        </Button>
       ),
     },
   ];
@@ -461,10 +450,15 @@ export default function WorkOrdersPage() {
     display: layout.isHidden(id) ? ("none" as const) : undefined,
   });
 
+  // ตัวกรองเปลี่ยน → remount DataTable (reset sorting/pagination)
+  const tableKey = `${search}|${statusFilter}|${priorityFilter}|${outsourceFilter}`;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
       {error && (
-        <Banner status="error" title="Error" description={error} isDismissable={false} />
+        <div role="alert" className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)]/30 bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-text-primary)]">
+          <strong>Error:</strong> {error}
+        </div>
       )}
 
       {/* Header */}
@@ -480,47 +474,39 @@ export default function WorkOrdersPage() {
           </Text>
         </VStack>
         <HStack gap={2} wrap="wrap">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             disabled={pdfBuilding || selected.size === 0}
             onClick={handleBatchDownload}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-              pdfBuilding || selected.size === 0
-                ? "bg-white/10 text-white/40 cursor-not-allowed"
-                : selected.size > 0
-                  ? "bg-white text-[var(--cmms-primary)] shadow-lg hover:bg-blue-50"
-                  : "bg-white/10 text-white/85 hover:bg-white/20"
-            }`}
+            className="border-white/20 bg-white text-[var(--cmms-primary)] hover:bg-blue-50 disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
           >
-            <DocumentArrowDownIcon className="w-4 h-4" />
+            <DocumentArrowDownIcon className="h-4 w-4" />
             {pdfBuilding ? (pdfProgress || t("action.building_pdf")) : selected.size > 0 ? `${t("action.download_pdf")} (${selected.size})` : t("action.download_pdf")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
             disabled={excelBuilding || filtered.length === 0}
             onClick={handleExportExcel}
             title={selected.size > 0 ? `ส่งออก ${selected.size} รายการที่เลือก` : "ส่งออกรายการที่กรองทั้งหมด"}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-              excelBuilding || filtered.length === 0
-                ? "bg-white/10 text-white/40 cursor-not-allowed"
-                : "bg-emerald-500 text-white shadow-lg hover:bg-emerald-600"
-            }`}
+            className="border-transparent bg-[var(--cmms-success)] text-white hover:opacity-90 disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
           >
-            <TableCellsIcon className="w-4 h-4" />
+            <TableCellsIcon className="h-4 w-4" />
             {excelBuilding ? "กำลังสร้าง Excel..." : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
             onClick={fetchWO}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+            className="border border-white/20 text-white hover:bg-white/20"
           >
-            <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
-          <button
-            type="button"
+            <ArrowPathIcon className="h-4 w-4" />{t("action.refresh")}
+          </Button>
+          <Button
+            variant="primary"
             onClick={() => router.push("/repair/create")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white cmms-btn-primary"
+            className="cmms-btn-primary"
           >
-            <PlusIcon className="w-4 h-4" />{t("action.create_wo")}</button>
+            <PlusIcon className="h-4 w-4" />{t("action.create_wo")}
+          </Button>
         </HStack>
       </div>
       </div>
@@ -662,109 +648,89 @@ export default function WorkOrdersPage() {
           </HStack>
 
           {/* Filter Toolbar */}
-          <Toolbar
-            label="ตัวกรองงานซ่อม"
-            startContent={
-              <>
-                <HStack gap={2} vAlign="center">
-                  <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>
-                    <input
-                      type="checkbox"
-                      aria-label={t("action.select_all_page")}
-                      checked={filtered.length > 0 && selected.size === filtered.length}
-                      onChange={toggleAll}
-                      style={{ width: 15, height: 15, cursor: "pointer" }}
-                    />{t("action.select_all")}</label>
-                  {selected.size > 0 && (
-                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-                      เลือก {selected.size} รายการ
-                    </span>
+          <div className="flex flex-wrap items-center gap-3 rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-3 shadow-[var(--cmms-shadow-sm)]">
+            <HStack gap={2} vAlign="center">
+              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] whitespace-nowrap text-[var(--cmms-text-secondary)]">
+                <input
+                  type="checkbox"
+                  aria-label={t("action.select_all_page")}
+                  checked={filtered.length > 0 && selected.size === filtered.length}
+                  onChange={toggleAll}
+                  className="h-4 w-4 cursor-pointer"
+                />{t("action.select_all")}</label>
+              {selected.size > 0 && (
+                <Badge variant="primary">เลือก {selected.size} รายการ</Badge>
+              )}
+            </HStack>
+            <Input
+              label="ค้นหา"
+              isLabelHidden
+              placeholder="ค้นหาเลขงาน, เครื่องจักร..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-56"
+            />
+            <Select
+              label="สถานะ"
+              isLabelHidden
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-44"
+            >
+              <option value="">{t("action.filter_all_status")}</option>
+              <option value="open">งานใหม่ (Open)</option>
+              <option value="in_progress">กำลังซ่อม</option>
+              <option value="overdue">เกินกำหนด (ไฟแดง)</option>
+              <option value="completed">เสร็จสิ้น</option>
+            </Select>
+            <Select
+              label="ความสำคัญ"
+              isLabelHidden
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="w-full sm:w-44"
+            >
+              <option value="">{t("action.filter_all_priority")}</option>
+              <option value="critical">วิกฤต (Critical)</option>
+              <option value="high">ด่วน (High)</option>
+              <option value="medium">ปกติ (Medium)</option>
+              <option value="low">ต่ำ (Low)</option>
+            </Select>
+            <div className="inline-flex items-center gap-1 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-1">
+              {([
+                { v: "all", label: "ทั้งหมด" },
+                { v: "in", label: "งานใน" },
+                { v: "out", label: "งานภายนอก" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setOutsourceFilter(opt.v)}
+                  className={cn(
+                    "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
+                    outsourceFilter === opt.v
+                      ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
+                      : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"
                   )}
-                </HStack>
-                <TextInput
-                  label="ค้นหา"
-                  isLabelHidden
-                  placeholder="ค้นหาเลขงาน, เครื่องจักร..."
-                  startIcon={MagnifyingGlassIcon}
-                  value={search}
-                  onChange={setSearch}
-                />
-                <Selector
-                  label="สถานะ"
-                  isLabelHidden
-                  placeholder="ทุกสถานะ"
-                  value={statusFilter}
-                  onChange={setStatusFilter}
-                  options={[
-                    { value: "", label: t("action.filter_all_status") },
-                    { value: "open", label: "งานใหม่ (Open)" },
-                    { value: "in_progress", label: "กำลังซ่อม" },
-                    { value: "overdue", label: "เกินกำหนด (ไฟแดง)" },
-                    { value: "completed", label: "เสร็จสิ้น" },
-                  ]}
-                />
-                <Selector
-                  label="ความสำคัญ"
-                  isLabelHidden
-                  placeholder="ทุกความเร่งด่วน"
-                  value={priorityFilter}
-                  onChange={setPriorityFilter}
-                  options={[
-                    { value: "", label: t("action.filter_all_priority") },
-                    { value: "critical", label: "วิกฤต (Critical)" },
-                    { value: "high", label: "ด่วน (High)" },
-                    { value: "medium", label: "ปกติ (Medium)" },
-                    { value: "low", label: "ต่ำ (Low)" },
-                  ]}
-                />
-                <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
-                  {([
-                    { v: "all", label: "ทั้งหมด" },
-                    { v: "in", label: "งานใน" },
-                    { v: "out", label: "งานภายนอก" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.v}
-                      type="button"
-                      onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
-                      style={{
-                        padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
-                        background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
-                        color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
-                        boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </HStack>
-              </>
-            }
-          />
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Table */}
-          {loading ? (
-            <HStack hAlign="center" style={{ padding: 40 }}>
-              <Spinner size="md" />
-              <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-            </HStack>
-          ) : paged.length === 0 ? (
-            <EmptyState
-              title="ไม่พบงานซ่อม"
-              description="ลองเปลี่ยนตัวกรองหรือสร้างใบสั่งงานใหม่"
-              icon={<MagnifyingGlassIcon className="w-6 h-6" />}
-            />
-          ) : (
-            <Table<WorkOrder>
-              data={paged}
-              columns={columns}
-              idKey="id"
-              density="balanced"
-              dividers="rows"
-              hasHover
-              plugins={{ pagination }}
-            />
-          )}
+          <DataTable<WorkOrder>
+            key={tableKey}
+            columns={columns}
+            data={filtered}
+            loading={loading}
+            skeletonRows={6}
+            pageSize={10}
+            caption="รายการงานซ่อม"
+            emptyTitle="ไม่พบงานซ่อม"
+            emptyDescription="ลองเปลี่ยนตัวกรองหรือสร้างใบสั่งงานใหม่"
+          />
         </VStack>
       </Card>
       </div>

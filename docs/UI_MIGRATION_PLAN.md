@@ -40,24 +40,25 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 
 ---
 
-## 3. Phase 1 — Shared Components (UI Kit)
+## 3. Phase 1 — Shared Components (UI Kit) ✅
 
 สร้างใน `frontend/components/ui/` (shadcn-style) บน tokens + cva:
 
 | Component | แทนที่ของเดิม | หมายเหตุ |
 |---|---|---|
-| `Button` | ปุ่มมือทำทุกหน้า | variants + sizes + icon slot |
-| `Input/Textarea/Select` | field มือทำ | label + error + focus ring |
-| `FormField` (RHF + zod) | ฟอร์ม useState ทั้งหมด | wrapper มาตรฐาน |
-| `Table` (TanStack) | Astryx Table + ตารางมือทำ 6 จุด | sort/filter/pagination + mobile card |
-| `Dialog/Sheet` | `AnimatedDialog` (เก็บ animation) | Radix base + bottom sheet mobile |
-| `Toast` | `ToastProvider` (เก็บ context) | Lucide icon + aria-live |
-| `EmptyState` | Astryx EmptyState + dashed-card copy | ตัวเดียวทั้งระบบ |
-| `Skeleton` | Spinner/text `กำลังโหลด...` | shimmer + aria-busy |
-| `Badge/Chip` | status chip มือทำ | semantic tokens |
-| `Tabs` | TabList (spare_parts) | Radix Tabs |
+| `Button` ✅ | ปุ่มมือทำทุกหน้า | variants + sizes + icon slot (`ui/button.tsx`) |
+| `Input/Textarea/Select` ✅ | field มือทำ | label + error + focus ring (`ui/input.tsx`, `ui/textarea.tsx`, `ui/select.tsx`) |
+| `FormField` ✅ (RHF + zod) | ฟอร์ม useState ทั้งหมด | wrapper มาตรฐาน (`ui/form-field.tsx`) |
+| `Table` ✅ (TanStack v9) | Astryx Table + ตารางมือทำ 6 จุด | sort/pagination + mobile card (`ui/table.tsx` + `ui/pagination.tsx`) |
+| `Dialog` ✅ | `AnimatedDialog` (เก็บไว้ backward compat) | native `<dialog>` + animation เดิม + bottom sheet (`ui/dialog.tsx`) |
+| `Toast` ✅ | `ToastProvider` (เก็บ context) | Lucide icon + aria-live (`components/ToastProvider.tsx`) |
+| `EmptyState` ✅ | Astryx EmptyState + dashed-card copy | ตัวเดียวทั้งระบบ (`ui/empty-state.tsx`) |
+| `Skeleton` ✅ | Spinner/text `กำลังโหลด...` | shimmer + aria-busy (`ui/skeleton.tsx`) |
+| `Badge/Chip` ✅ | status chip มือทำ | semantic tokens (`ui/badge.tsx`) |
+| `Tabs` ✅ | TabList (spare_parts) | accessible tabs ไม่พึ่ง Radix (`ui/tabs.tsx`) |
+| เพิ่มเติม | — | `Card`, `Alert`, `Spinner`, `PageHeader` (`ui/card.tsx`, `ui/alert.tsx`, `ui/spinner.tsx`, `ui/page-header.tsx`) |
 
-**Exit criteria:** ทุก component ใช้ในอย่างน้อย 1 หน้า pilot (repair list) ก่อนขยาย
+**Exit criteria:** ✅ ทุก component ใช้ในอย่างน้อย 1 หน้า pilot (repair list) — `/repair` migrate แล้ว (Lucide + Button/Input/Select + Badge + DataTable + Skeleton + EmptyState + Toast แทน alert; Astryx Table/TextInput/Selector/Spinner/EmptyState ถอดออกแล้ว) — Dialog/Tabs/FormField พร้อมใช้ใน Phase 2
 
 ---
 
@@ -69,7 +70,7 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 ### 4.1 Repair (หน้าหลัก — เริ่มก่อน)
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
 |---|---|---|---|---|---|
-| `/repair` (list) | Astryx Table + fetch useEffect + Spinner | TanStack Table + react-query + Skeleton + EmptyState + filter/search | P0 | 0.x, 1.x | ⬜ |
+| `/repair` (list) | Astryx Table + fetch useEffect + Spinner | TanStack Table + react-query + Skeleton + EmptyState + filter/search | P0 | 0.x, 1.x | ✅ |
 | `/repair/create` | useState ฟอร์ม + offlineQueue + SuccessDialog | RHF+zod + FormField + offline queue (เก็บ) | P0 | 0.x, 1.x | ⬜ |
 | `/repair/my_tasks` (981 บรรทัด) | ฟอร์ม/รายการ + offline snapshot | แยก component + RHF + offline (เก็บ) | P0 | 0.x, 1.x | ⬜ |
 | `/repair/view` | detail + WorkOrderClosureDocument PDF | tokens cleanup + PDF (เก็บ) + ตารางมือทำ → Table | P0 | 0.x, 1.x | ⬜ |
