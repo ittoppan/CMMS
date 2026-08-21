@@ -2,23 +2,19 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
 import {
-  ClipboardDocumentCheckIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  WrenchScrewdriverIcon,
-} from "@heroicons/react/24/outline";
+  ClipboardCheck,
+  CheckCircle2,
+  XCircle,
+  TriangleAlert,
+  Wrench,
+} from "lucide-react";
 import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
 interface RunItem {
@@ -223,225 +219,225 @@ export default function InspectionRunPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดรอบตรวจ...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดรอบตรวจ...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION RUN · CMMS-TOPPAN</Text>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION RUN · CMMS-TOPPAN</p>
 
           {pending > 0 && (
             <div
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "10px 14px", borderRadius: 8,
-                background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)",
-                fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
-              }}
+              className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold"
+              style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
             >
-              <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+              <span className="cmms-status-dot warn inline-block" />
               มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
             </div>
           )}
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ทำรายการตรวจเช็ค</Heading>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ทำรายการตรวจเช็ค</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> รายการไม่ผ่าน → แจ้งช่างซ่อมทันที
+              <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → แจ้งช่างซ่อมทันที
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             บันทึกผลตรวจรายข้อ — ตรวจค่า ผ่าน/ไม่ผ่าน และเพิ่มหมายเหตุตามจริง
-          </Text>
-        </VStack>
+          </p>
+        </div>
       </div>
 
-      <Card padding={4}>
-        <Field inputID="run-sel" label="เลือกรอบตรวจ *" isRequired>
-          <div style={{ width: "100%", maxWidth: 640 }}>
-            <Selector
-              label="เลือกรอบตรวจ"
-              isLabelHidden
-              placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."}
-              value={selectedId}
-              onChange={handleSelect}
-              options={schedules}
-              isDisabled={schedules.length === 0}
-            />
-          </div>
-        </Field>
-        {schedules.length === 0 && (
-          <Text type="body" size="sm" color="secondary">ไม่พบรอบตรวจที่รอดำเนินการ — ไปที่ "ตรวจเช็ครอบ" เพื่อสร้างรอบ</Text>
-        )}
+      {/* เลือกรอบ */}
+      <Card>
+        <CardContent className="p-4">
+          <Select
+            label="เลือกรอบตรวจ *"
+            placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."}
+            value={selectedId}
+            onChange={(e) => handleSelect(e.target.value)}
+            disabled={schedules.length === 0}
+            className="max-w-[640px]"
+          >
+            {schedules.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </Select>
+          {schedules.length === 0 && (
+            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ไม่พบรอบตรวจที่รอดำเนินการ — ไปที่ &quot;ตรวจเช็ครอบ&quot; เพื่อสร้างรอบ</p>
+          )}
+        </CardContent>
       </Card>
 
       {schedule && (
-        <div style={{ maxWidth: 860 }}>
-          <Card padding={0} style={{ overflow: "hidden" }}>
-            <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderBottom: "1px solid var(--color-border)" }}>
-              <HStack gap={6} hAlign="between" wrap="wrap">
-                <VStack gap={1}>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{schedule.template_code || "CHK"}</span>
-                    <span className="cmms-andon-chip" style={{ background: schedule.status === "completed" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: schedule.status === "completed" ? "var(--cmms-success)" : "var(--cmms-warning)", fontSize: "0.7rem", padding: "3px 9px" }}>
+        <div className="max-w-[860px]">
+          <Card className="overflow-hidden">
+            {/* หัวรอบ */}
+            <div className="border-b px-6 py-4" style={{ backgroundColor: "var(--cmms-bg-muted)", borderColor: "var(--cmms-border)" }}>
+              <div className="flex flex-wrap items-start justify-between gap-6">
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{schedule.template_code || "CHK"}</span>
+                    <span className="cmms-andon-chip" style={{ background: schedule.status === "completed" ? "var(--cmms-success-light)" : "var(--cmms-warning-light)", color: schedule.status === "completed" ? "var(--cmms-success-dark)" : "var(--cmms-warning-dark)" }}>
                       {schedule.status === "completed" ? "เสร็จสิ้น" : schedule.status === "in_progress" ? "กำลังทำ" : "รอดำเนินการ"}
                     </span>
                     {schedule.result && (
-                      <span className="cmms-andon-chip" style={{ background: schedule.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: schedule.result === "pass" ? "var(--cmms-success)" : "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
+                      <span className="cmms-andon-chip" style={{ background: schedule.result === "pass" ? "var(--cmms-success-light)" : "var(--cmms-danger-light)", color: schedule.result === "pass" ? "var(--cmms-success-dark)" : "var(--cmms-danger-dark)" }}>
                         {schedule.result === "pass" ? "ผ่านทุกรายการ" : `ไม่ผ่าน ${schedule.fail_count} รายการ`}
                       </span>
                     )}
-                  </HStack>
-                  <Text type="body" weight="bold">{schedule.template_title}</Text>
-                  <Text type="body" size="sm" color="secondary">
+                  </div>
+                  <p className="font-bold">{schedule.template_title}</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">
                     {schedule.asset_name}{schedule.asset_code ? ` (${schedule.asset_code})` : ""}
                     {schedule.assignee_name ? ` • ${schedule.assignee_name}` : ""}
                     {schedule.due_date ? ` • ครบกำหนด: ${schedule.due_date}` : ""}
-                  </Text>
-                </VStack>
-                <VStack gap={1} hAlign="end">
-                  <Text type="body" size="sm" color="secondary" weight="semibold">ความก้าวหน้า</Text>
-                  <Text type="body" weight="bold">{items.filter((i) => (i.type === "value" ? i.value.trim() !== "" : i.status !== null)).length} / {items.length} ข้อ</Text>
-                </VStack>
-              </HStack>
+                  </p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="text-sm font-semibold text-[var(--cmms-text-secondary)]">ความก้าวหน้า</p>
+                  <p className="font-bold">{items.filter((i) => (i.type === "value" ? i.value.trim() !== "" : i.status !== null)).length} / {items.length} ข้อ</p>
+                </div>
+              </div>
             </div>
 
-            <VStack gap={0}>
+            {/* รายการตรวจ */}
+            <div>
               {items.map((item, index) => {
                 const isNg = item.status === "fail";
                 return (
                   <div
                     key={item.item_id ?? index}
+                    className="p-5"
                     style={{
-                      padding: 20,
-                      borderBottom: index < items.length - 1 ? "1px solid var(--color-border)" : "none",
-                      backgroundColor: isNg ? "var(--color-error-wash)" : item.status === "pass" ? "var(--color-success-wash)" : "transparent",
+                      borderBottom: index < items.length - 1 ? "1px solid var(--cmms-border)" : "none",
+                      backgroundColor: isNg ? "var(--cmms-danger-light)" : item.status === "pass" ? "var(--cmms-success-light)" : "transparent",
                     }}
                   >
-                    <VStack gap={3}>
-                      <HStack hAlign="between" vAlign="start" gap={3} wrap="wrap">
-                        <HStack gap={3} vAlign="start" style={{ flex: 1, minWidth: 240 }}>
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "var(--color-muted)", color: "var(--color-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", flexShrink: 0 }}>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex min-w-[240px] flex-1 items-start gap-3">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-bold" style={{ backgroundColor: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {index + 1}
                           </div>
-                          <VStack gap={1} style={{ flex: 1 }}>
-                            <Text type="body" weight="semibold">{item.task}</Text>
+                          <div className="flex-1 space-y-1">
+                            <p className="font-semibold">{item.task}</p>
                             {item.type === "value" && (
-                              <VStack gap={1} style={{ maxWidth: 300 }}>
-                                <TextInput
+                              <div className="max-w-[300px] space-y-1">
+                                <Input
                                   label="ค่า"
                                   isLabelHidden
+                                  inputMode="decimal"
                                   placeholder={item.unit ? `ระบุค่า (${item.unit})...` : "ระบุค่าตัวเลข..."}
                                   value={item.value}
-                                  onChange={(v) => handleValue(index, v)}
+                                  onChange={(e) => handleValue(index, e.target.value)}
                                 />
-                                <Text type="body" size="sm" color="secondary">
+                                <p className="text-sm text-[var(--cmms-text-secondary)]">
                                   เกณฑ์: {item.min_value != null ? item.min_value : "-"} — {item.max_value != null ? item.max_value : "-"} {item.unit || ""}{item.standard ? ` (${item.standard})` : ""}
                                   {item.autoFailed && item.value !== "" ? " • เกินเกณฑ์ → ไม่ผ่านอัตโนมัติ" : ""}
-                                </Text>
-                              </VStack>
+                                </p>
+                              </div>
                             )}
-                          </VStack>
-                        </HStack>
+                          </div>
+                        </div>
 
                         {item.type === "check" && (
-                          <HStack gap={2}>
+                          <div className="flex gap-2">
                             <button
+                              type="button"
                               onClick={() => handleStatus(index, "pass")}
+                              aria-pressed={item.status === "pass"}
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6,
-                                backgroundColor: item.status === "pass" ? "var(--color-success)" : "var(--color-surface)",
-                                color: item.status === "pass" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "pass" ? "var(--color-success)" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer",
+                                backgroundColor: item.status === "pass" ? "var(--cmms-success)" : "var(--cmms-bg-card)",
+                                color: item.status === "pass" ? "white" : "var(--cmms-text-secondary)",
+                                borderColor: item.status === "pass" ? "var(--cmms-success)" : "var(--cmms-border)",
                               }}
                             >
-                              <CheckCircleIcon className="w-4 h-4" /> ผ่าน
+                              <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" /> ผ่าน
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleStatus(index, "fail")}
+                              aria-pressed={item.status === "fail"}
+                              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 font-semibold transition-all duration-300"
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6,
-                                backgroundColor: item.status === "fail" ? "var(--color-error)" : "var(--color-surface)",
-                                color: item.status === "fail" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "fail" ? "var(--color-error)" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer",
+                                backgroundColor: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-bg-card)",
+                                color: item.status === "fail" ? "white" : "var(--cmms-text-secondary)",
+                                borderColor: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-border)",
                               }}
                             >
-                              <XCircleIcon className="w-4 h-4" /> ไม่ผ่าน
+                              <XCircle size={16} strokeWidth={1.75} aria-hidden="true" /> ไม่ผ่าน
                             </button>
-                          </HStack>
+                          </div>
                         )}
-                      </HStack>
+                      </div>
 
                       {isNg && (
-                        <div style={{ marginLeft: 40, padding: 14, backgroundColor: "var(--color-surface)", borderRadius: 8, border: "1px dashed var(--color-error)" }}>
-                          <VStack gap={3}>
-                            <HStack gap={2} vAlign="center">
-                              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
-                              <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด (จำเป็น)</Text>
-                            </HStack>
-                            <FormLayout>
-                              <Field inputID={`ng-note-${index}`} label="สาเหตุที่พบ / หมายเหตุ *">
-                                <TextArea
-                                  label="สาเหตุที่พบ / หมายเหตุ"
-                                  placeholder="อธิบายอาการผิดปกติที่พบ..."
-                                  value={item.note}
-                                  onChange={(v) => handleNote(index, v)}
-                                />
-                              </Field>
-                            </FormLayout>
-                          </VStack>
+                        <div className="ml-10 rounded-lg border border-dashed p-3.5" style={{ backgroundColor: "var(--cmms-bg-card)", borderColor: "var(--cmms-danger)" }}>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <TriangleAlert size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-danger)" }} />
+                              <p className="font-semibold" style={{ color: "var(--cmms-danger)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด (จำเป็น)</p>
+                            </div>
+                            <Textarea
+                              label="สาเหตุที่พบ / หมายเหตุ *"
+                              aria-label={`สาเหตุที่พบ / หมายเหตุ ข้อที่ ${index + 1}`}
+                              placeholder="อธิบายอาการผิดปกติที่พบ..."
+                              value={item.note}
+                              onChange={(e) => handleNote(index, e.target.value)}
+                            />
+                          </div>
                         </div>
                       )}
-                    </VStack>
+                    </div>
                   </div>
                 );
               })}
-            </VStack>
+            </div>
 
-            <div style={{ padding: 20, backgroundColor: "var(--color-muted)", borderTop: "1px solid var(--color-border)" }}>
-              <VStack gap={3}>
+            {/* ส่งผล */}
+            <div className="border-t px-5 py-5" style={{ backgroundColor: "var(--cmms-bg-muted)", borderColor: "var(--cmms-border)" }}>
+              <div className="space-y-3">
                 {createdRepair && createdRepair.repair_id && (
-                  <div style={{ padding: 14, borderRadius: 8, backgroundColor: "var(--color-error-wash)", border: "1px solid var(--color-error)" }}>
-                    <HStack gap={2} vAlign="center" wrap="wrap">
-                      <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
-                      <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>ระบบสร้างใบแจ้งซ่อมอัตโนมัติแล้ว (มีความเสี่ยงเครื่องหยุด)</Text>
-                      <a href="/repair" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
-                        ดูใบแจ้งซ่อม →
-                      </a>
-                    </HStack>
+                  <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3.5" style={{ backgroundColor: "var(--cmms-danger-light)", borderColor: "var(--cmms-danger)" }}>
+                    <Wrench size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-danger)" }} />
+                    <p className="font-semibold" style={{ color: "var(--cmms-danger)" }}>ระบบสร้างใบแจ้งซ่อมอัตโนมัติแล้ว (มีความเสี่ยงเครื่องหยุด)</p>
+                    <a href="/repair" className="cmms-btn-primary inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white">
+                      ดูใบแจ้งซ่อม →
+                    </a>
                   </div>
                 )}
-                <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-                  <Text type="body" color="secondary">ตรวจให้ครบทุกข้อก่อนบันทึก — ข้อที่ไม่ผ่านต้องมีสาเหตุ</Text>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-[var(--cmms-text-secondary)]">ตรวจให้ครบทุกข้อก่อนบันทึก — ข้อที่ไม่ผ่านต้องมีสาเหตุ</p>
                   {schedule.status !== "completed" ? (
                     <button
                       type="button"
                       disabled={submitting || !allFilled}
                       onClick={handleSubmit}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+                      className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-6 py-3 text-sm font-semibold text-white disabled:pointer-events-none disabled:opacity-50"
                     >
-                      <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                      <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
                       {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการตรวจ"}
                     </button>
                   ) : (
                     <span className="cmms-status ok"><span className="cmms-status-dot" />บันทึกผลแล้ว</span>
                   )}
-                </HStack>
-              </VStack>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
       )}
 
-    </VStack>
+    </div>
   );
 }

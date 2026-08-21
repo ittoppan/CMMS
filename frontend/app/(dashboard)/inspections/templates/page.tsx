@@ -2,24 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
-  PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ClipboardDocumentListIcon,
-  CheckCircleIcon,
-  ArrowLeftIcon,
-} from "@heroicons/react/24/outline";
+  Plus,
+  SquarePen,
+  Trash2,
+  ClipboardList,
+  CheckCircle2,
+} from "lucide-react";
 
 const FREQ_LABELS: Record<string, string> = {
   daily: "รายวัน", weekly: "รายสัปดาห์", monthly: "รายเดือน",
@@ -147,204 +142,197 @@ export default function InspectionTemplatesPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลด Template...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลด Template...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTIONS TEMPLATES · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>จัดการ Template ตรวจเช็ค</Heading>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTIONS TEMPLATES · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>จัดการ Template ตรวจเช็ค</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ClipboardDocumentListIcon className="w-3.5 h-3.5" /> ครอบคลุม F-EN-07~63
+              <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" /> ครอบคลุม F-EN-07~63
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             สร้างหัวข้อตรวจเช็ครอบ (รายวัน/สัปดาห์/เดือน/ปี) — กำหนดข้อตรวจ ค่าเกณฑ์ และความถี่
-          </Text>
-        </VStack>
+          </p>
+        </div>
         {editingId === null && (
           <button
             type="button"
             onClick={() => { setError(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+            className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-6 py-3 text-sm font-semibold text-white"
           >
-            <PlusIcon className="w-4 h-4" />
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
             สร้าง Template ใหม่
           </button>
         )}
       </div>
 
       {/* Form สร้าง/แก้ */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center">
-            <Heading level={4}>{editingId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</Heading>
+      <Card>
+        <CardContent className="space-y-4 p-5">
+          <div className="flex items-center justify-between">
+            <h4 className="font-bold">{editingId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</h4>
             {editingId !== null && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+              <Button variant="secondary" onClick={resetForm}>
                 ยกเลิก
-              </button>
+              </Button>
             )}
-          </HStack>
-          <FormLayout direction="horizontal">
-            <Field inputID="tpl-code" label="รหัส Template * (เช่น CHK-CCTV-D)">
-              <TextInput id="tpl-code" label="รหัส Template" isLabelHidden placeholder="CHK-CCTV-D" value={form.code} onChange={(v) => setForm({ ...form, code: v })} />
-            </Field>
-            <Field inputID="tpl-freq" label="ความถี่ *">
-              <Selector label="ความถี่" isLabelHidden value={form.frequency} onChange={(v) => setForm({ ...form, frequency: String(v) })} options={Object.entries(FREQ_LABELS).map(([value, label]) => ({ value, label }))} />
-            </Field>
-          </FormLayout>
-          <Field inputID="tpl-title" label="ชื่อ Template * (เช่น ใบตรวจเช็ค CCTV ประจำวัน)">
-            <TextInput id="tpl-title" label="ชื่อ Template" isLabelHidden placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          </Field>
-          <FormLayout direction="horizontal">
-            <Field inputID="tpl-cat" label="หมวดหมู่">
-              <TextInput id="tpl-cat" label="หมวดหมู่" isLabelHidden placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย..." value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
-            </Field>
-            <Field inputID="tpl-desc" label="คำอธิบาย">
-              <TextInput id="tpl-desc" label="คำอธิบาย" isLabelHidden placeholder="เทียบเอกสาร F-EN-xx..." value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
-            </Field>
-          </FormLayout>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input label="รหัส Template * (เช่น CHK-CCTV-D)" placeholder="CHK-CCTV-D" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+            <Select label="ความถี่ *" value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })}>
+              {Object.entries(FREQ_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </Select>
+          </div>
+          <Input label="ชื่อ Template * (เช่น ใบตรวจเช็ค CCTV ประจำวัน)" placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Input label="หมวดหมู่" placeholder="สาธารณูปโภค / เครื่องจักร / ความปลอดภัย..." value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+            <Input label="คำอธิบาย" placeholder="เทียบเอกสาร F-EN-xx..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
 
           {/* Items */}
-          <VStack gap={3}>
-            <HStack hAlign="between" vAlign="center">
-              <Heading level={4}>รายการตรวจ ({items.length} ข้อ)</Heading>
-              <button
-                type="button"
-                onClick={addItem}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                <PlusIcon className="w-3.5 h-3.5" />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-bold">รายการตรวจ ({items.length} ข้อ)</h4>
+              <Button variant="secondary" onClick={addItem}>
+                <Plus size={14} strokeWidth={1.75} aria-hidden="true" />
                 เพิ่มข้อ
-              </button>
-            </HStack>
+              </Button>
+            </div>
 
             {items.length === 0 && (
-              <Text type="body" size="sm" color="secondary">ยังไม่มีรายการตรวจ — กด "เพิ่มข้อ" เพื่อเริ่ม (ตัวอย่าง: ตรวจสภาพโดยรวม / วัดอุณหภูมิ ≤ 40°C)</Text>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีรายการตรวจ — กด &quot;เพิ่มข้อ&quot; เพื่อเริ่ม (ตัวอย่าง: ตรวจสภาพโดยรวม / วัดอุณหภูมิ ≤ 40°C)</p>
             )}
 
             {items.map((it, idx) => (
-              <div key={idx} style={{ padding: 14, borderRadius: 10, border: "1px solid var(--cmms-border)", backgroundColor: "var(--cmms-bg-muted)" }}>
-                <VStack gap={3}>
-                  <HStack gap={2} vAlign="start">
-                    <div style={{ width: 26, height: 26, borderRadius: "50%", backgroundColor: "var(--cmms-primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, flexShrink: 0, marginTop: 4 }}>{idx + 1}</div>
-                    <div style={{ flex: 1 }}>
-                      <TextInput label="ข้อความตรวจ"
+              <div key={idx} className="rounded-[10px] border p-3.5" style={{ borderColor: "var(--cmms-border)", backgroundColor: "var(--cmms-bg-muted)" }}>
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-start gap-2">
+                    <div className="mt-1 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[13px] font-bold" style={{ backgroundColor: "var(--cmms-primary)", color: "white" }}>{idx + 1}</div>
+                    <div className="min-w-[200px] flex-1">
+                      <Input
+                        label="ข้อความตรวจ"
                         isLabelHidden
                         placeholder="เช่น ตรวจสอบกล้องบันทึกภาพปกติทุกจุด"
                         value={it.task}
-                        onChange={(v) => updateItem(idx, { task: v })}
+                        onChange={(e) => updateItem(idx, { task: e.target.value })}
                       />
                     </div>
-                    <div style={{ width: 130 }}>
-                      <Selector label="ประเภท" isLabelHidden value={it.type} onChange={(v) => updateItem(idx, { type: v === "value" ? "value" : "check" })} options={[{ value: "check", label: "ตรวจ" }, { value: "value", label: "# ค่าตัวเลข" }]} />
+                    <div className="w-[130px]">
+                      <Select label="ประเภท" isLabelHidden value={it.type} onChange={(e) => updateItem(idx, { type: e.target.value === "value" ? "value" : "check" })}>
+                        <option value="check">ตรวจ</option>
+                        <option value="value"># ค่าตัวเลข</option>
+                      </Select>
                     </div>
                     <button
                       type="button"
                       title="ลบข้อ"
+                      aria-label={`ลบข้อที่ ${idx + 1}`}
                       onClick={() => removeItem(idx)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+                      style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                     >
-                      <TrashIcon className="w-4 h-4" />
+                      <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                     </button>
-                  </HStack>
+                  </div>
                   {it.type === "value" && (
-                    <HStack gap={2} wrap="wrap" style={{ paddingLeft: 34 }}>
-                      <div style={{ width: 160 }}>
-                        <TextInput label="เกณฑ์อ้างอิง" placeholder="เช่น อุณหภูมิมอเตอร์" value={it.standard} onChange={(v) => updateItem(idx, { standard: v })} />
+                    <div className="flex flex-wrap gap-2 pl-[34px]">
+                      <div className="w-[160px]">
+                        <Input label="เกณฑ์อ้างอิง" placeholder="เช่น อุณหภูมิมอเตอร์" value={it.standard} onChange={(e) => updateItem(idx, { standard: e.target.value })} />
                       </div>
-                      <div style={{ width: 110 }}>
-                        <TextInput label="ค่าต่ำสุด" placeholder="ต่ำสุด" value={it.min_value} onChange={(v) => updateItem(idx, { min_value: v })} />
+                      <div className="w-[110px]">
+                        <Input label="ค่าต่ำสุด" placeholder="ต่ำสุด" value={it.min_value} onChange={(e) => updateItem(idx, { min_value: e.target.value })} />
                       </div>
-                      <div style={{ width: 110 }}>
-                        <TextInput label="ค่าสูงสุด" placeholder="สูงสุด" value={it.max_value} onChange={(v) => updateItem(idx, { max_value: v })} />
+                      <div className="w-[110px]">
+                        <Input label="ค่าสูงสุด" placeholder="สูงสุด" value={it.max_value} onChange={(e) => updateItem(idx, { max_value: e.target.value })} />
                       </div>
-                      <div style={{ width: 90 }}>
-                        <TextInput label="หน่วย" placeholder="°C" value={it.unit} onChange={(v) => updateItem(idx, { unit: v })} />
+                      <div className="w-[90px]">
+                        <Input label="หน่วย" placeholder="°C" value={it.unit} onChange={(e) => updateItem(idx, { unit: e.target.value })} />
                       </div>
-                    </HStack>
+                    </div>
                   )}
-                </VStack>
+                </div>
               </div>
             ))}
-          </VStack>
+          </div>
 
-          <HStack gap={2}>
-            <button
-              type="button"
-              onClick={saveTemplate}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-            >
-              <CheckCircleIcon className="w-4 h-4" />
+          <div className="flex gap-2">
+            <Button onClick={saveTemplate}>
+              <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
               {editingId ? "บันทึก Template" : "สร้าง Template"}
-            </button>
-          </HStack>
-        </VStack>
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
       {/* รายการ templates */}
-      <VStack gap={3}>
-        <Heading level={4}>Template ทั้งหมด ({templates.length})</Heading>
+      <div className="space-y-3">
+        <h4 className="font-bold">Template ทั้งหมด ({templates.length})</h4>
         {templates.length === 0 && (
-          <Card padding={5}>
-            <Text type="body" color="secondary">ยังไม่มี Template — สร้างชุดแรกเพื่อเริ่มใช้งาน เช่น "ใบตรวจเช็ค CCTV ประจำวัน" (F-EN-49)</Text>
+          <Card>
+            <CardContent className="p-5">
+              <p className="text-[var(--cmms-text-secondary)]">ยังไม่มี Template — สร้างชุดแรกเพื่อเริ่มใช้งาน เช่น &quot;ใบตรวจเช็ค CCTV ประจำวัน&quot; (F-EN-49)</p>
+            </CardContent>
           </Card>
         )}
-        {templates.map((t) => (
-          <Card key={t.id} padding={4}>
-            <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-              <HStack gap={3} vAlign="center">
-                <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: "var(--cmms-bg-wash)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-primary)", flexShrink: 0 }}>
-                  <ClipboardDocumentListIcon className="w-5 h-5" />
+        {templates.map((tpl) => (
+          <Card key={tpl.id}>
+            <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px]" style={{ backgroundColor: "var(--cmms-bg-wash)", color: "var(--cmms-primary)" }}>
+                  <ClipboardList size={20} strokeWidth={1.75} aria-hidden="true" />
                 </div>
-                <VStack gap={1}>
-                  <HStack gap={2} vAlign="center" wrap="wrap">
-                    <Text type="body" weight="bold">{t.title}</Text>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{t.code}</span>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>{FREQ_LABELS[t.frequency] || t.frequency}</span>
-                    {!t.is_active && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดใช้งาน</span>}
-                  </HStack>
-                  <Text type="body" size="sm" color="secondary">
-                    {t.item_count} รายการตรวจ • {t.open_schedules} รอบที่เปิดค้าง{t.category ? ` • ${t.category}` : ""}
-                  </Text>
-                </VStack>
-              </HStack>
-              <HStack gap={2}>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold">{tpl.title}</span>
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{tpl.code}</span>
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-muted)" }}>{FREQ_LABELS[tpl.frequency] || tpl.frequency}</span>
+                    {!tpl.is_active && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-muted)" }}>ปิดใช้งาน</span>}
+                  </div>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">
+                    {tpl.item_count} รายการตรวจ • {tpl.open_schedules} รอบที่เปิดค้าง{tpl.category ? ` • ${tpl.category}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => openTemplate(t)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                  onClick={() => openTemplate(tpl)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
+                  style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                 >
-                  <PencilSquareIcon className="w-3.5 h-3.5" />
+                  <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />
                   แก้ไข
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteTemplate(t)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                  onClick={() => deleteTemplate(tpl)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
+                  style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                 >
-                  <TrashIcon className="w-3.5 h-3.5" />
+                  <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
                   ลบ
                 </button>
-              </HStack>
-            </HStack>
+              </div>
+            </CardContent>
           </Card>
         ))}
-      </VStack>
+      </div>
 
-    </VStack>
+    </div>
   );
 }

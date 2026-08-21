@@ -2,21 +2,13 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Grid } from "@astryxdesign/core/Grid";
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import {
-  RectangleGroupIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Layers, Search } from "lucide-react";
 
 interface AssetItem {
   id: string;
@@ -144,190 +136,183 @@ export default function BatchSchedulePage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM SCHEDULER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM SCHEDULER · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               กำหนดเช็คชีทเดียว ให้หลายเครื่องพร้อมกัน
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน
-          </Text>
-        </VStack>
+          </p>
+        </div>
       </div>
 
-      <Grid columns={{ minWidth: 560, max: 2 }} gap={6}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* คอลัมน์ซ้าย: ข้อมูลแผน */}
-        <VStack gap={4}>
-          <Card padding={5}>
-            <Heading level={4} style={{ marginBottom: 16 }}>1. กำหนดแผน PM</Heading>
-            <FormLayout>
-              <VStack gap={4}>
-                <Field inputID="f-title" label="ชื่อแผน PM *" isRequired>
-                  <TextInput
-                    label="ชื่อแผน"
-                    isLabelHidden
-                    placeholder="เช่น PM ประจำเดือน: ตรวจสอบสายพานลำเลียง"
-                    value={formData.title}
-                    onChange={(v) => setFormData({ ...formData, title: v })}
-                  />
-                </Field>
-                <Field inputID="f-freq" label="รอบความถี่ *" isRequired>
-                  <Selector
-                    label="รอบความถี่"
-                    isLabelHidden
-                    options={[
-                      { value: "daily", label: "ทุกวัน (Daily)" },
-                      { value: "weekly", label: "ทุกสัปดาห์ (Weekly)" },
-                      { value: "monthly", label: "ทุกเดือน (Monthly)" },
-                      { value: "quarterly", label: "ทุกไตรมาส (Quarterly)" },
-                      { value: "yearly", label: "ทุกปี (Yearly)" },
-                    ]}
-                    value={formData.frequency}
-                    onChange={(v) => setFormData({ ...formData, frequency: String(v) })}
-                  />
-                </Field>
-                <Field inputID="f-date" label="วันที่เริ่มทำ PM ครั้งแรก *" isRequired>
-                  <TextInput
-                    label="วันที่เริ่ม"
-                    isLabelHidden
-                    placeholder="ปปปป-ดด-วว (เช่น 2026-08-01)"
-                    value={formData.startDate}
-                    onChange={(v) => setFormData({ ...formData, startDate: v })}
-                  />
-                </Field>
-                <Field inputID="f-assignee" label="มอบหมายผู้รับผิดชอบ (ไม่บังคับ)">
-                  <Selector
-                    label="ผู้รับผิดชอบ"
-                    isLabelHidden
-                    options={users}
-                    value={formData.assignee}
-                    onChange={(v) => setFormData({ ...formData, assignee: String(v) })}
-                    placeholder="เลือกช่าง / ทีม..."
-                  />
-                </Field>
-              </VStack>
-            </FormLayout>
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="space-y-4 p-5">
+              <h4 className="font-bold">1. กำหนดแผน PM</h4>
+              <div className="space-y-4">
+                <Input
+                  label="ชื่อแผน PM *"
+                  placeholder="เช่น PM ประจำเดือน: ตรวจสอบสายพานลำเลียง"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+                <Select
+                  label="รอบความถี่ *"
+                  aria-label="รอบความถี่"
+                  value={formData.frequency}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                >
+                  <option value="daily">ทุกวัน (Daily)</option>
+                  <option value="weekly">ทุกสัปดาห์ (Weekly)</option>
+                  <option value="monthly">ทุกเดือน (Monthly)</option>
+                  <option value="quarterly">ทุกไตรมาส (Quarterly)</option>
+                  <option value="yearly">ทุกปี (Yearly)</option>
+                </Select>
+                <Input
+                  label="วันที่เริ่มทำ PM ครั้งแรก *"
+                  placeholder="ปปปป-ดด-วว (เช่น 2026-08-01)"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                />
+                <Select
+                  label="มอบหมายผู้รับผิดชอบ (ไม่บังคับ)"
+                  aria-label="ผู้รับผิดชอบ"
+                  value={formData.assignee}
+                  onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
+                >
+                  <option value="">เลือกช่าง / ทีม...</option>
+                  {users.map((u) => (
+                    <option key={u.value} value={u.value}>{u.label}</option>
+                  ))}
+                </Select>
+              </div>
+            </CardContent>
           </Card>
 
-          <Card padding={5} className="cmms-kpi-card blue">
-            <HStack gap={3} vAlign="start">
-              <div className="w-10 h-10 rounded-xl cmms-icon-tile">
-                <RectangleGroupIcon className="w-5 h-5" />
+          <Card className="cmms-kpi-card blue">
+            <CardContent className="flex items-start gap-3 p-5">
+              <div className="cmms-icon-tile h-10 w-10 rounded-xl">
+                <Layers size={20} strokeWidth={1.75} aria-hidden="true" />
               </div>
-              <VStack gap={1}>
-                <Text type="body" weight="semibold">ข้อมูลสรุป</Text>
-                <Text type="body" size="sm" color="secondary">
+              <div className="space-y-1">
+                <p className="font-semibold">ข้อมูลสรุป</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
                   ระบบจะสร้างแผน PM จำนวน <strong className="cmms-kpi-value">{selectedAssets.length}</strong> แผน
                   (รอบ {formData.frequency}) เริ่มครั้งแรกวันที่ {formData.startDate || "-"}
-                </Text>
-              </VStack>
-            </HStack>
+                </p>
+              </div>
+            </CardContent>
           </Card>
-        </VStack>
+        </div>
 
         {/* คอลัมน์ขวา: เลือกเครื่องจักร */}
-        <VStack gap={4}>
-          <Card padding={5} style={{ display: "flex", flexDirection: "column", height: "100%", maxHeight: 560 }}>
-            <Heading level={4} style={{ marginBottom: 16 }}>2. เลือกเครื่องจักร (Select Assets)</Heading>
+        <div className="space-y-4">
+          <Card className="flex max-h-[560px] flex-col">
+            <CardContent className="flex min-h-0 flex-1 flex-col p-5">
+              <h4 className="mb-4 font-bold">2. เลือกเครื่องจักร (Select Assets)</h4>
 
-            <TextInput
-              label="ค้นหาเครื่องจักร"
-              isLabelHidden
-              placeholder="ค้นหารหัส หรือชื่อเครื่องจักร..."
-              value={assetSearch}
-              onChange={setAssetSearch}
-              startIcon={MagnifyingGlassIcon}
-            />
-
-            <HStack hAlign="between" vAlign="center" style={{ marginTop: 16, marginBottom: 8, paddingBottom: 8, borderBottom: "1px solid var(--color-border)" }}>
-              <HStack gap={2} vAlign="center">
-                <CheckboxInput
-                  id="select-all"
-                  label="เลือกทั้งหมด"
+              <div className="relative">
+                <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+                <Input
+                  label="ค้นหาเครื่องจักร"
                   isLabelHidden
-                  value={selectedAssets.length === filteredAssets.length && filteredAssets.length > 0}
-                  onChange={handleSelectAll}
+                  placeholder="ค้นหารหัส หรือชื่อเครื่องจักร..."
+                  value={assetSearch}
+                  onChange={(e) => setAssetSearch(e.target.value)}
+                  className="pl-9"
                 />
-                <Text type="body" size="sm" weight="semibold">เลือกทั้งหมด</Text>
-              </HStack>
-              <Text type="body" size="sm" color="secondary">เลือกแล้ว {selectedAssets.length} รายการ</Text>
-            </HStack>
+              </div>
 
-            <div style={{ flex: 1, overflowY: "auto", marginTop: 8 }}>
-              <VStack gap={2}>
-                {filteredAssets.map((asset) => (
-                  <label
-                    key={asset.rawId}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 6,
-                      backgroundColor: selectedAssets.includes(asset.rawId) ? "var(--color-accent-wash)" : "var(--color-surface)",
-                      border: "1px solid",
-                      borderColor: selectedAssets.includes(asset.rawId) ? "var(--color-accent)" : "var(--color-border)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <CheckboxInput
-                      id={`chk-${asset.rawId}`}
-                      label={asset.code}
-                      isLabelHidden
-                      value={selectedAssets.includes(asset.rawId)}
-                      onChange={() => handleToggleAsset(asset.rawId)}
-                    />
-                    <VStack gap={0}>
-                      <Text type="body" weight="semibold">{asset.code}</Text>
-                      <Text type="body" size="sm" color="secondary">{asset.name}</Text>
-                    </VStack>
-                  </label>
-                ))}
-                {filteredAssets.length === 0 && (
-                  <Text type="body" color="secondary" style={{ textAlign: "center", marginTop: 24 }}>
-                    ไม่พบเครื่องจักรที่ค้นหา
-                  </Text>
-                )}
-              </VStack>
-            </div>
+              <div className="mb-2 mt-4 flex items-center justify-between border-b pb-2" style={{ borderColor: "var(--cmms-border)" }}>
+                <label className="flex cursor-pointer items-center gap-2">
+                  <input
+                    id="select-all"
+                    type="checkbox"
+                    aria-label="เลือกทั้งหมด"
+                    checked={selectedAssets.length === filteredAssets.length && filteredAssets.length > 0}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 accent-[var(--cmms-primary)]"
+                  />
+                  <span className="text-sm font-semibold">เลือกทั้งหมด</span>
+                </label>
+                <span className="text-sm text-[var(--cmms-text-secondary)]">เลือกแล้ว {selectedAssets.length} รายการ</span>
+              </div>
+
+              <div className="mt-2 min-h-0 flex-1 overflow-y-auto">
+                <div className="space-y-2">
+                  {filteredAssets.map((asset) => (
+                    <label
+                      key={asset.rawId}
+                      className="flex cursor-pointer items-center gap-3 rounded-md border p-3"
+                      style={{
+                        backgroundColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary-wash)" : "var(--cmms-bg-card)",
+                        borderColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary)" : "var(--cmms-border)",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label={asset.code}
+                        checked={selectedAssets.includes(asset.rawId)}
+                        onChange={() => handleToggleAsset(asset.rawId)}
+                        className="h-4 w-4 accent-[var(--cmms-primary)]"
+                      />
+                      <div>
+                        <p className="font-semibold">{asset.code}</p>
+                        <p className="text-sm text-[var(--cmms-text-secondary)]">{asset.name}</p>
+                      </div>
+                    </label>
+                  ))}
+                  {filteredAssets.length === 0 && (
+                    <p className="mt-6 text-center text-[var(--cmms-text-secondary)]">
+                      ไม่พบเครื่องจักรที่ค้นหา
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
           </Card>
-        </VStack>
-      </Grid>
+        </div>
+      </div>
 
-      <HStack hAlign="end" gap={3} style={{ paddingTop: 24, borderTop: "1px solid var(--color-border)" }}>
-        <button
-          type="button"
+      <div className="flex justify-end gap-3 border-t pt-6" style={{ borderColor: "var(--cmms-border)" }}>
+        <Button
+          variant="secondary"
           onClick={() => {
             setFormData({ frequency: "monthly", startDate: new Date().toISOString().slice(0, 10), assignee: "", title: "" });
             setSelectedAssets([]);
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
         >
           ล้างฟอร์ม
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
           disabled={submitting || !formData.title.trim() || !formData.startDate || selectedAssets.length === 0}
           onClick={handleSubmit}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <RectangleGroupIcon className="w-4 h-4" />
+          <Layers size={16} strokeWidth={1.75} aria-hidden="true" />
           {submitting ? "กำลังสร้างแผน..." : "ยืนยันการสร้างแผนแบบกลุ่ม"}
-        </button>
-      </HStack>
+        </Button>
+      </div>
 
-    </VStack>
+    </div>
   );
 }

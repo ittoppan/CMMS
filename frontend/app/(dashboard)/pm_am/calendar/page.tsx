@@ -1,24 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Calendar } from "@astryxdesign/core/Calendar";
-import { Grid } from "@astryxdesign/core/Grid";
+import { usePageHero, t } from "@/lib/i18n";
+import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 import {
-  PlusIcon,
-  ClockIcon,
-  CalendarDaysIcon,
-  ClipboardDocumentListIcon,
-  PlayIcon,
-  DocumentCheckIcon,
-  EyeIcon,
-} from "@heroicons/react/24/outline";
+  Plus,
+  Clock,
+  CalendarDays,
+  ClipboardList,
+  Play,
+  FileCheck2,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import AndonLamp from "@/components/AndonLamp";
 
 const todayStr = new Date().toISOString().slice(0, 10);
+
+const THAI_MONTHS_SHORT = [
+  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
+];
+const DOW_SHORT = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 
 // สถานะ → ไฟ Andon: เขียวเสร็จ / เหลืองกำลังทำ / แดงเลยกำหนด / เทารอทำ
 const andonOf = (s: string): "ok" | "warn" | "down" | "idle" => {
@@ -42,9 +48,89 @@ const freqChipStyle: Record<string, React.CSSProperties> = {
   yearly: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
+/** ปฏิทินเดือนขนาดกะทัดรัด (tokens) — แทน Astryx Calendar */
+function MiniCalendar({ value, onChange }: { value: string; onChange: (d: string) => void }) {
+  const [viewYear, setViewYear] = useState(() => Number(value.slice(0, 4)) || new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => (Number(value.slice(5, 7)) || new Date().getMonth() + 1) - 1);
+
+  const shift = (delta: number) => {
+    let m = viewMonth + delta;
+    let y = viewYear;
+    if (m < 0) { m = 11; y -= 1; }
+    if (m > 11) { m = 0; y += 1; }
+    setViewMonth(m);
+    setViewYear(y);
+  };
+
+  const startDow = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array(startDow).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const fmt = (d: number) => `${viewYear}-${pad(viewMonth + 1)}-${pad(d)}`;
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => shift(-1)}
+          aria-label="เดือนก่อนหน้า"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
+          style={{ color: "var(--cmms-text-secondary)" }}
+        >
+          <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+        </button>
+        <span className="text-sm font-bold">{THAI_MONTHS_SHORT[viewMonth]} {viewYear + 543}</span>
+        <button
+          type="button"
+          onClick={() => shift(1)}
+          aria-label="เดือนถัดไป"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
+          style={{ color: "var(--cmms-text-secondary)" }}
+        >
+          <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+        </button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold" style={{ color: "var(--cmms-text-muted)" }}>
+        {DOW_SHORT.map((d) => (
+          <span key={d} className="py-1">{d}</span>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {cells.map((d, i) => {
+          if (d === null) return <span key={`e${i}`} />;
+          const iso = fmt(d);
+          const selected = iso === value;
+          const isToday = iso === todayStr;
+          return (
+            <button
+              key={iso}
+              type="button"
+              onClick={() => onChange(iso)}
+              aria-pressed={selected}
+              aria-current={isToday ? "date" : undefined}
+              className="inline-flex h-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors"
+              style={{
+                background: selected ? "var(--cmms-primary)" : "transparent",
+                color: selected ? "#fff" : isToday ? "var(--cmms-primary-hover)" : "var(--cmms-text-primary)",
+                boxShadow: isToday && !selected ? "inset 0 0 0 1px var(--cmms-primary)" : "none",
+              }}
+            >
+              {d}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function PMCalendarPage() {
   const hero = usePageHero("pm_am/calendar");
-  const [selectedDate, setSelectedDate] = useState<`${number}${number}${number}${number}-${number}${number}-${number}${number}` | undefined>(todayStr as `${number}${number}${number}${number}-${number}${number}-${number}${number}`);
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [tasks, setTasks] = useState<any[]>([]);
   const [viewAll, setViewAll] = useState(false);
 
@@ -79,161 +165,149 @@ export default function PMCalendarPage() {
   const visibleTasks = viewAll ? allTasksSorted : tasksForDate;
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               PM / AM
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={3} wrap="wrap">
-          <button
-            type="button"
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="outline"
             onClick={() => setViewAll((v) => !v)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 border ${
+            className={
               viewAll
-                ? "bg-white text-[var(--cmms-primary)] border-white shadow-lg"
-                : "text-white bg-white/10 hover:bg-white/20 border-white/20"
-            }`}
+                ? "border-white bg-white text-[var(--cmms-primary)] hover:bg-white/90"
+                : "border-white/20 bg-white/10 text-white hover:bg-white/20"
+            }
           >
-            <ClockIcon className="w-4 h-4" />
+            <Clock size={16} strokeWidth={1.75} aria-hidden="true" />
             {viewAll ? "กลับไปดูตามวันที่" : "ดูแผนทั้งหมด"}
-          </button>
-          <button
-            type="button"
-            onClick={() => window.location.href = '/pm_am/create'}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <PlusIcon className="w-4 h-4" />{t("action.create_pm")}</button>
-          <button
-            type="button"
-            onClick={() => window.open('/api/v1/pm_ical.php', '_blank')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
-          >
-            <CalendarDaysIcon className="w-4 h-4" />
+          </Button>
+          <Button onClick={() => (window.location.href = "/pm_am/create")}>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.create_pm")}
+          </Button>
+          <Button variant="outline" onClick={() => window.open("/api/v1/pm_ical.php", "_blank")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <CalendarDays size={16} strokeWidth={1.75} aria-hidden="true" />
             ส่งออก iCal
-          </button>
-        </HStack>
+          </Button>
+        </div>
       </div>
 
-      <Grid columns={{ minWidth: 230, repeat: "fit" }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card red">
-          <HStack gap={3} vAlign="center">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <Card className="cmms-kpi-card red">
+          <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="down" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">งานเลยกำหนด</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{overdueCount} <span className="cmms-kpi-unit">งาน</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">งานเลยกำหนด</p>
+              <h3 className="cmms-kpi-value">{overdueCount} <span className="cmms-kpi-unit">งาน</span></h3>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card amber">
-          <HStack gap={3} vAlign="center">
+        <Card className="cmms-kpi-card amber">
+          <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="warn" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">แผนงานวันนี้ (Today)</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{todayCount} <span className="cmms-kpi-unit">งาน</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">แผนงานวันนี้ (Today)</p>
+              <h3 className="cmms-kpi-value">{todayCount} <span className="cmms-kpi-unit">งาน</span></h3>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card green">
-          <HStack gap={3} vAlign="center">
+        <Card className="cmms-kpi-card green">
+          <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="ok" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">เสร็จแล้ววันนี้</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{completedCount} <span className="cmms-kpi-unit">งาน</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จแล้ววันนี้</p>
+              <h3 className="cmms-kpi-value">{completedCount} <span className="cmms-kpi-unit">งาน</span></h3>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card cyan">
-          <HStack gap={3} vAlign="center">
+        <Card className="cmms-kpi-card cyan">
+          <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="idle" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">ช่างที่กำลังปฏิบัติงาน</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{activeTechCount} <span className="cmms-kpi-unit">คน</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ช่างที่กำลังปฏิบัติงาน</p>
+              <h3 className="cmms-kpi-value">{activeTechCount} <span className="cmms-kpi-unit">คน</span></h3>
+            </div>
+          </CardContent>
         </Card>
-      </Grid>
+      </div>
 
-      <Grid columns={3} gap={6}>
-        <div style={{ gridColumn: 'span 1' }}>
-          <Card padding={4}>
-            <Calendar value={selectedDate} onChange={(d) => setSelectedDate(d)} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="p-4">
+              <MiniCalendar value={selectedDate} onChange={(d) => setSelectedDate(d)} />
+            </CardContent>
           </Card>
-          
-          <Card padding={4} style={{ marginTop: 16 }}>
-             <VStack gap={3}>
-               <Heading level={5}>สัญลักษณ์ (Legend)</Heading>
-               <HStack gap={2} vAlign="center">
-                 <AndonLamp status="down" size="sm" />
-                 <Text type="body" size="sm">เลยกำหนด (Overdue)</Text>
-               </HStack>
-               <HStack gap={2} vAlign="center">
-                 <AndonLamp status="warn" size="sm" />
-                 <Text type="body" size="sm">กำลังทำ (In Progress)</Text>
-               </HStack>
-               <HStack gap={2} vAlign="center">
-                 <AndonLamp status="idle" size="sm" />
-                 <Text type="body" size="sm">รอทำ (Scheduled)</Text>
-               </HStack>
-               <HStack gap={2} vAlign="center">
-                 <AndonLamp status="ok" size="sm" />
-                 <Text type="body" size="sm">เสร็จสิ้น (Completed)</Text>
-               </HStack>
-             </VStack>
+
+          <Card>
+            <CardContent className="space-y-3 p-4">
+              <h5 className="font-bold">สัญลักษณ์ (Legend)</h5>
+              <div className="flex items-center gap-2">
+                <AndonLamp status="down" size="sm" />
+                <span className="text-sm">เลยกำหนด (Overdue)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AndonLamp status="warn" size="sm" />
+                <span className="text-sm">กำลังทำ (In Progress)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AndonLamp status="idle" size="sm" />
+                <span className="text-sm">รอทำ (Scheduled)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AndonLamp status="ok" size="sm" />
+                <span className="text-sm">เสร็จสิ้น (Completed)</span>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
-        <div style={{ gridColumn: 'span 2' }}>
-          <Card padding={5} style={{ height: '100%' }}>
-            <VStack gap={4}>
-              <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: 12 }}>
-                <HStack gap={2} vAlign="center">
-                  <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-                    <ClipboardDocumentListIcon className="w-4 h-4" />
+        <div className="lg:col-span-2">
+          <Card className="h-full">
+            <CardContent className="space-y-4 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style={{ borderColor: "var(--cmms-border)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="cmms-icon-tile h-8 w-8 rounded-lg">
+                    <ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <Heading level={4} style={{ margin: 0 }}>
+                  <h4 className="font-bold">
                     {viewAll ? "แผน PM ทั้งหมด (ทุกวันที่)" : `รายการ PM ประจำวันที่ ${selectedDate || "ไม่ได้เลือกวันที่"}`}
-                  </Heading>
-                </HStack>
+                  </h4>
+                </div>
                 <span className="cmms-count-pill">{visibleTasks.length} งาน</span>
-              </HStack>
-              
+              </div>
+
               {visibleTasks.length === 0 ? (
-                <VStack gap={4} hAlign="center" vAlign="center" style={{ minHeight: 300, opacity: 0.5 }}>
-                  <CalendarDaysIcon className="w-6 h-6" />
-                  <Text type="body">{viewAll ? "ยังไม่มีแผน PM ในระบบ" : "ไม่มีแผน PM สำหรับวันนี้"}</Text>
-                </VStack>
+                <EmptyState
+                  icon={<CalendarDays size={28} strokeWidth={1.5} aria-hidden="true" />}
+                  title={viewAll ? "ยังไม่มีแผน PM ในระบบ" : "ไม่มีแผน PM สำหรับวันนี้"}
+                  description={viewAll ? "ลองกดสร้างแผน PM ใหม่ หรือนำเข้าแผนจากระบบเดิม" : "เลือกวันที่อื่นจากปฏิทิน หรือกด \"ดูแผนทั้งหมด\""}
+                />
               ) : (
-                <VStack gap={3}>
+                <div className="space-y-3">
                   {visibleTasks.map((t) => (
-                    <div key={t.id} style={{ 
-                      padding: 16, 
-                      borderRadius: 8, 
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-surface)',
-                      transition: 'all 0.2s'
-                    }}>
-                      <HStack hAlign="between" vAlign="start">
-                        <VStack gap={2}>
-                          <HStack gap={3} vAlign="center">
+                    <div key={t.id} className="rounded-lg border p-4 transition-all" style={{ borderColor: "var(--cmms-border)", backgroundColor: "var(--cmms-bg-card)" }}>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0 space-y-2">
+                          <div className="flex flex-wrap items-center gap-3">
                             {viewAll && (
                               <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                                 {t.date}
                               </span>
                             )}
-                            <Text type="body" weight="bold">{t.id}</Text>
+                            <span className="font-bold">{t.id}</span>
                             <span className="cmms-andon-chip" style={freqChipStyle[t.type] || freqChipStyle.monthly}>
                               {t.type.charAt(0).toUpperCase() + t.type.slice(1)}
                             </span>
@@ -241,25 +315,22 @@ export default function PMCalendarPage() {
                               <span className="cmms-status-dot" />
                               {pmStatusLabel[t.status] || t.status}
                             </span>
-                          </HStack>
-                          <Heading level={5} style={{ color: 'var(--color-primary)' }}>{t.task}</Heading>
-                          <HStack gap={4} vAlign="center">
-                            <Text type="body" size="sm" color="secondary">
-                              <span style={{ fontWeight: 600 }}>เครื่องจักร:</span> {t.asset}
-                            </Text>
-                            <Text type="body" size="sm" color="secondary">
-                              <span style={{ fontWeight: 600 }}>ผู้รับผิดชอบ:</span> {t.assignee}
-                            </Text>
-                          </HStack>
-                        </VStack>
-                        
-                        <div>
+                          </div>
+                          <h5 className="font-bold" style={{ color: "var(--cmms-primary)" }}>{t.task}</h5>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                            <p className="text-sm text-[var(--cmms-text-secondary)]">
+                              <span className="font-semibold">เครื่องจักร:</span> {t.asset}
+                            </p>
+                            <p className="text-sm text-[var(--cmms-text-secondary)]">
+                              <span className="font-semibold">ผู้รับผิดชอบ:</span> {t.assignee}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="shrink-0">
                           {t.status === "scheduled" && (
-                            <button
-                              type="button"
-                              className="cmms-btn-primary cmms-btn-primary--sm"
-                            >
-                              <PlayIcon className="w-3.5 h-3.5" />
+                            <button type="button" className="cmms-btn-primary cmms-btn-primary--sm">
+                              <Play size={14} strokeWidth={1.75} aria-hidden="true" />
                               เริ่มงาน
                             </button>
                           )}
@@ -267,31 +338,33 @@ export default function PMCalendarPage() {
                             <button
                               type="button"
                               onClick={() => (window.location.href = "/pm_am/checksheet")}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                              style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                             >
-                              <DocumentCheckIcon className="w-3.5 h-3.5" />
+                              <FileCheck2 size={14} strokeWidth={1.75} aria-hidden="true" />
                               ทำเช็คชีท
                             </button>
                           )}
                           {t.status === "completed" && (
                             <button
                               type="button"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+                              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                              style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                             >
-                              <EyeIcon className="w-3.5 h-3.5" />
+                              <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
                               ดูผลตรวจ
                             </button>
                           )}
                         </div>
-                      </HStack>
+                      </div>
                     </div>
                   ))}
-                </VStack>
+                </div>
               )}
-            </VStack>
+            </CardContent>
           </Card>
         </div>
-      </Grid>
-    </VStack>
+      </div>
+    </div>
   );
 }

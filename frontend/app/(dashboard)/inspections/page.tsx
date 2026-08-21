@@ -1,32 +1,41 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import CountUp from "react-countup";
 import {
-  PlusIcon,
-  ClipboardDocumentCheckIcon,
-  TrashIcon,
-  CalendarDaysIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+  Plus,
+  ClipboardCheck,
+  Trash2,
+  CalendarDays,
+  TriangleAlert,
+} from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "รอดำเนินการ", in_progress: "กำลังทำ", completed: "เสร็จสิ้น",
   overdue: "เกินกำหนด", skipped: "ข้าม",
 };
 const RESULT_LABELS: Record<string, string> = { pass: "ผ่าน", fail: "ไม่ผ่าน" };
+
+const statusChipStyle: Record<string, React.CSSProperties> = {
+  pending: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  in_progress: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  completed: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  overdue: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+  skipped: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+};
+
+const resultChipStyle: Record<string, React.CSSProperties> = {
+  pass: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
+  fail: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
+};
 
 export default function InspectionsPage() {
   const hero = usePageHero("inspections");
@@ -112,194 +121,199 @@ export default function InspectionsPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดรอบตรวจ...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดรอบตรวจ...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
+              <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <a href="/inspections/templates" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
-            <ClipboardDocumentCheckIcon className="w-4 h-4" />
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
+            <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
             จัดการ Template
           </a>
           <button
             type="button"
             onClick={() => { setShowCreate((v) => !v); setError(null); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+            className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-5 py-2.5 text-sm font-semibold text-white"
           >
-            <PlusIcon className="w-4 h-4" />
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
             สร้างรอบตรวจ
           </button>
-        </HStack>
+        </div>
       </div>
 
       {/* สรุปด่วน */}
-      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <ClipboardDocumentCheckIcon className="w-6 h-6" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card className="cmms-kpi-card amber">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile h-12 w-12">
+              <ClipboardCheck size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เปิดค้าง</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={openCount} /> <Text type="body" size="sm">รอบ</Text></Heading>
-            </VStack>
-          </HStack>
-        </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <CalendarDaysIcon className="w-6 h-6" />
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">เปิดค้าง</p>
+              <h2 className="cmms-kpi-value"><CountUp end={openCount} /> <span className="text-sm font-normal">รอบ</span></h2>
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ครบกำหนดวันนี้</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
-            </VStack>
-          </HStack>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile red">
-              <ExclamationTriangleIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile h-12 w-12">
+              <CalendarDays size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เกินกำหนด</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <Text type="body" size="sm">รอบ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ครบกำหนดวันนี้</p>
+              <h2 className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date === today && (s.status === "pending" || s.status === "in_progress")).length} /> <span className="text-sm font-normal">รอบ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-      </Grid>
+        <Card className="cmms-kpi-card red">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile red h-12 w-12">
+              <TriangleAlert size={24} strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด</p>
+              <h2 className="cmms-kpi-value"><CountUp end={schedules.filter((s) => s.due_date && s.due_date < today && (s.status === "pending" || s.status === "in_progress")).length} /> <span className="text-sm font-normal">รอบ</span></h2>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* สร้างรอบ */}
       {showCreate && (
-        <Card padding={5} className="cmms-animate-fadeInUp">
-          <VStack gap={4}>
-            <Heading level={4}>สร้างรอบตรวจใหม่</Heading>
-            <FormLayout direction="horizontal">
-              <Field inputID="sc-tpl" label="เทมเพลต *">
-                <Selector label="เทมเพลต" isLabelHidden placeholder="เลือกเทมเพลต..." value={cf.template_id} onChange={(v) => setCf({ ...cf, template_id: String(v) })} options={templates.map((t) => ({ value: String(t.id), label: `${t.title} (${t.code})` }))} />
-              </Field>
-              <Field inputID="sc-asset" label="เครื่องจักร / อุปกรณ์ *">
-                <Selector label="เครื่องจักร" isLabelHidden placeholder="เลือกเครื่อง..." value={cf.asset_id} onChange={(v) => setCf({ ...cf, asset_id: String(v) })} options={assets.map((a) => ({ value: String(a.id), label: `${a.name}${a.code ? ` (${a.code})` : ""}` }))} />
-              </Field>
-              <Field inputID="sc-assignee" label="ผู้รับผิดชอบ">
-                <Selector label="ผู้รับผิดชอบ" isLabelHidden placeholder="เลือกผู้รับผิดชอบ..." value={cf.assignee_id} onChange={(v) => setCf({ ...cf, assignee_id: String(v) })} options={users.map((u) => ({ value: String(u.id), label: u.full_name || u.username || `ผู้ใช้ #${u.id}` }))} />
-              </Field>
-              <Field inputID="sc-due" label="ครบกำหนดวันที่">
-                <TextInput id="sc-due" label="ครบกำหนดวันที่" isLabelHidden value={cf.due_date} onChange={(v) => setCf({ ...cf, due_date: v })} />
-              </Field>
-            </FormLayout>
-            <HStack gap={2}>
-              <button
-                type="button"
-                onClick={createSchedule}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PlusIcon className="w-4 h-4" />
+        <Card className="cmms-animate-fadeInUp">
+          <CardContent className="space-y-4 p-5">
+            <h4 className="font-bold">สร้างรอบตรวจใหม่</h4>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Select label="เทมเพลต *" value={cf.template_id} onChange={(e) => setCf({ ...cf, template_id: e.target.value })}>
+                <option value="">เลือกเทมเพลต...</option>
+                {templates.map((tpl) => (
+                  <option key={tpl.id} value={String(tpl.id)}>{tpl.title} ({tpl.code})</option>
+                ))}
+              </Select>
+              <Select label="เครื่องจักร / อุปกรณ์ *" value={cf.asset_id} onChange={(e) => setCf({ ...cf, asset_id: e.target.value })}>
+                <option value="">เลือกเครื่อง...</option>
+                {assets.map((a) => (
+                  <option key={a.id} value={String(a.id)}>{a.name}{a.code ? ` (${a.code})` : ""}</option>
+                ))}
+              </Select>
+              <Select label="ผู้รับผิดชอบ" value={cf.assignee_id} onChange={(e) => setCf({ ...cf, assignee_id: e.target.value })}>
+                <option value="">เลือกผู้รับผิดชอบ...</option>
+                {users.map((u) => (
+                  <option key={u.id} value={String(u.id)}>{u.full_name || u.username || `ผู้ใช้ #${u.id}`}</option>
+                ))}
+              </Select>
+              <Input label="ครบกำหนดวันที่" type="date" value={cf.due_date} onChange={(e) => setCf({ ...cf, due_date: e.target.value })} />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={createSchedule}>
+                <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
                 สร้างรอบ
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowCreate(false)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => setShowCreate(false)}>
                 ยกเลิก
-              </button>
-            </HStack>
-          </VStack>
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Filter + list */}
-      <Card elevation="low" padding={6}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-            <Heading level={4}>รอบตรวจทั้งหมด ({schedules.length})</Heading>
-            <div style={{ width: 220 }}>
-              <Selector label="สถานะ" isLabelHidden placeholder="ทุกสถานะ" value={statusFilter} onChange={(v) => setStatusFilter(String(v))} options={[{ value: "", label: t("action.filter_all_status") }, { value: "pending", label: "รอดำเนินการ" }, { value: "in_progress", label: "กำลังทำ" }, { value: "completed", label: "เสร็จสิ้น" }, { value: "overdue", label: "เกินกำหนด" }]} />
+      <Card>
+        <CardContent className="space-y-4 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h4 className="font-bold">รอบตรวจทั้งหมด ({schedules.length})</h4>
+            <div className="w-full sm:w-[220px]">
+              <Select label="กรองตามสถานะ" isLabelHidden value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                <option value="">{t("action.filter_all_status")}</option>
+                <option value="pending">รอดำเนินการ</option>
+                <option value="in_progress">กำลังทำ</option>
+                <option value="completed">เสร็จสิ้น</option>
+                <option value="overdue">เกินกำหนด</option>
+              </Select>
             </div>
-          </HStack>
+          </div>
 
           {schedules.length === 0 && (
-            <VStack gap={2} style={{ padding: 24, textAlign: "center" }}>
-              <CalendarDaysIcon className="w-8 h-8" style={{ color: "var(--cmms-secondary)" }} />
-              <Text type="body" color="secondary">ยังไม่มีรอบตรวจ — กด "สร้างรอบตรวจ" เพื่อเริ่ม</Text>
-            </VStack>
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <CalendarDays size={32} strokeWidth={1.5} aria-hidden="true" className="text-[var(--cmms-secondary)]" />
+              <p className="text-[var(--cmms-text-secondary)]">ยังไม่มีรอบตรวจ — กด &quot;สร้างรอบตรวจ&quot; เพื่อเริ่ม</p>
+            </div>
           )}
 
-          <VStack gap={2}>
+          <div className="space-y-2">
             {schedules.map((s) => (
-              <div key={s.id} style={{ padding: "14px 16px", borderRadius: 10, border: "1px solid var(--cmms-border)", backgroundColor: s.status === "completed" ? "var(--cmms-bg-muted)" : "var(--cmms-bg-surface, #fff)" }}>
-                <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-                  <VStack gap={1} style={{ flex: 1, minWidth: 260 }}>
-                    <HStack gap={2} vAlign="center" wrap="wrap">
-                      <Text type="body" weight="bold">{s.template_title || `Template #${s.template_id}`}</Text>
-                      <span
-                        className="cmms-andon-chip"
-                        style={{
-                          background: s.status === "completed" ? "rgba(16,185,129,0.12)" : s.status === "in_progress" ? "rgba(30,136,229,0.12)" : s.status === "overdue" ? "rgba(239,68,68,0.12)" : "rgba(245,158,11,0.12)",
-                          color: s.status === "completed" ? "var(--cmms-success)" : s.status === "in_progress" ? "var(--cmms-primary)" : s.status === "overdue" ? "var(--cmms-danger)" : "var(--cmms-warning)",
-                          fontSize: "0.7rem",
-                          padding: "3px 9px",
-                        }}
-                      >
+              <div
+                key={s.id}
+                className="rounded-[10px] border p-4"
+                style={{
+                  borderColor: "var(--cmms-border)",
+                  backgroundColor: s.status === "completed" ? "var(--cmms-bg-muted)" : "var(--cmms-bg-card)",
+                }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-[260px] flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold">{s.template_title || `Template #${s.template_id}`}</span>
+                      <span className="cmms-andon-chip" style={statusChipStyle[s.status] || statusChipStyle.pending}>
                         {STATUS_LABELS[s.status] || s.status}
                       </span>
                       {s.result && (
-                        <span className="cmms-andon-chip" style={{ background: s.result === "pass" ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)", color: s.result === "pass" ? "var(--cmms-success)" : "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
+                        <span className="cmms-andon-chip" style={resultChipStyle[s.result] || resultChipStyle.pass}>
                           {RESULT_LABELS[s.result] || s.result}
                         </span>
                       )}
-                    </HStack>
-                    <Text type="body" size="sm" color="secondary">
+                    </div>
+                    <p className="text-sm text-[var(--cmms-text-secondary)]">
                       {s.asset_name || `เครื่อง #${s.asset_id}`}{s.asset_code ? ` (${s.asset_code})` : ""}
                       {s.assignee_name ? ` • ${s.assignee_name}` : ""}
                       {s.due_date ? ` • ครบกำหนด ${s.due_date}` : ""}
                       {s.completed_at ? ` • เสร็จเมื่อ ${s.completed_at}` : ""}
-                    </Text>
-                  </VStack>
-                  <HStack gap={2}>
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
                     {s.status !== "completed" && (
-                      <a href={`/inspections/run?schedule_id=${s.id}`} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
-                        <ClipboardDocumentCheckIcon className="w-3.5 h-3.5" />
+                      <a href={`/inspections/run?schedule_id=${s.id}`} className="cmms-btn-primary inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold text-white">
+                        <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" />
                         ทำเช็ค
                       </a>
                     )}
                     <button
                       type="button"
                       title="ลบรอบ"
+                      aria-label={`ลบรอบ ${s.template_title || s.id}`}
                       onClick={() => deleteSchedule(s)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+                      style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                     >
-                      <TrashIcon className="w-4 h-4" />
+                      <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                     </button>
-                  </HStack>
-                </HStack>
+                  </div>
+                </div>
               </div>
             ))}
-          </VStack>
-        </VStack>
+          </div>
+        </CardContent>
       </Card>
 
-    </VStack>
+    </div>
   );
 }

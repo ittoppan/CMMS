@@ -92,11 +92,11 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 ### 4.3 PM/AM & Inspections
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
 |---|---|---|---|---|---|
-| `/pm_am` | list + calendar | tokens + Skeleton + EmptyState | P1 | 0.x, 1.x | ⬜ |
-| `/pm_am/checksheet` (875 บรรทัด) | offline queue + PDF + LIFF lang | แยก component + RHF + offline (เก็บ) | P0 | 0.x, 1.x | ⬜ |
-| `/pm_am/calendar` | calendar | tokens | P2 | 0.x | ⬜ |
-| `/pm_am/create|edit|batch_schedule` | ฟอร์ม | RHF + zod | P2 | 0.x, 1.x | ⬜ |
-| `/inspections` + templates + run | checklist engine + offline | tokens + RHF + offline (เก็บ) | P1 | 0.x, 1.x | ⬜ |
+| `/pm_am` | list + calendar | tokens + Skeleton + EmptyState | P1 | 0.x, 1.x | ✅ |
+| `/pm_am/checksheet` (875 บรรทัด) | offline queue + PDF + LIFF lang | แยก component + RHF + offline (เก็บ) | P0 | 0.x, 1.x | ✅ |
+| `/pm_am/calendar` | calendar | tokens | P2 | 0.x | ✅ |
+| `/pm_am/create\|edit\|batch_schedule` | ฟอร์ม | RHF + zod | P2 | 0.x, 1.x | ✅ |
+| `/inspections` + templates + run | checklist engine + offline | tokens + RHF + offline (เก็บ) | P1 | 0.x, 1.x | ✅ |
 
 ### 4.4 Assets & Registry
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |

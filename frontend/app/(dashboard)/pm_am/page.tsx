@@ -1,34 +1,30 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t, statusText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
 import CountUp from "react-countup";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Pagination } from "@astryxdesign/core/Pagination";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { TabList, Tab } from "@astryxdesign/core/TabList";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { 
-  MagnifyingGlassIcon,
-  CalendarIcon,
-  PlusIcon,
-  DocumentCheckIcon,
-  ListBulletIcon,
-  TrashIcon,
-  PencilSquareIcon,
-  WrenchScrewdriverIcon,
-  ClipboardDocumentCheckIcon,
-  CalendarDaysIcon,
-  EyeIcon,
-} from "@heroicons/react/24/outline";
+import {
+  Search,
+  Calendar,
+  Plus,
+  FileCheck2,
+  List,
+  Trash2,
+  SquarePen,
+  Wrench,
+  ClipboardCheck,
+  CalendarDays,
+  Eye,
+} from "lucide-react";
 
 interface PMTask extends Record<string, unknown> {
   rawId: number;
@@ -73,7 +69,6 @@ const freqLabels: Record<string, string> = {
   "yearly": "รายปี",
 };
 
-const PAGE_SIZE = 10;
 const TABS = ["All", "daily", "weekly", "monthly", "yearly"];
 
 export default function PMSchedulePage() {
@@ -82,7 +77,6 @@ export default function PMSchedulePage() {
   const [activeTab, setActiveTab] = useState("All");
   const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [tasks, setTasks] = useState<PMTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -228,347 +222,342 @@ export default function PMSchedulePage() {
     });
   }, [search, activeTab, outsourceFilter, tasks]);
 
-  const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-
-  const columns: TableColumn<PMTask>[] = [
-    { key: "id", header: t("tbl.pm_no"), width: proportional(1) },
-    { key: "asset", header: t("tbl.asset_full"), width: proportional(2) },
+  const columns: ColumnDef<UiTableFeatures, PMTask>[] = [
+    { accessorKey: "id", header: t("tbl.pm_no") },
+    { accessorKey: "asset", header: t("tbl.asset_full") },
     {
-      key: "task",
+      accessorKey: "task",
       header: t("tbl.title"),
-      width: proportional(2),
-      renderCell: (item) => (
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{item.task}</Text>
-          {item.isOutsource && (
+      cell: ({ row }: { row: { original: PMTask } }) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm">{row.original.task}</span>
+          {row.original.isOutsource && (
             <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-              ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
+              ภายนอก{row.original.outsourceBy ? ` · ${row.original.outsourceBy}` : ""}
             </span>
           )}
-        </HStack>
+        </div>
       ),
     },
     {
-      key: "frequency",
+      accessorKey: "frequency",
       header: t("tbl.frequency"),
-      width: proportional(1),
-      renderCell: (item) => (
+      cell: ({ row }: { row: { original: PMTask } }) => (
         <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {t("freq." + (item.frequency || ""))}
+          {t("freq." + (row.original.frequency || ""))}
         </span>
       ),
     },
-    { key: "nextDue", header: t("tbl.due_date"), width: proportional(1.5) },
+    { accessorKey: "nextDue", header: t("tbl.due_date") },
     {
-      key: "assignee",
+      accessorKey: "assignee",
       header: t("tbl.assignee"),
-      width: proportional(1.5),
-      renderCell: (item) => (
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{item.assignee}</Text>
-          {item.teamNames.length > 1 && (
+      cell: ({ row }: { row: { original: PMTask } }) => (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm">{row.original.assignee}</span>
+          {row.original.teamNames.length > 1 && (
             <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>
-              +{item.teamNames.length - 1} ทีม
+              +{row.original.teamNames.length - 1} ทีม
             </span>
           )}
-        </HStack>
+        </div>
       ),
     },
     {
-      key: "status",
+      accessorKey: "status",
       header: t("tbl.status"),
-      width: proportional(1),
-      renderCell: (item) => (
-        <VStack gap={1}>
-          <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.pending}>
-            {statusText(item.status, item.status)}
+      cell: ({ row }: { row: { original: PMTask } }) => (
+        <div className="space-y-1">
+          <span className="cmms-andon-chip" style={statusChipStyle[row.original.status] || statusChipStyle.pending}>
+            {statusText(row.original.status, row.original.status)}
           </span>
-          {deferBadge(item)}
-        </VStack>
+          {deferBadge(row.original)}
+        </div>
       ),
     },
     {
-      key: "actions",
+      id: "actions",
       header: t("tbl.actions"),
-      width: proportional(2),
-      renderCell: (item) => (
-        <HStack gap={2}>
-          {item.status === "completed" && (
+      cell: ({ row }: { row: { original: PMTask } }) => {
+        const item = row.original;
+        return (
+          <div className="flex flex-wrap gap-2">
+            {item.status === "completed" && (
+              <button
+                type="button"
+                onClick={() => openDetail(item)}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}
+              >
+                <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
+                ดูผล
+              </button>
+            )}
+            {item.status !== "completed" && item.deferralStatus !== "pending" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeferTarget(item);
+                  setDeferMsg(null);
+                  setDeferReason("");
+                  setDeferDate("");
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
+              >
+                <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />
+                เลื่อนกำหนด
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => openDetail(item)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all duration-300"
+              onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
             >
-              <EyeIcon className="w-3.5 h-3.5" />
-              ดูผล
+              <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.update")}
             </button>
-          )}
-          {item.status !== "completed" && item.deferralStatus !== "pending" && (
             <button
               type="button"
-              onClick={() => {
-                setDeferTarget(item);
-                setDeferMsg(null);
-                setDeferReason("");
-                setDeferDate("");
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all duration-300"
+              onClick={() => handleDelete(item.rawId)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
             >
-              <CalendarDaysIcon className="w-3.5 h-3.5" />
-              เลื่อนกำหนด
+              <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.delete")}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-          >
-            <PencilSquareIcon className="w-3.5 h-3.5" />{t("action.update")}</button>
-          <button
-            type="button"
-            onClick={() => handleDelete(item.rawId)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
-          >
-            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
-        </HStack>
-      ),
+          </div>
+        );
+      },
     },
   ];
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+    <div className="space-y-6">
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <WrenchScrewdriverIcon className="w-3.5 h-3.5" /> แผน {stats.total} รายการ
+              <Wrench size={14} strokeWidth={1.75} aria-hidden="true" /> แผน {stats.total} รายการ
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2}>
-          <button
-            type="button"
-            onClick={() => router.push("/pm_am/calendar")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <CalendarIcon className="w-4 h-4" />{t("action.open_calendar")}</button>
-          <a href="/pm_am/create" className="cmms-btn-primary">
-            <PlusIcon className="w-4 h-4" />{t("action.create_pm")}</a>
-        </HStack>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.push("/pm_am/calendar")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <Calendar size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.open_calendar")}
+          </Button>
+          <a href="/pm_am/create" className="cmms-btn-primary inline-flex items-center gap-2">
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.create_pm")}
+          </a>
+        </div>
       </div>
 
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3 p-4">
             <div className="cmms-icon-tile">
-              <ListBulletIcon className="w-5 h-5" />
+              <List size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">แผนบำรุงรักษาทั้งหมด</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">แผนบำรุงรักษาทั้งหมด</p>
+              <h2 className="cmms-kpi-value"><CountUp end={stats.total} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="cmms-icon-tile cmms-icon-tile--blue">
-              <ClipboardDocumentCheckIcon className="w-5 h-5" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile h-12 w-12">
+              <ClipboardCheck size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">รอตรวจเช็ค</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.dueThisWeek} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">รอตรวจเช็ค</p>
+              <h2 className="cmms-kpi-value"><CountUp end={stats.dueThisWeek} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="cmms-icon-tile cmms-icon-tile--green">
-              <DocumentCheckIcon className="w-5 h-5" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile green h-12 w-12">
+              <FileCheck2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">อัตราการปฏิบัติตามแผน</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.complianceRate} /> <Text type="body" size="sm">%</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">อัตราการปฏิบัติตามแผน</p>
+              <h2 className="cmms-kpi-value"><CountUp end={stats.complianceRate} /> <span className="text-sm font-normal">%</span></h2>
+            </div>
+          </CardContent>
         </Card>
         {stats.overdue > 0 && (
-          <Card elevation="low" padding={4} className="cmms-kpi-card">
-            <HStack gap={3} vAlign="center">
-              <div className="cmms-icon-tile cmms-icon-tile--red">
-                <TrashIcon className="w-5 h-5" />
+          <Card className="cmms-kpi-card">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="cmms-icon-tile red h-12 w-12">
+                <Trash2 size={20} strokeWidth={1.75} aria-hidden="true" />
               </div>
-              <VStack gap={1}>
-                <Text type="supporting" color="secondary">เลยกำหนด</Text>
-                <Heading level={2} className="cmms-kpi-value"><CountUp end={stats.overdue} /> <Text type="body" size="sm">รายการ</Text></Heading>
-              </VStack>
-            </HStack>
+              <div className="space-y-1">
+                <p className="text-sm text-[var(--cmms-text-secondary)]">เลยกำหนด</p>
+                <h2 className="cmms-kpi-value"><CountUp end={stats.overdue} /> <span className="text-sm font-normal">รายการ</span></h2>
+              </div>
+            </CardContent>
           </Card>
         )}
-      </Grid>
+      </div>
 
-      <Card padding={6} elevation="low">
-        <VStack gap={4}>
-          <Toolbar label="ค้นหาแผน PM" startContent={<HStack gap={3} vAlign="center" style={{ width: "100%" }}>
-              <TextInput
+      <Card>
+        <CardHeader>
+          <CardTitle>แผนบำรุงรักษาเชิงป้องกัน (PM/AM)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative w-full max-w-[300px]">
+              <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+              <Input
                 label="ค้นหา"
                 isLabelHidden
                 placeholder="ค้นหาแผน PM, เครื่องจักร..."
-                startIcon={MagnifyingGlassIcon}
                 value={search}
-                onChange={setSearch}
-                style={{ width: 300 }}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
               />
-              <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
-                {([
-                  { v: "all", label: "ทั้งหมด" },
-                  { v: "in", label: "งานใน" },
-                  { v: "out", label: "งานภายนอก" },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.v}
-                    type="button"
-                    onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
-                    style={{
-                      padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
-                      background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
-                      color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
-                      boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </HStack>
-              <div style={{ flex: 1 }} />
-              <TabList
-                value={activeTab}
-                onChange={(v) => {
-                  setActiveTab(v);
-                  setPage(1);
-                }}
-              >
+            </div>
+            <div className="flex items-center gap-1 rounded-[10px] border p-[3px]" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+              {([
+                { v: "all", label: "ทั้งหมด" },
+                { v: "in", label: "งานใน" },
+                { v: "out", label: "งานภายนอก" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setOutsourceFilter(opt.v)}
+                  className="rounded-[7px] border-none px-3 py-[5px] text-[12.5px] font-semibold cursor-pointer"
+                  style={{
+                    background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
+                    color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                    boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex-1" />
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v)}>
+              <TabsList>
                 {TABS.map((tabKey) => (
-                  <Tab key={tabKey} value={tabKey} label={tabKey === "All" ? t("common.all") : t("freq." + tabKey)} />
+                  <TabsTrigger key={tabKey} value={tabKey}>
+                    {tabKey === "All" ? t("common.all") : t("freq." + tabKey)}
+                  </TabsTrigger>
                 ))}
-              </TabList>
-            </HStack>} />
+              </TabsList>
+            </Tabs>
+          </div>
 
-          {error && <Text type="body" color="accent">{error}</Text>}
+          {error && <Alert variant="danger" description={error} />}
 
-          {loading ? (
-            <div style={{ padding: 40, textAlign: "center" }}>กำลังโหลดข้อมูล...</div>
-          ) : (
-            <Table columns={columns} data={paged} />
-          )}
-
-          {totalItems > PAGE_SIZE && (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onChange={setPage}
-            />
-          )}
-        </VStack>
+          <DataTable
+            columns={columns}
+            data={filtered}
+            loading={loading}
+            pageSize={10}
+            getRowId={(row) => String(row.rawId)}
+            emptyTitle="ยังไม่มีแผน PM/AM"
+            emptyDescription="กดปุ่มสร้างแผน PM เพื่อเพิ่มแผนบำรุงรักษาเชิงป้องกันรายการแรก"
+          />
+        </CardContent>
       </Card>
 
       {/* Dialog: เลื่อนกำหนด PM (ต้องอนุมัติโดยหัวหน้า — แจ้งผ่าน LINE) */}
-      <AnimatedDialog open={!!deferTarget} onClose={() => setDeferTarget(null)}>
-        <DialogHeader title={deferTarget ? `เลื่อนกำหนด PM ${deferTarget.id}` : "เลื่อนกำหนด PM"} onOpenChange={() => setDeferTarget(null)} />
-        <VStack gap={4} style={{ padding: 24 }}>
+      <Dialog
+        open={!!deferTarget}
+        onClose={() => setDeferTarget(null)}
+        title={deferTarget ? `เลื่อนกำหนด PM ${deferTarget.id}` : "เลื่อนกำหนด PM"}
+      >
+        <div className="space-y-4 p-6">
           {deferMsg && (
-            <Card padding={3} style={{ background: deferMsg.kind === "ok" ? "var(--cmms-success-light)" : "var(--cmms-danger-light)", border: `1px solid ${deferMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)"}` }}>
-              <Text type="body" size="sm">{deferMsg.text}</Text>
-            </Card>
+            <Alert variant={deferMsg.kind === "ok" ? "success" : "danger"} description={deferMsg.text} />
           )}
           {deferTarget && (
-            <VStack gap={2}>
-              <Text type="body" size="sm" color="secondary">เครื่องจักร: {deferTarget.asset} · กำหนดเดิม: {deferTarget.nextDue}</Text>
-              <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">วันที่ใหม่</Text>
+            <div className="space-y-2">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">เครื่องจักร: {deferTarget.asset} · กำหนดเดิม: {deferTarget.nextDue}</p>
+              <div className="space-y-1">
+                <label htmlFor="defer-date" className="text-sm font-semibold">วันที่ใหม่</label>
                 <input
+                  id="defer-date"
                   type="date"
                   value={deferDate}
                   min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => setDeferDate(e.target.value)}
-                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
+                  className="w-full rounded-lg border px-2.5 py-2 text-sm"
+                  style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)", color: "var(--cmms-text-primary)" }}
                 />
-              </VStack>
-              <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">เหตุผลที่เลื่อน</Text>
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="defer-reason" className="text-sm font-semibold">เหตุผลที่เลื่อน</label>
                 <textarea
+                  id="defer-reason"
                   value={deferReason}
                   onChange={(e) => setDeferReason(e.target.value)}
                   rows={3}
                   placeholder="เช่น รออะไหล่ / ติดงานด่วน / เครื่องเดินอยู่ ไม่สามารถหยุดได้"
-                  style={{ padding: "8px 10px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box" }}
+                  className="w-full rounded-lg border px-2.5 py-2 text-sm"
+                  style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)", color: "var(--cmms-text-primary)" }}
                 />
-              </VStack>
-              <Text type="body" size="sm" color="secondary">
+              </div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">
                 เมื่อส่งคำขอ ระบบจะแจ้งเตือนหัวหน้า/แอดมินผ่าน LINE เพื่ออนุมัติ — กำหนดจะเปลี่ยนเมื่อได้รับการอนุมัติเท่านั้น
-              </Text>
-            </VStack>
+              </p>
+            </div>
           )}
-          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
-            <button
-              type="button"
-              onClick={() => setDeferTarget(null)}
-              disabled={deferSaving}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+          <div className="flex justify-end gap-2 border-t pt-4" style={{ borderColor: "var(--cmms-border)" }}>
+            <Button variant="secondary" onClick={() => setDeferTarget(null)} disabled={deferSaving}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
-              onClick={submitDeferral}
-              disabled={deferSaving}
-              className="cmms-btn-primary inline-flex items-center gap-1.5"
-            >
+            </Button>
+            <Button onClick={submitDeferral} disabled={deferSaving}>
               {deferSaving ? "กำลังส่ง..." : "ส่งคำขอเลื่อนกำหนด"}
-            </button>
-          </HStack>
-        </VStack>
-      </AnimatedDialog>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
 
       {/* Dialog: ดูผลการทำ PM ที่เสร็จแล้ว (ตรวจเช็ค + ลายเซ็น ย้อนหลัง) */}
-      <AnimatedDialog open={!!detailTarget} onClose={() => setDetailTarget(null)}>
-        <DialogHeader title={detailTarget ? `ผลการทำ PM ${detailTarget.id}` : "ผลการทำ PM"} onOpenChange={() => setDetailTarget(null)} />
-        <VStack gap={4} style={{ padding: 24, maxWidth: 640 }}>
-          {detailErr && (
-            <Card padding={3} style={{ background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger)" }}>
-              <Text type="body" size="sm">{detailErr}</Text>
-            </Card>
+      <Dialog
+        open={!!detailTarget}
+        onClose={() => setDetailTarget(null)}
+        title={detailTarget ? `ผลการทำ PM ${detailTarget.id}` : "ผลการทำ PM"}
+      >
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto p-6">
+          {detailErr && <Alert variant="danger" description={detailErr} />}
+          {detailLoading && (
+            <div className="space-y-2 py-6" aria-busy="true">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="h-10 animate-pulse rounded-md bg-[var(--color-skeleton)]" />
+              ))}
+            </div>
           )}
-          {detailLoading && <div style={{ padding: 40, textAlign: "center" }}>กำลังโหลดผลการทำ PM...</div>}
           {detailData && !detailLoading && (
-            <VStack gap={4}>
+            <div className="space-y-4">
               {/* ข้อมูลแผน */}
-              <VStack gap={2}>
-                <Text type="body" weight="bold">{detailData.title || detailTarget?.task}</Text>
-                <Text type="body" size="sm" color="secondary">เครื่องจักร: {detailData.asset_name || "ไม่ระบุ"}</Text>
-                <HStack gap={4} wrap="wrap">
-                  <Text type="body" size="sm" color="secondary">ความถี่: {freqLabels[detailData.frequency_type] || detailData.frequency_type || "-"}</Text>
-                  <Text type="body" size="sm" color="secondary">กำหนด: {detailData.due_date || "-"}</Text>
-                  <Text type="body" size="sm" color="secondary">เสร็จเมื่อ: {(detailData.completed_at || "-").slice(0, 16).replace("T", " ")}</Text>
-                  <Text type="body" size="sm" color="secondary">ลงนามเมื่อ: {(detailData.signed_at || "-").slice(0, 16).replace("T", " ")}</Text>
-                </HStack>
+              <div className="space-y-2">
+                <p className="font-bold">{detailData.title || detailTarget?.task}</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">เครื่องจักร: {detailData.asset_name || "ไม่ระบุ"}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">ความถี่: {freqLabels[detailData.frequency_type] || detailData.frequency_type || "-"}</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">กำหนด: {detailData.due_date || "-"}</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จเมื่อ: {(detailData.completed_at || "-").slice(0, 16).replace("T", " ")}</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">ลงนามเมื่อ: {(detailData.signed_at || "-").slice(0, 16).replace("T", " ")}</p>
+                </div>
                 {!!Number(detailData.is_outsource) && (
-                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)", width: "fit-content" }}>
+                  <span className="cmms-andon-chip w-fit" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
                     งานภายนอก · {detailData.outsource_by || "ไม่ระบุบริษัท"}
                     {Number(detailData.cost_outsource) > 0 ? ` · ค่าใช้จ่าย ${Number(detailData.cost_outsource).toLocaleString("th-TH")} บาท` : ""}
                   </span>
                 )}
-              </VStack>
+              </div>
 
               {/* ผลตรวจเช็ค */}
-              <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>ผลตรวจเช็ค ({detailData.checklist ? (typeof detailData.checklist === "string" ? (() => { try { return JSON.parse(detailData.checklist).length; } catch { return 0; } })() : detailData.checklist.length) : 0} รายการ)</Text>
+              <div className="space-y-2">
+                <p className="text-sm font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>ผลตรวจเช็ค ({detailData.checklist ? (typeof detailData.checklist === "string" ? (() => { try { return JSON.parse(detailData.checklist).length; } catch { return 0; } })() : detailData.checklist.length) : 0} รายการ)</p>
                 {(() => {
                   const items: any[] = detailData.checklist
                     ? typeof detailData.checklist === "string"
@@ -576,16 +565,16 @@ export default function PMSchedulePage() {
                       : detailData.checklist
                     : [];
                   if (items.length === 0) {
-                    return <Text type="body" size="sm" color="secondary">ไม่มีรายการตรวจเช็คในรอบนี้</Text>;
+                    return <p className="text-sm text-[var(--cmms-text-secondary)]">ไม่มีรายการตรวจเช็คในรอบนี้</p>;
                   }
                   return items.map((item: any, idx: number) => {
                     const isValue = item.type === "value";
                     const ok = isValue ? (item.value || "").trim() !== "" : item.status === "pass";
                     const ng = !isValue && item.status === "fail";
                     return (
-                      <HStack key={idx} gap={3} vAlign="center" style={{ padding: "8px 10px", borderRadius: 8, background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                      <div key={idx} className="flex items-center gap-3 rounded-lg border px-2.5 py-2" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
                         <span
-                          className="cmms-andon-chip"
+                          className="cmms-andon-chip shrink-0"
                           style={{
                             background: ng ? "var(--cmms-danger-light)" : ok ? "var(--cmms-success-light)" : "var(--cmms-bg-muted)",
                             color: ng ? "var(--cmms-danger-dark)" : ok ? "var(--cmms-success-dark)" : "var(--cmms-text-secondary)",
@@ -593,21 +582,21 @@ export default function PMSchedulePage() {
                         >
                           {ng ? "ไม่ผ่าน" : ok ? (isValue ? "บันทึกค่า" : "ผ่าน") : "ไม่ได้บันทึก"}
                         </span>
-                        <VStack gap={0} style={{ flex: 1 }}>
-                          <Text type="body" size="sm">{item.task}</Text>
-                          {isValue && item.value && <Text type="body" size="sm" color="secondary">ค่า: {item.value}</Text>}
-                          {item.note && <Text type="body" size="sm" color="secondary">หมายเหตุ: {item.note}</Text>}
-                        </VStack>
-                      </HStack>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm">{item.task}</p>
+                          {isValue && item.value && <p className="text-sm text-[var(--cmms-text-secondary)]">ค่า: {item.value}</p>}
+                          {item.note && <p className="text-sm text-[var(--cmms-text-secondary)]">หมายเหตุ: {item.note}</p>}
+                        </div>
+                      </div>
                     );
                   });
                 })()}
-              </VStack>
+              </div>
 
               {/* ลายเซ็นยืนยัน */}
-              <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>ลายเซ็นยืนยัน</Text>
-                <HStack gap={4} wrap="wrap" vAlign="stretch">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>ลายเซ็นยืนยัน</p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-stretch">
                   {[
                     { label: "ผู้ตรวจเช็ค", sig: detailData.inspector_signature, sub: "ช่าง/ผู้ปฏิบัติงาน" },
                     { label: "ผู้ควบคุมเครื่อง", sig: detailData.operator_signature, sub: detailData.operator_name || "ไม่ระบุชื่อ" },
@@ -618,62 +607,59 @@ export default function PMSchedulePage() {
                         : `data:image/png;base64,${blk.sig}`
                       : "";
                     return (
-                      <Card key={blk.label} padding={3} style={{ flex: 1, minWidth: 220, border: "1px solid var(--cmms-border)" }}>
-                        <VStack gap={2} vAlign="center" hAlign="center" style={{ minHeight: 130 }}>
+                      <Card key={blk.label} className="min-w-0 flex-1" style={{ minWidth: 220 }}>
+                        <CardContent className="flex min-h-[130px] flex-col items-center justify-center gap-2 p-3">
                           {src ? (
                             <img src={src} alt={`ลายเซ็น ${blk.label}`} style={{ maxHeight: 80, maxWidth: "100%", objectFit: "contain", background: "var(--cmms-bg-card, #fff)" }} />
                           ) : (
-                            <Text type="body" size="sm" color="secondary">ยังไม่มีลายเซ็น</Text>
+                            <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีลายเซ็น</p>
                           )}
-                          <VStack gap={0} hAlign="center">
-                            <Text type="body" size="sm" weight="semibold">{blk.label}</Text>
-                            <Text type="body" size="sm" color="secondary">{blk.sub}</Text>
-                          </VStack>
-                        </VStack>
+                          <div className="text-center">
+                            <p className="text-sm font-semibold">{blk.label}</p>
+                            <p className="text-sm text-[var(--cmms-text-secondary)]">{blk.sub}</p>
+                          </div>
+                        </CardContent>
                       </Card>
                     );
                   })}
-                </HStack>
-              </VStack>
+                </div>
+              </div>
 
               {detailData.notes && (
-                <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
-                  <Text type="body" size="sm" color="secondary">หมายเหตุ: {detailData.notes}</Text>
-                </Card>
+                <div className="rounded-lg border p-3" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">หมายเหตุ: {detailData.notes}</p>
+                </div>
               )}
 
               {/* เอกสารแนบ */}
               {detailAtts.length > 0 && (
-                <VStack gap={2}>
-                  <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-text-secondary)" }}>เอกสารแนบ ({detailAtts.length})</Text>
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>เอกสารแนบ ({detailAtts.length})</p>
                   {detailAtts.map(a => (
-                    <HStack key={a.id} gap={3} vAlign="center" wrap="wrap" style={{ padding: "8px 12px", borderRadius: 8, background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
+                    <div key={a.id} className="flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
                       <a
                         href={a.file_path}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ fontSize: 13, fontWeight: 600, color: "var(--cmms-primary)", textDecoration: "none", wordBreak: "break-all" }}
+                        className="break-all text-[13px] font-semibold no-underline"
+                        style={{ color: "var(--cmms-primary)" }}
                       >
                         {a.file_name}
                       </a>
-                      <Text type="body" size="sm" color="secondary">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB{a.uploaded_name ? ` · ${a.uploaded_name}` : ""}</Text>
-                    </HStack>
+                      <span className="text-sm text-[var(--cmms-text-secondary)]">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB{a.uploaded_name ? ` · ${a.uploaded_name}` : ""}</span>
+                    </div>
                   ))}
-                </VStack>
+                </div>
               )}
-            </VStack>
+            </div>
           )}
-          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
-            <button
-              type="button"
-              onClick={() => setDetailTarget(null)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+          <div className="flex justify-end border-t pt-4" style={{ borderColor: "var(--cmms-border)" }}>
+            <Button variant="secondary" onClick={() => setDetailTarget(null)}>
               ปิด
-            </button>
-          </HStack>
-        </VStack>
-      </AnimatedDialog>
-    </VStack>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </div>
   );
 }

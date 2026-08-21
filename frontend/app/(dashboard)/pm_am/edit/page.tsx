@@ -2,17 +2,13 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea"; // Ensure TextArea is imported
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { DateInput } from "@astryxdesign/core/DateInput";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";
-
-type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
 function EditPMContent() {
   const router = useRouter();
@@ -26,7 +22,7 @@ function EditPMContent() {
 
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState("pending");
-  const [dueDate, setDueDate] = useState<ISODate | undefined>(undefined);
+  const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [pmNumber, setPmNumber] = useState("");
@@ -42,7 +38,7 @@ function EditPMContent() {
   const [attMsg, setAttMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   // New state variables for the new fields
-  const [completedAt, setCompletedAt] = useState<ISODate | undefined>(undefined);
+  const [completedAt, setCompletedAt] = useState("");
   const [completedBy, setCompletedBy] = useState("");
   const [rescheduleReason, setRescheduleReason] = useState("");
 
@@ -67,7 +63,7 @@ function EditPMContent() {
         if (json && !json.error) {
           setTitle(json.title || "");
           setStatus(json.status || "pending");
-          setDueDate(json.due_date || undefined);
+          setDueDate(json.due_date || "");
           setDescription(json.description || "");
           setNotes(json.notes || "");
           setPmNumber(`PM-${String(json.id).padStart(3, '0')}`);
@@ -77,7 +73,7 @@ function EditPMContent() {
           setCostOutsource(json.cost_outsource ? String(json.cost_outsource) : "");
 
           // Set new state variables
-          setCompletedAt(json.completed_at || undefined);
+          setCompletedAt(json.completed_at || "");
           setCompletedBy(json.completed_by_name || ""); // Assuming API returns name, adjust if it's an ID
           setRescheduleReason(json.reschedule_reason || "");
 
@@ -201,201 +197,209 @@ function EditPMContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM PLAN · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>อัปเดตสถานะงานซ่อมบำรุง</Heading>
+    <div className="space-y-6">
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM PLAN · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>อัปเดตสถานะงานซ่อมบำรุง</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               {pmNumber || "PM Plan"}
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             แก้ไขข้อมูลแผน PM และอัปเดตสถานะการดำเนินงาน
-          </Text>
-        </VStack>
+          </p>
+        </div>
       </div>
 
-      <Card padding={6}>
-        {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูลแผนงาน...</Text>
-        ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-                {error}
-              </div>
-            )}
+      <Card>
+        <CardContent className="p-6">
+          {loadingData ? (
+            <div className="max-w-[640px] space-y-3" aria-busy="true">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-10 animate-pulse rounded-md bg-[var(--color-skeleton)]" />
+              ))}
+            </div>
+          ) : (
+            <div className="max-w-[640px] space-y-5">
+              {error && <Alert variant="danger" description={error} />}
 
-            <TextInput
-              label="ชื่องาน PM"
-              value={title}
-              onChange={setTitle}  />
-
-            <Selector
-              label="ผู้รับผิดชอบ (ช่าง)"
-              placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..."
-              value={assignedTo}
-              onChange={setAssignedTo}
-              options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
-            />
-
-            <HStack gap={3} vAlign="center" wrap="wrap">
-              <Switch
-                label="งานภายนอก (Outsource)"
-                value={isOutsource}
-                onChange={setIsOutsource}
+              <Input
+                label="ชื่องาน PM"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
-              <Text type="body" size="sm" color="secondary">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM</Text>
-            </HStack>
 
-            {isOutsource && (
-              <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
-                <TextInput
-                  label="ชื่อบริษัท/ผู้รับเหมา *"
-                  placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
-                  value={outsourceBy}
-                  onChange={setOutsourceBy}
-                />
-                <VStack gap={1}>
-                  <Text type="body" size="sm" weight="semibold">ค่าใช้จ่าย (บาท)</Text>
+              <div className="space-y-1.5">
+                <label htmlFor="pm-edit-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง)</label>
+                <Select
+                  id="pm-edit-assignee"
+                  aria-label="ผู้รับผิดชอบ"
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                >
+                  <option value="">เลือกช่างที่รับผิดชอบงาน PM นี้...</option>
+                  {users.map(u => (
+                    <option key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</option>
+                  ))}
+                </Select>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="inline-flex cursor-pointer items-center gap-2">
                   <input
+                    type="checkbox"
+                    checked={isOutsource}
+                    onChange={(e) => setIsOutsource(e.target.checked)}
+                    className="h-4 w-4 accent-[var(--cmms-primary)]"
+                  />
+                  <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
+                </label>
+                <span className="text-sm text-[var(--cmms-text-secondary)]">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM</span>
+              </div>
+
+              {isOutsource && (
+                <div className="space-y-3 rounded-[10px] border p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+                  <Input
+                    label="ชื่อบริษัท/ผู้รับเหมา *"
+                    placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+                    value={outsourceBy}
+                    onChange={(e) => setOutsourceBy(e.target.value)}
+                  />
+                  <Input
+                    label="ค่าใช้จ่าย (บาท)"
                     type="number"
                     min={0}
                     placeholder="เช่น 25000"
                     value={costOutsource}
                     onChange={(e) => setCostOutsource(e.target.value)}
-                    style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--cmms-bg-card)" }}
                   />
-                </VStack>
-              </VStack>
-            )}
-
-            {/* ── เอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) ── */}
-            <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px dashed var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
-              <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">เอกสารแนบ (ใบแจ้งหนี้ / ใบเสนอราคา)</Text>
-                <Text type="body" size="sm" color="secondary">รองรับ pdf / xls / xlsx / doc / docx / csv / txt สูงสุด 6 MB ต่อไฟล์</Text>
-              </VStack>
-              <input
-                type="file"
-                multiple
-                accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.txt"
-                disabled={attUploading}
-                onChange={(e) => uploadAttachments(e.target.files)}
-                style={{ fontSize: 13, color: "var(--cmms-text-secondary)" }}
-              />
-              {attMsg && (
-                <Text type="body" size="sm" style={{ color: attMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)" }}>{attMsg.text}</Text>
+                </div>
               )}
-              {attUploading && <Text type="body" size="sm" color="secondary">กำลังอัปโหลด...</Text>}
-              {attachments.length > 0 && (
-                <VStack gap={2}>
-                  {attachments.map(a => (
-                    <HStack key={a.id} gap={2} vAlign="center" wrap="wrap" style={{ padding: "8px 12px", borderRadius: 8, background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)" }}>
-                      <a
-                        href={a.file_path}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ fontSize: 13, fontWeight: 600, color: "var(--cmms-primary)", textDecoration: "none", wordBreak: "break-all" }}
-                      >
-                        {a.file_name}
-                      </a>
-                      <Text type="body" size="sm" color="secondary">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB</Text>
-                      <button
-                        type="button"
-                        onClick={() => deleteAttachment(a.id)}
-                        style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--cmms-danger)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
-                      >
-                        ลบ
-                      </button>
-                    </HStack>
-                  ))}
-                </VStack>
+
+              {/* ── เอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) ── */}
+              <div className="space-y-3 rounded-[10px] border border-dashed p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold">เอกสารแนบ (ใบแจ้งหนี้ / ใบเสนอราคา)</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">รองรับ pdf / xls / xlsx / doc / docx / csv / txt สูงสุด 6 MB ต่อไฟล์</p>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.txt"
+                  disabled={attUploading}
+                  onChange={(e) => uploadAttachments(e.target.files)}
+                  className="text-[13px]"
+                  style={{ color: "var(--cmms-text-secondary)" }}
+                />
+                {attMsg && (
+                  <p className="text-sm" style={{ color: attMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)" }}>{attMsg.text}</p>
+                )}
+                {attUploading && <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังอัปโหลด...</p>}
+                {attachments.length > 0 && (
+                  <div className="space-y-2">
+                    {attachments.map(a => (
+                      <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2" style={{ background: "var(--cmms-bg-card)", borderColor: "var(--cmms-border)" }}>
+                        <a
+                          href={a.file_path}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="break-all text-[13px] font-semibold no-underline"
+                          style={{ color: "var(--cmms-primary)" }}
+                        >
+                          {a.file_name}
+                        </a>
+                        <span className="text-sm text-[var(--cmms-text-secondary)]">{(a.file_size ? (a.file_size / 1024).toFixed(0) : 0)} KB</span>
+                        <button
+                          type="button"
+                          onClick={() => deleteAttachment(a.id)}
+                          className="ml-auto cursor-pointer border-none bg-transparent text-xs font-semibold"
+                          style={{ color: "var(--cmms-danger)" }}
+                        >
+                          ลบ
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="pm-edit-status" className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานะปัจจุบัน</label>
+                <Select
+                  id="pm-edit-status"
+                  aria-label="สถานะปัจจุบัน"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="pending">รอดำเนินการ</option>
+                  <option value="in_progress">กำลังทำ</option>
+                  <option value="completed">ทำเสร็จแล้ว</option>
+                  <option value="overdue">เกินกำหนดเวลา</option>
+                  <option value="skipped">ข้ามรอบนี้</option>
+                </Select>
+              </div>
+
+              <Input
+                label="กำหนดการรอบนี้"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+
+              <Textarea
+                label="บันทึกผลการตรวจเช็ค"
+                placeholder="บันทึกย่อ ข้อมูลที่พบจากการตรวจเช็ค..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+
+              {/* Conditionally render completed_at and completed_by if status is 'completed' */}
+              {status === "completed" && completedAt && (
+                <Input
+                  label="วันที่เสร็จสิ้น"
+                  value={completedAt.split('T')[0]} // Display only the date part
+                  disabled
+                />
               )}
-            </VStack>
+              {status === "completed" && completedBy && (
+                <Input
+                  label="ผู้ดำเนินการ"
+                  value={completedBy}
+                  disabled
+                />
+              )}
 
-            <Selector
-              label="สถานะปัจจุบัน"
-              placeholder="เลือกสถานะ"
-              value={status}
-              onChange={setStatus}
-              options={[
-                { value: "pending", label: "รอดำเนินการ" },
-                { value: "in_progress", label: "กำลังทำ" },
-                { value: "completed", label: "ทำเสร็จแล้ว" },
-                { value: "overdue", label: "เกินกำหนดเวลา" },
-                { value: "skipped", label: "ข้ามรอบนี้" },
-              ]}
-            />
+              {/* Conditionally render rescheduleReason if status is 'skipped' or 'overdue' */}
+              {(status === "skipped" || status === "overdue") && (
+                <Textarea
+                  label="เหตุผลในการเลื่อน/ข้าม"
+                  placeholder="ระบุเหตุผลที่ทำให้งานนี้ถูกเลื่อนหรือข้ามรอบ"
+                  value={rescheduleReason}
+                  onChange={(e) => setRescheduleReason(e.target.value)}
+                />
+              )}
 
-            <DateInput
-              label="กำหนดการรอบนี้"
-              value={dueDate}
-              onChange={setDueDate}
-            />
-
-            <TextArea
-              label="บันทึกผลการตรวจเช็ค"
-              placeholder="บันทึกย่อ ข้อมูลที่พบจากการตรวจเช็ค..."
-              value={notes}
-              onChange={setNotes}
-            />
-
-            {/* Conditionally render completed_at and completed_by if status is 'completed' */}
-            {status === "completed" && completedAt && (
-              <TextInput
-                label="วันที่เสร็จสิ้น"
-                value={completedAt.split('T')[0]} // Display only the date part
-                isDisabled
-              />
-            )}
-            {status === "completed" && completedBy && (
-              <TextInput
-                label="ผู้ดำเนินการ"
-                value={completedBy}
-                isDisabled
-              />
-            )}
-
-            {/* Conditionally render rescheduleReason if status is 'skipped' or 'overdue' */}
-            {(status === "skipped" || status === "overdue") && (
-              <TextArea
-                label="เหตุผลในการเลื่อน/ข้าม"
-                placeholder="ระบุเหตุผลที่ทำให้งานนี้ถูกเลื่อนหรือข้ามรอบ"
-                value={rescheduleReason}
-                onChange={setRescheduleReason}
-              />
-            )}
-
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/pm_am")}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-              </button>
-            </HStack>
-          </VStack>
-        )}
+              <div className="flex justify-end gap-3">
+                <Button variant="secondary" onClick={() => router.push("/pm_am")}>
+                  ยกเลิก
+                </Button>
+                <Button disabled={submitting} onClick={handleSubmit}>
+                  {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
-    </VStack>
+    </div>
   );
 }
 
 export default function EditPMPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>}>
       <EditPMContent />
     </Suspense>
   );

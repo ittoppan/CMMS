@@ -2,28 +2,22 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Button } from "@astryxdesign/core/Button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import {
-  ClipboardDocumentCheckIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ExclamationTriangleIcon,
-  ArrowDownTrayIcon,
-} from "@heroicons/react/24/outline";
+  ClipboardCheck,
+  CheckCircle2,
+  XCircle,
+  TriangleAlert,
+  Download,
+} from "lucide-react";
 import { enqueue, pendingCount, subscribeOnline, flushQueue } from "@/lib/offlineQueue";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { serverResponds } from "@/lib/server-check";
@@ -352,7 +346,7 @@ export default function PMChecksheetPage() {
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff",
+        backgroundColor: "rgb(255, 255, 255)",
         logging: false,
       });
       const img = canvas.toDataURL("image/png");
@@ -486,7 +480,7 @@ export default function PMChecksheetPage() {
       style={{
         border: "2px dashed var(--cmms-primary)",
         borderRadius: 8,
-        background: "#FFFFFF",
+        background: "white",
         cursor: "crosshair",
         touchAction: "none",
         width: "100%",
@@ -496,21 +490,21 @@ export default function PMChecksheetPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดแผน PM...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดแผน PM...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Offline banner — ยังกรอกได้ บันทึกลงเครื่อง แล้วส่งเมื่อกลับมาออนไลน์ */}
       {(offline || onlineBack) && (
-        <Banner
-          status={onlineBack ? "success" : "warning"}
+        <Alert
+          variant={onlineBack ? "success" : "warning"}
           title={
             onlineBack
               ? tliff("liff.checksheet_onlineback_title")
@@ -524,9 +518,8 @@ export default function PMChecksheetPage() {
               ? tliff("liff.checksheet_onlineback_desc")
               : tliff("liff.checksheet_offline_desc"))
           }
-          endContent={
+          action={
             <Button
-              label={tliff("liff.checksheet_reload_btn")}
               variant={onlineBack ? "primary" : "ghost"}
               size="sm"
               onClick={async () => {
@@ -539,227 +532,227 @@ export default function PMChecksheetPage() {
                 if (ok) window.location.reload();
                 else setRetryMsg(tliff("liff.checksheet_reload_fail"));
               }}
-            />
+            >
+              {tliff("liff.checksheet_reload_btn")}
+            </Button>
           }
         />
       )}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CHECKSHEET · CMMS-TOPPAN</Text>
-          <Heading level={2} style={{ color: "#fff" }}>{tliff("liff.checksheet_title")}</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM CHECKSHEET · CMMS-TOPPAN</p>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{tliff("liff.checksheet_title")}</h2>
 
           {pending > 0 && (
             <div
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8,
-                padding: "10px 14px", borderRadius: 8,
-                background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)",
-                fontSize: "0.85rem", fontWeight: 600, width: "fit-content", maxWidth: "100%",
-              }}
+              className="w-fit max-w-full space-y-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold"
+              style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="cmms-status-dot warn inline-block" />
                 {tliff("liff.checksheet_pending").replace("{n}", String(pending))}
                 <button
                   type="button"
                   disabled={flushing || !navigator.onLine}
                   onClick={handleSendNow}
+                  className="ml-1 rounded-lg border-none px-3 py-1.5 text-[0.78rem] font-bold"
                   style={{
-                    marginLeft: 4,
-                    padding: "6px 12px", borderRadius: 8, border: "none", cursor: flushing ? "wait" : "pointer",
-                    background: "var(--cmms-primary)", color: "var(--cmms-text-on-primary, #fff)", fontSize: "0.78rem", fontWeight: 700,
+                    cursor: flushing ? "wait" : "pointer",
+                    background: "var(--cmms-primary)",
+                    color: "var(--cmms-text-on-primary, #fff)",
                     opacity: flushing || !navigator.onLine ? 0.6 : 1,
                   }}
                 >
                   {flushing ? "..." : tliff("liff.checksheet_send_now")}
                 </button>
               </div>
-              {flushMsg && <div style={{ fontSize: "0.75rem", opacity: 0.85 }}>{flushMsg}</div>}
+              {flushMsg && <div className="text-[0.75rem] opacity-85">{flushMsg}</div>}
             </div>
           )}
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             {tliff("liff.checksheet_desc")}
-          </Text>
-        </VStack>
+          </p>
+        </div>
         {plans.length > 0 && (
           <button
             type="button"
             disabled={!selectedPlan}
             onClick={handleCheckAll}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-success disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-success disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <CheckCircleIcon className="w-4 h-4" />
+            <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
             {tliff("liff.checksheet_check_all")}
           </button>
         )}
       </div>
 
       {/* เลือกแผน */}
-      <Card padding={4}>
-        <Field inputID="pm-plan" label="เลือกแผน PM ที่ต้องการทำเช็คชีท *" isRequired>
-          <div style={{ width: "100%", maxWidth: 560 }}>
-            <Selector
-              label="เลือกแผน PM"
-              isLabelHidden
+      <Card>
+        <CardContent className="p-4">
+          <label htmlFor="pm-plan" className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกแผน PM ที่ต้องการทำเช็คชีท *</label>
+          <div className="mt-1.5 w-full max-w-[560px]">
+            <Select
+              id="pm-plan"
+              aria-label="เลือกแผน PM"
               placeholder={plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}
               value={selectedPlanId}
-              onChange={handleSelectPlan}
-              options={plans}
-              isDisabled={plans.length === 0}
-            />
+              onChange={(e) => handleSelectPlan(e.target.value)}
+              disabled={plans.length === 0}
+            >
+              <option value="">{plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}</option>
+              {plans.map((p) => (
+                <option key={p.value} value={p.value}>{p.label}</option>
+              ))}
+            </Select>
           </div>
-        </Field>
-        {plans.length === 0 && (
-          <Text type="body" size="sm" color="secondary">ไม่พบแผน PM ที่รอดำเนินการ (pending / in_progress)</Text>
-        )}
+          {plans.length === 0 && (
+            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ไม่พบแผน PM ที่รอดำเนินการ (pending / in_progress)</p>
+          )}
+        </CardContent>
       </Card>
 
       {selectedPlan && (
-        <div style={{ maxWidth: 860 }}>
-          <Card padding={0} style={{ overflow: "hidden" }}>
+        <div className="max-w-[860px]">
+          <Card className="overflow-hidden p-0">
             {/* หัวแผน */}
-            <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderBottom: "1px solid var(--color-border)" }}>
-              <HStack gap={6} hAlign="between" wrap="wrap">
-                <VStack gap={1}>
-                  <HStack gap={2} vAlign="center">
+            <div className="px-6 py-4" style={{ backgroundColor: "var(--cmms-bg-muted)", borderBottom: "1px solid var(--cmms-border)" }}>
+              <div className="flex flex-wrap items-start justify-between gap-6">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
                       {selectedPlan.frequency_type?.toUpperCase()}
                     </span>
                     <span className="cmms-status warn"><span className="cmms-status-dot" />{selectedPlan.status === "in_progress" ? "กำลังดำเนินการ" : "รอดำเนินการ"}</span>
-                  </HStack>
-                  <Text type="body" weight="bold">{selectedPlan.title}</Text>
-                  <Text type="body" size="sm" color="secondary">เครื่องจักร: {assetName} {selectedPlan.due_date ? `• ครบกำหนด: ${selectedPlan.due_date}` : ""}</Text>
+                  </div>
+                  <p className="font-bold">{selectedPlan.title}</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">เครื่องจักร: {assetName} {selectedPlan.due_date ? `• ครบกำหนด: ${selectedPlan.due_date}` : ""}</p>
                   {!!Number(selectedPlan.is_outsource) && (
-                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)", width: "fit-content" }}>
+                    <span className="cmms-andon-chip w-fit" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
                       งานภายนอก · {selectedPlan.outsource_by || "ไม่ระบุบริษัท"}
                       {Number(selectedPlan.cost_outsource) > 0 ? ` · ${Number(selectedPlan.cost_outsource).toLocaleString("th-TH")} บาท` : ""}
                     </span>
                   )}
-                </VStack>
-                <VStack gap={1} hAlign="end">
-                  <Text type="body" size="sm" color="secondary" weight="semibold">ความก้าวหน้า</Text>
-                  <Text type="body" weight="bold">{checklist.filter((i) => (i.type === "value" ? i.value.trim() !== "" : i.status !== null)).length} / {checklist.length} ข้อ</Text>
-                </VStack>
-              </HStack>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-[var(--cmms-text-secondary)]">ความก้าวหน้า</p>
+                  <p className="font-bold">{checklist.filter((i) => (i.type === "value" ? i.value.trim() !== "" : i.status !== null)).length} / {checklist.length} ข้อ</p>
+                </div>
+              </div>
             </div>
 
             {/* รายการตรวจ */}
-            <VStack gap={0}>
+            <div>
               {checklist.map((item, index) => {
                 const isNg = item.status === "fail";
                 return (
                   <div
                     key={item.id}
+                    className="p-5"
                     style={{
-                      padding: 20,
-                      borderBottom: index < checklist.length - 1 ? "1px solid var(--color-border)" : "none",
-                      backgroundColor: isNg ? "var(--color-error-wash)" : item.status === "pass" ? "var(--color-success-wash)" : "transparent",
+                      borderBottom: index < checklist.length - 1 ? "1px solid var(--cmms-border)" : "none",
+                      backgroundColor: isNg ? "var(--cmms-danger-light)" : item.status === "pass" ? "var(--cmms-success-light)" : "transparent",
                     }}
                   >
-                    <VStack gap={3}>
-                      <HStack hAlign="between" vAlign="start" gap={3}>
-                        <HStack gap={3} vAlign="start">
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "var(--color-muted)", color: "var(--color-secondary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", flexShrink: 0 }}>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-bold" style={{ backgroundColor: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {index + 1}
                           </div>
-                          <VStack gap={1}>
-                            <Text type="body" weight="semibold">{item.task}</Text>
+                          <div className="min-w-0 space-y-1">
+                            <p className="font-semibold">{item.task}</p>
                             {item.type === "value" && (
-                              <div style={{ marginTop: 6, width: 200 }}>
-                                <TextInput
+                              <div className="mt-1.5 w-[200px] max-w-full">
+                                <Input
                                   label="ค่า"
                                   isLabelHidden
                                   placeholder="ระบุค่าตัวเลข..."
                                   value={item.value}
-                                  onChange={(v) => handleValue(item.id, v)}
+                                  onChange={(e) => handleValue(item.id, e.target.value)}
                                 />
                               </div>
                             )}
-                          </VStack>
-                        </HStack>
+                          </div>
+                        </div>
 
                         {item.type === "check" && (
-                          <HStack gap={2}>
+                          <div className="flex shrink-0 gap-2">
                             <button
                               onClick={() => handleStatus(item.id, "pass")}
+                              className="flex items-center gap-1.5 rounded-[10px] border px-4 py-2 font-semibold"
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
-                                background: item.status === "pass" ? "var(--cmms-success)" : "var(--color-surface)",
-                                color: item.status === "pass" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "pass" ? "transparent" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer", boxShadow: item.status === "pass" ? "0 4px 12px rgba(5,150,105,0.3)" : "none",
+                                background: item.status === "pass" ? "var(--cmms-success)" : "var(--cmms-bg-card)",
+                                color: item.status === "pass" ? "#fff" : "var(--cmms-text-secondary)",
+                                borderColor: item.status === "pass" ? "transparent" : "var(--cmms-border)",
+                                cursor: "pointer",
+                                boxShadow: item.status === "pass" ? "0 4px 12px rgba(5,150,105,0.3)" : "none",
                               }}
                             >
-                              <CheckCircleIcon className="w-4 h-4" /> ผ่าน
+                              <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" /> ผ่าน
                             </button>
                             <button
                               onClick={() => handleStatus(item.id, "fail")}
+                              className="flex items-center gap-1.5 rounded-[10px] border px-4 py-2 font-semibold"
                               style={{
-                                display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 10,
-                                background: item.status === "fail" ? "var(--cmms-danger)" : "var(--color-surface)",
-                                color: item.status === "fail" ? "#fff" : "var(--color-secondary)",
-                                border: `1px solid ${item.status === "fail" ? "transparent" : "var(--color-border)"}`,
-                                fontWeight: 600, cursor: "pointer", boxShadow: item.status === "fail" ? "0 4px 12px rgba(220,38,38,0.3)" : "none",
+                                background: item.status === "fail" ? "var(--cmms-danger)" : "var(--cmms-bg-card)",
+                                color: item.status === "fail" ? "#fff" : "var(--cmms-text-secondary)",
+                                borderColor: item.status === "fail" ? "transparent" : "var(--cmms-border)",
+                                cursor: "pointer",
+                                boxShadow: item.status === "fail" ? "0 4px 12px rgba(220,38,38,0.3)" : "none",
                               }}
                             >
-                              <XCircleIcon className="w-4 h-4" /> ไม่ผ่าน
+                              <XCircle size={16} strokeWidth={1.75} aria-hidden="true" /> ไม่ผ่าน
                             </button>
-                          </HStack>
+                          </div>
                         )}
-                      </HStack>
+                      </div>
 
                       {isNg && (
-                        <div style={{ marginLeft: 40, padding: 14, backgroundColor: "var(--color-surface)", borderRadius: 8, border: "1px dashed var(--color-error)" }}>
-                          <VStack gap={3}>
-                            <HStack gap={2} vAlign="center">
-                              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--color-error)" }} />
-                              <Text type="body" weight="semibold" style={{ color: "var(--color-error)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด</Text>
-                            </HStack>
-                            <FormLayout>
-                              <Field inputID="ng-note" label="สาเหตุที่พบ / หมายเหตุ *">
-                                <TextArea
-                                  label="สาเหตุที่พบ / หมายเหตุ"
-                                  placeholder="อธิบายอาการผิดปกติที่พบ..."
-                                  value={item.note}
-                                  onChange={(v) => handleNote(item.id, v)}
-                                />
-                              </Field>
-                            </FormLayout>
-                          </VStack>
+                        <div className="ml-0 space-y-3 rounded-lg border border-dashed p-3.5 sm:ml-10" style={{ backgroundColor: "var(--cmms-bg-card)", borderColor: "var(--cmms-danger)" }}>
+                          <div className="flex items-center gap-2">
+                            <TriangleAlert size={16} strokeWidth={1.75} style={{ color: "var(--cmms-danger)" }} aria-hidden="true" />
+                            <p className="font-semibold" style={{ color: "var(--cmms-danger)" }}>พบความผิดปกติ (NG) — ระบุรายละเอียด</p>
+                          </div>
+                          <Textarea
+                            label="สาเหตุที่พบ / หมายเหตุ *"
+                            placeholder="อธิบายอาการผิดปกติที่พบ..."
+                            value={item.note}
+                            onChange={(e) => handleNote(item.id, e.target.value)}
+                          />
                         </div>
                       )}
-                    </VStack>
+                    </div>
                   </div>
                 );
               })}
-            </VStack>
+            </div>
 
             {/* footer */}
-            <div style={{ padding: 20, backgroundColor: "var(--color-muted)", borderTop: "1px solid var(--color-border)" }}>
-              <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-                <Text type="body" color="secondary">ตรวจสอบให้ครบทุกข้อก่อนบันทึก</Text>
-                <HStack gap={2} wrap="wrap">
+            <div className="p-5" style={{ backgroundColor: "var(--cmms-bg-muted)", borderTop: "1px solid var(--cmms-border)" }}>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-[var(--cmms-text-secondary)]">ตรวจสอบให้ครบทุกข้อก่อนบันทึก</p>
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     disabled={pdfBusy}
                     onClick={handleDownloadPdf}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-success disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white cmms-btn-success disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <ArrowDownTrayIcon className="w-4 h-4" />
+                    <Download size={16} strokeWidth={1.75} aria-hidden="true" />
                     {pdfBusy ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF ใบตรวจเช็ค"}
                   </button>
                   <button
                     type="button"
                     disabled={submitting || !allFilled}
                     onClick={handleSubmit}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                    <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
                     {submitting ? "กำลังส่งข้อมูล..." : "บันทึกผลการทำ PM"}
                   </button>
-                </HStack>
-              </HStack>
+                </div>
+              </div>
             </div>
           </Card>
 
@@ -787,89 +780,81 @@ export default function PMChecksheetPage() {
       )}
 
       {/* ── ลายเซ็นยืนยันการทำ PM: ผู้ตรวจเช็ค + ผู้ควบคุมเครื่อง ── */}
-      <AnimatedDialog open={sigModalOpen && !!selectedPlan} onClose={() => { if (!submitting) setSigModalOpen(false); }}>
+      <Dialog
+        open={sigModalOpen && !!selectedPlan}
+        onClose={() => { if (!submitting) setSigModalOpen(false); }}
+        title={selectedPlan ? `ลงนามยืนยันการทำ PM: ${selectedPlan.title}` : ""}
+      >
         {selectedPlan && (
-          <>
-          <DialogHeader title={`ลงนามยืนยันการทำ PM: ${selectedPlan.title}`} />
-          <VStack gap={4} style={{ padding: 24 }}>
-            <Grid columns={2} gap={4}>
-              <Field label={!!Number(selectedPlan.is_outsource) ? `ลายเซ็นผู้ตรวจเช็ค (บริษัทภายนอก: ${selectedPlan.outsource_by || "-"}) *` : `ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`} inputID="inspectorSigCanvas">
-                <VStack gap={1}>
-                  {renderSigCanvas("inspector")}
-                  <HStack hAlign="between" vAlign="center">
-                    <Text type="body" size="sm" color="secondary">วาดด้วยเมาส์/นิ้ว</Text>
-                    <button type="button" onClick={() => clearSig("inspector")} className="text-xs text-slate-500 underline">ล้าง</button>
-                  </HStack>
-                </VStack>
-              </Field>
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto p-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">
+                  {!!Number(selectedPlan.is_outsource) ? `ลายเซ็นผู้ตรวจเช็ค (บริษัทภายนอก: ${selectedPlan.outsource_by || "-"}) *` : `ลายเซ็นผู้ตรวจเช็ค (ผู้ปฏิบัติงาน: ${currentUserName || "-"}) *`}
+                </label>
+                {renderSigCanvas("inspector")}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--cmms-text-secondary)]">วาดด้วยเมาส์/นิ้ว</span>
+                  <button type="button" onClick={() => clearSig("inspector")} className="text-xs underline" style={{ color: "var(--cmms-text-muted)" }}>ล้าง</button>
+                </div>
+              </div>
 
-              <Field label="ลายเซ็นผู้ควบคุมเครื่อง *" inputID="operatorSigCanvas">
-                <VStack gap={1}>
-                  {renderSigCanvas("operator")}
-                  <HStack hAlign="between" vAlign="center">
-                    <Text type="body" size="sm" color="secondary">วาดด้วยเมาส์/นิ้ว</Text>
-                    <button type="button" onClick={() => clearSig("operator")} className="text-xs text-slate-500 underline">ล้าง</button>
-                  </HStack>
-                  <TextInput
-                    label="ชื่อผู้ควบคุมเครื่อง"
-                    isLabelHidden
-                    placeholder="กรอกชื่อผู้ควบคุมเครื่อง..."
-                    value={operatorName}
-                    onChange={setOperatorName}
-                  />
-                </VStack>
-              </Field>
-            </Grid>
+              <div className="space-y-1">
+                <label htmlFor="operator-name-input" className="text-sm font-medium text-[var(--cmms-text-primary)]">ลายเซ็นผู้ควบคุมเครื่อง *</label>
+                {renderSigCanvas("operator")}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--cmms-text-secondary)]">วาดด้วยเมาส์/นิ้ว</span>
+                  <button type="button" onClick={() => clearSig("operator")} className="text-xs underline" style={{ color: "var(--cmms-text-muted)" }}>ล้าง</button>
+                </div>
+                <Input
+                  id="operator-name-input"
+                  label="ชื่อผู้ควบคุมเครื่อง"
+                  isLabelHidden
+                  placeholder="กรอกชื่อผู้ควบคุมเครื่อง..."
+                  value={operatorName}
+                  onChange={(e) => setOperatorName(e.target.value)}
+                />
+              </div>
+            </div>
 
             {(!inspectorSig.trim() || !operatorSig.trim() || !operatorName.trim()) && (
-              <HStack gap={2} vAlign="center">
-                <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--cmms-danger)" }} />
-                <Text type="body" size="sm" weight="semibold" style={{ color: "var(--cmms-danger)" }}>
+              <div className="flex items-center gap-2">
+                <TriangleAlert size={16} strokeWidth={1.75} style={{ color: "var(--cmms-danger)" }} aria-hidden="true" />
+                <p className="text-sm font-semibold" style={{ color: "var(--cmms-danger)" }}>
                   กรุณาเซ็นครบทั้ง 2 ช่อง และกรอกชื่อผู้ควบคุมเครื่อง ก่อนบันทึกผล
-                </Text>
-              </HStack>
+                </p>
+              </div>
             )}
 
             {inspectorSig.trim() && operatorSig.trim() && (
-              <HStack gap={3} vAlign="center">
+              <div className="flex flex-wrap items-center gap-3">
                 {inspectorSig && (
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" color="secondary">ผู้ตรวจเช็ค</Text>
-                    <img src={inspectorSig} alt="ลายเซ็นผู้ตรวจเช็ค" style={{ height: 44, background: "#fff", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
-                  </VStack>
+                  <div className="space-y-1">
+                    <p className="text-sm text-[var(--cmms-text-secondary)]">ผู้ตรวจเช็ค</p>
+                    <img src={inspectorSig} alt="ลายเซ็นผู้ตรวจเช็ค" style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                  </div>
                 )}
                 {operatorSig && (
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" color="secondary">ผู้ควบคุมเครื่อง ({operatorName || "-"})</Text>
-                    <img src={operatorSig} alt="ลายเซ็นผู้ควบคุมเครื่อง" style={{ height: 44, background: "#fff", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
-                  </VStack>
+                  <div className="space-y-1">
+                    <p className="text-sm text-[var(--cmms-text-secondary)]">ผู้ควบคุมเครื่อง ({operatorName || "-"})</p>
+                    <img src={operatorSig} alt="ลายเซ็นผู้ควบคุมเครื่อง" style={{ height: 44, background: "white", borderRadius: 6, border: "1px solid var(--cmms-border)" }} />
+                  </div>
                 )}
-              </HStack>
+              </div>
             )}
 
-            <HStack hAlign="end" gap={2}>
-              <button
-                type="button"
-                onClick={() => setSigModalOpen(false)}
-                disabled={submitting}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50"
-              >
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setSigModalOpen(false)} disabled={submitting}>
                 ยกเลิก
-              </button>
-              <button
-                type="button"
-                onClick={confirmSave}
-                disabled={submitting}
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ClipboardDocumentCheckIcon className="w-4 h-4" />
+              </Button>
+              <Button onClick={confirmSave} disabled={submitting}>
+                <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" />
                 {submitting ? "กำลังบันทึก..." : "ยืนยันและบันทึกผล PM"}
-              </button>
-            </HStack>
-          </VStack>
-          </>
+              </Button>
+            </div>
+          </div>
         )}
-        </AnimatedDialog>
-    </VStack>
+      </Dialog>
+    </div>
   );
 }

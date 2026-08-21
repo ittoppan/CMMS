@@ -2,21 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Switch } from "@astryxdesign/core/Switch";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";
-
-type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
 export default function PMCreatePage() {
   const router = useRouter();
-  
+
   const [assets, setAssets] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [assetId, setAssetId] = useState("");
@@ -28,7 +24,7 @@ export default function PMCreatePage() {
   const [outsourceBy, setOutsourceBy] = useState("");
   const [costOutsource, setCostOutsource] = useState("");
   const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState<ISODate | undefined>(undefined);
+  const [dueDate, setDueDate] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -111,147 +107,154 @@ export default function PMCreatePage() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM PLAN · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>สร้างแผนบำรุงรักษาเครื่องจักร</Heading>
+    <div className="space-y-6">
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM PLAN · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>สร้างแผนบำรุงรักษาเครื่องจักร</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               PM Plan
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             กำหนดแผนบำรุงรักษาเชิงป้องกัน (Preventive Maintenance) สำหรับเครื่องจักร
-          </Text>
-        </VStack>
+          </p>
+        </div>
       </div>
 
-      <Card padding={6}>
-        <VStack gap={5} style={{ maxWidth: 640 }}>
-          {error && (
-            <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-              {error}
-            </div>
-          )}
+      <Card>
+        <CardContent className="max-w-[640px] space-y-5 p-6">
+          {error && <Alert variant="danger" description={error} />}
 
-          <TextInput label="ชื่องาน PM *"
+          <Input
+            label="ชื่องาน PM *"
             placeholder="เช่น ตรวจเช็คสายพานมอเตอร์ประจำเดือน"
             value={title}
-            onChange={setTitle}  />
-
-          <Selector
-            label="เครื่องจักรเป้าหมาย *"
-            placeholder="เลือกเครื่องจักร..."
-            value={assetId}
-            onChange={setAssetId}
-            options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
+            onChange={(e) => setTitle(e.target.value)}
           />
 
-          <Selector
-            label="ผู้รับผิดชอบ (ช่าง) *"
-            placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..."
-            value={assignedTo}
-            onChange={setAssignedTo}
-            options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}` }))}
-          />
+          <div className="space-y-1.5">
+            <label htmlFor="pm-create-asset" className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักรเป้าหมาย *</label>
+            <Select
+              id="pm-create-asset"
+              aria-label="เครื่องจักรเป้าหมาย"
+              value={assetId}
+              onChange={(e) => setAssetId(e.target.value)}
+            >
+              <option value="">เลือกเครื่องจักร...</option>
+              {assets.map(a => (
+                <option key={a.id} value={String(a.id)}>{`${a.code} - ${a.name}`}</option>
+              ))}
+            </Select>
+          </div>
 
-          <VStack gap={1}>
-            <Text type="body" weight="bold">ทีมผู้ปฏิบัติงาน (เลือกเพิ่มได้หลายคน)</Text>
-            <Text type="body" size="sm" color="secondary">ช่างที่เลือกจะเห็นงาน PM นี้ใน "งานของฉัน" — ไม่บังคับ</Text>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 6, maxHeight: 180, overflowY: "auto", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 8 }}>
+          <div className="space-y-1.5">
+            <label htmlFor="pm-create-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง) *</label>
+            <Select
+              id="pm-create-assignee"
+              aria-label="ผู้รับผิดชอบ"
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+            >
+              <option value="">เลือกช่างที่รับผิดชอบงาน PM นี้...</option>
+              {users.map(u => (
+                <option key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <p className="font-bold">ทีมผู้ปฏิบัติงาน (เลือกเพิ่มได้หลายคน)</p>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">ช่างที่เลือกจะเห็นงาน PM นี้ใน &quot;งานของฉัน&quot; — ไม่บังคับ</p>
+            <div className="grid max-h-[180px] gap-1.5 overflow-y-auto rounded-[10px] border p-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", borderColor: "var(--cmms-border)" }}>
               {users
                 .filter(u => String(u.id) !== assignedTo)
                 .map(u => {
                   const tid = Number(u.id);
                   const checked = teamMembers.includes(tid);
                   return (
-                    <label key={u.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 8, cursor: "pointer", background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
+                    <label key={u.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
                       <input type="checkbox" checked={checked} onChange={() => setTeamMembers(prev => checked ? prev.filter(x => x !== tid) : [...prev, tid])} />
-                      <Text type="body" size="sm" weight={checked ? "semibold" : undefined}>{u.full_name || u.username || `#${u.id}`}</Text>
+                      <span className={`text-sm ${checked ? "font-semibold" : ""}`}>{u.full_name || u.username || `#${u.id}`}</span>
                     </label>
                   );
                 })}
             </div>
-          </VStack>
-          
-          <Selector
-            label="รอบความถี่ *"
-            placeholder="เลือกรอบความถี่"
-            value={frequency}
-            onChange={setFrequency}
-            options={[
-              { value: "daily", label: "รายวัน" },
-              { value: "weekly", label: "รายสัปดาห์" },
-              { value: "monthly", label: "รายเดือน" },
-              { value: "quarterly", label: "ทุก 3 เดือน" },
-              { value: "yearly", label: "รายปี" },
-            ]}
-          />
+          </div>
 
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Switch
-              label="งานภายนอก (Outsource)"
-              value={isOutsource}
-              onChange={setIsOutsource}
-            />
-            <Text type="body" size="sm" color="secondary">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM (เช่น ผู้ผลิตเครื่องจักร)</Text>
-          </HStack>
+          <div className="space-y-1.5">
+            <label htmlFor="pm-create-frequency" className="text-sm font-medium text-[var(--cmms-text-primary)]">รอบความถี่ *</label>
+            <Select
+              id="pm-create-frequency"
+              aria-label="รอบความถี่"
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value)}
+            >
+              <option value="daily">รายวัน</option>
+              <option value="weekly">รายสัปดาห์</option>
+              <option value="monthly">รายเดือน</option>
+              <option value="quarterly">ทุก 3 เดือน</option>
+              <option value="yearly">รายปี</option>
+            </Select>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isOutsource}
+                onChange={(e) => setIsOutsource(e.target.checked)}
+                className="h-4 w-4 accent-[var(--cmms-primary)]"
+              />
+              <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
+            </label>
+            <span className="text-sm text-[var(--cmms-text-secondary)]">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM (เช่น ผู้ผลิตเครื่องจักร)</span>
+          </div>
 
           {isOutsource && (
-            <VStack gap={3} style={{ padding: 16, borderRadius: 10, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
-              <TextInput
+            <div className="space-y-3 rounded-[10px] border p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+              <Input
                 label="ชื่อบริษัท/ผู้รับเหมา *"
                 placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
                 value={outsourceBy}
-                onChange={setOutsourceBy}
+                onChange={(e) => setOutsourceBy(e.target.value)}
               />
-              <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">ค่าใช้จ่าย (บาท)</Text>
-                <input
-                  type="number"
-                  min={0}
-                  placeholder="เช่น 25000"
-                  value={costOutsource}
-                  onChange={(e) => setCostOutsource(e.target.value)}
-                  style={{ padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14, width: "100%", boxSizing: "border-box", background: "var(--cmms-bg-card)" }}
-                />
-              </VStack>
-            </VStack>
+              <Input
+                label="ค่าใช้จ่าย (บาท)"
+                type="number"
+                min={0}
+                placeholder="เช่น 25000"
+                value={costOutsource}
+                onChange={(e) => setCostOutsource(e.target.value)}
+              />
+            </div>
           )}
-          
-          <TextArea
+
+          <Textarea
             label="รายละเอียดวิธีตรวจเช็ค"
             placeholder="อธิบายขั้นตอนการตรวจเช็คที่ต้องทำ..."
             value={description}
-            onChange={setDescription}
+            onChange={(e) => setDescription(e.target.value)}
           />
 
-          <DateInput
+          <Input
             label="กำหนดการทำครั้งแรก"
+            type="date"
             value={dueDate}
-            onChange={setDueDate}
+            onChange={(e) => setDueDate(e.target.value)}
           />
 
-          <HStack gap={3} hAlign="end">
-            <button
-              type="button"
-              onClick={() => router.push("/pm_am")}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
-            >
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => router.push("/pm_am")}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={handleSubmit}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            </Button>
+            <Button disabled={loading} onClick={handleSubmit}>
               {loading ? "กำลังบันทึก..." : "บันทึกแผนงาน"}
-            </button>
-          </HStack>
-        </VStack>
+            </Button>
+          </div>
+        </CardContent>
       </Card>
-    </VStack>
+    </div>
   );
 }
