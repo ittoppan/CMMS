@@ -35,7 +35,14 @@ const features = tableFeatures({
   paginatedRowModel: createPaginatedRowModel(),
 });
 
-type TFeatures = typeof features;
+/**
+ * Features object type ของ DataTable (TanStack v9)
+ * ใช้เป็น generic ตัวแรกของ ColumnDef เวลาประกาศ columns นอก component:
+ *   const columns: ColumnDef<UiTableFeatures, WorkOrder>[] = [...]
+ */
+export type UiTableFeatures = typeof features;
+
+type TFeatures = UiTableFeatures;
 
 export interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<TFeatures, TData, unknown>[];

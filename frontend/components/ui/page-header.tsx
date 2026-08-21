@@ -29,9 +29,7 @@ function PageHeader({
     >
       <div className="min-w-0 space-y-1">
         {eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cmms-text-muted)]">
-            {eyebrow}
-          </p>
+          <p className="cmms-eyebrow">{eyebrow}</p>
         )}
         <h1 className="text-2xl font-bold tracking-tight text-[var(--cmms-text-primary)]">
           {title}

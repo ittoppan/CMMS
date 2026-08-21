@@ -2,23 +2,29 @@
 
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
+import Link from "next/link";
 import {
-  HomeIcon,
-  WrenchScrewdriverIcon,
-  DocumentTextIcon,
-  CameraIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+  Home,
+  ChevronRight,
+  Wrench,
+  FileText,
+  Clock,
+  Camera,
+  X,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
+import { Badge } from "@/components/ui/badge";
 import SuccessDialog from "@/components/SuccessDialog";
 
 /* ============================================================
@@ -66,14 +72,6 @@ interface RepairData {
   completed_at: string;
   machine_status: string;
   product_lot_no: string;
-}
-
-interface SparePart {
-  id: number;
-  code: string;
-  name: string;
-  quantity_used: number;
-  unit_price: number;
 }
 
 function EditWorkOrderContent() {
@@ -246,47 +244,52 @@ function EditWorkOrderContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <Breadcrumbs>
-        <BreadcrumbItem href="/repair" startIcon={<HomeIcon />}>ใบแจ้งซ่อม</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>บันทึกข้อมูลซ่อม</BreadcrumbItem>
-      </Breadcrumbs>
+    <div className="space-y-6 max-w-4xl">
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <Link href="/repair" className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+          <Home className="w-4 h-4" />
+          <span>ใบแจ้งซ่อม</span>
+        </Link>
+        <ChevronRight className="w-4 h-4 text-slate-400" />
+        <span className="font-medium text-slate-900 dark:text-slate-100" aria-current="page">
+          บันทึกข้อมูลซ่อม
+        </span>
+      </nav>
 
-      {/* Header */}
-      <div className="cmms-page-hero" style={{ borderRadius: 12 }}>
-        <HStack gap={3} vAlign="center">
-          <WrenchScrewdriverIcon className="w-6 h-6" style={{ color: "#fff" }} />
-          <VStack gap={0}>
-            <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>F-EN-03 · บันทึกข้อมูลซ่อม</Text>
-            <Heading level={3} style={{ color: "#fff", margin: 0 }}>
-              {woData?.work_order_no || `WO-${woId}`} — {woData?.asset_name || woData?.asset_code || ""}
-            </Heading>
-          </VStack>
-        </HStack>
+      {/* Page Header */}
+      <div>
+        <p className="cmms-eyebrow">F-EN-03 · MAINTAIN RECORD</p>
+        <PageHeader
+          title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
+          description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"
+        />
       </div>
 
       {loadingData ? (
-        <HStack hAlign="center" style={{ padding: 40 }}>
-          <Spinner size="md" />
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        </HStack>
+        <div className="flex items-center justify-center gap-3 p-12 text-slate-500">
+          <Spinner size={24} />
+          <span>กำลังโหลดข้อมูล...</span>
+        </div>
       ) : (
-        <VStack gap={5} style={{ maxWidth: 900 }}>
+        <div className="space-y-6 max-w-3xl">
           {error && (
-            <div style={{ padding: "12px 16px", borderRadius: 8, background: "var(--cmms-danger-light)", color: "var(--cmms-danger)", fontSize: "0.85rem", fontWeight: 600 }}>
+            <Alert variant="danger" title="ข้อผิดพลาด">
               {error}
-            </div>
+            </Alert>
           )}
 
           {/* ── ส่วนที่ 1: สรุปข้อมูลจากผู้แจ้ง (อ่านอย่างเดียว) ── */}
-          <Card padding={5}>
-            <VStack gap={4}>
-              <HStack gap={2} vAlign="center">
-                <DocumentTextIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={4} style={{ margin: 0 }}>ข้อมูลจากผู้แจ้ง</Heading>
-                <Text type="body" size="sm" color="secondary">(อ่านอย่างเดียว)</Text>
-              </HStack>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px 24px" }}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <span>ข้อมูลจากผู้แจ้ง</span>
+                <span className="text-xs font-normal text-slate-400">(อ่านอย่างเดียว)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                 <InfoRow label="ผู้แจ้ง" value={woData?.receiver_name || "-"} />
                 <InfoRow label="เครื่องจักร" value={`${woData?.asset_code || "-"} ${woData?.asset_name || ""}`} />
                 <InfoRow label="สถานะเครื่อง" value={woData?.machine_status || "-"} />
@@ -294,277 +297,241 @@ function EditWorkOrderContent() {
                 <InfoRow label="รายละเอียดปัญหา" value={woData?.description || "-"} />
                 <InfoRow label="Lot No." value={woData?.product_lot_no || "-"} />
               </div>
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* ── ส่วนที่ 2: ข้อมูลช่างกรอก ── */}
-          <Card padding={5}>
-            <VStack gap={5}>
-              <HStack gap={2} vAlign="center">
-                <WrenchScrewdriverIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={4} style={{ margin: 0 }}>ข้อมูลซ่อม (ช่างกรอก)</Heading>
-              </HStack>
-
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <span>ข้อมูลซ่อม (ช่างกรอก)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
               {/* Status + Priority */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <Selector
-                  label="สถานะงาน (Job Status)"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  label="สถานะงาน (Job Status) *"
                   value={status}
-                  onChange={setStatus}
-                  options={[
-                    { value: "open", label: "เปิดงาน / รอดำเนินการ" },
-                    { value: "in_progress", label: "กำลังซ่อม" },
-                    { value: "waiting_parts", label: "รออะไหล่" },
-                    { value: "completed", label: "ซ่อมเสร็จแล้ว" },
-                    { value: "cancelled", label: "ยกเลิก" },
-                  ]}
-                />
-                <Selector
-                  label="ความสำคัญ (Priority)"
+                  onChange={(e) => setStatus(e.target.value)}
+                >
+                  <option value="open">เปิดงาน / รอดำเนินการ</option>
+                  <option value="in_progress">กำลังซ่อม</option>
+                  <option value="waiting_parts">รออะไหล่</option>
+                  <option value="completed">ซ่อมเสร็จแล้ว</option>
+                  <option value="cancelled">ยกเลิก</option>
+                </Select>
+
+                <Select
+                  label="ความสำคัญ (Priority) *"
                   value={priority}
-                  onChange={setPriority}
-                  options={[
-                    { value: "critical", label: "วิกฤต (Critical)" },
-                    { value: "high", label: "ด่วน (High)" },
-                    { value: "medium", label: "ปานกลาง (Medium)" },
-                    { value: "low", label: "ต่ำ (Low)" },
-                  ]}
-                />
+                  onChange={(e) => setPriority(e.target.value)}
+                >
+                  <option value="critical">วิกฤต (Critical)</option>
+                  <option value="high">ด่วน (High)</option>
+                  <option value="medium">ปานกลาง (Medium)</option>
+                  <option value="low">ต่ำ (Low)</option>
+                </Select>
               </div>
 
               {/* Root Cause */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  Root Cause (สาเหตุของปัญหา) <span style={{ color: "var(--cmms-danger)" }}>*</span>
-                </Text>
-                <TextArea
-                  label="Root Cause"
-                  isLabelHidden
-                  placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ..."
-                  value={rootCause}
-                  onChange={setRootCause}
-                  rows={3}
-                />
-              </div>
+              <Textarea
+                label="Root Cause (สาเหตุของปัญหา) *"
+                placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ..."
+                value={rootCause}
+                onChange={(e) => setRootCause(e.target.value)}
+                rows={3}
+              />
 
               {/* Maintenance Description */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  Maintenance Description (รายละเอียดการซ่อม) <span style={{ color: "var(--cmms-danger)" }}>*</span>
-                </Text>
-                <TextArea
-                  label="Maintenance Description"
-                  isLabelHidden
-                  placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด..."
-                  value={maintenanceDesc}
-                  onChange={setMaintenanceDesc}
-                  rows={3}
-                />
-              </div>
+              <Textarea
+                label="Maintenance Description (รายละเอียดการซ่อม) *"
+                placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด..."
+                value={maintenanceDesc}
+                onChange={(e) => setMaintenanceDesc(e.target.value)}
+                rows={3}
+              />
 
               {/* Maintenance Note */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  Maintenance Note (บันทึกการซ่อม)
-                </Text>
-                <TextArea
-                  label="Maintenance Note"
-                  isLabelHidden
-                  placeholder="บันทึกข้อมูลเพิ่มเติม เช่น ข้อควรระวัง, ควรตรวจสอบอีกครั้ง..."
-                  value={maintenanceNote}
-                  onChange={setMaintenanceNote}
-                  rows={2}
-                />
-              </div>
+              <Textarea
+                label="Maintenance Note (บันทึกการซ่อม)"
+                placeholder="บันทึกข้อมูลเพิ่มเติม เช่น ข้อควรระวัง, ควรตรวจสอบอีกครั้ง..."
+                value={maintenanceNote}
+                onChange={(e) => setMaintenanceNote(e.target.value)}
+                rows={2}
+              />
 
               {/* MTN. Action */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  MTN. Action (การดำเนินการ)
-                </Text>
-                <TextArea
-                  label="MTN. Action"
-                  isLabelHidden
-                  placeholder="ระบุการดำเนินการที่ทำ เช่น ซ่อมแซม, ปรับเปลี่ยน, ทดสอบ..."
-                  value={mtnAction}
-                  onChange={setMtnAction}
-                  rows={2}
-                />
-              </div>
+              <Textarea
+                label="MTN. Action (การดำเนินการ)"
+                placeholder="ระบุการดำเนินการที่ทำ เช่น ซ่อมแซม, ปรับเปลี่ยน, ทดสอบ..."
+                value={mtnAction}
+                onChange={(e) => setMtnAction(e.target.value)}
+                rows={2}
+              />
 
               {/* Contaminate Checking */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  Contaminate Checking (ตรวจสอบการปนเปื้อน) <span style={{ color: "var(--cmms-danger)" }}>*</span>
-                </Text>
-                <Selector
-                  label="ตรวจสอบการปนเปื้อน"
-                  isLabelHidden
-                  value={contaminateChecking}
-                  onChange={setContaminateChecking}
-                  options={[
-                    { value: "not_checked", label: "ยังไม่ตรวจ" },
-                    { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
-                    { value: "contaminated", label: "พบการปนเปื้อน" },
-                    { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
-                  ]}
-                />
-              </div>
+              <Select
+                label="Contaminate Checking (ตรวจสอบการปนเปื้อน) *"
+                value={contaminateChecking}
+                onChange={(e) => setContaminateChecking(e.target.value)}
+              >
+                <option value="not_checked">ยังไม่ตรวจ</option>
+                <option value="clean">ไม่พบการปนเปื้อน (ผ่าน)</option>
+                <option value="contaminated">พบการปนเปื้อน</option>
+                <option value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</option>
+              </Select>
 
               {/* Outsource By */}
-              <div>
-                <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                  Outsource By (ภายนอก โดย)
-                </Text>
-                <TextInput
-                  label="Outsource By"
-                  isLabelHidden
-                  placeholder="ระบุชื่อบริษัท/ผู้รับเหมาภายนอก (ถ้ามี)"
-                  value={outsourceBy}
-                  onChange={setOutsourceBy}
-                />
-              </div>
-            </VStack>
+              <Input
+                label="Outsource By (ภายนอก โดย)"
+                placeholder="ระบุชื่อบริษัท/ผู้รับเหมาภายนอก (ถ้ามี)"
+                value={outsourceBy}
+                onChange={(e) => setOutsourceBy(e.target.value)}
+              />
+            </CardContent>
           </Card>
 
           {/* ── ส่วนที่ 3: เวลาและค่าใช้จ่าย ── */}
-          <Card padding={5}>
-            <VStack gap={4}>
-              <HStack gap={2} vAlign="center">
-                <ClockIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={4} style={{ margin: 0 }}>เวลาและค่าใช้จ่าย</Heading>
-              </HStack>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div>
-                  <Text type="body" weight="bold" style={{ marginBottom: 8 }}>Start Date/Time (วันที่เริ่มซ่อม)</Text>
-                  <input
-                    type="datetime-local"
-                    value={downtimeStart ? downtimeStart.slice(0, 16) : ""}
-                    onChange={(e) => setDowntimeStart(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
-                  />
-                </div>
-                <div>
-                  <Text type="body" weight="bold" style={{ marginBottom: 8 }}>Finish Date/Time (วันที่เสร็จซ่อม)</Text>
-                  <input
-                    type="datetime-local"
-                    value={downtimeEnd ? downtimeEnd.slice(0, 16) : ""}
-                    onChange={(e) => setDowntimeEnd(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
-                  />
-                </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Clock className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <span>เวลาและค่าใช้จ่าย</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  type="datetime-local"
+                  label="Start Date/Time (วันที่เริ่มซ่อม)"
+                  value={downtimeStart ? downtimeStart.slice(0, 16) : ""}
+                  onChange={(e) =>
+                    setDowntimeStart(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")
+                  }
+                />
+                <Input
+                  type="datetime-local"
+                  label="Finish Date/Time (วันที่เสร็จซ่อม)"
+                  value={downtimeEnd ? downtimeEnd.slice(0, 16) : ""}
+                  onChange={(e) =>
+                    setDowntimeEnd(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")
+                  }
+                />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-                <div>
-                  <Text type="body" weight="bold" style={{ marginBottom: 8 }}>BD. Time (เวลาหยุดเครื่อง — นาที)</Text>
-                  <input
-                    type="number"
-                    value={downtimeMinutes || ""}
-                    onChange={(e) => setDowntimeMinutes(Number(e.target.value) || 0)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
-                  />
-                </div>
-                <div>
-                  <Text type="body" weight="bold" style={{ marginBottom: 8 }}>Cost Parts (ค่าอะไหล่ — บาท)</Text>
-                  <input
-                    type="number"
-                    value={costParts || ""}
-                    onChange={(e) => setCostParts(Number(e.target.value) || 0)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
-                  />
-                </div>
-                <div>
-                  <Text type="body" weight="bold" style={{ marginBottom: 8 }}>Cost Labor (ค่าแรง — บาท)</Text>
-                  <input
-                    type="number"
-                    value={costLabor || ""}
-                    onChange={(e) => setCostLabor(Number(e.target.value) || 0)}
-                    style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", fontSize: 14 }}
-                  />
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Input
+                  type="number"
+                  label="BD. Time (เวลาหยุดเครื่อง — นาที)"
+                  value={downtimeMinutes || ""}
+                  onChange={(e) => setDowntimeMinutes(Number(e.target.value) || 0)}
+                />
+                <Input
+                  type="number"
+                  label="Cost Parts (ค่าอะไหล่ — บาท)"
+                  value={costParts || ""}
+                  onChange={(e) => setCostParts(Number(e.target.value) || 0)}
+                />
+                <Input
+                  type="number"
+                  label="Cost Labor (ค่าแรง — บาท)"
+                  value={costLabor || ""}
+                  onChange={(e) => setCostLabor(Number(e.target.value) || 0)}
+                />
               </div>
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* ── ส่วนที่ 4: รูปหลังซ่อม ── */}
-          <Card padding={5}>
-            <VStack gap={4}>
-              <HStack gap={2} vAlign="center">
-                <CameraIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={4} style={{ margin: 0 }}>รูปหลังซ่อม (After Image)</Heading>
-              </HStack>
-
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Camera className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <span>รูปหลังซ่อม (After Image)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <input
                 ref={afterImageRef}
                 type="file"
                 accept="image/*"
                 multiple
                 capture="environment"
-                style={{ display: "none" }}
-                onChange={(e) => { addAfterImages(e.target.files); e.target.value = ""; }}
+                className="hidden"
+                onChange={(e) => {
+                  addAfterImages(e.target.files);
+                  e.target.value = "";
+                }}
               />
 
-              <div className="cmms-photo-grid">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {afterImages.map((p, i) => (
-                  <div key={i} className="cmms-photo-thumb">
-                    <img src={p} alt={`รูปหลังซ่อม ${i + 1}`} />
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 group">
+                    <img src={p} alt={`รูปหลังซ่อม ${i + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      className="cmms-photo-remove"
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/70 text-white hover:bg-slate-900 transition-colors"
                       onClick={() => setAfterImages(afterImages.filter((_, x) => x !== i))}
                     >
-                      <XMarkIcon style={{ width: 14, height: 14 }} />
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
                 {afterImages.length < 5 && (
-                  <button type="button" className="cmms-photo-add" onClick={() => afterImageRef.current?.click()}>
-                    <CameraIcon style={{ width: 24, height: 24 }} />
-                    <Text type="body" size="2xs" weight="bold">ถ่าย / เลือกรูป</Text>
+                  <button
+                    type="button"
+                    className="aspect-square rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 dark:hover:border-sky-400 flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 bg-slate-50/50 dark:bg-slate-800/50 transition-colors"
+                    onClick={() => afterImageRef.current?.click()}
+                  >
+                    <Camera className="w-6 h-6" />
+                    <span className="text-xs font-semibold">ถ่าย / เลือกรูป</span>
                   </button>
                 )}
               </div>
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* ── ปุ่มบันทึก ── */}
-          <HStack gap={3} hAlign="end">
-            <button
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--cmms-border)]">
+            <Button
               type="button"
+              variant="outline"
               onClick={() => router.push("/repair")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              disabled={submitting}
             >
               ยกเลิก
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="primary"
               onClick={handleSubmit}
               disabled={submitting}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="gap-2"
             >
-              {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูลซ่อม"}
-            </button>
-          </HStack>
-        </VStack>
+              <Save className="w-4 h-4" />
+              <span>{submitting ? "กำลังบันทึก..." : "บันทึกข้อมูลซ่อม"}</span>
+            </Button>
+          </div>
+        </div>
       )}
-    </VStack>
+    </div>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <Text type="body" size="sm" color="secondary">{label}</Text>
-      <Text type="body" size="sm" weight="bold">{value}</Text>
+      <span className="block text-xs text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="font-semibold text-slate-900 dark:text-slate-100">{value}</span>
     </div>
   );
 }
 
 export default function EditWorkOrderPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<div className="p-8 text-slate-500">กำลังโหลด...</div>}>
       <EditWorkOrderContent />
     </Suspense>
   );

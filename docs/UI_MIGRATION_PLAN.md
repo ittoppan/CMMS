@@ -71,10 +71,10 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
 |---|---|---|---|---|---|
 | `/repair` (list) | Astryx Table + fetch useEffect + Spinner | TanStack Table + react-query + Skeleton + EmptyState + filter/search | P0 | 0.x, 1.x | ✅ |
-| `/repair/create` | useState ฟอร์ม + offlineQueue + SuccessDialog | RHF+zod + FormField + offline queue (เก็บ) | P0 | 0.x, 1.x | ⬜ |
-| `/repair/my_tasks` (981 บรรทัด) | ฟอร์ม/รายการ + offline snapshot | แยก component + RHF + offline (เก็บ) | P0 | 0.x, 1.x | ⬜ |
-| `/repair/view` | detail + WorkOrderClosureDocument PDF | tokens cleanup + PDF (เก็บ) + ตารางมือทำ → Table | P0 | 0.x, 1.x | ⬜ |
-| `/repair/edit` | Suspense + ?id= | RHF + zod | P1 | 0.x, 1.x | ⬜ |
+| `/repair/create` | useState ฟอร์ม + offlineQueue + SuccessDialog | RHF+zod + FormField + offline queue (เก็บ) | P0 | 0.x, 1.x | ✅ |
+| `/repair/my_tasks` (981 บรรทัด) | ฟอร์ม/รายการ + offline snapshot | DataTable v9 + ui kit + Lucide (offline/AndonLamp/signature เก็บ) | P0 | 0.x, 1.x | ✅ |
+| `/repair/view` | detail + WorkOrderClosureDocument PDF | tokens cleanup + PDF (เก็บ) + ตารางมือทำ → Tailwind | P0 | 0.x, 1.x | ✅ |
+| `/repair/edit` | Suspense + ?id= | RHF + zod + ui kit + Lucide | P1 | 0.x, 1.x | ✅ |
 | `/repair/kanban` | KanbanItem + priorityTone inline | tokens + Lucide + a11y | P1 | 0.x, 1.x | ⬜ |
 | `/repair/tracking` | สถานะสด + rating dialog | tokens + Dialog มาตรฐาน | P1 | 0.x, 1.x | ⬜ |
 | `/repair/history` | Table + CountUp + pagination | TanStack Table + tokens | P1 | 0.x, 1.x | ⬜ |

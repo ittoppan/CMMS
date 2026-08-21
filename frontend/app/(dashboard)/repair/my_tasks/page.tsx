@@ -1,45 +1,41 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
 import AnimatedDialog from "@/components/AnimatedDialog";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { FileInput } from "@astryxdesign/core/FileInput";
-import { Switch } from "@astryxdesign/core/Switch";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Button } from "@astryxdesign/core/Button";
-import { useRouter } from "next/navigation";
-import { 
-  CheckCircleIcon,
-  PlayIcon,
-  CheckIcon,
-  CalendarIcon,
-  EyeIcon,
-  CameraIcon,
-  PencilIcon,
-  TrashIcon,
-  WrenchScrewdriverIcon,
-  ClockIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
+import { DialogHeader } from "@astryxdesign/core/Dialog";
+import { type ColumnDef } from "@tanstack/react-table";
+import {
+  CheckCircle2,
+  Play,
+  Check,
+  Calendar,
+  Eye,
+  Camera,
+  Trash2,
+  Wrench,
+  Clock,
+  RefreshCw,
+  AlertTriangle,
+  RotateCcw,
+} from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
+import { Badge } from "@/components/ui/badge";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 
 interface TaskItem extends Record<string, unknown> {
   rawId: number;
@@ -82,23 +78,21 @@ export default function MyTasksPage() {
   const [offline, setOffline] = useState(false);
   const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
   const [retryMsg, setRetryMsg] = useState("");
-  // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
   const [onlineBack, setOnlineBack] = useState(false);
   const offlineRef = useRef(false);
-  // tick เวลาปัจจุบัน — อัปเดต "กี่นาทีที่แล้ว" บน banner ทุก 30 วิ
   const [now, setNow] = useState(() => Date.now());
+
   useEffect(() => {
     const iv = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(iv);
   }, []);
+
   const [closeModalOpen, setCloseModalOpen] = useState(false);
-  const [etaModalOpen, setEtaModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   // Close Work Order Form State
   const [failureCode, setFailureCode] = useState("");
   const [repairCode, setRepairCode] = useState("");
-  // รหัส F/R จริงจากตาราง failure_codes / repair_codes (API ?reference=codes)
   const [failureCodes, setFailureCodes] = useState<{ id: number; code: string; name: string }[]>([]);
   const [repairCodes, setRepairCodes] = useState<{ id: number; code: string; name: string }[]>([]);
   const [rootCause, setRootCause] = useState("");
@@ -108,22 +102,17 @@ export default function MyTasksPage() {
   const [receiverName, setReceiverName] = useState("");
   const [receiverSignature, setReceiverSignature] = useState("");
   const [closing, setClosing] = useState(false);
-  // ผลตรวจการปนเปื้อน — บังคับเลือกก่อนปิดใบงาน (โรงงานอาหาร — กันลืมตรวจ)
   const [contaminateChecking, setContaminateChecking] = useState("");
-  // ค่าใช้จ่าย/เวลาหยุดเครื่อง/ผู้รับเหมา — กรอกตอนปิดใบงาน (ไปแสดงใน F-EN-03)
   const [costParts, setCostParts] = useState("");
   const [costLabor, setCostLabor] = useState("");
   const [costOutsource, setCostOutsource] = useState("");
   const [downtimeMinutes, setDowntimeMinutes] = useState("");
   const [outsourceBy, setOutsourceBy] = useState("");
 
-  // Canvas Ref for Signature Pad
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
   useEffect(() => {
-    // โหมด offline: แสดง banner + อ่านเวลา "อัปเดตล่าสุด" จาก snapshot
-    // (ข้อมูลอาจมาจาก SW cache หรือ snapshot — เวลาใช้ savedAt จาก snapshot เสมอ)
     const updateOffline = async () => {
       const isOff = !navigator.onLine;
       if (isOff) {
@@ -134,7 +123,6 @@ export default function MyTasksPage() {
         const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
         if (snap?.savedAt) setSnapshotTime(snap.savedAt);
       } else if (offlineRef.current) {
-        // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล คง banner ไว้ให้กด "โหลดข้อมูลใหม่"
         setOnlineBack(true);
         setRetryMsg("");
       }
@@ -149,30 +137,24 @@ export default function MyTasksPage() {
   }, []);
 
   useEffect(() => {
-    // 1) เอาผู้ใช้ปัจจุบัน (session) เพื่อกรองเฉพาะงานที่มอบหมายให้ตัวเอง
     fetch("/api/v1/menu_permissions.php")
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
       })
-      .catch(() => { /* offline — กรองไม่ได้ ปล่อยผ่าน */ });
+      .catch(() => {});
 
-    // 1.5) โหลดรหัส F/R จริงจากตาราง failure_codes / repair_codes (dropdown ปิดใบงาน)
     fetch("/api/v1/repair.php?reference=codes")
-      .then(r => r.json())
-      .then(j => {
+      .then((r) => r.json())
+      .then((j) => {
         if (Array.isArray(j?.failure_codes)) setFailureCodes(j.failure_codes);
         if (Array.isArray(j?.repair_codes)) setRepairCodes(j.repair_codes);
       })
       .catch(() => {});
 
-    // 2) โหลดงานซ่อม + แผน PM (งานของฉัน = งานซ่อม + PM ที่ได้รับมอบหมาย)
-    //    สำเร็จ → เก็บ snapshot ลง IndexedDB (offline ใช้ชุดนี้ ไม่พึ่ง SW cache)
-    //    พัง (offline ไม่มี cache) → อ่าน snapshot ล่าสุด
     const applyRows = (rows: any[], pmJson: any) => {
       const mapped: TaskItem[] = [];
 
-      // 2.1) งานซ่อม
       if (Array.isArray(rows) && rows.length > 0) {
         rows.forEach((r: any) => {
           mapped.push({
@@ -212,8 +194,7 @@ export default function MyTasksPage() {
         });
       }
 
-      // 2.2) แผน PM (จากตาราง pm_am จริง — แสดงเฉพาะที่ยังไม่เสร็จเป็นหลัก)
-      const pmList = Array.isArray(pmJson) ? pmJson : (Array.isArray(pmJson?.data) ? pmJson.data : []);
+      const pmList = Array.isArray(pmJson) ? pmJson : Array.isArray(pmJson?.data) ? pmJson.data : [];
       pmList.forEach((p: any) => {
         const pStatus = String(p.status || "pending").toLowerCase();
         const isDone = pStatus === "completed" || pStatus === "skipped";
@@ -224,7 +205,7 @@ export default function MyTasksPage() {
           woNumber: `PM-${String(p.id).padStart(3, "0")}`,
           machine: p.asset_name || "-",
           title: p.title || "-",
-          priority: (pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10))) ? "high" : "medium",
+          priority: pStatus === "overdue" || (p.due_date && String(p.due_date) < new Date().toISOString().slice(0, 10)) ? "high" : "medium",
           status: isDone ? "completed" : pStatus === "in_progress" ? "in_progress" : "new",
           overdue: isRepairOverdue(p.due_date, p.status),
           assignedTo: p.assigned_to || null,
@@ -247,7 +228,6 @@ export default function MyTasksPage() {
       return mapped;
     };
 
-    // พยายามโหลดจาก network ก่อน — สำเร็จ: เก็บ snapshot
     fetch("/api/v1/repair.php")
       .then((r) => r.json())
       .then((rows) =>
@@ -259,8 +239,7 @@ export default function MyTasksPage() {
           })
       )
       .catch(async (e) => {
-        console.error("Fetch tasks error — ลองอ่าน snapshot", e);
-        // offline: อ่าน snapshot ล่าสุดจาก IndexedDB (ไม่พึ่ง SW cache)
+        console.error("Fetch tasks error", e);
         const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
         if (snap && Array.isArray(snap.rows) && snap.rows.length > 0) {
           applyRows(snap.rows, snap.pm);
@@ -272,7 +251,6 @@ export default function MyTasksPage() {
       });
   }, []);
 
-  // Signature Canvas Handlers
   const startDrawing = (e: any) => {
     setIsDrawing(true);
     draw(e);
@@ -306,17 +284,18 @@ export default function MyTasksPage() {
   };
 
   const handleStartTask = (task: TaskItem) => {
-    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
     fetch(`/api/v1/repair.php?id=${task.rawId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress", actual_start_at: now, acknowledged_at: now })
+      body: JSON.stringify({ status: "in_progress", actual_start_at: now, acknowledged_at: now }),
     }).then(() => {
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t))
+      );
     });
   };
 
-  // ช่างกด "รับงาน" — อัปเดตสถานะต่อคน (ใครรับแล้ว/ยังไม่รับ) — งานซ่อม + PM ใช้ endpoint เดียวกัน
   const handleAcceptTask = (task: TaskItem) => {
     const endpoint = task.kind === "repair" ? "/api/v1/repair.php" : "/api/v1/pm_am.php";
     fetch(`${endpoint}?id=${task.rawId}`, {
@@ -336,34 +315,33 @@ export default function MyTasksPage() {
           );
         }
       })
-      .catch(() => { /* offline */ });
+      .catch(() => {});
   };
 
-  // ตั้งสถานะ "รออะไหล่" — งานยังค้าง ไฟเหลือง จนกว่าจะมีอะไหล่
   const handleWaitParts = (task: TaskItem) => {
     fetch(`/api/v1/repair.php?id=${task.rawId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "waiting_parts" })
+      body: JSON.stringify({ status: "waiting_parts" }),
     }).then(() => {
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "pending_parts" } : t));
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: "pending_parts" } : t)));
     });
   };
 
-  // อะไหล่มาถึงแล้ว — กลับมาซ่อมต่อ
   const handleResumeTask = (task: TaskItem) => {
     fetch(`/api/v1/repair.php?id=${task.rawId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress" })
+      body: JSON.stringify({ status: "in_progress" }),
     }).then(() => {
-      setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t))
+      );
     });
   };
 
   const openCloseModal = (task: TaskItem) => {
     setSelectedTask(task);
-    // prefill ค่าเดิมถ้าเคยบันทึกไว้ (เปิดอีกครั้ง = แก้ไขย้อนหลังได้)
     setFailureCode(task.failureCode || "");
     setRepairCode(task.repairCode || "");
     setCostParts(task.costParts ? String(task.costParts) : "");
@@ -377,12 +355,10 @@ export default function MyTasksPage() {
 
   const handleConfirmClose = async () => {
     if (!selectedTask) return;
-    // ต้องกรอกของจริง — ไม่มีค่าเริ่มต้นปลอม
     if (!rootCause.trim() || !solution.trim()) {
       alert("กรุณากรอกสาเหตุของปัญหา และวิธีการแก้ไข ก่อนปิดใบงาน");
       return;
     }
-    // บังคับผลตรวจการปนเปื้อนก่อนปิดงาน (สำคัญกับโรงงานอาหาร)
     if (!["clean", "contaminated", "not_applicable"].includes(contaminateChecking)) {
       alert("กรุณาระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม");
       return;
@@ -404,18 +380,20 @@ export default function MyTasksPage() {
           receiver_name: receiverName,
           receiver_signature_path: receiverSignature,
           contaminate_checking: contaminateChecking,
-          failure_code_id: failureCodes.find(c => c.code === failureCode)?.id || null,
-          repair_code_id: repairCodes.find(c => c.code === repairCode)?.id || null,
+          failure_code_id: failureCodes.find((c) => c.code === failureCode)?.id || null,
+          repair_code_id: repairCodes.find((c) => c.code === repairCode)?.id || null,
           cost_parts: costParts ? Number(costParts) : null,
           cost_labor: costLabor ? Number(costLabor) : null,
           cost_outsource: costOutsource ? Number(costOutsource) : null,
           downtime_minutes: downtimeMinutes ? Number(downtimeMinutes) : null,
           outsource_by: outsourceBy.trim() ? outsourceBy.trim() : null,
-          completed_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
-        })
+          completed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+        }),
       });
 
-      setTasks(prev => prev.map(t => t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature } : t));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature } : t))
+      );
       setCloseModalOpen(false);
     } catch (e) {
       console.error("Close WO error", e);
@@ -424,256 +402,253 @@ export default function MyTasksPage() {
     }
   };
 
-  // งานของฉัน = งานที่ถูกมอบหมายให้ผู้ใช้ที่ login อยู่เท่านั้น
-  // (ถ้ายังโหลด user id ไม่ทัน → แสดงทั้งหมดก่อน แล้ว filter ทันทีที่รู้ค่า)
-  // งานของฉัน = งานที่เราเป็นหัวหน้าชุด หรือเป็นสมาชิกในทีม (รับผิดชอบหลายคนต่อ 1 งาน)
-  const myTasks = currentUserId === null
-    ? tasks
-    : tasks.filter(t => t.assignedTo === currentUserId || (t.teamIds || []).includes(currentUserId));
-  const filteredTasks = myTasks.filter(t => {
-    const matchTab = activeTab === "new"
-      ? t.status === "new"
-      : activeTab === "in_progress"
+  const myTasks =
+    currentUserId === null
+      ? tasks
+      : tasks.filter((t) => t.assignedTo === currentUserId || (t.teamIds || []).includes(currentUserId));
+
+  const filteredTasks = myTasks.filter((t) => {
+    const matchTab =
+      activeTab === "new"
+        ? t.status === "new"
+        : activeTab === "in_progress"
         ? t.status === "in_progress" || t.status === "pending_parts"
         : t.status === "completed";
     const matchOutsource = outsourceFilter === "all" || (outsourceFilter === "out" ? !!t.outsourceBy : !t.outsourceBy);
     return matchTab && matchOutsource;
   });
 
-  const countNew = myTasks.filter(t => t.status === "new").length;
-  const countInProg = myTasks.filter(t => t.status === "in_progress" || t.status === "pending_parts").length;
-  const countDone = myTasks.filter(t => t.status === "completed").length;
+  const countNew = myTasks.filter((t) => t.status === "new").length;
+  const countInProg = myTasks.filter((t) => t.status === "in_progress" || t.status === "pending_parts").length;
+  const countDone = myTasks.filter((t) => t.status === "completed").length;
 
-  // PM task → ไปหน้าเช็คชีตโดยตรง (prefill แผน + เครื่องจาก QR)
   const goPM = (task: TaskItem) => {
     const params = new URLSearchParams({ plan_id: String(task.rawId) });
     if (task.assetCode) params.set("asset_code", task.assetCode);
     router.push(`/pm_am/checksheet?${params.toString()}`);
   };
 
-  const columns: TableColumn<TaskItem>[] = [
+  const columns: ColumnDef<UiTableFeatures, TaskItem>[] = [
     {
-      key: "woNumber",
+      accessorKey: "woNumber",
       header: t("tbl.work_order_no"),
-      width: proportional(1.4),
-      renderCell: (task) => (
-        <HStack gap={2} vAlign="center">
-          {task.kind === "pm" ? (
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>PM</span>
-          ) : (
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>ซ่อม</span>
-          )}
-          <Text type="body" weight="bold">{task.woNumber}</Text>
-        </HStack>
-      ),
-    },
-    { key: "machine", header: t("tbl.asset"), width: proportional(2) },
-    {
-      key: "title",
-      header: t("tbl.subject"),
-      width: proportional(2.5),
-      renderCell: (task) => (
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{task.title}</Text>
-          {task.outsourceBy && (
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-              ภายนอก{task.outsourceBy ? ` · ${task.outsourceBy}` : ""}
-            </span>
-          )}
-        </HStack>
-      ),
-    },
-    {
-      key: "status",
-      header: t("tbl.status"),
-      width: proportional(1.4),
-      renderCell: (task) => {
-        const k =
-          task.kind === "pm"
-            ? task.status === "completed" ? "completed" : task.status === "in_progress" ? "in_progress" : "open"
-            : task.status === "new" ? "open" : task.status === "pending_parts" ? "waiting_parts" : task.status;
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
         return (
-          <HStack gap={1.5} vAlign="center">
-            <AndonLamp status={repairStatusAndon(k, task.overdue)} size="sm" />
-            <Text type="body" size="sm" weight="semibold" style={{ color: task.overdue ? "var(--cmms-danger)" : undefined }}>
-              {task.overdue ? "เกินกำหนด" : repairStatusLabel(k)}
-            </Text>
-          </HStack>
+          <div className="flex items-center gap-2">
+            <Badge variant="info">{task.kind === "pm" ? "PM" : "ซ่อม"}</Badge>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{task.woNumber}</span>
+          </div>
+        );
+      },
+    },
+    { accessorKey: "machine", header: t("tbl.asset") },
+    {
+      accessorKey: "title",
+      header: t("tbl.subject"),
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        return (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm">{task.title}</span>
+            {task.outsourceBy && <Badge variant="warning">ภายนอก · {task.outsourceBy}</Badge>}
+          </div>
         );
       },
     },
     {
-      key: "assignedToName",
+      accessorKey: "status",
+      header: t("tbl.status"),
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        const k =
+          task.kind === "pm"
+            ? task.status === "completed"
+              ? "completed"
+              : task.status === "in_progress"
+              ? "in_progress"
+              : "open"
+            : task.status === "new"
+            ? "open"
+            : task.status === "pending_parts"
+            ? "waiting_parts"
+            : task.status;
+        return (
+          <div className="flex items-center gap-1.5">
+            <AndonLamp status={repairStatusAndon(k, task.overdue)} size="sm" />
+            <span className={`text-sm font-semibold ${task.overdue ? "text-red-600 dark:text-red-400" : ""}`}>
+              {task.overdue ? "เกินกำหนด" : repairStatusLabel(k)}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "assignedToName",
       header: t("tbl.assignee"),
-      width: proportional(1.4),
-      renderCell: (task) => (
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{task.assignedToName || "-"}</Text>
-          {currentUserId !== null && task.assignedTo !== currentUserId && (task.teamIds || []).includes(currentUserId) && (
-            <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>สมาชิกทีม</span>
-          )}
-        </HStack>
-      ),
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        return (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span>{task.assignedToName || "-"}</span>
+            {currentUserId !== null &&
+              task.assignedTo !== currentUserId &&
+              (task.teamIds || []).includes(currentUserId) && <Badge variant="info">สมาชิกทีม</Badge>}
+          </div>
+        );
+      },
     },
     {
-      key: "estimatedCompletion",
+      accessorKey: "estimatedCompletion",
       header: "กำหนดเสร็จ",
-      width: proportional(1.2),
-      renderCell: (task) => (
-        <Text type="body" size="sm" style={{ color: task.overdue ? "var(--cmms-danger)" : undefined }}>
-          {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
-        </Text>
-      ),
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        return (
+          <span className={`text-sm ${task.overdue ? "text-red-600 dark:text-red-400 font-semibold" : ""}`}>
+            {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
+          </span>
+        );
+      },
     },
     {
-      key: "beforeImg",
+      accessorKey: "beforeImg",
       header: t("tbl.before_after"),
-      width: proportional(1.5),
-      renderCell: (task) =>
-        task.kind === "pm" ? (
-          <Text type="body" size="sm" color="disabled">-</Text>
-        ) : (
-          <HStack gap={1} vAlign="center">
-            {task.beforeImg && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>ก่อนซ่อม</span>}
-            {task.afterImg && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>หลังซ่อม</span>}
-          </HStack>
-        ),
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        if (task.kind === "pm") return <span className="text-slate-400">-</span>;
+        return (
+          <div className="flex items-center gap-1">
+            {task.beforeImg && <Badge variant="neutral">ก่อนซ่อม</Badge>}
+            {task.afterImg && <Badge variant="neutral">หลังซ่อม</Badge>}
+          </div>
+        );
+      },
     },
     {
-      key: "actions",
+      id: "actions",
       header: t("tbl.processing"),
-      width: proportional(2),
-      renderCell: (task) =>
-        task.kind === "pm" ? (
-          <HStack gap={2} hAlign="end">
-            {task.status === "completed" ? (
-              <Text type="body" size="sm" color="disabled">ทำเสร็จแล้ว</Text>
-            ) : (
-              <button
-                type="button"
-                onClick={() => goPM(task)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-              >
-                <CheckCircleIcon className="w-3.5 h-3.5" />
-                ไปทำ PM
-              </button>
-            )}
-          </HStack>
-        ) : (
-          <HStack gap={2} hAlign="end">
-            {task.status === "new" && currentUserId !== null && (task.assignedTo === currentUserId || (task.teamIds || []).includes(currentUserId)) && !task.team?.some((m) => m.user_id === currentUserId && m.status === "accepted") && (
-              <button
-                type="button"
-                onClick={() => handleAcceptTask(task)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 transition-all duration-300"
-              >
-                <CheckCircleIcon className="w-3.5 h-3.5" />
-                รับงาน
-              </button>
-            )}
+      cell: ({ row }: { row: { original: TaskItem } }) => {
+        const task = row.original;
+        if (task.kind === "pm") {
+          return (
+            <div className="flex justify-end">
+              {task.status === "completed" ? (
+                <span className="text-xs text-slate-400">ทำเสร็จแล้ว</span>
+              ) : (
+                <Button variant="primary" size="sm" onClick={() => goPM(task)} className="gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>ไปทำ PM</span>
+                </Button>
+              )}
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+            {task.status === "new" &&
+              currentUserId !== null &&
+              (task.assignedTo === currentUserId || (task.teamIds || []).includes(currentUserId)) &&
+              !task.team?.some((m: any) => m.user_id === currentUserId && m.status === "accepted") && (
+                <Button variant="outline" size="sm" onClick={() => handleAcceptTask(task)} className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>รับงาน</span>
+                </Button>
+              )}
 
             {task.status === "new" && (
-              <button
-                type="button"
-                onClick={() => handleStartTask(task)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-              >
-                <PlayIcon className="w-3.5 h-3.5" />
-                เริ่มซ่อม
-              </button>
+              <Button variant="primary" size="sm" onClick={() => handleStartTask(task)} className="gap-1.5">
+                <Play className="w-3.5 h-3.5" />
+                <span>เริ่มซ่อม</span>
+              </Button>
             )}
 
             {task.status === "in_progress" && (
               <>
-                <button
-                  type="button"
-                  onClick={() => handleWaitParts(task)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 transition-all duration-300"
-                >
-                  <ClockIcon className="w-3.5 h-3.5" />
-                  รออะไหล่
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openCloseModal(task)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-                >
-                  <CheckIcon className="w-3.5 h-3.5" />
-                  ปิดใบงานซ่อม
-                </button>
+                <Button variant="outline" size="sm" onClick={() => handleWaitParts(task)} className="gap-1.5 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>รออะไหล่</span>
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>ปิดใบงานซ่อม</span>
+                </Button>
               </>
             )}
 
             {task.status === "pending_parts" && (
               <>
-                <button
-                  type="button"
-                  onClick={() => handleResumeTask(task)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-100 hover:bg-blue-200 transition-all duration-300"
-                >
-                  <ArrowPathIcon className="w-3.5 h-3.5" />
-                  กลับมาซ่อมต่อ
-                </button>
-                <button
-                  type="button"
-                  onClick={() => openCloseModal(task)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-                >
-                  <CheckIcon className="w-3.5 h-3.5" />
-                  ปิดใบงานซ่อม
-                </button>
+                <Button variant="outline" size="sm" onClick={() => handleResumeTask(task)} className="gap-1.5 text-sky-600 border-sky-300 hover:bg-sky-50">
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>กลับมาซ่อมต่อ</span>
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => openCloseModal(task)} className="gap-1.5">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>ปิดใบงานซ่อม</span>
+                </Button>
               </>
             )}
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.push(`/repair/view?id=${task.rawId}`)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+              className="gap-1.5"
             >
-              <EyeIcon className="w-3.5 h-3.5" />
-              ดูรายละเอียดปิดงาน
-            </button>
-          </HStack>
-        ),
+              <Eye className="w-3.5 h-3.5" />
+              <span>ดูรายละเอียดปิดงาน</span>
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
   return (
-    <VStack gap={6}>
-      {/* Header */}
-      <div className="cmms-page-hero">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            {hero.eyebrow}
-          </Text>
-          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
+    <div className="space-y-6">
+      <div>
+        <p className="cmms-eyebrow">{hero.eyebrow}</p>
+        <PageHeader
+          title={hero.title}
+          description={hero.desc}
+        />
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 bg-slate-100 dark:bg-slate-800/50 p-2 rounded-2xl w-fit">
-        <button
-          onClick={() => setActiveTab('new')}
-          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'new' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
-        >
-          งานใหม่ ({countNew})
-        </button>
-        <button
-          onClick={() => setActiveTab('in_progress')}
-          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'in_progress' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
-        >
-          กำลังซ่อม ({countInProg})
-        </button>
-        <button
-          onClick={() => setActiveTab('completed')}
-          className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${activeTab === 'completed' ? 'bg-white dark:bg-slate-700 text-[var(--cmms-primary)] shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}
-        >
-          ซ่อมเสร็จแล้ว ({countDone})
-        </button>
-        <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl">
+        <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
+          <button
+            onClick={() => setActiveTab("new")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === "new"
+                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+            }`}
+          >
+            งานใหม่ ({countNew})
+          </button>
+          <button
+            onClick={() => setActiveTab("in_progress")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === "in_progress"
+                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+            }`}
+          >
+            กำลังซ่อม ({countInProg})
+          </button>
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeTab === "completed"
+                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+            }`}
+          >
+            ซ่อมเสร็จแล้ว ({countDone})
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
           {([
             { v: "all", label: "ทั้งหมด" },
             { v: "in", label: "งานใน" },
@@ -683,40 +658,32 @@ export default function MyTasksPage() {
               key={opt.v}
               type="button"
               onClick={() => setOutsourceFilter(opt.v)}
-              style={{
-                padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
-                background: outsourceFilter === opt.v ? "var(--cmms-bg-wash)" : "transparent",
-                color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
-                boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
-              }}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                outsourceFilter === opt.v
+                  ? "bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
             >
               {opt.label}
             </button>
           ))}
-        </HStack>
+        </div>
       </div>
 
-      {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
+      {/* Offline banner */}
       {offline && (
-        <Banner
-          status={onlineBack ? "success" : "warning"}
+        <Alert
+          variant={onlineBack ? "info" : "warning"}
           title={
             onlineBack
               ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
               : snapshotTime
-                ? `โหมดออฟไลน์ — ข้อมูล ณ ${formatClockTime(snapshotTime)} — ${formatRelativeTime(snapshotTime, now)}`
-                : "โหมดออฟไลน์ — ข้อมูล ณ ครั้งล่าสุด"
+              ? `โหมดออฟไลน์ — ข้อมูล ณ ${formatClockTime(snapshotTime)} — ${formatRelativeTime(snapshotTime, now)}`
+              : "โหมดออฟไลน์ — ข้อมูล ณ ครั้งล่าสุด"
           }
-          description={
-            retryMsg ||
-            (onlineBack
-              ? "กด \"โหลดข้อมูลใหม่\" เพื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์"
-              : "กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น")
-          }
-          endContent={
+          action={
             <Button
-              label="โหลดข้อมูลใหม่"
-              variant={onlineBack ? "primary" : "ghost"}
+              variant={onlineBack ? "primary" : "outline"}
               size="sm"
               onClick={async () => {
                 if (!navigator.onLine) {
@@ -728,34 +695,41 @@ export default function MyTasksPage() {
                 if (ok) window.location.reload();
                 else setRetryMsg("โหลดไม่สำเร็จ — ลองอีกครั้ง");
               }}
-            />
+            >
+              โหลดข้อมูลใหม่
+            </Button>
           }
-        />
+        >
+          {retryMsg ||
+            (onlineBack
+              ? "กด \"โหลดข้อมูลใหม่\" เพื่อดึงข้อมูลล่าสุดจากเซิร์ฟเวอร์"
+              : "กำลังแสดงข้อมูลจากเครื่องของคุณ งานที่แก้ไขตอนนี้จะถูกบันทึกเมื่อกลับมาออนไลน์เท่านั้น")}
+        </Alert>
       )}
 
       {/* Table */}
       {error ? (
-        <Banner status="error" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
+        <Alert variant="danger" title="เกิดข้อผิดพลาด">
+          ไม่สามารถโหลดข้อมูลงานซ่อมได้
+        </Alert>
       ) : filteredTasks.length === 0 ? (
-        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมในสถานะนี้" icon={<WrenchScrewdriverIcon className="w-6 h-6" />} />
+        <EmptyState
+          title="ไม่พบข้อมูล"
+          description="ไม่มีรายการงานซ่อมในสถานะนี้"
+          icon={<Wrench className="w-8 h-8 text-slate-400" />}
+        />
       ) : (
-        <Card padding={0} style={{ overflow: 'hidden' }}>
-          <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
-            <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-                <WrenchScrewdriverIcon className="w-4 h-4" />
-              </div>
-              <Text type="body" weight="bold">รายการงานในสถานะนี้</Text>
-              <span className="cmms-count-pill">{filteredTasks.length} รายการ</span>
-            </HStack>
-          </HStack>
-          <Table<TaskItem>
-            data={filteredTasks}
-            columns={columns}
-            idKey="id"
-            density="balanced"
-            dividers="rows"
-          />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between py-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <span>รายการงานในสถานะนี้</span>
+            </CardTitle>
+            <Badge variant="info">{filteredTasks.length} รายการ</Badge>
+          </CardHeader>
+          <CardContent className="p-0">
+            <DataTable columns={columns} data={filteredTasks} />
+          </CardContent>
         </Card>
       )}
 
@@ -768,214 +742,185 @@ export default function MyTasksPage() {
         className="cmms-close-work-modal"
       >
         <div className="cmms-bottom-sheet-handle" aria-hidden="true" />
-          <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
-          <VStack gap={4} style={{ padding: 24 }} className="cmms-dialog-body">
-            <FormLayout>
-              <Grid columns={2} gap={4}>
-                <Field label="กลุ่มอาการเสีย (รหัส F)" inputID="fCode">
-                  <Selector
-                    label="รหัสอาการเสีย"
-                    isLabelHidden
-                    placeholder="เลือกกลุ่มอาการเสีย (รหัส F)"
-                    value={failureCode}
-                    onChange={setFailureCode}
-                    options={failureCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
-                  />
-                </Field>
-
-                <Field label="กลุ่มงานซ่อม (รหัส R)" inputID="rCode">
-                  <Selector
-                    label="รหัสการซ่อม"
-                    isLabelHidden
-                    placeholder="เลือกกลุ่มงานซ่อม (รหัส R)"
-                    value={repairCode}
-                    onChange={setRepairCode}
-                    options={repairCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
-                  />
-                </Field>
-              </Grid>
-
-              <Field label="สาเหตุของปัญหา *" inputID="rootCause" isRequired>
-                <TextArea
-                  label="สาเหตุของปัญหา"
-                  isLabelHidden
-                  placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน..."
-                  value={rootCause}
-                  onChange={setRootCause}
-                  rows={2}
-                />
-              </Field>
-
-              <Field label="วิธีการแก้ไข *" inputID="solution" isRequired>
-                <TextArea
-                  label="วิธีการแก้ไข"
-                  isLabelHidden
-                  placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี..."
-                  value={solution}
-                  onChange={setSolution}
-                  rows={2}
-                />
-              </Field>
-
-              {/* ผลตรวจการปนเปื้อน — บังคับก่อนปิดงาน (โรงงานอาหาร) */}
-              <Field label="ผลตรวจการปนเปื้อน *" inputID="contamCheck" isRequired>
-                <Selector
-                  label="ผลตรวจการปนเปื้อน"
-                  isLabelHidden
-                  placeholder="เลือกผลตรวจการปนเปื้อน (บังคับ)"
-                  value={contaminateChecking}
-                  onChange={setContaminateChecking}
-                  options={[
-                    { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
-                    { value: "contaminated", label: "พบการปนเปื้อน" },
-                    { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
-                  ]}
-                />
-              </Field>
-
-              {/* ค่าใช้จ่าย / เวลาหยุดเครื่อง / ผู้รับเหมา — บันทึกจริง ไปแสดงใน F-EN-03 */}
-              <Grid columns={2} gap={4}>
-                <Field label="ค่าอะไหล่ (บาท)" inputID="costParts">
-                  <TextInput
-                    label="ค่าอะไหล่"
-                    isLabelHidden
-                    placeholder="เช่น 4500"
-                    value={costParts}
-                    onChange={(v) => setCostParts(v.replace(/\D/g, ""))}
-                  />
-                </Field>
-                <Field label="ค่าแรง (บาท)" inputID="costLabor">
-                  <TextInput
-                    label="ค่าแรง"
-                    isLabelHidden
-                    placeholder="เช่น 1200"
-                    value={costLabor}
-                    onChange={(v) => setCostLabor(v.replace(/\D/g, ""))}
-                  />
-                </Field>
-                <Field label="ค่าจ้างภายนอก (บาท)" inputID="costOutsource">
-                  <TextInput
-                    label="ค่าจ้างภายนอก"
-                    isLabelHidden
-                    placeholder="เช่น 15000"
-                    value={costOutsource}
-                    onChange={(v) => setCostOutsource(v.replace(/\D/g, ""))}
-                  />
-                </Field>
-                <Field label="เวลาหยุดเครื่องจักร (นาที)" inputID="downtimeMin">
-                  <TextInput
-                    label="เวลาหยุดเครื่อง"
-                    isLabelHidden
-                    placeholder="เช่น 120"
-                    value={downtimeMinutes}
-                    onChange={(v) => setDowntimeMinutes(v.replace(/\D/g, ""))}
-                  />
-                </Field>
-                <Field label="ผู้รับเหมาภายนอก (ถ้ามี)" inputID="outsourceBy">
-                  <TextInput
-                    label="ผู้รับเหมาภายนอก"
-                    isLabelHidden
-                    placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
-                    value={outsourceBy}
-                    onChange={setOutsourceBy}
-                  />
-                </Field>
-              </Grid>
-
-              {/* AFTER REPAIR IMAGE UPLOAD */}
-              <Field label="แนบรูปถ่ายหลังซ่อมเสร็จ" inputID="afterPhoto">
-                <VStack gap={2}>
-                  <FileInput
-                    label="รูปหลังซ่อม"
-                    isLabelHidden
-                    accept="image/*"
-                    value={afterFile}
-                    onChange={(f) => {
-                      const file = Array.isArray(f) ? f[0] ?? null : f;
-                      setAfterFile(file);
-                      if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => { if (e.target?.result) setAfterImg(String(e.target.result)); };
-                        reader.readAsDataURL(file);
-                      }
-                    }}
-                  />
-                  {afterImg && (
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: 'var(--cmms-success-bg)', padding: 10, borderRadius: 8, border: '1px solid var(--cmms-success)' }}>
-                      <img src={afterImg} alt="รูปตัวอย่างหลังซ่อม" style={{ width: 60, height: 60, borderRadius: 6, objectFit: 'cover' }} />
-                      <Text type="body" size="sm" weight="bold" style={{ color: 'var(--cmms-success)' }}>พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ</Text>
-                    </div>
-                  )}
-                </VStack>
-              </Field>
-
-              {/* RECEIVER NAME & SIGNATURE CANVAS */}
-              <Grid columns={2} gap={4}>
-                <Field label="ชื่อผู้รับมอบงานซ่อมเสร็จ *" inputID="recName" isRequired>
-                  <TextInput
-                    label="ชื่อผู้รับมอบงาน"
-                    isLabelHidden
-                    placeholder="กรอกชื่อผู้รับมอบงาน..."
-                    value={receiverName}
-                    onChange={setReceiverName}
-                  />
-                </Field>
-
-                <Field label="ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์) *" inputID="sigCanvas">
-                  <VStack gap={1}>
-                    <canvas
-                      ref={canvasRef}
-                      width={280}
-                      height={90}
-                      onMouseDown={startDrawing}
-                      onMouseUp={stopDrawing}
-                      onMouseMove={draw}
-                      onTouchStart={startDrawing}
-                      onTouchEnd={stopDrawing}
-                      onTouchMove={draw}
-                      style={{
-                        border: '2px dashed var(--cmms-success)',
-                        borderRadius: 8,
-                        background: '#FFFFFF',
-                        cursor: 'crosshair',
-                        touchAction: 'none'
-                      }}
-                    />
-                    <HStack hAlign="between" vAlign="center">
-                      <Text type="body" size="sm" color="secondary">ใช้เมาส์หรือนิ้วเซ็นชื่อลงในช่อง</Text>
-                      <button
-                        type="button"
-                        onClick={clearSignature}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
-                      >
-                        ล้างลายเซ็น
-                      </button>
-                    </HStack>
-                  </VStack>
-                </Field>
-              </Grid>
-            </FormLayout>
-
-          </VStack>
-          <div className="cmms-dialog-footer">
-            <button
-              type="button"
-              onClick={() => setCloseModalOpen(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+        <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
+        <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Select
+              label="กลุ่มอาการเสีย (รหัส F)"
+              placeholder="เลือกกลุ่มอาการเสีย (รหัส F)"
+              value={failureCode}
+              onChange={(e) => setFailureCode(e.target.value)}
             >
-              ยกเลิก
-            </button>
-            <button
-              type="button"
-              disabled={closing}
-              onClick={handleConfirmClose}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              <option value="">เลือกกลุ่มอาการเสีย (รหัส F)</option>
+              {failureCodes.map((c) => (
+                <option key={c.id} value={c.code}>
+                  {c.code} - {c.name}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              label="กลุ่มงานซ่อม (รหัส R)"
+              placeholder="เลือกกลุ่มงานซ่อม (รหัส R)"
+              value={repairCode}
+              onChange={(e) => setRepairCode(e.target.value)}
             >
-              <CheckCircleIcon className="w-4 h-4" />
-              {closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}
-            </button>
+              <option value="">เลือกกลุ่มงานซ่อม (รหัส R)</option>
+              {repairCodes.map((c) => (
+                <option key={c.id} value={c.code}>
+                  {c.code} - {c.name}
+                </option>
+              ))}
+            </Select>
           </div>
-        </AnimatedDialog>
-    </VStack>
+
+          <Textarea
+            label="สาเหตุของปัญหา *"
+            placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน..."
+            value={rootCause}
+            onChange={(e) => setRootCause(e.target.value)}
+            rows={2}
+          />
+
+          <Textarea
+            label="วิธีการแก้ไข *"
+            placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี..."
+            value={solution}
+            onChange={(e) => setSolution(e.target.value)}
+            rows={2}
+          />
+
+          <Select
+            label="ผลตรวจการปนเปื้อน *"
+            value={contaminateChecking}
+            onChange={(e) => setContaminateChecking(e.target.value)}
+          >
+            <option value="">เลือกผลตรวจการปนเปื้อน (บังคับ)</option>
+            <option value="clean">ไม่พบการปนเปื้อน (ผ่าน)</option>
+            <option value="contaminated">พบการปนเปื้อน</option>
+            <option value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</option>
+          </Select>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              type="number"
+              label="ค่าอะไหล่ (บาท)"
+              placeholder="เช่น 4500"
+              value={costParts}
+              onChange={(e) => setCostParts(e.target.value.replace(/\D/g, ""))}
+            />
+            <Input
+              type="number"
+              label="ค่าแรง (บาท)"
+              placeholder="เช่น 1200"
+              value={costLabor}
+              onChange={(e) => setCostLabor(e.target.value.replace(/\D/g, ""))}
+            />
+            <Input
+              type="number"
+              label="ค่าจ้างภายนอก (บาท)"
+              placeholder="เช่น 15000"
+              value={costOutsource}
+              onChange={(e) => setCostOutsource(e.target.value.replace(/\D/g, ""))}
+            />
+            <Input
+              type="number"
+              label="เวลาหยุดเครื่องจักร (นาที)"
+              placeholder="เช่น 120"
+              value={downtimeMinutes}
+              onChange={(e) => setDowntimeMinutes(e.target.value.replace(/\D/g, ""))}
+            />
+          </div>
+
+          <Input
+            label="ผู้รับเหมาภายนอก (ถ้ามี)"
+            placeholder="เช่น บริษัท ไฮโดรเทสต์ จำกัด"
+            value={outsourceBy}
+            onChange={(e) => setOutsourceBy(e.target.value)}
+          />
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              แนบรูปถ่ายหลังซ่อมเสร็จ
+            </label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setAfterFile(file);
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    if (ev.target?.result) setAfterImg(String(ev.target.result));
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+            {afterImg && (
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                <img src={afterImg} alt="รูปตัวอย่างหลังซ่อม" className="w-14 h-14 rounded-lg object-cover" />
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                  พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <Input
+              label="ชื่อผู้รับมอบงานซ่อมเสร็จ *"
+              placeholder="กรอกชื่อผู้รับมอบงาน..."
+              value={receiverName}
+              onChange={(e) => setReceiverName(e.target.value)}
+            />
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) *
+              </label>
+              <canvas
+                ref={canvasRef}
+                width={280}
+                height={90}
+                onMouseDown={startDrawing}
+                onMouseUp={stopDrawing}
+                onMouseMove={draw}
+                onTouchStart={startDrawing}
+                onTouchEnd={stopDrawing}
+                onTouchMove={draw}
+                className="border-2 border-dashed border-emerald-500 rounded-xl bg-white cursor-crosshair touch-none w-full"
+              />
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>ใช้เมาส์หรือนิ้วเซ็นชื่อลงในช่อง</span>
+                <button
+                  type="button"
+                  onClick={clearSignature}
+                  className="text-red-600 hover:underline font-semibold"
+                >
+                  ล้างลายเซ็น
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-slate-200 dark:border-slate-800">
+          <Button variant="outline" onClick={() => setCloseModalOpen(false)}>
+            ยกเลิก
+          </Button>
+          <Button
+            variant="primary"
+            disabled={closing}
+            onClick={handleConfirmClose}
+            className="gap-2"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{closing ? "กำลังบันทึก..." : "ยืนยันปิดใบงานซ่อม"}</span>
+          </Button>
+        </div>
+      </AnimatedDialog>
+    </div>
   );
 }

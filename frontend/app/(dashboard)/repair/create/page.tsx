@@ -2,37 +2,64 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Home, ChevronRight, AlertTriangle, Send, Wrench } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
 import SuccessDialog from "@/components/SuccessDialog";
 import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
-type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
+const createRepairSchema = z.object({
+  asset_id: z.string().min(1, "กรุณาเลือกเครื่องจักรที่ชำรุด"),
+  title: z.string().min(1, "กรุณาระบุหัวข้ออาการเสีย").max(200, "หัวข้ออาการเสียยาวเกินไป"),
+  priority: z.enum(["critical", "high", "medium", "low"]),
+  department: z.string().min(1, "กรุณาเลือกแผนกซ่อมที่รับผิดชอบ"),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+});
+
+type CreateRepairFormValues = z.infer<typeof createRepairSchema>;
 
 export default function CreateWorkOrderPage() {
   const router = useRouter();
-  
-  const [assets, setAssets] = useState<any[]>([]);
-  const [assetId, setAssetId] = useState("");
-  const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState("medium");
-  const [department, setDepartment] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState<ISODate | undefined>(undefined);
+
+  const [assets, setAssets] = useState<Array<{ id: number | string; code: string; name: string }>>([]);
+  const [loadingAssets, setLoadingAssets] = useState(true);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [woNumber, setWoNumber] = useState("");
   const [queuedOffline, setQueuedOffline] = useState(false);
   const [pending, setPending] = useState(0);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<CreateRepairFormValues>({
+    resolver: zodResolver(createRepairSchema),
+    defaultValues: {
+      asset_id: "",
+      title: "",
+      priority: "medium",
+      department: "",
+      description: "",
+      dueDate: "",
+    },
+  });
+
+  const watchTitle = watch("title");
 
   useEffect(() => {
     setPending(pendingCount());
@@ -41,77 +68,68 @@ export default function CreateWorkOrderPage() {
   }, []);
 
   useEffect(() => {
+    setLoadingAssets(true);
     fetch("/api/v1/asset_registry.php")
-      .then(res => res.json())
-      .then(json => {
+      .then((res) => res.json())
+      .then((json) => {
         if (Array.isArray(json)) {
           setAssets(json);
         }
       })
-      .catch(e => console.error("Failed to load assets", e));
+      .catch((e) => console.error("Failed to load assets", e))
+      .finally(() => setLoadingAssets(false));
   }, []);
 
-  const handleSubmit = async () => {
-    if (!title) {
-      setError("กรุณาระบุหัวข้ออาการเสีย");
-      return;
-    }
-    if (!assetId) {
-      setError("กรุณาเลือกเครื่องจักรที่ชำรุด");
-      return;
-    }
-    if (!department) {
-      setError("กรุณาเลือกแผนกซ่อมที่รับผิดชอบ");
-      return;
-    }
+  const onSubmit = async (values: CreateRepairFormValues) => {
     setLoading(true);
-    setError("");
+    setSubmitError("");
+
+    const body = {
+      title: values.title,
+      description: values.description || "",
+      asset_id: values.asset_id || null,
+      priority: values.priority,
+      department_id: values.department === "mechanical" ? 1 : values.department === "electrical" ? 2 : null,
+      estimated_completion_date: values.dueDate ? `${values.dueDate} 23:59:59` : null,
+      status: "open",
+    };
 
     try {
-      const body = {
-        title,
-        description,
-        asset_id: assetId || null,
-        priority,
-        department_id: department === "mechanical" ? 1 : department === "electrical" ? 2 : null,
-        estimated_completion_date: dueDate ? `${dueDate} 23:59:59` : null,
-        status: "open"
-      };
       if (typeof navigator !== "undefined" && !navigator.onLine) {
-        enqueue({ kind: "repair", label: `แจ้งซ่อม: ${title}`, url: "/api/v1/repair.php", method: "POST", body });
+        enqueue({
+          kind: "repair",
+          label: `แจ้งซ่อม: ${values.title}`,
+          url: "/api/v1/repair.php",
+          method: "POST",
+          body,
+        });
         setQueuedOffline(true);
         setPending(pendingCount());
         setLoading(false);
         return;
       }
+
       const res = await fetch("/api/v1/repair.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+
       const json = await res.json();
       if (json.success || json.id) {
         setWoNumber(json.work_order_no || `WO-${json.id}`);
         setSubmitted(true);
       } else {
-        setError(json.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        setSubmitError(json.error || "เกิดข้อผิดพลาดในการบันทึกข้อมูล");
       }
     } catch {
       // เน็ตหลุดระหว่างส่ง → เก็บในเครื่อง รอส่งอัตโนมัติเมื่อกลับมาออนไลน์
       enqueue({
         kind: "repair",
-        label: `แจ้งซ่อม: ${title}`,
+        label: `แจ้งซ่อม: ${values.title}`,
         url: "/api/v1/repair.php",
         method: "POST",
-        body: {
-          title,
-          description,
-          asset_id: assetId || null,
-          priority,
-          department_id: department === "mechanical" ? 1 : department === "electrical" ? 2 : null,
-          estimated_completion_date: dueDate ? `${dueDate} 23:59:59` : null,
-          status: "open"
-        },
+        body,
       });
       setQueuedOffline(true);
       setPending(pendingCount());
@@ -136,10 +154,12 @@ export default function CreateWorkOrderPage() {
     return (
       <SuccessDialog
         title="บันทึกในเครื่องแล้ว (ออฟไลน์)"
-        message={<>
-          ระบบยังออนไลน์ไม่ถึง จึงเก็บใบแจ้งซ่อม <strong>“{title}”</strong> ไว้ในเครื่องแล้ว
-          <br />จะส่งให้อัตโนมัติทันทีที่กลับมาออนไลน์ (เหลือค้างส่ง {pending} รายการ)
-        </>}
+        message={
+          <>
+            ระบบยังออนไลน์ไม่ถึง จึงเก็บใบแจ้งซ่อม <strong>“{watchTitle}”</strong> ไว้ในเครื่องแล้ว
+            <br />จะส่งให้อัตโนมัติทันทีที่กลับมาออนไลน์ (เหลือค้างส่ง {pending} รายการ)
+          </>
+        }
         primaryLabel="กลับไปหน้ารวมใบแจ้งซ่อม"
         onPrimary={() => router.push("/repair")}
         onBackdrop={() => router.push("/repair")}
@@ -148,104 +168,147 @@ export default function CreateWorkOrderPage() {
   }
 
   return (
-    <VStack gap={6}>
-      <Breadcrumbs>
-        <BreadcrumbItem href="/repair" startIcon={<HomeIcon />}>ใบแจ้งซ่อม</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>เปิดใบแจ้งซ่อมใหม่</BreadcrumbItem>
-      </Breadcrumbs>
+    <div className="space-y-6 max-w-4xl">
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <Link href="/repair" className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+          <Home className="w-4 h-4" />
+          <span>ใบแจ้งซ่อม</span>
+        </Link>
+        <ChevronRight className="w-4 h-4 text-slate-400" />
+        <span className="font-medium text-slate-900 dark:text-slate-100" aria-current="page">
+          เปิดใบแจ้งซ่อมใหม่
+        </span>
+      </nav>
 
-      <Text type="body" size="sm" className="cmms-eyebrow">REPAIR CREATE · CMMS-TOPPAN</Text>
+      {/* Header */}
+      <div>
+        <p className="cmms-eyebrow">REPAIR CREATE · CMMS-TOPPAN</p>
+        <PageHeader
+          title="เปิดใบแจ้งซ่อมใหม่"
+          description="กรอกข้อมูลอาการเสียของเครื่องจักรเพื่อส่งเรื่องให้ทีมช่างดำเนินการ"
+        />
+      </div>
 
-      <Heading level={2}>เปิดใบแจ้งซ่อม</Heading>
-
+      {/* Offline Pending Banner */}
       {pending > 0 && (
-        <div
-          style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "10px 14px", borderRadius: 8,
-            background: "var(--cmms-warning-light, #FEF3C7)", color: "var(--cmms-warning-strong, #B45309)",
-            fontSize: "0.85rem", fontWeight: 600, width: "fit-content",
-          }}
-        >
-          <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
+        <Alert variant="info" title="โหมดออฟไลน์">
           มี {pending} รายการที่บันทึกไว้ในเครื่อง — จะส่งอัตโนมัติเมื่อกลับมาออนไลน์
-        </div>
+        </Alert>
       )}
 
-      <Card padding={6}>
-        <VStack gap={5} style={{ maxWidth: 640 }}>
-          {error && (
-            <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-              {error}
+      {/* Form Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <span>รายละเอียดใบแจ้งซ่อม</span>
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-2xl">
+            {submitError && (
+              <Alert variant="danger" title="ไม่สามารถส่งแจ้งซ่อมได้">
+                {submitError}
+              </Alert>
+            )}
+
+            {/* เครื่องจักรที่ชำรุด */}
+            <Select
+              label="เครื่องจักรที่ชำรุด *"
+              error={errors.asset_id?.message}
+              disabled={loadingAssets}
+              {...register("asset_id")}
+            >
+              <option value="">{loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."}</option>
+              {assets.map((a) => (
+                <option key={a.id} value={String(a.id)}>
+                  {a.code} - {a.name}
+                </option>
+              ))}
+            </Select>
+
+            {/* หัวข้ออาการเสีย */}
+            <Input
+              label="หัวข้ออาการเสีย *"
+              placeholder="เช่น ลูกปืนแกนหลักแตก เครื่องมีเสียงดัง"
+              error={errors.title?.message}
+              {...register("title")}
+            />
+
+            {/* ความสำคัญ & แผนกซ่อม */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Select
+                label="ความสำคัญ *"
+                error={errors.priority?.message}
+                {...register("priority")}
+              >
+                <option value="critical">วิกฤต (ต้องซ่อมทันที)</option>
+                <option value="high">ด่วน</option>
+                <option value="medium">ปานกลาง</option>
+                <option value="low">ต่ำ</option>
+              </Select>
+
+              <Select
+                label="แผนกซ่อมที่รับผิดชอบ *"
+                error={errors.department?.message}
+                {...register("department")}
+              >
+                <option value="">เลือกแผนกซ่อม...</option>
+                <option value="mechanical">ช่างกล</option>
+                <option value="electrical">ไฟฟ้า</option>
+                <option value="instrument">ควบคุมและวัด</option>
+                <option value="utility">สาธารณูปโภค</option>
+              </Select>
             </div>
-          )}
 
-          <Selector
-            label="เครื่องจักรที่ชำรุด *"
-            placeholder="เลือกเครื่องจักร..."
-            value={assetId}
-            onChange={setAssetId}
-            options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
-          />
-          <TextInput label="หัวข้ออาการเสีย *"
-            placeholder="เช่น ลูกปืนแกนหลักแตก เครื่องมีเสียงดัง"
-            value={title}
-            onChange={setTitle}  />
-          <Selector
-            label="ความสำคัญ"
-            placeholder="เลือกความสำคัญ"
-            value={priority}
-            onChange={setPriority}
-            options={[
-              { value: "critical", label: "วิกฤต (ต้องซ่อมทันที)" },
-              { value: "high", label: "ด่วน" },
-              { value: "medium", label: "ปานกลาง" },
-              { value: "low", label: "ต่ำ" },
-            ]}
-          />
-          <Selector
-            label="แผนกซ่อมที่รับผิดชอบ *"
-            placeholder="เลือกแผนกซ่อม"
-            value={department}
-            onChange={setDepartment}
-            options={[
-              { value: "mechanical", label: "ช่างกล" },
-              { value: "electrical", label: "ไฟฟ้า" },
-              { value: "instrument", label: "ควบคุมและวัด" },
-              { value: "utility", label: "สาธารณูปโภค" },
-            ]}
-          />
-          <TextArea
-            label="รายละเอียดเพิ่มเติม"
-            placeholder="อธิบายลักษณะอาการเสีย หรือข้อมูลเพิ่มเติมสำหรับช่าง..."
-            value={description}
-            onChange={setDescription}
-          />
-          <DateInput
-            label="วันที่ต้องการให้เสร็จ"
-            value={dueDate}
-            onChange={setDueDate}
-          />
+            {/* รายละเอียดเพิ่มเติม */}
+            <Textarea
+              label="รายละเอียดเพิ่มเติม"
+              placeholder="อธิบายลักษณะอาการเสีย หรือข้อมูลเพิ่มเติมสำหรับช่าง..."
+              rows={4}
+              error={errors.description?.message}
+              {...register("description")}
+            />
 
-          <HStack gap={3} hAlign="end">
-            <button
-              type="button"
-              onClick={() => router.push("/repair")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "กำลังบันทึก..." : "บันทึกและส่งแจ้งซ่อม"}
-            </button>
-          </HStack>
-        </VStack>
+            {/* วันที่ต้องการให้เสร็จ */}
+            <Input
+              type="date"
+              label="วันที่ต้องการให้เสร็จ"
+              error={errors.dueDate?.message}
+              {...register("dueDate")}
+            />
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--cmms-border)]">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push("/repair")}
+                disabled={loading}
+              >
+                ยกเลิก
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+                className="gap-2"
+              >
+                {loading ? (
+                  "กำลังบันทึก..."
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>บันทึกและส่งแจ้งซ่อม</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
       </Card>
-    </VStack>
+    </div>
   );
 }

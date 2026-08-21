@@ -1,12 +1,11 @@
 "use client";
 
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 /**
- * SuccessDialog — หน้าจอ "สำเร็จ" แบบเต็มจอ (Astryx design)
+ * SuccessDialog — หน้าจอ "สำเร็จ" แบบเต็มจอ (Modern Design)
  * ใช้แทน cmms-success-overlay/card/icon เดิมในหน้า create/edit ทุกรายการ
  * คลิกพื้นที่ว่าง = onBackdrop (มักพาไปหน้ารายการ)
  */
@@ -35,78 +34,69 @@ export default function SuccessDialog({
   onBackdrop,
   stackButtons = false,
 }: SuccessDialogProps) {
+  // Handle ESC key to close/trigger backdrop action
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && onBackdrop) {
+        onBackdrop();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onBackdrop]);
+
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="success-dialog-title"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm animate-fade-in"
       onClick={onBackdrop}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 1000,
-        background: "var(--color-overlay, rgba(15,23,42,0.5))",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-      }}
     >
-      <VStack
-        gap={4}
-        hAlign="center"
+      <div
+        className="flex flex-col items-center gap-6 bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 text-center max-w-[420px] w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: "var(--color-background-card, #fff)",
-          borderRadius: 18,
-          padding: 48,
-          textAlign: "center",
-          maxWidth: 420,
-          width: "100%",
-          boxShadow:
-            "0 20px 25px -5px rgba(15,23,42,0.08), 0 10px 10px -5px rgba(15,23,42,0.03)",
-        }}
       >
-        <div
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: "50%",
-            background: "var(--color-success-muted, #D1FAE5)",
-            color: "var(--color-success, #059669)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CheckCircleIcon style={{ width: 36, height: 36 }} />
+        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-bounce-short">
+          <CheckCircle2 className="w-9 h-9" />
         </div>
 
-        <Heading level={3} style={{ marginBottom: 0 }}>
-          {title}
-        </Heading>
+        <div className="space-y-2">
+          <h3
+            id="success-dialog-title"
+            className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50"
+          >
+            {title}
+          </h3>
 
-        {message && (
-          <Text type="body" color="secondary">
-            {message}
-          </Text>
-        )}
+          {message && (
+            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+              {message}
+            </p>
+          )}
+        </div>
 
-        {children}
+        {children && <div className="w-full">{children}</div>}
 
-        {stackButtons ? (
-          <VStack gap={2} style={{ width: "100%" }}>
-            <Button label={primaryLabel} variant="primary" width="100%" onClick={onPrimary} />
-            {secondaryLabel && onSecondary && (
-              <Button label={secondaryLabel} variant="secondary" width="100%" onClick={onSecondary} />
-            )}
-          </VStack>
-        ) : (
-          <HStack gap={2} hAlign="center" wrap="wrap">
-            <Button label={primaryLabel} variant="primary" onClick={onPrimary} />
-            {secondaryLabel && onSecondary && (
-              <Button label={secondaryLabel} variant="secondary" onClick={onSecondary} />
-            )}
-          </HStack>
-        )}
-      </VStack>
+        <div className={`w-full flex ${stackButtons ? "flex-col gap-2" : "flex-row flex-wrap justify-center gap-3"}`}>
+          {secondaryLabel && onSecondary && (
+            <Button
+              variant="outline"
+              onClick={onSecondary}
+              className={stackButtons ? "w-full" : ""}
+            >
+              {secondaryLabel}
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            onClick={onPrimary}
+            className={stackButtons ? "w-full" : ""}
+          >
+            {primaryLabel}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
