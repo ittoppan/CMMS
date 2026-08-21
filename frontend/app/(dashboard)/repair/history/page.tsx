@@ -1,32 +1,20 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { t, statusText, priorityText } from "@/lib/i18n";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
+import { t, statusText } from "@/lib/i18n";
 import AndonLamp from "@/components/AndonLamp";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
 import CountUp from "react-countup";
 import { useRouter } from "next/navigation";
-import {
-  MagnifyingGlassIcon,
-  ArrowPathIcon,
-  CheckCircleIcon,
-  WrenchScrewdriverIcon,
-  UserGroupIcon,
-  BuildingOffice2Icon,
-  ClockIcon,
-  ClipboardDocumentListIcon,
-} from "@heroicons/react/24/outline";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Search, RefreshCw, ClipboardList } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 
 interface HistoryWO extends Record<string, unknown> {
   id: string;
@@ -55,16 +43,8 @@ const statusColors: Record<string, React.CSSProperties> = {
   open: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
 };
 
-const statusLabels: Record<string, string> = {
-  completed: "เสร็จสิ้น", closed: "ปิดงาน", resolved: "แก้ไขแล้ว",
-  rejected: "ปฏิเสธ", cancelled: "ยกเลิก",
-  in_progress: "กำลังซ่อม", open: "รอดำเนินการ",
-};
-
 // สถานะที่ถือเป็น "จบงานแล้ว" (แสดงในประวัติ)
 const CLOSED_STATUSES = ["completed", "closed", "resolved", "rejected", "cancelled"];
-
-const PAGE_SIZE = 10;
 
 export default function RepairHistoryPage() {
   const router = useRouter();
@@ -74,7 +54,6 @@ export default function RepairHistoryPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
-  const [page, setPage] = useState(1);
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -139,276 +118,249 @@ export default function RepairHistoryPage() {
     return { total, costParts, costLabor, costOutsource, downtime };
   }, [workOrders]);
 
-  const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const pagination = useTablePagination<HistoryWO>({
-    page,
-    onPageChange: setPage,
-    totalItems,
-    pageSize: PAGE_SIZE,
-  });
-
-  const columns: TableColumn<HistoryWO>[] = [
+  const columns: ColumnDef<UiTableFeatures, HistoryWO>[] = [
     {
-      key: "woNumber",
+      accessorKey: "woNumber",
       header: t("tbl.wo_no_short"),
-      width: proportional(1.2),
-      renderCell: (item: HistoryWO) => (
-        <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>{item.woNumber}</Text>
+      cell: ({ row }: { row: { original: HistoryWO } }) => (
+        <span className="font-bold text-[var(--cmms-primary)]">{row.original.woNumber}</span>
       ),
     },
     {
-      key: "asset",
+      accessorKey: "asset",
       header: t("tbl.asset_full"),
-      width: proportional(2),
-      renderCell: (item: HistoryWO) => (
-        <VStack gap={0}>
-          <Text type="body" weight="semibold">{item.asset}</Text>
-          {(item.title || item.outsourceBy) && (
-            <HStack gap={2} vAlign="center" wrap="wrap">
-              {item.title && <Text type="body" size="sm" color="secondary">{item.title}</Text>}
-              {item.outsourceBy && (
-                <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
-                  ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
-                </span>
-              )}
-            </HStack>
-          )}
-        </VStack>
-      ),
-    },
-    {
-      key: "status",
-      header: t("tbl.status"),
-      width: proportional(1),
-      renderCell: (item: HistoryWO) => (
-        <span className="cmms-andon-chip" style={statusColors[item.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {statusText(item.status, item.status)}
-        </span>
-      ),
-    },
-    { key: "assignee", header: t("tbl.assignee"), width: proportional(1) },
-    { key: "requestDate", header: t("tbl.request_date"), width: proportional(1) },
-    { key: "completedDate", header: t("tbl.completed_date"), width: proportional(1) },
-    {
-      key: "rootCause",
-      header: t("tbl.root_cause"),
-      width: proportional(2.2),
-      renderCell: (item: HistoryWO) => (
-        <Text type="body" size="sm" color="secondary" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {item.rootCause || "-"}
-        </Text>
-      ),
-    },
-    {
-      key: "cost",
-      header: t("tbl.cost"),
-      width: proportional(1),
-      renderCell: (item: HistoryWO) => {
-        const total = item.costParts + item.costLabor + item.costOutsource;
-        return total > 0 ? (
-          <Text type="body" weight="semibold">{total.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</Text>
-        ) : (
-          <Text type="body" color="secondary">-</Text>
+      cell: ({ row }: { row: { original: HistoryWO } }) => {
+        const item = row.original;
+        return (
+          <div className="flex flex-col gap-0">
+            <span className="font-semibold">{item.asset}</span>
+            {(item.title || item.outsourceBy) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {item.title && <span className="text-sm text-[var(--cmms-text-secondary)]">{item.title}</span>}
+                {item.outsourceBy && (
+                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+                    ภายนอก{item.outsourceBy ? ` · ${item.outsourceBy}` : ""}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         );
       },
     },
     {
-      key: "actions",
+      accessorKey: "status",
+      header: t("tbl.status"),
+      cell: ({ row }: { row: { original: HistoryWO } }) => (
+        <span className="cmms-andon-chip" style={statusColors[row.original.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+          {statusText(row.original.status, row.original.status)}
+        </span>
+      ),
+    },
+    { accessorKey: "assignee", header: t("tbl.assignee") },
+    { accessorKey: "requestDate", header: t("tbl.request_date") },
+    { accessorKey: "completedDate", header: t("tbl.completed_date") },
+    {
+      accessorKey: "rootCause",
+      header: t("tbl.root_cause"),
+      cell: ({ row }: { row: { original: HistoryWO } }) => (
+        <span className="line-clamp-2 block text-sm text-[var(--cmms-text-secondary)]">
+          {row.original.rootCause || "-"}
+        </span>
+      ),
+    },
+    {
+      id: "cost",
+      header: t("tbl.cost"),
+      cell: ({ row }: { row: { original: HistoryWO } }) => {
+        const item = row.original;
+        const total = item.costParts + item.costLabor + item.costOutsource;
+        return total > 0 ? (
+          <span className="font-semibold">{total.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
+        ) : (
+          <span className="text-[var(--cmms-text-secondary)]">-</span>
+        );
+      },
+    },
+    {
+      id: "actions",
       header: t("tbl.actions"),
-      width: proportional(1),
-      renderCell: (item: HistoryWO) => (
-        <button
-          type="button"
-          onClick={() => router.push(`/repair/edit?id=${item.rawId}`)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-        >
+      enableSorting: false,
+      cell: ({ row }: { row: { original: HistoryWO } }) => (
+        <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/edit?id=${row.original.rawId}`)}>
           ดูรายละเอียด
-        </button>
+        </Button>
       ),
     },
   ];
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {error && (
-        <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}
 
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            Repair History · CMMS-TOPPAN
-          </Text>
-          <Heading level={2} style={{ color: "#fff" }}>ประวัติงานซ่อม</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={fetchHistory}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
-        >
-          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
+      <div>
+        <p className="cmms-eyebrow">Repair History · CMMS-TOPPAN</p>
+        <PageHeader
+          title="ประวัติงานซ่อม"
+          description="รายการใบสั่งงานที่เสร็จสิ้นแล้วทั้งหมด"
+          actions={
+            <Button variant="outline" onClick={fetchHistory} className="gap-2">
+              <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+              {t("action.refresh")}
+            </Button>
+          }
+        />
       </div>
 
       {/* Stat cards */}
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card green">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+        <Card className="cmms-kpi-card green">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
               <AndonLamp status="ok" size="sm" />
-              <Text type="supporting" color="secondary">งานที่เสร็จสิ้น</Text>
-            </HStack>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">งานที่เสร็จสิ้น</span>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.total} />
               <span className="cmms-kpi-unit">งาน</span>
             </div>
-          </VStack>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card blue">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+        <Card className="cmms-kpi-card blue">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
               <AndonLamp status="idle" size="sm" />
-              <Text type="supporting" color="secondary">ค่าอะไหล่</Text>
-            </HStack>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าอะไหล่</span>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.costParts} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
-          </VStack>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+        <Card className="cmms-kpi-card cyan">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
               <AndonLamp status="idle" size="sm" />
-              <Text type="supporting" color="secondary">ค่าแรง</Text>
-            </HStack>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าแรง</span>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.costLabor} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
-          </VStack>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
-          <VStack gap={2}>
-            <HStack vAlign="center" gap={2}>
+        <Card className="cmms-kpi-card amber">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
               <AndonLamp status="warn" size="sm" />
-              <Text type="supporting" color="secondary">ค่าจ้างภายนอก</Text>
-            </HStack>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าจ้างภายนอก</span>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.costOutsource} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
               <span className="cmms-kpi-unit">บาท</span>
             </div>
-          </VStack>
+          </CardContent>
         </Card>
         {stats.downtime > 0 && (
-          <Card elevation="low" padding={4} className="cmms-kpi-card red">
-            <VStack gap={2}>
-              <HStack vAlign="center" gap={2}>
+          <Card className="cmms-kpi-card red">
+            <CardContent className="space-y-2">
+              <div className="flex items-center gap-2">
                 <AndonLamp status="down" size="sm" />
-                <Text type="supporting" color="secondary">เวลาหยุดเครื่องรวม</Text>
-              </HStack>
+                <span className="text-sm text-[var(--cmms-text-secondary)]">เวลาหยุดเครื่องรวม</span>
+              </div>
               <div className="cmms-kpi-value">
                 <CountUp end={stats.downtime} />
                 <span className="cmms-kpi-unit">นาที</span>
               </div>
-            </VStack>
+            </CardContent>
           </Card>
         )}
-      </Grid>
+      </div>
 
       {/* Filter Toolbar */}
-      <Card elevation="low" padding={5}>
-        <VStack gap={4}>
-          <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-              <ClipboardDocumentListIcon className="w-4 h-4" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+              <ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            ประวัติใบสั่งงาน
+            <span className="cmms-count-pill">{filtered.length} รายการ</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+              <Search
+                size={16}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]"
+              />
+              <Input
+                aria-label="ค้นหา"
+                placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
             </div>
-            <Heading level={3} style={{ margin: 0 }}>ประวัติใบสั่งงาน</Heading>
-            <span className="cmms-count-pill">{totalItems} รายการ</span>
-          </HStack>
-          <Toolbar
-            label="ตัวกรองประวัติงานซ่อม"
-            startContent={
-              <>
-                <TextInput
-                  label="ค้นหา"
-                  isLabelHidden
-                  placeholder="ค้นหาเลขงาน, เครื่องจักร, ผู้รับผิดชอบ..."
-                  startIcon={MagnifyingGlassIcon}
-                  value={search}
-                  onChange={setSearch}
-                />
-                <Selector
-                  label="สถานะ"
-                  isLabelHidden
-                  placeholder="ทุกสถานะ"
-                  value={statusFilter}
-                  onChange={setStatusFilter}
-                  options={[
-                    { value: "", label: t("action.filter_all_status") },
-                    { value: "completed", label: "เสร็จสิ้น" },
-                    { value: "closed", label: "ปิดงาน" },
-                    { value: "resolved", label: "แก้ไขแล้ว" },
-                    { value: "rejected", label: "ปฏิเสธ" },
-                  ]}
-                />
-                <HStack gap={1} vAlign="center" style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: 3 }}>
-                  {([
-                    { v: "all", label: "ทั้งหมด" },
-                    { v: "in", label: "งานใน" },
-                    { v: "out", label: "งานภายนอก" },
-                  ] as const).map((opt) => (
-                    <button
-                      key={opt.v}
-                      type="button"
-                      onClick={() => { setOutsourceFilter(opt.v); setPage(1); }}
-                      style={{
-                        padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
-                        background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
-                        color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
-                        boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </HStack>
-              </>
-            }
-          />
-        </VStack>
+            <Select
+              aria-label="สถานะ"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="sm:w-44"
+            >
+              <option value="">{t("action.filter_all_status")}</option>
+              <option value="completed">เสร็จสิ้น</option>
+              <option value="closed">ปิดงาน</option>
+              <option value="resolved">แก้ไขแล้ว</option>
+              <option value="rejected">ปฏิเสธ</option>
+            </Select>
+            <div
+              className="flex items-center gap-1 rounded-[10px] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-[3px]"
+              role="group"
+              aria-label="กรองงานใน/งานภายนอก"
+            >
+              {([
+                { v: "all", label: "ทั้งหมด" },
+                { v: "in", label: "งานใน" },
+                { v: "out", label: "งานภายนอก" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.v}
+                  type="button"
+                  onClick={() => setOutsourceFilter(opt.v)}
+                  aria-pressed={outsourceFilter === opt.v}
+                  style={{
+                    padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                    background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
+                    color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
+                    boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Table */}
-      {loading ? (
-        <HStack hAlign="center" style={{ padding: 40 }}>
-          <Spinner size="md" />
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        </HStack>
-      ) : paged.length === 0 ? (
-        <EmptyState
-          title="ไม่พบประวัติงานซ่อม"
-          description="ลองเปลี่ยนตัวกรองหรือค้นหาด้วยคำอื่น"
-          icon={<MagnifyingGlassIcon className="w-6 h-6" />}
-        />
-      ) : (
-        <Card padding={0} style={{ overflow: "hidden" }}>
-          <Table<HistoryWO>
-            data={paged}
-            columns={columns}
-            idKey="id"
-            density="balanced"
-            dividers="rows"
-            hasHover
-            plugins={{ pagination }}
-          />
-        </Card>
-      )}
-    </VStack>
+      <DataTable
+        columns={columns}
+        data={filtered}
+        loading={loading}
+        pageSize={10}
+        getRowId={(row) => row.id}
+        emptyTitle="ไม่พบประวัติงานซ่อม"
+        emptyDescription="ลองเปลี่ยนตัวกรองหรือค้นหาด้วยคำอื่น"
+      />
+    </div>
   );
 }

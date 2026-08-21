@@ -1,25 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
+import { usePageHero, t } from "@/lib/i18n";
 import AndonLamp from "@/components/AndonLamp";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import {
-  UserGroupIcon,
-  ClipboardDocumentListIcon,
-  ExclamationTriangleIcon,
-  FireIcon,
-  CheckCircleIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
+import CountUp from "react-countup";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Users, RefreshCw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 
 interface TechRow extends Record<string, unknown> {
   id: string;
@@ -80,183 +72,197 @@ export default function WorkloadPage() {
     fetchWorkload();
   }, [fetchWorkload]);
 
-  const columns: TableColumn<TechRow>[] = [
+  const columns: ColumnDef<UiTableFeatures, TechRow>[] = [
     {
-      key: "name",
+      accessorKey: "name",
       header: t("tbl.tech_assignee_full"),
-      width: proportional(2),
-      renderCell: (item) => (
-        <HStack gap={2} vAlign="center">
-          <div
-            style={{
-              width: 30, height: 30, borderRadius: 999,
-              background: "var(--cmms-primary)",
-              color: "#fff", fontWeight: 700, fontSize: 13,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}
+      cell: ({ row }: { row: { original: TechRow } }) => (
+        <div className="flex items-center gap-2">
+          <span
+            aria-hidden="true"
+            className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-[13px] font-bold text-white"
+            style={{ background: "var(--cmms-primary)" }}
           >
-            {item.name.trim().charAt(0).toUpperCase()}
-          </div>
-          <Text type="body" weight="bold">{item.name}</Text>
-        </HStack>
+            {row.original.name.trim().charAt(0).toUpperCase()}
+          </span>
+          <span className="font-bold">{row.original.name}</span>
+        </div>
       ),
     },
     {
-      key: "openCount",
+      accessorKey: "openCount",
       header: t("tbl.open_jobs"),
-      width: proportional(1),
-      renderCell: (item) => (
-        <span className="cmms-andon-chip" style={item.openCount > 0 ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" } : { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
-          {item.openCount}
+      cell: ({ row }: { row: { original: TechRow } }) => (
+        <span
+          className="cmms-andon-chip"
+          style={
+            row.original.openCount > 0
+              ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+              : { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+          }
+        >
+          {row.original.openCount}
         </span>
       ),
     },
+    { accessorKey: "activeCount", header: t("tbl.in_progress_h") },
     {
-      key: "activeCount",
-      header: t("tbl.in_progress_h"),
-      width: proportional(1),
-      renderCell: (item) => <Text type="body">{item.activeCount}</Text>,
-    },
-    {
-      key: "overdueCount",
+      accessorKey: "overdueCount",
       header: t("tbl.overdue"),
-      width: proportional(1),
-      renderCell: (item) =>
-        item.overdueCount > 0 ? (
-          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>{item.overdueCount}</span>
+      cell: ({ row }: { row: { original: TechRow } }) =>
+        row.original.overdueCount > 0 ? (
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
+            {row.original.overdueCount}
+          </span>
         ) : (
-          <Text type="body" color="disabled">-</Text>
+          <span className="text-[var(--cmms-text-muted)]">-</span>
         ),
     },
     {
-      key: "urgentCount",
+      accessorKey: "urgentCount",
       header: t("tbl.urgent"),
-      width: proportional(1),
-      renderCell: (item) =>
-        item.urgentCount > 0 ? (
-          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>{item.urgentCount}</span>
+      cell: ({ row }: { row: { original: TechRow } }) =>
+        row.original.urgentCount > 0 ? (
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
+            {row.original.urgentCount}
+          </span>
         ) : (
-          <Text type="body" color="disabled">-</Text>
+          <span className="text-[var(--cmms-text-muted)]">-</span>
         ),
     },
     {
-      key: "due7dCount",
+      accessorKey: "due7dCount",
       header: t("tbl.due_in_7d"),
-      width: proportional(1.2),
-      renderCell: (item) => <Text type="body">{item.due7dCount} งาน</Text>,
+      cell: ({ row }: { row: { original: TechRow } }) => (
+        <span>{row.original.due7dCount} งาน</span>
+      ),
     },
     {
-      key: "done7dCount",
+      accessorKey: "done7dCount",
       header: t("tbl.closed_7d"),
-      width: proportional(1.2),
-      renderCell: (item) => (
-        <Text type="body" style={{ color: "var(--cmms-success)" }}>{item.done7dCount} งาน</Text>
+      cell: ({ row }: { row: { original: TechRow } }) => (
+        <span style={{ color: "var(--cmms-success)" }}>{row.original.done7dCount} งาน</span>
       ),
     },
   ];
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
+      {error && (
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
+      )}
+
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              คำนวณจากงานซ่อมจริง
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={fetchWorkload}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
-        >
-          <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
+      <div>
+        <p className="cmms-eyebrow">{hero.eyebrow}</p>
+        <PageHeader
+          title={hero.title}
+          description={hero.desc}
+          actions={
+            <div className="flex items-center gap-3">
+              <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                คำนวณจากงานซ่อมจริง
+              </span>
+              <Button variant="outline" onClick={fetchWorkload} className="gap-2">
+                <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+                {t("action.refresh")}
+              </Button>
+            </div>
+          }
+        />
       </div>
 
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
-
-      <Grid columns={5} gap={4}>
-        <Card padding={4} className="cmms-kpi-card blue">
-          <HStack gap={3} vAlign="center">
-            <AndonLamp status="idle" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">ช่างที่มีงาน</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.technicians} คน</Heading>
-            </VStack>
-          </HStack>
-        </Card>
-        <Card padding={4} className="cmms-kpi-card amber">
-          <HStack gap={3} vAlign="center">
-            <AndonLamp status="warn" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">งานค้างทั้งหมด</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_open} งาน</Heading>
-            </VStack>
-          </HStack>
-        </Card>
-        <Card padding={4} className="cmms-kpi-card red">
-          <HStack gap={3} vAlign="center">
-            <AndonLamp status="down" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">เกินกำหนด</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_overdue} งาน</Heading>
-            </VStack>
-          </HStack>
-        </Card>
-        <Card padding={4} className="cmms-kpi-card red">
-          <HStack gap={3} vAlign="center">
-            <AndonLamp status="warn" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">ด่วน / วิกฤต</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.total_urgent} งาน</Heading>
-            </VStack>
-          </HStack>
-        </Card>
-        <Card padding={4} className="cmms-kpi-card green">
-          <HStack gap={3} vAlign="center">
-            <AndonLamp status="ok" size="sm" />
-            <VStack gap={0}>
-              <Text type="supporting" color="secondary">ปิดงาน 7 วันล่าสุด</Text>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>{summary.done_7d} งาน</Heading>
-            </VStack>
-          </HStack>
-        </Card>
-      </Grid>
-
-      <Card padding={0} style={{ overflow: "hidden" }}>
-        <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
-          <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-              <UserGroupIcon className="w-4 h-4" />
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+        <Card className="cmms-kpi-card blue">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="idle" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ช่างที่มีงาน</span>
             </div>
-            <Text type="body" weight="bold">ภาระงานรายช่าง</Text>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.technicians} />
+              <span className="cmms-kpi-unit">คน</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cmms-kpi-card amber">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="warn" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">งานค้างทั้งหมด</span>
+            </div>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.total_open} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cmms-kpi-card red">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="down" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด</span>
+            </div>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.total_overdue} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cmms-kpi-card red">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="warn" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ด่วน / วิกฤต</span>
+            </div>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.total_urgent} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cmms-kpi-card green">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="ok" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ปิดงาน 7 วันล่าสุด</span>
+            </div>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.done_7d} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+              <Users size={16} strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            ภาระงานรายช่าง
             <span className="cmms-count-pill">{rows.length} ช่าง</span>
-          </HStack>
-        </HStack>
-        {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
-            <Spinner />
-          </div>
-        ) : rows.length === 0 ? (
-          <EmptyState
-            title="ยังไม่มีข้อมูลภาระงาน"
-            description="เมื่อมีงานซ่อมที่มอบหมายให้ช่าง จะแสดงภาพรวมที่นี่"
-            icon={<UserGroupIcon className="w-6 h-6" />}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={rows}
+            loading={loading}
+            pageSize={10}
+            getRowId={(row) => row.id}
+            emptyTitle="ยังไม่มีข้อมูลภาระงาน"
+            emptyDescription="เมื่อมีงานซ่อมที่มอบหมายให้ช่าง จะแสดงภาพรวมที่นี่"
           />
-        ) : (
-          <Table<TechRow> data={rows} columns={columns} idKey="id" density="balanced" dividers="rows" />
-        )}
+        </CardContent>
       </Card>
 
-      <Text type="body" size="sm" color="disabled">
+      <p className="text-sm text-[var(--cmms-text-muted)]">
         หมายเหตุ: งานเกินกำหนด = ยังไม่ปิดงานและเกินวันกำหนดเสร็จ (estimated_completion_date) — ข้อมูลจากตาราง repair จริง
-      </Text>
-    </VStack>
+      </p>
+    </div>
   );
 }

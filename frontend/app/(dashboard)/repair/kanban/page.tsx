@@ -3,23 +3,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { normalizeRepairStatus, repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import {
-  PlusIcon,
-  ArrowPathIcon,
-  MagnifyingGlassIcon,
-  ChevronRightIcon,
-  ChevronLeftIcon,
-  UserIcon,
-  InboxIcon,
-} from "@heroicons/react/24/outline";
+import { Plus, RefreshCw, Search, ChevronRight, ChevronLeft, User, Inbox } from "lucide-react";
 import AndonLamp from "@/components/AndonLamp";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
 
 export interface KanbanItem {
   id: string;
@@ -215,152 +207,138 @@ export default function RepairKanbanPage() {
   ];
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            {hero.eyebrow}
-          </Text>
-          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <button
-            type="button"
-            onClick={fetchKanban}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
-          >
-            <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
-          <button
-            type="button"
-            onClick={() => (window.location.href = "/repair/request")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white cmms-btn-primary"
-          >
-            <PlusIcon className="w-4 h-4" />{t("action.create_wo")}</button>
-        </HStack>
+      <div>
+        <p className="cmms-eyebrow">{hero.eyebrow}</p>
+        <PageHeader
+          title={hero.title}
+          description={hero.desc}
+          actions={
+            <>
+              <Button variant="outline" onClick={fetchKanban} className="gap-2">
+                <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+                {t("action.refresh")}
+              </Button>
+              <Button onClick={() => (window.location.href = "/repair/request")} className="gap-2">
+                <Plus size={16} strokeWidth={2} aria-hidden="true" />
+                {t("action.create_wo")}
+              </Button>
+            </>
+          }
+        />
       </div>
 
       {/* Toolbar Filter */}
-      <Card elevation="low" padding={5}>
-        <VStack gap={4}>
-          <HStack gap={2} vAlign="center">
-            <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-              <MagnifyingGlassIcon className="w-4 h-4" />
-            </div>
-            <Heading level={3} style={{ margin: 0 }}>ตัวกรองบอร์ด</Heading>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+              <Search size={16} strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            ตัวกรองบอร์ด
             <span className="cmms-count-pill">{filteredItems.length} งาน</span>
-          </HStack>
-          <Toolbar
-            label="ตัวกรอง Kanban"
-            startContent={
-              <>
-                <TextInput
-                  label="ค้นหา"
-                  isLabelHidden
-                  placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง..."
-                  startIcon={MagnifyingGlassIcon}
-                  value={search}
-                  onChange={setSearch}
-                />
-                <Selector
-                  label="ความสำคัญ"
-                  isLabelHidden
-                  placeholder="ทุกระดับความด่วน"
-                  value={priorityFilter}
-                  onChange={setPriorityFilter}
-                  options={[
-                    { value: "all", label: "ทุกความด่วน" },
-                    { value: "Critical", label: "วิกฤต (Critical)" },
-                    { value: "High", label: "สูง (High)" },
-                    { value: "Medium", label: "ปานกลาง (Medium)" },
-                    { value: "Low", label: "ต่ำ (Low)" },
-                  ]}
-                />
-                <button
-                  type="button"
-                  onClick={() => setOverdueOnly(v => !v)}
-                  title="แสดงเฉพาะงานที่เลยกำหนดเสร็จ"
-                  className={overdueOnly ? "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cmms-andon-chip" : "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"}
-                  style={overdueOnly
-                    ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)", border: "1px solid var(--cmms-danger)" }
-                    : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)", border: "1px solid var(--cmms-border)", cursor: "pointer" }}
-                >
-                  <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: overdueOnly ? "var(--cmms-danger)" : "var(--cmms-text-muted)" }} />
-                  เกินกำหนดเท่านั้น
-                </button>
-              </>
-            }
-          />
-        </VStack>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1 sm:max-w-xs">
+              <Search
+                size={16}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]"
+              />
+              <Input
+                aria-label="ค้นหา"
+                placeholder="ค้นหาเลขงาน, เครื่องจักร, ช่าง..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select
+              aria-label="ความสำคัญ"
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="sm:w-52"
+            >
+              <option value="all">ทุกความด่วน</option>
+              <option value="Critical">วิกฤต (Critical)</option>
+              <option value="High">สูง (High)</option>
+              <option value="Medium">ปานกลาง (Medium)</option>
+              <option value="Low">ต่ำ (Low)</option>
+            </Select>
+            <button
+              type="button"
+              onClick={() => setOverdueOnly(v => !v)}
+              title="แสดงเฉพาะงานที่เลยกำหนดเสร็จ"
+              className={overdueOnly ? "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cmms-andon-chip" : "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"}
+              style={overdueOnly
+                ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)", border: "1px solid var(--cmms-danger)" }
+                : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)", border: "1px solid var(--cmms-border)", cursor: "pointer" }}
+            >
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: overdueOnly ? "var(--cmms-danger)" : "var(--cmms-text-muted)" }} />
+              เกินกำหนดเท่านั้น
+            </button>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Board Columns */}
-      <Grid columns={{ minWidth: 260, repeat: "fit" }} gap={4}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {columnsDef.map((col) => (
-          <Card
-            key={col.key}
-            padding={4}
-            style={{
-              borderTop: `4px solid ${col.tone}`,
-              background: 'var(--cmms-bg-card)',
-              minHeight: 500,
-            }}
-          >
-            <VStack gap={4}>
-              <HStack hAlign="between" vAlign="center" style={{ borderBottom: '1px solid var(--cmms-border)', paddingBottom: 10 }}>            <HStack gap={2} vAlign="center">
-              <AndonLamp status={col.andon} size="sm" />
-              <Text type="body" weight="bold" style={{ fontSize: '0.95rem' }}>{col.title}</Text>
-            </HStack>
-            <span className="cmms-count-pill">{col.items.length}</span>
-          </HStack>
-
           <div
-            onDragOver={(e) => { e.preventDefault(); setDragOverKey(col.key); }}
-            onDragLeave={() => setDragOverKey(prev => prev === col.key ? null : prev)}
-            onDrop={(e) => {
-              e.preventDefault();
-              const id = dragId;
-              setDragId(null);
-              setDragOverKey(null);
-              if (!id) return;
-              const item = items.find(i => i.id === id);
-              if (item && item.status !== col.key) persistStatus(item, col.key);
-            }}
-            style={{
-              flex: 1,
-              borderRadius: 12,
-              outline: dragOverKey === col.key ? '2px dashed var(--cmms-primary)' : 'none',
-              outlineOffset: 2,
-              background: dragOverKey === col.key ? 'var(--cmms-primary-wash)' : 'transparent',
-              minHeight: 120,
-              transition: 'background 120ms ease',
-            }}
+            key={col.key}
+            className="flex flex-col gap-4 rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-4"
+            style={{ borderTop: `4px solid ${col.tone}`, minHeight: 500 }}
           >
+            <div className="flex items-center justify-between gap-2 border-b border-[var(--cmms-border)] pb-2.5">
+              <div className="flex items-center gap-2">
+                <AndonLamp status={col.andon} size="sm" />
+                <span className="text-[0.95rem] font-bold">{col.title}</span>
+              </div>
+              <span className="cmms-count-pill">{col.items.length}</span>
+            </div>
+
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOverKey(col.key); }}
+              onDragLeave={() => setDragOverKey(prev => prev === col.key ? null : prev)}
+              onDrop={(e) => {
+                e.preventDefault();
+                const id = dragId;
+                setDragId(null);
+                setDragOverKey(null);
+                if (!id) return;
+                const item = items.find(i => i.id === id);
+                if (item && item.status !== col.key) persistStatus(item, col.key);
+              }}
+              className="flex-1 rounded-xl"
+              style={{
+                outline: dragOverKey === col.key ? '2px dashed var(--cmms-primary)' : 'none',
+                outlineOffset: 2,
+                background: dragOverKey === col.key ? 'var(--cmms-primary-wash)' : 'transparent',
+                minHeight: 120,
+                transition: 'background 120ms ease',
+              }}
+            >
               {loading ? (
-                <Text type="body" color="secondary" style={{ textAlign: 'center', padding: 20 }}>กำลังโหลด...</Text>
+                <p className="p-5 text-center text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>
               ) : col.items.length === 0 ? (
-                <div style={{
-                  padding: 24, textAlign: 'center', borderRadius: 12,
-                  border: '1px dashed var(--cmms-border)', color: 'var(--cmms-text-muted)',
-                  fontSize: '0.85rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                }}>
-                  <InboxIcon className="w-6 h-6 opacity-50" />
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--cmms-border)] p-6 text-center text-[0.85rem] text-[var(--cmms-text-muted)]">
+                  <Inbox size={24} strokeWidth={1.5} className="opacity-50" aria-hidden="true" />
                   ไม่มีงานในสถานะนี้
                 </div>
               ) : (
-                <VStack gap={3}>
+                <div className="flex flex-col gap-3">
                   {col.items.map((item) => (
-                    <Card
+                    <div
                       key={item.id}
-                      padding={4}
                       draggable={!savingId}
                       onDragStart={(e) => { setDragId(item.id); e.dataTransfer.effectAllowed = "move"; }}
                       onDragEnd={() => { setDragId(null); setDragOverKey(null); }}
+                      className="rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-4"
                       style={{
-                        border: '1px solid var(--cmms-border)',
                         borderLeft: `3px solid ${priorityTone[item.priority] || "var(--cmms-text-secondary)"}`,
                         boxShadow: dragId === item.id ? '0 6px 16px rgba(0,0,0,0.12)' : '0 2px 4px rgba(0,0,0,0.04)',
                         opacity: dragId === item.id ? 0.55 : 1,
@@ -368,43 +346,35 @@ export default function RepairKanbanPage() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      <VStack gap={2}>
-                        <HStack hAlign="between" vAlign="center" wrap="wrap" gap={1}>
-                          <HStack gap={1.5} vAlign="center">
-                            <Text type="body" weight="bold" style={{ color: 'var(--cmms-primary)' }}>
-                              {item.woNumber}
-                            </Text>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-[var(--cmms-primary)]">{item.woNumber}</span>
                             {item.overdue && (
                               <span className="cmms-status down"><span className="cmms-status-dot" />เกินกำหนด</span>
                             )}
-                          </HStack>
+                          </div>
                           <span className="cmms-andon-chip" style={priorityColors[item.priority] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {item.priority}
                           </span>
-                        </HStack>
+                        </div>
 
-                        <Text type="body" weight="semibold" style={{ fontSize: '0.95rem' }}>
-                          {item.asset}
-                        </Text>
+                        <p className="text-[0.95rem] font-semibold">{item.asset}</p>
 
-                        <Text type="body" size="sm" color="secondary" style={{
-                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                        }}>
-                          {item.symptoms}
-                        </Text>
+                        <p className="line-clamp-2 text-sm text-[var(--cmms-text-secondary)]">{item.symptoms}</p>
 
-                        <HStack hAlign="between" vAlign="center" style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid var(--cmms-border-light)' }}>
-                          <Text type="body" size="sm" color="secondary" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <UserIcon className="w-3.5 h-3.5" /> {item.assignee}
-                          </Text>
-                          <Text type="body" size="sm" color="secondary">
+                        <div className="mt-1.5 flex items-center justify-between gap-2 border-t border-[var(--cmms-border)] pt-1.5">
+                          <span className="flex items-center gap-1 text-sm text-[var(--cmms-text-secondary)]">
+                            <User size={14} strokeWidth={1.75} aria-hidden="true" /> {item.assignee}
+                          </span>
+                          <span className="text-sm text-[var(--cmms-text-secondary)]">
                             {item.createdAt && item.createdAt !== "-" ? item.createdAt.split(" ")[0] : ""}
-                          </Text>
-                        </HStack>
+                          </span>
+                        </div>
 
                         {/* สถานะรับงานต่อคน — ใครรับแล้ว/ใครยังไม่รับ */}
                         {item.team.length > 0 && (
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                          <div className="mt-1.5 flex flex-wrap gap-1">
                             {item.team.map((m) => {
                               const accepted = m.status === "accepted";
                               const declined = m.status === "declined";
@@ -439,49 +409,50 @@ export default function RepairKanbanPage() {
                         )}
 
                         {/* Interactive Move Action Buttons */}
-                        <HStack hAlign="between" gap={1} style={{ marginTop: 8 }}>
+                        <div className="mt-2 flex items-center justify-between gap-1">
                           {col.prevStatus ? (
-                            <button
+                            <Button
                               type="button"
+                              size="sm"
+                              variant="secondary"
                               disabled={savingId === item.id}
                               onClick={() => persistStatus(item, col.prevStatus!)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                              className="gap-1.5"
                             >
-                              <ChevronLeftIcon className="w-3.5 h-3.5" />
+                              <ChevronLeft size={14} strokeWidth={2} aria-hidden="true" />
                               {savingId === item.id ? "กำลังบันทึก..." : col.prevLabel}
-                            </button>
+                            </Button>
                           ) : <div />}
 
                           {col.nextStatus && (
-                            <button
+                            <Button
                               type="button"
+                              size="sm"
                               disabled={savingId === item.id}
                               onClick={() => persistStatus(item, col.nextStatus!)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="gap-1.5"
                             >
-                              <ChevronRightIcon className="w-3.5 h-3.5" />
+                              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
                               {savingId === item.id ? "กำลังบันทึก..." : col.nextLabel}
-                            </button>
+                            </Button>
                           )}
-                        </HStack>
-                      </VStack>
-                    </Card>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </VStack>
+                </div>
               )}
             </div>
-          </VStack>
-          </Card>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {/* ผลการย้ายงาน */}
       {moveMsg && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 10, border: `1px solid ${moveMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)"}`, background: moveMsg.kind === "ok" ? "var(--cmms-success-light)" : "var(--cmms-danger-light)", color: moveMsg.kind === "ok" ? "var(--cmms-success-dark)" : "var(--cmms-danger)", fontSize: "0.85rem", fontWeight: 600 }}>
-          <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: moveMsg.kind === "ok" ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+        <Alert variant={moveMsg.kind === "ok" ? "success" : "danger"}>
           {moveMsg.text}
-        </div>
+        </Alert>
       )}
-    </VStack>
+    </div>
   );
 }

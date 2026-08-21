@@ -1,30 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t } from "@/lib/i18n";
 import { normalizeRepairStatus, isRepairOverdue } from "@/lib/repair-status";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
 import { useRouter } from "next/navigation";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Star, Wrench } from "lucide-react";
 
-import { 
-  StarIcon,
-  CheckBadgeIcon,
-  ClockIcon,
-  WrenchIcon,
-  WrenchScrewdriverIcon,
-  ChatBubbleBottomCenterTextIcon
-} from "@heroicons/react/24/outline";
-import { StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert } from "@/components/ui/alert";
+import { PageHeader } from "@/components/ui/page-header";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import { Dialog } from "@/components/ui/dialog";
 
 type TrackWO = Record<string, unknown> & {
   id: string;
@@ -76,7 +66,7 @@ export default function RepairTrackingPage() {
         setError(true);
       });
   }, []);
-  
+
   // Evaluation Dialog
   const [evalModalOpen, setEvalModalOpen] = useState(false);
   const [selectedWo, setSelectedWo] = useState<TrackWO | null>(null);
@@ -114,188 +104,149 @@ export default function RepairTrackingPage() {
     }
   };
 
-  const columns: TableColumn<TrackWO>[] = [
+  const columns: ColumnDef<UiTableFeatures, TrackWO>[] = [
     {
-      key: "woNumber",
+      accessorKey: "woNumber",
       header: t("tbl.work_order_no"),
-      width: proportional(1.5),
-      renderCell: (item: TrackWO) => <strong>{item.woNumber}</strong>,
-    },
-    {
-      key: "machine",
-      header: t("tbl.asset_full"),
-      width: proportional(2.5),
-      renderCell: (item: TrackWO) => <Text type="body">{item.machine}</Text>,
-    },
-    {
-      key: "symptoms",
-      header: t("tbl.issue_desc"),
-      width: proportional(3),
-      renderCell: (item: TrackWO) => <Text type="body">{item.symptoms}</Text>,
-    },
-    {
-      key: "status",
-      header: t("tbl.repair_status"),
-      width: proportional(2),
-      renderCell: (item: TrackWO) => getStatusDisplay(item),
-    },
-    {
-      key: "technician",
-      header: t("tbl.tech_assignee"),
-      width: proportional(1.5),
-      renderCell: (item: TrackWO) => <Text type="body">{item.technician || "-"}</Text>,
-    },
-    {
-      key: "requestDate",
-      header: t("tbl.request_date"),
-      width: proportional(1.5),
-      renderCell: (item: TrackWO) => <Text type="body" color="secondary">{item.requestDate}</Text>,
-    },
-    {
-      key: "actions",
-      header: t("tbl.actions"),
-      width: proportional(1.5),
-      renderCell: (item: TrackWO) => (
-        <HStack gap={2} hAlign="end">
-          {item.status === 'pending_eval' ? (
-            <button
-              type="button"
-              onClick={() => handleEvaluate(item)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-            >
-              <StarIcon className="w-3.5 h-3.5" />
-              ประเมินผล
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => router.push(`/repair/view?id=${item.id}`)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
-              ดูรายละเอียด
-            </button>
-          )}
-        </HStack>
+      cell: ({ row }: { row: { original: TrackWO } }) => (
+        <strong>{row.original.woNumber}</strong>
       ),
-    }
+    },
+    { accessorKey: "machine", header: t("tbl.asset_full") },
+    { accessorKey: "symptoms", header: t("tbl.issue_desc") },
+    {
+      accessorKey: "status",
+      header: t("tbl.repair_status"),
+      cell: ({ row }: { row: { original: TrackWO } }) => getStatusDisplay(row.original),
+    },
+    {
+      accessorKey: "technician",
+      header: t("tbl.tech_assignee"),
+      cell: ({ row }: { row: { original: TrackWO } }) => row.original.technician || "-",
+    },
+    {
+      accessorKey: "requestDate",
+      header: t("tbl.request_date"),
+      cell: ({ row }: { row: { original: TrackWO } }) => (
+        <span className="text-[var(--cmms-text-secondary)]">{row.original.requestDate}</span>
+      ),
+    },
+    {
+      id: "actions",
+      header: t("tbl.actions"),
+      enableSorting: false,
+      cell: ({ row }: { row: { original: TrackWO } }) => {
+        const item = row.original;
+        return item.status === 'pending_eval' ? (
+          <Button size="sm" onClick={() => handleEvaluate(item)} className="gap-1.5">
+            <Star size={14} strokeWidth={2} aria-hidden="true" />
+            ประเมินผล
+          </Button>
+        ) : (
+          <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${item.id}`)}>
+            ดูรายละเอียด
+          </Button>
+        );
+      },
+    },
   ];
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            {hero.eyebrow}
-          </Text>
-          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
+      <div>
+        <p className="cmms-eyebrow">{hero.eyebrow}</p>
+        <PageHeader title={hero.title} description={hero.desc} />
       </div>
-      
+
       {error ? (
-        <Banner status="error" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
-      ) : data.length === 0 ? (
-        <EmptyState title="ไม่พบข้อมูล" description="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้" icon={<WrenchScrewdriverIcon className="w-6 h-6" />} />
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description="ไม่สามารถโหลดข้อมูลงานซ่อมได้" />
       ) : (
-        <Card padding={0} style={{ overflow: 'hidden' }}>
-          <HStack hAlign="between" vAlign="center" style={{ padding: '14px 20px', borderBottom: '1px solid var(--cmms-border)' }}>
-            <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-                <WrenchScrewdriverIcon className="w-4 h-4" />
-              </div>
-              <Text type="body" weight="bold">รายการงานซ่อมที่แจ้งไว้</Text>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+                <Wrench size={16} strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              รายการงานซ่อมที่แจ้งไว้
               <span className="cmms-count-pill">{data.length} รายการ</span>
-            </HStack>
-          </HStack>
-          <Table<TrackWO>
-            data={data}
-            columns={columns}
-            idKey="id"
-            density="balanced"
-            dividers="rows"
-            hasHover
-          />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={columns}
+              data={data}
+              getRowId={(row) => row.id}
+              emptyTitle="ไม่พบข้อมูล"
+              emptyDescription="ไม่มีรายการงานซ่อมที่คุณได้แจ้งไว้"
+            />
+          </CardContent>
         </Card>
       )}
 
       {/* Evaluation Modal */}
-      <AnimatedDialog open={evalModalOpen} onClose={() => setEvalModalOpen(false)}>
-          <DialogHeader title="ประเมินผลความพึงพอใจงานซ่อม" onOpenChange={setEvalModalOpen} />
-          <div style={{ padding: 24 }}>
-            <div style={{ height: 4, borderRadius: 4, background: 'var(--cmms-primary)', marginBottom: 16 }} />
-            <VStack gap={4}>
-              <Card padding={4} style={{ backgroundColor: 'var(--cmms-bg-muted)' }}>
-                <VStack gap={2}>
-                  <HStack hAlign="between">
-                    <Text type="body" color="secondary" size="sm">ใบงาน:</Text>
-                    <Text type="body" weight="bold">{selectedWo?.woNumber}</Text>
-                  </HStack>
-                  <HStack hAlign="between">
-                    <Text type="body" color="secondary" size="sm">เครื่องจักร:</Text>
-                    <Text type="body" weight="bold">{selectedWo?.machine}</Text>
-                  </HStack>
-                  <HStack hAlign="between">
-                    <Text type="body" color="secondary" size="sm">ช่างซ่อม:</Text>
-                    <Text type="body" color="primary">{selectedWo?.technician}</Text>
-                  </HStack>
-                </VStack>
-              </Card>
-
-              <VStack gap={2}>
-                <Text type="body" weight="semibold">ให้คะแนนความพึงพอใจ:</Text>
-                <HStack gap={2}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                      onClick={() => setRating(star)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-                    >
-                      {star <= rating ? (
-                        <StarSolidIcon className="w-5 h-5" style={{ color: 'var(--cmms-warning)' }} />
-                      ) : (
-                        <StarIcon className="w-5 h-5" style={{ color: 'var(--cmms-text-muted)' }} />
-                      )}
-                    </button>
-                  ))}
-                </HStack>
-              </VStack>
-
-              <VStack gap={1}>
-                <Text type="body" weight="semibold">ข้อเสนอแนะเพิ่มเติม:</Text>
-                <TextArea
-                  label="ความคิดเห็น"
-                  isLabelHidden
-                  placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง..."
-                  value={comment}
-                  onChange={setComment}
-                  rows={3}
-                />
-              </VStack>
-
-              <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                <button
-                  type="button"
-                  onClick={() => setEvalModalOpen(false)}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                >
-                  ยกเลิก
-                </button>
-                <button
-                  type="button"
-                  onClick={submitEvaluation}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-                >
-                  บันทึกการประเมิน
-                </button>
-              </HStack>
-            </VStack>
+      <Dialog
+        open={evalModalOpen}
+        onClose={() => setEvalModalOpen(false)}
+        title="ประเมินผลความพึงพอใจงานซ่อม"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setEvalModalOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button onClick={submitEvaluation}>บันทึกการประเมิน</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-muted)] p-4 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">ใบงาน:</span>
+              <span className="font-bold">{selectedWo?.woNumber}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">เครื่องจักร:</span>
+              <span className="font-bold">{selectedWo?.machine}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[var(--cmms-text-secondary)]">ช่างซ่อม:</span>
+              <span className="font-semibold text-[var(--cmms-primary)]">{selectedWo?.technician}</span>
+            </div>
           </div>
-        </AnimatedDialog>
-    </VStack>
+
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">ให้คะแนนความพึงพอใจ:</p>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                  aria-pressed={star <= rating}
+                  onClick={() => setRating(star)}
+                  className="rounded p-1 transition-colors hover:bg-[var(--cmms-bg-muted)]"
+                >
+                  <Star
+                    size={20}
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                    className={star <= rating ? "text-[var(--cmms-warning)]" : "text-[var(--cmms-text-muted)]"}
+                    fill={star <= rating ? "currentColor" : "none"}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Textarea
+            label="ข้อเสนอแนะเพิ่มเติม"
+            placeholder="แสดงความคิดเห็นต่อการซ่อมบำรุง..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows={3}
+          />
+        </div>
+      </Dialog>
+    </div>
   );
 }

@@ -75,11 +75,11 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 | `/repair/my_tasks` (981 บรรทัด) | ฟอร์ม/รายการ + offline snapshot | DataTable v9 + ui kit + Lucide (offline/AndonLamp/signature เก็บ) | P0 | 0.x, 1.x | ✅ |
 | `/repair/view` | detail + WorkOrderClosureDocument PDF | tokens cleanup + PDF (เก็บ) + ตารางมือทำ → Tailwind | P0 | 0.x, 1.x | ✅ |
 | `/repair/edit` | Suspense + ?id= | RHF + zod + ui kit + Lucide | P1 | 0.x, 1.x | ✅ |
-| `/repair/kanban` | KanbanItem + priorityTone inline | tokens + Lucide + a11y | P1 | 0.x, 1.x | ⬜ |
-| `/repair/tracking` | สถานะสด + rating dialog | tokens + Dialog มาตรฐาน | P1 | 0.x, 1.x | ⬜ |
-| `/repair/history` | Table + CountUp + pagination | TanStack Table + tokens | P1 | 0.x, 1.x | ⬜ |
-| `/repair/assign` | assignment UI | tokens + a11y | P1 | 0.x, 1.x | ⬜ |
-| `/repair/workload` | tech load | tokens | P2 | 0.x | ⬜ |
+| `/repair/kanban` | KanbanItem + priorityTone inline | tokens + Lucide + a11y | P1 | 0.x, 1.x | ✅ |
+| `/repair/tracking` | สถานะสด + rating dialog | tokens + ui/Dialog มาตรฐาน | P1 | 0.x, 1.x | ✅ |
+| `/repair/history` | Table + CountUp + pagination | DataTable v9 (pagination ในตัว) + CountUp KPI | P1 | 0.x, 1.x | ✅ |
+| `/repair/assign` | assignment UI | DataTable v9 + ui/Dialog + Avatar initial | P1 | 0.x, 1.x | ✅ |
+| `/repair/workload` | tech load | DataTable v9 + CountUp KPI | P2 | 0.x | ✅ |
 
 ### 4.2 Dashboard & Analytics
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
