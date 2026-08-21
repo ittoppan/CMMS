@@ -84,10 +84,10 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 ### 4.2 Dashboard & Analytics
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
 |---|---|---|---|---|---|
-| `/dashboard` | KPI cards + recharts + andon | tokens + Skeleton + Lucide + dark: ค้างล้าง | P0 | 0.x, 1.x | ⬜ |
-| `/analytics` | BI รายปี + charts | tokens + Skeleton | P1 | 0.x | ⬜ |
-| `/analytics/kpi` | KPI headline + AndonLamp | tokens (เก็บ AndonLamp) | P1 | 0.x | ⬜ |
-| `/reports` + monthly_pdf + export_excel | hub + PDF + CSV | tokens + ตารางมือทำ → Table | P2 | 0.x, 1.x | ⬜ |
+| `/dashboard` | KPI cards + recharts + andon | tokens + Skeleton + Lucide + dark: ค้างล้าง | P0 | 0.x, 1.x | ✅ |
+| `/analytics` | BI รายปี + charts | tokens + Skeleton | P1 | 0.x | ✅ |
+| `/analytics/kpi` | KPI headline + AndonLamp | tokens (เก็บ AndonLamp) | P1 | 0.x | ✅ |
+| `/reports` + monthly_pdf + export_excel | hub + PDF + CSV | tokens + ตารางมือทำ → Table (คง semantic table ในเอกสาร A4 พิมพ์ได้) | P2 | 0.x, 1.x | ✅ |
 
 ### 4.3 PM/AM & Inspections
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |

@@ -1,23 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
-  PrinterIcon,
-  DocumentArrowDownIcon,
-  ArrowPathIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  BanknotesIcon,
-  WrenchScrewdriverIcon,
-} from "@heroicons/react/24/outline";
+  Printer,
+  FileDown,
+  RefreshCw,
+  CheckCircle2,
+  Clock,
+  Banknote,
+  Wrench,
+} from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -151,7 +149,7 @@ export default function MonthlyPdfReportPage() {
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff",
+        backgroundColor: "rgb(255, 255, 255)",
         logging: false,
       });
       const img = canvas.toDataURL("image/png");
@@ -187,136 +185,141 @@ export default function MonthlyPdfReportPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูลรายงาน...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={28} />
+        <span className="text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูลรายงาน...</span>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Header + Controls */}
       <div className="cmms-page-hero flex flex-col xl:flex-row xl:items-end justify-between gap-6 print:hidden">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MONTHLY REPORT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</Heading>
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MONTHLY REPORT · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <PrinterIcon className="w-3.5 h-3.5" /> พิมพ์เอกสาร A4 (ISO)
+              <Printer size={14} strokeWidth={1.75} aria-hidden="true" /> พิมพ์เอกสาร A4 (ISO)
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ
-          </Text>
-        </VStack>
-        <HStack gap={3} vAlign="end" wrap="wrap">
-          <Selector label="ปี" isLabelHidden value={String(year)} onChange={(v) => setYear(Number(v))} options={yearOptions} />
-          <Selector label="เดือน" isLabelHidden value={String(month)} onChange={(v) => setMonth(Number(v))} options={monthOptions} />
-          <button
-            type="button"
-            onClick={fetchData}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-3">
+          <Select
+            value={String(year)}
+            onChange={(e) => setYear(Number(e.target.value))}
+            aria-label="ปี"
+            className="w-auto"
           >
-            <ArrowPathIcon className="w-4 h-4" />
+            {yearOptions.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </Select>
+          <Select
+            value={String(month)}
+            onChange={(e) => setMonth(Number(e.target.value))}
+            aria-label="เดือน"
+            className="w-auto"
+          >
+            {monthOptions.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </Select>
+          <Button variant="outline" onClick={fetchData} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
-          </button>
-          <button
-            type="button"
-            disabled={downloading}
-            onClick={handleDownload}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 disabled:opacity-50"
-          >
-            <DocumentArrowDownIcon className="w-4 h-4" />
+          </Button>
+          <Button variant="outline" disabled={downloading} onClick={handleDownload} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
             {downloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
-          </button>
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <PrinterIcon className="w-4 h-4" />
+          </Button>
+          <Button onClick={handlePrint}>
+            <Printer size={16} strokeWidth={1.75} aria-hidden="true" />
             พิมพ์เอกสาร A4
-          </button>
-        </HStack>
+          </Button>
+        </div>
       </div>
 
       {/* A4 Printable Document Sheet */}
       <div style={{ maxWidth: 900, margin: "0 auto", width: "100%" }}>
         <div ref={reportRef}>
-          <Card padding={8} style={{ backgroundColor: "white", color: "var(--tp-navy-dark)" }}>
-            <VStack gap={6}>
+          <Card style={{ backgroundColor: "white", color: "var(--tp-navy-dark)" }}>
+            <CardContent className="space-y-6 p-8">
               {/* Header เอกสาร */}
-              <HStack hAlign="between" vAlign="center" style={{ borderBottom: "2px solid var(--tp-navy-dark)", paddingBottom: 16 }}>
-                <HStack gap={3} vAlign="center">
-                  <div style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: "var(--cmms-primary)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 20 }}>
+              <div className="flex flex-col gap-4 border-b-2 pb-4 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: "var(--tp-navy-dark)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-xl font-bold" style={{ backgroundColor: "var(--cmms-primary)", color: "white" }}>
                     C
                   </div>
-                  <VStack gap={0}>
-                    <Text type="body" weight="bold" style={{ fontSize: 18, color: "var(--tp-navy-dark)" }}>บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</Text>
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหาร</Text>
-                  </VStack>
-                </HStack>
-                <VStack gap={0} hAlign="end">
-                  <Badge label={`ประจำเดือน: ${THAI_MONTHS[month - 1]} ${year + 543}`} variant="neutral" />
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)", marginTop: 4 }}>เอกสารเลขที่: {docNo} · พิมพ์เมื่อ {todayStr}</Text>
-                </VStack>
-              </HStack>
+                  <div>
+                    <p className="text-lg font-bold leading-snug" style={{ color: "var(--tp-navy-dark)" }}>บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</p>
+                    <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหาร</p>
+                  </div>
+                </div>
+                <div className="sm:text-right">
+                  <Badge variant="neutral">{`ประจำเดือน: ${THAI_MONTHS[month - 1]} ${year + 543}`}</Badge>
+                  <p className="mt-1 text-sm" style={{ color: "var(--cmms-text-muted)" }}>เอกสารเลขที่: {docNo} · พิมพ์เมื่อ {todayStr}</p>
+                </div>
+              </div>
 
               {/* สรุป KPI สำคัญ */}
-              <Grid columns={4} gap={4}>
-                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
-                  <HStack gap={2} hAlign="center">
-                    <WrenchScrewdriverIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ใบแจ้งซ่อมเดือนนี้</Text>
-                  </HStack>
-                  <Heading level={3} style={{ color: "var(--tp-navy-dark)" }}>{fmt(monthTotal)} <span style={{ fontSize: 12 }}>งาน</span></Heading>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>เสร็จ {cur.completed} · แจ้งใหม่ {cur.breakdown}</Text>
+              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+                <div className="rounded-md border p-3 text-center" style={{ backgroundColor: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+                  <div className="flex items-center justify-center gap-2">
+                    <Wrench size={16} strokeWidth={1.75} style={{ color: "var(--cmms-primary)" }} aria-hidden="true" />
+                    <span className="text-sm" style={{ color: "var(--cmms-text-secondary)" }}>ใบแจ้งซ่อมเดือนนี้</span>
+                  </div>
+                  <h3 className="mt-1 text-xl font-bold" style={{ color: "var(--tp-navy-dark)" }}>{fmt(monthTotal)} <span className="text-xs font-normal">งาน</span></h3>
+                  <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>เสร็จ {cur.completed} · แจ้งใหม่ {cur.breakdown}</p>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
-                  <HStack gap={2} hAlign="center">
-                    <CheckCircleIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ปิดงานได้สำเร็จ</Text>
-                  </HStack>
-                  <Heading level={3} style={{ color: "var(--cmms-success)" }}>{closeRate.toFixed(1)}%</Heading>
+                <div className="rounded-md border p-3 text-center" style={{ backgroundColor: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+                  <div className="flex items-center justify-center gap-2">
+                    <CheckCircle2 size={16} strokeWidth={1.75} style={{ color: "var(--cmms-success)" }} aria-hidden="true" />
+                    <span className="text-sm" style={{ color: "var(--cmms-text-secondary)" }}>ปิดงานได้สำเร็จ</span>
+                  </div>
+                  <h3 className="mt-1 text-xl font-bold" style={{ color: "var(--cmms-success)" }}>{closeRate.toFixed(1)}%</h3>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
-                  <HStack gap={2} hAlign="center">
-                    <ClockIcon className="w-4 h-4" style={{ color: "var(--cmms-info)" }} />
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>MTBF เดือนนี้</Text>
-                  </HStack>
-                  <Heading level={3} style={{ color: "var(--cmms-primary)" }}>{fmt(cur.mtbf)} <span style={{ fontSize: 12 }}>ชม.</span></Heading>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>MTTR {cur.mttr} ชม.</Text>
+                <div className="rounded-md border p-3 text-center" style={{ backgroundColor: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+                  <div className="flex items-center justify-center gap-2">
+                    <Clock size={16} strokeWidth={1.75} style={{ color: "var(--cmms-info)" }} aria-hidden="true" />
+                    <span className="text-sm" style={{ color: "var(--cmms-text-secondary)" }}>MTBF เดือนนี้</span>
+                  </div>
+                  <h3 className="mt-1 text-xl font-bold" style={{ color: "var(--cmms-primary)" }}>{fmt(cur.mtbf)} <span className="text-xs font-normal">ชม.</span></h3>
+                  <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>MTTR {cur.mttr} ชม.</p>
                 </div>
-                <div style={{ padding: 12, backgroundColor: "var(--cmms-bg-wash)", borderRadius: 6, border: "1px solid var(--cmms-border)", textAlign: "center" }}>
-                  <HStack gap={2} hAlign="center">
-                    <BanknotesIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>ค่าใช้จ่ายเดือนนี้</Text>
-                  </HStack>
-                  <Heading level={3} style={{ color: "var(--tp-navy-dark)" }}>฿{fmt(monthCost)}</Heading>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>ทั้งปี ฿{fmt(yearCost)}</Text>
+                <div className="rounded-md border p-3 text-center" style={{ backgroundColor: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
+                  <div className="flex items-center justify-center gap-2">
+                    <Banknote size={16} strokeWidth={1.75} style={{ color: "var(--cmms-warning)" }} aria-hidden="true" />
+                    <span className="text-sm" style={{ color: "var(--cmms-text-secondary)" }}>ค่าใช้จ่ายเดือนนี้</span>
+                  </div>
+                  <h3 className="mt-1 text-xl font-bold" style={{ color: "var(--tp-navy-dark)" }}>฿{fmt(monthCost)}</h3>
+                  <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>ทั้งปี ฿{fmt(yearCost)}</p>
                 </div>
-              </Grid>
+              </div>
 
               {/* ตารางสรุปแยกตามประเภท */}
-              <VStack gap={3}>
-                <Text type="body" weight="bold" style={{ fontSize: 16, color: "var(--tp-navy-dark)" }}>1. สรุปผลการทำ PM และ AM (แผนงานจริง {pmTotal} แผน)</Text>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, border: "1px solid var(--cmms-border)" }}>
+              <div className="space-y-3">
+                <p className="text-base font-bold" style={{ color: "var(--tp-navy-dark)" }}>1. สรุปผลการทำ PM และ AM (แผนงานจริง {pmTotal} แผน)</p>
+                <table className="w-full text-[13px]" style={{ borderCollapse: "collapse", border: "1px solid var(--cmms-border)" }}>
                   <thead>
                     <tr style={{ backgroundColor: "var(--cmms-bg-muted)", textAlign: "left" }}>
-                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>ความถี่</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>แผนทั้งหมด</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>ทำสำเร็จแล้ว</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>อัตราสำเร็จ (%)</th>
-                      <th style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>สถานะ</th>
+                      <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>ความถี่</th>
+                      <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>แผนทั้งหมด</th>
+                      <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>ทำสำเร็จแล้ว</th>
+                      <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>อัตราสำเร็จ (%)</th>
+                      <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>สถานะ</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pmGroups.length === 0 && (
                       <tr>
-                        <td colSpan={5} style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: "var(--cmms-text-muted)" }}>ยังไม่มีแผน PM/AM</td>
+                        <td colSpan={5} className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)", color: "var(--cmms-text-muted)" }}>ยังไม่มีแผน PM/AM</td>
                       </tr>
                     )}
                     {pmGroups.map((g) => {
@@ -324,56 +327,56 @@ export default function MonthlyPdfReportPage() {
                       const pass = rate >= 95;
                       return (
                         <tr key={g.freq}>
-                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{FREQ_LABEL[g.freq] || g.freq}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{g.total}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{g.done}</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{rate.toFixed(1)}%</td>
-                          <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: pass ? "var(--cmms-success)" : "var(--cmms-danger)", fontWeight: "bold" }}>
+                          <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{FREQ_LABEL[g.freq] || g.freq}</td>
+                          <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{g.total}</td>
+                          <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{g.done}</td>
+                          <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{rate.toFixed(1)}%</td>
+                          <td className="px-3 py-2 font-bold" style={{ border: "1px solid var(--cmms-border)", color: pass ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
                             {pass ? "ผ่านเกณฑ์" : "ต้องปรับปรุง"}
                           </td>
                         </tr>
                       );
                     })}
                     {pmGroups.length > 0 && (
-                      <tr style={{ backgroundColor: "var(--cmms-bg-wash)", fontWeight: "bold" }}>
-                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>รวม</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmTotal}</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmDone}</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)" }}>{pmRate.toFixed(1)}%</td>
-                        <td style={{ padding: "8px 12px", border: "1px solid var(--cmms-border)", color: pmRate >= 95 ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
+                      <tr className="font-bold" style={{ backgroundColor: "var(--cmms-bg-wash)" }}>
+                        <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>รวม</td>
+                        <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{pmTotal}</td>
+                        <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{pmDone}</td>
+                        <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>{pmRate.toFixed(1)}%</td>
+                        <td className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)", color: pmRate >= 95 ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
                           {pmRate >= 95 ? "ผ่านเกณฑ์" : "ต้องปรับปรุง"}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
-                <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
+                <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>
                   หมายเหตุ: อุปกรณ์ที่ลงทะเบียน {assets} เครื่อง · ค่าใช้จ่ายซ่อมรวมทั้งปี (ใบสั่งงานจริง) ฿{fmt(yearCost)} · เกณฑ์ผ่าน ≥ 95%
-                </Text>
-              </VStack>
+                </p>
+              </div>
 
               {/* ลายเซ็นอนุมัติ */}
-              <HStack hAlign="between" style={{ marginTop: 40, paddingTop: 20 }}>
-                <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานโดย (ช่างซ่อมบำรุง)</Text>
-                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
-                  <Text type="body" size="sm">( {fullName || "ผู้ดูแลระบบ"} )</Text>
-                </VStack>
-                <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>ตรวจสอบโดย (วิศวกรซ่อมบำรุง)</Text>
-                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
-                  <Text type="body" size="sm">( นายสมศักดิ์ รักดี )</Text>
-                </VStack>
-                <VStack gap={6} hAlign="center" style={{ width: 220 }}>
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>อนุมัติโดย (ผู้จัดการโรงงาน)</Text>
-                  <div style={{ borderBottom: "1px solid var(--cmms-text-muted)", width: "100%", height: 30 }} />
-                  <Text type="body" size="sm">( ผจก. ฝ่ายผลิตและวิศวกรรม )</Text>
-                </VStack>
-              </HStack>
-            </VStack>
+              <div className="flex flex-col gap-8 pt-10 sm:flex-row sm:justify-between sm:pt-5">
+                <div className="flex w-full flex-col items-center gap-6 sm:w-[220px]">
+                  <span className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>รายงานโดย (ช่างซ่อมบำรุง)</span>
+                  <div className="h-[30px] w-full" style={{ borderBottom: "1px solid var(--cmms-text-muted)" }} />
+                  <span className="text-sm">( {fullName || "ผู้ดูแลระบบ"} )</span>
+                </div>
+                <div className="flex w-full flex-col items-center gap-6 sm:w-[220px]">
+                  <span className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>ตรวจสอบโดย (วิศวกรซ่อมบำรุง)</span>
+                  <div className="h-[30px] w-full" style={{ borderBottom: "1px solid var(--cmms-text-muted)" }} />
+                  <span className="text-sm">( นายสมศักดิ์ รักดี )</span>
+                </div>
+                <div className="flex w-full flex-col items-center gap-6 sm:w-[220px]">
+                  <span className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>อนุมัติโดย (ผู้จัดการโรงงาน)</span>
+                  <div className="h-[30px] w-full" style={{ borderBottom: "1px solid var(--cmms-text-muted)" }} />
+                  <span className="text-sm">( ผจก. ฝ่ายผลิตและวิศวกรรม )</span>
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
-    </VStack>
+    </div>
   );
 }

@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Selector } from "@astryxdesign/core/Selector";
-import { 
-  ArrowDownTrayIcon,
-  DocumentTextIcon,
-  TableCellsIcon,
-  CheckCircleIcon,
-  SparklesIcon,
-  CircleStackIcon,
-} from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Download, Table, CheckCircle2, Database } from "lucide-react";
 
 export default function ExportExcelReportPage() {
   const [reportType, setReportType] = useState("repair_all");
@@ -66,133 +58,118 @@ export default function ExportExcelReportPage() {
   };
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS EXPORT EXCEL · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS EXPORT EXCEL · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ศูนย์ส่งออกข้อมูล Excel &amp; CSV</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <TableCellsIcon className="w-3.5 h-3.5" /> รองรับ Excel & Sage 300
+              <Table size={14} strokeWidth={1.75} aria-hidden="true" /> รองรับ Excel &amp; Sage 300
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน
-          </Text>
-        </VStack>
+          </p>
+        </div>
       </div>
 
-      {/* Alert Notice */}
+      {/* Success Notice */}
       {successMsg && (
-        <Card padding={4} style={{ background: 'var(--cmms-success-bg)', border: '1px solid var(--cmms-success)' }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: 'var(--cmms-success)' }}>
-              {successMsg}
-            </Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title={successMsg} />
       )}
 
       {/* Export Options Form */}
-      <Grid columns={{ minWidth: 400, repeat: "fit" }} gap={6}>
-        <Card padding={5}>
-          <VStack gap={4}>
-            <Heading level={4}>1. เลือกชุดข้อมูลและเงื่อนไขการส่งออก</Heading>
-            
-            <VStack gap={3}>
-              <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">ประเภทรายงานข้อมูล:</Text>
-                <Selector
-                  label="ประเภทรายงาน"
-                  isLabelHidden
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardContent className="space-y-4">
+            <h3 className="font-bold">1. เลือกชุดข้อมูลและเงื่อนไขการส่งออก</h3>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label htmlFor="export-report-type" className="text-sm font-semibold">ประเภทรายงานข้อมูล:</label>
+                <Select
+                  id="export-report-type"
+                  aria-label="ประเภทรายงาน"
                   value={reportType}
-                  onChange={(v) => setReportType(String(v))}
-                  options={[
-                    { value: "repair_all", label: "รายการใบสั่งงานซ่อมบำรุงทั้งหมด" },
-                    { value: "spare_parts", label: "ยอดสต็อกและการเบิกจ่ายอะไหล่" },
-                    { value: "assets", label: "ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01" },
-                  ]}
-                />
-              </VStack>
+                  onChange={(e) => setReportType(e.target.value)}
+                >
+                  <option value="repair_all">รายการใบสั่งงานซ่อมบำรุงทั้งหมด</option>
+                  <option value="spare_parts">ยอดสต็อกและการเบิกจ่ายอะไหล่</option>
+                  <option value="assets">ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01</option>
+                </Select>
+              </div>
 
-              <HStack gap={3}>
-                <VStack gap={1} style={{ flex: 1 }}>
-                  <Text type="body" size="sm" weight="semibold">เลือกปี:</Text>
-                  <Selector
-                    label="ปี"
-                    isLabelHidden
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="flex-1 space-y-1">
+                  <label htmlFor="export-year" className="text-sm font-semibold">เลือกปี:</label>
+                  <Select
+                    id="export-year"
+                    aria-label="ปี"
                     value={year}
-                    onChange={(v) => setYear(String(v))}
-                    options={[
-                      { value: "2026", label: "ปี 2026 / 2569" },
-                      { value: "2025", label: "ปี 2025 / 2568" },
-                      { value: "2024", label: "ปี 2024 / 2567" },
-                    ]}
-                  />
-                </VStack>
+                    onChange={(e) => setYear(e.target.value)}
+                  >
+                    <option value="2026">ปี 2026 / 2569</option>
+                    <option value="2025">ปี 2025 / 2568</option>
+                    <option value="2024">ปี 2024 / 2567</option>
+                  </Select>
+                </div>
 
-                <VStack gap={1} style={{ flex: 1 }}>
-                  <Text type="body" size="sm" weight="semibold">เลือกเดือน:</Text>
-                  <Selector
-                    label="เดือน"
-                    isLabelHidden
+                <div className="flex-1 space-y-1">
+                  <label htmlFor="export-month" className="text-sm font-semibold">เลือกเดือน:</label>
+                  <Select
+                    id="export-month"
+                    aria-label="เดือน"
                     value={month}
-                    onChange={(v) => setMonth(String(v))}
-                    options={[
-                      { value: "all", label: "ทุกเดือน (ทั้งปี)" },
-                      { value: "1", label: "มกราคม" },
-                      { value: "7", label: "กรกฎาคม" },
-                      { value: "12", label: "ธันวาคม" },
-                    ]}
-                  />
-                </VStack>
-              </HStack>
-            </VStack>
+                    onChange={(e) => setMonth(e.target.value)}
+                  >
+                    <option value="all">ทุกเดือน (ทั้งปี)</option>
+                    <option value="1">มกราคม</option>
+                    <option value="7">กรกฎาคม</option>
+                    <option value="12">ธันวาคม</option>
+                  </Select>
+                </div>
+              </div>
+            </div>
 
-            <HStack hAlign="end" gap={2} style={{ marginTop: 8 }}>
-              <button
-                type="button"
-                disabled={exporting}
-                onClick={handleExportCSV}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <ArrowDownTrayIcon className="w-4 h-4" />
+            <div className="flex justify-end pt-2">
+              <Button disabled={exporting} onClick={handleExportCSV}>
+                <Download size={16} strokeWidth={1.75} aria-hidden="true" />
                 {exporting ? "กำลังส่งออก..." : "ส่งออกไฟล์ Excel / CSV ทันที"}
-              </button>
-            </HStack>
-          </VStack>
+              </Button>
+            </div>
+          </CardContent>
         </Card>
 
         {/* Right Info Card */}
-        <Card padding={5} style={{ background: 'var(--cmms-bg-muted)' }}>
-          <VStack gap={4}>
-            <Heading level={4}>รูปแบบไฟล์และการนำไปใช้งาน</Heading>
-            <VStack gap={3}>
-              <HStack gap={3} vAlign="center">
-                <div className="w-10 h-10 cmms-icon-tile">
-                  <TableCellsIcon className="w-5 h-5" />
+        <Card style={{ background: "var(--cmms-bg-muted)" }}>
+          <CardContent className="space-y-4">
+            <h3 className="font-bold">รูปแบบไฟล์และการนำไปใช้งาน</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="cmms-icon-tile h-10 w-10">
+                  <Table size={20} strokeWidth={1.75} aria-hidden="true" />
                 </div>
-                <VStack gap={0}>
-                  <Text type="body" weight="bold">รองรับ Microsoft Excel 100%</Text>
-                  <Text type="body" size="sm" color="secondary">ไฟล์ UTF-8 BOM แสดงภาษาไทยสมบูรณ์ สระไม่จม</Text>
-                </VStack>
-              </HStack>
+                <div>
+                  <p className="font-bold">รองรับ Microsoft Excel 100%</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">ไฟล์ UTF-8 BOM แสดงภาษาไทยสมบูรณ์ สระไม่จม</p>
+                </div>
+              </div>
 
-              <HStack gap={3} vAlign="center">
-                <div className="w-10 h-10 cmms-icon-tile green">
-                  <CircleStackIcon className="w-5 h-5" />
+              <div className="flex items-center gap-3">
+                <div className="cmms-icon-tile green h-10 w-10">
+                  <Database size={20} strokeWidth={1.75} aria-hidden="true" />
                 </div>
-                <VStack gap={0}>
-                  <Text type="body" weight="bold">นำเข้า Sage 300 ERP ได้ทันที</Text>
-                  <Text type="body" size="sm" color="secondary">ฟอร์แมตมาตรฐานสำหรับนำเข้า I/C Stock Journal</Text>
-                </VStack>
-              </HStack>
-            </VStack>
-          </VStack>
+                <div>
+                  <p className="font-bold">นำเข้า Sage 300 ERP ได้ทันที</p>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">ฟอร์แมตมาตรฐานสำหรับนำเข้า I/C Stock Journal</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-      </Grid>
-    </VStack>
+      </div>
+    </div>
   );
 }

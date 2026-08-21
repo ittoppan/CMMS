@@ -1,25 +1,22 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
+import { usePageHero } from "@/lib/i18n";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Selector } from "@astryxdesign/core/Selector";
-import { ProgressBar } from "@astryxdesign/core/ProgressBar";
+import {
+  Banknote, CalendarDays,
+  Zap, Clock, ChartBar, RefreshCw, TriangleAlert,
+} from "lucide-react";
 import {
   BarChart, Bar, ComposedChart, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell,
 } from "recharts";
-import {
-  BanknotesIcon, CalendarDaysIcon,
-  BoltIcon, ClockIcon, ChartBarIcon, ArrowPathIcon, ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
 
 interface KpiData {
   headline: { total: number; closed_cnt: number; open_cnt: number; overdue: number; sla_pct: number | null; cost_total: number; cost_month: number };
@@ -44,6 +41,23 @@ const STATUS_LABEL: Record<string, string> = {
   waiting_parts: "รออะไหล่", waiting_approval: "รออนุมัติ",
   pending_parts: "รออะไหล่", pending: "รอดำเนินการ", cancelled: "ยกเลิก", rejected: "ปฏิเสธ",
 };
+
+// แถบสัดส่วน (แทน Astryx ProgressBar) — role=progressbar + design tokens
+function MiniBar({ label, pct }: { label: string; pct: number }) {
+  return (
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      className="h-2 w-full overflow-hidden rounded-full"
+      style={{ background: "var(--cmms-bg-muted)" }}
+    >
+      <div className="h-full rounded-full" style={{ width: `${Math.min(100, pct)}%`, background: "var(--cmms-primary)" }} />
+    </div>
+  );
+}
 
 export default function KpiDashboardPage() {
   const hero = usePageHero("analytics/kpi");
@@ -98,282 +112,284 @@ export default function KpiDashboardPage() {
     display: layout.isHidden(id) ? ("none" as const) : undefined,
   });
 
-  if (loading && !data) {
-    return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังคำนวณ KPI...</Text>
-      </HStack>
-    );
-  }
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+    <div className="flex w-full flex-col gap-6">
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       <div style={layoutStyle("hero")}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ChartBarIcon className="w-3.5 h-3.5" /> ช่วง {months} เดือนล่าสุด
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <Selector
-          label="ช่วงเวลา"
-          value={String(months)}
-          onChange={(v) => setMonths(Number(v))}
-          options={[{ value: "3", label: "3 เดือน" }, { value: "6", label: "6 เดือน" }, { value: "12", label: "12 เดือน" }]}
-          style={{ minWidth: 150 }}
-        />
-      </div>
+        <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
+              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+                <ChartBar size={14} strokeWidth={2} aria-hidden="true" /> ช่วง {months} เดือนล่าสุด
+              </span>
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          </div>
+          <Select
+            aria-label="ช่วงเวลา"
+            value={String(months)}
+            onChange={(e) => setMonths(Number(e.target.value))}
+            className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
+          >
+            <option value="3" className="text-[var(--cmms-text-primary)]">3 เดือน</option>
+            <option value="6" className="text-[var(--cmms-text-primary)]">6 เดือน</option>
+            <option value="12" className="text-[var(--cmms-text-primary)]">12 เดือน</option>
+          </Select>
+        </div>
       </div>
 
       {/* ═══ การ์ด KPI หลัก ═══ */}
       <div style={layoutStyle("kpi")}>
-      <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card blue">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
-              <AndonLamp status="ok" size="sm" />
-            </HStack>
-            <div className="cmms-kpi-value">
-              {h?.total ?? 0}
-              <span className="cmms-kpi-unit">งาน</span>
-            </div>
-            <Text type="body" size="sm" color="secondary">ปิดแล้ว {h?.closed_cnt ?? 0} · ค้าง {h?.open_cnt ?? 0}</Text>
-          </VStack>
-        </Card>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="cmms-kpi-card blue">
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--cmms-text-secondary)]">งานซ่อมทั้งหมด</span>
+                <AndonLamp status="ok" size="sm" />
+              </div>
+              {loading && !data ? (
+                <Skeleton className="h-9 w-24" />
+              ) : (
+                <div className="cmms-kpi-value">
+                  {h?.total ?? 0}
+                  <span className="cmms-kpi-unit">งาน</span>
+                </div>
+              )}
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ปิดแล้ว {h?.closed_cnt ?? 0} · ค้าง {h?.open_cnt ?? 0}</p>
+            </CardContent>
+          </Card>
 
-        <Card elevation="low" padding={4} className="cmms-kpi-card green">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <Text type="supporting" color="secondary">ปิดงานใน SLA (≤120 นาที)</Text>
-              <AndonLamp status="ok" size="sm" />
-            </HStack>
-            <div className="cmms-kpi-value">
-              {h?.sla_pct ?? 0}
-              <span className="cmms-kpi-unit">%</span>
-            </div>
-            <Text type="body" size="sm" color="secondary">ตามเวลารับ-ปิดงาน 15/120 นาที</Text>
-          </VStack>
-        </Card>
+          <Card className="cmms-kpi-card green">
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--cmms-text-secondary)]">ปิดงานใน SLA (≤120 นาที)</span>
+                <AndonLamp status="ok" size="sm" />
+              </div>
+              {loading && !data ? (
+                <Skeleton className="h-9 w-24" />
+              ) : (
+                <div className="cmms-kpi-value">
+                  {h?.sla_pct ?? 0}
+                  <span className="cmms-kpi-unit">%</span>
+                </div>
+              )}
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ตามเวลารับ-ปิดงาน 15/120 นาที</p>
+            </CardContent>
+          </Card>
 
-        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <Text type="supporting" color="secondary">ค่าใช้จ่ายซ่อมเดือนล่าสุด</Text>
-              <AndonLamp status="warn" size="sm" />
-            </HStack>
-            <div className="cmms-kpi-value">{fmtBaht(h?.cost_month)}</div>
-            <Text type="body" size="sm" color="secondary">รวมช่วงเวลา: {fmtBaht(h?.cost_total)}</Text>
-          </VStack>
-        </Card>
+          <Card className="cmms-kpi-card amber">
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าใช้จ่ายซ่อมเดือนล่าสุด</span>
+                <AndonLamp status="warn" size="sm" />
+              </div>
+              {loading && !data ? (
+                <Skeleton className="h-9 w-32" />
+              ) : (
+                <div className="cmms-kpi-value">{fmtBaht(h?.cost_month)}</div>
+              )}
+              <p className="text-sm text-[var(--cmms-text-secondary)]">รวมช่วงเวลา: {fmtBaht(h?.cost_total)}</p>
+            </CardContent>
+          </Card>
 
-        <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <Text type="supporting" color="secondary">PM ทันกำหนด</Text>
-              <AndonLamp status="idle" size="sm" />
-            </HStack>
-            <div className="cmms-kpi-value">
-              {pmOnTime ?? 0}
-              <span className="cmms-kpi-unit">%</span>
-            </div>
-            <Text type="body" size="sm" color="secondary">
-              เสร็จ {data?.pm.total_completed ?? 0} · ทัน {data?.pm.on_time ?? 0} · เลท {data?.pm.late ?? 0} · ค้าง {data?.pm.overdue_pending ?? 0}
-            </Text>
-          </VStack>
-        </Card>
-      </Grid>
+          <Card className="cmms-kpi-card cyan">
+            <CardContent className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[var(--cmms-text-secondary)]">PM ทันกำหนด</span>
+                <AndonLamp status="idle" size="sm" />
+              </div>
+              {loading && !data ? (
+                <Skeleton className="h-9 w-24" />
+              ) : (
+                <div className="cmms-kpi-value">
+                  {pmOnTime ?? 0}
+                  <span className="cmms-kpi-unit">%</span>
+                </div>
+              )}
+              <p className="text-sm text-[var(--cmms-text-secondary)]">
+                เสร็จ {data?.pm.total_completed ?? 0} · ทัน {data?.pm.on_time ?? 0} · เลท {data?.pm.late ?? 0} · ค้าง {data?.pm.overdue_pending ?? 0}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* ═══ MTBF / MTTR ═══ */}
       <div style={layoutStyle("charts")}>
-      <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
-        <Card padding={5}>
-          <VStack gap={4}>
-            <HStack gap={2} vAlign="center">
-              <BoltIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-              <Heading level={3}>MTBF / MTTR (ล่าสุด)</Heading>
-            </HStack>
-            <HStack gap={4} wrap="wrap">
-              <VStack gap={0}>
-                <Text type="body" size="sm" color="secondary">MTBF (ชั่วโมงระหว่างเสีย)</Text>
-                <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mtbf ?? "—"}</div>
-                <Text type="body" size="sm" color="secondary">
-                  {data?.mtbf_mttr.latest ? `${data.mtbf_mttr.latest.failures} ครั้ง · Downtime ${data.mtbf_mttr.latest.downtime} นาที` : ""}
-                </Text>
-              </VStack>
-              <VStack gap={0}>
-                <Text type="body" size="sm" color="secondary">MTTR (นาที/ซ่อม)</Text>
-                <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mttr ?? "—"}</div>
-                <Text type="body" size="sm" color="secondary">ยิ่งต่ำ = กู้เครื่องได้ไว</Text>
-              </VStack>
-            </HStack>
-            <div style={{ width: "100%", height: 220 }}>
-              <ResponsiveContainer>
-                <ComposedChart data={mtbfChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
-                  <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
-                  <YAxis yAxisId="l" tick={{ fontSize: 11 }} />
-                  <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="l" dataKey="mtbf" name="MTBF (ชม.)" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} />
-                  <Line yAxisId="r" dataKey="mttr" name="MTTR (นาที)" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </VStack>
-        </Card>
+        <div className="grid items-start gap-6 xl:grid-cols-2">
+          <Card>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Zap size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                <h3 className="font-bold">MTBF / MTTR (ล่าสุด)</h3>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <div>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">MTBF (ชั่วโมงระหว่างเสีย)</p>
+                  <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mtbf ?? "—"}</div>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">
+                    {data?.mtbf_mttr.latest ? `${data.mtbf_mttr.latest.failures} ครั้ง · Downtime ${data.mtbf_mttr.latest.downtime} นาที` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">MTTR (นาที/ซ่อม)</p>
+                  <div className="cmms-kpi-value">{data?.mtbf_mttr.latest?.mttr ?? "—"}</div>
+                  <p className="text-sm text-[var(--cmms-text-secondary)]">ยิ่งต่ำ = กู้เครื่องได้ไว</p>
+                </div>
+              </div>
+              <div className="h-[220px] w-full">
+                <ResponsiveContainer>
+                  <ComposedChart data={mtbfChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
+                    <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
+                    <YAxis yAxisId="l" tick={{ fontSize: 11 }} />
+                    <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar yAxisId="l" dataKey="mtbf" name="MTBF (ชม.)" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="r" dataKey="mttr" name="MTTR (นาที)" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* ═══ สถานะงาน ═══ */}
-        <Card padding={5}>
-          <VStack gap={4}>
-            <HStack gap={2} vAlign="center">
-              <ChartBarIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-              <Heading level={3}>สถานะงานปัจจุบัน</Heading>
-            </HStack>
-            {statusRows.length === 0 ? (
-              <Text type="body" color="secondary">ไม่มีข้อมูลงาน</Text>
-            ) : (
-              <VStack gap={3}>
-                {statusRows.slice(0, 8).map((s) => (
-                  <VStack key={s.status} gap={1}>
-                    <HStack hAlign="between">
-                      <Text type="body" size="sm" weight="semibold">{s.label}</Text>
-                      <Text type="body" size="sm" color="secondary">{s.cnt} ({s.pct}%)</Text>
-                    </HStack>
-                    <ProgressBar label={s.label} isLabelHidden value={s.pct} />
-                  </VStack>
-                ))}
-              </VStack>
-            )}
-            <HStack gap={4} vAlign="center" wrap="wrap">
-              <span className={Number(h?.overdue) > 0 ? "cmms-status down" : "cmms-status idle"}>
-                <span className="cmms-status-dot" />เกินกำหนด {h?.overdue ?? 0} งาน
-              </span>
-              <span className={Number(h?.open_cnt) > 0 ? "cmms-status warn" : "cmms-status idle"}>
-                <span className="cmms-status-dot" />ค้างรวม {h?.open_cnt ?? 0} งาน
-              </span>
-            </HStack>
-          </VStack>
-        </Card>
-      </Grid>
+          {/* ═══ สถานะงาน ═══ */}
+          <Card>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <ChartBar size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                <h3 className="font-bold">สถานะงานปัจจุบัน</h3>
+              </div>
+              {statusRows.length === 0 ? (
+                <p className="text-[var(--cmms-text-secondary)]">ไม่มีข้อมูลงาน</p>
+              ) : (
+                <div className="space-y-3">
+                  {statusRows.slice(0, 8).map((s) => (
+                    <div key={s.status} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold">{s.label}</span>
+                        <span className="text-sm text-[var(--cmms-text-secondary)]">{s.cnt} ({s.pct}%)</span>
+                      </div>
+                      <MiniBar label={s.label} pct={s.pct} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-4">
+                <span className={Number(h?.overdue) > 0 ? "cmms-status down" : "cmms-status idle"}>
+                  <span className="cmms-status-dot" />เกินกำหนด {h?.overdue ?? 0} งาน
+                </span>
+                <span className={Number(h?.open_cnt) > 0 ? "cmms-status warn" : "cmms-status idle"}>
+                  <span className="cmms-status-dot" />ค้างรวม {h?.open_cnt ?? 0} งาน
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* ═══ ค่าใช้จ่ายรายเดือน ═══ */}
       <div style={layoutStyle("cost")}>
-      <Card padding={5}>
-        <VStack gap={4}>
-          <HStack gap={2} vAlign="center">
-            <BanknotesIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-            <Heading level={3}>ค่าใช้จ่ายซ่อมรายเดือน</Heading>
-            <Text type="body" size="sm" color="secondary">(ค่าอะไหล่ + ค่าแรง + ค่าจ้างภายนอก)</Text>
-          </HStack>
-          <div style={{ width: "100%", height: 260 }}>
-            <ResponsiveContainer>
-              <BarChart data={costChart}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
-                <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (Number(v) >= 1000 ? `${Math.round(v / 1000)}k` : String(v))} />
-                <Tooltip formatter={(v: any) => Number(v).toLocaleString("th-TH") + " บาท"} />
-                <Bar dataKey="cost" name="ค่าใช้จ่าย" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]}>
-                  {costChart.map((c, i) => (
-                    <Cell key={i} fill={i === costChart.length - 1 ? "var(--cmms-blue-bright)" : "var(--cmms-primary)"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </VStack>
-      </Card>
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Banknote size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+              <h3 className="font-bold">ค่าใช้จ่ายซ่อมรายเดือน</h3>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">(ค่าอะไหล่ + ค่าแรง + ค่าจ้างภายนอก)</span>
+            </div>
+            <div className="h-[260px] w-full">
+              <ResponsiveContainer>
+                <BarChart data={costChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
+                  <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (Number(v) >= 1000 ? `${Math.round(v / 1000)}k` : String(v))} />
+                  <Tooltip formatter={(v: any) => Number(v).toLocaleString("th-TH") + " บาท"} />
+                  <Bar dataKey="cost" name="ค่าใช้จ่าย" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]}>
+                    {costChart.map((c, i) => (
+                      <Cell key={i} fill={i === costChart.length - 1 ? "var(--cmms-blue-bright)" : "var(--cmms-primary)"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* ═══ SLA + PM รายละเอียด ═══ */}
       <div style={layoutStyle("sla_pm")}>
-      <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
-        <Card padding={5}>
-          <VStack gap={4}>
-            <HStack gap={2} vAlign="center">
-              <ClockIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-              <Heading level={3}>% งานปิดใน SLA รายเดือน</Heading>
-              <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
-            </HStack>
-            <div style={{ width: "100%", height: 200 }}>
-              <ResponsiveContainer>
-                <LineChart data={slaChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
-                  <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                  <Tooltip formatter={(v: any) => `${v}%`} />
-                  <Line dataKey="sla" name="SLA %" stroke="var(--cmms-success)" strokeWidth={2} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </VStack>
-        </Card>
+        <div className="grid items-start gap-6 xl:grid-cols-2">
+          <Card>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <Clock size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                <h3 className="font-bold">% งานปิดใน SLA รายเดือน</h3>
+                <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
+              </div>
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer>
+                  <LineChart data={slaChart}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
+                    <XAxis dataKey="ym" tick={{ fontSize: 11 }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                    <Tooltip formatter={(v: any) => `${v}%`} />
+                    <Line dataKey="sla" name="SLA %" stroke="var(--cmms-success)" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card padding={5}>
-          <VStack gap={4}>
-            <HStack gap={2} vAlign="center">
-              <CalendarDaysIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-              <Heading level={3}>แผน PM</Heading>
-            </HStack>
-            <VStack gap={2}>
-              <HStack hAlign="between">
-                <Text type="body" size="sm">เสร็จตามกำหนด (On-time)</Text>
-                <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success)" }}>{data?.pm.on_time ?? 0} รายการ</Text>
-              </HStack>
-              <HStack hAlign="between">
-                <Text type="body" size="sm">เสร็จช้ากว่ากำหนด (Late)</Text>
-                <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-warning)" }}>{data?.pm.late ?? 0} รายการ</Text>
-              </HStack>
-              <HStack hAlign="between">
-                <Text type="body" size="sm">ค้างเกินกำหนด (Overdue)</Text>
-                <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>{data?.pm.overdue_pending ?? 0} รายการ</Text>
-              </HStack>
-            </VStack>
-            <HStack gap={4} vAlign="center" wrap="wrap">
-              <span className={Number(pmOnTime ?? 0) >= 80 ? "cmms-status ok" : "cmms-status warn"}>
-                <span className="cmms-status-dot" />ทันกำหนด {pmOnTime ?? 0}%
-              </span>
-              {Number(data?.pm.overdue_pending) > 0 && (
-                <span className="cmms-status down">
-                  <span className="cmms-status-dot" />มี PM ค้าง {data?.pm.overdue_pending} รายการ
+          <Card>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-2">
+                <CalendarDays size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                <h3 className="font-bold">แผน PM</h3>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">เสร็จตามกำหนด (On-time)</span>
+                  <span className="text-sm font-bold" style={{ color: "var(--cmms-success)" }}>{data?.pm.on_time ?? 0} รายการ</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">เสร็จช้ากว่ากำหนด (Late)</span>
+                  <span className="text-sm font-bold" style={{ color: "var(--cmms-warning)" }}>{data?.pm.late ?? 0} รายการ</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">ค้างเกินกำหนด (Overdue)</span>
+                  <span className="text-sm font-bold" style={{ color: "var(--cmms-danger)" }}>{data?.pm.overdue_pending ?? 0} รายการ</span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-4">
+                <span className={Number(pmOnTime ?? 0) >= 80 ? "cmms-status ok" : "cmms-status warn"}>
+                  <span className="cmms-status-dot" />ทันกำหนด {pmOnTime ?? 0}%
                 </span>
-              )}
-            </HStack>
-            <HStack gap={2} vAlign="center">
-              <ExclamationTriangleIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
-              <Text type="body" size="sm" color="secondary">
-                ไปที่หน้า "ภาระงานช่าง" หรือ "ปฏิทิน PM" เพื่อดูรายละเอียดและดำเนินการ
-              </Text>
-            </HStack>
-          </VStack>
-        </Card>
-      </Grid>
+                {Number(data?.pm.overdue_pending) > 0 && (
+                  <span className="cmms-status down">
+                    <span className="cmms-status-dot" />มี PM ค้าง {data?.pm.overdue_pending} รายการ
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <TriangleAlert size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-text-muted)" }} />
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
+                  ไปที่หน้า &ldquo;ภาระงานช่าง&rdquo; หรือ &ldquo;ปฏิทิน PM&rdquo; เพื่อดูรายละเอียดและดำเนินการ
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <div style={layoutStyle("actions")}>
-      <HStack hAlign="center">
-        <button
-          type="button"
-          onClick={() => fetchData(months)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <ArrowPathIcon className="w-4 h-4" />
+      <div style={layoutStyle("actions")} className="flex justify-center">
+        <Button onClick={() => fetchData(months)} className="gap-2">
+          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรชข้อมูล
-        </button>
-      </HStack>
+        </Button>
       </div>
     </div>
   );

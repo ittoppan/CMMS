@@ -1,88 +1,73 @@
 "use client";
 
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import {
-  DocumentArrowDownIcon,
-  TableCellsIcon,
-} from "@heroicons/react/24/outline";
+import { usePageHero } from "@/lib/i18n";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { FileDown, Table } from "lucide-react";
 
 export default function ReportsHubPage() {
   const hero = usePageHero("reports");
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div>
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
               ISO 9001 / ISO 55000
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+        </div>
       </div>
 
-      <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={6}>
-        <Card elevation="low" padding={6}>
-          <VStack gap={4}>
-            <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl cmms-icon-tile">
-                <DocumentArrowDownIcon className="w-6 h-6" />
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="cmms-icon-tile h-12 w-12 rounded-xl">
+                <FileDown size={24} strokeWidth={1.75} aria-hidden="true" />
               </div>
-              <VStack gap={0}>
-                <Heading level={4} style={{ margin: 0 }}>รายงาน PDF สรุปประจำเดือนสำหรับผู้บริหาร</Heading>
-                <Text type="body" size="sm" color="secondary">รายงานสรุปผลซ่อมบำรุงประจำเดือนสำหรับผู้บริหาร</Text>
-              </VStack>
-            </HStack>
+              <div>
+                <h3 className="font-bold">รายงาน PDF สรุปประจำเดือนสำหรับผู้บริหาร</h3>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">รายงานสรุปผลซ่อมบำรุงประจำเดือนสำหรับผู้บริหาร</p>
+              </div>
+            </div>
 
-            <Text type="body" color="secondary">
+            <p className="text-[var(--cmms-text-secondary)]">
               สรุปภาพรวม KPI ประสิทธิภาพงานซ่อม MTBF, MTTR, สรุปการใช้อะไหล่ และค่าใช้จ่ายประจำเดือนในรูปแบบ PDF สำเร็จรูป
-            </Text>
+            </p>
 
-            <button
-              type="button"
-              onClick={() => (window.location.href = "/reports/monthly_pdf")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-            >
+            <Button onClick={() => (window.location.href = "/reports/monthly_pdf")}>
               เปิดศูนย์ออกรายงาน PDF
-            </button>
-          </VStack>
+            </Button>
+          </CardContent>
         </Card>
 
-        <Card elevation="low" padding={6}>
-          <VStack gap={4}>
-            <HStack gap={3} vAlign="center">
-              <div className="w-12 h-12 rounded-xl cmms-icon-tile green">
-                <TableCellsIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="cmms-icon-tile green h-12 w-12 rounded-xl">
+                <Table size={24} strokeWidth={1.75} aria-hidden="true" />
               </div>
-              <VStack gap={0}>
-                <Heading level={4} style={{ margin: 0 }}>ศูนย์ส่งออกข้อมูล Excel & CSV</Heading>
-                <Text type="body" size="sm" color="secondary">ส่งออกข้อมูลดิบและรายงานวิเคราะห์เป็น CSV</Text>
-              </VStack>
-            </HStack>
+              <div>
+                <h3 className="font-bold">ศูนย์ส่งออกข้อมูล Excel &amp; CSV</h3>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">ส่งออกข้อมูลดิบและรายงานวิเคราะห์เป็น CSV</p>
+              </div>
+            </div>
 
-            <Text type="body" color="secondary">
+            <p className="text-[var(--cmms-text-secondary)]">
               เลือกชุดข้อมูลใบแจ้งซ่อม รายการอะไหล่ สต็อก ประวัติเครื่องจักร และช่วงเวลาที่ต้องการส่งออกเป็นไฟล์ Excel หรือ CSV
-            </Text>
+            </p>
 
-            <button
-              type="button"
-              onClick={() => (window.location.href = "/reports/export_excel")}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-            >
-              เปิดหน้าส่งออก Excel & CSV
-            </button>
-          </VStack>
+            <Button onClick={() => (window.location.href = "/reports/export_excel")}>
+              เปิดหน้าส่งออก Excel &amp; CSV
+            </Button>
+          </CardContent>
         </Card>
-      </Grid>
-    </VStack>
+      </div>
+    </div>
   );
 }

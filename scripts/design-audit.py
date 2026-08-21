@@ -193,8 +193,12 @@ def audit_file(rel):
                 issues.append(("hex", "WARN", i, "%s %s" % (h, ln.strip()[:100])))
                 break  # 1 ต่อบรรทัดพอ
 
-    # 6) Andon heuristic (WARN)
-    n_badges = len(ANDON_BADGE_RE.findall(text))
+    # 6) Andon heuristic (WARN) — เฉพาะ Badge; <Alert> เป็น inline notice ที่มี variant เชิงความหมายของตัวเอง ไม่ใช่ไฟสถานะ
+    n_badges = sum(
+        len(ANDON_BADGE_RE.findall(ln))
+        for ln in lines
+        if "<Alert" not in ln
+    )
     if n_badges > 0 and "cmms-status" not in text and "AndonLamp" not in text:
         issues.append(("andon", "WARN", 0, "%d Badge error/warning/success → ควรใช้ไฟ Andon" % n_badges))
 

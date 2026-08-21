@@ -2,21 +2,18 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ArrowPathIcon,
-  WrenchScrewdriverIcon,
-  ClockIcon,
-  BanknotesIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+  RefreshCw,
+  Wrench,
+  Clock,
+  Banknote,
+  CheckCircle2,
+  TriangleAlert,
+} from "lucide-react";
 
 interface MonthlyStat {
   monthNum: number;
@@ -118,7 +115,7 @@ export default function AnalyticsDashboardPage() {
     return { rows: monthly, totalRepair, maxRepair, sumCost };
   }, [monthly]);
 
-  const months = useMemo(() => {
+  const years = useMemo(() => {
     const list: { value: string; label: string }[] = [];
     for (let y = 2024; y <= 2027; y++) list.push({ value: String(y), label: `ปี ${y}` });
     return list;
@@ -127,171 +124,195 @@ export default function AnalyticsDashboardPage() {
   const maxValue = monthlyData.maxRepair || 1;
   const maxCost = Math.max(1, ...monthly.map((m) => m.cost));
 
-  if (loading) {
-    return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูลวิเคราะห์...</Text>
-      </HStack>
-    );
-  }
-
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div>
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <CheckCircleIcon className="w-3.5 h-3.5" /> ข้อมูลจริง
+              <CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" /> ข้อมูลจริง
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <Selector
-            label="ปี"
-            isLabelHidden
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Select
+            aria-label="ปี"
             value={String(year)}
-            onChange={(v) => setYear(Number(v))}
-            options={months}
-          />
+            onChange={(e) => setYear(Number(e.target.value))}
+            className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white"
+          >
+            {years.map((y) => (
+              <option key={y.value} value={y.value} className="text-[var(--cmms-text-primary)]">
+                {y.label}
+              </option>
+            ))}
+          </Select>
           <button
             type="button"
             onClick={fetchAnalytics}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
           >
-            <ArrowPathIcon className="w-4 h-4" />
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
           </button>
-        </HStack>
+        </div>
       </div>
 
       {/* KPI Cards */}
-      <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <WrenchScrewdriverIcon className="w-6 h-6" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile h-12 w-12">
+              <Wrench size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ใบสั่งงานซ่อมทั้งหมด</Text>
-              <Heading level={3} className="cmms-kpi-value">{workOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ใบสั่งงานซ่อมทั้งหมด</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-16" />
+              ) : (
+                <p className="cmms-kpi-value">{workOrders} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ใบ</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile red">
-              <ExclamationTriangleIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile red h-12 w-12">
+              <TriangleAlert size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">งานที่ยังค้างอยู่</Text>
-              <Heading level={3} className="cmms-kpi-value">{openOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">งานที่ยังค้างอยู่</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-16" />
+              ) : (
+                <p className="cmms-kpi-value">{openOrders} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ใบ</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile green">
-              <CheckCircleIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile green h-12 w-12">
+              <CheckCircle2 size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">งานเสร็จสมบูรณ์</Text>
-              <Heading level={3} className="cmms-kpi-value">{completedOrders} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ใบ</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">งานเสร็จสมบูรณ์</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-16" />
+              ) : (
+                <p className="cmms-kpi-value">{completedOrders} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ใบ</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <BanknotesIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile amber h-12 w-12">
+              <Banknote size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ค่าใช้จ่ายซ่อมรวม</Text>
-              <Heading level={3} className="cmms-kpi-value">{totalCost.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>บาท</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ค่าใช้จ่ายซ่อมรวม</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-24" />
+              ) : (
+                <p className="cmms-kpi-value">{totalCost.toLocaleString("th-TH")} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">บาท</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
-      </Grid>
+      </div>
 
       {/* Second row of KPIs */}
-      <Grid columns={{ minWidth: 240, max: 4 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <ClockIcon className="w-6 h-6" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile h-12 w-12">
+              <Clock size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">MTBF เฉลี่ย ({year})</Text>
-              <Heading level={3} className="cmms-kpi-value">{mtbf} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">MTBF เฉลี่ย ({year})</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-20" />
+              ) : (
+                <p className="cmms-kpi-value">{mtbf} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ชั่วโมง</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <ClockIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile amber h-12 w-12">
+              <Clock size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">MTTR เฉลี่ย ({year})</Text>
-              <Heading level={3} className="cmms-kpi-value">{mttr} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>ชั่วโมง</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">MTTR เฉลี่ย ({year})</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-20" />
+              ) : (
+                <p className="cmms-kpi-value">{mttr} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ชั่วโมง</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile green">
-              <WrenchScrewdriverIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile green h-12 w-12">
+              <Wrench size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เครื่องจักรที่ลงทะเบียน</Text>
-              <Heading level={3} className="cmms-kpi-value">{assets} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>เครื่อง</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">เครื่องจักรที่ลงทะเบียน</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-16" />
+              ) : (
+                <p className="cmms-kpi-value">{assets} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">เครื่อง</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <CheckCircleIcon className="w-6 h-6" />
+        <Card className="cmms-kpi-card">
+          <CardContent className="flex items-center gap-3">
+            <div className="cmms-icon-tile h-12 w-12">
+              <CheckCircle2 size={24} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">แผนงาน PM/AM</Text>
-              <Heading level={3} className="cmms-kpi-value">{pmPlans} <span style={{ fontSize: 14, color: "var(--cmms-secondary)" }}>แผน</span></Heading>
-            </VStack>
-          </HStack>
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">แผนงาน PM/AM</p>
+              {loading ? (
+                <Skeleton className="mt-1 h-7 w-16" />
+              ) : (
+                <p className="cmms-kpi-value">{pmPlans} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">แผน</span></p>
+              )}
+            </div>
+          </CardContent>
         </Card>
-      </Grid>
+      </div>
 
       {/* Monthly bar chart (pure CSS) */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center">
-            <VStack gap={1}>
-              <Heading level={4}>งานซ่อมรายเดือน (ปี {year})</Heading>
-              <Text type="body" size="sm" color="secondary">รวม {monthlyData.totalRepair} ใบงาน (เสร็จ + แจ้งซ่อม)</Text>
-            </VStack>
-          </HStack>
-          <HStack hAlign="between" gap={2} style={{ alignItems: "flex-end", minHeight: 180, height: "100%" }}>
+      <Card>
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="font-bold">งานซ่อมรายเดือน (ปี {year})</h3>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">รวม {monthlyData.totalRepair} ใบงาน (เสร็จ + แจ้งซ่อม)</p>
+          </div>
+          <div className="flex items-end justify-between gap-2" style={{ minHeight: 180, height: "100%" }}>
             {monthlyData.rows.length > 0 ? (
               monthlyData.rows.map((m) => {
                 const val = m.completed + m.breakdown;
                 const h = Math.max(6, (val / maxValue) * 150);
                 return (
-                  <VStack key={m.monthNum} gap={1} style={{ flex: 1, alignItems: "center", justifyContent: "flex-end", height: "100%" }}>
-                    <Text type="body" size="sm" weight="bold" style={{ fontSize: 12 }}>{val}</Text>
+                  <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
+                    <span className="text-xs font-bold">{val}</span>
                     <div
                       style={{
                         width: "60%",
@@ -303,59 +324,57 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${val} ใบงาน`}
                     />
-                    <Text type="body" size="sm" color="secondary" style={{ fontSize: 11 }}>{m.month}</Text>
-                  </VStack>
+                    <span className="text-[11px] text-[var(--cmms-text-secondary)]">{m.month}</span>
+                  </div>
                 );
               })
             ) : (
-              <Text type="body" color="secondary">ไม่มีข้อมูล</Text>
+              <p className="text-[var(--cmms-text-secondary)]">ไม่มีข้อมูล</p>
             )}
-          </HStack>
-        </VStack>
+          </div>
+        </CardContent>
       </Card>
 
       {/* MTBF/MTTR Line comparison (pure CSS) */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <Heading level={4}>แนวโน้ม MTBF / MTTR รายเดือน (ปี {year})</Heading>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <Card>
+        <CardContent className="space-y-4">
+          <h3 className="font-bold">แนวโน้ม MTBF / MTTR รายเดือน (ปี {year})</h3>
+          <div className="flex flex-col gap-2">
             {monthlyData.rows.map((m) => (
-              <div key={m.monthNum} style={{ display: "grid", gridTemplateColumns: "56px 1fr 90px", gap: 10, alignItems: "center" }}>
-                <Text type="body" size="sm" color="secondary">{m.month}</Text>
-                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, color: "var(--cmms-info)", minWidth: 38 }}>MTBF</span>
-                    <div style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: "var(--cmms-bg-muted)" }}>
-                      <div style={{ width: `${Math.min(100, (m.mtbf / 400) * 100)}%`, height: 8, borderRadius: 4, backgroundColor: "var(--cmms-info)" }} />
+              <div key={m.monthNum} className="grid items-center gap-2.5" style={{ gridTemplateColumns: "56px 1fr 90px" }}>
+                <span className="text-sm text-[var(--cmms-text-secondary)]">{m.month}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="min-w-[38px] text-[11px]" style={{ color: "var(--cmms-info)" }}>MTBF</span>
+                    <div className="h-2 flex-1 rounded" style={{ backgroundColor: "var(--cmms-bg-muted)" }}>
+                      <div className="h-2 rounded" style={{ width: `${Math.min(100, (m.mtbf / 400) * 100)}%`, backgroundColor: "var(--cmms-info)" }} />
                     </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 11, color: "var(--cmms-warning)", minWidth: 38 }}>MTTR</span>
-                    <div style={{ flex: 1, height: 8, borderRadius: 4, backgroundColor: "var(--cmms-bg-muted)" }}>
-                      <div style={{ width: `${Math.min(100, (m.mttr / 8) * 100)}%`, height: 8, borderRadius: 4, backgroundColor: "var(--cmms-warning)" }} />
+                  <div className="flex items-center gap-1.5">
+                    <span className="min-w-[38px] text-[11px]" style={{ color: "var(--cmms-warning)" }}>MTTR</span>
+                    <div className="h-2 flex-1 rounded" style={{ backgroundColor: "var(--cmms-bg-muted)" }}>
+                      <div className="h-2 rounded" style={{ width: `${Math.min(100, (m.mttr / 8) * 100)}%`, backgroundColor: "var(--cmms-warning)" }} />
                     </div>
                   </div>
                 </div>
-                <Text type="body" size="sm" style={{ textAlign: "right", fontSize: 12 }}>
-                  {m.mtbf} ชม. / {m.mttr} ชม.
-                </Text>
+                <span className="text-right text-xs">{m.mtbf} ชม. / {m.mttr} ชม.</span>
               </div>
             ))}
           </div>
-        </VStack>
+        </CardContent>
       </Card>
 
       {/* Cost bar chart */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <Heading level={4}>ค่าใช้จ่ายซ่อมรายเดือน (ปี {year}) — หน่วย: หมื่นบาท</Heading>
-          <HStack hAlign="between" gap={2} style={{ alignItems: "flex-end", minHeight: 150 }}>
+      <Card>
+        <CardContent className="space-y-4">
+          <h3 className="font-bold">ค่าใช้จ่ายซ่อมรายเดือน (ปี {year}) — หน่วย: หมื่นบาท</h3>
+          <div className="flex items-end justify-between gap-2" style={{ minHeight: 150 }}>
             {monthlyData.rows.length > 0 ? (
               monthlyData.rows.map((m) => {
                 const h = Math.max(6, (m.cost / maxCost) * 120);
                 return (
-                  <VStack key={m.monthNum} gap={1} style={{ flex: 1, alignItems: "center", justifyContent: "flex-end", height: "100%" }}>
-                    <Text type="body" size="sm" weight="bold" style={{ fontSize: 12 }}>{m.cost}</Text>
+                  <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
+                    <span className="text-xs font-bold">{m.cost}</span>
                     <div
                       style={{
                         width: "60%",
@@ -367,16 +386,16 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${m.cost} หมื่นบาท`}
                     />
-                    <Text type="body" size="sm" color="secondary" style={{ fontSize: 11 }}>{m.month}</Text>
-                  </VStack>
+                    <span className="text-[11px] text-[var(--cmms-text-secondary)]">{m.month}</span>
+                  </div>
                 );
               })
             ) : (
-              <Text type="body" color="secondary">ไม่มีข้อมูล</Text>
+              <p className="text-[var(--cmms-text-secondary)]">ไม่มีข้อมูล</p>
             )}
-          </HStack>
-        </VStack>
+          </div>
+        </CardContent>
       </Card>
-    </VStack>
+    </div>
   );
 }
