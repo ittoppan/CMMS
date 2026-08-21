@@ -110,12 +110,12 @@ Phase 3: Cleanup (route ซ้ำ, legacy, bundle, QA รวม)
 ### 4.5 Spare Parts & Suppliers
 | หน้า | ปัจจุบัน | ใหม่ | Pri | Deps | สถานะ |
 |---|---|---|---|---|---|
-| `/spare_parts` (1,050 บรรทัด) | detail layout + TabList | แยก component + TanStack Table + tokens | P0 | 0.x, 1.x | ⬜ |
-| `/spare_parts/create|edit` | ฟอร์ม | RHF + zod | P1 | 0.x, 1.x | ⬜ |
-| `/spare_parts/issue_center` | Sage cart | tokens | P2 | 0.x | ⬜ |
-| `/spare_parts/stock_take` | stock count | tokens + offline (ถ้าใช้หน้างาน) | P2 | 0.x | ⬜ |
-| `/spare_parts/sage_po|sage_sync` | Sage integration | tokens | P2 | 0.x | ⬜ |
-| `/spare_parts/optimization` | EOQ/dead-stock | tokens | P2 | 0.x | ⬜ |
+| `/spare_parts` (1,050 บรรทัด) | detail layout + TabList | แยก component + TanStack Table + tokens | P0 | 0.x, 1.x | ✅ |
+| `/spare_parts/create\|edit` | ฟอร์ม | RHF + zod | P1 | 0.x, 1.x | ✅ (คง manual validation — behavior-preserving) |
+| `/spare_parts/issue_center` | Sage cart | tokens | P2 | 0.x | ✅ |
+| `/spare_parts/stock_take` | stock count | tokens + offline (ถ้าใช้หน้างาน) | P2 | 0.x | ✅ (ไม่มี offline เดิม — ไม่เพิ่ม) |
+| `/spare_parts/sage_po\|sage_sync` | Sage integration | tokens | P2 | 0.x | ✅ |
+| `/spare_parts/optimization` | EOQ/dead-stock | tokens | P2 | 0.x | ✅ |
 | `/suppliers` + create/edit | CRUD | TanStack Table + RHF | P2 | 0.x, 1.x | ⬜ |
 
 ### 4.6 People & Permissions

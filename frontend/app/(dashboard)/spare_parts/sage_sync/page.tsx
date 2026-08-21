@@ -1,27 +1,21 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { RadioList, RadioListItem } from "@astryxdesign/core/RadioList";
-import { CheckboxList, CheckboxListItem } from "@astryxdesign/core/CheckboxList";
-import { Switch } from "@astryxdesign/core/Switch";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { 
-  ArrowPathIcon,
-  CheckCircleIcon,
-  CircleStackIcon,
-  DocumentCheckIcon,
-  WrenchScrewdriverIcon,
-} from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  RefreshCw,
+  CheckCircle2,
+  Database,
+  FileCheck2,
+  Wrench,
+} from "lucide-react";
 
-interface SyncLog extends Record<string, unknown> {
+interface SyncLog {
   id: number | string;
   sync_type: string;
   status: string;
@@ -203,300 +197,346 @@ export default function SageSyncConfigPage() {
   const syncedCount = useMemo(() => parseInt(String(stats?.synced_count ?? "0"), 10) || 0, [stats]);
   const lastSyncTime = stats?.last_sync_time || "—";
 
-  const columns: TableColumn<SyncLog>[] = [
+  const columns: ColumnDef<UiTableFeatures, SyncLog>[] = [
     {
-      key: "item_code",
+      id: "item_code",
       header: "หมวดหมู่ / รายการ",
-      width: proportional(2.2),
-      renderCell: (item) => (
-        <VStack gap={0}>
-          <Text type="body" weight="semibold">{item.item_code || "—"}</Text>
-          {item.error_message && (
-            <Text type="body" size="sm" color="secondary">{item.error_message}</Text>
+      cell: ({ row }: { row: { original: SyncLog } }) => (
+        <div className="space-y-0.5">
+          <div className="text-sm font-semibold">{row.original.item_code || "—"}</div>
+          {row.original.error_message && (
+            <div className="text-sm text-[var(--cmms-text-secondary)]">{row.original.error_message}</div>
           )}
-        </VStack>
+        </div>
       ),
     },
     {
-      key: "sync_type",
+      id: "sync_type",
       header: "ประเภท",
-      width: proportional(1.2),
-      renderCell: (item) => (
+      cell: ({ row }: { row: { original: SyncLog } }) => (
         <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-          {item.sync_type || "SAGE_SYNC"}
+          {row.original.sync_type || "SAGE_SYNC"}
         </span>
       ),
     },
     {
-      key: "status",
+      id: "status",
       header: "สถานะ",
-      width: proportional(1.2),
-      renderCell: (item) => (
+      cell: ({ row }: { row: { original: SyncLog } }) => (
         <span
           className="cmms-andon-chip"
           style={
-            String(item.status).toUpperCase() === "SUCCESS"
+            String(row.original.status).toUpperCase() === "SUCCESS"
               ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
               : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
           }
         >
-          {String(item.status).toUpperCase() === "SUCCESS" ? "สำเร็จ" : item.status || "ไม่ทราบ"}
+          {String(row.original.status).toUpperCase() === "SUCCESS" ? "สำเร็จ" : row.original.status || "ไม่ทราบ"}
         </span>
       ),
     },
     {
-      key: "created_at",
+      id: "created_at",
       header: "เวลาซิงค์",
-      width: proportional(1.8),
-      renderCell: (item) => <Text type="body" size="sm">{item.created_at || "—"}</Text>,
+      cell: ({ row }: { row: { original: SyncLog } }) => (
+        <span className="text-sm">{row.original.created_at || "—"}</span>
+      ),
     },
   ];
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูลการซิงค์ Sage...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={22} label="กำลังโหลดข้อมูลการซิงค์ Sage..." />
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
+    <div className="space-y-6">
       {/* Page Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAGE SYNC · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ตั้งค่าการดึงสต็อก Sage 300 ERP</Heading>
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAGE SYNC · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ตั้งค่าการดึงสต็อก Sage 300 ERP</h2>
             <span className="cmms-andon-chip" style={{ background: sageConnected ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)" }}>
-              <CircleStackIcon className="w-3.5 h-3.5" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
+              <Database size={14} strokeWidth={1.75} aria-hidden="true" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             เลือกประเภทสต็อก กำหนดรูปแบบการดึง และซิงค์ข้อมูลกับฐานข้อมูล Sage 300 ERP (Inventory Control Module)
-          </Text>
-        </VStack>
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => (window.location.href = "/spare_parts")}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
         >
           กลับไปยังคลังอะไหล่
         </button>
       </div>
 
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Sync Success Alert */}
       {syncMessage && (
-        <Card padding={4} style={{ background: 'var(--cmms-success-bg)', border: '1px solid var(--cmms-success)' }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: 'var(--cmms-success)' }}>
-              {syncMessage}
-            </Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title={syncMessage} />
       )}
 
       {/* Connection Info Cards */}
-      <Grid columns={{ minWidth: 280, max: 3 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card blue">
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">ฐานข้อมูล Sage 300 ERP Server</Text>
-            <Heading level={3} className="cmms-kpi-value">{erpDatabase}</Heading>
-            <Text type="body" size="sm" style={{ color: sageConnected ? "var(--cmms-primary)" : "var(--cmms-danger)" }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
+        <Card className="cmms-kpi-card blue">
+          <div className="space-y-1 p-4">
+            <p className="text-xs text-[var(--cmms-text-secondary)]">ฐานข้อมูล Sage 300 ERP Server</p>
+            <h3 className="cmms-kpi-value">{erpDatabase}</h3>
+            <p className="text-sm" style={{ color: sageConnected ? "var(--cmms-primary)" : "var(--cmms-danger)" }}>
               {sageConnected ? "สถานะการเชื่อมต่อ: ปกติ" : "สถานะการเชื่อมต่อ: ไม่พร้อม"}
-            </Text>
-          </VStack>
+            </p>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card green">
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">โมดูลที่เชื่อมต่อ</Text>
-            <Heading level={3} className="cmms-kpi-value">Sage 300 I/C v6.8A</Heading>
-            <Text type="body" size="sm" color="secondary">ควบคุมสต็อกและการขอสั่งซื้อ</Text>
-          </VStack>
+        <Card className="cmms-kpi-card green">
+          <div className="space-y-1 p-4">
+            <p className="text-xs text-[var(--cmms-text-secondary)]">โมดูลที่เชื่อมต่อ</p>
+            <h3 className="cmms-kpi-value">Sage 300 I/C v6.8A</h3>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">ควบคุมสต็อกและการขอสั่งซื้อ</p>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card amber">
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">รายการสต็อกที่ซิงค์</Text>
-            <Heading level={3} className="cmms-kpi-value">
-              {totalItems.toLocaleString("th-TH")} <span style={{ fontSize: 14 }}>รายการ</span>
-            </Heading>
-            <Text type="body" size="sm" color="secondary">
+        <Card className="cmms-kpi-card amber">
+          <div className="space-y-1 p-4">
+            <p className="text-xs text-[var(--cmms-text-secondary)]">รายการสต็อกที่ซิงค์</p>
+            <h3 className="cmms-kpi-value">
+              {totalItems.toLocaleString("th-TH")} <span className="text-sm font-normal">รายการ</span>
+            </h3>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">
               ซิงค์แล้ว {syncedCount.toLocaleString("th-TH")} รายการ · ล่าสุด {lastSyncTime}
-            </Text>
-          </VStack>
+            </p>
+          </div>
         </Card>
-      </Grid>
+      </div>
 
       {/* Sync Mode Configuration */}
       {syncConfig && (
-        <Card padding={5}>
-          <VStack gap={4}>
-            <VStack gap={1}>
-              <HStack gap={2} vAlign="center">
-                <WrenchScrewdriverIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={4}>รูปแบบการดึงข้อมูล</Heading>
-              </HStack>
-              <Text type="body" size="sm" color="secondary">
+        <Card>
+          <CardContent className="space-y-4 p-5">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Wrench size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                <h4 className="text-base font-bold tracking-tight">รูปแบบการดึงข้อมูล</h4>
+              </div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">
                 กำหนดวิธีที่ระบบดึงและนำเข้าข้อมูลจาก Sage 300 — บันทึกแล้วจะใช้กับการซิงค์ครั้งถัดไปทุกครั้ง
-              </Text>
-            </VStack>
+              </p>
+            </div>
 
-            <RadioList
-              label="รูปแบบการดึง"
-              value={syncConfig.mode}
-              onChange={(v) => setSyncConfig(prev => prev ? { ...prev, mode: v as SyncConfig["mode"] } : prev)}
-              orientation="vertical"
-            >
+            {/* Radio group: รูปแบบการดึง */}
+            <div role="radiogroup" aria-label="รูปแบบการดึง" className="space-y-2">
               {Object.entries(MODE_LABELS).map(([key, m]) => (
-                <RadioListItem key={key} label={m.label} value={key} description={m.desc} />
+                <label
+                  key={key}
+                  className="flex cursor-pointer items-start gap-3 rounded-[var(--cmms-radius)] border p-3 transition-colors"
+                  style={{
+                    borderColor: syncConfig.mode === key ? "var(--cmms-primary)" : "var(--cmms-border)",
+                    background: syncConfig.mode === key ? "var(--cmms-primary-light)" : "var(--cmms-bg-card)",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="sync-mode"
+                    value={key}
+                    checked={syncConfig.mode === key}
+                    onChange={() => setSyncConfig(prev => prev ? { ...prev, mode: key as SyncConfig["mode"] } : prev)}
+                    className="mt-1 h-4 w-4 shrink-0 accent-[var(--cmms-primary)]"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold">{m.label}</span>
+                    <span className="block text-xs text-[var(--cmms-text-secondary)]">{m.desc}</span>
+                  </span>
+                </label>
               ))}
-            </RadioList>
+            </div>
 
-            <CheckboxList
-              label="ฟิลด์ที่จะอัปเดต (เฉพาะรายการที่มีอยู่แล้ว)"
-              description={syncConfig.mode === "new_only" ? "โหมด New Items Only ไม่ทับรายการเดิม — ฟิลด์นี้จึงไม่มีผล" : "เลือกว่าการซิงค์จะทับข้อมูลรายการใดบ้าง"}
-              value={syncConfig.fields}
-              onChange={(vals) => setSyncConfig(prev => prev ? { ...prev, fields: vals } : prev)}
-              isDisabled={syncConfig.mode === "new_only"}
-              density="balanced"
-            >
-              {Object.entries(FIELD_LABELS).map(([key, label]) => (
-                <CheckboxListItem key={key} label={label} value={key} />
-              ))}
-            </CheckboxList>
+            {/* Checkbox group: ฟิลด์ที่จะอัปเดต */}
+            <fieldset disabled={syncConfig.mode === "new_only"} className="space-y-2">
+              <legend className="text-sm font-semibold">ฟิลด์ที่จะอัปเดต (เฉพาะรายการที่มีอยู่แล้ว)</legend>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">
+                {syncConfig.mode === "new_only" ? "โหมด New Items Only ไม่ทับรายการเดิม — ฟิลด์นี้จึงไม่มีผล" : "เลือกว่าการซิงค์จะทับข้อมูลรายการใดบ้าง"}
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2" aria-disabled={syncConfig.mode === "new_only"}>
+                {Object.entries(FIELD_LABELS).map(([key, label]) => (
+                  <label
+                    key={key}
+                    className={`flex items-center gap-2.5 rounded-[var(--cmms-radius-sm)] border border-[var(--cmms-border)] px-3 py-2 text-sm transition-opacity ${syncConfig.mode === "new_only" ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={syncConfig.fields.includes(key)}
+                      onChange={(e) => setSyncConfig(prev => prev ? {
+                        ...prev,
+                        fields: e.target.checked
+                          ? [...prev.fields, key]
+                          : prev.fields.filter(f => f !== key),
+                      } : prev)}
+                      className="h-4 w-4 shrink-0 accent-[var(--cmms-primary)]"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
-            <Switch
-              label="ทับข้อมูลรายการเดิม"
-              description="ปิด = ไม่แก้รายการที่อยู่ในระบบแล้ว (เพิ่มเฉพาะรายการใหม่)"
-              value={syncConfig.overwrite}
-              onChange={(c) => setSyncConfig(prev => prev ? { ...prev, overwrite: c } : prev)}
-            />
+            {/* Switch: ทับข้อมูลรายการเดิม */}
+            <div className="flex items-start justify-between gap-4 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] p-3">
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-semibold">ทับข้อมูลรายการเดิม</p>
+                <p className="text-xs text-[var(--cmms-text-secondary)]">ปิด = ไม่แก้รายการที่อยู่ในระบบแล้ว (เพิ่มเฉพาะรายการใหม่)</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={syncConfig.overwrite}
+                aria-label="ทับข้อมูลรายการเดิม"
+                onClick={() => setSyncConfig(prev => prev ? { ...prev, overwrite: !prev.overwrite } : prev)}
+                className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
+                style={{ background: syncConfig.overwrite ? "var(--cmms-primary)" : "var(--cmms-bg-muted)", boxShadow: "inset 0 0 0 1px var(--cmms-border)" }}
+              >
+                <span
+                  className="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200"
+                  style={{ transform: syncConfig.overwrite ? "translateX(22px)" : "translateX(2px)" }}
+                />
+              </button>
+            </div>
 
-            <TextInput
-              label="รหัสหมวดหมู่ Sage 300 ที่ดึง"
-              description="คั่นหลายรหัสด้วยเครื่องหมายจุลภาค เช่น 15400, 15401, 15402"
-              value={allowedCatsText}
-              onChange={setAllowedCatsText}
-            />
+            <div className="space-y-1.5">
+              <Input
+                label="รหัสหมวดหมู่ Sage 300 ที่ดึง"
+                value={allowedCatsText}
+                onChange={(e) => setAllowedCatsText(e.target.value)}
+              />
+              <p className="text-xs text-[var(--cmms-text-muted)]">คั่นหลายรหัสด้วยเครื่องหมายจุลภาค เช่น 15400, 15401, 15402</p>
+            </div>
 
-            <HStack gap={2} wrap="wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 disabled={savingConfig}
                 onClick={handleSaveConfig}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+                className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {savingConfig ? "กำลังบันทึก..." : "บันทึกรูปแบบการดึง"}
               </button>
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-[var(--cmms-text-secondary)]">
                 หมวดหมู่ที่เปิดใช้งาน: {categories.filter(c => c.enabled).map(c => c.id).join(" · ") || "—"}
-              </Text>
-            </HStack>
-          </VStack>
+              </p>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Stock Category Selection Matrix */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <VStack gap={1}>
-            <Heading level={4}>กำหนดประเภทสต็อกที่ต้องการดึงมาจาก Sage 300 ERP</Heading>
-            <Text type="body" size="sm" color="secondary">
+      <Card>
+        <CardContent className="space-y-4 p-5">
+          <div className="space-y-1">
+            <h4 className="text-base font-bold tracking-tight">กำหนดประเภทสต็อกที่ต้องการดึงมาจาก Sage 300 ERP</h4>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">
               เลือกประเภทสต็อกในระบบ Sage 300 เพื่อเปิดใช้งานการดึงยอดคงเหลือ จุดสั่งซื้อ (Reorder Point) และราคาต้นทุนอัตโนมัติ — กด "บันทึกรูปแบบการดึง" ด้านบนเพื่อจัดเก็บ
-            </Text>
-          </VStack>
+            </p>
+          </div>
 
           {categories.length === 0 ? (
-            <Text type="body" color="secondary">ไม่พบประเภทสต็อก — กด "รีเฟรช" เพื่อโหลดใหม่</Text>
+            <p className="text-sm text-[var(--cmms-text-secondary)]">ไม่พบประเภทสต็อก — กด "รีเฟรช" เพื่อโหลดใหม่</p>
           ) : (
-          <Grid columns={2} gap={4}>
-            {categories.map((cat) => (
-              <Card key={cat.id} padding={4} style={{ background: cat.enabled ? 'var(--cmms-bg-card)' : 'var(--cmms-bg-muted)', opacity: cat.enabled ? 1 : 0.6 }}>
-                <VStack gap={3}>
-                  <HStack hAlign="between" vAlign="center">
-                    <HStack gap={2} vAlign="center">
-                      <CircleStackIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                      <Text type="body" weight="bold">{cat.name}</Text>
-                    </HStack>
-                    <span
-                      className="cmms-andon-chip"
-                      style={
-                        cat.enabled
-                          ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
-                          : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }
-                      }
-                    >
-                      {cat.enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}
-                    </span>
-                  </HStack>
-
-                  <Text type="body" size="sm" color="secondary">{cat.desc}</Text>
-
-                  <HStack hAlign="between" vAlign="center" style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid var(--cmms-border)' }}>
-                    <Text type="supporting" color="secondary">ข้อมูลในคลัง: <strong>{cat.count.toLocaleString("th-TH")} รายการ</strong></Text>
-                    <HStack gap={2}>
-                      <button
-                        type="button"
-                        onClick={() => toggleCategory(cat.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {categories.map((cat) => (
+                <Card
+                  key={cat.id}
+                  className="p-4"
+                  style={{
+                    background: cat.enabled ? "var(--cmms-bg-card)" : "var(--cmms-bg-muted)",
+                    opacity: cat.enabled ? 1 : 0.6,
+                  }}
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Database size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                        <span className="text-sm font-bold">{cat.name}</span>
+                      </div>
+                      <span
+                        className="cmms-andon-chip"
+                        style={
+                          cat.enabled
+                            ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }
+                        }
                       >
-                        {cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={syncingCat === cat.id}
-                        onClick={() => handleSyncCategory(cat.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-                      >
-                        <ArrowPathIcon className={`w-3.5 h-3.5 ${syncingCat === cat.id ? "animate-spin" : ""}`} />
-                        {syncingCat === cat.id ? "กำลังดึง..." : "ดึงข้อมูลทันที"}
-                      </button>
-                    </HStack>
-                  </HStack>
-                </VStack>
-              </Card>
-            ))}
-          </Grid>
+                        {cat.enabled ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-[var(--cmms-text-secondary)]">{cat.desc}</p>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-2" style={{ borderColor: "var(--cmms-border)" }}>
+                      <p className="text-xs text-[var(--cmms-text-secondary)]">ข้อมูลในคลัง: <strong>{cat.count.toLocaleString("th-TH")} รายการ</strong></p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => toggleCategory(cat.id)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
+                        >
+                          {cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={syncingCat === cat.id}
+                          onClick={() => handleSyncCategory(cat.id)}
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" className={syncingCat === cat.id ? "animate-spin" : ""} />
+                          {syncingCat === cat.id ? "กำลังดึง..." : "ดึงข้อมูลทันที"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
-        </VStack>
+        </CardContent>
       </Card>
 
       {/* Sync Log History Table */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center">
-            <Heading level={4}>ประวัติการซิงค์ข้อมูลกับ Sage 300 ERP</Heading>
+      <Card>
+        <CardContent className="space-y-4 p-5">
+          <div className="flex items-center justify-between">
+            <h4 className="text-base font-bold tracking-tight">ประวัติการซิงค์ข้อมูลกับ Sage 300 ERP</h4>
             <button
               type="button"
               onClick={fetchData}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
             >
-              <ArrowPathIcon className="w-3.5 h-3.5" />
+              <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
               รีเฟรช
             </button>
-          </HStack>
+          </div>
           {logs.length === 0 ? (
-            <VStack gap={2} style={{ padding: 32, textAlign: "center" }} hAlign="center">
-              <DocumentCheckIcon className="w-6 h-6" style={{ color: "var(--color-secondary)" }} />
-              <Text type="body" color="secondary">ยังไม่มีประวัติการซิงค์ — กด "ดึงข้อมูลทันที" เพื่อเริ่มซิงค์</Text>
-            </VStack>
+            <div className="flex flex-col items-center gap-2 p-8 text-center">
+              <FileCheck2 size={24} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-text-secondary)" }} />
+              <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีประวัติการซิงค์ — กด "ดึงข้อมูลทันที" เพื่อเริ่มซิงค์</p>
+            </div>
           ) : (
-            <Table<SyncLog>
-              data={logs}
+            <DataTable
               columns={columns}
-              idKey="id"
-              density="balanced"
-              dividers="rows"
+              data={logs}
+              showPagination={false}
+              getRowId={(row) => String(row.id)}
+              emptyTitle="ไม่พบประวัติการซิงค์"
             />
           )}
-        </VStack>
+        </CardContent>
       </Card>
-    </VStack>
+    </div>
   );
 }

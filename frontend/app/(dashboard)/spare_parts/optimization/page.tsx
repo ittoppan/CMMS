@@ -1,24 +1,21 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { TabList, Tab } from "@astryxdesign/core/TabList";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
-  SparklesIcon,
-  ExclamationTriangleIcon,
-  ArrowPathIcon,
-  LightBulbIcon,
-  ScaleIcon,
-} from "@heroicons/react/24/outline";
+  Sparkles,
+  TriangleAlert,
+  RefreshCw,
+  Lightbulb,
+  Scale,
+} from "lucide-react";
 
-interface EOQItem extends Record<string, unknown> {
+interface EOQItem {
   id: string;
   code: string;
   name: string;
@@ -119,6 +116,7 @@ export default function InventoryOptimizationPage() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const stats = useMemo(() => {
@@ -137,184 +135,178 @@ export default function InventoryOptimizationPage() {
     return items;
   }, [activeTab, items]);
 
-  const columns: TableColumn<EOQItem>[] = [
+  const columns: ColumnDef<UiTableFeatures, EOQItem>[] = [
     {
-      key: "code",
+      id: "code",
       header: "รหัส / ชื่ออะไหล่",
-      width: proportional(2),
-      renderCell: (item: EOQItem) => (
-        <VStack gap={0}>
-          <HStack gap={2} vAlign="center">
-            <Text type="body" weight="semibold">{item.code}</Text>
+      cell: ({ row }: { row: { original: EOQItem } }) => (
+        <div className="space-y-0.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold">{row.original.code}</span>
             <span
               className="cmms-andon-chip"
               style={
-                item.abcClass === "A"
+                row.original.abcClass === "A"
                   ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }
-                  : item.abcClass === "B"
+                  : row.original.abcClass === "B"
                     ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
                     : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }
               }
             >
-              Class {item.abcClass}
+              Class {row.original.abcClass}
             </span>
-          </HStack>
-          <Text type="body" size="sm" color="secondary">{item.name}</Text>
-        </VStack>
+          </div>
+          <div className="text-sm text-[var(--cmms-text-secondary)]">{row.original.name}</div>
+        </div>
       ),
     },
     {
-      key: "currentStock",
+      accessorKey: "currentStock",
       header: "สต็อกปัจจุบัน",
-      width: proportional(1),
-      renderCell: (item: EOQItem) => (
-        <Text type="body" weight="bold">
-          {item.currentStock}{item.needsReorder && " "}
-        </Text>
+      cell: ({ row }: { row: { original: EOQItem } }) => (
+        <span className="text-sm font-bold">{row.original.currentStock}</span>
       ),
     },
     {
-      key: "range",
+      id: "range",
       header: "Min / Max",
-      width: proportional(1),
-      renderCell: (item: EOQItem) => (
-        <Text type="body" size="sm">{item.minStock} / {item.maxStock}</Text>
+      cell: ({ row }: { row: { original: EOQItem } }) => (
+        <span className="text-sm">{row.original.minStock} / {row.original.maxStock}</span>
       ),
     },
     {
-      key: "reorder",
+      id: "reorder",
       header: "Reorder Point",
-      width: proportional(1),
-      renderCell: (item: EOQItem) => (
-        <Text type="body" size="sm" color="secondary">~{item.reorderPoint} หน่วย</Text>
+      cell: ({ row }: { row: { original: EOQItem } }) => (
+        <span className="text-sm text-[var(--cmms-text-secondary)]">~{row.original.reorderPoint} หน่วย</span>
       ),
     },
     {
-      key: "deadStockDays",
+      id: "deadStockDays",
       header: "ไม่เคลื่อนไหว (วัน)",
-      width: proportional(1.2),
-      renderCell: (item: EOQItem) =>
-        item.deadStockDays >= 180 ? (
-          <span className="cmms-status down"><span className="cmms-status-dot" />{item.deadStockDays} วัน</span>
+      cell: ({ row }: { row: { original: EOQItem } }) =>
+        row.original.deadStockDays >= 180 ? (
+          <span className="cmms-status down"><span className="cmms-status-dot" />{row.original.deadStockDays} วัน</span>
         ) : (
-          <Text type="body" size="sm">{item.deadStockDays} วัน</Text>
+          <span className="text-sm">{row.original.deadStockDays} วัน</span>
         ),
     },
     {
-      key: "aiRecommendation",
+      id: "aiRecommendation",
       header: "คำแนะนำจาก AI Copilot",
-      width: proportional(3),
-      renderCell: (item: EOQItem) => (
-        <HStack gap={2} vAlign="start">
-          <LightBulbIcon className="w-4 h-4 shrink-0" style={{ color: "var(--color-warning)", marginTop: 2 }} />
-          <Text type="body" size="sm">{item.aiRecommendation}</Text>
-        </HStack>
+      cell: ({ row }: { row: { original: EOQItem } }) => (
+        <div className="flex items-start gap-2">
+          <Lightbulb size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--cmms-warning)]" />
+          <span className="text-sm">{row.original.aiRecommendation}</span>
+        </div>
       ),
     },
   ];
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังคำนวณข้อมูลคลังอะไหล่...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={22} label="กำลังคำนวณข้อมูลคลังอะไหล่..." />
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>AI วิเคราะห์คลังอะไหล่</Heading>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>AI วิเคราะห์คลังอะไหล่</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <SparklesIcon className="w-3.5 h-3.5" /> ขับเคลื่อนด้วย AI
+              <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" /> ขับเคลื่อนด้วย AI
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)
-          </Text>
-        </VStack>
+          </p>
+        </div>
         <button
           type="button"
           onClick={fetchData}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
         >
-          <ArrowPathIcon className="w-4 h-4" />
+          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
           ประมวลผล AI ใหม่
         </button>
       </div>
 
-      <Grid columns={{ minWidth: 260, max: 4 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card blue">
-          <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 cmms-icon-tile">
-              <ScaleIcon className="w-5 h-5" />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+        <Card className="cmms-kpi-card blue">
+          <div className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile h-11 w-11">
+              <Scale size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={0}>
-              <Text type="supporting" weight="bold" color="accent">อะไหล่กลุ่มสำคัญสูง (Class A)</Text>
-              <Heading level={3} className="cmms-kpi-value">{stats.classA} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-0">
+              <p className="text-xs font-bold" style={{ color: "var(--cmms-primary)" }}>อะไหล่กลุ่มสำคัญสูง (Class A)</p>
+              <h3 className="cmms-kpi-value">{stats.classA} <span className="text-sm font-normal">รายการ</span></h3>
+            </div>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card red">
-          <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 cmms-icon-tile red">
-              <ExclamationTriangleIcon className="w-5 h-5" />
+        <Card className="cmms-kpi-card red">
+          <div className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile red h-11 w-11">
+              <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={0}>
-              <Text type="supporting" weight="bold" style={{ color: "var(--color-error)" }}>อะไหล่ค้างคลัง (&gt; 180 วัน)</Text>
-              <Heading level={3} className="cmms-kpi-value">{stats.deadCount} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (จมทุน {stats.deadValue.toLocaleString("th-TH")} บาท)</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-0">
+              <p className="text-xs font-bold" style={{ color: "var(--cmms-danger)" }}>อะไหล่ค้างคลัง (&gt; 180 วัน)</p>
+              <h3 className="cmms-kpi-value">{stats.deadCount} <span className="text-sm font-normal">รายการ (จมทุน {stats.deadValue.toLocaleString("th-TH")} บาท)</span></h3>
+            </div>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card amber">
-          <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 cmms-icon-tile amber">
-              <ExclamationTriangleIcon className="w-5 h-5" />
+        <Card className="cmms-kpi-card amber">
+          <div className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile amber h-11 w-11">
+              <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={0}>
-              <Text type="supporting" weight="bold" style={{ color: "var(--color-warning)" }}>ต่ำกว่า Min Stock</Text>
-              <Heading level={3} className="cmms-kpi-value">{stats.reorder} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>รายการ (ต้องสั่งซื้อ)</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-0">
+              <p className="text-xs font-bold" style={{ color: "var(--cmms-warning)" }}>ต่ำกว่า Min Stock</p>
+              <h3 className="cmms-kpi-value">{stats.reorder} <span className="text-sm font-normal">รายการ (ต้องสั่งซื้อ)</span></h3>
+            </div>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card green">
-          <HStack gap={3} vAlign="center">
-            <div className="w-11 h-11 cmms-icon-tile green">
-              <SparklesIcon className="w-5 h-5" />
+        <Card className="cmms-kpi-card green">
+          <div className="flex items-center gap-3 p-4">
+            <div className="cmms-icon-tile green h-11 w-11">
+              <Sparkles size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={0}>
-              <Text type="supporting" weight="bold" style={{ color: "var(--color-success)" }}>มูลค่าคงคลังรวม</Text>
-              <Heading level={3} className="cmms-kpi-value">{stats.totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-0">
+              <p className="text-xs font-bold" style={{ color: "var(--cmms-success)" }}>มูลค่าคงคลังรวม</p>
+              <h3 className="cmms-kpi-value">{stats.totalValue.toLocaleString("th-TH")} <span className="text-sm font-normal">บาท</span></h3>
+            </div>
+          </div>
         </Card>
-      </Grid>
+      </div>
 
-      <TabList value={activeTab} onChange={setActiveTab}>
-        <Tab value="all" label={`อะไหล่ทั้งหมด (${items.length})`} />
-        <Tab value="deadstock" label={`อะไหล่ค้างคลัง (${stats.deadCount})`} />
-        <Tab value="classA" label={`กลุ่มสำคัญสูง (${stats.classA})`} />
-        <Tab value="reorder" label={`ต้องสั่งซื้อ (${stats.reorder})`} />
-      </TabList>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v)}>
+        <TabsList>
+          <TabsTrigger value="all">อะไหล่ทั้งหมด ({items.length})</TabsTrigger>
+          <TabsTrigger value="deadstock">อะไหล่ค้างคลัง ({stats.deadCount})</TabsTrigger>
+          <TabsTrigger value="classA">กลุ่มสำคัญสูง ({stats.classA})</TabsTrigger>
+          <TabsTrigger value="reorder">ต้องสั่งซื้อ ({stats.reorder})</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-      <Card padding={0} style={{ overflow: "hidden" }}>
-        <Table<EOQItem>
-          data={filteredData.slice(0, 100)}
-          columns={columns}
-          idKey="id"
-          density="balanced"
-          dividers="rows"
-        />
-      </Card>
-    </VStack>
+      <DataTable
+        columns={columns}
+        data={filteredData.slice(0, 100)}
+        showPagination={false}
+        getRowId={(row) => row.id}
+        emptyTitle="ไม่พบอะไหล่ในหมวดนี้"
+        emptyDescription="ลองเปลี่ยนแท็บตัวกรอง หรือกดประมวลผล AI ใหม่"
+      />
+    </div>
   );
 }

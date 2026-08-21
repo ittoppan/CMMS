@@ -3,27 +3,24 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
-  MagnifyingGlassIcon,
-  PlusIcon,
-  TrashIcon,
-  CheckCircleIcon,
-  ArrowPathIcon,
-  DocumentCheckIcon,
-} from "@heroicons/react/24/outline";
+  Search,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  RefreshCw,
+  FileCheck2,
+} from "lucide-react";
 
-interface POItem extends Record<string, unknown> {
+interface POItem {
   id: string;
   partId: number;
   itemCode: string;
@@ -65,6 +62,7 @@ export default function SagePOReceiptPage() {
 
   useEffect(() => {
     fetchParts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const partOptions = useMemo(() => {
@@ -144,62 +142,64 @@ export default function SagePOReceiptPage() {
     setSubmitting(false);
   };
 
-  const columns: TableColumn<POItem>[] = [
+  const columns: ColumnDef<UiTableFeatures, POItem>[] = [
     {
-      key: "itemCode",
+      id: "itemCode",
       header: "รหัสอะไหล่ / รายละเอียด",
-      width: proportional(2.2),
-      renderCell: (item: POItem) => (
-        <VStack gap={0}>
-          <Text type="body" weight="semibold">{item.itemCode}</Text>
-          <Text type="body" size="sm" color="secondary">{item.description}</Text>
-        </VStack>
+      cell: ({ row }: { row: { original: POItem } }) => (
+        <div className="space-y-0.5">
+          <div className="text-sm font-semibold">{row.original.itemCode}</div>
+          <div className="text-sm text-[var(--cmms-text-secondary)]">{row.original.description}</div>
+        </div>
       ),
     },
     {
-      key: "currentStock",
+      id: "currentStock",
       header: "สต็อกเดิม",
-      width: proportional(1),
-      renderCell: (item: POItem) => <Text type="body">{item.currentStock} {item.unit}</Text>,
-    },
-    {
-      key: "receivedQty",
-      header: "จำนวนรับเข้า",
-      width: proportional(1.2),
-      renderCell: (item: POItem) => (
-        <HStack gap={1} vAlign="center">
-          <button
-            type="button"
-            disabled={item.receivedQty <= 1}
-            onClick={() => handleQtyChange(item.id, item.receivedQty - 1)}
-            className="w-7 h-7 rounded-lg text-sm font-bold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] disabled:opacity-40 transition-all"
-          >−</button>
-          <Text type="body" weight="bold">{item.receivedQty}</Text>
-          <button
-            type="button"
-            onClick={() => handleQtyChange(item.id, item.receivedQty + 1)}
-            className="w-7 h-7 rounded-lg text-sm font-bold text-white cmms-btn-primary transition-all"
-          >+</button>
-        </HStack>
+      cell: ({ row }: { row: { original: POItem } }) => (
+        <span className="text-sm">{row.original.currentStock} {row.original.unit}</span>
       ),
     },
     {
-      key: "unitPrice",
-      header: "ราคา/หน่วย",
-      width: proportional(1),
-      renderCell: (item: POItem) => <Text type="body">{item.unitPrice.toLocaleString("th-TH")}</Text>,
+      id: "receivedQty",
+      header: "จำนวนรับเข้า",
+      cell: ({ row }: { row: { original: POItem } }) => (
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={row.original.receivedQty <= 1}
+            onClick={() => handleQtyChange(row.original.id, row.original.receivedQty - 1)}
+            aria-label="ลดจำนวน"
+            className="h-7 w-7 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-sm font-bold text-[var(--cmms-text-secondary)] transition-all hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40"
+          >−</button>
+          <span className="text-sm font-bold">{row.original.receivedQty}</span>
+          <button
+            type="button"
+            onClick={() => handleQtyChange(row.original.id, row.original.receivedQty + 1)}
+            aria-label="เพิ่มจำนวน"
+            className="cmms-btn-primary h-7 w-7 rounded-lg text-sm font-bold text-white transition-all"
+          >+</button>
+        </div>
+      ),
     },
     {
-      key: "actions",
+      id: "unitPrice",
+      header: "ราคา/หน่วย",
+      cell: ({ row }: { row: { original: POItem } }) => (
+        <span className="text-sm">{row.original.unitPrice.toLocaleString("th-TH")}</span>
+      ),
+    },
+    {
+      id: "actions",
       header: "",
-      width: proportional(0.7),
-      renderCell: (item: POItem) => (
+      cell: ({ row }: { row: { original: POItem } }) => (
         <button
           type="button"
-          onClick={() => handleRemove(item.id)}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-all"
+          onClick={() => handleRemove(row.original.id)}
+          className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all"
+          style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
         >
-          <TrashIcon className="w-3.5 h-3.5" />
+          <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
           ลบ
         </button>
       ),
@@ -208,122 +208,127 @@ export default function SagePOReceiptPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Spinner size={22} />
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <div className="space-y-6">
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <DocumentCheckIcon className="w-3.5 h-3.5" /> {items.length} รายการ
+              <FileCheck2 size={14} strokeWidth={1.75} aria-hidden="true" /> {items.length} รายการ
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             {hero.desc}
-          </Text>
-        </VStack>
+          </p>
+        </div>
         <button
           type="button"
           onClick={fetchParts}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
         >
-          <ArrowPathIcon className="w-4 h-4" />
+          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
         </button>
       </div>
 
-      <Card padding={5}>
-        <Heading level={4} style={{ marginBottom: 16 }}>ข้อมูลใบสั่งซื้อ (PO)</Heading>
-        <FormLayout>
-          <VStack gap={4}>
-            <Field inputID="f-po" label="เลขที่ใบสั่งซื้อ (PO Number) *" isRequired>
-              <TextInput
-                label="เลขที่ใบสั่งซื้อ"
-                isLabelHidden
-                placeholder="เช่น PO-2026-9901"
-                value={poNumber}
-                onChange={setPoNumber}
-              />
-            </Field>
-            <Field inputID="f-part" label="เลือกอะไหล่ที่รับเข้าคลัง">
-              <HStack gap={2} vAlign="center">
-                <div style={{ flex: 1 }}>
-                  <TextInput
-                    label="ค้นหาอะไหล่"
-                    isLabelHidden
-                    placeholder="ค้นหารหัส / ชื่ออะไหล่..."
-                    startIcon={MagnifyingGlassIcon}
-                    value={partSearch}
-                    onChange={setPartSearch}
-                  />
-                </div>
-                <div style={{ flex: 2 }}>
-                  <Selector
-                    label="เลือกอะไหล่"
-                    isLabelHidden
-                    placeholder="เลือกอะไหล่..."
-                    options={partOptions}
-                    value={selectedPart}
-                    onChange={(v) => setSelectedPart(String(v))}
-                  />
-                </div>
-                <button type="button" disabled={!selectedPart} onClick={handleAddPart} className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"><PlusIcon className="w-4 h-4" /> เพิ่ม</button>
-              </HStack>
-            </Field>
-          </VStack>
-        </FormLayout>
+      <Card>
+        <CardContent className="space-y-4 p-5">
+          <h4 className="text-base font-bold tracking-tight">ข้อมูลใบสั่งซื้อ (PO)</h4>
+          <Input
+            label="เลขที่ใบสั่งซื้อ (PO Number) *"
+            placeholder="เช่น PO-2026-9901"
+            value={poNumber}
+            onChange={(e) => setPoNumber(e.target.value)}
+          />
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกอะไหล่ที่รับเข้าคลัง</label>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-[200px] flex-1">
+                <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+                <Input
+                  label="ค้นหาอะไหล่"
+                  isLabelHidden
+                  placeholder="ค้นหารหัส / ชื่ออะไหล่..."
+                  value={partSearch}
+                  onChange={(e) => setPartSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="min-w-[240px] flex-[2]">
+                <Select
+                  label="เลือกอะไหล่"
+                  isLabelHidden
+                  placeholder="เลือกอะไหล่..."
+                  value={selectedPart}
+                  onChange={(e) => setSelectedPart(e.target.value)}
+                >
+                  {partOptions.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </Select>
+              </div>
+              <Button disabled={!selectedPart} onClick={handleAddPart}>
+                <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> เพิ่ม
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
-      <Card padding={0} style={{ overflow: "hidden" }}>
-        <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderBottom: "1px solid var(--color-border)" }}>
-          <HStack hAlign="between" vAlign="center">
-            <HStack gap={2} vAlign="center">
-              <DocumentCheckIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
-              <Text type="body" weight="bold">รายการรับเข้า{poNumber ? ` — ${poNumber}` : ""}</Text>
-            </HStack>
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-              {items.length} รายการ
-            </span>
-          </HStack>
+      <Card className="overflow-hidden">
+        <div className="flex items-center justify-between border-b px-6 py-4" style={{ background: "var(--cmms-bg-muted)", borderColor: "var(--cmms-border)" }}>
+          <div className="flex items-center gap-2">
+            <FileCheck2 size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+            <span className="text-sm font-bold">รายการรับเข้า{poNumber ? ` — ${poNumber}` : ""}</span>
+          </div>
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+            {items.length} รายการ
+          </span>
         </div>
         {items.length === 0 ? (
-          <div style={{ padding: 40, textAlign: "center" }}>
-            <Text type="body" color="secondary">ยังไม่มีรายการ — เพิ่มอะไหล่ที่รับเข้าจากด้านบน</Text>
+          <div className="p-10 text-center">
+            <p className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มีรายการ — เพิ่มอะไหล่ที่รับเข้าจากด้านบน</p>
           </div>
         ) : (
           <>
-            <Table<POItem> data={items} columns={columns} idKey="id" density="balanced" dividers="rows" />
-            <div style={{ padding: "16px 24px", backgroundColor: "var(--color-muted)", borderTop: "1px solid var(--color-border)" }}>
-              <HStack hAlign="between" vAlign="center" gap={3}>
-                <Text type="body" color="secondary">มูลค่า PO รวม</Text>
-                <HStack gap={3} vAlign="center">
-                  <Heading level={3}>{totalValue.toLocaleString("th-TH")} <span style={{ fontSize: 14, color: "var(--color-secondary)" }}>บาท</span></Heading>
-                  <button
-                    type="button"
-                    disabled={submitting || !poNumber.trim() || items.length === 0}
-                    onClick={handleSubmitReceipt}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-                  >
-                    <CheckCircleIcon className="w-4 h-4" />
-                    {submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
-                  </button>
-                </HStack>
-              </HStack>
+            <DataTable
+              columns={columns}
+              data={items}
+              showPagination={false}
+              getRowId={(row) => row.id}
+              emptyTitle=""
+            />
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t px-6 py-4" style={{ background: "var(--cmms-bg-muted)", borderColor: "var(--cmms-border)" }}>
+              <span className="text-sm text-[var(--cmms-text-secondary)]">มูลค่า PO รวม</span>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xl font-bold tracking-tight">
+                  {totalValue.toLocaleString("th-TH")}{" "}
+                  <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">บาท</span>
+                </span>
+                <Button
+                  disabled={submitting || !poNumber.trim() || items.length === 0}
+                  onClick={handleSubmitReceipt}
+                >
+                  <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {submitting ? "กำลังบันทึก..." : "ยืนยันการรับเข้าคลัง"}
+                </Button>
+              </div>
             </div>
           </>
         )}
       </Card>
 
-    </VStack>
+    </div>
   );
 }

@@ -1,65 +1,37 @@
 "use client";
 
-// spare_parts — สร้างตามโครงสร้าง Astryx "detail-page" template
-// (Layout + LayoutHeader + TabList + Items list + Side Panel + mobile dialog)
+// spare_parts — migrate ui kit (ui/Tabs, ui/Dialog, ui/Pagination, Lucide, MiniBar progressbar)
+// business logic ครบเดิม: batch image upload, Sage 300 sync, tab filter, side panel สรุปคลัง
 
-import { useState, useEffect, useMemo } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { useState, useEffect, useMemo, type CSSProperties } from "react";
+import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { useMediaQuery } from "@astryxdesign/core/hooks";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pagination } from "@/components/ui/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Layout,
-  LayoutContent,
-  LayoutPanel,
-  VStack,
-  HStack,
-  StackItem,
-  Card,
-  Section,
-} from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TabList, Tab, TabMenu } from "@astryxdesign/core/TabList";
-import { Divider } from "@astryxdesign/core/Divider";
-import { Link } from "@astryxdesign/core/Link";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import { ProgressBar } from "@astryxdesign/core/ProgressBar";
-import { Collapsible } from "@astryxdesign/core/Collapsible";
-import { Thumbnail } from "@astryxdesign/core/Thumbnail";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { Pagination } from "@astryxdesign/core/Pagination";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Banner } from "@astryxdesign/core/Banner";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import {
-  ArrowLeftIcon,
-  ViewColumnsIcon,
-  CircleStackIcon,
-  PlusIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  CheckCircleIcon,
-  CubeIcon,
-  ExclamationTriangleIcon,
-  BanknotesIcon,
-  PhotoIcon,
-} from "@heroicons/react/24/outline";
-import type { CSSProperties } from "react";
+  ArrowLeft,
+  PanelRight,
+  Database,
+  Plus,
+  Search,
+  SquarePen,
+  Trash2,
+  CheckCircle2,
+  Box,
+  TriangleAlert,
+  Banknote,
+  ImagePlus,
+} from "lucide-react";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
-
-// ─── Styles (จาก template: bleed tab bar + list ไปจนถึงขอบ) ─────────────────
-const tabsRow: CSSProperties = {
-  marginInline: -12,
-  marginBottom: -16,
-  marginTop: 12,
-};
-const itemsList: CSSProperties = {
-  marginInline: -8,
-};
 
 // ─── Types & helpers ─────────────────────────────────────────────────────────
 interface SparePart {
@@ -94,14 +66,6 @@ const stockBadge: Record<string, { label: string; andon: "ok" | "warn" | "down" 
 
 const PAGE_SIZE = 15;
 
-function Bullet() {
-  return (
-    <Text type="supporting" color="secondary">
-      {"・"}
-    </Text>
-  );
-}
-
 function partThumbSrc(item: SparePart): string | undefined {
   const raw = item.imageUrl;
   if (!raw) return undefined;
@@ -109,6 +73,36 @@ function partThumbSrc(item: SparePart): string | undefined {
   return cleaned.startsWith("data:") || cleaned.startsWith("/") || cleaned.startsWith("http")
     ? cleaned
     : "/" + cleaned;
+}
+
+// ── แทน @astryxdesign/core/hooks useMediaQuery ──
+function useIsNarrow(): boolean {
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1024px)");
+    const onChange = () => setIsNarrow(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isNarrow;
+}
+
+// ── MiniBar — inline role="progressbar" แทน Astryx ProgressBar ──
+function MiniBar({ value, max, label }: { value: number; max: number; label: string }) {
+  const pct = Math.min(100, Math.max(0, max > 0 ? (value / max) * 100 : 0));
+  return (
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--cmms-bg-muted)]"
+    >
+      <div className="h-full rounded-full bg-[var(--cmms-primary)]" style={{ width: `${pct}%` }} />
+    </div>
+  );
 }
 
 // ─── Side Panel (desktop) ────────────────────────────────────────────────────
@@ -131,70 +125,67 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
   }, [parts]);
 
   return (
-    <VStack gap={4}>
-      <Collapsible trigger={<Heading level={4}>สรุปคลัง</Heading>}>
-        <MetadataList>
-          <MetadataListItem label="รายการอะไหล่ทั้งหมด">
-            <Text type="body" weight="bold">{kpis.total}</Text>
-          </MetadataListItem>
-          <MetadataListItem label="ใกล้หมด (Min Stock)">
-            <HStack gap={2} vAlign="center">
+    <div className="space-y-4">
+      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
+        <summary className="cursor-pointer font-bold">สรุปคลัง</summary>
+        <dl className="mt-3 space-y-2 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[var(--cmms-text-secondary)]">รายการอะไหล่ทั้งหมด</dt>
+            <dd className="font-bold">{kpis.total}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[var(--cmms-text-secondary)]">ใกล้หมด (Min Stock)</dt>
+            <dd className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-warning)" }}>
               <AndonLamp status="warn" size="sm" />
-              <Text type="body" weight="bold" style={{ color: "var(--cmms-warning)" }}>{kpis.lowCount}</Text>
-            </HStack>
-          </MetadataListItem>
-          <MetadataListItem label="หมดคลัง (Out of Stock)">
-            <HStack gap={2} vAlign="center">
+              {kpis.lowCount}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[var(--cmms-text-secondary)]">หมดคลัง (Out of Stock)</dt>
+            <dd className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-danger)" }}>
               <AndonLamp status="down" size="sm" />
-              <Text type="body" weight="bold" style={{ color: "var(--cmms-danger)" }}>{kpis.outCount}</Text>
-            </HStack>
-          </MetadataListItem>
-          <MetadataListItem label="มูลค่าคลังรวม">
-            <Text type="body" weight="bold">฿{kpis.totalValue.toLocaleString()}</Text>
-          </MetadataListItem>
-        </MetadataList>
-      </Collapsible>
+              {kpis.outCount}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[var(--cmms-text-secondary)]">มูลค่าคลังรวม</dt>
+            <dd className="font-bold">฿{kpis.totalValue.toLocaleString()}</dd>
+          </div>
+        </dl>
+      </details>
 
-      <Divider />
+      <hr style={{ borderColor: "var(--cmms-border)" }} />
 
-      <Collapsible trigger={<Heading level={4}>ประเภทสต็อก (Sage 300)</Heading>}>
-        <VStack gap={3}>
+      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
+        <summary className="cursor-pointer font-bold">ประเภทสต็อก (Sage 300)</summary>
+        <div className="mt-3 space-y-3">
           {categories.slice(0, 6).map(([cat, count]) => (
-            <VStack key={cat} gap={1}>
-              <HStack vAlign="center">
-                <StackItem size="fill">
-                  <Text type="supporting" maxLines={1}>{cat}</Text>
-                </StackItem>
-                <Text type="supporting" color="secondary">{count} รายการ</Text>
-              </HStack>
-              <ProgressBar label={cat} isLabelHidden value={count} max={Math.max(...categories.map(([, c]) => c))} />
-            </VStack>
+            <div key={cat} className="space-y-1">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="truncate text-[var(--cmms-text-secondary)]">{cat}</span>
+                <span className="shrink-0 text-[var(--cmms-text-secondary)]">{count} รายการ</span>
+              </div>
+              <MiniBar value={count} max={Math.max(...categories.map(([, c]) => c))} label={cat} />
+            </div>
           ))}
-        </VStack>
-      </Collapsible>
+        </div>
+      </details>
 
-      <Divider />
+      <hr style={{ borderColor: "var(--cmms-border)" }} />
 
-      <Collapsible trigger={<Heading level={4}>สถานะ Sage 300 Sync</Heading>}>
-        <VStack gap={1}>
-          <HStack gap={2} vAlign="center">
-            <CircleStackIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
-            <Text type="body">เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control)</Text>
-          </HStack>
-          <Text type="supporting" color="secondary">
-            กดปุ่ม "Restock from Sage" ที่หัวหน้ากระดานเพื่อดึงข้อมูลล่าสุด
-          </Text>
-        </VStack>
-      </Collapsible>
-    </VStack>
-  );
-}
-
-function RightPanel({ parts }: { parts: SparePart[] }) {
-  return (
-    <LayoutPanel width={320} padding={4} role="complementary">
-      <PanelContent parts={parts} />
-    </LayoutPanel>
+      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
+        <summary className="cursor-pointer font-bold">สถานะ Sage 300 Sync</summary>
+        <div className="mt-3 space-y-1 text-sm">
+          <p className="flex items-center gap-2">
+            <Database size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+            เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control)
+          </p>
+          <p className="text-[var(--cmms-text-secondary)]">
+            กดปุ่ม &quot;Restock from Sage&quot; ที่หัวหน้ากระดานเพื่อดึงข้อมูลล่าสุด
+          </p>
+        </div>
+      </details>
+    </div>
   );
 }
 
@@ -225,7 +216,6 @@ function ItemsCard({
   onRefresh: () => void;
 }) {
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const isNarrow = useMediaQuery("(max-width: 1024px)");
 
   // ── Batch image upload state ──
   const [selectMode, setSelectMode] = useState(false);
@@ -310,303 +300,274 @@ function ItemsCard({
     }
   };
 
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
   return (
-    <Section>
-      <VStack gap={4}>
-        <HStack vAlign="center" gap={2} wrap="wrap">
-          <StackItem size="fill">
-            <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-                <CubeIcon className="w-4 h-4" />
-              </div>
-              <Heading level={3} className="cmms-kpi-value" style={{ margin: 0 }}>รายการอะไหล่</Heading>
-              <span className="cmms-count-pill">{filtered.length} รายการ</span>
-              {selectMode && (
-                <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: "var(--cmms-text-secondary)" }}>
-                  <input
-                    type="checkbox"
-                    checked={paged.length > 0 && paged.every((p) => selectedIds.has(p.rawId))}
-                    onChange={toggleSelectAll}
-                    style={{ width: 16, height: 16, accentColor: "var(--cmms-primary)", cursor: "pointer" }}
-                  />
-                  {t("action.select_all_page")}
-                </label>
-              )}
-            </HStack>
-          </StackItem>
-          <HStack gap={2}>
+    <Card>
+      <CardContent className="space-y-4 p-5">
+        {/* Header row */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div className="cmms-icon-tile h-8 w-8 rounded-lg">
+              <Box size={16} strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <h3 className="cmms-kpi-value m-0 text-xl font-bold">รายการอะไหล่</h3>
+            <span className="cmms-count-pill">{filtered.length} รายการ</span>
+            {selectMode && (
+              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-[var(--cmms-text-secondary)]">
+                <input
+                  type="checkbox"
+                  checked={paged.length > 0 && paged.every((p) => selectedIds.has(p.rawId))}
+                  onChange={toggleSelectAll}
+                  className="h-4 w-4 accent-[var(--cmms-primary)]"
+                />
+                {t("action.select_all_page")}
+              </label>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
             {selectMode ? (
               <>
-                <button
-                  type="button"
-                  onClick={() => setBatchOpen(true)}
-                  disabled={selectedIds.size === 0 || batchUploading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <PhotoIcon className="w-4 h-4" />
+                <Button onClick={() => setBatchOpen(true)} disabled={selectedIds.size === 0 || batchUploading}>
+                  <ImagePlus size={16} strokeWidth={1.75} aria-hidden="true" />
                   {selectedIds.size > 0 ? `อัปโหลดรูป (${selectedIds.size})` : "เลือกรายการก่อน..."}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectMode(false);
-                    setSelectedIds(new Set());
-                  }}
-                  disabled={batchUploading}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                >
+                </Button>
+                <Button variant="secondary" disabled={batchUploading} onClick={() => { setSelectMode(false); setSelectedIds(new Set()); }}>
                   ยกเลิก
-                </button>
+                </Button>
               </>
             ) : (
-              <button
-                type="button"
-                onClick={() => setSelectMode(true)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                <PhotoIcon className="w-4 h-4" />
+              <Button variant="secondary" onClick={() => setSelectMode(true)}>
+                <ImagePlus size={16} strokeWidth={1.75} aria-hidden="true" />
                 อัปโหลดรูปหลายรายการ
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              onClick={() => onEdit({} as SparePart)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
-              <PlusIcon className="w-4 h-4" />
+            <Button variant="secondary" onClick={() => onEdit({} as SparePart)}>
+              <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
               เพิ่มรายการอะไหล่
-            </button>
-          </HStack>
-        </HStack>
+            </Button>
+          </div>
+        </div>
 
         {/* Search + filter */}
-        <HStack gap={2} wrap="wrap" vAlign="center">
-          <StackItem size="fill">
-            <TextInput
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[220px] flex-1">
+            <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+            <Input
               label="ค้นหา"
               isLabelHidden
               placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ..."
-              startIcon={MagnifyingGlassIcon}
               value={search}
-              onChange={setSearch}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
             />
-          </StackItem>
-          <Selector
-            label="หมวดหมู่สต็อก Sage"
-            isLabelHidden
-            placeholder="ทุกประเภทสต็อก Sage 300"
-            value={sageTypeFilter}
-            onChange={setSageTypeFilter}
-            options={[
-              { value: "", label: "ทุกประเภทสต็อก Sage 300" },
-              { value: "Spare Parts", label: "อะไหล่ซ่อมบำรุง" },
-              { value: "Raw Materials", label: "วัตถุดิบการผลิต" },
-              { value: "Consumables", label: "วัสดุสิ้นเปลือง" },
-              { value: "Tools", label: "เครื่องมือช่าง" },
-            ]}
-          />
-        </HStack>
+          </div>
+          <div className="w-full sm:w-[240px]">
+            <Select label="ประเภทสต็อก Sage" isLabelHidden value={sageTypeFilter} onChange={(e) => setSageTypeFilter(e.target.value)}>
+              <option value="">ทุกประเภทสต็อก Sage 300</option>
+              <option value="Spare Parts">อะไหล่ซ่อมบำรุง</option>
+              <option value="Raw Materials">วัตถุดิบการผลิต</option>
+              <option value="Consumables">วัสดุสิ้นเปลือง</option>
+              <option value="Tools">เครื่องมือช่าง</option>
+            </Select>
+          </div>
+        </div>
 
+        {/* List */}
         {paged.length === 0 ? (
           <EmptyState
+            icon={<Box size={24} strokeWidth={1.75} aria-hidden="true" />}
             title="ไม่มีข้อมูล"
             description="ไม่พบรายการอะไหล่ในคลัง (ลองปรับตัวกรอง)"
-            icon={<CubeIcon className="w-6 h-6" />}
           />
         ) : (
-          <List density="spacious" hasDividers style={itemsList}>
+          <div className="-mx-2 space-y-2">
             {paged.map((item) => {
               const status = getStockStatus(item);
               const badge = stockBadge[status];
               const thumb = partThumbSrc(item);
               return (
-                <ListItem
+                <div
                   key={item.id}
-                  label={item.name}
-                  description={
-                    <VStack gap={0}>
-                      <HStack gap={2} vAlign="center" wrap="wrap">
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{item.code}</span>
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{item.sageItemNo}</span>
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>{item.sageCategory || "Spare Parts"}</span>
-                        <span className={`cmms-status ${badge.andon}`}>
-                          <span className="cmms-status-dot" />
-                          {badge.label}
-                        </span>
-                      </HStack>
-                      <HStack gap={1} vAlign="center">
-                        <Text type="supporting" color="secondary">ที่เก็บ: {item.location || "-"}</Text>
-                        <Bullet />
-                        <Text type="supporting" color="secondary">ราคา: ฿{item.price.toLocaleString()}/{item.unit}</Text>
-                      </HStack>
-                    </VStack>
-                  }
-                  startContent={
-                    <HStack gap={2} vAlign="center">
-                      {selectMode && (
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(item.rawId)}
-                          onChange={() => toggleSelect(item.rawId)}
-                          style={{ width: 18, height: 18, accentColor: "var(--cmms-primary)", cursor: "pointer" }}
-                        />
-                      )}
-                      {thumb ? (
-                        <Thumbnail src={thumb} alt={item.name} label={item.name} />
-                      ) : (
-                        <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && e.target === e.currentTarget) {
+                      selectMode ? toggleSelect(item.rawId) : onEdit(item);
+                    }
+                  }}
+                  className="flex cursor-pointer flex-wrap items-start justify-between gap-3 rounded-[10px] border p-3 transition-colors duration-300 hover:bg-[var(--cmms-bg-wash)]"
+                  style={{ borderColor: "var(--cmms-border)" }}
+                >
+                  {/* start */}
+                  <div className="flex items-center gap-2">
+                    {selectMode && (
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(item.rawId)}
+                        onChange={() => toggleSelect(item.rawId)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-[18px] w-[18px] accent-[var(--cmms-primary)]"
+                        aria-label={`เลือก ${item.name}`}
+                      />
+                    )}
+                    {thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={thumb} alt={item.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]">
+                        <Box size={16} strokeWidth={1.75} aria-hidden="true" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* middle */}
+                  <div className="min-w-[200px] flex-1 space-y-1">
+                    <p className="font-semibold">{item.name}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{item.code}</span>
+                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{item.sageItemNo}</span>
+                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>{item.sageCategory || "Spare Parts"}</span>
+                      <span className={`cmms-status ${badge.andon}`}>
+                        <span className="cmms-status-dot" />
+                        {badge.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--cmms-text-secondary)]">
+                      ที่เก็บ: {item.location || "-"} ・ ราคา: ฿{item.price.toLocaleString()}/{item.unit}
+                    </p>
+                  </div>
+
+                  {/* end */}
+                  <div className="flex flex-col items-end gap-1.5">
+                    <div className="w-[140px] space-y-1">
+                      <div className="flex items-baseline justify-end gap-1">
+                        <span
+                          className="text-base font-bold"
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 6,
-                            backgroundColor: "var(--cmms-bg-muted)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "var(--cmms-text-muted)",
+                            color:
+                              status === "out"
+                                ? "var(--cmms-danger)"
+                                : status === "low"
+                                  ? "var(--cmms-warning)"
+                                  : "var(--cmms-success)",
                           }}
                         >
-                          <CubeIcon className="w-4 h-4" />
-                        </div>
-                      )}
-                    </HStack>
-                  }
-                  endContent={
-                    <VStack gap={1} hAlign="end">
-                      <VStack gap={0} hAlign="end">
-                        <HStack gap={1} vAlign="center" hAlign="end">
-                          <Text
-                            type="body"
-                            weight="bold"
-                            style={{
-                              color:
-                                status === "out"
-                                  ? "var(--cmms-danger)"
-                                  : status === "low"
-                                    ? "var(--cmms-warning)"
-                                    : "var(--cmms-success)",
-                            }}
-                          >
-                            {item.stock}
-                          </Text>
-                          <Text type="supporting" color="secondary">/ {item.maxStock} {item.unit}</Text>
-                        </HStack>
-                        <ProgressBar label={item.name} isLabelHidden value={item.stock} max={item.maxStock} />
-                      </VStack>
-                      <HStack gap={1}>
-                        <button
-                          type="button"
-                          onClick={() => onEdit(item)}
-                          aria-label="แก้ไข"
-                          title="แก้ไข"
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                        >
-                          <PencilSquareIcon className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onDelete(item)}
-                          aria-label="ลบ"
-                          title="ลบ"
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
-                        >
-                          <TrashIcon className="w-3.5 h-3.5" />
-                        </button>
-                      </HStack>
-                    </VStack>
-                  }
-                  onClick={selectMode ? () => toggleSelect(item.rawId) : () => onEdit(item)}
-                />
+                          {item.stock}
+                        </span>
+                        <span className="text-xs text-[var(--cmms-text-secondary)]">/ {item.maxStock} {item.unit}</span>
+                      </div>
+                      <MiniBar value={item.stock} max={item.maxStock} label={`สต็อก ${item.name}`} />
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onEdit(item); }}
+                        aria-label="แก้ไข"
+                        title="แก้ไข"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+                        style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
+                      >
+                        <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onDelete(item); }}
+                        aria-label="ลบ"
+                        title="ลบ"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+                        style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
+                      >
+                        <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               );
             })}
-          </List>
+          </div>
         )}
 
-        {filtered.length > PAGE_SIZE && (
-          <Pagination
-            page={page}
-            onChange={setPage}
-            totalItems={filtered.length}
-            pageSize={PAGE_SIZE}
-            size={isNarrow ? "sm" : "md"}
-          />
-        )}
-      </VStack>
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+          className="border-t-0 px-0 pt-2"
+        />
+      </CardContent>
 
       {/* Batch upload dialog */}
-      <AnimatedDialog open={batchOpen} onClose={() => setBatchOpen(false)}>
-        <DialogHeader title={`อัปโหลดรูปอะไหล่ (${selectedParts.length} รายการ)`} onOpenChange={setBatchOpen} />
-        <VStack gap={4} style={{ padding: 24 }}>
+      <Dialog
+        open={batchOpen}
+        onClose={() => setBatchOpen(false)}
+        title={`อัปโหลดรูปอะไหล่ (${selectedParts.length} รายการ)`}
+      >
+        <div className="space-y-4">
           {batchMsg && (
-            <Banner
-              status={batchMsg.kind === "ok" ? "success" : "error"}
-              title={batchMsg.kind === "ok" ? "สำเร็จ" : "มีข้อผิดพลาด"}
-              description={batchMsg.text}
-              isDismissable={false}
-            />
+            <Alert variant={batchMsg.kind === "ok" ? "success" : "danger"} title={batchMsg.kind === "ok" ? "สำเร็จ" : "มีข้อผิดพลาด"} description={batchMsg.text} />
           )}
-          <Text type="body" size="sm" color="secondary">
+          <p className="text-sm text-[var(--cmms-text-secondary)]">
             เลือกไฟล์รูปให้แต่ละรายการ (png/jpg/gif/webp/svg สูงสุด 6 MB ต่อไฟล์) แล้วกดอัปโหลดทั้งหมด
-          </Text>
-          {selectedParts.map((p) => {
-            const thumb = partThumbSrc(p);
-            const chosen = batchFiles[p.rawId];
-            return (
-              <HStack key={p.rawId} gap={3} vAlign="center" wrap="wrap" style={{ padding: 10, border: "1px solid var(--cmms-border)", borderRadius: 10 }}>
-                {thumb ? (
-                  <Thumbnail src={thumb} alt={p.name} label={p.name} />
-                ) : (
-                  <div style={{ width: 40, height: 40, borderRadius: 6, background: "var(--cmms-bg-muted)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-text-muted)" }}>
-                    <CubeIcon className="w-4 h-4" />
+          </p>
+          <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+            {selectedParts.map((p) => {
+              const thumb = partThumbSrc(p);
+              const chosen = batchFiles[p.rawId];
+              return (
+                <div key={p.rawId} className="flex flex-wrap items-center gap-3 rounded-[10px] border p-2.5" style={{ borderColor: "var(--cmms-border)" }}>
+                  {thumb ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={thumb} alt={p.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                  ) : (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]">
+                      <Box size={16} strokeWidth={1.75} aria-hidden="true" />
+                    </div>
+                  )}
+                  <div className="min-w-[160px] flex-1">
+                    <p className="text-sm font-bold">{p.code}</p>
+                    <p className="text-sm text-[var(--cmms-text-secondary)]">{p.name}</p>
                   </div>
-                )}
-                <VStack gap={0} style={{ flex: 1, minWidth: 160 }}>
-                  <Text type="body" size="sm" weight="bold">{p.code}</Text>
-                  <Text type="body" size="sm" color="secondary">{p.name}</Text>
-                </VStack>
-                <label style={{ cursor: "pointer" }}>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
-                    style={{ display: "none" }}
-                    onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
-                  />
-                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300">
-                    {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
-                  </span>
-                </label>
-                {chosen && (
-                  <>
-                    <img src={chosen.preview} alt="preview" style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover" }} />
-                    <Text type="body" size="sm" color="secondary" style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {chosen.file.name}
-                    </Text>
-                  </>
-                )}
-              </HStack>
-            );
-          })}
-          <HStack hAlign="end" gap={2} style={{ paddingTop: 8, borderTop: "1px solid var(--cmms-border)" }}>
-            <button
-              type="button"
-              disabled={batchUploading}
-              onClick={() => setBatchOpen(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                      className="hidden"
+                      onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
+                    />
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--cmms-primary)] px-3.5 py-2 text-xs font-semibold text-white transition-all duration-300 hover:opacity-90">
+                      {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
+                    </span>
+                  </label>
+                  {chosen && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={chosen.preview} alt="preview" className="h-10 w-10 rounded-md object-cover" />
+                      <span className="max-w-[160px] truncate text-sm text-[var(--cmms-text-secondary)]">
+                        {chosen.file.name}
+                      </span>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-end gap-2 border-t pt-3" style={{ borderColor: "var(--cmms-border)" }}>
+            <Button variant="secondary" disabled={batchUploading} onClick={() => setBatchOpen(false)}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               disabled={batchUploading || selectedParts.filter((p) => batchFiles[p.rawId]).length === 0}
               onClick={uploadBatch}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[var(--cmms-primary)] hover:opacity-90 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {batchUploading ? "กำลังอัปโหลด..." : "อัปโหลดทั้งหมด"}
-            </button>
-          </HStack>
-        </VStack>
-      </AnimatedDialog>
-    </Section>
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </Card>
   );
 }
 
@@ -629,13 +590,13 @@ export default function SparePartsPage() {
   const [syncNotice, setSyncNotice] = useState("");
   const [error, setError] = useState("");
 
-  const isNarrow = useMediaQuery("(max-width: 1024px)");
+  const isNarrow = useIsNarrow();
   const [showSidePanel, setShowSidePanel] = useState(true);
   const [isPanelDialogOpen, setPanelDialogOpen] = useState(false);
 
   // Page Designer → จัดวาง Layout: เรียง/ซ่อน section ตาม config (hero เป็นส่วนหัวคงที่)
   const layout = usePageLayout("/spare_parts", ["hero", "kpi", "content"]);
-  const layoutStyle = (id: string) => ({
+  const layoutStyle = (id: string): CSSProperties => ({
     order: layout.orderOf(id),
     display: layout.isHidden(id) ? ("none" as const) : undefined,
   });
@@ -728,17 +689,12 @@ export default function SparePartsPage() {
     }
   };
 
-  // TabList ควบคุม stockFilter: all → ทุกสถานะ, low/out → เฉพาะสถานะ
+  // Tabs ควบคุม stockFilter: all → ทุกสถานะ, low/out → เฉพาะสถานะ (sub-pages เป็นลิงก์แยก)
   const handleTabChange = (value: string) => {
     if (value === "all" || value === "low" || value === "out") {
       setActiveTab(value);
       setPage(1);
-      return;
     }
-    // TabMenu options → นำทางไปหน้า
-    if (value === "sage_sync") router.push("/spare_parts/sage_sync");
-    if (value === "optimization") router.push("/spare_parts/optimization");
-    if (value === "issue_center") router.push("/spare_parts/issue_center");
   };
 
   // Filter
@@ -779,182 +735,180 @@ export default function SparePartsPage() {
 
   return (
     <>
-      <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
+        {/* Hero */}
         <div style={layoutStyle("hero")}>
           <div className="cmms-page-hero flex flex-col gap-5">
-            <HStack gap={4} vAlign="start" wrap="wrap">
-              <StackItem size="fill">
-                <VStack gap={0}>
-                  <Link href="/dashboard" style={{ color: "rgba(255,255,255,0.75)" }}>
-                    <HStack gap={1} vAlign="center">
-                      <ArrowLeftIcon className="w-4 h-4" />
-                      แดชบอร์ดภาพรวม
-                    </HStack>
-                  </Link>
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-                    <Heading level={2} style={{ color: "#fff", marginTop: 4 }}>
-                      {hero.title}
-                    </Heading>
-                    <HStack gap={2} vAlign="center" wrap="wrap">
-                      <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-                        {kpis.total} รายการในคลัง
-                      </span>
-                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }}>
-                        ซิงค์สดกับ Sage 300
-                      </span>
-                    </HStack>
-                    <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-                      {hero.desc}
-                    </Text>
-                  </VStack>
-                </VStack>
-              </StackItem>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0 flex-1 space-y-1">
+                <a href="/dashboard" className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+                  แดชบอร์ด
+                </a>
+                <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
+                  {hero.title}
+                </h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+                    {kpis.total} รายการในคลัง
+                  </span>
+                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }}>
+                    ซิงค์สดกับ Sage 300
+                  </span>
+                </div>
+                <p style={{ color: "rgba(255,255,255,0.78)" }}>
+                  {hero.desc}
+                </p>
+              </div>
               {!isNarrow && (
-                <HStack gap={3}>
+                <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={handleSageSync}
                     disabled={syncingSage}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300 disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20 disabled:opacity-60"
                   >
-                    <CircleStackIcon className="w-4 h-4" />
+                    <Database size={16} strokeWidth={1.75} aria-hidden="true" />
                     {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
                   </button>
                   <button
                     type="button"
                     onClick={() => router.push("/spare_parts/create")}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
+                    className="cmms-btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
                   >
-                    <PlusIcon className="w-4 h-4" />
+                    <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
                     เพิ่มรายการ
                   </button>
-                </HStack>
+                </div>
               )}
-            </HStack>
+            </div>
 
             {isNarrow && (
-              <HStack gap={2}>
-                <StackItem size="fill">
-                  <VStack hAlign="stretch">
-                    <button
-                      type="button"
-                      onClick={handleSageSync}
-                      disabled={syncingSage}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300 disabled:opacity-60"
-                    >
-                      <CircleStackIcon className="w-4 h-4" />
-                      {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
-                    </button>
-                  </VStack>
-                </StackItem>
-                <StackItem size="fill">
-                  <VStack hAlign="stretch">
-                    <button
-                      type="button"
-                      onClick={() => router.push("/spare_parts/create")}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-                    >
-                      <PlusIcon className="w-4 h-4" />
-                      เพิ่มรายการ
-                    </button>
-                  </VStack>
-                </StackItem>
-              </HStack>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={handleSageSync}
+                  disabled={syncingSage}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20 disabled:opacity-60"
+                >
+                  <Database size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/spare_parts/create")}
+                  className="cmms-btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+                  เพิ่มรายการ
+                </button>
+              </div>
             )}
 
-            <HStack vAlign="center" style={tabsRow} wrap="wrap">
-              <StackItem size="fill">
-                <TabList value={activeTab} onChange={handleTabChange} size="lg">
-                  <Tab value="all" label={`ทั้งหมด (${kpis.total})`} />
-                  <Tab value="low" label={`ใกล้หมด (${kpis.lowCount})`} />
-                  <Tab value="out" label={`หมดคลัง (${kpis.outCount})`} />
-                  <TabMenu
-                    label="เพิ่มเติม"
-                    options={[
-                      { value: "sage_sync", label: "ตั้งค่าการดึง Sage 300" },
-                      { value: "issue_center", label: "ศูนย์เบิก-จ่าย" },
-                      { value: "optimization", label: "AI คำนวณ EOQ และสต็อกค้าง" },
-                    ]}
-                  />
-                </TabList>
-              </StackItem>
+            {/* Tabs + panel toggle */}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                <Tabs value={activeTab} onValueChange={handleTabChange}>
+                  <TabsList>
+                    <TabsTrigger value="all">ทั้งหมด ({kpis.total})</TabsTrigger>
+                    <TabsTrigger value="low">ใกล้หมด ({kpis.lowCount})</TabsTrigger>
+                    <TabsTrigger value="out">หมดคลัง ({kpis.outCount})</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <a href="/spare_parts/sage_sync" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
+                    ตั้งค่าการดึง Sage 300
+                  </a>
+                  <a href="/spare_parts/issue_center" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
+                    ศูนย์เบิก-จ่าย
+                  </a>
+                  <a href="/spare_parts/optimization" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
+                    AI คำนวณ EOQ และสต็อกค้าง
+                  </a>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={togglePanel}
                 aria-label={isPanelShown ? "Hide panel" : "Show panel"}
                 title={isPanelShown ? "Hide panel" : "Show panel"}
-                className="inline-flex items-center justify-center w-10 h-10 rounded-xl text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-300"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white transition-all duration-300 hover:bg-white/20"
               >
-                <ViewColumnsIcon className="w-4 h-4" />
+                <PanelRight size={16} strokeWidth={1.75} aria-hidden="true" />
               </button>
-            </HStack>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 24, alignItems: "start", width: "100%" }}>
-          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+        {/* Content + side panel */}
+        <div className="flex w-full items-start gap-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
             {error && (
-              <Banner status="error" title="Error" description={error} isDismissable={false} />
+              <Alert variant="danger" title="Error" description={error} />
             )}
             {syncNotice && (
-              <Banner status="success" title="Success" description={syncNotice} isDismissable={false} />
+              <Alert variant="success" title="Success" description={syncNotice} />
             )}
 
             {/* KPI row */}
             <div style={layoutStyle("kpi")}>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card padding={4} className="cmms-kpi-card blue">
-                  <HStack gap={3} vAlign="center">
-                    <div className="cmms-icon-tile">
-                      <CubeIcon className="w-5 h-5" />
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <Card className="cmms-kpi-card blue">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="cmms-icon-tile h-12 w-12">
+                      <Box size={20} strokeWidth={1.75} aria-hidden="true" />
                     </div>
-                    <VStack gap={1}>
-                      <Text type="supporting" color="secondary">รายการอะไหล่ทั้งหมด</Text>
-                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.total} <span className="cmms-kpi-unit">รายการ</span></Heading>
-                    </VStack>
-                  </HStack>
+                    <div className="space-y-1">
+                      <p className="text-sm text-[var(--cmms-text-secondary)]">รายการอะไหล่ทั้งหมด</p>
+                      <h2 className="cmms-kpi-value">{kpis.total} <span className="text-sm font-normal">รายการ</span></h2>
+                    </div>
+                  </CardContent>
                 </Card>
-                <Card padding={4} className="cmms-kpi-card amber">
-                  <HStack gap={3} vAlign="center">
-                    <div className="cmms-icon-tile cmms-icon-tile--amber">
-                      <ExclamationTriangleIcon className="w-5 h-5" />
+                <Card className="cmms-kpi-card amber">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="cmms-icon-tile amber h-12 w-12">
+                      <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
                     </div>
-                    <VStack gap={1}>
-                      <Text type="supporting" color="secondary">ใกล้หมด (Min Stock)</Text>
-                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.lowCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
-                    </VStack>
-                  </HStack>
+                    <div className="space-y-1">
+                      <p className="text-sm text-[var(--cmms-text-secondary)]">ใกล้หมด (Min Stock)</p>
+                      <h2 className="cmms-kpi-value">{kpis.lowCount} <span className="text-sm font-normal">รายการ</span></h2>
+                    </div>
+                  </CardContent>
                 </Card>
-                <Card padding={4} className="cmms-kpi-card red">
-                  <HStack gap={3} vAlign="center">
-                    <div className="cmms-icon-tile cmms-icon-tile--red">
-                      <ExclamationTriangleIcon className="w-5 h-5" />
+                <Card className="cmms-kpi-card red">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="cmms-icon-tile red h-12 w-12">
+                      <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
                     </div>
-                    <VStack gap={1}>
-                      <Text type="supporting" color="secondary">หมดคลัง (Out of Stock)</Text>
-                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>{kpis.outCount} <span className="cmms-kpi-unit">รายการ</span></Heading>
-                    </VStack>
-                  </HStack>
+                    <div className="space-y-1">
+                      <p className="text-sm text-[var(--cmms-text-secondary)]">หมดคลัง (Out of Stock)</p>
+                      <h2 className="cmms-kpi-value">{kpis.outCount} <span className="text-sm font-normal">รายการ</span></h2>
+                    </div>
+                  </CardContent>
                 </Card>
-                <Card padding={4} className="cmms-kpi-card green">
-                  <HStack gap={3} vAlign="center">
-                    <div className="cmms-icon-tile cmms-icon-tile--green">
-                      <BanknotesIcon className="w-5 h-5" />
+                <Card className="cmms-kpi-card green">
+                  <CardContent className="flex items-center gap-3 p-4">
+                    <div className="cmms-icon-tile green h-12 w-12">
+                      <Banknote size={20} strokeWidth={1.75} aria-hidden="true" />
                     </div>
-                    <VStack gap={1}>
-                      <Text type="supporting" color="secondary">มูลค่าคลังรวม</Text>
-                      <Heading level={2} className="cmms-kpi-value" style={{ margin: 0 }}>฿{kpis.totalValue.toLocaleString()}</Heading>
-                    </VStack>
-                  </HStack>
+                    <div className="space-y-1">
+                      <p className="text-sm text-[var(--cmms-text-secondary)]">มูลค่าคลังรวม</p>
+                      <h2 className="cmms-kpi-value">฿{kpis.totalValue.toLocaleString()}</h2>
+                    </div>
+                  </CardContent>
                 </Card>
               </div>
             </div>
 
             <div style={layoutStyle("content")}>
               {loading && parts.length === 0 ? (
-                <Card elevation="low" padding={6}>
-                  <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
+                <Card>
+                  <CardContent className="space-y-3 p-6">
+                    {[0, 1, 2].map((i) => (
+                      <Skeleton key={i} className="h-14 w-full rounded-[10px]" />
+                    ))}
+                  </CardContent>
                 </Card>
               ) : (
                 <ItemsCard
@@ -975,75 +929,60 @@ export default function SparePartsPage() {
           </div>
 
           {!isNarrow && showSidePanel && (
-            <div style={{ width: 320, flexShrink: 0 }}>
-              <RightPanel parts={parts} />
-            </div>
+            <aside className="w-[320px] shrink-0" aria-label="สรุปคลังอะไหล่">
+              <PanelContent parts={parts} />
+            </aside>
           )}
         </div>
       </div>
 
       {/* Mobile: side panel เป็น fullscreen dialog */}
-      <AnimatedDialog
-        variant="fullscreen"
+      <Dialog
         open={isNarrow && isPanelDialogOpen}
         onClose={() => setPanelDialogOpen(false)}
+        title="สรุปคลังอะไหล่"
       >
-        <Layout
-          header={
-            <DialogHeader title="สรุปคลังอะไหล่" onOpenChange={setPanelDialogOpen} />
-          }
-          content={
-            <LayoutContent padding={4}>
-              <PanelContent parts={parts} />
-            </LayoutContent>
-          }
-        />
-      </AnimatedDialog>
+        <PanelContent parts={parts} />
+      </Dialog>
 
       {/* Delete Dialog */}
-      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-          <DialogHeader title="ยืนยันการลบรายการอะไหล่" onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)} />
-          {deleteTarget && (
-          <VStack gap={4} style={{ padding: 24 }}>
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="ยืนยันการลบรายการอะไหล่"
+      >
+        {deleteTarget && (
+          <div className="space-y-4">
             {deleteSuccess ? (
-              <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
-                <CheckCircleIcon className="w-5 h-5" />
-                <Text type="body" weight="bold">ลบรายการอะไหล่สำเร็จแล้ว</Text>
-              </HStack>
+              <p className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-success)" }}>
+                <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
+                ลบรายการอะไหล่สำเร็จแล้ว
+              </p>
             ) : (
               <>
-                <Text type="body">
+                <p>
                   คุณแน่ใจหรือไม่ว่าต้องการลบรายการอะไหล่{" "}
                   <strong>
-                    "{deleteTarget.code} ({deleteTarget.sageItemNo}) - {deleteTarget.name}"
+                    &quot;{deleteTarget.code} ({deleteTarget.sageItemNo}) - {deleteTarget.name}&quot;
                   </strong>{" "}
                   ออกจากระบบ?
-                </Text>
-                <Text type="body" size="sm" color="secondary">
+                </p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
                   การลบนี้จะทำการลบข้อมูลจาก MySQL Database และไม่สามารถย้อนคืนได้
-                </Text>
-                <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(null)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                  >
+                </p>
+                <div className="mt-3 flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
                     ยกเลิก
-                  </button>
-                  <button
-                    type="button"
-                    disabled={deleting}
-                    onClick={handleDelete}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
-                  >
+                  </Button>
+                  <Button variant="danger" disabled={deleting} onClick={handleDelete}>
                     {deleting ? "กำลังลบ..." : "ลบรายการ"}
-                  </button>
-                </HStack>
+                  </Button>
+                </div>
               </>
             )}
-          </VStack>
-          )}
-        </AnimatedDialog>
+          </div>
+        )}
+      </Dialog>
 
     </>
   );

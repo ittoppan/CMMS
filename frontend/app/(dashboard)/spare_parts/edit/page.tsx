@@ -2,14 +2,17 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { PencilSquareIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  Box,
+  SquarePen,
+} from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
@@ -123,185 +126,157 @@ function EditSparePartContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PART REGISTER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.parts_edit_title")}</Heading>
+    <div className="space-y-6">
+      {/* Hero */}
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PART REGISTER · CMMS-TOPPAN</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{t("form.parts_edit_title")}</h2>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <PencilSquareIcon className="w-3.5 h-3.5" /> {form.code || "Spare Part"}
+              <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" /> {form.code || "Spare Part"}
             </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.78)" }}>
             {t("hero.parts_edit_desc")}
-          </Text>
-        </VStack>
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => router.push("/spare_parts")}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
         >
-          <ArrowLeftIcon className="w-4 h-4" />
+          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
           {t("action.back")}
         </button>
       </div>
 
-      <Card padding={6}>
-        {loading ? (
-          <Text type="body" color="secondary">{t("common.loading_parts")}</Text>
-        ) : (
-          <VStack gap={5}>
-            {errorMessage && (
-              <div style={{
-                padding: '12px 16px', borderRadius: 8,
-                background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)',
-                fontSize: '0.85rem', fontWeight: 600,
-              }}>
-                {errorMessage}
-              </div>
-            )}
+      <Card>
+        <CardContent className="space-y-5 p-6">
+          {loading ? (
+            <div className="space-y-4" aria-busy="true">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-2/3" />
+            </div>
+          ) : (
+            <>
+              {errorMessage && (
+                <Alert variant="danger" title="Error" description={errorMessage} />
+              )}
 
-            <FormLayout>
-              <Field label={t("form.part_code_req")} inputID="code" isRequired>
-                <TextInput
-                  label={t("form.part_code")}
-                  isLabelHidden
-                  value={form.code}
-                  onChange={(v: string) => update("code", v)}
-                />
-              </Field>
+              {!errorMessage || (form.code && form.name) ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label={t("form.part_code_req")}
+                    value={form.code}
+                    onChange={(e) => update("code", e.target.value)}
+                  />
 
-              <Field label={t("form.part_name_req")} inputID="name" isRequired>
-                <TextInput
-                  label={t("form.part_name")}
-                  isLabelHidden
-                  value={form.name}
-                  onChange={(v: string) => update("name", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.part_name_req")}
+                    value={form.name}
+                    onChange={(e) => update("name", e.target.value)}
+                  />
 
-              <Field label={t("field.category")} inputID="category">
-                <Selector
-                  label={t("field.category")}
-                  isLabelHidden
-                  value={form.category}
-                  onChange={(v: string) => update("category", v)}
-                  options={[
-                    { value: "ทั่วไป", label: t("form.general") },
-                    { value: "ลูกปืน (Bearings)", label: t("form.cat_bearings") },
-                    { value: "ซีลและโอริง (Seals)", label: t("form.cat_seals_orings") },
-                    { value: "สายพาน (Belts)", label: t("form.cat_belts") },
-                    { value: "ฟิลเตอร์ (Filters)", label: t("form.cat_filters") },
-                    { value: "ไฟฟ้า (Electrical)", label: t("form.cat_electrical") },
-                    { value: "ไฮดรอลิก (Hydraulics)", label: t("form.cat_hydraulics") },
-                  ]}
-                />
-              </Field>
+                  <Select
+                    label={t("field.category")}
+                    value={form.category}
+                    onChange={(e) => update("category", e.target.value)}
+                  >
+                    <option value="ทั่วไป">{t("form.general")}</option>
+                    <option value="ลูกปืน (Bearings)">{t("form.cat_bearings")}</option>
+                    <option value="ซีลและโอริง (Seals)">{t("form.cat_seals_orings")}</option>
+                    <option value="สายพาน (Belts)">{t("form.cat_belts")}</option>
+                    <option value="ฟิลเตอร์ (Filters)">{t("form.cat_filters")}</option>
+                    <option value="ไฟฟ้า (Electrical)">{t("form.cat_electrical")}</option>
+                    <option value="ไฮดรอลิก (Hydraulics)">{t("form.cat_hydraulics")}</option>
+                  </Select>
 
-              <Field label={t("field.unit")} inputID="unit">
-                <TextInput
-                  label={t("field.unit")}
-                  isLabelHidden
-                  value={form.unit}
-                  onChange={(v: string) => update("unit", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("field.unit")}
+                    value={form.unit}
+                    onChange={(e) => update("unit", e.target.value)}
+                  />
 
-              <Field label={t("form.current_stock_qty")} inputID="stock_qty">
-                <TextInput
-                  label={t("form.current_stock")}
-                  isLabelHidden
-                  value={form.stock_qty}
-                  onChange={(v: string) => update("stock_qty", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.current_stock_qty")}
+                    inputMode="decimal"
+                    value={form.stock_qty}
+                    onChange={(e) => update("stock_qty", e.target.value)}
+                  />
 
-              <Field label={t("form.reorder_point")} inputID="min_stock">
-                <TextInput
-                  label={t("form.reorder_point")}
-                  isLabelHidden
-                  value={form.min_stock}
-                  onChange={(v: string) => update("min_stock", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.reorder_point")}
+                    inputMode="decimal"
+                    value={form.min_stock}
+                    onChange={(e) => update("min_stock", e.target.value)}
+                  />
 
-              <Field label={t("form.max_stock")} inputID="max_stock">
-                <TextInput
-                  label={t("form.max_stock")}
-                  isLabelHidden
-                  value={form.max_stock}
-                  onChange={(v: string) => update("max_stock", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.max_stock")}
+                    inputMode="decimal"
+                    value={form.max_stock}
+                    onChange={(e) => update("max_stock", e.target.value)}
+                  />
 
-              <Field label={t("field.storage_location")} inputID="location">
-                <TextInput
-                  label={t("field.storage")}
-                  isLabelHidden
-                  value={form.location}
-                  onChange={(v: string) => update("location", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("field.storage_location")}
+                    value={form.location}
+                    onChange={(e) => update("location", e.target.value)}
+                  />
 
-              <Field label={t("form.unit_price_baht")} inputID="unit_price">
-                <TextInput
-                  label={t("field.unit_price")}
-                  isLabelHidden
-                  value={form.unit_price}
-                  onChange={(v: string) => update("unit_price", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.unit_price_baht")}
+                    inputMode="decimal"
+                    value={form.unit_price}
+                    onChange={(e) => update("unit_price", e.target.value)}
+                  />
 
-              <Field label={t("form.additional_details")} inputID="description">
-                <TextInput
-                  label={t("field.description")}
-                  isLabelHidden
-                  value={form.description}
-                  onChange={(v: string) => update("description", v)}
-                />
-              </Field>
+                  <Input
+                    label={t("form.additional_details")}
+                    value={form.description}
+                    onChange={(e) => update("description", e.target.value)}
+                  />
 
-              <Field label={t("form.part_image_upload")} inputID="image_url">
-                <ImageUploadField
-                  value={form.image_url || null}
-                  onChange={(url) => update("image_url", url || "")}
-                  folder="spares"
-                  label={t("form.part_image")}
-                />
-              </Field>
-            </FormLayout>
-          </VStack>
-        )}
+                  <div className="sm:col-span-2">
+                    <ImageUploadField
+                      value={form.image_url || null}
+                      onChange={(url) => update("image_url", url || "")}
+                      folder="spares"
+                      label={t("form.part_image_upload")}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </>
+          )}
+        </CardContent>
       </Card>
 
-      {!loading && (
-        <HStack hAlign="end" gap={3}>
-          <button
-            type="button"
-            onClick={() => (window.location.href = "/spare_parts")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--cmms-text-secondary)] bg-[var(--cmms-bg-muted)] hover:bg-[var(--cmms-bg-wash)] border border-[var(--cmms-border)] transition-all duration-300"
-          >
+      {!loading && !submitted && (
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" onClick={() => (window.location.href = "/spare_parts")}>
             {t("action.cancel")}
-          </button>
-          <button
-            type="button"
-            disabled={submitting}
-            onClick={handleSubmit}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <PencilSquareIcon className="w-4 h-4" />
+          </Button>
+          <Button disabled={submitting} onClick={handleSubmit}>
+            <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
             {submitting ? t("common.saving") : t("action.save_edit")}
-          </button>
-        </HStack>
+          </Button>
+        </div>
       )}
-    </VStack>
+    </div>
   );
 }
 
 export default function EditSparePartPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">{t("common.loading")}</Text></div>}>
+    <Suspense fallback={
+      <div className="space-y-4 p-10" aria-busy="true">
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-40 w-full" />
+      </div>
+    }>
       <EditSparePartContent />
     </Suspense>
   );
