@@ -97,6 +97,7 @@ export default function FormDesignerPage() {
         if (cancelled || !builderRef.current) return;
         $(builderRef.current).formBuilder({
           formData: "",
+          i18n: { location: "/assets/lang/" },
           controlOrder: [
             "header", "paragraph", "text", "textarea", "number", "date",
             "select", "checkbox-group", "radio-group", "autocomplete", "file", "hidden",

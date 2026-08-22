@@ -75,7 +75,7 @@ export default function AndonBoardPage() {
   const [refreshSec, setRefreshSec] = useState(30);
   const [lastSync, setLastSync] = useState<string>("—");
   const [countdown, setCountdown] = useState(30);
-  const [now, setNow] = useState(new Date());
+  const [now, setNow] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -233,7 +233,7 @@ export default function AndonBoardPage() {
               letterSpacing: "0.04em",
             }}
           >
-            {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })}
+            {now ? now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : "--:--:--"}
           </div>
           <div
             style={{

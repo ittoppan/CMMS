@@ -49,6 +49,8 @@ const isDark = () =>
   typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 let lastApplied: { primary: string; gradient: string; sidebar: string; body: string } | null = null;
+// เก็บ getter ของ settings ล่าสุดไว้ re-apply ตอนสลับ light/dark (design vars ผูกกับโหมด)
+let lastSettingsGet: ((k: string) => string) | null = null;
 
 const applyTheme = (theme: { primary: string; gradient: string; sidebar: string; body: string }) => {
   lastApplied = theme;
@@ -74,6 +76,9 @@ const applyTheme = (theme: { primary: string; gradient: string; sidebar: string;
     root.style.removeProperty("--cmms-bg-sidebar");
     root.style.removeProperty("--color-background-surface");
     root.style.removeProperty("--color-background-card");
+    // ค่าที่ design_body_bg เคย pin ไว้ — ต้องลบให้ .dark tokens ชนะ
+    root.style.removeProperty("--cmms-bg-page");
+    root.style.removeProperty("--cmms-bg-wash");
   }
   // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
   root.style.setProperty("--cmms-bg-sidebar-active", theme.primary);
@@ -122,9 +127,14 @@ const DESIGN_VAR_MAP: Record<string, string[]> = {
   design_font_size: ["--cmms-font-size-base"],
 };
 
+// keys ที่เป็น "สีพื้นหลังโหมดสว่าง" — ใน dark mode ต้องข้าม เพื่อให้ .dark tokens ชนะ
+const LIGHT_ONLY_DESIGN_KEYS = new Set(["design_body_bg", "design_sidebar_bg"]);
+
 const applyDesign = (get: (k: string) => string) => {
   const root = document.documentElement;
+  const dark = isDark();
   for (const [key, vars] of Object.entries(DESIGN_VAR_MAP)) {
+    if (dark && LIGHT_ONLY_DESIGN_KEYS.has(key)) continue;
     const v = get(key);
     if (!v) continue;
     for (const vn of vars) root.style.setProperty(vn, v);
@@ -166,9 +176,11 @@ export default function ThemeProvider() {
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
 
-  // สลับ light/dark — re-apply ธีมล่าสุด (พื้นหลัง light-only จะถูกข้ามใน dark)
+  // สลับ light/dark — re-apply ธีมล่าสุด + design vars ตามโหมด (พื้นหลัง light-only จะถูกข้าม/ลบใน dark)
   useEffect(() => {
+    if (!resolvedTheme) return;
     if (lastApplied) applyTheme(lastApplied);
+    if (lastSettingsGet) applyDesign(lastSettingsGet);
   }, [resolvedTheme]);
 
   // Hero เฉพาะหน้า — รีแท็กทุกครั้งที่เปลี่ยนเส้นทาง (ไคลเอนต์ nav ไม่ต้องโหลดใหม่)
@@ -202,16 +214,15 @@ export default function ThemeProvider() {
           ? `linear-gradient(135deg, ${primary}, ${secondary})`
           : base.gradient;
         if (!cancelled) {
+          lastSettingsGet = get;
           applyTheme({ ...base, primary, gradient });
-          // sidebar/body ใช้ของ preset เสมอ (ผู้ใช้เลือกผ่าน swatch)
-          const root = document.documentElement;
-          root.style.setProperty("--cmms-bg-sidebar", base.sidebar);
           // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
+          const root = document.documentElement;
           root.style.setProperty("--cmms-bg-sidebar-active", primary);
           root.style.setProperty("--cmms-gradient-primary", gradient);
           root.style.setProperty("--cmms-primary", primary);
           root.style.setProperty("--cmms-primary-hover", primary);
-          // Page Designer: design_* keys ชนะ preset (ถ้ามีค่า)
+          // Page Designer: design_* keys ชนะ preset (ถ้ามีค่า) — dark-aware ตาม applyDesign
           applyDesign(get);
           // สวิตช์ปิด animation (ผู้ดูแล)
           applyAnimSetting(get);
