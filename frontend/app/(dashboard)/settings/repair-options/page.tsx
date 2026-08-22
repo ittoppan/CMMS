@@ -318,7 +318,7 @@ export default function RepairOptionsPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
 
       {saveMessage && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>

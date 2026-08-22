@@ -910,14 +910,14 @@ export default function PageDesignerPage() {
               <VStack gap={0}>
                 {isNarrow && (
                   <Toolbar
-                    label={`Back to Page Designer — ${section.label}`}
+                    label={`กลับไปเมนูหมวด — ${section.label}`}
                     gap={2}
                     startContent={
                       <>
                         <button
                           type="button"
                           onClick={() => setMobileView("nav")}
-                          aria-label="Back to Page Designer"
+                          aria-label="กลับไปเมนูหมวด"
                           className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
                         >
                           <ArrowLeftIcon className="w-4 h-4" />

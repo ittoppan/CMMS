@@ -2,17 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import ThemeProvider from '../../components/ThemeProvider';
-import { VStack, HStack } from '@astryxdesign/core/Layout';
-import { Text } from '@astryxdesign/core/Text';
-import { TextInput } from '@astryxdesign/core/TextInput';
-import { Button } from '@astryxdesign/core/Button';
-import { Divider } from '@astryxdesign/core/Divider';
-import {
-  WrenchScrewdriverIcon,
-  ChartBarIcon,
-  ClockIcon,
-  CubeIcon,
-} from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Wrench, ChartBar, Clock, Box } from 'lucide-react';
 
 const LINE_SVG = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -21,9 +13,9 @@ const LINE_SVG = (
 );
 
 const FEATURES = [
-  { icon: ClockIcon, text: "ติดตามงานซ่อมแบบ Real-time" },
-  { icon: ChartBarIcon, text: "วิเคราะห์ข้อมูล MTBF/MTTR" },
-  { icon: CubeIcon, text: "บริหารคลังอะไหล่อัจฉริยะ" },
+  { icon: Clock, text: 'ติดตามงานซ่อมแบบ Real-time' },
+  { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF/MTTR' },
+  { icon: Box, text: 'บริหารคลังอะไหล่อัจฉริยะ' },
 ];
 
 export default function LoginPage() {
@@ -36,27 +28,24 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loginFailed, setLoginFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // ถ้ามาจากการกด LINE Login แล้วยังไม่ผูกบัญชี (bind_line=1) → หลัง login สำเร็จ จะพาไปผูก LINE อัตโนมัติ
   const bindLine =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("bind_line") === "1"
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('bind_line') === '1'
       : false;
 
-  // กลับไปหน้าปลายทางหลังล็อกอิน (เช่น /repair/request เมื่อเข้าเว็บแล้วเลือก User/Password)
   const nextPath =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("next") || ""
-      : "";
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('next') || ''
+      : '';
 
-  // แสดง error ที่ LINE callback ส่งกลับมา (เช่น LINE Login 400 / ไม่ผูกบัญชี)
   useEffect(() => {
-    const e = new URLSearchParams(window.location.search).get("error");
+    const e = new URLSearchParams(window.location.search).get('error');
     if (e) {
       setLoginFailed(true);
       setErrorMessage(e);
@@ -66,33 +55,32 @@ function LoginContent() {
   const handleLogin = async () => {
     if (!username || !password) {
       setLoginFailed(true);
-      setErrorMessage("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
+      setErrorMessage('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
       return;
     }
     setIsLoading(true);
     setLoginFailed(false);
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
       if (data.success) {
-        // บัญชีที่ตั้งรหัสเริ่มต้น → ต้องเปลี่ยนรหัสก่อนใช้งาน
         if (data.must_change_password) {
-          window.location.href = "/change-password";
+          window.location.href = '/change-password';
           return;
         }
-        window.location.href = bindLine ? "/line_login.php" : nextPath ? nextPath : "/";
+        window.location.href = bindLine ? '/line_login.php' : nextPath ? nextPath : '/';
       } else {
         setLoginFailed(true);
-        setErrorMessage(data.error || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        setErrorMessage(data.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
       }
     } catch {
       setLoginFailed(true);
-      setErrorMessage("ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง");
+      setErrorMessage('ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsLoading(false);
     }
@@ -104,27 +92,24 @@ function LoginContent() {
       <div
         className="hidden lg:flex flex-col justify-end overflow-hidden"
         style={{
-          position: "relative",
+          position: 'relative',
           padding: 48,
-          background: "linear-gradient(135deg, var(--tp-navy-dark) 0%, var(--cmms-bg-sidebar) 55%, var(--cmms-primary) 100%)",
+          background: 'linear-gradient(135deg, var(--tp-navy-dark) 0%, var(--cmms-bg-sidebar) 55%, var(--cmms-primary) 100%)',
         }}
       >
-        {/* QR-code grid — ลายตารางแบบ QR ที่ช่างสแกนบนเครื่องจักร */}
         <div style={{
-          position: "absolute", inset: 0, zIndex: 0, opacity: 0.32,
+          position: 'absolute', inset: 0, zIndex: 0, opacity: 0.32,
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)",
-          backgroundSize: "46px 46px",
+            'linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)',
+          backgroundSize: '46px 46px',
         }} />
-        {/* QR finder marker (มุมขวาบน) */}
-        <div style={{ position: "absolute", top: 36, right: 36, width: 84, height: 84, zIndex: 0, opacity: 0.5 }}>
-          <div style={{ position: "absolute", inset: 0, border: "1px solid rgba(255,255,255,0.4)", borderRadius: 10 }} />
-          <div style={{ position: "absolute", top: 8, left: 8, width: 26, height: 26, border: "1px solid rgba(255,255,255,0.4)", borderRadius: 5 }} />
-          <div style={{ position: "absolute", top: 16, left: 16, width: 10, height: 10, background: "rgba(255,255,255,0.75)", borderRadius: 2 }} />
+        <div style={{ position: 'absolute', top: 36, right: 36, width: 84, height: 84, zIndex: 0, opacity: 0.5 }}>
+          <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(255,255,255,0.4)', borderRadius: 10 }} />
+          <div style={{ position: 'absolute', top: 8, left: 8, width: 26, height: 26, border: '1px solid rgba(255,255,255,0.4)', borderRadius: 5 }} />
+          <div style={{ position: 'absolute', top: 16, left: 16, width: 10, height: 10, background: 'rgba(255,255,255,0.75)', borderRadius: 2 }} />
         </div>
 
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {/* Feature badges */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40 }}>
             {FEATURES.map((f, i) => (
               <div key={i} style={{
@@ -135,7 +120,7 @@ function LoginContent() {
                 border: '1px solid rgba(255,255,255,0.1)',
                 width: 'fit-content',
               }}>
-                <f.icon style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.8)' }} />
+                <f.icon style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.8)' }} strokeWidth={1.75} />
                 <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem', fontWeight: 500 }}>
                   {f.text}
                 </span>
@@ -155,7 +140,6 @@ function LoginContent() {
             CMMS-TOPPAN — Computerized Maintenance Management System สำหรับ TOPPAN Flexible Packaging (Thailand)
           </p>
 
-          {/* สถานะระบบ — ไฟ Andon */}
           <div style={{ marginTop: 32, display: 'flex', gap: 22, flexWrap: 'wrap' }}>
             {[
               { label: 'ระบบ', color: 'var(--cmms-success)' },
@@ -174,94 +158,84 @@ function LoginContent() {
       {/* Right Login Form */}
       <div
         className="flex flex-col justify-center"
-        style={{ padding: "48px 56px", maxWidth: 480, margin: "0 auto", width: "100%" }}
+        style={{ padding: '48px 56px', maxWidth: 480, margin: '0 auto', width: '100%' }}
       >
-        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
           <img src="/logo.png" alt="TOPPAN" style={{ height: 36, objectFit: 'contain' }} />
-          <Text type="body" weight="bold" as="span" style={{ fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
+          <span style={{ fontSize: '1.1rem', letterSpacing: '-0.02em', fontWeight: 'bold', color: 'var(--cmms-text-primary)' }}>
             CMMS-TOPPAN
-          </Text>
+          </span>
         </div>
 
-        <VStack gap={5} hAlign="stretch">
-          <VStack gap={1}>
-            <Text type="display-1" as="h2" style={{ fontSize: '1.5rem' }}>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1">
+            <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--cmms-text-primary)' }}>
               เข้าสู่ระบบ
-            </Text>
-            <Text type="body" color="secondary">
+            </h2>
+            <p style={{ color: 'var(--cmms-text-secondary)', margin: 0, fontSize: '0.875rem' }}>
               กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน
-            </Text>
-          </VStack>
+            </p>
+          </div>
 
-          <VStack gap={3}>
-            <TextInput
-              label="ชื่อผู้ใช้ (Username)"
+          <div className="flex flex-col gap-3">
+            <Input
+              label="ชื่อผู้ใช้"
               placeholder="กรอกชื่อผู้ใช้"
               value={username}
-              onChange={(v: string) => {
-                setUsername(v);
+              error={loginFailed ? errorMessage : undefined}
+              onChange={(e) => {
+                setUsername(e.target.value);
                 setLoginFailed(false);
               }}
-              size="lg"
-              status={
-                loginFailed
-                  ? { type: "error", message: errorMessage }
-                  : undefined
-              }
-              onKeyDown={(e: React.KeyboardEvent) => {
+              className="h-11"
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') handleLogin();
               }}
             />
-            <TextInput
-              label="รหัสผ่าน (Password)"
+            <Input
+              label="รหัสผ่าน"
               placeholder="กรอกรหัสผ่าน"
               type="password"
               value={password}
-              onChange={(v: string) => {
-                setPassword(v);
+              error={loginFailed ? errorMessage : undefined}
+              onChange={(e) => {
+                setPassword(e.target.value);
                 setLoginFailed(false);
               }}
-              size="lg"
-              status={
-                loginFailed
-                  ? { type: "error", message: errorMessage }
-                  : undefined
-              }
-              onKeyDown={(e: React.KeyboardEvent) => {
+              className="h-11"
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') handleLogin();
               }}
             />
-          </VStack>
+          </div>
 
           <Button
-            label="เข้าสู่ระบบ"
-            variant="primary"
-            size="lg"
-            isLoading={isLoading}
+            className="w-full h-11"
+            disabled={isLoading}
             onClick={handleLogin}
-          />
+          >
+            {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+          </Button>
 
-          <Divider label="หรือ" />
+          <div className="flex items-center gap-2 my-1">
+            <div className="flex-1 h-px bg-[var(--cmms-border)]" />
+            <span className="text-xs text-[var(--cmms-text-muted)]">หรือ</span>
+            <div className="flex-1 h-px bg-[var(--cmms-border)]" />
+          </div>
 
           <Button
-            label="เข้าสู่ระบบด้วย LINE"
             variant="secondary"
-            size="lg"
-            icon={LINE_SVG}
-            onClick={() => { window.location.href = "/line_login.php"; }}
-            style={{
-              backgroundColor: "var(--cmms-line-green)",
-              color: "#fff",
-              border: "none",
-            }}
-          />
-          <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
+            className="w-full h-11"
+            onClick={() => { window.location.href = '/line_login.php'; }}
+            style={{ backgroundColor: 'var(--cmms-line-green)', color: '#fff', border: 'none' }}
+          >
+            {LINE_SVG} เข้าสู่ระบบด้วย LINE
+          </Button>
+          <p style={{ textAlign: 'center', color: 'var(--cmms-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
             ครั้งแรก: ล็อกอินด้วยชื่อผู้ใช้/รหัสผ่านด้านบนก่อน แล้วกดปุ่ม LINE อีกครั้ง
             ระบบจะผูกบัญชีให้อัตโนมัติ — ครั้งต่อไปล็อกอินผ่าน LINE ได้ทันที (รับการแจ้งเตือน LINE)
-          </Text>
-
-        </VStack>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -428,7 +428,7 @@ const SUB_PAGES = [
   { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown ในฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
-  { href: "/settings/design", label: "ปรับแต่งหน้าตาระบบ (Page Designer)", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
+  { href: "/settings/design", label: "ปรับแต่งหน้าตาของระบบ", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
 ];
 
 export default function SettingsPage() {

@@ -2,17 +2,10 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { Spinner } from "@astryxdesign/core/Spinner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
-/**
- * หน้า QR Sheet — ปริ้นติกเกอร์ QR ของเครื่องจักรทั้งหมด
- * สแกนแล้วเปิดฟอร์มแจ้งซ่อมพร้อมเลือกเครื่องนั้นอัตโนมัติ
- * URL: /qr-sheet
- */
 type Asset = {
   id: number;
   code: string;
@@ -37,7 +30,7 @@ export default function QrSheetPage() {
       .then((r) => r.json())
       .then((rows: Asset[]) => {
         const list = (Array.isArray(rows) ? rows : [])
-          .filter((a) => /^A-[A-Z]{2}-\d{2}$/.test(a.code))
+          .filter((a) => /^A-[A-Z]{2}-\\d{2}$/.test(a.code))
           .sort((a, b) => a.code.localeCompare(b.code));
         setMachines(list);
       })
@@ -84,49 +77,58 @@ export default function QrSheetPage() {
         }
       `}</style>
 
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}
-        style={{ borderBottom: "3px solid var(--cmms-primary)", paddingBottom: 12, marginBottom: 20 }}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">QR SHEET · CMMS-TOPPAN</Text>
-          <Heading level={2} style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</Heading>
-          <Text type="supporting" color="secondary" size="sm">
+      <div className="flex items-center justify-between gap-4 wrap">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-[var(--cmms-text-secondary)] cmms-eyebrow">QR SHEET · CMMS-TOPPAN</p>
+          <h2 style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</h2>
+          <p className="text-sm text-[var(--cmms-text-secondary)] supporting">
             สแกน QR แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
             {" · "}{machines.length} เครื่อง{machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}
-          </Text>
-        </VStack>
-        <div className="no-print">
-          <Button label="ปริ้นติกเกอร์" variant="primary" size="lg" isDisabled={generating} onClick={() => window.print()} />
+          </p>
         </div>
-      </HStack>
+        <div className="no-print">
+          <Button
+            className="w-full"
+            disabled={generating}
+            onClick={() => window.print()}
+          >
+            ปริ้นติกเกอร์
+          </Button>
+        </div>
+      </div>
 
       {error && (
-        <Card padding={4} className="qr-sheet-note" style={{ background: "var(--cmms-danger-light)", borderLeftColor: "var(--cmms-danger)", marginBottom: 16 }}>
-          <Text type="body" className="text-red-700">{error}</Text>
+        <Card className="w-full qr-sheet-note" style={{ background: "var(--cmms-danger-light)", borderLeftColor: "var(--cmms-danger)", marginBottom: 16 }}>
+          <CardContent className="p-4">
+            <p className="text-red-700">{error}</p>
+          </CardContent>
         </Card>
       )}
 
-      <Card padding={4} className="qr-sheet-note" style={{ background: "var(--cmms-bg-muted)", marginBottom: 16 }}>
-        <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>
-          <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
-          — พนักงานสแกน QR ด้วย LINE/กล้อง จะได้หน้าเลือก: <b>แจ้งซ่อมด่วน</b> หรือ <b>ทำเช็คชีท PM</b> พร้อมเครื่องถูกต้องทันที
-        </Text>
+      <Card className="w-full qr-sheet-note" style={{ background: "var(--cmms-bg-muted)", marginBottom: 16 }}>
+        <CardContent className="p-4">
+          <p className="text-sm text-[var(--cmms-text-secondary)]">
+            <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
+            — พนักงานสแกน QR ด้วย LINE/กล้อง จะได้หน้าเลือก: <b>แจ้งซ่อมด่วน</b> หรือ <b>ทำเช็คชีท PM</b> พร้อมเครื่องถูกต้องทันที
+          </p>
+        </CardContent>
       </Card>
 
       <div className="qr-sheet-grid">
         {machines.map((m) => (
-          <Card key={m.code} className="qr-sheet-card" padding={3}>
-            <VStack gap={2} hAlign="center">
+          <Card key={m.code} className="qr-sheet-card">
+            <CardContent className="flex flex-col items-center gap-2 p-3">
               {qrMap[m.code] ? (
                 <img src={qrMap[m.code]} alt={`QR ${m.code}`} />
               ) : (
-                <VStack gap={2} hAlign="center" style={{ height: 120, justifyContent: "center" }}>
-                  {generating ? <Spinner /> : <Text type="body" size="sm" color="secondary">ไม่พบ QR</Text>}
-                </VStack>
+                <div className="flex flex-col items-center h-[120px] justify-center">
+                  {generating ? <Spinner /> : <p className="text-sm text-[var(--cmms-text-secondary)]">ไม่พบ QR</p>}
+                </div>
               )}
-              <Text type="body" weight="bold" style={{ color: "var(--cmms-primary)", fontSize: 18 }}>{m.code}</Text>
-              <Text type="body" size="sm" color="secondary">{m.name}</Text>
-              <Text type="body" size="sm" className="tip" style={{ color: "#999" }}>สแกน → แจ้งซ่อมด่วน</Text>
-            </VStack>
+              <p className="font-bold text-[var(--cmms-primary)] text-sm">{m.code}</p>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">{m.name}</p>
+              <p className="text-xs text-[var(--cmms-text-secondary)] tip">สแกน → แจ้งซ่อมด่วน</p>
+            </CardContent>
           </Card>
         ))}
       </div>

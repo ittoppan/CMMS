@@ -120,7 +120,7 @@ export default function PwaSettingsPage() {
   return (
     <VStack gap={6} data-bisect="full">
       {/* BISECT START */}
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
       {success && (
         <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
           <HStack gap={3} vAlign="center">
