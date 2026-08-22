@@ -140,7 +140,7 @@ export default function ScanLandingPage() {
   }, [assetCode]);
 
   const goRepair = () => {
-    window.location.href = `/repair-request?asset_code=${encodeURIComponent(assetCode)}`;
+    window.location.href = `/repair/request?asset_code=${encodeURIComponent(assetCode)}`;
   };
   const goPM = () => {
     window.location.href = `/pm_am/checksheet?asset_code=${encodeURIComponent(assetCode)}`;
@@ -188,7 +188,7 @@ export default function ScanLandingPage() {
                 </Text>
               )}
               <Text type="body" size="sm" color="secondary">
-                {tliff("liff.scan_repair_anyway")}<Link href="/repair-request">{tliff("liff.scan_to_form")}</Link>
+                {tliff("liff.scan_repair_anyway")}<Link href="/repair/request">{tliff("liff.scan_to_form")}</Link>
               </Text>
             </VStack>
           ) : asset ? (
@@ -337,7 +337,7 @@ export default function ScanLandingPage() {
               )}
 
               <Text type="body" size="sm" color="secondary">
-                <Link href={`/repair-request?asset_code=${encodeURIComponent(assetCode)}`}>
+                <Link href={`/repair/request?asset_code=${encodeURIComponent(assetCode)}`}>
                   {tliff("liff.scan_skip_form")}
                 </Link>
               </Text>

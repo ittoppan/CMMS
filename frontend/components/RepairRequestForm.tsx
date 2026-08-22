@@ -1,35 +1,32 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import type { ReactNode } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Button } from "@astryxdesign/core/Button";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
 import {
-  CheckCircleIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ExclamationTriangleIcon,
-  ShieldCheckIcon,
-  BuildingOffice2Icon,
-  UserIcon,
-  ClockIcon,
-  CameraIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  XMarkIcon,
-  PaperClipIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle,
+  ArrowLeft,
+  ArrowRight,
+  AlertTriangle,
+  ShieldCheck,
+  Building2,
+  User,
+  Clock,
+  Camera,
+  Phone,
+  Mail,
+  X,
+  Paperclip,
+} from "lucide-react";
 import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { serverResponds } from "@/lib/server-check";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 /* =========================================================
    ฟอร์มแจ้งซ่อม MAINTENANCE JOB REQUEST (F-EN-03)
@@ -145,7 +142,6 @@ const QUEUE_STORE = "submissions";
 function openQueueDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (!("indexedDB" in window)) { reject(new Error("no indexeddb")); return; }
-    // เปิดเวอร์ชันล่าสุด (ไม่ระบุ version) — กัน VersionError ถ้า store อื่น (เช่น offline-store.ts) ขยับเวอร์ชันขึ้น
     const req = indexedDB.open(QUEUE_DB);
     req.onupgradeneeded = () => {
       const db = req.result;
@@ -192,7 +188,7 @@ function queueRemove(id: number): Promise<void> {
 }
 
 export default function RepairRequestForm() {
-  useLiffLang(); // re-render ตามภาษาที่สลับ
+  useLiffLang();
   const [step, setStep] = useState(0);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
@@ -201,16 +197,14 @@ export default function RepairRequestForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [offlineNow, setOfflineNow] = useState(false);
-  // เพิ่งกลับมามีเน็ต — ยังไม่ refresh ข้อมูล (คง banner ไว้ให้กด "โหลดข้อมูลใหม่")
   const [onlineBack, setOnlineBack] = useState(false);
   const [retryMsg, setRetryMsg] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [createdWoNo, setCreatedWoNo] = useState<string | null>(null);
   const [offlineQueued, setOfflineQueued] = useState(0);
   const [flushingQueue, setFlushingQueue] = useState(false);
-  // รายการในคิว offline (สำหรับแสดง + ลบทีละรายการ)
   const [queueItems, setQueueItems] = useState<{ id: number; label: string }[]>([]);
-  
+
   // Dynamic options from API
   const [dynamicOptions, setDynamicOptions] = useState<RepairOption[]>([]);
   const [machineStatusOptions, setMachineStatusOptions] = useState(DEFAULT_MACHINE_STATUS);
@@ -218,15 +212,14 @@ export default function RepairRequestForm() {
   const [jobDescriptionOptions, setJobDescriptionOptions] = useState(DEFAULT_JOB_DESCRIPTIONS);
   const [contaminateCheckOptions, setContaminateCheckOptions] = useState(DEFAULT_CONTAMINATE_CHECK);
   const [rootCauseOptions, setRootCauseOptions] = useState<{ value: string; label: string; emoji?: string }[]>([]);
-  
-  const [lineBound, setLineBound] = useState<boolean | null>(null); // null=ยังไม่รู้, true/false=สถานะผูก
-  // เกตบังคับผูกบัญชี: checking=ตรวจอยู่, bound=ผูกแล้ว (เห็นฟอร์ม), unbound=มี LINE ID แต่ยังไม่ผูก, anonymous=ไม่มี LINE ID เลย
+
+  const [lineBound, setLineBound] = useState<boolean | null>(null);
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const offlineRef = useRef(false); // ติดตามว่าเคย offline → กลับ online (กัน banner เด้งหาย)
+  const offlineRef = useRef(false);
 
   const [form, setForm] = useState({
     machineCode: "",
@@ -252,10 +245,8 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  /* ---- fetch wrapper: รวม init เดิม ---- */
   const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
 
-  /* ---- QR scan prefill: ?asset_code=A-PT-01 เปิดฟอร์มพร้อมเลือกเครื่อง ---- */
   const qrPrefillRef = useRef<string | null>(null);
   useEffect(() => {
     try {
@@ -264,8 +255,6 @@ export default function RepairRequestForm() {
     } catch { /* ignore */ }
   }, []);
 
-  // ติดตามสถานะ offline — แสดง banner บอกว่ากรอกได้ แต่จะส่งเมื่อกลับมาออนไลน์
-  // เพิ่งกลับมามีเน็ต → คง banner ไว้ (เขียว) ให้กด "โหลดข้อมูลใหม่" จนกว่าจะ reload จริง
   useEffect(() => {
     const update = () => {
       const isOff = !navigator.onLine;
@@ -288,7 +277,7 @@ export default function RepairRequestForm() {
     };
   }, []);
 
-  /* ---- โหลดเครื่องจักรจริง + แผนก + ผู้ใช้ session + LINE profile ---- */
+  /* ---- โหลดข้อมูล ---- */
   useEffect(() => {
     apiFetch("/api/v1/asset_registry.php")
       .then((r) => r.json())
@@ -297,7 +286,6 @@ export default function RepairRequestForm() {
           .filter((a) => a.category === "Machine" || /^A-[A-Z]{2}-\d{2}$/.test(a.code))
           .sort((a, b) => a.code.localeCompare(b.code));
         setAssets(machines);
-        // ถ้ามาจาก QR scan → เลือกเครื่องนั้นอัตโนมัติ
         if (qrPrefillRef.current) {
           const hit = machines.find((m) => m.code === qrPrefillRef.current);
           if (hit) {
@@ -313,14 +301,12 @@ export default function RepairRequestForm() {
       .then((rows: Dept[]) => setDepts(Array.isArray(rows) ? rows : []))
       .catch(() => {});
 
-    // โหลดตัวเลือก dynamic จาก API
     apiFetch("/api/v1/repair_options.php")
       .then((r) => r.json())
       .then((rows: RepairOption[]) => {
         if (!Array.isArray(rows)) return;
         setDynamicOptions(rows);
-        
-        // แปลงข้อมูลจาก API เป็นรูปแบบที่ฟอร์มใช้
+
         const machineStatus = rows
           .filter(o => o.option_type === 'machine_status' && o.is_active)
           .map(o => ({
@@ -328,11 +314,11 @@ export default function RepairRequestForm() {
             label: o.option_label,
             th: o.option_label,
             emoji: o.option_emoji || '❓',
-            color: o.option_value === 'breakdown' ? 'var(--cmms-danger)' : 
+            color: o.option_value === 'breakdown' ? 'var(--cmms-danger)' :
                    o.option_value === 'wait' ? 'var(--cmms-warning)' : 'var(--cmms-success)'
           }));
         if (machineStatus.length > 0) setMachineStatusOptions(machineStatus);
-        
+
         const jobTypes = rows
           .filter(o => o.option_type === 'job_type' && o.is_active)
           .map(o => ({
@@ -343,7 +329,7 @@ export default function RepairRequestForm() {
             desc: o.option_label
           }));
         if (jobTypes.length > 0) setJobTypeOptions(jobTypes);
-        
+
         const jobDescs = rows
           .filter(o => o.option_type === 'job_description' && o.is_active)
           .map(o => ({
@@ -353,7 +339,7 @@ export default function RepairRequestForm() {
             emoji: o.option_emoji || '📋'
           }));
         if (jobDescs.length > 0) setJobDescriptionOptions(jobDescs);
-        
+
         const contamChecks = rows
           .filter(o => o.option_type === 'contaminate_check' && o.is_active)
           .map(o => ({
@@ -362,7 +348,7 @@ export default function RepairRequestForm() {
             emoji: o.option_emoji || '❓'
           }));
         if (contamChecks.length > 0) setContaminateCheckOptions(contamChecks);
-        
+
         const rootCauses = rows
           .filter(o => o.option_type === 'root_cause' && o.is_active)
           .map(o => ({
@@ -378,12 +364,10 @@ export default function RepairRequestForm() {
       .then((r) => r.json())
       .then((j) => {
         setSessionName(j?.me?.full_name || "");
-        // ล็อกอิน User/Password ผ่านเว็บแล้ว (มี session) → ผ่านเกตเลย
         if (j?.me?.id) setBindGate("bound");
       })
       .catch(() => {});
 
-    // ---- เกตบังคับผูกบัญชี LINE: ตัดสินสถานะ (bound/unbound/anonymous) ----
     const applyGate = (uid: string | null, bound: boolean) => {
       setBindGate(bound ? "bound" : uid ? "unbound" : "anonymous");
     };
@@ -397,7 +381,6 @@ export default function RepairRequestForm() {
       }
     };
 
-    // สถานะผูก LINE กับเลขพนักงาน (LiffBridge เก็บไว้ตอน init)
     try {
       if (localStorage.getItem("cmms_line_bound") === "1") {
         setLineBound(true);
@@ -407,7 +390,7 @@ export default function RepairRequestForm() {
       } else {
         const storedUid = localStorage.getItem("cmms_line_user_id");
         if (storedUid) {
-          setLineBound(false); // มี LINE userId แต่ยังไม่ผูก → เกต unbound
+          setLineBound(false);
           checkBound(storedUid).then((b) => {
             setLineBound(b);
             applyGate(storedUid, b);
@@ -420,7 +403,6 @@ export default function RepairRequestForm() {
             }
           });
         } else {
-          // ยังไม่รู้ LINE ID — LiffBridge อาจ init ยังไม่เสร็จ → ตรวจซ้ำอีกที
           window.setTimeout(() => {
             const uid = localStorage.getItem("cmms_line_user_id");
             if (uid) {
@@ -430,17 +412,16 @@ export default function RepairRequestForm() {
               });
               return;
             }
-            // ยังไม่มี LINE ID เลย: เช็ค session (User/Password) ก่อน
             apiFetch("/api/v1/line_notify.php")
               .then((r) => r.json())
               .then((j) => {
                 if (j?.me?.id) {
                   setSessionName(j.me.full_name || "");
-                  setBindGate("bound"); // เข้าเว็บด้วย User/Password → ผ่าน
+                  setBindGate("bound");
                 } else if ((window as any).liff?.isInClient?.()) {
-                  setBindGate("unbound"); // อยู่ใน LINE (LIFF) → บังคับ LINE login / ผูก
+                  setBindGate("unbound");
                 } else {
-                  setBindGate("webchoice"); // เว็บภายนอก → เลือก LINE หรือ User/Password
+                  setBindGate("webchoice");
                 }
               })
               .catch(() => setBindGate("webchoice"));
@@ -449,7 +430,6 @@ export default function RepairRequestForm() {
       }
     } catch { /* ignore */ }
 
-    // ?uid= — จำลอง LINE userId เมื่อเปิดนอก LINE (ทดสอบ / เปิดจากลิงก์ตรง)
     const simUid = new URLSearchParams(window.location.search).get("uid");
     if (simUid) {
       try { localStorage.setItem("cmms_line_user_id", simUid); } catch { /* ignore */ }
@@ -472,14 +452,12 @@ export default function RepairRequestForm() {
         .catch(() => { setLineBound(false); setBindGate("unbound"); });
     }
 
-    // LINE profile ถ้าเปิดอยู่ใน LINE
     const tryLiff = () => {
       try {
         if ((window as any).liff?.isLoggedIn?.()) {
           (window as any).liff.getProfile().then((p: any) => {
             setLineProfile({ name: p.displayName || "", pic: p.pictureUrl || "", userId: p.userId || "" });
             setForm((prev) => ({ ...prev, reporterName: p.displayName || prev.reporterName }));
-            // อัปเดตสถานะผูกแบบ real-time
             if (p.userId) {
               fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(p.userId)}`)
                 .then((r) => r.json())
@@ -498,13 +476,12 @@ export default function RepairRequestForm() {
             }
           });
         }
-      } catch { /* liff ยังไม่พร้อม — ใช้ session name แทน */ }
+      } catch { /* liff ยังไม่พร้อม */ }
     };
     const timer = window.setTimeout(tryLiff, 1500);
     return () => window.clearTimeout(timer);
   }, []);
 
-  // ---- เกต: ผูกบัญชี LINE (บังคับก่อนแจ้งซ่อม) ----
   const effectiveUid = (() => {
     try {
       return (
@@ -514,7 +491,7 @@ export default function RepairRequestForm() {
         ""
       );
     } catch {
-      return lineProfile?.userId || ""; // SSR / ไม่มี window
+      return lineProfile?.userId || "";
     }
   })();
 
@@ -552,7 +529,6 @@ export default function RepairRequestForm() {
 
   const selectedAsset = assets.find((a) => a.code === form.machineCode) || null;
 
-  /* ---- รายการคิว offline — อ่านจาก IndexedDB (แสดงชื่อ + ลบทีละรายการ) ---- */
   const refreshQueueItems = async () => {
     try {
       const items = await queueAll();
@@ -566,18 +542,15 @@ export default function RepairRequestForm() {
     } catch { /* offline store ไม่พร้อม */ }
   };
 
-  // ลบงานที่ค้างส่งทีละรายการ (กันส่งงานที่กรอกผิด)
   const removeQueuedItem = async (id: number) => {
     try {
       await queueRemove(id);
       setOfflineQueued((n) => Math.max(0, n - 1));
       setQueueItems((prev) => prev.filter((x) => x.id !== id));
-      // badge bottom nav อัปเดต
       try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
-    } catch { /* ลบไม่สำเร็จ — ข้าม */ }
+    } catch { /* ลบไม่สำเร็จ */ }
   };
 
-  /* ---- Flush offline queue: ส่งงานที่ค้างทั้งหมด (อัตโนมัติเมื่อออนไลน์กลับมา + ปุ่ม "ส่งตอนนี้") ---- */
   const flushQueue = async () => {
     if (!navigator.onLine) return;
     setFlushingQueue(true);
@@ -594,20 +567,17 @@ export default function RepairRequestForm() {
           if (json.success || json.id) {
             await queueRemove(item.id);
             setOfflineQueued((n) => Math.max(0, n - 1));
-            // badge bottom nav อัปเดต
             try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           }
-        } catch { /* รายการนี้ยังส่งไม่ได้ — ข้ามไปลองรายการถัดไป */ }
+        } catch { /* ยังส่งไม่ได้ */ }
       }
-    } catch { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ }
+    } catch { /* ยังออฟไลน์อยู่ */ }
     refreshQueueItems();
     setFlushingQueue(false);
   };
 
   useEffect(() => {
-    // เปิดให้สั่งย้ายมือจาก DevTools: window.__cmmsMigrateQueues()
     exposeQueueMigration();
-    // ย้ายงานที่ค้างจาก IndexedDB รุ่นเก่า (VersionError) เข้าคิวปัจจุบัน ก่อนอ่านคิว
     runQueueMigrationOnce()
       .then(() => queueAll())
       .then((items) => {
@@ -615,12 +585,11 @@ export default function RepairRequestForm() {
         refreshQueueItems();
         if (navigator.onLine) flushQueue();
       })
-      .catch(() => { /* ยังออฟไลน์อยู่ — ลองครั้งหน้า */ });
+      .catch(() => { /* ยังออฟไลน์อยู่ */ });
     window.addEventListener("online", flushQueue);
     return () => window.removeEventListener("online", flushQueue);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // เมื่อเลือกเครื่อง → auto เติมแผนก (ถ้ายังไม่ได้เลือกเอง)
   useEffect(() => {
     if (selectedAsset?.department_id) {
       const d = depts.find((x) => x.id === selectedAsset.department_id);
@@ -655,7 +624,6 @@ export default function RepairRequestForm() {
     setSubmitError(null);
     try {
       const priorityMap: Record<string, string> = { breakdown: "critical", wait: "high", running: "medium" };
-      // Override priority to critical if urgent repair is toggled
       if (form.isUrgent) priorityMap[form.machineStatus] = "critical";
       const sourceTypeMap: Record<string, string> = { Maintenance: "breakdown", PM: "pm", Modify: "modify", Build: "build" };
       const jt = jobTypeOptions.find((j) => j.value === form.jobType);
@@ -693,11 +661,9 @@ export default function RepairRequestForm() {
           body: JSON.stringify(payload),
         });
       } catch {
-        // ไม่มีเน็ต → เก็บเข้า offline queue แล้วบอกผู้ใช้
         try {
           await queueAdd(payload);
           setOfflineQueued((n) => n + 1);
-          // badge bottom nav อัปเดต
           try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           setSubmitted(true);
           setCreatedWoNo("SAVED-OFFLINE");
@@ -727,136 +693,132 @@ export default function RepairRequestForm() {
       <div className="cmms-success-overlay" onClick={() => (window.location.href = "/repair")}>
         <div className="cmms-success-card" onClick={(e) => e.stopPropagation()}>
           <div className="cmms-success-icon">
-            <CheckCircleIcon style={{ width: 36, height: 36 }} />
+            <CheckCircle size={36} strokeWidth={1.75} />
           </div>
-          <Heading level={3} style={{ marginBottom: 8 }}>{tliff("liff.repair_success")}</Heading>
-          <Text type="body" color="secondary" style={{ marginBottom: 4 }}>
+          <h3 className="text-lg font-bold mb-2">{tliff("liff.repair_success")}</h3>
+          <p className="text-sm text-[var(--cmms-text-secondary)] mb-1">
             ใบแจ้งซ่อม (F-EN-03) เลขที่
-          </Text>
+          </p>
           <div className="cmms-success-wo">{createdWoNo}</div>
-          <Text type="body" size="sm" color="secondary" style={{ textAlign: "center", marginBottom: 20 }}>
+          <p className="text-xs text-[var(--cmms-text-secondary)] text-center mb-5">
             {selectedAsset?.code} · {machineStatusOptions.find((s) => s.value === form.machineStatus)?.label}
             {"\n"}{offlineQueued > 0 ? "📴 ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว 📲"}
-          </Text>
-          <VStack gap={2} style={{ width: "100%" }}>
-            <Button label="📋 ดูรายการงานซ่อม" variant="primary" width="100%" onClick={() => (window.location.href = "/repair")} />
-            <Button label="แจ้งซ่อมอีก" variant="secondary" width="100%" onClick={() => {
+          </p>
+          <div className="flex flex-col gap-2 w-full">
+            <Button className="w-full" onClick={() => (window.location.href = "/repair")}>
+              📋 ดูรายการงานซ่อม
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
               setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], note: "", isUrgent: false });
-            }} />
-          </VStack>
+            }}>
+              แจ้งซ่อมอีก
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  /* ---------- เกต: บังคับผูกบัญชี LINE ก่อนแจ้งซ่อม ---------- */
+  /* ---------- เกต: บังคับผูกบัญชี LINE ---------- */
   if (bindGate !== "bound") {
     return (
       <div className="cmms-mobile-page">
         <div className="cmms-page-header">
-          <HStack gap={3} vAlign="center">
+          <div className="flex items-center gap-3">
             <LiffLangToggle />
             <div className="cmms-header-emoji">🚨</div>
-            <VStack gap={0} style={{ flex: 1 }}>
-              <Heading level={3} style={{ margin: 0 }}>{tliff("liff.repair_header")}</Heading>
-              <Text type="body" size="sm" color="secondary">MAINTENANCE JOB REQUEST · F-EN-03</Text>
-            </VStack>
-          </HStack>
+            <div className="flex flex-col flex-1">
+              <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
+              <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
+            </div>
+          </div>
         </div>
 
-        <Card padding={5} className="cmms-card-flat" style={{ margin: 16 }}>
+        <Card className="cmms-card-flat mx-4 my-4 p-5">
           {bindGate === "checking" && (
-            <VStack gap={4} style={{ padding: "8px 0", alignItems: "center", textAlign: "center" }}>
-              <div className="cmms-header-emoji" style={{ marginBottom: 4 }}>⏳</div>
-              <Heading level={4} style={{ margin: 0 }}>{tliff("liff.repair_checking")}</Heading>
-              <Text type="body" size="sm" color="secondary">{tliff("liff.repair_wait")}</Text>
-            </VStack>
+            <div className="flex flex-col gap-4 py-2 items-center text-center">
+              <div className="cmms-header-emoji mb-1">⏳</div>
+              <h4 className="text-base font-bold m-0">{tliff("liff.repair_checking")}</h4>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">{tliff("liff.repair_wait")}</p>
+            </div>
           )}
 
           {bindGate === "anonymous" && (
-            <VStack gap={4} style={{ alignItems: "stretch" }}>
-              <div style={{ textAlign: "center" }}>
-                <div className="cmms-header-emoji" style={{ marginBottom: 8 }}>🔗</div>
-                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>{tliff("liff.repair_need_login")}</Heading>
-                <Text type="body" size="sm" color="secondary">
+            <div className="flex flex-col gap-4">
+              <div className="text-center">
+                <div className="cmms-header-emoji mb-2">🔗</div>
+                <h4 className="text-base font-bold m-0 mb-1.5">{tliff("liff.repair_need_login")}</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
                   {tliff("liff.repair_need_login_desc")}
-                </Text>
+                </p>
               </div>
-              <Button
-                label={`🔗 ${tliff("liff.repair_line_login_btn")}`}
-                variant="primary"
-                width="100%"
-                onClick={() => (window.location.href = "/line_login.php")}
-              />
-              <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
+              <Button className="w-full" onClick={() => (window.location.href = "/line_login.php")}>
+                🔗 {tliff("liff.repair_line_login_btn")}
+              </Button>
+              <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
                 {tliff("liff.repair_after_login")}
-              </Text>
-            </VStack>
+              </p>
+            </div>
           )}
 
           {bindGate === "webchoice" && (
-            <VStack gap={4} style={{ alignItems: "stretch" }}>
-              <div style={{ textAlign: "center" }}>
-                <div className="cmms-header-emoji" style={{ marginBottom: 8 }}>🔐</div>
-                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>{tliff("liff.repair_confirm_identity")}</Heading>
-                <Text type="body" size="sm" color="secondary">
+            <div className="flex flex-col gap-4">
+              <div className="text-center">
+                <div className="cmms-header-emoji mb-2">🔐</div>
+                <h4 className="text-base font-bold m-0 mb-1.5">{tliff("liff.repair_confirm_identity")}</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
                   {tliff("liff.repair_confirm_desc")}
-                </Text>
+                </p>
               </div>
+              <Button className="w-full" onClick={() => (window.location.href = "/login?next=/repair/request")}>
+                👤 {tliff("liff.repair_userpass_btn")}
+              </Button>
               <Button
-                label={`👤 ${tliff("liff.repair_userpass_btn")}`}
-                variant="primary"
-                width="100%"
-                onClick={() => (window.location.href = "/login?next=/repair/request")}
-              />
-              <Button
-                label="🔗 เข้าด้วย LINE"
                 variant="secondary"
-                width="100%"
-                style={{ backgroundColor: "#06C755", color: "#fff", border: "none" }}
+                className="w-full bg-[#06C755] text-white border-none hover:bg-[#05b34c]"
                 onClick={() => (window.location.href = "/line_login.php")}
-              />
-            </VStack>
+              >
+                🔗 เข้าด้วย LINE
+              </Button>
+            </div>
           )}
 
           {bindGate === "unbound" && (
-            <VStack gap={4} style={{ alignItems: "stretch" }}>
-              <div style={{ textAlign: "center" }}>
-                <div className="cmms-header-emoji" style={{ marginBottom: 8 }}>🔗</div>
-                <Heading level={4} style={{ margin: 0, marginBottom: 6 }}>ผูกบัญชี LINE กับเลขพนักงาน</Heading>
-                <Text type="body" size="sm" color="secondary">
+            <div className="flex flex-col gap-4">
+              <div className="text-center">
+                <div className="cmms-header-emoji mb-2">🔗</div>
+                <h4 className="text-base font-bold m-0 mb-1.5">ผูกบัญชี LINE กับเลขพนักงาน</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
                   {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name} 👋` : "สวัสดี 👋"}
                   {"\n"}กรอกรหัสพนักงานเพื่อเริ่มแจ้งซ่อม (ครั้งเดียวจบ)
-                </Text>
+                </p>
               </div>
-              <div>
-                <TextInput
-                  label="เลขพนักงาน"
-                  isLabelHidden
-                  placeholder="เช่น E01117"
-                  value={bindEmpCode}
-                  onChange={(v) => setBindEmpCode(v.toUpperCase().slice(0, 6))}
-                />
-              </div>
+              <Input
+                label="เลขพนักงาน"
+                isLabelHidden
+                placeholder="เช่น E01117"
+                value={bindEmpCode}
+                onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}
+              />
               {bindError && (
-                <div style={{ background: "#FEE2E2", color: "#B91C1C", borderRadius: 8, padding: "8px 12px", fontSize: 13 }}>
+                <div className="bg-[#FEE2E2] text-[#B91C1C] rounded-lg px-3 py-2 text-sm">
                   ❌ {bindError}
                 </div>
               )}
               <Button
-                label={bindSubmitting ? "กำลังผูก…" : "ผูกบัญชีและไปแจ้งซ่อม"}
-                variant="primary"
-                width="100%"
-                isDisabled={bindSubmitting || !effectiveUid}
+                className="w-full"
+                disabled={bindSubmitting || !effectiveUid}
                 onClick={handleInlineBind}
-              />
+              >
+                {bindSubmitting ? "กำลังผูก…" : "ผูกบัญชีและไปแจ้งซ่อม"}
+              </Button>
               {!effectiveUid && (
-                <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
+                <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
                   กำลังโหลดข้อมูล LINE…
-                </Text>
+                </p>
               )}
-            </VStack>
+            </div>
           )}
         </Card>
       </div>
@@ -869,19 +831,19 @@ export default function RepairRequestForm() {
     <div className="cmms-mobile-page">
       {/* Header */}
       <div className="cmms-page-header">
-        <HStack gap={3} vAlign="center">
+        <div className="flex items-center gap-3">
           <div className="cmms-header-emoji">🚨</div>
-          <VStack gap={0} style={{ flex: 1 }}>
-            <Heading level={3} style={{ margin: 0 }}>{tliff("liff.repair_header")}</Heading>
-            <Text type="body" size="sm" color="secondary">MAINTENANCE JOB REQUEST · F-EN-03</Text>
-          </VStack>
+          <div className="flex flex-col flex-1">
+            <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
+            <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
+          </div>
           <LiffLangToggle />
           {lineProfile?.pic ? (
             <img src={lineProfile.pic} alt="LINE profile" className="cmms-avatar" />
           ) : (
-            <div className="cmms-avatar cmms-avatar-fallback"><UserIcon style={{ width: 18, height: 18 }} /></div>
+            <div className="cmms-avatar cmms-avatar-fallback"><User size={18} strokeWidth={1.75} /></div>
           )}
-        </HStack>
+        </div>
       </div>
 
       {/* Step Indicator */}
@@ -895,18 +857,16 @@ export default function RepairRequestForm() {
         ))}
       </div>
 
-      {/* Offline status — ยังกรอกได้ จะเก็บ queue ส่งเมื่อกลับมาออนไลน์
-          กลับมามีเน็ตแล้ว → คง banner ไว้ (เขียว) ให้กด "โหลดข้อมูลใหม่" */}
+      {/* Offline status */}
       {(offlineNow || onlineBack) && (
         <div className={`cmms-offline-banner${onlineBack ? " success" : ""}`}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+          <div className="flex items-center justify-between gap-2.5 flex-wrap">
             <span>
               {onlineBack
                 ? "✅ เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
                 : "📴 ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์"}
             </span>
             <Button
-              label="โหลดข้อมูลใหม่"
               variant={onlineBack ? "primary" : "ghost"}
               size="sm"
               onClick={async () => {
@@ -919,11 +879,13 @@ export default function RepairRequestForm() {
                 if (ok) window.location.reload();
                 else setRetryMsg("โหลดไม่สำเร็จ — ลองอีกครั้ง");
               }}
-              style={{ flexShrink: 0 }}
-            />
+              className="shrink-0"
+            >
+              โหลดข้อมูลใหม่
+            </Button>
           </div>
           {retryMsg && (
-            <div style={{ marginTop: 4, opacity: 0.85, fontSize: 12 }}>{retryMsg}</div>
+            <div className="mt-1 opacity-85 text-xs">{retryMsg}</div>
           )}
         </div>
       )}
@@ -931,31 +893,27 @@ export default function RepairRequestForm() {
       {/* Offline queue status */}
       {offlineQueued > 0 && (
         <div className="cmms-offline-banner">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+          <div className="flex items-center justify-between gap-2.5 flex-wrap">
             <span>📴 มีงานแจ้งซ่อมที่ยังไม่ได้ส่ง <b>{offlineQueued}</b> รายการ</span>
             <Button
-              label={flushingQueue ? "กำลังส่ง..." : "ส่งงานค้างทั้งหมดตอนนี้"}
               variant="primary"
               size="sm"
-              isDisabled={flushingQueue || !navigator.onLine}
+              disabled={flushingQueue || !navigator.onLine}
               onClick={flushQueue}
-              style={{ flexShrink: 0 }}
-            />
+              className="shrink-0"
+            >
+              {flushingQueue ? "กำลังส่ง..." : "ส่งงานค้างทั้งหมดตอนนี้"}
+            </Button>
           </div>
 
-          {/* รายการค้างส่ง — ลบทีละรายการได้ (กันส่งงานที่กรอกผิด) */}
           {queueItems.length > 0 && (
-            <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="mt-2 flex flex-col gap-1.5">
               {queueItems.map((it) => (
                 <div
                   key={it.id}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    background: "rgba(255,255,255,0.7)", border: "1px solid #f0d9b8",
-                    borderRadius: 8, padding: "6px 10px",
-                  }}
+                  className="flex items-center gap-2 bg-white/70 border border-[#f0d9b8] rounded-lg px-2.5 py-1.5"
                 >
-                  <span style={{ flex: 1, fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span className="flex-1 text-xs font-semibold overflow-hidden text-ellipsis whitespace-nowrap">
                     {it.label}
                   </span>
                   <button
@@ -963,11 +921,7 @@ export default function RepairRequestForm() {
                     title="ลบงานนี้ออกจากคิว"
                     aria-label={`ลบ ${it.label}`}
                     onClick={() => removeQueuedItem(it.id)}
-                    style={{
-                      background: "none", border: "none", cursor: "pointer",
-                      color: "var(--cmms-danger, #DC2626)", fontSize: 14, fontWeight: 800,
-                      padding: "2px 6px", borderRadius: 6, flexShrink: 0, lineHeight: 1,
-                    }}
+                    className="bg-none border-none cursor-pointer text-[var(--cmms-danger,#DC2626)] text-sm font-extrabold px-1.5 py-0.5 rounded-md shrink-0 leading-none hover:bg-[var(--cmms-danger-light)]"
                   >
                     ✕
                   </button>
@@ -976,13 +930,13 @@ export default function RepairRequestForm() {
             </div>
           )}
 
-          <div style={{ marginTop: 4, opacity: 0.8, fontSize: 12 }}>
+          <div className="mt-1 opacity-80 text-xs">
             จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์ — หรือกดปุ่มนี้เพื่อส่งทันที
           </div>
         </div>
       )}
 
-      {/* ผูกบัญชี LINE กับเลขพนักงาน (ครั้งแรก) */}
+      {/* ผูกบัญชี LINE */}
       {lineBound === false && (
         <div className="cmms-bind-banner" onClick={() => (window.location.href = "/register")}>
           <div>
@@ -995,19 +949,19 @@ export default function RepairRequestForm() {
 
       {/* ============ STEP 1 : เครื่องจักร ============ */}
       {step === 0 && (
-        <Card padding={5} className="cmms-card-flat">
-          <VStack gap={5}>
+        <Card className="cmms-card-flat p-5">
+          <div className="flex flex-col gap-5">
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 2 }}>1. เลือกเครื่องจักร / อุปกรณ์ <span className="cmms-req">*</span></Text>
-              <Text type="body" size="sm" color="secondary">ทะเบียนเครื่องจักรโรงงาน (22 เครื่อง)</Text>
+              <p className="text-sm font-bold mb-0.5">1. เลือกเครื่องจักร / อุปกรณ์ <span className="cmms-req">*</span></p>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">ทะเบียนเครื่องจักรโรงงาน (22 เครื่อง)</p>
             </div>
 
             {MACHINE_GROUPS.map((g) => {
               const groupMachines = assets.filter((a) => a.code.startsWith(g.prefix));
               if (groupMachines.length === 0) return null;
               return (
-                <VStack key={g.prefix} gap={2}>
-                  <Text type="body" size="sm" weight="bold" color="secondary">{g.emoji} {g.label} ({groupMachines.length})</Text>
+                <div key={g.prefix} className="flex flex-col gap-2">
+                  <p className="text-xs font-bold text-[var(--cmms-text-secondary)]">{g.emoji} {g.label} ({groupMachines.length})</p>
                   <div className="cmms-chip-grid">
                     {groupMachines.map((m) => (
                       <button key={m.id} type="button"
@@ -1017,282 +971,290 @@ export default function RepairRequestForm() {
                       </button>
                     ))}
                   </div>
-                </VStack>
+                </div>
               );
             })}
 
             {selectedAsset && (
               <div className="cmms-machine-summary">
-                <HStack gap={3} vAlign="center">
-                  <div className="cmms-machine-icon"><BuildingOffice2Icon style={{ width: 22, height: 22 }} /></div>
-                  <VStack gap={0} style={{ flex: 1 }}>
-                    <Text type="body" weight="bold">{selectedAsset.code}</Text>
-                    <Text type="body" size="sm" color="secondary">{selectedAsset.name}</Text>
-                  </VStack>
-                  <Badge label={`${selectedAsset.criticality || "-"}`} variant={selectedAsset.criticality === "A" ? "error" : "neutral"} />
-                </HStack>
-                <Text type="body" size="sm" color="secondary" style={{ marginTop: 8 }}>
+                <div className="flex items-center gap-3">
+                  <div className="cmms-machine-icon"><Building2 size={22} strokeWidth={1.75} /></div>
+                  <div className="flex flex-col flex-1">
+                    <p className="text-sm font-bold m-0">{selectedAsset.code}</p>
+                    <p className="text-xs text-[var(--cmms-text-secondary)] m-0">{selectedAsset.name}</p>
+                  </div>
+                  <Badge variant={selectedAsset.criticality === "A" ? "danger" : "neutral"}>
+                    {selectedAsset.criticality || "-"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-[var(--cmms-text-secondary)] mt-2">
                   แผนก: {selectedAsset.department || "—"}
-                </Text>
+                </p>
               </div>
             )}
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 10 }}>2. สถานะเครื่องจักร (Machine Status) <span className="cmms-req">*</span></Text>
-              <VStack gap={2}>
+              <p className="text-sm font-bold mb-2.5">2. สถานะเครื่องจักร (Machine Status) <span className="cmms-req">*</span></p>
+              <div className="flex flex-col gap-2">
                 {machineStatusOptions.map((s) => (
                   <button key={s.value} type="button"
                     className={`cmms-option-row ${form.machineStatus === s.value ? "selected" : ""}`}
                     style={{ ["--opt-color" as any]: s.color }}
                     onClick={() => update("machineStatus", s.value)}>
                     <span className="cmms-option-emoji">{s.emoji}</span>
-                    <VStack gap={0} style={{ flex: 1 }}>
-                      <Text type="body" weight="bold">{s.label}</Text>
-                      <Text type="body" size="sm" color="secondary">{s.th}</Text>
-                    </VStack>
+                    <div className="flex flex-col flex-1">
+                      <p className="text-sm font-bold m-0">{s.label}</p>
+                      <p className="text-xs text-[var(--cmms-text-secondary)] m-0">{s.th}</p>
+                    </div>
                     <span className="cmms-radio-dot" />
                   </button>
                 ))}
-              </VStack>
+              </div>
             </div>
-          </VStack>
+          </div>
         </Card>
       )}
 
       {/* ============ STEP 2 : งาน ============ */}
       {step === 1 && (
-        <Card padding={5} className="cmms-card-flat">
-          <VStack gap={5}>
+        <Card className="cmms-card-flat p-5">
+          <div className="flex flex-col gap-5">
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 10 }}>Ⓐ ประเภทงาน (Job Type) <span className="cmms-req">*</span></Text>
+              <p className="text-sm font-bold mb-2.5">Ⓐ ประเภทงาน (Job Type) <span className="cmms-req">*</span></p>
               <div className="cmms-job-grid">
                 {jobTypeOptions.map((j) => (
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobType === j.value ? "selected" : ""}`}
                     onClick={() => update("jobType", j.value)}>
                     <span className="cmms-job-emoji">{j.emoji}</span>
-                    <Text type="body" size="sm" weight="bold">{j.label}</Text>
-                    <Text type="body" size="2xs" color="secondary">{j.en}</Text>
+                    <p className="text-sm font-bold m-0">{j.label}</p>
+                    <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">{j.en}</p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 10 }}>Ⓑ ลักษณะงาน (Job Description) <span className="cmms-req">*</span></Text>
+              <p className="text-sm font-bold mb-2.5">Ⓑ ลักษณะงาน (Job Description) <span className="cmms-req">*</span></p>
               <div className="cmms-job-grid">
                 {jobDescriptionOptions.map((j) => (
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobDescription === j.value ? "selected" : ""}`}
                     onClick={() => update("jobDescription", j.value)}>
                     <span className="cmms-job-emoji">{j.emoji}</span>
-                    <Text type="body" size="sm" weight="bold">{j.label}</Text>
-                    <Text type="body" size="2xs" color="secondary">{j.en}</Text>
+                    <p className="text-sm font-bold m-0">{j.label}</p>
+                    <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">{j.en}</p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>※ รายละเอียดของปัญหา (Problem Description) <span className="cmms-req">*</span></Text>
-              <TextArea
+              <p className="text-sm font-bold mb-2">※ รายละเอียดของปัญหา (Problem Description) <span className="cmms-req">*</span></p>
+              <Textarea
                 label="รายละเอียดปัญหา"
                 isLabelHidden
                 placeholder="อธิบายปัญหาที่พบให้ละเอียด เช่น อาการที่พบ ข้อความแจ้งเตือน เวลาเกิดปัญหา..."
                 value={form.symptoms}
-                onChange={(v: string) => update("symptoms", v)}
+                onChange={(e) => update("symptoms", e.target.value)}
                 rows={4}
               />
-              <Text type="body" size="2xs" color="secondary" style={{ marginTop: 4 }}>
+              <p className="text-2xs text-[var(--cmms-text-secondary)] mt-1">
                 {form.symptoms.length} ตัวอักษร (ขั้นต่ำ 5)
-              </Text>
+              </p>
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>Lot No. ที่กำลังผลิต (ถ้ามี)</Text>
-              <TextInput
+              <p className="text-sm font-bold mb-2">Lot No. ที่กำลังผลิต (ถ้ามี)</p>
+              <Input
                 label="Lot No."
                 isLabelHidden
                 placeholder="ระบุ Lot No. สินค้าที่กำลังผลิต"
                 value={form.lotNo}
-                onChange={(v: string) => update("lotNo", v)}
+                onChange={(e) => update("lotNo", e.target.value)}
               />
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>ตรวจสอบการปนเปื้อนหลังงานเสร็จ (Contaminate Checking)</Text>
-              <Selector
+              <p className="text-sm font-bold mb-2">ตรวจสอบการปนเปื้อนหลังงานเสร็จ (Contaminate Checking)</p>
+              <Select
                 label="ตรวจสอบการปนเปื้อน"
                 isLabelHidden
                 value={form.contaminateChecking}
-                onChange={(v: string) => update("contaminateChecking", v)}
-                options={[
-                  { value: "not_checked", label: "ยังไม่ตรวจ" },
-                  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)" },
-                  { value: "contaminated", label: "พบการปนเปื้อน" },
-                  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้" },
-                ]}
-              />
+                onChange={(e) => update("contaminateChecking", e.target.value)}
+              >
+                {contaminateCheckOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </Select>
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>ผู้รับเหมาภายนอก (ถ้าจ้างภายนอกทำ)</Text>
-              <TextInput
+              <p className="text-sm font-bold mb-2">ผู้รับเหมาภายนอก (ถ้าจ้างภายนอกทำ)</p>
+              <Input
                 label="ผู้รับเหมาภายนอก"
                 isLabelHidden
                 placeholder="ระบุชื่อบริษัท/ผู้รับเหมาภายนอก (ถ้ามี)"
                 value={form.outsourceBy}
-                onChange={(v: string) => update("outsourceBy", v)}
+                onChange={(e) => update("outsourceBy", e.target.value)}
               />
             </div>
 
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>หมายเหตุ (Note)</Text>
-              <TextArea
+              <p className="text-sm font-bold mb-2">หมายเหตุ (Note)</p>
+              <Textarea
                 label="หมายเหตุ"
                 isLabelHidden
                 placeholder="บันทึกข้อมูลเพิ่มเติม (ถ้ามี)"
                 value={form.note}
-                onChange={(v: string) => update("note", v)}
+                onChange={(e) => update("note", e.target.value)}
                 rows={2}
               />
             </div>
-          </VStack>
+          </div>
         </Card>
       )}
 
       {/* ============ STEP 3 : ผู้แจ้ง & รูป ============ */}
       {step === 2 && (
-        <Card padding={5} className="cmms-card-flat">
-          <VStack gap={5}>
+        <Card className="cmms-card-flat p-5">
+          <div className="flex flex-col gap-5">
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 2 }}>ข้อมูลผู้แจ้ง</Text>
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm font-bold mb-0.5">ข้อมูลผู้แจ้ง</p>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">
                 {lineProfile ? "ดึงข้อมูลจากบัญชี LINE แล้ว — แก้ไขได้ถ้าต้องการ" : "ดึงชื่อจากระบบให้อัตโนมัติ"}
-              </Text>
+              </p>
             </div>
 
             <FieldRow label="ชื่อ-นามสกุล (Requestor)" required>
-              <TextInput
+              <Input
                 label="ชื่อ-นามสกุล"
                 isLabelHidden
                 placeholder="เช่น สมชาย ใจดี"
                 value={form.reporterName}
-                onChange={(v: string) => update("reporterName", v)}
+                onChange={(e) => update("reporterName", e.target.value)}
               />
             </FieldRow>
 
             <FieldRow label="แผนก (Department)" required>
-              <Selector
+              <Select
                 label="แผนก"
                 isLabelHidden
                 placeholder="เลือกแผนก..."
                 value={form.departmentCode}
-                onChange={(v: string) => update("departmentCode", v)}
-                options={depts.map((d) => ({ value: d.code, label: d.name }))}
-              />
+                onChange={(e) => update("departmentCode", e.target.value)}
+              >
+                <option value="">เลือกแผนก...</option>
+                {depts.map((d) => (
+                  <option key={d.id} value={d.code}>{d.name}</option>
+                ))}
+              </Select>
             </FieldRow>
 
             <FieldRow label="สำนักงาน (Office)" required>
-              <Selector
+              <Select
                 label="สำนักงาน"
                 isLabelHidden
                 value={form.office}
-                onChange={(v: string) => update("office", v)}
-                options={OFFICES.map((o) => ({ value: o, label: o }))}
-              />
+                onChange={(e) => update("office", e.target.value)}
+              >
+                {OFFICES.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </Select>
             </FieldRow>
 
             <FieldRow label="เบอร์ติดต่อ (Phone)" required>
-              <TextInput
+              <Input
                 label="เบอร์ติดต่อ"
                 isLabelHidden
                 placeholder="เช่น 083-0000000"
                 value={form.phone}
-                onChange={(v: string) => update("phone", v)}
+                onChange={(e) => update("phone", e.target.value)}
               />
             </FieldRow>
 
             <FieldRow label="อีเมล (ถ้ามี)">
-              <TextInput
+              <Input
                 label="อีเมล"
                 isLabelHidden
                 placeholder="เช่น example@company.com"
+                type="email"
                 value={form.email}
-                onChange={(v: string) => update("email", v)}
+                onChange={(e) => update("email", e.target.value)}
               />
             </FieldRow>
 
-            {/* Contamination Risk — ตาม F-EN-03 */}
+            {/* Contamination Risk */}
             <div className={`cmms-contam-box ${form.contaminationRisk ? "risk" : "safe"}`}>
-              <VStack gap={3}>
-                <HStack gap={2} vAlign="center">
-                  <ShieldCheckIcon style={{ width: 18, height: 18 }} />
-                  <Text type="body" weight="bold">ความเสี่ยงปนเปื้อนจากการซ่อม (GMP)</Text>
-                </HStack>
-                <HStack gap={3} vAlign="center">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={18} strokeWidth={1.75} />
+                  <p className="text-sm font-bold m-0">ความเสี่ยงปนเปื้อนจากการซ่อม (GMP)</p>
+                </div>
+                <div className="flex items-center gap-3">
                   <Switch
                     label="Contamination"
                     isLabelHidden
-                    value={form.contaminationRisk}
-                    onChange={(v: boolean) => update("contaminationRisk", v)}
+                    checked={form.contaminationRisk}
+                    onChange={(e) => update("contaminationRisk", e.target.checked)}
                   />
-                  <Text type="body" size="sm" style={{ color: form.contaminationRisk ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
+                  <p className="text-sm m-0" style={{ color: form.contaminationRisk ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
                     {form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่มีความเสี่ยงปนเปื้อน"}
-                  </Text>
-                </HStack>
-              </VStack>
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Safety Related */}
-            <HStack gap={3} vAlign="center" style={{ padding: "12px 0", borderBottom: "1px solid var(--cmms-border)" }}>
+            <div className="flex items-center gap-3 py-3 border-b border-[var(--cmms-border)]">
               <Switch
                 label="Safety Related"
                 isLabelHidden
-                value={form.safetyRelated}
-                onChange={(v: boolean) => update("safetyRelated", v)}
+                checked={form.safetyRelated}
+                onChange={(e) => update("safetyRelated", e.target.checked)}
               />
-              <VStack gap={0}>
-                <Text type="body" size="sm" weight="bold">เกี่ยวข้องกับความปลอดภัย</Text>
-                <Text type="body" size="2xs" color="secondary">
+              <div className="flex flex-col">
+                <p className="text-sm font-bold m-0">เกี่ยวข้องกับความปลอดภัย</p>
+                <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">
                   {form.safetyRelated ? "ใช่ — ต้องทำ LOTO / Work Permit" : "ไม่เกี่ยวข้อง"}
-                </Text>
-              </VStack>
-            </HStack>
+                </p>
+              </div>
+            </div>
 
             {/* Urgent Repair Toggle */}
             <div className={`cmms-contam-box ${form.isUrgent ? "risk" : "safe"}`}>
-              <VStack gap={3}>
-                <HStack gap={2} vAlign="center">
-                  <ExclamationTriangleIcon style={{ width: 18, height: 18 }} />
-                  <Text type="body" weight="bold">แจ้งซ่อมด่วน (Urgent Repair)</Text>
-                </HStack>
-                <HStack gap={3} vAlign="center">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={18} strokeWidth={1.75} />
+                  <p className="text-sm font-bold m-0">แจ้งซ่อมด่วน (Urgent Repair)</p>
+                </div>
+                <div className="flex items-center gap-3">
                   <Switch
                     label="Urgent Repair"
                     isLabelHidden
-                    value={form.isUrgent}
-                    onChange={(v: boolean) => update("isUrgent", v)}
+                    checked={form.isUrgent}
+                    onChange={(e) => update("isUrgent", e.target.checked)}
                   />
-                  <Text type="body" size="sm" style={{ color: form.isUrgent ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
+                  <p className="text-sm m-0" style={{ color: form.isUrgent ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
                     {form.isUrgent ? "🚨 แจ้งด่วน — ส่ง LINE + Telegram ทันที" : "ปกติ"}
-                  </Text>
-                </HStack>
-              </VStack>
+                  </p>
+                </div>
+              </div>
             </div>
 
-            {/* Photos — หลายไฟล์ + กล้อง */}
+            {/* Photos */}
             <div>
-              <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
-                <PaperClipIcon style={{ width: 14, height: 14, verticalAlign: -2 }} /> แนบรูปถ่ายจุดชำรุด (สูงสุด 5 รูป)
-              </Text>
+              <p className="text-sm font-bold mb-2">
+                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่ายจุดชำรุด (สูงสุด 5 รูป)
+              </p>
               <input
                 ref={photoInputRef}
                 type="file"
                 accept="image/*"
                 multiple
                 capture="environment"
-                style={{ display: "none" }}
+                className="hidden"
                 onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }}
               />
               <div className="cmms-photo-grid">
@@ -1301,89 +1263,90 @@ export default function RepairRequestForm() {
                     <img src={p} alt={`รูป ${i + 1}`} />
                     <button type="button" className="cmms-photo-remove"
                       onClick={() => update("photos", form.photos.filter((_, x) => x !== i))}>
-                      <XMarkIcon style={{ width: 14, height: 14 }} />
+                      <X size={14} strokeWidth={1.75} />
                     </button>
                   </div>
                 ))}
                 {form.photos.length < 5 && (
                   <button type="button" className="cmms-photo-add" onClick={() => photoInputRef.current?.click()}>
-                    <CameraIcon style={{ width: 24, height: 24 }} />
-                    <Text type="body" size="2xs" weight="bold">ถ่าย / เลือกรูป</Text>
+                    <Camera size={24} strokeWidth={1.75} />
+                    <p className="text-2xs font-bold m-0">ถ่าย / เลือกรูป</p>
                   </button>
                 )}
               </div>
             </div>
-          </VStack>
+          </div>
         </Card>
       )}
 
       {/* ============ STEP 4 : ยืนยัน ============ */}
       {step === 3 && (
-        <Card padding={5} className="cmms-card-flat">
-          <VStack gap={4}>
-            <Heading level={4}>ตรวจสอบก่อนส่ง</Heading>
+        <Card className="cmms-card-flat p-5">
+          <div className="flex flex-col gap-4">
+            <h4 className="text-base font-bold">ตรวจสอบก่อนส่ง</h4>
 
             <div className="cmms-summary-box">
               <SummaryRow label="เครื่องจักร" value={selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : form.machineCode} />
               <SummaryRow label="สถานะเครื่อง" value={machineStatusOptions.find((s) => s.value === form.machineStatus)?.label || "—"} />
               <SummaryRow label="ประเภทงาน" value={`${jobTypeOptions.find((j) => j.value === form.jobType)?.label || "—"} / ${jobDescriptionOptions.find((j) => j.value === form.jobDescription)?.label || "—"}`} />
-              <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${depts.find((d) => d.code === form.departmentCode)?.name || "—"})`} icon={<UserIcon style={{ width: 14, height: 14 }} />} />
-              <SummaryRow label="ติดต่อ" value={[form.phone, form.email].filter(Boolean).join(" · ") || "—"} icon={<PhoneIcon style={{ width: 14, height: 14 }} />} />
+              <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${depts.find((d) => d.code === form.departmentCode)?.name || "—"})`} icon={<User size={14} strokeWidth={1.75} />} />
+              <SummaryRow label="ติดต่อ" value={[form.phone, form.email].filter(Boolean).join(" · ") || "—"} icon={<Phone size={14} strokeWidth={1.75} />} />
               <SummaryRow label="สำนักงาน" value={form.office} />
               <SummaryRow label="Lot No." value={form.lotNo || "—"} />
-              <SummaryRow label="วันที่แจ้ง" value={new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })} icon={<ClockIcon style={{ width: 14, height: 14 }} />} />
+              <SummaryRow label="วันที่แจ้ง" value={new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })} icon={<Clock size={14} strokeWidth={1.75} />} />
             </div>
 
             <div>
-              <Text type="body" size="sm" weight="bold" color="secondary">รายละเอียดปัญหา</Text>
+              <p className="text-xs font-bold text-[var(--cmms-text-secondary)]">รายละเอียดปัญหา</p>
               <div className="cmms-summary-text">{form.symptoms}</div>
             </div>
 
-            <HStack gap={2} style={{ flexWrap: "wrap" }}>
-              <Badge label={form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่ปนเปื้อน"} variant={form.contaminationRisk ? "error" : "success"} />
-              {form.safetyRelated && <Badge label="🛡️ Safety" variant="error" />}
-              <Badge label={`📷 ${form.photos.length} รูป`} variant="info" />
-            </HStack>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={form.contaminationRisk ? "danger" : "success"}>
+                {form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่ปนเปื้อน"}
+              </Badge>
+              {form.safetyRelated && <Badge variant="danger">🛡️ Safety</Badge>}
+              <Badge variant="info">📷 {form.photos.length} รูป</Badge>
+            </div>
 
             {submitError && (
               <div className="cmms-submit-error">
-                <ExclamationTriangleIcon style={{ width: 16, height: 16 }} />
+                <AlertTriangle size={16} strokeWidth={1.75} />
                 {submitError}
               </div>
             )}
-          </VStack>
+          </div>
         </Card>
       )}
 
       {/* Sticky bottom bar */}
       <div className="cmms-mobile-bottom-bar">
-        <HStack gap={3} vAlign="center">
+        <div className="flex items-center gap-3">
           {step > 0 ? (
-            <Button label="ย้อนกลับ" variant="secondary" onClick={() => setStep(step - 1)} icon={<ArrowLeftIcon style={{ width: 16, height: 16 }} />} />
+            <Button variant="secondary" onClick={() => setStep(step - 1)}>
+              <ArrowLeft size={16} strokeWidth={1.75} /> ย้อนกลับ
+            </Button>
           ) : <div />}
-          <div style={{ flex: 1 }}>
+          <div className="flex-1">
             {step < 3 ? (
               <Button
-                label={["ถัดไป · รายละเอียดงาน", "ถัดไป · ผู้แจ้ง & รูป", "ถัดไป · ยืนยัน"][step]}
-                variant="primary"
-                width="100%"
-                isDisabled={!canNext()}
+                className="w-full"
+                disabled={!canNext()}
                 onClick={() => setStep(step + 1)}
-                icon={<ArrowRightIcon style={{ width: 16, height: 16 }} />}
-              />
+              >
+                {["ถัดไป · รายละเอียดงาน", "ถัดไป · ผู้แจ้ง & รูป", "ถัดไป · ยืนยัน"][step]} <ArrowRight size={16} strokeWidth={1.75} />
+              </Button>
             ) : (
               <Button
-                label="ยืนยัน & ส่งแจ้งซ่อม"
-                variant="primary"
-                width="100%"
-                isLoading={submitting}
-                isDisabled={submitting}
+                className="w-full"
+                disabled={submitting}
                 onClick={handleSubmit}
-                icon={<CheckCircleIcon style={{ width: 16, height: 16 }} />}
-              />
+              >
+                <CheckCircle size={16} strokeWidth={1.75} /> {submitting ? "กำลังส่ง…" : "ยืนยัน & ส่งแจ้งซ่อม"}
+              </Button>
             )}
           </div>
-        </HStack>
+        </div>
       </div>
     </div>
   );
@@ -1391,24 +1354,24 @@ export default function RepairRequestForm() {
 
 /* ---------- helpers ---------- */
 
-function FieldRow({ label, required, children }: { label: string; required?: boolean; children: ReactNode }) {
+function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div>
-      <Text type="body" weight="bold" style={{ marginBottom: 8 }}>
+      <p className="text-sm font-bold mb-2">
         {label} {required && <span className="cmms-req">*</span>}
-      </Text>
+      </p>
       {children}
     </div>
   );
 }
 
-function SummaryRow({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
+function SummaryRow({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <HStack hAlign="between" gap={3}>
-      <Text type="body" size="sm" color="secondary">{label}</Text>
-      <Text type="body" size="sm" weight="bold" style={{ textAlign: "right", display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-sm text-[var(--cmms-text-secondary)]">{label}</p>
+      <p className="text-sm font-bold flex items-center gap-1 flex-wrap justify-end text-right">
         {icon}{value}
-      </Text>
-    </HStack>
+      </p>
+    </div>
   );
 }

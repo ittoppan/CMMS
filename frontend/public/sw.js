@@ -33,7 +33,6 @@ const PRECACHE_URLS = [
  * (ไม่ได้อยู่ในลิสต์ = network-only เดิม — กันเห็นหน้าเก่าหลัง deploy) */
 const OFFLINE_ROUTES = [
   "/repair/request",
-  "/repair-request",
   "/repair/my_tasks",
   "/repair/view",
   "/pm_am/checksheet",
