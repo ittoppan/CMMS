@@ -62,7 +62,7 @@ renderHeader();
             <h1 class="text-2xl font-black">🛡️ ระบบใบอนุญาตทำงานความปลอดภัย & LOTO (Work Permit & Lockout/Tagout)</h1>
             <p class="text-xs text-rose-100 mt-1">อนุมัติงานเสี่ยงอันตรายสูง (Hot Work / Confined Space / High Work) และตัดระบบพลังงานก่อนเข้าซ่อม</p>
         </div>
-        <button onclick="document.getElementById('permitModal').style.display='flex'" class="btn btn-primary bg-white text-rose-900 hover:bg-rose-50 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg">
+        <button onclick="document.getElementById('permitModal').style.display='flex'" class="card btn btn-primary text-rose-900 hover:bg-rose-50 text-xs font-black px-4 py-2.5 shadow-lg">
             + ออกใบอนุญาตทำงานความปลอดภัยใหม่
         </button>
     </div>
@@ -74,7 +74,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Active Work Permits List -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 รายการใบอนุญาตทำงานความปลอดภัย (Safety Work Permits Registry)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($permits) ?> เอกสาร</span>
@@ -128,7 +128,7 @@ renderHeader();
 
 <!-- New Work Permit Modal -->
 <div id="permitModal" style="display:none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-2xl animate-fade-in">
+    <div class="card max-w-xl w-full p-6 space-y-4 shadow-2xl animate-fade-in">
         <div class="flex justify-between items-center border-b pb-3">
             <h3 class="font-extrabold text-slate-900 text-base">🛡️ สร้างใบอนุญาตทำงานความปลอดภัย & LOTO ใหม่</h3>
             <button onclick="document.getElementById('permitModal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>

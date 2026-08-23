@@ -41,7 +41,7 @@ renderHeader();
             <div class="cmms-section-title">⌨️ หรือค้นหาด้วยรหัส</div>
             <form method="GET" class="flex gap-2">
                 <input type="text" name="code" value="<?= htmlspecialchars($code) ?>" placeholder="รหัสอะไหล่ / Sage No. / ชื่อ..." autofocus
-                       class="flex-1 h-11 px-3 rounded-lg border border-border bg-white dark:bg-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/40">
+                       class="card flex-1 h-11 px-3 border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent/40">
                 <button type="submit" class="h-11 px-4 bg-accent text-white rounded-lg text-sm font-bold">ค้นหา</button>
             </form>
 

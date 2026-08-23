@@ -207,7 +207,7 @@ renderHeader();
 
 <!-- Modal: Add Item -->
 <div id="add-item-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 space-y-4">
+    <div class="card shadow-2xl w-full max-w-lg p-6 space-y-4">
         <h3 class="font-bold text-slate-900 text-lg border-b pb-2">➕ เพิ่มรายการตรวจเช็คใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="add_item" value="1">

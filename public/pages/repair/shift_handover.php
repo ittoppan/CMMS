@@ -82,7 +82,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Pending Tasks Summary Card -->
-    <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-6 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
             <span>📋 รายการงานซ่อมค้างที่ต้องส่งมอบเข้ากะถัดไป (<?= count($pendingTasks) ?> รายการ)</span>
             <span class="badge badge badge-warning text-xs font-bold">Pending Tasks</span>
@@ -121,7 +121,7 @@ renderHeader();
     </div>
 
     <!-- Handover Form -->
-    <form method="POST" class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <form method="POST" class="card p-6 space-y-4">
         <input type="hidden" name="submit_handover" value="1">
 
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center gap-2">

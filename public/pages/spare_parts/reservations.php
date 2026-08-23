@@ -32,19 +32,19 @@ renderHeader();
 
     <!-- Overview Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">จำนวนรายการที่มีการจอง</span>
             <span class="text-3xl font-extrabold text-amber-600 mt-1 block">
                 <?= count(array_filter($parts, fn($p) => $p['reserved_qty'] > 0)) ?>
             </span>
         </div>
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">จำนวนชิ้นรวมที่ถูกจอง (Reserved)</span>
             <span class="text-3xl font-extrabold text-indigo-600 mt-1 block">
                 <?= number_format(array_sum(array_column($parts, 'reserved_qty')), 0) ?>
             </span>
         </div>
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">อะไหล่พร้อมใช้งาน (Available Stock)</span>
             <span class="text-3xl font-extrabold text-emerald-600 mt-1 block">
                 <?= number_format(array_sum(array_column($parts, 'available_qty')), 0) ?>
@@ -53,7 +53,7 @@ renderHeader();
     </div>
 
     <!-- Reservation Table -->
-    <div class="card overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-200 font-bold text-gray-900">
             📊 รายละเอียดสต็อกและการจองอะไหล่ (Stock & Reservation Balance)
         </div>

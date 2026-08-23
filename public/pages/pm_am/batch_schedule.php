@@ -125,7 +125,7 @@ renderHeader();
             <h1 class="text-2xl font-black">🗓️ ระบบเพิ่มงาน PM/AM ประจำปีอัตโนมัติในครั้งเดียว</h1>
             <p class="text-xs text-indigo-100 mt-1">สร้างตารางการบำรุงรักษาล่วงหน้าตลอดทั้งปี ทั้งเช็คประจำวัน, ประจำเดือน, ครึ่งปี และบำรุงใหญ่ประจำปี</p>
         </div>
-        <a href="calendar.php" class="btn bg-white text-indigo-800 font-bold text-xs shadow hover:bg-indigo-50">
+        <a href="calendar.php" class="card btn text-indigo-800 font-bold text-xs shadow hover:bg-indigo-50">
             📅 ดูปฏิทิน PM ทั้งหมด →
         </a>
     </div>
@@ -179,7 +179,7 @@ renderHeader();
             </span>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <label class="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400">
+                <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_daily" checked class="w-4 h-4 text-indigo-600">
                     <div>
                         <span class="font-bold text-slate-900 block">☀️ เช็คประจำวัน (Daily Inspection - F-EN-07)</span>
@@ -187,7 +187,7 @@ renderHeader();
                     </div>
                 </label>
 
-                <label class="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400">
+                <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_monthly" checked class="w-4 h-4 text-indigo-600">
                     <div>
                         <span class="font-bold text-slate-900 block">📅 เช็คประจำเดือน (Monthly Maintenance - F-EN-06)</span>
@@ -195,7 +195,7 @@ renderHeader();
                     </div>
                 </label>
 
-                <label class="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400">
+                <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_6month" checked class="w-4 h-4 text-indigo-600">
                     <div>
                         <span class="font-bold text-slate-900 block">🗓️ เช็คประจำ 6 เดือน (Semi-Annual Maintenance - F-EN-14)</span>
@@ -203,7 +203,7 @@ renderHeader();
                     </div>
                 </label>
 
-                <label class="flex items-center gap-2 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-indigo-400">
+                <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_annual" checked class="w-4 h-4 text-indigo-600">
                     <div>
                         <span class="font-bold text-slate-900 block">🏆 เช็คบำรุงใหญ่ประจำปี (Annual Maintenance - F-EN-15)</span>

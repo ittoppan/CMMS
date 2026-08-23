@@ -34,7 +34,7 @@ renderHeader();
             <h1 class="text-2xl font-black">🧠 ระบบวิเคราะห์หาสาเหตุรากเหง้า RCA (Root Cause Analysis Engine)</h1>
             <p class="text-xs text-purple-100 mt-1">ขจัดปัญหาเครื่องจักรเสียซ้ำซากด้วยเทคนิค 5 Why Analysis, Fishbone Diagram (6M), และรหัสอาการเสียมาตรฐาน (Failure Code Standard)</p>
         </div>
-        <button onclick="document.getElementById('rcaModal').style.display='flex'" class="btn btn-primary bg-white text-purple-900 hover:bg-purple-50 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg">
+        <button onclick="document.getElementById('rcaModal').style.display='flex'" class="card btn btn-primary text-purple-900 hover:bg-purple-50 text-xs font-black px-4 py-2.5 shadow-lg">
             + บันทึกวิเคราะห์ RCA ใบงานใหม่
         </button>
     </div>
@@ -46,7 +46,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Visual 6M Fishbone Diagram Showcase -->
-    <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-6 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>🐟 แผงผังแสดงก้างปลาวิเคราะห์ 6M (Fishbone / Ishikawa Diagram)</span>
             <span class="text-xs text-slate-400">วิธีวิเคราะห์ครอบคลุม 6 มิติ</span>
@@ -84,7 +84,7 @@ renderHeader();
 
 <!-- Modal Create RCA -->
 <div id="rcaModal" style="display:none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl my-8">
+    <div class="card max-w-2xl w-full p-6 space-y-4 shadow-2xl my-8">
         <div class="flex justify-between items-center border-b pb-3">
             <h3 class="font-extrabold text-slate-900 text-base">🧠 บันทึกการวิเคราะห์หาสาเหตุรากเหง้า (RCA Form)</h3>
             <button onclick="document.getElementById('rcaModal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>

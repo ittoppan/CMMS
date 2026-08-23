@@ -40,7 +40,7 @@ renderHeader();
 <div class="space-y-6">
     
     <!-- Top Header Banner -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Flex Studio Pro v3.0</span>
@@ -67,7 +67,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- 1-Click Preset Template Selector -->
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+    <div class="card p-5 space-y-3">
         <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between">
             <span>⚡ เลือกใช้แม่แบบสำเร็จรูป 1-Click Preset Templates:</span>
             <span class="text-xs text-indigo-600 font-bold">4 Ready-to-Use Enterprise Templates</span>
@@ -207,7 +207,7 @@ renderHeader();
                     <div class="text-center text-[10px] text-white/80 font-bold">วันนี้ <?= date('H:i') ?></div>
 
                     <!-- LINE Flex Message Bubble Container -->
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden max-w-[270px] text-xs">
+                    <div class="card shadow-md overflow-hidden max-w-[270px] text-xs">
                         
                         <!-- Flex Header -->
                         <div id="preview-header-bg" class="bg-rose-600 text-white p-3 font-bold text-sm flex items-center justify-between">

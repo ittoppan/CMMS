@@ -62,7 +62,7 @@ renderHeader();
             <h1 class="text-2xl font-black">🔌 ศูนย์เลือกระบุเลข PO จาก Sage 300 เข้าประวัติเครื่องจักร</h1>
             <p class="text-xs text-blue-100 mt-1">เลือกรายการ PO ที่เปิดสำเร็จในระบบ Sage 300 เพื่อดึงยอดเงินและซัพพลายเออร์ผูกเข้าประวัติเครื่องจักร ISO F-EN-01 (ลดความผิดพลาด)</p>
         </div>
-        <button onclick="document.getElementById('linkPoModal').style.display='flex'" class="btn btn-primary bg-white text-indigo-900 hover:bg-blue-50 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg">
+        <button onclick="document.getElementById('linkPoModal').style.display='flex'" class="card btn btn-primary text-indigo-900 hover:bg-blue-50 text-xs font-black px-4 py-2.5 shadow-lg">
             + เลือกผูกเลข PO Sage 300 เข้าใบงาน
         </button>
     </div>
@@ -74,7 +74,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Sage 300 PO Cost Linked Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ประวัติการผูกเลข PO Sage 300 เข้ากับเครื่องจักร (Sage 300 PO Cost History)</span>
             <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($linkedOrders) ?> รายการ</span>
@@ -120,7 +120,7 @@ renderHeader();
 
 <!-- Modal Link Sage 300 PO with Smart Dropdown Selector -->
 <div id="linkPoModal" style="display:none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-fade-in">
+    <div class="card max-w-lg w-full p-6 space-y-4 shadow-2xl animate-fade-in">
         <div class="flex justify-between items-center border-b pb-3">
             <h3 class="font-extrabold text-slate-900 text-base">🛒 เลือกผูกเลข PO จาก Sage 300 เข้าใบงานซ่อม</h3>
             <button onclick="document.getElementById('linkPoModal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>

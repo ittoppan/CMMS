@@ -262,7 +262,7 @@ renderHeader();
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-center">
                         <label class="font-bold text-slate-700 block text-xs">โลโก้หลัก (Light Theme)</label>
-                        <div class="w-full h-14 bg-white border border-slate-300 rounded-lg p-2 flex items-center justify-center shadow-sm mx-auto">
+                        <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($companyLogo, 'asset') ?>" class="max-h-full object-contain">
                         </div>
                         <input type="file" name="company_logo" accept="image/*" class="block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
@@ -278,7 +278,7 @@ renderHeader();
 
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-center">
                         <label class="font-bold text-slate-700 block text-xs">Favicon แท็บเบราว์เซอร์</label>
-                        <div class="w-full h-14 bg-white border border-slate-300 rounded-lg p-2 flex items-center justify-center shadow-sm mx-auto">
+                        <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($faviconIcon, 'asset') ?>" class="w-7 h-7 object-contain">
                         </div>
                         <input type="file" name="favicon_icon" accept="image/*" class="block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
@@ -560,7 +560,7 @@ renderHeader();
             <div class="p-3 bg-slate-800 rounded-xl border border-slate-700 flex items-center justify-between">
                 <span class="text-[11px] font-bold text-slate-400">มุมขวาบน (Header):</span>
                 <div class="flex items-center gap-2">
-                    <img id="preview-header-logo" src="<?= getImageUrl($companyLogo, 'asset') ?>" class="w-7 h-7 rounded-md object-contain bg-white p-0.5 shadow-sm">
+                    <img id="preview-header-logo" src="<?= getImageUrl($companyLogo, 'asset') ?>" class="card w-7 h-7 rounded-md object-contain p-0.5">
                     <span id="preview-company-name" class="text-xs font-black text-white"><?= htmlspecialchars($companyName) ?></span>
                 </div>
             </div>
@@ -579,7 +579,7 @@ renderHeader();
             </div>
 
             <!-- ISO Document Header Preview -->
-            <div class="p-3 bg-white text-slate-900 rounded-xl border border-slate-300 space-y-1 text-xs">
+            <div class="card p-3 text-slate-900 space-y-1 text-xs">
                 <span class="text-[10px] font-bold text-slate-400 uppercase block">ตัวอย่างส่วนหัวเอกสาร ISO F-EN:</span>
                 <div class="font-extrabold text-indigo-900 border-b pb-1 text-[11px]"><?= htmlspecialchars($isoHeaderTitle) ?></div>
                 <div class="text-[9px] text-slate-500 italic pt-0.5"><?= htmlspecialchars($isoFooterNote) ?></div>

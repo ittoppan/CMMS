@@ -24,7 +24,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Top Header -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <a href="index.php" class="text-sm text-brand-600 hover:underline">&larr; กลับไปงาน PM</a>
@@ -57,7 +57,7 @@ renderHeader();
         <?php foreach ($templates as $t): 
             $itemCount = (int)$pdo->query("SELECT COUNT(*) FROM checklist_template_items WHERE template_id = " . (int)$t['id'])->fetchColumn();
         ?>
-        <div draggable="true" data-id="<?= $t['id'] ?>" class="template-card card p-5 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-indigo-400 transition-all cursor-grab active:cursor-grabbing">
+        <div draggable="true" data-id="<?= $t['id'] ?>" class="template-card card p-5 flex flex-col justify-between hover:border-indigo-400 transition-all cursor-grab active:cursor-grabbing">
             <div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -84,7 +84,7 @@ renderHeader();
 
 <!-- Modal: New Template -->
 <div id="new-template-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
+    <div class="card shadow-2xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-slate-900 text-lg border-b pb-2">➕ สร้างเทมเพลตเช็คชีทใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="create_template" value="1">

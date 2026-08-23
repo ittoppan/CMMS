@@ -34,7 +34,7 @@ renderHeader();
     <div id="view-desktop" class="space-y-6">
         <!-- Reusable KPI Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+            <div class="card p-5 space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
                     <span>AVAILABILITY %</span>
                     <span class="text-emerald-500 font-black">↗ +1.2%</span>
@@ -45,7 +45,7 @@ renderHeader();
                 </div>
             </div>
 
-            <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+            <div class="card p-5 space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
                     <span>MTBF (MEAN TIME BETWEEN FAILURES)</span>
                     <span class="text-emerald-500 font-black">↗ +14 hrs</span>
@@ -56,7 +56,7 @@ renderHeader();
                 </div>
             </div>
 
-            <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+            <div class="card p-5 space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
                     <span>MTTR (MEAN TIME TO REPAIR)</span>
                     <span class="text-emerald-500 font-black">↘ -8 mins</span>
@@ -67,7 +67,7 @@ renderHeader();
                 </div>
             </div>
 
-            <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+            <div class="card p-5 space-y-2">
                 <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
                     <span>MAINTENANCE COST (SAGE 300)</span>
                     <span class="text-rose-500 font-black">฿ 248,500</span>

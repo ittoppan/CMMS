@@ -32,7 +32,7 @@ renderHeader();
     </div>
 
     <!-- TCO Machines Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📊 ตารางคำนวณ TCO และประเมินจุดคุ้มทุนการบำรุงรักษา</span>
             <span class="text-xs text-slate-400">สูตร: ราคาจัดซื้อ + ค่าซ่อมสะสม - มูลค่าเสื่อมสภาพ</span>

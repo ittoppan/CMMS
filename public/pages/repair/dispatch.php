@@ -21,13 +21,13 @@ renderHeader();
             <h1 class="text-2xl font-black">🔄 ระบบจัดคิวงานซ่อมช่างแมตช์สกิลอัตโนมัติ (AI Auto Scheduler)</h1>
             <p class="text-xs text-blue-100 mt-1">วิเคราะห์ภาระงานช่าง (Workload) ความเชี่ยวชาญเฉพาะทาง (Skill Match) และสถานะความว่าง เพื่อจ่ายงานให้ช่างที่เหมาะสมที่สุดอัตโนมัติ</p>
         </div>
-        <button onclick="location.reload();" class="btn btn-primary bg-white text-indigo-900 hover:bg-blue-50 text-xs font-black px-4 py-2.5 rounded-xl shadow-lg">
+        <button onclick="location.reload();" class="card btn btn-primary text-indigo-900 hover:bg-blue-50 text-xs font-black px-4 py-2.5 shadow-lg">
             ⚡ คำนวณแมตช์คิวงานซ่อมสด
         </button>
     </div>
 
     <!-- AI Match Results Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ผลการวิเคราะห์จัดคิวงานซ่อมอัตโนมัติ (AI Matched Dispatch Assignments)</span>
             <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($matches) ?> ใบงาน</span>

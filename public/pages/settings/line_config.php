@@ -82,7 +82,7 @@ renderHeader();
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                 <span>🎨 ออกแบบข้อความ LINE Flex →</span>
             </a>
-            <a href="line_richmenu.php" class="btn bg-white text-emerald-800 font-extrabold text-xs shadow hover:bg-emerald-50 gap-1">
+            <a href="line_richmenu.php" class="card btn text-emerald-800 font-extrabold text-xs shadow hover:bg-emerald-50 gap-1">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
                 <span>LINE Rich Menu</span>
             </a>
@@ -98,7 +98,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Form: Configuration -->
-    <form method="POST" class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-6">
+    <form method="POST" class="card p-6 space-y-6">
         <input type="hidden" name="save_line_config" value="1">
 
         <!-- Section 1: LINE Notify Token -->

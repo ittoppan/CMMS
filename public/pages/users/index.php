@@ -23,7 +23,7 @@ $rows = $stmt->fetchAll();
         <div><h1 class="text-2xl font-bold text-gray-900">ผู้ใช้ระบบ</h1><p class="mt-1 text-sm text-gray-500">Users</p></div>
         <a href="create.php" class="btn-primary">+ เพิ่มผู้ใช้</a>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
+    <div class="card p-4 shadow">
         <?php include __DIR__ . '/../../../src/components/search_form.php'; ?>
     </div>
     <div class="card overflow-hidden">

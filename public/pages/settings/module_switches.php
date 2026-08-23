@@ -97,7 +97,7 @@ renderHeader();
         <input type="hidden" name="save_switches" value="1">
 
         <?php foreach ($allModules as $groupTitle => $modules): ?>
-        <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="card p-6 space-y-4">
             <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
                 <span>📁 <?= htmlspecialchars($groupTitle) ?></span>
                 <span class="text-xs font-bold text-slate-400"><?= count($modules) ?> Modules</span>

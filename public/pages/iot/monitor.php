@@ -51,7 +51,7 @@ renderHeader();
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-center">
-                <div class="p-3 bg-white border rounded-xl space-y-1">
+                <div class="card p-3 border space-y-1">
                     <span class="text-[10px] font-bold text-slate-500 uppercase block">VIBRATION (ความสั่น)</span>
                     <div id="vib-<?= $dev['id'] ?>" class="text-2xl font-black <?= $isAlarm ? 'text-rose-600' : 'text-indigo-900' ?>">
                         <?= $isAlarm ? '4.8' : '1.4' ?> <span class="text-xs font-normal">mm/s</span>
@@ -59,7 +59,7 @@ renderHeader();
                     <span class="text-[9px] text-slate-400 font-bold">เกณฑ์เตือน: > <?= $dev['vibration_threshold'] ?> mm/s</span>
                 </div>
 
-                <div class="p-3 bg-white border rounded-xl space-y-1">
+                <div class="card p-3 border space-y-1">
                     <span class="text-[10px] font-bold text-slate-500 uppercase block">TEMP (อุณหภูมิ)</span>
                     <div id="temp-<?= $dev['id'] ?>" class="text-2xl font-black text-purple-700">
                         <?= $isAlarm ? '68.5' : '48.2' ?> <span class="text-xs font-normal">°C</span>

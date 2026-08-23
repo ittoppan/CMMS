@@ -63,7 +63,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Header Banner -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <span class="badge bg-purple-100 text-purple-800 font-bold">Hybrid Inventory Management</span>
@@ -81,7 +81,7 @@ renderHeader();
     </div>
 
     <!-- Source Type Filter Bar -->
-    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-4 text-xs">
+    <div class="card p-4 flex items-center justify-between flex-wrap gap-4 text-xs">
         <div class="flex items-center gap-2">
             <span class="font-bold text-slate-700">ตัวกรองคลัง:</span>
             <a href="index.php" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === '' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200' ?>">
@@ -103,7 +103,7 @@ renderHeader();
     </div>
 
     <!-- Table List -->
-    <div class="card overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
+    <div class="card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-slate-50 border-b border-slate-200">
@@ -174,7 +174,7 @@ renderHeader();
 
 <!-- Modal: Bind Legacy Item to Sage 300 -->
 <div id="bind-sage-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 space-y-4">
+    <div class="card shadow-2xl w-full max-w-md p-6 space-y-4">
         <h3 class="font-bold text-slate-900 text-lg border-b pb-2">🔗 ผูกรายการอะไหล่เก่าเข้ากับ Sage 300</h3>
         <p class="text-xs text-slate-500" id="bind-item-name-label">เลือกรายการอะไหล่ใน Sage 300 เพื่อแมตช์จับคู่</p>
 

@@ -190,7 +190,7 @@ renderHeader();
             <p class="text-xs text-purple-100 mt-1">กรองเฉพาะหมวดหมู่ <strong>15400 ถึง 15404</strong> ใน Sage 300 ดึงข้อมูลรายการอะไหล่, ยอดคงเหลือ, ราคาเฉลี่ย และหน่วยนับเข้าสู่ CMMS</p>
         </div>
         <div class="flex gap-2">
-            <a href="index.php" class="btn bg-white text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
+            <a href="index.php" class="card btn text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
                 ⚙️ ดูคลังอะไหล่ทั้งหมด →
             </a>
         </div>
@@ -313,7 +313,7 @@ renderHeader();
     </div>
 
     <!-- CMMS Spare Parts Catalog Table -->
-    <div class="card overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+    <div class="card overflow-hidden space-y-3">
         <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
             <span>📦 รายการอะไหล่ทั้งหมดที่ซิงค์มาจาก Sage 300 (CMMS Master Catalog)</span>
             <span class="text-xs text-purple-600 font-bold">Sage 300 Matched</span>

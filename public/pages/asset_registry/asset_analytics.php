@@ -87,7 +87,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Top Header Banner -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Asset 360 Analytics</span>
@@ -161,7 +161,7 @@ renderHeader();
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Spare Parts Issued Table (2 cols wide) -->
-        <div class="lg:col-span-2 card bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
+        <div class="lg:col-span-2 card overflow-hidden space-y-3">
             <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
                 <span>📦 รายการอะไหล่ที่มีการเบิกสำหรับเครื่องจักรนี้ (Spare Parts Issued Breakdown)</span>
                 <span class="text-xs text-purple-600 font-bold">Sage 300 Matched</span>
@@ -209,7 +209,7 @@ renderHeader();
     </div>
 
     <!-- Recent Repair Orders Table -->
-    <div class="card bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="card overflow-hidden">
         <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
             <span>🔧 ประวัติใบสั่งซ่อมเครื่องจักร F-EN-03 (Repair History Logs)</span>
             <a href="../repair/create.php?asset_id=<?= $assetId ?>" class="text-xs text-indigo-600 font-bold hover:underline">+ แจ้งซ่อมเครื่องนี้ →</a>

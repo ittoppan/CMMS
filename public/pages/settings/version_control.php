@@ -21,7 +21,7 @@ renderHeader();
     </div>
 
     <!-- Document Version Control Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ทะเบียนควบคุมเวอร์ชันเอกสาร ISO (ISO Controlled Documents Table)</span>
             <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">ISO Audited</span>

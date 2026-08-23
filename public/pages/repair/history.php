@@ -66,7 +66,7 @@ try {
         </div>
     </div>
 
-    <div class="bg-white p-4 rounded-lg shadow">
+    <div class="card p-4 shadow">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <div><label class="block text-xs font-medium text-gray-600 mb-1">ค้นหา</label><input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="ค้นหา..." class="w-48 px-3 py-2 border border-gray-300 rounded-md text-sm"></div>
             <div><label class="block text-xs font-medium text-gray-600 mb-1">สถานะ</label>
@@ -122,7 +122,7 @@ try {
         </form>
     </div>
 
-    <div class="bg-white shadow rounded-lg overflow-hidden overflow-x-auto">
+    <div class="card shadow overflow-hidden overflow-x-auto">
         <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>

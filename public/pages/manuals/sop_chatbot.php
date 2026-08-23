@@ -21,7 +21,7 @@ renderHeader();
     </div>
 
     <!-- Chatbot Container Card -->
-    <div class="card bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden flex flex-col h-[520px]">
+    <div class="card shadow-xl overflow-hidden flex flex-col h-[520px]">
         <!-- Chat Header -->
         <div class="bg-slate-900 text-white p-4 font-bold text-xs flex items-center justify-between border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -36,7 +36,7 @@ renderHeader();
             <!-- AI Welcome Message -->
             <div class="flex gap-2 max-w-lg">
                 <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-black shrink-0 text-xs">AI</div>
-                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm text-slate-800 leading-relaxed">
+                <div class="card p-3.5 text-slate-800 leading-relaxed">
                     สวัสดีครับผมคือ **AI ผู้ช่วยตอบคู่มือการซ่อมบำรุง (Maintenance SOP Chatbot)** 🤖<br><br>
                     สามารถสอบถามวิธีแก้ไข Error Code หรือขั้นตอนซ่อมได้เลยครับ เช่น:<br>
                     - *"วิธีแก้ไข Error Code E-402 มอเตอร์อุณหภูมิสูง"*<br>
@@ -81,7 +81,7 @@ function sendChat(e) {
         aiDiv.className = 'flex gap-2 max-w-lg';
         aiDiv.innerHTML = `
             <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-black shrink-0 text-xs">AI</div>
-            <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm text-slate-800 leading-relaxed">
+            <div class="card p-3.5 text-slate-800 leading-relaxed">
                 🔍 <strong>คำแนะนำการแก้ไขตามคู่มือ ISO SOP:</strong><br><br>
                 สำหรับคำถาม <em>"${escapeHtml(txt)}"</em><br>
                 1. ตรวจสอบระดับน้ำมันหล่อลื่นและแรงดันลมในระบบ<br>

@@ -71,7 +71,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Backup List Table -->
-    <div class="card overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-200">
             <h2 class="font-bold text-gray-900 text-base">📁 ไฟล์สำรองข้อมูลทั้งหมด (Backup Files History)</h2>
         </div>

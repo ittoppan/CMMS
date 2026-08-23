@@ -34,7 +34,7 @@ renderHeader();
             <h1 class="text-2xl font-black">🔄 โครงสร้างพังผืดชิ้นส่วนเครื่องจักร BOM Tree Viewer</h1>
             <p class="text-xs text-blue-100 mt-1">แสดงพิกัดชิ้นส่วนเครื่องจักร <?= htmlspecialchars($asset['code']) ?> - <?= htmlspecialchars($asset['name']) ?> และรหัสเบิกอะไหล่ Sage 300</p>
         </div>
-        <a href="/pages/asset_registry/history.php?id=<?= $asset['id'] ?>" class="btn btn-primary bg-white text-indigo-900 hover:bg-blue-50 text-xs font-bold px-4 py-2 rounded-xl shadow-md">
+        <a href="/pages/asset_registry/history.php?id=<?= $asset['id'] ?>" class="card btn btn-primary text-indigo-900 hover:bg-blue-50 text-xs font-bold px-4 py-2 shadow-md">
             📑 บัตรประวัติ F-EN-01
         </a>
     </div>
@@ -43,7 +43,7 @@ renderHeader();
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Tree View Structure Column -->
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <h3 class="font-extrabold text-slate-900 text-base border-b pb-2">🌳 โครงสร้างต้นไม้ (Asset Hierarchy Tree)</h3>
 
             <div class="space-y-2 text-xs font-bold">
@@ -74,7 +74,7 @@ renderHeader();
         </div>
 
         <!-- BOM Spares Table Column -->
-        <div class="lg:col-span-2 card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="lg:col-span-2 card p-5 space-y-3">
             <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
                 <span>📦 รายการชิ้นส่วนอะไหล่ BOM (Machine Bill of Materials)</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($bomSpares) ?> รายการ</span>

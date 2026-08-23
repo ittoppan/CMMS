@@ -40,7 +40,7 @@ $curYear = (int)date('Y');
         <div><h1 class="text-2xl font-bold text-gray-900">ปฏิทินสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Calibration Calendar</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปรายการ</a>
     </div>
-    <div class="bg-white rounded-lg shadow p-4">
+    <div class="card shadow p-4">
         <div class="flex items-center justify-between mb-4">
             <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="px-3 py-1 text-sm border rounded hover:bg-gray-50">&larr; <?= $thaiMonths[$prevMonth] ?></a>
             <h2 class="text-lg font-semibold"><?= $thaiMonths[$month] ?> <?= $year + 543 ?></h2>

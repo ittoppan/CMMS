@@ -80,7 +80,7 @@ renderHeader();
     </div>
 
     <!-- Asset Details Card -->
-    <div class="card p-6 bg-white shadow-sm rounded-xl border border-gray-200 space-y-4">
+    <div class="card p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-gray-200 pb-4 flex-wrap gap-4">
             <div class="flex items-center gap-4">
                 <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-slate-300 shadow-sm shrink-0">
@@ -105,7 +105,7 @@ renderHeader();
     </div>
 
     <!-- 1. Repair History -->
-    <div class="card p-4 bg-white rounded-lg shadow-sm">
+    <div class="card p-4">
         <h2 class="text-lg font-bold text-gray-900 mb-3">🔧 1. ประวัติงานซ่อม (Repair Orders Log)</h2>
         <?php if (empty($repairList)): ?>
         <p class="text-sm text-gray-500 text-center py-4">ไม่มีประวัติการซ่อม</p>
@@ -140,7 +140,7 @@ renderHeader();
     </div>
 
     <!-- 2. PM History -->
-    <div class="card p-4 bg-white rounded-lg shadow-sm">
+    <div class="card p-4">
         <h2 class="text-lg font-bold text-gray-900 mb-3">📋 2. ประวัติการทำ PM/AM (Preventive Maintenance Log)</h2>
         <?php if (empty($pmList)): ?>
         <p class="text-sm text-gray-500 text-center py-4">ไม่มีประวัติ PM/AM</p>

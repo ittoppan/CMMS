@@ -22,7 +22,7 @@ renderHeader();
 
     <!-- BI Architecture Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Power BI / Tableau / Metabase</span>
             <h3 class="font-extrabold text-slate-900 text-base">📊 1. Power BI Live OData Connector</h3>
             <p class="text-xs text-slate-600">เชื่อมต่อพอร์ต OData / MySQL Read-Replica เข้าสูซอฟต์แวร์ Power BI เพื่อสร้างดาดช์บอร์ดกราฟผู้บริหารระดับองค์กรแบบวิเคราะห์เชิงลึก</p>
@@ -31,7 +31,7 @@ renderHeader();
             </a>
         </div>
 
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <span class="badge badge badge-success font-bold text-xs">ETL Pipeline</span>
             <h3 class="font-extrabold text-slate-900 text-base">🔄 2. Scheduled Data Warehouse Refresh</h3>
             <p class="text-xs text-slate-600">ท่อส่งข้อมูล ETL สรุปผลยอดซ่อมบำรุง, ค่าใช้จ่ายอะไหล่ Sage 300, และ OEE เข้า Data Warehouse ทุกเที่ยงคืนโดยอัตโนมัติ</p>

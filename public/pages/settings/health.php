@@ -129,22 +129,22 @@ renderHeader();
 
     <!-- Server Disk Summary -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="card p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-4">
             <span class="text-xs font-bold text-gray-500 block">พื้นที่ว่างฮาร์ดดิสก์ (Drive C:)</span>
             <span class="text-2xl font-extrabold text-brand-600 mt-1 block"><?= $freeSpace ?> GB / <?= $totalSpace ?> GB</span>
         </div>
-        <div class="card p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-4">
             <span class="text-xs font-bold text-gray-500 block">เวอร์ชัน PHP</span>
             <span class="text-2xl font-extrabold text-emerald-600 mt-1 block">PHP <?= phpversion() ?></span>
         </div>
-        <div class="card p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="card p-4">
             <span class="text-xs font-bold text-gray-500 block">Web Server Host</span>
             <span class="text-lg font-bold text-gray-800 mt-1 block truncate"><?= $_SERVER['HTTP_HOST'] ?></span>
         </div>
     </div>
 
     <!-- Automation Status -->
-    <div class="card overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-200">
             <h2 class="font-bold text-gray-900 text-base">🤖 ระบบอัตโนมัติ (Watchdog / Tunnel / Backup)</h2>
         </div>
@@ -218,7 +218,7 @@ renderHeader();
     </div>
 
     <!-- Diagnostic Checks Table -->
-    <div class="card overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="card overflow-hidden">
         <div class="p-4 border-b border-gray-200">
             <h2 class="font-bold text-gray-900 text-base">📋 รายงานผลการตรวจสอบ 4 จุดสำคัญ</h2>
         </div>

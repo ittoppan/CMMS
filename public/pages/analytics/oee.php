@@ -49,7 +49,7 @@ renderHeader();
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <!-- 1. Availability Rate -->
-        <div class="card p-5 bg-white rounded-2xl border-2 border-indigo-200 shadow-sm space-y-3">
+        <div class="card p-5 border-2 border-indigo-200 space-y-3">
             <div class="flex items-center justify-between">
                 <span class="font-extrabold text-indigo-900 text-sm">⏱️ 1. Availability Rate (อัตราความพร้อมใช้งาน)</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= $avail !== null ? $avail . '%' : 'N/A' ?></span>
@@ -61,7 +61,7 @@ renderHeader();
         </div>
 
         <!-- 2. Performance Rate -->
-        <div class="card p-5 bg-white rounded-2xl border-2 border-purple-200 shadow-sm space-y-3">
+        <div class="card p-5 border-2 border-purple-200 space-y-3">
             <div class="flex items-center justify-between">
                 <span class="font-extrabold text-purple-900 text-sm">⚡ 2. Performance Rate (สมรรถนะการเดินเครื่อง)</span>
                 <span class="badge bg-purple-100 text-purple-800 font-bold text-xs"><?= $perf !== null ? $perf . '%' : 'N/A' ?></span>
@@ -73,7 +73,7 @@ renderHeader();
         </div>
 
         <!-- 3. Quality Rate -->
-        <div class="card p-5 bg-white rounded-2xl border-2 border-emerald-200 shadow-sm space-y-3">
+        <div class="card p-5 border-2 border-emerald-200 space-y-3">
             <div class="flex items-center justify-between">
                 <span class="font-extrabold text-emerald-900 text-sm">🎯 3. Quality Rate (คุณภาพชิ้นงานดี)</span>
                 <span class="badge badge badge-success font-bold text-xs"><?= $qual !== null ? $qual . '%' : 'N/A' ?></span>

@@ -36,7 +36,7 @@ renderHeader();
     </div>
 
     <!-- Supplier Scorecard Table -->
-    <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-6 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
             <span>📊 ตารางคะแนนและเกรดผู้จำหน่ายประจำปี (Vendor Performance Matrix)</span>
             <span class="text-xs text-amber-700 font-bold">ISO 9001 Approved Vendors</span>

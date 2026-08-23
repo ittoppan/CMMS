@@ -35,7 +35,7 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
         <div><h1 class="text-2xl font-bold text-gray-900">ประวัติการสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Calibration History</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปรายการ</a>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow">
+    <div class="card p-4 shadow">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <div>
                 <label class="block text-xs font-medium text-gray-600 mb-1">ทรัพย์สิน</label>

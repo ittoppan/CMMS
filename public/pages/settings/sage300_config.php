@@ -99,7 +99,7 @@ renderHeader();
             <a href="../spare_parts/sage_sync.php" class="btn bg-amber-400 text-slate-900 font-extrabold text-xs shadow hover:bg-amber-300 gap-1">
                 <span>🏷️</span> <span>ตั้งค่าหมวดหมู่อะไหล่ Sage 300 →</span>
             </a>
-            <a href="../spare_parts/issue_center.php" class="btn bg-white text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
+            <a href="../spare_parts/issue_center.php" class="card btn text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
                 📦 ศูนย์เบิก-จ่าย Sage 300
             </a>
         </div>
@@ -118,7 +118,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- 1-Click Environment Switcher Buttons -->
-    <div class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-6 space-y-4">
         <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">
             <span>🎛️ ปุ่มสลับสภาพแวดล้อม 1-Click Sage 300 Environment Switcher:</span>
             <span class="text-xs text-indigo-600 font-bold">Testing ↔ Production</span>
@@ -129,7 +129,7 @@ renderHeader();
             <input type="hidden" name="sage_pass" value="<?= htmlspecialchars($pass) ?>">
 
             <!-- Option 1: TFPT2C (Testing) -->
-            <button type="submit" name="switch_env" value="TFPT2C" class="p-4 rounded-xl border-2 text-left transition-all flex flex-col justify-between <?= $isTestingEnv ? 'border-amber-500 bg-amber-50/60 shadow-md ring-2 ring-amber-400/30' : 'border-slate-200 hover:border-amber-300 bg-white' ?>">
+            <button type="submit" name="switch_env" value="TFPT2C" class="card p-4 border-2 text-left transition-all flex flex-col justify-between <?= $isTestingEnv ? 'border-amber-500 bg-amber-50/60 shadow-md ring-2 ring-amber-400/30' : ' hover:border-amber-300 ' ?>">
                 <div>
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-sm font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">DSN: TFPT2C</span>
@@ -144,7 +144,7 @@ renderHeader();
             </button>
 
             <!-- Option 2: TFPT1C (Production) -->
-            <button type="submit" name="switch_env" value="TFPT1C" class="p-4 rounded-xl border-2 text-left transition-all flex flex-col justify-between <?= !$isTestingEnv ? 'border-emerald-500 bg-emerald-50/60 shadow-md ring-2 ring-emerald-400/30' : 'border-slate-200 hover:border-emerald-300 bg-white' ?>">
+            <button type="submit" name="switch_env" value="TFPT1C" class="card p-4 border-2 text-left transition-all flex flex-col justify-between <?= !$isTestingEnv ? 'border-emerald-500 bg-emerald-50/60 shadow-md ring-2 ring-emerald-400/30' : ' hover:border-emerald-300 ' ?>">
                 <div>
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">DSN: TFPT1C</span>
@@ -181,7 +181,7 @@ renderHeader();
     <?php endif; ?>
 
     <!-- Config Form -->
-    <form method="POST" class="card p-6 bg-white rounded-xl border border-slate-200 shadow-sm space-y-6">
+    <form method="POST" class="card p-6 space-y-6">
         <input type="hidden" name="save_sage_config" value="1">
 
         <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">

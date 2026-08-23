@@ -82,7 +82,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Header Banner -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <a href="index.php" class="text-xs text-indigo-600 font-bold hover:underline">← ทะเบียนทรัพย์สิน</a>
@@ -179,7 +179,7 @@ renderHeader();
         </div>
 
         <!-- BOM Items Table -->
-        <div class="lg:col-span-2 card bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
+        <div class="lg:col-span-2 card overflow-hidden space-y-3">
             <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
                 <span>📋 ตารางโครงสร้างอะไหล่มาตรฐานประจำเครื่อง (Bill of Materials List)</span>
                 <span class="text-xs text-indigo-600 font-bold">รวม <?= count($bomItems) ?> รายการ</span>

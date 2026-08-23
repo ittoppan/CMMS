@@ -29,7 +29,7 @@ renderHeader();
 
 <div class="space-y-6">
     <!-- Header Banner -->
-    <div class="flex items-center justify-between flex-wrap gap-4 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 p-5">
         <div>
             <div class="flex items-center gap-2">
                 <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -45,25 +45,25 @@ renderHeader();
 
     <!-- Cost Breakdown Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">รวมค่าแรง (Labor Cost)</span>
             <span class="text-2xl font-extrabold text-brand-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_labor) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
         </div>
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">รวมค่าอะไหล่ (Parts Cost)</span>
             <span class="text-2xl font-extrabold text-amber-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_parts) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
         </div>
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center">
+        <div class="card p-5 text-center">
             <span class="text-xs font-bold text-gray-500 uppercase block">รวม Outsource</span>
             <span class="text-2xl font-extrabold text-indigo-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_outsource) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
         </div>
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm text-center bg-emerald-50 border-emerald-200">
+        <div class="card p-5 text-center bg-emerald-50 border-emerald-200">
             <span class="text-xs font-bold text-emerald-800 uppercase block">รวมค่าใช้จ่ายซ่อมบำรุงทั้งหมด</span>
             <span class="text-2xl font-extrabold text-emerald-700 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_labor + cost_parts + cost_outsource) FROM repair")->fetchColumn() ?: 0, 2) ?>
@@ -76,7 +76,7 @@ renderHeader();
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <!-- Chart 1: Cost by Machine -->
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="card p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-3">💰 5 อันดับเครื่องจักรที่มีค่าใช้จ่ายซ่อมบำรุงสูงสุด</h3>
             <div style="height:220px;" class="relative">
                 <canvas id="chartCostMachine"></canvas>
@@ -84,7 +84,7 @@ renderHeader();
         </div>
 
         <!-- Chart 2: RCA 5Ms Pareto -->
-        <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="card p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-3">🔍 Root Cause Analysis 5Ms Breakdown</h3>
             <div style="height:220px;" class="relative">
                 <canvas id="chartRCA"></canvas>
@@ -94,7 +94,7 @@ renderHeader();
     </div>
 
     <!-- Downtime SLA Timeline Example Widget -->
-    <div class="card p-5 bg-white rounded-lg border border-gray-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-bold text-gray-900 text-base">⏱️ ตัวอย่างวิเคราะห์ Downtime Timeline & SLA Response</h3>
         
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs overflow-x-auto gap-4">

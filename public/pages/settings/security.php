@@ -44,7 +44,7 @@ renderHeader();
     </div>
 
     <!-- Login Audit Log Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 บันทึกประวัติการเข้าสู่ระบบ (System Login Audit Log)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($loginLogs) ?> บันทึกล่าสุด</span>

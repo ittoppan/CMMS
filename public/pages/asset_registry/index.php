@@ -67,14 +67,14 @@ $activeCount = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE statu
         </div>
     </div>
 
-    <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="card p-4">
         <?php
         $statusOptions = ['active' => 'ใช้งาน', 'inactive' => 'ไม่ได้ใช้งาน', 'under_repair' => 'อยู่ระหว่างซ่อม', 'disposed' => 'จำหน่าย'];
         include __DIR__ . '/../../../src/components/search_form.php';
         ?>
     </div>
 
-    <div class="card overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+    <div class="card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 font-bold uppercase text-xs">

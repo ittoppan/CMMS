@@ -19,7 +19,7 @@ renderHeader();
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <!-- Card 1: Operator / Reporter -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <span class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">📱</span>
                 <div>
@@ -37,7 +37,7 @@ renderHeader();
         </div>
 
         <!-- Card 2: Maintenance Technician -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <span class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">🔧</span>
                 <div>
@@ -54,7 +54,7 @@ renderHeader();
         </div>
 
         <!-- Card 3: Store & Sage 300 -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <span class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">📦</span>
                 <div>
@@ -71,7 +71,7 @@ renderHeader();
         </div>
 
         <!-- Card 4: Management & ISO Audit -->
-        <div class="card p-5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
                 <span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">📊</span>
                 <div>

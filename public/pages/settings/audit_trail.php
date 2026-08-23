@@ -37,7 +37,7 @@ renderHeader();
     </div>
 
     <!-- Timeline Audit Trail List -->
-    <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-6 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ลำดับประวัติเหตุการณ์ไทม์ไลน์ระบบ (System Action Event Timeline)</span>
             <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($logs) ?> เหตุการณ์ล่าสุด</span>
@@ -62,7 +62,7 @@ renderHeader();
                     </p>
 
                     <?php if (!empty($log['old_value']) || !empty($log['new_value'])): ?>
-                    <div class="text-[11px] font-mono bg-white p-2 rounded-lg border border-slate-200 text-slate-600">
+                    <div class="card text-[11px] font-mono p-2 text-slate-600">
                         <span class="text-rose-600 line-through mr-2">เก่า: <?= htmlspecialchars($log['old_value']) ?></span> ➔ 
                         <span class="text-emerald-600 font-bold ml-2">ใหม่: <?= htmlspecialchars($log['new_value']) ?></span>
                     </div>

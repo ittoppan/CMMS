@@ -98,7 +98,7 @@ renderHeader();
             <div class="sm:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                 <label class="block text-xs font-bold text-slate-800">🖼️ รูปภาพประจำรายการอะไหล่ (Spare Part Image)</label>
                 <div class="flex items-center gap-4">
-                    <img src="<?= getImageUrl($row['image_url'] ?? null, 'spare') ?>" class="w-16 h-16 rounded-xl object-cover border border-slate-300 shadow-sm bg-white shrink-0">
+                    <img src="<?= getImageUrl($row['image_url'] ?? null, 'spare') ?>" class="card w-16 h-16 object-cover shrink-0">
                     <div class="flex-1 space-y-1">
                         <input type="file" name="spare_image" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all cursor-pointer">
                         <span class="text-[11px] text-slate-400 block">อัปโหลดไฟล์ใหม่ หรือแก้ URL รูปภาพด้านล่าง</span>

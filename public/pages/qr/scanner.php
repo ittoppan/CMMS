@@ -20,7 +20,7 @@ renderHeader();
     </div>
 
     <!-- Live Camera Scanner Card -->
-    <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-lg space-y-4">
+    <div class="card p-6 shadow-lg space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
             <span class="font-extrabold text-slate-900 text-base">กล้องสแกน QR Code (Scan Tag Code)</span>
             <span id="scanStatus" class="badge badge badge-success font-bold text-xs">พร้อมสแกน</span>
@@ -33,7 +33,7 @@ renderHeader();
         <div id="scanResultBox" class="hidden p-5 bg-indigo-50 border-2 border-indigo-300 rounded-2xl space-y-3">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-indigo-700">ผลการสแกน QR CODE:</span>
-                <span id="scannedCode" class="font-mono text-lg font-black text-indigo-900 bg-white px-3 py-1 rounded-lg border border-indigo-200"></span>
+                <span id="scannedCode" class="card font-mono text-lg font-black text-indigo-900 px-3 py-1 border border-indigo-200"></span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">

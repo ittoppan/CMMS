@@ -25,7 +25,7 @@ renderHeader();
     </div>
 
     <!-- Optimization Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ตารางคำนวณจุดสั่งซื้อ EOQ & วิเคราะห์เงินจมคลัง (AI Inventory Optimization Metrics)</span>
             <span class="badge badge badge-success font-bold text-xs"><?= count($optList) ?> รายการ</span>

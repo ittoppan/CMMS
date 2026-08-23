@@ -26,7 +26,7 @@ renderHeader();
     <!-- Multi-Site Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <?php foreach ($sites as $st): ?>
-        <div class="card p-5 bg-white border-2 border-slate-200 rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all">
+        <div class="card p-5 border-2 space-y-4 hover:shadow-md transition-all">
             <div class="flex items-center justify-between">
                 <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200"><?= htmlspecialchars($st['site_code']) ?></span>
                 <span class="badge badge badge-success font-bold text-xs">🟢 ACTIVE (ออนไลน์)</span>

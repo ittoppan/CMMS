@@ -26,7 +26,7 @@ renderHeader();
     </div>
 
     <!-- Skill Matrix Table -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ตารางทักษะช่างซ่อมบำรุงจำแนกตามชนิดเครื่องจักร (Technician Machine Skill Matrix)</span>
             <span class="badge badge badge-warning font-bold text-xs"><?= count($techs) ?> รายชื่อช่าง</span>

@@ -307,7 +307,7 @@ renderHeader();
 
 <!-- Modal: Smart Machine BOM First Requisition -->
 <div id="smart-req-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 space-y-5">
+    <div class="card shadow-2xl w-full max-w-2xl p-6 space-y-5">
         
         <!-- Header -->
         <div class="flex items-center justify-between border-b pb-3">

@@ -144,7 +144,7 @@ renderHeader();
 <div class="space-y-6">
     
     <!-- Top Action Bar -->
-    <div class="flex items-center justify-between flex-wrap gap-4 no-print bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="card flex items-center justify-between flex-wrap gap-4 no-print p-5">
         <div>
             <div class="flex items-center gap-2">
                 <a href="index.php" class="text-sm font-bold text-indigo-600 hover:underline">&larr; กลับไปปฏิทิน PM</a>
@@ -172,7 +172,7 @@ renderHeader();
         <input type="hidden" name="action" value="save_checksheet">
 
         <!-- Official Printable ISO PM Checksheet Document Container -->
-        <div id="printable-checksheet" class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-xl text-slate-900 space-y-6 max-w-5xl mx-auto">
+        <div id="printable-checksheet" class="card p-6 md:p-8 shadow-xl text-slate-900 space-y-6 max-w-5xl mx-auto">
             
             <!-- Checksheet Header Block -->
             <div class="border-2 border-slate-900 p-4 rounded-xl">
@@ -269,15 +269,15 @@ renderHeader();
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <input type="radio" id="pass-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="pass" checked class="hidden check-pass" onchange="syncMobileResult(<?= $item['no'] ?>, 'pass')">
-                                <label for="pass-mb-<?= $item['no'] ?>" class="block text-center py-2 text-xs font-black rounded-lg border border-slate-300 bg-white text-slate-700">✔ PASS</label>
+                                <label for="pass-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">✔ PASS</label>
                             </div>
                             <div>
                                 <input type="radio" id="fail-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="fail" class="hidden check-fail" onchange="syncMobileResult(<?= $item['no'] ?>, 'fail')">
-                                <label for="fail-mb-<?= $item['no'] ?>" class="block text-center py-2 text-xs font-black rounded-lg border border-slate-300 bg-white text-slate-700">✖ FAIL</label>
+                                <label for="fail-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">✖ FAIL</label>
                             </div>
                             <div>
                                 <input type="radio" id="na-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="na" class="hidden check-na" onchange="syncMobileResult(<?= $item['no'] ?>, 'na')">
-                                <label for="na-mb-<?= $item['no'] ?>" class="block text-center py-2 text-xs font-black rounded-lg border border-slate-300 bg-white text-slate-700">N/A</label>
+                                <label for="na-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">N/A</label>
                             </div>
                         </div>
                     </div>
@@ -286,11 +286,11 @@ renderHeader();
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">ค่าที่วัดได้:</label>
-                            <input type="text" value="<?= htmlspecialchars($item['default_value']) ?>" class="w-full text-xs font-bold border border-slate-300 rounded-lg p-2 bg-white text-indigo-700" onchange="document.getElementsByName('check_values[<?= $item['no'] ?>]')[0].value = this.value" />
+                            <input type="text" value="<?= htmlspecialchars($item['default_value']) ?>" class="card w-full text-xs font-bold p-2 text-indigo-700" onchange="document.getElementsByName('check_values[<?= $item['no'] ?>]')[0].value = this.value" />
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">หมายเหตุ:</label>
-                            <input type="text" placeholder="ระบุ..." class="w-full text-xs border border-slate-300 rounded-lg p-2 bg-white" onchange="document.getElementsByName('check_remarks[<?= $item['no'] ?>]')[0].value = this.value" />
+                            <input type="text" placeholder="ระบุ..." class="card w-full text-xs p-2" onchange="document.getElementsByName('check_remarks[<?= $item['no'] ?>]')[0].value = this.value" />
                         </div>
                     </div>
                 </div>
@@ -303,7 +303,7 @@ renderHeader();
                     <span class="font-bold block text-slate-700">ผู้ตรวจเช็ค / เซ็นชื่อดิจิทัล (Inspector Signature) *</span>
                     
                     <div class="no-print bg-slate-50 p-2 rounded-xl border border-slate-300 space-y-2">
-                        <canvas id="sigCanvas" width="280" height="110" class="w-full h-24 bg-white border border-slate-300 rounded-lg cursor-crosshair touch-none"></canvas>
+                        <canvas id="sigCanvas" width="280" height="110" class="card w-full h-24 cursor-crosshair touch-none"></canvas>
                         <div class="flex items-center justify-between text-[11px]">
                             <button type="button" onclick="clearSignature()" class="text-rose-600 font-bold hover:underline">🧹 ล้างลายเซ็น</button>
                             <span class="text-slate-400">เซ็นด้วยนิ้วหรือเมาส์</span>

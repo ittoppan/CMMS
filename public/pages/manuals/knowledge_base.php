@@ -22,21 +22,21 @@ renderHeader();
 
     <!-- SOP Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <span class="badge badge badge-info font-bold text-[10px]">SOP-ELEC-01</span>
             <h3 class="font-extrabold text-slate-900 text-base">📄 ขั้นตอนการตรวจเช็คระบบไฟฟ้าตู้ PLC พิมพ์ 10 สี</h3>
             <p class="text-xs text-slate-600">ขั้นตอนมาตรฐานการวัดแรงดันไฟฟ้าและตรวจซ่อมการสื่อสารอินเวอร์เตอร์ Siemens S120</p>
             <a href="#" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-xs font-bold w-full py-2">📖 เปิดดูคู่มือ SOP</a>
         </div>
 
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <span class="badge bg-purple-100 text-purple-800 font-bold text-[10px]">SOP-HYDR-02</span>
             <h3 class="font-extrabold text-slate-900 text-base">📄 วิธีการอัดจารบีและเปลี่ยนตลับลูกปืนมอเตอร์หลัก</h3>
             <p class="text-xs text-slate-600">คำแนะนำปริมาณการเติมจารบีเทียบตามเบอร์ลูกปืน (SKF Standard)</p>
             <a href="#" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-xs font-bold w-full py-2">📖 เปิดดูคู่มือ SOP</a>
         </div>
 
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div class="card p-5 space-y-3">
             <span class="badge badge badge-success font-bold text-[10px]">SOP-PNEU-03</span>
             <h3 class="font-extrabold text-slate-900 text-base">📄 การปรับตั้งความตึงสายพานเครื่องสลิตติ้ง</h3>
             <p class="text-xs text-slate-600">เกณฑ์มาตรฐานแรงดึงสายพานลำเลียงม้วนพลาสติก ป้องกันสายพานรูดสลิป</p>

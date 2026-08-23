@@ -249,7 +249,7 @@ renderHeader();
             <a href="?export=csv" class="btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow">
                 📥 ดาวน์โหลด CSV คีย์ Sage 300
             </a>
-            <a href="../settings/sage300_config.php" class="btn bg-white text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
+            <a href="../settings/sage300_config.php" class="card btn text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
                 🔌 ตั้งค่า Sage 300 (<?= htmlspecialchars($dsn) ?>)
             </a>
         </div>
@@ -338,7 +338,7 @@ renderHeader();
         </div>
 
         <!-- Table: คิวรายการขอเบิกจากช่าง & สถานะการจ่ายของ (Requisitions Queue) -->
-        <div class="lg:col-span-2 card bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
+        <div class="lg:col-span-2 card overflow-hidden space-y-3">
             <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
                 <span>📋 คิวรายการขอเบิกจากช่าง & ประวัติการตัดสต็อก (Requisitions Queue)</span>
                 <span class="text-xs text-slate-400">เรียงตามวันที่ล่าสุด</span>

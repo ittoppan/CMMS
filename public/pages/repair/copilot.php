@@ -27,7 +27,7 @@ renderHeader();
     </div>
 
     <!-- Interactive Query Box -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <form method="GET" class="flex gap-2">
             <input type="text" name="q" value="<?= htmlspecialchars($userQuery) ?>" placeholder="พิมพ์อาการเสีย เช่น 'มอเตอร์ร้อน + เสียงดัง', 'สายพานลำเลียงสั่น', 'แรงดันลมตก'..." class="input input-bordered w-full font-bold text-slate-800 text-sm">
             <button type="submit" class="btn btn-primary bg-purple-700 hover:bg-purple-800 font-bold px-6 py-2">
@@ -37,7 +37,7 @@ renderHeader();
     </div>
 
     <!-- AI Result Display Card -->
-    <div class="card p-6 bg-white rounded-2xl border-2 border-purple-200 shadow-lg space-y-6">
+    <div class="card p-6 border-2 border-purple-200 shadow-lg space-y-6">
         <div class="flex items-center justify-between border-b pb-3">
             <h3 class="font-black text-purple-900 text-lg flex items-center gap-2">
                 <span>🤖 ผลการวิเคราะห์อาการ:</span>
@@ -52,7 +52,7 @@ renderHeader();
                 <span class="font-extrabold text-rose-900 text-sm block">⚠️ 1. สาเหตุที่เป็นไปได้ (Probable Causes)</span>
                 <ul class="space-y-1.5 text-xs text-slate-700">
                     <?php foreach ($aiResponse['causes'] as $c): ?>
-                    <li class="font-medium bg-white p-2 rounded-lg border border-rose-100"><?= htmlspecialchars($c) ?></li>
+                    <li class="card font-medium p-2 border border-rose-100"><?= htmlspecialchars($c) ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -62,7 +62,7 @@ renderHeader();
                 <span class="font-extrabold text-indigo-900 text-sm block">🔍 2. ขั้นตอนการตรวจเช็คหน้างาน (SOP Inspection)</span>
                 <ul class="space-y-1.5 text-xs text-slate-700">
                     <?php foreach ($aiResponse['steps'] as $s): ?>
-                    <li class="font-medium bg-white p-2 rounded-lg border border-indigo-100"><?= htmlspecialchars($s) ?></li>
+                    <li class="card font-medium p-2 border border-indigo-100"><?= htmlspecialchars($s) ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -72,7 +72,7 @@ renderHeader();
                 <span class="font-extrabold text-emerald-900 text-sm block">📦 3. อะไหล่ที่ต้องเตรียมเบิก (Recommended Spares)</span>
                 <ul class="space-y-1.5 text-xs text-slate-700">
                     <?php foreach ($aiResponse['spares'] as $sp): ?>
-                    <li class="font-bold bg-white p-2 rounded-lg border border-emerald-100 flex items-center justify-between">
+                    <li class="card font-bold p-2 border border-emerald-100 flex items-center justify-between">
                         <div>
                             <span class="font-mono text-indigo-700"><?= htmlspecialchars($sp['code']) ?></span>
                             <div class="text-slate-800 text-[11px]"><?= htmlspecialchars($sp['name']) ?></div>

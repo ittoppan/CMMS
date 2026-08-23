@@ -47,7 +47,7 @@ if ($id > 0) {
                 <span class="badge bg-indigo-100 text-indigo-800 font-mono font-bold text-xs">#WO-<?= str_pad($id, 5, '0', STR_PAD_LEFT) ?></span>
             </div>
 
-            <div class="card p-6 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div class="card p-6 space-y-4">
                 <h1 class="text-xl font-bold text-slate-900">⭐ ประเมินผลความพึงพอใจการซ่อมบำรุง</h1>
                 <div class="p-4 bg-slate-50 rounded-xl space-y-1 text-xs">
                     <div class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($r['title']) ?></div>
@@ -135,7 +135,7 @@ renderHeader();
     </div>
 
     <!-- Search Bar -->
-    <div class="card p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <div class="card p-4">
         <form method="get" class="flex gap-2">
             <input
                 type="text"
@@ -154,7 +154,7 @@ renderHeader();
     </div>
 
     <!-- Requests Table -->
-    <div class="card bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
+    <div class="card overflow-hidden space-y-3">
         <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center text-sm">
             <span>📋 รายการแจ้งซ่อมล่าสุด (Submitted Requests)</span>
             <span class="text-xs text-slate-500">พบ <?= count($requests) ?> รายการ</span>

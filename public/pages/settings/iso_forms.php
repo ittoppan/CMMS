@@ -56,22 +56,22 @@ renderHeader();
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div class="p-4 bg-white border rounded-2xl shadow-sm space-y-1">
+        <div class="card p-4 border space-y-1">
             <span class="text-xs text-slate-500 font-bold uppercase">จำนวนแบบฟอร์มมาตรฐาน</span>
             <div class="text-2xl font-black text-indigo-700"><?= count($filesList) ?> เอกสาร</div>
             <span class="text-[10px] text-slate-400">หมวดวิศวกรรม & ซ่อมบำรุง F-EN</span>
         </div>
-        <div class="p-4 bg-white border rounded-2xl shadow-sm space-y-1">
+        <div class="card p-4 border space-y-1">
             <span class="text-xs text-slate-500 font-bold uppercase">ใบแจ้งซ่อมหลัก</span>
             <div class="text-2xl font-black text-rose-600">ISO F-EN-03</div>
             <span class="text-[10px] text-slate-400">MAINTENANCE RECORD REV.05</span>
         </div>
-        <div class="p-4 bg-white border rounded-2xl shadow-sm space-y-1">
+        <div class="card p-4 border space-y-1">
             <span class="text-xs text-slate-500 font-bold uppercase">บัตรประวัติเครื่องจักร</span>
             <div class="text-2xl font-black text-emerald-600">ISO F-EN-01</div>
             <span class="text-[10px] text-slate-400">Machine History Register</span>
         </div>
-        <div class="p-4 bg-white border rounded-2xl shadow-sm space-y-1">
+        <div class="card p-4 border space-y-1">
             <span class="text-xs text-slate-500 font-bold uppercase">สต็อกการ์ดคลังอะไหล่</span>
             <div class="text-2xl font-black text-purple-600">ISO F-EN-18</div>
             <span class="text-[10px] text-slate-400">Spare Parts Stock Card</span>

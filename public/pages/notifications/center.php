@@ -92,7 +92,7 @@ renderHeader();
     </div>
 
     <!-- Notification List -->
-    <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-4">
+    <div class="card p-5 space-y-4">
         <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
             <span>📋 รายการแจ้งเตือนล่าสุด (Recent System Notifications)</span>
             <button onclick="alert('อ่านแล้วทั้งหมด')" class="text-xs text-indigo-600 font-bold hover:underline">กำจัดตัวเลขแจ้งเตือนทั้งหมด</button>

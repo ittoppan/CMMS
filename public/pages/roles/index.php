@@ -31,7 +31,7 @@ $rows = $stmt->fetchAll();
         <a href="create.php" class="btn-primary">+ เพิ่มบทบาท</a>
     </div>
 
-    <div class="bg-white p-4 rounded-lg shadow">
+    <div class="card p-4 shadow">
         <form method="get" class="flex gap-3">
             <input type="text" name="search" value="<?= htmlspecialchars($search) ?>"
                 placeholder="ค้นหาชื่อบทบาท..." class="input input-bordered w-full flex-1">
