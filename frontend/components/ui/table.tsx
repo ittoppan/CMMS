@@ -120,7 +120,7 @@ export function DataTable<TData extends RowData>({
   }
 
   return (
-    <div className={cn("flex w-full flex-col overflow-x-auto rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)]", className)}>
+    <div className={cn("w-full overflow-x-auto rounded-xl border border-border bg-card shadow-sm", className)}>
       <table className="cmms-ui-table">
         {caption && <caption>{caption}</caption>}
         <thead>
