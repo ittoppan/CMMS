@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   output: "standalone",
+  // Allow building to an alternate dir while the standalone prod server
+  // (node server.js, port 3001) holds a lock on .next/standalone:
+  //   $env:NEXT_DIST_DIR=".next-verify"; npm run build
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   turbopack: {
     // Fix: Next.js inferred the workspace root from the parent package-lock.json
     // (C:\inetpub\wwwroot\cmms-tpt), which broke the standalone static-file copy.

@@ -106,7 +106,6 @@ body {
   --color-skeleton: #E4E8EE;
   --color-track: #E4E8EE;
 
-     ไฟล์ theme แล้วทุกหน้าจะเปลี่ยนสีตามอัตโนมัติ */
   --cmms-primary: var(--color-accent);
   --cmms-primary-hover: #00508C;
   --cmms-primary-light: var(--color-background-blue);
@@ -934,13 +933,6 @@ html, body {
 .cmms-mobile-bottom-nav { display: none; }
 
 @media (max-width: 1023.98px) {
-  /* ซ่อน TopNav แบบ desktop — Mobile App Bar แทนที่
-
-  /* แถว header/toolbar ในเนื้อหาที่กว้างเกินจอ (เช่น title + ปุ่ม FMEA)
-     ให้ wrap ลงบรรทัดใหม่แทนการเลื่อนซ้าย-ขวา */
-
-     ทำให้ข้อความยาว (เช่น subtitle หน้ากระดาน) ไม่ยอมขึ้นบรรทัดใหม่
-     จนกว้างเกินจอ — บนมือถืออนุญาตให้ wrap ได้ */
 
   /* ── Mobile App Bar ── */
   .cmms-mobile-app-bar {
@@ -1057,7 +1049,6 @@ html, body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.25);
   }
 
-  /* กันคอนเทนต์ถูก App Bar / Bottom Nav ทับ
 }
 
 /* ── Mobile UX Polish (ระบบ-wide) ──
