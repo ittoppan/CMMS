@@ -5,7 +5,8 @@ import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -266,17 +267,23 @@ export default function SagePOReceiptPage() {
                 />
               </div>
               <div className="min-w-[240px] flex-[2]">
-                <Select
-                  label="เลือกอะไหล่"
-                  isLabelHidden
-                  placeholder="เลือกอะไหล่..."
-                  value={selectedPart}
-                  onChange={(e) => setSelectedPart(e.target.value)}
-                >
-                  {partOptions.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </Select>
+                <div className="space-y-1.5">
+                  <Label className="sr-only">เลือกอะไหล่</Label>
+                  <Select
+                    value={selectedPart || "__none__"}
+                    onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกอะไหล่..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__" disabled>เลือกอะไหล่...</SelectItem>
+                      {partOptions.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <Button disabled={!selectedPart} onClick={handleAddPart}>
                 <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> เพิ่ม

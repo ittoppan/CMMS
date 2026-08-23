@@ -5,7 +5,8 @@ import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -276,26 +277,40 @@ export default function SageIssueCenterPage() {
               <CardTitle>1. ข้อมูลการเบิกจ่าย</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select
-                label="ใบสั่งงานซ่อม (Work Order) *"
-                placeholder="เลือกใบสั่งงาน..."
-                value={workOrder}
-                onChange={(e) => setWorkOrder(e.target.value)}
-              >
-                {workOrders.map((w) => (
-                  <option key={w.value} value={w.value}>{w.label}</option>
-                ))}
-              </Select>
-              <Select
-                label="ช่างผู้เบิก / ผู้รับผิดชอบ *"
-                placeholder="เลือกช่าง..."
-                value={technician}
-                onChange={(e) => setTechnician(e.target.value)}
-              >
-                {users.map((u) => (
-                  <option key={u.value} value={u.value}>{u.label}</option>
-                ))}
-              </Select>
+              <div className="space-y-1.5">
+                <Label>ใบสั่งงานซ่อม (Work Order) *</Label>
+                <Select
+                  value={workOrder || "__none__"}
+                  onValueChange={(v) => setWorkOrder(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกใบสั่งงาน..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__" disabled>เลือกใบสั่งงาน...</SelectItem>
+                    {workOrders.map((w) => (
+                      <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>ช่างผู้เบิก / ผู้รับผิดชอบ *</Label>
+                <Select
+                  value={technician || "__none__"}
+                  onValueChange={(v) => setTechnician(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกช่าง..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__" disabled>เลือกช่าง...</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 
@@ -317,17 +332,23 @@ export default function SageIssueCenterPage() {
               </div>
               <div className="flex items-center gap-2">
                 <div className="min-w-0 flex-1">
-                  <Select
-                    label="เลือกอะไหล่"
-                    isLabelHidden
-                    placeholder="เลือกอะไหล่..."
-                    value={selectedPart}
-                    onChange={(e) => setSelectedPart(e.target.value)}
-                  >
-                    {partOptions.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </Select>
+                  <div className="space-y-1.5">
+                    <Label className="sr-only">เลือกอะไหล่</Label>
+                    <Select
+                      value={selectedPart || "__none__"}
+                      onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกอะไหล่..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__" disabled>เลือกอะไหล่...</SelectItem>
+                        {partOptions.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <Button disabled={!selectedPart} onClick={handleAddPart}>
                   <Plus size={16} strokeWidth={1.75} aria-hidden="true" />

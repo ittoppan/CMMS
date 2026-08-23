@@ -5,7 +5,8 @@ import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -203,24 +204,48 @@ export default function InspectionsPage() {
           <CardContent className="space-y-4 p-5">
             <h4 className="font-bold">สร้างรอบตรวจใหม่</h4>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Select label="เทมเพลต *" value={cf.template_id} onChange={(e) => setCf({ ...cf, template_id: e.target.value })}>
-                <option value="">เลือกเทมเพลต...</option>
-                {templates.map((tpl) => (
-                  <option key={tpl.id} value={String(tpl.id)}>{tpl.title} ({tpl.code})</option>
-                ))}
-              </Select>
-              <Select label="เครื่องจักร / อุปกรณ์ *" value={cf.asset_id} onChange={(e) => setCf({ ...cf, asset_id: e.target.value })}>
-                <option value="">เลือกเครื่อง...</option>
-                {assets.map((a) => (
-                  <option key={a.id} value={String(a.id)}>{a.name}{a.code ? ` (${a.code})` : ""}</option>
-                ))}
-              </Select>
-              <Select label="ผู้รับผิดชอบ" value={cf.assignee_id} onChange={(e) => setCf({ ...cf, assignee_id: e.target.value })}>
-                <option value="">เลือกผู้รับผิดชอบ...</option>
-                {users.map((u) => (
-                  <option key={u.id} value={String(u.id)}>{u.full_name || u.username || `ผู้ใช้ #${u.id}`}</option>
-                ))}
-              </Select>
+              <div className="space-y-1.5">
+                <Label>เทมเพลต *</Label>
+                <Select value={cf.template_id || "__none__"} onValueChange={(v) => setCf({ ...cf, template_id: v === "__none__" ? "" : v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกเทมเพลต..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">เลือกเทมเพลต...</SelectItem>
+                    {templates.map((tpl) => (
+                      <SelectItem key={tpl.id} value={String(tpl.id)}>{tpl.title} ({tpl.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>เครื่องจักร / อุปกรณ์ *</Label>
+                <Select value={cf.asset_id || "__none__"} onValueChange={(v) => setCf({ ...cf, asset_id: v === "__none__" ? "" : v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกเครื่อง..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">เลือกเครื่อง...</SelectItem>
+                    {assets.map((a) => (
+                      <SelectItem key={a.id} value={String(a.id)}>{a.name}{a.code ? ` (${a.code})` : ""}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>ผู้รับผิดชอบ</Label>
+                <Select value={cf.assignee_id || "__none__"} onValueChange={(v) => setCf({ ...cf, assignee_id: v === "__none__" ? "" : v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกผู้รับผิดชอบ..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">เลือกผู้รับผิดชอบ...</SelectItem>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={String(u.id)}>{u.full_name || u.username || `ผู้ใช้ #${u.id}`}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Input label="ครบกำหนดวันที่" type="date" value={cf.due_date} onChange={(e) => setCf({ ...cf, due_date: e.target.value })} />
             </div>
             <div className="flex gap-2">
@@ -242,13 +267,21 @@ export default function InspectionsPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h4 className="font-bold">รอบตรวจทั้งหมด ({schedules.length})</h4>
             <div className="w-full sm:w-[220px]">
-              <Select label="กรองตามสถานะ" isLabelHidden value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                <option value="">{t("action.filter_all_status")}</option>
-                <option value="pending">รอดำเนินการ</option>
-                <option value="in_progress">กำลังทำ</option>
-                <option value="completed">เสร็จสิ้น</option>
-                <option value="overdue">เกินกำหนด</option>
-              </Select>
+              <div className="space-y-1.5">
+                <Label className="sr-only">กรองตามสถานะ</Label>
+                <Select value={statusFilter || "__all__"} onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("action.filter_all_status")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">{t("action.filter_all_status")}</SelectItem>
+                    <SelectItem value="pending">รอดำเนินการ</SelectItem>
+                    <SelectItem value="in_progress">กำลังทำ</SelectItem>
+                    <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                    <SelectItem value="overdue">เกินกำหนด</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

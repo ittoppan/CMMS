@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -128,15 +128,18 @@ export default function KpiDashboardPage() {
             </div>
             <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
           </div>
-          <Select
-            aria-label="ช่วงเวลา"
-            value={String(months)}
-            onChange={(e) => setMonths(Number(e.target.value))}
-            className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
-          >
-            <option value="3" className="text-[var(--cmms-text-primary)]">3 เดือน</option>
-            <option value="6" className="text-[var(--cmms-text-primary)]">6 เดือน</option>
-            <option value="12" className="text-[var(--cmms-text-primary)]">12 เดือน</option>
+          <Select value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
+            <SelectTrigger
+              aria-label="ช่วงเวลา"
+              className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="3">3 เดือน</SelectItem>
+              <SelectItem value="6">6 เดือน</SelectItem>
+              <SelectItem value="12">12 เดือน</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>

@@ -4,7 +4,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -176,35 +177,41 @@ export default function BatchSchedulePage() {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
-                <Select
-                  label="รอบความถี่ *"
-                  aria-label="รอบความถี่"
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                >
-                  <option value="daily">ทุกวัน (Daily)</option>
-                  <option value="weekly">ทุกสัปดาห์ (Weekly)</option>
-                  <option value="monthly">ทุกเดือน (Monthly)</option>
-                  <option value="quarterly">ทุกไตรมาส (Quarterly)</option>
-                  <option value="yearly">ทุกปี (Yearly)</option>
-                </Select>
+                <div className="space-y-1.5">
+                  <Label>รอบความถี่ *</Label>
+                  <Select value={formData.frequency} onValueChange={(v) => setFormData({ ...formData, frequency: v })}>
+                    <SelectTrigger aria-label="รอบความถี่">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">ทุกวัน (Daily)</SelectItem>
+                      <SelectItem value="weekly">ทุกสัปดาห์ (Weekly)</SelectItem>
+                      <SelectItem value="monthly">ทุกเดือน (Monthly)</SelectItem>
+                      <SelectItem value="quarterly">ทุกไตรมาส (Quarterly)</SelectItem>
+                      <SelectItem value="yearly">ทุกปี (Yearly)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Input
                   label="วันที่เริ่มทำ PM ครั้งแรก *"
                   placeholder="ปปปป-ดด-วว (เช่น 2026-08-01)"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 />
-                <Select
-                  label="มอบหมายผู้รับผิดชอบ (ไม่บังคับ)"
-                  aria-label="ผู้รับผิดชอบ"
-                  value={formData.assignee}
-                  onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
-                >
-                  <option value="">เลือกช่าง / ทีม...</option>
-                  {users.map((u) => (
-                    <option key={u.value} value={u.value}>{u.label}</option>
-                  ))}
-                </Select>
+                <div className="space-y-1.5">
+                  <Label>มอบหมายผู้รับผิดชอบ (ไม่บังคับ)</Label>
+                  <Select value={formData.assignee || "__none__"} onValueChange={(v) => setFormData({ ...formData, assignee: v === "__none__" ? "" : v })}>
+                    <SelectTrigger aria-label="ผู้รับผิดชอบ">
+                      <SelectValue placeholder="เลือกช่าง / ทีม..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">เลือกช่าง / ทีม...</SelectItem>
+                      {users.map((u) => (
+                        <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>

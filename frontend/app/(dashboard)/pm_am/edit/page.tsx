@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -234,15 +234,18 @@ function EditPMContent() {
               <div className="space-y-1.5">
                 <label htmlFor="pm-edit-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง)</label>
                 <Select
-                  id="pm-edit-assignee"
-                  aria-label="ผู้รับผิดชอบ"
-                  value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
+                  value={assignedTo || "__none__"}
+                  onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}
                 >
-                  <option value="">เลือกช่างที่รับผิดชอบงาน PM นี้...</option>
-                  {users.map(u => (
-                    <option key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</option>
-                  ))}
+                  <SelectTrigger id="pm-edit-assignee" aria-label="ผู้รับผิดชอบ">
+                    <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้...</SelectItem>
+                    {users.map(u => (
+                      <SelectItem key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
 
@@ -328,16 +331,19 @@ function EditPMContent() {
               <div className="space-y-1.5">
                 <label htmlFor="pm-edit-status" className="text-sm font-medium text-[var(--cmms-text-primary)]">สถานะปัจจุบัน</label>
                 <Select
-                  id="pm-edit-status"
-                  aria-label="สถานะปัจจุบัน"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  onValueChange={(v) => setStatus(v)}
                 >
-                  <option value="pending">รอดำเนินการ</option>
-                  <option value="in_progress">กำลังทำ</option>
-                  <option value="completed">ทำเสร็จแล้ว</option>
-                  <option value="overdue">เกินกำหนดเวลา</option>
-                  <option value="skipped">ข้ามรอบนี้</option>
+                  <SelectTrigger id="pm-edit-status" aria-label="สถานะปัจจุบัน">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">รอดำเนินการ</SelectItem>
+                    <SelectItem value="in_progress">กำลังทำ</SelectItem>
+                    <SelectItem value="completed">ทำเสร็จแล้ว</SelectItem>
+                    <SelectItem value="overdue">เกินกำหนดเวลา</SelectItem>
+                    <SelectItem value="skipped">ข้ามรอบนี้</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
 

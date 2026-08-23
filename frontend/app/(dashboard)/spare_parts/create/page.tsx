@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -143,19 +144,26 @@ export default function CreateSparePartPage() {
               onChange={(e) => update("name", e.target.value)}
             />
 
-            <Select
-              label={t("field.category")}
-              value={form.category}
-              onChange={(e) => update("category", e.target.value)}
-            >
-              <option value="ทั่วไป">{t("form.general")}</option>
-              <option value="ลูกปืน (Bearings)">{t("form.cat_bearings")}</option>
-              <option value="ซีลและโอริง (Seals)">{t("form.cat_seals_orings")}</option>
-              <option value="สายพาน (Belts)">{t("form.cat_belts")}</option>
-              <option value="ฟิลเตอร์ (Filters)">{t("form.cat_filters")}</option>
-              <option value="ไฟฟ้า (Electrical)">{t("form.cat_electrical")}</option>
-              <option value="ไฮดรอลิก (Hydraulics)">{t("form.cat_hydraulics")}</option>
-            </Select>
+            <div className="space-y-1.5">
+              <Label>{t("field.category")}</Label>
+              <Select
+                value={form.category}
+                onValueChange={(v) => update("category", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ทั่วไป">{t("form.general")}</SelectItem>
+                  <SelectItem value="ลูกปืน (Bearings)">{t("form.cat_bearings")}</SelectItem>
+                  <SelectItem value="ซีลและโอริง (Seals)">{t("form.cat_seals_orings")}</SelectItem>
+                  <SelectItem value="สายพาน (Belts)">{t("form.cat_belts")}</SelectItem>
+                  <SelectItem value="ฟิลเตอร์ (Filters)">{t("form.cat_filters")}</SelectItem>
+                  <SelectItem value="ไฟฟ้า (Electrical)">{t("form.cat_electrical")}</SelectItem>
+                  <SelectItem value="ไฮดรอลิก (Hydraulics)">{t("form.cat_hydraulics")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <Input
               label={t("field.unit")}

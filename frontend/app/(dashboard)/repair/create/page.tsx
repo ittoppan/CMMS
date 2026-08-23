@@ -10,7 +10,7 @@ import { Send, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
@@ -47,6 +47,7 @@ export default function CreateWorkOrderPage() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<CreateRepairFormValues>({
     resolver: zodResolver(createRepairSchema),
     defaultValues: {
@@ -202,18 +203,25 @@ export default function CreateWorkOrderPage() {
             <div className="space-y-1.5">
               <Label htmlFor="wo-create-asset">เครื่องจักรที่ชำรุด<span className="text-destructive"> *</span></Label>
               <Select
-                id="wo-create-asset"
-                error={errors.asset_id?.message}
+                value={watch("asset_id") || "__none__"}
+                onValueChange={(v) => setValue("asset_id", v === "__none__" ? "" : v, { shouldValidate: true })}
                 disabled={loadingAssets}
-                {...register("asset_id")}
               >
-                <option value="">{loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."}</option>
-                {assets.map((a) => (
-                  <option key={a.id} value={String(a.id)}>
-                    {a.code} - {a.name}
-                  </option>
-                ))}
+                <SelectTrigger id="wo-create-asset" aria-invalid={!!errors.asset_id || undefined}>
+                  <SelectValue placeholder={loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" disabled>{loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."}</SelectItem>
+                  {assets.map((a) => (
+                    <SelectItem key={a.id} value={String(a.id)}>
+                      {a.code} - {a.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
+              {errors.asset_id?.message && (
+                <p className="text-xs font-medium text-destructive">{errors.asset_id.message}</p>
+              )}
             </div>
 
             {/* หัวข้ออาการเสีย */}
@@ -226,28 +234,48 @@ export default function CreateWorkOrderPage() {
 
             {/* ความสำคัญ & แผนกซ่อม */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Select
-                label="ความสำคัญ *"
-                error={errors.priority?.message}
-                {...register("priority")}
-              >
-                <option value="critical">วิกฤต (ต้องซ่อมทันที)</option>
-                <option value="high">ด่วน</option>
-                <option value="medium">ปานกลาง</option>
-                <option value="low">ต่ำ</option>
-              </Select>
+              <div className="space-y-1.5">
+                <Label>ความสำคัญ *</Label>
+                <Select
+                  value={watch("priority")}
+                  onValueChange={(v) => setValue("priority", v as CreateRepairFormValues["priority"], { shouldValidate: true })}
+                >
+                  <SelectTrigger aria-invalid={!!errors.priority || undefined}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">วิกฤต (ต้องซ่อมทันที)</SelectItem>
+                    <SelectItem value="high">ด่วน</SelectItem>
+                    <SelectItem value="medium">ปานกลาง</SelectItem>
+                    <SelectItem value="low">ต่ำ</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.priority?.message && (
+                  <p className="text-xs font-medium text-destructive">{errors.priority.message}</p>
+                )}
+              </div>
 
-              <Select
-                label="แผนกซ่อมที่รับผิดชอบ *"
-                error={errors.department?.message}
-                {...register("department")}
-              >
-                <option value="">เลือกแผนกซ่อม...</option>
-                <option value="mechanical">ช่างกล</option>
-                <option value="electrical">ไฟฟ้า</option>
-                <option value="instrument">ควบคุมและวัด</option>
-                <option value="utility">สาธารณูปโภค</option>
-              </Select>
+              <div className="space-y-1.5">
+                <Label>แผนกซ่อมที่รับผิดชอบ *</Label>
+                <Select
+                  value={watch("department") || "__none__"}
+                  onValueChange={(v) => setValue("department", v === "__none__" ? "" : v, { shouldValidate: true })}
+                >
+                  <SelectTrigger aria-invalid={!!errors.department || undefined}>
+                    <SelectValue placeholder="เลือกแผนกซ่อม..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__" disabled>เลือกแผนกซ่อม...</SelectItem>
+                    <SelectItem value="mechanical">ช่างกล</SelectItem>
+                    <SelectItem value="electrical">ไฟฟ้า</SelectItem>
+                    <SelectItem value="instrument">ควบคุมและวัด</SelectItem>
+                    <SelectItem value="utility">สาธารณูปโภค</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.department?.message && (
+                  <p className="text-xs font-medium text-destructive">{errors.department.message}</p>
+                )}
+              </div>
             </div>
 
             {/* รายละเอียดเพิ่มเติม */}

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -192,11 +193,19 @@ export default function InspectionTemplatesPage() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="รหัส Template * (เช่น CHK-CCTV-D)" placeholder="CHK-CCTV-D" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
-            <Select label="ความถี่ *" value={form.frequency} onChange={(e) => setForm({ ...form, frequency: e.target.value })}>
-              {Object.entries(FREQ_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </Select>
+            <div className="space-y-1.5">
+              <Label>ความถี่ *</Label>
+              <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(FREQ_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <Input label="ชื่อ Template * (เช่น ใบตรวจเช็ค CCTV ประจำวัน)" placeholder="ใบตรวจเช็ค CCTV ประจำวัน" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -233,10 +242,18 @@ export default function InspectionTemplatesPage() {
                       />
                     </div>
                     <div className="w-[130px]">
-                      <Select label="ประเภท" isLabelHidden value={it.type} onChange={(e) => updateItem(idx, { type: e.target.value === "value" ? "value" : "check" })}>
-                        <option value="check">ตรวจ</option>
-                        <option value="value"># ค่าตัวเลข</option>
-                      </Select>
+                      <div className="space-y-1.5">
+                        <Label className="sr-only">ประเภท</Label>
+                        <Select value={it.type} onValueChange={(v) => updateItem(idx, { type: v === "value" ? "value" : "check" })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="check">ตรวจ</SelectItem>
+                            <SelectItem value="value"># ค่าตัวเลข</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <button
                       type="button"

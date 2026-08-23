@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -141,17 +141,20 @@ export default function AnalyticsDashboardPage() {
           <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Select
-            aria-label="ปี"
-            value={String(year)}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white"
-          >
-            {years.map((y) => (
-              <option key={y.value} value={y.value} className="text-[var(--cmms-text-primary)]">
-                {y.label}
-              </option>
-            ))}
+          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger
+              aria-label="ปี"
+              className="h-10 w-auto border-white/20 bg-white/10 text-sm text-white"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((y) => (
+                <SelectItem key={y.value} value={y.value}>
+                  {y.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
           <button
             type="button"

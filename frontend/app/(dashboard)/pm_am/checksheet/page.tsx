@@ -5,7 +5,7 @@ import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -593,17 +593,19 @@ export default function PMChecksheetPage() {
           <label htmlFor="pm-plan" className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกแผน PM ที่ต้องการทำเช็คชีท *</label>
           <div className="mt-1.5 w-full max-w-[560px]">
             <Select
-              id="pm-plan"
-              aria-label="เลือกแผน PM"
-              placeholder={plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}
-              value={selectedPlanId}
-              onChange={(e) => handleSelectPlan(e.target.value)}
+              value={selectedPlanId || "__none__"}
+              onValueChange={(v) => handleSelectPlan(v === "__none__" ? "" : v)}
               disabled={plans.length === 0}
             >
-              <option value="">{plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}</option>
-              {plans.map((p) => (
-                <option key={p.value} value={p.value}>{p.label}</option>
-              ))}
+              <SelectTrigger id="pm-plan" aria-label="เลือกแผน PM">
+                <SelectValue placeholder={plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__" disabled>{plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}</SelectItem>
+                {plans.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           {plans.length === 0 && (

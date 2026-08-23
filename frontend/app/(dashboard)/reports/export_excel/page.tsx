@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Download, Table, CheckCircle2, Database } from "lucide-react";
@@ -90,14 +90,17 @@ export default function ExportExcelReportPage() {
               <div className="space-y-1">
                 <label htmlFor="export-report-type" className="text-sm font-semibold">ประเภทรายงานข้อมูล:</label>
                 <Select
-                  id="export-report-type"
-                  aria-label="ประเภทรายงาน"
                   value={reportType}
-                  onChange={(e) => setReportType(e.target.value)}
+                  onValueChange={(v) => setReportType(v)}
                 >
-                  <option value="repair_all">รายการใบสั่งงานซ่อมบำรุงทั้งหมด</option>
-                  <option value="spare_parts">ยอดสต็อกและการเบิกจ่ายอะไหล่</option>
-                  <option value="assets">ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01</option>
+                  <SelectTrigger id="export-report-type" aria-label="ประเภทรายงาน">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="repair_all">รายการใบสั่งงานซ่อมบำรุงทั้งหมด</SelectItem>
+                    <SelectItem value="spare_parts">ยอดสต็อกและการเบิกจ่ายอะไหล่</SelectItem>
+                    <SelectItem value="assets">ทะเบียนเครื่องจักรและทรัพย์สิน F-EN-01</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
 
@@ -105,29 +108,35 @@ export default function ExportExcelReportPage() {
                 <div className="flex-1 space-y-1">
                   <label htmlFor="export-year" className="text-sm font-semibold">เลือกปี:</label>
                   <Select
-                    id="export-year"
-                    aria-label="ปี"
                     value={year}
-                    onChange={(e) => setYear(e.target.value)}
+                    onValueChange={(v) => setYear(v)}
                   >
-                    <option value="2026">ปี 2026 / 2569</option>
-                    <option value="2025">ปี 2025 / 2568</option>
-                    <option value="2024">ปี 2024 / 2567</option>
+                    <SelectTrigger id="export-year" aria-label="ปี">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2026">ปี 2026 / 2569</SelectItem>
+                      <SelectItem value="2025">ปี 2025 / 2568</SelectItem>
+                      <SelectItem value="2024">ปี 2024 / 2567</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
 
                 <div className="flex-1 space-y-1">
                   <label htmlFor="export-month" className="text-sm font-semibold">เลือกเดือน:</label>
                   <Select
-                    id="export-month"
-                    aria-label="เดือน"
                     value={month}
-                    onChange={(e) => setMonth(e.target.value)}
+                    onValueChange={(v) => setMonth(v)}
                   >
-                    <option value="all">ทุกเดือน (ทั้งปี)</option>
-                    <option value="1">มกราคม</option>
-                    <option value="7">กรกฎาคม</option>
-                    <option value="12">ธันวาคม</option>
+                    <SelectTrigger id="export-month" aria-label="เดือน">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">ทุกเดือน (ทั้งปี)</SelectItem>
+                      <SelectItem value="1">มกราคม</SelectItem>
+                      <SelectItem value="7">กรกฎาคม</SelectItem>
+                      <SelectItem value="12">ธันวาคม</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>

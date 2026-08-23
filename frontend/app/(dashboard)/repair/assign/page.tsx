@@ -9,7 +9,7 @@ import { Search, UserPlus, RefreshCw, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
@@ -355,15 +355,18 @@ export default function RepairAssignPage() {
           />
         </div>
         <Select
-          aria-label="สถานะ"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="sm:w-64"
+          value={statusFilter || "__all__"}
+          onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}
         >
-          <option value="">{t("action.filter_all_status")}</option>
-          <option value="open">รอมอบหมาย / รอดำเนินการ</option>
-          <option value="in_progress">กำลังซ่อม</option>
-          <option value="waiting_parts">รออะไหล่</option>
+          <SelectTrigger aria-label="สถานะ" className="sm:w-64">
+            <SelectValue placeholder={t("action.filter_all_status")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">{t("action.filter_all_status")}</SelectItem>
+            <SelectItem value="open">รอมอบหมาย / รอดำเนินการ</SelectItem>
+            <SelectItem value="in_progress">กำลังซ่อม</SelectItem>
+            <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+          </SelectContent>
         </Select>
       </div>
 
@@ -412,16 +415,20 @@ export default function RepairAssignPage() {
           <div className="space-y-1.5">
             <p className="text-sm font-bold">หัวหน้าชุด (ผู้รับผิดชอบหลัก) *</p>
             <Select
-              aria-label="เลือกหัวหน้าชุด"
-              value={selectedTech}
-              onChange={(e) => setSelectedTech(e.target.value)}
+              value={selectedTech || "__none__"}
+              onValueChange={(v) => setSelectedTech(v === "__none__" ? "" : v)}
             >
-              <option value="">เลือกหัวหน้าชุด...</option>
-              {technicians.map((tech) => (
-                <option key={tech.value} value={tech.value}>
-                  {tech.label}
-                </option>
-              ))}
+              <SelectTrigger aria-label="เลือกหัวหน้าชุด">
+                <SelectValue placeholder="เลือกหัวหน้าชุด..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">เลือกหัวหน้าชุด...</SelectItem>
+                {technicians.map((tech) => (
+                  <SelectItem key={tech.value} value={tech.value}>
+                    {tech.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 

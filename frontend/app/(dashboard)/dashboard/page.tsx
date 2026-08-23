@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -439,27 +439,27 @@ export default function DashboardPage() {
               className="flex flex-wrap items-center gap-2 rounded-xl border p-2"
               style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}
             >
-              <Select
-                aria-label="ปี"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                className="h-9 w-auto text-sm"
-              >
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
+              <Select value={selectedYear} onValueChange={(v) => setSelectedYear(v)}>
+                <SelectTrigger aria-label="ปี" className="h-9 w-auto text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2026">2026</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                </SelectContent>
               </Select>
               {viewMode === "monthly" && (
-                <Select
-                  aria-label="เดือน"
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="h-9 w-auto text-sm"
-                >
-                  <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
-                  <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
-                  <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
-                  <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                <Select value={selectedMonth} onValueChange={(v) => setSelectedMonth(v)}>
+                  <SelectTrigger aria-label="เดือน" className="h-9 w-auto text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">ม.ค.</SelectItem><SelectItem value="2">ก.พ.</SelectItem><SelectItem value="3">มี.ค.</SelectItem>
+                    <SelectItem value="4">เม.ย.</SelectItem><SelectItem value="5">พ.ค.</SelectItem><SelectItem value="6">มิ.ย.</SelectItem>
+                    <SelectItem value="7">ก.ค.</SelectItem><SelectItem value="8">ส.ค.</SelectItem><SelectItem value="9">ก.ย.</SelectItem>
+                    <SelectItem value="10">ต.ค.</SelectItem><SelectItem value="11">พ.ย.</SelectItem><SelectItem value="12">ธ.ค.</SelectItem>
+                  </SelectContent>
                 </Select>
               )}
             </div>

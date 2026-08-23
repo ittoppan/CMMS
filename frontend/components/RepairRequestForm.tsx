@@ -23,8 +23,9 @@ import { serverResponds } from "@/lib/server-check";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
-import { Switch } from "@/components/ui/switch-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -1077,16 +1078,22 @@ export default function RepairRequestForm() {
 
             <div>
               <p className="text-sm font-bold mb-2">ตรวจสอบการปนเปื้อนหลังงานเสร็จ (Contaminate Checking)</p>
-              <Select
-                label="ตรวจสอบการปนเปื้อน"
-                isLabelHidden
-                value={form.contaminateChecking}
-                onChange={(e) => update("contaminateChecking", e.target.value)}
-              >
-                {contaminateCheckOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </Select>
+              <div className="space-y-1.5">
+                <Label className="sr-only">ตรวจสอบการปนเปื้อน</Label>
+                <Select
+                  value={form.contaminateChecking}
+                  onValueChange={(v) => update("contaminateChecking", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contaminateCheckOptions.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div>
@@ -1137,31 +1144,42 @@ export default function RepairRequestForm() {
             </FieldRow>
 
             <FieldRow label="แผนก (Department)" required>
-              <Select
-                label="แผนก"
-                isLabelHidden
-                placeholder="เลือกแผนก..."
-                value={form.departmentCode}
-                onChange={(e) => update("departmentCode", e.target.value)}
-              >
-                <option value="">เลือกแผนก...</option>
-                {depts.map((d) => (
-                  <option key={d.id} value={d.code}>{d.name}</option>
-                ))}
-              </Select>
+              <div className="space-y-1.5">
+                <Label className="sr-only">แผนก</Label>
+                <Select
+                  value={form.departmentCode || "__none__"}
+                  onValueChange={(v) => update("departmentCode", v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกแผนก..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__" disabled>เลือกแผนก...</SelectItem>
+                    {depts.map((d) => (
+                      <SelectItem key={d.id} value={d.code}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </FieldRow>
 
             <FieldRow label="สำนักงาน (Office)" required>
-              <Select
-                label="สำนักงาน"
-                isLabelHidden
-                value={form.office}
-                onChange={(e) => update("office", e.target.value)}
-              >
-                {OFFICES.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </Select>
+              <div className="space-y-1.5">
+                <Label className="sr-only">สำนักงาน</Label>
+                <Select
+                  value={form.office}
+                  onValueChange={(v) => update("office", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OFFICES.map((o) => (
+                      <SelectItem key={o} value={o}>{o}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </FieldRow>
 
             <FieldRow label="เบอร์ติดต่อ (Phone)" required>
@@ -1197,7 +1215,7 @@ export default function RepairRequestForm() {
                     label="Contamination"
                     isLabelHidden
                     checked={form.contaminationRisk}
-                    onChange={(e) => update("contaminationRisk", e.target.checked)}
+                    onChange={(c) => update("contaminationRisk", c)}
                   />
                   <p className="text-sm m-0" style={{ color: form.contaminationRisk ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
                     {form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่มีความเสี่ยงปนเปื้อน"}
@@ -1208,12 +1226,12 @@ export default function RepairRequestForm() {
 
             {/* Safety Related */}
             <div className="flex items-center gap-3 py-3 border-b border-[var(--cmms-border)]">
-              <Switch
-                label="Safety Related"
-                isLabelHidden
-                checked={form.safetyRelated}
-                onChange={(e) => update("safetyRelated", e.target.checked)}
-              />
+                  <Switch
+                    label="Safety Related"
+                    isLabelHidden
+                    checked={form.safetyRelated}
+                    onChange={(c) => update("safetyRelated", c)}
+                  />
               <div className="flex flex-col">
                 <p className="text-sm font-bold m-0">เกี่ยวข้องกับความปลอดภัย</p>
                 <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">
@@ -1234,7 +1252,7 @@ export default function RepairRequestForm() {
                     label="Urgent Repair"
                     isLabelHidden
                     checked={form.isUrgent}
-                    onChange={(e) => update("isUrgent", e.target.checked)}
+                    onChange={(c) => update("isUrgent", c)}
                   />
                   <p className="text-sm m-0" style={{ color: form.isUrgent ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
                     {form.isUrgent ? "🚨 แจ้งด่วน — ส่ง LINE + Telegram ทันที" : "ปกติ"}

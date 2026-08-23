@@ -8,7 +8,7 @@ import AndonLamp from "@/components/AndonLamp";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
@@ -257,17 +257,17 @@ export default function RepairKanbanPage() {
                 className="pl-9"
               />
             </div>
-            <Select
-              aria-label="ความสำคัญ"
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="sm:w-52"
-            >
-              <option value="all">ทุกความด่วน</option>
-              <option value="Critical">วิกฤต (Critical)</option>
-              <option value="High">สูง (High)</option>
-              <option value="Medium">ปานกลาง (Medium)</option>
-              <option value="Low">ต่ำ (Low)</option>
+            <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v)}>
+              <SelectTrigger aria-label="ความสำคัญ" className="sm:w-52">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกความด่วน</SelectItem>
+                <SelectItem value="Critical">วิกฤต (Critical)</SelectItem>
+                <SelectItem value="High">สูง (High)</SelectItem>
+                <SelectItem value="Medium">ปานกลาง (Medium)</SelectItem>
+                <SelectItem value="Low">ต่ำ (Low)</SelectItem>
+              </SelectContent>
             </Select>
             <button
               type="button"

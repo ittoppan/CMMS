@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -211,25 +211,25 @@ export default function MonthlyPdfReportPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <Select
-            value={String(year)}
-            onChange={(e) => setYear(Number(e.target.value))}
-            aria-label="ปี"
-            className="w-auto"
-          >
-            {yearOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
+          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))} aria-label="ปี">
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
-          <Select
-            value={String(month)}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            aria-label="เดือน"
-            className="w-auto"
-          >
-            {monthOptions.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
+          <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))} aria-label="เดือน">
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {monthOptions.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
           </Select>
           <Button variant="outline" onClick={fetchData} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
             <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />

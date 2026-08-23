@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -137,30 +137,36 @@ export default function PMCreatePage() {
           <div className="space-y-1.5">
             <label htmlFor="pm-create-asset" className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักรเป้าหมาย *</label>
             <Select
-              id="pm-create-asset"
-              aria-label="เครื่องจักรเป้าหมาย"
-              value={assetId}
-              onChange={(e) => setAssetId(e.target.value)}
+              value={assetId || "__none__"}
+              onValueChange={(v) => setAssetId(v === "__none__" ? "" : v)}
             >
-              <option value="">เลือกเครื่องจักร...</option>
-              {assets.map(a => (
-                <option key={a.id} value={String(a.id)}>{`${a.code} - ${a.name}`}</option>
-              ))}
+              <SelectTrigger id="pm-create-asset" aria-label="เครื่องจักรเป้าหมาย">
+                <SelectValue placeholder="เลือกเครื่องจักร..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">เลือกเครื่องจักร...</SelectItem>
+                {assets.map(a => (
+                  <SelectItem key={a.id} value={String(a.id)}>{`${a.code} - ${a.name}`}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="pm-create-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง) *</label>
             <Select
-              id="pm-create-assignee"
-              aria-label="ผู้รับผิดชอบ"
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
+              value={assignedTo || "__none__"}
+              onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}
             >
-              <option value="">เลือกช่างที่รับผิดชอบงาน PM นี้...</option>
-              {users.map(u => (
-                <option key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</option>
-              ))}
+              <SelectTrigger id="pm-create-assignee" aria-label="ผู้รับผิดชอบ">
+                <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้...</SelectItem>
+                {users.map(u => (
+                  <SelectItem key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
 
@@ -186,16 +192,19 @@ export default function PMCreatePage() {
           <div className="space-y-1.5">
             <label htmlFor="pm-create-frequency" className="text-sm font-medium text-[var(--cmms-text-primary)]">รอบความถี่ *</label>
             <Select
-              id="pm-create-frequency"
-              aria-label="รอบความถี่"
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
+              onValueChange={(v) => setFrequency(v)}
             >
-              <option value="daily">รายวัน</option>
-              <option value="weekly">รายสัปดาห์</option>
-              <option value="monthly">รายเดือน</option>
-              <option value="quarterly">ทุก 3 เดือน</option>
-              <option value="yearly">รายปี</option>
+              <SelectTrigger id="pm-create-frequency" aria-label="รอบความถี่">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">รายวัน</SelectItem>
+                <SelectItem value="weekly">รายสัปดาห์</SelectItem>
+                <SelectItem value="monthly">รายเดือน</SelectItem>
+                <SelectItem value="quarterly">ทุก 3 เดือน</SelectItem>
+                <SelectItem value="yearly">รายปี</SelectItem>
+              </SelectContent>
             </Select>
           </div>
 

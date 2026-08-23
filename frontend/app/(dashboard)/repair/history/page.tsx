@@ -10,7 +10,7 @@ import { Search, RefreshCw, ClipboardList } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
@@ -310,16 +310,19 @@ export default function RepairHistoryPage() {
               />
             </div>
             <Select
-              aria-label="สถานะ"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="sm:w-44"
+              value={statusFilter || "__all__"}
+              onValueChange={(v) => setStatusFilter(v === "__all__" ? "" : v)}
             >
-              <option value="">{t("action.filter_all_status")}</option>
-              <option value="completed">เสร็จสิ้น</option>
-              <option value="closed">ปิดงาน</option>
-              <option value="resolved">แก้ไขแล้ว</option>
-              <option value="rejected">ปฏิเสธ</option>
+              <SelectTrigger aria-label="สถานะ" className="sm:w-44">
+                <SelectValue placeholder={t("action.filter_all_status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">{t("action.filter_all_status")}</SelectItem>
+                <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+                <SelectItem value="closed">ปิดงาน</SelectItem>
+                <SelectItem value="resolved">แก้ไขแล้ว</SelectItem>
+                <SelectItem value="rejected">ปฏิเสธ</SelectItem>
+              </SelectContent>
             </Select>
             <div
               className="flex items-center gap-1 rounded-[10px] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-[3px]"

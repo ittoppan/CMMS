@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
@@ -259,18 +260,24 @@ export default function InspectionRunPage() {
       {/* เลือกรอบ */}
       <Card>
         <CardContent className="p-4">
-          <Select
-            label="เลือกรอบตรวจ *"
-            placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."}
-            value={selectedId}
-            onChange={(e) => handleSelect(e.target.value)}
-            disabled={schedules.length === 0}
-            className="max-w-[640px]"
-          >
-            {schedules.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </Select>
+          <div className="max-w-[640px] space-y-1.5">
+            <Label>เลือกรอบตรวจ *</Label>
+            <Select
+              value={selectedId || "__none__"}
+              onValueChange={(v) => handleSelect(v === "__none__" ? "" : v)}
+              disabled={schedules.length === 0}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__" disabled>{schedules.length === 0 ? "ไม่มีรอบตรวจที่รอดำเนินการ" : "เลือกรอบตรวจ..."}</SelectItem>
+                {schedules.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {schedules.length === 0 && (
             <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ไม่พบรอบตรวจที่รอดำเนินการ — ไปที่ &quot;ตรวจเช็ครอบ&quot; เพื่อสร้างรอบ</p>
           )}
