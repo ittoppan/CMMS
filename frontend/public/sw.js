@@ -1,18 +1,18 @@
-/* CMMS-TPT Service Worker — PWA full-app shell v8
- * กลยุทธ์:
- *  - Navigation (HTML): network-only → offline.html → synthesized offline page
- *    (ไม่คืนหน้า HTML เก่าจาก cache เด็ดขาด — กันเห็นหน้าเก่าหลัง deploy)
+﻿/* CMMS-TPT Service Worker â€” PWA full-app shell v8
+ * à¸à¸¥à¸¢à¸¸à¸—à¸˜à¹Œ:
+ *  - Navigation (HTML): network-only â†’ offline.html â†’ synthesized offline page
+ *    (à¹„à¸¡à¹ˆà¸„à¸·à¸™à¸«à¸™à¹‰à¸² HTML à¹€à¸à¹ˆà¸²à¸ˆà¸²à¸ cache à¹€à¸”à¹‡à¸”à¸‚à¸²à¸” â€” à¸à¸±à¸™à¹€à¸«à¹‡à¸™à¸«à¸™à¹‰à¸²à¹€à¸à¹ˆà¸²à¸«à¸¥à¸±à¸‡ deploy)
  *  - API (GET /api/v1/*): network-first + cache fallback
  *  - Static assets (/_next/static, /icons): stale-while-revalidate
- *    (มี cache → เสิร์ฟทันที + อัปเดตจาก network ในพื้นหลัง / ไม่มี → โหลด network)
- *  - Install: precache แบบ per-URL (URL หนึ่งพัง ไม่ล้มทั้งชุด)
- *  ทุก respondWith คืน Response เสมอ — ป้องกัน "Failed to convert value to 'Response'"
+ *    (à¸¡à¸µ cache â†’ à¹€à¸ªà¸´à¸£à¹Œà¸Ÿà¸—à¸±à¸™à¸—à¸µ + à¸­à¸±à¸›à¹€à¸”à¸•à¸ˆà¸²à¸ network à¹ƒà¸™à¸žà¸·à¹‰à¸™à¸«à¸¥à¸±à¸‡ / à¹„à¸¡à¹ˆà¸¡à¸µ â†’ à¹‚à¸«à¸¥à¸” network)
+ *  - Install: precache à¹à¸šà¸š per-URL (URL à¸«à¸™à¸¶à¹ˆà¸‡à¸žà¸±à¸‡ à¹„à¸¡à¹ˆà¸¥à¹‰à¸¡à¸—à¸±à¹‰à¸‡à¸Šà¸¸à¸”)
+ *  à¸—à¸¸à¸ respondWith à¸„à¸·à¸™ Response à¹€à¸ªà¸¡à¸­ â€” à¸›à¹‰à¸­à¸‡à¸à¸±à¸™ "Failed to convert value to 'Response'"
  *
- * ⚠️ เมื่อ deploy UI ใหม่ ให้ bump SW_VERSION (v8 → v9 ...) หนึ่งบรรทัดเดียว:
- *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
- *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
+ * âš ï¸ à¹€à¸¡à¸·à¹ˆà¸­ deploy UI à¹ƒà¸«à¸¡à¹ˆ à¹ƒà¸«à¹‰ bump SW_VERSION (v8 â†’ v9 ...) à¸«à¸™à¸¶à¹ˆà¸‡à¸šà¸£à¸£à¸—à¸±à¸”à¹€à¸”à¸µà¸¢à¸§:
+ *    SW à¹ƒà¸«à¸¡à¹ˆ activate â†’ à¸¥à¹‰à¸²à¸‡ cache à¹€à¸à¹ˆà¸²à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” (activate handler) â†’ à¸žà¸™à¸±à¸à¸‡à¸²à¸™à¹€à¸«à¹‡à¸™à¸‚à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¸—à¸±à¸™à¸—à¸µ
+ *    à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¥à¹‰à¸²à¸‡ cache à¹€à¸­à¸‡ (PwaRegister reload à¸«à¸™à¹‰à¸²à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´à¸œà¹ˆà¸²à¸™ SKIP_WAITING)
  */
-const SW_VERSION = "v11";
+const SW_VERSION = "v12-20260823-1537";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -26,11 +26,11 @@ const PRECACHE_URLS = [
 ];
 
 /* ---------- Offline Routes (PWA) ----------
- * หน้าเหล่านี้เปิดดู/กรอกได้แม้ไม่มีเน็ต:
- *  - /repair/request (แจ้งซ่อมด่วน — LIFF) — ฟอร์ม + queue submit ออฟไลน์
- *  - /repair/my_tasks (งานของฉัน) — ดูรายการงานจาก cache
- * หน้าแรกที่ออนไลน์ จะถูกเก็บ HTML ลง PAGE_CACHE แล้วตอน offline เสิร์ฟจาก cache
- * (ไม่ได้อยู่ในลิสต์ = network-only เดิม — กันเห็นหน้าเก่าหลัง deploy) */
+ * à¸«à¸™à¹‰à¸²à¹€à¸«à¸¥à¹ˆà¸²à¸™à¸µà¹‰à¹€à¸›à¸´à¸”à¸”à¸¹/à¸à¸£à¸­à¸à¹„à¸”à¹‰à¹à¸¡à¹‰à¹„à¸¡à¹ˆà¸¡à¸µà¹€à¸™à¹‡à¸•:
+ *  - /repair/request (à¹à¸ˆà¹‰à¸‡à¸‹à¹ˆà¸­à¸¡à¸”à¹ˆà¸§à¸™ â€” LIFF) â€” à¸Ÿà¸­à¸£à¹Œà¸¡ + queue submit à¸­à¸­à¸Ÿà¹„à¸¥à¸™à¹Œ
+ *  - /repair/my_tasks (à¸‡à¸²à¸™à¸‚à¸­à¸‡à¸‰à¸±à¸™) â€” à¸”à¸¹à¸£à¸²à¸¢à¸à¸²à¸£à¸‡à¸²à¸™à¸ˆà¸²à¸ cache
+ * à¸«à¸™à¹‰à¸²à¹à¸£à¸à¸—à¸µà¹ˆà¸­à¸­à¸™à¹„à¸¥à¸™à¹Œ à¸ˆà¸°à¸–à¸¹à¸à¹€à¸à¹‡à¸š HTML à¸¥à¸‡ PAGE_CACHE à¹à¸¥à¹‰à¸§à¸•à¸­à¸™ offline à¹€à¸ªà¸´à¸£à¹Œà¸Ÿà¸ˆà¸²à¸ cache
+ * (à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™à¸¥à¸´à¸ªà¸•à¹Œ = network-only à¹€à¸”à¸´à¸¡ â€” à¸à¸±à¸™à¹€à¸«à¹‡à¸™à¸«à¸™à¹‰à¸²à¹€à¸à¹ˆà¸²à¸«à¸¥à¸±à¸‡ deploy) */
 const OFFLINE_ROUTES = [
   "/repair/request",
   "/repair/my_tasks",
@@ -38,7 +38,7 @@ const OFFLINE_ROUTES = [
   "/pm_am/checksheet",
 ];
 
-/* API ที่ precache ตอน install — ฟอร์มแจ้งซ่อมโหลดข้อมูล (เครื่องจักร/แผนก) */
+/* API à¸—à¸µà¹ˆ precache à¸•à¸­à¸™ install â€” à¸Ÿà¸­à¸£à¹Œà¸¡à¹à¸ˆà¹‰à¸‡à¸‹à¹ˆà¸­à¸¡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ (à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸ˆà¸±à¸à¸£/à¹à¸œà¸™à¸) */
 const PRECACHE_APIS = [
   "/api/v1/asset_registry.php",
   "/api/v1/departments.php",
@@ -59,7 +59,7 @@ function cachePut(cacheName, request, response) {
 
 function offlineFallback() {
   return new Response(
-    "<!DOCTYPE html><html lang='th'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CMMS-TPT — Offline</title><style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f1f1;color:#262626;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center}.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:40px 32px;max-width:360px;box-shadow:0 2px 4px rgba(0,0,0,.05)}.logo{width:64px;height:64px;border-radius:18px;background:#0D4785;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin-bottom:16px}h1{font-size:18px;margin:0 0 8px}p{font-size:13px;color:#737373;line-height:1.6;margin:0}</style></head><body><div class='card'><div class='logo'>C</div><h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1><p>ระบบ CMMS-TOPPAN ต้องการเครือข่ายเพื่อโหลดข้อมูล<br>กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง</p></div></body></html>",
+    "<!DOCTYPE html><html lang='th'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CMMS-TPT â€” Offline</title><style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f1f1;color:#262626;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center}.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:40px 32px;max-width:360px;box-shadow:0 2px 4px rgba(0,0,0,.05)}.logo{width:64px;height:64px;border-radius:18px;background:#0D4785;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin-bottom:16px}h1{font-size:18px;margin:0 0 8px}p{font-size:13px;color:#737373;line-height:1.6;margin:0}</style></head><body><div class='card'><div class='logo'>C</div><h1>à¹„à¸¡à¹ˆà¸¡à¸µà¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸­à¸´à¸™à¹€à¸—à¸­à¸£à¹Œà¹€à¸™à¹‡à¸•</h1><p>à¸£à¸°à¸šà¸š CMMS-TOPPAN à¸•à¹‰à¸­à¸‡à¸à¸²à¸£à¹€à¸„à¸£à¸·à¸­à¸‚à¹ˆà¸²à¸¢à¹€à¸žà¸·à¹ˆà¸­à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥<br>à¸à¸£à¸¸à¸“à¸²à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¹à¸¥à¸°à¸¥à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡</p></div></body></html>",
     {
       status: 503,
       statusText: "Offline",
@@ -68,7 +68,7 @@ function offlineFallback() {
   );
 }
 
-/* ---------- Install: precache shell + data APIs (per-URL — ไม่ล้มทั้งชุด) ---------- */
+/* ---------- Install: precache shell + data APIs (per-URL â€” à¹„à¸¡à¹ˆà¸¥à¹‰à¸¡à¸—à¸±à¹‰à¸‡à¸Šà¸¸à¸”) ---------- */
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
@@ -76,7 +76,7 @@ self.addEventListener("install", (event) => {
       await Promise.allSettled(
         PRECACHE_URLS.map((url) => shell.add(url).catch(() => {}))
       );
-      // precache API สำหรับหน้า offline (ล้มไม่เป็นไร — ตอนออนไลน์จะ cache เองผ่าน fetch handler)
+      // precache API à¸ªà¸³à¸«à¸£à¸±à¸šà¸«à¸™à¹‰à¸² offline (à¸¥à¹‰à¸¡à¹„à¸¡à¹ˆà¹€à¸›à¹‡à¸™à¹„à¸£ â€” à¸•à¸­à¸™à¸­à¸­à¸™à¹„à¸¥à¸™à¹Œà¸ˆà¸° cache à¹€à¸­à¸‡à¸œà¹ˆà¸²à¸™ fetch handler)
       const api = await caches.open(API_CACHE);
       await Promise.allSettled(
         PRECACHE_APIS.map((url) => api.add(url).catch(() => {}))
@@ -86,14 +86,14 @@ self.addEventListener("install", (event) => {
   );
 });
 
-/* ---------- Message: SKIP_WAITING จากหน้าเว็บ (PwaRegister) ---------- */
+/* ---------- Message: SKIP_WAITING à¸ˆà¸²à¸à¸«à¸™à¹‰à¸²à¹€à¸§à¹‡à¸š (PwaRegister) ---------- */
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-/* ---------- Activate: ล้าง cache เวอร์ชันเก่า ---------- */
+/* ---------- Activate: à¸¥à¹‰à¸²à¸‡ cache à¹€à¸§à¸­à¸£à¹Œà¸Šà¸±à¸™à¹€à¸à¹ˆà¸² ---------- */
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -115,9 +115,9 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return; // cross-origin (CDN, LINE) ปล่อยผ่าน
+  if (url.origin !== self.location.origin) return; // cross-origin (CDN, LINE) à¸›à¸¥à¹ˆà¸­à¸¢à¸œà¹ˆà¸²à¸™
 
-  // 1) API — network-first + cache fallback (คืน Response.error() แทน undefined)
+  // 1) API â€” network-first + cache fallback (à¸„à¸·à¸™ Response.error() à¹à¸—à¸™ undefined)
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(request)
@@ -132,12 +132,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2) Static assets — stale-while-revalidate (โหลดเร็ว + อัปเดต cache ในพื้นหลัง)
+  // 2) Static assets â€” stale-while-revalidate (à¹‚à¸«à¸¥à¸”à¹€à¸£à¹‡à¸§ + à¸­à¸±à¸›à¹€à¸”à¸• cache à¹ƒà¸™à¸žà¸·à¹‰à¸™à¸«à¸¥à¸±à¸‡)
   if (url.pathname.startsWith("/_next/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) {
-          // มี cache → เสิร์ฟทันที + ดึง version ใหม่จาก network อัปเดต cache (พื้นหลัง)
+          // à¸¡à¸µ cache â†’ à¹€à¸ªà¸´à¸£à¹Œà¸Ÿà¸—à¸±à¸™à¸—à¸µ + à¸”à¸¶à¸‡ version à¹ƒà¸«à¸¡à¹ˆà¸ˆà¸²à¸ network à¸­à¸±à¸›à¹€à¸”à¸• cache (à¸žà¸·à¹‰à¸™à¸«à¸¥à¸±à¸‡)
           fetch(request)
             .then((response) => {
               if (response && response.ok) cachePut(ASSET_CACHE, request, response.clone());
@@ -145,7 +145,7 @@ self.addEventListener("fetch", (event) => {
             .catch(() => {});
           return cached;
         }
-        // ไม่มี cache → โหลดจาก network ตามปกติ + เก็บ cache
+        // à¹„à¸¡à¹ˆà¸¡à¸µ cache â†’ à¹‚à¸«à¸¥à¸”à¸ˆà¸²à¸ network à¸•à¸²à¸¡à¸›à¸à¸•à¸´ + à¹€à¸à¹‡à¸š cache
         return fetch(request)
           .then((response) => {
             cachePut(ASSET_CACHE, request, response.clone());
@@ -158,8 +158,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   // 3) Navigation / pages
-  //    - หน้าใน OFFLINE_ROUTES: network-first + cache fallback (เปิดดูได้ตอน offline)
-  //    - หน้าอื่น: network-only (ไม่คืน HTML เก่า — กันเห็นหน้าเก่าหลัง deploy)
+  //    - à¸«à¸™à¹‰à¸²à¹ƒà¸™ OFFLINE_ROUTES: network-first + cache fallback (à¹€à¸›à¸´à¸”à¸”à¸¹à¹„à¸”à¹‰à¸•à¸­à¸™ offline)
+  //    - à¸«à¸™à¹‰à¸²à¸­à¸·à¹ˆà¸™: network-only (à¹„à¸¡à¹ˆà¸„à¸·à¸™ HTML à¹€à¸à¹ˆà¸² â€” à¸à¸±à¸™à¹€à¸«à¹‡à¸™à¸«à¸™à¹‰à¸²à¹€à¸à¹ˆà¸²à¸«à¸¥à¸±à¸‡ deploy)
   if (request.mode === "navigate") {
     const isOfflineRoute = OFFLINE_ROUTES.some((r) => url.pathname === r || url.pathname.startsWith(r + "/"));
     if (!isOfflineRoute) {
@@ -170,7 +170,7 @@ self.addEventListener("fetch", (event) => {
       );
       return;
     }
-    // offline route — network-first, เก็บ HTML ลง PAGE_CACHE, offline เสิร์ฟจาก cache
+    // offline route â€” network-first, à¹€à¸à¹‡à¸š HTML à¸¥à¸‡ PAGE_CACHE, offline à¹€à¸ªà¸´à¸£à¹Œà¸Ÿà¸ˆà¸²à¸ cache
     event.respondWith(
       fetch(request)
         .then((response) => {
@@ -186,7 +186,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 4) อื่นๆ (ไฟล์ static ทั่วไป) — network-first + cache fallback
+  // 4) à¸­à¸·à¹ˆà¸™à¹† (à¹„à¸Ÿà¸¥à¹Œ static à¸—à¸±à¹ˆà¸§à¹„à¸›) â€” network-first + cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
