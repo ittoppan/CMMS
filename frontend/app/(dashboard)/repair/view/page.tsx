@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { t, statusText, priorityText } from "@/lib/i18n";
 import AnimatedDialog from "@/components/AnimatedDialog";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
@@ -31,6 +29,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PageShell } from "@/components/PageShell";
 
 interface PartRow {
   spare_part_id: number;
@@ -448,7 +456,44 @@ export default function RepairViewDetailsPage() {
   const partsTotal = partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0);
 
   return (
-    <div className="space-y-6">
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "งานซ่อมบำรุง", href: "/repair" },
+        { label: "ใบสั่งงานซ่อม" },
+      ]}
+      title="ใบสั่งงานซ่อม"
+      description="WORK ORDER DETAIL · CMMS-TOPPAN"
+      actions={
+        <>
+          <Button
+            variant="outline"
+            onClick={() => (window.location.href = "/repair/tracking")}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>กลับ</span>
+          </Button>
+          <Button
+            variant="outline"
+            disabled={downloading}
+            onClick={handleDownloadPdf}
+            className="gap-2"
+          >
+            <FileDown className="w-4 h-4" />
+            <span>{downloading ? t("action.building_pdf") : t("action.download_pdf_fen03")}</span>
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handlePrint}
+            className="gap-2"
+          >
+            <Printer className="w-4 h-4" />
+            <span>{t("action.print_closure_doc")}</span>
+          </Button>
+        </>
+      }
+    >
       {/* Offline banner — ข้อมูลมาจาก snapshot (IndexedDB) */}
       {offline && (
         <Alert
@@ -486,76 +531,37 @@ export default function RepairViewDetailsPage() {
         </Alert>
       )}
 
-      {/* Header (Hidden on Print) */}
+      {/* Interactive detail (Hidden on Print) */}
       <div className="no-print">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-          <div>
-            <span className="cmms-eyebrow">
-              WORK ORDER DETAIL · CMMS-TOPPAN
-            </span>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-50">
-              ใบสั่งงานซ่อม
-            </h1>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button
-              variant="outline"
-              onClick={() => (window.location.href = "/repair/tracking")}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>กลับ</span>
-            </Button>
-            <Button
-              variant="outline"
-              disabled={downloading}
-              onClick={handleDownloadPdf}
-              className="gap-2"
-            >
-              <FileDown className="w-4 h-4" />
-              <span>{downloading ? t("action.building_pdf") : t("action.download_pdf_fen03")}</span>
-            </Button>
-            <Button
-              variant="primary"
-              onClick={handlePrint}
-              className="gap-2"
-            >
-              <Printer className="w-4 h-4" />
-              <span>{t("action.print_closure_doc")}</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* ── แถบสถานะ Andon (ticket header) — ข้อมูลงาน + สถานะกวาดตาเดียว ── */}
-        <div className="cmms-andon-board mb-6">
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-wrap">
-                <AndonLamp status={andonOf(wo.status)} size="lg" />
-                <div className="space-y-1">
-                  <span className="text-xs font-bold uppercase text-white/60">
-                    {statusLabel(wo.status)}
-                  </span>
-                  <div className="cmms-display text-3xl font-black text-white">
-                    {wo.workOrderNo}
-                  </div>
-                  <p className="text-base font-semibold text-white/90">
-                    {wo.title}
-                  </p>
-                  <p className="text-sm text-white/60">
-                    {wo.assetName}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-end justify-end">
-                <Badge variant={priorityBadgeVariant(wo.priority)}>
-                  ความเร่งด่วน: {priorityLabel(wo.priority)}
-                </Badge>
+        {/* ── สถานะใบงาน + ข้อเท็จจริงของใบงาน (definition rows) ── */}
+        <Card className="mb-6">
+          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4 flex-wrap">
+              <AndonLamp status={andonOf(wo.status)} size="lg" />
+              <div className="space-y-1 min-w-0">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {statusLabel(wo.status)}
+                </span>
+                <h2 className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+                  {wo.workOrderNo}
+                </h2>
+                <p className="text-base font-semibold text-foreground">
+                  {wo.title}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {wo.assetName}
+                </p>
               </div>
             </div>
-
+            <div className="flex items-end justify-end">
+              <Badge variant={priorityBadgeVariant(wo.priority)}>
+                ความเร่งด่วน: {priorityLabel(wo.priority)}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
             {/* ข้อเท็จจริงของใบงาน */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-5">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
               {([
                 { label: "ผู้แจ้ง", value: wo.receiverName },
                 { label: "ผู้รับผิดชอบ", value: wo.assignedName },
@@ -566,31 +572,31 @@ export default function RepairViewDetailsPage() {
                 { label: "ผลตรวจการปนเปื้อน", value: contamLabel[wo.contaminateChecking || "not_checked"] ?? "ยังไม่ตรวจ", tone: contamTone(wo.contaminateChecking || "") },
                 { label: "ผู้รับเหมาภายนอก", value: wo.outsourceBy || "—", tone: wo.outsourceBy ? "warn" : "idle" },
               ] as { label: string; value: string; tone?: "ok" | "warn" | "down" | "idle" }[]).map((f) => (
-                <div
-                  key={f.label}
-                  className="cmms-andon-tile flex-col items-start gap-1"
-                >
-                  <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+                <div key={f.label} className="min-w-0 rounded-[var(--cmms-radius-sm)] border border-border p-2.5">
+                  <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {f.label}
-                  </span>
-                  <span className="cmms-andon-tile-name text-sm font-semibold flex items-center gap-1.5">
+                  </dt>
+                  <dd className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-foreground">
                     {f.tone && (
-                      <span className={`cmms-status-dot ${f.tone} inline-block w-2 h-2 shrink-0`} />
+                      <span
+                        aria-hidden="true"
+                        className={`inline-block h-2 w-2 shrink-0 rounded-full ${f.tone === "ok" ? "bg-emerald-500" : f.tone === "warn" ? "bg-amber-500" : f.tone === "down" ? "bg-red-500" : "bg-zinc-400"}`}
+                      />
                     )}
-                    {f.value}
-                  </span>
+                    <span className="truncate">{f.value}</span>
+                  </dd>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
+            </dl>
+          </CardContent>
+        </Card>
 
         {/* ── ทีมซ่อม (ผู้รับผิดชอบหลายคน) ── */}
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-base">ทีมซ่อม</CardTitle>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 ผู้รับผิดชอบหลัก (หัวหน้าชุด) + สมาชิกในทีม — ใครในทีมก็ปิดงานได้
               </p>
             </div>
@@ -600,7 +606,7 @@ export default function RepairViewDetailsPage() {
           </CardHeader>
           <CardContent>
             {wo.team.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 ยังไม่มีการมอบหมายทีมซ่อม — ไปที่หน้า "แจกงานซ่อม" เพื่อเลือกทีม
               </p>
             ) : (
@@ -610,37 +616,37 @@ export default function RepairViewDetailsPage() {
                     key={m.user_id}
                     className={`flex items-center gap-3 p-3 rounded-xl border ${
                       m.role === "lead"
-                        ? "border-sky-200 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-950/20"
-                        : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50"
+                        ? "border-[var(--cmms-info)]/30 bg-[var(--cmms-info-light)]"
+                        : "border-border bg-muted/50"
                     }`}
                   >
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
                         m.role === "lead"
-                          ? "bg-sky-600 text-white"
-                          : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                          ? "bg-[var(--cmms-info)] text-white"
+                          : "bg-secondary text-secondary-foreground"
                       }`}
                     >
                       {(m.full_name || "?").charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                      <p className="text-sm font-semibold text-foreground truncate">
                         {m.full_name || "-"}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         {m.role === "lead" ? "หัวหน้าชุด" : "สมาชิกทีม"}
                       </p>
                       {m.status === "accepted" ? (
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="cmms-status-dot ok inline-block w-1.5 h-1.5" />
+                          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
                           <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                             รับงานแล้ว{m.accepted_at ? ` · ${String(m.accepted_at).slice(11, 16)} น.` : ""}
                           </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="cmms-status-dot warn inline-block w-1.5 h-1.5" />
-                          <span className="text-[11px] text-slate-400">
+                          <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                          <span className="text-[11px] text-muted-foreground">
                             ยังไม่รับงาน
                           </span>
                         </div>
@@ -657,18 +663,18 @@ export default function RepairViewDetailsPage() {
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
-              <span className="cmms-status-dot ok inline-block" />
+              <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
               <span>ไทม์ไลน์การซ่อม</span>
             </CardTitle>
-            <span className="text-xs text-slate-500">{activity.length} เหตุการณ์</span>
+            <span className="text-xs text-muted-foreground">{activity.length} เหตุการณ์</span>
           </CardHeader>
           <CardContent>
             {activity.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 ยังไม่มีประวัติการซ่อมสำหรับงานนี้
               </p>
             ) : (
-              <div className="relative pl-8 space-y-5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--cmms-border)]">
+              <div className="relative pl-8 space-y-5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
                 {activity.map((a) => {
                   const tone = actionTone(a.action);
                   const IconCmp = actionIcon(a.action);
@@ -682,14 +688,14 @@ export default function RepairViewDetailsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-xs md:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                          <p className="text-xs md:text-sm font-semibold text-foreground truncate">
                             {a.description || a.action}
                           </p>
-                          <span className="text-[11px] text-slate-400 whitespace-nowrap">
+                          <span className="text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
                             {a.created_at}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-muted-foreground">
                           {a.user_name || "ระบบ"}
                         </p>
                       </div>
@@ -705,7 +711,7 @@ export default function RepairViewDetailsPage() {
         <Card className="mb-6">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 SPARE PARTS USED · F-EN-03
               </span>
               <CardTitle className="text-base">อะไหล่ที่ใช้ซ่อม (ใบเบิก)</CardTitle>
@@ -726,7 +732,7 @@ export default function RepairViewDetailsPage() {
                   ⏳ รอหัวหน้าอนุมัติ (กดปุ่มใน LINE)
                 </Badge>
               )}
-              <span className="text-slate-500">
+              <span className="text-muted-foreground">
                 รวม {partsTotal.toLocaleString()} บาท · {deductStock ? "ตัดสต็อกอัตโนมัติ" : "ไม่ตัดสต็อก (ปิดการตั้งค่า)"}
               </span>
             </div>
@@ -741,24 +747,24 @@ export default function RepairViewDetailsPage() {
 
             {/* รายการที่เลือกแล้ว */}
             {partRows.length === 0 ? (
-              <p className="text-sm text-slate-500">ยังไม่มีอะไหล่ในใบเบิก — เลือกจากคลังด้านล่าง</p>
+              <p className="text-sm text-muted-foreground">ยังไม่มีอะไหล่ในใบเบิก — เลือกจากคลังด้านล่าง</p>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+              <div className="overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 text-left border-b border-slate-200 dark:border-slate-800">
-                      <th className="p-3">รูป</th>
-                      <th className="p-3">รหัส</th>
-                      <th className="p-3">ชื่ออะไหล่</th>
-                      <th className="p-3">จำนวน</th>
-                      <th className="p-3">ราคา/หน่วย</th>
-                      <th className="p-3">รวม</th>
-                      <th className="p-3 text-right">จัดการ</th>
+                    <tr className="bg-muted/60 text-left border-b border-border">
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รูป</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวน</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ราคา/หน่วย</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รวม</th>
+                      <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                  <tbody className="divide-y divide-border">
                     {partRows.map((r) => (
-                      <tr key={r.spare_part_id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <tr key={r.spare_part_id} className="transition-colors hover:bg-primary-light/60">
                         <td className="p-3">
                           <img
                             src={r.image_url || `/api/v1/spare_image.php?id=${r.spare_part_id}`}
@@ -767,7 +773,7 @@ export default function RepairViewDetailsPage() {
                               if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${r.spare_part_id}`;
                             }}
                             alt={r.code}
-                            className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                            className="w-10 h-10 rounded-lg object-cover border border-border"
                           />
                         </td>
                         <td className="p-3 font-semibold">{r.code}</td>
@@ -780,17 +786,18 @@ export default function RepairViewDetailsPage() {
                             onChange={(e) =>
                               setPartRows(partRows.map((x) => (x.spare_part_id === r.spare_part_id ? { ...x, quantity_used: Math.max(1, Number(e.target.value) || 1) } : x)))
                             }
-                            className="w-20 px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+                            className="w-20 px-2 py-1 rounded-lg border border-input bg-card text-sm"
                           />
                         </td>
-                        <td className="p-3">{(r.unit_price || 0).toLocaleString()}</td>
-                        <td className="p-3 font-semibold">{(r.quantity_used * (r.unit_price || 0)).toLocaleString()}</td>
+                        <td className="p-3 tabular-nums">{(r.unit_price || 0).toLocaleString()}</td>
+                        <td className="p-3 font-semibold tabular-nums">{(r.quantity_used * (r.unit_price || 0)).toLocaleString()}</td>
                         <td className="p-3 text-right">
                           <Button
                             variant="ghost"
                             size="sm"
+                            aria-label={`นำอะไหล่ ${r.code} ออก`}
                             onClick={() => removePart(r.spare_part_id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -803,27 +810,36 @@ export default function RepairViewDetailsPage() {
             )}
 
             {/* เพิ่มอะไหล่จากคลัง */}
-            <div className="flex flex-wrap items-center gap-3">
-              <select
-                value={newPartId}
-                onChange={(e) => setNewPartId(e.target.value)}
-                className="flex-1 min-w-[240px] px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-              >
-                <option value="">— เลือกอะไหล่จากคลัง —</option>
-                {catalog.map((sp) => (
-                  <option key={sp.id} value={String(sp.id)}>
-                    {sp.code} — {sp.name} (คงเหลือ {Number(sp.stock_qty ?? 0)})
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                min={1}
-                value={newQty}
-                onChange={(e) => setNewQty(e.target.value)}
-                className="w-20 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-                aria-label="จำนวนที่เบิก"
-              />
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5 min-w-[240px] flex-1">
+                <Label htmlFor="repair-view-new-part">เลือกอะไหล่จากคลัง</Label>
+                <Select
+                  value={newPartId || "__none__"}
+                  onValueChange={(v) => setNewPartId(v === "__none__" ? "" : v)}
+                >
+                  <SelectTrigger id="repair-view-new-part">
+                    <SelectValue placeholder="— เลือกอะไหล่จากคลัง —" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— เลือกอะไหล่จากคลัง —</SelectItem>
+                    {catalog.map((sp) => (
+                      <SelectItem key={sp.id} value={String(sp.id)}>
+                        {sp.code} — {sp.name} (คงเหลือ {Number(sp.stock_qty ?? 0)})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5 w-20">
+                <Label htmlFor="repair-view-new-qty">จำนวนที่เบิก</Label>
+                <Input
+                  id="repair-view-new-qty"
+                  type="number"
+                  min={1}
+                  value={newQty}
+                  onChange={(e) => setNewQty(e.target.value)}
+                />
+              </div>
               <Button variant="outline" onClick={addPart} className="gap-1.5">
                 <Plus className="w-4 h-4" />
                 <span>เพิ่ม</span>
@@ -894,14 +910,19 @@ export default function RepairViewDetailsPage() {
       <AnimatedDialog
         open={!!previewUrl}
         onClose={() => handleClosePreview()}
+        className="max-w-3xl"
       >
-        <DialogHeader title={`ดูตัวอย่าง PDF — ${wo.workOrderNo}`} onOpenChange={() => handleClosePreview()} />
+        <div className="flex items-start justify-between gap-3 border-b border-border px-6 pb-4 pt-5">
+          <h2 className="text-base font-semibold">
+            ดูตัวอย่าง PDF — {wo.workOrderNo}
+          </h2>
+        </div>
         <div className="p-4 space-y-4">
           {previewUrl && (
             <iframe
               src={previewUrl}
               title={`PDF Preview ${wo.workOrderNo}`}
-              className="w-full h-[68vh] border border-slate-200 dark:border-slate-800 rounded-lg bg-white"
+              className="w-full h-[68vh] rounded-lg border border-border bg-white"
             />
           )}
           <div className="flex items-center justify-end gap-2">
@@ -915,6 +936,6 @@ export default function RepairViewDetailsPage() {
           </div>
         </div>
       </AnimatedDialog>
-    </div>
+    </PageShell>
   );
 }

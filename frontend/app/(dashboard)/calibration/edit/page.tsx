@@ -2,16 +2,23 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon, ScaleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { SquarePen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -117,113 +124,125 @@ function EditCalibrationContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>CALIBRATION EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.cal_edit_full")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ScaleIcon className="w-3.5 h-3.5" /> {t("form.calibration_plan")}
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.cal_edit_desc")}
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "การสอบเทียบ", href: "/calibration" },
+        { label: t("form.cal_edit_title") },
+      ]}
+      title={t("form.cal_edit_full")}
+      description={t("hero.cal_edit_desc")}
+    >
+      <Card className="mx-auto w-full max-w-[640px]">
+        <CardContent className="space-y-5">
+          {loadingData ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <>
+              {error && <Alert variant="danger">{error}</Alert>}
 
-      <Breadcrumbs>
-        <BreadcrumbItem href="/calibration" startIcon={<HomeIcon className="w-4 h-4" />}>{t("form.calibration")}</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>{t("form.cal_edit_title")}</BreadcrumbItem>
-      </Breadcrumbs>
-
-      <Card padding={6}>
-        {loadingData ? (
-          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
-        ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-                {error}
+              <div className="space-y-1.5">
+                <Label htmlFor="cal-edit-asset">{t("form.measuring_tool_req")}</Label>
+                <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
+                  <SelectTrigger id="cal-edit-asset">
+                    <SelectValue placeholder={t("placeholder.select_tool")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.map((a) => (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        {a.code} - {a.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            <Selector
-              label={t("form.measuring_tool_req")}
-              placeholder={t("placeholder.select_tool")}
-              value={assetId}
-              onChange={setAssetId}
-              options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
-            />
-            
-            <Selector
-              label={t("form.cal_type_req")}
-              value={calType}
-              onChange={setCalType}
-              options={[
-                { value: "Internal", label: t("form.cal_internal") },
-                { value: "External Lab", label: t("form.cal_external") },
-              ]}
-            />
-            
-            <HStack gap={4}>
-              <DateInput
-                label={t("form.last_cal_date_req")}
-                value={calDate}
-                onChange={setCalDate}
+              <div className="space-y-1.5">
+                <Label htmlFor="cal-edit-type">{t("form.cal_type_req")}</Label>
+                <Select value={calType} onValueChange={(v) => setCalType(v)}>
+                  <SelectTrigger id="cal-edit-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Internal">{t("form.cal_internal")}</SelectItem>
+                    <SelectItem value="External Lab">{t("form.cal_external")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="cal-edit-last-date">{t("form.last_cal_date_req")}</Label>
+                  <Input
+                    id="cal-edit-last-date"
+                    type="date"
+                    value={calDate ?? ""}
+                    onChange={(e) =>
+                      setCalDate(e.target.value ? (e.target.value as ISODate) : undefined)
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="cal-edit-due-date">{t("form.due_date_req")}</Label>
+                  <Input
+                    id="cal-edit-due-date"
+                    type="date"
+                    value={dueDate ?? ""}
+                    onChange={(e) =>
+                      setDueDate(e.target.value ? (e.target.value as ISODate) : undefined)
+                    }
+                  />
+                </div>
+              </div>
+
+              <Input
+                id="cal-edit-cert-no"
+                label={t("form.certificate_no")}
+                placeholder={t("placeholder.certificate_no")}
+                value={certNo}
+                onChange={(e) => setCertNo(e.target.value)}
               />
-              <DateInput
-                label={t("form.due_date_req")}
-                value={dueDate}
-                onChange={setDueDate}
-              />
-            </HStack>
 
-            <TextInput label={t("form.certificate_no")}
-              placeholder={t("placeholder.certificate_no")}
-              value={certNo}
-              onChange={setCertNo}  />
+              <div className="space-y-1.5">
+                <Label htmlFor="cal-edit-status">{t("field.status")}</Label>
+                <Select value={status} onValueChange={(v) => setStatus(v)}>
+                  <SelectTrigger id="cal-edit-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">{t("status.pending")}</SelectItem>
+                    <SelectItem value="scheduled">{t("form.pending_schedule")}</SelectItem>
+                    <SelectItem value="completed">{t("status.completed")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+        </CardContent>
 
-            <Selector
-              label={t("field.status")}
-              value={status}
-              onChange={setStatus}
-              options={[
-                { value: "pending", label: t("status.pending") },
-                { value: "scheduled", label: t("form.pending_schedule") },
-                { value: "completed", label: t("status.completed") }
-              ]}
-            />
-
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/calibration")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                {t("action.cancel")}
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? t("common.saving") : t("action.save_data")}
-              </button>
-            </HStack>
-          </VStack>
+        {!loadingData && (
+          <CardFooter className="justify-end gap-2">
+            <Button variant="secondary" onClick={() => router.push("/calibration")}>
+              {t("action.cancel")}
+            </Button>
+            <Button variant="primary" disabled={submitting} onClick={handleSubmit}>
+              <SquarePen className="w-4 h-4" />
+              {submitting ? t("common.saving") : t("action.save_data")}
+            </Button>
+          </CardFooter>
         )}
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditCalibrationPage() {
   return (
-    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
+    <Suspense fallback={<p className="text-sm">{t("common.loading")}</p>}>
       <EditCalibrationContent />
     </Suspense>
   );

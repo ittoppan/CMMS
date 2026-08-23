@@ -2,16 +2,23 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon, WrenchIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
+import { SquarePen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -138,152 +145,185 @@ function EditBorrowingContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EQUIPMENT BORROWING EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขรายการยืม-คืนอุปกรณ์</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <WrenchIcon className="w-3.5 h-3.5" /> รายการยืม
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แก้ไขรายละเอียดการยืม-คืน — วันที่ สภาพอุปกรณ์ และสถานะ
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
+        { label: "แก้ไขรายการยืม" },
+      ]}
+      title="แก้ไขรายการยืม-คืนอุปกรณ์"
+      description="แก้ไขรายละเอียดการยืม-คืน — วันที่ สภาพอุปกรณ์ และสถานะ"
+    >
+      <Card className="mx-auto w-full max-w-[640px]">
+        <CardContent className="space-y-5">
+          {loadingData ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <>
+              {error && <Alert variant="danger">{error}</Alert>}
 
-      <Breadcrumbs>
-        <BreadcrumbItem href="/equipment_borrowing" startIcon={<HomeIcon className="w-4 h-4" />}>การยืม-คืนเครื่องมือ</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>แก้ไขรายการยืม</BreadcrumbItem>
-      </Breadcrumbs>
-
-      <Card padding={6}>
-        {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-                {error}
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-asset">อุปกรณ์ / เครื่องมือที่ยืม *</Label>
+                <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
+                  <SelectTrigger id="brw-edit-asset">
+                    <SelectValue placeholder="เลือกอุปกรณ์..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.map((a) => (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        {a.code} - {a.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            <Selector
-              label="อุปกรณ์ / เครื่องมือที่ยืม *"
-              placeholder="เลือกอุปกรณ์..."
-              value={assetId}
-              onChange={setAssetId}
-              options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
-            />
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-borrower">ผู้ยืม *</Label>
+                <Select value={borrowerId || undefined} onValueChange={(v) => setBorrowerId(v)}>
+                  <SelectTrigger id="brw-edit-borrower">
+                    <SelectValue placeholder="เลือกผู้ยืม..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u.id} value={String(u.id)}>
+                        {u.full_name || u.username} ({u.position || "ช่างเทคนิค"})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <Selector
-              label="ผู้ยืม *"
-              placeholder="เลือกผู้ยืม..."
-              value={borrowerId}
-              onChange={setBorrowerId}
-              options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username} (${u.position || "ช่างเทคนิค"})` }))}
-            />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="brw-edit-borrow-date">วันที่ยืม *</Label>
+                  <Input
+                    id="brw-edit-borrow-date"
+                    type="date"
+                    value={borrowDate ?? ""}
+                    onChange={(e) =>
+                      setBorrowDate(e.target.value ? (e.target.value as ISODate) : undefined)
+                    }
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="brw-edit-expected-return">กำหนดคืน</Label>
+                  <Input
+                    id="brw-edit-expected-return"
+                    type="date"
+                    value={expectedReturnDate ?? ""}
+                    onChange={(e) =>
+                      setExpectedReturnDate(
+                        e.target.value ? (e.target.value as ISODate) : undefined
+                      )
+                    }
+                  />
+                </div>
+              </div>
 
-            <HStack gap={4}>
-              <DateInput
-                label="วันที่ยืม *"
-                value={borrowDate}
-                onChange={setBorrowDate}
-              />
-              <DateInput
-                label="กำหนดคืน"
-                value={expectedReturnDate}
-                onChange={setExpectedReturnDate}
-              />
-            </HStack>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="brw-edit-status">สถานะ</Label>
+                  <Select value={status} onValueChange={(v) => setStatus(v)}>
+                    <SelectTrigger id="brw-edit-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="borrowed">กำลังยืมใช้งาน</SelectItem>
+                      <SelectItem value="overdue">เกินกำหนดคืน</SelectItem>
+                      <SelectItem value="returned">คืนแล้ว</SelectItem>
+                      <SelectItem value="lost">สูญหาย</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="brw-edit-actual-return">วันที่คืนจริง</Label>
+                  <Input
+                    id="brw-edit-actual-return"
+                    type="date"
+                    value={actualReturnDate ?? ""}
+                    onChange={(e) =>
+                      setActualReturnDate(
+                        e.target.value ? (e.target.value as ISODate) : undefined
+                      )
+                    }
+                  />
+                </div>
+              </div>
 
-            <HStack gap={4}>
-              <div style={{ flex: 1 }}>
-                <Selector
-                  label="สถานะ"
-                  value={status}
-                  onChange={setStatus}
-                  options={[
-                    { value: "borrowed", label: "กำลังยืมใช้งาน" },
-                    { value: "overdue", label: "เกินกำหนดคืน" },
-                    { value: "returned", label: "คืนแล้ว" },
-                    { value: "lost", label: "สูญหาย" },
-                  ]}
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-type">ประเภทการยืม</Label>
+                <Select value={borrowingType} onValueChange={(v) => setBorrowingType(v)}>
+                  <SelectTrigger id="brw-edit-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single">รายบุคคล</SelectItem>
+                    <SelectItem value="group">กลุ่ม / ชุดช่าง</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-purpose">วัตถุประสงค์การยืม</Label>
+                <Textarea
+                  id="brw-edit-purpose"
+                  value={purpose}
+                  onChange={(e) => setPurpose(e.target.value)}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <DateInput
-                  label="วันที่คืนจริง"
-                  value={actualReturnDate}
-                  onChange={setActualReturnDate}
+
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-condition-before">สภาพอุปกรณ์ก่อนยืม</Label>
+                <Textarea
+                  id="brw-edit-condition-before"
+                  value={conditionBefore}
+                  onChange={(e) => setConditionBefore(e.target.value)}
                 />
               </div>
-            </HStack>
 
-            <Selector
-              label="ประเภทการยืม"
-              value={borrowingType}
-              onChange={setBorrowingType}
-              options={[
-                { value: "single", label: "รายบุคคล" },
-                { value: "group", label: "กลุ่ม / ชุดช่าง" },
-              ]}
-            />
+              <div className="space-y-1.5">
+                <Label htmlFor="brw-edit-condition-after">สภาพอุปกรณ์เมื่อรับคืน</Label>
+                <Textarea
+                  id="brw-edit-condition-after"
+                  value={conditionAfter}
+                  onChange={(e) => setConditionAfter(e.target.value)}
+                />
+              </div>
 
-            <TextArea
-              label="วัตถุประสงค์การยืม"
-              value={purpose}
-              onChange={setPurpose}
-            />
+              <Input
+                id="brw-edit-notes"
+                label="หมายเหตุ"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </>
+          )}
+        </CardContent>
 
-            <TextArea
-              label="สภาพอุปกรณ์ก่อนยืม"
-              value={conditionBefore}
-              onChange={setConditionBefore}
-            />
-
-            <TextArea
-              label="สภาพอุปกรณ์เมื่อรับคืน"
-              value={conditionAfter}
-              onChange={setConditionAfter}
-            />
-
-            <TextInput
-              label="หมายเหตุ"
-              value={notes}
-              onChange={setNotes}
-            />
-
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/equipment_borrowing")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-              </button>
-            </HStack>
-          </VStack>
+        {!loadingData && (
+          <CardFooter className="justify-end gap-2">
+            <Button variant="secondary" onClick={() => router.push("/equipment_borrowing")}>
+              ยกเลิก
+            </Button>
+            <Button variant="primary" disabled={submitting} onClick={handleSubmit}>
+              <SquarePen className="w-4 h-4" />
+              {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            </Button>
+          </CardFooter>
         )}
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditBorrowingPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<p className="text-sm">กำลังโหลด...</p>}>
       <EditBorrowingContent />
     </Suspense>
   );

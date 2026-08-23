@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon, WrenchIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
+import { Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
@@ -99,115 +105,130 @@ export default function BorrowingCreatePage() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>EQUIPMENT BORROWING CREATE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แบบฟอร์มขอยืมอุปกรณ์ / เครื่องมือพิเศษ</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <WrenchIcon className="w-3.5 h-3.5" /> บันทึกการยืมใหม่
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            กรอกรายละเอียดการยืม — อุปกรณ์ ผู้ยืม วันที่ และวัตถุประสงค์
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },
+        { label: "ขอยืมอุปกรณ์" },
+      ]}
+      title="แบบฟอร์มขอยืมอุปกรณ์ / เครื่องมือพิเศษ"
+      description="กรอกรายละเอียดการยืม — อุปกรณ์ ผู้ยืม วันที่ และวัตถุประสงค์"
+    >
+      <Card className="mx-auto w-full max-w-[640px]">
+        <CardContent className="space-y-5">
+          {error && <Alert variant="danger">{error}</Alert>}
 
-      <Breadcrumbs>
-        <BreadcrumbItem href="/equipment_borrowing" startIcon={<HomeIcon className="w-4 h-4" />}>การยืม-คืนเครื่องมือ</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>ขอยืมอุปกรณ์</BreadcrumbItem>
-      </Breadcrumbs>
+          <div className="space-y-1.5">
+            <Label htmlFor="brw-create-asset">อุปกรณ์ / เครื่องมือที่ต้องการยืม *</Label>
+            <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
+              <SelectTrigger id="brw-create-asset">
+                <SelectValue placeholder="เลือกอุปกรณ์..." />
+              </SelectTrigger>
+              <SelectContent>
+                {assets.map((a) => (
+                  <SelectItem key={a.id} value={String(a.id)}>
+                    {a.code} - {a.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <Card padding={6}>
-        <VStack gap={5} style={{ maxWidth: 640 }}>
-          {error && (
-            <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-              {error}
+          <div className="space-y-1.5">
+            <Label htmlFor="brw-create-borrower">ผู้ขอยืม *</Label>
+            <Select value={borrowerId || undefined} onValueChange={(v) => setBorrowerId(v)}>
+              <SelectTrigger id="brw-create-borrower">
+                <SelectValue placeholder="เลือกผู้ยืม..." />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={String(u.id)}>
+                    {u.full_name || u.username} ({u.position || "ช่างเทคนิค"})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="brw-create-borrow-date">วันที่ยืม *</Label>
+              <Input
+                id="brw-create-borrow-date"
+                type="date"
+                value={borrowDate ?? ""}
+                onChange={(e) =>
+                  setBorrowDate(e.target.value ? (e.target.value as ISODate) : undefined)
+                }
+              />
             </div>
-          )}
+            <div className="space-y-1.5">
+              <Label htmlFor="brw-create-return-date">กำหนดคืน</Label>
+              <Input
+                id="brw-create-return-date"
+                type="date"
+                value={expectedReturnDate ?? ""}
+                onChange={(e) =>
+                  setExpectedReturnDate(
+                    e.target.value ? (e.target.value as ISODate) : undefined
+                  )
+                }
+              />
+            </div>
+          </div>
 
-          <Selector
-            label="อุปกรณ์ / เครื่องมือที่ต้องการยืม *"
-            placeholder="เลือกอุปกรณ์..."
-            value={assetId}
-            onChange={setAssetId}
-            options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="brw-create-type">ประเภทการยืม</Label>
+            <Select value={borrowingType} onValueChange={(v) => setBorrowingType(v)}>
+              <SelectTrigger id="brw-create-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single">รายบุคคล</SelectItem>
+                <SelectItem value="group">กลุ่ม / ชุดช่าง</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <Selector
-            label="ผู้ขอยืม *"
-            placeholder="เลือกผู้ยืม..."
-            value={borrowerId}
-            onChange={setBorrowerId}
-            options={users.map(u => ({ value: String(u.id), label: `${u.full_name || u.username} (${u.position || "ช่างเทคนิค"})` }))}
-          />
-
-          <HStack gap={4}>
-            <DateInput
-              label="วันที่ยืม *"
-              value={borrowDate}
-              onChange={setBorrowDate}
+          <div className="space-y-1.5">
+            <Label htmlFor="brw-create-purpose">วัตถุประสงค์การยืม</Label>
+            <Textarea
+              id="brw-create-purpose"
+              placeholder="ระบุงานที่นำไปใช้ เช่น งานซ่อมปั๊มน้ำไลน์ 3..."
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
             />
-            <DateInput
-              label="กำหนดคืน"
-              value={expectedReturnDate}
-              onChange={setExpectedReturnDate}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="brw-create-condition-before">สภาพอุปกรณ์ก่อนยืม</Label>
+            <Textarea
+              id="brw-create-condition-before"
+              placeholder="ระบุสภาพก่อนยืม เช่น สมบูรณ์ปกติ ไม่มีรอย..."
+              value={conditionBefore}
+              onChange={(e) => setConditionBefore(e.target.value)}
             />
-          </HStack>
+          </div>
 
-          <Selector
-            label="ประเภทการยืม"
-            value={borrowingType}
-            onChange={setBorrowingType}
-            options={[
-              { value: "single", label: "รายบุคคล" },
-              { value: "group", label: "กลุ่ม / ชุดช่าง" },
-            ]}
-          />
-
-          <TextArea
-            label="วัตถุประสงค์การยืม"
-            placeholder="ระบุงานที่นำไปใช้ เช่น งานซ่อมปั๊มน้ำไลน์ 3..."
-            value={purpose}
-            onChange={setPurpose}
-          />
-
-          <TextArea
-            label="สภาพอุปกรณ์ก่อนยืม"
-            placeholder="ระบุสภาพก่อนยืม เช่น สมบูรณ์ปกติ ไม่มีรอย..."
-            value={conditionBefore}
-            onChange={setConditionBefore}
-          />
-
-          <TextInput
+          <Input
+            id="brw-create-notes"
             label="หมายเหตุ"
             placeholder="ระบุเพิ่มเติม (ถ้ามี)..."
             value={notes}
-            onChange={setNotes}
+            onChange={(e) => setNotes(e.target.value)}
           />
+        </CardContent>
 
-          <HStack gap={3} hAlign="end">
-            <button
-              type="button"
-              onClick={() => router.push("/equipment_borrowing")}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
-              ยกเลิก
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={handleSubmit}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-            >
-              <ArrowUturnLeftIcon className="w-4 h-4" />
-              {loading ? "กำลังบันทึก..." : "ยืนยันยืมอุปกรณ์"}
-            </button>
-          </HStack>
-        </VStack>
+        <CardFooter className="justify-end gap-2">
+          <Button variant="secondary" onClick={() => router.push("/equipment_borrowing")}>
+            ยกเลิก
+          </Button>
+          <Button variant="primary" disabled={loading} onClick={handleSubmit}>
+            <Undo2 className="w-4 h-4" />
+            {loading ? "กำลังบันทึก..." : "ยืนยันยืมอุปกรณ์"}
+          </Button>
+        </CardFooter>
       </Card>
-    </VStack>
+    </PageShell>
   );
 }

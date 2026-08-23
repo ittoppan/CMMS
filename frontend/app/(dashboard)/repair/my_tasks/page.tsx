@@ -2,40 +2,43 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t } from "@/lib/i18n";
 import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
 import AnimatedDialog from "@/components/AnimatedDialog";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
   Play,
   Check,
-  Calendar,
   Eye,
-  Camera,
-  Trash2,
   Wrench,
   Clock,
-  RefreshCw,
-  AlertTriangle,
   RotateCcw,
 } from "lucide-react";
 
+import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select-native";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
+import { cn } from "@/lib/cn";
 
 interface TaskItem extends Record<string, unknown> {
   rawId: number;
@@ -437,7 +440,7 @@ export default function MyTasksPage() {
         return (
           <div className="flex items-center gap-2">
             <Badge variant="info">{task.kind === "pm" ? "PM" : "ซ่อม"}</Badge>
-            <span className="font-semibold text-slate-900 dark:text-slate-100">{task.woNumber}</span>
+            <span className="font-semibold">{task.woNumber}</span>
           </div>
         );
       },
@@ -476,7 +479,7 @@ export default function MyTasksPage() {
         return (
           <div className="flex items-center gap-1.5">
             <AndonLamp status={repairStatusAndon(k, task.overdue)} size="sm" />
-            <span className={`text-sm font-semibold ${task.overdue ? "text-red-600 dark:text-red-400" : ""}`}>
+            <span className={`text-sm font-semibold ${task.overdue ? "text-destructive" : ""}`}>
               {task.overdue ? "เกินกำหนด" : repairStatusLabel(k)}
             </span>
           </div>
@@ -504,7 +507,7 @@ export default function MyTasksPage() {
       cell: ({ row }: { row: { original: TaskItem } }) => {
         const task = row.original;
         return (
-          <span className={`text-sm ${task.overdue ? "text-red-600 dark:text-red-400 font-semibold" : ""}`}>
+          <span className={`text-sm ${task.overdue ? "text-destructive font-semibold" : ""}`}>
             {task.estimatedCompletion ? String(task.estimatedCompletion).slice(0, 10) : "-"}
           </span>
         );
@@ -515,7 +518,7 @@ export default function MyTasksPage() {
       header: t("tbl.before_after"),
       cell: ({ row }: { row: { original: TaskItem } }) => {
         const task = row.original;
-        if (task.kind === "pm") return <span className="text-slate-400">-</span>;
+        if (task.kind === "pm") return <span className="text-muted-foreground">-</span>;
         return (
           <div className="flex items-center gap-1">
             {task.beforeImg && <Badge variant="neutral">ก่อนซ่อม</Badge>}
@@ -533,7 +536,7 @@ export default function MyTasksPage() {
           return (
             <div className="flex justify-end">
               {task.status === "completed" ? (
-                <span className="text-xs text-slate-400">ทำเสร็จแล้ว</span>
+                <span className="text-xs text-muted-foreground">ทำเสร็จแล้ว</span>
               ) : (
                 <Button variant="primary" size="sm" onClick={() => goPM(task)} className="gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -604,71 +607,52 @@ export default function MyTasksPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <p className="cmms-eyebrow">{hero.eyebrow}</p>
-        <PageHeader
-          title={hero.title}
-          description={hero.desc}
-        />
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "งานซ่อมบำรุง", href: "/repair" },
+        { label: hero.title },
+      ]}
+      title={hero.title}
+      description={hero.desc}
+    >
+      {/* Filter: status tabs + outsource segmented control */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as "new" | "in_progress" | "completed")}
+          >
+            <TabsList>
+              <TabsTrigger value="new">งานใหม่ ({countNew})</TabsTrigger>
+              <TabsTrigger value="in_progress">กำลังซ่อม ({countInProg})</TabsTrigger>
+              <TabsTrigger value="completed">ซ่อมเสร็จแล้ว ({countDone})</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-      {/* Tabs */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl">
-        <div className="flex items-center gap-1.5 flex-wrap w-full sm:w-auto">
-          <button
-            onClick={() => setActiveTab("new")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeTab === "new"
-                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-            }`}
-          >
-            งานใหม่ ({countNew})
-          </button>
-          <button
-            onClick={() => setActiveTab("in_progress")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeTab === "in_progress"
-                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-            }`}
-          >
-            กำลังซ่อม ({countInProg})
-          </button>
-          <button
-            onClick={() => setActiveTab("completed")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeTab === "completed"
-                ? "bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-            }`}
-          >
-            ซ่อมเสร็จแล้ว ({countDone})
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-          {([
-            { v: "all", label: "ทั้งหมด" },
-            { v: "in", label: "งานใน" },
-            { v: "out", label: "งานภายนอก" },
-          ] as const).map((opt) => (
-            <button
-              key={opt.v}
-              type="button"
-              onClick={() => setOutsourceFilter(opt.v)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                outsourceFilter === opt.v
-                  ? "bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+          <div className="inline-flex items-center gap-1 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-1">
+            {([
+              { v: "all", label: "ทั้งหมด" },
+              { v: "in", label: "งานใน" },
+              { v: "out", label: "งานภายนอก" },
+            ] as const).map((opt) => (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setOutsourceFilter(opt.v)}
+                className={cn(
+                  "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
+                  outsourceFilter === opt.v
+                    ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
+                    : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Offline banner */}
       {offline && (
@@ -716,13 +700,13 @@ export default function MyTasksPage() {
         <EmptyState
           title="ไม่พบข้อมูล"
           description="ไม่มีรายการงานซ่อมในสถานะนี้"
-          icon={<Wrench className="w-8 h-8 text-slate-400" />}
+          icon={<Wrench className="w-8 h-8 text-muted-foreground" />}
         />
       ) : (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between py-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <Wrench className="w-5 h-5 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
               <span>รายการงานในสถานะนี้</span>
             </CardTitle>
             <Badge variant="info">{filteredTasks.length} รายการ</Badge>
@@ -735,71 +719,103 @@ export default function MyTasksPage() {
 
       {/* CLOSE WORK ORDER MODAL WITH AFTER PHOTO & RECEIVER SIGNATURE */}
       <AnimatedDialog
-        width="min(720px, 94vw)"
-        maxHeight="92dvh"
         open={closeModalOpen}
         onClose={() => setCloseModalOpen(false)}
-        className="cmms-close-work-modal"
+        className="max-h-[92dvh] max-w-[min(720px,94vw)] cmms-close-work-modal"
       >
-        <div className="cmms-bottom-sheet-handle" aria-hidden="true" />
-        <DialogHeader title={`ปิดใบงานซ่อม: ${selectedTask?.woNumber}`} />
+        <div className="flex items-start justify-between gap-3 border-b border-border px-6 pb-4 pt-5">
+          <h2 className="text-base font-semibold">
+            ปิดใบงานซ่อม: {selectedTask?.woNumber}
+          </h2>
+        </div>
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Select
-              label="กลุ่มอาการเสีย (รหัส F)"
-              placeholder="เลือกกลุ่มอาการเสีย (รหัส F)"
-              value={failureCode}
-              onChange={(e) => setFailureCode(e.target.value)}
-            >
-              <option value="">เลือกกลุ่มอาการเสีย (รหัส F)</option>
-              {failureCodes.map((c) => (
-                <option key={c.id} value={c.code}>
-                  {c.code} - {c.name}
-                </option>
-              ))}
-            </Select>
+            <div className="space-y-1.5">
+              <Label htmlFor="close-failure-code">กลุ่มอาการเสีย (รหัส F)</Label>
+              <Select
+                value={failureCode || "__none__"}
+                onValueChange={(v) => setFailureCode(v === "__none__" ? "" : v)}
+              >
+                <SelectTrigger id="close-failure-code">
+                  <SelectValue placeholder="เลือกกลุ่มอาการเสีย (รหัส F)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">เลือกกลุ่มอาการเสีย (รหัส F)</SelectItem>
+                  {failureCodes.map((c) => (
+                    <SelectItem key={c.id} value={c.code}>
+                      {c.code} - {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select
-              label="กลุ่มงานซ่อม (รหัส R)"
-              placeholder="เลือกกลุ่มงานซ่อม (รหัส R)"
-              value={repairCode}
-              onChange={(e) => setRepairCode(e.target.value)}
-            >
-              <option value="">เลือกกลุ่มงานซ่อม (รหัส R)</option>
-              {repairCodes.map((c) => (
-                <option key={c.id} value={c.code}>
-                  {c.code} - {c.name}
-                </option>
-              ))}
-            </Select>
+            <div className="space-y-1.5">
+              <Label htmlFor="close-repair-code">กลุ่มงานซ่อม (รหัส R)</Label>
+              <Select
+                value={repairCode || "__none__"}
+                onValueChange={(v) => setRepairCode(v === "__none__" ? "" : v)}
+              >
+                <SelectTrigger id="close-repair-code">
+                  <SelectValue placeholder="เลือกกลุ่มงานซ่อม (รหัส R)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">เลือกกลุ่มงานซ่อม (รหัส R)</SelectItem>
+                  {repairCodes.map((c) => (
+                    <SelectItem key={c.id} value={c.code}>
+                      {c.code} - {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <Textarea
-            label="สาเหตุของปัญหา *"
-            placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน..."
-            value={rootCause}
-            onChange={(e) => setRootCause(e.target.value)}
-            rows={2}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="close-root-cause">
+              สาเหตุของปัญหา <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="close-root-cause"
+              placeholder="อธิบายสาเหตุที่แท้จริง เช่น ตลับลูกปืนหมดอายุการใช้งาน..."
+              value={rootCause}
+              onChange={(e) => setRootCause(e.target.value)}
+              rows={2}
+            />
+          </div>
 
-          <Textarea
-            label="วิธีการแก้ไข *"
-            placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี..."
-            value={solution}
-            onChange={(e) => setSolution(e.target.value)}
-            rows={2}
-          />
+          <div className="space-y-1.5">
+            <Label htmlFor="close-solution">
+              วิธีการแก้ไข <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
+              id="close-solution"
+              placeholder="อธิบายขั้นตอนการซ่อม เช่น ถอดเปลี่ยน SKF 6205 และอัดจาระบี..."
+              value={solution}
+              onChange={(e) => setSolution(e.target.value)}
+              rows={2}
+            />
+          </div>
 
-          <Select
-            label="ผลตรวจการปนเปื้อน *"
-            value={contaminateChecking}
-            onChange={(e) => setContaminateChecking(e.target.value)}
-          >
-            <option value="">เลือกผลตรวจการปนเปื้อน (บังคับ)</option>
-            <option value="clean">ไม่พบการปนเปื้อน (ผ่าน)</option>
-            <option value="contaminated">พบการปนเปื้อน</option>
-            <option value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</option>
-          </Select>
+          <div className="space-y-1.5">
+            <Label htmlFor="close-contaminate">
+              ผลตรวจการปนเปื้อน <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={contaminateChecking || "__none__"}
+              onValueChange={(v) => setContaminateChecking(v === "__none__" ? "" : v)}
+            >
+              <SelectTrigger id="close-contaminate">
+                <SelectValue placeholder="เลือกผลตรวจการปนเปื้อน (บังคับ)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">เลือกผลตรวจการปนเปื้อน (บังคับ)</SelectItem>
+                <SelectItem value="clean">ไม่พบการปนเปื้อน (ผ่าน)</SelectItem>
+                <SelectItem value="contaminated">พบการปนเปื้อน</SelectItem>
+                <SelectItem value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -840,10 +856,11 @@ export default function MyTasksPage() {
           />
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <Label className="text-sm font-medium text-foreground" htmlFor="mytasks-after-photo">
               แนบรูปถ่ายหลังซ่อมเสร็จ
-            </label>
+            </Label>
             <Input
+              id="mytasks-after-photo"
               type="file"
               accept="image/*"
               onChange={(e) => {
@@ -859,9 +876,9 @@ export default function MyTasksPage() {
               }}
             />
             {afterImg && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-[var(--cmms-success)]/30 bg-[var(--cmms-success-light)]">
                 <img src={afterImg} alt="รูปตัวอย่างหลังซ่อม" className="w-14 h-14 rounded-lg object-cover" />
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="text-xs font-semibold text-[var(--cmms-success-dark)]">
                   พร้อมแนบรูปถ่ายหลังซ่อมเสร็จ
                 </span>
               </div>
@@ -869,17 +886,22 @@ export default function MyTasksPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <Input
-              label="ชื่อผู้รับมอบงานซ่อมเสร็จ *"
-              placeholder="กรอกชื่อผู้รับมอบงาน..."
-              value={receiverName}
-              onChange={(e) => setReceiverName(e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <Label htmlFor="mytasks-receiver-name">
+                ชื่อผู้รับมอบงานซ่อมเสร็จ <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="mytasks-receiver-name"
+                placeholder="กรอกชื่อผู้รับมอบงาน..."
+                value={receiverName}
+                onChange={(e) => setReceiverName(e.target.value)}
+              />
+            </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) *
-              </label>
+              <Label>
+                ลายเซ็นผู้รับมอบงาน (วาดด้วยเมาส์/นิ้ว) <span className="text-destructive">*</span>
+              </Label>
               <canvas
                 ref={canvasRef}
                 width={280}
@@ -892,12 +914,12 @@ export default function MyTasksPage() {
                 onTouchMove={draw}
                 className="border-2 border-dashed border-emerald-500 rounded-xl bg-white cursor-crosshair touch-none w-full"
               />
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>ใช้เมาส์หรือนิ้วเซ็นชื่อลงในช่อง</span>
                 <button
                   type="button"
                   onClick={clearSignature}
-                  className="text-red-600 hover:underline font-semibold"
+                  className="text-destructive hover:underline font-semibold"
                 >
                   ล้างลายเซ็น
                 </button>
@@ -906,7 +928,7 @@ export default function MyTasksPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-3 p-4 border-t border-border">
           <Button variant="outline" onClick={() => setCloseModalOpen(false)}>
             ยกเลิก
           </Button>
@@ -921,6 +943,6 @@ export default function MyTasksPage() {
           </Button>
         </div>
       </AnimatedDialog>
-    </div>
+    </PageShell>
   );
 }
