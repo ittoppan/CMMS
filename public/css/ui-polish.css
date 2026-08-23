@@ -658,3 +658,17 @@ html.dark .theme-icon-sun  { display: block; }
   font-size: 0.85rem;
   letter-spacing: 0.01em;
 }
+
+/* ------------------------------------------------------------
+   14. Mobile form ergonomics (Redesign Plan Sec.3 Step 12)
+   iOS Safari auto-zooms when an input's font-size < 16px.
+   Force >=16px on touch layouts; also guarantee comfortable
+   tap targets for native inputs.
+   ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
