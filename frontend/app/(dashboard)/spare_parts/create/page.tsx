@@ -132,6 +132,7 @@ export default function CreateSparePartPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               label={t("form.part_code_req")}
+              required
               placeholder={t("placeholder.part_code")}
               value={form.code}
               onChange={(e) => update("code", e.target.value)}
@@ -139,6 +140,7 @@ export default function CreateSparePartPage() {
 
             <Input
               label={t("form.part_name_req")}
+              required
               placeholder={t("placeholder.part_description")}
               value={form.name}
               onChange={(e) => update("name", e.target.value)}

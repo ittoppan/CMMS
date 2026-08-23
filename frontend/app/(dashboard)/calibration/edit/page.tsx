@@ -146,7 +146,7 @@ function EditCalibrationContent() {
               {error && <Alert variant="danger">{error}</Alert>}
 
               <div className="space-y-1.5">
-                <Label htmlFor="cal-edit-asset">{t("form.measuring_tool_req")}</Label>
+                <Label htmlFor="cal-edit-asset">{t("form.measuring_tool_req")}<span className="text-destructive"> *</span></Label>
                 <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
                   <SelectTrigger id="cal-edit-asset">
                     <SelectValue placeholder={t("placeholder.select_tool")} />
@@ -162,7 +162,7 @@ function EditCalibrationContent() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="cal-edit-type">{t("form.cal_type_req")}</Label>
+                <Label htmlFor="cal-edit-type">{t("form.cal_type_req")}<span className="text-destructive"> *</span></Label>
                 <Select value={calType} onValueChange={(v) => setCalType(v)}>
                   <SelectTrigger id="cal-edit-type">
                     <SelectValue />
@@ -176,7 +176,7 @@ function EditCalibrationContent() {
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="cal-edit-last-date">{t("form.last_cal_date_req")}</Label>
+                  <Label htmlFor="cal-edit-last-date">{t("form.last_cal_date_req")}<span className="text-destructive"> *</span></Label>
                   <Input
                     id="cal-edit-last-date"
                     type="date"
@@ -187,7 +187,7 @@ function EditCalibrationContent() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="cal-edit-due-date">{t("form.due_date_req")}</Label>
+                  <Label htmlFor="cal-edit-due-date">{t("form.due_date_req")}<span className="text-destructive"> *</span></Label>
                   <Input
                     id="cal-edit-due-date"
                     type="date"

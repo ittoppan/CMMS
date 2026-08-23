@@ -63,25 +63,27 @@ export default function CreateAssetPage() {
         <CardContent>
           <Grid columns={{ minWidth: 260, max: 2 }} gap={4}>
             <div className="space-y-1.5">
-              <Label htmlFor="asset-code">{t("form.asset_code_req")}</Label>
+              <Label htmlFor="asset-code">{t("form.asset_code_req")}<span className="text-destructive"> *</span></Label>
               <Input
                 id="asset-code"
                 label={t("form.asset_code_req")}
+                required
                 isLabelHidden
                 placeholder={t("placeholder.asset_code")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="asset-name">{t("form.asset_name_req")}</Label>
+              <Label htmlFor="asset-name">{t("form.asset_name_req")}<span className="text-destructive"> *</span></Label>
               <Input
                 id="asset-name"
                 label={t("form.asset_name_req")}
+                required
                 isLabelHidden
                 placeholder={t("placeholder.asset_name")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("form.category_req")}</Label>
+              <Label>{t("form.category_req")}<span className="text-destructive"> *</span></Label>
               <Select>
                 <SelectTrigger aria-label={t("form.category_req")}>
                   <SelectValue placeholder={t("form.select_category")} />
@@ -94,7 +96,7 @@ export default function CreateAssetPage() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>{t("form.department_req")}</Label>
+              <Label>{t("form.department_req")}<span className="text-destructive"> *</span></Label>
               <Select>
                 <SelectTrigger aria-label={t("form.department_req")}>
                   <SelectValue placeholder={t("form.select_department")} />

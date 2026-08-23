@@ -170,12 +170,14 @@ function EditSparePartContent() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Input
                     label={t("form.part_code_req")}
+                    required
                     value={form.code}
                     onChange={(e) => update("code", e.target.value)}
                   />
 
                   <Input
                     label={t("form.part_name_req")}
+                    required
                     value={form.name}
                     onChange={(e) => update("name", e.target.value)}
                   />

@@ -24,6 +24,8 @@ interface FormFieldProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   name: Path<T>;
   label?: string;
+  /** show red asterisk after the label */
+  required?: boolean;
   hint?: string;
   isLabelHidden?: boolean;
   className?: string;
@@ -34,6 +36,7 @@ export function FormField<T extends FieldValues>({
   form,
   name,
   label,
+  required,
   hint,
   isLabelHidden,
   className,
@@ -69,6 +72,7 @@ export function FormField<T extends FieldValues>({
           )}
         >
           {label}
+          {required && <span className="text-destructive"> *</span>}
         </label>
       )}
       {child}

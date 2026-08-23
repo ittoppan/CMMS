@@ -9,13 +9,15 @@ import { cn } from "@/lib/cn";
  */
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  /** show red asterisk after the label */
+  required?: boolean;
   error?: string;
   hint?: string;
   isLabelHidden?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, hint, isLabelHidden, id, ...props }, ref) => {
+  ({ className, label, required, error, hint, isLabelHidden, id, ...props }, ref) => {
     const autoId = useId();
     const inputId = id || autoId;
     const errorId = error ? `${inputId}-error` : undefined;
@@ -32,6 +34,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           >
             {label}
+            {required && <span className="text-destructive"> *</span>}
           </label>
         )}
         <input
