@@ -18,7 +18,6 @@ import {
   Settings,
 } from "lucide-react";
 import LiffBridge from "../../components/LiffBridge";
-import CardTableLabels from "../../components/CardTableLabels";
 import { offlineQueueCount } from "../../lib/offline-store";
 import { runQueueMigrationOnce } from "../../lib/queue-migration";
 import ToastProvider from "../../components/ToastProvider";
@@ -211,7 +210,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <ThemeProvider />
       <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
       <LiffBridge />
-      <CardTableLabels />
 
       {/* ═══════════ DESKTOP SHELL (≥1024px): sidebar + topbar ═══════════ */}
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
