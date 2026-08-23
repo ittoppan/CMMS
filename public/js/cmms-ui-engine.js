@@ -415,6 +415,51 @@
         }
     }
 
+    // ── Modal manager (Step 8): focus trap + ESC + focus restore ──
+    var lastFocused = null;
+
+    function openModal(id) {
+        var m = document.getElementById(id);
+        if (!m) return;
+        lastFocused = document.activeElement;
+        if (m.classList.contains('cmms-modal-backdrop')) {
+            m.classList.add('open');
+        } else {
+            m.style.display = 'flex';
+        }
+        document.body.style.overflow = 'hidden';
+        var focusables = m.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        var first = focusables[0];
+        if (first) first.focus();
+        m.__trap = function(e) {
+            if (e.key === 'Escape') { closeModal(id); return; }
+            if (e.key !== 'Tab' || focusables.length === 0) return;
+            var f = Array.prototype.filter.call(focusables, function(el) {
+                return el.offsetParent !== null;
+            });
+            if (!f.length) return;
+            var firstEl = f[0], lastEl = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === firstEl) { e.preventDefault(); lastEl.focus(); }
+            else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); firstEl.focus(); }
+        };
+        m.addEventListener('keydown', m.__trap);
+    }
+
+    function closeModal(id) {
+        var m = document.getElementById(id);
+        if (!m) return;
+        if (m.classList.contains('cmms-modal-backdrop')) {
+            m.classList.remove('open');
+        } else {
+            m.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+        if (m.__trap) { m.removeEventListener('keydown', m.__trap); m.__trap = null; }
+        if (lastFocused && lastFocused.focus) lastFocused.focus();
+    }
+
     window.CMMS_UI = {
         init: function() {
             this.initTheme();
@@ -429,6 +474,8 @@
         closeQuickSearch: closeQuickSearch,
         showToast: showToast,
         playEmergencyAlarm: playEmergencyAlarm,
+        openModal: openModal,
+        closeModal: closeModal,
         bindEvents: bindEvents
     };
 
@@ -438,6 +485,8 @@
     window.openQuickSearch = function() { window.CMMS_UI.openQuickSearch(); };
     window.closeQuickSearch = function() { window.CMMS_UI.closeQuickSearch(); };
     window.showToast = function(type, msg, title) { window.CMMS_UI.showToast(type, msg, title); };
+    window.openModal = function(id) { window.CMMS_UI.openModal(id); };
+    window.closeModal = function(id) { window.CMMS_UI.closeModal(id); };
 
     document.addEventListener('DOMContentLoaded', function() {
         window.CMMS_UI.init();

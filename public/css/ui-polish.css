@@ -746,3 +746,35 @@ html.dark .theme-icon-sun  { display: block; }
   line-height: 1;
   padding: 0 2px;
 }
+
+/* ------------------------------------------------------------
+   17. Modal (Redesign Plan Sec.3 Step 8)
+   ------------------------------------------------------------ */
+.cmms-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgb(15 23 42 / 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.cmms-modal-backdrop.open { display: flex; }
+.cmms-modal-panel {
+  background: var(--color-background-popover, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-container, 14px);
+  box-shadow: var(--shadow-high, 0 20px 50px rgb(0 0 0 / 0.3));
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.cmms-modal-panel-sm { max-width: 360px; }
+.cmms-modal-panel-lg { max-width: 720px; }
+@media (max-width: 640px) {
+  .cmms-modal-panel, .cmms-modal-panel-lg { max-width: 100%; }
+}

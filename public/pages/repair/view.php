@@ -173,7 +173,7 @@ renderHeader();
             <span class="badge bg-muted text-primary border border-border"><?= $statusLabels[$r['status']] ?? $r['status'] ?></span>
         </div>
         <div class="flex gap-2">
-            <button onclick="document.getElementById('smart-req-modal').style.display='flex'" class="h-9 px-3.5 bg-accent hover:bg-accent/90 text-white rounded-md text-xs font-semibold inline-flex items-center gap-2 transition-colors shadow-xs">
+            <button onclick="openModal('smart-req-modal')" class="h-9 px-3.5 bg-accent hover:bg-accent/90 text-white rounded-md text-xs font-semibold inline-flex items-center gap-2 transition-colors shadow-xs">
                 <span>📦 ขอเบิกอะไหล่ซ่อมเครื่องนี้ (Machine BOM First)</span>
             </button>
             <a href="print.php?id=<?= $id ?>" target="_blank" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">🖨️ พิมพ์ใบสั่งงานซ่อม (F-EN-03)</a>
@@ -235,7 +235,7 @@ renderHeader();
                         <span>⚙️ รายการอะไหล่มาตรฐานประจำเครื่องนี้ (Machine BOM Catalog)</span>
                         <span class="badge bg-indigo-100 text-indigo-800 text-[10px] font-bold"><?= count($bomSpares) ?> รายการ</span>
                     </h3>
-                    <button onclick="document.getElementById('smart-req-modal').style.display='flex'" class="text-xs text-indigo-600 font-bold hover:underline">+ เลือกเบิกอะไหล่ →</button>
+                    <button onclick="openModal('smart-req-modal')" class="text-xs text-indigo-600 font-bold hover:underline">+ เลือกเบิกอะไหล่ →</button>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -306,7 +306,7 @@ renderHeader();
 </div>
 
 <!-- Modal: Smart Machine BOM First Requisition -->
-<div id="smart-req-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+<div id="smart-req-modal" class="cmms-modal-backdrop" onclick="if (event.target === this) closeModal('smart-req-modal')">
     <div class="card shadow-2xl w-full max-w-2xl p-6 space-y-5">
         
         <!-- Header -->
@@ -315,7 +315,7 @@ renderHeader();
                 <span class="badge bg-indigo-100 text-indigo-800 text-xs font-bold">Smart Machine BOM Requisition</span>
                 <h3 class="font-black text-slate-900 text-lg mt-0.5">📦 ขอเบิกอะไหล่ซ่อมเครื่อง: <?= htmlspecialchars($r['asset_name'] ?? 'เครื่องจักร') ?></h3>
             </div>
-            <button onclick="document.getElementById('smart-req-modal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
+            <button onclick="closeModal('smart-req-modal')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
         </div>
 
         <!-- 2 Tab Selector -->
@@ -380,7 +380,7 @@ renderHeader();
             </div>
 
             <div class="flex justify-end gap-2 pt-2 border-t">
-                <button type="button" onclick="document.getElementById('smart-req-modal').style.display='none'" class="btn btn-secondary">ยกเลิก</button>
+                <button type="button" onclick="closeModal('smart-req-modal')" class="btn btn-secondary">ยกเลิก</button>
                 <button type="submit" class="btn btn-primary bg-purple-700 border-purple-700 hover:bg-purple-800">ส่งคำขอเบิกอะไหล่</button>
             </div>
         </form>
@@ -410,7 +410,7 @@ function selectModalSpare(id, name) {
 }
 
 function quickSelectBom(id, name) {
-    document.getElementById('smart-req-modal').style.display = 'flex';
+    openModal('smart-req-modal');
     switchReqTab('bom');
     selectModalSpare(id, name);
 }
