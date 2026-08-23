@@ -109,6 +109,10 @@ This document outlines the current status of features and modules within the CMM
   - Step 5: `.cmms-filter-bar` canonical (flex layout) + search-input wrap + filter chips
   - Step 8: `.cmms-modal-*` + `CMMS_UI.openModal/closeModal` (focus trap + ESC + restore) — migrate smart-req modal
   - Step 9: `.cmms-banner` 4 variants — convert 134 alert divs / ~78 pages (+fix dead ternaries 21 จุด) + wire `?msg=/?error=` → toast (engine v6.2)
+- [x] **Per-module sweep pass 1 + G8 + Step 11 (2026-08-23):**
+  - Semantic color utilities §19 (`.text-primary/.text-secondary/.text-muted/.bg-subtle/.bg-muted/.border-line/.hover-tint/.divide-line`) — แทน raw slate/gray ~1,600 token ใน 113 ไฟล์ dark mode ถูกต้องทั้งระบบ (debt คงเหลือ = intentional-on-dark surfaces)
+  - G8 a11y: `label for=`/`id=`/`aria-required` ครบ 221 field ใน 19 create/edit form pages
+  - Step 11: `.cmms-stat-tile` canonical (gradient variants = brand asset) แทน pipeline tiles 8 ชิ้นใน dashboard
 
 ## [ ] Pending/Incomplete Features & Modules
 
