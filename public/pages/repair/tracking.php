@@ -55,8 +55,8 @@ if ($id > 0) {
                     <div class="text-slate-500">สถานะงาน: <span class="badge badge badge-success font-bold text-[10px]"><?= strtoupper($r['status']) ?></span></div>
                 </div>
 
-                <?php if ($error): ?><div class="p-3 bg-rose-50 text-rose-700 text-xs rounded-xl font-bold"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-                <?php if ($success): ?><div class="p-3 bg-emerald-50 text-emerald-700 text-xs rounded-xl font-bold"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+                <?php if ($error): ?><div class="cmms-banner error p-3 text-xs rounded-xl font-bold"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+                <?php if ($success): ?><div class="cmms-banner success p-3 text-xs rounded-xl font-bold"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
                 <form method="post" class="space-y-4">
                     <div>

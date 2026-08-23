@@ -90,7 +90,7 @@ renderHeader();
             <a href="index.php?source=sage" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === 'sage' ? 'bg-purple-700 text-white border-purple-700' : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' ?>">
                 🟣 อะไหล่ใน Sage 300
             </a>
-            <a href="index.php?source=legacy" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === 'legacy' ? 'bg-amber-600 text-white border-amber-600' : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100' ?>">
+            <a href="index.php?source=legacy" class="cmms-banner warning px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === 'legacy' ? 'bg-amber-600 text-white border-amber-600' : ' hover:bg-amber-100' ?>">
                 🟠 อะไหล่เก่าภายใน (รอเข้า Sage 300)
             </a>
         </div>

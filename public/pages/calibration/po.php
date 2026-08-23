@@ -54,8 +54,8 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
         <div><h1 class="text-2xl font-bold text-gray-900">ติดตาม PO การสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Purchase Order Tracking</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปสอบเทียบ</a>
     </div>
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <div class="card p-6">
         <h2 class="text-lg font-semibold mb-4"><?= $editRow ? 'แก้ไข PO' : 'เพิ่ม PO' ?></h2>
         <form method="post" class="space-y-4">

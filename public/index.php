@@ -252,7 +252,7 @@ renderHeader();
                 <i data-lucide="kanban-square" class="w-4 h-4 text-indigo-500"></i>
                 Kanban Board
             </a>
-            <a href="/pages/spare_parts/issue_center.php" class="h-10 inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-indigo-50/50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl backdrop-blur-sm shadow-sm">
+            <a href="/pages/spare_parts/issue_center.php" class="cmms-banner info h-10 inline-flex items-center justify-center gap-2 px-5 rounded-xl /50 /40 dark:text-indigo-300 border /50 /50 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl backdrop-blur-sm shadow-sm">
                 <i data-lucide="package" class="w-4 h-4 text-indigo-500"></i>
                 Sage 300 Issue
             </a>

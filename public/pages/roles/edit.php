@@ -36,10 +36,10 @@ renderHeader();
     </div>
 
     <?php if ($error): ?>
-    <div class="bg-red-50 text-red-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div>
+    <div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <?php if ($success): ?>
-    <div class="bg-green-50 text-green-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div>
+    <div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
     <form method="post" class="card p-6 space-y-4">

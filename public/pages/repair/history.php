@@ -50,7 +50,7 @@ try {
     $stmt->execute($params);
     $repairs = $stmt->fetchAll();
 } catch (Exception $e) {
-    echo '<div class="bg-red-50 text-red-700 p-4 rounded">DB Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    echo '<div class="cmms-banner error p-4 rounded">DB Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
     $repairs = [];
 }
 ?>

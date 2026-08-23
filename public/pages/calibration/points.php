@@ -61,8 +61,8 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
         </div>
         <a href="history.php?asset_id=<?= $cal['asset_id'] ?>" class="btn-secondary">&larr; กลับไปประวัติ</a>
     </div>
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <div class="card p-6">
         <h2 class="text-lg font-semibold mb-4"><?= $editRow ? 'แก้ไขจุดสอบเทียบ' : 'เพิ่มจุดสอบเทียบ' ?></h2>
         <form method="post" class="space-y-4">

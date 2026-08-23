@@ -33,7 +33,7 @@ if ($gid) {
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">กลุ่มอะไหล่</h1><p class="mt-1 text-sm text-gray-500">Spare Part Groups</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
-    <?php if($msg):?><div class="<?=str_starts_with($msg,'error')?'bg-red-50 text-red-700':'bg-green-50 text-green-700'?> text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
+    <?php if($msg):?><div class="<?= str_starts_with($msg,'error') ? 'cmms-banner error' : 'cmms-banner success' ?>"text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
     <div class="card p-4"><h2 class="text-lg font-semibold mb-3"><?=$editRow?'แก้ไข':'เพิ่ม'?>กลุ่มอะไหล่</h2>
         <form method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3"><?php if($editRow):?><input type="hidden" name="id" value="<?=$editRow['id']?>"><?php endif;?>
             <div><label class="block text-xs font-medium text-gray-600">รหัสกลุ่ม</label><input type="text" name="code" value="<?=$editRow?htmlspecialchars($editRow['code']):''?>" required class="input input-bordered w-full mt-1"></div>
@@ -51,7 +51,7 @@ if ($gid) {
     <?php if ($gid): $grp=$pdo->prepare('SELECT * FROM spare_part_groups WHERE id=?'); $grp->execute([$gid]); $grp=$grp->fetch(); if ($grp): ?>
     <div class="card p-4">
         <div class="flex items-center justify-between mb-3"><h3 class="text-lg font-semibold">อะไหล่ในกลุ่ม: <?=htmlspecialchars($grp['name'])?></h3><a href="?" class="text-sm text-primary-600">ปิด</a></div>
-        <?php if($itemMsg):?><div class="<?=str_starts_with($itemMsg,'error')?'bg-red-50 text-red-700':'bg-green-50 text-green-700'?> text-sm rounded p-2 mb-3"><?=htmlspecialchars($itemMsg)?></div><?php endif;?>
+        <?php if($itemMsg):?><div class="<?= str_starts_with($itemMsg,'error') ? 'cmms-banner error' : 'cmms-banner success' ?> text-sm rounded p-2 mb-3"><?=htmlspecialchars($itemMsg)?></div><?php endif;?>
         <form method="post" class="flex gap-2 items-end mb-4">
             <input type="hidden" name="add_item" value="1"><input type="hidden" name="gid" value="<?=$gid?>">
             <div><label class="block text-xs font-medium">เพิ่มอะไหล่</label><select name="spare_part_id" class="input input-bordered w-full mt-1"><?php foreach($availParts as$p):?><option value="<?=$p['id']?>"><?=htmlspecialchars($p['code'].' - '.$p['name'])?></option><?php endforeach;?></select></div>

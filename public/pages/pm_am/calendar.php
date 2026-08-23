@@ -94,7 +94,7 @@ function pmChip(array $pm, string $today): string {
         <div class="cmms-section-title">🔴 งานค้างเกินจากเดือนก่อนหน้า</div>
         <div class="flex flex-wrap gap-2 mt-2">
             <?php foreach ($overdue as $pm): ?>
-            <a href="view.php?id=<?= (int)$pm['id'] ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-50 border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-100">
+            <a href="view.php?id=<?= (int)$pm['id'] ?>" class="cmms-banner error inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-semibold hover:bg-red-100">
                 ⏰ <?= htmlspecialchars(($pm['asset_code'] ?? '') . ' — ' . ($pm['title'] ?? '')) ?>
                 <span class="text-red-400">(<?= htmlspecialchars(date('d/m/Y', strtotime($pm['due_date']))) ?>)</span>
             </a>

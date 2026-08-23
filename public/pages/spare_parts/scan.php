@@ -47,7 +47,7 @@ renderHeader();
 
             <?php if ($code !== ''): ?>
                 <?php if (!$part): ?>
-                <div class="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">❌ ไม่พบอะไหล่ "<?= htmlspecialchars($code) ?>"</div>
+                <div class="cmms-banner error p-4 rounded-lg border text-sm font-semibold">❌ ไม่พบอะไหล่ "<?= htmlspecialchars($code) ?>"</div>
                 <?php else:
                     $low = (float)$part['stock_qty'] <= (float)$part['min_stock'];
                 ?>

@@ -48,13 +48,13 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
     </div>
 
     <?php if ($successMsg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 font-medium">
+    <div class="cmms-banner success p-4 rounded-lg border font-medium">
         ✅ <?= htmlspecialchars($successMsg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($errorMsg): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 font-medium">
+    <div class="cmms-banner error p-4 rounded-lg border font-medium">
         ❌ <?= htmlspecialchars($errorMsg) ?>
     </div>
     <?php endif; ?>

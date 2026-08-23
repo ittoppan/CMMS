@@ -181,7 +181,7 @@ renderHeader();
     </div>
 
     <?php if ($reqMsg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-sm">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm">
         ✅ <?= htmlspecialchars($reqMsg) ?>
     </div>
     <?php endif; ?>

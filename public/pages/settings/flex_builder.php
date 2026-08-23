@@ -55,13 +55,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 font-medium">
+    <div class="cmms-banner success p-4 rounded-lg border font-medium">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 font-medium font-bold">
+    <div class="cmms-banner error p-4 rounded-lg border font-medium font-bold">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>
@@ -105,8 +105,8 @@ renderHeader();
                     <span class="text-xs text-indigo-600 font-bold">📷 Dynamic Variables</span>
                 </h3>
                 <div class="flex flex-wrap gap-2 text-xs">
-                    <button onclick="insertVar('{before_image}')" class="px-2.5 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 rounded font-mono font-bold">🖼️ {before_image} (รูปก่อนซ่อม)</button>
-                    <button onclick="insertVar('{after_image}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded font-mono font-bold">🖼️ {after_image} (รูปหลังซ่อม)</button>
+                    <button onclick="insertVar('{before_image}')" class="cmms-banner error px-2.5 py-1.5 border hover:bg-rose-100 rounded font-mono font-bold">🖼️ {before_image} (รูปก่อนซ่อม)</button>
+                    <button onclick="insertVar('{after_image}')" class="cmms-banner success px-2.5 py-1.5 border hover:bg-emerald-100 rounded font-mono font-bold">🖼️ {after_image} (รูปหลังซ่อม)</button>
                     <button onclick="insertVar('{work_order_id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{work_order_id}</button>
                     <button onclick="insertVar('{title}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{title}</button>
                     <button onclick="insertVar('{asset_name}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{asset_name}</button>

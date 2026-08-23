@@ -128,14 +128,14 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 rounded-xl border text-xs font-semibold flex items-center gap-2 <?= $msgType === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200' ?>">
+    <div class="p-4 rounded-xl border text-xs font-semibold flex items-center gap-2 <?= $msgType === 'success' ? 'cmms-banner success' : 'cmms-banner error' ?>">
         <span><?= $msgType === 'success' ? '✅' : '⚠️' ?></span>
         <span><?= htmlspecialchars($msg) ?></span>
     </div>
     <?php endif; ?>
 
     <?php if ($lineQuotaHit): ?>
-    <div class="p-4 rounded-xl border text-xs font-semibold bg-amber-50 text-amber-800 border-amber-200 flex items-center gap-2">
+    <div class="cmms-banner warning p-4 rounded-xl border text-xs font-semibold flex items-center gap-2">
         <span>🚨</span>
         <span>LINE OA หมดโควตาข้อความรายเดือน (HTTP 429 "monthly limit") — ต้องอัปเกรดแผนที่ LINE Developers Console หรือลดปริมาณข้อความ (ปิด daily_summary / weekly_report ด้านล่าง)</span>
     </div>

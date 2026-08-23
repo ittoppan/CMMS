@@ -67,7 +67,7 @@ renderHeader();
 
     <!-- Alert Banner -->
     <?php if ($msg): ?>
-    <div class="p-4 <?= $msgType === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200' ?> font-bold rounded-xl border text-xs flex items-center gap-2">
+    <div class="p-4 <?= $msgType === 'success' ? 'cmms-banner success' : 'cmms-banner error' ?> font-bold rounded-xl border text-xs flex items-center gap-2">
         <i data-lucide="<?= $msgType === 'success' ? 'check-circle' : 'alert-circle' ?>" class="w-4 h-4"></i>
         <span><?= htmlspecialchars($msg) ?></span>
     </div>

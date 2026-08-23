@@ -415,6 +415,28 @@
         }
     }
 
+    // ── Query message wiring (Step 9): ?msg= / ?error= -> toast ──
+    function wireQueryMessages() {
+        try {
+            var q = new URLSearchParams(window.location.search);
+            var msg = q.get('msg');
+            var err = q.get('error');
+            if (err) showToast('error', err);
+            else if (msg) {
+                // PHP pages conventionally prefix failures with "error:"
+                if (/^error:/i.test(msg)) showToast('error', msg.replace(/^error:\s*/i, ''));
+                else showToast('success', msg);
+            }
+            if (msg || err) {
+                q.delete('msg');
+                q.delete('error');
+                var qs = q.toString();
+                var url = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+                window.history.replaceState({}, '', url);
+            }
+        } catch (e) { /* noop */ }
+    }
+
     // ── Modal manager (Step 8): focus trap + ESC + focus restore ──
     var lastFocused = null;
 
@@ -465,6 +487,7 @@
             this.initTheme();
             this.initSidebarGroups();
             this.bindEvents();
+            this.wireQueryMessages();
         },
         initTheme: initTheme,
         toggleDarkMode: toggleDarkMode,
@@ -476,6 +499,7 @@
         playEmergencyAlarm: playEmergencyAlarm,
         openModal: openModal,
         closeModal: closeModal,
+        wireQueryMessages: wireQueryMessages,
         bindEvents: bindEvents
     };
 

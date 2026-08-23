@@ -28,7 +28,7 @@ renderHeader();
         <?php foreach ($sites as $st): ?>
         <div class="card p-5 border-2 space-y-4 hover:shadow-md transition-all">
             <div class="flex items-center justify-between">
-                <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200"><?= htmlspecialchars($st['site_code']) ?></span>
+                <span class="cmms-banner info font-mono text-xs font-bold px-2.5 py-1 rounded-lg border"><?= htmlspecialchars($st['site_code']) ?></span>
                 <span class="badge badge badge-success font-bold text-xs">🟢 ACTIVE (ออนไลน์)</span>
             </div>
 

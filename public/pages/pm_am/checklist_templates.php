@@ -41,13 +41,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 font-medium">
+    <div class="cmms-banner success p-4 rounded-lg border font-medium">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 font-medium">
+    <div class="cmms-banner error p-4 rounded-lg border font-medium">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>
@@ -64,7 +64,7 @@ renderHeader();
                         <span class="text-slate-400 hover:text-indigo-600 font-bold text-base cursor-grab">⋮⋮</span>
                         <span class="font-mono text-xs font-extrabold text-indigo-600"><?= htmlspecialchars($t['code']) ?></span>
                     </div>
-                    <span class="badge bg-indigo-50 text-indigo-700 text-xs font-bold"><?= htmlspecialchars($t['category'] ?? 'General') ?></span>
+                    <span class="cmms-banner info badge text-xs font-bold"><?= htmlspecialchars($t['category'] ?? 'General') ?></span>
                 </div>
                 <h3 class="font-bold text-slate-900 text-base mt-2"><?= htmlspecialchars($t['name']) ?></h3>
                 <p class="text-xs text-slate-500 mt-1"><?= htmlspecialchars($t['description'] ?? 'ไม่มีคำอธิบายเพิ่มเติม') ?></p>

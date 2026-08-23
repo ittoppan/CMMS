@@ -155,7 +155,7 @@ renderHeader();
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-            <button type="button" onclick="passAllItems()" class="btn bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100 text-xs font-bold px-3.5 py-2">
+            <button type="button" onclick="passAllItems()" class="cmms-banner success btn hover:bg-emerald-100 text-xs font-bold px-3.5 py-2">
                 ✔ ผ่านหมดทุกรายการ (Pass All)
             </button>
             <button type="button" onclick="window.print()" class="btn btn-primary bg-indigo-600 border-indigo-600 text-xs font-bold px-3.5 py-2">

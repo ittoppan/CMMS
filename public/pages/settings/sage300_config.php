@@ -106,13 +106,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-sm">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-xl border border-rose-200 font-bold text-sm">
+    <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>
@@ -162,7 +162,7 @@ renderHeader();
 
     <?php if ($testResult): ?>
     <?php if (!empty($testResult['success'])): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-300 font-bold text-sm flex items-center gap-3">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm flex items-center gap-3">
         <span class="text-2xl">🔌</span>
         <div>
             <div class="font-extrabold">ทดสอบการเชื่อมต่อ ODBC DSN (<?= htmlspecialchars($dsn) ?>) สำเร็จเรียบร้อย!</div>
@@ -170,7 +170,7 @@ renderHeader();
         </div>
     </div>
     <?php else: ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-xl border border-rose-300 font-bold text-sm space-y-1">
+    <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm space-y-1">
         <div class="font-extrabold">❌ ไม่สามารถเชื่อมต่อกับ ODBC DSN (<?= htmlspecialchars($dsn) ?>) ได้</div>
         <div class="text-xs text-rose-700 font-mono font-normal">Error Trace: <?= htmlspecialchars($testResult['error'] ?? 'ODBC DSN Not Found or Login Failed') ?></div>
         <div class="text-xs text-slate-600 pt-1">

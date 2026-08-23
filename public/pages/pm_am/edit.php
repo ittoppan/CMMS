@@ -71,8 +71,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>
         <h1 class="mt-2 text-2xl font-bold text-gray-900">แก้ไขแผน PM #<?= $id ?></h1>
     </div>
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">

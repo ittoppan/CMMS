@@ -778,3 +778,40 @@ html.dark .theme-icon-sun  { display: block; }
 @media (max-width: 640px) {
   .cmms-modal-panel, .cmms-modal-panel-lg { max-width: 100%; }
 }
+
+/* ------------------------------------------------------------
+   18. Banners (Redesign Plan Sec.3 Step 9)
+   Inline notice blocks; colors via tokens (dark-mode safe).
+   ------------------------------------------------------------ */
+.cmms-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--color-background-muted, #f1f5f9);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-container, 12px);
+  color: var(--color-text-primary, #0f172a);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.cmms-banner.success {
+  background: var(--color-background-green, rgb(36 187 94 / 0.2));
+  border-color: var(--color-border-green, #24bb5e);
+  color: var(--color-text-green, #0a5d2b);
+}
+.cmms-banner.error {
+  background: var(--color-background-red, rgb(227 25 59 / 0.2));
+  border-color: var(--color-border-red, #e3193b);
+  color: var(--color-text-red, #9f1239);
+}
+.cmms-banner.warning {
+  background: var(--color-background-yellow, rgb(226 164 0 / 0.2));
+  border-color: var(--color-border-yellow, #e2a400);
+  color: var(--color-text-yellow, #854d0e);
+}
+.cmms-banner.info {
+  background: var(--color-background-blue, rgb(1 113 227 / 0.2));
+  border-color: var(--color-border-blue, #0064e0);
+  color: var(--color-text-blue, #042f97);
+}

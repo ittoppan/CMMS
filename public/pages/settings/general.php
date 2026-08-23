@@ -25,8 +25,8 @@ foreach ($groups as $g) {
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">ตั้งค่าทั่วไป</h1><p class="mt-1 text-sm text-gray-500">General Settings</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
-    <?php if ($msg === 'success'): ?><div class="bg-green-50 text-green-700 text-sm rounded-md p-3">บันทึกเรียบร้อย</div><?php endif; ?>
-    <?php if (str_starts_with($msg, 'error:')): ?><div class="bg-red-50 text-red-700 text-sm rounded-md p-3"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <?php if ($msg === 'success'): ?><div class="cmms-banner success text-sm rounded-md p-3">บันทึกเรียบร้อย</div><?php endif; ?>
+    <?php if (str_starts_with($msg, 'error:')): ?><div class="cmms-banner error text-sm rounded-md p-3"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
     <form method="post">
         <?php foreach ($settings as $group => $items): ?>
         <div class="card p-6 mb-4">

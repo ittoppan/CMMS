@@ -16,7 +16,7 @@ $rows=$pdo->query('SELECT r.*, u.full_name assignee_name FROM auto_assignment_ru
 $users=$pdo->query('SELECT id, full_name FROM users ORDER BY full_name')->fetchAll(); ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">กฎการมอบหมายงานอัตโนมัติ</h1><p class="mt-1 text-sm text-gray-500">Auto Assignment Rules</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
-    <?php if($msg):?><div class="<?=str_starts_with($msg,'error')?'bg-red-50 text-red-700':'bg-green-50 text-green-700'?> text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
+    <?php if($msg):?><div class="<?= str_starts_with($msg,'error') ? 'cmms-banner error' : 'cmms-banner success' ?>"text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
     <div class="card p-4"><h2 class="text-lg font-semibold mb-3"><?=$editRow?'แก้ไข':'เพิ่ม'?>กฎ</h2>
         <form method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3"><?php if($editRow):?><input type="hidden" name="id" value="<?=$editRow['id']?>"><?php endif;?>
             <div><label class="block text-xs font-medium text-gray-600">โมดูล</label><select name="module" class="input input-bordered w-full mt-1"><option value="repair" <?=$editRow&&$editRow['module']==='repair'?'selected':''?>>Repair</option><option value="pm_am" <?=$editRow&&$editRow['module']==='pm_am'?'selected':''?>>PM/AM</option><option value="calibration" <?=$editRow&&$editRow['module']==='calibration'?'selected':''?>>Calibration</option></select></div>

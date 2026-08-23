@@ -40,7 +40,7 @@ renderHeader();
         ?>
         <div class="card p-5 border-2 rounded-2xl shadow-sm space-y-3 transition-all hover:shadow-md <?= $cardBorder ?>">
             <div class="flex items-center justify-between">
-                <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200"><?= htmlspecialchars($r['code']) ?></span>
+                <span class="cmms-banner info font-mono text-xs font-bold px-2 py-0.5 rounded border"><?= htmlspecialchars($r['code']) ?></span>
                 <span class="text-2xl font-black <?= $scoreColor ?>"><?= $r['risk_score'] ?>%</span>
             </div>
 

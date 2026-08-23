@@ -63,7 +63,7 @@ if ($appBarTitle === '') {
 
     <!-- LINE LIFF SDK & CMMS UI Engine -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="/js/cmms-ui-engine.js?v=6.1"></script>
+    <script src="/js/cmms-ui-engine.js?v=6.2"></script>
 </head>
 <body class="font-sans antialiased bg-body text-primary h-full">
 

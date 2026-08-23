@@ -87,7 +87,7 @@ $rows = $stmt->fetchAll();
     </div>
 
     <!-- Tip card -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
+    <div class="cmms-banner info border rounded-lg p-4 text-sm">
         <strong>💡 หมายเหตุ:</strong> บทบาทที่มีผู้ใช้งานอยู่จะไม่สามารถลบได้ กรุณาย้ายผู้ใช้ไปบทบาทอื่นก่อนลบ
         หากต้องการกำหนดสิทธิ์ละเอียด ไปที่ <a href="../settings/user_permissions.php" class="underline font-semibold">ตั้งค่าสิทธิ์</a>
     </div>

@@ -200,13 +200,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-sm">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm">
         <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-xl border border-rose-200 font-bold text-sm">
+    <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>
@@ -265,7 +265,7 @@ renderHeader();
                         <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($companyLogo, 'asset') ?>" class="max-h-full object-contain">
                         </div>
-                        <input type="file" name="company_logo" accept="image/*" class="block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                        <input type="file" name="company_logo" accept="image/*" class="cmms-banner info block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
                     </div>
 
                     <div class="p-3 bg-slate-800 text-white border border-slate-700 rounded-xl space-y-2 text-center">
@@ -281,7 +281,7 @@ renderHeader();
                         <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($faviconIcon, 'asset') ?>" class="w-7 h-7 object-contain">
                         </div>
-                        <input type="file" name="favicon_icon" accept="image/*" class="block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 cursor-pointer">
+                        <input type="file" name="favicon_icon" accept="image/*" class="cmms-banner info block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
                     </div>
                 </div>
             </div>

@@ -46,8 +46,8 @@ renderHeader();
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปอะไหล่</a>
         <h1 class="mt-2 text-2xl font-bold text-gray-900">แก้ไขอะไหล่ (พร้อมรูปภาพ)</h1>
     </div>
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -100,7 +100,7 @@ renderHeader();
                 <div class="flex items-center gap-4">
                     <img src="<?= getImageUrl($row['image_url'] ?? null, 'spare') ?>" class="card w-16 h-16 object-cover shrink-0">
                     <div class="flex-1 space-y-1">
-                        <input type="file" name="spare_image" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all cursor-pointer">
+                        <input type="file" name="spare_image" accept="image/*" class="cmms-banner info block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file: file: hover:file:bg-indigo-100 transition-all cursor-pointer">
                         <span class="text-[11px] text-slate-400 block">อัปโหลดไฟล์ใหม่ หรือแก้ URL รูปภาพด้านล่าง</span>
                         <input type="text" name="image_url" value="<?= htmlspecialchars($row['image_url'] ?? '') ?>" placeholder="หรือระบุ URL รูปภาพที่นี่..." class="input input-bordered w-full text-xs font-mono">
                     </div>

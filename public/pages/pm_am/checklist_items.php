@@ -79,13 +79,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 font-medium">
+    <div class="cmms-banner success p-4 rounded-lg border font-medium">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 font-medium">
+    <div class="cmms-banner error p-4 rounded-lg border font-medium">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>
@@ -111,7 +111,7 @@ renderHeader();
                     <div class="flex items-center gap-3">
                         <!-- Drag Handle Icon -->
                         <div class="text-slate-400 hover:text-indigo-600 font-bold text-lg cursor-grab">⋮⋮</div>
-                        <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 font-extrabold text-xs flex items-center justify-center border border-indigo-100">
+                        <div class="cmms-banner info w-7 h-7 rounded-lg font-extrabold text-xs flex items-center justify-center border border-indigo-100">
                             <?= $idx + 1 ?>
                         </div>
                         <div>
@@ -177,10 +177,10 @@ renderHeader();
                             <!-- Interactive Touch Inputs -->
                             <?php if (($it['input_type'] ?? 'pass_fail') === 'pass_fail'): ?>
                             <div class="flex gap-2 pt-1">
-                                <label class="flex-1 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 rounded font-bold text-center text-xs cursor-pointer hover:bg-emerald-100">
+                                <label class="cmms-banner success flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-emerald-100">
                                     <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden" checked> ✔ PASS (ปกติ)
                                 </label>
-                                <label class="flex-1 py-1.5 bg-rose-50 text-rose-700 border border-rose-300 rounded font-bold text-center text-xs cursor-pointer hover:bg-rose-100">
+                                <label class="cmms-banner error flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-rose-100">
                                     <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden"> ❌ FAIL (ผิดปกติ)
                                 </label>
                             </div>

@@ -29,7 +29,7 @@ $rows = $pdo->query('SELECT * FROM departments ORDER BY code')->fetchAll();
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">จัดการแผนก</h1><p class="mt-1 text-sm text-gray-500">Departments</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
-    <?php if ($msg): ?><div class="<?= str_starts_with($msg,'error')?'bg-red-50 text-red-700':'bg-green-50 text-green-700'?> text-sm rounded-md p-3"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
+    <?php if ($msg): ?><div class="<?= str_starts_with($msg,'error') ? 'cmms-banner error' : 'cmms-banner success' ?>"text-sm rounded-md p-3"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
     <div class="card p-4">
         <h2 class="text-lg font-semibold mb-3"><?= $editRow ? 'แก้ไขแผนก' : 'เพิ่มแผนก' ?></h2>
         <form method="post" class="grid grid-cols-1 sm:grid-cols-4 gap-3">

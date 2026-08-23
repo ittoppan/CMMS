@@ -125,19 +125,19 @@ renderHeader();
             <h1 class="text-2xl font-black">🗓️ ระบบเพิ่มงาน PM/AM ประจำปีอัตโนมัติในครั้งเดียว</h1>
             <p class="text-xs text-indigo-100 mt-1">สร้างตารางการบำรุงรักษาล่วงหน้าตลอดทั้งปี ทั้งเช็คประจำวัน, ประจำเดือน, ครึ่งปี และบำรุงใหญ่ประจำปี</p>
         </div>
-        <a href="calendar.php" class="card btn text-indigo-800 font-bold text-xs shadow hover:bg-indigo-50">
+        <a href="calendar.php" class="cmms-banner info card btn font-bold text-xs shadow hover:">
             📅 ดูปฏิทิน PM ทั้งหมด →
         </a>
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-sm">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm">
         🎉 <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-xl border border-rose-200 font-bold text-sm">
+    <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>

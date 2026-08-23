@@ -256,13 +256,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-sm">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-sm">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-xl border border-rose-200 font-bold text-sm">
+    <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>

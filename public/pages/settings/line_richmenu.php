@@ -15,7 +15,7 @@ renderHeader();
             <h1 class="text-2xl font-black">📱 LINE Rich Menu Configurator & Action Center</h1>
             <p class="text-xs text-emerald-100 mt-1">ตั้งค่าเมนูลัด 6 ช่องบนหน้าจอแอป LINE Official Account (`@823cenqj`) สำหรับช่างและผู้ใช้งาน</p>
         </div>
-        <a href="https://manager.line.biz/" target="_blank" class="card btn text-emerald-800 font-extrabold text-xs shadow hover:bg-emerald-50">
+        <a href="https://manager.line.biz/" target="_blank" class="cmms-banner success card btn font-extrabold text-xs shadow hover:">
             🔗 เปิด LINE Official Account Manager →
         </a>
     </div>

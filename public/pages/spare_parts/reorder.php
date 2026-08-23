@@ -119,7 +119,7 @@ renderHeader();
     </div>
 
     <?php if ($flash): ?>
-    <div class="cmms-card px-4 py-3 text-sm font-semibold <?= $flash[0] === 'ok' ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-700 bg-red-50 border border-red-200' ?>">
+    <div class="cmms-banner success cmms-card px-4 py-3 text-sm font-semibold <?= $flash[0] === 'ok' ? ' border ' : ' border ' ?>">
         <?= $flash[0] === 'ok' ? '✅' : '❌' ?> <?= htmlspecialchars($flash[1]) ?>
     </div>
     <?php endif; ?>

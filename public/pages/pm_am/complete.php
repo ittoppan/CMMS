@@ -87,8 +87,8 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
         <a href="view.php?id=<?= $id ?>" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปรายละเอียด</a>
         <h1 class="mt-2 text-2xl font-bold text-gray-900">ทำ PM เสร็จ: <?= htmlspecialchars($r['title']) ?></h1>
     </div>
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" class="card p-6 space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div><span class="font-medium text-gray-600">ทรัพย์สิน:</span> <?= htmlspecialchars($r['asset_id']) ?></div>

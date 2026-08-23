@@ -82,7 +82,7 @@ renderHeader();
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                 <span>🎨 ออกแบบข้อความ LINE Flex →</span>
             </a>
-            <a href="line_richmenu.php" class="card btn text-emerald-800 font-extrabold text-xs shadow hover:bg-emerald-50 gap-1">
+            <a href="line_richmenu.php" class="cmms-banner success card btn font-extrabold text-xs shadow hover: gap-1">
                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
                 <span>LINE Rich Menu</span>
             </a>
@@ -91,7 +91,7 @@ renderHeader();
 
     <!-- Alert Banner -->
     <?php if ($msg): ?>
-    <div class="p-4 <?= $msgType === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200' ?> font-bold rounded-xl border text-xs flex items-center gap-2">
+    <div class="p-4 <?= $msgType === 'success' ? 'cmms-banner success' : 'cmms-banner error' ?> font-bold rounded-xl border text-xs flex items-center gap-2">
         <i data-lucide="<?= $msgType === 'success' ? 'check-circle' : 'alert-circle' ?>" class="w-4 h-4"></i>
         <span><?= htmlspecialchars($msg) ?></span>
     </div>
@@ -152,7 +152,7 @@ renderHeader();
 
         <!-- Action Buttons -->
         <div class="pt-4 border-t flex justify-between items-center flex-wrap gap-3">
-            <button type="submit" name="test_line_notify" value="1" class="btn btn-secondary text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 font-bold gap-2">
+            <button type="submit" name="test_line_notify" value="1" class="cmms-banner success btn btn-secondary text-xs hover: font-bold gap-2">
                 <i data-lucide="send" class="w-4 h-4"></i>
                 <span>🚀 ทดสอบส่งข้อความ LINE Notify</span>
             </button>

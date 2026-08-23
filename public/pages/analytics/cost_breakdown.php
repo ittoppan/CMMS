@@ -61,7 +61,7 @@ renderHeader();
                         <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($r['asset_code']) ?> — <?= htmlspecialchars($r['asset_name']) ?></td>
                         <td class="p-3 text-right font-bold text-slate-700">฿<?= number_format($laborCost, 2) ?></td>
                         <td class="p-3 text-right font-bold text-purple-700">฿<?= number_format($partsCost, 2) ?></td>
-                        <td class="p-3 text-right font-bold text-rose-700 bg-rose-50/50">฿<?= number_format($downtimeLoss, 2) ?></td>
+                        <td class="cmms-banner error p-3 text-right font-bold /50">฿<?= number_format($downtimeLoss, 2) ?></td>
                         <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/50 text-sm">฿<?= number_format($totalCost, 2) ?></td>
                     </tr>
                     <?php endforeach; ?>

@@ -75,7 +75,7 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 font-bold text-xs flex items-center gap-2">
+    <div class="cmms-banner success p-4 rounded-xl border font-bold text-xs flex items-center gap-2">
         <i data-lucide="check-circle" class="w-4 h-4"></i>
         <span><?= htmlspecialchars($msg) ?></span>
     </div>

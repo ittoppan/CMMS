@@ -59,13 +59,13 @@ renderHeader();
     </div>
 
     <?php if ($msg): ?>
-    <div class="p-4 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 font-medium">
+    <div class="cmms-banner success p-4 rounded-lg border font-medium">
         ✅ <?= htmlspecialchars($msg) ?>
     </div>
     <?php endif; ?>
 
     <?php if ($error): ?>
-    <div class="p-4 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 font-medium">
+    <div class="cmms-banner error p-4 rounded-lg border font-medium">
         ❌ <?= htmlspecialchars($error) ?>
     </div>
     <?php endif; ?>

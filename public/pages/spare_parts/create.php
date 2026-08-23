@@ -42,8 +42,8 @@ renderHeader();
         <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มอะไหล่ใหม่ (พร้อมรูปภาพ)</h1>
     </div>
 
-    <?php if ($error): ?><div class="bg-red-50 text-red-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
-    <?php if ($success): ?><div class="bg-green-50 text-green-700 text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -94,7 +94,7 @@ renderHeader();
             </div>
             <div class="sm:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <label class="block text-xs font-bold text-slate-800 mb-1">🖼️ อัปโหลดรูปภาพอะไหล่ (Spare Part Image)</label>
-                <input type="file" name="spare_image" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all cursor-pointer">
+                <input type="file" name="spare_image" accept="image/*" class="cmms-banner info block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file: file: hover:file:bg-indigo-100 transition-all cursor-pointer">
                 <span class="text-[11px] text-slate-400 block mt-1">รองรับไฟล์ภาพ JPG, PNG, WEBP (หรือใส่ URL รูปภาพแทนได้ด้านล่าง)</span>
                 <input type="text" name="image_url" placeholder="หรือวาง URL รูปภาพที่นี่..." class="input input-bordered w-full text-xs font-mono mt-2">
             </div>

@@ -15,7 +15,7 @@ $editId=(int)($_GET['edit']??0);$editRow=null;if($editId){$s=$pdo->prepare('SELE
 $rows=$pdo->query('SELECT*FROM failure_codes ORDER BY code')->fetchAll(); ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">รหัสสาเหตุเสียหาย</h1><p class="mt-1 text-sm text-gray-500">Failure Codes</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
-    <?php if($msg):?><div class="<?=str_starts_with($msg,'error')?'bg-red-50 text-red-700':'bg-green-50 text-green-700'?> text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
+    <?php if($msg):?><div class="<?= str_starts_with($msg,'error') ? 'cmms-banner error' : 'cmms-banner success' ?>"text-sm rounded p-3"><?=htmlspecialchars($msg)?></div><?php endif;?>
     <div class="card p-4"><h2 class="text-lg font-semibold mb-3"><?=$editRow?'แก้ไข':'เพิ่ม'?>รหัสสาเหตุเสียหาย</h2>
         <form method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3"><?php if($editRow):?><input type="hidden" name="id" value="<?=$editRow['id']?>"><?php endif;?>
             <div><label class="block text-xs font-medium text-gray-600">รหัส</label><input type="text" name="code" value="<?=$editRow?htmlspecialchars($editRow['code']):''?>" required class="input input-bordered w-full mt-1"></div>

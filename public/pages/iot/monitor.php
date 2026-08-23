@@ -44,7 +44,7 @@ renderHeader();
         <div class="card p-5 border-2 rounded-2xl shadow-sm space-y-4 <?= $statusBg ?>">
             <div class="flex items-center justify-between">
                 <div>
-                    <span class="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200"><?= htmlspecialchars($dev['device_code']) ?></span>
+                    <span class="cmms-banner info font-mono text-xs font-bold px-2 py-0.5 rounded border"><?= htmlspecialchars($dev['device_code']) ?></span>
                     <h3 class="font-black text-slate-900 text-base mt-1"><?= htmlspecialchars($dev['asset_code']) ?> - <?= htmlspecialchars($dev['asset_name']) ?></h3>
                 </div>
                 <span class="badge font-bold text-xs <?= $statusBadge ?>"><?= strtoupper($dev['status']) ?></span>
