@@ -60,7 +60,7 @@ renderHeader();
                         $maintRatio = round(($maintCost / $estPurchase) * 100, 1);
 
                         $isReplace = ($maintRatio >= 60.0);
-                        $badgeBg = $isReplace ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800';
+                        $badgeBg = $isReplace ? 'priority-high' : 'status-pass';
                         $recText = $isReplace ? '🔴 แนะนำปลดแท่นซื้อใหม่ (Replace)' : '🟢 คุ้มค่าในการซ่อมต่อ (Maintain)';
                     ?>
                     <tr class="hover:bg-slate-50">

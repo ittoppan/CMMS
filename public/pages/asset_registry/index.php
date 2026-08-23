@@ -119,7 +119,7 @@ $activeCount = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE statu
                         <td class="px-4 py-3 text-center">
                             <span class="badge <?= match($a['status']) {
                                 'active'       => 'badge badge-success',
-                                'inactive'     => 'bg-slate-100 text-slate-800',
+                                'inactive'     => 'status-inactive',
                                 'disposed'     => 'badge badge-error',
                                 'under_repair' => 'badge badge-warning',
                                 default        => 'bg-slate-100 text-slate-800'

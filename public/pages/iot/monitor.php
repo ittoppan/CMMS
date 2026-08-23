@@ -39,7 +39,7 @@ renderHeader();
         <?php
             $isAlarm = ($dev['status'] === 'alarm');
             $statusBg = $isAlarm ? 'border-rose-400 bg-rose-50/50' : 'border-slate-200 bg-white';
-            $statusBadge = $isAlarm ? 'bg-rose-600 text-white animate-pulse' : 'bg-emerald-100 text-emerald-800';
+            $statusBadge = $isAlarm ? 'status-fail animate-pulse' : 'status-active';
         ?>
         <div class="card p-5 border-2 rounded-2xl shadow-sm space-y-4 <?= $statusBg ?>">
             <div class="flex items-center justify-between">

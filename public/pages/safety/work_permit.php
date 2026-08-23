@@ -98,7 +98,7 @@ renderHeader();
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-mono font-bold text-rose-700 text-sm"><?= htmlspecialchars($p['permit_no']) ?></td>
                         <td class="p-3 font-bold">
-                            <span class="badge <?= match($p['permit_type']) { 'hot_work'=>'bg-orange-100 text-orange-800', 'confined_space'=>'bg-purple-100 text-purple-800', 'high_work'=>'badge badge-warning', default=>'badge badge-info' } ?> font-bold text-[10px]">
+                            <span class="badge <?= match($p['permit_type']) { 'hot_work'=>'priority-high', 'confined_space'=>'status-waiting_approval', 'high_work'=>'badge badge-warning', default=>'badge badge-info' } ?> font-bold text-[10px]">
                                 <?= strtoupper(str_replace('_', ' ', $p['permit_type'])) ?>
                             </span>
                         </td>
@@ -106,9 +106,9 @@ renderHeader();
                         <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($p['location']) ?></td>
                         <td class="p-3 text-center">
                             <div class="flex justify-center gap-1">
-                                <?php if ($p['loto_electrical']): ?><span class="badge bg-yellow-100 text-yellow-800 text-[9px] font-bold">⚡ ไฟฟ้า</span><?php endif; ?>
+                                <?php if ($p['loto_electrical']): ?><span class="badge status-active text-[9px] font-bold">⚡ ไฟฟ้า</span><?php endif; ?>
                                 <?php if ($p['loto_pneumatic']): ?><span class="badge badge badge-info text-[9px] font-bold">💨 ลม</span><?php endif; ?>
-                                <?php if ($p['loto_hydraulic']): ?><span class="badge bg-red-100 text-red-800 text-[9px] font-bold">🛢️ น้ำมัน</span><?php endif; ?>
+                                <?php if ($p['loto_hydraulic']): ?><span class="badge status-active text-[9px] font-bold">🛢️ น้ำมัน</span><?php endif; ?>
                             </div>
                         </td>
                         <td class="p-3 text-center">
