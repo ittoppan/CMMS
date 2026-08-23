@@ -672,3 +672,77 @@ html.dark .theme-icon-sun  { display: block; }
     font-size: 16px;
   }
 }
+
+/* ------------------------------------------------------------
+   15. Form extensions (Redesign Plan Sec.3 Step 4)
+   ------------------------------------------------------------ */
+.form-checkbox,
+.form-radio {
+  accent-color: var(--color-accent, #0064e0);
+  width: 1rem;
+  height: 1rem;
+  vertical-align: -2px;
+}
+.textarea-field {
+  display: block;
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  color: var(--color-text-primary, #0f172a);
+  background-color: var(--color-background-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-inner, 8px);
+  resize: vertical;
+}
+.textarea-field:focus {
+  outline: none;
+  border-color: var(--color-accent, #0064e0);
+  box-shadow: 0 0 0 3px var(--color-accent-muted, rgb(0 100 224 / 0.12));
+}
+.form-required-legend {
+  font-size: 0.75rem;
+  color: var(--color-text-disabled, #94a3b8);
+  margin-bottom: 0.5rem;
+}
+.form-required-legend .req { margin-right: 2px; }
+
+/* ------------------------------------------------------------
+   16. Filter bar canonical + search input + chips (Step 5)
+   .cmms-filter-bar base styles live in mobile-shell.css (shared
+   selector with legacy .filter-bar). Extras below.
+   ------------------------------------------------------------ */
+.cmms-filter-bar:focus-within {
+  border-color: var(--color-accent, #0064e0);
+  box-shadow: 0 0 0 3px var(--color-accent-muted, rgb(0 100 224 / 0.12));
+}
+.cmms-search-input { position: relative; flex: 1 1 200px; min-width: 200px; }
+.cmms-search-input > input { padding-left: 2.25rem; }
+.cmms-search-input .icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary, #64748b);
+  pointer-events: none;
+}
+.cmms-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--color-accent-muted, rgb(0 100 224 / 0.12));
+  color: var(--color-text-primary, #0f172a);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.cmms-filter-chip button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0 2px;
+}
