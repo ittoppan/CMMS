@@ -1,24 +1,33 @@
 "use client";
 
+// notifications/history — v3 design system (shadcn-style)
+// logic ครบเดิม: โหลด notification_logs + ตัวกรอง + export CSV
+
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Stack";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  ArrowPathIcon,
-  MagnifyingGlassIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  PaperAirplaneIcon,
-  DocumentArrowDownIcon,
-} from "@heroicons/react/24/outline";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
+import {
+  RefreshCw,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Send,
+  FileDown,
+} from "lucide-react";
 
 const TEMPLATE_LABELS: Record<string, string> = {
   line_tpl_breakdown: "แจ้งซ่อมด่วน (Breakdown)",
@@ -33,16 +42,18 @@ const TEMPLATE_LABELS: Record<string, string> = {
 };
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  SENT:           { label: "ส่งสำเร็จ", color: "var(--cmms-success)", bg: "rgba(16,185,129,0.12)" },
-  FAILED:         { label: "ล้มเหลว", color: "var(--cmms-danger)", bg: "rgba(239,68,68,0.12)" },
-  NO_RECIPIENT:   { label: "ไม่มีผู้รับ", color: "var(--cmms-warning)", bg: "rgba(245,158,11,0.12)" },
-  PENDING_CONFIG: { label: "ยังไม่ตั้งค่า", color: "var(--cmms-text-muted)", bg: "rgba(100,116,139,0.12)" },
+  SENT:           { label: "ส่งสำเร็จ", color: "var(--cmms-success)", bg: "var(--cmms-success-light)" },
+  FAILED:         { label: "ล้มเหลว", color: "var(--cmms-danger)", bg: "var(--cmms-danger-light)" },
+  NO_RECIPIENT:   { label: "ไม่มีผู้รับ", color: "var(--cmms-warning)", bg: "var(--cmms-warning-light)" },
+  PENDING_CONFIG: { label: "ยังไม่ตั้งค่า", color: "var(--cmms-text-muted)", bg: "var(--cmms-bg-muted)" },
 };
 
 function fmtTime(dt: string): string {
   if (!dt) return "-";
   return dt.replace("T", " ").slice(0, 19);
 }
+
+const ALL_SENTINEL = "__all__";
 
 export default function LineDeliveryHistoryPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -100,7 +111,7 @@ export default function LineDeliveryHistoryPage() {
       (l.content || "").replace(/[\r\n]+/g, " "),
     ]);
     const csv = [header, ...rows]
-      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .map((r) => r.map((c) => `"` + String(c).replace(/"/g, '""') + `"`).join(","))
       .join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -112,193 +123,244 @@ export default function LineDeliveryHistoryPage() {
   };
 
   const kpiCards = [
-    { label: "ส่งทั้งหมด", value: stats.total, icon: PaperAirplaneIcon, tile: "" },
-    { label: "ส่งสำเร็จ (SENT)", value: stats.sent, icon: CheckCircleIcon, tile: "green" },
-    { label: "ล้มเหลว / ไม่มีผู้รับ", value: stats.failed, icon: XCircleIcon, tile: "red" },
-    { label: "ส่งวันนี้", value: stats.today, icon: ClockIcon, tile: "amber" },
+    { label: "ส่งทั้งหมด", value: stats.total, icon: Send, tile: "" },
+    { label: "ส่งสำเร็จ (SENT)", value: stats.sent, icon: CheckCircle2, tile: "green" },
+    { label: "ล้มเหลว / ไม่มีผู้รับ", value: stats.failed, icon: XCircle, tile: "red" },
+    { label: "ส่งวันนี้", value: stats.today, icon: Clock, tile: "amber" },
   ];
+
+  const tileClasses: Record<string, string> = {
+    green: "bg-[var(--cmms-success-light)] text-[var(--cmms-success)]",
+    red: "bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)]",
+    amber: "bg-[var(--cmms-warning-light)] text-[var(--cmms-warning)]",
+  };
 
   const filteredCount = useMemo(() => logs.length, [logs]);
 
+  const columns: SimpleColumn<any>[] = [
+    {
+      key: "created_at",
+      header: "เวลา",
+      renderCell: (log) => (
+        <span className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+          {fmtTime(log.created_at)}
+        </span>
+      ),
+    },
+    {
+      key: "template",
+      header: "เทมเพลต",
+      renderCell: (log) => {
+        const tplLabel = TEMPLATE_LABELS[log.template] || log.template || "ข้อความทั่วไป";
+        return (
+          <Badge variant="primary" className="max-w-[220px]">
+            <span className="truncate">{tplLabel}</span>
+          </Badge>
+        );
+      },
+    },
+    {
+      key: "recipient_name",
+      header: "ผู้รับ",
+      renderCell: (log) => {
+        const isGroup = String(log.recipient || "").startsWith("C");
+        return (
+          <div className="min-w-0 whitespace-nowrap">
+            <p className="text-sm font-semibold">
+              {log.recipient_name || (isGroup ? "กลุ่ม LINE ช่าง" : log.recipient || "-")}
+            </p>
+            {log.recipient && (
+              <p className="font-mono text-[11px] text-muted-foreground">{log.recipient}</p>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      key: "status",
+      header: "สถานะ",
+      renderCell: (log) => {
+        const st = STATUS_META[log.status] || {
+          label: log.status || "-",
+          color: "var(--cmms-text-muted)",
+          bg: "var(--cmms-bg-muted)",
+        };
+        return (
+          <span
+            className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+            style={{ background: st.bg, color: st.color }}
+          >
+            {st.label}
+          </span>
+        );
+      },
+    },
+    {
+      key: "content",
+      header: "ข้อความ",
+      renderCell: (log) => (
+        <div className="line-clamp-2 max-w-[420px] whitespace-pre-line text-sm text-muted-foreground">
+          {String(log.content || "")}
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
-
-      {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>LINE DELIVERY LOG · AUDIT TRAIL</Text>
-          <Heading level={2} style={{ color: "#fff" }}>ประวัติการส่ง LINE</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ตรวจสอบว่าใครส่งอะไร ถึงใคร เมื่อไหร่ ด้วยเทมเพลตไหน — บันทึกจริงจาก notification_logs
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <button
-            type="button"
-            onClick={exportCsv}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <DocumentArrowDownIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ประวัติการส่ง LINE" }]}
+      title="ประวัติการส่ง LINE"
+      description="ตรวจสอบว่าใครส่งอะไร ถึงใคร เมื่อไหร่ ด้วยเทมเพลตไหน — บันทึกจริงจาก notification_logs"
+      actions={
+        <>
+          <Button variant="outline" onClick={exportCsv}>
+            <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
             ส่งออก CSV
-          </button>
-          <button
-            type="button"
-            onClick={fetchLogs}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <ArrowPathIcon className="w-4 h-4" />
+          </Button>
+          <Button onClick={fetchLogs}>
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
-          </button>
-        </HStack>
-      </div>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-6 pb-24 lg:pb-8">
+        {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      {/* KPI Cards */}
-      <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
-        {kpiCards.map((k) => {
-          const IconComp = k.icon;
-          return (
-            <Card key={k.label} padding={4} className="cmms-kpi-card">
-              <HStack gap={3} vAlign="center">
-                <div className={`w-12 h-12 cmms-icon-tile${k.tile ? ` ${k.tile}` : ""}`}>
-                  <IconComp className="w-6 h-6" />
-                </div>
-                <VStack gap={1}>
-                  <Text type="supporting" color="secondary">{k.label}</Text>
-                  <Heading level={3} className="cmms-kpi-value">{k.value ?? 0} <span style={{ fontSize: 14 }}>ครั้ง</span></Heading>
-                </VStack>
-              </HStack>
-            </Card>
-          );
-        })}
-      </Grid>
+        {/* KPI Cards */}
+        <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
+          {kpiCards.map((k) => {
+            const IconComp = k.icon;
+            return (
+              <Card key={k.label}>
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                      k.tile ? tileClasses[k.tile] : "bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-secondary)]"
+                    }`}
+                  >
+                    <IconComp size={18} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm text-muted-foreground">{k.label}</p>
+                    <p className="text-xl font-semibold tabular-nums">
+                      {k.value ?? 0} <span className="text-sm font-normal">ครั้ง</span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Grid>
 
-      {/* Filters */}
-      <Toolbar
-        label="ตัวกรองประวัติการส่ง"
-        startContent={
-          <>
-            <Selector
-              label="ช่องทาง"
-              isLabelHidden
-              value={channel}
-              onChange={setChannel}
-              options={[
-                { value: "LINE", label: "LINE" },
-                { value: "TELEGRAM", label: "Telegram" },
-                { value: "EMAIL", label: "Email" },
-                { value: "", label: "ทุกช่องทาง" },
-              ]}
-            />
-            <Selector
-              label="สถานะ"
-              isLabelHidden
-              placeholder="ทุกสถานะ"
-              value={status}
-              onChange={setStatus}
-              options={[
-                { value: "", label: "ทุกสถานะ" },
-                { value: "SENT", label: "ส่งสำเร็จ" },
-                { value: "FAILED", label: "ล้มเหลว" },
-                { value: "NO_RECIPIENT", label: "ไม่มีผู้รับ" },
-                { value: "PENDING_CONFIG", label: "ยังไม่ตั้งค่า" },
-              ]}
-            />
-            <Selector
-              label="เทมเพลต"
-              isLabelHidden
-              placeholder="ทุกเทมเพลต"
-              value={template}
-              onChange={setTemplate}
-              options={[
-                { value: "", label: "ทุกเทมเพลต" },
-                { value: "GENERIC", label: "ข้อความทั่วไป" },
-                ...templates.map((t) => ({ value: t, label: TEMPLATE_LABELS[t] || t })),
-              ]}
-            />
-            <TextInput label="ค้นหา" isLabelHidden placeholder="ค้นหาชื่อ/ข้อความ..." startIcon={MagnifyingGlassIcon} value={q} onChange={setQ} />
-            <input
+        {/* Filters */}
+        <Card>
+          <CardContent className="flex flex-wrap items-end gap-2 p-4">
+            {/* Radix Select ไม่รับ value="" — map ค่าว่างเป็น sentinel "__all__" ที่ boundary */}
+            <div className="w-full sm:w-[160px]">
+              <Select
+                value={channel || ALL_SENTINEL}
+                onValueChange={(v) => setChannel(v === ALL_SENTINEL ? "" : v)}
+              >
+                <SelectTrigger aria-label="ช่องทาง">
+                  <SelectValue placeholder="ทุกช่องทาง" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SENTINEL}>ทุกช่องทาง</SelectItem>
+                  <SelectItem value="LINE">LINE</SelectItem>
+                  <SelectItem value="TELEGRAM">Telegram</SelectItem>
+                  <SelectItem value="EMAIL">Email</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-[170px]">
+              <Select
+                value={status || ALL_SENTINEL}
+                onValueChange={(v) => setStatus(v === ALL_SENTINEL ? "" : v)}
+              >
+                <SelectTrigger aria-label="สถานะ">
+                  <SelectValue placeholder="ทุกสถานะ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SENTINEL}>ทุกสถานะ</SelectItem>
+                  <SelectItem value="SENT">ส่งสำเร็จ</SelectItem>
+                  <SelectItem value="FAILED">ล้มเหลว</SelectItem>
+                  <SelectItem value="NO_RECIPIENT">ไม่มีผู้รับ</SelectItem>
+                  <SelectItem value="PENDING_CONFIG">ยังไม่ตั้งค่า</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-[200px]">
+              <Select
+                value={template || ALL_SENTINEL}
+                onValueChange={(v) => setTemplate(v === ALL_SENTINEL ? "" : v)}
+              >
+                <SelectTrigger aria-label="เทมเพลต">
+                  <SelectValue placeholder="ทุกเทมเพลต" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SENTINEL}>ทุกเทมเพลต</SelectItem>
+                  <SelectItem value="GENERIC">ข้อความทั่วไป</SelectItem>
+                  {templates.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {TEMPLATE_LABELS[t] || t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="relative min-w-[200px] flex-1">
+              <Search
+                size={16}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                label="ค้นหา"
+                isLabelHidden
+                placeholder="ค้นหาชื่อ/ข้อความ..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            <Input
               aria-label="จากวันที่"
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)", fontSize: 13, color: "var(--cmms-text-primary)", outline: "none" }}
+              className="w-full sm:w-[150px]"
             />
-            <input
+            <Input
               aria-label="ถึงวันที่"
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)", background: "var(--cmms-bg-wash)", fontSize: 13, color: "var(--cmms-text-primary)", outline: "none" }}
+              className="w-full sm:w-[150px]"
             />
-          </>
-        }
-      />
+          </CardContent>
+        </Card>
 
-      {/* Table */}
-      <Card padding={0} style={{ overflow: "hidden" }}>
-        {loading ? (
-          <HStack hAlign="center" style={{ padding: 48 }}>
-            <Spinner size="md" />
-            <Text type="body" color="secondary">กำลังโหลดประวัติ...</Text>
-          </HStack>
-        ) : logs.length === 0 ? (
-          <div style={{ padding: 32, textAlign: "center" }}>
-            <Text type="body" color="secondary">ไม่พบรายการตามตัวกรอง — ยังไม่มีประวัติการส่ง</Text>
-          </div>
-        ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid var(--cmms-border)", color: "var(--cmms-text-secondary)" }}>
-                  <th style={{ padding: "10px 14px" }}>เวลา</th>
-                  <th style={{ padding: "10px 14px" }}>เทมเพลต</th>
-                  <th style={{ padding: "10px 14px" }}>ผู้รับ</th>
-                  <th style={{ padding: "10px 14px" }}>สถานะ</th>
-                  <th style={{ padding: "10px 14px" }}>ข้อความ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log: any) => {
-                  const st = STATUS_META[log.status] || { label: log.status || "-", color: "var(--cmms-text-muted)", bg: "rgba(100,116,139,0.12)" };
-                  const isGroup = String(log.recipient || "").startsWith("C");
-                  const tplLabel = TEMPLATE_LABELS[log.template] || log.template || "ข้อความทั่วไป";
-                  return (
-                    <tr key={log.id} style={{ borderBottom: "1px solid var(--cmms-border)" }}>
-                      <td style={{ padding: "10px 14px", whiteSpace: "nowrap", color: "var(--cmms-text-muted)" }}>{fmtTime(log.created_at)}</td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px", maxWidth: 220, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {tplLabel}
-                        </span>
-                      </td>
-                      <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
-                        <VStack gap={0}>
-                          <Text type="body" size="sm" weight="bold">{log.recipient_name || (isGroup ? "กลุ่ม LINE ช่าง" : log.recipient || "-")}</Text>
-                          {log.recipient && (
-                            <Text type="body" color="disabled" style={{ fontFamily: "monospace", fontSize: 11 }}>{log.recipient}</Text>
-                          )}
-                        </VStack>
-                      </td>
-                      <td style={{ padding: "10px 14px", whiteSpace: "nowrap" }}>
-                        <span className="cmms-andon-chip" style={{ background: st.bg, color: st.color, fontSize: "0.7rem", padding: "3px 9px" }}>{st.label}</span>
-                      </td>
-                      <td style={{ padding: "10px 14px", color: "var(--cmms-text-secondary)", maxWidth: 420 }}>
-                        <div style={{ whiteSpace: "pre-line", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                          {String(log.content || "")}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+        {/* Table */}
+        <SimpleDataTable
+          columns={columns}
+          data={logs}
+          idKey="id"
+          pageSize={15}
+          loading={loading}
+          emptyTitle="ไม่พบรายการตามตัวกรอง"
+          emptyDescription="ยังไม่มีประวัติการส่ง"
+        />
 
-      <Text type="body" size="sm" color="disabled">
-        แสดง {filteredCount} รายการล่าสุด (จำกัด 500) — ข้อมูลจากตาราง notification_logs โดยตรง
-      </Text>
-    </VStack>
+        <p className="text-xs text-muted-foreground">
+          แสดง {filteredCount} รายการล่าสุด (จำกัด 500) — ข้อมูลจากตาราง notification_logs โดยตรง
+        </p>
+      </div>
+    </PageShell>
   );
 }

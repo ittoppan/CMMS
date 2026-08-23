@@ -1,11 +1,18 @@
 "use client";
 
+// pages — v3 design system (shadcn-style)
+// logic ครบเดิม: ตรวจสิทธิ์ useMenuPermission + โหลดรายการ custom_pages
+
 import { useEffect, useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { DocumentTextIcon, Squares2X2Icon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FileText, LayoutGrid, ExternalLink, SquarePen } from "lucide-react";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 
 interface PageRow {
@@ -46,188 +53,114 @@ export default function CustomPagesListPage() {
 
   if (permLoading) {
     return (
-      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
-        <Text type="body" className="cmms-eyebrow">
-          CUSTOM PAGES · GRAPESJS
-        </Text>
-        <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>
-          กำลังตรวจสอบสิทธิ์การเข้าถึง...
-        </Text>
-      </VStack>
+      <PageShell
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
+        title="หน้าเว็บที่สร้างเอง"
+        description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"
+      >
+        <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
+      </PageShell>
     );
   }
 
   // บังคับสิทธิ์เมนู "หน้าเว็บที่สร้างเอง" (pages)
   if (!canViewPages) {
     return (
-      <VStack gap={3} style={{ padding: "40px 0" }} vAlign="center">
-        <Text type="body" className="cmms-eyebrow">
-          CUSTOM PAGES · GRAPESJS
-        </Text>
-        <Text type="body" style={{ color: "var(--cmms-text-secondary)" }}>
-          ไม่มีสิทธิ์เข้าถึงหน้านี้ — กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"
-        </Text>
-        <a
-          href="/dashboard"
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            color: "var(--cmms-primary)",
-            textDecoration: "none",
-          }}
-        >
-          กลับไปหน้าแรก
-        </a>
-      </VStack>
+      <PageShell
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
+        title="หน้าเว็บที่สร้างเอง"
+        description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"
+      >
+        <Alert variant="danger" title="ไม่มีสิทธิ์เข้าถึงหน้านี้" description={`กรุณาติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์เมนู "หน้าเว็บที่สร้างเอง"`} />
+        <div className="pt-2">
+          <Link href="/dashboard" className="text-sm font-semibold text-primary hover:underline">
+            กลับไปหน้าแรก
+          </Link>
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <VStack gap={4}>
-      <div
-        style={{
-          background: "var(--cmms-bg-card)",
-          border: "1px solid var(--cmms-border)",
-          borderRadius: 14,
-          padding: "18px 20px",
-        }}
-      >
-        <Text type="body" size="sm" className="cmms-eyebrow">
-          CUSTOM PAGES · GRAPESJS
-        </Text>
-        <HStack gap={3} vAlign="center" wrap="wrap">
-          <Heading level={2} style={{ margin: 0 }}>
-            หน้าเว็บที่สร้างเอง
-          </Heading>
-          {canBuild && (
-            <a
-              href="/editor/builder"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                background: "var(--cmms-primary)",
-                color: "var(--cmms-text-on-primary)",
-                fontSize: 13,
-                fontWeight: 600,
-                padding: "8px 14px",
-                borderRadius: 8,
-                textDecoration: "none",
-              }}
-            >
-              <Squares2X2Icon className="w-4 h-4" /> สร้างหน้าใหม่
-            </a>
-          )}
-        </HStack>
-        <Text type="body" style={{ color: "var(--cmms-text-secondary)", marginTop: 4 }}>
-          หน้าทั้งหมดที่สร้างจาก Visual Page Builder — กดเพื่อเปิดดูหรือเข้าไปแก้ไข
-        </Text>
-      </div>
-
-      {pages === null ? (
-        <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>
-          กำลังโหลด...
-        </Text>
-      ) : pages.length === 0 ? (
-        <Card padding={5}>
-          <VStack gap={3} vAlign="center">
-            <DocumentTextIcon className="w-8 h-8" style={{ color: "var(--cmms-text-muted)" }} />
-            <Heading level={3}>ยังไม่มีหน้าเว็บที่สร้างเอง</Heading>
-            <Text type="body" style={{ color: "var(--cmms-text-secondary)" }}>
-              ไปที่หน้า Visual Page Builder เพื่อลากวางบล็อกและสร้างหน้าแรกของคุณ
-            </Text>
-            {canBuild && (
-              <a
-                href="/editor/builder"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  background: "var(--cmms-primary)",
-                  color: "var(--cmms-text-on-primary)",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  padding: "10px 18px",
-                  borderRadius: 8,
-                  textDecoration: "none",
-                }}
-              >
-                <Squares2X2Icon className="w-4 h-4" /> เปิด Visual Page Builder
-              </a>
-            )}
-          </VStack>
-        </Card>
-      ) : (
-        <Grid columns={{ minWidth: 260, repeat: "fit" }} gap={4}>
-          {pages.map((p) => (
-            <Card key={p.id} padding={4}>
-              <VStack gap={2} style={{ height: "100%" }}>
-                <HStack gap={2} vAlign="center">
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: "var(--cmms-andon-ok)",
-                      display: "inline-block",
-                      flex: "none",
-                    }}
-                  />
-                  <Heading level={4} style={{ margin: 0, flex: 1 }}>
-                    {p.title}
-                  </Heading>
-                </HStack>
-                <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
-                  /pages/{p.slug}
-                </Text>
-                <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
-                  อัปเดต: {p.updated_at}
-                </Text>
-                <HStack gap={2} style={{ marginTop: "auto", paddingTop: 8 }}>
-                  <a
-                    href={`/pages/${encodeURIComponent(p.slug)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 4,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "var(--cmms-primary)",
-                      textDecoration: "none",
-                      padding: "6px 12px",
-                      borderRadius: 8,
-                      border: "1px solid var(--cmms-border)",
-                    }}
-                  >
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" /> เปิดดู
-                  </a>
-                  {canBuild && (
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
+      title="หน้าเว็บที่สร้างเอง"
+      description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder — กดเพื่อเปิดดูหรือเข้าไปแก้ไข"
+      actions={
+        canBuild ? (
+          <Link
+            href="/editor/builder"
+            className="inline-flex h-10 items-center gap-2 rounded-[var(--cmms-radius)] bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white shadow-[var(--cmms-shadow-sm)] transition-colors hover:bg-[var(--cmms-primary-hover)]"
+          >
+            <LayoutGrid size={16} strokeWidth={1.75} aria-hidden="true" />
+            สร้างหน้าใหม่
+          </Link>
+        ) : undefined
+      }
+    >
+      <div className="space-y-6 pb-24 lg:pb-8">
+        {pages === null ? (
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+          </div>
+        ) : pages.length === 0 ? (
+          <Card>
+            <CardContent>
+              <EmptyState
+                icon={<FileText size={28} strokeWidth={1.75} aria-hidden="true" />}
+                title="ยังไม่มีหน้าเว็บที่สร้างเอง"
+                description="ไปที่หน้า Visual Page Builder เพื่อลากวางบล็อกและสร้างหน้าแรกของคุณ"
+                action={
+                  canBuild ? (
+                    <Button onClick={() => (window.location.href = "/editor/builder")}>
+                      <LayoutGrid size={16} strokeWidth={1.75} aria-hidden="true" />
+                      เปิด Visual Page Builder
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Grid columns={{ minWidth: 260, repeat: "fit" }} gap={4}>
+            {pages.map((p) => (
+              <Card key={p.id} className="transition-shadow hover:shadow-md">
+                <CardContent className="flex h-full flex-col gap-2 p-4">
+                  <div className="flex items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--cmms-success)]"
+                    />
+                    <h3 className="min-w-0 flex-1 truncate text-base font-semibold text-foreground">{p.title}</h3>
+                  </div>
+                  <p className="truncate text-xs text-muted-foreground">/pages/{p.slug}</p>
+                  <p className="text-xs text-muted-foreground">อัปเดต: {p.updated_at}</p>
+                  <div className="mt-auto flex gap-2 pt-2">
                     <a
-                      href={`/editor/builder?slug=${encodeURIComponent(p.slug)}`}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: "var(--cmms-text-secondary)",
-                        textDecoration: "none",
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        border: "1px solid var(--cmms-border)",
-                      }}
+                      href={`/pages/${encodeURIComponent(p.slug)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] px-3 py-1.5 text-xs font-semibold text-[var(--cmms-primary)] hover:bg-accent"
                     >
-                      <Squares2X2Icon className="w-4 h-4" /> แก้ไข
+                      <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" /> เปิดดู
                     </a>
-                  )}
-                </HStack>
-              </VStack>
-            </Card>
-          ))}
-        </Grid>
-      )}
-    </VStack>
+                    {canBuild && (
+                      <a
+                        href={`/editor/builder?slug=${encodeURIComponent(p.slug)}`}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-secondary"
+                      >
+                        <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" /> แก้ไข
+                      </a>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </Grid>
+        )}
+      </div>
+    </PageShell>
   );
 }

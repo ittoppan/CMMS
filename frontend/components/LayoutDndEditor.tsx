@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Stack";
-import { Text } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Divider } from "@astryxdesign/core/Divider";
-import { Icon } from "@astryxdesign/core/Icon";
+import { VStack, HStack } from "@/components/layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
-  Bars3Icon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/24/outline";
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import type { PageLayoutItem, PageLayoutSection } from "../lib/pageLayout";
 
 interface Props {
@@ -55,10 +53,10 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
   return (
     <VStack gap={2}>
       <HStack hAlign="between" vAlign="center">
-        <Text type="body" size="sm" className="cmms-eyebrow">
-          DRAG & DROP · เรียงลำดับ section ของหน้า
-        </Text>
-        <Badge label={`${full.filter((v) => v.enabled).length}/${full.length} แสดง`} variant="info" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          DRAG &amp; DROP · เรียงลำดับ section ของหน้า
+        </p>
+        <Badge variant="info">{`${full.filter((v) => v.enabled).length}/${full.length} แสดง`}</Badge>
       </HStack>
 
       <VStack gap={2}>
@@ -94,40 +92,26 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
                 setDragIndex(null);
                 setOverIndex(null);
               }}
+              className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 transition-colors ${
+                isOver
+                  ? "border-2 border-[var(--cmms-primary)] bg-[var(--cmms-primary-light)]"
+                  : "border border-border bg-card"
+              }`}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                borderRadius: "var(--cmms-radius)",
-                border: isOver
-                  ? "2px solid var(--cmms-primary)"
-                  : "1px solid var(--cmms-border)",
-                background: isOver
-                  ? "var(--cmms-primary-light)"
-                  : "var(--cmms-bg-card)",
                 opacity: item.enabled ? 1 : 0.55,
-                cursor: "grab",
-                transition: "border 0.15s ease, background 0.15s ease",
+                cursor: pinned ? "default" : "grab",
               }}
             >
               {/* Drag handle */}
-              <span style={{ color: "var(--cmms-text-muted)", cursor: "grab" }}>
-                <Icon icon={Bars3Icon} size="sm" />
+              <span aria-hidden="true" className="shrink-0 text-muted-foreground">
+                <GripVertical size={16} strokeWidth={1.75} />
               </span>
 
               {/* หมายเลขลำดับ */}
               <span
-                className="cmms-num"
+                className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md text-xs tabular-nums"
                 style={{
-                  minWidth: 22,
-                  height: 22,
-                  borderRadius: 6,
                   background: "var(--cmms-bg-wash)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
                   color: "var(--cmms-text-secondary)",
                 }}
               >
@@ -135,77 +119,75 @@ export default function LayoutDndEditor({ sections, value, onChange }: Props) {
               </span>
 
               {/* Label */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Text
-                  type="body"
-                  weight="semibold"
-                  size="sm"
-                  display="block"
-                  style={{ fontSize: 13 }}
-                >
+              <div className="min-w-0 flex-1">
+                <p className="block truncate text-sm font-semibold leading-snug">
                   {meta?.label ?? item.id}
-                </Text>
+                </p>
                 {meta?.desc && (
-                  <Text
-                    type="body"
-                    size="sm"
-                    color="secondary"
-                    display="block"
-                    style={{ fontSize: 11 }}
-                  >
+                  <p className="block truncate text-[11px] leading-snug text-muted-foreground">
                     {meta.desc}
-                  </Text>
+                  </p>
                 )}
                 {pinned && (
-                  <Badge label="ส่วนหัวคงที่" variant="neutral" />
+                  <span className="mt-1 inline-block">
+                    <Badge variant="neutral">ส่วนหัวคงที่</Badge>
+                  </span>
                 )}
               </div>
 
               {/* Toggle แสดง/ซ่อน */}
               <Button
-                label={item.enabled ? "ซ่อน section" : "แสดง section"}
-                icon={
-                  <Icon icon={item.enabled ? EyeIcon : EyeSlashIcon} size="sm" />
-                }
+                aria-label={item.enabled ? "ซ่อน section" : "แสดง section"}
+                title={item.enabled ? "ซ่อน section" : "แสดง section"}
                 variant="ghost"
-                size="sm"
-                isIconOnly
+                size="icon"
+                className="h-8 w-8 shrink-0"
                 onClick={() => toggle(item.id)}
-              />
+              >
+                {item.enabled ? (
+                  <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
+                ) : (
+                  <EyeOff size={16} strokeWidth={1.75} aria-hidden="true" />
+                )}
+              </Button>
 
               {/* เลื่อนขึ้น/ลง */}
               <HStack gap={1}>
                 <Button
-                  label="เลื่อนขึ้น"
-                  icon={<Icon icon={ChevronUpIcon} size="sm" />}
+                  aria-label="เลื่อนขึ้น"
+                  title="เลื่อนขึ้น"
                   variant="ghost"
-                  size="sm"
-                  isIconOnly
-                  isDisabled={pinned || i === 0}
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  disabled={pinned || i === 0}
                   onClick={() => move(i, i - 1)}
-                />
+                >
+                  <ChevronUp size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Button>
                 <Button
-                  label="เลื่อนลง"
-                  icon={<Icon icon={ChevronDownIcon} size="sm" />}
+                  aria-label="เลื่อนลง"
+                  title="เลื่อนลง"
                   variant="ghost"
-                  size="sm"
-                  isIconOnly
-                  isDisabled={pinned || i === full.length - 1}
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  disabled={pinned || i === full.length - 1}
                   onClick={() => move(i, i + 1)}
-                />
+                >
+                  <ChevronDown size={16} strokeWidth={1.75} aria-hidden="true" />
+                </Button>
               </HStack>
             </div>
           );
         })}
       </VStack>
 
-      <Divider />
+      <Separator />
 
-      <Text type="body" size="sm" color="secondary">
+      <p className="text-xs text-muted-foreground">
         ลากแถวเพื่อจัดลำดับ หรือใช้ปุ่มลูกศร — สลับตาเพื่อซ่อน section นั้นจากหน้า
-        (การซ่อน/เรียงลำดับมีผลกับหน้าที่เชื่อมต่อแล้ว — ดูป้าย "มีผลกับหน้าแล้ว" ·
+        (การซ่อน/เรียงลำดับมีผลกับหน้าที่เชื่อมต่อแล้ว — ดูป้าย &quot;มีผลกับหน้าแล้ว&quot; ·
         ส่วนหัวคงที่ = ย้ายไม่ได้แต่ซ่อนได้)
-      </Text>
+      </p>
     </VStack>
   );
 }

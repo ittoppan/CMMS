@@ -1,38 +1,34 @@
 "use client";
 
+// editor — v3 design system (shadcn-style)
+// logic ครบเดิม: โหลด/บันทึก page_editor.php, live preview iframe, DnD layout
+
 import { useState, useEffect, useRef } from "react";
-import { useMediaQuery } from "@astryxdesign/core/hooks";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  VStack,
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutHeader,
-  LayoutPanel,
-} from "@astryxdesign/core/Layout";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Card } from "@astryxdesign/core/Card";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Divider } from "@astryxdesign/core/Divider";
-import { TabList, Tab } from "@astryxdesign/core/TabList";
-import { Badge } from "@astryxdesign/core/Badge";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
-  PencilSquareIcon,
-  CheckCircleIcon,
-  EyeIcon,
-  ComputerDesktopIcon,
-  DeviceTabletIcon,
-  DevicePhoneMobileIcon,
-  PaintBrushIcon,
-  SparklesIcon,
-  SwatchIcon,
-  Square2StackIcon,
-  AdjustmentsVerticalIcon,
-  Squares2X2Icon,
-} from "@heroicons/react/24/outline";
+  CheckCircle2,
+  Eye,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Paintbrush,
+} from "lucide-react";
 import LayoutDndEditor from "../../../components/LayoutDndEditor";
 import {
   ALL_PAGES,
@@ -73,6 +69,19 @@ const FONT_OPTIONS = [
 
 type ViewportSize = "desktop" | "tablet" | "phone";
 type SidebarTab = "colors" | "formatting" | "text" | "banner" | "layout";
+
+// ── local matchMedia hook ──
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+  return matches;
+}
 
 export default function InteractiveStylePageEditor() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -181,348 +190,320 @@ export default function InteractiveStylePageEditor() {
   };
 
   return (
-    <VStack gap={4} style={{ height: "calc(100vh - 120px)", minHeight: 650 }}>
-      {/* Hero */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>STYLE EDITOR · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>สตูดิโอปรับแต่งสไตล์ & โทนสีหน้าเว็บ</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <PaintBrushIcon className="w-3.5 h-3.5" /> Live Preview
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            เลือกหน้า เปลี่ยนสีหลัก พื้นหลัง มุมมน และฟอนต์ แล้วบันทึกลงฐานข้อมูล — ดูตัวอย่างแบบเรียลไทม์ก่อนเผยแพร่
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "สตูดิโอปรับแต่งสไตล์" }]}
+      title="สตูดิโอปรับแต่งสไตล์ & โทนสีหน้าเว็บ"
+      description="เลือกหน้า เปลี่ยนสีหลัก พื้นหลัง มุมมน และฟอนต์ แล้วบันทึกลงฐานข้อมูล — ดูตัวอย่างแบบเรียลไทม์ก่อนเผยแพร่"
+      actions={
+        <Badge variant="info">
+          <Paintbrush size={14} strokeWidth={1.75} aria-hidden="true" /> Live Preview
+        </Badge>
+      }
+    >
+      <div className="flex flex-col gap-4 pb-24 lg:pb-8">
+        {/* Header Notification Banner */}
+        {saveSuccess && (
+          <Alert variant="success" title="สำเร็จ" description={`บันทึกโทนสีและสไตล์รูปแบบของหน้า '${selectedRoute}' เข้าฐานข้อมูลเรียบร้อยแล้ว!`} />
+        )}
 
-      {/* Header Notification Banner */}
-      {saveSuccess && (
-        <Card padding={3} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>
-              บันทึกโทนสีและสไตล์รูปแบบของหน้า '{selectedRoute}' เข้าฐานข้อมูลเรียบร้อยแล้ว!
-            </Text>
-          </HStack>
-        </Card>
-      )}
-
-      {/* Main Split Layout: Interactive Color/Format Panel + Real Live Preview */}
-      <Layout
-        height="fill"
-        start={
-          <LayoutPanel width={350} padding={0} style={{ borderRight: "1px solid var(--cmms-border)", background: "#FAFAFA" }}>
-            <VStack gap={4} style={{ padding: 16, height: "100%", overflowY: "auto" }}>
+        {/* Main Split Layout: Interactive Color/Format Panel + Real Live Preview */}
+        <div className="flex min-h-[650px] flex-col gap-4 lg:h-[calc(100vh-260px)] lg:flex-row">
+          {/* Left panel */}
+          <aside
+            className="w-full shrink-0 overflow-y-auto rounded-xl border border-border bg-card lg:w-[350px]"
+            style={{ maxHeight: "100%" }}
+          >
+            <div className="flex h-full flex-col gap-4 p-4">
               {/* Target Page Selector */}
-              <VStack gap={2}>
-                <Text type="body" weight="bold">เลือกหน้าที่จะปรับเปลี่ยนสี & รูปแบบ</Text>
-                <Selector
-                  label="เลือกหน้า"
-                  isLabelHidden
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">เลือกหน้าที่จะปรับเปลี่ยนสี & รูปแบบ</p>
+                <Select
                   value={selectedRoute}
-                  onChange={(v) => setSelectedRoute(String(v))}
-                  options={ALL_PAGES.map(p => ({
-                    value: p.value,
-                    label: `${p.category} · ${p.label}`
-                  }))}
-                />
-              </VStack>
+                  onValueChange={(v) => setSelectedRoute(String(v))}
+                >
+                  <SelectTrigger aria-label="เลือกหน้า">
+                    <SelectValue placeholder="เลือกหน้า" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ALL_PAGES.map(p => (
+                      <SelectItem key={p.value} value={p.value}>
+                        {`${p.category} · ${p.label}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              <Divider />
+              <Separator />
 
               {/* Sidebar Tabs */}
-              <TabList
-                layout="fill"
-                value={sidebarTab}
-                onChange={(v) => setSidebarTab(v as SidebarTab)}
-              >
-                <Tab value="colors" label="สี & จานสี" />
-                <Tab value="formatting" label="รูปแบบ & สไตล์" />
-                <Tab value="text" label="ข้อความ" />
-                <Tab value="layout" label="จัดวาง Layout" />
-              </TabList>
+              <Tabs value={sidebarTab} onValueChange={(v) => setSidebarTab(v as SidebarTab)}>
+                <TabsList className="w-full">
+                  <TabsTrigger value="colors" className="flex-1">สี &amp; จานสี</TabsTrigger>
+                  <TabsTrigger value="formatting" className="flex-1">รูปแบบ &amp; สไตล์</TabsTrigger>
+                  <TabsTrigger value="text" className="flex-1">ข้อความ</TabsTrigger>
+                  <TabsTrigger value="layout" className="flex-1">จัดวาง Layout</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
               {/* TAB 1: CLICKABLE COLOR PALETTES */}
               {sidebarTab === "colors" && (
-                <VStack gap={4}>
-                  <VStack gap={2}>
-                    <Text type="body" size="sm" weight="semibold">1. เลือกสีหลักของปุ่มและจุดเน้น:</Text>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">1. เลือกสีหลักของปุ่มและจุดเน้น:</p>
                     <Grid columns={2} gap={2}>
                       {COLOR_SWATCHES.map((swatch, i) => (
                         <button
                           key={i}
                           type="button"
                           onClick={() => setPrimaryColor(swatch.hex)}
-                          style={{
-                            padding: 8,
-                            borderRadius: 8,
-                            border: primaryColor === swatch.hex ? "3px solid #000" : "1px solid #CBD5E1",
-                            background: swatch.bg,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                            textAlign: "left"
-                          }}
+                          className={`flex items-center gap-2 rounded-lg p-2 text-left transition-shadow ${
+                            primaryColor === swatch.hex
+                              ? "border-2 border-transparent ring-2 ring-ring"
+                              : "border border-zinc-300 dark:border-zinc-600"
+                          }`}
+                          style={{ background: swatch.bg }}
                         >
-                          <div style={{ width: 22, height: 22, borderRadius: "50%", background: swatch.hex, flexShrink: 0 }} />
-                          <Text type="body" size="sm" weight="semibold" style={{ fontSize: "0.75rem", color: swatch.text }}>
+                          <span aria-hidden="true" className="h-[22px] w-[22px] shrink-0 rounded-full" style={{ background: swatch.hex }} />
+                          <span className="text-xs font-semibold leading-tight" style={{ color: swatch.text }}>
                             {swatch.name}
-                          </Text>
+                          </span>
                         </button>
                       ))}
                     </Grid>
-                  </VStack>
+                  </div>
 
-                  <Divider />
+                  <Separator />
 
-                  <VStack gap={2}>
-                    <Text type="body" size="sm" weight="bold">2. เลือกสีพื้นหลังหน้า:</Text>
-                    <VStack gap={2}>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">2. เลือกสีพื้นหลังหน้า:</p>
+                    <div className="space-y-2">
                       {BG_STYLES.map((bgStyle) => (
                         <button
                           key={bgStyle.id}
                           type="button"
                           onClick={() => setBgColor(bgStyle.color)}
+                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-shadow ${
+                            bgColor === bgStyle.color
+                              ? "border-2 border-transparent ring-2 ring-ring"
+                              : "border border-zinc-300 dark:border-zinc-600"
+                          }`}
                           style={{
-                            padding: "10px 12px",
-                            borderRadius: 8,
-                            border: bgColor === bgStyle.color ? "3px solid #4F46E5" : "1px solid #CBD5E1",
                             background: bgStyle.color,
                             color: bgStyle.color === "#0F172A" ? "#FFF" : "#0F172A",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between"
                           }}
                         >
-                          <Text type="body" size="sm" weight="bold">{bgStyle.label}</Text>
-                          {bgColor === bgStyle.color && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
+                          <span className="text-sm font-semibold">{bgStyle.label}</span>
+                          {bgColor === bgStyle.color && <Badge variant="primary">เลือกอยู่</Badge>}
                         </button>
                       ))}
-                    </VStack>
-                  </VStack>
-                </VStack>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* TAB 2: FORMATTING & STYLES */}
               {sidebarTab === "formatting" && (
-                <VStack gap={4}>
-                  <VStack gap={2}>
-                    <Text type="body" size="sm" weight="bold">1. มุมมนของการ์ด:</Text>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">1. มุมมนของการ์ด:</p>
                     <Grid columns={2} gap={2}>
                       {BORDER_RADIUS_OPTIONS.map((opt) => (
                         <button
                           key={opt.id}
                           type="button"
                           onClick={() => setBorderRadius(opt.id)}
-                          style={{
-                            padding: 10,
-                            borderRadius: opt.id,
-                            border: borderRadius === opt.id ? "3px solid #4F46E5" : "1px solid #CBD5E1",
-                            background: "#FFFFFF",
-                            cursor: "pointer",
-                            textAlign: "center"
-                          }}
+                          className={`bg-card p-2.5 text-center transition-shadow ${
+                            borderRadius === opt.id
+                              ? "border-2 border-transparent ring-2 ring-ring"
+                              : "border border-zinc-300 dark:border-zinc-600"
+                          }`}
+                          style={{ borderRadius: opt.id }}
                         >
-                          <Text type="body" size="sm" weight="bold">{opt.label}</Text>
+                          <span className="text-sm font-semibold">{opt.label}</span>
                         </button>
                       ))}
                     </Grid>
-                  </VStack>
+                  </div>
 
-                  <Divider />
+                  <Separator />
 
-                  <VStack gap={2}>
-                    <Text type="body" size="sm" weight="bold">2. รูปแบบฟอนต์:</Text>
-                    <VStack gap={2}>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">2. รูปแบบฟอนต์:</p>
+                    <div className="space-y-2">
                       {FONT_OPTIONS.map((font) => (
                         <button
                           key={font.id}
                           type="button"
                           onClick={() => setFontFamily(font.id)}
-                          style={{
-                            padding: "10px 12px",
-                            borderRadius: 8,
-                            border: fontFamily === font.id ? "3px solid #4F46E5" : "1px solid #CBD5E1",
-                            background: "#FFFFFF",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between"
-                          }}
+                          className={`flex w-full items-center justify-between bg-card px-3 py-2.5 transition-shadow ${
+                            fontFamily === font.id
+                              ? "border-2 border-transparent ring-2 ring-ring"
+                              : "border border-zinc-300 dark:border-zinc-600"
+                          } rounded-lg`}
                         >
-                          <Text type="body" size="sm" weight="bold">{font.label}</Text>
-                          {fontFamily === font.id && <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>เลือกอยู่</span>}
+                          <span className="text-sm font-semibold">{font.label}</span>
+                          {fontFamily === font.id && <Badge variant="primary">เลือกอยู่</Badge>}
                         </button>
                       ))}
-                    </VStack>
-                  </VStack>
-                </VStack>
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* TAB 3: TEXT OVERRIDES */}
               {sidebarTab === "text" && (
-                <VStack gap={4}>
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" weight="semibold">ชื่อหัวข้อหน้า:</Text>
-                    <TextInput
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">ชื่อหัวข้อหน้า:</p>
+                    <Input
                       label="ชื่อหัวข้อหน้า"
                       isLabelHidden
                       value={customTitle}
-                      onChange={setCustomTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
                     />
-                  </VStack>
+                  </div>
 
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" weight="semibold">คำอธิบายย่อย:</Text>
-                    <TextArea
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">คำอธิบายย่อย:</p>
+                    <Textarea
                       label="คำอธิบายย่อย"
                       isLabelHidden
                       rows={3}
                       value={customSubtitle}
-                      onChange={setCustomSubtitle}
+                      onChange={(e) => setCustomSubtitle(e.target.value)}
                     />
-                  </VStack>
-                </VStack>
+                  </div>
+                </div>
               )}
 
               {/* TAB 4: LAYOUT (Drag & Drop) */}
               {sidebarTab === "layout" && (
-                <VStack gap={4}>
-                  <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
-                    <VStack gap={0}>
-                      <Text type="body" size="sm" weight="semibold">
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
                         จัดเรียง Layout หน้า (ลาก-วาง)
-                      </Text>
-                      <Text type="body" size="sm" color="secondary">
+                      </p>
+                      <p className="text-xs text-muted-foreground">
                         ลาก section ขึ้น/ลง หรือกดปุ่มตาเพื่อซ่อน
-                      </Text>
-                    </VStack>
+                      </p>
+                    </div>
                     {isWired(selectedRoute) ? (
-                      <Badge label="มีผลกับหน้าแล้ว" variant="info" />
+                      <Badge variant="info">มีผลกับหน้าแล้ว</Badge>
                     ) : (
-                      <Badge label="พร้อมใช้ (เชื่อมหน้านี้ในรอบถัดไป)" variant="neutral" />
+                      <Badge variant="neutral">พร้อมใช้ (เชื่อมหน้านี้ในรอบถัดไป)</Badge>
                     )}
-                  </HStack>
+                  </div>
                   <LayoutDndEditor
                     sections={sectionsFor(selectedRoute)}
                     value={layoutItems}
                     onChange={setLayoutItems}
                   />
-                </VStack>
+                </div>
               )}
 
-              <Divider style={{ marginTop: "auto" }} />
+              <Separator className="mt-auto" />
 
               {/* Publish Action Button */}
-              <VStack gap={2}>
-                <button
-                  type="button"
+              <div className="space-y-2">
+                <Button
                   disabled={publishing}
                   onClick={handlePublish}
-                  className="cmms-btn-primary"
+                  className="w-full"
                 >
-                  <CheckCircleIcon className="w-4 h-4" />
+                  <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
                   {publishing ? "กำลังบันทึก..." : "บันทึกสไตล์ & โทนสี"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => (window.location.href = selectedRoute)}
+                  className="w-full"
+                >
+                  <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
+                  เปิดดูหน้าจริงแบบเต็มจอ
+                </Button>
+              </div>
+            </div>
+          </aside>
+
+          {/* Right content: live preview */}
+          <div className="flex min-w-0 flex-1 flex-col gap-3 rounded-xl border border-border bg-muted/40 p-3">
+            {/* Top Viewport Controls Bar */}
+            <Card className="flex flex-wrap items-center justify-between gap-4 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="primary">กำลังจำลองสไตล์หน้า: {selectedRoute}</Badge>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">สีหลัก:</span>
+                  <span aria-hidden="true" className="h-4 w-4 rounded-full" style={{ background: primaryColor }} />
+                  <span className="text-xs text-muted-foreground">มุมมน: {borderRadius}</span>
+                </div>
+              </div>
+
+              {/* Device Viewport Buttons */}
+              <div className="flex items-center gap-1 rounded-lg border border-border bg-secondary p-1">
+                <button
+                  type="button"
+                  onClick={() => setViewport("desktop")}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={{
+                    background: viewport === "desktop" ? primaryColor : "transparent",
+                    color: viewport === "desktop" ? "#fff" : undefined,
+                  }}
+                >
+                  <Monitor size={16} strokeWidth={1.75} aria-hidden="true" /> Desktop
                 </button>
                 <button
                   type="button"
-                  onClick={() => (window.location.href = selectedRoute)}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-                >
-                  <EyeIcon className="w-4 h-4" />
-                  เปิดดูหน้าจริงแบบเต็มจอ
-                </button>
-              </VStack>
-            </VStack>
-          </LayoutPanel>
-        }
-        content={
-          <LayoutContent padding={4} style={{ background: "#F1F5F9", display: "flex", flexDirection: "column" }}>
-            <VStack gap={3} style={{ height: "100%" }}>
-              {/* Top Viewport Controls Bar */}
-              <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4} style={{ background: "#FFFFFF", padding: 12, borderRadius: 12, border: "1px solid #CBD5E1" }}>
-                <HStack gap={2} vAlign="center">
-                  <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.75rem", padding: "4px 10px" }}>กำลังจำลองสไตล์หน้า: {selectedRoute}</span>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span style={{ fontSize: "0.8rem", color: "#64748B" }}>สีหลัก:</span>
-                    <div style={{ width: 16, height: 16, borderRadius: "50%", background: primaryColor }} />
-                    <span style={{ fontSize: "0.8rem", color: "#64748B" }}>มุมมน: {borderRadius}</span>
-                  </div>
-                </HStack>
-
-                {/* Device Viewport Buttons */}
-                <HStack gap={1} style={{ background: "#F8FAFC", padding: 4, borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                  <button
-                    type="button"
-                    onClick={() => setViewport("desktop")}
-                    style={{
-                      padding: "6px 12px", borderRadius: 6, cursor: "pointer", border: "none",
-                      background: viewport === "desktop" ? primaryColor : "transparent",
-                      color: viewport === "desktop" ? "#fff" : "#64748B",
-                      fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
-                    }}
-                  >
-                    <ComputerDesktopIcon className="w-4 h-4" /> Desktop
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewport("tablet")}
-                    style={{
-                      padding: "6px 12px", borderRadius: 6, cursor: "pointer", border: "none",
-                      background: viewport === "tablet" ? primaryColor : "transparent",
-                      color: viewport === "tablet" ? "#fff" : "#64748B",
-                      fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
-                    }}
-                  >
-                    <DeviceTabletIcon className="w-4 h-4" /> Tablet
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewport("phone")}
-                    style={{
-                      padding: "6px 12px", borderRadius: 6, cursor: "pointer", border: "none",
-                      background: viewport === "phone" ? primaryColor : "transparent",
-                      color: viewport === "phone" ? "#fff" : "#64748B",
-                      fontWeight: 700, fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 4
-                    }}
-                  >
-                    <DevicePhoneMobileIcon className="w-4 h-4" /> Mobile
-                  </button>
-                </HStack>
-              </HStack>
-
-              {/* REAL-TIME DYNAMIC CSS CUSTOMIZATION PREVIEW CONTAINER */}
-              <div style={{
-                flex: 1,
-                width: getViewportWidth(),
-                margin: "0 auto",
-                background: bgColor,
-                borderRadius: borderRadius,
-                boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
-                overflow: "hidden",
-                border: `3px solid ${primaryColor}`,
-                transition: "all 0.3s ease-in-out"
-              }}>
-                <iframe
-                  ref={iframeRef}
-                  src={selectedRoute}
-                  title="ตัวอย่างการปรับแต่งสไตล์"
+                  onClick={() => setViewport("tablet")}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none"
+                    background: viewport === "tablet" ? primaryColor : "transparent",
+                    color: viewport === "tablet" ? "#fff" : undefined,
                   }}
-                />
+                >
+                  <Tablet size={16} strokeWidth={1.75} aria-hidden="true" /> Tablet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewport("phone")}
+                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
+                  style={{
+                    background: viewport === "phone" ? primaryColor : "transparent",
+                    color: viewport === "phone" ? "#fff" : undefined,
+                  }}
+                >
+                  <Smartphone size={16} strokeWidth={1.75} aria-hidden="true" /> Mobile
+                </button>
               </div>
-            </VStack>
-          </LayoutContent>
-        }
-      />
-    </VStack>
+            </Card>
+
+            {/* REAL-TIME DYNAMIC CSS CUSTOMIZATION PREVIEW CONTAINER */}
+            <div style={{
+              flex: 1,
+              width: getViewportWidth(),
+              margin: "0 auto",
+              background: bgColor,
+              borderRadius: borderRadius,
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)",
+              overflow: "hidden",
+              border: `3px solid ${primaryColor}`,
+              transition: "all 0.3s ease-in-out"
+            }}>
+              <iframe
+                ref={iframeRef}
+                src={selectedRoute}
+                title="ตัวอย่างการปรับแต่งสไตล์"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "none"
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageShell>
   );
 }
