@@ -2,15 +2,30 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon, BookOpenIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SuccessDialog from "@/components/SuccessDialog";
+import { SquarePen } from "lucide-react";
 
 function EditManualContent() {
   const router = useRouter();
@@ -111,98 +126,109 @@ function EditManualContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MANUALS EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลเอกสาร</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <BookOpenIcon className="w-3.5 h-3.5" /> เอกสารคู่มือ
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แก้ไขรายละเอียดเอกสารคู่มือ — ชื่อ รายละเอียด เวอร์ชัน และลิงก์ไฟล์
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "คู่มือ & SOP", href: "/manuals" },
+        { label: "แก้ไขเอกสาร" },
+      ]}
+      title="แก้ไขข้อมูลเอกสาร"
+      description="แก้ไขรายละเอียดเอกสารคู่มือ — ชื่อ รายละเอียด เวอร์ชัน และลิงก์ไฟล์"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>ข้อมูลเอกสาร</CardTitle>
+          <CardDescription>ปรับแก้รายละเอียดของเอกสารที่มีอยู่</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingData ? (
+            <div className="max-w-[640px] space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <div className="max-w-[640px] space-y-5">
+              {error && (
+                <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
+              )}
 
-      <Breadcrumbs>
-        <BreadcrumbItem href="/manuals" startIcon={<HomeIcon className="w-4 h-4" />}>เอกสารคู่มือ & SOP</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>แก้ไขเอกสาร</BreadcrumbItem>
-      </Breadcrumbs>
-
-      <Card padding={6}>
-        {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-                {error}
-              </div>
-            )}
-
-            <TextInput label="ชื่อเอกสาร *"
-              value={title}
-              onChange={setTitle}  />
-
-            <TextArea
-              label="รายละเอียด"
-              value={description}
-              onChange={setDescription}
-            />
-            
-            <HStack gap={4}>
-              <div style={{ flex: 2 }}>
-                <Selector
-                  label="เครื่องจักรที่เกี่ยวข้อง (ไม่บังคับ)"
-                  placeholder="เอกสารทั่วไป (ไม่ต้องเลือก)"
-                  value={assetId}
-                  onChange={setAssetId}
-                  options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
+              <div className="space-y-1.5">
+                <Label htmlFor="manual-title">
+                  ชื่อเอกสาร <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="manual-title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <TextInput label="เวอร์ชัน"
-                  value={version}
-                  onChange={setVersion}  />
+
+              <div className="space-y-1.5">
+                <Label htmlFor="manual-description">รายละเอียด</Label>
+                <Textarea
+                  id="manual-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </div>
-            </HStack>
 
-            <TextInput label="ลิงก์ไฟล์เอกสาร"
-              placeholder="https://..."
-              value={filePath}
-              onChange={setFilePath}  />
+              <Grid columns={{ minWidth: 220, max: 2 }} gap={4}>
+                <div className="space-y-1.5">
+                  <Label>เครื่องจักรที่เกี่ยวข้อง (ไม่บังคับ)</Label>
+                  <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="เอกสารทั่วไป (ไม่ต้องเลือก)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assets.map((a) => (
+                        <SelectItem key={a.id} value={String(a.id)}>
+                          {`${a.code} - ${a.name}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="manual-version">เวอร์ชัน</Label>
+                  <Input
+                    id="manual-version"
+                    value={version}
+                    onChange={(e) => setVersion(e.target.value)}
+                  />
+                </div>
+              </Grid>
 
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/manuals")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-              </button>
-            </HStack>
-          </VStack>
-        )}
+              <div className="space-y-1.5">
+                <Label htmlFor="manual-filepath">ลิงก์ไฟล์เอกสาร</Label>
+                <Input
+                  id="manual-filepath"
+                  placeholder="https://..."
+                  value={filePath}
+                  onChange={(e) => setFilePath(e.target.value)}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => router.push("/manuals")}>
+                  ยกเลิก
+                </Button>
+                <Button disabled={submitting} onClick={handleSubmit}>
+                  <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditManualPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด...</p>}>
       <EditManualContent />
     </Suspense>
   );

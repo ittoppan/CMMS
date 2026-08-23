@@ -1,30 +1,40 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { Field } from "@astryxdesign/core/Field";
-import { FileInput } from "@astryxdesign/core/FileInput";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
 import {
-  DocumentArrowDownIcon,
-  MagnifyingGlassIcon,
-  DocumentTextIcon,
-  ArrowPathIcon,
-  ArrowUpTrayIcon,
-  PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import AnimatedDialog from "@/components/AnimatedDialog";
+import {
+  FileDown,
+  FileText,
+  RefreshCw,
+  Upload,
+  Plus,
+  SquarePen,
+  Trash2,
+  Search,
+} from "lucide-react";
 
 interface FormItem {
   code: string;
@@ -198,176 +208,166 @@ export default function FormsPage() {
   };
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>FORM CENTER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ศูนย์แบบฟอร์ม (Form Center)</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <DocumentTextIcon className="w-3.5 h-3.5" /> {forms.length} แบบฟอร์ม
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แบบฟอร์มมาตรฐานของฝ่ายวิศวกรรม (F-EN / F-SF) — ดาวน์โหลดเพื่อพิมพ์ใช้หน้างานได้ทันที
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <button
-            type="button"
-            onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <ArrowUpTrayIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "อนุมัติ & เอกสาร", href: "/forms" },
+        { label: "ศูนย์แบบฟอร์ม (Form Center)" },
+      ]}
+      title="ศูนย์แบบฟอร์ม (Form Center)"
+      description="แบบฟอร์มมาตรฐานของฝ่ายวิศวกรรม (F-EN / F-SF) — ดาวน์โหลดเพื่อพิมพ์ใช้หน้างานได้ทันที"
+      actions={
+        <>
+          <Button onClick={() => { setUpMsg(null); setUpFile(null); setUploadOpen(true); }}>
+            <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             อัปโหลดแบบฟอร์ม
-          </button>
-          <button
-            type="button"
-            onClick={fetchForms}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <ArrowPathIcon className="w-4 h-4" />
+          </Button>
+          <Button variant="secondary" onClick={fetchForms}>
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
-          </button>
-        </HStack>
-      </div>
-
+          </Button>
+        </>
+      }
+    >
       {/* ═══ แบบฟอร์มดิจิทัล (formBuilder) ═══ */}
-      <Card padding={5}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center" gap={3} wrap="wrap">
-            <VStack gap={0.5}>
-              <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "var(--cmms-text-muted)" }}>
-                DIGITAL FORMS · FORM BUILDER
-              </Text>
-              <Heading level={4}>แบบฟอร์มดิจิทัล (ออกแบบ + กรอก + PDF)</Heading>
-              <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
-                สร้างแบบฟอร์มด้วยลาก-วาง ผูกข้อมูลจากฐานข้อมูล แล้วพิมพ์เป็น PDF — ตรง "ออกแบบแบบฟอร์ม"
-              </Text>
-            </VStack>
-            {canDesign && (
-              <a href="/forms/designer">
-                <button type="button" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary">
-                  <PlusIcon className="w-4 h-4" />
-                  ออกแบบแบบฟอร์มใหม่
-                </button>
-              </a>
-            )}
-          </HStack>
-
+      <Card>
+        <CardHeader className="flex-row items-start justify-between gap-3 space-y-0">
+          <div className="space-y-1">
+            <CardTitle>แบบฟอร์มดิจิทัล (ออกแบบ + กรอก + PDF)</CardTitle>
+            <CardDescription>
+              สร้างแบบฟอร์มด้วยลาก-วาง ผูกข้อมูลจากฐานข้อมูล แล้วพิมพ์เป็น PDF — ตรง &quot;ออกแบบแบบฟอร์ม&quot;
+            </CardDescription>
+          </div>
+          {canDesign && (
+            <a href="/forms/designer" className={buttonVariants({ size: "sm" })}>
+              <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+              ออกแบบแบบฟอร์มใหม่
+            </a>
+          )}
+        </CardHeader>
+        <CardContent>
           {digitalsLoading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: 24 }}>
+            <div className="flex justify-center py-6">
               <Spinner />
             </div>
           ) : digitals.length === 0 ? (
-            <div style={{ padding: "20px 8px" }}>
-              <Text type="body" color="secondary">ยังไม่มีแบบฟอร์มดิจิทัล — กด "ออกแบบแบบฟอร์มใหม่" เพื่อสร้าง (เฉพาะผู้ดูแลระบบ)</Text>
-            </div>
+            <p className="py-5 text-sm text-muted-foreground">
+              ยังไม่มีแบบฟอร์มดิจิทัล — กด &quot;ออกแบบแบบฟอร์มใหม่&quot; เพื่อสร้าง (เฉพาะผู้ดูแลระบบ)
+            </p>
           ) : (
             <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={4}>
               {digitals.map((d) => (
-                <Card key={d.id} padding={4} elevation="low" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  <HStack hAlign="between" vAlign="start" gap={2} wrap="wrap">
-                    <span className="cmms-andon-chip" style={{ background: "rgba(0,87,168,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{d.code}</span>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)", fontSize: "0.7rem", padding: "3px 9px" }}>{d.submission_count} ครั้ง</span>
-                  </HStack>
-                  <Text type="body" weight="bold" style={{ lineHeight: 1.4, flex: 1 }}>
-                    {d.title}
-                  </Text>
-                  <Text type="body" size="sm" color="disabled">
+                <Card key={d.id} className="flex flex-col gap-3 p-4 shadow-none">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <Badge variant="primary">{d.code}</Badge>
+                    <Badge variant="success">{d.submission_count} ครั้ง</Badge>
+                  </div>
+                  <p className="flex-1 text-sm font-semibold leading-snug text-foreground">{d.title}</p>
+                  <p className="text-xs text-muted-foreground">
                     {d.rev} · แก้ไขล่าสุด {d.updated_at ? d.updated_at.slice(0, 10) : "-"}
-                  </Text>
-                  <HStack gap={2} wrap="wrap">
-                    <a href={`/forms/run/${d.id}`} className="flex-1">
-                      <button type="button" className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary">
-                        <DocumentTextIcon className="w-3.5 h-3.5" />
-                        กรอกแบบฟอร์ม
-                      </button>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <a href={`/forms/run/${d.id}`} className={`${buttonVariants({ size: "sm" })} min-w-0 flex-1`}>
+                      <FileText className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                      กรอกแบบฟอร์ม
                     </a>
                     {canDesign && (
-                      <a href="/forms/designer">
-                        <button type="button" className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--cmms-border)] hover:bg-[var(--cmms-bg-wash)] transition-colors">
-                          <PencilSquareIcon className="w-3.5 h-3.5" />
-                          แก้ไข
-                        </button>
+                      <a href="/forms/designer" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                        <SquarePen className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                        แก้ไข
                       </a>
                     )}
                     {canDesign && (
-                      <button type="button" onClick={() => deleteDigital(d.id)} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--cmms-border)] hover:bg-[var(--cmms-bg-wash)] transition-colors" aria-label="ลบแบบฟอร์ม">
-                        <TrashIcon className="w-3.5 h-3.5" />
-                      </button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => deleteDigital(d.id)}
+                        aria-label="ลบแบบฟอร์ม"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+                      </Button>
                     )}
-                  </HStack>
+                  </div>
                 </Card>
               ))}
             </Grid>
           )}
-        </VStack>
+        </CardContent>
       </Card>
 
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-      <Toolbar
-        label="ค้นหาแบบฟอร์ม"
-        startContent={
-          <HStack gap={2} wrap="wrap">
-            <TextInput
+      {/* Filter card */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-2 py-4">
+          <div className="relative min-w-[220px] flex-1 sm:max-w-[420px]">
+            <Search
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
               label="ค้นหา"
               isLabelHidden
               placeholder="ค้นหารหัสแบบฟอร์ม หรือชื่อ... เช่น F-EN-07, ตรวจเช็ค, ใบแจ้งซ่อม"
-              startIcon={MagnifyingGlassIcon}
               value={search}
-              onChange={setSearch}
-              style={{ width: "100%", maxWidth: 420 }}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
             />
-            <Selector
-              label="ประเภทไฟล์"
-              isLabelHidden
-              placeholder="ทุกไฟล์"
-              value={extFilter}
-              onChange={setExtFilter}
-              options={extOptions}
-            />
-          </HStack>
-        }
-      />
+          </div>
+          <Select value={extFilter} onValueChange={(v) => setExtFilter(v)}>
+            <SelectTrigger className="w-full sm:w-[200px]" aria-label="ประเภทไฟล์">
+              <SelectValue placeholder="ทุกไฟล์" />
+            </SelectTrigger>
+            <SelectContent>
+              {extOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
+      {/* ═══ แบบฟอร์มมาตรฐาน (ไฟล์) ═══ */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
-          <Spinner />
-        </div>
+        <Card>
+          <CardContent className="flex justify-center py-12">
+            <Spinner />
+          </CardContent>
+        </Card>
       ) : filtered.length === 0 ? (
-        <Card padding={6}>
-          <VStack gap={2} hAlign="center">
-            <DocumentTextIcon className="w-8 h-8" style={{ color: "var(--cmms-disabled)" }} />
-            <Text type="body" color="secondary">ไม่พบแบบฟอร์มที่ค้นหา</Text>
-          </VStack>
+        <Card>
+          <CardContent className="p-6">
+            <EmptyState
+              icon={<FileText className="w-8 h-8" strokeWidth={1.75} aria-hidden="true" />}
+              title="ไม่พบแบบฟอร์มที่ค้นหา"
+              description="ลองปรับคำค้นหาหรือประเภทไฟล์"
+            />
+          </CardContent>
         </Card>
       ) : (
         <Grid columns={{ minWidth: 300, repeat: "fit" }} gap={4}>
           {filtered.map((f) => (
-            <Card key={f.filename} padding={4} elevation="low" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <HStack hAlign="between" vAlign="start" gap={2} wrap="wrap">
-                <span className="cmms-andon-chip" style={{ background: "rgba(124,58,237,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "3px 9px" }}>{f.code || "เอกสาร"}</span>
-                {f.rev && <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>{f.rev}</span>}
-              </HStack>
-              <Text type="body" weight="bold" style={{ lineHeight: 1.4, flex: 1 }}>
-                {f.title}
-              </Text>
-              <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
-                <HStack gap={2} vAlign="center" wrap="wrap">
-                  <span className="cmms-andon-chip" style={{ background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)", fontSize: "0.7rem", padding: "3px 9px" }}>{extLabel[f.ext] || f.ext.toUpperCase()}</span>
-                  <Text type="body" size="sm" color="disabled">{formatSize(f.size)}</Text>
-                </HStack>
-                <button
-                  type="button"
-                  onClick={() => download(f)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-                >
-                  <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+            <Card key={f.filename} className="flex flex-col gap-3 p-4 shadow-none">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <Badge variant="primary">{f.code || "เอกสาร"}</Badge>
+                {f.rev && <Badge variant="neutral">{f.rev}</Badge>}
+              </div>
+              <p className="flex-1 text-sm font-semibold leading-snug text-foreground">{f.title}</p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="success">{extLabel[f.ext] || f.ext.toUpperCase()}</Badge>
+                  <span className="text-xs text-muted-foreground">{formatSize(f.size)}</span>
+                </div>
+                <Button size="sm" onClick={() => download(f)} className="gap-1.5">
+                  <FileDown className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
                   ดาวน์โหลด
-                </button>
-              </HStack>
+                </Button>
+              </div>
             </Card>
           ))}
         </Grid>
@@ -375,101 +375,84 @@ export default function FormsPage() {
 
       {/* ═══ Dialog อัปโหลดแบบฟอร์มใหม่ ═══ */}
       <AnimatedDialog open={uploadOpen} onClose={() => setUploadOpen(false)}>
-          <DialogHeader title="อัปโหลดแบบฟอร์มใหม่" />
-          <VStack gap={4} style={{ padding: 24 }}>
-            <Text type="body" color="secondary">
-              เลือกไฟล์แบบฟอร์ม (xls/xlsx/xlsm/pdf/docx/ods/doc/csv/pptx สูงสุด 25 MB) — ไฟล์จะถูกบันทึกที่ docs/EN และโผล่ในรายการทันที
-            </Text>
+        <div className="border-b border-border p-5">
+          <h2 className="text-base font-semibold">อัปโหลดแบบฟอร์มใหม่</h2>
+        </div>
+        <div className="space-y-4 p-5">
+          <p className="text-sm text-muted-foreground">
+            เลือกไฟล์แบบฟอร์ม (xls/xlsx/xlsm/pdf/docx/ods/doc/csv/pptx สูงสุด 25 MB) — ไฟล์จะถูกบันทึกที่ docs/EN และโผล่ในรายการทันที
+          </p>
 
-            {upMsg && (
-              <div style={{
-                padding: "10px 14px", borderRadius: 8,
-                background: upMsg.isError ? "var(--cmms-danger-light, #fef2f2)" : "var(--cmms-success-light)",
-                border: `1px solid ${upMsg.isError ? "var(--cmms-danger, #ef4444)" : "var(--cmms-success)"}`,
-                color: upMsg.isError ? "var(--cmms-danger, #ef4444)" : "var(--cmms-success)",
-                fontWeight: 600, fontSize: 13,
-              }}>
-                {upMsg.text}
-              </div>
-            )}
+          {upMsg && (
+            <Alert variant={upMsg.isError ? "danger" : "success"}>{upMsg.text}</Alert>
+          )}
 
-            <FormLayout>
-              <Field label="รหัสแบบฟอร์ม (ไม่บังคับ)" inputID="upCode">
-                <TextInput
-                  label="รหัส"
-                  isLabelHidden
-                  placeholder="เช่น F-EN-64 (เว้นว่าง = ใช้ชื่อไฟล์เดิม)"
-                  value={upCode}
-                  onChange={setUpCode}
-                />
-              </Field>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="upCode">รหัสแบบฟอร์ม (ไม่บังคับ)</Label>
+              <Input
+                id="upCode"
+                placeholder="เช่น F-EN-64 (เว้นว่าง = ใช้ชื่อไฟล์เดิม)"
+                value={upCode}
+                onChange={(e) => setUpCode(e.target.value)}
+              />
+            </div>
 
-              <Field label="REV (ไม่บังคับ)" inputID="upRev">
-                <TextInput
-                  label="REV"
-                  isLabelHidden
-                  placeholder="เช่น REV.00 หรือ 01"
-                  value={upRev}
-                  onChange={setUpRev}
-                />
-              </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="upRev">REV (ไม่บังคับ)</Label>
+              <Input
+                id="upRev"
+                placeholder="เช่น REV.00 หรือ 01"
+                value={upRev}
+                onChange={(e) => setUpRev(e.target.value)}
+              />
+            </div>
 
-              <Field label="ชื่อแบบฟอร์ม (จำเป็นเมื่อระบุรหัส)" inputID="upTitle">
-                <TextInput
-                  label="ชื่อ"
-                  isLabelHidden
-                  placeholder="เช่น ใบตรวจเช็คเครื่องจักรประจำวัน"
-                  value={upTitle}
-                  onChange={setUpTitle}
-                />
-              </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="upTitle">ชื่อแบบฟอร์ม (จำเป็นเมื่อระบุรหัส)</Label>
+              <Input
+                id="upTitle"
+                placeholder="เช่น ใบตรวจเช็คเครื่องจักรประจำวัน"
+                value={upTitle}
+                onChange={(e) => setUpTitle(e.target.value)}
+              />
+            </div>
 
-              <Field label="ไฟล์แบบฟอร์ม *" inputID="upFile">
-                <FileInput
-                  label="เลือกไฟล์"
-                  isLabelHidden
-                  accept=".xls,.xlsx,.xlsm,.pdf,.docx,.ods,.doc,.csv,.pptx"
-                  value={upFile}
-                  onChange={(f) => {
-                    const file = Array.isArray(f) ? f[0] ?? null : f;
-                    setUpFile(file);
-                    if (file) setUpMsg(null);
-                  }}
-                />
-              </Field>
-            </FormLayout>
+            <div className="space-y-1.5">
+              <Label htmlFor="upFile">
+                ไฟล์แบบฟอร์ม <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="upFile"
+                type="file"
+                accept=".xls,.xlsx,.xlsm,.pdf,.docx,.ods,.doc,.csv,.pptx"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setUpFile(file);
+                  if (file) setUpMsg(null);
+                }}
+                className="py-1.5 file:mr-3 file:rounded-md file:border-0 file:bg-[var(--cmms-bg-muted)] file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-[var(--cmms-bg-wash)]"
+              />
+            </div>
+          </div>
 
-            {computedName && (
-              <div style={{
-                padding: "10px 14px", borderRadius: 8,
-                background: "var(--cmms-bg-muted)",
-                border: "1px dashed var(--cmms-border)",
-                fontSize: 12.5, color: "var(--cmms-text-secondary)",
-              }}>
-                <strong>ชื่อไฟล์ที่จะบันทึก:</strong> {computedName}
-              </div>
-            )}
+          {computedName && (
+            <div className="rounded-lg border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3.5 py-2.5 text-xs text-[var(--cmms-text-secondary)]">
+              <strong>ชื่อไฟล์ที่จะบันทึก:</strong> {computedName}
+            </div>
+          )}
 
-            <HStack hAlign="end" gap={2}>
-              <button
-                type="button"
-                onClick={() => setUploadOpen(false)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={upLoading}
-                onClick={handleUpload}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <ArrowUpTrayIcon className="w-4 h-4" />
-                {upLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
-              </button>
-            </HStack>
-          </VStack>
-        </AnimatedDialog>
-    </VStack>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button variant="outline" onClick={() => setUploadOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button disabled={upLoading} onClick={handleUpload}>
+              <Upload className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+              {upLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
+            </Button>
+          </div>
+        </div>
+      </AnimatedDialog>
+    </PageShell>
   );
 }

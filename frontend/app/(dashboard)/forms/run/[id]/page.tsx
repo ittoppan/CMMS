@@ -1,19 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { PageShell } from "@/components/PageShell";
 import {
-  DocumentArrowDownIcon,
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  TrashIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/outline";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import {
+  FileDown,
+  ArrowLeft,
+  CheckCircle2,
+  Trash2,
+  SquarePen,
+} from "lucide-react";
 
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -159,32 +163,32 @@ export default function FormRunPage() {
     const name = fieldName(f, i);
     const value = (values[name] ?? "") as string;
     const bind = fieldBind(f);
-    const required = f.required ? <span className="text-[var(--cmms-accent-danger)]"> *</span> : null;
+    const required = f.required ? <span className="text-destructive"> *</span> : null;
     const label = f.label ? (
-      <label className="block text-sm font-semibold text-[var(--cmms-text-primary)] mb-1.5" htmlFor={name}>
+      <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor={name}>
         {f.label}
         {required}
       </label>
     ) : null;
 
     const inputClass =
-      "w-full rounded-lg border border-[var(--cmms-border)] bg-white px-3 py-2 text-sm text-[var(--cmms-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
+      "w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/30";
 
     switch (f.type) {
       case "header": {
         const level = f.subtype === "h1" ? 1 : f.subtype === "h2" ? 2 : f.subtype === "h3" ? 3 : 4;
         return (
           <div key={i} className="cmms-form-block">
-            {level === 1 && <Heading level={2} style={{ color: "var(--cmms-text-primary)" }}>{f.label}</Heading>}
-            {level === 2 && <Heading level={3} style={{ color: "var(--cmms-text-primary)" }}>{f.label}</Heading>}
-            {level >= 3 && <Heading level={4} style={{ color: "var(--cmms-text-primary)" }}>{f.label}</Heading>}
+            {level === 1 && <h2 className="text-lg font-semibold tracking-tight text-foreground">{f.label}</h2>}
+            {level === 2 && <h3 className="text-base font-semibold text-foreground">{f.label}</h3>}
+            {level >= 3 && <h4 className="text-sm font-medium text-foreground">{f.label}</h4>}
           </div>
         );
       }
       case "paragraph":
         return (
           <div key={i} className="cmms-form-block">
-            <Text type="body" style={{ color: "var(--cmms-text-secondary)" }}>{f.label}</Text>
+            <p className="text-sm text-muted-foreground">{f.label}</p>
           </div>
         );
       case "textarea":
@@ -222,7 +226,7 @@ export default function FormRunPage() {
               {(f.values || []).map((opt, oi) => {
                 const arr = (values[name] ?? []) as string[];
                 return (
-                  <label key={oi} className="flex items-center gap-2 text-sm text-[var(--cmms-text-primary)]">
+                  <label key={oi} className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={arr.includes(opt.value)}
@@ -244,7 +248,7 @@ export default function FormRunPage() {
             {label}
             <div className="space-y-1.5">
               {(f.values || []).map((opt, oi) => (
-                <label key={oi} className="flex items-center gap-2 text-sm text-[var(--cmms-text-primary)]">
+                <label key={oi} className="flex items-center gap-2 text-sm text-foreground">
                   <input
                     type="radio"
                     name={name}
@@ -382,146 +386,152 @@ export default function FormRunPage() {
 
   if (loading) {
     return (
-      <VStack gap={6} vAlign="center" style={{ paddingTop: 80 }}>
-        <Spinner size="lg" />
-        <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>กำลังโหลดแบบฟอร์ม...</Text>
-      </VStack>
+      <PageShell
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ & เอกสาร", href: "/forms" },
+          { label: hero.title },
+        ]}
+        title={hero.title}
+        description={hero.desc}
+      >
+        <div className="flex flex-col items-center gap-3 py-20">
+          <Spinner size={28} label="" />
+          <p className="text-sm text-muted-foreground">กำลังโหลดแบบฟอร์ม...</p>
+        </div>
+      </PageShell>
     );
   }
 
   if (error || !tpl) {
     return (
-      <VStack gap={6}>
-        <Banner status="error" title="ไม่พบแบบฟอร์ม" description={error || "แบบฟอร์มนี้ถูกลบหรือไม่มีอยู่แล้ว"} isDismissable={false} />            <a href="/forms">
-              <Button label="กลับไปศูนย์แบบฟอร์ม" variant="secondary" />
-            </a>
-      </VStack>
+      <PageShell
+        breadcrumbs={[
+          { label: "หน้าแรก", href: "/dashboard" },
+          { label: "อนุมัติ & เอกสาร", href: "/forms" },
+          { label: "ไม่พบแบบฟอร์ม" },
+        ]}
+        title="ไม่พบแบบฟอร์ม"
+      >
+        <div className="space-y-4">
+          <Alert variant="danger" title="ไม่พบแบบฟอร์ม" description={error || "แบบฟอร์มนี้ถูกลบหรือไม่มีอยู่แล้ว"} />
+          <a href="/forms" className={buttonVariants({ variant: "secondary" })}>
+            กลับไปศูนย์แบบฟอร์ม
+          </a>
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            {hero.eyebrow}
-          </Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{tpl.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              {tpl.code} {tpl.rev}
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {tpl.description || hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <a href="/forms">
-            <Button label={t("action.back")} variant="ghost" icon={<ArrowLeftIcon className="w-4 h-4" />} />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "อนุมัติ & เอกสาร", href: "/forms" },
+        { label: tpl.title },
+      ]}
+      title={tpl.title}
+      description={tpl.description || hero.desc}
+      actions={
+        <>
+          <a href="/forms" className={buttonVariants({ variant: "ghost" })}>
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.back")}
           </a>
           {canDesign && (
-            <a href={`/forms/designer`}>
-              <Button label="แก้ไขฟอร์ม" variant="secondary" icon={<PencilSquareIcon className="w-4 h-4" />} />
+            <a href={`/forms/designer`} className={buttonVariants({ variant: "secondary" })}>
+              <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+              แก้ไขฟอร์ม
             </a>
           )}
-          <button
-            type="button"
-            onClick={exportPdf}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary disabled:opacity-60"
-          >
-            {exporting ? <Spinner size="sm" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
+          <Button onClick={exportPdf} disabled={exporting}>
+            {exporting ? <Spinner size={16} label="" /> : <FileDown className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />}
             {t("action.download_pdf")}
-          </button>
-        </HStack>
-      </div>
-
+          </Button>
+        </>
+      }
+    >
       {msg && (
-        <Banner
-          status={msg.isError ? "error" : "success"}
+        <Alert
+          variant={msg.isError ? "danger" : "success"}
           title={msg.isError ? "เกิดข้อผิดพลาด" : "สำเร็จ"}
           description={msg.text}
-          isDismissable={false}
         />
       )}
 
-      <div className="grid md:grid-cols-12 gap-5">
+      <div className="grid gap-5 md:grid-cols-12">
         <div className="md:col-span-8">
-          <Card padding={5}>
-            <div ref={printRef} className="cmms-print-area" style={{ background: "#fff", borderRadius: "12px", padding: 24 }}>
-              <VStack gap={4}>                  <VStack gap={1} style={{ borderBottom: "2px solid var(--cmms-border)", paddingBottom: 12 }}>
-                    <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "var(--cmms-text-muted)" }}>
+          <Card>
+            <CardContent className="p-5">
+              <div ref={printRef} className="cmms-print-area rounded-xl bg-white p-6">
+                <div className="space-y-4">
+                  <div className="space-y-1 border-b-2 border-border pb-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
                       CMMS-TOPPAN · {tpl.code} {tpl.rev}
-                    </Text>
-                  <Heading level={3} style={{ color: "var(--cmms-text-primary)" }}>{tpl.title}</Heading>
-                  {tpl.description && (
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-secondary)" }}>{tpl.description}</Text>
+                    </p>
+                    <h2 className="text-base font-semibold text-foreground">{tpl.title}</h2>
+                    {tpl.description && (
+                      <p className="text-sm text-muted-foreground">{tpl.description}</p>
+                    )}
+                  </div>
+                  {schema.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      แบบฟอร์มนี้ยังไม่มีฟิลด์ — กลับไปหน้าออกแบบเพื่อเพิ่มฟิลด์ก่อน
+                    </p>
+                  ) : (
+                    schema.map((f, i) => renderField(f, i))
                   )}
-                </VStack>
-                {schema.length === 0 ? (
-                  <Text type="body" style={{ color: "var(--cmms-text-muted)" }}>
-                    แบบฟอร์มนี้ยังไม่มีฟิลด์ — กลับไปหน้าออกแบบเพื่อเพิ่มฟิลด์ก่อน
-                  </Text>
-                ) : (
-                  schema.map((f, i) => renderField(f, i))
-                )}
-              </VStack>
-            </div>
+                </div>
+              </div>
 
-            <HStack gap={2} wrap="wrap" style={{ marginTop: 20 }}>
-              <Button
-                label={saving ? "กำลังบันทึก..." : "บันทึกผลการกรอก"}
-                variant="primary"
-                isDisabled={saving}
-                isLoading={saving}
-                icon={<CheckCircleIcon className="w-4 h-4" />}
-                onClick={saveSubmission}
-              />
-              <Button
-                label={exporting ? "กำลังสร้าง PDF..." : "สร้าง PDF"}
-                variant="secondary"
-                isDisabled={exporting}
-                isLoading={exporting}
-                icon={<DocumentArrowDownIcon className="w-4 h-4" />}
-                onClick={exportPdf}
-              />
-            </HStack>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Button onClick={saveSubmission} disabled={saving} className="gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  {saving ? "กำลังบันทึก..." : "บันทึกผลการกรอก"}
+                </Button>
+                <Button variant="secondary" onClick={exportPdf} disabled={exporting} className="gap-1.5">
+                  <FileDown className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  {exporting ? "กำลังสร้าง PDF..." : "สร้าง PDF"}
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
         <div className="md:col-span-4">
-          <Card padding={5}>
-            <VStack gap={3}>
-              <Heading level={4}>ผลการกรอกล่าสุด</Heading>
+          <Card>
+            <CardHeader>
+              <CardTitle>ผลการกรอกล่าสุด</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
               {submissions.length === 0 && (
-                <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
+                <p className="text-xs text-muted-foreground">
                   ยังไม่มีผู้กรอกแบบฟอร์มนี้
-                </Text>
+                </p>
               )}
               {submissions.map((s) => (
-                <div key={s.id} className="rounded-lg border border-[var(--cmms-border)] p-3">
-                  <HStack gap={2} vAlign="center" wrap="wrap" style={{ justifyContent: "space-between" }}>
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-primary)" }}>
-                      {s.created_name || "ไม่ระบุชื่อ"}
-                    </Text>
-                    <Text type="body" size="sm" style={{ color: "var(--cmms-text-muted)" }}>
-                      {s.created_at}
-                    </Text>
-                  </VStack>
+                <div key={s.id} className="rounded-lg border border-border p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="space-y-1">
+                      <p className="text-sm text-foreground">
+                        {s.created_name || "ไม่ระบุชื่อ"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {s.created_at}
+                      </p>
+                    </div>
                     {canDesign && (
-                      <button type="button" onClick={() => deleteSubmission(s.id)} className="text-[var(--cmms-text-muted)] hover:text-[var(--cmms-accent-danger)]" aria-label="ลบผลการกรอก">
-                        <TrashIcon className="w-4 h-4" />
+                      <button type="button" onClick={() => deleteSubmission(s.id)} className="text-muted-foreground hover:text-destructive" aria-label="ลบผลการกรอก">
+                        <Trash2 className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                       </button>
                     )}
-                  </HStack>
+                  </div>
                 </div>
               ))}
-            </VStack>
+            </CardContent>
           </Card>
         </div>
       </div>
-    </VStack>
+    </PageShell>
   );
 }

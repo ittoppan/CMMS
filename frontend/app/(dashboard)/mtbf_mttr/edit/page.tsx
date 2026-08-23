@@ -2,14 +2,29 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { HomeIcon, ChartBarIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import SuccessDialog from "@/components/SuccessDialog";
+import { SquarePen } from "lucide-react";
 
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
   value: String(i + 1),
@@ -127,120 +142,137 @@ function EditMtbfMttrContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MTBF MTTR EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>แก้ไขข้อมูลดัชนีชี้วัด MTBF / MTTR</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ChartBarIcon className="w-3.5 h-3.5" /> Reliability KPI
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            แก้ไขข้อมูลชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "MTBF/MTTR", href: "/mtbf_mttr" },
+        { label: "แก้ไขข้อมูล" },
+      ]}
+      title="แก้ไขข้อมูลดัชนีชี้วัด MTBF / MTTR"
+      description="แก้ไขข้อมูลชั่วโมงการทำงาน จำนวนครั้งที่เสีย และเวลาหยุดซ่อม"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>ข้อมูลบันทึก</CardTitle>
+          <CardDescription>ปรับแก้ตัวเลขการใช้งานของรอบเวลานี้</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingData ? (
+            <div className="max-w-[640px] space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <div className="max-w-[640px] space-y-5">
+              {error && (
+                <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
+              )}
 
-      <Breadcrumbs>
-        <BreadcrumbItem href="/mtbf_mttr" startIcon={<HomeIcon className="w-4 h-4" />}>MTBF และ MTTR</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>แก้ไขข้อมูล</BreadcrumbItem>
-      </Breadcrumbs>
-
-      <Card padding={6}>
-        {loadingData ? (
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)', fontSize: '0.85rem', fontWeight: 600 }}>
-                {error}
+              <div className="space-y-1.5">
+                <Label>
+                  เครื่องจักร/อุปกรณ์ <span className="text-destructive">*</span>
+                </Label>
+                <Select value={assetId || undefined} onValueChange={(v) => setAssetId(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="เลือกเครื่องจักร..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.map((a) => (
+                      <SelectItem key={a.id} value={String(a.id)}>
+                        {`${a.code} - ${a.name}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
 
-            <Selector
-              label="เครื่องจักร/อุปกรณ์ *"
-              placeholder="เลือกเครื่องจักร..."
-              value={assetId}
-              onChange={setAssetId}
-              options={assets.map(a => ({ value: String(a.id), label: `${a.code} - ${a.name}` }))}
-            />
+              <Grid columns={{ minWidth: 220, max: 2 }} gap={4}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="mtbf-year">
+                    ปี <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="mtbf-year"
+                    placeholder="เช่น 2026"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>
+                    เดือน <span className="text-destructive">*</span>
+                  </Label>
+                  <Select value={month} onValueChange={(v) => setMonth(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="เลือกเดือน..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MONTH_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </Grid>
 
-            <HStack gap={4}>
-              <div style={{ flex: 1 }}>
-                <TextInput
-                  label="ปี *"
-                  placeholder="เช่น 2026"
-                  value={year}
-                  onChange={setYear}
+              <Grid columns={{ minWidth: 220, max: 2 }} gap={4}>
+                <div className="space-y-1.5">
+                  <Label htmlFor="mtbf-hours">ชั่วโมงการทำงาน</Label>
+                  <Input
+                    id="mtbf-hours"
+                    inputMode="decimal"
+                    value={operatingHours}
+                    onChange={(e) => setOperatingHours(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="mtbf-failures">จำนวนครั้งที่เสีย</Label>
+                  <Input
+                    id="mtbf-failures"
+                    inputMode="numeric"
+                    value={totalFailures}
+                    onChange={(e) => setTotalFailures(e.target.value)}
+                  />
+                </div>
+              </Grid>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="mtbf-downtime">เวลาหยุดซ่อมรวม (นาที)</Label>
+                <Input
+                  id="mtbf-downtime"
+                  inputMode="numeric"
+                  value={totalDowntime}
+                  onChange={(e) => setTotalDowntime(e.target.value)}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <Selector
-                  label="เดือน *"
-                  value={month}
-                  onChange={setMonth}
-                  options={MONTH_OPTIONS}
-                />
+
+              <p className="text-xs text-muted-foreground">
+                ระบบจะคำนวณค่า MTBF (ชม.) และ MTTR (นาที) ใหม่โดยอัตโนมัติจากข้อมูลด้านบน
+              </p>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => router.push("/mtbf_mttr")}>
+                  ยกเลิก
+                </Button>
+                <Button disabled={submitting} onClick={handleSubmit}>
+                  <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                  {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+                </Button>
               </div>
-            </HStack>
-
-            <HStack gap={4}>
-              <div style={{ flex: 1 }}>
-                <TextInput
-                  label="ชั่วโมงการทำงาน"
-                  value={operatingHours}
-                  onChange={setOperatingHours}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <TextInput
-                  label="จำนวนครั้งที่เสีย"
-                  value={totalFailures}
-                  onChange={setTotalFailures}
-                />
-              </div>
-            </HStack>
-
-            <TextInput
-              label="เวลาหยุดซ่อมรวม (นาที)"
-              value={totalDowntime}
-              onChange={setTotalDowntime}
-            />
-
-            <Text type="supporting" color="secondary">
-              ระบบจะคำนวณค่า MTBF (ชม.) และ MTTR (นาที) ใหม่โดยอัตโนมัติจากข้อมูลด้านบน
-            </Text>
-
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/mtbf_mttr")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-              </button>
-            </HStack>
-          </VStack>
-        )}
+            </div>
+          )}
+        </CardContent>
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditMtbfMttrPage() {
   return (
-    <Suspense fallback={<Text type="body">กำลังโหลด...</Text>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด...</p>}>
       <EditMtbfMttrContent />
     </Suspense>
   );
