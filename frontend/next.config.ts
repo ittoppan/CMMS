@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     // (C:\inetpub\wwwroot\cmms-tpt), which broke the standalone static-file copy.
     root: __dirname,
   },
-  transpilePackages: ["@astryxdesign/core", "@astryxdesign/theme-neutral"],
   // Allow ngrok, Cloudflare tunnels, and local IPs for HMR
   allowedDevOrigins: [
     "127.0.0.1",

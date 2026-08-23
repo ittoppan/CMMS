@@ -3,14 +3,11 @@
 /* TOPPAN design tokens (single source — design-system/tokens.css) */
 @import "../../design-system/tokens.css";
 
-@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+
+@layer reset, theme, base, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/preflight.css" layer(base);
-@import "@astryxdesign/core/reset.css";
-@import "@astryxdesign/core/astryx.css";
-@import "@astryxdesign/theme-neutral/theme.css";
-@import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
 
 /* Dark mode: bind Tailwind `dark:` variant to `.dark` class
@@ -73,18 +70,12 @@
    - html/body ต้องมี height:100% ไม่งั้น AppShell height:fill
      (100%) จะกลายเป็น auto → หน้าเลื่อนทั้งแผงพร้อมเมนู
    - บังคับ shell = viewport (100vh/100dvh) → พื้นที่เมนู
-     (.astryx-layout-panel) และเนื้อหา (.astryx-layout-content)
-     มี overflow:auto ของ astryx อยู่แล้ว เลื่อนแยกกันอัตโนมัติ
    ──────────────────────────────────────────────── */
 html,
 body {
   height: 100%;
 }
 
-.astryx-app-shell {
-  height: 100vh !important;
-  height: 100dvh !important; /* mobile — ปรับตาม URL bar จริง */
-}
 
 :root {
   /* === TOPPAN Brand Theme ===
@@ -115,9 +106,6 @@ body {
   --color-skeleton: #E4E8EE;
   --color-track: #E4E8EE;
 
-  /* === Brand Colors (Astryx Theme Tokens) ===
-     ค่าทั้งหมดอ้างอิง astryx theme (--color-*) เพื่อให้
-     ทั้งระบบตามธีม astryx — เปลี่ยน theme ทีหลัง แค่สลับ
      ไฟล์ theme แล้วทุกหน้าจะเปลี่ยนสีตามอัตโนมัติ */
   --cmms-primary: var(--color-accent);
   --cmms-primary-hover: #00508C;
@@ -202,7 +190,6 @@ body {
    ================================================ */
 
 /* === Font unification ========================
-   Astryx components ใช้ตัวแปร --font-family-body/heading
    (ค่า default เป็น Segoe UI) — ต้อง override ให้เป็น
    ฟอนต์เดียวกับ body: Roboto (ฟอนต์เว็บ TOPPAN Holdings)
    สำหรับอักษรละติน + Noto Sans Thai สำหรับภาษาไทย
@@ -232,13 +219,11 @@ html, body {
 
 /* ================================================
    Dark Mode Tokens (next-themes เพิ่ม .dark บน <html>)
-   - สลับ color-scheme → Astryx light-dark() เลือกค่ามืดอัตโนมัติ
    - override --color-* และ --cmms-* ที่กำหนดตายตัวใน :root
    ================================================ */
 .dark {
   color-scheme: dark;
 
-  /* === Astryx color tokens (dark) === */
   --color-accent-muted: rgba(96, 165, 250, 0.18);
   --color-text-accent: #6CB2E8;
   --color-icon-accent: #3E8FCF;
@@ -303,68 +288,6 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--cmms-border); border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--cmms-text-muted); }
-
-/* ================================================
-   Astryx Card Overrides
-   ================================================ */
-[data-astryx-card], [class*="Card_card"], .astryx-card {
-  border-radius: var(--cmms-radius-lg) !important;
-  box-shadow: var(--cmms-shadow) !important;
-  border: 1px solid var(--cmms-border) !important;
-  transition: box-shadow var(--cmms-transition), transform var(--cmms-transition) !important;
-}
-[data-astryx-card]:hover, [class*="Card_card"]:hover, .astryx-card:hover {
-  box-shadow: var(--cmms-shadow-md) !important;
-}
-
-/* ================================================
-   Astryx Button Overrides
-   ================================================ */
-button[class*="Button_primary"], [class*="Button_button"][class*="primary"], .astryx-button.primary {
-  border-radius: var(--cmms-radius) !important;
-  font-weight: 600 !important;
-  transition: all var(--cmms-transition) !important;
-}
-button[class*="Button_primary"]:hover, .astryx-button.primary:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--cmms-shadow-md) !important;
-}
-button[class*="Button_secondary"], .astryx-button.secondary {
-  border-radius: var(--cmms-radius) !important;
-  transition: all var(--cmms-transition) !important;
-}
-
-/* ================================================
-   Astryx Input Overrides
-   ================================================ */
-[class*="TextInput_input"], [class*="Selector_trigger"], [class*="TextArea_textarea"],
-.astryx-text-input input, .astryx-selector [class*="trigger"], .astryx-text-area textarea {
-  border-radius: var(--cmms-radius-sm) !important;
-  transition: border-color var(--cmms-transition), box-shadow var(--cmms-transition) !important;
-}
-[class*="TextInput_input"]:focus, [class*="TextArea_textarea"]:focus,
-.astryx-text-input input:focus, .astryx-text-area textarea:focus {
-  border-color: var(--cmms-border-focus) !important;
-  box-shadow: var(--cmms-shadow-focus) !important;
-}
-
-/* ================================================
-   Astryx Table Overrides
-   ================================================ */
-[class*="Table_table"], .astryx-base-table {
-  border-radius: var(--cmms-radius-lg) !important;
-  overflow: hidden;
-}
-[class*="TableRow_row"]:nth-child(even), .astryx-base-table tbody tr:nth-child(even) { background: var(--cmms-bg-muted); }
-[class*="TableRow_row"], .astryx-base-table tbody tr { transition: background var(--cmms-transition-fast) !important; }
-[class*="TableRow_row"]:hover, .astryx-base-table tbody tr:hover { background: var(--cmms-primary-light) !important; }
-[class*="TableHeader"], .astryx-table-header-cell {
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  font-size: 0.7rem !important;
-  letter-spacing: 0.05em !important;
-  color: var(--cmms-text-secondary) !important;
-}
 
 /* ================================================
    UI Kit DataTable (components/ui/table.tsx)
@@ -453,259 +376,6 @@ button[class*="Button_secondary"], .astryx-button.secondary {
     flex-shrink: 0;
   }
 }
-
-/* ================================================
-   Astryx Badge Overrides
-   ================================================ */
-[class*="Badge_badge"], .astryx-badge {
-  border-radius: 100px !important;
-  font-weight: 600 !important;
-  font-size: 0.7rem !important;
-  letter-spacing: 0.02em !important;
-}
-
-/* ================================================
-   Astryx Toolbar Overrides
-   ================================================ */
-[class*="Toolbar_toolbar"], .astryx-toolbar {
-  border-radius: var(--cmms-radius-lg) !important;
-  background: var(--cmms-bg-card) !important;
-  box-shadow: var(--cmms-shadow-sm) !important;
-  border: 1px solid var(--cmms-border) !important;
-}
-
-/* ================================================
-   Astryx Dialog Overrides
-   ================================================ */
-[class*="Dialog_dialog"], [class*="Dialog_content"], [role="dialog"] {
-  border-radius: var(--cmms-radius-xl) !important;
-  box-shadow: var(--cmms-shadow-xl) !important;
-}
-
-/* ================================================
-   Astryx SideNav Overrides — Light Operator Console
-   โฉมใหม่: พื้นขาว + ตัวหนังสือน้ำเงินเข้ม + หลอดไฟ Andon
-   ติดสว่างท้ายเมนู active (แทนแถบซ้ายเดิม) + หัวข้อหมวด
-   แบบ tag plate — ตรงข้ามกับโฉมเดิมพื้นน้ำเงินเข้มโดยสิ้นเชิง
-   ================================================ */
-[class*="SideNav_sideNav"], .astryx-side-nav,
-[class*="LayoutPanel_panel"], .astryx-layout-panel {
-  background: var(--cmms-bg-sidebar) !important;
-  border-right: 1px solid var(--cmms-border) !important;
-}
-
-/* Brand header — โลโก้ + คำว่า CMMS-TOPPAN สีน้ำเงินเข้ม */
-/* Override Astryx SideNavHeading styles - remove all CSS-in-JS classes */
-.astryx-side-nav-heading,
-[class*="astryx-side-nav-heading"] {
-  padding-block: 0 !important;
-  padding-inline: 0 !important;
-  color: inherit !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  gap: 0 !important;
-  min-height: auto !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-/* Remove all x-prefixed CSS-in-JS classes from sidebar heading */
-.astryx-side-nav-heading .astryx-navicon,
-[class*="astryx-side-nav-heading"] .astryx-navicon {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  color: inherit !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* Override specific x-prefixed classes */
-.x78zum5, .x6s0dn4, .x1txdalj, .xkoleio, .x12gdq22, .x1betex2,
-.x1djylfy, .xt970qd, .x9f619, .x1hl2dhg, .x1heor9g, .x1ypdohk,
-.xh6dtrn, .xc342km, .xng3xce, .xjbqb8w, .xjb2p0i, .x1qlqyl8,
-.x1sodnla, .x1yc453h {
-  padding: 0 !important;
-  margin: 0 !important;
-  gap: 0 !important;
-  min-height: auto !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-/* Nav items — ตัวหนังสือเทาน้ำเงิน, hover พื้นฟ้าอ่อน */
-[class*="SideNavItem_item"], .astryx-side-nav-item {
-  position: relative;
-  border-radius: 8px !important;
-  margin: 2px 10px !important;
-  padding-block: 8px !important;
-  transition: all var(--cmms-transition) !important;
-  color: var(--cmms-sidebar-text) !important;
-  font-weight: 500 !important;
-}
-[class*="SideNavItem_item"]:hover, .astryx-side-nav-item:hover {
-  color: var(--cmms-sidebar-text-strong) !important;
-  background: var(--cmms-bg-sidebar-hover) !important;
-}
-[class*="SideNavItem_item"][data-selected="true"],
-[class*="SideNavItem_item"][class*="selected"],
-.astryx-side-nav-item.selected {
-  color: #FFFFFF !important;
-  background: var(--cmms-bg-sidebar-active) !important;
-  box-shadow: 0 2px 10px rgba(0, 87, 168, 0.28) !important;
-}
-/* Signature: หลอดไฟ Andon ติดสว่างท้ายเมนู active */
-[class*="SideNavItem_item"][data-selected="true"]::after,
-[class*="SideNavItem_item"][class*="selected"]::after,
-.astryx-side-nav-item.selected::after {
-  content: "";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #BAE6FD;
-  box-shadow: 0 0 10px 2px rgba(186, 230, 253, 0.9);
-}
-[class*="SideNav_sideNav"] :is(a, span, [class*="SideNavItem_label"], [class*="SideNavItem_icon"], [class*="Badge_badge"]),
-.astryx-side-nav :is(a, span, svg) { color: inherit; }
-
-/* Section headers — ตัวเล็กตัวพิมพ์ใหญ่ + จุด Andon นำหน้า (tag plate) */
-.astryx-side-nav-section {
-  border-top: 1px solid var(--cmms-border) !important;
-  margin-top: 4px !important;
-}
-.astryx-side-nav-section:first-of-type {
-  border-top: none !important;
-  margin-top: 0 !important;
-}
-.astryx-side-nav-section > div:first-child {
-  padding: 16px 14px 6px !important;
-}
-.astryx-side-nav-section > div:first-child span {
-  text-transform: uppercase !important;
-  font-size: 0.68rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.12em !important;
-  color: #64748B !important;
-  opacity: 1 !important;
-}
-.astryx-side-nav-section > div:first-child span[id$="-title"] {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-}
-.astryx-side-nav-section > div:first-child span[id$="-title"]::before {
-  content: "";
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: var(--cmms-sidebar-indicator, #0057A8);
-  box-shadow: 0 0 6px rgba(0, 87, 168, 0.45);
-  flex-shrink: 0;
-}
-/* Scrollbar บาง ๆ ริม sidebar (Windows/Chromium) */
-.astryx-layout-panel::-webkit-scrollbar {
-  width: 6px;
-}
-.astryx-layout-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-.astryx-layout-panel::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.35);
-  border-radius: 999px;
-}
-.astryx-layout-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.55);
-}
-/* ช่องค้นหาเมนู: focus ring น้ำเงินแบรนด์ */
-.astryx-side-nav input[aria-label="ค้นหาเมนูใน SideNav"]:focus {
-  border-color: var(--cmms-primary, #0057A8) !important;
-  background: #FFFFFF !important;
-  box-shadow: 0 0 0 3px rgba(0, 87, 168, 0.16) !important;
-}
-
-/* SideNav footer — user card zone (element ท้ายสุดของ SideNav) */
-.astryx-side-nav > :last-child {
-  border-top: 1px solid var(--cmms-border) !important;
-  background: #F8FAFC !important;
-  padding-block: 8px !important;
-}
-/* footer item labels — คืนขนาดปกติ (อย่าให้โดน style หัวข้อหมวด) */
-.astryx-side-nav > :last-child .astryx-side-nav-item span {
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-}
-
-/* ================================================
-   Mobile drawer (astryx-mobile-nav) — light theme
-   (โฉมใหม่ = light ทั้ง desktop และมือถือ — สไตล์เดียวกัน)
-   ================================================ */
-.astryx-mobile-nav .astryx-side-nav-item {
-  color: var(--cmms-sidebar-text, #475569) !important;
-}
-.astryx-mobile-nav .astryx-side-nav-item:hover {
-  color: var(--cmms-sidebar-text-strong, #0B1F4B) !important;
-  background: var(--cmms-bg-sidebar-hover, #F1F5F9) !important;
-}
-.astryx-mobile-nav .astryx-side-nav-item.selected,
-.astryx-mobile-nav .astryx-side-nav-item[data-selected="true"],
-.astryx-mobile-nav .astryx-side-nav-item[class*="selected"] {
-  color: #FFFFFF !important;
-  background: var(--cmms-bg-sidebar-active, #0057A8) !important;
-  box-shadow: 0 2px 10px rgba(0, 87, 168, 0.28) !important;
-}
-.astryx-mobile-nav .astryx-side-nav-section {
-  border-top-color: var(--cmms-border) !important;
-}
-.astryx-mobile-nav .astryx-side-nav-section > div:first-child span {
-  color: #64748B !important;
-}
-.astryx-mobile-nav .astryx-side-nav-section > div:first-child span[id$="-title"]::before {
-  background: var(--cmms-sidebar-indicator, #0057A8) !important;
-  box-shadow: 0 0 6px rgba(0, 87, 168, 0.45) !important;
-}
-
-/* ================================================
-   Astryx TopNav Overrides
-   ================================================ */
-[class*="TopNav_topNav"], .astryx-top-nav {
-  background: var(--cmms-bg-topnav) !important;
-  border-bottom: 1px solid var(--cmms-border) !important;
-  box-shadow: 0 1px 3px rgba(15, 30, 61, 0.06) !important;
-}
-
-/* Breadcrumb pill ใน TopNav */
-.cmms-breadcrumb {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--cmms-bg-muted);
-  border: 1px solid var(--cmms-border);
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-.cmms-breadcrumb .sep { color: var(--cmms-text-muted); }
-.cmms-breadcrumb .crumb { color: var(--cmms-text-muted); }
-.cmms-breadcrumb .current { color: var(--cmms-text-primary); font-weight: 600; }
-
-/* ================================================
-   Astryx ProgressBar Overrides
-   ================================================ */
-[class*="ProgressBar_track"], [class*="progress" i] [class*="track"] { border-radius: 100px !important; height: 6px !important; }
-[class*="ProgressBar_bar"], [class*="progress" i] [class*="bar"] { border-radius: 100px !important; }
 
 /* ================================================
    Headings
@@ -938,196 +608,6 @@ h1, h2, h3, h4 {
 .cmms-kpi-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--cmms-shadow-lg);
-}
-
-/* ================================================
-   Page-load choreography — ใช้กับคลาสโครงสร้างที่ทุกหน้าใช้ร่วมกัน
-   (hero → เนื้อหา → KPI → แถวตาราง) ไม่ต้องแก้ทีละหน้า
-   ================================================ */
-/* หัวข้อหน้าแบบไม่มี hero (edit/create/settings/form) */
-.cmms-eyebrow { animation: cmms-fadeInUp 0.4s ease both; }
-h2.astryx-heading { animation: cmms-fadeInUp 0.4s ease 0.06s both; }
-
-/* Hero: eyebrow → ชื่อเรื่อง → คำอธิบาย → ปุ่ม/แอ็กชัน (เรียงลำดับ) */
-.cmms-page-hero .cmms-eyebrow { animation: cmms-fadeInUp 0.4s ease both; }
-.cmms-page-hero h2 { animation: cmms-fadeInUp 0.4s ease 0.08s both; }
-.cmms-page-hero .astryx-stack > h2 ~ span,
-.cmms-page-hero .astryx-stack > h2 ~ p { animation: cmms-fadeInUp 0.4s ease 0.16s both; }
-.cmms-page-hero > .astryx-stack.horizontal,
-.cmms-page-hero > button { animation: cmms-fadeInUp 0.4s ease 0.22s both; }
-
-/* เนื้อหาหลัง hero ค่อยๆ ปรากฏ (เฟดนุ่มๆ ไม่เลื่อน) */
-.cmms-page-hero ~ * { animation: cmms-fadeIn 0.5s ease 0.15s both; }
-
-/* KPI การ์ด — เลื่อนขึ้นทีละใบ (backwards กันทับ hover lift) */
-.cmms-kpi-card { animation: cmms-fadeInUp 0.45s ease backwards; }
-.cmms-kpi-card:nth-child(2) { animation-delay: 0.06s; }
-.cmms-kpi-card:nth-child(3) { animation-delay: 0.12s; }
-.cmms-kpi-card:nth-child(4) { animation-delay: 0.18s; }
-.cmms-kpi-card:nth-child(5) { animation-delay: 0.24s; }
-.cmms-kpi-card:nth-child(6) { animation-delay: 0.3s; }
-
-/* แถวตาราง — เฟดเข้าสั้นๆ (กรอง/เปลี่ยนหน้าแล้วลื่นขึ้น) */
-.astryx-base-table tbody tr { animation: cmms-fadeIn 0.22s ease both; }
-
-/* ปุ่มหลัก — กดแล้วเด้งเล็กน้อย ให้สัมผัสได้ */
-.cmms-btn-primary:active { transform: scale(0.97); }
-
-/* Accessibility: ปิด animation ทั้งหมดเมื่อผู้ใช้ตั้งค่าลดการเคลื่อนไหว
-   (ป้องกัน opacity:0 ค้างจาก stagger delay) */
-@media (prefers-reduced-motion: reduce) {
-  .cmms-animate-fadeInUp,
-  .cmms-animate-scaleIn,
-  .cmms-animate-slideInRight {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .cmms-stagger-1, .cmms-stagger-2, .cmms-stagger-3, .cmms-stagger-4,
-  .cmms-stagger-5, .cmms-stagger-6, .cmms-stagger-7, .cmms-stagger-8 {
-    animation-delay: 0s !important;
-    opacity: 1 !important;
-  }
-  .cmms-kpi-card { transition: none; }
-  .cmms-kpi-card:hover { transform: none; box-shadow: none; }
-  /* หน้าโหลด choreography — แสดงทันที ไม่มีดีเลย์ */
-  .cmms-eyebrow, h2.astryx-heading,
-  .cmms-page-hero .cmms-eyebrow, .cmms-page-hero h2,
-  .cmms-page-hero .astryx-stack > h2 ~ span, .cmms-page-hero .astryx-stack > h2 ~ p,
-  .cmms-page-hero > .astryx-stack.horizontal, .cmms-page-hero > button,
-  .cmms-page-hero ~ *, .cmms-kpi-card, .astryx-base-table tbody tr {
-    animation: none !important;
-    animation-delay: 0s !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .cmms-btn-primary:active { transform: none; }
-  /* Modal/Dialog + Dropdown — แสดงทันทีเมื่อผู้ใช้ตั้งค่าลดการเคลื่อนไหว */
-  dialog[open],
-  dialog[open]::backdrop,
-  [role="listbox"],
-  [role="menu"] {
-    animation: none !important;
-    animation-delay: 0s !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* ================================================
-   Modal / Dialog + Dropdown — เปิด: scale-in + fade
-   (Astryx Dialog/AlertDialog ทุกหน้า + Selector/Popover)
-   ปิด: scale-out + fade — ผ่าน AnimatedDialog (component เดียว
-   ที่ทุกหน้าใช้) ใส่คลาส cmms-dialog-closing ตอนปิด แล้วค่อย
-   unmount หลัง animation จบ (220ms)
-   ================================================ */
-dialog[open] {
-  animation: cmmsDialogIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-dialog[open]::backdrop {
-  animation: cmmsBackdropIn 0.2s ease-out both;
-}
-@keyframes cmmsDialogIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes cmmsBackdropIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* ── ปิด: scale-out + fade (AnimatedDialog ใส่คลาส cmms-dialog-closing
-   ตอนปิด แล้วค่อย unmount หลัง animation จบ) ── */
-dialog.cmms-dialog-closing[open] {
-  animation: cmmsDialogOut 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
-}
-dialog.cmms-dialog-closing[open]::backdrop {
-  animation: cmmsBackdropOut 0.2s ease forwards;
-}
-@keyframes cmmsDialogOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateY(10px) scale(0.95); }
-}
-@keyframes cmmsBackdropOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-/* ── เนื้อหายาวเกินความสูง dialog (เช่น ปิดใบงานซ่อม) — ให้เลื่อนได้
-   แทนการถูกตัดทิ้ง (Astryx inner มี overflow:hidden) ── */
-dialog[open] > div {
-  overflow-y: auto;
-}
-
-/* ===== Mobile bottom sheet (modal แบบแอปมือถือ) =====
-   ใช้กับ popup ที่ส่ง className="cmms-close-work-modal"
-   - จอเล็ก: ติดขอบล่าง เต็มความกว้าง มุมมนบน + drag handle + ปุ่มยืนยันตรึงล่าง
-   - จอใหญ่: ยังเป็น dialog กลางจอตามเดิม */
-.cmms-bottom-sheet-handle {
-  display: none;
-}
-
-.cmms-dialog-body {
-  min-height: 0;
-}
-
-.cmms-dialog-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 24px;
-  border-top: 1px solid var(--cmms-border, #E2E8F0);
-  background: #FFFFFF;
-}
-
-@media (max-width: 640px) {
-  dialog[open].cmms-close-work-modal {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    max-height: 92dvh !important;
-    margin: auto 0 0 0 !important;
-    border-radius: 20px 20px 0 0 !important;
-    align-self: flex-end;
-  }
-
-  dialog[open].cmms-close-work-modal > div {
-    display: flex;
-    flex-direction: column;
-    max-height: 92dvh;
-    overflow: hidden;
-  }
-
-  dialog[open].cmms-close-work-modal .cmms-bottom-sheet-handle {
-    display: block;
-    flex: 0 0 auto;
-    width: 44px;
-    height: 5px;
-    margin: 10px auto 2px;
-    border-radius: 999px;
-    background: #CBD5E1;
-  }
-
-  dialog[open].cmms-close-work-modal .cmms-dialog-body {
-    overflow-y: auto;
-    flex: 1 1 auto;
-    min-height: 0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  dialog[open].cmms-close-work-modal .cmms-dialog-footer {
-    flex: 0 0 auto;
-    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
-/* Dropdown (Selector listbox / menu) — ปรับจังหวะเปิดให้กลมกลืนกับ dialog
-   (Astryx มี entry animation อยู่แล้ว — เปลี่ยน easing เป็นแบบค่อยๆ ทรงตัว)
-   ใช้ longhand เพื่อคง keyframe เดิมของ Astryx ไว้ (ทิศตามตำแหน่ง dropdown) */
-[role="listbox"],
-[role="menu"] {
-  animation-duration: 0.22s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ================================================
@@ -1455,22 +935,12 @@ html, body {
 
 @media (max-width: 1023.98px) {
   /* ซ่อน TopNav แบบ desktop — Mobile App Bar แทนที่
-     (คลาสจริงคือ .astryx-top-nav — selector เดิม [class*="TopNav_topNav"]
-     ไม่ตรงกับคลาสที่ Astryx render จริง จึงไม่เคยซ่อนได้เลย) */
-  .astryx-top-nav { display: none !important; }
 
   /* แถว header/toolbar ในเนื้อหาที่กว้างเกินจอ (เช่น title + ปุ่ม FMEA)
      ให้ wrap ลงบรรทัดใหม่แทนการเลื่อนซ้าย-ขวา */
-  .astryx-layout-content .astryx-stack.horizontal {
-    flex-wrap: wrap;
-  }
 
-  /* Astryx Text component เปิด white-space: nowrap ไว้เป็นค่าเริ่มต้น
      ทำให้ข้อความยาว (เช่น subtitle หน้ากระดาน) ไม่ยอมขึ้นบรรทัดใหม่
      จนกว้างเกินจอ — บนมือถืออนุญาตให้ wrap ได้ */
-  .astryx-text {
-    white-space: normal !important;
-  }
 
   /* ── Mobile App Bar ── */
   .cmms-mobile-app-bar {
@@ -1588,11 +1058,6 @@ html, body {
   }
 
   /* กันคอนเทนต์ถูก App Bar / Bottom Nav ทับ
-     (คลาสจริงคือ .astryx-app-shell — selector เดิม [class*="AppShell"] ไม่ตรง) */
-  .astryx-app-shell {
-    padding-top: calc(56px + env(safe-area-inset-top)) !important;
-    padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
-  }
 }
 
 /* ── Mobile UX Polish (ระบบ-wide) ──
@@ -1602,50 +1067,22 @@ html, body {
 @media (max-width: 767.98px) {
   /* แถวฟิลเตอร์/เครื่องมือ: flex แนวนอนที่มี form control (Field/input/button) หลายตัว
      ให้ wrap ลงบรรทัดใหม่แทนการถูกตัดทิ้ง (เช่น ฟิลเตอร์ 5 ตัวของหน้ารายงาน) */
-  .astryx-layout-content .astryx-stack.horizontal:has(> :is(input, select, button, label, .astryx-field)),
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) {
-    flex-wrap: wrap;
-  }
 
   /* ลูกในแถวฟิลเตอร์: ยืด-หดได้ ไม่บังคับความกว้างตายตัว */
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > .astryx-field,
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > input[type="text"],
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > input:not([type]),
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > [class*="TextInput"],
-  .astryx-layout-content div:has(> :is(input, select, button, .astryx-field)) > [class*="Selector"] {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
 
   /* ตัวบ่งชี้เลื่อนแนวนอนของตาราง: scrollbar บางๆ + พื้นหลัง fade ด้านขวา */
-  .astryx-table-scroll-wrapper {
-    scrollbar-width: thin;
-    scrollbar-color: var(--cmms-border) transparent;
-    -webkit-overflow-scrolling: touch;
-  }
 }
 
 /* Scrollbar บางๆ สำหรับตารางทุกขนาด (desktop ก็เห็นว่ายังมีคอลัมน์เพิ่ม) */
-.astryx-table-scroll-wrapper::-webkit-scrollbar {
-  height: 6px;
-}
-.astryx-table-scroll-wrapper::-webkit-scrollbar-thumb {
-  background: var(--cmms-border);
-  border-radius: 999px;
-}
-.astryx-table-scroll-wrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
 
 /* ═══════════════════════════════════════════════════════════
    ตาราง → การ์ดสไลด์บนมือถือ (Card Table View)
    -----------------------------------------------------------
-   - ใช้ได้ทุกตาราง Astryx (มี data-label ฉีดโดย CardTableLabels)
    - มือถือ: ซ่อน thead + แต่ละแถวเป็นบัตรการ์ด พร้อมชื่อคอลัมน์
    - Desktop: ไม่มีผล (ยังเป็นตารางตามเดิม)
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
-  .astryx-layout-content table.cmms-card-table {
+  table.cmms-card-table {
     display: block !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -1655,21 +1092,20 @@ html, body {
     border-spacing: 0 10px;
   }
 
-  /* ลูกของตารางก็ต้องเต็มความกว้างใหม่ (Astryx ตั้ง width ตายตัวตามคอลัมน์) */
-  .astryx-layout-content table.cmms-card-table colgroup,
-  .astryx-layout-content table.cmms-card-table col {
+  table.cmms-card-table colgroup,
+  table.cmms-card-table col {
     display: none;
   }
 
-  .astryx-layout-content table.cmms-card-table thead {
+  table.cmms-card-table thead {
     display: none;
   }
 
-  .astryx-layout-content table.cmms-card-table tbody {
+  table.cmms-card-table tbody {
     display: block;
   }
 
-  .astryx-layout-content table.cmms-card-table tbody tr {
+  table.cmms-card-table tbody tr {
     display: block;
     margin: 0 0 12px 0;
     padding: 14px 16px;
@@ -1679,11 +1115,11 @@ html, body {
     box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
   }
 
-  .astryx-layout-content table.cmms-card-table tbody tr:hover {
+  table.cmms-card-table tbody tr:hover {
     background: #FFFFFF;
   }
 
-  .astryx-layout-content table.cmms-card-table td {
+  table.cmms-card-table td {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -1698,7 +1134,7 @@ html, body {
   }
 
   /* ชื่อคอลัมน์เป็นป้ายหัวข้อเหนือค่า */
-  .astryx-layout-content table.cmms-card-table td::before {
+  table.cmms-card-table td::before {
     content: attr(data-label);
     display: block;
     margin-bottom: 2px;
@@ -1710,10 +1146,10 @@ html, body {
   }
 
   /* cell แรก (เลขที่ใบงาน/ชื่อ) = หัวการ์ด ชัดเจน ไม่ต้องมีป้าย */
-  .astryx-layout-content table.cmms-card-table td:first-child::before {
+  table.cmms-card-table td:first-child::before {
     display: none;
   }
-  .astryx-layout-content table.cmms-card-table td:first-child {
+  table.cmms-card-table td:first-child {
     font-weight: 700;
     font-size: 1rem;
     color: var(--cmms-text-primary);
@@ -1724,7 +1160,7 @@ html, body {
 
   /* checkbox เลือก → แสดงเป็นช่องเล็กมุมขวาบนของหัวการ์ด (แทนการซ่อน)
      ใช้ float เพื่อไม่รบกวน flow ของ cell แรก */
-  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) {
+  table.cmms-card-table td:has(> input[type="checkbox"]) {
     display: block;
     position: absolute;
     right: 10px;
@@ -1735,33 +1171,33 @@ html, body {
     padding: 0;
     z-index: 1;
   }
-  .astryx-layout-content table.cmms-card-table tbody tr {
+  table.cmms-card-table tbody tr {
     position: relative;
   }
-  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) input {
+  table.cmms-card-table td:has(> input[type="checkbox"]) input {
     width: 20px;
     height: 20px;
     accent-color: var(--cmms-primary);
   }
-  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"])::before {
+  table.cmms-card-table td:has(> input[type="checkbox"])::before {
     display: none;
   }
-  .astryx-layout-content table.cmms-card-table td:first-child {
+  table.cmms-card-table td:first-child {
     padding-right: 34px;
   }
 
   /* cell ว่าง (เช่น คอลัมน์รูปถ่ายที่ไม่มีรูป) → ซ่อน */
-  .astryx-layout-content table.cmms-card-table td:empty {
+  table.cmms-card-table td:empty {
     display: none;
   }
 
   /* cell ที่มี checkbox (เลือก) → ซ่อน */
-  .astryx-layout-content table.cmms-card-table td:has(> input[type="checkbox"]) {
+  table.cmms-card-table td:has(> input[type="checkbox"]) {
     display: none;
   }
 
   /* ปุ่มใน cell action → เต็มความกว้าง กดถนัด */
-  .astryx-layout-content table.cmms-card-table td button {
+  table.cmms-card-table td button {
     width: 100%;
     justify-content: center;
   }
@@ -1773,37 +1209,33 @@ html, body {
    ================================================ */
 @media (max-width: 767.98px) {
   /* ซ่อน Breadcrumb — Mobile App Bar แสดงชื่อหน้าแทน */
-  [class*="Breadcrumb"] { display: none !important; }
+  nav[aria-label="breadcrumb"] { display: none !important; }
 
   /* Input ทุกช่อง: เต็มความกว้าง, สูง 48px, ฟอนต์ 16px
      (16px ป้องกัน iOS auto-zoom ตอนโฟกัส) */
-  [class*="TextInput_input"],
-  [class*="Selector_trigger"],
-  [class*="TextArea_textarea"],
-  [class*="Select_trigger"],
-  [class*="DatePicker_input"],
-  [class*="NumberInput_input"] {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
     width: 100% !important;
     height: 48px !important;
     min-height: 48px !important;
     font-size: 16px !important;
   }
-  [class*="TextArea_textarea"] {
+  textarea {
     height: auto !important;
     min-height: 96px !important;
     resize: vertical;
   }
 
   /* การ์ด: ถอดเงาหนา + ลดเหลี่ยมให้เนียนตาม app native */
-  [data-astryx-card],
-  [class*="Card_card"] {
+  .cmms-card-flat {
     border-radius: 12px !important;
     box-shadow: none !important;
   }
 
   /* ปุ่มหลัก/รอง: ขนาดนิ้วแตะถนัด */
-  button[class*="Button_primary"],
-  button[class*="Button_secondary"] {
+  button[type="submit"].btn-mobile-48,
+  button.btn-mobile-48 {
     min-height: 48px !important;
     font-size: 16px !important;
   }
@@ -2014,7 +1446,7 @@ textarea:focus-visible,
 .animate-fade-in { animation: cmmsPageEnter 0.3s var(--ease-standard, ease) both; }
 
 /* ---- Route transition (ทุกหน้า) ---- */
-[class*="LayoutContent"] > *:first-child {
+#cmms-main-scroll main > div > *:first-child {
   animation: cmmsPageEnter 0.24s var(--ease-standard, ease) both;
 }
 @keyframes cmmsPageEnter {
@@ -2024,15 +1456,15 @@ textarea:focus-visible,
 
 /* ---- Print ---- */
 @media print {
-  [class*="SideNav"],
-  [class*="TopNav"],
+  aside,
+  header,
   .cmms-mobile-app-bar,
   .cmms-mobile-bottom-nav,
   .cmms-toast-container {
     display: none !important;
   }
-  [class*="AppShell"] { display: block !important; height: auto !important; }
-  [class*="LayoutContent"] > *:first-child { animation: none; }
+  #cmms-main-scroll > div { display: block !important; height: auto !important; }
+  
 }
 
 /* ---- Reduced motion ---- */
@@ -2046,7 +1478,7 @@ textarea:focus-visible,
     scroll-behavior: auto !important;
   }
   .cmms-skeleton::after { animation: none; }
-  [class*="LayoutContent"] > *:first-child { animation: none; }
+  
 }
 /* ================================================
    Fix: next-route-announcer (ฉีดโดย Next.js สำหรับ screen reader)
@@ -3040,5 +2472,23 @@ html.cmms-no-anim *::after {
   .cmms-menu-content, .cmms-pop-content, .cmms-sel-content,
   .cmms-tip-content, .cmms-sheet-overlay, .cmms-sheet-content {
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* ================================================================
+   v3 ADDENDUM — mobile bottom-sheet for Radix dialogs
+   (ports the legacy native-<dialog> .cmms-close-work-modal UX)
+   ================================================================ */
+@media (max-width: 640px) {
+  .cmms-dlg-content.cmms-close-work-modal {
+    top: auto !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 92dvh !important;
+    border-radius: 20px 20px 0 0 !important;
+    animation: none !important;
   }
 }
