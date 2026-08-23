@@ -95,7 +95,7 @@ This document outlines the current status of features and modules within the CMM
   - Command Palette (Ctrl/Cmd+K) `components/CommandPalette.tsx` — ค้นหาเมนูแบบสด จัดลำดับตามสิทธิ์ (ใช้ SideNav + bottom nav) + คีย์บอร์ด ↑↓/↵/ESC
   - `globals.css`: toast styles, skeleton shimmer, focus-visible ring, selection, route transition, print, reduced-motion, palette styles
   - ทดสอบจริงบน production build (`next build` + `next start`): toast 3 แบบ + auto-dismiss, palette เปิด/กรอง/คีย์บอร์ด/ปิด ผ่านทั้งหมด
-- [x] **UI Redesign Plan Steps 0–2, 7, 10, 12-partial (2026-08-23):**
+- [x] **UI Redesign Plan Steps 0–12 complete (2026-08-23):**
   - Step 0: `.form-section` family (ui-polish.css §11) + Playwright e2e smoke harness
   - Step 1 (PWA): PageShell `eyebrow` prop + sweep 52 pages — design-audit `--strict` PASS 0 WARN; pre-push hook unblocked
   - Step 7: `.status-*` / `.priority-*` semantic badge palette (ui-polish.css §12, light-dark aware) + `src/components/badge.php` helper + migrate ~30 PHP pages off raw Tailwind colors
@@ -104,6 +104,11 @@ This document outlines the current status of features and modules within the CMM
   - Step 12 partial: viewport เปิด pinch-zoom (WCAG 1.4.4) + input ≥16px กัน iOS auto-zoom
   - Visual regression harness: screenshots 28 PWA routes × 2 viewports (authed shots env-gated)
   - Dark-mode hex debt: assessed — hex ที่เหลือใน frontend เป็นของ legit (PDF/print docs, LINE template defaults, theme engine, GrapesJS canvas)
+  - Step 3: canonical `.card` — strip raw white-card scaffolding 78 จุด + convert 72 จุด (62 ไฟล์), translucent chips เก็บไว้
+  - Step 4: `.form-checkbox/.form-radio/.textarea-field/.form-required-legend`
+  - Step 5: `.cmms-filter-bar` canonical (flex layout) + search-input wrap + filter chips
+  - Step 8: `.cmms-modal-*` + `CMMS_UI.openModal/closeModal` (focus trap + ESC + restore) — migrate smart-req modal
+  - Step 9: `.cmms-banner` 4 variants — convert 134 alert divs / ~78 pages (+fix dead ternaries 21 จุด) + wire `?msg=/?error=` → toast (engine v6.2)
 
 ## [ ] Pending/Incomplete Features & Modules
 
