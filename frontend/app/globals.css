@@ -2807,3 +2807,238 @@ next-route-announcer {
   display: inline-block;
   margin-right: 6px;
 }
+
+/* ================================================================
+   v3 TOKEN LAYER (ux-redesign) — docs/DESIGN_SYSTEM.md §2
+   ----------------------------------------------------------------
+   Appended AFTER the legacy blocks so these values win the cascade.
+   - shadcn token names added alongside kept --cmms-* names
+   - TOPPAN Blue #0068B5 stays --primary / --cmms-primary
+   - neutral zinc base replaces gradient/glass chrome
+   ================================================================ */
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --background: #f4f5f7;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #0068b5;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --accent: #eef4f9;
+  --accent-foreground: #00508c;
+  --destructive: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+  --info: #0284c7;
+  --border: #e4e4e7;
+  --input: #d4d4d8;
+  --ring: #0068b5;
+
+  /* --- refreshed --cmms-* values (names unchanged) --- */
+  --cmms-bg-page: #f4f5f7;
+  --cmms-bg-card: #ffffff;
+  --cmms-bg-popover: #ffffff;
+  --cmms-bg-muted: #f4f4f5;
+  --cmms-bg-wash: #f4f4f5;
+  --cmms-text-primary: #18181b;
+  --cmms-text-secondary: #52525b;
+  --cmms-text-muted: #a1a1aa;
+  --cmms-text-on-primary: #ffffff;
+  --cmms-border: #e4e4e7;
+  --cmms-border-hover: #d4d4d8;
+  --cmms-border-focus: #0068b5;
+  --cmms-primary: #0068b5;
+  --cmms-primary-hover: #005fa3;
+  --cmms-primary-light: rgba(0, 104, 181, 0.10);
+  --cmms-primary-glow: rgba(0, 104, 181, 0.22);
+  --cmms-danger: #dc2626;
+  --cmms-danger-light: #fee2e2;
+  --cmms-danger-dark: #b91c1c;
+  --cmms-success: #16a34a;
+  --cmms-success-light: #dcfce7;
+  --cmms-success-dark: #15803d;
+  --cmms-warning: #d97706;
+  --cmms-warning-light: #fef3c7;
+  --cmms-warning-dark: #b45309;
+  --cmms-info: #0284c7;
+  --cmms-info-light: #e0f2fe;
+  --cmms-bg-sidebar: #ffffff;
+  --cmms-bg-sidebar-hover: #f4f5f7;
+  --cmms-bg-sidebar-active: #0068b5;
+  --cmms-sidebar-indicator: #0068b5;
+  --cmms-sidebar-text: #52525b;
+  --cmms-sidebar-text-strong: #18181b;
+  --cmms-radius-sm: 6px;
+  --cmms-radius: 8px;
+  --cmms-radius-lg: 12px;
+  --cmms-radius-xl: 16px;
+  --cmms-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.05);
+  --cmms-shadow: 0 1px 3px rgba(24, 24, 27, 0.07), 0 1px 2px rgba(24, 24, 27, 0.04);
+  --cmms-shadow-md: 0 4px 8px -2px rgba(24, 24, 27, 0.08);
+  --cmms-shadow-lg: 0 10px 18px -6px rgba(24, 24, 27, 0.10);
+  --cmms-shadow-xl: 0 20px 30px -10px rgba(24, 24, 27, 0.14);
+  --cmms-shadow-focus: 0 0 0 3px rgba(0, 104, 181, 0.18);
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #101012;
+  --foreground: #f4f4f5;
+  --card: #1b1b1f;
+  --card-foreground: #f4f4f5;
+  --popover: #1b1b1f;
+  --popover-foreground: #f4f4f5;
+  --primary: #3b93cf;
+  --primary-foreground: #0b1220;
+  --secondary: #27272a;
+  --secondary-foreground: #f4f4f5;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #1f2937;
+  --accent-foreground: #dbeafe;
+  --destructive: #ef4444;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --info: #38bdf8;
+  --border: #2e2e33;
+  --input: #3f3f46;
+  --ring: #3b93cf;
+
+  --cmms-bg-page: #101012;
+  --cmms-bg-card: #1b1b1f;
+  --cmms-bg-popover: #1b1b1f;
+  --cmms-bg-muted: #27272a;
+  --cmms-bg-wash: #27272a;
+  --cmms-text-primary: #f4f4f5;
+  --cmms-text-secondary: #a1a1aa;
+  --cmms-text-muted: #71717a;
+  --cmms-text-on-primary: #0b1220;
+  --cmms-border: #2e2e33;
+  --cmms-border-hover: #3f3f46;
+  --cmms-border-focus: #3b93cf;
+  --cmms-primary: #3b93cf;
+  --cmms-primary-hover: #5aa8de;
+  --cmms-primary-light: rgba(59, 147, 207, 0.15);
+  --cmms-primary-glow: rgba(59, 147, 207, 0.28);
+  --cmms-danger: #ef4444;
+  --cmms-danger-light: rgba(239, 68, 68, 0.15);
+  --cmms-success: #22c55e;
+  --cmms-success-light: rgba(34, 197, 94, 0.15);
+  --cmms-warning: #f59e0b;
+  --cmms-warning-light: rgba(245, 158, 11, 0.15);
+  --cmms-info: #38bdf8;
+  --cmms-info-light: rgba(56, 189, 248, 0.15);
+  --cmms-bg-sidebar: #1b1b1f;
+  --cmms-bg-sidebar-hover: #27272a;
+  --cmms-bg-sidebar-active: #0068b5;
+  --cmms-sidebar-indicator: #3b93cf;
+  --cmms-sidebar-text: #a1a1aa;
+  --cmms-sidebar-text-strong: #f4f4f5;
+  --cmms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --cmms-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --cmms-shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.5);
+  --cmms-shadow-lg: 0 10px 18px -6px rgba(0, 0, 0, 0.5);
+  --cmms-shadow-xl: 0 20px 30px -10px rgba(0, 0, 0, 0.55);
+  --cmms-shadow-focus: 0 0 0 3px rgba(59, 147, 207, 0.35);
+}
+
+/* ================================================================
+   v3 MOTION — Radix state animations (no plugin dependency)
+   ================================================================ */
+@keyframes cmmsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cmmsFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes cmmsPopIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes cmmsPopOut {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+}
+@keyframes cmmsSlideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes cmmsSlideOutLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@keyframes cmmsSlideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes cmmsSlideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes cmmsMenuIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cmms-dlg-overlay[data-state="open"] { animation: cmmsFadeIn 150ms ease-out; }
+.cmms-dlg-overlay[data-state="closed"] { animation: cmmsFadeOut 150ms ease-in forwards; }
+.cmms-dlg-content[data-state="open"] { animation: cmmsPopIn 160ms ease-out; }
+.cmms-dlg-content[data-state="closed"] { animation: cmmsPopOut 140ms ease-in forwards; }
+
+.cmms-menu-content[data-state="open"],
+.cmms-pop-content[data-state="open"],
+.cmms-sel-content[data-state="open"] { animation: cmmsMenuIn 130ms ease-out; }
+.cmms-tip-content[data-state="delayed-open"],
+.cmms-tip-content[data-state="instant-open"] { animation: cmmsFadeIn 120ms ease-out; }
+
+.cmms-sheet-overlay[data-state="open"] { animation: cmmsFadeIn 180ms ease-out; }
+.cmms-sheet-overlay[data-state="closed"] { animation: cmmsFadeOut 180ms ease-in forwards; }
+.cmms-sheet-content[data-state="open"].inset-y-0.left-0,
+.cmms-sheet-content[data-state="open"][style*="left"] { animation: cmmsSlideInLeft 220ms ease-out; }
+.cmms-sheet-content[data-state="closed"] { animation: cmmsSlideOutLeft 200ms ease-in forwards; }
+
+html.cmms-no-anim *,
+html.cmms-no-anim *::before,
+html.cmms-no-anim *::after {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmms-dlg-overlay, .cmms-dlg-content,
+  .cmms-menu-content, .cmms-pop-content, .cmms-sel-content,
+  .cmms-tip-content, .cmms-sheet-overlay, .cmms-sheet-content {
+    animation-duration: 0.01ms !important;
+  }
+}
