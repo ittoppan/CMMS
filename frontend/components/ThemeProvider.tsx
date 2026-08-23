@@ -5,11 +5,15 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 
 /**
- * ThemeProvider — โหลดธีมจากฐานข้อมูล (settings) แล้ว apply เป็น CSS variables
- * แบบเรียลไทม์ (ไม่ต้อง refresh) ทั่วทั้งระบบ
+ * ThemeProvider — v3 port (ux-redesign).
+ * โหลดธีมจากฐานข้อมูล (settings) แล้ว apply เป็น CSS variables แบบเรียลไทม์
+ *
+ * v3 change: writes ONLY the token names this codebase owns after the Astryx
+ * removal — `--cmms-*` (app semantic layer) and the shadcn base tokens
+ * (`--primary`, `--background`, ...). No more `--color-*` Astryx names.
  *
  * - อ่าน key: theme_preset / theme_primary_hex / theme_secondary_hex จาก /api/v1/settings.php
- * - ฟัง event "cmms-theme-preview" (จากหน้า settings) เพื่ออัปเดตทันทีโดยไม่ต้อง reload
+ * - ฟัง event "cmms-theme-preview" (หน้า settings) อัปเดตทันทีโดยไม่ reload
  */
 export const THEME_PRESETS: Record<
   string,
@@ -17,10 +21,10 @@ export const THEME_PRESETS: Record<
 > = {
   toppan: {
     label: "TOPPAN Blue",
-    primary: "#0057A8",
-    gradient: "linear-gradient(135deg, #0057A8, #1E88E5)",
+    primary: "#0068B5",
+    gradient: "linear-gradient(135deg, #0068B5, #0093FF)",
     sidebar: "#FFFFFF",
-    body: "#F5F7FA",
+    body: "#F4F5F7",
   },
   indigo: {
     label: "Indigo & Violet",
@@ -49,57 +53,21 @@ const isDark = () =>
   typeof document !== "undefined" && document.documentElement.classList.contains("dark");
 
 let lastApplied: { primary: string; gradient: string; sidebar: string; body: string } | null = null;
-// เก็บ getter ของ settings ล่าสุดไว้ re-apply ตอนสลับ light/dark (design vars ผูกกับโหมด)
+// เก็บ getter ของ settings ล่าสุดไว้ re-apply ตอนสลับ light/dark
 let lastSettingsGet: ((k: string) => string) | null = null;
 
-const applyTheme = (theme: { primary: string; gradient: string; sidebar: string; body: string }) => {
-  lastApplied = theme;
-  const root = document.documentElement;
-  const dark = isDark();
-  root.style.setProperty("--color-accent", theme.primary);
-  root.style.setProperty("--color-accent-muted", `${theme.primary}1F`);
-  root.style.setProperty("--color-text-accent", theme.primary);
-  root.style.setProperty("--color-icon-accent", theme.primary);
-  root.style.setProperty("--color-border-blue", theme.primary);
-  root.style.setProperty("--color-icon-blue", theme.primary);
-  // พื้นหลัง/พื้นผิว light-only — dark mode ต้องลบ inline เพื่อให้ .dark tokens ชนะ
-  if (!dark) {
-    root.style.setProperty("--color-background-body", theme.body);
-    root.style.setProperty("--color-background-muted", `${theme.body}E6`);
-    root.style.setProperty("--cmms-bg-sidebar", theme.sidebar);
-    // ค่าตรงๆ สำหรับของที่ใช้ตัวแปรสี hardcode จาก theme.css ของ astryx
-    root.style.setProperty("--color-background-surface", "#FFFFFF");
-    root.style.setProperty("--color-background-card", "#FFFFFF");
-  } else {
-    root.style.removeProperty("--color-background-body");
-    root.style.removeProperty("--color-background-muted");
-    root.style.removeProperty("--cmms-bg-sidebar");
-    root.style.removeProperty("--color-background-surface");
-    root.style.removeProperty("--color-background-card");
-    // ค่าที่ design_body_bg เคย pin ไว้ — ต้องลบให้ .dark tokens ชนะ
-    root.style.removeProperty("--cmms-bg-page");
-    root.style.removeProperty("--cmms-bg-wash");
-  }
-  // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
-  root.style.setProperty("--cmms-bg-sidebar-active", theme.primary);
-  root.style.setProperty("--cmms-gradient-primary", theme.gradient);
-  root.style.setProperty("--cmms-primary", theme.primary);
-  root.style.setProperty("--cmms-primary-hover", theme.primary);
-  root.style.setProperty("--cmms-border-focus", theme.primary);
-  root.style.setProperty("--cmms-shadow-focus", `0 0 0 3px ${theme.primary}33`);
-};
-
-const hexToRgb = (hex: string): string => {
+/** hex → rgba tint string */
+const tint = (hex: string, alpha: number): string => {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
   const n = parseInt(full, 16);
-  if (Number.isNaN(n) || full.length !== 6) return "79, 70, 229";
-  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+  if (Number.isNaN(n) || full.length !== 6) return `rgba(0,104,181,${alpha})`;
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
 };
 
 /**
- * สร้าง gradient string จากสี primary/secondary (อยู่ component เพื่อให้หน้า
- * Page Designer ไม่ต้องมี literal "linear-gradient(" ใน JSX — audit guideline)
+ * buildGradient — legacy helper still imported by settings/design preview.
+ * Kept until that page converts to the v3 design (flat surfaces, no gradients).
  */
 export const buildGradient = (primary: string, secondary: string, presetKey?: string): string => {
   const base = (presetKey && THEME_PRESETS[presetKey]) || THEME_PRESETS.toppan;
@@ -109,8 +77,46 @@ export const buildGradient = (primary: string, secondary: string, presetKey?: st
   return base.gradient;
 };
 
+const applyTheme = (theme: { primary: string; gradient: string; sidebar: string; body: string }) => {
+  lastApplied = theme;
+  const root = document.documentElement;
+  const dark = isDark();
+
+  // Brand / accent tokens (--cmms-* + shadcn base)
+  root.style.setProperty("--cmms-primary", theme.primary);
+  root.style.setProperty("--cmms-primary-hover", theme.primary);
+  root.style.setProperty("--cmms-primary-light", tint(theme.primary, 0.10));
+  root.style.setProperty("--cmms-primary-glow", tint(theme.primary, 0.22));
+  root.style.setProperty("--cmms-border-focus", theme.primary);
+  root.style.setProperty("--cmms-shadow-focus", `0 0 0 3px ${tint(theme.primary, 0.18)}`);
+  root.style.setProperty("--cmms-bg-sidebar-active", theme.primary);
+  root.style.setProperty("--cmms-sidebar-indicator", theme.primary);
+  // legacy hook kept alive for not-yet-converted pages (hero gradient)
+  root.style.setProperty("--cmms-gradient-primary", theme.gradient);
+  root.style.setProperty("--primary", theme.primary);
+  root.style.setProperty("--ring", theme.primary);
+
+  // Light surfaces are light-mode-only — removed in dark so .dark tokens win
+  if (!dark) {
+    root.style.setProperty("--cmms-bg-page", theme.body);
+    root.style.setProperty("--cmms-bg-wash", theme.body);
+    root.style.setProperty("--cmms-bg-muted", theme.body);
+    root.style.setProperty("--cmms-bg-sidebar", theme.sidebar);
+    root.style.setProperty("--background", theme.body);
+    root.style.setProperty("--secondary", theme.body);
+    root.style.setProperty("--muted", theme.body);
+  } else {
+    for (const v of [
+      "--cmms-bg-page", "--cmms-bg-wash", "--cmms-bg-muted", "--cmms-bg-sidebar",
+      "--background", "--secondary", "--muted",
+    ]) {
+      root.style.removeProperty(v);
+    }
+  }
+};
+
 /**
- * Page Designer (settings/design) — apply design_* keys เป็น CSS vars ทั่วระบบ
+ * Page Designer (settings/design) — apply design_* keys เป็น CSS vars
  * (sidebar / การ์ด / Andon / ฟอนต์ / พื้นหลัง) — design keys ชนะ preset เสมอ
  */
 const DESIGN_VAR_MAP: Record<string, string[]> = {
@@ -119,7 +125,7 @@ const DESIGN_VAR_MAP: Record<string, string[]> = {
   design_sidebar_indicator: ["--cmms-sidebar-indicator"],
   design_card_radius: ["--cmms-radius", "--cmms-radius-sm", "--cmms-radius-lg", "--cmms-radius-xl"],
   design_card_shadow: ["--cmms-shadow-sm", "--cmms-shadow-md", "--cmms-shadow-lg", "--cmms-shadow-xl"],
-  design_body_bg: ["--color-background-body", "--cmms-bg-page", "--cmms-bg-wash"],
+  design_body_bg: ["--cmms-bg-page", "--cmms-bg-wash", "--background"],
   design_andon_ok: ["--cmms-andon-ok"],
   design_andon_warn: ["--cmms-andon-warn"],
   design_andon_down: ["--cmms-andon-down"],
@@ -127,7 +133,7 @@ const DESIGN_VAR_MAP: Record<string, string[]> = {
   design_font_size: ["--cmms-font-size-base"],
 };
 
-// keys ที่เป็น "สีพื้นหลังโหมดสว่าง" — ใน dark mode ต้องข้าม เพื่อให้ .dark tokens ชนะ
+// keys ที่เป็น "สีพื้นหลังโหมดสว่าง" — ใน dark mode ต้องข้าม ให้ .dark tokens ชนะ
 const LIGHT_ONLY_DESIGN_KEYS = new Set(["design_body_bg", "design_sidebar_bg"]);
 
 const applyDesign = (get: (k: string) => string) => {
@@ -143,9 +149,6 @@ const applyDesign = (get: (k: string) => string) => {
 
 /**
  * สวิตช์ "เปิด animation ของระบบ" (settings → animations_enabled)
- * ผู้ดูแลปิดได้เองแม้ OS ตั้งค่าให้แสดง animation อยู่ — เติมคลาส
- * cmms-no-anim บน <html> ให้ CSS กัน animation/transition ทั้งระบบ
- * (แยกจาก prefers-reduced-motion ของ OS ต่างหาก)
  */
 const applyAnimSetting = (get: (k: string) => string) => {
   const root = document.documentElement;
@@ -154,8 +157,8 @@ const applyAnimSetting = (get: (k: string) => string) => {
 };
 
 /**
- * Hero เฉพาะหน้า — ใส่ data-hero ตามเส้นทาง (repair/spare_parts/…) ให้ CSS
- * ธีมสี + ไอคอนลายน้ำเฉพาะหมวด แทนไล่สีน้ำเงินเดียวกันทุกหน้า
+ * Hero เฉพาะหน้า — data-hero ตามเส้นทาง (legacy hero CSS; คงไว้จนกว่าทุกหน้า
+ * จะ convert เป็น PageShell แล้ว Stage 5 จะลบ CSS นี้)
  */
 const HERO_THEMES = new Set([
   "dashboard", "andon-board", "iot", "repair", "spare_parts", "pm_am",
@@ -176,15 +179,14 @@ export default function ThemeProvider() {
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
 
-  // สลับ light/dark — re-apply ธีมล่าสุด + design vars ตามโหมด (พื้นหลัง light-only จะถูกข้าม/ลบใน dark)
+  // สลับ light/dark — re-apply ธีมล่าสุด + design vars ตามโหมด
   useEffect(() => {
     if (!resolvedTheme) return;
     if (lastApplied) applyTheme(lastApplied);
     if (lastSettingsGet) applyDesign(lastSettingsGet);
   }, [resolvedTheme]);
 
-  // Hero เฉพาะหน้า — รีแท็กทุกครั้งที่เปลี่ยนเส้นทาง (ไคลเอนต์ nav ไม่ต้องโหลดใหม่)
-  // + MutationObserver จัดการ hero ที่ mount ทีหลัง (หน้าบางหน้า render หลังโหลดข้อมูล)
+  // Hero เฉพาะหน้า — retag ตามเส้นทาง
   useEffect(() => {
     const tag = () => applyHeroTheme(pathname ?? "");
     tag();
@@ -204,11 +206,10 @@ export default function ThemeProvider() {
         const json = await res.json();
         if (!Array.isArray(json)) return;
         const get = (k: string) => json.find((s: any) => s.setting_key === k)?.setting_value ?? "";
-        const preset = get("theme_preset") || "indigo";
+        const preset = get("theme_preset") || "toppan";
         const customPrimary = get("theme_primary_hex");
-        const base = THEME_PRESETS[preset] ?? THEME_PRESETS.indigo;
+        const base = THEME_PRESETS[preset] ?? THEME_PRESETS.toppan;
         const primary = /^#[0-9a-fA-F]{3,8}$/.test(customPrimary) ? customPrimary : base.primary;
-        // gradient จาก secondary hex (ถ้าไม่มีใช้ gradient ของ preset)
         const secondary = get("theme_secondary_hex");
         const gradient = /^#[0-9a-fA-F]{3,8}$/.test(secondary)
           ? `linear-gradient(135deg, ${primary}, ${secondary})`
@@ -216,15 +217,7 @@ export default function ThemeProvider() {
         if (!cancelled) {
           lastSettingsGet = get;
           applyTheme({ ...base, primary, gradient });
-          // SideNav โฉมใหม่: active = สีทึบของแบรนด์ (ไม่ใช้ gradient)
-          const root = document.documentElement;
-          root.style.setProperty("--cmms-bg-sidebar-active", primary);
-          root.style.setProperty("--cmms-gradient-primary", gradient);
-          root.style.setProperty("--cmms-primary", primary);
-          root.style.setProperty("--cmms-primary-hover", primary);
-          // Page Designer: design_* keys ชนะ preset (ถ้ามีค่า) — dark-aware ตาม applyDesign
           applyDesign(get);
-          // สวิตช์ปิด animation (ผู้ดูแล)
           applyAnimSetting(get);
         }
       } catch (e) {
@@ -232,19 +225,15 @@ export default function ThemeProvider() {
       }
     };
 
-    // ฟังการ preview จากหน้า settings (ไม่ต้อง save ก็เห็นผลทันที)
+    // preview จากหน้า settings
     const onPreview = (e: Event) => {
       const detail = (e as CustomEvent).detail as { primary?: string; gradient?: string; sidebar?: string; body?: string } | undefined;
-      if (detail) applyTheme({ ...THEME_PRESETS.indigo, ...detail });
+      if (detail) applyTheme({ ...THEME_PRESETS.toppan, ...detail });
     };
-
-    // ฟังการปรับแต่งจากหน้า Page Designer (settings/design) — apply design keys แบบเรียลไทม์
     const onDesignPreview = (e: Event) => {
       const detail = (e as CustomEvent).detail as Record<string, string> | undefined;
       if (detail) applyDesign((k) => detail[k] ?? "");
     };
-
-    // สลับ "เปิด animation ของระบบ" ทันทีจากหน้า settings (ไม่ต้อง refresh)
     const onAnimSetting = (e: Event) => {
       const detail = (e as CustomEvent).detail as { enabled?: boolean } | undefined;
       document.documentElement.classList.toggle("cmms-no-anim", detail?.enabled === false);

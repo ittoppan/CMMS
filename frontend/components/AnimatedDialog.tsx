@@ -1,76 +1,64 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ComponentProps } from "react";
-import { Dialog } from "@astryxdesign/core/Dialog";
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { cn } from "@/lib/cn";
 
 /**
- * AnimatedDialog — wrapper เดียวของ Astryx Dialog ที่มี exit animation จริง
+ * AnimatedDialog — v3 port onto Radix Dialog (ux-redesign).
  *
- * ปัญหาเดิม: Astryx Dialog unmount ทันทีตอนปิด → ทำ exit animation ไม่ได้
- * วิธีแก้: ตัว wrapper ยัง mount อยู่เสมอ (หน้าที่ใช้ต้อง render แบบไม่มี `{x && ...}`)
- * ควบคุม isOpen เอง — ตอนปิดใส่คลาส cmms-dialog-closing (scale-out + fade 220ms)
- * แล้วค่อย unmount หลัง animation จบ
+ * เดิม: wrapper ของ Astryx Dialog + manual delayed-unmount เพื่อ exit animation
+ * ตอนนี้: Radix คุม lifecycle เองผ่าน data-state (CSS keyframes ใน globals.css
+ * `.cmms-dlg-*`) จึงเหลือแค่ pass-through ที่คง public API เดิมไว้:
  *
- * API:
  *   <AnimatedDialog open={x} onClose={() => setX(false)}>...</AnimatedDialog>
- *   - open: ควบคุมเปิด/ปิด (แทน isOpen)
- *   - onClose: เรียกเมื่อผู้ใช้ปิด (Esc / คลิก backdrop / ปุ่ม X) หลัง animation จบ
- *   - props ที่เหลือส่งต่อให้ Astryx Dialog (variant/width/position/...)
+ *
+ * หมายเหตุ: props ของ Astryx Dialog เดิม (variant/width/position) ไม่รองรับแล้ว —
+ * หน้าที่ยังส่ง props เหล่านั้นต้องย้ายมาใช้ utility classes ตอน convert
  */
-type AnimatedDialogProps = Omit<ComponentProps<typeof Dialog>, "isOpen" | "onOpenChange"> & {
-  open: boolean;
-  onClose: () => void;
-};
-
 export const DIALOG_EXIT_MS = 220;
 
-export default function AnimatedDialog({ open, onClose, className, children, ...rest }: AnimatedDialogProps) {
-  const [mounted, setMounted] = useState(open);
-  const [closing, setClosing] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+export type AnimatedDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  /** @deprecated legacy Astryx prop — use className/style instead */
+  width?: string | number;
+  /** @deprecated legacy Astryx prop — use className/style instead */
+  maxHeight?: string | number;
+  children?: React.ReactNode;
+};
 
-  // เปิด → mount ทันที (entry animation จาก CSS dialog[open])
-  // ปิด (parent ตั้ง open=false) → เล่น exit animation แล้วค่อย unmount
-  useEffect(() => {
-    if (open) {
-      if (timer.current) clearTimeout(timer.current);
-      setClosing(false);
-      setMounted(true);
-    } else if (mounted && !closing) {
-      setClosing(true);
-      timer.current = setTimeout(() => {
-        setMounted(false);
-        setClosing(false);
-      }, DIALOG_EXIT_MS);
-    }
-  }, [open, mounted, closing]);
-
-  // ล้าง timer เมื่อ component ถูกทำลาย
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-
-  // ผู้ใช้ปิดผ่าน Astryx (Esc / คลิก backdrop) → exit animation ก่อนแจ้ง parent
-  const handleOpenChange = useCallback((next: boolean) => {
-    if (next || closing) return;
-    setClosing(true);
-    timer.current = setTimeout(() => {
-      setMounted(false);
-      setClosing(false);
-      onClose();
-    }, DIALOG_EXIT_MS);
-  }, [closing, onClose]);
-
-  if (!mounted) return null;
-
-  const mergedClassName = [className, closing && "cmms-dialog-closing"].filter(Boolean).join(" ") || undefined;
-
+export default function AnimatedDialog({
+  open,
+  onClose,
+  className,
+  style,
+  width,
+  maxHeight,
+  children,
+}: AnimatedDialogProps) {
+  const legacyStyle = React.useMemo<React.CSSProperties | undefined>(() => {
+    if (width === undefined && maxHeight === undefined && style === undefined) return undefined;
+    return { ...style, ...(width !== undefined ? { width: "100%", maxWidth: typeof width === "number" ? `${width}px` : width } : {}), ...(maxHeight !== undefined ? { maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight } : {}) };
+  }, [style, width, maxHeight]);
   return (
-    <Dialog
-      isOpen
-      onOpenChange={handleOpenChange}
-      className={mergedClassName}
-      {...rest}
-    >
-      {children}
-    </Dialog>
+    <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="cmms-dlg-overlay fixed inset-0 z-50 bg-black/50" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          style={legacyStyle}
+          className={cn(
+            "cmms-dlg-content fixed left-1/2 top-1/2 z-50 max-h-[85dvh] w-[calc(100vw-32px)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-xl",
+            className
+          )}
+        >
+          <DialogPrimitive.Title className="sr-only">dialog</DialogPrimitive.Title>
+          <div className="max-h-[85dvh] overflow-y-auto">{children}</div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
