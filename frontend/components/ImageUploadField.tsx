@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text } from "@astryxdesign/core/Text";
-import { FileInput } from "@astryxdesign/core/FileInput";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
-import { TrashIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+// ImageUploadField — v3 design port (ux-redesign)
+// Public API unchanged: value / onChange / folder / label / allowUrl
+// business logic ครบเดิม: POST /api/v1/upload.php (dataURL) หรือวาง URL เอง
+
+import { useRef, useState } from "react";
+import { VStack, HStack } from "@/components/layout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, Trash2 } from "lucide-react";
 
 interface ImageUploadFieldProps {
   /** ค่าปัจจุบัน: URL ของรูป (เช่น /uploads/spares/xxx.png) หรือ null */
@@ -37,6 +38,7 @@ export default function ImageUploadField({
   const [uploading, setUploading] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const uploadFile = async (f: File) => {
     setErrorMsg("");
@@ -78,67 +80,75 @@ export default function ImageUploadField({
   };
 
   return (
-    <VStack gap={2}>
-      <VStack gap={1}>
-        <FileInput
-          label={label}
-          isLabelHidden
+    <VStack gap={2} className="items-start">
+      <VStack gap={1} className="items-start">
+        <input
+          ref={fileInputRef}
+          type="file"
           accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
-          value={file}
-          onChange={(f) => {
-            const selected = Array.isArray(f) ? f[0] ?? null : f;
+          aria-label={label}
+          className="sr-only"
+          onChange={(e) => {
+            const selected = e.target.files?.[0] ?? null;
             setFile(selected);
             if (selected) uploadFile(selected);
           }}
         />
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          เลือกไฟล์รูป...
+        </Button>
         {uploading && (
           <HStack gap={2} vAlign="center">
-            <Icon icon={ArrowPathIcon} size="sm" />
-            <Text type="body" size="sm" color="secondary">กำลังอัปโหลดรูป...</Text>
+            <Loader2 size={14} strokeWidth={1.75} aria-hidden="true" className="animate-spin text-[var(--cmms-text-secondary)]" />
+            <p className="text-sm text-muted-foreground">กำลังอัปโหลดรูป...</p>
           </HStack>
         )}
       </VStack>
 
       {value ? (
         <HStack gap={3} vAlign="center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value}
             alt={label}
-            style={{ width: 96, height: 72, borderRadius: 8, objectFit: "cover", border: "1px solid var(--color-border)" }}
+            style={{ width: 96, height: 72, borderRadius: 8, objectFit: "cover", border: "1px solid var(--cmms-border)" }}
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.opacity = "0.4"; }}
           />
-          <VStack gap={1}>
-            <Text type="body" size="sm" color="secondary" style={{ wordBreak: "break-all", maxWidth: 320 }}>{value}</Text>
-            <Button
-              label="ลบรูป"
-              variant="secondary"
-              size="sm"
-              icon={<Icon icon={TrashIcon} size="xsm" />}
-              onClick={() => onChange(null)}
-            />
+          <VStack gap={1} className="items-start">
+            <p className="max-w-[320px] break-all text-sm text-muted-foreground">{value}</p>
+            <Button variant="secondary" size="sm" onClick={() => onChange(null)}>
+              <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+              ลบรูป
+            </Button>
           </VStack>
         </HStack>
       ) : (
         !uploading && (
-          <Text type="body" size="sm" color="secondary" style={{ opacity: 0.7 }}>ยังไม่มีรูปภาพ</Text>
+          <p className="text-sm text-muted-foreground opacity-70">ยังไม่มีรูปภาพ</p>
         )
       )}
 
       {allowUrl && (
         <HStack gap={2} vAlign="center">
-          <TextInput
+          <Input
             label="URL รูปภาพ"
             isLabelHidden
             placeholder="หรือวาง URL รูปภาพที่นี่ (เช่น จาก Sage)..."
             value={urlInput}
-            onChange={setUrlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            className="w-64"
           />
-          <Button label="ใช้ URL นี้" variant="secondary" size="sm" onClick={handleUrlApply} />
+          <Button variant="secondary" size="sm" onClick={handleUrlApply}>ใช้ URL นี้</Button>
         </HStack>
       )}
 
       {errorMsg && (
-        <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>⚠️ {errorMsg}</Text>
+        <p className="text-sm" style={{ color: "var(--cmms-danger)" }}>⚠️ {errorMsg}</p>
       )}
     </VStack>
   );

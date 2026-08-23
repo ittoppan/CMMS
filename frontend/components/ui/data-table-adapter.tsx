@@ -52,12 +52,21 @@ export function toColumnDefs<T extends RowData>(
 export interface SimpleDataTableProps<T extends RowData>
   extends Omit<React.ComponentProps<typeof DataTable<T>>, "columns"> {
   columns: SimpleColumn<T>[];
+  /** convenience alias for getRowId */
+  idKey?: keyof T & string;
 }
 
 export function SimpleDataTable<T extends RowData>({
   columns,
+  idKey,
   ...rest
 }: SimpleDataTableProps<T>) {
   const defs = useMemo(() => toColumnDefs(columns), [columns]);
-  return <DataTable<T> columns={defs} {...rest} />;
+  return (
+    <DataTable<T>
+      columns={defs}
+      {...(idKey ? { getRowId: (row: T) => String(row[idKey]) } : null)}
+      {...rest}
+    />
+  );
 }

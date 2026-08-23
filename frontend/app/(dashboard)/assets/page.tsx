@@ -1,25 +1,28 @@
 "use client";
 
+// assets — migrate ui kit (PageShell, ui/Card, ui/Select, SimpleDataTable, Lucide)
+// business logic ครบเดิม: fetch index.php?resource=assets, filter search/dept/status
+
 import { useState, useEffect, useMemo } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Table, proportional, pixel, useTablePagination } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Link } from "@astryxdesign/core/Link";
+import Link from "next/link";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
 import CountUp from "react-countup";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
 import {
-  PlusIcon,
-  MagnifyingGlassIcon,
-  BuildingOffice2Icon,
-  CheckCircleIcon,
-  WrenchScrewdriverIcon,
-  ClockIcon,
-} from "@heroicons/react/24/outline";
+  Plus,
+  Search,
+  Building2,
+  CheckCircle2,
+  Wrench,
+  Clock,
+} from "lucide-react";
 
 interface Asset extends Record<string, unknown> {
   code: string;
@@ -45,11 +48,12 @@ const statusLabelMap: Record<string, string> = {
   decommissioned: "เลิกใช้งาน",
 };
 
-const statusChipStyle: Record<string, React.CSSProperties> = {
-  operational: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
-  standby: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
-  "under-repair": { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
-  decommissioned: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
+// สถานะ → Badge variant (docs/DESIGN_SYSTEM.md §2.3)
+const statusBadgeVariant: Record<string, "success" | "warning" | "danger" | "neutral"> = {
+  operational: "success",
+  standby: "warning",
+  "under-repair": "danger",
+  decommissioned: "neutral",
 };
 
 const departmentLabelMap: Record<string, string> = {
@@ -76,8 +80,6 @@ export default function AssetsPage() {
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -124,132 +126,134 @@ export default function AssetsPage() {
     });
   }, [search, deptFilter, statusFilter, assets]);
 
-  const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  // ตัวกรองเปลี่ยน → remount table (reset sorting/pagination)
+  const tableKey = `${search}|${deptFilter}|${statusFilter}`;
 
-  const pagination = useTablePagination<Asset>({
-    page,
-    onPageChange: setPage,
-    totalItems,
-    pageSize,
-  });
-
-  const columns: TableColumn<Asset>[] = [
-    { key: "code", header: "รหัสเครื่องจักร", width: proportional(1), renderCell: (item: Asset) => <Link href={`/assets/${item.code}`}>{item.code}</Link> },
-    { key: "name", header: "ชื่อเครื่องจักร", width: proportional(2) },
-    { key: "department", header: "แผนก", width: proportional(1), renderCell: (item: Asset) => departmentLabelMap[item.department] || item.department },
+  const columns: SimpleColumn<Asset>[] = [
+    {
+      key: "code",
+      header: "รหัสเครื่องจักร",
+      renderCell: (item: Asset) => (
+        <Link href={`/assets/${item.code}`} className="font-medium text-primary hover:underline">{item.code}</Link>
+      ),
+    },
+    { key: "name", header: "ชื่อเครื่องจักร" },
+    {
+      key: "department",
+      header: "แผนก",
+      renderCell: (item: Asset) => departmentLabelMap[item.department] || item.department,
+    },
     {
       key: "status",
       header: "สถานะ",
-      width: proportional(1),
       renderCell: (item: Asset) => (
-        <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.decommissioned}>
+        <Badge variant={statusBadgeVariant[item.status] || "neutral"}>
           {statusLabelMap[item.status] || item.status}
-        </span>
+        </Badge>
       ),
     },
-    { key: "location", header: "สถานที่ติดตั้ง", width: proportional(2) },
-    { key: "lastPM", header: "วัน PM ล่าสุด", width: proportional(1) },
+    { key: "location", header: "สถานที่ติดตั้ง" },
+    { key: "lastPM", header: "วัน PM ล่าสุด" },
   ];
 
-  return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSETS · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ทะเบียนเครื่องจักรและทรัพย์สิน</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <BuildingOffice2Icon className="w-3.5 h-3.5" /> ทะเบียน {kpiData.total} รายการ
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว
-          </Text>
-        </VStack>
-        <a href="/assets/create" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary">
-          <PlusIcon className="w-4 h-4" />
-          เพิ่มเครื่องจักร
-        </a>
-      </div>
+  const kpiIconChip = "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg";
 
+  return (
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ทะเบียนเครื่องจักรและทรัพย์สิน" }]}
+      title="ทะเบียนเครื่องจักรและทรัพย์สิน"
+      description="ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว"
+      actions={
+        <Button onClick={() => (window.location.href = "/assets/create")}>
+          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+          เพิ่มเครื่องจักร
+        </Button>
+      }
+    >
+      {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <BuildingOffice2Icon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className={kpiIconChip} style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)" }}>
+              <Building2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.total} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">เครื่องจักรทั้งหมด</p>
+              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.total} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile green">
-              <CheckCircleIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className={kpiIconChip} style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }}>
+              <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">พร้อมใช้งาน</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.operational} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">พร้อมใช้งาน</p>
+              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.operational} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile red">
-              <WrenchScrewdriverIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className={kpiIconChip} style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger)" }}>
+              <Wrench size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">กำลังซ่อม</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.underRepair} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">กำลังซ่อม</p>
+              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.underRepair} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <ClockIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className={kpiIconChip} style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning)" }}>
+              <Clock size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">สแตนด์บาย</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={kpiData.standby} /> <Text type="body" size="sm">รายการ</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">สแตนด์บาย</p>
+              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.standby} /> <span className="text-sm font-normal">รายการ</span></h2>
+            </div>
+          </CardContent>
         </Card>
       </Grid>
 
-      <Card elevation="low" padding={6}>
-        <VStack gap={4}>
-          <HStack gap={3} vAlign="end" wrap="wrap">
-            <TextInput label="ค้นหา"
-              isLabelHidden
-              placeholder="ค้นหาด้วยรหัส ชื่อ หรือสถานที่..."
-              value={search}
-              onChange={setSearch}
-              hasClear
-              startIcon={MagnifyingGlassIcon}
-              style={{ minWidth: 280 }}  />
-            <Selector
-              label="แผนก"
-              isLabelHidden
-              placeholder="แผนกทั้งหมด"
-              value={deptFilter}
-              onChange={(v) => { setDeptFilter(v); setPage(1); }}
-              options={departments}
-              style={{ minWidth: 160 }}
-            />
-            <Selector
-              label="สถานะ"
-              isLabelHidden
-              placeholder="สถานะทั้งหมด"
-              value={statusFilter}
-              onChange={(v) => { setStatusFilter(v); setPage(1); }}
-              options={statuses.map((s) => ({ value: s, label: s === "All" ? "ทั้งหมด" : statusLabelMap[s] }))}
-              style={{ minWidth: 160 }}
-            />
-          </HStack>
+      {/* Filter + table */}
+      <Card>
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="relative min-w-[280px] flex-1">
+              <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+              <Input
+                label="ค้นหา"
+                isLabelHidden
+                placeholder="ค้นหาด้วยรหัส ชื่อ หรือสถานที่..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={deptFilter} onValueChange={setDeptFilter}>
+              <SelectTrigger aria-label="แผนก" className="w-full sm:w-[180px]">
+                <SelectValue placeholder="แผนกทั้งหมด" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger aria-label="สถานะ" className="w-full sm:w-[180px]">
+                <SelectValue placeholder="สถานะทั้งหมด" />
+              </SelectTrigger>
+              <SelectContent>
+                {statuses.map((s) => (
+                  <SelectItem key={s} value={s}>{s === "All" ? "ทั้งหมด" : statusLabelMap[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {!loading && filtered.length === 0 ? (
             <EmptyState
@@ -257,18 +261,19 @@ export default function AssetsPage() {
               description="ลองเปลี่ยนตัวกรอง หรือเพิ่มเครื่องจักรใหม่ในระบบ"
             />
           ) : (
-            <Table<Asset>
-              data={paged}
+            <SimpleDataTable<Asset>
+              key={tableKey}
               columns={columns}
-              idKey="code"
-              density="balanced"
-              dividers="rows"
-              hasHover
-              plugins={{ pagination }}
+              data={filtered}
+              loading={loading}
+              getRowId={(r) => r.code}
+              pageSize={10}
+              emptyTitle="ไม่พบเครื่องจักร"
+              emptyDescription="ลองเปลี่ยนตัวกรอง หรือเพิ่มเครื่องจักรใหม่ในระบบ"
             />
           )}
-        </VStack>
+        </CardContent>
       </Card>
-    </VStack>
+    </PageShell>
   );
 }

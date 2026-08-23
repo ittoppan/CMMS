@@ -1,31 +1,33 @@
 "use client";
 
+// asset_registry — migrate ui kit (PageShell, ui/Card, ui/Select, SimpleDataTable, ui/Dialog, Badge, Lucide)
+// business logic ครบเดิม: fetch asset_registry.php, delete, filter search/criticality/status
+
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
-import { 
-  BuildingOffice2Icon,
-  PlusIcon,
-  RectangleGroupIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  WrenchScrewdriverIcon,
-  PencilSquareIcon,
-  TrashIcon
-} from "@heroicons/react/24/outline";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
+import {
+  Building2,
+  Plus,
+  Network,
+  TriangleAlert,
+  CheckCircle2,
+  Boxes,
+  Search,
+  SquarePen,
+  Trash2,
+} from "lucide-react";
 
 interface AssetRecord extends Record<string, unknown> {
   rawId?: number;
@@ -56,17 +58,18 @@ const statusMap: Record<string, { label: string }> = {
   standby: { label: "พร้อมใช้งาน" },
 };
 
-const statusChipStyle: Record<string, React.CSSProperties> = {
-  running: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
-  breakdown: { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
-  maintenance: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
-  standby: { background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)" },
+// สถานะ → Badge variant (docs/DESIGN_SYSTEM.md §2.3)
+const statusBadgeVariant: Record<string, "success" | "danger" | "warning" | "info"> = {
+  running: "success",
+  breakdown: "danger",
+  maintenance: "warning",
+  standby: "info",
 };
 
-const criticalityChipStyle: Record<string, React.CSSProperties> = {
-  A: { background: "rgba(244,63,94,0.12)", color: "var(--cmms-danger)" },
-  B: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
-  C: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
+const criticalityBadgeVariant: Record<string, "danger" | "warning" | "neutral"> = {
+  A: "danger",
+  B: "warning",
+  C: "neutral",
 };
 
 const PAGE_SIZE = 10;
@@ -142,8 +145,6 @@ export default function AssetRegistryPage() {
     }
   };
 
-  const [page, setPage] = useState(1);
-
   const filteredAssets = useMemo(() => {
     return assets.filter((a) => {
       const q = search.toLowerCase();
@@ -154,21 +155,18 @@ export default function AssetRegistryPage() {
     });
   }, [search, criticalityFilter, statusFilter, assets]);
 
-  const totalItems = filteredAssets.length;
-  const paged = filteredAssets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // ตัวกรองเปลี่ยน → remount table (reset sorting/pagination)
+  const tableKey = `${search}|${criticalityFilter}|${statusFilter}`;
 
-  const pagination = useTablePagination<AssetRecord>({ page, onPageChange: setPage, totalItems, pageSize: PAGE_SIZE });
-
-  const columns: TableColumn<AssetRecord>[] = [
+  const columns: SimpleColumn<AssetRecord>[] = [
     {
       key: "image",
       header: t("tbl.image"),
-      width: proportional(0.7),
       renderCell: (item) => {
         const raw = item.imageUrl;
         if (!raw) {
           return (
-            <div style={{ width: 40, height: 40, borderRadius: 6, backgroundColor: "var(--cmms-bg-muted)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--cmms-text-muted)", fontSize: 16 }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[var(--cmms-bg-muted)] text-base text-[var(--cmms-text-muted)]">
               —
             </div>
           );
@@ -176,284 +174,260 @@ export default function AssetRegistryPage() {
         const cleaned = String(raw).replace(/\\/g, "/");
         const src = cleaned.startsWith("data:") || cleaned.startsWith("/") || cleaned.startsWith("http") ? cleaned : "/" + cleaned;
         return (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
             alt={item.name}
-            style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", border: "1px solid var(--cmms-border)" }}
+            className="h-10 w-10 rounded-md border border-border object-cover"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
         );
       },
     },
-    { 
-      key: "code", 
-      header: t("tbl.asset_code_serial"), 
-      width: proportional(2),
+    {
+      key: "code",
+      header: t("tbl.asset_code_serial"),
       renderCell: (item) => (
-        <VStack gap={0}>
-          <Text type="body" weight="bold">{item.code}</Text>
-          <Text type="body" size="sm" color="secondary">S/N: {item.serialNo}</Text>
-        </VStack>
-      )
+        <div className="flex flex-col">
+          <span className="font-semibold">{item.code}</span>
+          <span className="text-xs text-muted-foreground">S/N: {item.serialNo}</span>
+        </div>
+      ),
     },
     {
       key: "name",
       header: t("tbl.asset_location"),
-      width: proportional(3),
       renderCell: (item) => (
-        <VStack gap={0}>
-          <Text type="body" weight="semibold">{item.name}</Text>
-          <Text type="body" size="sm" color="secondary">หมวดหมู่: {item.category} · {item.location}</Text>
-        </VStack>
+        <div className="flex flex-col">
+          <span className="font-medium">{item.name}</span>
+          <span className="text-xs text-muted-foreground">หมวดหมู่: {item.category} · {item.location}</span>
+        </div>
       ),
     },
     {
       key: "criticality",
       header: t("tbl.criticality"),
-      width: proportional(1.2),
       renderCell: (item) => (
-        <span className="cmms-andon-chip" style={criticalityChipStyle[item.criticality] || criticalityChipStyle.C}>
+        <Badge variant={criticalityBadgeVariant[item.criticality] || "neutral"}>
           เกรด {item.criticality}
-        </span>
+        </Badge>
       ),
     },
     {
       key: "status",
       header: t("tbl.asset_status"),
-      width: proportional(1.8),
       renderCell: (item) => {
         const label = statusMap[item.status]?.label || item.status;
         return (
-          <span className="cmms-andon-chip" style={statusChipStyle[item.status] || statusChipStyle.standby}>
+          <Badge variant={statusBadgeVariant[item.status] || "info"}>
             {label}
-          </span>
+          </Badge>
         );
       },
     },
     {
       key: "actions",
       header: t("tbl.actions"),
-      width: proportional(2.5),
+      align: "right",
       renderCell: (item) => (
-        <HStack gap={1} wrap="wrap">
-          <button
-            type="button"
+        <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label="ผัง BOM"
+            title="ผัง BOM"
             onClick={() => router.push(`/asset_registry/bom_tree?code=${item.code}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
           >
-            <RectangleGroupIcon className="w-3.5 h-3.5" />
-            ผัง BOM
-          </button>
-          <button
-            type="button"
+            <Network size={16} strokeWidth={1.75} aria-hidden="true" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label="แก้ไข"
+            title="แก้ไข"
             onClick={() => router.push(`/asset_registry/edit?id=${item.rawId || item.id}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
           >
-            <PencilSquareIcon className="w-3.5 h-3.5" />
-            แก้ไข
-          </button>
-          <button
-            type="button"
+            <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:bg-[var(--cmms-danger-light)] hover:text-[var(--cmms-danger-dark)]"
+            aria-label={t("action.delete")}
+            title={t("action.delete")}
             onClick={() => setDeleteTarget(item)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
           >
-            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
-        </HStack>
-      )
-    }
+            <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+          </Button>
+        </div>
+      ),
+    },
   ];
 
-  return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <BuildingOffice2Icon className="w-3.5 h-3.5" /> ทะเบียน {assets.length} เครื่อง
-            </span>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              แบบฟอร์มมาตรฐาน ISO
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <button
-            type="button"
-            onClick={() => router.push("/asset_registry/criticality")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <RectangleGroupIcon className="w-4 h-4" />
-            วิเคราะห์ความสำคัญ
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/asset_registry/create")}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-          >
-            <PlusIcon className="w-4 h-4" />
-            เพิ่มเครื่องจักรใหม่
-          </button>
-        </HStack>
-      </div>
+  const kpiIconChip = "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg";
 
+  return (
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <>
+          <Button variant="secondary" onClick={() => router.push("/asset_registry/criticality")}>
+            <Network size={16} strokeWidth={1.75} aria-hidden="true" />
+            วิเคราะห์ความสำคัญ
+          </Button>
+          <Button onClick={() => router.push("/asset_registry/create")}>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            เพิ่มเครื่องจักรใหม่
+          </Button>
+        </>
+      }
+    >
       {error && (
-        <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}
 
+      {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 4 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <BuildingOffice2Icon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className={kpiIconChip} style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)" }}>
+              <Building2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เครื่องจักรทั้งหมด</Text>
-              <Heading level={2} className="cmms-kpi-value">{assets.length} <Text type="body" size="sm">เครื่อง</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">เครื่องจักรทั้งหมด</p>
+              <h2 className="text-xl font-semibold tabular-nums">{assets.length} <span className="text-sm font-normal">เครื่อง</span></h2>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile green">
-              <CheckCircleIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }} className={kpiIconChip}>
+              <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เดินเครื่องปกติ</Text>
-              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.status === "running").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">เดินเครื่องปกติ</p>
+              <h2 className="text-xl font-semibold tabular-nums">{assets.filter(a => a.status === "running").length} <span className="text-sm font-normal">เครื่อง</span></h2>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile red">
-              <ExclamationTriangleIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger)" }} className={kpiIconChip}>
+              <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เครื่องเสีย</Text>
-              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.status === "breakdown").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">เครื่องเสีย</p>
+              <h2 className="text-xl font-semibold tabular-nums">{assets.filter(a => a.status === "breakdown").length} <span className="text-sm font-normal">เครื่อง</span></h2>
+            </div>
+          </CardContent>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <RectangleGroupIcon className="w-6 h-6" />
+        <Card>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning)" }} className={kpiIconChip}>
+              <Boxes size={20} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">เครื่องจักรคลาส A (วิกฤต)</Text>
-              <Heading level={2} className="cmms-kpi-value">{assets.filter(a => a.criticality === "A").length} <Text type="body" size="sm">เครื่อง</Text></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">เครื่องจักรคลาส A (วิกฤต)</p>
+              <h2 className="text-xl font-semibold tabular-nums">{assets.filter(a => a.criticality === "A").length} <span className="text-sm font-normal">เครื่อง</span></h2>
+            </div>
+          </CardContent>
         </Card>
       </Grid>
 
-      <Toolbar
-        label="ตัวกรองเครื่องจักร"
-        startContent={
-          <>
-            <TextInput
+      {/* Filter toolbar */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px] flex-1">
+            <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+            <Input
               label="ค้นหา"
               isLabelHidden
               placeholder="ค้นหารหัส, ชื่อเครื่องจักร, Serial No..."
-              startIcon={WrenchScrewdriverIcon}
               value={search}
-              onChange={setSearch}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
             />
-            <Selector
-              label="ระดับความสำคัญ"
-              isLabelHidden
-              placeholder="ทุกระดับความสำคัญ"
-              value={criticalityFilter}
-              onChange={setCriticalityFilter}
-              options={[
-                { value: "all", label: "ทุกระดับความสำคัญ" },
-                { value: "A", label: "ระดับ A" },
-                { value: "B", label: "ระดับ B" },
-                { value: "C", label: "ระดับ C" },
-              ]}
-            />
-            <Selector
-              label="สถานะ"
-              isLabelHidden
-              placeholder="ทุกสถานะการทำงาน"
-              value={statusFilter}
-              onChange={setStatusFilter}
-              options={[
-                { value: "all", label: "ทุกสถานะการทำงาน" },
-                { value: "running", label: "กำลังทำงานปกติ" },
-                { value: "breakdown", label: "เครื่องเสีย" },
-                { value: "maintenance", label: "กำลังทำซ่อมบำรุง" },
-                { value: "standby", label: "พร้อมใช้งาน" },
-              ]}
-            />
-          </>
-        }
-      />
+          </div>
+          <Select value={criticalityFilter} onValueChange={setCriticalityFilter}>
+            <SelectTrigger aria-label="ระดับความสำคัญ" className="w-full sm:w-[200px]">
+              <SelectValue placeholder="ทุกระดับความสำคัญ" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">ทุกระดับความสำคัญ</SelectItem>
+              <SelectItem value="A">ระดับ A</SelectItem>
+              <SelectItem value="B">ระดับ B</SelectItem>
+              <SelectItem value="C">ระดับ C</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger aria-label="สถานะ" className="w-full sm:w-[210px]">
+              <SelectValue placeholder="ทุกสถานะการทำงาน" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">ทุกสถานะการทำงาน</SelectItem>
+              <SelectItem value="running">กำลังทำงานปกติ</SelectItem>
+              <SelectItem value="breakdown">เครื่องเสีย</SelectItem>
+              <SelectItem value="maintenance">กำลังทำซ่อมบำรุง</SelectItem>
+              <SelectItem value="standby">พร้อมใช้งาน</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
 
-      <Card padding={0} style={{ overflowX: 'auto' }}>
-        {paged.length === 0 ? (
-          <EmptyState title="ไม่มีข้อมูล" description="ไม่พบเครื่องจักรในระบบ" icon={<WrenchScrewdriverIcon className="w-6 h-6" />} />
-        ) : (
-          <Table<AssetRecord>
-            data={paged}
-            columns={columns}
-            idKey="id"
-            density="balanced"
-            dividers="rows"
-            hasHover
-            plugins={{ pagination }}
-          />
-        )}
+      {/* Table */}
+      <Card>
+        <SimpleDataTable<AssetRecord>
+          key={tableKey}
+          columns={columns}
+          data={filteredAssets}
+          getRowId={(r) => r.id}
+          pageSize={PAGE_SIZE}
+          emptyTitle="ไม่มีข้อมูล"
+          emptyDescription="ไม่พบเครื่องจักรในระบบ (ลองปรับตัวกรอง)"
+        />
       </Card>
 
       {/* Delete Dialog */}
-      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-          <DialogHeader title="ยืนยันการลบข้อมูลเครื่องจักร" onOpenChange={(isOpen) => !isOpen && setDeleteTarget(null)} />
-          {deleteTarget && (
-          <VStack gap={4} style={{ padding: 24 }}>
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="ยืนยันการลบข้อมูลเครื่องจักร"
+      >
+        {deleteTarget && (
+          <div className="space-y-4">
             {deleteSuccess ? (
-              <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
-                <CheckCircleIcon className="w-5 h-5" />
-                <Text type="body" weight="bold">ลบข้อมูลเครื่องจักรสำเร็จแล้ว</Text>
-              </HStack>
+              <p className="flex items-center gap-2 font-semibold" style={{ color: "var(--cmms-success)" }}>
+                <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
+                ลบข้อมูลเครื่องจักรสำเร็จแล้ว
+              </p>
             ) : (
               <>
-                <Text type="body">
-                  คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลเครื่องจักร <strong>"{deleteTarget.code} - {deleteTarget.name}"</strong> ออกจากระบบ?
-                </Text>
-                <Text type="body" size="sm" color="secondary">
+                <p className="text-sm">
+                  คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลเครื่องจักร <strong>&quot;{deleteTarget.code} - {deleteTarget.name}&quot;</strong> ออกจากระบบ?
+                </p>
+                <p className="text-sm text-muted-foreground">
                   การลบนี้จะทำการลบข้อมูลจาก MySQL Database และไม่สามารถย้อนคืนได้
-                </Text>
-                <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                  <button
-                    type="button"
-                    onClick={() => setDeleteTarget(null)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                  >
+                </p>
+                <div className="mt-3 flex justify-end gap-2">
+                  <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
                     ยกเลิก
-                  </button>
-                  <button
-                    type="button"
-                    disabled={deleting}
-                    onClick={handleDelete}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
-                  >
+                  </Button>
+                  <Button variant="danger" disabled={deleting} onClick={handleDelete}>
                     {deleting ? "กำลังลบ..." : "ลบเครื่องจักร"}
-                  </button>
-                </HStack>
+                  </Button>
+                </div>
               </>
             )}
-          </VStack>
-          )}
-        </AnimatedDialog>
-    </VStack>
+          </div>
+        )}
+      </Dialog>
+    </PageShell>
   );
 }

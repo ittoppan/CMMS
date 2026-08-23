@@ -1,30 +1,33 @@
 "use client";
 
+// asset_registry/bom_tree — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Dialog, Badge, Lucide)
+// business logic ครบเดิม: machine_bom.php CRUD, spare-parts index, side panel เลือกชิ้นส่วน
+
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
-import { 
-  RectangleGroupIcon,
-  CogIcon,
-  CubeIcon,
-  ShoppingBagIcon,
-  PlusIcon,
-  CheckCircleIcon,
-  TrashIcon,
-  BuildingOffice2Icon,
-  MapPinIcon,
-  PhotoIcon,
-} from "@heroicons/react/24/outline";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Dialog } from "@/components/ui/dialog";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Boxes,
+  Cog,
+  Box,
+  ShoppingBag,
+  Plus,
+  CheckCircle2,
+  Trash2,
+  Building2,
+  MapPin,
+  Image as ImageIcon,
+} from "lucide-react";
 
 interface Machine {
   id: number;
@@ -67,11 +70,12 @@ function normalizeImage(raw?: string | null): string | null {
   return "/" + cleaned;
 }
 
-const statusChipStyle: Record<string, React.CSSProperties> = {
-  active: { background: "rgba(16,185,129,0.12)", color: "var(--cmms-success)" },
-  inactive: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
-  disposed: { background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" },
-  under_repair: { background: "rgba(245,158,11,0.12)", color: "var(--cmms-warning)" },
+// สถานะเครื่องจักร → Badge variant (docs/DESIGN_SYSTEM.md §2.3)
+const statusBadgeVariant: Record<string, "success" | "neutral" | "warning"> = {
+  active: "success",
+  inactive: "neutral",
+  disposed: "neutral",
+  under_repair: "warning",
 };
 
 export default function BOMTreePage() {
@@ -246,137 +250,129 @@ export default function BOMTreePage() {
   const selectedSpareObj = spareParts.find((p) => String(p.id) === selectedSpareId);
 
   return (
-    <VStack gap={6}>
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)" }]}
+      title="ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)"
+      description="ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง"
+      actions={
+        <Button disabled={machines.length === 0} onClick={() => setModalOpen(true)}>
+          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+          เพิ่มชิ้นส่วนเข้า BOM
+        </Button>
+      }
+    >
       {error && (
-        <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}
 
-      {/* Header */}
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY BOM TREE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <RectangleGroupIcon className="w-3.5 h-3.5" /> รายการชิ้นส่วนประกอบ
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          disabled={machines.length === 0}
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <PlusIcon className="w-4 h-4" />
-          เพิ่มชิ้นส่วนเข้า BOM
-        </button>
-      </div>
-
       {loading ? (
-        <HStack hAlign="center" vAlign="center" style={{ padding: 60 }}>
-          <Spinner size="md" />
-          <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-        </HStack>
+        <Card>
+          <CardContent className="flex items-center justify-center gap-3 py-16">
+            <Spinner size={20} label="" />
+            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูล...</span>
+          </CardContent>
+        </Card>
       ) : machines.length === 0 ? (
-        <EmptyState
-          title="ยังไม่มีเครื่องจักรในระบบ"
-          description="เพิ่มเครื่องจักรที่ทะเบียนเครื่องจักรก่อน แล้วกลับมาสร้าง BOM Tree"
-          icon={<BuildingOffice2Icon className="w-6 h-6" />}
-        />
+        <Card>
+          <EmptyState
+            title="ยังไม่มีเครื่องจักรในระบบ"
+            description="เพิ่มเครื่องจักรที่ทะเบียนเครื่องจักรก่อน แล้วกลับมาสร้าง BOM Tree"
+            icon={<Building2 size={24} strokeWidth={1.75} aria-hidden="true" />}
+          />
+        </Card>
       ) : (
         <>
           {/* เลือกเครื่องจักร + ข้อมูลเครื่อง */}
-          <Card padding={4}>
-            <HStack gap={6} vAlign="center" wrap="wrap">
-              <HStack gap={3} vAlign="center" style={{ minWidth: 380, flex: 1 }}>
-                <Text type="body" weight="semibold">เลือกเครื่องจักร:</Text>
-                <div style={{ flex: 1 }}>
-                  <Selector
-                    label="เลือกเครื่องจักร"
-                    isLabelHidden
-                    options={machines.map((m) => ({
-                      value: String(m.id),
-                      label: `${m.code}: ${m.name}`,
-                    }))}
-                    value={selectedAssetId != null ? String(selectedAssetId) : ""}
-                    onChange={handleMachineChange}
-                  />
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-6 p-5">
+              <div className="flex min-w-[320px] flex-1 items-center gap-3">
+                <p className="whitespace-nowrap text-sm font-medium">เลือกเครื่องจักร:</p>
+                <div className="flex-1">
+                  <Select
+                    value={selectedAssetId != null ? String(selectedAssetId) : undefined}
+                    onValueChange={handleMachineChange}
+                  >
+                    <SelectTrigger aria-label="เลือกเครื่องจักร">
+                      <SelectValue placeholder="เลือกเครื่องจักร..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {machines.map((m) => (
+                        <SelectItem key={m.id} value={String(m.id)}>
+                          {`${m.code}: ${m.name}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </HStack>
+              </div>
               {machine && (
-                <HStack gap={4} vAlign="center">
+                <div className="flex flex-wrap items-center gap-4">
                   {normalizeImage(machine.image_path) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={normalizeImage(machine.image_path)!}
                       alt={machine.name}
-                      style={{ width: 56, height: 56, borderRadius: 8, objectFit: "cover", border: "1px solid var(--color-border)" }}
+                      className="h-14 w-14 rounded-lg border border-border object-cover"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                     />
                   ) : (
-                    <div style={{ width: 56, height: 56, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--color-muted)" }}>
-                      <BuildingOffice2Icon className="w-6 h-6" style={{ color: "var(--color-text-secondary)" }} />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                      <Building2 size={24} strokeWidth={1.75} aria-hidden="true" />
                     </div>
                   )}
-                  <VStack gap={1}>
-                    <HStack gap={2} vAlign="center">
-                      <Text type="body" weight="bold">{machine.code}</Text>
-                      <span className="cmms-andon-chip" style={statusChipStyle[machine.status || ""] || statusChipStyle.active}>
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold">{machine.code}</span>
+                      <Badge variant={statusBadgeVariant[machine.status || ""] || "success"}>
                         {machine.status || "active"}
-                      </span>
-                    </HStack>
-                    <Text type="body" size="sm" color="secondary">{machine.name}</Text>
-                    <HStack gap={4}>
-                      {machine.category && <Text type="body" size="sm" color="secondary">หมวด: {machine.category}</Text>}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{machine.name}</p>
+                    <div className="flex flex-wrap gap-4">
+                      {machine.category && <p className="text-xs text-muted-foreground">หมวด: {machine.category}</p>}
                       {machine.location && (
-                        <HStack gap={1} vAlign="center">
-                          <MapPinIcon className="w-4 h-4" style={{ color: "var(--color-text-secondary)" }} />
-                          <Text type="body" size="sm" color="secondary">{machine.location}</Text>
-                        </HStack>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin size={14} strokeWidth={1.75} aria-hidden="true" />
+                          {machine.location}
+                        </span>
                       )}
-                    </HStack>
-                  </VStack>
-                </HStack>
+                    </div>
+                  </div>
+                </div>
               )}
-            </HStack>
+            </CardContent>
           </Card>
 
           <Grid columns={3} gap={6}>
             {/* แพนซ้าย: BOM tree */}
             <div style={{ gridColumn: "span 2" }}>
-              <Card padding={5}>
-                <VStack gap={4}>
-                  <HStack hAlign="between" vAlign="center" style={{ paddingBottom: 12, borderBottom: "1px solid var(--color-border)" }}>
-                    <Heading level={4}>ชิ้นส่วนประกอบของ {machine?.code || "เครื่องจักร"}</Heading>
-                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>{parts.length} ชิ้นส่วน</span>
-                  </HStack>
-
+              <Card className="h-full">
+                <CardHeader className="flex-row items-center justify-between">
+                  <CardTitle>ชิ้นส่วนประกอบของ {machine?.code || "เครื่องจักร"}</CardTitle>
+                  <Badge variant="neutral">{parts.length} ชิ้นส่วน</Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
                   {bomLoading ? (
-                    <HStack hAlign="center" style={{ padding: 40 }}>
-                      <Spinner size="md" />
-                    </HStack>
+                    <div className="flex justify-center py-10">
+                      <Spinner size={20} label="" />
+                    </div>
                   ) : parts.length === 0 ? (
-                    <VStack gap={3} hAlign="center" vAlign="center" style={{ padding: 40 }}>
-                      <CubeIcon className="w-6 h-6" style={{ color: "var(--color-text-secondary)" }} />
-                      <Text type="body" color="secondary">ยังไม่มีชิ้นส่วนใน BOM ของเครื่องนี้ — กด "เพิ่มชิ้นส่วนเข้า BOM" เพื่อเริ่มต้น</Text>
-                    </VStack>
+                    <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+                      <Box size={24} strokeWidth={1.75} aria-hidden="true" className="text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">ยังไม่มีชิ้นส่วนใน BOM ของเครื่องนี้ — กด &quot;เพิ่มชิ้นส่วนเข้า BOM&quot; เพื่อเริ่มต้น</p>
+                    </div>
                   ) : (
-                    <VStack gap={3}>
+                    <div className="space-y-3">
                       {/* Root node: เครื่องจักร */}
-                      <div style={{ padding: "12px 16px", borderRadius: 8, border: "1px solid var(--color-primary)", backgroundColor: "var(--color-accent-wash)" }}>
-                        <HStack gap={3} vAlign="center">
-                          <RectangleGroupIcon className="w-5 h-5" style={{ color: "var(--color-primary)" }} />
-                          <VStack gap={0}>
-                            <HStack gap={2} vAlign="center">
-                              <Text type="body" weight="bold">{machine?.code}</Text>
-                              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)" }}>เครื่องจักร</span>
-                            </HStack>
-                            <Text type="body" size="sm" color="secondary">{machine?.name}</Text>
-                          </VStack>
-                        </HStack>
+                      <div className="flex items-center gap-3 rounded-lg border border-[var(--cmms-primary)] bg-accent px-4 py-3">
+                        <Boxes size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">{machine?.code}</span>
+                            <Badge variant="primary">เครื่องจักร</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{machine?.name}</p>
+                        </div>
                       </div>
 
                       {parts.map((p) => {
@@ -388,127 +384,144 @@ export default function BOMTreePage() {
                           <div
                             key={`p-db-${p.id}`}
                             onClick={() => setSelectedPart(p)}
-                            style={{
-                              marginLeft: 24,
-                              padding: "10px 16px",
-                              borderRadius: 8,
-                              border: "1px solid var(--color-border)",
-                              backgroundColor: selectedPart?.id === p.id ? "var(--color-accent-wash)" : "var(--color-surface)",
-                              cursor: "pointer",
-                              transition: "all 0.15s",
-                            }}
+                            className={`ml-6 cursor-pointer rounded-lg border px-4 py-2.5 transition-colors duration-150 ${
+                              selectedPart?.id === p.id ? "border-ring bg-accent" : "bg-card hover:bg-secondary/60"
+                            }`}
                           >
-                            <HStack hAlign="between" vAlign="center" gap={3}>
-                              <HStack gap={3} vAlign="center" style={{ flex: 1, minWidth: 0 }}>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex min-w-0 flex-1 items-center gap-3">
                                 {img ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
                                   <img
                                     src={img}
                                     alt={p.part_name || ""}
-                                    style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", border: "1px solid var(--color-border)", flexShrink: 0 }}
+                                    className="h-11 w-11 shrink-0 rounded-md border border-border object-cover"
                                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                                   />
                                 ) : (
-                                  <div style={{ width: 44, height: 44, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "var(--color-muted)", flexShrink: 0 }}>
-                                    <PhotoIcon className="w-5 h-5" style={{ color: "var(--color-text-secondary)" }} />
+                                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                    <ImageIcon size={20} strokeWidth={1.75} aria-hidden="true" />
                                   </div>
                                 )}
-                                <VStack gap={0} style={{ minWidth: 0 }}>
-                                  <HStack gap={2} vAlign="center">
-                                    <Text type="body" weight="bold">{p.part_code || `SP-${p.spare_part_id}`}</Text>
-                                    <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)" }}>ชิ้นส่วน</span>
-                                  </HStack>
-                                  <Text type="body" size="sm" color="secondary" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold">{p.part_code || `SP-${p.spare_part_id}`}</span>
+                                    <Badge variant="neutral">ชิ้นส่วน</Badge>
+                                  </div>
+                                  <p className="truncate text-sm text-muted-foreground">
                                     {p.part_name || "ชิ้นส่วนอะไหล่"}
-                                  </Text>
+                                  </p>
                                   {p.remarks && (
-                                    <Text type="body" size="sm" color="secondary">หมายเหตุ: {p.remarks}</Text>
+                                    <p className="text-xs text-muted-foreground">หมายเหตุ: {p.remarks}</p>
                                   )}
-                                </VStack>
-                              </HStack>
+                                </div>
+                              </div>
 
-                              <HStack gap={3} vAlign="center" style={{ flexShrink: 0 }}>
-                                <VStack gap={0} style={{ textAlign: "right" }}>
-                                  <Text type="body" size="sm">ใช้ {qty} {p.unit || "ชิ้น"}</Text>
-                                  <Text type="body" size="sm" style={{ color: low ? "var(--color-error)" : "var(--color-success)", fontWeight: 600 }}>
+                              <div className="flex shrink-0 items-center gap-3">
+                                <div className="text-right">
+                                  <p className="text-sm">ใช้ {qty} {p.unit || "ชิ้น"}</p>
+                                  <p className={`text-sm font-semibold ${low ? "text-destructive" : "text-[var(--cmms-success)]"}`}>
                                     คงเหลือ {stock} {p.unit || "ชิ้น"}{low ? " " : ""}
-                                  </Text>
-                                </VStack>
-                                <button
-                                  type="button"
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
                                   onClick={(e) => { e.stopPropagation(); window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(p.part_code || "")}`; }}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
                                 >
-                                  <ShoppingBagIcon className="w-3.5 h-3.5" />
+                                  <ShoppingBag size={14} strokeWidth={1.75} aria-hidden="true" />
                                   เบิก
-                                </button>
-                                <button
-                                  type="button"
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-destructive hover:bg-[var(--cmms-danger-light)] hover:text-[var(--cmms-danger-dark)]"
                                   onClick={(e) => { e.stopPropagation(); setConfirmDelete(p); }}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
                                 >
-                                  <TrashIcon className="w-3.5 h-3.5" />
+                                  <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
                                   ลบ
-                                </button>
-                              </HStack>
-                            </HStack>
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         );
                       })}
-                    </VStack>
+                    </div>
                   )}
-                </VStack>
+                </CardContent>
               </Card>
             </div>
 
             {/* แพนขวา: รายละเอียดชิ้นส่วน */}
             <div>
-              <Card padding={5} style={{ height: "100%" }}>
-                {selectedPart ? (
-                  <VStack gap={4}>
-                    <Heading level={5}>รายละเอียดชิ้นส่วน</Heading>
-                    {normalizeImage(selectedPart.image_url) && (
-                      <img
-                        src={normalizeImage(selectedPart.image_url)!}
-                        alt={selectedPart.part_name || ""}
-                        style={{ width: "100%", maxHeight: 180, borderRadius: 8, objectFit: "cover", border: "1px solid var(--color-border)" }}
-                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                      />
-                    )}
-                    <VStack gap={1}>
-                      <Text type="body" weight="bold">{selectedPart.part_name || "ชิ้นส่วนอะไหล่"}</Text>
-                      <Text type="body" size="sm" color="secondary">รหัส: {selectedPart.part_code || `SP-${selectedPart.spare_part_id}`}</Text>
-                    </VStack>
-                    <VStack gap={2}>
-                      <HStack hAlign="between"><Text type="body" size="sm" color="secondary">จำนวนที่ใช้ประกอบ</Text><Text type="body" size="sm" weight="semibold">{selectedPart.default_qty} {selectedPart.unit || "ชิ้น"}</Text></HStack>
-                      <HStack hAlign="between"><Text type="body" size="sm" color="secondary">คงเหลือในคลัง</Text><Text type="body" size="sm" weight="semibold" style={{ color: Number(selectedPart.stock_qty || 0) < Number(selectedPart.default_qty || 1) ? "var(--color-error)" : "var(--color-success)" }}>{Number(selectedPart.stock_qty || 0)} {selectedPart.unit || "ชิ้น"}</Text></HStack>
-                      {selectedPart.part_location && <HStack hAlign="between"><Text type="body" size="sm" color="secondary">ตำแหน่งจัดเก็บ</Text><Text type="body" size="sm" weight="semibold">{selectedPart.part_location}</Text></HStack>}
-                      {selectedPart.remarks && <HStack hAlign="between"><Text type="body" size="sm" color="secondary">หมายเหตุ</Text><Text type="body" size="sm" weight="semibold">{selectedPart.remarks}</Text></HStack>}
-                    </VStack>
-                    <HStack hAlign="between" gap={2}>
-                      <button
-                        type="button"
-                        onClick={() => window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(selectedPart.part_code || "")}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white cmms-btn-primary"
-                      >
-                        <ShoppingBagIcon className="w-3.5 h-3.5" />
-                        เบิกอะไหล่นี้
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setConfirmDelete(selectedPart)}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
-                      >
-                        <TrashIcon className="w-3.5 h-3.5" />
-                        ลบออกจาก BOM
-                      </button>
-                    </HStack>
-                  </VStack>
-                ) : (
-                  <VStack gap={3} hAlign="center" vAlign="center" style={{ padding: 30, opacity: 0.6 }}>
-                    <CogIcon className="w-6 h-6" />
-                    <Text type="body" color="secondary">คลิกชิ้นส่วนเพื่อดูรายละเอียด</Text>
-                  </VStack>
-                )}
+              <Card className="h-full">
+                <CardContent className="space-y-4 p-5">
+                  {selectedPart ? (
+                    <>
+                      <h4 className="text-base font-semibold">รายละเอียดชิ้นส่วน</h4>
+                      {normalizeImage(selectedPart.image_url) && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={normalizeImage(selectedPart.image_url)!}
+                          alt={selectedPart.part_name || ""}
+                          className="max-h-[180px] w-full rounded-lg border border-border object-cover"
+                          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                        />
+                      )}
+                      <div className="space-y-1">
+                        <p className="font-semibold">{selectedPart.part_name || "ชิ้นส่วนอะไหล่"}</p>
+                        <p className="text-sm text-muted-foreground">รหัส: {selectedPart.part_code || `SP-${selectedPart.spare_part_id}`}</p>
+                      </div>
+                      <dl className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="text-sm text-muted-foreground">จำนวนที่ใช้ประกอบ</dt>
+                          <dd className="text-sm font-medium">{selectedPart.default_qty} {selectedPart.unit || "ชิ้น"}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="text-sm text-muted-foreground">คงเหลือในคลัง</dt>
+                          <dd className={`text-sm font-medium ${Number(selectedPart.stock_qty || 0) < Number(selectedPart.default_qty || 1) ? "text-destructive" : "text-[var(--cmms-success)]"}`}>
+                            {Number(selectedPart.stock_qty || 0)} {selectedPart.unit || "ชิ้น"}
+                          </dd>
+                        </div>
+                        {selectedPart.part_location && (
+                          <div className="flex items-center justify-between gap-2">
+                            <dt className="text-sm text-muted-foreground">ตำแหน่งจัดเก็บ</dt>
+                            <dd className="text-sm font-medium">{selectedPart.part_location}</dd>
+                          </div>
+                        )}
+                        {selectedPart.remarks && (
+                          <div className="flex items-center justify-between gap-2">
+                            <dt className="text-sm text-muted-foreground">หมายเหตุ</dt>
+                            <dd className="text-sm font-medium">{selectedPart.remarks}</dd>
+                          </div>
+                        )}
+                      </dl>
+                      <div className="flex items-center justify-between gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          onClick={() => window.location.href = `/spare_parts/issue_center?code=${encodeURIComponent(selectedPart.part_code || "")}`}
+                        >
+                          <ShoppingBag size={14} strokeWidth={1.75} aria-hidden="true" />
+                          เบิกอะไหล่นี้
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-[var(--cmms-danger-light)] hover:text-[var(--cmms-danger-dark)]"
+                          onClick={() => setConfirmDelete(selectedPart)}
+                        >
+                          <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                          ลบออกจาก BOM
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-8 text-center opacity-60">
+                      <Cog size={24} strokeWidth={1.75} aria-hidden="true" />
+                      <p className="text-sm text-muted-foreground">คลิกชิ้นส่วนเพื่อดูรายละเอียด</p>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
             </div>
           </Grid>
@@ -516,120 +529,114 @@ export default function BOMTreePage() {
       )}
 
       {/* Modal: เพิ่มชิ้นส่วน */}
-      <AnimatedDialog open={modalOpen} onClose={() => setModalOpen(false)}>
-          <DialogHeader title={`เพิ่มชิ้นส่วนเข้า BOM: ${machine?.code || ""}`} onOpenChange={(open) => { if (!open) setModalOpen(false); }} />
-          <VStack gap={4} style={{ padding: 24 }}>
-            {successMsg ? (
-              <HStack gap={2} vAlign="center" style={{ color: "var(--cmms-success)" }}>
-                <CheckCircleIcon className="w-5 h-5" />
-                <Text type="body" weight="bold">{successMsg}</Text>
-              </HStack>
-            ) : (
-              <>
-                <VStack gap={3}>
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" weight="semibold">เครื่องจักรเป้าหมาย:</Text>
-                    <Text type="body" size="sm">{machine?.code} — {machine?.name}</Text>
-                  </VStack>
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title={`เพิ่มชิ้นส่วนเข้า BOM: ${machine?.code || ""}`}
+      >
+        {successMsg ? (
+          <p className="flex items-center gap-2 font-semibold" style={{ color: "var(--cmms-success)" }}>
+            <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
+            {successMsg}
+          </p>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">เครื่องจักรเป้าหมาย:</p>
+              <p className="text-sm">{machine?.code} — {machine?.name}</p>
+            </div>
 
-                  <VStack gap={1}>
-                    <Text type="body" size="sm" weight="semibold">เลือกรายการอะไหล่จากคลัง:</Text>
-                    {selectedSpareObj && normalizeImage(selectedSpareObj.image_url) && (
-                      <img
-                        src={normalizeImage(selectedSpareObj.image_url)!}
-                        alt={selectedSpareObj.name}
-                        style={{ width: 72, height: 72, borderRadius: 8, objectFit: "cover", border: "1px solid var(--color-border)" }}
-                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-                      />
-                    )}
-                    <Selector
-                      label="รายการอะไหล่"
-                      isLabelHidden
-                      value={selectedSpareId}
-                      onChange={(v) => setSelectedSpareId(String(v))}
-                      options={spareParts.map((p) => ({
-                        value: String(p.id),
-                        label: `${p.code} - ${p.name} (คงเหลือ: ${p.stock_qty ?? 0} ${p.unit || "ชิ้น"})`,
-                      }))}
-                    />
-                  </VStack>
-
-                  <HStack gap={3}>
-                    <VStack gap={1} style={{ flex: 1 }}>
-                      <Text type="body" size="sm" weight="semibold">จำนวนที่ใช้ประกอบ:</Text>
-                      <TextInput
-                        label="จำนวน"
-                        isLabelHidden
-                        value={partQty}
-                        onChange={setPartQty}
-                      />
-                    </VStack>
-
-                    <VStack gap={1} style={{ flex: 1 }}>
-                      <Text type="body" size="sm" weight="semibold">หมายเหตุ / หน้าที่ของชิ้นส่วน:</Text>
-                      <TextInput
-                        label="หมายเหตุ"
-                        isLabelHidden
-                        placeholder="เช่น อะไหล่สำรองเปลี่ยนตามรอบ 500 ชม..."
-                        value={partRemarks}
-                        onChange={setPartRemarks}
-                      />
-                    </VStack>
-                  </HStack>
-                </VStack>
-
-                <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                  <button
-                    type="button"
-                    onClick={() => setModalOpen(false)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">เลือกรายการอะไหล่จากคลัง:</p>
+              {selectedSpareObj && normalizeImage(selectedSpareObj.image_url) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={normalizeImage(selectedSpareObj.image_url)!}
+                  alt={selectedSpareObj.name}
+                  className="h-[72px] w-[72px] rounded-lg border border-border object-cover"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
+              )}
+                  <Select
+                    value={selectedSpareId}
+                    onValueChange={(v) => setSelectedSpareId(String(v))}
                   >
-                    ยกเลิก
-                  </button>
-                  <button
-                    type="button"
-                    disabled={saving || !selectedSpareId}
-                    onClick={handleAddComponent}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-                  >
-                    {saving ? "กำลังบันทึก..." : "บันทึกเพิ่มชิ้นส่วน"}
-                  </button>
-                </HStack>
-              </>
-            )}
-          </VStack>
-        </AnimatedDialog>
+                <SelectTrigger aria-label="รายการอะไหล่">
+                  <SelectValue placeholder="เลือกรายการอะไหล่..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {spareParts.map((p) => (
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {`${p.code} - ${p.name} (คงเหลือ: ${p.stock_qty ?? 0} ${p.unit || "ชิ้น"})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium">จำนวนที่ใช้ประกอบ:</p>
+                <Input
+                  label="จำนวน"
+                  isLabelHidden
+                  value={partQty}
+                  onChange={(e) => setPartQty(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium">หมายเหตุ / หน้าที่ของชิ้นส่วน:</p>
+                <Input
+                  label="หมายเหตุ"
+                  isLabelHidden
+                  placeholder="เช่น อะไหล่สำรองเปลี่ยนตามรอบ 500 ชม..."
+                  value={partRemarks}
+                  onChange={(e) => setPartRemarks(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-border pt-3">
+              <Button variant="secondary" onClick={() => setModalOpen(false)}>
+                ยกเลิก
+              </Button>
+              <Button
+                disabled={saving || !selectedSpareId}
+                onClick={handleAddComponent}
+              >
+                {saving ? "กำลังบันทึก..." : "บันทึกเพิ่มชิ้นส่วน"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
 
       {/* Dialog ยืนยันการลบ */}
-      <AnimatedDialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)}>
-          <DialogHeader title="ยืนยันการลบชิ้นส่วน" onOpenChange={(open) => { if (!open) setConfirmDelete(null); }} />
-          {confirmDelete && (
-          <VStack gap={4} style={{ padding: 24 }}>
-            <Text type="body">
+      <Dialog
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="ยืนยันการลบชิ้นส่วน"
+      >
+        {confirmDelete && (
+          <div className="space-y-4">
+            <p className="text-sm">
               ต้องการลบชิ้นส่วน <strong>{confirmDelete.part_name || "ชิ้นส่วนอะไหล่"}</strong> (รหัส {confirmDelete.part_code || `SP-${confirmDelete.spare_part_id}`}) ออกจาก BOM ของ {machine?.code || "เครื่องจักรนี้"} หรือไม่?
-            </Text>
-            <HStack hAlign="end" gap={2}>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(null)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+            </p>
+            <div className="flex justify-end gap-2 border-t border-border pt-3">
+              <Button variant="secondary" onClick={() => setConfirmDelete(null)}>
                 ยกเลิก
-              </button>
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={confirmDeletePart}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-danger"
-              >
-                <TrashIcon className="w-4 h-4" />
+              </Button>
+              <Button variant="danger" disabled={deleting} onClick={confirmDeletePart}>
+                <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                 {deleting ? "กำลังลบ..." : "ยืนยันลบ"}
-              </button>
-            </HStack>
-          </VStack>
-          )}
-        </AnimatedDialog>
+              </Button>
+            </div>
+          </div>
+        )}
+      </Dialog>
 
-    </VStack>
+    </PageShell>
   );
 }
+

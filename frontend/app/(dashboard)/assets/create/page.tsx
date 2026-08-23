@@ -1,13 +1,17 @@
 "use client";
 
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { DateInput } from "@astryxdesign/core/DateInput";
-import { PlusIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+// assets/create — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Select, Lucide)
+// ฟอร์มลงทะเบียนทรัพย์สิน (หน้านิ่ง — ไม่มี state/submit เดิม)
+
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import Link from "next/link";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Plus, ClipboardList } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 const categoryOptions = [
@@ -31,51 +35,128 @@ const departmentOptions = [
 
 export default function CreateAssetPage() {
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSETS CREATE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.assets_create_title")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ClipboardDocumentIcon className="w-3.5 h-3.5" /> {t("form.registration_form")}
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.assets_create_desc")}
-          </Text>
-        </VStack>
-        <a href="/assets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300">
-          <PlusIcon className="w-4 h-4" />
-          {t("action.reverse_entry")}
-        </a>
-      </div>
-
-      <Card padding={6}>
-        <Grid columns={2} gap={4}>
-          <TextInput label={t("form.asset_code_req")} value="" placeholder={t("placeholder.asset_code")}  />
-          <TextInput label={t("form.asset_name_req")} value="" placeholder={t("placeholder.asset_name")}  />
-          <Selector label={t("form.category_req")} options={categoryOptions} placeholder={t("form.select_category")} />
-          <Selector label={t("form.department_req")} options={departmentOptions} placeholder={t("form.select_department")} />
-          <TextInput label={t("form.install_location")} value="" placeholder={t("placeholder.address")}  />
-          <DateInput label={t("form.install_date")} />
-          <TextInput label={t("field.manufacturer")} value="" placeholder={t("placeholder.manufacturer")}  />
-          <TextInput label={t("field.model")} value="" placeholder={t("placeholder.model")}  />
-        </Grid>
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: t("form.assets_create_title") }]}
+      title={t("form.assets_create_title")}
+      description={t("hero.assets_create_desc")}
+      actions={
+        <>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+            <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" />
+            {t("form.registration_form")}
+          </span>
+          <Link
+            href="/assets"
+            className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 text-sm font-semibold text-[var(--cmms-text-primary)] transition-colors hover:bg-[var(--cmms-bg-wash)]"
+          >
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("action.reverse_entry")}
+          </Link>
+        </>
+      }
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("form.assets_create_title")}</CardTitle>
+          <CardDescription>{t("form.registration_form")} · ช่องที่มี * จำเป็นต้องกรอก</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Grid columns={{ minWidth: 260, max: 2 }} gap={4}>
+            <div className="space-y-1.5">
+              <Label htmlFor="asset-code">{t("form.asset_code_req")}</Label>
+              <Input
+                id="asset-code"
+                label={t("form.asset_code_req")}
+                isLabelHidden
+                placeholder={t("placeholder.asset_code")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="asset-name">{t("form.asset_name_req")}</Label>
+              <Input
+                id="asset-name"
+                label={t("form.asset_name_req")}
+                isLabelHidden
+                placeholder={t("placeholder.asset_name")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("form.category_req")}</Label>
+              <Select>
+                <SelectTrigger aria-label={t("form.category_req")}>
+                  <SelectValue placeholder={t("form.select_category")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>{t("form.department_req")}</Label>
+              <Select>
+                <SelectTrigger aria-label={t("form.department_req")}>
+                  <SelectValue placeholder={t("form.select_department")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {departmentOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="install-location">{t("form.install_location")}</Label>
+              <Input
+                id="install-location"
+                label={t("form.install_location")}
+                isLabelHidden
+                placeholder={t("placeholder.address")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="install-date">{t("form.install_date")}</Label>
+              <Input
+                id="install-date"
+                type="date"
+                label={t("form.install_date")}
+                isLabelHidden
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="manufacturer">{t("field.manufacturer")}</Label>
+              <Input
+                id="manufacturer"
+                label={t("field.manufacturer")}
+                isLabelHidden
+                placeholder={t("placeholder.manufacturer")}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="model">{t("field.model")}</Label>
+              <Input
+                id="model"
+                label={t("field.model")}
+                isLabelHidden
+                placeholder={t("placeholder.model")}
+              />
+            </div>
+          </Grid>
+        </CardContent>
+        <CardFooter className="justify-end gap-2">
+          <Link
+            href="/assets"
+            className="inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-4 text-sm font-semibold text-[var(--cmms-text-primary)] transition-colors hover:bg-[var(--cmms-bg-wash)]"
+          >
+            {t("action.cancel")}
+          </Link>
+          <Button>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            {t("form.assets_save")}
+          </Button>
+        </CardFooter>
       </Card>
-
-      <HStack gap={3} hAlign="end">
-        <a href="/assets" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300">
-          {t("action.cancel")}
-        </a>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <PlusIcon className="w-4 h-4" />
-          {t("form.assets_save")}
-        </button>
-      </HStack>
-    </VStack>
+    </PageShell>
   );
 }

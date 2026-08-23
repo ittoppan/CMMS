@@ -1,19 +1,19 @@
 "use client";
 
+// asset_registry/create — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Select, Lucide)
+// business logic ครบเดิม: POST /api/v1/asset_registry.php + SuccessDialog flow
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { 
-  PlusIcon,
-  ArrowLeftIcon,
-  BuildingOffice2Icon
-} from "@heroicons/react/24/outline";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, ArrowLeft } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
 
@@ -94,179 +94,167 @@ export default function CreateAssetPage() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY CREATE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ลงทะเบียนเครื่องจักรใหม่</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <BuildingOffice2Icon className="w-3.5 h-3.5" /> F-EN-01
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            บันทึกประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/asset_registry")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ลงทะเบียนเครื่องจักรใหม่" }]}
+      title="ลงทะเบียนเครื่องจักรใหม่"
+      description="บันทึกประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)"
+      actions={
+        <Button variant="secondary" onClick={() => router.push("/asset_registry")}>
+          <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
           ย้อนกลับ
-        </button>
-      </div>
-
-      <Card padding={6}>
-        <VStack gap={5}>
+        </Button>
+      }
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>ข้อมูลเครื่องจักร</CardTitle>
+          <CardDescription>ฟอร์มมาตรฐาน F-EN-01 · ช่องที่มี * จำเป็นต้องกรอก</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
           {errorMessage && (
-            <div style={{
-              padding: '12px 16px', borderRadius: 8,
-              background: 'var(--cmms-danger-light)', color: 'var(--cmms-danger)',
-              fontSize: '0.85rem', fontWeight: 600,
-            }}>
-              {errorMessage}
-            </div>
+            <Alert variant="danger" title="เกิดข้อผิดพลาด" description={errorMessage} />
           )}
 
-          <FormLayout>
-            <Field label="รหัสเครื่องจักร *" inputID="code" isRequired>
-              <TextInput
+          <Grid columns={{ minWidth: 260, max: 2 }} gap={4}>
+            <div className="space-y-1.5">
+              <Label htmlFor="code">รหัสเครื่องจักร <span className="text-destructive">*</span></Label>
+              <Input
+                id="code"
                 label="รหัสเครื่องจักร"
                 isLabelHidden
                 placeholder="เช่น MC-FX-05, MC-LM-02"
                 value={form.code}
-                onChange={(v: string) => update("code", v)}
+                onChange={(e) => update("code", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="ชื่อเครื่องจักร / อุปกรณ์ *" inputID="name" isRequired>
-              <TextInput
+            <div className="space-y-1.5">
+              <Label htmlFor="name">ชื่อเครื่องจักร / อุปกรณ์ <span className="text-destructive">*</span></Label>
+              <Input
+                id="name"
                 label="ชื่อเครื่องจักร"
                 isLabelHidden
                 placeholder="เช่น เครื่องพิมพ์เฟล็กโซ 10 สี"
                 value={form.name}
-                onChange={(v: string) => update("name", v)}
+                onChange={(e) => update("name", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="หมวดหมู่เครื่องจักร" inputID="category">
-              <Selector
-                label="หมวดหมู่"
-                isLabelHidden
-                value={form.category}
-                onChange={(v: string) => update("category", v)}
-                options={[
-                  { value: "Printing Press", label: "เครื่องพิมพ์" },
-                  { value: "Laminator", label: "เครื่องลามิเนต" },
-                  { value: "Slitting Machine", label: "เครื่องตัดสลิต" },
-                  { value: "Conveyor", label: "สายพานลำเลียง" },
-                  { value: "Utility", label: "ระบบสาธารณูปโภค / เครื่องอัดอากาศ" },
-                  { value: "Vehicle", label: "ยานพาหนะ / รถโฟล์คลิฟท์" },
-                ]}
-              />
-            </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="category">หมวดหมู่เครื่องจักร</Label>
+              <Select value={form.category} onValueChange={(v) => update("category", v)}>
+                <SelectTrigger id="category" aria-label="หมวดหมู่">
+                  <SelectValue placeholder="เลือกหมวดหมู่" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Printing Press">เครื่องพิมพ์</SelectItem>
+                  <SelectItem value="Laminator">เครื่องลามิเนต</SelectItem>
+                  <SelectItem value="Slitting Machine">เครื่องตัดสลิต</SelectItem>
+                  <SelectItem value="Conveyor">สายพานลำเลียง</SelectItem>
+                  <SelectItem value="Utility">ระบบสาธารณูปโภค / เครื่องอัดอากาศ</SelectItem>
+                  <SelectItem value="Vehicle">ยานพาหนะ / รถโฟล์คลิฟท์</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Field label="สถานที่ติดตั้ง" inputID="location">
-              <TextInput
+            <div className="space-y-1.5">
+              <Label htmlFor="location">สถานที่ติดตั้ง</Label>
+              <Input
+                id="location"
                 label="สถานที่"
                 isLabelHidden
                 placeholder="เช่น อาคาร A โซน 1, หลังคา, สถานีไฟฟ้าย่อย B"
                 value={form.location}
-                onChange={(v: string) => update("location", v)}
+                onChange={(e) => update("location", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="ระดับความสำคัญ (A/B/C)" inputID="criticality">
-              <Selector
-                label="ระดับความสำคัญ"
-                isLabelHidden
-                value={form.criticality}
-                onChange={(v: string) => update("criticality", v)}
-                options={[
-                  { value: "A", label: "Class A — ส่งผลต่อการผลิตหลักหยุดชะงัก" },
-                  { value: "B", label: "Class B — เครื่องจักรรอง สำรองได้" },
-                  { value: "C", label: "Class C — อุปกรณ์ทั่วไป" },
-                ]}
-              />
-            </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="criticality">ระดับความสำคัญ (A/B/C)</Label>
+              <Select value={form.criticality} onValueChange={(v) => update("criticality", v)}>
+                <SelectTrigger id="criticality" aria-label="ระดับความสำคัญ">
+                  <SelectValue placeholder="เลือกระดับความสำคัญ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A">Class A — ส่งผลต่อการผลิตหลักหยุดชะงัก</SelectItem>
+                  <SelectItem value="B">Class B — เครื่องจักรรอง สำรองได้</SelectItem>
+                  <SelectItem value="C">Class C — อุปกรณ์ทั่วไป</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Field label="สถานะการทำงานปัจจุบัน" inputID="status">
-              <Selector
-                label="สถานะ"
-                isLabelHidden
-                value={form.status}
-                onChange={(v: string) => update("status", v)}
-                options={[
-                  { value: "running", label: "เดินเครื่องทำงานปกติ" },
-                  { value: "breakdown", label: "เครื่องเสีย" },
-                  { value: "maintenance", label: "กำลังทำซ่อมบำรุง" },
-                  { value: "standby", label: "พร้อมใช้งานสำรอง" },
-                ]}
-              />
-            </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="status">สถานะการทำงานปัจจุบัน</Label>
+              <Select value={form.status} onValueChange={(v) => update("status", v)}>
+                <SelectTrigger id="status" aria-label="สถานะ">
+                  <SelectValue placeholder="เลือกสถานะ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="running">เดินเครื่องทำงานปกติ</SelectItem>
+                  <SelectItem value="breakdown">เครื่องเสีย</SelectItem>
+                  <SelectItem value="maintenance">กำลังทำซ่อมบำรุง</SelectItem>
+                  <SelectItem value="standby">พร้อมใช้งานสำรอง</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Field label="เลขซีเรียล" inputID="serialNumber">
-              <TextInput
+            <div className="space-y-1.5">
+              <Label htmlFor="serialNumber">เลขซีเรียล</Label>
+              <Input
+                id="serialNumber"
                 label="เลขซีเรียล"
                 isLabelHidden
                 placeholder="เช่น SN-FX-88201-JP"
                 value={form.serialNumber}
-                onChange={(v: string) => update("serialNumber", v)}
+                onChange={(e) => update("serialNumber", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="ยี่ห้อ / ผู้ผลิต" inputID="brand">
-              <TextInput
+            <div className="space-y-1.5">
+              <Label htmlFor="brand">ยี่ห้อ / ผู้ผลิต</Label>
+              <Input
+                id="brand"
                 label="ยี่ห้อ"
                 isLabelHidden
                 placeholder="เช่น Komori, Nordmeccanica, Toyota"
                 value={form.brand}
-                onChange={(v: string) => update("brand", v)}
+                onChange={(e) => update("brand", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="รุ่น" inputID="model">
-              <TextInput
+            <div className="space-y-1.5">
+              <Label htmlFor="model">รุ่น</Label>
+              <Input
+                id="model"
                 label="รุ่น"
                 isLabelHidden
                 placeholder="เช่น FX-2000 Pro"
                 value={form.model}
-                onChange={(v: string) => update("model", v)}
+                onChange={(e) => update("model", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label="รูปภาพเครื่องจักร" inputID="image_path">
+            <div className="space-y-1.5">
+              <Label>รูปภาพเครื่องจักร</Label>
               <ImageUploadField
                 value={form.image_path || null}
                 onChange={(url) => update("image_path", url || "")}
                 folder="assets"
                 label="รูปเครื่องจักร"
               />
-            </Field>
-          </FormLayout>
-        </VStack>
+            </div>
+          </Grid>
+        </CardContent>
+        <CardFooter className="justify-end gap-2">
+          <Button variant="secondary" onClick={() => (window.location.href = "/asset_registry")}>
+            ยกเลิก
+          </Button>
+          <Button disabled={submitting} onClick={handleSubmit}>
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            {submitting ? "กำลังบันทึก..." : "บันทึกเครื่องจักร"}
+          </Button>
+        </CardFooter>
       </Card>
-
-      <HStack hAlign="end" gap={3}>
-        <button
-          type="button"
-          onClick={() => (window.location.href = "/asset_registry")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-        >
-          ยกเลิก
-        </button>
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={handleSubmit}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <PlusIcon className="w-4 h-4" />
-          {submitting ? "กำลังบันทึก..." : "บันทึกเครื่องจักร"}
-        </button>
-      </HStack>
-    </VStack>
+    </PageShell>
   );
 }

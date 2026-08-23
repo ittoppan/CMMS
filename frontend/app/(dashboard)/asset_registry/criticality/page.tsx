@@ -1,20 +1,23 @@
 "use client";
 
+// asset_registry/criticality — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Button, Lucide)
+// business logic ครบเดิม: fetch index.php?resource=assets, PUT asset_registry.php (criticality), scoring matrix
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import {
-  ScaleIcon,
-  CalculatorIcon,
-} from "@heroicons/react/24/outline";
+  Scale,
+  Calculator,
+} from "lucide-react";
 
 const FACTORS = [
   {
@@ -149,147 +152,165 @@ export default function AssetCriticalityPage() {
     setSubmitting(false);
   };
 
-  if (loading) {
-    return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูลเครื่องจักร...</Text>
-      </HStack>
-    );
-  }
-
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ประเมินลำดับความสำคัญของเครื่องจักร" }]}
+      title="ประเมินลำดับความสำคัญของเครื่องจักร"
+      description="ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ"
+      actions={
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+          <Scale size={14} strokeWidth={1.75} aria-hidden="true" />
+          เมทริกซ์ความเสี่ยง
+        </span>
+      }
+    >
+      {error && (
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
+      )}
 
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ASSET REGISTRY CRITICALITY · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ประเมินลำดับความสำคัญของเครื่องจักร</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ScaleIcon className="w-3.5 h-3.5" /> เมทริกซ์ความเสี่ยง
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ
-          </Text>
-        </VStack>
-      </div>
+      {loading ? (
+        <Card>
+          <CardContent className="flex items-center justify-center gap-3 py-16">
+            <Spinner size={20} label="" />
+            <span className="text-sm text-muted-foreground">กำลังโหลดข้อมูลเครื่องจักร...</span>
+          </CardContent>
+        </Card>
+      ) : (
+        <Grid columns={3} gap={6}>
+          {/* คอลัมน์ซ้าย: ฟอร์มประเมิน */}
+          <div style={{ gridColumn: "span 2" }}>
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle>1. เลือกเครื่องจักรและระบุปัจจัยความเสี่ยง</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="f-asset">เลือกเครื่องจักรที่ต้องการประเมิน <span className="text-destructive">*</span></Label>
+                  <Select
+                    value={selectedMachine}
+                    onValueChange={handleSelect}
+                  >
+                    <SelectTrigger id="f-asset" aria-label="เลือกเครื่องจักร">
+                      <SelectValue placeholder="เลือกเครื่องจักร..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assets.map((a) => (
+                        <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-      <Grid columns={3} gap={6}>
-        {/* คอลัมน์ซ้าย: ฟอร์มประเมิน */}
-        <div style={{ gridColumn: "span 2" }}>
-          <Card padding={5}>
-            <VStack gap={4}>
-              <Heading level={4}>1. เลือกเครื่องจักรและระบุปัจจัยความเสี่ยง</Heading>
-
-              <Field inputID="f-asset" label="เลือกเครื่องจักรที่ต้องการประเมิน *" isRequired>
-                <Selector
-                  label="เลือกเครื่องจักร"
-                  isLabelHidden
-                  placeholder="เลือกเครื่องจักร..."
-                  options={assets}
-                  value={selectedMachine}
-                  onChange={handleSelect}
-                />
-              </Field>
-
-              <FormLayout>
-                <VStack gap={4}>
+                <div className="space-y-4">
                   {FACTORS.map((factor) => (
-                    <Field key={factor.key} inputID={`f-${factor.key}`} label={`${factor.label} *`}>
-                      <Selector
-                        label={factor.label}
-                        isLabelHidden
-                        options={factor.options}
+                    <div key={factor.key} className="space-y-1.5">
+                      <Label htmlFor={`f-${factor.key}`}>{factor.label} <span className="text-destructive">*</span></Label>
+                      <Select
                         value={scores[factor.key]}
-                        onChange={(v) => setScores({ ...scores, [factor.key]: String(v) })}
-                      />
-                    </Field>
+                        onValueChange={(v) => setScores({ ...scores, [factor.key]: String(v) })}
+                      >
+                        <SelectTrigger id={`f-${factor.key}`} aria-label={factor.label}>
+                          <SelectValue placeholder="เลือกระดับ" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {factor.options.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   ))}
-                </VStack>
-              </FormLayout>
-            </VStack>
-          </Card>
-        </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* คอลัมน์ขวา: ผลการประเมิน */}
-        <VStack gap={4}>
-          <Card
-            padding={5}
-            style={{
-              textAlign: "center",
-              backgroundColor: rank === "A" ? "var(--color-error-wash)" : rank === "B" ? "var(--color-warning-wash)" : "var(--color-surface)",
-              border: `2px solid ${rank === "A" ? "var(--color-error)" : rank === "B" ? "var(--color-warning)" : "var(--color-border)"}`,
-            }}
-          >
-            <VStack gap={3} hAlign="center">
-              <CalculatorIcon className="w-8 h-8" style={{ color: rank === "A" ? "var(--color-error)" : rank === "B" ? "var(--color-warning)" : "var(--color-primary)" }} />
-              <VStack gap={0}>
-                <Text type="supporting" weight="bold" style={{ textTransform: "uppercase" }}>คะแนนประเมินรวม</Text>
-                <Heading level={1} style={{ fontSize: 42 }}>
-                  {totalScore} <span style={{ fontSize: 18, color: "var(--color-secondary)" }}>/ 30</span>
-                </Heading>
-              </VStack>
-              <span
-                className="cmms-andon-chip"
-                style={{
-                  fontSize: 16,
-                  padding: "8px 16px",
-                  background: rank === "A" ? "rgba(244,63,94,0.12)" : rank === "B" ? "rgba(245,158,11,0.12)" : "rgba(30,136,229,0.12)",
-                  color: rank === "A" ? "var(--cmms-danger)" : rank === "B" ? "var(--cmms-warning)" : "var(--cmms-primary)",
-                }}
-              >
-                ผลการจัดเกรด: เกรด {rank}
-              </span>
-              {currentRank && currentRank !== rank && (
-                <Text type="body" size="sm" color="secondary">(ปัจจุบัน: เกรด {currentRank} — ยังไม่บันทึก)</Text>
-              )}
-            </VStack>
-          </Card>
+          {/* คอลัมน์ขวา: ผลการประเมิน */}
+          <div className="space-y-4">
+            <Card
+              className="text-center"
+              style={{
+                backgroundColor:
+                  rank === "A" ? "var(--cmms-danger-light)"
+                  : rank === "B" ? "var(--cmms-warning-light)"
+                  : undefined,
+                borderWidth: 2,
+                borderColor:
+                  rank === "A" ? "var(--cmms-danger)"
+                  : rank === "B" ? "var(--cmms-warning)"
+                  : "var(--cmms-border)",
+              }}
+            >
+              <CardContent className="flex flex-col items-center gap-3 space-y-0 p-5">
+                <Calculator
+                  size={32}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                  style={{
+                    color:
+                      rank === "A" ? "var(--cmms-danger)"
+                      : rank === "B" ? "var(--cmms-warning)"
+                      : "var(--cmms-primary)",
+                  }}
+                />
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">คะแนนประเมินรวม</p>
+                  <p className="text-[42px] font-semibold leading-tight tabular-nums">
+                    {totalScore} <span className="text-lg font-normal text-muted-foreground">/ 30</span>
+                  </p>
+                </div>
+                <Badge
+                  variant={rank === "A" ? "danger" : rank === "B" ? "warning" : "primary"}
+                  className="px-4 py-1.5 text-base"
+                >
+                  ผลการจัดเกรด: เกรด {rank}
+                </Badge>
+                {currentRank && currentRank !== rank && (
+                  <p className="text-sm text-muted-foreground">(ปัจจุบัน: เกรด {currentRank} — ยังไม่บันทึก)</p>
+                )}
+              </CardContent>
+            </Card>
 
-          <Card padding={5}>
-            <VStack gap={3}>
-              <Heading level={4}>มาตรการดูแลตามเกรด {rank}</Heading>
-              {rank === "A" && (
-                <VStack gap={2}>
-                  <Text type="body" size="sm" style={{ color: "var(--color-error)" }} weight="semibold">เครื่องจักรเกรด A (วิกฤต):</Text>
-                  <Text type="body" size="sm" color="secondary">• ต้องทำ PM เข้มงวด (รายสัปดาห์/รายเดือน)</Text>
-                  <Text type="body" size="sm" color="secondary">• สำรองอะไหล่วิกฤต 100%</Text>
-                  <Text type="body" size="sm" color="secondary">• ติดตั้ง IoT Sensor เฝ้าระวังตลอด 24 ชม.</Text>
-                </VStack>
-              )}
-              {rank === "B" && (
-                <VStack gap={2}>
-                  <Text type="body" size="sm" style={{ color: "var(--color-warning)" }} weight="semibold">เครื่องจักรเกรด B (สำคัญ):</Text>
-                  <Text type="body" size="sm" color="secondary">• ทำ PM ตามรอบปกติ (รายเดือน/ราย 3 เดือน)</Text>
-                  <Text type="body" size="sm" color="secondary">• สำรองอะไหล่ตามจุดสั่งซื้อขั้นต่ำ</Text>
-                </VStack>
-              )}
-              {rank === "C" && (
-                <VStack gap={2}>
-                  <Text type="body" size="sm" color="secondary" weight="semibold">เครื่องจักรเกรด C (รอง):</Text>
-                  <Text type="body" size="sm" color="secondary">• สามารถปล่อยใช้งานจนเสียแล้วซ่อม หรือทำ PM รายปี</Text>
-                  <Text type="body" size="sm" color="secondary">• ไม่จำเป็นต้องสต็อกอะไหล่ราคาสูง</Text>
-                </VStack>
-              )}
+            <Card>
+              <CardContent className="space-y-3 p-5">
+                <h4 className="text-base font-semibold">มาตรการดูแลตามเกรด {rank}</h4>
+                {rank === "A" && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-destructive">เครื่องจักรเกรด A (วิกฤต):</p>
+                    <p className="text-sm text-muted-foreground">• ต้องทำ PM เข้มงวด (รายสัปดาห์/รายเดือน)</p>
+                    <p className="text-sm text-muted-foreground">• สำรองอะไหล่วิกฤต 100%</p>
+                    <p className="text-sm text-muted-foreground">• ติดตั้ง IoT Sensor เฝ้าระวังตลอด 24 ชม.</p>
+                  </div>
+                )}
+                {rank === "B" && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium" style={{ color: "var(--cmms-warning)" }}>เครื่องจักรเกรด B (สำคัญ):</p>
+                    <p className="text-sm text-muted-foreground">• ทำ PM ตามรอบปกติ (รายเดือน/ราย 3 เดือน)</p>
+                    <p className="text-sm text-muted-foreground">• สำรองอะไหล่ตามจุดสั่งซื้อขั้นต่ำ</p>
+                  </div>
+                )}
+                {rank === "C" && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">เครื่องจักรเกรด C (รอง):</p>
+                    <p className="text-sm text-muted-foreground">• สามารถปล่อยใช้งานจนเสียแล้วซ่อม หรือทำ PM รายปี</p>
+                    <p className="text-sm text-muted-foreground">• ไม่จำเป็นต้องสต็อกอะไหล่ราคาสูง</p>
+                  </div>
+                )}
 
-              <button
-                type="button"
-                disabled={submitting || !selectedMachine}
-                onClick={handleSave}
-                style={{ marginTop: 16 }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <ScaleIcon className="w-4 h-4" />
-                {submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}
-              </button>
-            </VStack>
-          </Card>
-        </VStack>
-      </Grid>
+                <Button
+                  className="mt-4 w-full"
+                  disabled={submitting || !selectedMachine}
+                  onClick={handleSave}
+                >
+                  <Scale size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {submitting ? "กำลังบันทึก..." : "บันทึกผลการประเมินเกรด"}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </Grid>
+      )}
 
-    </VStack>
+    </PageShell>
   );
 }
