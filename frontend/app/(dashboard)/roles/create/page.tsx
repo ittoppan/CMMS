@@ -70,6 +70,7 @@ export default function RoleCreatePage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">USER ROLES · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "บุคลากร", href: "/roles" },

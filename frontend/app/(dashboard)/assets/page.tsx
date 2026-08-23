@@ -160,6 +160,7 @@ export default function AssetsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ทะเบียนเครื่องจักรและทรัพย์สิน" }]}
       title="ทะเบียนเครื่องจักรและทรัพย์สิน"
       description="ระบบทะเบียนประวัติเครื่องจักรและอุปกรณ์ — ดูสถานะและวัน PM ล่าสุดได้ในที่เดียว"

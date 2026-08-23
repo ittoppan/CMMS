@@ -59,6 +59,7 @@ export default function CustomPageView() {
   if (permLoading) {
     return (
       <PageShell
+        eyebrow={<p className="cmms-eyebrow">CMS PAGES · CMMS-TOPPAN</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ดูหน้าที่สร้างเอง" }]}
         title="ดูหน้าที่สร้างเอง"
       >

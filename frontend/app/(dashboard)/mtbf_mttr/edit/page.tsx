@@ -143,6 +143,7 @@ function EditMtbfMttrContent() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">MTBF / MTTR · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "MTBF/MTTR", href: "/mtbf_mttr" },

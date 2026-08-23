@@ -176,6 +176,7 @@ export default function SuppliersPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">SUPPLIERS · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ผู้จำหน่าย", href: "/suppliers" },

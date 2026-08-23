@@ -118,7 +118,7 @@ export default function WorkPermitPage() {
       header: "สถานะ LOTO",
       renderCell: (item) => (
         item.lotoStatus === 'Locked Out' ? (
-          <Badge variant="success" dot>ล็อกตัดพลังงานแล้ว</Badge>
+          <span className="cmms-status ok"><span className="cmms-status-dot" />ล็อกตัดพลังงานแล้ว</span>
         ) : (
           <Badge variant="neutral">ไม่ใช้ LOTO</Badge>
         )
@@ -129,9 +129,9 @@ export default function WorkPermitPage() {
       header: "สถานะการอนุมัติ",
       renderCell: (item) => (
         item.status === 'approved' ? (
-          <Badge variant="success" dot>อนุมัติแล้ว</Badge>
+          <span className="cmms-status ok"><span className="cmms-status-dot" />อนุมัติแล้ว</span>
         ) : item.status === 'pending_safety' ? (
-          <Badge variant="warning" dot>รอ จป. อนุมัติ</Badge>
+          <span className="cmms-status warn"><span className="cmms-status-dot" />รอ จป. อนุมัติ</span>
         ) : (
           <Badge variant="neutral">ปิดงานแล้ว</Badge>
         )
@@ -141,6 +141,7 @@ export default function WorkPermitPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">SAFETY WORK PERMIT · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ความปลอดภัย", href: "/safety/work_permit" },

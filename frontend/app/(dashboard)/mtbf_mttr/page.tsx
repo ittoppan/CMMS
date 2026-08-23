@@ -170,6 +170,7 @@ export default function MtbfMttrPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "MTBF/MTTR", href: "/mtbf_mttr" },

@@ -161,6 +161,7 @@ function EditUserContent() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">USERS · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "บุคลากร", href: "/users" },

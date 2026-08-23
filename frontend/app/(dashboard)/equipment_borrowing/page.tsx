@@ -163,6 +163,7 @@ export default function EquipmentBorrowingPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">EQUIPMENT BORROWING · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "ยืม-คืนอุปกรณ์", href: "/equipment_borrowing" },

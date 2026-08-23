@@ -457,6 +457,7 @@ export default function WorkOrdersPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}

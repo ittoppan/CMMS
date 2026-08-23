@@ -251,6 +251,7 @@ export default function BOMTreePage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)" }]}
       title="ผังโครงสร้างชิ้นส่วนอะไหล่ (BOM)"
       description="ดูและจัดการชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่องจักร พร้อมจำนวนคงเหลือในคลัง"

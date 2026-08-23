@@ -118,6 +118,7 @@ export default function PwaSettingsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">PWA SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ไอคอน PWA (Mobile App)" }]}
       title="ตั้งค่าไอคอน PWA"
       description="เปลี่ยนไอคอนแอปพลิเคชันบนหน้าจอมือถือ (ติดตั้งจากเบราว์เซอร์) — อัปเดตให้ทั้ง PWA และเว็บ PHP พร้อมกัน"

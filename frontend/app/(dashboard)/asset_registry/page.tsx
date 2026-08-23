@@ -270,6 +270,7 @@ export default function AssetRegistryPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}

@@ -45,10 +45,10 @@ if (-not $SkipBuild) {
 $swFile = Join-Path $frontendDir "public\sw.js"
 if (Test-Path -LiteralPath $swFile) {
     $sw = Get-Content $swFile -Raw
-    if ($sw -match 'const SW_VERSION = "v(\d+)"') {
+    if ($sw -match 'const SW_VERSION = "v([0-9]+)') {
         $next = [int]$Matches[1] + 1
         $stamp = Get-Date -Format "yyyyMMdd-HHmm"
-        $sw = $sw -replace 'const SW_VERSION = "v\d+"', ('const SW_VERSION = "v' + $next + '-' + $stamp + '"')
+        $sw = $sw -replace 'const SW_VERSION = "v[^"]*"', ('const SW_VERSION = "v' + $next + '-' + $stamp + '"')
         Set-Content $swFile $sw -Encoding UTF8 -NoNewline
         Write-Host "==> bumped SW_VERSION -> v$next-$stamp" -ForegroundColor Cyan
     } else {

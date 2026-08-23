@@ -740,6 +740,7 @@ export default function SettingsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: hero.title }]}
       title={hero.title}
       description={hero.desc}

@@ -219,6 +219,7 @@ export default function AndonBoardPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ANDON BOARD · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "Andon Board", href: "/andon-board" },

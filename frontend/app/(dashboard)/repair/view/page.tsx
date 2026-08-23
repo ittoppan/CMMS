@@ -457,6 +457,7 @@ export default function RepairViewDetailsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">WORK ORDER DETAIL · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "งานซ่อมบำรุง", href: "/repair" },

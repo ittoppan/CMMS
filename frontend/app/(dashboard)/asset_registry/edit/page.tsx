@@ -124,6 +124,7 @@ function EditAssetContent() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "แก้ไขข้อมูลเครื่องจักร" }]}
       title="แก้ไขข้อมูลเครื่องจักร"
       description="แก้ไขประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)"

@@ -282,6 +282,7 @@ export default function NotificationCenterPage() {
   if (loading) {
     return (
       <PageShell
+        eyebrow={<p className="cmms-eyebrow">NOTIFICATIONS · CMMS-TOPPAN</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ศูนย์แจ้งเตือน" }]}
         title="ศูนย์แจ้งเตือนระบบ"
         description="แจ้งเตือนจากข้อมูลจริง: งานซ่อมด่วน อะไหล่ใกล้หมด แผน PM และการสอบเทียบ"

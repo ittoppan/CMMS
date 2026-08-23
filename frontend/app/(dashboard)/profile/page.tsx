@@ -190,6 +190,7 @@ export default function ProfilePage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">USER PROFILE · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "โปรไฟล์" },

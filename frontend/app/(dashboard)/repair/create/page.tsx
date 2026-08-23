@@ -170,6 +170,7 @@ export default function CreateWorkOrderPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">REPAIR REQUEST · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "เปิดใบแจ้งซ่อมใหม่" }]}
       title="เปิดใบแจ้งซ่อมใหม่"
       description="กรอกข้อมูลอาการเสียของเครื่องจักรเพื่อส่งเรื่องให้ทีมช่างดำเนินการ"

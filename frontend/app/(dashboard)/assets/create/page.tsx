@@ -36,6 +36,7 @@ const departmentOptions = [
 export default function CreateAssetPage() {
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: t("form.assets_create_title") }]}
       title={t("form.assets_create_title")}
       description={t("hero.assets_create_desc")}

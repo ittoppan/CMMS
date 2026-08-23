@@ -208,6 +208,7 @@ export default function LineDeliveryHistoryPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">NOTIFICATION HISTORY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "ประวัติการส่ง LINE" }]}
       title="ประวัติการส่ง LINE"
       description="ตรวจสอบว่าใครส่งอะไร ถึงใคร เมื่อไหร่ ด้วยเทมเพลตไหน — บันทึกจริงจาก notification_logs"

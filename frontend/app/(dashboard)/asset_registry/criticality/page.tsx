@@ -154,6 +154,7 @@ export default function AssetCriticalityPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ประเมินลำดับความสำคัญของเครื่องจักร" }]}
       title="ประเมินลำดับความสำคัญของเครื่องจักร"
       description="ประเมินความเสี่ยงและผลกระทบเพื่อจัดเกรดเครื่องจักรเป็นเกรด A, B, C อัตโนมัติ"

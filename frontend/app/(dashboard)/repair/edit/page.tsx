@@ -241,6 +241,7 @@ function EditWorkOrderContent() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">REPAIR ORDER · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "บันทึกข้อมูลซ่อม" }]}
       title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
       description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"

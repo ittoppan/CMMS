@@ -761,6 +761,7 @@ export default function SparePartsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "คลังอะไหล่", href: "/spare_parts" },

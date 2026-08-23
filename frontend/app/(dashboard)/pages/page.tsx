@@ -54,6 +54,7 @@ export default function CustomPagesListPage() {
   if (permLoading) {
     return (
       <PageShell
+        eyebrow={<p className="cmms-eyebrow">CMS PAGES · CMMS-TOPPAN</p>}
         breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "หน้าเว็บที่สร้างเอง" }]}
         title="หน้าเว็บที่สร้างเอง"
         description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"

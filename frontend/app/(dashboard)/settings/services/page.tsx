@@ -148,6 +148,7 @@ export default function SystemServicesPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">SERVICES · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "บริการและสถานะการรันระบบ" }]}
       title="Service & การรันระบบ"
       description="เช็คว่า service ตัวไหนรันหรือยัง และรัน/หยุดได้จากที่นี่ (เฉพาะผู้ดูแลระบบ)"

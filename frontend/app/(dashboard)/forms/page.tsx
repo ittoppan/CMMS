@@ -209,6 +209,7 @@ export default function FormsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">DIGITAL FORMS · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "อนุมัติ & เอกสาร", href: "/forms" },
@@ -260,7 +261,7 @@ export default function FormsPage() {
                 <Card key={d.id} className="flex flex-col gap-3 p-4 shadow-none">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <Badge variant="primary">{d.code}</Badge>
-                    <Badge variant="success">{d.submission_count} ครั้ง</Badge>
+                    <Badge variant="neutral">{d.submission_count} ครั้ง</Badge>
                   </div>
                   <p className="flex-1 text-sm font-semibold leading-snug text-foreground">{d.title}</p>
                   <p className="text-xs text-muted-foreground">
@@ -360,7 +361,7 @@ export default function FormsPage() {
               <p className="flex-1 text-sm font-semibold leading-snug text-foreground">{f.title}</p>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="success">{extLabel[f.ext] || f.ext.toUpperCase()}</Badge>
+                  <Badge variant="neutral">{extLabel[f.ext] || f.ext.toUpperCase()}</Badge>
                   <span className="text-xs text-muted-foreground">{formatSize(f.size)}</span>
                 </div>
                 <Button size="sm" onClick={() => download(f)} className="gap-1.5">

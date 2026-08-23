@@ -70,6 +70,7 @@ export default function IotMonitorPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">IOT MONITOR · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "IoT Monitor", href: "/iot/monitor" },

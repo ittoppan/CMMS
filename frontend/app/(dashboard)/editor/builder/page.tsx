@@ -11,11 +11,12 @@ import GrapesBuilder from "@/components/GrapesBuilder";
 export default function VisualBuilderPage() {
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">PAGE BUILDER · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ระบบ & ตั้งค่า" }, { label: "Visual Page Builder" }]}
       title="สร้างหน้าเว็บด้วยการลากวาง"
       description={`ลากบล็อกจากซ้ายมือ (การ์ด KPI, ไฟ Andon, ตาราง, ฟอร์ม) ลง canvas ปรับแต่งด้วยแผงสไตล์ทางขวา แล้วกดบันทึก — หน้าใหม่จะเปิดได้ที่ /pages/ชื่อslug ทันที — หมวด "ข้อมูลจริง (จากฐานข้อมูล)" จะดึง KPI งานซ่อม, ไฟ Andon และอะไหล่ใกล้หมดจาก DB มาแสดงอัตโนมัติเมื่อเปิดหน้า`}
       actions={
-        <Badge variant="success">
+        <Badge variant="neutral">
           <LayoutGrid size={14} strokeWidth={1.75} aria-hidden="true" /> Open Source · GrapesJS
         </Badge>
       }

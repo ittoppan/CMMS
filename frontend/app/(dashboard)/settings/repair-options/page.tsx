@@ -315,6 +315,7 @@ export default function RepairOptionsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">REPAIR OPTIONS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ตัวเลือกฟอร์มแจ้งซ่อม" }]}
       title="ตัวเลือกฟอร์มแจ้งซ่อม"
       description="จัดการตัวเลือก dropdown ที่ใช้ในฟอร์มแจ้งซ่อม (F-EN-03)"

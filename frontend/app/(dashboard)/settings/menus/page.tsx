@@ -199,6 +199,7 @@ export default function MenuPermissionsPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">MENU SETTINGS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "สิทธิ์เมนูตามบทบาท" }]}
       title="สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)"
       description="เลือกว่าแต่ละบทบาทเห็นเมนูใดในแอป และปุ่มล่างมือถือแบบไหน — พรีวิวทางขวาจะอัปเดตสดทุกครั้งที่แก้"

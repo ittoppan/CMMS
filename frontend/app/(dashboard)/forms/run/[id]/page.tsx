@@ -387,6 +387,7 @@ export default function FormRunPage() {
   if (loading) {
     return (
       <PageShell
+        eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
         breadcrumbs={[
           { label: "หน้าแรก", href: "/dashboard" },
           { label: "อนุมัติ & เอกสาร", href: "/forms" },

@@ -125,6 +125,7 @@ function EditCalibrationContent() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">CALIBRATION · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "การสอบเทียบ", href: "/calibration" },

@@ -608,6 +608,7 @@ export default function MyTasksPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "งานซ่อมบำรุง", href: "/repair" },

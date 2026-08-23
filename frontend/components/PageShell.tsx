@@ -31,6 +31,9 @@ export interface PageShellCrumb {
 
 export interface PageShellProps {
   breadcrumbs?: PageShellCrumb[];
+  /** small uppercase kicker rendered above the title (guideline §6.1);
+   *  pass a full element so the page file keeps its own .cmms-eyebrow class */
+  eyebrow?: React.ReactNode;
   title: React.ReactNode;
   /** one-line description under the title */
   description?: React.ReactNode;
@@ -42,6 +45,7 @@ export interface PageShellProps {
 
 export function PageShell({
   breadcrumbs,
+  eyebrow,
   title,
   description,
   actions,
@@ -75,6 +79,7 @@ export function PageShell({
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1">
+          {eyebrow}
           <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
             {title}
           </h1>

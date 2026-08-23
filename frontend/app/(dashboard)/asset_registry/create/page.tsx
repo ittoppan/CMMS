@@ -95,6 +95,7 @@ export default function CreateAssetPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">ASSET REGISTRY · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "เครื่องจักร", href: "/asset_registry" }, { label: "ลงทะเบียนเครื่องจักรใหม่" }]}
       title="ลงทะเบียนเครื่องจักรใหม่"
       description="บันทึกประวัติรหัส ชื่อ หมวดหมู่ สถานที่ และระดับความสำคัญ (F-EN-01)"

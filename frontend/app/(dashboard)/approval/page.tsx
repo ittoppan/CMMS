@@ -167,6 +167,7 @@ export default function ApprovalCenterPage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">APPROVAL CENTER · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "อนุมัติ" },

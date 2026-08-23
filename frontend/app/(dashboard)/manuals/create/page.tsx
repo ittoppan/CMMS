@@ -98,6 +98,7 @@ export default function ManualCreatePage() {
 
   return (
     <PageShell
+      eyebrow={<p className="cmms-eyebrow">MANUALS · CMMS-TOPPAN</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
         { label: "คู่มือ & SOP", href: "/manuals" },
