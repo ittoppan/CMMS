@@ -1,4 +1,4 @@
-# deploy-next.ps1 - Build Next.js PWA, stage standalone output, restart node server, verify.
+﻿# deploy-next.ps1 - Build Next.js PWA, stage standalone output, restart node server, verify.
 # Usage: powershell -ExecutionPolicy Bypass -File deploy-next.ps1 [-SkipBuild] [-Prebuilt <dir>] [-Port 3001]
 #   -Prebuilt <dir> : fast-deploy — reuse a prebuilt .next (e.g. from the worktree) instead of
 #                     running `npm run build` on the production box. Cuts the server-down window

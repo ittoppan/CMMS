@@ -471,3 +471,71 @@ html.dark .theme-icon-sun  { display: block; }
   .data-table th,
   .data-table td { padding: 0.55rem 0.625rem; }
 }
+
+/* ------------------------------------------------------------
+   11. Form system (Redesign Plan §3 Step 0)
+   Canonical form classes used by create/edit pages but never
+   defined until now (.form-section family). Defined exactly as
+   specified in docs/CMMS_UI_REDESIGN_PLAN.md — Step 0.
+   ------------------------------------------------------------ */
+.form-section {
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.form-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem 1rem;
+}
+.form-grid > [style*="grid-column: span 2"] { grid-column: span 2; }
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid > [style*="grid-column: span 2"] { grid-column: span 1; }
+}
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.01em;
+}
+.form-hint {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-disabled);
+  margin-top: 0.2rem;
+}
+.form-error {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-error);
+  margin-top: 0.2rem;
+}
+.req { color: var(--color-error); margin-left: 2px; }
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+@media (max-width: 768px) {
+  .form-actions { flex-direction: column; }
+  .form-actions .btn { width: 100%; min-height: 48px; }
+}

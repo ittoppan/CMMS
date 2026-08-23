@@ -1,4 +1,4 @@
-# Deploy CMMS-TPT frontend (Next.js standalone) — Windows PowerShell
+﻿# Deploy CMMS-TPT frontend (Next.js standalone) — Windows PowerShell
 # ขั้นตอน: build -> copy public + .next/static ไป standalone -> restart server :3001
 #
 # ทำไมต้อง copy เอง:
@@ -48,7 +48,7 @@ if (Test-Path -LiteralPath $swFile) {
     if ($sw -match 'const SW_VERSION = "v(\d+)"') {
         $next = [int]$Matches[1] + 1
         $stamp = Get-Date -Format "yyyyMMdd-HHmm"
-        $sw = $sw -replace 'const SW_VERSION = "v\d+"', ("const SW_VERSION = `"v$next-$stamp`"")
+        $sw = $sw -replace 'const SW_VERSION = "v\d+"', ('const SW_VERSION = "v' + $next + '-' + $stamp + '"')
         Set-Content $swFile $sw -Encoding UTF8 -NoNewline
         Write-Host "==> bumped SW_VERSION -> v$next-$stamp" -ForegroundColor Cyan
     } else {

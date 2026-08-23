@@ -18,3 +18,9 @@ astryx-main/
 
 # Freebuff worktrees (internal)
 .freebuff/
+
+# Playwright e2e artifacts
+frontend/test-results/
+frontend/playwright-report/
+# alternate build dir (NEXT_DIST_DIR escape hatch)
+frontend/.next-verify/
