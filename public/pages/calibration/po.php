@@ -141,7 +141,7 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>
-                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">ไม่มีข้อมูล PO</td></tr>
+                <tr><td colspan="7" class="cmms-empty-state-cell">ไม่มีข้อมูล PO</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

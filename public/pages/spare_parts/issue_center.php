@@ -422,7 +422,7 @@ renderHeader();
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($requests)): ?>
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">ยังไม่มีคิวคำขอเบิกอะไหล่ในระบบ</td></tr>
+                        <tr><td colspan="6" class="cmms-empty-state-cell">ยังไม่มีคิวคำขอเบิกอะไหล่ในระบบ</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

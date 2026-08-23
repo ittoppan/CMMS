@@ -145,7 +145,7 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($points)): ?>
-                <tr><td colspan="8" class="px-4 py-8 text-center text-gray-500">ไม่มีจุดสอบเทียบ</td></tr>
+                <tr><td colspan="8" class="cmms-empty-state-cell">ไม่มีจุดสอบเทียบ</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

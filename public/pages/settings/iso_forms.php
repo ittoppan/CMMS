@@ -123,7 +123,7 @@ renderHeader();
                     <?php endforeach; ?>
                     <?php if (empty($filesList)): ?>
                     <tr>
-                        <td colspan="6" class="p-6 text-center text-slate-400 font-bold">ไม่พบไฟล์เอกสาร ISO</td>
+                        <td colspan="6" class="cmms-empty-state-cell">ไม่พบไฟล์เอกสาร ISO</td>
                     </tr>
                     <?php endif; ?>
                 </tbody>

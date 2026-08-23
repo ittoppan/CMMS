@@ -234,7 +234,7 @@ renderHeader();
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($bomItems)): ?>
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400 font-medium">ยังไม่มีการเพิ่มรายการอะไหล่ประจำเครื่องนี้ (กรุณาใช้ฟอร์มด้านซ้ายเพื่อเพิ่มอะไหล่)</td></tr>
+                        <tr><td colspan="6" class="cmms-empty-state-cell">ยังไม่มีการเพิ่มรายการอะไหล่ประจำเครื่องนี้ (กรุณาใช้ฟอร์มด้านซ้ายเพื่อเพิ่มอะไหล่)</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

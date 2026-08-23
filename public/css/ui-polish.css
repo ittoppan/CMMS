@@ -604,3 +604,57 @@ html.dark .theme-icon-sun  { display: block; }
 .priority-high { --_badge-bg: var(--color-background-orange); --_badge-fg: var(--color-text-orange); --_badge-bd: var(--color-border-orange); }
 .priority-critical { --_badge-bg: var(--color-background-red); --_badge-fg: var(--color-text-red); --_badge-bd: var(--color-border-red); }
 
+
+/* ------------------------------------------------------------
+   13. Loading / empty states (Redesign Plan Sec.3 Step 10)
+   ------------------------------------------------------------ */
+.cmms-skeleton {
+  background: linear-gradient(90deg,
+    var(--color-background-muted, #f1f5f9) 0%,
+    var(--color-tint-hover, #f8fafc) 50%,
+    var(--color-background-muted, #f1f5f9) 100%);
+  background-size: 200% 100%;
+  animation: cmms-skeleton 1.2s ease-in-out infinite;
+  border-radius: var(--radius-inner, 8px);
+  min-height: 0.75rem;
+}
+@keyframes cmms-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmms-skeleton { animation: none; }
+}
+.cmms-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border-emphasized, #cbd5e1);
+  border-top-color: var(--color-accent, #0064e0);
+  border-radius: 50%;
+  animation: cmms-spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: -3px;
+}
+@keyframes cmms-spin { to { transform: rotate(360deg); } }
+
+/* Block empty state (div) */
+.cmms-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 2rem 1rem;
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: var(--radius-container, 12px);
+  color: var(--color-text-secondary, #64748b);
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* Table-cell empty state */
+.cmms-empty-state-cell {
+  color: var(--color-text-secondary, #64748b) !important;
+  background-color: transparent;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+}

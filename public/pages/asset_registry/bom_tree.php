@@ -108,7 +108,7 @@ renderHeader();
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($bomSpares)): ?>
-                        <tr><td colspan="6" class="p-6 text-center text-slate-400 font-bold">ไม่มีรายการ BOM อะไหล่ผูกไว้กับเครื่องนี้</td></tr>
+                        <tr><td colspan="6" class="cmms-empty-state-cell">ไม่มีรายการ BOM อะไหล่ผูกไว้กับเครื่องนี้</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

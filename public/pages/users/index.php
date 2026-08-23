@@ -69,7 +69,7 @@ $rows = $stmt->fetchAll();
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>
-                <tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">ไม่มีข้อมูลผู้ใช้</td></tr>
+                <tr><td colspan="7" class="cmms-empty-state-cell">ไม่มีข้อมูลผู้ใช้</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

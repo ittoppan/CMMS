@@ -138,7 +138,7 @@ $activeCount = (int)$pdo->query("SELECT COUNT(*) FROM asset_registry WHERE statu
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($rows)): ?>
-                    <tr><td colspan="7" class="px-4 py-8 text-center text-slate-400 font-medium">ไม่พบข้อมูลทรัพย์สินในหน้านี้</td></tr>
+                    <tr><td colspan="7" class="cmms-empty-state-cell">ไม่พบข้อมูลทรัพย์สินในหน้านี้</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

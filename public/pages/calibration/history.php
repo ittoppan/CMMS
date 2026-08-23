@@ -124,7 +124,7 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>
-                <tr><td colspan="10" class="px-4 py-8 text-center text-gray-500">ไม่มีประวัติการสอบเทียบ</td></tr>
+                <tr><td colspan="10" class="cmms-empty-state-cell">ไม่มีประวัติการสอบเทียบ</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

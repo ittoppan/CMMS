@@ -214,7 +214,7 @@ renderHeader();
                     <?php endforeach; ?>
                     <?php if (empty($requests)): ?>
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-slate-400 font-bold">
+                        <td colspan="6" class="cmms-empty-state-cell">
                             ไม่พบรายการแจ้งซ่อมตามเงื่อนไขที่ค้นหา
                         </td>
                     </tr>

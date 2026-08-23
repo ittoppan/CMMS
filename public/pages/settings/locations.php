@@ -51,7 +51,7 @@ $parents = $pdo->query('SELECT id, code, name FROM locations ORDER BY code')->fe
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50"><td data-label="รหัส" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['code']) ?></td><td data-label="ชื่อ" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars($r['name']) ?></td><td data-label="ประเภท" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['type']) ?></td><td data-label="สถานที่หลัก" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['parent_name']??'-') ?></td><td data-label="สถานะ" class="px-4 py-3 text-sm"><span class="badge <?= $r['is_active']?'status-active':'status-inactive' ?>"><?= $r['is_active']?'Active':'Inactive' ?></span></td><td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2"><a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="?delete=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td></tr>
                 <?php endforeach; ?>
-                <?php if (empty($rows)): ?><tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">ไม่มีข้อมูลสถานที่</td></tr><?php endif; ?>
+                <?php if (empty($rows)): ?><tr><td colspan="6" class="cmms-empty-state-cell">ไม่มีข้อมูลสถานที่</td></tr><?php endif; ?>
             </tbody>
         </table>
     </div>

@@ -139,7 +139,7 @@ try {
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php if (empty($repairs)): ?>
-                <tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">ไม่มีข้อมูล</td></tr>
+                <tr><td colspan="9" class="cmms-empty-state-cell">ไม่มีข้อมูล</td></tr>
                 <?php else: ?>
                 <?php foreach ($repairs as $r): ?>
                 <tr class="hover:bg-gray-50">

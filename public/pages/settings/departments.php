@@ -48,7 +48,7 @@ $rows = $pdo->query('SELECT * FROM departments ORDER BY code')->fetchAll();
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50"><td data-label="รหัส" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['code']) ?></td><td data-label="ชื่อแผนก" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars($r['name']) ?></td><td data-label="คำอธิบาย" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description']??'-') ?></td><td data-label="สถานะ" class="px-4 py-3 text-sm"><span class="badge <?= $r['is_active']?'status-active':'status-inactive' ?>"><?= $r['is_active']?'Active':'Inactive' ?></span></td><td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2"><a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="?delete=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td></tr>
                 <?php endforeach; ?>
-                <?php if (empty($rows)): ?><tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">ไม่มีข้อมูลแผนก</td></tr><?php endif; ?>
+                <?php if (empty($rows)): ?><tr><td colspan="5" class="cmms-empty-state-cell">ไม่มีข้อมูลแผนก</td></tr><?php endif; ?>
             </tbody>
         </table>
     </div>

@@ -130,7 +130,7 @@ renderHeader();
                 </thead>
                 <tbody>
                     <?php if (empty($requests)): ?>
-                    <tr><td colspan="7" class="text-center py-6 text-slate-400">ยังไม่มีคำขออนุมัติในระบบ</td></tr>
+                    <tr><td colspan="7" class="cmms-empty-state-cell">ยังไม่มีคำขออนุมัติในระบบ</td></tr>
                     <?php else: ?>
                     <?php foreach ($requests as $r): ?>
                     <tr>

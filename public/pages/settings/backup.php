@@ -101,7 +101,7 @@ renderHeader();
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($files)): ?>
-                    <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">ยังไม่มีไฟล์สำรองข้อมูล (กดปุ่มสำรองข้อมูลทันทีเพื่อเริ่มสร้าง)</td></tr>
+                    <tr><td colspan="4" class="cmms-empty-state-cell">ยังไม่มีไฟล์สำรองข้อมูล (กดปุ่มสำรองข้อมูลทันทีเพื่อเริ่มสร้าง)</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

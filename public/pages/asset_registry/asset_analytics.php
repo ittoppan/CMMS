@@ -191,7 +191,7 @@ renderHeader();
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($issuedParts)): ?>
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">ยังไม่มีประวัติการเบิกอะไหล่สำหรับเครื่องจักรนี้</td></tr>
+                        <tr><td colspan="6" class="cmms-empty-state-cell">ยังไม่มีประวัติการเบิกอะไหล่สำหรับเครื่องจักรนี้</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
