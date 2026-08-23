@@ -21,20 +21,20 @@ renderHeader(); ?>
     <?php if($success):?><div class="cmms-banner success text-sm rounded p-3 mb-4"><?=htmlspecialchars($success)?></div><?php endif;?>
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div><label class="block text-sm font-medium">รหัสผู้จำหน่าย</label><input type="text" name="code" value="<?=htmlspecialchars($row['code'])?>" required class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">ชื่อบริษัท</label><input type="text" name="name" value="<?=htmlspecialchars($row['name'])?>" required class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">ผู้ติดต่อ</label><input type="text" name="contact_person" value="<?=htmlspecialchars($row['contact_person']??'')?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">เบอร์โทร</label><input type="text" name="phone" value="<?=htmlspecialchars($row['phone']??'')?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">อีเมล</label><input type="email" name="email" value="<?=htmlspecialchars($row['email']??'')?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">เลขประจำตัวผู้เสียภาษี</label><input type="text" name="tax_id" value="<?=htmlspecialchars($row['tax_id']??'')?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">สถานะ</label>
-                <select name="is_active" class="input input-bordered w-full mt-1">
+            <div><label for="field_code" class="block text-sm font-medium">รหัสผู้จำหน่าย</label><input type="text" id="field_code" name="code" value="<?=htmlspecialchars($row['code'])?>" required aria-required="true" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_name" class="block text-sm font-medium">ชื่อบริษัท</label><input type="text" id="field_name" name="name" value="<?=htmlspecialchars($row['name'])?>" required aria-required="true" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_contact_person" class="block text-sm font-medium">ผู้ติดต่อ</label><input type="text" id="field_contact_person" name="contact_person" value="<?=htmlspecialchars($row['contact_person']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_phone" class="block text-sm font-medium">เบอร์โทร</label><input type="text" id="field_phone" name="phone" value="<?=htmlspecialchars($row['phone']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_email" class="block text-sm font-medium">อีเมล</label><input type="email" id="field_email" name="email" value="<?=htmlspecialchars($row['email']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_tax_id" class="block text-sm font-medium">เลขประจำตัวผู้เสียภาษี</label><input type="text" id="field_tax_id" name="tax_id" value="<?=htmlspecialchars($row['tax_id']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_is_active" class="block text-sm font-medium">สถานะ</label>
+                <select id="field_is_active" name="is_active" class="input input-bordered w-full mt-1">
                     <option value="1" <?=$row['is_active']?'selected':''?>>Active</option>
                     <option value="0" <?=!$row['is_active']?'selected':''?>>Inactive</option>
                 </select>
             </div>
         </div>
-        <div><label class="block text-sm font-medium">ที่อยู่</label><textarea name="address" rows="3" class="input input-bordered w-full mt-1"><?=htmlspecialchars($row['address']??'')?></textarea></div>
+        <div><label for="field_address" class="block text-sm font-medium">ที่อยู่</label><textarea id="field_address" name="address" rows="3" class="input input-bordered w-full mt-1"><?=htmlspecialchars($row['address']??'')?></textarea></div>
         <div class="flex gap-3"><button type="submit" class="btn-primary">บันทึก</button><a href="index.php" class="btn-secondary">ยกเลิก</a></div>
     </form>
 </div>

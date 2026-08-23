@@ -36,12 +36,12 @@ renderHeader();
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ชื่อเอกสาร <span class="text-red-500">*</span></label>
-                <input type="text" name="title" required class="input input-bordered w-full mt-1">
+                <label for="field_title" class="block text-sm font-medium text-secondary">ชื่อเอกสาร <span class="text-red-500">*</span></label>
+                <input type="text" name="title" id="field_title" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ทรัพย์สินที่เกี่ยวข้อง</label>
-                <select name="asset_id" class="input input-bordered w-full mt-1">
+                <label for="field_asset_id" class="block text-sm font-medium text-secondary">ทรัพย์สินที่เกี่ยวข้อง</label>
+                <select name="asset_id" id="field_asset_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -49,25 +49,25 @@ renderHeader();
                 </select>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">อัปโหลดไฟล์</label>
-                <input type="file" name="file" class="input input-bordered w-full mt-1">
+                <label for="field_file" class="block text-sm font-medium text-secondary">อัปโหลดไฟล์</label>
+                <input type="file" name="file" id="field_file" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หรือ URL ไฟล์</label>
-                <input type="text" name="file_path" class="input input-bordered w-full mt-1" placeholder="/uploads/manuals/file.pdf">
+                <label for="field_file_path" class="block text-sm font-medium text-secondary">หรือ URL ไฟล์</label>
+                <input type="text" name="file_path" id="field_file_path" class="input input-bordered w-full mt-1" placeholder="/uploads/manuals/file.pdf">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ประเภทไฟล์</label>
-                <input type="text" name="file_type" class="input input-bordered w-full mt-1" placeholder="application/pdf">
+                <label for="field_file_type" class="block text-sm font-medium text-secondary">ประเภทไฟล์</label>
+                <input type="text" name="file_type" id="field_file_type" class="input input-bordered w-full mt-1" placeholder="application/pdf">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เวอร์ชัน</label>
-                <input type="text" name="version" class="input input-bordered w-full mt-1" placeholder="1.0">
+                <label for="field_version" class="block text-sm font-medium text-secondary">เวอร์ชัน</label>
+                <input type="text" name="version" id="field_version" class="input input-bordered w-full mt-1" placeholder="1.0">
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
-            <textarea name="description" rows="2" class="input input-bordered w-full mt-1"></textarea>
+            <label for="field_description" class="block text-sm font-medium text-secondary">คำอธิบาย</label>
+            <textarea name="description" id="field_description" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>

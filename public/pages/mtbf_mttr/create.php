@@ -30,8 +30,8 @@ renderHeader();
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
-                <select name="asset_id" required class="input input-bordered w-full mt-1">
+                <label for="field_asset_id" class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <select name="asset_id" id="field_asset_id" required aria-required="true" class="input input-bordered w-full mt-1">
                     <option value="">-- เลือกทรัพย์สิน --</option>
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -39,24 +39,24 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ปี <span class="text-red-500">*</span></label>
-                <input type="number" name="year" value="<?= date('Y') ?>" min="2000" max="2099" required class="input input-bordered w-full mt-1">
+                <label for="field_year" class="block text-sm font-medium text-secondary">ปี <span class="text-red-500">*</span></label>
+                <input type="number" name="year" id="field_year" value="<?= date('Y') ?>" min="2000" max="2099" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เดือน <span class="text-red-500">*</span></label>
-                <input type="number" name="month" value="<?= date('n') ?>" min="1" max="12" required class="input input-bordered w-full mt-1">
+                <label for="field_month" class="block text-sm font-medium text-secondary">เดือน <span class="text-red-500">*</span></label>
+                <input type="number" name="month" id="field_month" value="<?= date('n') ?>" min="1" max="12" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชั่วโมงทำงาน</label>
-                <input type="number" name="operating_hours" step="0.5" class="input input-bordered w-full mt-1" value="0">
+                <label for="field_operating_hours" class="block text-sm font-medium text-secondary">ชั่วโมงทำงาน</label>
+                <input type="number" name="operating_hours" id="field_operating_hours" step="0.5" class="input input-bordered w-full mt-1" value="0">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">จำนวนครั้งที่เสีย</label>
-                <input type="number" name="total_failures" min="0" class="input input-bordered w-full mt-1" value="0">
+                <label for="field_total_failures" class="block text-sm font-medium text-secondary">จำนวนครั้งที่เสีย</label>
+                <input type="number" name="total_failures" id="field_total_failures" min="0" class="input input-bordered w-full mt-1" value="0">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">Downtime (นาที)</label>
-                <input type="number" name="total_downtime_minutes" min="0" class="input input-bordered w-full mt-1" value="0">
+                <label for="field_total_downtime_minutes" class="block text-sm font-medium text-secondary">Downtime (นาที)</label>
+                <input type="number" name="total_downtime_minutes" id="field_total_downtime_minutes" min="0" class="input input-bordered w-full mt-1" value="0">
             </div>
         </div>
         <div class="bg-subtle rounded-md p-4 text-sm text-secondary">

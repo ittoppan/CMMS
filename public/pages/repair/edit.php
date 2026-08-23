@@ -188,20 +188,20 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลทั่วไป</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">หัวข้องาน</label>
-                <input type="text" name="title" value="<?= htmlspecialchars($row['title']) ?>" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_title">หัวข้องาน</label>
+                <input type="text" name="title" id="field_title" value="<?= htmlspecialchars($row['title']) ?>" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน</label>
-                <select name="asset_id" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_asset_id">ทรัพย์สิน</label>
+                <select name="asset_id" id="field_asset_id" required aria-required="true" class="input input-bordered w-full mt-1">
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= $row['asset_id']==$a['id']?'selected':'' ?>><?= htmlspecialchars($a['code'].' - '.$a['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ช่างผู้รับ</label>
-                <select name="assigned_to" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_assigned_to">ช่างผู้รับ</label>
+                <select name="assigned_to" id="field_assigned_to" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
                     <option value="<?= $u['id'] ?>" <?= opt($row['assigned_to'],$u['id']) ?>><?= htmlspecialchars($u['full_name']) ?></option>
@@ -209,16 +209,16 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ความสำคัญ</label>
-                <select name="priority" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_priority">ความสำคัญ</label>
+                <select name="priority" id="field_priority" class="input input-bordered w-full mt-1">
                     <?php foreach (['low'=>'Low','medium'=>'Medium','high'=>'High','critical'=>'Critical'] as $pk => $pl): ?>
                     <option value="<?= $pk ?>" <?= opt($row['priority'],$pk) ?>><?= htmlspecialchars($pl) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_status">สถานะ</label>
+                <select name="status" id="field_status" class="input input-bordered w-full mt-1">
                     <?php foreach (['open','acknowledged','in_progress','waiting_parts','waiting_approval','resolved','closed','cancelled','rejected'] as $s): ?>
                     <option value="<?= $s ?>" <?= opt($row['status'],$s) ?>><?= ucfirst(str_replace('_',' ',$s)) ?></option>
                     <?php endforeach; ?>
@@ -229,8 +229,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลจำเพาะ</h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ประเภทการซ่อม</label>
-                <select name="repair_type_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_repair_type_id">ประเภทการซ่อม</label>
+                <select name="repair_type_id" id="field_repair_type_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($repairTypes as $rt): ?>
                     <option value="<?= $rt['id'] ?>" <?= opt($row['repair_type_id'],$rt['id']) ?>><?= htmlspecialchars($rt['code'].' - '.$rt['name']) ?></option>
@@ -238,8 +238,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสอาการเสีย</label>
-                <select name="failure_code_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_failure_code_id">รหัสอาการเสีย</label>
+                <select name="failure_code_id" id="field_failure_code_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($failureCodes as $fc): ?>
                     <option value="<?= $fc['id'] ?>" <?= opt($row['failure_code_id'],$fc['id']) ?>><?= htmlspecialchars($fc['code'].' - '.$fc['name']) ?></option>
@@ -247,8 +247,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสการซ่อม</label>
-                <select name="repair_code_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_repair_code_id">รหัสการซ่อม</label>
+                <select name="repair_code_id" id="field_repair_code_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($repairCodes as $rc): ?>
                     <option value="<?= $rc['id'] ?>" <?= opt($row['repair_code_id'],$rc['id']) ?>><?= htmlspecialchars($rc['code'].' - '.$rc['name']) ?></option>
@@ -256,8 +256,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
-                <select name="work_zone_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_work_zone_id">โซนงาน</label>
+                <select name="work_zone_id" id="field_work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($workZones as $wz): ?>
                     <option value="<?= $wz['id'] ?>" <?= opt($row['work_zone_id'],$wz['id']) ?>><?= htmlspecialchars($wz['code'].' - '.$wz['name']) ?></option>
@@ -265,8 +265,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานที่</label>
-                <select name="location_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_location_id">สถานที่</label>
+                <select name="location_id" id="field_location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locations as $loc): ?>
                     <option value="<?= $loc['id'] ?>" <?= opt($row['location_id'],$loc['id']) ?>><?= htmlspecialchars($loc['code'].' - '.$loc['name']) ?></option>
@@ -274,8 +274,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก</label>
-                <select name="department_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_department_id">แผนก</label>
+                <select name="department_id" id="field_department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
                     <option value="<?= $d['id'] ?>" <?= opt($row['department_id'],$d['id']) ?>><?= htmlspecialchars($d['name']) ?></option>
@@ -283,12 +283,12 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">Lot No.</label>
-                <input type="text" name="product_lot_no" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['product_lot_no']??'') ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_product_lot_no">Lot No.</label>
+                <input type="text" name="product_lot_no" id="field_product_lot_no" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['product_lot_no']??'') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะเครื่องจักร</label>
-                <select name="machine_status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_machine_status">สถานะเครื่องจักร</label>
+                <select name="machine_status" id="field_machine_status" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach (['running'=>'Running','stopped'=>'Stopped','idle'=>'Idle','standby'=>'Standby'] as $mk=>$mv): ?>
                     <option value="<?= $mk ?>" <?= opt($row['machine_status'],$mk) ?>><?= $mv ?></option>
@@ -296,8 +296,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะสายการผลิต</label>
-                <select name="production_line_status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_production_line_status">สถานะสายการผลิต</label>
+                <select name="production_line_status" id="field_production_line_status" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach (['normal'=>'Normal','stopped'=>'Stopped','slowdown'=>'Slowdown'] as $pk2=>$pv): ?>
                     <option value="<?= $pk2 ?>" <?= opt($row['production_line_status'],$pk2) ?>><?= $pv ?></option>
@@ -305,8 +305,8 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">วันที่คาดว่าจะเสร็จ</label>
-                <input type="datetime-local" name="estimated_completion_date" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['estimated_completion_date']??'') ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_estimated_completion_date">วันที่คาดว่าจะเสร็จ</label>
+                <input type="datetime-local" name="estimated_completion_date" id="field_estimated_completion_date" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['estimated_completion_date']??'') ?>">
             </div>
             <div class="flex items-center mt-6">
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -319,48 +319,48 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
         <h2 class="text-lg font-semibold text-primary border-b pb-2">รายละเอียดงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รายละเอียด</label>
-                <textarea name="description" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_description">รายละเอียด</label>
+                <textarea name="description" id="field_description" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รายงานอาการเสีย</label>
-                <textarea name="failure_report" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['failure_report']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_failure_report">รายงานอาการเสีย</label>
+                <textarea name="failure_report" id="field_failure_report" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['failure_report']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">การวินิจฉัย</label>
-                <textarea name="diagnosis" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['diagnosis']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_diagnosis">การวินิจฉัย</label>
+                <textarea name="diagnosis" id="field_diagnosis" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['diagnosis']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แนวทางแก้ไข</label>
-                <textarea name="resolution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['resolution']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_resolution">แนวทางแก้ไข</label>
+                <textarea name="resolution" id="field_resolution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['resolution']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สาเหตุหลัก (Root Cause)</label>
-                <textarea name="root_cause" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['root_cause']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_root_cause">สาเหตุหลัก (Root Cause)</label>
+                <textarea name="root_cause" id="field_root_cause" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['root_cause']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">วิธีแก้ไข (Solution)</label>
-                <textarea name="solution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['solution']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_solution">วิธีแก้ไข (Solution)</label>
+                <textarea name="solution" id="field_solution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['solution']??'') ?></textarea>
             </div>
         </div>
 
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ค่าใช้จ่ายและระยะเวลา</h2>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ค่าแรง</label>
-                <input type="number" name="cost_labor" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_labor'] ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_cost_labor">ค่าแรง</label>
+                <input type="number" name="cost_labor" id="field_cost_labor" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_labor'] ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ค่าอะไหล่</label>
-                <input type="number" name="cost_parts" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_parts'] ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_cost_parts">ค่าอะไหล่</label>
+                <input type="number" name="cost_parts" id="field_cost_parts" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_parts'] ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เริ่มหยุด</label>
-                <input type="datetime-local" name="downtime_start" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_start']??'') ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_downtime_start">เริ่มหยุด</label>
+                <input type="datetime-local" name="downtime_start" id="field_downtime_start" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_start']??'') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สิ้นสุดหยุด</label>
-                <input type="datetime-local" name="downtime_end" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_end']??'') ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_downtime_end">สิ้นสุดหยุด</label>
+                <input type="datetime-local" name="downtime_end" id="field_downtime_end" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_end']??'') ?>">
             </div>
         </div>
 
@@ -390,21 +390,21 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
         </div>
         <?php endif; ?>
         <div>
-            <label class="block text-sm font-medium text-secondary">📸 รูปก่อนซ่อม (Before) — failure_image</label>
-            <input type="file" name="failure_image[]" multiple accept="image/*" class="input input-bordered w-full mt-1">
+            <label class="block text-sm font-medium text-secondary" for="field_failure_image">📸 รูปก่อนซ่อม (Before) — failure_image</label>
+            <input type="file" name="failure_image[]" id="field_failure_image" multiple accept="image/*" class="input input-bordered w-full mt-1">
             <p class="text-xs text-muted mt-1">รูปสภาพเครื่องก่อนซ่อม / อาการเสีย (เลือกหลายไฟล์ได้) — ใช้ส่ง LINE ตอนแจ้งงานและตอนปิดงาน</p>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">📸 รูปหลังซ่อม (After)</label>
-            <input type="file" name="after_image[]" multiple accept="image/*" class="input input-bordered w-full mt-1">
+            <label class="block text-sm font-medium text-secondary" for="field_after_image">📸 รูปหลังซ่อม (After)</label>
+            <input type="file" name="after_image[]" id="field_after_image" multiple accept="image/*" class="input input-bordered w-full mt-1">
             <p class="text-xs text-muted mt-1">รูปหลังซ่อมเสร็จ — ใช้ส่ง LINE ตอนปิดงาน (สถานะเปลี่ยนเป็น ซ่อมเสร็จ)</p>
         </div>
 
         <h2 class="text-lg font-semibold text-primary border-b pb-2">การปฏิเสธงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">เหตุผลที่ปฏิเสธ</label>
-                <select name="rejection_reason_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_rejection_reason_id">เหตุผลที่ปฏิเสธ</label>
+                <select name="rejection_reason_id" id="field_rejection_reason_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($rejectionReasons as $rr): ?>
                     <option value="<?= $rr['id'] ?>" <?= opt($row['rejection_reason_id'],$rr['id']) ?>><?= htmlspecialchars($rr['code'].' - '.$rr['name']) ?></option>
@@ -412,14 +412,14 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หมายเหตุปฏิเสธ</label>
-                <textarea name="rejection_note" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['rejection_note']??'') ?></textarea>
+                <label class="block text-sm font-medium text-secondary" for="field_rejection_note">หมายเหตุปฏิเสธ</label>
+                <textarea name="rejection_note" id="field_rejection_note" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['rejection_note']??'') ?></textarea>
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
-            <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes']??'') ?></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_notes">หมายเหตุ</label>
+            <textarea name="notes" id="field_notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes']??'') ?></textarea>
         </div>
 
         <div class="flex gap-3">

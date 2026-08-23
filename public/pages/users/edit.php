@@ -73,8 +73,8 @@ renderHeader();
             </div>
             <?php endif; ?>
             <div>
-                <label class="block text-sm font-bold text-primary">📸 อัปเดต/เปลี่ยนรูปภาพโปรไฟล์</label>
-                <input type="file" name="avatar_file" accept="image/*" capture="user" class="input input-bordered w-full mt-1 text-xs">
+                <label for="field_avatar_file" class="block text-sm font-bold text-primary">📸 อัปเดต/เปลี่ยนรูปภาพโปรไฟล์</label>
+                <input type="file" id="field_avatar_file" name="avatar_file" accept="image/*" capture="user" class="input input-bordered w-full mt-1 text-xs">
                 <p class="text-xs text-muted mt-1">ถ่ายภาพเซลฟี่จากกล้องมือถือ หรือเลือกรูปโปรไฟล์ (JPG, PNG)</p>
             </div>
         </div>
@@ -82,36 +82,36 @@ renderHeader();
         <h2 class="text-base font-semibold text-primary border-b pb-2">ข้อมูลบัญชี</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อผู้ใช้ <span class="text-red-500">*</span></label>
-                <input type="text" name="username" value="<?= htmlspecialchars($row['username']) ?>" required class="input input-bordered w-full mt-1">
+                <label for="field_username" class="block text-sm font-medium text-secondary">ชื่อผู้ใช้ <span class="text-red-500">*</span></label>
+                <input type="text" id="field_username" name="username" value="<?= htmlspecialchars($row['username']) ?>" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">อีเมล <span class="text-red-500">*</span></label>
-                <input type="email" name="email" value="<?= htmlspecialchars($row['email']) ?>" required class="input input-bordered w-full mt-1">
+                <label for="field_email" class="block text-sm font-medium text-secondary">อีเมล <span class="text-red-500">*</span></label>
+                <input type="email" id="field_email" name="email" value="<?= htmlspecialchars($row['email']) ?>" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
-                <input type="text" name="full_name" value="<?= htmlspecialchars($row['full_name']) ?>" required class="input input-bordered w-full mt-1">
+                <label for="field_full_name" class="block text-sm font-medium text-secondary">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
+                <input type="text" id="field_full_name" name="full_name" value="<?= htmlspecialchars($row['full_name']) ?>" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสผ่านใหม่ (เว้นว่างไว้ไม่เปลี่ยน)</label>
-                <input type="password" name="password" minlength="4" class="input input-bordered w-full mt-1">
+                <label for="field_password" class="block text-sm font-medium text-secondary">รหัสผ่านใหม่ (เว้นว่างไว้ไม่เปลี่ยน)</label>
+                <input type="password" id="field_password" name="password" minlength="4" class="input input-bordered w-full mt-1">
             </div>
         </div>
 
         <h2 class="text-base font-semibold text-primary border-b pb-2">ข้อมูลพนักงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสพนักงาน</label>
-                <input type="text" name="employee_code" value="<?= htmlspecialchars($row['employee_code'] ?? '') ?>" class="input input-bordered w-full mt-1">
+                <label for="field_employee_code" class="block text-sm font-medium text-secondary">รหัสพนักงาน</label>
+                <input type="text" id="field_employee_code" name="employee_code" value="<?= htmlspecialchars($row['employee_code'] ?? '') ?>" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ตำแหน่ง</label>
-                <input type="text" name="position" value="<?= htmlspecialchars($row['position'] ?? '') ?>" class="input input-bordered w-full mt-1">
+                <label for="field_position" class="block text-sm font-medium text-secondary">ตำแหน่ง</label>
+                <input type="text" id="field_position" name="position" value="<?= htmlspecialchars($row['position'] ?? '') ?>" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">บทบาท</label>
-                <select name="role_id" class="input input-bordered w-full mt-1">
+                <label for="field_role_id" class="block text-sm font-medium text-secondary">บทบาท</label>
+                <select id="field_role_id" name="role_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($roles as $r): ?>
                     <option value="<?= $r['id'] ?>" <?= $row['role_id'] == $r['id'] ? 'selected' : '' ?>><?= htmlspecialchars($r['name']) ?></option>
@@ -119,8 +119,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก</label>
-                <select name="department_id" class="input input-bordered w-full mt-1">
+                <label for="field_department_id" class="block text-sm font-medium text-secondary">แผนก</label>
+                <select id="field_department_id" name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
                     <option value="<?= $d['id'] ?>" <?= $row['department_id'] == $d['id'] ? 'selected' : '' ?>><?= htmlspecialchars($d['name']) ?></option>
@@ -128,16 +128,16 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เบอร์โทร</label>
-                <input type="text" name="phone" value="<?= htmlspecialchars($row['phone'] ?? '') ?>" class="input input-bordered w-full mt-1">
+                <label for="field_phone" class="block text-sm font-medium text-secondary">เบอร์โทร</label>
+                <input type="text" id="field_phone" name="phone" value="<?= htmlspecialchars($row['phone'] ?? '') ?>" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">LINE User ID (สำหรับการแจ้งเตือน LINE)</label>
-                <input type="text" name="line_user_id" value="<?= htmlspecialchars($row['line_user_id'] ?? '') ?>" placeholder="U123456789..." class="input input-bordered w-full mt-1">
+                <label for="field_line_user_id" class="block text-sm font-medium text-secondary">LINE User ID (สำหรับการแจ้งเตือน LINE)</label>
+                <input type="text" id="field_line_user_id" name="line_user_id" value="<?= htmlspecialchars($row['line_user_id'] ?? '') ?>" placeholder="U123456789..." class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="is_active" class="input input-bordered w-full mt-1">
+                <label for="field_is_active" class="block text-sm font-medium text-secondary">สถานะ</label>
+                <select id="field_is_active" name="is_active" class="input input-bordered w-full mt-1">
                     <option value="1" <?= $row['is_active'] ? 'selected' : '' ?>>Active - ใช้งาน</option>
                     <option value="0" <?= !$row['is_active'] ? 'selected' : '' ?>>Inactive - ปิดใช้งาน</option>
                 </select>

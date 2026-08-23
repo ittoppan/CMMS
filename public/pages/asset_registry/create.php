@@ -82,21 +82,21 @@ renderHeader();
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลพื้นฐาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสทรัพย์สิน <span class="text-red-500">*</span></label>
-                <input type="text" name="code" required class="input input-bordered w-full mt-1"
+                <label class="block text-sm font-medium text-secondary" for="field_code">รหัสทรัพย์สิน <span class="text-red-500">*</span></label>
+                <input type="text" name="code" id="field_code" required aria-required="true" class="input input-bordered w-full mt-1"
                     value="AST-<?= date('Ymd') ?>-">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อทรัพย์สิน <span class="text-red-500">*</span></label>
-                <input type="text" name="name" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_name">ชื่อทรัพย์สิน <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="field_name" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หมวดหมู่</label>
-                <input type="text" name="category" class="input input-bordered w-full mt-1" placeholder="Machine, Instrument, Vehicle...">
+                <label class="block text-sm font-medium text-secondary" for="field_category">หมวดหมู่</label>
+                <input type="text" name="category" id="field_category" class="input input-bordered w-full mt-1" placeholder="Machine, Instrument, Vehicle...">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_status">สถานะ</label>
+                <select name="status" id="field_status" class="input input-bordered w-full mt-1">
                     <option value="active">Active - ใช้งานอยู่</option>
                     <option value="inactive">Inactive - ไม่ได้ใช้งาน</option>
                     <option value="disposed">Disposed - จำหน่ายแล้ว</option>
@@ -104,16 +104,16 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">Barcode</label>
-                <input type="text" name="barcode" class="input input-bordered w-full mt-1" placeholder="Barcode หรือ QR code value">
+                <label class="block text-sm font-medium text-secondary" for="field_barcode">Barcode</label>
+                <input type="text" name="barcode" id="field_barcode" class="input input-bordered w-full mt-1" placeholder="Barcode หรือ QR code value">
             </div>
         </div>
 
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ผู้รับผิดชอบ / ที่ตั้ง</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบหลัก</label>
-                <select name="responsible_user_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_responsible_user_id">ผู้รับผิดชอบหลัก</label>
+                <select name="responsible_user_id" id="field_responsible_user_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
                     <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['full_name']) ?></option>
@@ -121,8 +121,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก (จากระบบ)</label>
-                <select name="department_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_department_id">แผนก (จากระบบ)</label>
+                <select name="department_id" id="field_department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
                     <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
@@ -130,8 +130,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานที่ (จากระบบ)</label>
-                <select name="location_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_location_id">สถานที่ (จากระบบ)</label>
+                <select name="location_id" id="field_location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locations as $loc): ?>
                     <option value="<?= $loc['id'] ?>"><?= htmlspecialchars($loc['code'] . ' - ' . $loc['name']) ?></option>
@@ -139,8 +139,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
-                <select name="work_zone_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_work_zone_id">โซนงาน</label>
+                <select name="work_zone_id" id="field_work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($workZones as $wz): ?>
                     <option value="<?= $wz['id'] ?>"><?= htmlspecialchars($wz['code'] . ' - ' . $wz['name']) ?></option>
@@ -148,56 +148,56 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานที่ (ข้อความ)</label>
-                <input type="text" name="location" class="input input-bordered w-full mt-1" placeholder="เช่น อาคาร A ชั้น 2">
+                <label class="block text-sm font-medium text-secondary" for="field_location">สถานที่ (ข้อความ)</label>
+                <input type="text" name="location" id="field_location" class="input input-bordered w-full mt-1" placeholder="เช่น อาคาร A ชั้น 2">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก (ข้อความ)</label>
-                <input type="text" name="department" class="input input-bordered w-full mt-1" placeholder="เช่น แผนกช่าง">
+                <label class="block text-sm font-medium text-secondary" for="field_department">แผนก (ข้อความ)</label>
+                <input type="text" name="department" id="field_department" class="input input-bordered w-full mt-1" placeholder="เช่น แผนกช่าง">
             </div>
         </div>
 
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลทางเทคนิค</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้ผลิต</label>
-                <input type="text" name="manufacturer" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_manufacturer">ผู้ผลิต</label>
+                <input type="text" name="manufacturer" id="field_manufacturer" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รุ่น</label>
-                <input type="text" name="model" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_model">รุ่น</label>
+                <input type="text" name="model" id="field_model" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">Serial Number</label>
-                <input type="text" name="serial_number" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_serial_number">Serial Number</label>
+                <input type="text" name="serial_number" id="field_serial_number" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">วันที่ซื้อ</label>
-                <input type="date" name="purchase_date" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_purchase_date">วันที่ซื้อ</label>
+                <input type="date" name="purchase_date" id="field_purchase_date" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หมดประกัน</label>
-                <input type="date" name="warranty_expiry" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_warranty_expiry">หมดประกัน</label>
+                <input type="date" name="warranty_expiry" id="field_warranty_expiry" class="input input-bordered w-full mt-1">
             </div>
         </div>
 
         <h2 class="text-lg font-semibold text-primary border-b pb-2">ไฟล์แนบ</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary font-bold text-blue-900">📸 ถ่ายภาพเครื่องจักรจากกล้อง / แนบรูปภาพทรัพย์สิน</label>
-                <input type="file" name="image_file" accept="image/*" capture="environment" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary font-bold text-blue-900" for="field_image_file">📸 ถ่ายภาพเครื่องจักรจากกล้อง / แนบรูปภาพทรัพย์สิน</label>
+                <input type="file" name="image_file" id="field_image_file" accept="image/*" capture="environment" class="input input-bordered w-full mt-1">
                 <p class="text-xs text-blue-600 mt-1">กดที่กล่องเพื่อถ่ายภาพเครื่องจักรบนมือถือทันที (JPG, PNG, WebP)</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">คู่มือการใช้งาน (ไฟล์)</label>
-                <input type="file" name="instruction_manual" accept=".pdf,.doc,.docx" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_instruction_manual">คู่มือการใช้งาน (ไฟล์)</label>
+                <input type="file" name="instruction_manual" id="field_instruction_manual" accept=".pdf,.doc,.docx" class="input input-bordered w-full mt-1">
                 <p class="text-xs text-muted mt-1">PDF, DOC, DOCX</p>
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
-            <textarea name="description" rows="2" class="input input-bordered w-full mt-1"></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_description">คำอธิบาย</label>
+            <textarea name="description" id="field_description" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
 
         <div class="flex gap-3">

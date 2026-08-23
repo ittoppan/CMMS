@@ -76,20 +76,20 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">หัวข้อ <span class="text-red-500">*</span></label>
-                <input type="text" name="title" value="<?= htmlspecialchars($row['title']) ?>" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_title">หัวข้อ <span class="text-red-500">*</span></label>
+                <input type="text" name="title" id="field_title" value="<?= htmlspecialchars($row['title']) ?>" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
-                <select name="asset_id" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_asset_id">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <select name="asset_id" id="field_asset_id" required aria-required="true" class="input input-bordered w-full mt-1">
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= sel($row['asset_id'], $a['id']) ?>><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนงาน (Plan)</label>
-                <select name="plan_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_plan_id">แผนงาน (Plan)</label>
+                <select name="plan_id" id="field_plan_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($plans as $p): ?>
                     <option value="<?= $p['id'] ?>" <?= sel($row['plan_id'], $p['id']) ?>><?= htmlspecialchars($p['code'] . ' - ' . $p['name']) ?></option>
@@ -97,8 +97,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก</label>
-                <select name="department_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_department_id">แผนก</label>
+                <select name="department_id" id="field_department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($depts as $d): ?>
                     <option value="<?= $d['id'] ?>" <?= sel($row['department_id'], $d['id']) ?>><?= htmlspecialchars($d['name']) ?></option>
@@ -106,8 +106,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานที่</label>
-                <select name="location_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_location_id">สถานที่</label>
+                <select name="location_id" id="field_location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locs as $l): ?>
                     <option value="<?= $l['id'] ?>" <?= sel($row['location_id'], $l['id']) ?>><?= htmlspecialchars($l['code'] . ' - ' . $l['name']) ?></option>
@@ -115,8 +115,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
-                <select name="work_zone_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_work_zone_id">โซนงาน</label>
+                <select name="work_zone_id" id="field_work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($zones as $z): ?>
                     <option value="<?= $z['id'] ?>" <?= sel($row['work_zone_id'], $z['id']) ?>><?= htmlspecialchars($z['code'] . ' - ' . $z['name']) ?></option>
@@ -124,8 +124,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบ</label>
-                <select name="assigned_to" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_assigned_to">ผู้รับผิดชอบ</label>
+                <select name="assigned_to" id="field_assigned_to" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
                     <option value="<?= $u['id'] ?>" <?= sel($row['assigned_to'], $u['id']) ?>><?= htmlspecialchars($u['full_name']) ?></option>
@@ -133,55 +133,55 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ประเภทความถี่</label>
-                <select name="frequency_type" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_frequency_type">ประเภทความถี่</label>
+                <select name="frequency_type" id="field_frequency_type" class="input input-bordered w-full mt-1">
                     <?php foreach (['daily','weekly','monthly','quarterly','yearly','custom'] as $f): ?>
                     <option value="<?= $f ?>" <?= sel($row['frequency_type'], $f) ?>><?= ucfirst($f) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">Interval</label>
-                <input type="number" name="frequency_interval" class="input input-bordered w-full mt-1" value="<?= $row['frequency_interval'] ?>" min="1">
+                <label class="block text-sm font-medium text-secondary" for="field_frequency_interval">Interval</label>
+                <input type="number" name="frequency_interval" id="field_frequency_interval" class="input input-bordered w-full mt-1" value="<?= $row['frequency_interval'] ?>" min="1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">กำหนดเสร็จ</label>
-                <input type="date" name="due_date" class="input input-bordered w-full mt-1" value="<?= $row['due_date'] ?? '' ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_due_date">กำหนดเสร็จ</label>
+                <input type="date" name="due_date" id="field_due_date" class="input input-bordered w-full mt-1" value="<?= $row['due_date'] ?? '' ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ทำล่าสุด</label>
-                <input type="date" name="last_done_date" class="input input-bordered w-full mt-1" value="<?= $row['last_done_date'] ?? '' ?>">
+                <label class="block text-sm font-medium text-secondary" for="field_last_done_date">ทำล่าสุด</label>
+                <input type="date" name="last_done_date" id="field_last_done_date" class="input input-bordered w-full mt-1" value="<?= $row['last_done_date'] ?? '' ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_status">สถานะ</label>
+                <select name="status" id="field_status" class="input input-bordered w-full mt-1">
                     <?php foreach (['pending','in_progress','completed','overdue','skipped'] as $s): ?>
                     <option value="<?= $s ?>" <?= sel($row['status'], $s) ?>><?= ucfirst($s) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ไฟล์คำสั่งปฏิบัติงาน</label>
+                <label class="block text-sm font-medium text-secondary" for="field_work_instruction_file">ไฟล์คำสั่งปฏิบัติงาน</label>
                 <?php if ($row['work_instruction_file']): ?>
                 <div class="mb-2 text-sm">
                     <a href="/<?= htmlspecialchars($row['work_instruction_file']) ?>" target="_blank" class="text-primary-600 hover:underline">ดูไฟล์ปัจจุบัน</a>
                 </div>
                 <?php endif; ?>
-                <input type="file" name="work_instruction_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="input input-bordered w-full mt-1">
+                <input type="file" name="work_instruction_file" id="field_work_instruction_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="input input-bordered w-full mt-1">
                 <p class="text-xs text-muted mt-1">เว้นว่างไว้หากไม่ต้องการเปลี่ยนไฟล์</p>
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
-            <textarea name="description" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_description">คำอธิบาย</label>
+            <textarea name="description" id="field_description" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
-            <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes'] ?? '') ?></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_notes">หมายเหตุ</label>
+            <textarea name="notes" id="field_notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes'] ?? '') ?></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">Checklist (บรรทัดละ 1 รายการ)</label>
-            <textarea name="checklist" rows="4" class="input input-bordered w-full mt-1"><?php $cl = json_decode($row['checklist'] ?? '[]'); echo is_array($cl) ? implode("\n", $cl) : '' ?></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_checklist">Checklist (บรรทัดละ 1 รายการ)</label>
+            <textarea name="checklist" id="field_checklist" rows="4" class="input input-bordered w-full mt-1"><?php $cl = json_decode($row['checklist'] ?? '[]'); echo is_array($cl) ? implode("\n", $cl) : '' ?></textarea>
         </div>
         <?php if ($templates): ?>
         <div>
@@ -197,8 +197,8 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
         </div>
         <?php endif; ?>
         <div>
-            <label class="block text-sm font-medium text-secondary">เหตุผลที่เลื่อนกำหนดการ</label>
-            <textarea name="reschedule_reason" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['reschedule_reason'] ?? '') ?></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_reschedule_reason">เหตุผลที่เลื่อนกำหนดการ</label>
+            <textarea name="reschedule_reason" id="field_reschedule_reason" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['reschedule_reason'] ?? '') ?></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>

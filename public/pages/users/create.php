@@ -44,36 +44,36 @@ renderHeader();
         <h2 class="text-base font-semibold text-primary border-b pb-2">ข้อมูลบัญชี</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อผู้ใช้ <span class="text-red-500">*</span></label>
-                <input type="text" name="username" required class="input input-bordered w-full mt-1">
+                <label for="field_username" class="block text-sm font-medium text-secondary">ชื่อผู้ใช้ <span class="text-red-500">*</span></label>
+                <input type="text" id="field_username" name="username" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">อีเมล <span class="text-red-500">*</span></label>
-                <input type="email" name="email" required class="input input-bordered w-full mt-1">
+                <label for="field_email" class="block text-sm font-medium text-secondary">อีเมล <span class="text-red-500">*</span></label>
+                <input type="email" id="field_email" name="email" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
-                <input type="text" name="full_name" required class="input input-bordered w-full mt-1">
+                <label for="field_full_name" class="block text-sm font-medium text-secondary">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
+                <input type="text" id="field_full_name" name="full_name" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสผ่าน <span class="text-red-500">*</span></label>
-                <input type="password" name="password" required minlength="4" class="input input-bordered w-full mt-1">
+                <label for="field_password" class="block text-sm font-medium text-secondary">รหัสผ่าน <span class="text-red-500">*</span></label>
+                <input type="password" id="field_password" name="password" required aria-required="true" minlength="4" class="input input-bordered w-full mt-1">
             </div>
         </div>
 
         <h2 class="text-base font-semibold text-primary border-b pb-2">ข้อมูลพนักงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสพนักงาน</label>
-                <input type="text" name="employee_code" class="input input-bordered w-full mt-1" placeholder="EMP-001">
+                <label for="field_employee_code" class="block text-sm font-medium text-secondary">รหัสพนักงาน</label>
+                <input type="text" id="field_employee_code" name="employee_code" class="input input-bordered w-full mt-1" placeholder="EMP-001">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ตำแหน่ง</label>
-                <input type="text" name="position" class="input input-bordered w-full mt-1" placeholder="เช่น ช่างซ่อม, หัวหน้าช่าง">
+                <label for="field_position" class="block text-sm font-medium text-secondary">ตำแหน่ง</label>
+                <input type="text" id="field_position" name="position" class="input input-bordered w-full mt-1" placeholder="เช่น ช่างซ่อม, หัวหน้าช่าง">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">บทบาท</label>
-                <select name="role_id" class="input input-bordered w-full mt-1">
+                <label for="field_role_id" class="block text-sm font-medium text-secondary">บทบาท</label>
+                <select id="field_role_id" name="role_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($roles as $r): ?>
                     <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
@@ -81,8 +81,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">แผนก</label>
-                <select name="department_id" class="input input-bordered w-full mt-1">
+                <label for="field_department_id" class="block text-sm font-medium text-secondary">แผนก</label>
+                <select id="field_department_id" name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
                     <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['name']) ?></option>
@@ -90,12 +90,12 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เบอร์โทร</label>
-                <input type="text" name="phone" class="input input-bordered w-full mt-1">
+                <label for="field_phone" class="block text-sm font-medium text-secondary">เบอร์โทร</label>
+                <input type="text" id="field_phone" name="phone" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="is_active" class="input input-bordered w-full mt-1">
+                <label for="field_is_active" class="block text-sm font-medium text-secondary">สถานะ</label>
+                <select id="field_is_active" name="is_active" class="input input-bordered w-full mt-1">
                     <option value="1">Active - ใช้งาน</option>
                     <option value="0">Inactive - ปิดใช้งาน</option>
                 </select>

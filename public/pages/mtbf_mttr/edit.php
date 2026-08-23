@@ -25,16 +25,16 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
     <?php if($success):?><div class="cmms-banner success text-sm rounded p-3 mb-4"><?=htmlspecialchars($success)?></div><?php endif;?>
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="sm:col-span-2"><label class="block text-sm font-medium">ทรัพย์สิน</label>
-                <select name="asset_id" required class="input input-bordered w-full mt-1">
+            <div class="sm:col-span-2"><label for="field_asset_id" class="block text-sm font-medium">ทรัพย์สิน</label>
+                <select name="asset_id" id="field_asset_id" required aria-required="true" class="input input-bordered w-full mt-1">
                     <?php foreach($assets as $a):?><option value="<?=$a['id']?>" <?=sel($row['asset_id'],$a['id'])?>><?=htmlspecialchars($a['code'].' - '.$a['name'])?></option><?php endforeach;?>
                 </select>
             </div>
-            <div><label class="block text-sm font-medium">ปี</label><input type="number" name="year" value="<?=$row['year']?>" min="2000" max="2099" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">เดือน</label><input type="number" name="month" value="<?=$row['month']?>" min="1" max="12" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">ชั่วโมงทำงาน</label><input type="number" name="operating_hours" step="0.5" value="<?=$row['operating_hours']?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">จำนวนครั้งเสีย</label><input type="number" name="total_failures" min="0" value="<?=$row['total_failures']?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">Downtime (นาที)</label><input type="number" name="total_downtime_minutes" min="0" value="<?=$row['total_downtime_minutes']?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_year" class="block text-sm font-medium">ปี</label><input type="number" name="year" id="field_year" value="<?=$row['year']?>" min="2000" max="2099" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_month" class="block text-sm font-medium">เดือน</label><input type="number" name="month" id="field_month" value="<?=$row['month']?>" min="1" max="12" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_operating_hours" class="block text-sm font-medium">ชั่วโมงทำงาน</label><input type="number" name="operating_hours" id="field_operating_hours" step="0.5" value="<?=$row['operating_hours']?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_total_failures" class="block text-sm font-medium">จำนวนครั้งเสีย</label><input type="number" name="total_failures" id="field_total_failures" min="0" value="<?=$row['total_failures']?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_total_downtime_minutes" class="block text-sm font-medium">Downtime (นาที)</label><input type="number" name="total_downtime_minutes" id="field_total_downtime_minutes" min="0" value="<?=$row['total_downtime_minutes']?>" class="input input-bordered w-full mt-1"></div>
         </div>
         <div class="bg-subtle rounded-md p-4 text-sm text-secondary">MTBF = ชม.ทำงาน/จำนวนครั้งเสีย, MTTR = นาที Downtime/จำนวนครั้งเสีย</div>
         <div class="flex gap-3"><button type="submit" class="btn-primary">บันทึก</button><a href="index.php" class="btn-secondary">ยกเลิก</a></div>

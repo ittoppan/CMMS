@@ -51,40 +51,40 @@ renderHeader();
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสอะไหล่ <span class="text-red-500">*</span></label>
-                <input type="text" name="code" required class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['code']) ?>">
+                <label for="field_code" class="block text-sm font-medium text-secondary">รหัสอะไหล่ <span class="text-red-500">*</span></label>
+                <input type="text" name="code" id="field_code" required aria-required="true" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['code']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่ออะไหล่ <span class="text-red-500">*</span></label>
-                <input type="text" name="name" required class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['name']) ?>">
+                <label for="field_name" class="block text-sm font-medium text-secondary">ชื่ออะไหล่ <span class="text-red-500">*</span></label>
+                <input type="text" name="name" id="field_name" required aria-required="true" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['name']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หมวดหมู่</label>
-                <input type="text" name="category" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['category'] ?? '') ?>">
+                <label for="field_category" class="block text-sm font-medium text-secondary">หมวดหมู่</label>
+                <input type="text" name="category" id="field_category" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['category'] ?? '') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">หน่วย</label>
-                <input type="text" name="unit" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['unit'] ?? 'ชิ้น') ?>">
+                <label for="field_unit" class="block text-sm font-medium text-secondary">หน่วย</label>
+                <input type="text" name="unit" id="field_unit" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['unit'] ?? 'ชิ้น') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">จำนวนในสต็อก</label>
-                <input type="number" name="stock_qty" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['stock_qty']) ?>">
+                <label for="field_stock_qty" class="block text-sm font-medium text-secondary">จำนวนในสต็อก</label>
+                <input type="number" name="stock_qty" id="field_stock_qty" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['stock_qty']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สต็อกขั้นต่ำ</label>
-                <input type="number" name="min_stock" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['min_stock']) ?>">
+                <label for="field_min_stock" class="block text-sm font-medium text-secondary">สต็อกขั้นต่ำ</label>
+                <input type="number" name="min_stock" id="field_min_stock" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['min_stock']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สต็อกสูงสุด</label>
-                <input type="number" name="max_stock" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['max_stock']) ?>">
+                <label for="field_max_stock" class="block text-sm font-medium text-secondary">สต็อกสูงสุด</label>
+                <input type="number" name="max_stock" id="field_max_stock" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['max_stock']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ราคาต่อหน่วย</label>
-                <input type="number" name="unit_price" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['unit_price']) ?>">
+                <label for="field_unit_price" class="block text-sm font-medium text-secondary">ราคาต่อหน่วย</label>
+                <input type="number" name="unit_price" id="field_unit_price" step="0.01" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['unit_price']) ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้จำหน่าย</label>
-                <select name="supplier_id" class="input input-bordered w-full mt-1">
+                <label for="field_supplier_id" class="block text-sm font-medium text-secondary">ผู้จำหน่าย</label>
+                <select name="supplier_id" id="field_supplier_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($suppliers as $s): ?>
                     <option value="<?= $s['id'] ?>" <?= $row['supplier_id']==$s['id']?'selected':'' ?>><?= htmlspecialchars($s['name']) ?></option>
@@ -92,15 +92,15 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ตำแหน่งจัดเก็บ</label>
-                <input type="text" name="location" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['location'] ?? '') ?>">
+                <label for="field_location" class="block text-sm font-medium text-secondary">ตำแหน่งจัดเก็บ</label>
+                <input type="text" name="location" id="field_location" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['location'] ?? '') ?>">
             </div>
             <div class="sm:col-span-2 bg-subtle p-4 rounded-xl border border-line space-y-3">
-                <label class="block text-xs font-bold text-primary">🖼️ รูปภาพประจำรายการอะไหล่ (Spare Part Image)</label>
+                <label for="field_spare_image" class="block text-xs font-bold text-primary">🖼️ รูปภาพประจำรายการอะไหล่ (Spare Part Image)</label>
                 <div class="flex items-center gap-4">
                     <img src="<?= getImageUrl($row['image_url'] ?? null, 'spare') ?>" class="card w-16 h-16 object-cover shrink-0">
                     <div class="flex-1 space-y-1">
-                        <input type="file" name="spare_image" accept="image/*" class="cmms-banner info block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file: file: hover:file:bg-indigo-100 transition-all cursor-pointer">
+                        <input type="file" name="spare_image" id="field_spare_image" accept="image/*" class="cmms-banner info block w-full text-xs text-muted file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file: file: hover:file:bg-indigo-100 transition-all cursor-pointer">
                         <span class="text-[11px] text-muted block">อัปโหลดไฟล์ใหม่ หรือแก้ URL รูปภาพด้านล่าง</span>
                         <input type="text" name="image_url" value="<?= htmlspecialchars($row['image_url'] ?? '') ?>" placeholder="หรือระบุ URL รูปภาพที่นี่..." class="input input-bordered w-full text-xs font-mono">
                     </div>
@@ -108,8 +108,8 @@ renderHeader();
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
-            <textarea name="description" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
+            <label for="field_description" class="block text-sm font-medium text-secondary">คำอธิบาย</label>
+            <textarea name="description" id="field_description" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>

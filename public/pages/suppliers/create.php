@@ -22,40 +22,40 @@ renderHeader();
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-secondary">รหัสผู้จำหน่าย <span class="text-red-500">*</span></label>
-                <input type="text" name="code" required class="input input-bordered w-full mt-1">
+                <label for="field_code" class="block text-sm font-medium text-secondary">รหัสผู้จำหน่าย <span class="text-red-500">*</span></label>
+                <input type="text" id="field_code" name="code" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ชื่อบริษัท <span class="text-red-500">*</span></label>
-                <input type="text" name="name" required class="input input-bordered w-full mt-1">
+                <label for="field_name" class="block text-sm font-medium text-secondary">ชื่อบริษัท <span class="text-red-500">*</span></label>
+                <input type="text" id="field_name" name="name" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้ติดต่อ</label>
-                <input type="text" name="contact_person" class="input input-bordered w-full mt-1">
+                <label for="field_contact_person" class="block text-sm font-medium text-secondary">ผู้ติดต่อ</label>
+                <input type="text" id="field_contact_person" name="contact_person" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เบอร์โทร</label>
-                <input type="text" name="phone" class="input input-bordered w-full mt-1">
+                <label for="field_phone" class="block text-sm font-medium text-secondary">เบอร์โทร</label>
+                <input type="text" id="field_phone" name="phone" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">อีเมล</label>
-                <input type="email" name="email" class="input input-bordered w-full mt-1">
+                <label for="field_email" class="block text-sm font-medium text-secondary">อีเมล</label>
+                <input type="email" id="field_email" name="email" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เลขประจำตัวผู้เสียภาษี</label>
-                <input type="text" name="tax_id" class="input input-bordered w-full mt-1">
+                <label for="field_tax_id" class="block text-sm font-medium text-secondary">เลขประจำตัวผู้เสียภาษี</label>
+                <input type="text" id="field_tax_id" name="tax_id" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="is_active" class="input input-bordered w-full mt-1">
+                <label for="field_is_active" class="block text-sm font-medium text-secondary">สถานะ</label>
+                <select id="field_is_active" name="is_active" class="input input-bordered w-full mt-1">
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
                 </select>
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">ที่อยู่</label>
-            <textarea name="address" rows="3" class="input input-bordered w-full mt-1"></textarea>
+            <label for="field_address" class="block text-sm font-medium text-secondary">ที่อยู่</label>
+            <textarea id="field_address" name="address" rows="3" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>

@@ -34,18 +34,18 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
     <?php if($success):?><div class="cmms-banner success text-sm rounded p-3 mb-4"><?=htmlspecialchars($success)?></div><?php endif;?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="sm:col-span-2"><label class="block text-sm font-medium">ชื่อเอกสาร</label><input type="text" name="title" value="<?=htmlspecialchars($row['title'])?>" required class="input input-bordered w-full mt-1"></div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium">ทรัพย์สิน</label>
-                <select name="asset_id" class="input input-bordered w-full mt-1">
+            <div class="sm:col-span-2"><label for="field_title" class="block text-sm font-medium">ชื่อเอกสาร</label><input type="text" name="title" id="field_title" value="<?=htmlspecialchars($row['title'])?>" required aria-required="true" class="input input-bordered w-full mt-1"></div>
+            <div class="sm:col-span-2"><label for="field_asset_id" class="block text-sm font-medium">ทรัพย์สิน</label>
+                <select name="asset_id" id="field_asset_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach($assets as $a):?><option value="<?=$a['id']?>" <?=sel($row['asset_id'],$a['id'])?>><?=htmlspecialchars($a['code'].' - '.$a['name'])?></option><?php endforeach;?>
                 </select>
             </div>
-            <div class="sm:col-span-2"><label class="block text-sm font-medium">อัปโหลดไฟล์ใหม่ (เว้นว่างไว้ถ้าไม่เปลี่ยน)</label><input type="file" name="file" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">ประเภทไฟล์</label><input type="text" name="file_type" value="<?=htmlspecialchars($row['file_type']??'')?>" class="input input-bordered w-full mt-1"></div>
-            <div><label class="block text-sm font-medium">เวอร์ชัน</label><input type="text" name="version" value="<?=htmlspecialchars($row['version']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div class="sm:col-span-2"><label for="field_file" class="block text-sm font-medium">อัปโหลดไฟล์ใหม่ (เว้นว่างไว้ถ้าไม่เปลี่ยน)</label><input type="file" name="file" id="field_file" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_file_type" class="block text-sm font-medium">ประเภทไฟล์</label><input type="text" name="file_type" id="field_file_type" value="<?=htmlspecialchars($row['file_type']??'')?>" class="input input-bordered w-full mt-1"></div>
+            <div><label for="field_version" class="block text-sm font-medium">เวอร์ชัน</label><input type="text" name="version" id="field_version" value="<?=htmlspecialchars($row['version']??'')?>" class="input input-bordered w-full mt-1"></div>
         </div>
-        <div><label class="block text-sm font-medium">คำอธิบาย</label><textarea name="description" rows="2" class="input input-bordered w-full mt-1"><?=htmlspecialchars($row['description']??'')?></textarea></div>
+        <div><label for="field_description" class="block text-sm font-medium">คำอธิบาย</label><textarea name="description" id="field_description" rows="2" class="input input-bordered w-full mt-1"><?=htmlspecialchars($row['description']??'')?></textarea></div>
         <div class="flex gap-3"><button type="submit" class="btn-primary">บันทึก</button><a href="index.php" class="btn-secondary">ยกเลิก</a></div>
     </form>
 </div>

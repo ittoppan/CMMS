@@ -49,8 +49,8 @@ renderHeader();
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
-                <select name="asset_id" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_asset_id">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <select name="asset_id" id="field_asset_id" required aria-required="true" class="input input-bordered w-full mt-1">
                     <option value="">-- เลือกทรัพย์สิน --</option>
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>"><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -58,31 +58,31 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">วันที่สอบเทียบ <span class="text-red-500">*</span></label>
-                <input type="date" name="calibration_date" required class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_calibration_date">วันที่สอบเทียบ <span class="text-red-500">*</span></label>
+                <input type="date" name="calibration_date" id="field_calibration_date" required aria-required="true" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สอบเทียบครั้งถัดไป</label>
-                <input type="date" name="next_calibration_date" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_next_calibration_date">สอบเทียบครั้งถัดไป</label>
+                <input type="date" name="next_calibration_date" id="field_next_calibration_date" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ประเภทการสอบเทียบ</label>
-                <select name="calibration_type" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_calibration_type">ประเภทการสอบเทียบ</label>
+                <select name="calibration_type" id="field_calibration_type" class="input input-bordered w-full mt-1">
                     <option value="full">เต็มรูปแบบ (Full)</option>
                     <option value="abbreviated">แบบย่อ (Abbreviated)</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผลลัพธ์</label>
-                <select name="result" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_result">ผลลัพธ์</label>
+                <select name="result" id="field_result" class="input input-bordered w-full mt-1">
                     <option value="pass">ผ่าน</option>
                     <option value="fail">ไม่ผ่าน</option>
                     <option value="conditional">มีเงื่อนไข</option>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">สถานะ</label>
-                <select name="status" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_status">สถานะ</label>
+                <select name="status" id="field_status" class="input input-bordered w-full mt-1">
                     <option value="scheduled">รอดำเนินการ</option>
                     <option value="in_progress">กำลังดำเนินการ</option>
                     <option value="completed">เสร็จสิ้น</option>
@@ -91,24 +91,24 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">มาตรฐานที่ใช้</label>
-                <input type="text" name="standard_used" class="input input-bordered w-full mt-1" placeholder="Gauge Block Class 1">
+                <label class="block text-sm font-medium text-secondary" for="field_standard_used">มาตรฐานที่ใช้</label>
+                <input type="text" name="standard_used" id="field_standard_used" class="input input-bordered w-full mt-1" placeholder="Gauge Block Class 1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เลขที่ใบรับรอง</label>
-                <input type="text" name="certificate_number" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_certificate_number">เลขที่ใบรับรอง</label>
+                <input type="text" name="certificate_number" id="field_certificate_number" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ต้นทุนรวม (บาท)</label>
-                <input type="number" name="total_cost" step="0.01" class="input input-bordered w-full mt-1" placeholder="0.00">
+                <label class="block text-sm font-medium text-secondary" for="field_total_cost">ต้นทุนรวม (บาท)</label>
+                <input type="number" name="total_cost" id="field_total_cost" step="0.01" class="input input-bordered w-full mt-1" placeholder="0.00">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">เลขที่ PO</label>
-                <input type="text" name="po_number" class="input input-bordered w-full mt-1" placeholder="PO-XXXX">
+                <label class="block text-sm font-medium text-secondary" for="field_po_number">เลขที่ PO</label>
+                <input type="text" name="po_number" id="field_po_number" class="input input-bordered w-full mt-1" placeholder="PO-XXXX">
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้จำหน่าย</label>
-                <select name="supplier_id" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_supplier_id">ผู้จำหน่าย</label>
+                <select name="supplier_id" id="field_supplier_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($suppliers as $s): ?>
                     <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] . ' - ' . $s['name']) ?></option>
@@ -116,8 +116,8 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ผู้ดำเนินการ</label>
-                <select name="performed_by" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_performed_by">ผู้ดำเนินการ</label>
+                <select name="performed_by" id="field_performed_by" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
                     <option value="<?= $u['id'] ?>"><?= htmlspecialchars($u['full_name']) ?></option>
@@ -125,14 +125,14 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-secondary">ไฟล์ใบรับรอง</label>
-                <input type="file" name="certificate_file" accept=".pdf,.jpg,.jpeg,.png" class="input input-bordered w-full mt-1">
+                <label class="block text-sm font-medium text-secondary" for="field_certificate_file">ไฟล์ใบรับรอง</label>
+                <input type="file" name="certificate_file" id="field_certificate_file" accept=".pdf,.jpg,.jpeg,.png" class="input input-bordered w-full mt-1">
                 <p class="text-xs text-muted mt-1">PDF, JPG, PNG เท่านั้น</p>
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
-            <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"></textarea>
+            <label class="block text-sm font-medium text-secondary" for="field_notes">หมายเหตุ</label>
+            <textarea name="notes" id="field_notes" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>

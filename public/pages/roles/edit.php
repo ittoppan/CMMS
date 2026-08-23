@@ -44,14 +44,14 @@ renderHeader();
 
     <form method="post" class="card p-6 space-y-4">
         <div>
-            <label class="block text-sm font-medium text-secondary">ชื่อบทบาท <span class="text-red-500">*</span></label>
-            <input type="text" name="name" required
+            <label for="field_name" class="block text-sm font-medium text-secondary">ชื่อบทบาท <span class="text-red-500">*</span></label>
+            <input type="text" id="field_name" name="name" required aria-required="true"
                 class="input input-bordered w-full mt-1"
                 value="<?= htmlspecialchars($row['name']) ?>">
         </div>
         <div>
-            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
-            <textarea name="description" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
+            <label for="field_description" class="block text-sm font-medium text-secondary">คำอธิบาย</label>
+            <textarea id="field_description" name="description" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
         </div>
         <div class="flex gap-3">
             <button type="submit" class="btn-primary">บันทึก</button>
