@@ -5,7 +5,7 @@ import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";

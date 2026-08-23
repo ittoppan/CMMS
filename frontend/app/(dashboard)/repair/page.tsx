@@ -3,10 +3,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairOverdue } from "@/lib/repair-status";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
+import { Grid } from "@/components/layout";
+import { PageShell } from "@/components/PageShell";
 import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
@@ -24,8 +22,9 @@ import html2canvas from "html2canvas";
 import WorkOrderClosureDocument, { WorkOrderDocData, WorkOrderPart } from "../../../components/WorkOrderClosureDocument";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataTable, type DataTableProps } from "@/components/ui/table";
 import { useToast } from "@/components/ToastProvider";
 import { cn } from "@/lib/cn";
@@ -84,6 +83,9 @@ const priorityVariant = (p: string): "danger" | "warning" | "primary" | "neutral
   if (v === "medium") return "primary";
   return "neutral";
 };
+
+const ALL_STATUS = "__all__";
+const ALL_PRIORITY = "__all__";
 
 export default function WorkOrdersPage() {
   const hero = usePageHero("repair");
@@ -399,12 +401,12 @@ export default function WorkOrdersPage() {
       accessorKey: "asset",
       header: t("tbl.asset_full"),
       cell: ({ row }) => (
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <Text type="body" size="sm">{row.original.asset}</Text>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm">{row.original.asset}</span>
           {row.original.outsourceBy && (
             <Badge variant="warning">ภายนอก{row.original.outsourceBy ? ` · ${row.original.outsourceBy}` : ""}</Badge>
           )}
-        </HStack>
+        </div>
       ),
     },
     {
@@ -454,31 +456,16 @@ export default function WorkOrdersPage() {
   const tableKey = `${search}|${statusFilter}|${priorityFilter}|${outsourceFilter}`;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {error && (
-        <div role="alert" className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)]/30 bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-text-primary)]">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={layoutStyle("hero")}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            {hero.eyebrow}
-          </Text>
-          <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: hero.title }]}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <>
           <Button
             variant="secondary"
             disabled={pdfBuilding || selected.size === 0}
             onClick={handleBatchDownload}
-            className="border-white/20 bg-white text-[var(--cmms-primary)] hover:bg-blue-50 disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
           >
             <DocumentArrowDownIcon className="h-4 w-4" />
             {pdfBuilding ? (pdfProgress || t("action.building_pdf")) : selected.size > 0 ? `${t("action.download_pdf")} (${selected.size})` : t("action.download_pdf")}
@@ -488,93 +475,79 @@ export default function WorkOrdersPage() {
             disabled={excelBuilding || filtered.length === 0}
             onClick={handleExportExcel}
             title={selected.size > 0 ? `ส่งออก ${selected.size} รายการที่เลือก` : "ส่งออกรายการที่กรองทั้งหมด"}
-            className="border-transparent bg-[var(--cmms-success)] text-white hover:opacity-90 disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
+            className="border-transparent bg-[var(--cmms-success)] text-white hover:opacity-90"
           >
             <TableCellsIcon className="h-4 w-4" />
             {excelBuilding ? "กำลังสร้าง Excel..." : selected.size > 0 ? `ส่งออก F-EN-03 Excel (${selected.size})` : "ส่งออก F-EN-03 Excel"}
           </Button>
-          <Button
-            variant="ghost"
-            onClick={fetchWO}
-            className="border border-white/20 text-white hover:bg-white/20"
-          >
+          <Button variant="ghost" onClick={fetchWO}>
             <ArrowPathIcon className="h-4 w-4" />{t("action.refresh")}
           </Button>
-          <Button
-            variant="primary"
-            onClick={() => router.push("/repair/create")}
-            className="cmms-btn-primary"
-          >
+          <Button variant="primary" onClick={() => router.push("/repair/create")}>
             <PlusIcon className="h-4 w-4" />{t("action.create_wo")}
           </Button>
-        </HStack>
-      </div>
-      </div>
+        </>
+      }
+    >
+      {error && (
+        <div role="alert" className="rounded-[var(--cmms-radius)] border border-[var(--cmms-danger)]/30 bg-[var(--cmms-danger-light)] p-4 text-sm text-[var(--cmms-text-primary)]">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
+      <div className="flex flex-col gap-6">
       {/* KPI — มินิบอร์ด Andon: กวาดตาเดียวรู้สถานะงาน */}
       <div style={layoutStyle("kpi")}>
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card blue">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <HStack vAlign="center" gap={2}>
-                
-                <Text type="supporting" color="secondary">งานซ่อมทั้งหมด</Text>
-              </HStack>
+        <Card className="p-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">งานซ่อมทั้งหมด</span>
               <AndonLamp status="idle" size="sm" />
-            </HStack>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.total} />
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
-          </VStack>
+          </div>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <HStack vAlign="center" gap={2}>
-                
-                <Text type="supporting" color="secondary">รอดำเนินการ (Open)</Text>
-              </HStack>
+        <Card className="p-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">รอดำเนินการ (Open)</span>
               <AndonLamp status="warn" size="sm" />
-            </HStack>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.open} />
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
-          </VStack>
+          </div>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card cyan">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <HStack vAlign="center" gap={2}>
-                
-                <Text type="supporting" color="secondary">กำลังซ่อม (In Progress)</Text>
-              </HStack>
+        <Card className="p-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">กำลังซ่อม (In Progress)</span>
               <AndonLamp status="warn" size="sm" />
-            </HStack>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.inprog} />
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
-          </VStack>
+          </div>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card green">
-          <VStack gap={2}>
-            <HStack hAlign="between" vAlign="center">
-              <HStack vAlign="center" gap={2}>
-                
-                <Text type="supporting" color="secondary">เสร็จสิ้น (Completed)</Text>
-              </HStack>
+        <Card className="p-4">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground">เสร็จสิ้น (Completed)</span>
               <AndonLamp status="ok" size="sm" />
-            </HStack>
+            </div>
             <div className="cmms-kpi-value">
               <CountUp end={stats.done} />
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
-          </VStack>
+          </div>
         </Card>
-        <Card elevation="low" padding={4} className="cmms-kpi-card amber">
+        <Card className="p-4">
           <div
             role="button"
             tabIndex={0}
@@ -583,25 +556,23 @@ export default function WorkOrdersPage() {
             title={outsourceFilter === "out" ? "ยกเลิกกรองงานภายนอก" : "กรองเฉพาะงานจ้างภายนอก"}
             style={{ cursor: "pointer" }}
           >
-            <VStack gap={2}>
-              <HStack hAlign="between" vAlign="center">
-                <HStack vAlign="center" gap={2}>
-                  <Text type="supporting" color="secondary">จ้างภายนอก (Outsource)</Text>
-                </HStack>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-muted-foreground">จ้างภายนอก (Outsource)</span>
                 <AndonLamp status="warn" size="sm" />
-              </HStack>
+              </div>
               <div className="cmms-kpi-value">
                 <CountUp end={stats.outsourceCount} />
                 <span className="cmms-kpi-unit">ใบ</span>
               </div>
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 ฿{stats.outsourceCost.toLocaleString("th-TH")}
-              </Text>
-            </VStack>
+              </p>
+            </div>
           </div>
         </Card>
         {stats.overdue > 0 && (
-          <Card elevation="low" padding={4} className="cmms-kpi-card red">
+          <Card className="p-4">
             <div
               role="button"
               tabIndex={0}
@@ -610,116 +581,120 @@ export default function WorkOrdersPage() {
               title={statusFilter === "overdue" ? "ยกเลิกกรองงานเกินกำหนด" : "กรองเฉพาะงานเกินกำหนด"}
               style={{ cursor: "pointer" }}
             >
-              <VStack gap={2}>
-                <HStack hAlign="between" vAlign="center">
-                  <HStack vAlign="center" gap={2}>
-                    
-                    <Text type="supporting" color="secondary">เกินกำหนด</Text>
-                  </HStack>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm text-muted-foreground">เกินกำหนด</span>
                   <AndonLamp status="down" size="sm" />
-                </HStack>
+                </div>
                 <div className="cmms-kpi-value">
                   <CountUp end={stats.overdue} />
                   <span className="cmms-kpi-unit">รายการ</span>
                 </div>
-              </VStack>
+              </div>
             </div>
           </Card>
         )}
       </Grid>
       </div>
 
-      <div style={layoutStyle("content")}>
-      <Card elevation="low" padding={6}>
-        <VStack gap={4}>
-          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-            <HStack gap={2} vAlign="center">
-              <div className="w-8 h-8 rounded-lg cmms-icon-tile">
-                <ClipboardDocumentListIcon className="w-4 h-4" />
-              </div>
-              <Heading level={3} style={{ margin: 0 }}>รายการงานซ่อม</Heading>
-              <span className="cmms-count-pill">{totalItems} รายการ</span>
-            </HStack>
-            {statusFilter && (
-              <Text type="body" size="sm" color="secondary">
-                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : statusFilter === "overdue" ? "เกินกำหนด" : "เสร็จสิ้น"}
-              </Text>
+      <div style={layoutStyle("content")} className="space-y-6">
+      {/* Filter Toolbar */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] text-[var(--cmms-text-secondary)]">
+              <input
+                type="checkbox"
+                aria-label={t("action.select_all_page")}
+                checked={filtered.length > 0 && selected.size === filtered.length}
+                onChange={toggleAll}
+                className="h-4 w-4 cursor-pointer"
+              />{t("action.select_all")}</label>
+            {selected.size > 0 && (
+              <Badge variant="primary">เลือก {selected.size} รายการ</Badge>
             )}
-          </HStack>
-
-          {/* Filter Toolbar */}
-          <div className="flex flex-wrap items-center gap-3 rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-3 shadow-[var(--cmms-shadow-sm)]">
-            <HStack gap={2} vAlign="center">
-              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] whitespace-nowrap text-[var(--cmms-text-secondary)]">
-                <input
-                  type="checkbox"
-                  aria-label={t("action.select_all_page")}
-                  checked={filtered.length > 0 && selected.size === filtered.length}
-                  onChange={toggleAll}
-                  className="h-4 w-4 cursor-pointer"
-                />{t("action.select_all")}</label>
-              {selected.size > 0 && (
-                <Badge variant="primary">เลือก {selected.size} รายการ</Badge>
-              )}
-            </HStack>
-            <Input
-              label="ค้นหา"
-              isLabelHidden
-              placeholder="ค้นหาเลขงาน, เครื่องจักร..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full sm:w-56"
-            />
-            <Select
-              label="สถานะ"
-              isLabelHidden
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full sm:w-44"
-            >
-              <option value="">{t("action.filter_all_status")}</option>
-              <option value="open">งานใหม่ (Open)</option>
-              <option value="in_progress">กำลังซ่อม</option>
-              <option value="overdue">เกินกำหนด (ไฟแดง)</option>
-              <option value="completed">เสร็จสิ้น</option>
-            </Select>
-            <Select
-              label="ความสำคัญ"
-              isLabelHidden
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full sm:w-44"
-            >
-              <option value="">{t("action.filter_all_priority")}</option>
-              <option value="critical">วิกฤต (Critical)</option>
-              <option value="high">ด่วน (High)</option>
-              <option value="medium">ปกติ (Medium)</option>
-              <option value="low">ต่ำ (Low)</option>
-            </Select>
-            <div className="inline-flex items-center gap-1 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-1">
-              {([
-                { v: "all", label: "ทั้งหมด" },
-                { v: "in", label: "งานใน" },
-                { v: "out", label: "งานภายนอก" },
-              ] as const).map((opt) => (
-                <button
-                  key={opt.v}
-                  type="button"
-                  onClick={() => setOutsourceFilter(opt.v)}
-                  className={cn(
-                    "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
-                    outsourceFilter === opt.v
-                      ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
-                      : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
           </div>
+          <Input
+            label="ค้นหา"
+            isLabelHidden
+            placeholder="ค้นหาเลขงาน, เครื่องจักร..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:w-56"
+          />
+          <Select
+            value={statusFilter || ALL_STATUS}
+            onValueChange={(v) => setStatusFilter(v === ALL_STATUS ? "" : v)}
+          >
+            <SelectTrigger aria-label="สถานะ" className="w-full sm:w-44">
+              <SelectValue placeholder={t("action.filter_all_status")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_STATUS}>{t("action.filter_all_status")}</SelectItem>
+              <SelectItem value="open">งานใหม่ (Open)</SelectItem>
+              <SelectItem value="in_progress">กำลังซ่อม</SelectItem>
+              <SelectItem value="overdue">เกินกำหนด (ไฟแดง)</SelectItem>
+              <SelectItem value="completed">เสร็จสิ้น</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={priorityFilter || ALL_PRIORITY}
+            onValueChange={(v) => setPriorityFilter(v === ALL_PRIORITY ? "" : v)}
+          >
+            <SelectTrigger aria-label="ความสำคัญ" className="w-full sm:w-44">
+              <SelectValue placeholder={t("action.filter_all_priority")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_PRIORITY}>{t("action.filter_all_priority")}</SelectItem>
+              <SelectItem value="critical">วิกฤต (Critical)</SelectItem>
+              <SelectItem value="high">ด่วน (High)</SelectItem>
+              <SelectItem value="medium">ปกติ (Medium)</SelectItem>
+              <SelectItem value="low">ต่ำ (Low)</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="inline-flex items-center gap-1 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-1">
+            {([
+              { v: "all", label: "ทั้งหมด" },
+              { v: "in", label: "งานใน" },
+              { v: "out", label: "งานภายนอก" },
+            ] as const).map((opt) => (
+              <button
+                key={opt.v}
+                type="button"
+                onClick={() => setOutsourceFilter(opt.v)}
+                className={cn(
+                  "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
+                  outsourceFilter === opt.v
+                    ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
+                    : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Table */}
+      {/* Table */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg cmms-icon-tile">
+                <ClipboardDocumentListIcon className="h-4 w-4" />
+              </div>
+              <h3 className="text-base font-semibold">รายการงานซ่อม</h3>
+              <span className="cmms-count-pill">{totalItems} รายการ</span>
+            </div>
+            {statusFilter && (
+              <p className="text-sm text-muted-foreground">
+                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : statusFilter === "overdue" ? "เกินกำหนด" : "เสร็จสิ้น"}
+              </p>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
           <DataTable<WorkOrder>
             key={tableKey}
             columns={columns}
@@ -731,8 +706,9 @@ export default function WorkOrdersPage() {
             emptyTitle="ไม่พบงานซ่อม"
             emptyDescription="ลองเปลี่ยนตัวกรองหรือสร้างใบสั่งงานใหม่"
           />
-        </VStack>
+        </CardContent>
       </Card>
+      </div>
       </div>
 
       {/* Hidden off-screen document nodes for batch PDF capture */}
@@ -749,6 +725,6 @@ export default function WorkOrdersPage() {
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

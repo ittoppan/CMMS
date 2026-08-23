@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";

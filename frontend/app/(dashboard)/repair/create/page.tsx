@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Home, ChevronRight, AlertTriangle, Send, Wrench } from "lucide-react";
+import { Send, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { Label } from "@/components/ui/label";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { enqueue, pendingCount, subscribeOnline } from "@/lib/offlineQueue";
 
@@ -168,28 +168,12 @@ export default function CreateWorkOrderPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/repair" className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-          <Home className="w-4 h-4" />
-          <span>ใบแจ้งซ่อม</span>
-        </Link>
-        <ChevronRight className="w-4 h-4 text-slate-400" />
-        <span className="font-medium text-slate-900 dark:text-slate-100" aria-current="page">
-          เปิดใบแจ้งซ่อมใหม่
-        </span>
-      </nav>
-
-      {/* Header */}
-      <div>
-        <p className="cmms-eyebrow">REPAIR CREATE · CMMS-TOPPAN</p>
-        <PageHeader
-          title="เปิดใบแจ้งซ่อมใหม่"
-          description="กรอกข้อมูลอาการเสียของเครื่องจักรเพื่อส่งเรื่องให้ทีมช่างดำเนินการ"
-        />
-      </div>
-
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "เปิดใบแจ้งซ่อมใหม่" }]}
+      title="เปิดใบแจ้งซ่อมใหม่"
+      description="กรอกข้อมูลอาการเสียของเครื่องจักรเพื่อส่งเรื่องให้ทีมช่างดำเนินการ"
+      className="max-w-4xl"
+    >
       {/* Offline Pending Banner */}
       {pending > 0 && (
         <Alert variant="info" title="โหมดออฟไลน์">
@@ -207,7 +191,7 @@ export default function CreateWorkOrderPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-2xl">
+          <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-5">
             {submitError && (
               <Alert variant="danger" title="ไม่สามารถส่งแจ้งซ่อมได้">
                 {submitError}
@@ -215,19 +199,22 @@ export default function CreateWorkOrderPage() {
             )}
 
             {/* เครื่องจักรที่ชำรุด */}
-            <Select
-              label="เครื่องจักรที่ชำรุด *"
-              error={errors.asset_id?.message}
-              disabled={loadingAssets}
-              {...register("asset_id")}
-            >
-              <option value="">{loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."}</option>
-              {assets.map((a) => (
-                <option key={a.id} value={String(a.id)}>
-                  {a.code} - {a.name}
-                </option>
-              ))}
-            </Select>
+            <div className="space-y-1.5">
+              <Label htmlFor="wo-create-asset">เครื่องจักรที่ชำรุด<span className="text-destructive"> *</span></Label>
+              <Select
+                id="wo-create-asset"
+                error={errors.asset_id?.message}
+                disabled={loadingAssets}
+                {...register("asset_id")}
+              >
+                <option value="">{loadingAssets ? "กำลังโหลดข้อมูลเครื่องจักร..." : "เลือกเครื่องจักร..."}</option>
+                {assets.map((a) => (
+                  <option key={a.id} value={String(a.id)}>
+                    {a.code} - {a.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
 
             {/* หัวข้ออาการเสีย */}
             <Input
@@ -238,7 +225,7 @@ export default function CreateWorkOrderPage() {
             />
 
             {/* ความสำคัญ & แผนกซ่อม */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Select
                 label="ความสำคัญ *"
                 error={errors.priority?.message}
@@ -281,7 +268,7 @@ export default function CreateWorkOrderPage() {
             />
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--cmms-border)]">
+            <div className="flex items-center justify-end gap-3 border-t border-[var(--cmms-border)] pt-4">
               <Button
                 type="button"
                 variant="outline"
@@ -309,6 +296,6 @@ export default function CreateWorkOrderPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   );
 }

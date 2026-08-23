@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Download, Table, CheckCircle2, Database } from "lucide-react";

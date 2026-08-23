@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {

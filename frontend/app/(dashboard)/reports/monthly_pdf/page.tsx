@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

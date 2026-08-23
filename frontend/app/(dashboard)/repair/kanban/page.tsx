@@ -8,7 +8,7 @@ import AndonLamp from "@/components/AndonLamp";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";

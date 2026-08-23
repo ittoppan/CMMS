@@ -9,7 +9,7 @@ import { Search, UserPlus, RefreshCw, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";

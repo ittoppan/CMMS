@@ -2,29 +2,25 @@
 
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import {
-  Home,
-  ChevronRight,
   Wrench,
   FileText,
   Clock,
   Camera,
   X,
   Save,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
-import { PageHeader } from "@/components/ui/page-header";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 
 /* ============================================================
@@ -244,35 +240,19 @@ function EditWorkOrderContent() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/repair" className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-          <Home className="w-4 h-4" />
-          <span>ใบแจ้งซ่อม</span>
-        </Link>
-        <ChevronRight className="w-4 h-4 text-slate-400" />
-        <span className="font-medium text-slate-900 dark:text-slate-100" aria-current="page">
-          บันทึกข้อมูลซ่อม
-        </span>
-      </nav>
-
-      {/* Page Header */}
-      <div>
-        <p className="cmms-eyebrow">F-EN-03 · MAINTAIN RECORD</p>
-        <PageHeader
-          title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
-          description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"
-        />
-      </div>
-
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "งานซ่อม", href: "/repair" }, { label: "บันทึกข้อมูลซ่อม" }]}
+      title={woData?.work_order_no ? `${woData.work_order_no} — ${woData.asset_name || woData.asset_code || ""}` : `WO-${woId}`}
+      description="กรอกข้อมูลสาเหตุ ผลการซ่อม เวลาหยุดเครื่อง และค่าใช้จ่ายในการซ่อม"
+      className="max-w-4xl"
+    >
       {loadingData ? (
-        <div className="flex items-center justify-center gap-3 p-12 text-slate-500">
+        <div className="flex items-center justify-center gap-3 p-12 text-muted-foreground">
           <Spinner size={24} />
           <span>กำลังโหลดข้อมูล...</span>
         </div>
       ) : (
-        <div className="space-y-6 max-w-3xl">
+        <div className="max-w-3xl space-y-6">
           {error && (
             <Alert variant="danger" title="ข้อผิดพลาด">
               {error}
@@ -285,11 +265,11 @@ function EditWorkOrderContent() {
               <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 <span>ข้อมูลจากผู้แจ้ง</span>
-                <span className="text-xs font-normal text-slate-400">(อ่านอย่างเดียว)</span>
+                <span className="text-xs font-normal text-muted-foreground">(อ่านอย่างเดียว)</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
                 <InfoRow label="ผู้แจ้ง" value={woData?.receiver_name || "-"} />
                 <InfoRow label="เครื่องจักร" value={`${woData?.asset_code || "-"} ${woData?.asset_name || ""}`} />
                 <InfoRow label="สถานะเครื่อง" value={woData?.machine_status || "-"} />
@@ -310,29 +290,37 @@ function EditWorkOrderContent() {
             </CardHeader>
             <CardContent className="space-y-5">
               {/* Status + Priority */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Select
-                  label="สถานะงาน (Job Status) *"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="open">เปิดงาน / รอดำเนินการ</option>
-                  <option value="in_progress">กำลังซ่อม</option>
-                  <option value="waiting_parts">รออะไหล่</option>
-                  <option value="completed">ซ่อมเสร็จแล้ว</option>
-                  <option value="cancelled">ยกเลิก</option>
-                </Select>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="wo-edit-status">สถานะงาน (Job Status)<span className="text-destructive"> *</span></Label>
+                  <Select value={status} onValueChange={setStatus}>
+                    <SelectTrigger id="wo-edit-status" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">เปิดงาน / รอดำเนินการ</SelectItem>
+                      <SelectItem value="in_progress">กำลังซ่อม</SelectItem>
+                      <SelectItem value="waiting_parts">รออะไหล่</SelectItem>
+                      <SelectItem value="completed">ซ่อมเสร็จแล้ว</SelectItem>
+                      <SelectItem value="cancelled">ยกเลิก</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                <Select
-                  label="ความสำคัญ (Priority) *"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                >
-                  <option value="critical">วิกฤต (Critical)</option>
-                  <option value="high">ด่วน (High)</option>
-                  <option value="medium">ปานกลาง (Medium)</option>
-                  <option value="low">ต่ำ (Low)</option>
-                </Select>
+                <div className="space-y-1.5">
+                  <Label htmlFor="wo-edit-priority">ความสำคัญ (Priority)<span className="text-destructive"> *</span></Label>
+                  <Select value={priority} onValueChange={setPriority}>
+                    <SelectTrigger id="wo-edit-priority" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">วิกฤต (Critical)</SelectItem>
+                      <SelectItem value="high">ด่วน (High)</SelectItem>
+                      <SelectItem value="medium">ปานกลาง (Medium)</SelectItem>
+                      <SelectItem value="low">ต่ำ (Low)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Root Cause */}
@@ -372,16 +360,20 @@ function EditWorkOrderContent() {
               />
 
               {/* Contaminate Checking */}
-              <Select
-                label="Contaminate Checking (ตรวจสอบการปนเปื้อน) *"
-                value={contaminateChecking}
-                onChange={(e) => setContaminateChecking(e.target.value)}
-              >
-                <option value="not_checked">ยังไม่ตรวจ</option>
-                <option value="clean">ไม่พบการปนเปื้อน (ผ่าน)</option>
-                <option value="contaminated">พบการปนเปื้อน</option>
-                <option value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</option>
-              </Select>
+              <div className="space-y-1.5">
+                <Label htmlFor="wo-edit-contam">Contaminate Checking (ตรวจสอบการปนเปื้อน)<span className="text-destructive"> *</span></Label>
+                <Select value={contaminateChecking} onValueChange={setContaminateChecking}>
+                  <SelectTrigger id="wo-edit-contam" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="not_checked">ยังไม่ตรวจ</SelectItem>
+                    <SelectItem value="clean">ไม่พบการปนเปื้อน (ผ่าน)</SelectItem>
+                    <SelectItem value="contaminated">พบการปนเปื้อน</SelectItem>
+                    <SelectItem value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Outsource By */}
               <Input
@@ -402,7 +394,7 @@ function EditWorkOrderContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input
                   type="datetime-local"
                   label="Start Date/Time (วันที่เริ่มซ่อม)"
@@ -421,7 +413,7 @@ function EditWorkOrderContent() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <Input
                   type="number"
                   label="BD. Time (เวลาหยุดเครื่อง — นาที)"
@@ -466,13 +458,14 @@ function EditWorkOrderContent() {
                 }}
               />
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
                 {afterImages.map((p, i) => (
-                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 group">
-                    <img src={p} alt={`รูปหลังซ่อม ${i + 1}`} className="w-full h-full object-cover" />
+                  <div key={i} className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted">
+                    <img src={p} alt={`รูปหลังซ่อม ${i + 1}`} className="h-full w-full object-cover" />
                     <button
                       type="button"
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/70 text-white hover:bg-slate-900 transition-colors"
+                      aria-label={`ลบรูปหลังซ่อม ${i + 1}`}
+                      className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900/70 p-1 text-white transition-colors hover:bg-zinc-900"
                       onClick={() => setAfterImages(afterImages.filter((_, x) => x !== i))}
                     >
                       <X className="w-3.5 h-3.5" />
@@ -482,7 +475,7 @@ function EditWorkOrderContent() {
                 {afterImages.length < 5 && (
                   <button
                     type="button"
-                    className="aspect-square rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 dark:hover:border-sky-400 flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 bg-slate-50/50 dark:bg-slate-800/50 transition-colors"
+                    className="flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input bg-muted/50 text-muted-foreground transition-colors hover:border-ring hover:text-primary"
                     onClick={() => afterImageRef.current?.click()}
                   >
                     <Camera className="w-6 h-6" />
@@ -494,7 +487,7 @@ function EditWorkOrderContent() {
           </Card>
 
           {/* ── ปุ่มบันทึก ── */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--cmms-border)]">
+          <div className="flex items-center justify-end gap-3 border-t border-[var(--cmms-border)] pt-4">
             <Button
               type="button"
               variant="outline"
@@ -516,22 +509,22 @@ function EditWorkOrderContent() {
           </div>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <span className="block text-xs text-slate-500 dark:text-slate-400">{label}</span>
-      <span className="font-semibold text-slate-900 dark:text-slate-100">{value}</span>
+      <dt className="block text-xs text-muted-foreground">{label}</dt>
+      <dd className="text-sm font-semibold">{value}</dd>
     </div>
   );
 }
 
 export default function EditWorkOrderPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-slate-500">กำลังโหลด...</div>}>
+    <Suspense fallback={<div className="p-8 text-muted-foreground">กำลังโหลด...</div>}>
       <EditWorkOrderContent />
     </Suspense>
   );

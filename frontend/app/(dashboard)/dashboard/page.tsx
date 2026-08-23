@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

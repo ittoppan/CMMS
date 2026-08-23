@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select } from "@/components/ui/select-native";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
