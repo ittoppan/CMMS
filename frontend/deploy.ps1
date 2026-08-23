@@ -40,6 +40,22 @@ if (-not $SkipBuild) {
     try { npm run build } finally { Pop-Location }
 }
 
+# Auto-bump service worker version on every deploy so clients pick up the
+# new shell immediately (old caches = stale chunks / hydration mismatches).
+$swFile = Join-Path $frontendDir "public\sw.js"
+if (Test-Path -LiteralPath $swFile) {
+    $sw = Get-Content $swFile -Raw
+    if ($sw -match 'const SW_VERSION = "v(\d+)"') {
+        $next = [int]$Matches[1] + 1
+        $stamp = Get-Date -Format "yyyyMMdd-HHmm"
+        $sw = $sw -replace 'const SW_VERSION = "v\d+"', ("const SW_VERSION = `"v$next-$stamp`"")
+        Set-Content $swFile $sw -Encoding UTF8 -NoNewline
+        Write-Host "==> bumped SW_VERSION -> v$next-$stamp" -ForegroundColor Cyan
+    } else {
+        Write-Warning "SW_VERSION marker not found in sw.js — cache-bust skipped"
+    }
+}
+
 if (Test-Path -LiteralPath $publicSrc) {
     Write-Host "==> copy public -> standalone" -ForegroundColor Cyan
     New-Item -ItemType Directory -Force -Path $standalonePublic | Out-Null
