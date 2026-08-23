@@ -1,33 +1,36 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Button } from "@astryxdesign/core/Button";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
-import { TabList, Tab } from "@astryxdesign/core/TabList";
-import EmailNotifySettings from "@/components/EmailNotifySettings";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
-  CheckCircleIcon,
-  ChatBubbleLeftRightIcon,
-  BellAlertIcon,
-  LinkIcon,
-  PaperAirplaneIcon,
-  PaintBrushIcon,
-  EyeIcon,
-  BoltIcon,
-  ShieldCheckIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EmailNotifySettings from "@/components/EmailNotifySettings";
+import { PageShell } from "@/components/PageShell";
+import {
+  CheckCircle2 as CheckCircleIcon,
+  MessagesSquare as ChatBubbleLeftRightIcon,
+  Link as LinkIcon,
+  Send as PaperAirplaneIcon,
+  Paintbrush as PaintBrushIcon,
+  Eye as EyeIcon,
+  Zap as BoltIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Users as UsersIcon,
+} from "lucide-react";
 
 interface TemplateDef {
   header_color: string;
@@ -444,75 +447,99 @@ export default function NotificationsSettingsPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดการตั้งค่าการแจ้งเตือน LINE...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าการแจ้งเตือน LINE...</p>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "รูปแบบการแจ้งเตือน" }]}
+      title="ตั้งค่ารูปแบบการแจ้งเตือน"
+      description="LINE · Email · Telegram — กำหนดรูปแบบข้อความและช่องทางส่งของระบบ"
+      actions={
+        <>
+          <Badge variant={me?.line_bound ? "info" : "neutral"}>
+            {me?.line_bound ? `ผูก LINE: ${me.full_name}` : "ยังไม่ผูกบัญชี LINE"}
+          </Badge>
+          {!me?.line_bound && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => window.open("/bind_line.php", "_blank")}
+            >
+              <LinkIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+              ผูกบัญชี LINE
+            </Button>
+          )}
+        </>
+      }
+    >
+      <VStack gap={6}>
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {/* Channel tabs */}
-      <TabList value={activeChannel} onChange={setActiveChannel} hasDivider layout="fill" aria-label="ช่องทางการแจ้งเตือน">
-        <Tab value="line" label="LINE Messenger" />
-        <Tab value="email" label="อีเมล (Email)" />
-        <Tab value="telegram" label="Telegram (แอดมิน)" />
-      </TabList>
+      <Tabs value={activeChannel} onValueChange={setActiveChannel}>
+        <TabsList aria-label="ช่องทางการแจ้งเตือน">
+          <TabsTrigger value="line">LINE Messenger</TabsTrigger>
+          <TabsTrigger value="email">อีเมล (Email)</TabsTrigger>
+          <TabsTrigger value="telegram">Telegram (แอดมิน)</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {activeChannel === "email" && <EmailNotifySettings />}
 
       {activeChannel === "telegram" && (
         <VStack gap={6}>
-          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-            <VStack gap={1}>
-              <Text type="body" size="sm" className="cmms-eyebrow">TELEGRAM ALERTS · ADMIN CONSOLE</Text>
-              <HStack gap={3} vAlign="center">
-                <Heading level={2}>แจ้งเตือนแอดมินระบบผ่าน Telegram</Heading>
-                <Badge label={settings.telegram_enabled === "1" ? "Telegram เปิดใช้งาน" : "Telegram ปิดใช้งาน"} variant={settings.telegram_enabled === "1" ? "success" : "neutral"} />
-              </HStack>
-              <Text type="body" color="secondary">
-                ระบบแจ้งเตือนไปยังแอดมินเมื่อมีเหตุการณ์สำคัญ: งานซ่อมด่วน CRITICAL, การตั้งค่าการแจ้งเตือนถูกแก้ไข, และสถานะระบบ
-              </Text>
-            </VStack>
-          </HStack>
+          <VStack gap={1}>
+            <p className="cmms-eyebrow text-sm text-muted-foreground">TELEGRAM ALERTS · ADMIN CONSOLE</p>
+            <HStack gap={3} vAlign="center">
+              <h2 className="text-base font-semibold">แจ้งเตือนแอดมินระบบผ่าน Telegram</h2>
+              <Badge variant={settings.telegram_enabled === "1" ? "success" : "neutral"}>
+                {settings.telegram_enabled === "1" ? "Telegram เปิดใช้งาน" : "Telegram ปิดใช้งาน"}
+              </Badge>
+            </HStack>
+            <p className="text-sm text-muted-foreground">
+              ระบบแจ้งเตือนไปยังแอดมินเมื่อมีเหตุการณ์สำคัญ: งานซ่อมด่วน CRITICAL, การตั้งค่าการแจ้งเตือนถูกแก้ไข, และสถานะระบบ
+            </p>
+          </VStack>
 
           {/* Telegram status strip */}
-          <Card padding={4}>
-            <HStack gap={5} wrap="wrap">
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-5 p-4">
               <HStack gap={2} vAlign="center">
-                <Icon icon={ShieldCheckIcon} size="sm" color={(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "success" : "error"} />
-                <Text type="body" size="sm" weight="semibold">
+                <ShieldCheckIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: (settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+                <span className="text-sm font-medium">
                   Bot Token: {(settings.telegram_bot_token || envInfo?.telegram_bot_token_set) ? "พร้อม" : "ยังไม่ตั้ง (กรอกด้านล่างหรือใส่ .env)"}
-                </Text>
+                </span>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <Icon icon={UsersIcon} size="sm" color={(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "success" : "secondary"} />
-                <Text type="body" size="sm" weight="semibold">
+                <UsersIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: (settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "var(--cmms-success)" : "var(--cmms-text-secondary)" }} />
+                <span className="text-sm font-medium">
                   Chat ID: {(settings.telegram_chat_id || envInfo?.telegram_chat_id_set) ? "ตั้งค่าแล้ว" : "ยังไม่ตั้ง — ใส่ Chat ID ปลายทาง (เช่น กลุ่มแอดมิน)"}
-                </Text>
+                </span>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <Icon icon={BoltIcon} size="sm" color="secondary" />
-                <Text type="body" size="sm" weight="semibold">
+                <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+                <span className="text-sm font-medium">
                   วิธีหา Chat ID: ส่งข้อความให้บอท แล้วเรียก https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates
-                </Text>
+                </span>
               </HStack>
-            </HStack>
+            </CardContent>
           </Card>
 
           <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
             {/* Left: Telegram settings */}
             <VStack gap={6}>
-              <Card padding={5}>
-                <VStack gap={4}>
+              <Card>
+                <CardContent className="space-y-4 p-5">
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={ChatBubbleLeftRightIcon} size="md" color="primary" />
+                    <ChatBubbleLeftRightIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                     <VStack gap={0}>
-                      <Heading level={3}>การเชื่อมต่อ Telegram Bot</Heading>
-                      <Text type="supporting" color="secondary">สร้างบอทที่ @BotFather แล้ววาง Token + Chat ID ที่นี่</Text>
+                      <h3 className="text-base font-semibold">การเชื่อมต่อ Telegram Bot</h3>
+                      <p className="text-sm text-muted-foreground">สร้างบอทที่ @BotFather แล้ววาง Token + Chat ID ที่นี่</p>
                     </VStack>
                   </HStack>
 
@@ -522,75 +549,74 @@ export default function NotificationsSettingsPage() {
                     onChange={(c) => setSettingField("telegram_enabled", c ? "1" : "0")}
                   />
 
-                  <TextInput
+                  <Input
                     label="Bot Token"
                     type="password"
-                    description="Token จาก @BotFather (รูปแบบ 123456:ABC...)"
+                    hint="Token จาก @BotFather (รูปแบบ 123456:ABC...)"
                     value={settings.telegram_bot_token ?? ""}
-                    onChange={(v) => setSettingField("telegram_bot_token", v)}
+                    onChange={(e) => setSettingField("telegram_bot_token", e.target.value)}
                   />
-                  <TextInput
+                  <Input
                     label="Chat ID"
-                    description="Chat ID ที่รับการแจ้งเตือนแอดมิน (เช่น กลุ่มแอดมิน -100xxxxxxxxxx)"
+                    hint="Chat ID ที่รับการแจ้งเตือนแอดมิน (เช่น กลุ่มแอดมิน -100xxxxxxxxxx)"
                     value={settings.telegram_chat_id ?? ""}
-                    onChange={(v) => setSettingField("telegram_chat_id", v)}
+                    onChange={(e) => setSettingField("telegram_chat_id", e.target.value)}
                   />
 
                   <HStack gap={2} wrap="wrap">
+                    <Button disabled={tgTesting} onClick={handleTelegramTest}>
+                      <PaperAirplaneIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                      {tgTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Telegram"}
+                    </Button>
                     <Button
-                      label={tgTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Telegram"}
-                      variant="primary"
-                      icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                      isLoading={tgTesting}
-                      onClick={handleTelegramTest}
-                    />
-                    <Button
-                      label={hasChanges ? "บันทึกการตั้งค่า" : "บันทึกการตั้งค่า"}
                       variant="secondary"
-                      isLoading={saving}
-                      isDisabled={!hasChanges}
+                      disabled={!hasChanges || saving}
                       onClick={handleSave}
-                    />
+                    >
+                      {hasChanges ? "บันทึกการตั้งค่า" : "บันทึกการตั้งค่า"}
+                    </Button>
                   </HStack>
 
                   {tgTestResult && (
-                    <Card padding={3} style={{
+                    <Card style={{
                       background: tgTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
                       border: `1px solid ${tgTestResult.ok ? "var(--cmms-success)" : "#f87171"}`,
                     }}>
-                      <Text type="body" size="sm" weight="bold" style={{ color: tgTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
-                        {tgTestResult.ok ? "✅ " : ""}{tgTestResult.msg}
-                      </Text>
+                      <CardContent className="p-3">
+                        <span className="text-sm font-bold" style={{ color: tgTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                          {tgTestResult.ok ? "✅ " : ""}{tgTestResult.msg}
+                        </span>
+                      </CardContent>
                     </Card>
                   )}
-                </VStack>
+                </CardContent>
               </Card>
 
-              <Card padding={5}>
-                <VStack gap={3}>
-                  <Heading level={3}>เหตุการณ์ที่แจ้งเตือนแอดมินอัตโนมัติ</Heading>
+              <Card>
+                <CardContent className="space-y-3 p-5">
+                  <h3 className="text-base font-semibold">เหตุการณ์ที่แจ้งเตือนแอดมินอัตโนมัติ</h3>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="error" />
-                    <Text type="body" size="sm"><strong>งานซ่อมด่วน CRITICAL / เครื่องหยุด</strong> — ส่งทันทีเมื่อมีใบแจ้งซ่อมฉุกเฉิน (พร้อมลิงก์ใบงาน)</Text>
+                    <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-danger)" }} />
+                    <p className="text-sm"><strong>งานซ่อมด่วน CRITICAL / เครื่องหยุด</strong> — ส่งทันทีเมื่อมีใบแจ้งซ่อมฉุกเฉิน (พร้อมลิงก์ใบงาน)</p>
                   </HStack>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="primary" />
-                    <Text type="body" size="sm"><strong>การตั้งค่าการแจ้งเตือนถูกแก้ไข</strong> — ทุกครั้งที่มีผู้ใช้บันทึก LINE/Telegram settings (กันคนอื่นมาแก้โดยไม่รู้ตัว)</Text>
+                    <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                    <p className="text-sm"><strong>การตั้งค่าการแจ้งเตือนถูกแก้ไข</strong> — ทุกครั้งที่มีผู้ใช้บันทึก LINE/Telegram settings (กันคนอื่นมาแก้โดยไม่รู้ตัว)</p>
                   </HStack>
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={BoltIcon} size="sm" color="success" />
-                    <Text type="body" size="sm"><strong>สถานะระบบ / deploy</strong> — รายงานจาก watchdog และสคริปต์อัตโนมัติ</Text>
+                    <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-success)" }} />
+                    <p className="text-sm"><strong>สถานะระบบ / deploy</strong> — รายงานจาก watchdog และสคริปต์อัตโนมัติ</p>
                   </HStack>
-                </VStack>
+                </CardContent>
               </Card>
             </VStack>
 
             {/* Right: Telegram preview */}
-            <Card padding={5}>
-              <VStack gap={4}>
+            <Card>
+              <CardContent className="space-y-4 p-5">
                 <HStack gap={2} vAlign="center">
-                  <Icon icon={EyeIcon} size="md" color="primary" />
-                  <Heading level={3}>ตัวอย่างข้อความบนแอป Telegram</Heading>
+                  <EyeIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                  <h3 className="text-base font-semibold">ตัวอย่างข้อความบนแอป Telegram</h3>
                 </HStack>
                 <div
                   style={{
@@ -628,12 +654,12 @@ export default function NotificationsSettingsPage() {
                       <div style={{ fontSize: 11, color: "#4da3ff", marginTop: 6 }}>เปิดในระบบ →</div>
                       <div style={{ fontSize: 9, color: "#7d8b99", marginTop: 4, textAlign: "right" }}>✓✓ อ่านแล้ว</div>
                     </div>
-                    <Text type="body" size="sm" color="secondary" style={{ marginTop: 4 }}>
+                    <p className="mt-1 text-sm text-muted-foreground">
                       รูปแบบเดียวกับที่แอดมินได้รับจริง: หัวข้อตัวหนา + รายละเอียด + ลิงก์เปิดใบงาน
-                    </Text>
+                    </p>
                   </div>
                 </div>
-              </VStack>
+              </CardContent>
             </Card>
           </Grid>
         </VStack>
@@ -641,85 +667,66 @@ export default function NotificationsSettingsPage() {
 
       {activeChannel === "line" && (
       <>
+      <VStack gap={6}>
       {saveMessage && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={saveMessage} />
       )}
 
       {/* Header */}
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">LINE NOTIFICATIONS · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ตั้งค่ารูปแบบการแจ้งเตือน LINE</Heading>
-            <Badge label={settings.line_notify_enabled === "1" ? "LINE เปิดใช้งาน" : "LINE ปิดใช้งาน"} variant={settings.line_notify_enabled === "1" ? "info" : "neutral"} />
-          </HStack>
-          <Text type="body" color="secondary">
-            กำหนดรูปแบบ Flex Message ที่ระบบส่งเข้า LINE — ใช้ได้กับ LIFF บนมือถือ และ Messaging API Push
-          </Text>
-        </VStack>
-        <HStack gap={2}>
-          <Badge
-            label={me?.line_bound ? `ผูก LINE: ${me.full_name}` : "ยังไม่ผูกบัญชี LINE"}
-            variant={me?.line_bound ? "info" : "neutral"}
-          />
-          {!me?.line_bound && (
-            <Button
-              label="ผูกบัญชี LINE"
-              variant="secondary"
-              size="sm"
-              icon={<Icon icon={LinkIcon} size="sm" />}
-              onClick={() => window.open("/bind_line.php", "_blank")}
-            />
-          )}
+      <VStack gap={1}>
+        <p className="cmms-eyebrow text-sm text-muted-foreground">LINE NOTIFICATIONS · CMMS-TOPPAN</p>
+        <HStack gap={3} vAlign="center">
+          <h2 className="text-base font-semibold">ตั้งค่ารูปแบบการแจ้งเตือน LINE</h2>
+          <Badge variant={settings.line_notify_enabled === "1" ? "info" : "neutral"}>
+            {settings.line_notify_enabled === "1" ? "LINE เปิดใช้งาน" : "LINE ปิดใช้งาน"}
+          </Badge>
         </HStack>
-      </HStack>
+        <p className="text-sm text-muted-foreground">
+          กำหนดรูปแบบ Flex Message ที่ระบบส่งเข้า LINE — ใช้ได้กับ LIFF บนมือถือ และ Messaging API Push
+        </p>
+      </VStack>
 
       {/* Env status strip */}
-      <Card padding={4}>
-        <HStack gap={5} wrap="wrap">
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-5 p-4">
           <HStack gap={2} vAlign="center">
-            <Icon icon={ShieldCheckIcon} size="sm" color={envInfo?.channel_token_set ? "success" : "error"} />
-            <Text type="body" size="sm" weight="semibold">
+            <ShieldCheckIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: envInfo?.channel_token_set ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+            <span className="text-sm font-medium">
               Channel Token: {envInfo?.channel_token_set ? "พร้อมใน .env" : "ไม่พบ"}
-            </Text>
+            </span>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={BoltIcon} size="sm" color={envInfo?.channel_secret_set ? "success" : "error"} />
-            <Text type="body" size="sm" weight="semibold">
+            <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: envInfo?.channel_secret_set ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+            <span className="text-sm font-medium">
               Channel Secret: {envInfo?.channel_secret_set ? "พร้อม" : "ไม่พบ (LINE Login จะไม่ทำงาน)"}
-            </Text>
+            </span>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={EyeIcon} size="sm" color="secondary" />
-            <Text type="body" size="sm" weight="semibold">
+            <EyeIcon size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+            <span className="text-sm font-medium">
               LIFF ID: {envInfo?.liff_id_env || settings.line_liff_id || "— (ตั้งได้ด้านล่าง)"}
-            </Text>
+            </span>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={UsersIcon} size="sm" color={settings.line_maintenance_group_id ? "success" : "secondary"} />
-            <Text type="body" size="sm" weight="semibold">
+            <UsersIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: settings.line_maintenance_group_id ? "var(--cmms-success)" : "var(--cmms-text-secondary)" }} />
+            <span className="text-sm font-medium">
               กลุ่มช่าง: {settings.line_maintenance_group_id ? "ตั้งค่าแล้ว (" + settings.line_maintenance_group_id + ")" : "ยังไม่ตั้ง — เพิ่มบอทเข้าห้อง LINE แล้วพิมพ์ \"แจ้งเตือนที่นี่\""}
-            </Text>
+            </span>
           </HStack>
-        </HStack>
+        </CardContent>
       </Card>
 
       <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
         {/* Left: settings + template editor */}
         <VStack gap={6}>
           {/* LINE connection settings */}
-          <Card padding={5}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-5">
               <HStack gap={2} vAlign="center">
-                <Icon icon={ChatBubbleLeftRightIcon} size="md" color="primary" />
+                <ChatBubbleLeftRightIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                 <VStack gap={0}>
-                  <Heading level={3}>การเชื่อมต่อ LINE Messenger</Heading>
-                  <Text type="supporting" color="secondary">Token / LIFF / Callback — บันทึกลงตาราง settings</Text>
+                  <h3 className="text-base font-semibold">การเชื่อมต่อ LINE Messenger</h3>
+                  <p className="text-sm text-muted-foreground">Token / LIFF / Callback — บันทึกลงตาราง settings</p>
                 </VStack>
               </HStack>
 
@@ -730,26 +737,26 @@ export default function NotificationsSettingsPage() {
               />
 
               {SETTING_FIELDS.map((f) => (
-                <TextInput
+                <Input
                   key={f.key}
                   label={f.label}
                   type={f.secret ? "password" : "text"}
-                  description={f.hint}
+                  hint={f.hint}
                   value={settings[f.key] ?? ""}
-                  onChange={(v) => setSettingField(f.key, v)}
+                  onChange={(e) => setSettingField(f.key, e.target.value)}
                 />
               ))}
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* LINE event toggles: ระบบ/process + รายงานประจำสัปดาห์ */}
-          <Card padding={5}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-5">
               <HStack gap={2} vAlign="center">
-                <Icon icon={BoltIcon} size="md" color="primary" />
+                <BoltIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                 <VStack gap={0}>
-                  <Heading level={3}>เหตุการณ์ที่ส่งเข้า LINE</Heading>
-                  <Text type="supporting" color="secondary">สวิตช์ควบคุมเหตุการณ์ที่ระบบส่งข้อความเข้า LINE (แยกจาก Telegram แอดมิน)</Text>
+                  <h3 className="text-base font-semibold">เหตุการณ์ที่ส่งเข้า LINE</h3>
+                  <p className="text-sm text-muted-foreground">สวิตช์ควบคุมเหตุการณ์ที่ระบบส่งข้อความเข้า LINE (แยกจาก Telegram แอดมิน)</p>
                 </VStack>
               </HStack>
 
@@ -758,53 +765,60 @@ export default function NotificationsSettingsPage() {
                 value={(settings.line_system_alerts ?? "0") === "1"}
                 onChange={(c) => setSettingField("line_system_alerts", c ? "1" : "0")}
               />
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 สถานะ server/tunnel และเหตุการณ์จาก watchdog — แนะนำปิดไว้ (ค่าเริ่มต้น) กันข้อความเต็มใน LINE; เหตุการณ์ระบบจะแจ้งผ่าน Telegram แอดมินแทน
-              </Text>
+              </p>
 
               <Switch
                 label="รายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์)"
                 value={(settings.line_weekly_report ?? "1") === "1"}
                 onChange={(c) => setSettingField("line_weekly_report", c ? "1" : "0")}
               />
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 สรุปงานซ่อม / PM / สต็อกประจำสัปดาห์ (weekly_report.php) — เปิด/ปิดได้ตามต้องการ
-              </Text>
+              </p>
 
               <Switch
                 label="ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง"
                 value={(settings.line_group_enabled ?? "1") === "1"}
                 onChange={(c) => setSettingField("line_group_enabled", c ? "1" : "0")}
               />
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 เมื่องานซ่อมใหม่เข้าหรือปิดงาน → push ข้อความเข้ากลุ่ม LINE (line_maintenance_group_id) — ปิดแล้วจะส่งเฉพาะถึงตัวช่างที่รับผิดชอบเท่านั้น
-              </Text>
-            </VStack>
+              </p>
+            </CardContent>
           </Card>
 
           {/* Template editor */}
-          <Card padding={5}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-5">
               <HStack gap={2} vAlign="center">
-                <Icon icon={PaintBrushIcon} size="md" color="primary" />
+                <PaintBrushIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                 <VStack gap={0}>
-                  <Heading level={3}>รูปแบบข้อความแจ้งเตือน (Flex Template)</Heading>
-                  <Text type="supporting" color="secondary">เลือกเหตุการณ์ แล้วแก้ไขการ์ดด้านขวา (พรีวิวอัตโนมัติ)</Text>
+                  <h3 className="text-base font-semibold">รูปแบบข้อความแจ้งเตือน (Flex Template)</h3>
+                  <p className="text-sm text-muted-foreground">เลือกเหตุการณ์ แล้วแก้ไขการ์ดด้านขวา (พรีวิวอัตโนมัติ)</p>
                 </VStack>
               </HStack>
 
-              <Selector
-                label="เหตุการณ์การแจ้งเตือน"
-                value={activeTemplate}
-                onChange={(v) => { setActiveTemplate(v); setTestResult(null); }}
-                options={TEMPLATE_ORDER.map((k) => ({
-                  value: k,
-                  label: `${TEMPLATE_META[k].icon} ${TEMPLATE_META[k].label}`,
-                }))}
-              />
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">เหตุการณ์การแจ้งเตือน</label>
+                <Select
+                  value={activeTemplate}
+                  onValueChange={(v) => { setActiveTemplate(v); setTestResult(null); }}
+                >
+                  <SelectTrigger aria-label="เหตุการณ์การแจ้งเตือน"><SelectValue placeholder="เลือกเหตุการณ์..." /></SelectTrigger>
+                  <SelectContent>
+                    {TEMPLATE_ORDER.map((k) => (
+                      <SelectItem key={k} value={k}>
+                        {`${TEMPLATE_META[k].icon} ${TEMPLATE_META[k].label}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <HStack gap={2} vAlign="center" wrap="wrap">
-                <Badge label={plainOn ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={plainOn ? "info" : "neutral"} />
+                <Badge variant={plainOn ? "info" : "neutral"}>{plainOn ? "เปิดใช้งาน" : "ปิดใช้งาน"}</Badge>
                 <Switch
                   label="ส่งการแจ้งเตือนเหตุการณ์นี้"
                   value={plainOn}
@@ -812,40 +826,42 @@ export default function NotificationsSettingsPage() {
                 />
               </HStack>
 
-              <Card padding={3} style={{ background: "var(--cmms-bg-wash)", border: "1px solid var(--cmms-border)" }}>
-                <HStack gap={2} vAlign="center">
-                  <Icon icon={BoltIcon} size="sm" color="success" />
-                  <Text type="body" size="sm">
-                    <strong>ส่งอัตโนมัติเมื่อ:</strong> {TEMPLATE_META[activeTemplate].wired}
-                  </Text>
-                </HStack>
-                <Text type="body" size="sm" color="secondary" style={{ marginTop: 4 }}>{TEMPLATE_META[activeTemplate].hint}</Text>
+              <Card style={{ background: "var(--cmms-bg-wash)" }}>
+                <CardContent className="space-y-1 p-3">
+                  <HStack gap={2} vAlign="center">
+                    <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-success)" }} />
+                    <p className="text-sm">
+                      <strong>ส่งอัตโนมัติเมื่อ:</strong> {TEMPLATE_META[activeTemplate].wired}
+                    </p>
+                  </HStack>
+                  <p className="mt-1 text-sm text-muted-foreground">{TEMPLATE_META[activeTemplate].hint}</p>
+                </CardContent>
               </Card>
 
               {isPlain ? (
                 <>
-                  <Card padding={4} style={{ background: "var(--cmms-info-light, #EFF6FF)", border: "1px solid var(--cmms-border)" }}>
-                    <VStack gap={2}>
-                      <Text type="body" size="sm" weight="semibold">เหตุการณ์นี้ส่งเป็นข้อความธรรมดา (ไม่ใช่ Flex Template)</Text>
-                      <Text type="body" size="sm" color="secondary">
+                  <Card style={{ background: "var(--cmms-info-light, #EFF6FF)" }}>
+                    <CardContent className="space-y-2 p-4">
+                      <p className="text-sm font-medium">เหตุการณ์นี้ส่งเป็นข้อความธรรมดา (ไม่ใช่ Flex Template)</p>
+                      <p className="text-sm text-muted-foreground">
                         ระบบสร้างข้อความให้อัตโนมัติ — เปิด/ปิดได้จากสวิตช์ด้านบน แต่ไม่สามารถปรับรูปแบบ/สี/รูปภาพได้ (ต่างจาก 5 เหตุการณ์แรกที่ปรับ Flex ได้)
-                      </Text>
+                      </p>
                       <div style={{ background: "#FFFFFF", border: "1px solid var(--cmms-border)", borderRadius: 10, padding: "12px 14px", fontSize: "0.82rem", whiteSpace: "pre-wrap", color: "#334155", lineHeight: 1.6, fontFamily: "var(--cmms-font-body)" }}>
                         {tplMeta.sample || "ข้อความตัวอย่างจากระบบ"}
                       </div>
-                    </VStack>
+                    </CardContent>
                   </Card>
                 </>
               ) : (
                 <>
-              <TextInput
+              <Input
                 label="หัวข้อการ์ด (Header Title)"
                 value={activeTpl.header_title ?? ""}
-                onChange={(v) => setTplField("header_title", v)}
+                onChange={(e) => setTplField("header_title", e.target.value)}
               />
 
               <HStack gap={2} wrap="wrap" vAlign="center">
-                <Text type="body" size="sm" weight="semibold">สีแถบหัวข้อ:</Text>
+                <span className="text-sm font-medium">สีแถบหัวข้อ:</span>
                 <input
                   type="color"
                   value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.header_color) ? activeTpl.header_color : "#1d4ed8"}
@@ -853,77 +869,74 @@ export default function NotificationsSettingsPage() {
                   style={{ width: 44, height: 32, border: "1px solid var(--cmms-border, #d1d5db)", borderRadius: 6, cursor: "pointer", background: "none" }}
                   aria-label="เลือกสีแถบหัวข้อ"
                 />
-                <TextInput
-                  label="รหัสสี (Hex)"
-                  isLabelHidden
-                  value={activeTpl.header_color ?? "#1d4ed8"}
-                  onChange={(v) => setTplField("header_color", v)}
-                  style={{ width: 140 }}
-                />
+                <div className="w-[140px]">
+                  <Input
+                    label="รหัสสี (Hex)"
+                    isLabelHidden
+                    value={activeTpl.header_color ?? "#1d4ed8"}
+                    onChange={(e) => setTplField("header_color", e.target.value)}
+                  />
+                </div>
               </HStack>
 
               <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold">เนื้อหาการ์ด (Body) — ตัวแปรจากระบบ:</Text>
+                <span className="text-sm font-medium">เนื้อหาการ์ด (Body) — ตัวแปรจากระบบ:</span>
                 <HStack gap={1.5} wrap="wrap">
                   {VARIABLES.map((v) => (
                     <button
                       key={v}
                       type="button"
                       onClick={() => insertVar(v)}
+                      className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] text-[var(--cmms-primary-hover)]"
                       style={{
-                        padding: "3px 8px",
-                        fontSize: 11,
                         fontFamily: "monospace",
-                        background: "var(--cmms-primary-light, #e0e7ff)",
-                        color: "var(--cmms-primary, #4f46e5)",
-                        border: "1px solid var(--cmms-primary-light, #c7d2fe)",
-                        borderRadius: 999,
-                        cursor: "pointer",
+                        background: "var(--cmms-primary-light)",
+                        border: "1px solid var(--cmms-border)",
                       }}
                     >
                       {v}
                     </button>
                   ))}
                 </HStack>
-                <TextArea
+                <Textarea
                   label="ข้อความเนื้อหา"
                   value={activeTpl.body_text ?? ""}
                   rows={7}
-                  onChange={(v) => setTplField("body_text", v)}
+                  onChange={(e) => setTplField("body_text", e.target.value)}
                 />
               </VStack>
 
               {/* รูปก่อน/หลังซ่อมใน Flex */}
               <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold">รูปภาพก่อน/หลังซ่อม (แสดงในข้อความ Flex):</Text>
-                <TextInput
+                <span className="text-sm font-medium">รูปภาพก่อน/หลังซ่อม (แสดงในข้อความ Flex):</span>
+                <Input
                   label="รูปก่อนซ่อม (URL)"
                   placeholder="https://.../failure.jpg"
                   value={activeTpl.image_before ?? ""}
-                  onChange={(v) => setTplField("image_before", v)}
+                  onChange={(e) => setTplField("image_before", e.target.value)}
                 />
-                <TextInput
+                <Input
                   label="รูปหลังซ่อม (URL)"
                   placeholder="https://.../after.jpg"
                   value={activeTpl.image_after ?? ""}
-                  onChange={(v) => setTplField("image_after", v)}
+                  onChange={(e) => setTplField("image_after", e.target.value)}
                 />
-                <Text type="body" size="sm" color="secondary">
+                <p className="text-sm text-muted-foreground">
                   เว้นว่าง = ไม่แสดงรูป (งานซ่อมจริง ระบบดึงรูปจากใบแจ้งซ่อมอัตโนมัติ: ก่อนซ่อม = failure_image, หลังซ่อม = after_image) — ตั้ง URL ตรงนี้เพื่อกำหนดรูปคงที่ หรือดูตัวอย่างตอนยิงทดสอบ
-                </Text>
+                </p>
               </VStack>
 
-              <TextInput
+              <Input
                 label="ข้อความบนปุ่มกด (Button Label)"
                 value={activeTpl.btn_label ?? "เปิดดูในระบบ"}
-                onChange={(v) => setTplField("btn_label", v)}
+                onChange={(e) => setTplField("btn_label", e.target.value)}
               />
 
               {/* ── Flex แบบละเอียด (v2) — ส่วนหัว/hero/เนื้อหา/ปุ่ม/กรอบ ── */}
               <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 14 }}>
-                <Text type="body" size="sm" weight="semibold" style={{ marginBottom: 10 }}>
+                <span className="mb-2.5 block text-sm font-medium">
                   ปรับแต่งขั้นสูง (Flex รายละเอียด)
-                </Text>
+                </span>
 
                 {/* Header */}
                 <div style={{ border: "1px solid var(--cmms-border)", borderRadius: 10, marginBottom: 10, overflow: "hidden" }}>
@@ -933,14 +946,14 @@ export default function NotificationsSettingsPage() {
                   </button>
                   {openSections.header && (
                     <VStack gap={3} style={{ padding: 14 }}>
-                      <TextInput label="หัวข้อรอง (Subtitle)" placeholder="เช่น หมายเลขเครื่อง / แผนก" value={activeTpl.header_subtitle ?? ""} onChange={(v) => setTplField("header_subtitle", v)} />
+                      <Input label="หัวข้อรอง (Subtitle)" placeholder="เช่น หมายเลขเครื่อง / แผนก" value={activeTpl.header_subtitle ?? ""} onChange={(e) => setTplField("header_subtitle", e.target.value)} />
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีตัวอักษร:</Text>
+                        <span className="text-sm font-medium">สีตัวอักษร:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.header_text_color ?? "") ? activeTpl.header_text_color! : "#ffffff"} onChange={(e) => setTplField("header_text_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรหัวข้อ" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.header_text_color ?? "#ffffff"} onChange={(v) => setTplField("header_text_color", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.header_text_color ?? "#ffffff"} onChange={(e) => setTplField("header_text_color", e.target.value)} /></div>
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">จัดตำแหน่ง:</Text>
+                        <span className="text-sm font-medium">จัดตำแหน่ง:</span>
                         {(["start", "center", "end"] as const).map((a) => (
                           <button key={a} type="button" onClick={() => setTplField("header_align", a)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -950,7 +963,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ขนาดตัวอักษร:</Text>
+                        <span className="text-sm font-medium">ขนาดตัวอักษร:</span>
                         {(["xxs", "xs", "sm", "md"] as const).map((s) => (
                           <button key={s} type="button" onClick={() => setTplField("header_size", s)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -960,7 +973,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">น้ำหนักตัวอักษร:</Text>
+                        <span className="text-sm font-medium">น้ำหนักตัวอักษร:</span>
                         {(["regular", "bold"] as const).map((w) => (
                           <button key={w} type="button" onClick={() => setTplField("header_weight", w)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -970,7 +983,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ระยะห่างใน (Padding):</Text>
+                        <span className="text-sm font-medium">ระยะห่างใน (Padding):</span>
                         {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
                           <button key={p} type="button" onClick={() => setTplField("header_padding", p)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -991,9 +1004,9 @@ export default function NotificationsSettingsPage() {
                   </button>
                   {openSections.hero && (
                     <VStack gap={3} style={{ padding: 14 }}>
-                      <TextInput label="URL รูป Hero" placeholder="https://.../hero.jpg" value={activeTpl.hero_image ?? ""} onChange={(v) => setTplField("hero_image", v)} />
+                      <Input label="URL รูป Hero" placeholder="https://.../hero.jpg" value={activeTpl.hero_image ?? ""} onChange={(e) => setTplField("hero_image", e.target.value)} />
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">สัดส่วน:</Text>
+                        <span className="text-sm font-medium">สัดส่วน:</span>
                         {(["1.91:1", "16:9", "4:3", "1:1"] as const).map((r) => (
                           <button key={r} type="button" onClick={() => setTplField("hero_ratio", r)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1003,7 +1016,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ขนาดรูป:</Text>
+                        <span className="text-sm font-medium">ขนาดรูป:</span>
                         {(["full", "xxl", "xl", "lg", "md", "sm"] as const).map((s) => (
                           <button key={s} type="button" onClick={() => setTplField("hero_size", s)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1013,7 +1026,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ลักษณะแสดง:</Text>
+                        <span className="text-sm font-medium">ลักษณะแสดง:</span>
                         {(["cover", "fit"] as const).map((m) => (
                           <button key={m} type="button" onClick={() => setTplField("hero_mode", m)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1022,7 +1035,7 @@ export default function NotificationsSettingsPage() {
                           </button>
                         ))}
                       </HStack>
-                      <Text type="body" size="sm" color="secondary">รูป Hero อยู่ระหว่างแถบหัวข้อกับเนื้อหา (ต่างจากรูปก่อน/หลังซ่อมที่อยู่ในเนื้อหา)</Text>
+                      <span className="block text-sm text-muted-foreground">รูป Hero อยู่ระหว่างแถบหัวข้อกับเนื้อหา (ต่างจากรูปก่อน/หลังซ่อมที่อยู่ในเนื้อหา)</span>
                     </VStack>
                   )}
                 </div>
@@ -1036,12 +1049,12 @@ export default function NotificationsSettingsPage() {
                   {openSections.body && (
                     <VStack gap={3} style={{ padding: 14 }}>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีตัวอักษร:</Text>
+                        <span className="text-sm font-medium">สีตัวอักษร:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.body_color ?? "") ? activeTpl.body_color! : "#475569"} onChange={(e) => setTplField("body_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรเนื้อหา" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.body_color ?? "#475569"} onChange={(v) => setTplField("body_color", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.body_color ?? "#475569"} onChange={(e) => setTplField("body_color", e.target.value)} /></div>
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ขนาดตัวอักษร:</Text>
+                        <span className="text-sm font-medium">ขนาดตัวอักษร:</span>
                         {(["xs", "sm", "md"] as const).map((s) => (
                           <button key={s} type="button" onClick={() => setTplField("body_size", s)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1051,7 +1064,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">น้ำหนักตัวอักษร:</Text>
+                        <span className="text-sm font-medium">น้ำหนักตัวอักษร:</span>
                         {(["regular", "bold"] as const).map((w) => (
                           <button key={w} type="button" onClick={() => setTplField("body_weight", w)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1061,7 +1074,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">จัดตำแหน่ง:</Text>
+                        <span className="text-sm font-medium">จัดตำแหน่ง:</span>
                         {(["start", "center", "end"] as const).map((a) => (
                           <button key={a} type="button" onClick={() => setTplField("body_align", a)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1071,7 +1084,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">จัดเรียงตามแนวแกน (Justify):</Text>
+                        <span className="text-sm font-medium">จัดเรียงตามแนวแกน (Justify):</span>
                         {(["flex-start", "center", "flex-end", "space-between"] as const).map((j) => (
                           <button key={j} type="button" onClick={() => setTplField("body_justify", j)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1081,7 +1094,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ระยะห่างระหว่างบรรทัด (Spacing):</Text>
+                        <span className="text-sm font-medium">ระยะห่างระหว่างบรรทัด (Spacing):</span>
                         {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
                           <button key={p} type="button" onClick={() => setTplField("body_spacing", p)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1091,7 +1104,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ระยะห่างใน (Padding):</Text>
+                        <span className="text-sm font-medium">ระยะห่างใน (Padding):</span>
                         {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((p) => (
                           <button key={p} type="button" onClick={() => setTplField("body_padding", p)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1101,13 +1114,13 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีพื้นหลังเนื้อหา:</Text>
+                        <span className="text-sm font-medium">สีพื้นหลังเนื้อหา:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.body_background ?? "") ? activeTpl.body_background! : "#ffffff"} onChange={(e) => setTplField("body_background", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีพื้นหลังเนื้อหา" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.body_background ?? ""} onChange={(v) => setTplField("body_background", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.body_background ?? ""} onChange={(e) => setTplField("body_background", e.target.value)} /></div>
                         <button type="button" onClick={() => setTplField("body_background", "")} style={{ padding: "4px 10px", borderRadius: 8, fontSize: "0.75rem", border: "1px solid var(--cmms-border)", cursor: "pointer", background: "var(--cmms-bg-wash)" }}>ล้าง</button>
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ตัดบรรทัดอัตโนมัติ (Wrap):</Text>
+                        <span className="text-sm font-medium">ตัดบรรทัดอัตโนมัติ (Wrap):</span>
                         {(["1", "0"] as const).map((w) => (
                           <button key={w} type="button" onClick={() => setTplField("body_wrap", w)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1117,7 +1130,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">เส้นคั่นใต้เนื้อหา (Separator):</Text>
+                        <span className="text-sm font-medium">เส้นคั่นใต้เนื้อหา (Separator):</span>
                         {(["1", "0"] as const).map((w) => (
                           <button key={w} type="button" onClick={() => setTplField("body_separator", w)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1139,7 +1152,7 @@ export default function NotificationsSettingsPage() {
                   {openSections.footer && (
                     <VStack gap={3} style={{ padding: 14 }}>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">สไตล์ปุ่ม:</Text>
+                        <span className="text-sm font-medium">สไตล์ปุ่ม:</span>
                         {(["primary", "secondary", "link"] as const).map((st) => (
                           <button key={st} type="button" onClick={() => setTplField("btn_style", st)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1149,7 +1162,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ความสูงปุ่ม:</Text>
+                        <span className="text-sm font-medium">ความสูงปุ่ม:</span>
                         {(["sm", "md", "lg"] as const).map((h) => (
                           <button key={h} type="button" onClick={() => setTplField("btn_height", h)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1159,20 +1172,20 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีปุ่ม:</Text>
+                        <span className="text-sm font-medium">สีปุ่ม:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.btn_color ?? "") ? activeTpl.btn_color! : "#06C755"} onChange={(e) => setTplField("btn_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีปุ่ม" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.btn_color ?? "#06C755"} onChange={(v) => setTplField("btn_color", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.btn_color ?? "#06C755"} onChange={(e) => setTplField("btn_color", e.target.value)} /></div>
                       </HStack>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีตัวอักษรปุ่ม:</Text>
+                        <span className="text-sm font-medium">สีตัวอักษรปุ่ม:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.btn_text_color ?? "") ? activeTpl.btn_text_color! : "#ffffff"} onChange={(e) => setTplField("btn_text_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีตัวอักษรปุ่ม" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.btn_text_color ?? "#ffffff"} onChange={(v) => setTplField("btn_text_color", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.btn_text_color ?? "#ffffff"} onChange={(e) => setTplField("btn_text_color", e.target.value)} /></div>
                       </HStack>
                       <div style={{ borderTop: "1px dashed var(--cmms-border)", paddingTop: 10 }}>
-                        <Text type="body" size="sm" weight="semibold" style={{ marginBottom: 8 }}>ปุ่มที่ 2 (ไม่บังคับ)</Text>
+                        <span className="mb-2 block text-sm font-medium">ปุ่มที่ 2 (ไม่บังคับ)</span>
                         <HStack gap={2} wrap="wrap">
-                          <TextInput label="ข้อความปุ่มที่ 2" placeholder="เว้นว่าง = ไม่แสดง" value={activeTpl.btn2_label ?? ""} onChange={(v) => setTplField("btn2_label", v)} style={{ flex: 1, minWidth: 160 }} />
-                          <TextInput label="URL ปุ่มที่ 2" placeholder="https://..." value={activeTpl.btn2_url ?? ""} onChange={(v) => setTplField("btn2_url", v)} style={{ flex: 1, minWidth: 160 }} />
+                          <div className="min-w-[160px] flex-1"><Input label="ข้อความปุ่มที่ 2" placeholder="เว้นว่าง = ไม่แสดง" value={activeTpl.btn2_label ?? ""} onChange={(e) => setTplField("btn2_label", e.target.value)} /></div>
+                          <div className="min-w-[160px] flex-1"><Input label="URL ปุ่มที่ 2" placeholder="https://..." value={activeTpl.btn2_url ?? ""} onChange={(e) => setTplField("btn2_url", e.target.value)} /></div>
                         </HStack>
                       </div>
                     </VStack>
@@ -1188,17 +1201,17 @@ export default function NotificationsSettingsPage() {
                   {openSections.container && (
                     <VStack gap={3} style={{ padding: 14 }}>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">พื้นหลังการ์ด:</Text>
+                        <span className="text-sm font-medium">พื้นหลังการ์ด:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.container_bg ?? "") ? activeTpl.container_bg! : "#ffffff"} onChange={(e) => setTplField("container_bg", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="พื้นหลังการ์ด" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.container_bg ?? "#ffffff"} onChange={(v) => setTplField("container_bg", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.container_bg ?? "#ffffff"} onChange={(e) => setTplField("container_bg", e.target.value)} /></div>
                       </HStack>
                       <HStack gap={2} wrap="wrap" vAlign="center">
-                        <Text type="body" size="sm" weight="semibold">สีขอบ:</Text>
+                        <span className="text-sm font-medium">สีขอบ:</span>
                         <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(activeTpl.border_color ?? "") ? activeTpl.border_color! : "#e2e8f0"} onChange={(e) => setTplField("border_color", e.target.value)} style={{ width: 44, height: 32, border: "1px solid var(--cmms-border)", borderRadius: 6, cursor: "pointer", background: "none" }} aria-label="สีขอบการ์ด" />
-                        <TextInput isLabelHidden label="Hex" value={activeTpl.border_color ?? "#e2e8f0"} onChange={(v) => setTplField("border_color", v)} style={{ width: 110 }} />
+                        <div className="w-[110px]"><Input isLabelHidden label="Hex" value={activeTpl.border_color ?? "#e2e8f0"} onChange={(e) => setTplField("border_color", e.target.value)} /></div>
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">มุมโค้ง:</Text>
+                        <span className="text-sm font-medium">มุมโค้ง:</span>
                         {(["none", "xs", "sm", "md", "lg", "xl"] as const).map((r) => (
                           <button key={r} type="button" onClick={() => setTplField("corner_radius", r)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1208,7 +1221,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ทิศทางข้อความ:</Text>
+                        <span className="text-sm font-medium">ทิศทางข้อความ:</span>
                         {(["ltr", "rtl"] as const).map((d) => (
                           <button key={d} type="button" onClick={() => setTplField("bubble_direction", d)}
                             style={{ padding: "5px 12px", borderRadius: 8, fontSize: "0.78rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1218,7 +1231,7 @@ export default function NotificationsSettingsPage() {
                         ))}
                       </HStack>
                       <HStack gap={2} vAlign="center" wrap="wrap">
-                        <Text type="body" size="sm" weight="semibold">ขนาดการ์ด (Bubble Size):</Text>
+                        <span className="text-sm font-medium">ขนาดการ์ด (Bubble Size):</span>
                         {(["", "nano", "micro", "deci", "hecto", "kilo", "mega"] as const).map((s) => (
                           <button key={s} type="button" onClick={() => setTplField("bubble_size", s)}
                             style={{ padding: "5px 10px", borderRadius: 8, fontSize: "0.75rem", fontWeight: 600, border: "1px solid var(--cmms-border)", cursor: "pointer",
@@ -1236,45 +1249,42 @@ export default function NotificationsSettingsPage() {
 
               <HStack hAlign="end" gap={2} wrap="wrap">
                 {!isPlain && (
-                  <Button
-                    label={testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
-                    variant="primary"
-                    icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                    isLoading={testing}
-                    onClick={handleTestSend}
-                  />
+                  <Button disabled={testing} onClick={handleTestSend}>
+                    <PaperAirplaneIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                    {testing ? "กำลังส่ง..." : "ยิงทดสอบเข้า LINE"}
+                  </Button>
                 )}
                 <Button
-                  label={hasChanges ? `บันทึก (${hasChanges ? "มีการแก้ไข" : ""})` : "บันทึกการตั้งค่า"}
                   variant="secondary"
-                  isLoading={saving}
-                  isDisabled={!hasChanges}
+                  disabled={!hasChanges || saving}
                   onClick={handleSave}
-                />
+                >
+                  {hasChanges ? `บันทึก (${hasChanges ? "มีการแก้ไข" : ""})` : "บันทึกการตั้งค่า"}
+                </Button>
               </HStack>
 
               {testResult && (
-                <Card padding={3} style={{
+                <Card style={{
                   background: testResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
                   border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "#f87171"}`,
                 }}>
-                  <HStack gap={2} vAlign="center">
-                    <Text type="body" size="sm" weight="bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                  <CardContent className="p-3">
+                    <span className="text-sm font-bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
                       {testResult.ok ? "✅ " : " "}{testResult.msg}
-                    </Text>
-                  </HStack>
+                    </span>
+                  </CardContent>
                 </Card>
               )}
-            </VStack>
+            </CardContent>
           </Card>
         </VStack>
 
         {/* Right: live preview */}
-        <Card padding={5}>
-          <VStack gap={4}>
+        <Card>
+          <CardContent className="space-y-4 p-5">
             <HStack gap={2} vAlign="center">
-              <Icon icon={EyeIcon} size="md" color="primary" />
-              <Heading level={3}>พรีวิวบนแอป LINE มือถือ</Heading>
+              <EyeIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+              <h3 className="text-base font-semibold">พรีวิวบนแอป LINE มือถือ</h3>
             </HStack>
 
             {!isPlain && (
@@ -1438,23 +1448,25 @@ export default function NotificationsSettingsPage() {
 
             <HStack hAlign="between" vAlign="center" gap={2} wrap="wrap">
               <HStack gap={2} vAlign="center">
-                <Icon icon={BoltIcon} size="sm" color="primary" />
-                <Text type="body" size="sm" weight="semibold">Flex Message JSON ต้นฉบับ (ที่ระบบส่งจริง)</Text>
+                <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                <span className="text-sm font-medium">Flex Message JSON ต้นฉบับ (ที่ระบบส่งจริง)</span>
               </HStack>
               <HStack gap={2}>
                 <Button
-                  label={showJson ? "ซ่อน JSON" : "ดู JSON"}
                   variant="secondary"
                   size="sm"
                   onClick={() => setShowJson((v) => !v)}
-                />
+                >
+                  {showJson ? "ซ่อน JSON" : "ดู JSON"}
+                </Button>
                 <Button
-                  label={copied ? "คัดลอกแล้ว ✓" : "คัดลอก JSON"}
                   variant="secondary"
                   size="sm"
-                  isDisabled={!showJson}
+                  disabled={!showJson}
                   onClick={copyJson}
-                />
+                >
+                  {copied ? "คัดลอกแล้ว ✓" : "คัดลอก JSON"}
+                </Button>
               </HStack>
             </HStack>
 
@@ -1468,9 +1480,9 @@ export default function NotificationsSettingsPage() {
                 }}>
                   {flexJson}
                 </div>
-                <Text type="body" size="sm" color="secondary">
+                <span className="block text-sm text-muted-foreground">
                   เป็น payload ตัวเดียวกับที่กด "ยิงทดสอบเข้า LINE" ส่งจริง — ตัวแปรในตัวอย่างถูกแทนค่าด้วยข้อมูลจำลอง
-                </Text>
+                </span>
               </VStack>
             )}
             </>
@@ -1507,30 +1519,32 @@ export default function NotificationsSettingsPage() {
                   <div style={{ background: "#ffffff", borderRadius: 12, padding: "12px 14px", maxWidth: 280, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", fontSize: 12, color: "#334155", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                     {tplMeta.sample || "ข้อความตัวอย่างจากระบบ"}
                   </div>
-                  <Text type="body" size="sm" color="secondary" style={{ marginTop: 14, fontSize: 11, textAlign: "center" }}>
+                  <span className="mt-3.5 block text-center text-[11px] text-muted-foreground">
                     ข้อความจริงสร้างอัตโนมัติจากข้อมูลของระบบ — ตัวอย่างด้านบนเท่านั้น
-                  </Text>
+                  </span>
                 </div>
               </div>
             )}
 
             <VStack gap={1}>
-              <Text type="body" size="sm" weight="semibold">วิธีใช้งานกับ LINE</Text>
-              <Text type="body" size="sm" color="secondary">
+              <span className="text-sm font-medium">วิธีใช้งานกับ LINE</span>
+              <span className="block text-sm text-muted-foreground">
                 1. ตั้งค่า Channel Access Token / Secret ใน LINE Developers Console
-              </Text>
-              <Text type="body" size="sm" color="secondary">
+              </span>
+              <span className="block text-sm text-muted-foreground">
                 2. วาง LIFF ID ด้านบนเพื่อให้ผู้ใช้เปิดระบบได้ในแอป LINE บนมือถือ
-              </Text>
-              <Text type="body" size="sm" color="secondary">
+              </span>
+              <span className="block text-sm text-muted-foreground">
                 3. ผู้ใช้ผูกบัญชี LINE ที่ /bind_line.php แล้วกด "ยิงทดสอบเข้า LINE"
-              </Text>
+              </span>
             </VStack>
-          </VStack>
+          </CardContent>
         </Card>
       </Grid>
+      </VStack>
       </>
       )}
-    </VStack>
+      </VStack>
+    </PageShell>
   );
 }

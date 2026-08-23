@@ -4,48 +4,47 @@ import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { setUserLang } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
+import { PageShell } from "@/components/PageShell";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
-  CheckCircleIcon,
-  BuildingOffice2Icon,
-  Cog6ToothIcon,
-  BellAlertIcon,
-  WrenchScrewdriverIcon,
-  CalendarDaysIcon,
-  CubeIcon,
-  CircleStackIcon,
-  PaintBrushIcon,
-  ShieldCheckIcon,
-  ChatBubbleLeftRightIcon,
-  DevicePhoneMobileIcon,
-  ServerStackIcon,
-  ArrowRightIcon,
-  LockClosedIcon,
-  MagnifyingGlassIcon,
-  ClockIcon,
-  ScaleIcon,
-  ArrowPathIcon,
-  DocumentTextIcon,
-  BoltIcon,
-  UsersIcon,
-  ChartBarIcon,
-  ExclamationTriangleIcon,
-  WrenchIcon,
-  CogIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle2 as CheckCircleIcon,
+  Building2 as BuildingOffice2Icon,
+  Settings as Cog6ToothIcon,
+  BellRing as BellAlertIcon,
+  Wrench as WrenchScrewdriverIcon,
+  CalendarDays as CalendarDaysIcon,
+  Box as CubeIcon,
+  Database as CircleStackIcon,
+  Paintbrush as PaintBrushIcon,
+  ShieldCheck as ShieldCheckIcon,
+  MessagesSquare as ChatBubbleLeftRightIcon,
+  Smartphone as DevicePhoneMobileIcon,
+  Server as ServerStackIcon,
+  ArrowRight as ArrowRightIcon,
+  Lock as LockClosedIcon,
+  Search as MagnifyingGlassIcon,
+  Clock as ClockIcon,
+  Scale as ScaleIcon,
+  RefreshCw as ArrowPathIcon,
+  Hammer as WrenchIcon,
+} from "lucide-react";
 
 interface SettingRow {
   id: number;
@@ -730,77 +729,62 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดการตั้งค่าระบบ...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าระบบ...</p>
+      </div>
     );
   }
 
   const totalDirty = Object.values(groupDirtyCount).reduce((a, b) => a + b, 0);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: hero.title }]}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <>
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+            {settings.length} keys
+          </span>
+          {totalDirty > 0 && (
+            <span className="cmms-status warn"><span className="cmms-status-dot" />{totalDirty} รายการยังไม่บันทึก</span>
+          )}
+          <Button variant="secondary" onClick={openAudit}>
+            <ClockIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+            ประวัติการแก้ไข
+          </Button>
+        </>
+      }
+    >
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
-      {saveMessage && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
-          </HStack>
-        </Card>
-      )}
+      {saveMessage && <Alert variant="success" title="สำเร็จ" description={saveMessage} />}
 
       {/* ═══ HEADER ═══ */}
       <div style={layoutStyle("header")}>
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1} style={{ flex: 1 }}>
-          <Text type="body" size="sm" className="cmms-eyebrow">{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>{hero.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              {settings.length} keys
-            </span>
-            {totalDirty > 0 && <span className="cmms-status warn"><span className="cmms-status-dot" />{totalDirty} รายการยังไม่บันทึก</span>}
-          </HStack>
-          <Text type="body" color="secondary">
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2} vAlign="center" wrap="wrap">
-          <button
-            type="button"
-            onClick={openAudit}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-          >
-            <ClockIcon className="w-4 h-4" />
-            ประวัติการแก้ไข
-          </button>
-          <VStack gap={1} style={{ minWidth: 280, maxWidth: 420 }}>
-            <HStack gap={2} vAlign="center">
-              <MagnifyingGlassIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
-              <TextInput
-                label="ค้นหาการตั้งค่า"
-                isLabelHidden
-                placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
-                value={searchQuery}
-                onChange={setSearchQuery}
-                description={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                >
-                  ล้าง
-                </button>
-              )}
-            </HStack>
-          </VStack>
-        </HStack>
-      </HStack>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[220px] flex-1">
+            <MagnifyingGlassIcon
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--cmms-text-muted)]"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            <Input
+              label="ค้นหาการตั้งค่า"
+              isLabelHidden
+              placeholder="ค้นหา: ชื่อไทย / key / ค่า (ข้ามทุกกลุ่ม)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              hint={searchQuery.trim() ? `พบ ${searchRows?.length ?? 0} รายการจากทุกกลุ่ม` : undefined}
+              className="pl-9"
+            />
+          </div>
+          {searchQuery && (
+            <Button variant="secondary" onClick={() => setSearchQuery("")}>ล้าง</Button>
+          )}
+        </div>
       </div>
 
       {/* ═══ ลิงก์หน้าย่อยตั้งค่า ═══ */}
@@ -809,21 +793,19 @@ export default function SettingsPage() {
         {SUB_PAGES.map((p) => (
           <Card
             key={p.href}
-            padding={4}
-            elevation="low"
-            style={{ cursor: "pointer" }}
+            className="cursor-pointer transition-shadow hover:shadow-md"
             onClick={() => router.push(p.href)}
           >
-            <HStack gap={3} vAlign="center">
-              <div style={{ padding: 10, borderRadius: 8, background: "var(--cmms-primary-wash)", color: "var(--cmms-primary)" }}>
-                <p.icon className="w-5 h-5" />
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="rounded-lg p-2.5" style={{ background: "var(--cmms-primary-wash)", color: "var(--cmms-primary)" }}>
+                <p.icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
               </div>
-              <VStack gap={0} style={{ flex: 1 }}>
-                <Text type="body" weight="bold" size="sm">{p.label}</Text>
-                <Text type="body" size="sm" color="secondary">{p.desc}</Text>
-              </VStack>
-              <ArrowRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-disabled)" }} />
-            </HStack>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold">{p.label}</p>
+                <p className="text-sm text-muted-foreground">{p.desc}</p>
+              </div>
+              <ArrowRightIcon className="h-4 w-4 shrink-0 text-[var(--cmms-text-disabled)]" strokeWidth={1.75} aria-hidden="true" />
+            </CardContent>
           </Card>
         ))}
       </Grid>
@@ -832,14 +814,14 @@ export default function SettingsPage() {
       {/* ═══ คีย์ที่แก้ไขล่าสุด ═══ */}
       <div style={layoutStyle("recent")}>
       {recentRows.length > 0 && (
-        <Card padding={4}>
-          <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
             <HStack gap={2} vAlign="center">
-              <ClockIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
-              <Text type="body" weight="bold">แก้ไขล่าสุด</Text>
-              <Text type="body" size="sm" color="secondary">กดเพื่อไปยังการตั้งค่านั้น</Text>
+              <ClockIcon className="h-4 w-4 text-[var(--cmms-primary)]" strokeWidth={1.75} aria-hidden="true" />
+              <span className="font-semibold">แก้ไขล่าสุด</span>
+              <span className="text-sm text-muted-foreground">กดเพื่อไปยังการตั้งค่านั้น</span>
             </HStack>
-            <HStack gap={2} wrap="wrap">
+            <div className="flex flex-wrap items-center gap-2">
               {recentRows.map((s) => {
                 const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
                 // หา topic ที่กลุ่มนี้อยู่
@@ -865,8 +847,8 @@ export default function SettingsPage() {
                   </button>
                 );
               })}
-            </HStack>
-          </HStack>
+            </div>
+          </CardContent>
         </Card>
       )}
       </div>
@@ -880,20 +862,18 @@ export default function SettingsPage() {
           <VStack gap={4}>
             <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
               <VStack gap={0}>
-                <Heading level={3}>เลือกหมวดการตั้งค่า</Heading>
-                <Text type="body" size="sm" color="secondary">
+                <h2 className="text-base font-semibold">เลือกหมวดการตั้งค่า</h2>
+                <p className="text-sm text-muted-foreground">
                   คลิกที่หมวดเพื่อดูและแก้ไขการตั้งค่ารายละเอียด
-                </Text>
+                </p>
               </VStack>
               {totalDirty > 0 && (
-                <button
-                  type="button"
+                <Button
                   disabled={totalDirty === 0}
                   onClick={handleSave}
-                  className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "กำลังบันทึก..." : `บันทึกทั้งหมด (${totalDirty} รายการ)`}
-                </button>
+                </Button>
               )}
             </HStack>
 
@@ -906,9 +886,8 @@ export default function SettingsPage() {
                 return (
                   <Card
                     key={topicId}
-                    padding={5}
-                    elevation="low"
-                    style={{ cursor: "pointer", borderLeft: `4px solid ${topic.color}` }}
+                    className="cursor-pointer transition-shadow hover:shadow-md"
+                    style={{ borderLeft: `4px solid ${topic.color}` }}
                     onClick={() => {
                       if (topic.link) {
                         router.push(topic.link);
@@ -917,21 +896,20 @@ export default function SettingsPage() {
                       }
                     }}
                   >
-                    <VStack gap={3}>
+                    <CardContent className="space-y-3 p-5">
                       <HStack gap={3} vAlign="center">
-                        <div style={{
-                          padding: 12, borderRadius: 10,
+                        <div className="rounded-[10px] p-3" style={{
                           background: topic.bgColor, color: topic.color,
                         }}>
-                          <TopicIcon className="w-6 h-6" />
+                          <TopicIcon className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
                         </div>
-                        <VStack gap={0} style={{ flex: 1 }}>
-                          <Text type="body" weight="bold">{topic.label}</Text>
-                          <Text type="body" size="sm" color="secondary">{topic.hint}</Text>
-                        </VStack>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold">{topic.label}</p>
+                          <p className="text-sm text-muted-foreground">{topic.hint}</p>
+                        </div>
                       </HStack>
 
-                      <HStack gap={2} wrap="wrap">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="cmms-andon-chip" style={{ background: topic.bgColor, color: topic.color }}>
                           {topicSettings.length} รายการ
                         </span>
@@ -941,10 +919,10 @@ export default function SettingsPage() {
                             {dirtyCount} ยังไม่บันทึก
                           </span>
                         )}
-                      </HStack>
+                      </div>
 
                       <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 12 }}>
-                        <Text type="body" size="sm" color="secondary">ตัวอย่างการตั้งค่า:</Text>
+                        <p className="text-sm text-muted-foreground">ตัวอย่างการตั้งค่า:</p>
                         <VStack gap={1} style={{ marginTop: 8 }}>
                           {topicSettings.slice(0, 3).map((s) => {
                             const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
@@ -952,7 +930,7 @@ export default function SettingsPage() {
                             const value = form[s.setting_key] ?? "";
                             return (
                               <HStack key={s.id} gap={2} vAlign="center" wrap="wrap">
-                                <Text type="body" size="sm" weight="semibold">{meta.label}</Text>
+                                <span className="text-sm font-semibold">{meta.label}</span>
                                 <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                                   {isBool ? (value === "1" ? "เปิด" : "ปิด") : value || "(ว่าง)"}
                                 </span>
@@ -960,17 +938,17 @@ export default function SettingsPage() {
                             );
                           })}
                           {topicSettings.length > 3 && (
-                            <Text type="body" size="sm" color="secondary">
+                            <p className="text-sm text-muted-foreground">
                               +{topicSettings.length - 3} รายการเพิ่มเติม...
-                            </Text>
+                            </p>
                           )}
                         </VStack>
                       </div>
 
                       <HStack hAlign="end">
-                        <ArrowRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-disabled)" }} />
+                        <ArrowRightIcon className="h-4 w-4 text-[var(--cmms-text-disabled)]" strokeWidth={1.75} aria-hidden="true" />
                       </HStack>
-                    </VStack>
+                    </CardContent>
                   </Card>
                 );
               })}
@@ -982,8 +960,8 @@ export default function SettingsPage() {
           // ═══════════════════════════════════════════════════════════════════════════
           <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
             {/* Sidebar: กลุ่มย่อยใน topic */}
-            <Card padding={2}>
-              <VStack gap={2}>
+            <Card>
+              <CardContent className="space-y-2 p-2">
                 {/* ปุ่มกลับ */}
                 <button
                   type="button"
@@ -1008,8 +986,8 @@ export default function SettingsPage() {
                   color: TOPICS[activeTopic]?.color,
                 }}>
                   <HStack gap={2} vAlign="center">
-                    {TopicIcon && <TopicIcon className="w-5 h-5" />}
-                    <Text type="body" weight="bold" size="sm">{TOPICS[activeTopic]?.label}</Text>
+                    {TopicIcon && <TopicIcon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />}
+                    <span className="text-sm font-semibold">{TOPICS[activeTopic]?.label}</span>
                   </HStack>
                 </div>
                 ); })()}
@@ -1037,7 +1015,7 @@ export default function SettingsPage() {
                         font: "inherit",
                       }}
                     >
-                      <Text type="body" weight={isActive ? "bold" : "normal"}>{groupLabel}</Text>
+                      <span className={isActive ? "font-bold" : ""}>{groupLabel}</span>
                       {dirty > 0 ? (
                         <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, background: "var(--cmms-warning)", color: "#fff", borderRadius: 999, padding: "2px 8px" }}>
                           {dirty}
@@ -1048,24 +1026,24 @@ export default function SettingsPage() {
                     </button>
                   );
                 })}
-              </VStack>
+              </CardContent>
             </Card>
 
             {/* Form panel */}
-            <Card padding={5} style={{ gridColumn: "span 2" }}>
-              <VStack gap={5}>
+            <Card style={{ gridColumn: "span 2" }}>
+              <CardContent className="space-y-5 p-5">
                 <VStack gap={1}>
-                  <Heading level={3}>
+                  <h2 className="text-base font-semibold">
                     {searchRows
                       ? `ผลการค้นหา "${searchQuery.trim()}"`
                       : TOPICS[activeTopic]?.label}
-                  </Heading>
-                  <Text type="supporting" color="secondary">
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
                     {searchRows
                       ? `พบ ${searchRows.length} รายการจากทุกกลุ่ม`
                       : `${TOPICS[activeTopic]?.hint} — มี ${currentRows.length} รายการ`}
                     {changedRows.length > 0 && ` · ยังไม่บันทึก ${changedRows.length} รายการ`}
-                  </Text>
+                  </p>
                 </VStack>
 
                 {!searchRows && activeTopic === "company" && activeGroup === "branding" && (
@@ -1081,9 +1059,9 @@ export default function SettingsPage() {
                 )}
 
                 {(searchRows ?? currentRows).length === 0 ? (
-                  <Text type="body" color="secondary">
+                  <p className="text-sm text-muted-foreground">
                     {searchRows ? `ไม่พบการตั้งค่าที่ตรงกับ "${searchQuery.trim()}"` : "ไม่มีรายการตั้งค่าในกลุ่มนี้"}
-                  </Text>
+                  </p>
                 ) : (
                   (searchRows ?? currentRows).map((row) => {
                     const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
@@ -1109,8 +1087,8 @@ export default function SettingsPage() {
                         <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                           <VStack gap={0}>
                             <HStack gap={2} vAlign="center">
-                              {isSensitive && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
-                              <Text type="body" weight="semibold">{meta.label}</Text>
+                              {isSensitive && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
+                              <span className="font-semibold">{meta.label}</span>
                               {searchRows && (
                                 <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                                   {row.setting_group}
@@ -1118,10 +1096,10 @@ export default function SettingsPage() {
                               )}
                               {dirty && (<span className="cmms-status warn"><span className="cmms-status-dot" />ยังไม่บันทึก</span>)}
                             </HStack>
-                            <Text type="body" size="sm" color="secondary">
+                            <p className="text-sm text-muted-foreground">
                               {meta.hint || row.description || row.setting_key}
                               {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
-                            </Text>
+                            </p>
                           </VStack>
                           {isReadonly && (
                             <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
@@ -1146,7 +1124,7 @@ export default function SettingsPage() {
                                 fontSize: 11, fontWeight: 600,
                               }}
                             >
-                              <ArrowPathIcon className="w-3.5 h-3.5" />
+                              <ArrowPathIcon className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
                               รีเซ็ตเริ่มต้น
                             </button>
                           )}
@@ -1159,13 +1137,13 @@ export default function SettingsPage() {
                                 ? `•••••••• (ตั้งค่าแล้ว ความยาว ${String(form[row.setting_key]).length} ตัวอักษร)`
                                 : "ยังไม่ได้ตั้งค่า"}
                             </div>
-                            <TextInput
+                            <Input
                               label="ป้อนค่าใหม่ (ถ้าต้องการเปลี่ยน)"
                               isLabelHidden
                               type={secretFilled[row.setting_key] ? "text" : "password"}
                               placeholder="เว้นว่าง = ไม่เปลี่ยนค่าเดิม"
                               value={newSecrets[row.setting_key] ?? ""}
-                              onChange={(v) => setNewSecrets((f) => ({ ...f, [row.setting_key]: v }))}
+                              onChange={(e) => setNewSecrets((f) => ({ ...f, [row.setting_key]: e.target.value }))}
                             />
                           </VStack>
                         ) : isJson ? (
@@ -1230,15 +1208,20 @@ export default function SettingsPage() {
                             </span>
                           </HStack>
                         ) : selectOptions ? (
-                          <Selector
-                            label={meta.label}
-                            isLabelHidden
+                          <Select
                             value={form[row.setting_key] ?? ""}
-                            isDisabled={isReadonly}
-                            placeholder="เลือกค่า..."
-                            options={selectOptions}
-                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
-                          />
+                            onValueChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
+                            disabled={isReadonly}
+                          >
+                            <SelectTrigger aria-label={meta.label} className="sm:max-w-xs">
+                              <SelectValue placeholder="เลือกค่า..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectOptions.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ) : isColor ? (
                           <VStack gap={1}>
                             <HStack gap={2} vAlign="center" wrap="wrap">
@@ -1253,41 +1236,41 @@ export default function SettingsPage() {
                                   background: "var(--cmms-bg-wash)",
                                 }}
                               />
-                              <TextInput
-                                label={meta.label}
-                                isLabelHidden
-                                placeholder="#RRGGBB"
-                                value={String(form[row.setting_key] ?? "").toUpperCase()}
-                                onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
-                                status={hexValue === "" ? undefined : { type: hexValid ? "success" : "error" }}
-                                style={{ flex: 1, minWidth: 160, maxWidth: 260 }}
-                              />
+                              <div style={{ flex: 1, minWidth: 160, maxWidth: 260 }}>
+                                <Input
+                                  label={meta.label}
+                                  isLabelHidden
+                                  placeholder="#RRGGBB"
+                                  value={String(form[row.setting_key] ?? "").toUpperCase()}
+                                  onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
+                                />
+                              </div>
                             </HStack>
                             {hexValue === "" ? (
-                              <Text type="body" size="sm" color="secondary">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</Text>
+                              <p className="text-sm text-muted-foreground">ต้องเป็นรหัสสี #RRGGBB (6 หลัก)</p>
                             ) : hexValid ? (
-                              <Text type="body" size="sm" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</Text>
+                              <p className="text-sm" style={{ color: "var(--cmms-success)" }}>รหัสสีถูกต้อง</p>
                             ) : (
-                              <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</Text>
+                              <p className="text-sm" style={{ color: "var(--cmms-danger)" }}>รหัสสีไม่ถูกต้อง — ต้องเป็น #RRGGBB (6 หลัก)</p>
                             )}
                           </VStack>
                         ) : isTextarea ? (
-                          <TextArea
+                          <Textarea
                             label={meta.label}
                             isLabelHidden
                             value={form[row.setting_key] ?? ""}
-                            isDisabled={isReadonly}
+                            disabled={isReadonly}
                             rows={row.setting_key === "company_address" ? 3 : 2}
-                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                            onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
                           />
                         ) : (
-                          <TextInput
+                          <Input
                             label={meta.label}
                             isLabelHidden
                             type={isEmail ? "email" : "text"}
                             value={form[row.setting_key] ?? ""}
-                            isDisabled={isReadonly}
-                            onChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: v }))}
+                            disabled={isReadonly}
+                            onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
                           />
                         )}
                       </VStack>
@@ -1296,8 +1279,8 @@ export default function SettingsPage() {
                 )}
 
                 <HStack hAlign="end" wrap="wrap" gap={2}>
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     disabled={changedRows.length === 0}
                     onClick={() => {
                       const next: Record<string, string> = {};
@@ -1305,29 +1288,25 @@ export default function SettingsPage() {
                       setForm(next);
                       setNewSecrets({});
                     }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     รีเซ็ตการแก้ไข
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="secondary"
                     disabled={changedRows.length === 0}
                     onClick={() => setShowDiff(true)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ScaleIcon className="w-4 h-4" />
+                    <ScaleIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                     {changedRows.length > 0 ? `เปรียบเทียบก่อนบันทึก (${changedRows.length})` : "เปรียบเทียบก่อนบันทึก"}
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
                     disabled={changedRows.length === 0}
                     onClick={handleSave}
-                    className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? "กำลังบันทึก..." : changedRows.length > 0 ? `บันทึก (${changedRows.length} รายการ)` : "บันทึกการตั้งค่า"}
-                  </button>
+                  </Button>
                 </HStack>
-              </VStack>
+              </CardContent>
             </Card>
           </Grid>
         )}
@@ -1335,52 +1314,52 @@ export default function SettingsPage() {
 
       {/* ═══ Dialog เปรียบเทียบก่อนบันทึก ═══ */}
       <AnimatedDialog open={showDiff} onClose={() => setShowDiff(false)}>
-        <DialogHeader title={`เปรียบเทียบก่อนบันทึก (${diffRows.length} รายการ)`} />
-        <VStack gap={4}>
-          <Text type="body" size="sm" color="secondary">
+        <div className="space-y-4 p-5">
+          <h2 className="text-lg font-semibold">เปรียบเทียบก่อนบันทึก ({diffRows.length} รายการ)</h2>
+          <p className="text-sm text-muted-foreground">
             ตรวจสอบความแตกต่างระหว่างค่าปัจจุบันในฐานข้อมูล (ซ้าย แดง) กับค่าที่จะบันทึก (ขวา เขียว) ก่อนยืนยัน
-          </Text>
+          </p>
 
           {diffRows.length === 0 ? (
-            <Text type="body" color="secondary">ไม่มีการเปลี่ยนแปลงที่ต้องบันทึก</Text>
+            <p className="text-sm text-muted-foreground">ไม่มีการเปลี่ยนแปลงที่ต้องบันทึก</p>
           ) : (
             <VStack gap={2} style={{ maxHeight: 420, overflow: "auto" }}>
               {diffRows.map(({ row, oldVal, newVal }) => {
                 const meta = KEY_META[row.setting_key] ?? { label: row.setting_key };
                 const changed = oldVal !== newVal;
                 return (
-                  <Card key={row.id} padding={3}>
-                    <VStack gap={1.5}>
+                  <Card key={row.id}>
+                    <CardContent className="space-y-1.5 p-3">
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
-                          {SENSITIVE_KEYS.has(row.setting_key) && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
-                          <Text type="body" weight="bold" size="sm">{meta.label}</Text>
+                          {SENSITIVE_KEYS.has(row.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
+                          <span className="text-sm font-bold">{meta.label}</span>
                           <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                             {row.setting_group}
                           </span>
                         </HStack>
-                        <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>
+                        <span className="font-mono text-sm text-muted-foreground">
                           {row.setting_key}
-                        </Text>
+                        </span>
                       </HStack>
-                      <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
+                      <div className="flex flex-wrap items-stretch gap-2">
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</Text>
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                          <p className="text-sm font-bold" style={{ color: "var(--cmms-danger)" }}>ก่อนแก้</p>
+                          <p className="whitespace-pre-wrap font-mono text-sm break-all" style={{ color: "var(--cmms-danger-dark)" }}>
                             {valuePreview(row, oldVal)}
-                          </Text>
+                          </p>
                         </div>
                         <div style={{ flex: 1, minWidth: 200, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</Text>
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                          <p className="text-sm font-bold" style={{ color: "var(--cmms-success-dark)" }}>หลังแก้</p>
+                          <p className="whitespace-pre-wrap font-mono text-sm break-all" style={{ color: "var(--cmms-success-deep)" }}>
                             {valuePreview(row, newVal)}
-                          </Text>
+                          </p>
                         </div>
-                      </HStack>
+                      </div>
                       {!changed && (
-                        <Text type="body" size="sm" color="secondary">คีย์ลับไม่ได้เปลี่ยน — จะคงค่าเดิม</Text>
+                        <p className="text-sm text-muted-foreground">คีย์ลับไม่ได้เปลี่ยน — จะคงค่าเดิม</p>
                       )}
-                    </VStack>
+                    </CardContent>
                   </Card>
                 );
               })}
@@ -1388,73 +1367,64 @@ export default function SettingsPage() {
           )}
 
           <HStack hAlign="end" wrap="wrap" gap={2}>
-            <button
-              type="button"
-              onClick={() => setShowDiff(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+            <Button variant="secondary" onClick={() => setShowDiff(false)}>
               ปิด
-            </button>
-            <button
-              type="button"
-              disabled={diffRows.length === 0}
-              onClick={handleSave}
-              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            </Button>
+            <Button disabled={diffRows.length === 0} onClick={handleSave}>
               {saving ? "กำลังบันทึก..." : `ยืนยันและบันทึก (${diffRows.length} รายการ)`}
-            </button>
+            </Button>
           </HStack>
-        </VStack>
+        </div>
       </AnimatedDialog>
 
       {/* ═══ Dialog ประวัติการแก้ไข (audit log) ═══ */}
       <AnimatedDialog open={showAudit} onClose={() => setShowAudit(false)}>
-        <DialogHeader title={`ประวัติการแก้ไขการตั้งค่า (${auditRows.length} รายการ)`} />
-        <VStack gap={4}>
-          <Text type="body" size="sm" color="secondary">
+        <div className="space-y-4 p-5">
+          <h2 className="text-lg font-semibold">ประวัติการแก้ไขการตั้งค่า ({auditRows.length} รายการ)</h2>
+          <p className="text-sm text-muted-foreground">
             บันทึกทุกครั้งที่ค่ามีการเปลี่ยนแปลง — ใคร แก้ key ไหน เมื่อไหร่ จากค่าเดิมเป็นค่าใหม่
-          </Text>
+          </p>
 
           {auditLoading ? (
             <HStack hAlign="center" gap={2}>
-              <Spinner size="sm" />
-              <Text type="body" size="sm" color="secondary">กำลังโหลดประวัติ...</Text>
+              <Spinner size={16} />
+              <span className="text-sm text-muted-foreground">กำลังโหลดประวัติ...</span>
             </HStack>
           ) : auditRows.length === 0 ? (
-            <Text type="body" color="secondary">ยังไม่มีประวัติการแก้ไข — บันทึกการตั้งค่าครั้งถัดไปจะปรากฏที่นี่</Text>
+            <p className="text-sm text-muted-foreground">ยังไม่มีประวัติการแก้ไข — บันทึกการตั้งค่าครั้งถัดไปจะปรากฏที่นี่</p>
           ) : (
             <VStack gap={2} style={{ maxHeight: 460, overflow: "auto" }}>
               {auditRows.map((a) => {
                 const meta = KEY_META[a.setting_key] ?? { label: a.setting_key };
                 const fakeRow = { id: 0, setting_key: a.setting_key } as SettingRow;
                 return (
-                  <Card key={a.id} padding={3}>
-                    <VStack gap={1.5}>
+                  <Card key={a.id}>
+                    <CardContent className="space-y-1.5 p-3">
                       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                         <HStack gap={2} vAlign="center">
-                          <Text type="body" weight="bold" size="sm">{meta.label}</Text>
-                          {SENSITIVE_KEYS.has(a.setting_key) && <LockClosedIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />}
-                          <Text type="body" size="sm" color="secondary" style={{ fontFamily: "monospace" }}>{a.setting_key}</Text>
+                          <span className="text-sm font-bold">{meta.label}</span>
+                          {SENSITIVE_KEYS.has(a.setting_key) && <LockClosedIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />}
+                          <span className="font-mono text-sm text-muted-foreground">{a.setting_key}</span>
                         </HStack>
-                        <Text type="body" size="sm" color="secondary">
+                        <span className="text-sm text-muted-foreground">
                           {a.user_name || "ผู้ใช้ระบบ"} · {relativeTime(a.created_at)} ({String(a.created_at).slice(0, 16)})
-                        </Text>
+                        </span>
                       </HStack>
-                      <HStack gap={2} wrap="wrap" style={{ alignItems: "stretch" }}>
+                      <div className="flex flex-wrap items-stretch gap-2">
                         <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-danger-light)", background: "var(--cmms-danger-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-danger)" }}>จาก</Text>
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-danger-dark)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                          <p className="text-sm font-bold" style={{ color: "var(--cmms-danger)" }}>จาก</p>
+                          <p className="whitespace-pre-wrap font-mono text-sm break-all" style={{ color: "var(--cmms-danger-dark)" }}>
                             {valuePreview(fakeRow, a.old_value ?? "")}
-                          </Text>
+                          </p>
                         </div>
                         <div style={{ flex: 1, minWidth: 180, borderRadius: 8, border: "1px solid var(--cmms-success-light)", background: "var(--cmms-success-light)", padding: "8px 10px" }}>
-                          <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>เป็น</Text>
-                          <Text type="body" size="sm" style={{ color: "var(--cmms-success-deep)", whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "monospace" }}>
+                          <p className="text-sm font-bold" style={{ color: "var(--cmms-success-dark)" }}>เป็น</p>
+                          <p className="whitespace-pre-wrap font-mono text-sm break-all" style={{ color: "var(--cmms-success-deep)" }}>
                             {valuePreview(fakeRow, a.new_value ?? "")}
-                          </Text>
+                          </p>
                         </div>
-                      </HStack>
-                    </VStack>
+                      </div>
+                    </CardContent>
                   </Card>
                 );
               })}
@@ -1462,16 +1432,12 @@ export default function SettingsPage() {
           )}
 
           <HStack hAlign="end">
-            <button
-              type="button"
-              onClick={() => setShowAudit(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+            <Button variant="secondary" onClick={() => setShowAudit(false)}>
               ปิด
-            </button>
+            </Button>
           </HStack>
-        </VStack>
+        </div>
       </AnimatedDialog>
-    </div>
+    </PageShell>
   );
 }

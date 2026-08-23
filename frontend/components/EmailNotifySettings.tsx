@@ -1,29 +1,32 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Button } from "@astryxdesign/core/Button";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Card } from "@astryxdesign/core/Card";
-import { Badge } from "@astryxdesign/core/Badge";
-import { Icon } from "@astryxdesign/core/Icon";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
-  CheckCircleIcon,
-  EnvelopeIcon,
-  ServerIcon,
-  PaintBrushIcon,
-  EyeIcon,
-  PaperAirplaneIcon,
-  ShieldCheckIcon,
-  BoltIcon,
-} from "@heroicons/react/24/outline";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import {
+  CheckCircle2,
+  Mail,
+  Server,
+  Paintbrush,
+  Eye,
+  Send,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 
 interface EmailTemplateDef {
   subject: string;
@@ -193,79 +196,72 @@ export default function EmailNotifySettings() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดการตั้งค่าอีเมล...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3 py-14">
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดการตั้งค่าอีเมล...</p>
+      </div>
     );
   }
 
   return (
     <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {saveMessage && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <Icon icon={CheckCircleIcon} size="md" color="success" />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={saveMessage} />
       )}
 
       {/* Header */}
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
         <VStack gap={1}>
           <HStack gap={3} vAlign="center">
-            <Heading level={2}>ตั้งค่ารูปแบบการแจ้งเตือนอีเมล</Heading>
-            <Badge
-              label={settings.email_notify_enabled === "1" ? "อีเมลเปิดใช้งาน" : "อีเมลปิดใช้งาน"}
-              variant={settings.email_notify_enabled === "1" ? "info" : "neutral"}
-            />
+            <h2 className="text-base font-semibold">ตั้งค่ารูปแบบการแจ้งเตือนอีเมล</h2>
+            <Badge variant={settings.email_notify_enabled === "1" ? "info" : "neutral"}>
+              {settings.email_notify_enabled === "1" ? "อีเมลเปิดใช้งาน" : "อีเมลปิดใช้งาน"}
+            </Badge>
           </HStack>
-          <Text type="body" color="secondary">
+          <p className="text-sm text-muted-foreground">
             ออกแบบหัวข้อ + เนื้อหา HTML ของอีเมลแต่ละรูปแบบ และตั้งค่า SMTP สำหรับส่ง
-          </Text>
+          </p>
         </VStack>
-        <Badge
-          label={me?.email ? `ส่งทดสอบถึง: ${me.email}` : "ยังไม่มีอีเมลผู้ใช้"}
-          variant={me?.email ? "info" : "neutral"}
-        />
+        <Badge variant={me?.email ? "info" : "neutral"}>
+          {me?.email ? `ส่งทดสอบถึง: ${me.email}` : "ยังไม่มีอีเมลผู้ใช้"}
+        </Badge>
       </HStack>
 
       {/* Env status strip */}
-      <Card padding={4}>
-        <HStack gap={5} wrap="wrap">
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-5 p-4">
           <HStack gap={2} vAlign="center">
-            <Icon icon={ShieldCheckIcon} size="sm" color={envInfo?.smtp_configured ? "success" : "error"} />
-            <Text type="body" size="sm" weight="semibold">
+            <ShieldCheck size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: envInfo?.smtp_configured ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+            <span className="text-sm font-medium">
               SMTP: {envInfo?.smtp_configured ? "พร้อมใช้งาน" : "ยังไม่ได้ตั้งค่า"}
-            </Text>
+            </span>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={BoltIcon} size="sm" color={envInfo?.mail_function ? "success" : "error"} />
-            <Text type="body" size="sm" weight="semibold">
+            <Zap size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: envInfo?.mail_function ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+            <span className="text-sm font-medium">
               PHP mail(): {envInfo?.mail_function ? "มี" : "ไม่มี"} {envInfo?.mail_function && "(บน Windows/IIS มักต้องใช้ SMTP แทน)"}
-            </Text>
+            </span>
           </HStack>
           <HStack gap={2} vAlign="center">
-            <Icon icon={ServerIcon} size="sm" color="secondary" />
-            <Text type="body" size="sm" weight="semibold">PHP {envInfo?.php_version ?? "—"}</Text>
+            <Server size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+            <span className="text-sm font-medium">PHP {envInfo?.php_version ?? "—"}</span>
           </HStack>
-        </HStack>
+        </CardContent>
       </Card>
 
       <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
         {/* Left: SMTP settings + template editor */}
         <VStack gap={6}>
           {/* SMTP connection settings */}
-          <Card padding={5}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-5">
               <HStack gap={2} vAlign="center">
-                <Icon icon={ServerIcon} size="md" color="primary" />
+                <Server size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                 <VStack gap={0}>
-                  <Heading level={3}>การเชื่อมต่อ SMTP</Heading>
-                  <Text type="supporting" color="secondary">ใช้ SMTP จริงในการส่ง — ไม่พึ่ง mail() ของ PHP</Text>
+                  <h3 className="text-base font-semibold">การเชื่อมต่อ SMTP</h3>
+                  <p className="text-sm text-muted-foreground">ใช้ SMTP จริงในการส่ง — ไม่พึ่ง mail() ของ PHP</p>
                 </VStack>
               </HStack>
 
@@ -280,53 +276,61 @@ export default function EmailNotifySettings() {
                 onChange={(c) => setSettingField("smtp_enabled", c ? "1" : "0")}
               />
 
-              <Selector
-                label="การเข้ารหัส SMTP"
-                value={settings.smtp_encryption || "tls"}
-                onChange={(v) => setSettingField("smtp_encryption", v)}
-                options={[
-                  { value: "tls", label: "STARTTLS (พอร์ต 587)" },
-                  { value: "ssl", label: "SSL (พอร์ต 465)" },
-                  { value: "none", label: "ไม่เข้ารหัส (พอร์ต 25)" },
-                ]}
-              />
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">การเข้ารหัส SMTP</label>
+                <Select value={settings.smtp_encryption || "tls"} onValueChange={(v) => setSettingField("smtp_encryption", v)}>
+                  <SelectTrigger aria-label="การเข้ารหัส SMTP"><SelectValue placeholder="เลือกการเข้ารหัส..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tls">STARTTLS (พอร์ต 587)</SelectItem>
+                    <SelectItem value="ssl">SSL (พอร์ต 465)</SelectItem>
+                    <SelectItem value="none">ไม่เข้ารหัส (พอร์ต 25)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {SMTP_FIELDS.map((f) => (
-                <TextInput
+                <Input
                   key={f.key}
                   label={f.label}
                   type={f.secret ? "password" : "text"}
-                  description={f.hint}
+                  hint={f.hint}
                   value={settings[f.key] ?? ""}
-                  onChange={(v) => setSettingField(f.key, v)}
+                  onChange={(e) => setSettingField(f.key, e.target.value)}
                 />
               ))}
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* Template editor */}
-          <Card padding={5}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-5">
               <HStack gap={2} vAlign="center">
-                <Icon icon={PaintBrushIcon} size="md" color="primary" />
+                <Paintbrush size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
                 <VStack gap={0}>
-                  <Heading level={3}>รูปแบบอีเมลแจ้งเตือน (Email Template)</Heading>
-                  <Text type="supporting" color="secondary">เลือกเหตุการณ์ แล้วแก้ไขหัวข้อ + เนื้อหา HTML (พรีวิวด้านขวา)</Text>
+                  <h3 className="text-base font-semibold">รูปแบบอีเมลแจ้งเตือน (Email Template)</h3>
+                  <p className="text-sm text-muted-foreground">เลือกเหตุการณ์ แล้วแก้ไขหัวข้อ + เนื้อหา HTML (พรีวิวด้านขวา)</p>
                 </VStack>
               </HStack>
 
-              <Selector
-                label="เหตุการณ์การแจ้งเตือน"
-                value={activeTemplate}
-                onChange={(v) => { setActiveTemplate(v); setTestResult(null); }}
-                options={TEMPLATE_ORDER.map((k) => ({
-                  value: k,
-                  label: `${meta[k]?.icon ?? "✉️"} ${meta[k]?.label ?? k}`,
-                }))}
-              />
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">เหตุการณ์การแจ้งเตือน</label>
+                <Select
+                  value={activeTemplate}
+                  onValueChange={(v) => { setActiveTemplate(v); setTestResult(null); }}
+                >
+                  <SelectTrigger aria-label="เหตุการณ์การแจ้งเตือน"><SelectValue placeholder="เลือกเหตุการณ์..." /></SelectTrigger>
+                  <SelectContent>
+                    {TEMPLATE_ORDER.map((k) => (
+                      <SelectItem key={k} value={k}>
+                        {`${meta[k]?.icon ?? "✉️"} ${meta[k]?.label ?? k}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
               <HStack gap={2} vAlign="center" wrap="wrap">
-                <Badge label={activeTpl.enabled === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"} variant={activeTpl.enabled === "1" ? "info" : "neutral"} />
+                <Badge variant={activeTpl.enabled === "1" ? "info" : "neutral"}>{activeTpl.enabled === "1" ? "เปิดใช้งาน" : "ปิดใช้งาน"}</Badge>
                 <Switch
                   label="ส่งการแจ้งเตือนเหตุการณ์นี้"
                   value={activeTpl.enabled === "1"}
@@ -334,16 +338,16 @@ export default function EmailNotifySettings() {
                 />
               </HStack>
 
-              <Text type="supporting" color="secondary">{meta[activeTemplate]?.hint ?? ""}</Text>
+              <p className="text-sm text-muted-foreground">{meta[activeTemplate]?.hint ?? ""}</p>
 
-              <TextInput
+              <Input
                 label="หัวข้ออีเมล (Subject)"
                 value={activeTpl.subject ?? ""}
-                onChange={(v) => setTplField("subject", v)}
+                onChange={(e) => setTplField("subject", e.target.value)}
               />
 
               <HStack gap={2} wrap="wrap" vAlign="center">
-                <Text type="body" size="sm" weight="semibold">สีแถบหัวอีเมล:</Text>
+                <span className="text-sm font-medium">สีแถบหัวอีเมล:</span>
                 <input
                   type="color"
                   value={headerColor}
@@ -351,110 +355,100 @@ export default function EmailNotifySettings() {
                   style={{ width: 44, height: 32, border: "1px solid var(--cmms-border, #d1d5db)", borderRadius: 6, cursor: "pointer", background: "none" }}
                   aria-label="เลือกสีแถบหัวอีเมล"
                 />
-                <TextInput
-                  label="รหัสสี (Hex)"
-                  isLabelHidden
-                  value={activeTpl.header_color ?? "#1d4ed8"}
-                  onChange={(v) => setTplField("header_color", v)}
-                  style={{ width: 140 }}
-                />
+                <div className="w-[140px]">
+                  <Input
+                    label="รหัสสี (Hex)"
+                    isLabelHidden
+                    value={activeTpl.header_color ?? "#1d4ed8"}
+                    onChange={(e) => setTplField("header_color", e.target.value)}
+                  />
+                </div>
               </HStack>
 
               <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold">เนื้อหาอีเมล (HTML) — ตัวแปรจากระบบ:</Text>
+                <span className="text-sm font-medium">เนื้อหาอีเมล (HTML) — ตัวแปรจากระบบ:</span>
                 <HStack gap={1.5} wrap="wrap">
                   {VARIABLES.map((v) => (
                     <button
                       key={v}
                       type="button"
                       onClick={() => insertVar(v)}
+                      className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] text-[var(--cmms-primary-hover)]"
                       style={{
-                        padding: "3px 8px",
-                        fontSize: 11,
                         fontFamily: "monospace",
-                        background: "var(--cmms-primary-light, #e0e7ff)",
-                        color: "var(--cmms-primary, #4f46e5)",
-                        border: "1px solid var(--cmms-primary-light, #c7d2fe)",
-                        borderRadius: 999,
-                        cursor: "pointer",
+                        background: "var(--cmms-primary-light)",
+                        border: "1px solid var(--cmms-border)",
                       }}
                     >
                       {v}
                     </button>
                   ))}
                 </HStack>
-                <TextArea
+                <Textarea
                   label="Body HTML"
                   value={activeTpl.body_html ?? ""}
                   rows={7}
-                  onChange={(v) => setTplField("body_html", v)}
+                  onChange={(e) => setTplField("body_html", e.target.value)}
                 />
-                <Text type="supporting" color="secondary">
+                <p className="text-sm text-muted-foreground">
                   รองรับแท็ก HTML พื้นฐาน เช่น {"<b>"}, {"<br>"}, {"<i>"} — ตัวแปร {`{...}`} จะถูกแทนด้วยค่าจริงจากระบบ
-                </Text>
+                </p>
               </VStack>
 
-              <TextInput
+              <Input
                 label="ข้อความบนปุ่ม (Button Label)"
                 value={activeTpl.btn_label ?? "เปิดดูในระบบ"}
-                onChange={(v) => setTplField("btn_label", v)}
+                onChange={(e) => setTplField("btn_label", e.target.value)}
               />
-              <TextInput
+              <Input
                 label="ลิงก์ปุ่ม (Button URL) — ว่าง = เปิดระบบ CMMS-TPT"
                 value={activeTpl.btn_url ?? ""}
-                onChange={(v) => setTplField("btn_url", v)}
+                onChange={(e) => setTplField("btn_url", e.target.value)}
               />
 
               <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold">ส่งทดสอบไปยังอีเมล:</Text>
-                <TextInput
+                <span className="text-sm font-medium">ส่งทดสอบไปยังอีเมล:</span>
+                <Input
                   label="อีเมลปลายทาง (ทดสอบ)"
                   type="email"
                   value={testToEmail}
-                  onChange={setTestToEmail}
-                  description="ใช้ชื่อผู้รับจากระบบเป็นค่าเริ่มต้น — แก้ได้เพื่อทดสอบกับอีเมลจริง"
+                  onChange={(e) => setTestToEmail(e.target.value)}
+                  hint="ใช้ชื่อผู้รับจากระบบเป็นค่าเริ่มต้น — แก้ได้เพื่อทดสอบกับอีเมลจริง"
                 />
               </VStack>
 
               <HStack hAlign="end" gap={2} wrap="wrap">
-                <Button
-                  label={testing ? "กำลังส่ง..." : "ยิงทดสอบส่งอีเมล"}
-                  variant="primary"
-                  icon={<Icon icon={PaperAirplaneIcon} size="sm" />}
-                  isLoading={testing}
-                  onClick={handleTestSend}
-                />
-                <Button
-                  label={hasChanges ? "บันทึก (มีการแก้ไข)" : "บันทึกการตั้งค่า"}
-                  variant="secondary"
-                  isLoading={saving}
-                  isDisabled={!hasChanges}
-                  onClick={handleSave}
-                />
+                <Button disabled={testing} onClick={handleTestSend}>
+                  <Send size={16} strokeWidth={1.75} aria-hidden="true" />
+                  {testing ? "กำลังส่ง..." : "ยิงทดสอบส่งอีเมล"}
+                </Button>
+                <Button variant="secondary" disabled={!hasChanges || saving} onClick={handleSave}>
+                  {hasChanges ? "บันทึก (มีการแก้ไข)" : "บันทึกการตั้งค่า"}
+                </Button>
               </HStack>
 
               {testResult && (
-                <Card padding={3} style={{
+                <Card style={{
                   background: testResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
                   border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "#f87171"}`,
                 }}>
-                  <HStack gap={2} vAlign="center">
-                    <Text type="body" size="sm" weight="bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                  <CardContent className="p-3">
+                    <span className="text-sm font-bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
                       {testResult.ok ? "✅ " : "⚠️ "}{testResult.msg}
-                    </Text>
-                  </HStack>
+                    </span>
+                  </CardContent>
                 </Card>
               )}
-            </VStack>
+            </CardContent>
           </Card>
         </VStack>
 
         {/* Right: email preview */}
-        <Card padding={5}>
-          <VStack gap={4}>
+        <Card>
+          <CardContent className="space-y-4 p-5">
             <HStack gap={2} vAlign="center">
-              <Icon icon={EyeIcon} size="md" color="primary" />
-              <Heading level={3}>พรีวิวอีเมล (กล่องขาเข้า)</Heading>
+              <Eye size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+              <h3 className="text-base font-semibold">พรีวิวอีเมล (กล่องขาเข้า)</h3>
             </HStack>
 
             <div
@@ -474,24 +468,24 @@ export default function EmailNotifySettings() {
                 <div style={{ width: 10, height: 10, borderRadius: 999, background: "#f59e0b" }} />
                 <div style={{ width: 10, height: 10, borderRadius: 999, background: "#22c55e" }} />
                 <div style={{ flex: 1 }} />
-                <Text type="body" size="sm" color="secondary">Inbox — CMMS-TPT</Text>
+                <span className="text-sm text-muted-foreground">Inbox — CMMS-TPT</span>
               </div>
               {/* Subject */}
               <div style={{ background: "#ffffff", padding: "12px 16px", borderBottom: "1px solid #e2e8f0" }}>
-                <Text type="body" weight="bold">{previewSubject || "แจ้งเตือน CMMS-TPT"}</Text>
-                <Text type="body" size="sm" color="secondary">
+                <p className="font-bold">{previewSubject || "แจ้งเตือน CMMS-TPT"}</p>
+                <p className="text-sm text-muted-foreground">
                   {fromName} &lt;{fromEmail}&gt; — ถึง: {me?.email || "คุณ"} · {new Date().toLocaleString("th-TH")}
-                </Text>
+                </p>
               </div>
               {/* Email body */}
               <div style={{ background: "#ffffff", padding: 0 }}>
                 <div style={{ background: headerColor, padding: "14px 18px" }}>
-                  <Text type="body" size="sm" weight="bold" style={{ color: "#ffffff" }}>
+                  <span className="text-sm font-bold" style={{ color: "#ffffff" }}>
                     CMMS-TPT ENTERPRISE
-                  </Text>
+                  </span>
                 </div>
                 <div style={{ padding: "18px 18px 22px" }}>
-                  <Text type="body" size="sm" color="secondary">เรียน คุณ {me?.full_name || "ผู้ใช้งาน"},</Text>
+                  <span className="text-sm text-muted-foreground">เรียน คุณ {me?.full_name || "ผู้ใช้งาน"},</span>
                   <div
                     style={{
                       margin: "14px 0",
@@ -524,25 +518,25 @@ export default function EmailNotifySettings() {
               </div>
               {/* Footer */}
               <div style={{ background: "#f8fafc", borderTop: "1px solid #e2e8f0", padding: "12px 16px" }}>
-                <Text type="body" size="sm" color="secondary" style={{ textAlign: "center" }}>
+                <p className="text-center text-sm text-muted-foreground">
                   ระบบแจ้งเตือนอัตโนมัติ CMMS-TPT Enterprise — กรุณาอย่าตอบกลับอีเมลนี้
-                </Text>
+                </p>
               </div>
             </div>
 
             <VStack gap={1}>
-              <Text type="body" size="sm" weight="semibold">วิธีใช้งานกับอีเมล</Text>
-              <Text type="body" size="sm" color="secondary">
+              <span className="text-sm font-medium">วิธีใช้งานกับอีเมล</span>
+              <p className="text-sm text-muted-foreground">
                 1. เปิด SMTP แล้วกรอก Host / Port / Username / Password (Gmail ใช้ App Password)
-              </Text>
-              <Text type="body" size="sm" color="secondary">
-                2. ตั้ง From Email + From Name แล้วกด "ยิงทดสอบส่งอีเมล" เพื่อตรวจสอบ
-              </Text>
-              <Text type="body" size="sm" color="secondary">
+              </p>
+              <p className="text-sm text-muted-foreground">
+                2. ตั้ง From Email + From Name แล้วกด &quot;ยิงทดสอบส่งอีเมล&quot; เพื่อตรวจสอบ
+              </p>
+              <p className="text-sm text-muted-foreground">
                 3. ถ้าไม่มี SMTP ระบบจะใช้ mail() ของ PHP (บน Windows/IIS มักส่งไม่ได้ — แนะนำ SMTP)
-              </Text>
+              </p>
             </VStack>
-          </VStack>
+          </CardContent>
         </Card>
       </Grid>
     </VStack>

@@ -2,36 +2,47 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useMediaQuery } from "@astryxdesign/core/hooks";
+import { VStack, HStack } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import {
-  VStack,
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutPanel,
-} from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Divider } from "@astryxdesign/core/Divider";
-import { Selector } from "@astryxdesign/core/Selector";
-import { List, ListItem } from "@astryxdesign/core/List";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PageShell } from "@/components/PageShell";
 import { THEME_PRESETS, buildGradient } from "../../../../components/ThemeProvider";
 import AndonLamp from "../../../../components/AndonLamp";
 import { ALL_PAGES, isWired } from "../../../../lib/pageLayout";
 import {
-  SwatchIcon,
-  Bars3Icon,
-  Squares2X2Icon,
-  PencilSquareIcon,
-  ArrowLeftIcon,
-  ChevronRightIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  ArrowPathIcon,
-  WindowIcon,
-  PaintBrushIcon,
-} from "@heroicons/react/24/outline";
+  SwatchBook as SwatchIcon,
+  Menu as Bars3Icon,
+  LayoutGrid as Squares2X2Icon,
+  SquarePen as PencilSquareIcon,
+  ArrowLeft as ArrowLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  CheckCircle2 as CheckCircleIcon,
+  CircleAlert as ExclamationCircleIcon,
+  RefreshCw as ArrowPathIcon,
+  AppWindow as WindowIcon,
+  Paintbrush as PaintBrushIcon,
+} from "lucide-react";
+
+// ── แทน useMediaQuery ของ core hooks ──
+function useIsNarrow(): boolean {
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = () => setIsNarrow(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isNarrow;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Config — sections, keys, defaults
@@ -41,7 +52,7 @@ interface SectionDef {
   id: string;
   label: string;
   desc: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number | string }>;
 }
 
 const SECTIONS: SectionDef[] = [
@@ -141,9 +152,9 @@ function ColorField({
   const safe = isHex6(value) ? value : "#0068B5";
   return (
     <VStack gap={1}>
-      <Text type="body" size="sm" weight="semibold">
+      <span className="text-sm font-medium">
         {label}
-      </Text>
+      </span>
       <HStack gap={2} vAlign="center">
         <input
           type="color"
@@ -174,9 +185,9 @@ function ColorField({
           }}
         />
         {isHex6(value) ? (
-          <CheckCircleIcon className="w-4 h-4" style={{ color: "var(--cmms-success)" }} />
+          <CheckCircleIcon className="h-4 w-4 text-[var(--cmms-success)]" strokeWidth={1.75} aria-hidden="true" />
         ) : (
-          <ExclamationCircleIcon className="w-4 h-4" style={{ color: "var(--cmms-warning)" }} />
+          <ExclamationCircleIcon className="h-4 w-4 text-[var(--cmms-warning)]" strokeWidth={1.75} aria-hidden="true" />
         )}
       </HStack>
     </VStack>
@@ -186,13 +197,13 @@ function ColorField({
 function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string; desc: string }) {
   return (
     <VStack gap={1}>
-      <Text type="body" size="sm" className="cmms-eyebrow">
+      <p className="cmms-eyebrow text-sm text-muted-foreground">
         {eyebrow}
-      </Text>
-      <Heading level={2}>{title}</Heading>
-      <Text type="body" size="sm" color="secondary">
+      </p>
+      <h2 className="text-base font-semibold">{title}</h2>
+      <p className="text-sm text-muted-foreground">
         {desc}
-      </Text>
+      </p>
     </VStack>
   );
 }
@@ -203,7 +214,7 @@ function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string
 
 export default function PageDesignerPage() {
   const router = useRouter();
-  const isNarrow = useMediaQuery("(max-width: 768px)");
+  const isNarrow = useIsNarrow();
   const [activeSection, setActiveSection] = useState<string>("theme");
   const [mobileView, setMobileView] = useState<"nav" | "detail">("nav");
 
@@ -365,38 +376,45 @@ export default function PageDesignerPage() {
 
   // ── Nav list (settings-sidebar pattern) ──
   const navList = (
-    <VStack gap={3} style={{ padding: "var(--spacing-4) var(--spacing-3)" }}>
-      <VStack gap={1} style={{ paddingInline: "var(--spacing-4)" }}>
-        <Text type="body" size="sm" className="cmms-eyebrow">
-          PAGE DESIGNER
-        </Text>
-        <Heading level={2}>ปรับแต่งหน้าตาระบบ</Heading>
-        <Text type="body" size="sm" color="secondary">
-          เลือกหมวดที่ต้องการปรับแต่ง — ดูตัวอย่างสดทันที ก่อนกดบันทึก
-        </Text>
-      </VStack>
-      <Divider />
-      <List density="spacious">
-        {SECTIONS.map((s) => (
-          <ListItem
+    <nav className="flex flex-col gap-1 p-3" aria-label="หมวดการปรับแต่ง">
+      {SECTIONS.map((s) => {
+        const active = !isNarrow && activeSection === s.id;
+        return (
+          <button
             key={s.id}
-            label={s.label}
-            description={s.desc}
-            startContent={<s.icon className="w-5 h-5" />}
-            endContent={
-              isNarrow ? (
-                <ChevronRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />
-              ) : undefined
-            }
-            isSelected={!isNarrow && activeSection === s.id}
+            type="button"
+            aria-current={active ? "page" : undefined}
             onClick={() => {
               setActiveSection(s.id);
               if (isNarrow) setMobileView("detail");
             }}
-          />
-        ))}
-      </List>
-    </VStack>
+            style={{
+              display: "flex", alignItems: "center", gap: 10,
+              width: "100%", padding: "10px 12px",
+              border: "none", borderRadius: "var(--cmms-radius)",
+              cursor: "pointer", textAlign: "left",
+              background: active ? "var(--cmms-primary-light)" : "transparent",
+              color: active ? "var(--cmms-primary)" : "var(--cmms-text-primary)",
+              font: "inherit",
+            }}
+          >
+            <s.icon
+              className="h-5 w-5 shrink-0"
+              strokeWidth={1.75}
+              aria-hidden="true"
+              style={{ color: active ? "var(--cmms-primary)" : "var(--cmms-text-secondary)" }}
+            />
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold">{s.label}</span>
+              <span className="block text-xs text-muted-foreground">{s.desc}</span>
+            </span>
+            {isNarrow && (
+              <ChevronRightIcon className="h-4 w-4 shrink-0 text-[var(--cmms-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
+            )}
+          </button>
+        );
+      })}
+    </nav>
   );
 
   const section = SECTIONS.find((s) => s.id === activeSection) ?? SECTIONS[0];
@@ -438,12 +456,8 @@ export default function PageDesignerPage() {
                     style={{ width: 34, height: 34, ["--design-grad-a" as any]: t.primary } as React.CSSProperties}
                   />
                   <VStack gap={0} hAlign="start">
-                    <Text type="body" weight="bold" style={{ fontSize: 13 }}>
-                      {t.label}
-                    </Text>
-                    <Text type="body" size="sm" color="secondary" style={{ fontSize: 11 }}>
-                      {t.primary}
-                    </Text>
+                    <span className="text-[13px] font-bold">{t.label}</span>
+                    <span className="text-[11px] text-muted-foreground">{t.primary}</span>
                   </VStack>
                 </button>
               );
@@ -462,9 +476,9 @@ export default function PageDesignerPage() {
             />
           </HStack>
           <VStack gap={2}>
-            <Text type="body" size="sm" weight="semibold">
+            <span className="text-sm font-medium">
               ตัวอย่าง gradient
-            </Text>
+            </span>
             <div
               className="cmms-design-grad"
               style={
@@ -506,9 +520,9 @@ export default function PageDesignerPage() {
                 value={form.design_sidebar_bg ?? ""}
                 onChange={(v) => setField("design_sidebar_bg", v)}
               />
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 เว้นว่าง = ใช้สี SideNav จากธีมที่เลือกอัตโนมัติ
-              </Text>
+              </p>
               <ColorField
                 label="สีตัวหนังสือเมนู"
                 value={form.design_sidebar_text ?? ""}
@@ -520,35 +534,37 @@ export default function PageDesignerPage() {
                 onChange={(v) => setField("design_sidebar_indicator", v)}
               />
             </VStack>
-            <Card padding={4} style={{ flex: "1 1 220px", maxWidth: 260 }}>
-              <Text type="body" size="sm" className="cmms-eyebrow">
-                LIVE PREVIEW
-              </Text>
-              <div className="cmms-design-sidenav" style={{ padding: 12, marginTop: 8 }}>
-                <VStack gap={2}>
-                  <HStack gap={2} vAlign="center" style={{ padding: "6px 10px" }}>
-                    <span className="cmms-design-sidenav-dot" />
-                    <Text type="body" size="sm" weight="bold" style={{ color: "var(--cmms-sidebar-text-strong)" }}>
-                      CMMS-TOPPAN
-                    </Text>
-                  </HStack>
-                  {["แดชบอร์ดภาพรวม", "ใบสั่งงานซ่อม", "แจ้งซ่อมด่วน", "งานของฉัน"].map((m, i) => (
-                    <div
-                      key={m}
-                      className={`cmms-design-sidenav-item ${i === 2 ? "selected" : ""}`}
-                      style={{ padding: "7px 10px", display: "flex", alignItems: "center", gap: 8 }}
-                    >
+            <Card style={{ flex: "1 1 220px", maxWidth: 260 }}>
+              <CardContent className="p-4">
+                <p className="cmms-eyebrow text-sm text-muted-foreground">
+                  LIVE PREVIEW
+                </p>
+                <div className="cmms-design-sidenav" style={{ padding: 12, marginTop: 8 }}>
+                  <VStack gap={2}>
+                    <HStack gap={2} vAlign="center" style={{ padding: "6px 10px" }}>
                       <span className="cmms-design-sidenav-dot" />
-                      <Text type="body" size="sm" style={{ color: "inherit" }}>
-                        {m}
-                      </Text>
+                      <span className="text-sm font-bold" style={{ color: "var(--cmms-sidebar-text-strong)" }}>
+                        CMMS-TOPPAN
+                      </span>
+                    </HStack>
+                    {["แดชบอร์ดภาพรวม", "ใบสั่งงานซ่อม", "แจ้งซ่อมด่วน", "งานของฉัน"].map((m, i) => (
+                      <div
+                        key={m}
+                        className={`cmms-design-sidenav-item ${i === 2 ? "selected" : ""}`}
+                        style={{ padding: "7px 10px", display: "flex", alignItems: "center", gap: 8 }}
+                      >
+                        <span className="cmms-design-sidenav-dot" />
+                        <span className="text-sm" style={{ color: "inherit" }}>
+                          {m}
+                        </span>
+                      </div>
+                    ))}
+                    <div style={{ padding: "8px 10px" }}>
+                      <AndonLamp status="ok" size="sm" showLabel />
                     </div>
-                  ))}
-                  <div style={{ padding: "8px 10px" }}>
-                    <AndonLamp status="ok" size="sm" showLabel />
-                  </div>
-                </VStack>
-              </div>
+                  </VStack>
+                </div>
+              </CardContent>
             </Card>
           </HStack>
         </>
@@ -564,39 +580,47 @@ export default function PageDesignerPage() {
           <HStack gap={5} wrap="wrap">
             <VStack gap={3} style={{ flex: "1 1 240px" }}>
               <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">
+                <span className="text-sm font-medium">
                   มุมโค้งการ์ด
-                </Text>
-                <Selector
-                  label="มุมโค้งการ์ด"
-                  isLabelHidden
+                </span>
+                <Select
                   value={form.design_card_radius ?? "12px"}
-                  onChange={(v) => setField("design_card_radius", String(v))}
-                  options={RADIUS_OPTIONS}
-                />
+                  onValueChange={(v) => setField("design_card_radius", String(v))}
+                >
+                  <SelectTrigger aria-label="มุมโค้งการ์ด"><SelectValue placeholder="เลือกมุมโค้ง..." /></SelectTrigger>
+                  <SelectContent>
+                    {RADIUS_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </VStack>
               <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">
+                <span className="text-sm font-medium">
                   ความเข้มเงา
-                </Text>
-                <Selector
-                  label="ความเข้มเงา"
-                  isLabelHidden
+                </span>
+                <Select
                   value={form.design_card_shadow ?? SHADOW_OPTIONS[1].value}
-                  onChange={(v) => setField("design_card_shadow", String(v))}
-                  options={SHADOW_OPTIONS}
-                />
+                  onValueChange={(v) => setField("design_card_shadow", String(v))}
+                >
+                  <SelectTrigger aria-label="ความเข้มเงา"><SelectValue placeholder="เลือกความเข้มเงา..." /></SelectTrigger>
+                  <SelectContent>
+                    {SHADOW_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </VStack>
               <ColorField
                 label="สีพื้นหลังหน้า"
                 value={form.design_body_bg ?? ""}
                 onChange={(v) => setField("design_body_bg", v)}
               />
-              <Divider />
+              <hr style={{ borderColor: "var(--cmms-border)" }} />
               <VStack gap={2}>
-                <Text type="body" size="sm" weight="semibold">
+                <span className="text-sm font-medium">
                   สีหลอดไฟ Andon
-                </Text>
+                </span>
                 <ColorField
                   label="หลอดเขียว (พร้อมใช้งาน)"
                   value={form.design_andon_ok ?? ""}
@@ -615,15 +639,15 @@ export default function PageDesignerPage() {
               </VStack>
             </VStack>
             <VStack gap={3} style={{ flex: "1 1 280px" }}>
-              <Text type="body" size="sm" className="cmms-eyebrow">
+              <span className="cmms-eyebrow text-sm text-muted-foreground">
                 LIVE PREVIEW
-              </Text>
+              </span>
               <div className="cmms-design-kpi" style={{ padding: 16 }}>
                 <HStack hAlign="between" vAlign="center">
                   <VStack gap={0}>
-                    <Text type="body" size="sm" color="secondary">
+                    <p className="text-sm text-muted-foreground">
                       งานที่ค้าง
-                    </Text>
+                    </p>
                     <span className="cmms-kpi-value cmms-num" style={{ fontSize: 28, lineHeight: 1 }}>
                       9
                     </span>
@@ -634,9 +658,9 @@ export default function PageDesignerPage() {
               <div className="cmms-design-kpi" style={{ padding: 16 }}>
                 <HStack hAlign="between" vAlign="center">
                   <VStack gap={0}>
-                    <Text type="body" size="sm" color="secondary">
+                    <p className="text-sm text-muted-foreground">
                       งานที่กำลังทำ
-                    </Text>
+                    </p>
                     <span className="cmms-kpi-value cmms-num" style={{ fontSize: 28, lineHeight: 1 }}>
                       14
                     </span>
@@ -647,9 +671,9 @@ export default function PageDesignerPage() {
               <div className="cmms-design-kpi" style={{ padding: 16 }}>
                 <HStack hAlign="between" vAlign="center">
                   <VStack gap={0}>
-                    <Text type="body" size="sm" color="secondary">
+                    <p className="text-sm text-muted-foreground">
                       งานที่เสร็จวันนี้
-                    </Text>
+                    </p>
                     <span className="cmms-kpi-value cmms-num" style={{ fontSize: 28, lineHeight: 1 }}>
                       32
                     </span>
@@ -672,49 +696,59 @@ export default function PageDesignerPage() {
           <HStack gap={6} wrap="wrap" vAlign="start">
             <VStack gap={4} style={{ flex: "1 1 260px" }}>
               <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">
+                <span className="text-sm font-medium">
                   ฟอนต์หลัก
-                </Text>
-                <Selector
-                  label="ฟอนต์หลัก"
-                  isLabelHidden
+                </span>
+                <Select
                   value={form.design_font_family ?? FONT_OPTIONS[0].value}
-                  onChange={(v) => setField("design_font_family", String(v))}
-                  options={FONT_OPTIONS}
-                />
+                  onValueChange={(v) => setField("design_font_family", String(v))}
+                >
+                  <SelectTrigger aria-label="ฟอนต์หลัก"><SelectValue placeholder="เลือกฟอนต์..." /></SelectTrigger>
+                  <SelectContent>
+                    {FONT_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </VStack>
               <VStack gap={1}>
-                <Text type="body" size="sm" weight="semibold">
+                <span className="text-sm font-medium">
                   ขนาดตัวหนังสือฐาน
-                </Text>
-                <Selector
-                  label="ขนาดตัวหนังสือฐาน"
-                  isLabelHidden
+                </span>
+                <Select
                   value={form.design_font_size ?? "16px"}
-                  onChange={(v) => setField("design_font_size", String(v))}
-                  options={FONT_SIZE_OPTIONS}
-                />
+                  onValueChange={(v) => setField("design_font_size", String(v))}
+                >
+                  <SelectTrigger aria-label="ขนาดตัวหนังสือฐาน"><SelectValue placeholder="เลือกขนาด..." /></SelectTrigger>
+                  <SelectContent>
+                    {FONT_SIZE_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </VStack>
             </VStack>
-            <Card padding={6} style={{ flex: "1 1 320px" }}>
-              <Text type="body" size="sm" className="cmms-eyebrow">
-                LIVE PREVIEW
-              </Text>
-              <VStack gap={2} style={{ marginTop: 10 }}>
-                <Heading level={2}>หัวข้อตัวอย่าง</Heading>
-                <Text type="body">
-                  ข้อความเนื้อหาตัวอย่าง — แสดงฟอนต์และขนาดที่เลือกแบบเรียลไทม์
-                  ทั้งหัวข้อ เนื้อหา และป้ายกำกับต่าง ๆ ทั่วทั้งระบบ
-                </Text>
-                <HStack gap={2} wrap="wrap">
-                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-                    ป้ายสถานะ
-                  </span>
-                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                    หมายเลข 12345
-                  </span>
-                </HStack>
-              </VStack>
+            <Card style={{ flex: "1 1 320px" }}>
+              <CardContent className="p-6">
+                <p className="cmms-eyebrow text-sm text-muted-foreground">
+                  LIVE PREVIEW
+                </p>
+                <VStack gap={2} style={{ marginTop: 10 }}>
+                  <h2 className="text-base font-semibold">หัวข้อตัวอย่าง</h2>
+                  <p className="text-sm">
+                    ข้อความเนื้อหาตัวอย่าง — แสดงฟอนต์และขนาดที่เลือกแบบเรียลไทม์
+                    ทั้งหัวข้อ เนื้อหา และป้ายกำกับต่าง ๆ ทั่วทั้งระบบ
+                  </p>
+                  <HStack gap={2} wrap="wrap">
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+                      ป้ายสถานะ
+                    </span>
+                    <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                      หมายเลข 12345
+                    </span>
+                  </HStack>
+                </VStack>
+              </CardContent>
             </Card>
           </HStack>
         </>
@@ -727,43 +761,45 @@ export default function PageDesignerPage() {
             title="สตูดิโอปรับแต่งรายหน้า"
             desc="ครบทุกหน้าในระบบ — เปิดสตูดิโอเพื่อปรับสี สไตล์ ข้อความ และจัดวาง Layout (ลาก-วาง) เฉพาะหน้านั้น"
           />
-          <Card padding={4}>
-            <VStack gap={3}>
+          <Card>
+            <CardContent className="space-y-3 p-4">
               {Array.from(new Set(ALL_PAGES.map((p) => p.category))).map((cat) => (
-                <VStack key={cat} gap={1}>
-                  <Text type="body" size="sm" className="cmms-eyebrow">
+                <div key={cat} className="space-y-1">
+                  <p className="cmms-eyebrow text-sm text-muted-foreground">
                     {cat}
-                  </Text>
-                  <List density="balanced" hasDividers={false}>
+                  </p>
+                  <div>
                     {ALL_PAGES.filter((p) => p.category === cat).map((p) => (
-                      <ListItem
+                      <div
                         key={p.value}
-                        label={p.label}
-                        description={p.value}
-                        startContent={<WindowIcon className="w-5 h-5" />}
-                        endContent={
-                          <HStack gap={2}>
-                            {isWired(p.value) && (
-                              <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
-                                มีผลกับหน้าแล้ว
-                              </span>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => router.push(`/editor?page=${encodeURIComponent(p.value)}`)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                            >
-                              <PencilSquareIcon className="w-3.5 h-3.5" />
-                              เปิดสตูดิโอ
-                            </button>
-                          </HStack>
-                        }
-                      />
+                        className="flex items-center gap-3 border-b py-2.5 last:border-b-0"
+                        style={{ borderColor: "var(--cmms-border)" }}
+                      >
+                        <WindowIcon className="h-5 w-5 shrink-0 text-[var(--cmms-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-medium">{p.label}</span>
+                          <span className="block font-mono text-xs text-muted-foreground">{p.value}</span>
+                        </span>
+                        {isWired(p.value) && (
+                          <span className="cmms-andon-chip shrink-0" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>
+                            มีผลกับหน้าแล้ว
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/editor?page=${encodeURIComponent(p.value)}`)}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-[var(--cmms-text-primary)] transition-colors hover:bg-[var(--cmms-bg-muted)]"
+                          style={{ background: "var(--cmms-bg-muted)" }}
+                        >
+                          <PencilSquareIcon className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
+                          เปิดสตูดิโอ
+                        </button>
+                      </div>
                     ))}
-                  </List>
-                </VStack>
+                  </div>
+                </div>
               ))}
-            </VStack>
+            </CardContent>
           </Card>
         </>
       )}
@@ -773,30 +809,21 @@ export default function PageDesignerPage() {
   // ── Mobile: master → detail ──
   if (isNarrow && mobileView === "nav") {
     return (
-      <VStack gap={4}>
-        <div className="cmms-page-hero">
-          <VStack gap={1}>
-            <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-              PAGE DESIGNER · CMMS-TOPPAN
-            </Text>
-            <Heading level={2} style={{ color: "#FFFFFF" }}>
-              ปรับแต่งหน้าตาระบบทั้งหมด
-            </Heading>
-            <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-              ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึก
-            </Text>
-          </VStack>
-        </div>
-        <Card padding={2}>
-          <VStack gap={3}>
+      <PageShell
+        breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
+        title="ปรับแต่งหน้าตาระบบทั้งหมด"
+        description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึก"
+      >
+        <Card>
+          <CardContent className="space-y-3 p-2">
             <HStack hAlign="between" vAlign="center" style={{ padding: "8px 12px 0" }}>
               <VStack gap={0}>
-                <Text type="body" size="sm" className="cmms-eyebrow">
+                <p className="cmms-eyebrow text-sm text-muted-foreground">
                   QUICK ACTIONS
-                </Text>
-                <Text type="body" weight="bold">
+                </p>
+                <span className="font-semibold">
                   หมวดการปรับแต่ง
-                </Text>
+                </span>
               </VStack>
               {dirtyCount > 0 && (
                 <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
@@ -804,135 +831,77 @@ export default function PageDesignerPage() {
                 </span>
               )}
             </HStack>
-            <Divider />
-            <VStack gap={1}>
-              {SECTIONS.map((s) => (
-                <ListItem
-                  key={s.id}
-                  label={s.label}
-                  description={s.desc}
-                  startContent={<s.icon className="w-5 h-5" />}
-                  endContent={<ChevronRightIcon className="w-4 h-4" style={{ color: "var(--cmms-text-secondary)" }} />}
-                  onClick={() => {
-                    setActiveSection(s.id);
-                    setMobileView("detail");
-                  }}
-                />
-              ))}
-            </VStack>
-          </VStack>
+            <hr style={{ borderColor: "var(--cmms-border)" }} />
+            {navList}
+          </CardContent>
         </Card>
-      </VStack>
+      </PageShell>
     );
   }
 
   return (
-    <VStack gap={4}>
-      {/* Hero header */}
-      <div className="cmms-page-hero">
-        <HStack hAlign="between" vAlign="center" wrap="wrap" gap={4}>
-          <VStack gap={1}>
-            <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-              PAGE DESIGNER · ระบบ & ตั้งค่า
-            </Text>
-            <Heading level={2} style={{ color: "#FFFFFF" }}>
-              ปรับแต่งหน้าตาระบบทั้งหมด
-            </Heading>
-            <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-              ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึกลงฐานข้อมูล
-            </Text>
-          </VStack>
-          <HStack gap={2} wrap="wrap">
-            {dirtyCount > 0 && (
-              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-                มีการแก้ไข {dirtyCount} รายการ
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-            >
-              <ArrowPathIcon className="w-4 h-4" />
-              คืนค่าเริ่มต้น
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={handleSave}
-              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
-            </button>
-          </HStack>
-        </HStack>
-      </div>
-
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ปรับแต่งหน้าตาของระบบ" }]}
+      title="ปรับแต่งหน้าตาระบบทั้งหมด"
+      description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึกลงฐานข้อมูล"
+      actions={
+        <>
+          {dirtyCount > 0 && (
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
+              มีการแก้ไข {dirtyCount} รายการ
+            </span>
+          )}
+          <Button variant="secondary" onClick={handleResetAll}>
+            <ArrowPathIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+            คืนค่าเริ่มต้น
+          </Button>
+          <Button disabled={saving} onClick={handleSave}>
+            {saving ? "กำลังบันทึก..." : "บันทึกการปรับแต่ง"}
+          </Button>
+        </>
+      }
+    >
       {saveMsg && (
-        <Card padding={3} style={{ background: "var(--cmms-success-light)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success-dark)" }}>
-              {saveMsg}
-            </Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={saveMsg} />
       )}
       {saveErr && (
-        <Card padding={3} style={{ background: "var(--cmms-danger-light)", border: "1px solid var(--cmms-danger)" }}>
-          <HStack gap={3} vAlign="center">
-            <ExclamationCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-danger)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-danger-dark)" }}>
-              {saveErr}
-            </Text>
-          </HStack>
-        </Card>
+        <Alert variant="danger" title="เกิดข้อผิดพลาด" description={saveErr} />
       )}
 
       {loading ? (
-        <Card padding={6}>
-          <Text type="body" color="secondary">
-            กำลังโหลดค่าปัจจุบันจากฐานข้อมูล...
-          </Text>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-sm text-muted-foreground">
+              กำลังโหลดค่าปัจจุบันจากฐานข้อมูล...
+            </p>
+          </CardContent>
         </Card>
       ) : (
-        <Layout
-          height="fill"
-          start={
-            isNarrow ? undefined : (
-              <LayoutPanel hasDivider padding={0} style={{ minWidth: 300 }}>
-                {navList}
-              </LayoutPanel>
-            )
-          }
-          content={
-            <LayoutContent padding={4}>
-              <VStack gap={0}>
-                {isNarrow && (
-                  <Toolbar
-                    label={`กลับไปเมนูหมวด — ${section.label}`}
-                    gap={2}
-                    startContent={
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setMobileView("nav")}
-                          aria-label="กลับไปเมนูหมวด"
-                          className="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                        >
-                          <ArrowLeftIcon className="w-4 h-4" />
-                        </button>
-                        <Heading level={2}>{section.label}</Heading>
-                      </>
-                    }
-                  />
-                )}
-                {detail}
-              </VStack>
-            </LayoutContent>
-          }
-        />
+        <div className="grid items-start gap-6 lg:grid-cols-[300px_1fr]">
+          {!isNarrow && (
+            <Card className="lg:sticky lg:top-4 self-start">
+              {navList}
+            </Card>
+          )}
+          <div className="min-w-0 space-y-6">
+            {isNarrow && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileView("nav")}
+                  aria-label="กลับไปเมนูหมวด"
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--cmms-text-primary)] transition-colors hover:bg-[var(--cmms-bg-muted)]"
+                  style={{ background: "var(--cmms-bg-muted)" }}
+                >
+                  <ArrowLeftIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+                </button>
+                <h2 className="text-base font-semibold">{section.label}</h2>
+              </div>
+            )}
+            {detail}
+          </div>
+        </div>
       )}
-    </VStack>
+    </PageShell>
   );
 }

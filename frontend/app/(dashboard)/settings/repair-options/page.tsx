@@ -1,32 +1,29 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import AnimatedDialog from "@/components/AnimatedDialog";
+import { PageShell } from "@/components/PageShell";
 import {
-  CheckCircleIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  ArrowLeftIcon,
-  WrenchScrewdriverIcon,
-  BuildingOffice2Icon,
-  BriefcaseIcon,
-  Cog6ToothIcon,
-  ExclamationTriangleIcon,
-  DocumentTextIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle2 as CheckCircleIcon,
+  Plus as PlusIcon,
+  Pencil,
+  Trash2,
+  Building2 as BuildingOffice2Icon,
+  Briefcase,
+  Settings as Cog6ToothIcon,
+  TriangleAlert as ExclamationTriangleIcon,
+  FileText as DocumentTextIcon,
+  User,
+  Wrench as WrenchScrewdriverIcon,
+} from "lucide-react";
 
 interface RepairOption {
   id: number;
@@ -64,7 +61,7 @@ const OPTION_TYPES: Record<string, OptionTypeMeta> = {
   },
   job_type: {
     label: "ประเภทงาน (Job Type)",
-    icon: BriefcaseIcon,
+    icon: Briefcase,
     hint: "ประเภทของงานซ่อมบำรุง",
     color: "var(--cmms-success)",
     bgColor: "var(--cmms-success-bg)",
@@ -106,7 +103,7 @@ const OPTION_TYPES: Record<string, OptionTypeMeta> = {
   },
   operator: {
     label: "ผู้ปฏิบัติงาน (Operator)",
-    icon: UserIcon,
+    icon: User,
     hint: "ผู้หรือทีมที่รับผิดชอบงานซ่อม",
     color: "var(--cmms-text-secondary)",
     bgColor: "var(--cmms-bg-muted)",
@@ -307,51 +304,32 @@ export default function RepairOptionsPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูล...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูล...</p>
+      </div>
     );
   }
 
   const currentMeta = OPTION_TYPES[activeType];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ตัวเลือกฟอร์มแจ้งซ่อม" }]}
+      title="ตัวเลือกฟอร์มแจ้งซ่อม"
+      description="จัดการตัวเลือก dropdown ที่ใช้ในฟอร์มแจ้งซ่อม (F-EN-03)"
+    >
+      <VStack gap={6}>
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {saveMessage && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMessage}</Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={saveMessage} />
       )}
-
-      {/* Header */}
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
-          <HStack gap={2} vAlign="center">
-            <a
-              href="/settings"
-              style={{ color: "var(--cmms-text-secondary)", textDecoration: "none" }}
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-            </a>
-            <Text type="body" size="sm" className="cmms-eyebrow">ตั้งค่าระบบ</Text>
-          </HStack>
-          <Heading level={2}>ตัวเลือกฟอร์มแจ้งซ่อม</Heading>
-          <Text type="body" color="secondary">
-            จัดการตัวเลือก dropdown ที่ใช้ในฟอร์มแจ้งซ่อม (F-EN-03)
-          </Text>
-        </VStack>
-      </HStack>
 
       <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
         {/* Sidebar: ประเภทตัวเลือก */}
-        <Card padding={2}>
-          <VStack gap={1}>
+        <Card>
+          <CardContent className="space-y-1 p-2">
             {Object.entries(OPTION_TYPES).map(([typeId, meta]) => {
               const count = typeCounts[typeId] || 0;
               const isActive = activeType === typeId;
@@ -376,77 +354,68 @@ export default function RepairOptionsPage() {
                     font: "inherit",
                   }}
                 >
-                  <TypeIcon className="w-5 h-5" style={{ color: isActive ? meta.color : "var(--cmms-text-secondary)" }} />
-                  <Text type="body" weight={isActive ? "bold" : "normal"} size="sm">{meta.label}</Text>
-                  <span style={{ marginLeft: "auto", fontSize: 12, color: "var(--cmms-text-muted)" }}>{count}</span>
+                  <TypeIcon className="h-5 w-5 shrink-0" strokeWidth={1.75} aria-hidden="true" style={{ color: isActive ? meta.color : "var(--cmms-text-secondary)" }} />
+                  <span className={"min-w-0 flex-1 truncate text-sm " + (isActive ? "font-bold" : "")}>{meta.label}</span>
+                  <span className="shrink-0 text-xs text-[var(--cmms-text-muted)]">{count}</span>
                 </button>
               );
             })}
-          </VStack>
+          </CardContent>
         </Card>
 
         {/* Main content */}
-        <Card padding={5} style={{ gridColumn: "span 2" }}>
-          <VStack gap={5}>
+        <Card style={{ gridColumn: "span 2" }}>
+          <CardContent className="space-y-5 p-5">
             {/* Header */}
             <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
               <VStack gap={0}>
                 <HStack gap={2} vAlign="center">
-                  {currentMeta && <currentMeta.icon className="w-5 h-5" style={{ color: currentMeta.color }} />}
-                  <Heading level={3}>{currentMeta?.label}</Heading>
+                  {currentMeta && <currentMeta.icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" style={{ color: currentMeta.color }} />}
+                  <h3 className="text-base font-semibold">{currentMeta?.label}</h3>
                 </HStack>
-                <Text type="body" size="sm" color="secondary">
+                <p className="text-sm text-muted-foreground">
                   {currentMeta?.hint} — มี {filteredOptions.length} รายการ
-                </Text>
+                </p>
               </VStack>
-              <button
-                type="button"
-                onClick={handleAdd}
-                className="cmms-btn-primary"
-              >
-                <PlusIcon className="w-4 h-4" />
+              <Button onClick={handleAdd}>
+                <PlusIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                 เพิ่มใหม่
-              </button>
+              </Button>
             </HStack>
 
             {/* Options table */}
             {filteredOptions.length === 0 ? (
               <div style={{ textAlign: "center", padding: 40 }}>
-                <Text type="body" color="secondary">ยังไม่มีตัวเลือกในหมวดนี้</Text>
-                <button
-                  type="button"
-                  onClick={handleAdd}
-                  className="cmms-btn-primary"
-                  style={{ marginTop: 16 }}
-                >
-                  <PlusIcon className="w-4 h-4" />
+                <p className="text-sm text-muted-foreground">ยังไม่มีตัวเลือกในหมวดนี้</p>
+                <Button className="mt-4" onClick={handleAdd}>
+                  <PlusIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                   เพิ่มตัวเลือกแรก
-                </button>
+                </Button>
               </div>
             ) : (
               <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }} className="text-sm">
                   <thead>
                     <tr style={{ borderBottom: "2px solid var(--cmms-border)" }}>
-                      <th style={{ textAlign: "left", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         ไอคอน
                       </th>
-                      <th style={{ textAlign: "left", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         ค่า (Value)
                       </th>
-                      <th style={{ textAlign: "left", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         ชื่อ (Label)
                       </th>
-                      <th style={{ textAlign: "left", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-left text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         ชื่ออังกฤษ
                       </th>
-                      <th style={{ textAlign: "center", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-center text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         ลำดับ
                       </th>
-                      <th style={{ textAlign: "center", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-center text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         สถานะ
                       </th>
-                      <th style={{ textAlign: "right", padding: "12px 8px", fontSize: 12, fontWeight: 600, color: "var(--cmms-text-secondary)" }}>
+                      <th className="px-2 py-3 text-right text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">
                         จัดการ
                       </th>
                     </tr>
@@ -460,79 +429,54 @@ export default function RepairOptionsPage() {
                           opacity: opt.is_active ? 1 : 0.5,
                         }}
                       >
-                        <td style={{ padding: "12px 8px", fontSize: 20 }}>
+                        <td className="px-2 py-3 text-xl">
                           {opt.option_emoji || "-"}
                         </td>
-                        <td style={{ padding: "12px 8px" }}>
-                          <code style={{
-                            background: "var(--cmms-bg-muted)",
-                            padding: "2px 6px",
-                            borderRadius: 4,
-                            fontSize: 12,
-                          }}>
+                        <td className="px-2 py-3">
+                          <code className="rounded bg-[var(--cmms-bg-muted)] px-1.5 py-0.5 text-xs">
                             {opt.option_value}
                           </code>
                         </td>
-                        <td style={{ padding: "12px 8px", fontWeight: 600 }}>
+                        <td className="px-2 py-3 font-semibold">
                           {opt.option_label}
                         </td>
-                        <td style={{ padding: "12px 8px", color: "var(--cmms-text-secondary)" }}>
+                        <td className="px-2 py-3 text-[var(--cmms-text-secondary)]">
                           {opt.option_label_en || "—"}
                         </td>
-                        <td style={{ padding: "12px 8px", textAlign: "center" }}>
+                        <td className="px-2 py-3 text-center tabular-nums">
                           {opt.sort_order}
                         </td>
-                        <td style={{ padding: "12px 8px", textAlign: "center" }}>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleActive(opt)}
-                            style={{
-                              background: "none",
-                              border: "none",
-                              cursor: "pointer",
-                              padding: 4,
-                            }}
-                          >
-                            <Switch
-                              label="เปิด/ปิด"
-                              isLabelHidden
-                              value={opt.is_active}
-                              onChange={() => handleToggleActive(opt)}
-                            />
-                          </button>
+                        <td className="px-2 py-3 text-center">
+                          <Switch
+                            label="เปิด/ปิด"
+                            isLabelHidden
+                            value={opt.is_active}
+                            onChange={() => handleToggleActive(opt)}
+                            aria-label={`เปิด/ปิด ${opt.option_label}`}
+                          />
                         </td>
-                        <td style={{ padding: "12px 8px", textAlign: "right" }}>
+                        <td className="px-2 py-3 text-right">
                           <HStack gap={1} hAlign="end">
-                            <button
-                              type="button"
-                              onClick={() => handleEdit(opt)}
-                              style={{
-                                background: "var(--cmms-bg-muted)",
-                                border: "none",
-                                borderRadius: 6,
-                                padding: "6px 8px",
-                                cursor: "pointer",
-                                color: "var(--cmms-primary)",
-                              }}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="แก้ไข"
                               title="แก้ไข"
+                              className="text-[var(--cmms-primary)] hover:text-[var(--cmms-primary-hover)]"
+                              onClick={() => handleEdit(opt)}
                             >
-                              <PencilIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(opt)}
-                              style={{
-                                background: "var(--cmms-bg-muted)",
-                                border: "none",
-                                borderRadius: 6,
-                                padding: "6px 8px",
-                                cursor: "pointer",
-                                color: "var(--cmms-danger)",
-                              }}
+                              <Pencil className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="ลบ"
                               title="ลบ"
+                              className="text-[var(--cmms-danger)] hover:text-[var(--cmms-danger-dark)]"
+                              onClick={() => handleDelete(opt)}
                             >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
+                              <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+                            </Button>
                           </HStack>
                         </td>
                       </tr>
@@ -541,179 +485,154 @@ export default function RepairOptionsPage() {
                 </table>
               </div>
             )}
-          </VStack>
+          </CardContent>
         </Card>
       </Grid>
 
       {/* ═══ Dialog เพิ่มตัวเลือกใหม่ ═══ */}
       <AnimatedDialog open={showAddDialog} onClose={() => setShowAddDialog(false)}>
-        <DialogHeader title={`เพิ่ม${currentMeta?.label}`} />
-        <VStack gap={4}>
-          <TextInput
+        <div className="space-y-4 p-5">
+          <h2 className="text-lg font-semibold">เพิ่ม{currentMeta?.label}</h2>
+          <Input
             label="ค่า (Value)"
             placeholder="เช่น PROD, Machinery, breakdown"
             value={form.option_value}
-            onChange={(v) => setForm((f) => ({ ...f, option_value: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_value: e.target.value }))}
           />
-          <TextInput
+          <Input
             label="ชื่อ (Label)"
             placeholder="เช่น ฝ่ายผลิต, เครื่องจักร"
             value={form.option_label}
-            onChange={(v) => setForm((f) => ({ ...f, option_label: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_label: e.target.value }))}
           />
-          <TextInput
+          <Input
             label="ชื่ออังกฤษ (Label EN)"
             placeholder="เช่น Production, Machinery"
             value={form.option_label_en}
-            onChange={(v) => setForm((f) => ({ ...f, option_label_en: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_label_en: e.target.value }))}
           />
           <HStack gap={3} vAlign="center">
-            <TextInput
-              label="ไอคอน (Emoji)"
-              placeholder="เช่น (emoji)"
-              value={form.option_emoji}
-              onChange={(v) => setForm((f) => ({ ...f, option_emoji: v }))}
-              style={{ width: 100 }}
-            />
-            <TextInput
-              label="ลำดับ"
-              value={String(form.sort_order)}
-              onChange={(v) => setForm((f) => ({ ...f, sort_order: parseInt(v) || 0 }))}
-              style={{ width: 80 }}
-            />
+            <div className="w-[100px]">
+              <Input
+                label="ไอคอน (Emoji)"
+                placeholder="เช่น (emoji)"
+                value={form.option_emoji}
+                onChange={(e) => setForm((f) => ({ ...f, option_emoji: e.target.value }))}
+              />
+            </div>
+            <div className="w-[80px]">
+              <Input
+                label="ลำดับ"
+                value={String(form.sort_order)}
+                onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
           </HStack>
-          <TextArea
+          <Textarea
             label="คำอธิบาย"
             placeholder="คำอธิบายเพิ่มเติม (ถ้ามี)"
             value={form.description}
-            onChange={(v) => setForm((f) => ({ ...f, description: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             rows={2}
           />
           <HStack hAlign="end" gap={2}>
-            <button
-              type="button"
-              onClick={() => setShowAddDialog(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+            <Button variant="secondary" onClick={() => setShowAddDialog(false)}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={handleSubmitAdd}
               disabled={!form.option_value || !form.option_label}
-              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               เพิ่มตัวเลือก
-            </button>
+            </Button>
           </HStack>
-        </VStack>
+        </div>
       </AnimatedDialog>
 
       {/* ═══ Dialog แก้ไขตัวเลือก ═══ */}
       <AnimatedDialog open={showEditDialog} onClose={() => setShowEditDialog(false)}>
-        <DialogHeader title={`แก้ไข${currentMeta?.label}`} />
-        <VStack gap={4}>
-          <TextInput
+        <div className="space-y-4 p-5">
+          <h2 className="text-lg font-semibold">แก้ไข{currentMeta?.label}</h2>
+          <Input
             label="ค่า (Value)"
             placeholder="เช่น PROD, Machinery, breakdown"
             value={form.option_value}
-            onChange={(v) => setForm((f) => ({ ...f, option_value: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_value: e.target.value }))}
           />
-          <TextInput
+          <Input
             label="ชื่อ (Label)"
             placeholder="เช่น ฝ่ายผลิต, เครื่องจักร"
             value={form.option_label}
-            onChange={(v) => setForm((f) => ({ ...f, option_label: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_label: e.target.value }))}
           />
-          <TextInput
+          <Input
             label="ชื่ออังกฤษ (Label EN)"
             placeholder="เช่น Production, Machinery"
             value={form.option_label_en}
-            onChange={(v) => setForm((f) => ({ ...f, option_label_en: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, option_label_en: e.target.value }))}
           />
           <HStack gap={3} vAlign="center">
-            <TextInput
-              label="ไอคอน (Emoji)"
-              placeholder="เช่น (emoji)"
-              value={form.option_emoji}
-              onChange={(v) => setForm((f) => ({ ...f, option_emoji: v }))}
-              style={{ width: 100 }}
-            />
-            <TextInput
-              label="ลำดับ"
-              value={String(form.sort_order)}
-              onChange={(v) => setForm((f) => ({ ...f, sort_order: parseInt(v) || 0 }))}
-              style={{ width: 80 }}
-            />
+            <div className="w-[100px]">
+              <Input
+                label="ไอคอน (Emoji)"
+                placeholder="เช่น (emoji)"
+                value={form.option_emoji}
+                onChange={(e) => setForm((f) => ({ ...f, option_emoji: e.target.value }))}
+              />
+            </div>
+            <div className="w-[80px]">
+              <Input
+                label="ลำดับ"
+                value={String(form.sort_order)}
+                onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
           </HStack>
-          <TextArea
+          <Textarea
             label="คำอธิบาย"
             placeholder="คำอธิบายเพิ่มเติม (ถ้ามี)"
             value={form.description}
-            onChange={(v) => setForm((f) => ({ ...f, description: v }))}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
             rows={2}
           />
           <HStack hAlign="end" gap={2}>
-            <button
-              type="button"
-              onClick={() => setShowEditDialog(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+            <Button variant="secondary" onClick={() => setShowEditDialog(false)}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={handleSubmitEdit}
               disabled={!form.option_value || !form.option_label}
-              className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               บันทึกการแก้ไข
-            </button>
+            </Button>
           </HStack>
-        </VStack>
+        </div>
       </AnimatedDialog>
 
       {/* ═══ Dialog ยืนยันการลบ ═══ */}
       <AnimatedDialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
-        <DialogHeader title="ยืนยันการลบ" />
-        <VStack gap={4}>
+        <div className="space-y-4 p-5">
+          <h2 className="text-lg font-semibold">ยืนยันการลบ</h2>
           <div style={{ textAlign: "center", padding: "20px 0" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}></div>
-            <Text type="body" weight="bold">
+            <p className="font-bold">
               ต้องการลบตัวเลือก "{selectedOption?.option_label}" ใช่หรือไม่?
-            </Text>
-            <Text type="body" size="sm" color="secondary" style={{ marginTop: 8 }}>
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
               การดำเนินการนี้ไม่สามารถย้อนกลับได้
-            </Text>
+            </p>
           </div>
           <HStack hAlign="center" gap={2}>
-            <button
-              type="button"
-              onClick={() => setShowDeleteDialog(false)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-            >
+            <Button variant="secondary" onClick={() => setShowDeleteDialog(false)}>
               ยกเลิก
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirmDelete}
-              style={{
-                padding: "10px 20px",
-                borderRadius: 12,
-                border: "none",
-                background: "var(--cmms-danger)",
-                color: "var(--cmms-text-on-danger)",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+            </Button>
+            <Button variant="danger" onClick={handleConfirmDelete}>
               ลบตัวเลือก
-            </button>
+            </Button>
           </HStack>
-        </VStack>
+        </div>
       </AnimatedDialog>
-    </div>
+      </VStack>
+    </PageShell>
   );
 }
-
-

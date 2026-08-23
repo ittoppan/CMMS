@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Stack";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
-import { Badge } from "@astryxdesign/core/Badge";
+import { VStack, HStack } from "@/components/layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { THEME_PRESETS } from "./ThemeProvider";
 
 interface Props {
@@ -30,9 +29,9 @@ function HexStatus({ value }: { value: string }) {
   if (!v) return null;
   const ok = /^#[0-9a-fA-F]{6}$/.test(v);
   return (
-    <Text type="body" size="sm" style={{ color: ok ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
+    <p className="text-sm" style={{ color: ok ? "var(--cmms-success)" : "var(--cmms-danger)" }}>
       {ok ? "✓ รหัสสีถูกต้อง" : "✕ ต้องเป็น #RRGGBB (6 หลัก)"}
-    </Text>
+    </p>
   );
 }
 
@@ -79,12 +78,12 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
     <VStack gap={4}>
       <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
         <VStack gap={0}>
-          <Heading level={4}>เลือกธีมสีทั้งระบบ</Heading>
-          <Text type="body" size="sm" color="secondary">
+          <h3 className="text-base font-semibold">เลือกธีมสีทั้งระบบ</h3>
+          <p className="text-sm text-muted-foreground">
             เปลี่ยนสี accent / gradient / sidebar ได้ทันทีแบบเรียลไทม์ — กดบันทึกเพื่อบันทึกลงฐานข้อมูล
-          </Text>
+          </p>
         </VStack>
-        <Badge label="แสดงผลสด" variant="info" />
+        <Badge variant="info">แสดงผลสด</Badge>
       </HStack>
 
       {/* Preset Swatches A/B/C */}
@@ -119,8 +118,8 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
                 }}
               />
               <VStack gap={0} hAlign="start">
-                <Text type="body" weight="bold" style={{ fontSize: 13 }}>{t.label}</Text>
-                <Text type="body" size="sm" color="secondary" style={{ fontSize: 11 }}>{t.primary}</Text>
+                <span className="text-[13px] font-bold">{t.label}</span>
+                <span className="text-[11px] text-muted-foreground">{t.primary}</span>
               </VStack>
             </button>
           );
@@ -130,7 +129,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
       {/* Custom color pickers */}
       <HStack gap={4} wrap="wrap">
         <VStack gap={1}>
-          <Text type="body" size="sm" weight="semibold">สีหลัก (Accent)</Text>
+          <span className="text-sm font-medium">สีหลัก (Accent)</span>
           <HStack gap={2} vAlign="center">
             <input
               type="color"
@@ -153,7 +152,7 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
           <HexStatus value={values.theme_primary_hex ?? ""} />
         </VStack>
         <VStack gap={1}>
-          <Text type="body" size="sm" weight="semibold">สีรอง (Gradient ปลาย)</Text>
+          <span className="text-sm font-medium">สีรอง (Gradient ปลาย)</span>
           <HStack gap={2} vAlign="center">
             <input
               type="color"
@@ -175,18 +174,14 @@ export default function ThemeSettingsPanel({ values, onChange, onSave, saving }:
           </HStack>
           <HexStatus value={values.theme_secondary_hex ?? ""} />
         </VStack>
-        <Button
-          label={saving ? "กำลังบันทึก..." : "บันทึกธีมลงฐานข้อมูล"}
-          variant="primary"
-          isLoading={saving}
-          isDisabled={saving}
-          onClick={onSave}
-        />
+        <Button disabled={saving} onClick={onSave}>
+          {saving ? "กำลังบันทึก..." : "บันทึกธีมลงฐานข้อมูล"}
+        </Button>
       </HStack>
 
       {/* Live gradient preview bar */}
       <VStack gap={1}>
-        <Text type="body" size="sm" weight="semibold">ตัวอย่าง gradient</Text>
+        <span className="text-sm font-medium">ตัวอย่าง gradient</span>
         <div
           style={{
             height: 56,

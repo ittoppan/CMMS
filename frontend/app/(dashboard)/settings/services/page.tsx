@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { VStack, HStack } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { PageShell } from "@/components/PageShell";
 
 interface ServiceInfo {
   key: string;
@@ -47,23 +48,25 @@ function LinkRow({
 }) {
   return (
     <HStack hAlign="between" vAlign="center" gap={3}>
-      <VStack gap={0.5} style={{ minWidth: 0, flex: 1 }}>
-        <Text type="body" size="sm" weight="semibold">{label}</Text>
-        <Text type="body" size="sm" color="secondary" style={{ wordBreak: "break-all" }}>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{label}</p>
+        <p className="break-all text-sm text-muted-foreground">
           {value || "—"}
-        </Text>
-      </VStack>
-      <button
-        type="button"
+        </p>
+      </div>
+      <Button
+        variant="secondary"
+        size="sm"
         disabled={!value}
         onClick={onCopy}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {copied ? "คัดลอกแล้ว ✓" : "คัดลอก"}
-      </button>
+      </Button>
     </HStack>
   );
-}export default function SystemServicesPage() {
+}
+
+export default function SystemServicesPage() {
   const [services, setServices] = useState<ServiceInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -144,16 +147,12 @@ function LinkRow({
   const liffUrl = cfUrl || "";
 
   return (
-    <VStack gap={6}>
-      <HStack hAlign="between" vAlign="center">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">SERVICES · CMMS-TOPPAN</Text>
-          <Heading level={1}>Service & การรันระบบ</Heading>
-          <Text type="body" size="sm" color="secondary">
-            เช็คว่า service ตัวไหนรันหรือยัง และรัน/หยุดได้จากที่นี่ (เฉพาะผู้ดูแลระบบ)
-          </Text>
-        </VStack>
-        <HStack gap={2}>
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "บริการและสถานะการรันระบบ" }]}
+      title="Service & การรันระบบ"
+      description="เช็คว่า service ตัวไหนรันหรือยัง และรัน/หยุดได้จากที่นี่ (เฉพาะผู้ดูแลระบบ)"
+      actions={
+        <>
           <span
             className="cmms-andon-chip"
             style={allRunning
@@ -162,85 +161,82 @@ function LinkRow({
           >
             {allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"}
           </span>
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             disabled={loading}
             onClick={() => fetchStatus()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "กำลังโหลด..." : "รีเฟรชสถานะ"}
-          </button>
-        </HStack>
-      </HStack>
-
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด">{error}</Banner>}
-      {notice && <Banner status="info" title="ผลลัพธ์">{notice}</Banner>}
+          </Button>
+        </>
+      }
+    >
+      <VStack gap={6}>
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด">{error}</Alert>}
+      {notice && <Alert variant="info" title="ผลลัพธ์">{notice}</Alert>}
 
       {loading && services.length === 0 ? (
-        <HStack gap={2}><Spinner size="md" /><Text type="body">กำลังตรวจสอบ service...</Text></HStack>
+        <HStack gap={2}><Spinner size={20} /><span className="text-sm">กำลังตรวจสอบ service...</span></HStack>
       ) : (
         <VStack gap={4}>
-          <Text type="supporting" color="secondary">
+          <p className="text-sm text-muted-foreground">
             อัปเดตล่าสุด: {lastRefresh || "-"} — การรันบางตัวใช้เวลา (Next.js ~10-20 วิ, ngrok ~5-10 วิ)
-          </Text>
+          </p>
 
           {services.map((s) => {
             const isBusy = busyKey === s.key;
             return (
-              <Card key={s.key} padding={5}>
-                <HStack hAlign="between" vAlign="center" gap={4}>
+              <Card key={s.key}>
+                <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
                   <HStack gap={4} vAlign="center">
-                    <Text size="xl" style={{ fontSize: 28 }}>{s.icon}</Text>
+                    <span className="text-[28px] leading-none">{s.icon}</span>
                     <VStack gap={1}>
                       <HStack gap={2} vAlign="center">
-                        <Heading level={3} style={{ margin: 0 }}>{s.name}</Heading>
+                        <h3 className="m-0 text-base font-semibold">{s.name}</h3>
                         <span className="cmms-andon-chip" style={STATUS_CHIP_STYLE[s.status] || STATUS_CHIP_STYLE.unknown}>
                           {STATUS_LABEL[s.status] || s.status}
                         </span>
-                        {isBusy && <Spinner size="sm" />}
+                        {isBusy && <Spinner size={16} />}
                       </HStack>
-                      <Text type="body" size="sm" color="secondary">{s.desc}</Text>
-                      <Text type="body" size="sm">
+                      <p className="text-sm text-muted-foreground">{s.desc}</p>
+                      <p className="text-sm">
                         {s.detail}
                         {s.url && s.status === "running" && (
                           <> • <a href={s.url} target="_blank" rel="noreferrer" style={{ color: "var(--cmms-primary)", fontWeight: 600 }}>เปิด URL</a></>
                         )}
-                      </Text>
+                      </p>
                     </VStack>
                   </HStack>
                   <HStack gap={2}>
                     {!s.running ? (
-                      <button
-                        type="button"
+                      <Button
                         disabled={isBusy}
                         onClick={() => runAction(s.key, "start")}
-                        className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         ▶ รัน
-                      </button>
+                      </Button>
                     ) : (
-                      <button
-                        type="button"
+                      <Button
+                        variant="danger"
                         disabled={isBusy || s.key === "line"}
                         onClick={() => runAction(s.key, "stop")}
-                        className="cmms-btn-danger disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         ⏹ หยุด
-                      </button>
+                      </Button>
                     )}
                   </HStack>
-                </HStack>
+                </CardContent>
               </Card>
             );
           })}
 
-          <Card padding={5}>
-            <VStack gap={3}>
+          <Card>
+            <CardContent className="space-y-3 p-5">
               <VStack gap={1}>
-                <Heading level={3}>External Access — URL สำหรับ LINE</Heading>
-                <Text type="body" size="sm" color="secondary">
+                <h3 className="text-base font-semibold">External Access — URL สำหรับ LINE</h3>
+                <p className="text-sm text-muted-foreground">
                   คัดลอกไปวางใน LINE Developers Console — LIFF Endpoint URL กับ Webhook URL (ต้องตั้งค่าที่ละรายการ)
-                </Text>
+                </p>
               </VStack>
               <LinkRow
                 label="LIFF Endpoint URL (ใช้ Cloudflare Tunnel)"
@@ -266,24 +262,25 @@ function LinkRow({
                 copied={copiedKey === "ngrok"}
                 onCopy={() => copyText("ngrok", ngrokUrl)}
               />
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 Tunnel URL เปลี่ยนทุกครั้งที่รัน Cloudflare ใหม่ — หลังกด "รัน" ให้รีเฟรชหน้านี้เพื่อดึง URL ล่าสุดมาใส่ Console
-              </Text>
-            </VStack>
+              </p>
+            </CardContent>
           </Card>
 
-          <Card padding={4} style={{ background: "var(--cmms-bg-subtle, #f8fafc)" }}>
-            <VStack gap={2}>
-              <Text type="body" size="sm" weight="semibold">คำแนะนำการใช้งาน</Text>
-              <Text type="body" size="sm" color="secondary">
+          <Card style={{ background: "var(--cmms-bg-subtle, #f8fafc)" }}>
+            <CardContent className="space-y-2 p-4">
+              <p className="text-sm font-medium">คำแนะนำการใช้งาน</p>
+              <p className="text-sm text-muted-foreground">
                 ลำดับการรันที่ถูกต้อง: ① MySQL → ② PHP API (IIS) → ③ Web App (Next.js) → ④ Cloudflare Tunnel (หรือ ngrok)
                 <br />
                 LINE Webhook จะพร้อมใช้ต่อเมื่อ tunnel + IIS รันพร้อมกัน — Cloudflare Tunnel เหมาะกับ LIFF เพราะไม่มีหน้าเตือน
-              </Text>
-            </VStack>
+              </p>
+            </CardContent>
           </Card>
         </VStack>
       )}
-    </VStack>
+      </VStack>
+    </PageShell>
   );
 }

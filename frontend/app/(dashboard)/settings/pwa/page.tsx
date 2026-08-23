@@ -1,19 +1,18 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { PageShell } from "@/components/PageShell";
 import {
-  CheckCircleIcon,
-  PhotoIcon,
-  ArrowPathIcon,
-  ExclamationTriangleIcon,
-  DevicePhoneMobileIcon,
-} from "@heroicons/react/24/outline";
+  Image as ImageIcon,
+  RefreshCw as ArrowPathIcon,
+  TriangleAlert as ExclamationTriangleIcon,
+  Smartphone as DevicePhoneMobileIcon,
+} from "lucide-react";
 
 interface IconInfo {
   path: string;
@@ -110,60 +109,48 @@ export default function PwaSettingsPage() {
 
   if (loading && !status) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดข้อมูลไอคอน PWA...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลไอคอน PWA...</p>
+      </div>
     );
   }
 
   return (
-    <VStack gap={6} data-bisect="full">
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ไอคอน PWA (Mobile App)" }]}
+      title="ตั้งค่าไอคอน PWA"
+      description="เปลี่ยนไอคอนแอปพลิเคชันบนหน้าจอมือถือ (ติดตั้งจากเบราว์เซอร์) — อัปเดตให้ทั้ง PWA และเว็บ PHP พร้อมกัน"
+      actions={
+        <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+          Mobile App
+        </span>
+      }
+    >
       {/* BISECT START */}
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+      <VStack gap={6} data-bisect="full">
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
       {success && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>
-              {success}
-            </Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={success} />
       )}
-
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">SETTINGS PWA · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>ตั้งค่าไอคอน PWA</Heading>
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-              Mobile App
-            </span>
-          </HStack>
-          <Text type="body" color="secondary">
-            เปลี่ยนไอคอนแอปพลิเคชันบนหน้าจอมือถือ (ติดตั้งจากเบราว์เซอร์) — อัปเดตให้ทั้ง PWA และเว็บ PHP พร้อมกัน
-          </Text>
-        </VStack>
-      </HStack>
 
       <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
         {/* ซ้าย: ไอคอนปัจจุบัน + แบบฟอร์มอัปโหลด */}
-        <Card padding={5} style={{ gridColumn: "span 2" }}>
-          <VStack gap={5}>
+        <Card style={{ gridColumn: "span 2" }}>
+          <CardContent className="space-y-5 p-5">
             <VStack gap={1}>
               <HStack gap={3} vAlign="center">
-                <PhotoIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={3}>ไอคอนปัจจุบัน</Heading>
+                <ImageIcon className="h-5 w-5 text-[var(--cmms-primary)]" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="text-base font-semibold">ไอคอนปัจจุบัน</h3>
               </HStack>
-              <Text type="supporting" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 ระบบจะสร้างขนาด 192x192 และ 512x512 อัตโนมัติจากภาพต้นฉบับ (ครอบกลางจอ — cover center crop)
-              </Text>
+              </p>
             </VStack>
 
             <HStack gap={5} wrap="wrap" vAlign="center">
               {status?.icons[192] && (
-                <VStack gap={1} hAlign="center">
+                <VStack gap={1}>
                   <img
                     src={iconSrc(status.icons[192]) ?? undefined}
                     alt="icon 192"
@@ -171,11 +158,11 @@ export default function PwaSettingsPage() {
                     height={96}
                     style={{ borderRadius: 22, boxShadow: "0 4px 14px rgba(0,0,0,.18)", background: "#fff" }}
                   />
-                  <Text type="body" size="sm" color="secondary">192×192</Text>
+                  <p className="text-sm text-muted-foreground">192×192</p>
                 </VStack>
               )}
               {status?.icons[512] && (
-                <VStack gap={1} hAlign="center">
+                <VStack gap={1}>
                   <img
                     src={iconSrc(status.icons[512]) ?? undefined}
                     alt="icon 512"
@@ -183,26 +170,26 @@ export default function PwaSettingsPage() {
                     height={128}
                     style={{ borderRadius: 28, boxShadow: "0 4px 14px rgba(0,0,0,.18)", background: "#fff" }}
                   />
-                  <Text type="body" size="sm" color="secondary">512×512</Text>
+                  <p className="text-sm text-muted-foreground">512×512</p>
                 </VStack>
               )}
               <VStack gap={1}>
-                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                <span className="cmms-andon-chip self-start" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                   SW Frontend {status?.sw.frontend ?? "-"}
                 </span>
-                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+                <span className="cmms-andon-chip self-start" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                   SW PHP {status?.sw.php ?? "-"}
                 </span>
-                <Text type="body" size="sm" color="secondary">
+                <p className="text-sm text-muted-foreground">
                   cache version — อัปเดตอัตโนมัติทุกครั้งที่เปลี่ยนไอคอน
-                </Text>
+                </p>
               </VStack>
             </HStack>
 
             <VStack gap={2} style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 20 }}>
               <HStack gap={3} vAlign="center">
-                <ArrowPathIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={3}>เปลี่ยนไอคอนใหม่</Heading>
+                <ArrowPathIcon className="h-5 w-5 text-[var(--cmms-primary)]" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="text-base font-semibold">เปลี่ยนไอคอนใหม่</h3>
               </HStack>
 
               <div
@@ -231,14 +218,14 @@ export default function PwaSettingsPage() {
                   style={{ display: "none" }}
                   onChange={(e) => handleFile(e.target.files?.[0])}
                 />
-                <VStack gap={1} hAlign="center">
-                  <PhotoIcon className="w-6 h-6" style={{ color: "var(--cmms-text-secondary)" }} />
-                  <Text type="body" weight="semibold">
+                <VStack gap={1}>
+                  <ImageIcon className="mx-auto h-6 w-6 text-[var(--cmms-text-secondary)]" strokeWidth={1.75} aria-hidden="true" />
+                  <span className="font-medium">
                     {selectedName || "ลากไฟล์ภาพมาวาง หรือคลิกเพื่อเลือก"}
-                  </Text>
-                  <Text type="body" size="sm" color="secondary">
+                  </span>
+                  <p className="text-sm text-muted-foreground">
                     PNG / JPEG / WebP — แนะนำภาพสี่เหลี่ยมจัตุรัส (เช่น 512×512) โปร่งใสได้
-                  </Text>
+                  </p>
                 </VStack>
               </div>
 
@@ -253,69 +240,67 @@ export default function PwaSettingsPage() {
                       style={{ borderRadius: 20, boxShadow: "0 4px 14px rgba(0,0,0,.18)", background: "#fff", objectFit: "cover" }}
                     />
                     <VStack gap={0}>
-                      <Text type="body" weight="semibold">{selectedName}</Text>
-                      <Text type="body" size="sm" color="secondary">พรีวิวภาพต้นฉบับ (จะ crop เป็นจัตุรัส)</Text>
+                      <span className="font-medium">{selectedName}</span>
+                      <p className="text-sm text-muted-foreground">พรีวิวภาพต้นฉบับ (จะ crop เป็นจัตุรัส)</p>
                     </VStack>
                   </HStack>
                 )}
                 <HStack hAlign="end" gap={3} style={{ marginLeft: "auto" }}>
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
                     disabled={!preview || saving}
                     onClick={() => {
                       setPreview((old) => { if (old) URL.revokeObjectURL(old); return null; });
                       setSelectedName("");
                       if (fileInputRef.current) fileInputRef.current.value = "";
                     }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ยกเลิก
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
                     disabled={!preview}
                     onClick={handleUpload}
-                    className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ArrowPathIcon className="w-4 h-4" />
+                    <ArrowPathIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
                     {saving ? "กำลังบันทึก..." : "บันทึกไอคอนใหม่"}
-                  </button>
+                  </Button>
                 </HStack>
               </HStack>
             </VStack>
-          </VStack>
+          </CardContent>
         </Card>
 
         {/* ขวา: คำแนะนำ (BISECT: div instead of Text) */}
-        <Card padding={5}>
-          <VStack gap={4}>
+        <Card>
+          <CardContent className="space-y-4 p-5">
             <HStack gap={3} vAlign="center">
-              <DevicePhoneMobileIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-              <Heading level={3}>วิธีดูผลลัพธ์</Heading>
+              <DevicePhoneMobileIcon className="h-5 w-5 text-[var(--cmms-primary)]" strokeWidth={1.75} aria-hidden="true" />
+              <h3 className="text-base font-semibold">วิธีดูผลลัพธ์</h3>
             </HStack>
             <VStack gap={2}>
-              <Text type="body" weight="semibold">บนมือถือ (PWA ที่ติดตั้งแล้ว)</Text>
-              <Text type="body" size="sm" color="secondary">
+              <span className="font-medium">บนมือถือ (PWA ที่ติดตั้งแล้ว)</span>
+              <p className="text-sm text-muted-foreground">
                 ไอคอนบนหน้าจอหลักจะเปลี่ยนเมื่อเปิดแอปครั้งถัดไป — Service Worker อัปเดต
                 cache เองอัตโนมัติ (รุ่น cache bump ทุกครั้งที่บันทึก)
-              </Text>
+              </p>
             </VStack>
             <VStack gap={2}>
-              <Text type="body" weight="semibold">บนเว็บเบราว์เซอร์</Text>
-              <Text type="body" size="sm" color="secondary">
+              <span className="font-medium">บนเว็บเบราว์เซอร์</span>
+              <p className="text-sm text-muted-foreground">
                 กดรีเฟรช (Ctrl+F5) 1 ครั้ง หลังจากนั้นไอคอนใหม่ในแท็บ/บุ๊กมาร์กจะโผล่เมื่อเปิดเว็บใหม่
-              </Text>
+              </p>
             </VStack>
             <VStack gap={2}>
-              <Text type="body" weight="semibold">คำแนะนำ</Text>
-              <div style={{ fontSize: "0.875rem", color: "var(--color-secondary)" }}>
-                <ExclamationTriangleIcon className="w-3.5 h-3.5" />
-                {" "}ใช้ภาพจัตุรัส และเว้นขอบปลอดภัย ~20% สำหรับ maskable icon เพื่อไม่ให้โดน crop ตอนติดตั้งแอป
+              <span className="font-medium">คำแนะนำ</span>
+              <div className="flex items-start gap-1.5 text-sm" style={{ color: "var(--color-secondary)" }}>
+                <ExclamationTriangleIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden="true" />
+                <span>ใช้ภาพจัตุรัส และเว้นขอบปลอดภัย ~20% สำหรับ maskable icon เพื่อไม่ให้โดน crop ตอนติดตั้งแอป</span>
               </div>
             </VStack>
-          </VStack>
+          </CardContent>
         </Card>
       </Grid>
-    </VStack>
+      </VStack>
+    </PageShell>
   );
 }

@@ -1,28 +1,29 @@
 "use client";
 
 import { useState, useEffect, useMemo, type ComponentType } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { VStack, HStack } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { PageShell } from "@/components/PageShell";
 import {
-  CheckCircleIcon,
-  ShieldCheckIcon,
-  HomeIcon,
-  ClipboardDocumentCheckIcon,
-  WrenchScrewdriverIcon,
-  MapIcon,
-  ClipboardDocumentListIcon,
-  CalendarDaysIcon,
-  BuildingOffice2Icon,
-  MagnifyingGlassIcon,
-  ChartBarIcon,
-  BellAlertIcon,
-  TableCellsIcon,
-  DocumentArrowDownIcon,
-  Cog6ToothIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle2 as CheckCircleIcon,
+  ShieldCheck as ShieldCheckIcon,
+  House as HomeIcon,
+  ClipboardCheck as ClipboardDocumentCheckIcon,
+  Wrench as WrenchScrewdriverIcon,
+  Map as MapIcon,
+  ClipboardList as ClipboardDocumentListIcon,
+  CalendarDays as CalendarDaysIcon,
+  Building2 as BuildingOffice2Icon,
+  Search as MagnifyingGlassIcon,
+  ChartNoAxesColumn as ChartBarIcon,
+  BellRing as BellAlertIcon,
+  Table as TableCellsIcon,
+  FileDown as DocumentArrowDownIcon,
+  Settings as Cog6ToothIcon,
+} from "lucide-react";
 
 interface MenuItem {
   key: string;
@@ -175,10 +176,10 @@ export default function MenuPermissionsPage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดสิทธิ์เมนู...</Text>
-      </HStack>
+      <div className="flex items-center justify-center gap-3" style={{ padding: 60 }}>
+        <Spinner size={20} />
+        <p className="text-sm text-muted-foreground">กำลังโหลดสิทธิ์เมนู...</p>
+      </div>
     );
   }
 
@@ -197,7 +198,22 @@ export default function MenuPermissionsPage() {
     : { fg: "var(--cmms-text-secondary)", bg: "var(--cmms-bg-muted)" };
 
   return (
-    <VStack gap={6}>
+    <PageShell
+      breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "สิทธิ์เมนูตามบทบาท" }]}
+      title="สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)"
+      description="เลือกว่าแต่ละบทบาทเห็นเมนูใดในแอป และปุ่มล่างมือถือแบบไหน — พรีวิวทางขวาจะอัปเดตสดทุกครั้งที่แก้"
+      actions={
+        <>
+          <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
+            {menus.length} เมนู × {roles.length} บทบาท
+          </span>
+          <Button disabled={saving} onClick={handleSave}>
+            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+          </Button>
+        </>
+      }
+    >
+      <VStack gap={6}>
       <style>{`
         .bn-config-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
         .bn-preview-sticky { position: sticky; top: 16px; }
@@ -210,45 +226,17 @@ export default function MenuPermissionsPage() {
         .bn-chip-btn.danger:hover { color: #dc2626; background: #fee2e2; }
       `}</style>
 
-      {error && <Banner status="error" title="Error" description={error} isDismissable={false} />}
+      {error && <Alert variant="danger" title="Error" description={error} />}
 
       {saveMsg && (
-        <Card padding={4} style={{ background: "var(--cmms-success-bg)", border: "1px solid var(--cmms-success)" }}>
-          <HStack gap={3} vAlign="center">
-            <CheckCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-success)" }} />
-            <Text type="body" weight="bold" style={{ color: "var(--cmms-success)" }}>{saveMsg}</Text>
-          </HStack>
-        </Card>
+        <Alert variant="success" title="สำเร็จ" description={saveMsg} />
       )}
-
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">MENU PERMISSIONS · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center">
-            <Heading level={2}>สิทธิ์เมนูและปุ่มล่างตามบทบาท (PWA)</Heading>
-            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
-              {menus.length} เมนู × {roles.length} บทบาท
-            </span>
-          </HStack>
-          <Text type="body" color="secondary">
-            เลือกว่าแต่ละบทบาทเห็นเมนูใดในแอป และปุ่มล่างมือถือแบบไหน — พรีวิวทางขวาจะอัปเดตสดทุกครั้งที่แก้
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={handleSave}
-          className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
-        </button>
-      </HStack>
 
       <div className="bn-config-grid">
         {/* ═══════════ คอลัมน์ซ้าย: ตารางสิทธิ์ + ตั้งค่าปุ่มล่าง ═══════════ */}
         <VStack gap={6}>
-          <Card padding={4}>
-            <VStack gap={5}>
+          <Card>
+            <CardContent className="space-y-5 p-4">
               {/* หัวตารางบทบาท */}
               <div style={{ overflowX: "auto" }}>
                 <div style={{
@@ -350,27 +338,25 @@ export default function MenuPermissionsPage() {
               </div>
 
               <HStack hAlign="end">
-                <button
-                  type="button"
+                <Button
                   disabled={saving}
                   onClick={handleSave}
-                  className="cmms-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? "กำลังบันทึก..." : "บันทึกสิทธิ์เมนูทั้งหมด"}
-                </button>
+                </Button>
               </HStack>
-            </VStack>
+            </CardContent>
           </Card>
 
           {/* ═══════════ ตั้งค่าปุ่มล่างมือถือต่อบทบาท ═══════════ */}
-          <Card padding={4}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-4">
               <VStack gap={1}>
-                <Heading level={3}>ปุ่มล่างมือถือ (Bottom Nav)</Heading>
-                <Text type="body" size="sm" color="secondary">
+                <h3 className="text-base font-semibold">ปุ่มล่างมือถือ (Bottom Nav)</h3>
+                <p className="text-sm text-muted-foreground">
                   เลือกปุ่มที่ผู้ใช้ของบทบาทนั้นเห็นที่แถบด้านล่างสุดของแอปมือถือ — กดการ์ดบทบาทเพื่อดูพรีวิวฝั่งขวา
                   {" "}ปุ่มที่เมนูถูกปิดสิทธิ์ (ติ๊กออกด้านบน) จะขึ้นเป็นปุ่มจางในพรีวิว และไม่แสดงบนมือถือจริง
-                </Text>
+                </p>
               </VStack>
 
               {roles.map((r) => {
@@ -414,9 +400,9 @@ export default function MenuPermissionsPage() {
                           <span className="cmms-status warn"><span className="cmms-status-dot" />{hiddenCount} ปุ่มถูกปิดสิทธิ์</span>
                         )}
                       </HStack>
-                      <Text type="body" size="sm" color="secondary">
+                      <p className="text-sm text-muted-foreground">
                         {isPreview ? "กำลังพรีวิว" : "กดเพื่อพรีวิว"}
-                      </Text>
+                      </p>
                     </HStack>
 
                     {/* แถวปุ่มที่เลือกไว้ */}
@@ -451,9 +437,9 @@ export default function MenuPermissionsPage() {
                         );
                       })}
                       {list.length === 0 && (
-                        <Text type="body" size="sm" color="secondary" style={{ padding: "4px 0" }}>
+                        <p className="px-0 py-1 text-sm text-muted-foreground">
                           ยังไม่มีปุ่มที่ตั้งเอง — จะใช้ค่าเริ่มต้นของบทบาท
-                        </Text>
+                        </p>
                       )}
                     </div>
 
@@ -476,31 +462,31 @@ export default function MenuPermissionsPage() {
                           ))}
                         </select>
                         {list.length >= MAX_BN && (
-                          <Text type="body" size="sm" color="secondary" style={{ marginTop: 6 }}>
+                          <p className="mt-1.5 text-sm text-muted-foreground">
                             แนะนำไม่เกิน {MAX_BN} ปุ่ม — ถ้าเกิน ปุ่มจะเล็กลง (flex:1)
-                          </Text>
+                          </p>
                         )}
                       </div>
                     ) : (
-                      <Text type="body" size="sm" color="secondary" style={{ marginTop: 10 }}>
+                      <p className="mt-2.5 text-sm text-muted-foreground">
                         เลือกครบทุกปุ่มแล้ว
-                      </Text>
+                      </p>
                     )}
                   </div>
                 );
               })}
-            </VStack>
+            </CardContent>
           </Card>
         </VStack>
 
         {/* ═══════════ คอลัมน์ขวา: พรีวิวโทรศัพท์ (สดทุกครั้งที่แก้) ═══════════ */}
         <div className="bn-preview-sticky">
-          <Card padding={4}>
-            <VStack gap={4}>
+          <Card>
+            <CardContent className="space-y-4 p-4">
               <HStack hAlign="between" vAlign="center" wrap="wrap" gap={2}>
                 <VStack gap={0}>
-                  <Heading level={4}>พรีวิวมือถือ</Heading>
-                  <Text type="body" size="sm" color="secondary">เห็นผลสดขณะแก้ไข</Text>
+                  <h3 className="text-sm font-semibold">พรีวิวมือถือ</h3>
+                  <p className="text-sm text-muted-foreground">เห็นผลสดขณะแก้ไข</p>
                 </VStack>
                 <select
                   value={previewRole?.id ?? ""}
@@ -583,34 +569,35 @@ export default function MenuPermissionsPage() {
 
               <VStack gap={1}>
                 {previewKeys.length > MAX_BN && (
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-warning-dark)", fontWeight: 600 }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--cmms-warning-dark)" }}>
                     {previewKeys.length} ปุ่ม — เกินที่แนะนำ ({MAX_BN}) ปุ่มจะเล็กลงบนมือถือจริง
-                  </Text>
+                  </p>
                 )}
                 {previewItems.some((it) => it.hidden) && (
-                  <Text type="body" size="sm" style={{ color: "var(--cmms-warning-dark)", fontWeight: 600 }}>
+                  <p className="text-sm font-semibold" style={{ color: "var(--cmms-warning-dark)" }}>
                     ปุ่มจาง = เมนูถูกปิดสิทธิ์ จะไม่แสดงบนมือถือจริง
-                  </Text>
+                  </p>
                 )}
-                <Text type="body" size="sm" color="secondary">
+                <p className="text-sm text-muted-foreground">
                   แถบนี้ตรงกับแถบล่างสุดของแอปบนมือถือ — เรียงจากซ้ายไปขวาตามลำดับปุ่ม
-                </Text>
+                </p>
               </VStack>
-            </VStack>
+            </CardContent>
           </Card>
         </div>
       </div>
 
-      <Card padding={3} style={{ background: "var(--cmms-bg-muted)", border: "1px dashed var(--cmms-border)" }}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" weight="bold">หมายเหตุ</Text>
-          <Text type="body" size="sm" color="secondary">
+      <Card className="border-dashed" style={{ background: "var(--cmms-bg-muted)" }}>
+        <CardContent className="space-y-1 p-3">
+          <p className="text-sm font-bold">หมายเหตุ</p>
+          <p className="text-sm text-muted-foreground">
             • ติ๊ก = เมนูนี้แสดงกับบทบาทนั้น ・ ว่าง = ซ่อนเมนู (ปุ่มล่างที่เมนูถูกปิดจะไม่แสดงบนมือถือ)
             {" "}• ปุ่มล่างถ้ายังไม่ตั้งค่า (การ์ดว่าง) จะใช้ค่าเริ่มต้นของบทบาท
             {" "}• การเปลี่ยนแปลงมีผลกับผู้ใช้ที่เปิดแอปใหม่ (รีเฟรช/เข้าสู่ระบบใหม่)
-          </Text>
-        </VStack>
+          </p>
+        </CardContent>
       </Card>
-    </VStack>
+      </VStack>
+    </PageShell>
   );
 }
