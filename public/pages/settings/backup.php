@@ -52,8 +52,8 @@ renderHeader();
 <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">💾 <?= __t('backup') ?> (Database Backup & Disaster Recovery)</h1>
-            <p class="mt-1 text-sm text-gray-500">สำรองและกู้คืนข้อมูลฐานข้อมูล MySQL ของระบบ CMMS-TPT</p>
+            <h1 class="text-2xl font-bold text-primary">💾 <?= __t('backup') ?> (Database Backup & Disaster Recovery)</h1>
+            <p class="mt-1 text-sm text-muted">สำรองและกู้คืนข้อมูลฐานข้อมูล MySQL ของระบบ CMMS-TPT</p>
         </div>
         <a href="backup.php?action=create" class="btn btn-primary">⚡ สำรองข้อมูลทันที (Backup Now)</a>
     </div>
@@ -72,12 +72,12 @@ renderHeader();
 
     <!-- Backup List Table -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-            <h2 class="font-bold text-gray-900 text-base">📁 ไฟล์สำรองข้อมูลทั้งหมด (Backup Files History)</h2>
+        <div class="p-4 border-b border-line">
+            <h2 class="font-bold text-primary text-base">📁 ไฟล์สำรองข้อมูลทั้งหมด (Backup Files History)</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-gray-50 text-gray-500 uppercase font-semibold text-xs">
+                <thead class="bg-subtle text-muted uppercase font-semibold text-xs">
                     <tr>
                         <th class="px-4 py-3 text-left">ชื่อไฟล์ .sql</th>
                         <th class="px-4 py-3 text-left">วันที่สำรอง</th>
@@ -85,16 +85,16 @@ renderHeader();
                         <th class="px-4 py-3 text-center">ดาวน์โหลด</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($files as $f): 
                         $bName = basename($f);
                         $fSize = round(filesize($f) / 1024, 2);
                         $fDate = date('d/m/Y H:i:s', filemtime($f));
                     ?>
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="ชื่อไฟล์ .sql" class="px-4 py-3 font-mono font-bold text-brand-600"><?= htmlspecialchars($bName) ?></td>
-                        <td data-label="วันที่สำรอง" class="px-4 py-3 text-gray-600"><?= $fDate ?></td>
-                        <td data-label="ขนาดไฟล์" class="px-4 py-3 text-gray-600"><?= $fSize ?> KB</td>
+                        <td data-label="วันที่สำรอง" class="px-4 py-3 text-secondary"><?= $fDate ?></td>
+                        <td data-label="ขนาดไฟล์" class="px-4 py-3 text-secondary"><?= $fSize ?> KB</td>
                         <td data-label="ดาวน์โหลด" class="px-4 py-3 text-center">
                             <a href="/backups/<?= urlencode($bName) ?>" download class="btn btn-secondary btn-sm">⬇️ Download SQL</a>
                         </td>

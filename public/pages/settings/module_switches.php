@@ -98,27 +98,27 @@ renderHeader();
 
         <?php foreach ($allModules as $groupTitle => $modules): ?>
         <div class="card p-6 space-y-4">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
+            <h3 class="font-extrabold text-primary text-base border-b pb-3 flex items-center justify-between">
                 <span>📁 <?= htmlspecialchars($groupTitle) ?></span>
-                <span class="text-xs font-bold text-slate-400"><?= count($modules) ?> Modules</span>
+                <span class="text-xs font-bold text-muted"><?= count($modules) ?> Modules</span>
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <?php foreach ($modules as $key => $meta): 
                     $isEnabled = !isset($currentSwitches[$key]) || $currentSwitches[$key] !== '0';
                 ?>
-                <div class="p-4 rounded-xl border transition-all flex items-start justify-between gap-3 <?= $isEnabled ? 'bg-indigo-50/40 border-indigo-200' : 'bg-slate-50 border-slate-200 opacity-60' ?>">
+                <div class="p-4 rounded-xl border transition-all flex items-start justify-between gap-3 <?= $isEnabled ? 'bg-indigo-50/40 border-indigo-200' : 'bg-subtle border-line opacity-60' ?>">
                     <div class="space-y-1">
-                        <label for="switch-<?= $key ?>" class="font-bold text-slate-900 text-xs cursor-pointer block">
+                        <label for="switch-<?= $key ?>" class="font-bold text-primary text-xs cursor-pointer block">
                             <?= htmlspecialchars($meta['label']) ?>
                         </label>
-                        <p class="text-[11px] text-slate-500 leading-normal"><?= htmlspecialchars($meta['desc']) ?></p>
+                        <p class="text-[11px] text-muted leading-normal"><?= htmlspecialchars($meta['desc']) ?></p>
                     </div>
 
                     <!-- Custom Toggle Switch -->
                     <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
                         <input type="checkbox" id="switch-<?= $key ?>" name="switches[<?= $key ?>]" value="1" <?= $isEnabled ? 'checked' : '' ?> class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-line after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                     </label>
                 </div>
                 <?php endforeach; ?>

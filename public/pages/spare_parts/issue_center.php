@@ -296,7 +296,7 @@ renderHeader();
 
         <!-- Form: จ่ายของด่วนหน้าสโตร์ (Direct Store Counter Issue Form) -->
         <div class="card cmms-card p-5 space-y-4">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                 <span>⚡ จ่ายของด่วนหน้าสโตร์ (Direct Store Counter Issue)</span>
                 <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Instant Issue</span>
             </h3>
@@ -305,7 +305,7 @@ renderHeader();
                 <input type="hidden" name="create_direct_issue" value="1">
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">เลือกใบสั่งซ่อม F-EN-03 (Work Order)</label>
+                    <label class="font-bold text-secondary block mb-1">เลือกใบสั่งซ่อม F-EN-03 (Work Order)</label>
                     <select name="work_order_id" required class="input input-bordered w-full font-medium">
                         <option value="">-- เลือกใบสั่งซ่อมที่ช่างมาเบิก --</option>
                         <?php foreach ($repairs as $r): ?>
@@ -315,7 +315,7 @@ renderHeader();
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">เลือกรายการอะไหล่ (Sage 300 / คลังเก่า)</label>
+                    <label class="font-bold text-secondary block mb-1">เลือกรายการอะไหล่ (Sage 300 / คลังเก่า)</label>
                     <select name="spare_part_id" required class="input input-bordered w-full font-mono">
                         <option value="">-- ค้นหาและเลือกรายการอะไหล่ --</option>
                         <?php foreach ($spares as $sp): ?>
@@ -327,7 +327,7 @@ renderHeader();
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">จำนวนที่เบิกจ่ายให้ช่าง</label>
+                    <label class="font-bold text-secondary block mb-1">จำนวนที่เบิกจ่ายให้ช่าง</label>
                     <input type="number" step="0.01" min="0.01" name="qty" required value="1" class="input input-bordered w-full font-bold text-sm">
                 </div>
 
@@ -339,14 +339,14 @@ renderHeader();
 
         <!-- Table: คิวรายการขอเบิกจากช่าง & สถานะการจ่ายของ (Requisitions Queue) -->
         <div class="lg:col-span-2 card overflow-hidden space-y-3">
-            <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
+            <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
                 <span>📋 คิวรายการขอเบิกจากช่าง & ประวัติการตัดสต็อก (Requisitions Queue)</span>
-                <span class="text-xs text-slate-400">เรียงตามวันที่ล่าสุด</span>
+                <span class="text-xs text-muted">เรียงตามวันที่ล่าสุด</span>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="data-table cmms-stack-table text-sm">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                    <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">เลขที่ใบเบิก / WO</th>
                             <th class="px-4 py-3 text-left">รูปอะไหล่</th>
@@ -357,26 +357,26 @@ renderHeader();
                             <th class="px-4 py-3 text-center">การดำเนินการ (Actions)</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($requests as $rq): ?>
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-subtle">
                             <td class="px-4 py-3 font-mono text-xs" data-label="เลขที่ใบเบิก / WO">
                                 <span class="font-extrabold text-indigo-600 block">#REQ-<?= $rq['id'] ?></span>
-                                <span class="text-slate-400 block font-bold">#WO-<?= $rq['work_order_id'] ?></span>
+                                <span class="text-muted block font-bold">#WO-<?= $rq['work_order_id'] ?></span>
                             </td>
                             <td data-label="รูปอะไหล่" class="px-4 py-3" data-hide-label>
-                                <img src="<?= getImageUrl($rq['spare_image'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50" title="<?= htmlspecialchars($rq['spare_name'] ?? 'อะไหล่') ?>">
+                                <img src="<?= getImageUrl($rq['spare_image'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-line shadow-sm bg-subtle" title="<?= htmlspecialchars($rq['spare_name'] ?? 'อะไหล่') ?>">
                             </td>
                             <td class="px-4 py-3" data-label="เครื่องจักร / อาการเสีย">
-                                <span class="font-bold text-slate-900 block text-xs"><?= htmlspecialchars($rq['asset_code'] ?? '-') ?> - <?= htmlspecialchars($rq['asset_name'] ?? '-') ?></span>
-                                <span class="text-[11px] text-slate-500 block truncate max-w-xs"><?= htmlspecialchars($rq['wo_title'] ?? '-') ?></span>
+                                <span class="font-bold text-primary block text-xs"><?= htmlspecialchars($rq['asset_code'] ?? '-') ?> - <?= htmlspecialchars($rq['asset_name'] ?? '-') ?></span>
+                                <span class="text-[11px] text-muted block truncate max-w-xs"><?= htmlspecialchars($rq['wo_title'] ?? '-') ?></span>
                                 <?php if (!empty($rq['spare_name'])): ?>
                                 <span class="text-[11px] text-indigo-600 font-bold block mt-0.5">⚙️ อะไหล่: <?= htmlspecialchars($rq['spare_name']) ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-xs text-slate-700 font-medium" data-label="ผู้ขอเบิก">
+                            <td class="px-4 py-3 text-xs text-secondary font-medium" data-label="ผู้ขอเบิก">
                                 <?= htmlspecialchars($rq['requester_name'] ?? 'ช่างผู้เบิก') ?>
-                                <span class="text-[10px] text-slate-400 block"><?= date('d/m/Y H:i', strtotime($rq['created_at'])) ?></span>
+                                <span class="text-[10px] text-muted block"><?= date('d/m/Y H:i', strtotime($rq['created_at'])) ?></span>
                             </td>
                             <td class="px-4 py-3 text-center" data-label="สถานะ">
                                 <span class="badge <?= match($rq['status']) {
@@ -394,7 +394,7 @@ renderHeader();
                                 <?php if (!empty($rq['sage_doc_no'])): ?>
                                 <span class="badge bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px]"><?= htmlspecialchars($rq['sage_doc_no']) ?></span>
                                 <?php else: ?>
-                                <span class="text-slate-400 text-xs italic">-</span>
+                                <span class="text-muted text-xs italic">-</span>
                                 <?php endif; ?>
                             </td>
                             <td class="px-4 py-3 text-center space-x-1 text-xs" data-label="การดำเนินการ (Actions)">

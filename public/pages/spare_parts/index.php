@@ -67,10 +67,10 @@ renderHeader();
         <div>
             <div class="flex items-center gap-2">
                 <span class="badge bg-purple-100 text-purple-800 font-bold">Hybrid Inventory Management</span>
-                <span class="text-xs text-slate-400">Sage 300 & Legacy Internal Stock</span>
+                <span class="text-xs text-muted">Sage 300 & Legacy Internal Stock</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 mt-1">⚙️ คลังสต็อกอะไหล่ (Sage 300 & คลังเก่าภายใน)</h1>
-            <p class="text-xs text-slate-500 mt-0.5">รองรับทั้งอะไหล่ในระบบ Sage 300 และอะไหล่เก่ารอ Migration เข้า Sage 300</p>
+            <h1 class="text-2xl font-black text-primary mt-1">⚙️ คลังสต็อกอะไหล่ (Sage 300 & คลังเก่าภายใน)</h1>
+            <p class="text-xs text-muted mt-0.5">รองรับทั้งอะไหล่ในระบบ Sage 300 และอะไหล่เก่ารอ Migration เข้า Sage 300</p>
         </div>
         <div class="flex gap-2">
             <a href="sage_sync.php" class="btn btn-primary text-xs bg-purple-700 border-purple-700 hover:bg-purple-800">
@@ -83,8 +83,8 @@ renderHeader();
     <!-- Source Type Filter Bar -->
     <div class="card p-4 flex items-center justify-between flex-wrap gap-4 text-xs">
         <div class="flex items-center gap-2">
-            <span class="font-bold text-slate-700">ตัวกรองคลัง:</span>
-            <a href="index.php" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === '' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200' ?>">
+            <span class="font-bold text-secondary">ตัวกรองคลัง:</span>
+            <a href="index.php" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === '' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-muted text-secondary border-line hover:bg-slate-200' ?>">
                 ทั้งหมด (<?= $totalRecords ?>)
             </a>
             <a href="index.php?source=sage" class="px-3 py-1.5 rounded-lg border font-bold <?= $filterSource === 'sage' ? 'bg-purple-700 text-white border-purple-700' : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' ?>">
@@ -106,7 +106,7 @@ renderHeader();
     <div class="card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-slate-50 border-b border-slate-200">
+                <thead class="bg-subtle border-b border-line">
                     <tr>
                         <th class="px-4 py-3 text-left">ประเภทระบบ</th>
                         <th class="px-4 py-3 text-left">รูปภาพอะไหล่</th>
@@ -118,11 +118,11 @@ renderHeader();
                         <th class="px-4 py-3 text-center">จัดการ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($spares as $sp): 
                         $hasSage = !empty($sp['sage_item_no']);
                     ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="ประเภทระบบ" class="px-4 py-3 text-xs font-bold">
                             <?php if ($hasSage): ?>
                             <span class="badge bg-purple-100 text-purple-800">🟣 Sage 300</span>
@@ -131,18 +131,18 @@ renderHeader();
                             <?php endif; ?>
                         </td>
                         <td data-label="รูปภาพอะไหล่" class="px-4 py-3">
-                            <img src="<?= getImageUrl($sp['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50">
+                            <img src="<?= getImageUrl($sp['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-line shadow-sm bg-subtle">
                         </td>
                         <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                        <td data-label="ชื่ออะไหล่ / รายละเอียด" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
+                        <td data-label="ชื่ออะไหล่ / รายละเอียด" class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($sp['name']) ?></td>
                         <td data-label="Sage 300 Item No" class="px-4 py-3 text-center">
                             <?php if ($hasSage): ?>
                             <span class="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200"><?= htmlspecialchars($sp['sage_item_no']) ?></span>
                             <?php else: ?>
-                            <span class="text-slate-400 text-xs italic">ยังไม่ได้ผูก Sage</span>
+                            <span class="text-muted text-xs italic">ยังไม่ได้ผูก Sage</span>
                             <?php endif; ?>
                         </td>
-                        <td data-label="คงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-slate-800">
+                        <td data-label="คงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-primary">
                             <?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?>
                             <?php if (($sp['reserved_qty'] ?? 0) > 0): ?>
                             <span class="text-[10px] text-amber-600 block">(จอง <?= number_format($sp['reserved_qty']) ?>)</span>
@@ -175,15 +175,15 @@ renderHeader();
 <!-- Modal: Bind Legacy Item to Sage 300 -->
 <div id="bind-sage-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="card shadow-2xl w-full max-w-md p-6 space-y-4">
-        <h3 class="font-bold text-slate-900 text-lg border-b pb-2">🔗 ผูกรายการอะไหล่เก่าเข้ากับ Sage 300</h3>
-        <p class="text-xs text-slate-500" id="bind-item-name-label">เลือกรายการอะไหล่ใน Sage 300 เพื่อแมตช์จับคู่</p>
+        <h3 class="font-bold text-primary text-lg border-b pb-2">🔗 ผูกรายการอะไหล่เก่าเข้ากับ Sage 300</h3>
+        <p class="text-xs text-muted" id="bind-item-name-label">เลือกรายการอะไหล่ใน Sage 300 เพื่อแมตช์จับคู่</p>
 
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="match_sage_item" value="1">
             <input type="hidden" name="spare_id" id="bind-spare-id">
 
             <div>
-                <label class="font-bold text-slate-700 block mb-1">รหัสอะไหล่ใน Sage 300 (Sage Item No)</label>
+                <label class="font-bold text-secondary block mb-1">รหัสอะไหล่ใน Sage 300 (Sage Item No)</label>
                 <input type="text" name="sage_item_no" required placeholder="เช่น BEARING-6205" class="input input-bordered w-full font-mono font-bold">
             </div>
 

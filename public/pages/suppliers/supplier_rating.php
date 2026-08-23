@@ -37,14 +37,14 @@ renderHeader();
 
     <!-- Supplier Scorecard Table -->
     <div class="card p-6 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-3 flex items-center justify-between">
             <span>📊 ตารางคะแนนและเกรดผู้จำหน่ายประจำปี (Vendor Performance Matrix)</span>
             <span class="text-xs text-amber-700 font-bold">ISO 9001 Approved Vendors</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-xs">
-                <thead class="bg-slate-50 font-bold text-slate-600 uppercase">
+                <thead class="bg-subtle font-bold text-secondary uppercase">
                     <tr>
                         <th class="px-4 py-3 text-left">ผู้จำหน่าย / ผู้รับเหมา</th>
                         <th class="px-4 py-3 text-center">จำนวนอะไหล่ในคลัง</th>
@@ -53,7 +53,7 @@ renderHeader();
                         <th class="px-4 py-3 text-center">เกรดผู้ขาย (Grade)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 font-medium">
+                <tbody class="divide-y divide-line font-medium">
                     <?php foreach ($suppliers as $idx => $sup): 
                         $grade = match($idx % 3) {
                             0 => ['code' => 'A+', 'bg' => 'status-pass'],
@@ -61,12 +61,12 @@ renderHeader();
                             default => ['code' => 'B+', 'bg' => 'priority-medium']
                         };
                     ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="ผู้จำหน่าย / ผู้รับเหมา" class="px-4 py-3">
-                            <span class="font-bold text-slate-900 block"><?= htmlspecialchars($sup['name']) ?></span>
-                            <span class="text-[11px] text-slate-500">📞 <?= htmlspecialchars($sup['phone'] ?? '-') ?> | ✉️ <?= htmlspecialchars($sup['email'] ?? '-') ?></span>
+                            <span class="font-bold text-primary block"><?= htmlspecialchars($sup['name']) ?></span>
+                            <span class="text-[11px] text-muted">📞 <?= htmlspecialchars($sup['phone'] ?? '-') ?> | ✉️ <?= htmlspecialchars($sup['email'] ?? '-') ?></span>
                         </td>
-                        <td data-label="จำนวนอะไหล่ในคลัง" class="px-4 py-3 text-center font-bold font-mono text-slate-800"><?= $sup['spare_count'] ?> รายการ</td>
+                        <td data-label="จำนวนอะไหล่ในคลัง" class="px-4 py-3 text-center font-bold font-mono text-primary"><?= $sup['spare_count'] ?> รายการ</td>
                         <td data-label="การส่งตรงเวลา (On-Time Rate)" class="px-4 py-3 text-center font-bold text-emerald-600">98.5%</td>
                         <td data-label="ผ่านเกณฑ์คุณภาพ (Quality Pass)" class="px-4 py-3 text-center font-bold text-indigo-600">99.0%</td>
                         <td data-label="เกรดผู้ขาย (Grade)" class="px-4 py-3 text-center">

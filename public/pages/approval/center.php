@@ -57,7 +57,7 @@ renderHeader();
                 <i data-lucide="send" class="w-7 h-7 text-indigo-400"></i>
                 <span>ศูนย์การอนุมัติเอกสารผ่าน LINE & Email (1-Click Approval)</span>
             </h1>
-            <p class="text-xs text-slate-400 mt-1">อนุมัติหรือปฏิเสธใบสั่งซ่อม F-EN-03, ใบ LOTO, และใบขอเบิกอะไหล่ผ่าน LINE Flex Message หรือ Email ได้ใน 1 สัมผัส</p>
+            <p class="text-xs text-muted mt-1">อนุมัติหรือปฏิเสธใบสั่งซ่อม F-EN-03, ใบ LOTO, และใบขอเบิกอะไหล่ผ่าน LINE Flex Message หรือ Email ได้ใน 1 สัมผัส</p>
         </div>
         <button onclick="document.getElementById('modalCreate').style.display='flex'" class="btn btn-primary bg-emerald-600 hover:bg-emerald-500 text-white text-xs gap-2">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
@@ -76,30 +76,30 @@ renderHeader();
     <!-- KPI Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="card p-5 space-y-2 border-l-4 border-amber-500">
-            <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+            <div class="flex justify-between items-center text-xs text-muted font-bold">
                 <span>คำขอรออนุมัติ (PENDING)</span>
                 <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
             </div>
             <div class="text-2xl font-black text-amber-600"><?= $pendingCount ?></div>
-            <p class="text-[11px] text-slate-400">รอการกดอนุมัติผ่าน LINE / Email</p>
+            <p class="text-[11px] text-muted">รอการกดอนุมัติผ่าน LINE / Email</p>
         </div>
 
         <div class="card p-5 space-y-2 border-l-4 border-emerald-500">
-            <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+            <div class="flex justify-between items-center text-xs text-muted font-bold">
                 <span>อนุมัติสำเร็จแล้ว (APPROVED)</span>
                 <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
             </div>
             <div class="text-2xl font-black text-emerald-600"><?= $approvedCount ?></div>
-            <p class="text-[11px] text-slate-400">ดำเนินการอนุมัติสำเร็จเรียบร้อย</p>
+            <p class="text-[11px] text-muted">ดำเนินการอนุมัติสำเร็จเรียบร้อย</p>
         </div>
 
         <div class="card p-5 space-y-2 border-l-4 border-rose-500">
-            <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+            <div class="flex justify-between items-center text-xs text-muted font-bold">
                 <span>ปฏิเสธคำขอ (REJECTED)</span>
                 <i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i>
             </div>
             <div class="text-2xl font-black text-rose-600"><?= $rejectedCount ?></div>
-            <p class="text-[11px] text-slate-400">ไม่อนุมัติพร้อมระบุเหตุผล</p>
+            <p class="text-[11px] text-muted">ไม่อนุมัติพร้อมระบุเหตุผล</p>
         </div>
     </div>
 
@@ -107,11 +107,11 @@ renderHeader();
     <div class="card p-6 space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
             <div>
-                <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                     <i data-lucide="list-checks" class="w-5 h-5 text-indigo-600"></i>
                     <span>ประวัติคำขออนุมัติทั้งหมด (Approval Request Logs)</span>
                 </h3>
-                <p class="text-xs text-slate-500">แสดงผลคำขออนุมัติล่าสุด ลิงก์ 1-Click และสถานะการตอบรับ</p>
+                <p class="text-xs text-muted">แสดงผลคำขออนุมัติล่าสุด ลิงก์ 1-Click และสถานะการตอบรับ</p>
             </div>
         </div>
 
@@ -136,9 +136,9 @@ renderHeader();
                     <tr>
                         <td class="font-mono font-bold text-indigo-600"><?= htmlspecialchars($r['document_no']) ?></td>
                         <td><span class="badge badge-outline text-[10px] uppercase"><?= htmlspecialchars($r['request_type']) ?></span></td>
-                        <td class="font-bold text-slate-900"><?= htmlspecialchars($r['title']) ?></td>
+                        <td class="font-bold text-primary"><?= htmlspecialchars($r['title']) ?></td>
                         <td><?= htmlspecialchars($r['requester_name']) ?></td>
-                        <td class="font-mono text-slate-600 text-xs"><?= htmlspecialchars($r['approver_email']) ?></td>
+                        <td class="font-mono text-secondary text-xs"><?= htmlspecialchars($r['approver_email']) ?></td>
                         <td class="text-center">
                             <?php if ($r['status'] === 'approved'): ?>
                             <span class="badge badge badge-success border-emerald-200">✅ อนุมัติแล้ว</span>
@@ -168,11 +168,11 @@ renderHeader();
 <div id="modalCreate" style="display:none;" class="dialog-overlay flex items-center justify-center p-4">
     <div class="dialog-content max-w-md w-full">
         <div class="flex items-center justify-between border-b pb-3">
-            <h3 class="font-black text-slate-900 text-base flex items-center gap-2">
+            <h3 class="font-black text-primary text-base flex items-center gap-2">
                 <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-600"></i>
                 <span>สร้างคำขออนุมัติผ่าน LINE / Email</span>
             </h3>
-            <button onclick="document.getElementById('modalCreate').style.display='none'" class="text-slate-400 hover:text-slate-600">
+            <button onclick="document.getElementById('modalCreate').style.display='none'" class="text-muted hover:text-secondary">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
@@ -181,7 +181,7 @@ renderHeader();
             <input type="hidden" name="action" value="create_request">
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">ประเภทเอกสาร:</label>
+                <label class="text-xs font-bold text-secondary">ประเภทเอกสาร:</label>
                 <select name="request_type" class="select-field text-xs font-bold">
                     <option value="repair">🔧 ใบสั่งงานซ่อมบำรุง F-EN-03</option>
                     <option value="loto">🛡️ ใบอนุญาตความปลอดภัย LOTO</option>
@@ -190,22 +190,22 @@ renderHeader();
             </div>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">เลขที่เอกสาร:</label>
+                <label class="text-xs font-bold text-secondary">เลขที่เอกสาร:</label>
                 <input type="text" name="document_no" value="EN-<?= date('y') ?>-<?= rand(100, 999) ?>" class="input input-bordered w-full text-xs font-mono font-bold" required>
             </div>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">หัวข้อรายการที่ขออนุมัติ:</label>
+                <label class="text-xs font-bold text-secondary">หัวข้อรายการที่ขออนุมัติ:</label>
                 <input type="text" name="title" value="อนุมัติงานซ่อมเปลี่ยนซีลยางกระบอกสูบไฮดรอลิก" class="input input-bordered w-full text-xs font-bold" required>
             </div>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">ผู้ส่งเรื่องขออนุมัติ:</label>
+                <label class="text-xs font-bold text-secondary">ผู้ส่งเรื่องขออนุมัติ:</label>
                 <input type="text" name="requester_name" value="<?= htmlspecialchars($_SESSION['full_name'] ?? 'ช่างซ่อมบำรุง') ?>" class="input input-bordered w-full text-xs font-bold" required>
             </div>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">อีเมลผู้อนุมัติ (Approver Email):</label>
+                <label class="text-xs font-bold text-secondary">อีเมลผู้อนุมัติ (Approver Email):</label>
                 <input type="email" name="approver_email" value="manager@toppan.co.th" class="input input-bordered w-full text-xs font-mono font-bold" required>
             </div>
 

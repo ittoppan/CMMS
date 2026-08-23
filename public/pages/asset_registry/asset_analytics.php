@@ -91,15 +91,15 @@ renderHeader();
         <div>
             <div class="flex items-center gap-2">
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Asset 360 Analytics</span>
-                <span class="text-xs text-slate-400">Machine Deep Diagnostic & Spare Cost</span>
+                <span class="text-xs text-muted">Machine Deep Diagnostic & Spare Cost</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 mt-1">🏭 Dashboard วิเคราะห์ข้อมูลเครื่องจักร & อะไหล่ที่ถูกเบิก (Machine 360)</h1>
-            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์ประวัติการซ่อม ค่าใช้จ่ายอะไหล่สะสม เวลา Downtime และรายการเบิกอะไหล่เฉพาะเครื่อง</p>
+            <h1 class="text-2xl font-black text-primary mt-1">🏭 Dashboard วิเคราะห์ข้อมูลเครื่องจักร & อะไหล่ที่ถูกเบิก (Machine 360)</h1>
+            <p class="text-xs text-muted mt-0.5">วิเคราะห์ประวัติการซ่อม ค่าใช้จ่ายอะไหล่สะสม เวลา Downtime และรายการเบิกอะไหล่เฉพาะเครื่อง</p>
         </div>
         <div class="flex items-center gap-3">
             <!-- Asset Picker Dropdown -->
             <form method="GET" class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-700">เลือกเครื่องจักร:</label>
+                <label class="text-xs font-bold text-secondary">เลือกเครื่องจักร:</label>
                 <select name="asset_id" onchange="this.form.submit()" class="input input-bordered w-full font-bold text-xs cursor-pointer">
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= $a['id'] === $assetId ? 'selected' : '' ?>>
@@ -116,14 +116,14 @@ renderHeader();
     <div class="card cmms-card p-5">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-4">
-                <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-slate-300 shadow-sm">
+                <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-line shadow-sm">
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="font-mono text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><?= htmlspecialchars($asset['code']) ?></span>
                         <span class="badge badge badge-success text-xs font-bold"><?= htmlspecialchars($asset['status'] ?? 'active') ?></span>
                     </div>
-                    <h2 class="text-xl font-extrabold text-slate-900 mt-1"><?= htmlspecialchars($asset['name']) ?></h2>
-                    <p class="text-xs text-slate-500">แผนก: <strong><?= htmlspecialchars($asset['dept_name'] ?? '-') ?></strong> | สถานที่: <strong><?= htmlspecialchars($asset['loc_name'] ?? '-') ?></strong></p>
+                    <h2 class="text-xl font-extrabold text-primary mt-1"><?= htmlspecialchars($asset['name']) ?></h2>
+                    <p class="text-xs text-muted">แผนก: <strong><?= htmlspecialchars($asset['dept_name'] ?? '-') ?></strong> | สถานที่: <strong><?= htmlspecialchars($asset['loc_name'] ?? '-') ?></strong></p>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -136,24 +136,24 @@ renderHeader();
     <!-- 4 High Level Metric Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="card cmms-card p-5">
-            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">มูลค่าเบิกอะไหล่สะสม</div>
+            <div class="text-xs text-muted font-bold uppercase tracking-wider">มูลค่าเบิกอะไหล่สะสม</div>
             <div class="text-2xl font-black text-purple-700 mt-1">฿<?= number_format($totalPartsCost, 2) ?></div>
-            <div class="text-[11px] text-slate-400 mt-1">รวม <?= count($issuedParts) ?> รายการอะไหล่</div>
+            <div class="text-[11px] text-muted mt-1">รวม <?= count($issuedParts) ?> รายการอะไหล่</div>
         </div>
         <div class="card cmms-card p-5">
-            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">รวมค่าใช้จ่ายซ่อมบำรุง</div>
+            <div class="text-xs text-muted font-bold uppercase tracking-wider">รวมค่าใช้จ่ายซ่อมบำรุง</div>
             <div class="text-2xl font-black text-indigo-600 mt-1">฿<?= number_format($totalMachineCost, 2) ?></div>
-            <div class="text-[11px] text-slate-400 mt-1">ค่าแรง + อะไหล่ + Outsource</div>
+            <div class="text-[11px] text-muted mt-1">ค่าแรง + อะไหล่ + Outsource</div>
         </div>
         <div class="card cmms-card p-5">
-            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">จำนวนครั้งที่เครื่องจักรเสีย</div>
+            <div class="text-xs text-muted font-bold uppercase tracking-wider">จำนวนครั้งที่เครื่องจักรเสีย</div>
             <div class="text-2xl font-black text-rose-600 mt-1"><?= $totalRepairs ?> ครั้ง</div>
-            <div class="text-[11px] text-slate-400 mt-1">ใบสั่งซ่อม F-EN-03 สะสม</div>
+            <div class="text-[11px] text-muted mt-1">ใบสั่งซ่อม F-EN-03 สะสม</div>
         </div>
         <div class="card cmms-card p-5">
-            <div class="text-xs text-slate-500 font-bold uppercase tracking-wider">เวลา Downtime สะสม</div>
+            <div class="text-xs text-muted font-bold uppercase tracking-wider">เวลา Downtime สะสม</div>
             <div class="text-2xl font-black text-amber-600 mt-1"><?= number_format($totalDowntime, 1) ?> ชม.</div>
-            <div class="text-[11px] text-slate-400 mt-1">ชั่วโมงเครื่องหยุดทำงาน</div>
+            <div class="text-[11px] text-muted mt-1">ชั่วโมงเครื่องหยุดทำงาน</div>
         </div>
     </div>
 
@@ -162,14 +162,14 @@ renderHeader();
 
         <!-- Spare Parts Issued Table (2 cols wide) -->
         <div class="lg:col-span-2 card overflow-hidden space-y-3">
-            <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
+            <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
                 <span>📦 รายการอะไหล่ที่มีการเบิกสำหรับเครื่องจักรนี้ (Spare Parts Issued Breakdown)</span>
                 <span class="text-xs text-purple-600 font-bold">Sage 300 Matched</span>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="data-table cmms-stack-table text-sm">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                    <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">รหัสอะไหล่</th>
                             <th class="px-4 py-3 text-left">ชื่อรายการอะไหล่</th>
@@ -179,13 +179,13 @@ renderHeader();
                             <th class="px-4 py-3 text-right">รวมมูลค่า (บาท)</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($issuedParts as $p): ?>
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-subtle">
                             <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($p['code']) ?></td>
-                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($p['name']) ?></td>
+                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($p['name']) ?></td>
                             <td data-label="รหัส Sage 300" class="px-4 py-3 text-center"><span class="badge bg-purple-50 text-purple-700 text-xs font-mono font-bold"><?= htmlspecialchars($p['sage_item_no'] ?? '-') ?></span></td>
-                            <td data-label="จำนวนที่เบิก" class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($p['total_qty_issued']) ?> <?= htmlspecialchars($p['unit'] ?? 'ชิ้น') ?></td>
+                            <td data-label="จำนวนที่เบิก" class="px-4 py-3 text-center font-bold text-primary"><?= number_format($p['total_qty_issued']) ?> <?= htmlspecialchars($p['unit'] ?? 'ชิ้น') ?></td>
                             <td data-label="ราคา/หน่วย" class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($p['unit_price'], 2) ?></td>
                             <td data-label="รวมมูลค่า (บาท)" class="px-4 py-3 text-right font-mono font-bold text-purple-700">฿<?= number_format($p['total_parts_cost'], 2) ?></td>
                         </tr>
@@ -200,7 +200,7 @@ renderHeader();
 
         <!-- Cost Breakdown Doughnut Chart -->
         <div class="card cmms-card p-5">
-            <h3 class="font-bold text-slate-900 text-sm border-b pb-2">📊 สัดส่วนค่าใช้จ่ายซ่อมบำรุง (Cost Ratio)</h3>
+            <h3 class="font-bold text-primary text-sm border-b pb-2">📊 สัดส่วนค่าใช้จ่ายซ่อมบำรุง (Cost Ratio)</h3>
             <div class="relative h-64 flex items-center justify-center">
                 <canvas id="costRatioChart"></canvas>
             </div>
@@ -210,14 +210,14 @@ renderHeader();
 
     <!-- Recent Repair Orders Table -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
+        <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
             <span>🔧 ประวัติใบสั่งซ่อมเครื่องจักร F-EN-03 (Repair History Logs)</span>
             <a href="../repair/create.php?asset_id=<?= $assetId ?>" class="text-xs text-indigo-600 font-bold hover:underline">+ แจ้งซ่อมเครื่องนี้ →</a>
         </div>
 
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">เลขที่ WO</th>
                         <th class="px-4 py-3 text-left">อาการเสีย / ปัญหา</th>
@@ -228,14 +228,14 @@ renderHeader();
                         <th class="px-4 py-3 text-center">ดูงาน</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($repairs as $r): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="เลขที่ WO" class="px-4 py-3 font-mono font-bold text-indigo-600 text-xs">#WO-<?= $r['id'] ?></td>
-                        <td data-label="อาการเสีย / ปัญหา" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($r['title']) ?></td>
+                        <td data-label="อาการเสีย / ปัญหา" class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($r['title']) ?></td>
                         <td data-label="ระดับความด่วน" class="px-4 py-3 text-center"><span class="badge badge badge-error text-xs font-bold"><?= htmlspecialchars($r['priority'] ?? 'Medium') ?></span></td>
                         <td data-label="สถานะ" class="px-4 py-3 text-center"><span class="badge badge badge-success text-xs font-bold"><?= htmlspecialchars($r['status']) ?></span></td>
-                        <td data-label="ช่างผู้ดูแล" class="px-4 py-3 text-slate-700 font-medium"><?= htmlspecialchars($r['tech_name'] ?? 'ไม่ระบุ') ?></td>
+                        <td data-label="ช่างผู้ดูแล" class="px-4 py-3 text-secondary font-medium"><?= htmlspecialchars($r['tech_name'] ?? 'ไม่ระบุ') ?></td>
                         <td data-label="ค่าซ่อมรวม" class="px-4 py-3 text-right font-mono font-bold text-indigo-700">฿<?= number_format(($r['cost_labor']+$r['cost_parts']+$r['cost_outsource']), 2) ?></td>
                         <td data-label="ดูงาน" class="px-4 py-3 text-center"><a href="../repair/view.php?id=<?= $r['id'] ?>" class="btn btn-secondary btn-sm text-xs text-indigo-600 font-bold">ดูงาน →</a></td>
                     </tr>

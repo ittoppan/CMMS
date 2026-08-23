@@ -38,7 +38,7 @@ renderHeader();
 
     <!-- Timeline Audit Trail List -->
     <div class="card p-6 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ลำดับประวัติเหตุการณ์ไทม์ไลน์ระบบ (System Action Event Timeline)</span>
             <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($logs) ?> เหตุการณ์ล่าสุด</span>
         </h3>
@@ -49,20 +49,20 @@ renderHeader();
                 <!-- Timeline Bullet Dot -->
                 <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-indigo-600 border-2 border-white shadow"></div>
                 
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1 hover:bg-slate-100/80 transition-all">
+                <div class="bg-subtle p-4 rounded-2xl border border-line space-y-1 hover:bg-muted/80 transition-all">
                     <div class="flex items-center justify-between">
                         <span class="font-black text-indigo-900 text-xs uppercase tracking-wide">
                             <?= htmlspecialchars($log['action']) ?> &bull; <span class="font-mono text-purple-700"><?= htmlspecialchars($log['doc_no']) ?></span>
                         </span>
-                        <span class="text-[10px] text-slate-400 font-mono"><?= $log['created_at'] ?> &bull; IP: <?= htmlspecialchars($log['ip_address']) ?></span>
+                        <span class="text-[10px] text-muted font-mono"><?= $log['created_at'] ?> &bull; IP: <?= htmlspecialchars($log['ip_address']) ?></span>
                     </div>
 
-                    <p class="text-xs font-bold text-slate-800">
+                    <p class="text-xs font-bold text-primary">
                         👤 ปฏิบัติงานโดย: <span class="text-indigo-700"><?= htmlspecialchars($log['user_name'] ?? 'ระบบอัตโนมัติ') ?></span>
                     </p>
 
                     <?php if (!empty($log['old_value']) || !empty($log['new_value'])): ?>
-                    <div class="card text-[11px] font-mono p-2 text-slate-600">
+                    <div class="card text-[11px] font-mono p-2 text-secondary">
                         <span class="text-rose-600 line-through mr-2">เก่า: <?= htmlspecialchars($log['old_value']) ?></span> ➔ 
                         <span class="text-emerald-600 font-bold ml-2">ใหม่: <?= htmlspecialchars($log['new_value']) ?></span>
                     </div>

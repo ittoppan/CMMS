@@ -69,18 +69,18 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">แก้ไขแผน PM #<?= $id ?></h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">แก้ไขแผน PM #<?= $id ?></h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">หัวข้อ <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">หัวข้อ <span class="text-red-500">*</span></label>
                 <input type="text" name="title" value="<?= htmlspecialchars($row['title']) ?>" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
                 <select name="asset_id" required class="input input-bordered w-full mt-1">
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= sel($row['asset_id'], $a['id']) ?>><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -88,7 +88,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนงาน (Plan)</label>
+                <label class="block text-sm font-medium text-secondary">แผนงาน (Plan)</label>
                 <select name="plan_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($plans as $p): ?>
@@ -97,7 +97,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนก</label>
+                <label class="block text-sm font-medium text-secondary">แผนก</label>
                 <select name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($depts as $d): ?>
@@ -106,7 +106,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานที่</label>
+                <label class="block text-sm font-medium text-secondary">สถานที่</label>
                 <select name="location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locs as $l): ?>
@@ -115,7 +115,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">โซนงาน</label>
+                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
                 <select name="work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($zones as $z): ?>
@@ -124,7 +124,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ผู้รับผิดชอบ</label>
+                <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบ</label>
                 <select name="assigned_to" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
@@ -133,7 +133,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ประเภทความถี่</label>
+                <label class="block text-sm font-medium text-secondary">ประเภทความถี่</label>
                 <select name="frequency_type" class="input input-bordered w-full mt-1">
                     <?php foreach (['daily','weekly','monthly','quarterly','yearly','custom'] as $f): ?>
                     <option value="<?= $f ?>" <?= sel($row['frequency_type'], $f) ?>><?= ucfirst($f) ?></option>
@@ -141,19 +141,19 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Interval</label>
+                <label class="block text-sm font-medium text-secondary">Interval</label>
                 <input type="number" name="frequency_interval" class="input input-bordered w-full mt-1" value="<?= $row['frequency_interval'] ?>" min="1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">กำหนดเสร็จ</label>
+                <label class="block text-sm font-medium text-secondary">กำหนดเสร็จ</label>
                 <input type="date" name="due_date" class="input input-bordered w-full mt-1" value="<?= $row['due_date'] ?? '' ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ทำล่าสุด</label>
+                <label class="block text-sm font-medium text-secondary">ทำล่าสุด</label>
                 <input type="date" name="last_done_date" class="input input-bordered w-full mt-1" value="<?= $row['last_done_date'] ?? '' ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                <label class="block text-sm font-medium text-secondary">สถานะ</label>
                 <select name="status" class="input input-bordered w-full mt-1">
                     <?php foreach (['pending','in_progress','completed','overdue','skipped'] as $s): ?>
                     <option value="<?= $s ?>" <?= sel($row['status'], $s) ?>><?= ucfirst($s) ?></option>
@@ -161,35 +161,35 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
                 </select>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ไฟล์คำสั่งปฏิบัติงาน</label>
+                <label class="block text-sm font-medium text-secondary">ไฟล์คำสั่งปฏิบัติงาน</label>
                 <?php if ($row['work_instruction_file']): ?>
                 <div class="mb-2 text-sm">
                     <a href="/<?= htmlspecialchars($row['work_instruction_file']) ?>" target="_blank" class="text-primary-600 hover:underline">ดูไฟล์ปัจจุบัน</a>
                 </div>
                 <?php endif; ?>
                 <input type="file" name="work_instruction_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="input input-bordered w-full mt-1">
-                <p class="text-xs text-gray-500 mt-1">เว้นว่างไว้หากไม่ต้องการเปลี่ยนไฟล์</p>
+                <p class="text-xs text-muted mt-1">เว้นว่างไว้หากไม่ต้องการเปลี่ยนไฟล์</p>
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">คำอธิบาย</label>
+            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
             <textarea name="description" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description'] ?? '') ?></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
+            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
             <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes'] ?? '') ?></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Checklist (บรรทัดละ 1 รายการ)</label>
+            <label class="block text-sm font-medium text-secondary">Checklist (บรรทัดละ 1 รายการ)</label>
             <textarea name="checklist" rows="4" class="input input-bordered w-full mt-1"><?php $cl = json_decode($row['checklist'] ?? '[]'); echo is_array($cl) ? implode("\n", $cl) : '' ?></textarea>
         </div>
         <?php if ($templates): ?>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">เลือก Checklist Template</label>
+            <label class="block text-sm font-medium text-secondary mb-2">เลือก Checklist Template</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
                 <?php foreach ($templates as $t): ?>
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="checklist_templates[]" value="<?= $t['id'] ?>" class="rounded border-gray-300" <?= chk($selectedTplIds, $t['id']) ?>>
+                    <input type="checkbox" name="checklist_templates[]" value="<?= $t['id'] ?>" class="rounded border-line" <?= chk($selectedTplIds, $t['id']) ?>>
                     <?= htmlspecialchars($t['code'] . ' - ' . $t['name']) ?>
                 </label>
                 <?php endforeach; ?>
@@ -197,7 +197,7 @@ function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
         </div>
         <?php endif; ?>
         <div>
-            <label class="block text-sm font-medium text-gray-700">เหตุผลที่เลื่อนกำหนดการ</label>
+            <label class="block text-sm font-medium text-secondary">เหตุผลที่เลื่อนกำหนดการ</label>
             <textarea name="reschedule_reason" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['reschedule_reason'] ?? '') ?></textarea>
         </div>
         <div class="flex gap-3">

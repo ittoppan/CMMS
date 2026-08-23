@@ -212,11 +212,11 @@ renderHeader();
     <div class="card cmms-card p-5">
         <div class="flex items-center justify-between border-b pb-3">
             <div>
-                <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                     <span>🏷️ กำหนดรหัสหมวดหมู่อะไหล่ Sage 300 (Category Codes) ที่ต้องการซิงค์</span>
                     <span class="badge bg-indigo-100 text-indigo-800 text-[10px] font-bold">Sage 300 Category Codes</span>
                 </h3>
-                <p class="text-xs text-slate-500 mt-0.5">ระบบจะดึงเฉพาะรายการสินค้าที่มี **รหัสหมวดหมู่ (Category Code)** ตรงกับที่ระบุด้านล่าง และตัดรายการที่ไม่เกี่ยวข้องออกโดยอัตโนมัติ</p>
+                <p class="text-xs text-muted mt-0.5">ระบบจะดึงเฉพาะรายการสินค้าที่มี **รหัสหมวดหมู่ (Category Code)** ตรงกับที่ระบุด้านล่าง และตัดรายการที่ไม่เกี่ยวข้องออกโดยอัตโนมัติ</p>
             </div>
         </div>
 
@@ -224,8 +224,8 @@ renderHeader();
             <input type="hidden" name="save_categories" value="1">
 
             <!-- Active Categories Badges -->
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                <span class="text-xs font-bold text-slate-700 block">รหัสหมวดหมู่ Sage 300 ที่เปิดใช้งานซิงค์อยู่ในปัจจุบัน:</span>
+            <div class="bg-subtle p-4 rounded-xl border border-line space-y-2">
+                <span class="text-xs font-bold text-secondary block">รหัสหมวดหมู่ Sage 300 ที่เปิดใช้งานซิงค์อยู่ในปัจจุบัน:</span>
                 <div class="flex flex-wrap gap-2">
                     <?php foreach ($currentCatsArray as $cCode): ?>
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white rounded-lg text-xs font-mono font-bold shadow-sm">
@@ -237,16 +237,16 @@ renderHeader();
 
             <!-- Quick Selection Checkboxes for Sage 300 Codes -->
             <div>
-                <label class="font-bold text-slate-800 block mb-2">เลือกปุ่มรหัสหมวดหมู่ใน Sage 300 (Category Code Quick Select):</label>
+                <label class="font-bold text-primary block mb-2">เลือกปุ่มรหัสหมวดหมู่ใน Sage 300 (Category Code Quick Select):</label>
                 <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                     <?php
                     $sageCodes = ['15400', '15401', '15402', '15403', '15404', '15405', '15406', '15407', '15408', '15409', '15410', '15420'];
                     foreach ($sageCodes as $code):
                         $checked = in_array($code, $currentCatsArray) ? 'checked' : '';
                     ?>
-                    <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 hover:bg-indigo-50/50 cursor-pointer transition-all font-mono font-bold">
+                    <label class="flex items-center gap-2 p-2.5 rounded-lg border border-line hover:bg-indigo-50/50 cursor-pointer transition-all font-mono font-bold">
                         <input type="checkbox" name="categories[]" value="<?= $code ?>" <?= $checked ?> class="rounded text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-xs font-bold text-slate-900"><?= $code ?></span>
+                        <span class="text-xs font-bold text-primary"><?= $code ?></span>
                     </label>
                     <?php endforeach; ?>
                 </div>
@@ -254,9 +254,9 @@ renderHeader();
 
             <!-- Manual Custom Input Field for any Sage 300 Code -->
             <div class="pt-2">
-                <label class="font-bold text-slate-800 block mb-1">พิมพ์ระบุรหัสหมวดหมู่ใน Sage 300 แบบกำหนดเอง (คั่นด้วยเครื่องหมายจุลภาค , ):</label>
+                <label class="font-bold text-primary block mb-1">พิมพ์ระบุรหัสหมวดหมู่ใน Sage 300 แบบกำหนดเอง (คั่นด้วยเครื่องหมายจุลภาค , ):</label>
                 <input type="text" name="custom_categories" value="<?= htmlspecialchars($currentCatsStr) ?>" placeholder="เช่น 15401, 15402, 15403" class="input input-bordered w-full text-xs font-mono font-bold text-indigo-600">
-                <span class="text-[11px] text-slate-400 block mt-1">ตัวอย่าง: หากต้องการซิงค์เฉพาะหมวดหมู่ <strong>15401</strong> ให้พิมพ์ระบุเพียง <strong>15401</strong></span>
+                <span class="text-[11px] text-muted block mt-1">ตัวอย่าง: หากต้องการซิงค์เฉพาะหมวดหมู่ <strong>15401</strong> ให้พิมพ์ระบุเพียง <strong>15401</strong></span>
             </div>
 
             <div class="bg-rose-50 border border-rose-200 p-3 rounded-lg flex items-center justify-between flex-wrap gap-2">
@@ -281,12 +281,12 @@ renderHeader();
     <div class="card cmms-card p-5">
         <div class="flex items-center justify-between flex-wrap gap-4 border-b pb-3">
             <div>
-                <h3 class="font-bold text-slate-900 text-base">⚡ สั่งซิงค์คลังอะไหล่จาก Sage 300 (1-Click Inventory Sync)</h3>
-                <p class="text-xs text-slate-500 mt-0.5">กดปุ่มด้านล่างเพื่อดึงข้อมูล Item Master เฉพาะหมวดหมู่ <strong class="font-mono text-indigo-600"><?= htmlspecialchars($currentCatsStr) ?></strong> จาก Sage 300 DSN: <strong><?= htmlspecialchars($dsn) ?></strong></p>
+                <h3 class="font-bold text-primary text-base">⚡ สั่งซิงค์คลังอะไหล่จาก Sage 300 (1-Click Inventory Sync)</h3>
+                <p class="text-xs text-muted mt-0.5">กดปุ่มด้านล่างเพื่อดึงข้อมูล Item Master เฉพาะหมวดหมู่ <strong class="font-mono text-indigo-600"><?= htmlspecialchars($currentCatsStr) ?></strong> จาก Sage 300 DSN: <strong><?= htmlspecialchars($dsn) ?></strong></p>
             </div>
             <form method="POST" class="flex flex-col items-end gap-2">
                 <input type="hidden" name="exec_sync" value="1">
-                <label class="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
+                <label class="flex items-center gap-1.5 text-xs text-secondary font-bold">
                     <input type="checkbox" name="purge_unselected" value="1" class="rounded text-rose-600">
                     <span>ล้างอะไหล่เก่าที่ไม่ตรงกับหมวดหมู่ที่เลือกออกด้วย</span>
                 </label>
@@ -297,16 +297,16 @@ renderHeader();
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <span class="text-slate-500 block">จำนวนรายการอะไหล่ใน CMMS:</span>
-                <strong class="text-lg text-slate-900 font-bold"><?= count($spares) ?> รายการ</strong>
+            <div class="p-3 bg-subtle border border-line rounded-lg">
+                <span class="text-muted block">จำนวนรายการอะไหล่ใน CMMS:</span>
+                <strong class="text-lg text-primary font-bold"><?= count($spares) ?> รายการ</strong>
             </div>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <span class="text-slate-500 block">DSN ฐานข้อมูลที่เชื่อมต่อ:</span>
+            <div class="p-3 bg-subtle border border-line rounded-lg">
+                <span class="text-muted block">DSN ฐานข้อมูลที่เชื่อมต่อ:</span>
                 <strong class="text-lg text-purple-700 font-mono font-bold"><?= htmlspecialchars($dsn) ?></strong>
             </div>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <span class="text-slate-500 block">สถานะการซิงค์ข้อมูล:</span>
+            <div class="p-3 bg-subtle border border-line rounded-lg">
+                <span class="text-muted block">สถานะการซิงค์ข้อมูล:</span>
                 <strong class="text-lg text-emerald-600 font-bold">READY TO SYNC</strong>
             </div>
         </div>
@@ -314,14 +314,14 @@ renderHeader();
 
     <!-- CMMS Spare Parts Catalog Table -->
     <div class="card overflow-hidden space-y-3">
-        <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
+        <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
             <span>📦 รายการอะไหล่ทั้งหมดที่ซิงค์มาจาก Sage 300 (CMMS Master Catalog)</span>
             <span class="text-xs text-purple-600 font-bold">Sage 300 Matched</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">รหัสอะไหล่ (Sage Item No)</th>
                         <th class="px-4 py-3 text-left">ชื่อรายการอะไหล่</th>
@@ -332,14 +332,14 @@ renderHeader();
                         <th class="px-4 py-3 text-center">สถานะ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($spares as $sp): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="รหัสอะไหล่ (Sage Item No)" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                        <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
-                        <td data-label="หมวดหมู่" class="px-4 py-3 text-xs text-slate-600"><?= htmlspecialchars($sp['category'] ?? 'General') ?></td>
-                        <td data-label="สถานที่เก็บ" class="px-4 py-3 text-center text-xs text-slate-600"><?= htmlspecialchars($sp['location'] ?? '-') ?></td>
-                        <td data-label="คงเหลือ (On Hand)" class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?></td>
+                        <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($sp['name']) ?></td>
+                        <td data-label="หมวดหมู่" class="px-4 py-3 text-xs text-secondary"><?= htmlspecialchars($sp['category'] ?? 'General') ?></td>
+                        <td data-label="สถานที่เก็บ" class="px-4 py-3 text-center text-xs text-secondary"><?= htmlspecialchars($sp['location'] ?? '-') ?></td>
+                        <td data-label="คงเหลือ (On Hand)" class="px-4 py-3 text-center font-bold text-primary"><?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?></td>
                         <td data-label="ราคาเฉลี่ย/หน่วย" class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price'], 2) ?></td>
                         <td data-label="สถานะ" class="px-4 py-3 text-center">
                             <span class="badge bg-purple-100 text-purple-800 text-xs font-bold">Sage 300</span>

@@ -57,37 +57,37 @@ renderHeader();
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div class="card p-4 border space-y-1">
-            <span class="text-xs text-slate-500 font-bold uppercase">จำนวนแบบฟอร์มมาตรฐาน</span>
+            <span class="text-xs text-muted font-bold uppercase">จำนวนแบบฟอร์มมาตรฐาน</span>
             <div class="text-2xl font-black text-indigo-700"><?= count($filesList) ?> เอกสาร</div>
-            <span class="text-[10px] text-slate-400">หมวดวิศวกรรม & ซ่อมบำรุง F-EN</span>
+            <span class="text-[10px] text-muted">หมวดวิศวกรรม & ซ่อมบำรุง F-EN</span>
         </div>
         <div class="card p-4 border space-y-1">
-            <span class="text-xs text-slate-500 font-bold uppercase">ใบแจ้งซ่อมหลัก</span>
+            <span class="text-xs text-muted font-bold uppercase">ใบแจ้งซ่อมหลัก</span>
             <div class="text-2xl font-black text-rose-600">ISO F-EN-03</div>
-            <span class="text-[10px] text-slate-400">MAINTENANCE RECORD REV.05</span>
+            <span class="text-[10px] text-muted">MAINTENANCE RECORD REV.05</span>
         </div>
         <div class="card p-4 border space-y-1">
-            <span class="text-xs text-slate-500 font-bold uppercase">บัตรประวัติเครื่องจักร</span>
+            <span class="text-xs text-muted font-bold uppercase">บัตรประวัติเครื่องจักร</span>
             <div class="text-2xl font-black text-emerald-600">ISO F-EN-01</div>
-            <span class="text-[10px] text-slate-400">Machine History Register</span>
+            <span class="text-[10px] text-muted">Machine History Register</span>
         </div>
         <div class="card p-4 border space-y-1">
-            <span class="text-xs text-slate-500 font-bold uppercase">สต็อกการ์ดคลังอะไหล่</span>
+            <span class="text-xs text-muted font-bold uppercase">สต็อกการ์ดคลังอะไหล่</span>
             <div class="text-2xl font-black text-purple-600">ISO F-EN-18</div>
-            <span class="text-[10px] text-slate-400">Spare Parts Stock Card</span>
+            <span class="text-[10px] text-muted">Spare Parts Stock Card</span>
         </div>
     </div>
 
     <!-- ISO Document List Table -->
     <div class="card cmms-card p-5 space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
-            <h3 class="font-extrabold text-slate-900 text-base">รายการทะเบียนแบบฟอร์ม ISO F-EN ทั้งหมดในระบบ</h3>
-            <span class="text-xs text-slate-400 font-mono">Status: <?= count($filesList) ?> files available for HTTP download</span>
+            <h3 class="font-extrabold text-primary text-base">รายการทะเบียนแบบฟอร์ม ISO F-EN ทั้งหมดในระบบ</h3>
+            <span class="text-xs text-muted font-mono">Status: <?= count($filesList) ?> files available for HTTP download</span>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border-collapse">
-                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                     <tr>
                         <th class="p-3 text-center w-10">#</th>
                         <th class="p-3">ชื่อไฟล์เอกสารแบบฟอร์ม ISO</th>
@@ -97,11 +97,11 @@ renderHeader();
                         <th class="p-3 text-center w-36">การจัดการ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($filesList as $i => $file): ?>
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="p-3 text-center font-bold text-slate-400"><?= $i + 1 ?></td>
-                        <td class="p-3 font-bold text-slate-900 flex items-center gap-2">
+                    <tr class="hover:bg-subtle transition-colors">
+                        <td class="p-3 text-center font-bold text-muted"><?= $i + 1 ?></td>
+                        <td class="p-3 font-bold text-primary flex items-center gap-2">
                             <span class="text-base">
                                 <?= match($file['ext']) { 'xlsx'=>'📊', 'xls'=>'📊', 'docx'=>'📄', 'pdf'=>'📕', default=>'📁' } ?>
                             </span>
@@ -112,8 +112,8 @@ renderHeader();
                                 <?= strtoupper($file['ext']) ?>
                             </span>
                         </td>
-                        <td class="p-3 text-center font-mono text-slate-600"><?= $file['size'] ?></td>
-                        <td class="p-3 text-center text-slate-500 font-mono"><?= $file['modified'] ?></td>
+                        <td class="p-3 text-center font-mono text-secondary"><?= $file['size'] ?></td>
+                        <td class="p-3 text-center text-muted font-mono"><?= $file['modified'] ?></td>
                         <td class="p-3 text-center">
                             <a href="<?= $file['download_url'] ?>" download class="btn btn-primary bg-indigo-600 border-indigo-600 hover:bg-indigo-700 text-[11px] font-bold px-3 py-1 flex items-center justify-center gap-1">
                                 📥 ดาวน์โหลด

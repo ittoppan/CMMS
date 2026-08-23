@@ -45,7 +45,7 @@ renderHeader();
 
     <!-- Login Audit Log Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 บันทึกประวัติการเข้าสู่ระบบ (System Login Audit Log)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($loginLogs) ?> บันทึกล่าสุด</span>
         </h3>
@@ -61,16 +61,16 @@ renderHeader();
                         <th class="p-3 font-mono">เวลาบันทึก</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($loginLogs as $ll): ?>
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-slate-400"><?= $ll['id'] ?></td>
+                    <tr class="hover:bg-subtle">
+                        <td class="p-3 font-bold text-muted"><?= $ll['id'] ?></td>
                         <td class="p-3 font-mono font-bold text-indigo-700"><?= htmlspecialchars($ll['username']) ?></td>
-                        <td class="p-3 font-mono font-bold text-slate-800"><?= htmlspecialchars($ll['ip_address']) ?></td>
+                        <td class="p-3 font-mono font-bold text-primary"><?= htmlspecialchars($ll['ip_address']) ?></td>
                         <td class="p-3 text-center">
                             <span class="badge badge badge-success font-bold text-[10px]">🟢 SUCCESS</span>
                         </td>
-                        <td class="p-3 font-mono text-slate-500"><?= $ll['created_at'] ?></td>
+                        <td class="p-3 font-mono text-muted"><?= $ll['created_at'] ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

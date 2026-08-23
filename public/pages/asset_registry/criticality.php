@@ -26,7 +26,7 @@ renderHeader();
 
     <!-- Criticality Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ตารางจำแนกความสำคัญเครื่องจักรในโรงงาน (Class A/B/C Machine Matrix)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($assets) ?> เครื่องจักร</span>
         </h3>
@@ -43,25 +43,25 @@ renderHeader();
                         <th class="p-3 text-center">การจัดลำดับซ่อม</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($assets as $idx => $a): ?>
                     <?php
                         $class = ($idx % 3 === 0) ? 'Class A (Critical)' : (($idx % 2 === 0) ? 'Class B (Medium)' : 'Class C (Low)');
                     ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700 text-sm"><?= htmlspecialchars($a['code']) ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($a['name']) ?></td>
-                        <td class="p-3 font-medium text-slate-600"><?= htmlspecialchars($a['location'] ?: 'โรงงาน 1') ?></td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($a['name']) ?></td>
+                        <td class="p-3 font-medium text-secondary"><?= htmlspecialchars($a['location'] ?: 'โรงงาน 1') ?></td>
                         <td class="p-3 text-center">
                             <span class="badge font-black text-xs <?= str_contains($class, 'Class A') ? 'badge badge-error animate-pulse' : (str_contains($class, 'Class B') ? 'badge badge-warning' : 'badge badge-info') ?>">
                                 <?= $class ?>
                             </span>
                         </td>
-                        <td class="p-3 text-center font-bold text-slate-700">
+                        <td class="p-3 text-center font-bold text-secondary">
                             <?= str_contains($class, 'Class A') ? '🔴 ลน์ผลิตหยุดทันที (100% Downtime Loss)' : (str_contains($class, 'Class B') ? '🟡 สายการผลิตชะลอตัว' : '🟢 ไม่มีผลกระทบตรงต่อไลน์ผลิต') ?>
                         </td>
                         <td class="p-3 text-center font-bold">
-                            <?= str_contains($class, 'Class A') ? '<span class="text-rose-600">🚨 ต้องเข้าซ่อมทันทีภายใน 15 นาที</span>' : '<span class="text-slate-500">ซ่อมตามคิวปกติ</span>' ?>
+                            <?= str_contains($class, 'Class A') ? '<span class="text-rose-600">🚨 ต้องเข้าซ่อมทันทีภายใน 15 นาที</span>' : '<span class="text-muted">ซ่อมตามคิวปกติ</span>' ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

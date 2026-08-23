@@ -199,14 +199,14 @@ foreach ($repairs as $r) {
                         <?= htmlspecialchars($item['title']) ?>
                     </a>
 
-                    <div class="text-xs text-gray-600 mb-2 space-y-1">
+                    <div class="text-xs text-secondary mb-2 space-y-1">
                         <div><strong>เครื่อง:</strong> <?= htmlspecialchars($item['asset_code'] ?? '-') ?> - <?= htmlspecialchars($item['asset_name'] ?? '-') ?></div>
                         <?php if ($item['work_zone_name']): ?>
                         <div><strong>โซน:</strong> <?= htmlspecialchars($item['work_zone_name']) ?></div>
                         <?php endif; ?>
                     </div>
 
-                    <div class="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100 mt-2">
+                    <div class="flex items-center justify-between text-xs text-muted pt-2 border-t border-line mt-2">
                         <div class="flex items-center gap-1">
                             <span class="w-2 h-2 rounded-full bg-brand-500 inline-block"></span>
                             <span><?= htmlspecialchars($item['assigned_name'] ?? 'ยังไม่มอบหมาย') ?></span>

@@ -218,33 +218,33 @@ renderHeader();
 
             <!-- MODULE 1: Corporate Identity & Legal Info -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🏷️ 1. ข้อมูลองค์กรและชุดโลโก้ (Corporate Identity & Assets)</span>
                     <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs">Module 1</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ชื่อสั้นของระบบ (App Short Title)</label>
+                        <label class="font-bold text-secondary block mb-1">ชื่อสั้นของระบบ (App Short Title)</label>
                         <input type="text" name="app_name" value="<?= htmlspecialchars($appName) ?>" required class="input input-bordered w-full font-extrabold text-sm">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ชื่อเต็มองค์กร / บริษัท (Company Full Name)</label>
+                        <label class="font-bold text-secondary block mb-1">ชื่อเต็มองค์กร / บริษัท (Company Full Name)</label>
                         <input type="text" name="company_name" value="<?= htmlspecialchars($companyName) ?>" required class="input input-bordered w-full font-bold text-sm">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">เบอร์โทรศัพท์ติดต่อองค์กร</label>
+                        <label class="font-bold text-secondary block mb-1">เบอร์โทรศัพท์ติดต่อองค์กร</label>
                         <input type="text" name="company_phone" value="<?= htmlspecialchars($companyPhone) ?>" class="input input-bordered w-full">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
+                        <label class="font-bold text-secondary block mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
                         <input type="text" name="company_tax_id" value="<?= htmlspecialchars($companyTaxId) ?>" class="input input-bordered w-full font-mono">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ตำแหน่งแสดงผลโลโก้</label>
+                        <label class="font-bold text-secondary block mb-1">ตำแหน่งแสดงผลโลโก้</label>
                         <select name="logo_position" class="input input-bordered w-full font-bold">
                             <option value="both" <?= $logoPos === 'both' ? 'selected' : '' ?>>ทั้งมุมซ้าย & มุมขวา (แนะนำ)</option>
                             <option value="header_only" <?= $logoPos === 'header_only' ? 'selected' : '' ?>>มุมขวาบน (Header Corner)</option>
@@ -254,18 +254,18 @@ renderHeader();
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1 text-xs">ที่อยู่สถานประกอบการ (Company Address)</label>
+                    <label class="font-bold text-secondary block mb-1 text-xs">ที่อยู่สถานประกอบการ (Company Address)</label>
                     <input type="text" name="company_address" value="<?= htmlspecialchars($companyAddress) ?>" class="input input-bordered w-full text-xs">
                 </div>
 
                 <!-- Logotype Uploaders -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
-                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-center">
-                        <label class="font-bold text-slate-700 block text-xs">โลโก้หลัก (Light Theme)</label>
+                    <div class="p-3 bg-subtle border border-line rounded-xl space-y-2 text-center">
+                        <label class="font-bold text-secondary block text-xs">โลโก้หลัก (Light Theme)</label>
                         <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($companyLogo, 'asset') ?>" class="max-h-full object-contain">
                         </div>
-                        <input type="file" name="company_logo" accept="image/*" class="cmms-banner info block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
+                        <input type="file" name="company_logo" accept="image/*" class="cmms-banner info block w-full text-[11px] text-muted file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
                     </div>
 
                     <div class="p-3 bg-slate-800 text-white border border-slate-700 rounded-xl space-y-2 text-center">
@@ -273,29 +273,29 @@ renderHeader();
                         <div class="w-full h-14 bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center justify-center shadow-sm mx-auto">
                             <img src="<?= getImageUrl($companyLogoDark ?: $companyLogo, 'asset') ?>" class="max-h-full object-contain">
                         </div>
-                        <input type="file" name="company_logo_dark" accept="image/*" class="block w-full text-[11px] text-slate-400 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-slate-700 file:text-slate-200 cursor-pointer">
+                        <input type="file" name="company_logo_dark" accept="image/*" class="block w-full text-[11px] text-muted file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-slate-700 file:text-slate-200 cursor-pointer">
                     </div>
 
-                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-center">
-                        <label class="font-bold text-slate-700 block text-xs">Favicon แท็บเบราว์เซอร์</label>
+                    <div class="p-3 bg-subtle border border-line rounded-xl space-y-2 text-center">
+                        <label class="font-bold text-secondary block text-xs">Favicon แท็บเบราว์เซอร์</label>
                         <div class="card w-full h-14 p-2 flex items-center justify-center mx-auto">
                             <img src="<?= getImageUrl($faviconIcon, 'asset') ?>" class="w-7 h-7 object-contain">
                         </div>
-                        <input type="file" name="favicon_icon" accept="image/*" class="cmms-banner info block w-full text-[11px] text-slate-500 file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
+                        <input type="file" name="favicon_icon" accept="image/*" class="cmms-banner info block w-full text-[11px] text-muted file:py-1 file:px-2 file:rounded-lg file:border-0 file: file: cursor-pointer">
                     </div>
                 </div>
             </div>
 
             <!-- MODULE 2: Color Palette, Fonts & UI Styles -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🎨 2. โทนสี ฟอนต์ และสไตล์ระบบ (Theme & Typography)</span>
                     <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Module 2</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ฟอนต์ภาษาไทยหลัก (System Font)</label>
+                        <label class="font-bold text-secondary block mb-1">ฟอนต์ภาษาไทยหลัก (System Font)</label>
                         <select name="theme_font_family" class="input input-bordered w-full font-bold text-xs">
                             <option value="Sarabun" <?= $fontFamily === 'Sarabun' ? 'selected' : '' ?>>Sarabun (ทางการ ISO - แนะนำ)</option>
                             <option value="Prompt" <?= $fontFamily === 'Prompt' ? 'selected' : '' ?>>Prompt (โมเดิร์นทันสมัย)</option>
@@ -303,7 +303,7 @@ renderHeader();
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">สไตล์ความโค้งมน (Border Radius)</label>
+                        <label class="font-bold text-secondary block mb-1">สไตล์ความโค้งมน (Border Radius)</label>
                         <select name="border_radius_style" class="input input-bordered w-full font-bold text-xs">
                             <option value="rounded-xl" <?= $borderRadiusStyle === 'rounded-xl' ? 'selected' : '' ?>>Rounded Modern (12px)</option>
                             <option value="rounded-md" <?= $borderRadiusStyle === 'rounded-md' ? 'selected' : '' ?>>Minimal Sharp (6px)</option>
@@ -311,7 +311,7 @@ renderHeader();
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">สไตล์ Sidebar ด้านซ้าย</label>
+                        <label class="font-bold text-secondary block mb-1">สไตล์ Sidebar ด้านซ้าย</label>
                         <select name="sidebar_style" class="input input-bordered w-full font-bold text-xs">
                             <option value="dark_slate" <?= $sidebarStyle === 'dark_slate' ? 'selected' : '' ?>>Cruip Dark Slate (#0f172a)</option>
                             <option value="midnight_navy" <?= $sidebarStyle === 'midnight_navy' ? 'selected' : '' ?>>Midnight Navy (#1e1b4b)</option>
@@ -321,12 +321,12 @@ renderHeader();
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div class="p-3 bg-slate-50 border rounded-xl flex items-center justify-between">
-                        <span class="font-bold text-slate-700">สีเน้นหลัก (Primary Hex):</span>
+                    <div class="p-3 bg-subtle border rounded-xl flex items-center justify-between">
+                        <span class="font-bold text-secondary">สีเน้นหลัก (Primary Hex):</span>
                         <input type="color" name="theme_primary_hex" value="<?= htmlspecialchars($primaryHex) ?>" class="w-12 h-8 rounded cursor-pointer border-0">
                     </div>
-                    <div class="p-3 bg-slate-50 border rounded-xl flex items-center justify-between">
-                        <span class="font-bold text-slate-700">สีเน้นรอง (Secondary Hex):</span>
+                    <div class="p-3 bg-subtle border rounded-xl flex items-center justify-between">
+                        <span class="font-bold text-secondary">สีเน้นรอง (Secondary Hex):</span>
                         <input type="color" name="theme_secondary_hex" value="<?= htmlspecialchars($secondaryHex) ?>" class="w-12 h-8 rounded cursor-pointer border-0">
                     </div>
                 </div>
@@ -334,18 +334,18 @@ renderHeader();
 
             <!-- MODULE 3: ISO Forms & Report Printing Customization -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>📄 3. แบบฟอร์ม ISO และการพิมพ์รายงาน (ISO Forms Setup)</span>
                     <span class="badge badge badge-warning font-bold text-xs">Module 3</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">รหัสอ้างอิงแบบฟอร์ม ISO (Form Code Prefix)</label>
+                        <label class="font-bold text-secondary block mb-1">รหัสอ้างอิงแบบฟอร์ม ISO (Form Code Prefix)</label>
                         <input type="text" name="iso_form_code_prefix" value="<?= htmlspecialchars($isoCodePrefix) ?>" class="input input-bordered w-full font-bold font-mono">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">เปิดใช้งานลายน้ำ ISO (Watermark)</label>
+                        <label class="font-bold text-secondary block mb-1">เปิดใช้งานลายน้ำ ISO (Watermark)</label>
                         <select name="iso_watermark_enabled" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $isoWatermark === '1' ? 'selected' : '' ?>>เปิดใช้งาน (Controlled Copy)</option>
                             <option value="0" <?= $isoWatermark === '0' ? 'selected' : '' ?>>ปิดใช้งาน</option>
@@ -355,11 +355,11 @@ renderHeader();
 
                 <div class="space-y-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ข้อความส่วนหัว ISO (ISO Header Title)</label>
+                        <label class="font-bold text-secondary block mb-1">ข้อความส่วนหัว ISO (ISO Header Title)</label>
                         <input type="text" name="iso_header_title" value="<?= htmlspecialchars($isoHeaderTitle) ?>" class="input input-bordered w-full font-bold">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ข้อความประกาศท้ายแบบฟอร์ม (ISO Footer Note)</label>
+                        <label class="font-bold text-secondary block mb-1">ข้อความประกาศท้ายแบบฟอร์ม (ISO Footer Note)</label>
                         <input type="text" name="iso_footer_note" value="<?= htmlspecialchars($isoFooterNote) ?>" class="input input-bordered w-full">
                     </div>
                 </div>
@@ -367,22 +367,22 @@ renderHeader();
 
             <!-- MODULE 4: Work Order & Labor Policy -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>⏱️ 4. กฎการซ่อมบำรุงและค่าแรง (Work Order & Labor Policy)</span>
                     <span class="badge badge badge-info font-bold text-xs">Module 4</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ค่าแรงมาตรฐาน (บาท/ชม.)</label>
+                        <label class="font-bold text-secondary block mb-1">ค่าแรงมาตรฐาน (บาท/ชม.)</label>
                         <input type="number" step="0.01" name="standard_labor_rate" value="<?= htmlspecialchars($standardLaborRate) ?>" class="input input-bordered w-full font-bold">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">เวลาทำงานมาตรฐาน (ชม./วัน)</label>
+                        <label class="font-bold text-secondary block mb-1">เวลาทำงานมาตรฐาน (ชม./วัน)</label>
                         <input type="number" step="0.5" name="work_hours_per_day" value="<?= htmlspecialchars($workHoursPerDay) ?>" class="input input-bordered w-full font-bold">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">บังคับระบุสาเหตุการเสีย (Root Cause)</label>
+                        <label class="font-bold text-secondary block mb-1">บังคับระบุสาเหตุการเสีย (Root Cause)</label>
                         <select name="require_root_cause" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $requireRootCause === '1' ? 'selected' : '' ?>>บังคับระบุ (Required)</option>
                             <option value="0" <?= $requireRootCause === '0' ? 'selected' : '' ?>>ระบุหรือไม่ก็ได้</option>
@@ -393,28 +393,28 @@ renderHeader();
 
             <!-- MODULE 5: Spare Parts & Store Policy -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>📦 5. นโยบายเบิกอะไหล่ & ตัด Sage 300 (Store Policy)</span>
                     <span class="badge bg-purple-100 text-purple-800 font-bold text-xs">Module 5</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ต้องอนุมัติก่อนเบิกอะไหล่</label>
+                        <label class="font-bold text-secondary block mb-1">ต้องอนุมัติก่อนเบิกอะไหล่</label>
                         <select name="spare_require_approval" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $spareRequireApproval === '1' ? 'selected' : '' ?>>ต้องอนุมัติก่อน (Require Approval)</option>
                             <option value="0" <?= $spareRequireApproval === '0' ? 'selected' : '' ?>>จ่ายของได้ทันที</option>
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ตัดสต็อก Sage 300 อัตโนมัติ</label>
+                        <label class="font-bold text-secondary block mb-1">ตัดสต็อก Sage 300 อัตโนมัติ</label>
                         <select name="auto_sage_sync" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $autoSageSync === '1' ? 'selected' : '' ?>>ตัดสต็อกสดทันที (Realtime)</option>
                             <option value="0" <?= $autoSageSync === '0' ? 'selected' : '' ?>>สร้างคิวตัดภายหลัง</option>
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">รหัสคลังสินค้าเริ่มต้น (Sage 300)</label>
+                        <label class="font-bold text-secondary block mb-1">รหัสคลังสินค้าเริ่มต้น (Sage 300)</label>
                         <input type="text" name="default_warehouse" value="<?= htmlspecialchars($defaultWarehouse) ?>" class="input input-bordered w-full font-bold font-mono">
                     </div>
                 </div>
@@ -422,28 +422,28 @@ renderHeader();
 
             <!-- MODULE 6: Notifications & Audio -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🔔 6. ระบบแจ้งเตือน & เอฟเฟกต์เสียง (Notifications & Audio)</span>
                     <span class="badge badge badge-success font-bold text-xs">Module 6</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">แจ้งเตือนผ่าน LINE Notify/LIFF</label>
+                        <label class="font-bold text-secondary block mb-1">แจ้งเตือนผ่าน LINE Notify/LIFF</label>
                         <select name="line_notify_enabled" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $lineNotifyEnabled === '1' ? 'selected' : '' ?>>เปิดใช้งาน (Enabled)</option>
                             <option value="0" <?= $lineNotifyEnabled === '0' ? 'selected' : '' ?>>ปิดใช้งาน</option>
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">แจ้งเตือนผ่าน Email</label>
+                        <label class="font-bold text-secondary block mb-1">แจ้งเตือนผ่าน Email</label>
                         <select name="email_notify_enabled" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $emailNotifyEnabled === '1' ? 'selected' : '' ?>>เปิดใช้งาน</option>
                             <option value="0" <?= $emailNotifyEnabled === '0' ? 'selected' : '' ?>>ปิดใช้งาน (Disabled)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">เสียงเอฟเฟกต์แจ้งเตือน</label>
+                        <label class="font-bold text-secondary block mb-1">เสียงเอฟเฟกต์แจ้งเตือน</label>
                         <select name="notification_sound" class="input input-bordered w-full font-bold">
                             <option value="chime" <?= $notificationSound === 'chime' ? 'selected' : '' ?>>Chime Bell (นุ่มนวล)</option>
                             <option value="pop" <?= $notificationSound === 'pop' ? 'selected' : '' ?>>Pop Alert</option>
@@ -455,14 +455,14 @@ renderHeader();
 
             <!-- MODULE 7: Security & Session Policy -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🛡️ 7. นโยบายความปลอดภัยและเซสชัน (Security Policy)</span>
                     <span class="badge badge badge-error font-bold text-xs">Module 7</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">หมดเวลาเซสชันอัตโนมัติ (Session Timeout)</label>
+                        <label class="font-bold text-secondary block mb-1">หมดเวลาเซสชันอัตโนมัติ (Session Timeout)</label>
                         <select name="session_timeout_mins" class="input input-bordered w-full font-bold">
                             <option value="30" <?= $sessionTimeout === '30' ? 'selected' : '' ?>>30 นาที</option>
                             <option value="60" <?= $sessionTimeout === '60' ? 'selected' : '' ?>>60 นาที (แนะนำ)</option>
@@ -470,7 +470,7 @@ renderHeader();
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">จำนวนครั้งล็อกอินผิดพลาดสูงสุดก่อนล็อกบัญชี</label>
+                        <label class="font-bold text-secondary block mb-1">จำนวนครั้งล็อกอินผิดพลาดสูงสุดก่อนล็อกบัญชี</label>
                         <select name="max_login_attempts" class="input input-bordered w-full font-bold">
                             <option value="3" <?= $maxLoginAttempts === '3' ? 'selected' : '' ?>>3 ครั้ง</option>
                             <option value="5" <?= $maxLoginAttempts === '5' ? 'selected' : '' ?>>5 ครั้ง (แนะนำ)</option>
@@ -478,19 +478,19 @@ renderHeader();
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ปุ่มบัญชีทดสอบบนหน้า Login (Demo Accounts)</label>
+                        <label class="font-bold text-secondary block mb-1">ปุ่มบัญชีทดสอบบนหน้า Login (Demo Accounts)</label>
                         <select name="demo_login_enabled" class="input input-bordered w-full font-bold">
                             <option value="1" <?= $demoLoginEnabled === '1' ? 'selected' : '' ?>>แสดง (สำหรับทดสอบ)</option>
                             <option value="0" <?= $demoLoginEnabled === '0' ? 'selected' : '' ?>>ซ่อน (แนะนำเมื่อใช้งานจริง)</option>
                         </select>
-                        <p class="text-[10px] text-slate-400 mt-1">ปุ่ม admin/manager/tech01 (รหัส default) — ควรซ่อนเมื่อใช้งานจริง</p>
+                        <p class="text-[10px] text-muted mt-1">ปุ่ม admin/manager/tech01 (รหัส default) — ควรซ่อนเมื่อใช้งานจริง</p>
                     </div>
                 </div>
             </div>
 
             <!-- MODULE 8: Feature Module Toggles -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🌐 8. การเปิด/ปิด โมดูลระบบ (Module Feature Toggles)</span>
                     <span class="badge bg-cyan-100 text-cyan-800 font-bold text-xs">Module 8</span>
                 </h3>
@@ -498,44 +498,44 @@ renderHeader();
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <label class="p-3 border rounded-xl cursor-pointer hover:bg-indigo-50 flex items-center gap-2">
                         <input type="checkbox" name="enable_machine_bom" value="1" <?= $enableMachineBom === '1' ? 'checked' : '' ?>>
-                        <span class="font-bold text-slate-800">Machine BOM</span>
+                        <span class="font-bold text-primary">Machine BOM</span>
                     </label>
                     <label class="p-3 border rounded-xl cursor-pointer hover:bg-indigo-50 flex items-center gap-2">
                         <input type="checkbox" name="enable_mtbf_analytics" value="1" <?= $enableMtbf === '1' ? 'checked' : '' ?>>
-                        <span class="font-bold text-slate-800">MTBF/MTTR</span>
+                        <span class="font-bold text-primary">MTBF/MTTR</span>
                     </label>
                     <label class="p-3 border rounded-xl cursor-pointer hover:bg-indigo-50 flex items-center gap-2">
                         <input type="checkbox" name="enable_borrowing" value="1" <?= $enableBorrowing === '1' ? 'checked' : '' ?>>
-                        <span class="font-bold text-slate-800">ยืม-คืนอุปกรณ์</span>
+                        <span class="font-bold text-primary">ยืม-คืนอุปกรณ์</span>
                     </label>
                     <label class="p-3 border rounded-xl cursor-pointer hover:bg-indigo-50 flex items-center gap-2">
                         <input type="checkbox" name="enable_leaderboard" value="1" <?= $enableLeaderboard === '1' ? 'checked' : '' ?>>
-                        <span class="font-bold text-slate-800">ตาราง KPI ช่าง</span>
+                        <span class="font-bold text-primary">ตาราง KPI ช่าง</span>
                     </label>
                 </div>
             </div>
 
             <!-- MODULE 9: System Defaults & Formats -->
             <div class="card cmms-card p-6 space-y-4">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>⚙️ 9. ค่าเริ่มต้นระบบและการแสดงผล (System Defaults)</span>
-                    <span class="badge bg-slate-100 text-slate-800 font-bold text-xs">Module 9</span>
+                    <span class="badge bg-muted text-primary font-bold text-xs">Module 9</span>
                 </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">สัญลักษณ์สกุลเงิน</label>
+                        <label class="font-bold text-secondary block mb-1">สัญลักษณ์สกุลเงิน</label>
                         <input type="text" name="system_currency" value="<?= htmlspecialchars($systemCurrency) ?>" class="input input-bordered w-full font-bold">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">รูปแบบวันที่ (Date Format)</label>
+                        <label class="font-bold text-secondary block mb-1">รูปแบบวันที่ (Date Format)</label>
                         <select name="date_format" class="input input-bordered w-full font-bold">
                             <option value="d/m/Y" <?= $dateFormat === 'd/m/Y' ? 'selected' : '' ?>>DD/MM/YYYY (25/07/2026)</option>
                             <option value="Y-m-d" <?= $dateFormat === 'Y-m-d' ? 'selected' : '' ?>>YYYY-MM-DD (2026-07-25)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">สถานะเซิร์ฟเวอร์ (Server Mode)</label>
+                        <label class="font-bold text-secondary block mb-1">สถานะเซิร์ฟเวอร์ (Server Mode)</label>
                         <select name="system_mode" class="input input-bordered w-full font-bold text-emerald-700">
                             <option value="online" <?= $systemMode === 'online' ? 'selected' : '' ?>>🟢 ออนไลน์ปกติ (Online)</option>
                             <option value="maintenance" <?= $systemMode === 'maintenance' ? 'selected' : '' ?>>🔴 ปิดปรับปรุงระบบ (Maintenance)</option>
@@ -558,7 +558,7 @@ renderHeader();
 
             <!-- Simulated Desktop Topbar Header -->
             <div class="p-3 bg-slate-800 rounded-xl border border-slate-700 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-slate-400">มุมขวาบน (Header):</span>
+                <span class="text-[11px] font-bold text-muted">มุมขวาบน (Header):</span>
                 <div class="flex items-center gap-2">
                     <img id="preview-header-logo" src="<?= getImageUrl($companyLogo, 'asset') ?>" class="card w-7 h-7 rounded-md object-contain p-0.5">
                     <span id="preview-company-name" class="text-xs font-black text-white"><?= htmlspecialchars($companyName) ?></span>
@@ -567,7 +567,7 @@ renderHeader();
 
             <!-- Simulated Button Components -->
             <div class="p-4 bg-slate-800 rounded-xl border border-slate-700 space-y-3 text-xs">
-                <span class="text-slate-400 block font-bold text-[11px]">ตัวอย่างปุ่มและ Badge ในระบบ:</span>
+                <span class="text-muted block font-bold text-[11px]">ตัวอย่างปุ่มและ Badge ในระบบ:</span>
                 <div class="flex items-center gap-2 flex-wrap">
                     <button id="preview-btn-primary" type="button" style="background-color:<?= htmlspecialchars($primaryHex) ?>;" class="px-4 py-2 text-white font-bold rounded-xl shadow transition-all">
                         ปุ่มหลัก (Primary)
@@ -579,10 +579,10 @@ renderHeader();
             </div>
 
             <!-- ISO Document Header Preview -->
-            <div class="card p-3 text-slate-900 space-y-1 text-xs">
-                <span class="text-[10px] font-bold text-slate-400 uppercase block">ตัวอย่างส่วนหัวเอกสาร ISO F-EN:</span>
+            <div class="card p-3 text-primary space-y-1 text-xs">
+                <span class="text-[10px] font-bold text-muted uppercase block">ตัวอย่างส่วนหัวเอกสาร ISO F-EN:</span>
                 <div class="font-extrabold text-indigo-900 border-b pb-1 text-[11px]"><?= htmlspecialchars($isoHeaderTitle) ?></div>
-                <div class="text-[9px] text-slate-500 italic pt-0.5"><?= htmlspecialchars($isoFooterNote) ?></div>
+                <div class="text-[9px] text-muted italic pt-0.5"><?= htmlspecialchars($isoFooterNote) ?></div>
             </div>
         </div>
 

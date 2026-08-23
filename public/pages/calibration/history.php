@@ -32,14 +32,14 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
-        <div><h1 class="text-2xl font-bold text-gray-900">ประวัติการสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Calibration History</p></div>
+        <div><h1 class="text-2xl font-bold text-primary">ประวัติการสอบเทียบ</h1><p class="mt-1 text-sm text-muted">Calibration History</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปรายการ</a>
     </div>
     <div class="card p-4 shadow">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">ทรัพย์สิน</label>
-                <select name="asset_id" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <label class="block text-xs font-medium text-secondary mb-1">ทรัพย์สิน</label>
+                <select name="asset_id" class="px-3 py-2 border border-line rounded-md text-sm">
                     <option value="">ทั้งหมด</option>
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= $assetId === (int)$a['id'] ? 'selected' : '' ?>><?= htmlspecialchars($a['code'] . ' - ' . $a['name']) ?></option>
@@ -47,8 +47,8 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">ประเภท</label>
-                <select name="type" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <label class="block text-xs font-medium text-secondary mb-1">ประเภท</label>
+                <select name="type" class="px-3 py-2 border border-line rounded-md text-sm">
                     <option value="">ทั้งหมด</option>
                     <?php foreach ($typeLabel as $k => $v): ?>
                     <option value="<?= $k ?>" <?= $filterType === $k ? 'selected' : '' ?>><?= $v ?></option>
@@ -56,8 +56,8 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">ผลลัพธ์</label>
-                <select name="result" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <label class="block text-xs font-medium text-secondary mb-1">ผลลัพธ์</label>
+                <select name="result" class="px-3 py-2 border border-line rounded-md text-sm">
                     <option value="">ทั้งหมด</option>
                     <?php foreach ($resultLabel as $k => $v): ?>
                     <option value="<?= $k ?>" <?= $filterResult === $k ? 'selected' : '' ?>><?= $v ?></option>
@@ -65,43 +65,43 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">วันที่เริ่มต้น</label>
-                <input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <label class="block text-xs font-medium text-secondary mb-1">วันที่เริ่มต้น</label>
+                <input type="date" name="date_from" value="<?= htmlspecialchars($dateFrom) ?>" class="px-3 py-2 border border-line rounded-md text-sm">
             </div>
             <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">วันที่สิ้นสุด</label>
-                <input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="px-3 py-2 border border-gray-300 rounded-md text-sm">
+                <label class="block text-xs font-medium text-secondary mb-1">วันที่สิ้นสุด</label>
+                <input type="date" name="date_to" value="<?= htmlspecialchars($dateTo) ?>" class="px-3 py-2 border border-line rounded-md text-sm">
             </div>
             <?php if ($calId > 0): ?>
             <input type="hidden" name="calibration_id" value="<?= $calId ?>">
             <?php endif; ?>
             <button type="submit" class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-md hover:bg-primary-700">ค้นหา</button>
-            <a href="?" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 underline">ล้างตัวกรอง</a>
+            <a href="?" class="px-4 py-2 text-sm text-secondary hover:text-primary underline">ล้างตัวกรอง</a>
         </form>
     </div>
     <div class="card overflow-hidden">
         <table class="data-table cmms-stack-table">
-            <thead class="bg-gray-50">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ทรัพย์สิน</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่สอบเทียบ</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สอบเทียบครั้งถัดไป</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ประเภท</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ผลลัพธ์</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ใบรับรอง</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correction</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uncertainty</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ค่าใช้จ่าย</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ผู้ดำเนินการ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ทรัพย์สิน</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">วันที่สอบเทียบ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">สอบเทียบครั้งถัดไป</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ประเภท</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ผลลัพธ์</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ใบรับรอง</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Correction</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Uncertainty</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ค่าใช้จ่าย</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ผู้ดำเนินการ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="divide-y divide-line">
                 <?php foreach ($rows as $r): ?>
-                <tr class="hover:bg-gray-50">
-                    <td data-label="ทรัพย์สิน" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['asset_code'] ?? '') . ' - ' . ($r['asset_name'] ?? '-')) ?></td>
-                    <td data-label="วันที่สอบเทียบ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['calibration_date']) ?></td>
-                    <td data-label="สอบเทียบครั้งถัดไป" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['next_calibration_date'] ?? '-') ?></td>
-                    <td data-label="ประเภท" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($typeLabel[$r['type']] ?? $r['type'] ?? '-') ?></td>
+                <tr class="hover:bg-subtle">
+                    <td data-label="ทรัพย์สิน" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars(($r['asset_code'] ?? '') . ' - ' . ($r['asset_name'] ?? '-')) ?></td>
+                    <td data-label="วันที่สอบเทียบ" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['calibration_date']) ?></td>
+                    <td data-label="สอบเทียบครั้งถัดไป" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['next_calibration_date'] ?? '-') ?></td>
+                    <td data-label="ประเภท" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($typeLabel[$r['type']] ?? $r['type'] ?? '-') ?></td>
                     <td data-label="ผลลัพธ์" class="px-4 py-3 text-sm">
                         <span class="badge <?= $r['result'] === 'pass' ? 'status-pass' : ($r['result'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($resultLabel[$r['result']] ?? $r['result']) ?>
@@ -114,13 +114,13 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                             <a href="/uploads/calibration/<?= urlencode($r['certificate_file']) ?>" class="text-primary-600 hover:text-primary-700 underline" target="_blank">ดาวน์โหลด</a>
                             <?php endif; ?>
                         <?php else: ?>
-                        <span class="text-gray-400">-</span>
+                        <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
-                    <td data-label="Correction" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['correction_value'] ?? '-') ?></td>
-                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['uncertainty_value'] ?? '-') ?></td>
-                    <td data-label="ค่าใช้จ่าย" class="px-4 py-3 text-sm text-gray-600"><?= $r['cost'] ? number_format((float)$r['cost'], 2) : '-' ?></td>
-                    <td data-label="ผู้ดำเนินการ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['performer_name'] ?? '-') ?></td>
+                    <td data-label="Correction" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['correction_value'] ?? '-') ?></td>
+                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['uncertainty_value'] ?? '-') ?></td>
+                    <td data-label="ค่าใช้จ่าย" class="px-4 py-3 text-sm text-secondary"><?= $r['cost'] ? number_format((float)$r['cost'], 2) : '-' ?></td>
+                    <td data-label="ผู้ดำเนินการ" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['performer_name'] ?? '-') ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>

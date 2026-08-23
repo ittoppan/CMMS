@@ -22,9 +22,9 @@ renderHeader();
 
     <!-- 6 Rich Menu Action Tiles Grid -->
     <div class="card cmms-card p-6 space-y-4">
-        <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">
+        <h3 class="font-bold text-primary text-base border-b pb-2 flex justify-between items-center">
             <span>🎛️ ปุ่มเมนูลัด 6 ช่องบนหน้าจอ LINE (6-Tile Action Matrix)</span>
-            <span class="text-xs text-slate-400">Target Action URLs</span>
+            <span class="text-xs text-muted">Target Action URLs</span>
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -32,9 +32,9 @@ renderHeader();
             <!-- Tile 1: แจ้งซ่อมด่วน -->
             <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-rose-600 text-white font-bold flex items-center justify-center text-sm">1</div>
-                <h4 class="font-bold text-slate-900 text-sm">🔧 แจ้งซ่อมด่วน (F-EN-03)</h4>
-                <p class="text-[11px] text-slate-600">เปิดหน้าแจ้งซ่อมด่วน ถ่ายภาพ/คลิปวิดีโอส่งเข้าช่าง</p>
-                <div class="bg-white p-2 rounded border border-rose-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">🔧 แจ้งซ่อมด่วน (F-EN-03)</h4>
+                <p class="text-[11px] text-secondary">เปิดหน้าแจ้งซ่อมด่วน ถ่ายภาพ/คลิปวิดีโอส่งเข้าช่าง</p>
+                <div class="bg-white p-2 rounded border border-rose-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/repair/create.php
                 </div>
             </div>
@@ -42,9 +42,9 @@ renderHeader();
             <!-- Tile 2: Kanban Board -->
             <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold flex items-center justify-center text-sm">2</div>
-                <h4 class="font-bold text-slate-900 text-sm">📌 กระดานติดตามงาน (Kanban)</h4>
-                <p class="text-[11px] text-slate-600">ติดตามสถานะงานซ่อมแบบการ์ดลากวาง Real-time</p>
-                <div class="bg-white p-2 rounded border border-indigo-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">📌 กระดานติดตามงาน (Kanban)</h4>
+                <p class="text-[11px] text-secondary">ติดตามสถานะงานซ่อมแบบการ์ดลากวาง Real-time</p>
+                <div class="bg-white p-2 rounded border border-indigo-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/repair/kanban.php
                 </div>
             </div>
@@ -52,9 +52,9 @@ renderHeader();
             <!-- Tile 3: เบิก Sage 300 -->
             <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-purple-600 text-white font-bold flex items-center justify-center text-sm">3</div>
-                <h4 class="font-bold text-slate-900 text-sm">📦 เบิกอะไหล่ & Sage 300</h4>
-                <p class="text-[11px] text-slate-600">ศูนย์อนุมัติและจ่ายอะไหล่คลัง Sage 300</p>
-                <div class="bg-white p-2 rounded border border-purple-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">📦 เบิกอะไหล่ & Sage 300</h4>
+                <p class="text-[11px] text-secondary">ศูนย์อนุมัติและจ่ายอะไหล่คลัง Sage 300</p>
+                <div class="bg-white p-2 rounded border border-purple-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/spare_parts/issue_center.php
                 </div>
             </div>
@@ -62,9 +62,9 @@ renderHeader();
             <!-- Tile 4: แผน PM & Checksheet -->
             <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-amber-600 text-white font-bold flex items-center justify-center text-sm">4</div>
-                <h4 class="font-bold text-slate-900 text-sm">📋 แผน PM & เช็คชีท (F-EN-02)</h4>
-                <p class="text-[11px] text-slate-600">ปฏิทินงาน PM และเปิดทำแบบฟอร์มเช็คชีท ISO</p>
-                <div class="bg-white p-2 rounded border border-amber-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">📋 แผน PM & เช็คชีท (F-EN-02)</h4>
+                <p class="text-[11px] text-secondary">ปฏิทินงาน PM และเปิดทำแบบฟอร์มเช็คชีท ISO</p>
+                <div class="bg-white p-2 rounded border border-amber-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/pm_am/calendar.php
                 </div>
             </div>
@@ -72,9 +72,9 @@ renderHeader();
             <!-- Tile 5: ทะเบียนทรัพย์สิน & QR -->
             <div class="p-4 bg-cyan-50 border border-cyan-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-cyan-600 text-white font-bold flex items-center justify-center text-sm">5</div>
-                <h4 class="font-bold text-slate-900 text-sm">🏭 ทะเบียนทรัพย์สิน & สแกน QR</h4>
-                <p class="text-[11px] text-slate-600">ค้นหาประวัติเครื่องจักร สแกน QR Code หน้าเครื่อง</p>
-                <div class="bg-white p-2 rounded border border-cyan-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">🏭 ทะเบียนทรัพย์สิน & สแกน QR</h4>
+                <p class="text-[11px] text-secondary">ค้นหาประวัติเครื่องจักร สแกน QR Code หน้าเครื่อง</p>
+                <div class="bg-white p-2 rounded border border-cyan-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/asset_registry/
                 </div>
             </div>
@@ -82,9 +82,9 @@ renderHeader();
             <!-- Tile 6: Executive Dashboard -->
             <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
                 <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center text-sm">6</div>
-                <h4 class="font-bold text-slate-900 text-sm">📊 Executive Dashboard</h4>
-                <p class="text-[11px] text-slate-600">รายงานวิเคราะห์ Cost, MTBF/MTTR & RCA 5Ms</p>
-                <div class="bg-white p-2 rounded border border-emerald-200 font-mono text-[10px] text-slate-700 break-all select-all">
+                <h4 class="font-bold text-primary text-sm">📊 Executive Dashboard</h4>
+                <p class="text-[11px] text-secondary">รายงานวิเคราะห์ Cost, MTBF/MTTR & RCA 5Ms</p>
+                <div class="bg-white p-2 rounded border border-emerald-200 font-mono text-[10px] text-secondary break-all select-all">
                     https://ommatophorous-robert-fortifyingly.ngrok-free.app/pages/settings/executive_dashboard.php
                 </div>
             </div>
@@ -94,8 +94,8 @@ renderHeader();
 
     <!-- Instructions Guide -->
     <div class="card cmms-card p-6 space-y-3">
-        <h3 class="font-bold text-slate-900 text-sm border-b pb-2">🛠️ วิธีการนำ URL ไปวางใน LINE Official Account Manager:</h3>
-        <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+        <h3 class="font-bold text-primary text-sm border-b pb-2">🛠️ วิธีการนำ URL ไปวางใน LINE Official Account Manager:</h3>
+        <ol class="list-decimal list-inside text-xs text-secondary space-y-2 leading-relaxed">
             <li>เปิดเข้า <a href="https://manager.line.biz/" target="_blank" class="text-indigo-600 font-bold hover:underline">LINE Official Account Manager</a> และเลือกบัญชี <strong>@823cenqj</strong></li>
             <li>เข้าที่เมนู <strong>Rich Menus (ริชเมนู) ➔ สร้างใหม่ (Create New)</strong></li>
             <li>เลือกเทมเพลตแบบ <strong>6 ช่อง (Large - 6 tiles)</strong></li>

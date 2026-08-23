@@ -60,18 +60,18 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6 page-heading">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มแผน Preventive Maintenance</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">เพิ่มแผน Preventive Maintenance</h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?><a href="index.php" class="ml-2 underline">กลับไปรายการ</a></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">หัวข้อ <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">หัวข้อ <span class="text-red-500">*</span></label>
                 <input type="text" name="title" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
                 <select name="asset_id" required class="input input-bordered w-full mt-1">
                     <option value="">-- เลือกทรัพย์สิน --</option>
                     <?php foreach ($assets as $a): ?>
@@ -80,7 +80,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนงาน (Plan)</label>
+                <label class="block text-sm font-medium text-secondary">แผนงาน (Plan)</label>
                 <select name="plan_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($plans as $p): ?>
@@ -89,7 +89,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนก</label>
+                <label class="block text-sm font-medium text-secondary">แผนก</label>
                 <select name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($depts as $d): ?>
@@ -98,7 +98,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานที่</label>
+                <label class="block text-sm font-medium text-secondary">สถานที่</label>
                 <select name="location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locs as $l): ?>
@@ -107,7 +107,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">โซนงาน</label>
+                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
                 <select name="work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($zones as $z): ?>
@@ -116,7 +116,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ผู้รับผิดชอบ</label>
+                <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบ</label>
                 <select name="assigned_to" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
@@ -125,7 +125,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ประเภทความถี่</label>
+                <label class="block text-sm font-medium text-secondary">ประเภทความถี่</label>
                 <select name="frequency_type" class="input input-bordered w-full mt-1">
                     <?php foreach (['daily','weekly','monthly','quarterly','yearly','custom'] as $f): ?>
                     <option value="<?= $f ?>" <?= $f==='monthly'?'selected':'' ?>><?= ucfirst($f) ?></option>
@@ -133,19 +133,19 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Interval</label>
+                <label class="block text-sm font-medium text-secondary">Interval</label>
                 <input type="number" name="frequency_interval" class="input input-bordered w-full mt-1" value="1" min="1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">กำหนดเสร็จ</label>
+                <label class="block text-sm font-medium text-secondary">กำหนดเสร็จ</label>
                 <input type="date" name="due_date" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ทำล่าสุด</label>
+                <label class="block text-sm font-medium text-secondary">ทำล่าสุด</label>
                 <input type="date" name="last_done_date" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                <label class="block text-sm font-medium text-secondary">สถานะ</label>
                 <select name="status" class="input input-bordered w-full mt-1">
                     <?php foreach (['pending','in_progress','completed','overdue','skipped'] as $s): ?>
                     <option value="<?= $s ?>" <?= $s==='pending'?'selected':'' ?>><?= ucfirst($s) ?></option>
@@ -153,30 +153,30 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                 </select>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ไฟล์คำสั่งปฏิบัติงาน</label>
+                <label class="block text-sm font-medium text-secondary">ไฟล์คำสั่งปฏิบัติงาน</label>
                 <input type="file" name="work_instruction_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="input input-bordered w-full mt-1">
-                <p class="text-xs text-gray-500 mt-1">PDF, DOC, XLS, รูปภาพ</p>
+                <p class="text-xs text-muted mt-1">PDF, DOC, XLS, รูปภาพ</p>
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">คำอธิบาย</label>
+            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
             <textarea name="description" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
+            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
             <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">Checklist (บรรทัดละ 1 รายการ)</label>
+            <label class="block text-sm font-medium text-secondary">Checklist (บรรทัดละ 1 รายการ)</label>
             <textarea name="checklist" rows="4" class="input input-bordered w-full mt-1" placeholder="ตรวจสอบระดับน้ำมัน&#10;ตรวจสอบสายพาน&#10;หล่อลื่นชิ้นส่วน"></textarea>
         </div>
         <?php if ($templates): ?>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">เลือก Checklist Template</label>
+            <label class="block text-sm font-medium text-secondary mb-2">เลือก Checklist Template</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto border rounded-md p-3">
                 <?php foreach ($templates as $t): ?>
                 <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="checklist_templates[]" value="<?= $t['id'] ?>" class="rounded border-gray-300">
+                    <input type="checkbox" name="checklist_templates[]" value="<?= $t['id'] ?>" class="rounded border-line">
                     <?= htmlspecialchars($t['code'] . ' - ' . $t['name']) ?>
                 </label>
                 <?php endforeach; ?>
@@ -184,7 +184,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
         </div>
         <?php endif; ?>
         <div>
-            <label class="block text-sm font-medium text-gray-700">เหตุผลที่เลื่อนกำหนดการ</label>
+            <label class="block text-sm font-medium text-secondary">เหตุผลที่เลื่อนกำหนดการ</label>
             <textarea name="reschedule_reason" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="form-actions flex gap-3">

@@ -22,7 +22,7 @@ renderHeader();
                 <a href="index.php" class="text-sm text-brand-600 hover:underline">&larr; คลังอะไหล่</a>
                 <span class="badge badge-info badge badge-warning">Reservation Tracking</span>
             </div>
-            <h1 class="mt-1 text-2xl font-bold text-gray-900">📑 Reservation Center (ศูนย์ควบคุมและติดตามการจองอะไหล่)</h1>
+            <h1 class="mt-1 text-2xl font-bold text-primary">📑 Reservation Center (ศูนย์ควบคุมและติดตามการจองอะไหล่)</h1>
         </div>
         <div class="flex gap-2">
             <a href="issue_center.php" class="btn btn-secondary">📦 Spare Issue Center (เบิก-จ่าย)</a>
@@ -33,19 +33,19 @@ renderHeader();
     <!-- Overview Metrics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">จำนวนรายการที่มีการจอง</span>
+            <span class="text-xs font-bold text-muted uppercase block">จำนวนรายการที่มีการจอง</span>
             <span class="text-3xl font-extrabold text-amber-600 mt-1 block">
                 <?= count(array_filter($parts, fn($p) => $p['reserved_qty'] > 0)) ?>
             </span>
         </div>
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">จำนวนชิ้นรวมที่ถูกจอง (Reserved)</span>
+            <span class="text-xs font-bold text-muted uppercase block">จำนวนชิ้นรวมที่ถูกจอง (Reserved)</span>
             <span class="text-3xl font-extrabold text-indigo-600 mt-1 block">
                 <?= number_format(array_sum(array_column($parts, 'reserved_qty')), 0) ?>
             </span>
         </div>
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">อะไหล่พร้อมใช้งาน (Available Stock)</span>
+            <span class="text-xs font-bold text-muted uppercase block">อะไหล่พร้อมใช้งาน (Available Stock)</span>
             <span class="text-3xl font-extrabold text-emerald-600 mt-1 block">
                 <?= number_format(array_sum(array_column($parts, 'available_qty')), 0) ?>
             </span>
@@ -54,13 +54,13 @@ renderHeader();
 
     <!-- Reservation Table -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-gray-200 font-bold text-gray-900">
+        <div class="p-4 border-b border-line font-bold text-primary">
             📊 รายละเอียดสต็อกและการจองอะไหล่ (Stock & Reservation Balance)
         </div>
         
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+                <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">รูปภาพอะไหล่</th>
                         <th class="px-4 py-3 text-left">รหัส / ชื่ออะไหล่</th>
@@ -70,17 +70,17 @@ renderHeader();
                         <th class="px-4 py-3 text-center">สถานะการจอง</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($parts as $p): ?>
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="รูปภาพอะไหล่" class="px-4 py-3">
-                            <img src="<?= getImageUrl($p['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50" title="<?= htmlspecialchars($p['name']) ?>">
+                            <img src="<?= getImageUrl($p['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-line shadow-sm bg-subtle" title="<?= htmlspecialchars($p['name']) ?>">
                         </td>
                         <td data-label="รหัส / ชื่ออะไหล่" class="px-4 py-3">
                             <span class="font-mono font-bold text-indigo-600 block text-xs"><?= htmlspecialchars($p['code']) ?></span>
-                            <span class="font-bold text-gray-900"><?= htmlspecialchars($p['name']) ?></span>
+                            <span class="font-bold text-primary"><?= htmlspecialchars($p['name']) ?></span>
                         </td>
-                        <td data-label="คลังคงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-gray-800">
+                        <td data-label="คลังคงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-primary">
                             <?= number_format($p['stock_qty'], 2) ?> <?= htmlspecialchars($p['unit_name'] ?? 'PCS') ?>
                         </td>
                         <td data-label="ถูกจองแล้ว (Reserved)" class="px-4 py-3 text-center font-bold text-amber-600">
@@ -93,7 +93,7 @@ renderHeader();
                             <?php if ($p['reserved_qty'] > 0): ?>
                             <span class="badge badge badge-warning font-bold px-2.5 py-1">⚠️ มีรายการจอง</span>
                             <?php else: ?>
-                            <span class="badge bg-gray-100 text-gray-600 font-bold px-2.5 py-1">⚪ ไม่มีรายการจอง</span>
+                            <span class="badge bg-muted text-secondary font-bold px-2.5 py-1">⚪ ไม่มีรายการจอง</span>
                             <?php endif; ?>
                         </td>
                     </tr>

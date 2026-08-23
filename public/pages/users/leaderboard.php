@@ -27,8 +27,8 @@ renderHeader();
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">🏆 <?= __t('leaderboard') ?> (Technician KPI Leaderboard)</h1>
-            <p class="mt-1 text-sm text-gray-500">ตารางสรุปผลงานและการปิดงานซ่อมของทีมช่างบำรุงรักษา</p>
+            <h1 class="text-2xl font-bold text-primary">🏆 <?= __t('leaderboard') ?> (Technician KPI Leaderboard)</h1>
+            <p class="mt-1 text-sm text-muted">ตารางสรุปผลงานและการปิดงานซ่อมของทีมช่างบำรุงรักษา</p>
         </div>
         <div class="flex gap-2">
             <a href="/pages/users/" class="btn btn-secondary">👥 รายชื่อผู้ใช้</a>
@@ -46,19 +46,19 @@ renderHeader();
         foreach ($top3 as $idx => $top):
         ?>
         <div class="card p-5 rounded-xl shadow-sm border-2 text-center flex flex-col items-center" style="background:<?= $colors[$idx] ?>; border-color:<?= $borders[$idx] ?>;">
-            <div class="text-xs font-extrabold text-gray-700 mb-2 uppercase"><?= $badges[$idx] ?></div>
+            <div class="text-xs font-extrabold text-secondary mb-2 uppercase"><?= $badges[$idx] ?></div>
             <img src="<?= getImageUrl($top['avatar_path'] ?? '', 'avatar') ?>" class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md mb-2">
-            <div class="text-base font-black text-gray-900 mb-0.5"><?= htmlspecialchars($top['full_name']) ?></div>
-            <div class="text-xs text-gray-600 mb-3"><?= htmlspecialchars($top['position'] ?? 'Technician') ?> (<?= htmlspecialchars($top['dept_name'] ?? 'ฝ่ายช่าง') ?>)</div>
+            <div class="text-base font-black text-primary mb-0.5"><?= htmlspecialchars($top['full_name']) ?></div>
+            <div class="text-xs text-secondary mb-3"><?= htmlspecialchars($top['position'] ?? 'Technician') ?> (<?= htmlspecialchars($top['dept_name'] ?? 'ฝ่ายช่าง') ?>)</div>
             
-            <div class="grid grid-cols-2 gap-2 text-center pt-2 border-t border-gray-300">
+            <div class="grid grid-cols-2 gap-2 text-center pt-2 border-t border-line">
                 <div>
                     <span class="text-xl font-bold text-emerald-600"><?= $top['completed_count'] ?></span>
-                    <span class="text-xs text-gray-600 block">งานซ่อมเสร็จสิ้น</span>
+                    <span class="text-xs text-secondary block">งานซ่อมเสร็จสิ้น</span>
                 </div>
                 <div>
                     <span class="text-xl font-bold text-amber-600">⭐ <?= number_format($top['avg_rating'] ?: 5.0, 1) ?></span>
-                    <span class="text-xs text-gray-600 block">ดาวความพึงพอใจ</span>
+                    <span class="text-xs text-secondary block">ดาวความพึงพอใจ</span>
                 </div>
             </div>
         </div>
@@ -67,12 +67,12 @@ renderHeader();
 
     <!-- Full Ranking Table -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-            <h2 class="font-bold text-gray-900 text-base">📊 ตารางเปรียบเทียบผลงานทีมช่างทั้งหมด</h2>
+        <div class="p-4 border-b border-line">
+            <h2 class="font-bold text-primary text-base">📊 ตารางเปรียบเทียบผลงานทีมช่างทั้งหมด</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-sm">
-                <thead class="bg-gray-50 text-gray-500 uppercase font-semibold text-xs">
+                <thead class="bg-subtle text-muted uppercase font-semibold text-xs">
                     <tr>
                         <th class="px-4 py-3 text-left">อันดับ</th>
                         <th class="px-4 py-3 text-left">ชื่อ-นามสกุล</th>
@@ -84,14 +84,14 @@ renderHeader();
                         <th class="px-4 py-3 text-center">คะแนนเฉลี่ย</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($techs as $rank => $t): 
                         $rate = $t['total_assigned'] > 0 ? round(($t['completed_count'] / $t['total_assigned']) * 100) : 0;
                     ?>
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="อันดับ" class="px-4 py-3 font-bold text-center"><?= $rank + 1 ?></td>
-                        <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($t['full_name']) ?></td>
-                        <td data-label="ตำแหน่ง/แผนก" class="px-4 py-3 text-gray-600"><?= htmlspecialchars($t['position'] ?? '-') ?> (<?= htmlspecialchars($t['dept_name'] ?? '-') ?>)</td>
+                        <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 font-medium text-primary"><?= htmlspecialchars($t['full_name']) ?></td>
+                        <td data-label="ตำแหน่ง/แผนก" class="px-4 py-3 text-secondary"><?= htmlspecialchars($t['position'] ?? '-') ?> (<?= htmlspecialchars($t['dept_name'] ?? '-') ?>)</td>
                         <td data-label="งานที่รับมอบหมาย" class="px-4 py-3 text-center font-bold count-up"><?= $t['total_assigned'] ?></td>
                         <td data-label="กำลังซ่อม" class="px-4 py-3 text-center text-amber-600 font-bold count-up"><?= $t['in_progress_count'] ?></td>
                         <td data-label="ปิดงานแล้ว" class="px-4 py-3 text-center text-emerald-600 font-bold count-up"><?= $t['completed_count'] ?></td>

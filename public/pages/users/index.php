@@ -20,7 +20,7 @@ $rows = $stmt->fetchAll();
 
 <div class="space-y-4">
     <div class="flex items-center justify-between">
-        <div><h1 class="text-2xl font-bold text-gray-900">ผู้ใช้ระบบ</h1><p class="mt-1 text-sm text-gray-500">Users</p></div>
+        <div><h1 class="text-2xl font-bold text-primary">ผู้ใช้ระบบ</h1><p class="mt-1 text-sm text-muted">Users</p></div>
         <a href="create.php" class="btn-primary">+ เพิ่มผู้ใช้</a>
     </div>
     <div class="card p-4 shadow">
@@ -28,33 +28,33 @@ $rows = $stmt->fetchAll();
     </div>
     <div class="card overflow-hidden">
         <table class="data-table cmms-stack-table">
-            <thead class="bg-gray-50">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อผู้ใช้</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อ-นามสกุล</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">อีเมล</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">บทบาท</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">เบอร์โทร</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ LINE</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ชื่อผู้ใช้</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ชื่อ-นามสกุล</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">อีเมล</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">บทบาท</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">เบอร์โทร</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">สถานะ LINE</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">สถานะ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จัดการ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="divide-y divide-line">
                 <?php foreach ($rows as $r): ?>
-                <tr class="hover:bg-gray-50">
-                    <td data-label="ชื่อผู้ใช้" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['username']) ?></td>
-                    <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 text-sm text-gray-700">
+                <tr class="hover:bg-subtle">
+                    <td data-label="ชื่อผู้ใช้" class="px-4 py-3 text-sm font-medium text-primary"><?= htmlspecialchars($r['username']) ?></td>
+                    <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 text-sm text-secondary">
                         <div class="flex items-center gap-3">
-                            <img src="<?= getImageUrl($r['avatar_path'] ?? '', 'avatar') ?>" class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0">
-                            <span class="font-bold text-gray-900"><?= htmlspecialchars($r['full_name']) ?></span>
+                            <img src="<?= getImageUrl($r['avatar_path'] ?? '', 'avatar') ?>" class="w-8 h-8 rounded-full object-cover border border-line shadow-sm flex-shrink-0">
+                            <span class="font-bold text-primary"><?= htmlspecialchars($r['full_name']) ?></span>
                         </div>
                     </td>
-                    <td data-label="อีเมล" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['email']) ?></td>
+                    <td data-label="อีเมล" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['email']) ?></td>
                     <td data-label="บทบาท" class="px-4 py-3 text-sm">
                         <span class="badge bg-primary-100 text-primary-800"><?= htmlspecialchars($r['role_name'] ?? '-') ?></span>
                     </td>
-                    <td data-label="เบอร์โทร" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['phone'] ?? '-') ?></td>
+                    <td data-label="เบอร์โทร" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['phone'] ?? '-') ?></td>
                     <td data-label="สถานะ LINE" class="px-4 py-3 text-sm">
                         <?php if (!empty($r['line_user_id'])): ?>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium badge badge-success">🟢 ผูก LINE แล้ว</span>

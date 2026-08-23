@@ -27,7 +27,7 @@ renderHeader();
 
     <!-- Skill Matrix Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ตารางทักษะช่างซ่อมบำรุงจำแนกตามชนิดเครื่องจักร (Technician Machine Skill Matrix)</span>
             <span class="badge badge badge-warning font-bold text-xs"><?= count($techs) ?> รายชื่อช่าง</span>
         </h3>
@@ -44,15 +44,15 @@ renderHeader();
                         <th class="p-3 text-center bg-emerald-900">🔧 ระบบไฮดรอลิก (Hydraulics)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($techs as $idx => $t): ?>
                     <?php
                         $level = ($idx % 3 === 0) ? 'Level 4: Master Specialist' : (($idx % 2 === 0) ? 'Level 3: Senior Technician' : 'Level 2: Junior Technician');
                     ?>
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-slate-900">
+                    <tr class="hover:bg-subtle">
+                        <td class="p-3 font-bold text-primary">
                             👤 <?= htmlspecialchars($t['full_name']) ?>
-                            <span class="text-[10px] text-slate-400 block font-mono">@<?= htmlspecialchars($t['username']) ?></span>
+                            <span class="text-[10px] text-muted block font-mono">@<?= htmlspecialchars($t['username']) ?></span>
                         </td>
                         <td class="p-3 text-center">
                             <span class="badge font-black text-[10px] <?= str_contains($level, 'Master') ? 'badge badge-warning' : (str_contains($level, 'Senior') ? 'status-acknowledged' : 'badge badge-info') ?>">

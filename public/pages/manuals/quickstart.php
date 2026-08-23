@@ -20,14 +20,14 @@ renderHeader();
 
         <!-- Card 1: Operator / Reporter -->
         <div class="card p-5 space-y-3">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3 border-b border-line pb-3">
                 <span class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">📱</span>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-base">1. สำหรับผู้แจ้งซ่อม (Operators)</h3>
-                    <p class="text-xs text-slate-500">ขั้นตอนการแจ้งซ่อมผ่านมือถือ & QR Code</p>
+                    <h3 class="font-bold text-primary text-base">1. สำหรับผู้แจ้งซ่อม (Operators)</h3>
+                    <p class="text-xs text-muted">ขั้นตอนการแจ้งซ่อมผ่านมือถือ & QR Code</p>
                 </div>
             </div>
-            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+            <ol class="list-decimal list-inside text-xs text-secondary space-y-2 leading-relaxed">
                 <li>สแกน <strong>QR Code</strong> ที่ติดอยู่บนตัวเครื่องจักร หรือเปิดลิงก์ระบบบนมือถือ</li>
                 <li>กดปุ่ม <strong>"+ แจ้งซ่อมด่วน (F-EN-03)"</strong></li>
                 <li>กรอกหัวข้อ อาการเสีย และเลือกระดับความเร่งด่วน</li>
@@ -38,14 +38,14 @@ renderHeader();
 
         <!-- Card 2: Maintenance Technician -->
         <div class="card p-5 space-y-3">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3 border-b border-line pb-3">
                 <span class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">🔧</span>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-base">2. สำหรับช่างซ่อมบำรุง (Technicians)</h3>
-                    <p class="text-xs text-slate-500">การรับงาน ปิดงาน และขอเบิกอะไหล่</p>
+                    <h3 class="font-bold text-primary text-base">2. สำหรับช่างซ่อมบำรุง (Technicians)</h3>
+                    <p class="text-xs text-muted">การรับงาน ปิดงาน และขอเบิกอะไหล่</p>
                 </div>
             </div>
-            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+            <ol class="list-decimal list-inside text-xs text-secondary space-y-2 leading-relaxed">
                 <li>เปิดเข้าเมนู <strong>"งานของฉัน"</strong> หรือดูบน <strong>Kanban Board</strong></li>
                 <li>กดเปลี่ยนสถานะเป็น <strong>"In Progress (กำลังซ่อม)"</strong></li>
                 <li>หากต้องการใช้อะไหล่ กด <strong>"ขอเบิกอะไหล่"</strong> เพื่อส่งเรื่องหาหัวหน้างานและสโตร์</li>
@@ -55,14 +55,14 @@ renderHeader();
 
         <!-- Card 3: Store & Sage 300 -->
         <div class="card p-5 space-y-3">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3 border-b border-line pb-3">
                 <span class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">📦</span>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-base">3. สำหรับเจ้าหน้าที่สโตร์ (Storekeeper)</h3>
-                    <p class="text-xs text-slate-500">การจ่ายของ ตัดสต็อก และเชื่อม Sage 300</p>
+                    <h3 class="font-bold text-primary text-base">3. สำหรับเจ้าหน้าที่สโตร์ (Storekeeper)</h3>
+                    <p class="text-xs text-muted">การจ่ายของ ตัดสต็อก และเชื่อม Sage 300</p>
                 </div>
             </div>
-            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+            <ol class="list-decimal list-inside text-xs text-secondary space-y-2 leading-relaxed">
                 <li>เปิดเข้าเมนู <strong>"📦 เบิก Sage 300 (Spare Issue Center)"</strong></li>
                 <li>ตรวจสอบใบขอเบิกที่ได้รับการอนุมัติจากหัวหน้าวิศวกรรม</li>
                 <li>หยิบอะไหล่จ่ายให้ช่าง และกดปุ่ม <strong>"จ่ายของ (Store Issue)"</strong> ในระบบ</li>
@@ -72,14 +72,14 @@ renderHeader();
 
         <!-- Card 4: Management & ISO Audit -->
         <div class="card p-5 space-y-3">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3 border-b border-line pb-3">
                 <span class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">📊</span>
                 <div>
-                    <h3 class="font-bold text-slate-900 text-base">4. สำหรับผู้บริหาร & ตรวจสอบ ISO</h3>
-                    <p class="text-xs text-slate-500">รายงานวิเคราะห์ Cost, MTBF/MTTR & ISO Print</p>
+                    <h3 class="font-bold text-primary text-base">4. สำหรับผู้บริหาร & ตรวจสอบ ISO</h3>
+                    <p class="text-xs text-muted">รายงานวิเคราะห์ Cost, MTBF/MTTR & ISO Print</p>
                 </div>
             </div>
-            <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+            <ol class="list-decimal list-inside text-xs text-secondary space-y-2 leading-relaxed">
                 <li>เปิดดู <strong>Executive Dashboard</strong> เพื่อดูสรุป Cost by Machine และ RCA 5Ms</li>
                 <li>สั่งพิมพ์แบบฟอร์ม ISO <strong>F-EN-03 (ใบแจ้งซ่อม)</strong> หรือ <strong>F-EN-01 (บัตรประวัติเครื่องจักร)</strong></li>
                 <li>ตรวจสอบปฏิทินงาน PM & AM และแบบฟอร์มเช็คชีท <strong>F-EN-02</strong></li>

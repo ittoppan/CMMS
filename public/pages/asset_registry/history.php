@@ -74,25 +74,25 @@ renderHeader();
                 <a href="index.php" class="text-sm text-brand-600 hover:underline">&larr; กลับหน้ารายชื่อทรัพย์สิน</a>
                 <span class="badge badge-info">F-EN-01 REV.03</span>
             </div>
-            <h1 class="mt-1 text-2xl font-bold text-gray-900">บัตรประวัติเครื่องจักร (MACHINE HISTORY CARD)</h1>
+            <h1 class="mt-1 text-2xl font-bold text-primary">บัตรประวัติเครื่องจักร (MACHINE HISTORY CARD)</h1>
         </div>
         <button onclick="window.print()" class="btn btn-primary">🖨️ พิมพ์บัตรประวัติ (F-EN-01)</button>
     </div>
 
     <!-- Asset Details Card -->
     <div class="card p-6 space-y-4">
-        <div class="flex items-center justify-between border-b border-gray-200 pb-4 flex-wrap gap-4">
+        <div class="flex items-center justify-between border-b border-line pb-4 flex-wrap gap-4">
             <div class="flex items-center gap-4">
-                <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-slate-300 shadow-sm shrink-0">
+                <img src="<?= getImageUrl($asset['image_path'] ?? '', 'asset') ?>" class="w-16 h-16 rounded-xl object-cover border border-line shadow-sm shrink-0">
                 <div>
                     <span class="text-xs text-indigo-600 font-mono font-extrabold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100"><?= htmlspecialchars($asset['code']) ?></span>
-                    <h2 class="text-xl font-bold text-gray-900 mt-0.5"><?= htmlspecialchars($asset['name']) ?></h2>
-                    <span class="text-xs text-gray-500 block">แผนก/สถานที่: <?= htmlspecialchars($asset['dept_name'] ?? '-') ?> (<?= htmlspecialchars($asset['location_name'] ?? '-') ?>)</span>
+                    <h2 class="text-xl font-bold text-primary mt-0.5"><?= htmlspecialchars($asset['name']) ?></h2>
+                    <span class="text-xs text-muted block">แผนก/สถานที่: <?= htmlspecialchars($asset['dept_name'] ?? '-') ?> (<?= htmlspecialchars($asset['location_name'] ?? '-') ?>)</span>
                 </div>
             </div>
             <div class="text-right">
                 <span class="badge badge badge-success text-xs font-bold"><?= htmlspecialchars($asset['status'] ?? 'Active') ?></span>
-                <span class="text-xs text-gray-400 block mt-1">ผู้รับผิดชอบ: <?= htmlspecialchars($asset['custodian_name'] ?? '-') ?></span>
+                <span class="text-xs text-muted block mt-1">ผู้รับผิดชอบ: <?= htmlspecialchars($asset['custodian_name'] ?? '-') ?></span>
             </div>
         </div>
 
@@ -106,14 +106,14 @@ renderHeader();
 
     <!-- 1. Repair History -->
     <div class="card p-4">
-        <h2 class="text-lg font-bold text-gray-900 mb-3">🔧 1. ประวัติงานซ่อม (Repair Orders Log)</h2>
+        <h2 class="text-lg font-bold text-primary mb-3">🔧 1. ประวัติงานซ่อม (Repair Orders Log)</h2>
         <?php if (empty($repairList)): ?>
-        <p class="text-sm text-gray-500 text-center py-4">ไม่มีประวัติการซ่อม</p>
+        <p class="text-sm text-muted text-center py-4">ไม่มีประวัติการซ่อม</p>
         <?php else: ?>
         <div class="overflow-x-auto">
             <table class="data-table w-full text-xs">
                 <thead>
-                    <tr class="bg-gray-100">
+                    <tr class="bg-muted">
                         <th class="p-2">วันที่</th>
                         <th class="p-2">ชื่องาน/อาการเสีย</th>
                         <th class="p-2">ช่างผู้ซ่อม</th>
@@ -141,14 +141,14 @@ renderHeader();
 
     <!-- 2. PM History -->
     <div class="card p-4">
-        <h2 class="text-lg font-bold text-gray-900 mb-3">📋 2. ประวัติการทำ PM/AM (Preventive Maintenance Log)</h2>
+        <h2 class="text-lg font-bold text-primary mb-3">📋 2. ประวัติการทำ PM/AM (Preventive Maintenance Log)</h2>
         <?php if (empty($pmList)): ?>
-        <p class="text-sm text-gray-500 text-center py-4">ไม่มีประวัติ PM/AM</p>
+        <p class="text-sm text-muted text-center py-4">ไม่มีประวัติ PM/AM</p>
         <?php else: ?>
         <div class="overflow-x-auto">
             <table class="data-table w-full text-xs">
                 <thead>
-                    <tr class="bg-gray-100">
+                    <tr class="bg-muted">
                         <th class="p-2">กำหนดวันที่</th>
                         <th class="p-2">ชื่อแผน PM</th>
                         <th class="p-2">ผู้รับผิดชอบ</th>

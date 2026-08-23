@@ -35,14 +35,14 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
 
 <div class="max-w-2xl mx-auto space-y-6">
     <!-- Header -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-line">
         <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-2xl">
                 📲
             </div>
             <div>
-                <h1 class="text-xl font-bold text-gray-900">ลงทะเบียนผูกบัญชี LINE & รับการแจ้งเตือน</h1>
-                <p class="text-sm text-gray-500">สำหรับช่างและผู้ใช้งานในระบบ CMMS-TPT</p>
+                <h1 class="text-xl font-bold text-primary">ลงทะเบียนผูกบัญชี LINE & รับการแจ้งเตือน</h1>
+                <p class="text-sm text-muted">สำหรับช่างและผู้ใช้งานในระบบ CMMS-TPT</p>
             </div>
         </div>
     </div>
@@ -60,13 +60,13 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
     <?php endif; ?>
 
     <!-- Status Box -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
-        <h2 class="text-base font-bold text-gray-900">1. สถานะการผูกบัญชีปัจจุบัน</h2>
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-line space-y-4">
+        <h2 class="text-base font-bold text-primary">1. สถานะการผูกบัญชีปัจจุบัน</h2>
         
-        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-md border border-gray-200">
+        <div class="flex items-center justify-between p-4 bg-subtle rounded-md border border-line">
             <div>
-                <div class="text-sm font-semibold text-gray-800"><?= htmlspecialchars($user['full_name']) ?> (<?= htmlspecialchars($user['username']) ?>)</div>
-                <div class="text-xs text-gray-500">อีเมลรับการแจ้งเตือน: <?= htmlspecialchars($user['email']) ?></div>
+                <div class="text-sm font-semibold text-primary"><?= htmlspecialchars($user['full_name']) ?> (<?= htmlspecialchars($user['username']) ?>)</div>
+                <div class="text-xs text-muted">อีเมลรับการแจ้งเตือน: <?= htmlspecialchars($user['email']) ?></div>
             </div>
             <div>
                 <?php if (!empty($user['line_user_id'])): ?>
@@ -82,16 +82,16 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
         </div>
 
         <?php if (!empty($user['line_user_id'])): ?>
-        <div class="text-xs text-gray-500 font-mono bg-gray-100 p-2 rounded">
+        <div class="text-xs text-muted font-mono bg-muted p-2 rounded">
             LINE User ID: <?= htmlspecialchars($user['line_user_id']) ?>
         </div>
         <?php endif; ?>
     </div>
 
     <!-- Quick Binding Method 1: Auto LINE Login -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
-        <h2 class="text-base font-bold text-gray-900">2. วิธีผูกบัญชีอัตโนมัติด้วย LINE (แนะนำ)</h2>
-        <p class="text-sm text-gray-600">กดปุ่มด้านล่างเพื่อล็อกอิน LINE ระบบจะเชื่อมต่อ LINE ID ของคุณกับผู้ใช้นี้โดยอัตโนมัติทันที</p>
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-line space-y-4">
+        <h2 class="text-base font-bold text-primary">2. วิธีผูกบัญชีอัตโนมัติด้วย LINE (แนะนำ)</h2>
+        <p class="text-sm text-secondary">กดปุ่มด้านล่างเพื่อล็อกอิน LINE ระบบจะเชื่อมต่อ LINE ID ของคุณกับผู้ใช้นี้โดยอัตโนมัติทันที</p>
         
         <div class="flex flex-col sm:flex-row items-center gap-6 pt-2">
             <a href="/line_login.php" class="w-full sm:w-auto text-center font-bold px-6 py-3 rounded-lg text-white transition-all shadow-md flex items-center justify-center gap-2" style="background:#06C755;">
@@ -99,15 +99,15 @@ $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" . urle
                 เข้าสู่ระบบเพื่อผูกบัญชี LINE ทันที
             </a>
             <div class="text-center sm:text-left">
-                <img src="<?= $qrUrl ?>" alt="QR Code LINE Login" class="w-32 h-32 mx-auto rounded border border-gray-300">
-                <span class="text-xs text-gray-500 block mt-1">สแกนผ่านแอป LINE บนมือถือ</span>
+                <img src="<?= $qrUrl ?>" alt="QR Code LINE Login" class="w-32 h-32 mx-auto rounded border border-line">
+                <span class="text-xs text-muted block mt-1">สแกนผ่านแอป LINE บนมือถือ</span>
             </div>
         </div>
     </div>
 
     <!-- Manual Binding Method 2 -->
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
-        <h2 class="text-base font-bold text-gray-900">3. กรอก LINE User ID ด้วยตนเอง (ถ้ามี)</h2>
+    <div class="bg-white p-6 rounded-lg shadow-sm border border-line space-y-4">
+        <h2 class="text-base font-bold text-primary">3. กรอก LINE User ID ด้วยตนเอง (ถ้ามี)</h2>
         <form method="POST" class="flex gap-2">
             <?= csrfField() ?>
             <input type="text" name="line_user_id" value="<?= htmlspecialchars($user['line_user_id'] ?? '') ?>" placeholder="ระบุ LINE User ID (เช่น U1234567...)" class="input input-bordered w-full flex-1">

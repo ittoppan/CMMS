@@ -83,14 +83,14 @@ renderHeader();
 
     <!-- Pending Tasks Summary Card -->
     <div class="card p-6 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-3 flex items-center justify-between">
             <span>📋 รายการงานซ่อมค้างที่ต้องส่งมอบเข้ากะถัดไป (<?= count($pendingTasks) ?> รายการ)</span>
             <span class="badge badge badge-warning text-xs font-bold">Pending Tasks</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="data-table cmms-stack-table text-xs">
-                <thead class="bg-slate-50 font-bold text-slate-600 uppercase">
+                <thead class="bg-subtle font-bold text-secondary uppercase">
                     <tr>
                         <th class="px-4 py-3 text-left">เลขที่ใบสั่งซ่อม</th>
                         <th class="px-4 py-3 text-left">เครื่องจักร</th>
@@ -100,19 +100,19 @@ renderHeader();
                         <th class="px-4 py-3 text-left">ช่างผู้รับผิดชอบ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 font-medium">
+                <tbody class="divide-y divide-line font-medium">
                     <?php foreach ($pendingTasks as $t): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td data-label="เลขที่ใบสั่งซ่อม" class="px-4 py-3 font-mono font-bold text-indigo-600">#WO-<?= $t['id'] ?></td>
-                        <td data-label="เครื่องจักร" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($t['asset_code'] ?? '') ?> - <?= htmlspecialchars($t['asset_name'] ?? '') ?></td>
-                        <td data-label="อาการเสีย" class="px-4 py-3 text-slate-700"><?= htmlspecialchars($t['title']) ?></td>
+                        <td data-label="เครื่องจักร" class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($t['asset_code'] ?? '') ?> - <?= htmlspecialchars($t['asset_name'] ?? '') ?></td>
+                        <td data-label="อาการเสีย" class="px-4 py-3 text-secondary"><?= htmlspecialchars($t['title']) ?></td>
                         <td data-label="ความเร่งด่วน" class="px-4 py-3 text-center">
                             <span class="badge <?php echo match($t['priority']) { 'critical' => 'priority-critical font-bold', 'high' => 'priority-high', 'medium' => 'priority-medium', default => 'priority-low' }; ?>">
                                 <?= strtoupper($t['priority']) ?>
                             </span>
                         </td>
                         <td data-label="สถานะปัจจุบัน" class="px-4 py-3 text-center font-bold text-amber-600"><?= htmlspecialchars($t['status']) ?></td>
-                        <td data-label="ช่างผู้รับผิดชอบ" class="px-4 py-3 text-slate-800 font-semibold"><?= htmlspecialchars($t['assigned_name'] ?? 'ยังไม่ได้มอบหมาย') ?></td>
+                        <td data-label="ช่างผู้รับผิดชอบ" class="px-4 py-3 text-primary font-semibold"><?= htmlspecialchars($t['assigned_name'] ?? 'ยังไม่ได้มอบหมาย') ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -124,22 +124,22 @@ renderHeader();
     <form method="POST" class="card p-6 space-y-4">
         <input type="hidden" name="submit_handover" value="1">
 
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-3 flex items-center gap-2">
+        <h3 class="font-extrabold text-primary text-base border-b pb-3 flex items-center gap-2">
             <i data-lucide="edit-3" class="w-5 h-5 text-teal-600"></i>
             <span>กรอกรายละเอียดการส่งมอบกะ & ลงชื่อส่งกะ</span>
         </h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">กะผู้ส่งมอบ (From Shift):</label>
-                <select name="from_shift" class="input input-bordered w-full font-bold text-slate-800">
+                <label class="font-bold text-secondary block mb-1">กะผู้ส่งมอบ (From Shift):</label>
+                <select name="from_shift" class="input input-bordered w-full font-bold text-primary">
                     <option value="กะเช้า (08:00 - 20:00)">กะเช้า (08:00 - 20:00)</option>
                     <option value="กะดึก (20:00 - 08:00)">กะดึก (20:00 - 08:00)</option>
                 </select>
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">กะผู้รับมอบ (To Shift):</label>
-                <select name="to_shift" class="input input-bordered w-full font-bold text-slate-800">
+                <label class="font-bold text-secondary block mb-1">กะผู้รับมอบ (To Shift):</label>
+                <select name="to_shift" class="input input-bordered w-full font-bold text-primary">
                     <option value="กะดึก (20:00 - 08:00)">กะดึก (20:00 - 08:00)</option>
                     <option value="กะเช้า (08:00 - 20:00)">กะเช้า (08:00 - 20:00)</option>
                 </select>
@@ -147,7 +147,7 @@ renderHeader();
         </div>
 
         <div class="text-xs">
-            <label class="font-bold text-slate-700 block mb-1">หมายเหตุสำคัญส่งถึงกะถัดไป (Handover Notes):</label>
+            <label class="font-bold text-secondary block mb-1">หมายเหตุสำคัญส่งถึงกะถัดไป (Handover Notes):</label>
             <textarea name="handover_notes" rows="4" placeholder="ระบุเครื่องจักรที่ต้องเฝ้าระวัง อะไหล่ที่รอของเข้า หรือคำแนะนำเพิ่มเติม..." class="input input-bordered w-full text-xs font-medium"></textarea>
         </div>
 

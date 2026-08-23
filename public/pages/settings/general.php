@@ -24,19 +24,19 @@ foreach ($groups as $g) {
 }
 ?>
 <div class="space-y-4">
-    <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-gray-900">ตั้งค่าทั่วไป</h1><p class="mt-1 text-sm text-gray-500">General Settings</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
+    <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold text-primary">ตั้งค่าทั่วไป</h1><p class="mt-1 text-sm text-muted">General Settings</p></div><a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a></div>
     <?php if ($msg === 'success'): ?><div class="cmms-banner success text-sm rounded-md p-3">บันทึกเรียบร้อย</div><?php endif; ?>
     <?php if (str_starts_with($msg, 'error:')): ?><div class="cmms-banner error text-sm rounded-md p-3"><?= htmlspecialchars($msg) ?></div><?php endif; ?>
     <form method="post">
         <?php foreach ($settings as $group => $items): ?>
         <div class="card p-6 mb-4">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4 capitalize"><?= $group === 'general' ? 'ทั่วไป' : 'บริษัท' ?></h2>
+            <h2 class="text-lg font-semibold text-primary mb-4 capitalize"><?= $group === 'general' ? 'ทั่วไป' : 'บริษัท' ?></h2>
             <div class="space-y-4">
                 <?php foreach ($items as $s): ?>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700"><?= htmlspecialchars($s['setting_key']) ?></label>
+                    <label class="block text-sm font-medium text-secondary"><?= htmlspecialchars($s['setting_key']) ?></label>
                     <input type="text" name="settings[<?= htmlspecialchars($s['setting_key']) ?>]" value="<?= htmlspecialchars($s['setting_value'] ?? '') ?>" class="input input-bordered w-full mt-1 w-full max-w-lg">
-                    <?php if ($s['description']): ?><p class="text-xs text-gray-500 mt-1"><?= htmlspecialchars($s['description']) ?></p><?php endif; ?>
+                    <?php if ($s['description']): ?><p class="text-xs text-muted mt-1"><?= htmlspecialchars($s['description']) ?></p><?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>

@@ -38,7 +38,7 @@ renderHeader();
 
     <!-- Status Legend Card -->
     <div class="card p-4 flex items-center justify-between flex-wrap gap-4 text-xs font-bold">
-        <span class="text-slate-700 block">คำอธิบายสีไฟสถานะเครื่องจักร:</span>
+        <span class="text-secondary block">คำอธิบายสีไฟสถานะเครื่องจักร:</span>
         <div class="flex items-center gap-4 flex-wrap">
             <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse"></span> 🟢 ทำงานปกติ (Operating)</span>
             <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-600 animate-ping"></span> 🔴 เกิดเหตุซ่อมด่วน (Breakdown Critical)</span>
@@ -50,7 +50,7 @@ renderHeader();
     <div class="card p-6 bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 space-y-6 text-white">
         <h3 class="font-bold text-sm text-indigo-300 uppercase tracking-wider flex items-center justify-between border-b border-slate-800 pb-3">
             <span>🏭 แผนผังโซนการผลิต TOPPAN Factory Floor (Zone A & Zone B)</span>
-            <span class="text-xs text-slate-400">Live Grid Node Map</span>
+            <span class="text-xs text-muted">Live Grid Node Map</span>
         </h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

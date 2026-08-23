@@ -61,7 +61,7 @@ renderHeader();
             <a href="index.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">← ทะเบียนครุภัณฑ์</a>
             <a href="oee_dashboard.php?month=<?= $prevM ?>" class="h-9 w-9 items-center justify-center bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-sm font-bold inline-flex">‹</a>
             <form method="GET" class="flex items-center gap-1">
-                <input type="month" name="month" value="<?= $month ?>" class="h-9 px-2 rounded-md border border-border bg-white dark:bg-slate-900 text-xs font-semibold">
+                <input type="month" name="month" value="<?= $month ?>" class="h-9 px-2 rounded-md border border-border bg-white  text-xs font-semibold">
                 <button class="h-9 px-3 bg-accent text-white rounded-md text-xs font-bold">ดู</button>
             </form>
             <a href="oee_dashboard.php?month=<?= $nextM ?>" class="h-9 w-9 items-center justify-center bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-sm font-bold inline-flex">›</a>
@@ -95,7 +95,7 @@ renderHeader();
             ?>
             <div class="flex-1 flex flex-col items-center gap-1">
                 <span class="text-[10px] font-bold <?= $isCur ? 'text-accent' : 'text-secondary' ?>"><?= number_format($h, 1) ?></span>
-                <div class="w-full rounded-t-md <?= $isCur ? 'bg-gradient-to-t from-accent to-indigo-400' : 'bg-slate-300 dark:bg-slate-700' ?>" style="height:<?= $barH ?>%"></div>
+                <div class="w-full rounded-t-md <?= $isCur ? 'bg-gradient-to-t from-accent to-indigo-400' : 'bg-slate-300 ' ?>" style="height:<?= $barH ?>%"></div>
                 <span class="text-[10px] text-secondary"><?= $label ?></span>
             </div>
             <?php endforeach; ?>

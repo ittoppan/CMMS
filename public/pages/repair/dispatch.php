@@ -28,14 +28,14 @@ renderHeader();
 
     <!-- AI Match Results Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ผลการวิเคราะห์จัดคิวงานซ่อมอัตโนมัติ (AI Matched Dispatch Assignments)</span>
             <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($matches) ?> ใบงาน</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border-collapse">
-                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                     <tr>
                         <th class="p-3">เลขที่ใบสั่งซ่อม</th>
                         <th class="p-3">เครื่องจักร</th>
@@ -45,11 +45,11 @@ renderHeader();
                         <th class="p-3 text-center">การจัดการ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($matches as $m): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700 text-sm"><?= htmlspecialchars($m['work_order_no']) ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($m['asset_name']) ?> — <span class="text-slate-500 font-normal"><?= htmlspecialchars($m['title']) ?></span></td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($m['asset_name']) ?> — <span class="text-muted font-normal"><?= htmlspecialchars($m['title']) ?></span></td>
                         <td class="p-3">
                             <span class="badge font-bold text-[10px] uppercase <?= match($m['priority']) { 'critical'=>'badge badge-error', 'high'=>'badge badge-warning', default=>'badge badge-info' } ?>">
                                 <?= htmlspecialchars($m['priority']) ?>

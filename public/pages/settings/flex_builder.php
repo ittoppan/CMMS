@@ -46,8 +46,8 @@ renderHeader();
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Flex Studio Pro v3.0</span>
                 <span class="text-xs text-emerald-600 font-bold">✨ Supported: 1-Click Templates, Photos, Sage 300 & KPI Badges</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 mt-1">📱 Visual LINE Flex Message Builder Studio Pro</h1>
-            <p class="text-xs text-slate-500 mt-0.5">เลือกใช้แม่แบบสากล 4 แบบ หรือออกแบบการ์ดรูปภาพเปรียบเทียบก่อน-หลังซ่อม Real-time</p>
+            <h1 class="text-2xl font-black text-primary mt-1">📱 Visual LINE Flex Message Builder Studio Pro</h1>
+            <p class="text-xs text-muted mt-0.5">เลือกใช้แม่แบบสากล 4 แบบ หรือออกแบบการ์ดรูปภาพเปรียบเทียบก่อน-หลังซ่อม Real-time</p>
         </div>
         <div class="flex gap-2">
             <a href="../../bind_line.php" class="btn btn-secondary text-xs">📲 ผูกบัญชี LINE</a>
@@ -68,26 +68,26 @@ renderHeader();
 
     <!-- 1-Click Preset Template Selector -->
     <div class="card p-5 space-y-3">
-        <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between">
+        <h3 class="font-bold text-primary text-sm flex items-center justify-between">
             <span>⚡ เลือกใช้แม่แบบสำเร็จรูป 1-Click Preset Templates:</span>
             <span class="text-xs text-indigo-600 font-bold">4 Ready-to-Use Enterprise Templates</span>
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <button type="button" onclick="loadPreset('breakdown')" class="p-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-left transition-all">
                 <div class="text-xs font-black text-rose-700">🔴 1. แจ้งซ่อมด่วน (Emergency)</div>
-                <p class="text-[11px] text-slate-600 mt-1">การ์ดแจ้งซ่อมฉุกเฉิน + รูปภาพความเสียหายก่อนซ่อม</p>
+                <p class="text-[11px] text-secondary mt-1">การ์ดแจ้งซ่อมฉุกเฉิน + รูปภาพความเสียหายก่อนซ่อม</p>
             </button>
             <button type="button" onclick="loadPreset('sage300')" class="p-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-left transition-all">
                 <div class="text-xs font-black text-purple-700">📦 2. อนุมัติเบิก Sage 300</div>
-                <p class="text-[11px] text-slate-600 mt-1">การ์ดขออนุมัติเบิกอะไหล่ + ปุ่มอนุมัติจ่ายของ</p>
+                <p class="text-[11px] text-secondary mt-1">การ์ดขออนุมัติเบิกอะไหล่ + ปุ่มอนุมัติจ่ายของ</p>
             </button>
             <button type="button" onclick="loadPreset('pm_am')" class="p-3 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-left transition-all">
                 <div class="text-xs font-black text-amber-700">📋 3. เตือนแผน PM & Checksheet</div>
-                <p class="text-[11px] text-slate-600 mt-1">การ์ดแจ้งเตือนแผน PM + ปุ่มกรอกเช็คชีท ISO</p>
+                <p class="text-[11px] text-secondary mt-1">การ์ดแจ้งเตือนแผน PM + ปุ่มกรอกเช็คชีท ISO</p>
             </button>
             <button type="button" onclick="loadPreset('completed')" class="p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-left transition-all">
                 <div class="text-xs font-black text-emerald-700">✅ 4. ซ่อมเสร็จแล้ว (Done)</div>
-                <p class="text-[11px] text-slate-600 mt-1">การ์ดซ่อมเสร็จ + รูป Before/After & Cost</p>
+                <p class="text-[11px] text-secondary mt-1">การ์ดซ่อมเสร็จ + รูป Before/After & Cost</p>
             </button>
         </div>
     </div>
@@ -100,22 +100,22 @@ renderHeader();
 
             <!-- Database Variables Palette -->
             <div class="card cmms-card p-5 space-y-3">
-                <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between border-b pb-2">
+                <h3 class="font-bold text-primary text-sm flex items-center justify-between border-b pb-2">
                     <span>🗄️ ฟิลด์ข้อมูลจาก Database & รูปภาพ (คลิกเพื่อแทรก):</span>
                     <span class="text-xs text-indigo-600 font-bold">📷 Dynamic Variables</span>
                 </h3>
                 <div class="flex flex-wrap gap-2 text-xs">
                     <button onclick="insertVar('{before_image}')" class="cmms-banner error px-2.5 py-1.5 border hover:bg-rose-100 rounded font-mono font-bold">🖼️ {before_image} (รูปก่อนซ่อม)</button>
                     <button onclick="insertVar('{after_image}')" class="cmms-banner success px-2.5 py-1.5 border hover:bg-emerald-100 rounded font-mono font-bold">🖼️ {after_image} (รูปหลังซ่อม)</button>
-                    <button onclick="insertVar('{work_order_id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{work_order_id}</button>
-                    <button onclick="insertVar('{title}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{title}</button>
-                    <button onclick="insertVar('{asset_name}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{asset_name}</button>
-                    <button onclick="insertVar('{asset_code}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{asset_code}</button>
-                    <button onclick="insertVar('{priority}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{priority}</button>
-                    <button onclick="insertVar('{status}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{status}</button>
-                    <button onclick="insertVar('{assigned_name}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{assigned_name}</button>
-                    <button onclick="insertVar('{downtime_hours}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{downtime_hours}</button>
-                    <button onclick="insertVar('{total_cost}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 rounded font-mono font-bold">{total_cost}</button>
+                    <button onclick="insertVar('{work_order_id}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{work_order_id}</button>
+                    <button onclick="insertVar('{title}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{title}</button>
+                    <button onclick="insertVar('{asset_name}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{asset_name}</button>
+                    <button onclick="insertVar('{asset_code}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{asset_code}</button>
+                    <button onclick="insertVar('{priority}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{priority}</button>
+                    <button onclick="insertVar('{status}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{status}</button>
+                    <button onclick="insertVar('{assigned_name}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{assigned_name}</button>
+                    <button onclick="insertVar('{downtime_hours}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{downtime_hours}</button>
+                    <button onclick="insertVar('{total_cost}')" class="px-2.5 py-1.5 bg-muted hover:bg-indigo-50 hover:text-indigo-600 border border-line rounded font-mono font-bold">{total_cost}</button>
                 </div>
             </div>
 
@@ -123,20 +123,20 @@ renderHeader();
             <form method="POST" class="card cmms-card p-5 space-y-4">
                 <input type="hidden" name="send_test_flex" value="1">
                 
-                <h3 class="font-bold text-slate-900 text-sm border-b pb-2 flex justify-between">
+                <h3 class="font-bold text-primary text-sm border-b pb-2 flex justify-between">
                     <span>🎨 กำหนดค่าการออกแบบ Flex Card & รูปภาพ</span>
                     <span class="text-xs text-indigo-600 font-bold">Advanced Controls</span>
                 </h3>
 
                 <!-- Image Options -->
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-xs">
-                    <span class="font-bold text-slate-800 block">🖼️ โหมดการแสดงผลรูปภาพเครื่องจักร/การซ่อม:</span>
+                <div class="p-3 bg-subtle border border-line rounded-lg space-y-2 text-xs">
+                    <span class="font-bold text-primary block">🖼️ โหมดการแสดงผลรูปภาพเครื่องจักร/การซ่อม:</span>
                     <div class="flex items-center gap-6">
-                        <label class="flex items-center gap-1.5 font-semibold text-slate-700 cursor-pointer">
+                        <label class="flex items-center gap-1.5 font-semibold text-secondary cursor-pointer">
                             <input type="radio" name="image_mode" id="img-mode-ba" value="before_after" checked onchange="updatePreview()">
                             <span>รูปเปรียบเทียบ ก่อนซ่อม vs หลังซ่อม (Before & After)</span>
                         </label>
-                        <label class="flex items-center gap-1.5 font-semibold text-slate-700 cursor-pointer">
+                        <label class="flex items-center gap-1.5 font-semibold text-secondary cursor-pointer">
                             <input type="radio" name="image_mode" id="img-mode-single" value="single" onchange="updatePreview()">
                             <span>รูปภาพอาการเสียเดี่ยว (Single Hero Photo)</span>
                         </label>
@@ -145,7 +145,7 @@ renderHeader();
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">สีแถบหัวข้อการ์ด (Theme Color)</label>
+                        <label class="font-bold text-secondary block mb-1">สีแถบหัวข้อการ์ด (Theme Color)</label>
                         <select id="input-header-bg" onchange="updatePreview()" class="input input-bordered w-full">
                             <option value="#dc2626" selected>🔴 Red (#dc2626 - สำหรับแจ้งซ่อมด่วน Critical)</option>
                             <option value="#4f46e5">🔵 Indigo (#4f46e5 - มาตรฐาน CMMS)</option>
@@ -155,13 +155,13 @@ renderHeader();
                         </select>
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ข้อความหัวการ์ด (Header Title)</label>
+                        <label class="font-bold text-secondary block mb-1">ข้อความหัวการ์ด (Header Title)</label>
                         <input type="text" id="input-header-title" value="🚨 ใบแจ้งซ่อมวิศวกรรม #{work_order_id}" onkeyup="updatePreview()" class="input input-bordered w-full">
                     </div>
                 </div>
 
                 <div class="text-xs">
-                    <label class="font-bold text-slate-700 block mb-1">รายละเอียดและสรุปข้อมูล (Body Content)</label>
+                    <label class="font-bold text-secondary block mb-1">รายละเอียดและสรุปข้อมูล (Body Content)</label>
                     <textarea id="input-body-text" rows="4" onkeyup="updatePreview()" class="input input-bordered w-full">เครื่องจักร: {asset_code} - {asset_name}
 อาการเสีย: {title}
 ความเร่งด่วน: {priority} | สถานะ: {status}
@@ -171,11 +171,11 @@ renderHeader();
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">ข้อความบนปุ่มกด (Action Button Label)</label>
+                        <label class="font-bold text-secondary block mb-1">ข้อความบนปุ่มกด (Action Button Label)</label>
                         <input type="text" id="input-btn-label" value="🔍 ดูรายละเอียดใบสั่งซ่อม & อนุมัติ" onkeyup="updatePreview()" class="input input-bordered w-full">
                     </div>
                     <div>
-                        <label class="font-bold text-slate-700 block mb-1">Action Target URL (ลิงก์เมื่อกดปุ่ม)</label>
+                        <label class="font-bold text-secondary block mb-1">Action Target URL (ลิงก์เมื่อกดปุ่ม)</label>
                         <input type="text" name="flex_btn_url" id="input-btn-url" value="<?= publicBaseUrl() ?>/pages/repair/view.php?id=1" onkeyup="updatePreview()" class="input input-bordered w-full">
                     </div>
                 </div>
@@ -193,7 +193,7 @@ renderHeader();
 
         <!-- Right Column: Smartphone Flex Message Simulator Preview -->
         <div class="space-y-4">
-            <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between">
+            <h3 class="font-bold text-primary text-sm flex items-center justify-between">
                 <span>📱 พรีวิวบนแอป LINE (Live Preview Pro)</span>
                 <span class="text-xs text-emerald-600 font-bold">Live Flex Container</span>
             </h3>
@@ -216,7 +216,7 @@ renderHeader();
                         </div>
 
                         <!-- Before & After Photos Container -->
-                        <div id="preview-photos-container" class="p-2 bg-slate-100 border-b border-slate-200">
+                        <div id="preview-photos-container" class="p-2 bg-muted border-b border-line">
                             <div class="grid grid-cols-2 gap-1.5">
                                 <div class="relative rounded overflow-hidden border border-rose-300 bg-white">
                                     <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80" class="w-full h-20 object-cover">
@@ -230,12 +230,12 @@ renderHeader();
                         </div>
 
                         <!-- Single Photo Container (Hidden by default) -->
-                        <div id="preview-single-photo" style="display:none;" class="bg-slate-100 border-b border-slate-200">
+                        <div id="preview-single-photo" style="display:none;" class="bg-muted border-b border-line">
                             <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80" class="w-full h-28 object-cover">
                         </div>
 
                         <!-- Flex Body -->
-                        <div class="p-3 space-y-2 text-slate-700 font-medium leading-relaxed">
+                        <div class="p-3 space-y-2 text-secondary font-medium leading-relaxed">
                             <div id="preview-body-text" class="whitespace-pre-wrap text-xs">
 เครื่องจักร: MCH-01 - Press Machine 01
 อาการเสีย: มีเสียงดังผิดปกติที่มอเตอร์
@@ -246,7 +246,7 @@ renderHeader();
                         </div>
 
                         <!-- Flex Footer Buttons -->
-                        <div class="p-2 border-t border-slate-100 bg-slate-50 space-y-1.5">
+                        <div class="p-2 border-t border-line bg-subtle space-y-1.5">
                             <a id="preview-btn-label" href="#" onclick="return false;" class="block w-full py-2 bg-indigo-600 text-white text-center rounded-lg font-bold text-xs shadow-sm hover:bg-indigo-700">
                                 🔍 ดูรายละเอียดใบสั่งซ่อม & อนุมัติ
                             </a>

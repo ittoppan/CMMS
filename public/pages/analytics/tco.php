@@ -33,14 +33,14 @@ renderHeader();
 
     <!-- TCO Machines Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📊 ตารางคำนวณ TCO และประเมินจุดคุ้มทุนการบำรุงรักษา</span>
-            <span class="text-xs text-slate-400">สูตร: ราคาจัดซื้อ + ค่าซ่อมสะสม - มูลค่าเสื่อมสภาพ</span>
+            <span class="text-xs text-muted">สูตร: ราคาจัดซื้อ + ค่าซ่อมสะสม - มูลค่าเสื่อมสภาพ</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border-collapse">
-                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                     <tr>
                         <th class="p-3">รหัสเครื่องจักร</th>
                         <th class="p-3">ชื่อเครื่องจักร</th>
@@ -51,7 +51,7 @@ renderHeader();
                         <th class="p-3 text-center">คำแนะนำระบบ (Recommendation)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($assets as $ast): ?>
                     <?php
                         $estPurchase = 1200000.00; // Estimated 1.2M THB
@@ -63,11 +63,11 @@ renderHeader();
                         $badgeBg = $isReplace ? 'priority-high' : 'status-pass';
                         $recText = $isReplace ? '🔴 แนะนำปลดแท่นซื้อใหม่ (Replace)' : '🟢 คุ้มค่าในการซ่อมต่อ (Maintain)';
                     ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700 text-sm"><?= htmlspecialchars($ast['code']) ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($ast['name']) ?></td>
-                        <td class="p-3 text-center font-bold text-slate-700"><?= $ast['total_repairs'] ?> ครั้ง</td>
-                        <td class="p-3 text-right font-mono text-slate-700">฿<?= number_format($estPurchase, 2) ?></td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($ast['name']) ?></td>
+                        <td class="p-3 text-center font-bold text-secondary"><?= $ast['total_repairs'] ?> ครั้ง</td>
+                        <td class="p-3 text-right font-mono text-secondary">฿<?= number_format($estPurchase, 2) ?></td>
                         <td class="p-3 text-right font-black text-rose-600">฿<?= number_format($maintCost, 2) ?></td>
                         <td class="p-3 text-right font-black text-indigo-900 text-sm">฿<?= number_format($tcoTotal, 2) ?></td>
                         <td class="p-3 text-center">

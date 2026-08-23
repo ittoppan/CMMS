@@ -65,8 +65,8 @@ renderHeader();
                 <a href="checklist_templates.php" class="text-sm text-brand-600 hover:underline">&larr; กลับไปรายการเทมเพลตเช็คชีท</a>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Touch Drag & Drop Builder</span>
             </div>
-            <h1 class="text-2xl font-extrabold text-slate-900 mt-1">📋 เครื่องมือออกแบบเช็คชีท (Checksheet Drag & Drop Builder)</h1>
-            <p class="text-xs text-slate-500 mt-0.5">เทมเพลต: <strong><?= htmlspecialchars($template['name']) ?></strong> (<?= htmlspecialchars($template['code']) ?>) &mdash; ออกแบบสำหรับมือถือและแท็บเล็ต</p>
+            <h1 class="text-2xl font-extrabold text-primary mt-1">📋 เครื่องมือออกแบบเช็คชีท (Checksheet Drag & Drop Builder)</h1>
+            <p class="text-xs text-muted mt-0.5">เทมเพลต: <strong><?= htmlspecialchars($template['name']) ?></strong> (<?= htmlspecialchars($template['code']) ?>) &mdash; ออกแบบสำหรับมือถือและแท็บเล็ต</p>
         </div>
         <div class="flex gap-2">
             <button onclick="document.getElementById('add-item-modal').style.display='flex'" class="btn btn-primary text-xs">
@@ -97,10 +97,10 @@ renderHeader();
         <div class="lg:col-span-2 space-y-4">
             
             <div class="flex items-center justify-between">
-                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <h3 class="font-bold text-primary text-sm flex items-center gap-2">
                     <span>🖐️ รายการตรวจเช็คในเทมเพลต (ลากจัดลำดับตำแหน่งได้):</span>
                 </h3>
-                <span class="text-xs text-slate-400">Total <?= count($items) ?> Items</span>
+                <span class="text-xs text-muted">Total <?= count($items) ?> Items</span>
             </div>
 
             <!-- Drag & Drop Sortable Container -->
@@ -110,17 +110,17 @@ renderHeader();
                     
                     <div class="flex items-center gap-3">
                         <!-- Drag Handle Icon -->
-                        <div class="text-slate-400 hover:text-indigo-600 font-bold text-lg cursor-grab">⋮⋮</div>
+                        <div class="text-muted hover:text-indigo-600 font-bold text-lg cursor-grab">⋮⋮</div>
                         <div class="cmms-banner info w-7 h-7 rounded-lg font-extrabold text-xs flex items-center justify-center border border-indigo-100">
                             <?= $idx + 1 ?>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
-                                <span class="badge bg-slate-100 text-slate-700 text-[10px] font-bold"><?= htmlspecialchars($it['category'] ?? 'ทั่วไป') ?></span>
-                                <h4 class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($it['item_name']) ?></h4>
+                                <span class="badge bg-muted text-secondary text-[10px] font-bold"><?= htmlspecialchars($it['category'] ?? 'ทั่วไป') ?></span>
+                                <h4 class="font-bold text-primary text-sm"><?= htmlspecialchars($it['item_name']) ?></h4>
                             </div>
-                            <div class="text-xs text-slate-500 mt-0.5">
-                                วิธีตรวจ: <span class="text-slate-800 font-medium"><?= htmlspecialchars($it['method'] ?? '-') ?></span> | 
+                            <div class="text-xs text-muted mt-0.5">
+                                วิธีตรวจ: <span class="text-primary font-medium"><?= htmlspecialchars($it['method'] ?? '-') ?></span> | 
                                 เกณฑ์: <strong class="text-indigo-700"><?= htmlspecialchars($it['standard_criteria'] ?? 'ปกติ') ?></strong>
                             </div>
                         </div>
@@ -136,7 +136,7 @@ renderHeader();
                 <?php endforeach; ?>
 
                 <?php if (empty($items)): ?>
-                <div class="p-8 text-center cmms-card border border-dashed text-slate-500 text-xs">
+                <div class="p-8 text-center cmms-card border border-dashed text-muted text-xs">
                     ยังไม่มีรายการตรวจเช็คในเทมเพลตนี้ กดปุ่ม <strong>"+ เพิ่มรายการตรวจเช็คใหม่"</strong> เพื่อเริ่มต้นสร้าง
                 </div>
                 <?php endif; ?>
@@ -146,14 +146,14 @@ renderHeader();
 
         <!-- Right: Tablet / iPad Interactive Checksheet Simulator -->
         <div class="space-y-4">
-            <h3 class="font-bold text-slate-900 text-sm flex items-center justify-between">
+            <h3 class="font-bold text-primary text-sm flex items-center justify-between">
                 <span>📱 พรีวิวบนหน้าจอแท็บเล็ต/มือถือ (Tablet Simulator)</span>
                 <span class="text-xs text-indigo-600 font-bold">Touch UI Feel</span>
             </h3>
 
             <!-- Tablet Frame mockup -->
             <div class="bg-slate-900 p-4 rounded-3xl shadow-2xl border-4 border-slate-800">
-                <div class="bg-slate-100 rounded-xl p-4 space-y-4 font-sans text-xs min-h-[460px] max-h-[580px] overflow-y-auto">
+                <div class="bg-muted rounded-xl p-4 space-y-4 font-sans text-xs min-h-[460px] max-h-[580px] overflow-y-auto">
                     
                     <!-- Tablet Screen Header -->
                     <div class="bg-indigo-600 text-white p-3 rounded-lg flex items-center justify-between shadow-sm">
@@ -169,10 +169,10 @@ renderHeader();
                         <?php foreach ($items as $idx => $it): ?>
                         <div class="cmms-card p-3 space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-slate-900"><?= $idx + 1 ?>. <?= htmlspecialchars($it['item_name']) ?></span>
-                                <span class="text-[10px] text-slate-400 font-bold"><?= htmlspecialchars($it['category'] ?? 'General') ?></span>
+                                <span class="font-bold text-primary"><?= $idx + 1 ?>. <?= htmlspecialchars($it['item_name']) ?></span>
+                                <span class="text-[10px] text-muted font-bold"><?= htmlspecialchars($it['category'] ?? 'General') ?></span>
                             </div>
-                            <div class="text-[11px] text-slate-500">เกณฑ์: <strong><?= htmlspecialchars($it['standard_criteria'] ?? 'ปกติ') ?></strong></div>
+                            <div class="text-[11px] text-muted">เกณฑ์: <strong><?= htmlspecialchars($it['standard_criteria'] ?? 'ปกติ') ?></strong></div>
                             
                             <!-- Interactive Touch Inputs -->
                             <?php if (($it['input_type'] ?? 'pass_fail') === 'pass_fail'): ?>
@@ -186,7 +186,7 @@ renderHeader();
                             </div>
                             <?php else: ?>
                             <div class="pt-1">
-                                <input type="text" placeholder="กรอกค่าที่วัดได้จริง..." class="w-full p-2 bg-slate-50 border border-slate-300 rounded text-xs">
+                                <input type="text" placeholder="กรอกค่าที่วัดได้จริง..." class="w-full p-2 bg-subtle border border-line rounded text-xs">
                             </div>
                             <?php endif; ?>
                         </div>
@@ -208,27 +208,27 @@ renderHeader();
 <!-- Modal: Add Item -->
 <div id="add-item-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="card shadow-2xl w-full max-w-lg p-6 space-y-4">
-        <h3 class="font-bold text-slate-900 text-lg border-b pb-2">➕ เพิ่มรายการตรวจเช็คใหม่</h3>
+        <h3 class="font-bold text-primary text-lg border-b pb-2">➕ เพิ่มรายการตรวจเช็คใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="add_item" value="1">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">หมวดการตรวจเช็ค (Category)</label>
+                <label class="font-bold text-secondary block mb-1">หมวดการตรวจเช็ค (Category)</label>
                 <input type="text" name="category" required placeholder="เช่น การหล่อลื่น, ระบบไฟฟ้า, ระบบลม" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">รายการที่ต้องตรวจ (Check Item)</label>
+                <label class="font-bold text-secondary block mb-1">รายการที่ต้องตรวจ (Check Item)</label>
                 <input type="text" name="item_name" required placeholder="เช่น ตรวจสอบระดับน้ำมันหล่อลื่นในเกียร์" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">วิธีการตรวจเช็ค (Inspection Method)</label>
+                <label class="font-bold text-secondary block mb-1">วิธีการตรวจเช็ค (Inspection Method)</label>
                 <input type="text" name="method" placeholder="เช่น สายตาดูช่องระดับน้ำมัน (Sight Glass)" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">เกณฑ์มาตรฐาน (Standard Criteria)</label>
+                <label class="font-bold text-secondary block mb-1">เกณฑ์มาตรฐาน (Standard Criteria)</label>
                 <input type="text" name="standard_criteria" placeholder="เช่น อยู่ระหว่างขีด Min-Max หรือ 5.5 - 6.5 Bar" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ประเภทการกรอกผลการตรวจ</label>
+                <label class="font-bold text-secondary block mb-1">ประเภทการกรอกผลการตรวจ</label>
                 <select name="input_type" class="input input-bordered w-full">
                     <option value="pass_fail">Pass / Fail (ปุ่มกด ปกติ / ผิดปกติ)</option>
                     <option value="numeric">Numerical Value (ช่องกรอกตัวเลขค่าที่วัดได้จริง)</option>

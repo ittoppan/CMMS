@@ -47,35 +47,35 @@ renderHeader();
 
     <!-- Visual 6M Fishbone Diagram Showcase -->
     <div class="card p-6 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>🐟 แผงผังแสดงก้างปลาวิเคราะห์ 6M (Fishbone / Ishikawa Diagram)</span>
-            <span class="text-xs text-slate-400">วิธีวิเคราะห์ครอบคลุม 6 มิติ</span>
+            <span class="text-xs text-muted">วิธีวิเคราะห์ครอบคลุม 6 มิติ</span>
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-4 bg-blue-50/80 rounded-xl border border-blue-200 space-y-1">
                 <span class="font-bold text-blue-900 text-xs block">👤 1. Man (คน/ช่าง)</span>
-                <p class="text-[11px] text-slate-600">ทักษะช่างไม่เพียงพอ, สื่อสารผิดพลาด, ความเมื่อยล้าในการทำงาน</p>
+                <p class="text-[11px] text-secondary">ทักษะช่างไม่เพียงพอ, สื่อสารผิดพลาด, ความเมื่อยล้าในการทำงาน</p>
             </div>
             <div class="p-4 bg-purple-50/80 rounded-xl border border-purple-200 space-y-1">
                 <span class="font-bold text-purple-900 text-xs block">⚙️ 2. Machine (เครื่องจักร)</span>
-                <p class="text-[11px] text-slate-600">อะไหล่เสื่อมสภาพ, ตลับลูกปืนร้อนจัด, สายพานหย่อน</p>
+                <p class="text-[11px] text-secondary">อะไหล่เสื่อมสภาพ, ตลับลูกปืนร้อนจัด, สายพานหย่อน</p>
             </div>
             <div class="p-4 bg-amber-50/80 rounded-xl border border-amber-200 space-y-1">
                 <span class="font-bold text-amber-900 text-xs block">📦 3. Material (วัตถุดิบ/อะไหล่)</span>
-                <p class="text-[11px] text-slate-600">สเปกอะไหล่ไม่ตรงมาตรฐาน, สารหล่อลื่นไม่ได้คุณภาพ</p>
+                <p class="text-[11px] text-secondary">สเปกอะไหล่ไม่ตรงมาตรฐาน, สารหล่อลื่นไม่ได้คุณภาพ</p>
             </div>
             <div class="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200 space-y-1">
                 <span class="font-bold text-emerald-900 text-xs block">📋 4. Method (วิธีการ)</span>
-                <p class="text-[11px] text-slate-600">ไม่มีเช็คชีทมาตรฐาน, ขั้นตอน PM ไม่ครอบคลุม</p>
+                <p class="text-[11px] text-secondary">ไม่มีเช็คชีทมาตรฐาน, ขั้นตอน PM ไม่ครอบคลุม</p>
             </div>
             <div class="p-4 bg-cyan-50/80 rounded-xl border border-cyan-200 space-y-1">
                 <span class="font-bold text-cyan-900 text-xs block">📐 5. Measurement (การวัด)</span>
-                <p class="text-[11px] text-slate-600">เซนเซอร์ตั้งค่าคลาดเคลื่อน, เครื่องมือวัดไม่ได้สอบเทียบ</p>
+                <p class="text-[11px] text-secondary">เซนเซอร์ตั้งค่าคลาดเคลื่อน, เครื่องมือวัดไม่ได้สอบเทียบ</p>
             </div>
             <div class="p-4 bg-rose-50/80 rounded-xl border border-rose-200 space-y-1">
                 <span class="font-bold text-rose-900 text-xs block">🌡️ 6. Environment (สภาพแวดล้อม)</span>
-                <p class="text-[11px] text-slate-600">ความร้อนสะสมในโรงงาน, ความชื้นสูง, ฝุ่นเคมีเกาะตู้คอนโทรล</p>
+                <p class="text-[11px] text-secondary">ความร้อนสะสมในโรงงาน, ความชื้นสูง, ฝุ่นเคมีเกาะตู้คอนโทรล</p>
             </div>
         </div>
     </div>
@@ -86,8 +86,8 @@ renderHeader();
 <div id="rcaModal" style="display:none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
     <div class="card max-w-2xl w-full p-6 space-y-4 shadow-2xl my-8">
         <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-extrabold text-slate-900 text-base">🧠 บันทึกการวิเคราะห์หาสาเหตุรากเหง้า (RCA Form)</h3>
-            <button onclick="document.getElementById('rcaModal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            <h3 class="font-extrabold text-primary text-base">🧠 บันทึกการวิเคราะห์หาสาเหตุรากเหง้า (RCA Form)</h3>
+            <button onclick="document.getElementById('rcaModal').style.display='none'" class="text-muted hover:text-secondary font-bold text-lg">&times;</button>
         </div>
 
         <form method="POST" class="space-y-4 text-xs">
@@ -95,7 +95,7 @@ renderHeader();
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">เลือกใบสั่งซ่อมบำรุง *</label>
+                    <label class="block font-bold text-secondary mb-1">เลือกใบสั่งซ่อมบำรุง *</label>
                     <select name="repair_id" class="input input-bordered w-full font-bold">
                         <?php foreach ($repairs as $r): ?>
                         <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['work_order_no'] ?? 'WO') ?> — <?= htmlspecialchars($r['asset_code']) ?> (<?= htmlspecialchars($r['title']) ?>)</option>

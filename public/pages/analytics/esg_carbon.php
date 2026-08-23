@@ -35,17 +35,17 @@ renderHeader();
     <!-- KPI Grid Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-slate-500 uppercase block">สะสมเวลาหยุดเครื่อง (Total Downtime)</span>
+            <span class="text-xs font-bold text-muted uppercase block">สะสมเวลาหยุดเครื่อง (Total Downtime)</span>
             <span class="text-3xl font-black text-rose-600 mt-1 block font-mono"><?= number_format($totalDowntime, 1) ?> <span class="text-sm font-normal">ชั่วโมง</span></span>
         </div>
 
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-slate-500 uppercase block">พลังงานไฟฟ้าสูญเสียสะสม (KWh Loss)</span>
+            <span class="text-xs font-bold text-muted uppercase block">พลังงานไฟฟ้าสูญเสียสะสม (KWh Loss)</span>
             <span class="text-3xl font-black text-amber-600 mt-1 block font-mono"><?= number_format($totalKwhLoss, 0) ?> <span class="text-sm font-normal">kWh</span></span>
         </div>
 
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-slate-500 uppercase block">ปริมาณปล่อยก๊าซเรือนกระจก (CO2 Emission)</span>
+            <span class="text-xs font-bold text-muted uppercase block">ปริมาณปล่อยก๊าซเรือนกระจก (CO2 Emission)</span>
             <span class="text-3xl font-black text-emerald-600 mt-1 block font-mono"><?= number_format($totalCo2Ton, 3) ?> <span class="text-sm font-normal">ตัน CO2e</span></span>
         </div>
     </div>
@@ -54,7 +54,7 @@ renderHeader();
     <div class="card p-6 bg-slate-900 text-white rounded-2xl shadow-xl space-y-4 border border-slate-800">
         <h3 class="font-extrabold text-sm text-emerald-400 flex items-center justify-between border-b border-slate-800 pb-3">
             <span>🌱 ตารางสรุปการปล่อยคาร์บอนฟุตพริ้นท์แยกตามแผนก (ISO 14001 ESG Report)</span>
-            <span class="text-xs text-slate-400 font-mono">Emission Factor: 0.4999 kg CO2/kWh</span>
+            <span class="text-xs text-muted font-mono">Emission Factor: 0.4999 kg CO2/kWh</span>
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">

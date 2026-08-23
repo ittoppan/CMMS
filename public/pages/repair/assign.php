@@ -38,10 +38,10 @@ renderHeader();
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="view.php?id=<?= $id ?>" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับ</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">มอบหมายงานซ่อม #<?= $id ?></h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">มอบหมายงานซ่อม #<?= $id ?></h1>
     </div>
 
-    <div class="card p-4 mb-4 bg-gray-50">
+    <div class="card p-4 mb-4 bg-subtle">
         <p class="text-sm"><span class="font-medium">หัวข้องาน:</span> <?= htmlspecialchars($r['title']) ?></p>
         <p class="text-sm"><span class="font-medium">ทรัพย์สิน:</span> <?= htmlspecialchars($r['asset_name']??'-') ?></p>
         <p class="text-sm"><span class="font-medium">ผู้รับปัจจุบัน:</span> <?php
@@ -57,7 +57,7 @@ renderHeader();
 
     <form method="post" class="card p-6 space-y-4">
         <div>
-            <label class="block text-sm font-medium text-gray-700">ผู้รับผิดชอบ <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบ <span class="text-red-500">*</span></label>
             <select name="assigned_to" class="input input-bordered w-full mt-1" required>
                 <option value="">-- เลือกผู้รับผิดชอบ --</option>
                 <?php foreach ($users as $u): ?>
@@ -66,7 +66,7 @@ renderHeader();
             </select>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">หมายเหตุ (ไม่บังคับ)</label>
+            <label class="block text-sm font-medium text-secondary">หมายเหตุ (ไม่บังคับ)</label>
             <textarea name="note" rows="3" class="input input-bordered w-full mt-1" placeholder="ระบุหมายเหตุการมอบหมาย..."></textarea>
         </div>
         <div class="flex gap-3">

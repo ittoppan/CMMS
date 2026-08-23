@@ -21,11 +21,11 @@ renderHeader();
     </div>
 
     <!-- Wireframe View Switcher Tabs -->
-    <div class="flex gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+    <div class="flex gap-2 border-b border-line  pb-3">
         <button onclick="showView('desktop')" id="btn-desktop" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2">
             🖥️ Desktop View (สำหรับวิศวกร & ผู้บริหาร)
         </button>
-        <button onclick="showView('mobile')" id="btn-mobile" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-2">
+        <button onclick="showView('mobile')" id="btn-mobile" class="px-4 py-2 bg-muted  text-secondary  rounded-xl text-xs font-bold flex items-center gap-2">
             📱 Mobile PWA View (สำหรับช่างหน้างาน)
         </button>
     </div>
@@ -35,45 +35,45 @@ renderHeader();
         <!-- Reusable KPI Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="card p-5 space-y-2">
-                <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+                <div class="flex justify-between items-center text-xs text-muted font-bold">
                     <span>AVAILABILITY %</span>
                     <span class="text-emerald-500 font-black">↗ +1.2%</span>
                 </div>
-                <div class="text-2xl font-black text-slate-900 dark:text-white">98.5%</div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div class="text-2xl font-black text-primary dark:text-white">98.5%</div>
+                <div class="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                     <div class="bg-indigo-600 h-full w-[98.5%]"></div>
                 </div>
             </div>
 
             <div class="card p-5 space-y-2">
-                <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+                <div class="flex justify-between items-center text-xs text-muted font-bold">
                     <span>MTBF (MEAN TIME BETWEEN FAILURES)</span>
                     <span class="text-emerald-500 font-black">↗ +14 hrs</span>
                 </div>
-                <div class="text-2xl font-black text-slate-900 dark:text-white">142.5 hrs</div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div class="text-2xl font-black text-primary dark:text-white">142.5 hrs</div>
+                <div class="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                     <div class="bg-purple-600 h-full w-[85%]"></div>
                 </div>
             </div>
 
             <div class="card p-5 space-y-2">
-                <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+                <div class="flex justify-between items-center text-xs text-muted font-bold">
                     <span>MTTR (MEAN TIME TO REPAIR)</span>
                     <span class="text-emerald-500 font-black">↘ -8 mins</span>
                 </div>
-                <div class="text-2xl font-black text-slate-900 dark:text-white">45.2 mins</div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div class="text-2xl font-black text-primary dark:text-white">45.2 mins</div>
+                <div class="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                     <div class="bg-emerald-600 h-full w-[70%]"></div>
                 </div>
             </div>
 
             <div class="card p-5 space-y-2">
-                <div class="flex justify-between items-center text-xs text-slate-500 font-bold">
+                <div class="flex justify-between items-center text-xs text-muted font-bold">
                     <span>MAINTENANCE COST (SAGE 300)</span>
                     <span class="text-rose-500 font-black">฿ 248,500</span>
                 </div>
                 <div class="text-2xl font-black text-indigo-900 dark:text-indigo-400">฿ 248,500.00</div>
-                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div class="w-full bg-muted h-1.5 rounded-full overflow-hidden">
                     <div class="bg-amber-500 h-full w-[60%]"></div>
                 </div>
             </div>

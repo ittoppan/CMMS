@@ -815,3 +815,20 @@ html.dark .theme-icon-sun  { display: block; }
   border-color: var(--color-border-blue, #0064e0);
   color: var(--color-text-blue, #042f97);
 }
+
+/* ------------------------------------------------------------
+   19. Semantic color utilities (per-module sweep)
+   Token-backed replacements for raw slate/gray utilities so PHP
+   pages follow dark mode automatically.
+   ------------------------------------------------------------ */
+.text-primary   { color: var(--color-text-primary, #0f172a); }
+.text-secondary { color: var(--color-text-secondary, #475569); }
+.text-muted     { color: var(--color-text-disabled, #94a3b8); }
+.bg-subtle      { background-color: var(--color-background-body, #f8fafc); }
+.bg-muted       { background-color: var(--color-background-muted, #f1f5f9); }
+.border-line    { border-color: var(--color-border, #e2e8f0); }
+.hover-tint:hover { background-color: var(--color-tint-hover, #f8fafc); }
+
+.divide-line > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--color-border, #e2e8f0);
+}

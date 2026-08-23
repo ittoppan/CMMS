@@ -85,17 +85,17 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="view.php?id=<?= $id ?>" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปรายละเอียด</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">ทำ PM เสร็จ: <?= htmlspecialchars($r['title']) ?></h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">ทำ PM เสร็จ: <?= htmlspecialchars($r['title']) ?></h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" class="card p-6 space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><span class="font-medium text-gray-600">ทรัพย์สิน:</span> <?= htmlspecialchars($r['asset_id']) ?></div>
-            <div><span class="font-medium text-gray-600">ความถี่:</span> <?= htmlspecialchars($r['frequency_type']) ?> (<?= $r['frequency_interval'] ?>)</div>
-            <div><span class="font-medium text-gray-600">กำหนดส่งเดิม:</span> <?= htmlspecialchars($r['due_date'] ?? '-') ?></div>
+            <div><span class="font-medium text-secondary">ทรัพย์สิน:</span> <?= htmlspecialchars($r['asset_id']) ?></div>
+            <div><span class="font-medium text-secondary">ความถี่:</span> <?= htmlspecialchars($r['frequency_type']) ?> (<?= $r['frequency_interval'] ?>)</div>
+            <div><span class="font-medium text-secondary">กำหนดส่งเดิม:</span> <?= htmlspecialchars($r['due_date'] ?? '-') ?></div>
             <div>
-                <span class="font-medium text-gray-600">กำหนดครั้งถัดไป:</span>
+                <span class="font-medium text-secondary">กำหนดครั้งถัดไป:</span>
                 <?php
                 $nextCalc = null;
                 $today = date('Y-m-d');
@@ -112,27 +112,27 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">บันทึกการปฏิบัติงาน</label>
+            <label class="block text-sm font-medium text-secondary mb-2">บันทึกการปฏิบัติงาน</label>
             <textarea name="notes" rows="3" class="input input-bordered w-full" placeholder="บันทึกผลการปฏิบัติงาน ปัญหาที่พบ ฯลฯ"></textarea>
         </div>
 
         <?php if ($templates): ?>
         <div>
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">ผลการตรวจสอบตาม Checklist</h2>
+            <h2 class="text-lg font-semibold text-primary mb-4">ผลการตรวจสอบตาม Checklist</h2>
             <?php foreach ($templates as $t): ?>
             <div class="border rounded-md p-4 mb-4">
-                <h3 class="font-medium text-gray-800 mb-3"><?= htmlspecialchars($t['code'] . ' - ' . $t['name']) ?></h3>
+                <h3 class="font-medium text-primary mb-3"><?= htmlspecialchars($t['code'] . ' - ' . $t['name']) ?></h3>
                 <?php if (isset($templateItems[$t['id']]) && count($templateItems[$t['id']])): ?>
                 <div class="space-y-3">
                     <?php foreach ($templateItems[$t['id']] as $item): ?>
                     <div class="border-b pb-3">
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex-1">
-                                <label class="text-sm font-medium text-gray-700"><?= htmlspecialchars($item['description']) ?></label>
-                                <?php if ($item['expected_value']): ?><span class="text-xs text-gray-500 ml-2">(ค่าที่คาดหวัง: <?= htmlspecialchars($item['expected_value']) ?>)</span><?php endif; ?>
+                                <label class="text-sm font-medium text-secondary"><?= htmlspecialchars($item['description']) ?></label>
+                                <?php if ($item['expected_value']): ?><span class="text-xs text-muted ml-2">(ค่าที่คาดหวัง: <?= htmlspecialchars($item['expected_value']) ?>)</span><?php endif; ?>
                             </div>
                             <div class="flex items-center gap-2">
-                                <select name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][result]" class="text-sm border border-gray-300 rounded-md px-2 py-1">
+                                <select name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][result]" class="text-sm border border-line rounded-md px-2 py-1">
                                     <option value="">--</option>
                                     <option value="pass">ผ่าน</option>
                                     <option value="fail">ไม่ผ่าน</option>
@@ -142,17 +142,17 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
                         </div>
                         <?php if ($item['item_type'] === 'text' || $item['item_type'] === 'number' || $item['item_type'] === 'measurement'): ?>
                         <div class="mt-2">
-                            <input type="text" name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][value]" placeholder="ค่าที่วัดได้" class="w-full text-sm border border-gray-300 rounded-md px-2 py-1">
+                            <input type="text" name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][value]" placeholder="ค่าที่วัดได้" class="w-full text-sm border border-line rounded-md px-2 py-1">
                         </div>
                         <?php endif; ?>
                         <div class="mt-1">
-                            <input type="text" name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][notes]" placeholder="หมายเหตุ" class="w-full text-sm border border-gray-300 rounded-md px-2 py-1">
+                            <input type="text" name="checklist_result[<?= $t['id'] ?>_<?= $item['id'] ?>][notes]" placeholder="หมายเหตุ" class="w-full text-sm border border-line rounded-md px-2 py-1">
                         </div>
                     </div>
                     <?php endforeach; ?>
                 </div>
                 <?php else: ?>
-                <p class="text-sm text-gray-500">ไม่มีรายการใน template นี้</p>
+                <p class="text-sm text-muted">ไม่มีรายการใน template นี้</p>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>

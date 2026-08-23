@@ -26,14 +26,14 @@ renderHeader();
 
     <!-- Optimization Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 ตารางคำนวณจุดสั่งซื้อ EOQ & วิเคราะห์เงินจมคลัง (AI Inventory Optimization Metrics)</span>
             <span class="badge badge badge-success font-bold text-xs"><?= count($optList) ?> รายการ</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border-collapse">
-                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                     <tr>
                         <th class="p-3">รหัสอะไหล่</th>
                         <th class="p-3">ชื่ออะไหล่</th>
@@ -44,19 +44,19 @@ renderHeader();
                         <th class="p-3 text-center">สถานะทุนจม (Dead Stock Status)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($optList as $item): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700"><?= htmlspecialchars($item['code']) ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($item['name']) ?></td>
-                        <td class="p-3 text-center font-bold text-slate-700"><?= number_format($item['stock_qty']) ?> ชิ้น</td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($item['name']) ?></td>
+                        <td class="p-3 text-center font-bold text-secondary"><?= number_format($item['stock_qty']) ?> ชิ้น</td>
                         <td class="p-3 text-center font-bold text-purple-800 bg-purple-50/50">
                             Min: <?= $item['ai_min'] ?> / Max: <?= $item['ai_max'] ?>
                         </td>
                         <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/50 text-sm">
                             🎯 <?= $item['eoq'] ?> ชิ้น/ครั้ง
                         </td>
-                        <td class="p-3 text-right font-black text-slate-900">฿<?= number_format($item['capital_tied'], 2) ?></td>
+                        <td class="p-3 text-right font-black text-primary">฿<?= number_format($item['capital_tied'], 2) ?></td>
                         <td class="p-3 text-center">
                             <?php if ($item['is_dead_stock']): ?>
                             <span class="badge badge badge-error font-bold text-[10px] animate-pulse">⚠️ Dead Stock Alert</span>

@@ -45,8 +45,8 @@ renderHeader();
             </div>
 
             <div>
-                <h3 class="font-black text-slate-900 text-base"><?= htmlspecialchars($r['name']) ?></h3>
-                <span class="text-xs text-slate-500">ผ่านการเสียมาแล้ว: <strong class="text-slate-800"><?= $r['days_since_failure'] ?> วัน</strong> (รวม <?= $r['total_failures'] ?> ครั้ง)</span>
+                <h3 class="font-black text-primary text-base"><?= htmlspecialchars($r['name']) ?></h3>
+                <span class="text-xs text-muted">ผ่านการเสียมาแล้ว: <strong class="text-primary"><?= $r['days_since_failure'] ?> วัน</strong> (รวม <?= $r['total_failures'] ?> ครั้ง)</span>
             </div>
 
             <!-- Risk Progress Bar -->
@@ -56,7 +56,7 @@ renderHeader();
                 </div>
             </div>
 
-            <div class="p-3 bg-white/80 rounded-xl border border-slate-200 text-xs font-bold text-slate-700">
+            <div class="p-3 bg-white/80 rounded-xl border border-line text-xs font-bold text-secondary">
                 <?= $r['recommendation'] ?>
             </div>
 

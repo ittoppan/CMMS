@@ -28,17 +28,17 @@ renderHeader();
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="card p-5 space-y-2">
             <span class="font-extrabold text-indigo-900 text-sm block">🏷️ 1. บังคับรูปแบบรหัสเครื่องจักร (Code Standard)</span>
-            <p class="text-xs text-slate-600">บังคับรูปแบบ `หมวด-สายการผลิต-ลำดับ` (เช่น <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-700 font-bold">A-PT-01</code>) ป้องกันการพิมพ์ผิดเป็น <code class="line-through text-rose-500">APT01</code> หรือ <code class="line-through text-rose-500">apt-1</code></p>
+            <p class="text-xs text-secondary">บังคับรูปแบบ `หมวด-สายการผลิต-ลำดับ` (เช่น <code class="bg-muted px-1.5 py-0.5 rounded font-mono text-indigo-700 font-bold">A-PT-01</code>) ป้องกันการพิมพ์ผิดเป็น <code class="line-through text-rose-500">APT01</code> หรือ <code class="line-through text-rose-500">apt-1</code></p>
         </div>
 
         <div class="card p-5 space-y-2">
             <span class="font-extrabold text-purple-900 text-sm block">📦 2. ตรวจจับอะไหล่ซ้ำซ้อน (Duplicate Detection)</span>
-            <p class="text-xs text-slate-600">ระบบ AI สแกนชื่อและรหัสอะไหล่ซ้ำซ้อนจากคลัง Sage 300 ERP เพื่อยุบรวมข้อมูลคลังอะไหล่ให้อยู่ในมาตรฐานเดียวกัน</p>
+            <p class="text-xs text-secondary">ระบบ AI สแกนชื่อและรหัสอะไหล่ซ้ำซ้อนจากคลัง Sage 300 ERP เพื่อยุบรวมข้อมูลคลังอะไหล่ให้อยู่ในมาตรฐานเดียวกัน</p>
         </div>
 
         <div class="card p-5 space-y-2">
             <span class="font-extrabold text-emerald-900 text-sm block">🔐 3. ขั้นตอนการอนุมัติ Master Data (Approval Flow)</span>
-            <p class="text-xs text-slate-600">การแก้ไขชื่อเครื่องจักร, หมวดหมู่, หรือสเปกอะไหล่หลัก ต้องผ่านการอนุมัติจากวิศวกรหัวหน้างานเพื่อความถูกต้อง 100%</p>
+            <p class="text-xs text-secondary">การแก้ไขชื่อเครื่องจักร, หมวดหมู่, หรือสเปกอะไหล่หลัก ต้องผ่านการอนุมัติจากวิศวกรหัวหน้างานเพื่อความถูกต้อง 100%</p>
         </div>
     </div>
 

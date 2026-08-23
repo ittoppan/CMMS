@@ -29,7 +29,7 @@ renderHeader();
     <!-- Interactive Query Box -->
     <div class="card p-5 space-y-4">
         <form method="GET" class="flex gap-2">
-            <input type="text" name="q" value="<?= htmlspecialchars($userQuery) ?>" placeholder="พิมพ์อาการเสีย เช่น 'มอเตอร์ร้อน + เสียงดัง', 'สายพานลำเลียงสั่น', 'แรงดันลมตก'..." class="input input-bordered w-full font-bold text-slate-800 text-sm">
+            <input type="text" name="q" value="<?= htmlspecialchars($userQuery) ?>" placeholder="พิมพ์อาการเสีย เช่น 'มอเตอร์ร้อน + เสียงดัง', 'สายพานลำเลียงสั่น', 'แรงดันลมตก'..." class="input input-bordered w-full font-bold text-primary text-sm">
             <button type="submit" class="btn btn-primary bg-purple-700 hover:bg-purple-800 font-bold px-6 py-2">
                 🤖 AI วิเคราะห์งานซ่อม
             </button>
@@ -50,7 +50,7 @@ renderHeader();
             <!-- 1. Probable Causes -->
             <div class="p-4 bg-rose-50 rounded-2xl border border-rose-200 space-y-2">
                 <span class="font-extrabold text-rose-900 text-sm block">⚠️ 1. สาเหตุที่เป็นไปได้ (Probable Causes)</span>
-                <ul class="space-y-1.5 text-xs text-slate-700">
+                <ul class="space-y-1.5 text-xs text-secondary">
                     <?php foreach ($aiResponse['causes'] as $c): ?>
                     <li class="card font-medium p-2 border border-rose-100"><?= htmlspecialchars($c) ?></li>
                     <?php endforeach; ?>
@@ -60,7 +60,7 @@ renderHeader();
             <!-- 2. Inspection Steps -->
             <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
                 <span class="font-extrabold text-indigo-900 text-sm block">🔍 2. ขั้นตอนการตรวจเช็คหน้างาน (SOP Inspection)</span>
-                <ul class="space-y-1.5 text-xs text-slate-700">
+                <ul class="space-y-1.5 text-xs text-secondary">
                     <?php foreach ($aiResponse['steps'] as $s): ?>
                     <li class="card font-medium p-2 border border-indigo-100"><?= htmlspecialchars($s) ?></li>
                     <?php endforeach; ?>
@@ -70,12 +70,12 @@ renderHeader();
             <!-- 3. Recommended Spare Parts -->
             <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-2">
                 <span class="font-extrabold text-emerald-900 text-sm block">📦 3. อะไหล่ที่ต้องเตรียมเบิก (Recommended Spares)</span>
-                <ul class="space-y-1.5 text-xs text-slate-700">
+                <ul class="space-y-1.5 text-xs text-secondary">
                     <?php foreach ($aiResponse['spares'] as $sp): ?>
                     <li class="card font-bold p-2 border border-emerald-100 flex items-center justify-between">
                         <div>
                             <span class="font-mono text-indigo-700"><?= htmlspecialchars($sp['code']) ?></span>
-                            <div class="text-slate-800 text-[11px]"><?= htmlspecialchars($sp['name']) ?></div>
+                            <div class="text-primary text-[11px]"><?= htmlspecialchars($sp['name']) ?></div>
                         </div>
                         <span class="badge bg-emerald-200 text-emerald-900 font-black text-[10px]"><?= htmlspecialchars($sp['qty']) ?></span>
                     </li>

@@ -180,19 +180,19 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
 <div class="max-w-4xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปงานซ่อม</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">แก้ไขงานซ่อม #<?= $id ?></h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">แก้ไขงานซ่อม #<?= $id ?></h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ข้อมูลทั่วไป</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลทั่วไป</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">หัวข้องาน</label>
+                <label class="block text-sm font-medium text-secondary">หัวข้องาน</label>
                 <input type="text" name="title" value="<?= htmlspecialchars($row['title']) ?>" required class="input input-bordered w-full mt-1">
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ทรัพย์สิน</label>
+                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน</label>
                 <select name="asset_id" required class="input input-bordered w-full mt-1">
                     <?php foreach ($assets as $a): ?>
                     <option value="<?= $a['id'] ?>" <?= $row['asset_id']==$a['id']?'selected':'' ?>><?= htmlspecialchars($a['code'].' - '.$a['name']) ?></option>
@@ -200,7 +200,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ช่างผู้รับ</label>
+                <label class="block text-sm font-medium text-secondary">ช่างผู้รับ</label>
                 <select name="assigned_to" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
@@ -209,7 +209,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ความสำคัญ</label>
+                <label class="block text-sm font-medium text-secondary">ความสำคัญ</label>
                 <select name="priority" class="input input-bordered w-full mt-1">
                     <?php foreach (['low'=>'Low','medium'=>'Medium','high'=>'High','critical'=>'Critical'] as $pk => $pl): ?>
                     <option value="<?= $pk ?>" <?= opt($row['priority'],$pk) ?>><?= htmlspecialchars($pl) ?></option>
@@ -217,7 +217,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                <label class="block text-sm font-medium text-secondary">สถานะ</label>
                 <select name="status" class="input input-bordered w-full mt-1">
                     <?php foreach (['open','acknowledged','in_progress','waiting_parts','waiting_approval','resolved','closed','cancelled','rejected'] as $s): ?>
                     <option value="<?= $s ?>" <?= opt($row['status'],$s) ?>><?= ucfirst(str_replace('_',' ',$s)) ?></option>
@@ -226,10 +226,10 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ข้อมูลจำเพาะ</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลจำเพาะ</h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">ประเภทการซ่อม</label>
+                <label class="block text-sm font-medium text-secondary">ประเภทการซ่อม</label>
                 <select name="repair_type_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($repairTypes as $rt): ?>
@@ -238,7 +238,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">รหัสอาการเสีย</label>
+                <label class="block text-sm font-medium text-secondary">รหัสอาการเสีย</label>
                 <select name="failure_code_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($failureCodes as $fc): ?>
@@ -247,7 +247,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">รหัสการซ่อม</label>
+                <label class="block text-sm font-medium text-secondary">รหัสการซ่อม</label>
                 <select name="repair_code_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($repairCodes as $rc): ?>
@@ -256,7 +256,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">โซนงาน</label>
+                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
                 <select name="work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($workZones as $wz): ?>
@@ -265,7 +265,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานที่</label>
+                <label class="block text-sm font-medium text-secondary">สถานที่</label>
                 <select name="location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locations as $loc): ?>
@@ -274,7 +274,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนก</label>
+                <label class="block text-sm font-medium text-secondary">แผนก</label>
                 <select name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
@@ -283,11 +283,11 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Lot No.</label>
+                <label class="block text-sm font-medium text-secondary">Lot No.</label>
                 <input type="text" name="product_lot_no" class="input input-bordered w-full mt-1" value="<?= htmlspecialchars($row['product_lot_no']??'') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะเครื่องจักร</label>
+                <label class="block text-sm font-medium text-secondary">สถานะเครื่องจักร</label>
                 <select name="machine_status" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach (['running'=>'Running','stopped'=>'Stopped','idle'=>'Idle','standby'=>'Standby'] as $mk=>$mv): ?>
@@ -296,7 +296,7 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะสายการผลิต</label>
+                <label class="block text-sm font-medium text-secondary">สถานะสายการผลิต</label>
                 <select name="production_line_status" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach (['normal'=>'Normal','stopped'=>'Stopped','slowdown'=>'Slowdown'] as $pk2=>$pv): ?>
@@ -305,76 +305,76 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">วันที่คาดว่าจะเสร็จ</label>
+                <label class="block text-sm font-medium text-secondary">วันที่คาดว่าจะเสร็จ</label>
                 <input type="datetime-local" name="estimated_completion_date" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['estimated_completion_date']??'') ?>">
             </div>
             <div class="flex items-center mt-6">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="safety_related" value="1" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500" <?= $row['safety_related']?'checked':'' ?>>
-                    <span class="text-sm font-medium text-gray-700">เกี่ยวกับความปลอดภัย (Safety)</span>
+                    <input type="checkbox" name="safety_related" value="1" class="w-4 h-4 text-red-600 border-line rounded focus:ring-red-500" <?= $row['safety_related']?'checked':'' ?>>
+                    <span class="text-sm font-medium text-secondary">เกี่ยวกับความปลอดภัย (Safety)</span>
                 </label>
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">รายละเอียดงาน</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">รายละเอียดงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">รายละเอียด</label>
+                <label class="block text-sm font-medium text-secondary">รายละเอียด</label>
                 <textarea name="description" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['description']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">รายงานอาการเสีย</label>
+                <label class="block text-sm font-medium text-secondary">รายงานอาการเสีย</label>
                 <textarea name="failure_report" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['failure_report']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">การวินิจฉัย</label>
+                <label class="block text-sm font-medium text-secondary">การวินิจฉัย</label>
                 <textarea name="diagnosis" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['diagnosis']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แนวทางแก้ไข</label>
+                <label class="block text-sm font-medium text-secondary">แนวทางแก้ไข</label>
                 <textarea name="resolution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['resolution']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สาเหตุหลัก (Root Cause)</label>
+                <label class="block text-sm font-medium text-secondary">สาเหตุหลัก (Root Cause)</label>
                 <textarea name="root_cause" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['root_cause']??'') ?></textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">วิธีแก้ไข (Solution)</label>
+                <label class="block text-sm font-medium text-secondary">วิธีแก้ไข (Solution)</label>
                 <textarea name="solution" rows="3" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['solution']??'') ?></textarea>
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ค่าใช้จ่ายและระยะเวลา</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ค่าใช้จ่ายและระยะเวลา</h2>
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">ค่าแรง</label>
+                <label class="block text-sm font-medium text-secondary">ค่าแรง</label>
                 <input type="number" name="cost_labor" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_labor'] ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ค่าอะไหล่</label>
+                <label class="block text-sm font-medium text-secondary">ค่าอะไหล่</label>
                 <input type="number" name="cost_parts" step="0.01" class="input input-bordered w-full mt-1" value="<?= $row['cost_parts'] ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">เริ่มหยุด</label>
+                <label class="block text-sm font-medium text-secondary">เริ่มหยุด</label>
                 <input type="datetime-local" name="downtime_start" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_start']??'') ?>">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สิ้นสุดหยุด</label>
+                <label class="block text-sm font-medium text-secondary">สิ้นสุดหยุด</label>
                 <input type="datetime-local" name="downtime_end" class="input input-bordered w-full mt-1" value="<?= str_replace(' ','T',$row['downtime_end']??'') ?>">
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">แท็ก</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">แท็ก</h2>
         <div class="flex flex-wrap gap-3">
             <?php foreach ($tags as $tag): ?>
             <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="tags[]" value="<?= $tag['id'] ?>" class="w-4 h-4 text-primary-600 border-gray-300 rounded" <?= chk($tag['id'], $existingTagIds) ?>>
+                <input type="checkbox" name="tags[]" value="<?= $tag['id'] ?>" class="w-4 h-4 text-primary-600 border-line rounded" <?= chk($tag['id'], $existingTagIds) ?>>
                 <span class="px-2 py-0.5 text-xs font-semibold rounded-full text-white" style="background-color:<?= htmlspecialchars($tag['color']) ?>"><?= htmlspecialchars($tag['name']) ?></span>
             </label>
             <?php endforeach; ?>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ไฟล์แนบ</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ไฟล์แนบ</h2>
         <?php if ($attachments): ?>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <?php foreach ($attachments as $att): ?>
@@ -390,20 +390,20 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
         </div>
         <?php endif; ?>
         <div>
-            <label class="block text-sm font-medium text-gray-700">📸 รูปก่อนซ่อม (Before) — failure_image</label>
+            <label class="block text-sm font-medium text-secondary">📸 รูปก่อนซ่อม (Before) — failure_image</label>
             <input type="file" name="failure_image[]" multiple accept="image/*" class="input input-bordered w-full mt-1">
-            <p class="text-xs text-gray-500 mt-1">รูปสภาพเครื่องก่อนซ่อม / อาการเสีย (เลือกหลายไฟล์ได้) — ใช้ส่ง LINE ตอนแจ้งงานและตอนปิดงาน</p>
+            <p class="text-xs text-muted mt-1">รูปสภาพเครื่องก่อนซ่อม / อาการเสีย (เลือกหลายไฟล์ได้) — ใช้ส่ง LINE ตอนแจ้งงานและตอนปิดงาน</p>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">📸 รูปหลังซ่อม (After)</label>
+            <label class="block text-sm font-medium text-secondary">📸 รูปหลังซ่อม (After)</label>
             <input type="file" name="after_image[]" multiple accept="image/*" class="input input-bordered w-full mt-1">
-            <p class="text-xs text-gray-500 mt-1">รูปหลังซ่อมเสร็จ — ใช้ส่ง LINE ตอนปิดงาน (สถานะเปลี่ยนเป็น ซ่อมเสร็จ)</p>
+            <p class="text-xs text-muted mt-1">รูปหลังซ่อมเสร็จ — ใช้ส่ง LINE ตอนปิดงาน (สถานะเปลี่ยนเป็น ซ่อมเสร็จ)</p>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">การปฏิเสธงาน</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">การปฏิเสธงาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">เหตุผลที่ปฏิเสธ</label>
+                <label class="block text-sm font-medium text-secondary">เหตุผลที่ปฏิเสธ</label>
                 <select name="rejection_reason_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($rejectionReasons as $rr): ?>
@@ -412,13 +412,13 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">หมายเหตุปฏิเสธ</label>
+                <label class="block text-sm font-medium text-secondary">หมายเหตุปฏิเสธ</label>
                 <textarea name="rejection_note" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['rejection_note']??'') ?></textarea>
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
+            <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
             <textarea name="notes" rows="2" class="input input-bordered w-full mt-1"><?= htmlspecialchars($row['notes']??'') ?></textarea>
         </div>
 
@@ -429,20 +429,20 @@ function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
     </form>
 
     <div class="mt-8">
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">ประวัติการดำเนินการ</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2 mb-4">ประวัติการดำเนินการ</h2>
         <div class="space-y-2">
             <?php
             $logs = $pdo->prepare('SELECT l.*, u.full_name FROM repair_activity_log l LEFT JOIN users u ON l.user_id = u.id WHERE l.repair_id = ? ORDER BY l.created_at DESC');
             $logs->execute([$id]); $logs = $logs->fetchAll();
             ?>
             <?php if (empty($logs)): ?>
-            <p class="text-sm text-gray-500">ไม่มีประวัติ</p>
+            <p class="text-sm text-muted">ไม่มีประวัติ</p>
             <?php else: ?>
             <?php foreach ($logs as $log): ?>
-            <div class="flex items-start gap-3 text-sm border-b border-gray-100 pb-2">
-                <span class="text-gray-400 whitespace-nowrap"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($log['created_at']))) ?></span>
-                <span class="font-medium text-gray-700"><?= htmlspecialchars($log['full_name']??'ระบบ') ?></span>
-                <span class="text-gray-600"><?= htmlspecialchars($log['description'] ?? $log['action']) ?></span>
+            <div class="flex items-start gap-3 text-sm border-b border-line pb-2">
+                <span class="text-muted whitespace-nowrap"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($log['created_at']))) ?></span>
+                <span class="font-medium text-secondary"><?= htmlspecialchars($log['full_name']??'ระบบ') ?></span>
+                <span class="text-secondary"><?= htmlspecialchars($log['description'] ?? $log['action']) ?></span>
             </div>
             <?php endforeach; ?>
             <?php endif; ?>

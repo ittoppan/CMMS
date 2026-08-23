@@ -86,9 +86,9 @@ renderHeader();
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <?php if ($isTestingEnv): ?>
-                <span class="bg-amber-400 text-slate-900 text-xs font-black px-2.5 py-1 rounded-full uppercase">🧪 โหมดทดสอบ (TFPT2C Testing)</span>
+                <span class="bg-amber-400 text-primary text-xs font-black px-2.5 py-1 rounded-full uppercase">🧪 โหมดทดสอบ (TFPT2C Testing)</span>
                 <?php else: ?>
-                <span class="bg-emerald-400 text-slate-900 text-xs font-black px-2.5 py-1 rounded-full uppercase">🚀 โหมดใช้งานจริง (TFPT1C Production)</span>
+                <span class="bg-emerald-400 text-primary text-xs font-black px-2.5 py-1 rounded-full uppercase">🚀 โหมดใช้งานจริง (TFPT1C Production)</span>
                 <?php endif; ?>
                 <span class="text-xs text-purple-200">Sage 300 ERP DSN</span>
             </div>
@@ -96,7 +96,7 @@ renderHeader();
             <p class="text-xs text-purple-100 mt-1">ปัจจุบันเชื่อมต่อ DSN: <strong class="underline font-mono text-white text-sm"><?= htmlspecialchars($dsn) ?></strong> (<?= $isTestingEnv ? 'ก้อนทดสอบ TFPT2C' : 'ก้อนใช้งานจริง TFPT1C' ?>)</p>
         </div>
         <div class="flex gap-2">
-            <a href="../spare_parts/sage_sync.php" class="btn bg-amber-400 text-slate-900 font-extrabold text-xs shadow hover:bg-amber-300 gap-1">
+            <a href="../spare_parts/sage_sync.php" class="btn bg-amber-400 text-primary font-extrabold text-xs shadow hover:bg-amber-300 gap-1">
                 <span>🏷️</span> <span>ตั้งค่าหมวดหมู่อะไหล่ Sage 300 →</span>
             </a>
             <a href="../spare_parts/issue_center.php" class="card btn text-purple-800 font-bold text-xs shadow hover:bg-purple-50">
@@ -119,7 +119,7 @@ renderHeader();
 
     <!-- 1-Click Environment Switcher Buttons -->
     <div class="card p-6 space-y-4">
-        <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">
+        <h3 class="font-bold text-primary text-base border-b pb-2 flex justify-between items-center">
             <span>🎛️ ปุ่มสลับสภาพแวดล้อม 1-Click Sage 300 Environment Switcher:</span>
             <span class="text-xs text-indigo-600 font-bold">Testing ↔ Production</span>
         </h3>
@@ -137,8 +137,8 @@ renderHeader();
                         <span class="badge status-active font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
                         <?php endif; ?>
                     </div>
-                    <h4 class="font-extrabold text-slate-900 text-base mt-2">🧪 ฐานข้อมูลสำหรับทดสอบ (TFPT2C Testing)</h4>
-                    <p class="text-xs text-slate-500 mt-1">ใช้สำหรับการทดสอบเบิก-จ่ายอะไหล่ ตัดสต็อก และทดสอบกระบวนการทำงานโดยไม่กระทบข้อมูลจริง</p>
+                    <h4 class="font-extrabold text-primary text-base mt-2">🧪 ฐานข้อมูลสำหรับทดสอบ (TFPT2C Testing)</h4>
+                    <p class="text-xs text-muted mt-1">ใช้สำหรับการทดสอบเบิก-จ่ายอะไหล่ ตัดสต็อก และทดสอบกระบวนการทำงานโดยไม่กระทบข้อมูลจริง</p>
                 </div>
                 <div class="mt-3 text-xs font-bold text-amber-700">กดสลับใช้งาน TFPT2C (ตัวทดสอบ) →</div>
             </button>
@@ -152,8 +152,8 @@ renderHeader();
                         <span class="badge status-active font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
                         <?php endif; ?>
                     </div>
-                    <h4 class="font-extrabold text-slate-900 text-base mt-2">🚀 ฐานข้อมูลใช้งานจริง (TFPT1C Production)</h4>
-                    <p class="text-xs text-slate-500 mt-1">ใช้สำหรับเมื่อพร้อมเปิดใช้งานระบบ CMMS ตัดบัญชีจริงกับระบบ Sage 300 ในการผลิต</p>
+                    <h4 class="font-extrabold text-primary text-base mt-2">🚀 ฐานข้อมูลใช้งานจริง (TFPT1C Production)</h4>
+                    <p class="text-xs text-muted mt-1">ใช้สำหรับเมื่อพร้อมเปิดใช้งานระบบ CMMS ตัดบัญชีจริงกับระบบ Sage 300 ในการผลิต</p>
                 </div>
                 <div class="mt-3 text-xs font-bold text-emerald-700">กดสลับใช้งาน TFPT1C (ตัวจริง) →</div>
             </button>
@@ -173,7 +173,7 @@ renderHeader();
     <div class="cmms-banner error p-4 rounded-xl border font-bold text-sm space-y-1">
         <div class="font-extrabold">❌ ไม่สามารถเชื่อมต่อกับ ODBC DSN (<?= htmlspecialchars($dsn) ?>) ได้</div>
         <div class="text-xs text-rose-700 font-mono font-normal">Error Trace: <?= htmlspecialchars($testResult['error'] ?? 'ODBC DSN Not Found or Login Failed') ?></div>
-        <div class="text-xs text-slate-600 pt-1">
+        <div class="text-xs text-secondary pt-1">
             * คำแนะนำ: กรุณาตรวจสอบว่ามี System DSN ชื่อ <strong>"<?= htmlspecialchars($dsn) ?>"</strong> ใน ODBC Data Source Administrator บนเครื่อง Host แล้วหรือยัง
         </div>
     </div>
@@ -184,31 +184,31 @@ renderHeader();
     <form method="POST" class="card p-6 space-y-6">
         <input type="hidden" name="save_sage_config" value="1">
 
-        <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between items-center">
+        <h3 class="font-bold text-primary text-base border-b pb-2 flex justify-between items-center">
             <span>⚙️ รายละเอียดพารามิเตอร์ ODBC DSN (<?= htmlspecialchars($dsn) ?>)</span>
             <span class="badge bg-purple-100 text-purple-800 font-bold">DSN: <?= htmlspecialchars($dsn) ?></span>
         </h3>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ODBC System DSN Name</label>
+                <label class="font-bold text-secondary block mb-1">ODBC System DSN Name</label>
                 <input type="text" name="sage_dsn" value="<?= htmlspecialchars($dsn) ?>" required class="input input-bordered w-full font-mono font-bold">
             </div>
 
             <div>
-                <label class="font-bold text-slate-700 block mb-1">Sage 300 Company Database ID</label>
+                <label class="font-bold text-secondary block mb-1">Sage 300 Company Database ID</label>
                 <input type="text" name="sage_comp" value="<?= htmlspecialchars($comp) ?>" required class="input input-bordered w-full font-mono font-bold">
             </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">Sage 300 DB Username</label>
+                <label class="font-bold text-secondary block mb-1">Sage 300 DB Username</label>
                 <input type="text" name="sage_user" value="<?= htmlspecialchars($user) ?>" required class="input input-bordered w-full font-mono">
             </div>
 
             <div>
-                <label class="font-bold text-slate-700 block mb-1">Sage 300 DB Password</label>
+                <label class="font-bold text-secondary block mb-1">Sage 300 DB Password</label>
                 <input type="password" name="sage_pass" value="<?= htmlspecialchars($pass) ?>" required class="input input-bordered w-full font-mono">
             </div>
         </div>

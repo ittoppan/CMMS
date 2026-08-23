@@ -26,7 +26,7 @@ renderHeader();
 <div class="max-w-xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปรายการบทบาท</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มบทบาทผู้ใช้ใหม่</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">เพิ่มบทบาทผู้ใช้ใหม่</h1>
     </div>
 
     <?php if ($error): ?>
@@ -35,13 +35,13 @@ renderHeader();
 
     <form method="post" class="card p-6 space-y-4">
         <div>
-            <label class="block text-sm font-medium text-gray-700">ชื่อบทบาท <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-secondary">ชื่อบทบาท <span class="text-red-500">*</span></label>
             <input type="text" name="name" required
                 class="input input-bordered w-full mt-1" placeholder="เช่น Technician, Supervisor, Admin"
                 value="<?= htmlspecialchars($_POST['name'] ?? '') ?>">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">คำอธิบาย</label>
+            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
             <textarea name="description" rows="3" class="input input-bordered w-full mt-1"
                 placeholder="อธิบายหน้าที่และสิทธิ์ของบทบาทนี้..."><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
         </div>

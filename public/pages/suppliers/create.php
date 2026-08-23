@@ -15,38 +15,38 @@ renderHeader();
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปผู้จำหน่าย</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มผู้จำหน่าย</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">เพิ่มผู้จำหน่าย</h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">รหัสผู้จำหน่าย <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">รหัสผู้จำหน่าย <span class="text-red-500">*</span></label>
                 <input type="text" name="code" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ชื่อบริษัท <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ชื่อบริษัท <span class="text-red-500">*</span></label>
                 <input type="text" name="name" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ผู้ติดต่อ</label>
+                <label class="block text-sm font-medium text-secondary">ผู้ติดต่อ</label>
                 <input type="text" name="contact_person" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">เบอร์โทร</label>
+                <label class="block text-sm font-medium text-secondary">เบอร์โทร</label>
                 <input type="text" name="phone" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">อีเมล</label>
+                <label class="block text-sm font-medium text-secondary">อีเมล</label>
                 <input type="email" name="email" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">เลขประจำตัวผู้เสียภาษี</label>
+                <label class="block text-sm font-medium text-secondary">เลขประจำตัวผู้เสียภาษี</label>
                 <input type="text" name="tax_id" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                <label class="block text-sm font-medium text-secondary">สถานะ</label>
                 <select name="is_active" class="input input-bordered w-full mt-1">
                     <option value="1">Active</option>
                     <option value="0">Inactive</option>
@@ -54,7 +54,7 @@ renderHeader();
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">ที่อยู่</label>
+            <label class="block text-sm font-medium text-secondary">ที่อยู่</label>
             <textarea name="address" rows="3" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="flex gap-3">

@@ -32,7 +32,7 @@ renderHeader();
 
     <!-- SLA Countdown Cards -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 รายการใบสั่งซ่อมที่อยู่ระหว่างนับเวลา SLA (Active Work Order SLA Countdown)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($wos) ?> ใบงาน active</span>
         </h3>
@@ -48,12 +48,12 @@ renderHeader();
                         <th class="p-3 text-center">สถานะ SLA</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($wos as $wo): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700 text-sm"><?= htmlspecialchars($wo['work_order_no'] ?? 'WO') ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($wo['asset_code']) ?> — <?= htmlspecialchars($wo['asset_name']) ?></td>
-                        <td class="p-3 text-center font-bold text-slate-700">15.00 นาที</td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($wo['asset_code']) ?> — <?= htmlspecialchars($wo['asset_name']) ?></td>
+                        <td class="p-3 text-center font-bold text-secondary">15.00 นาที</td>
                         <td class="p-3 text-center font-mono font-black text-rose-600 text-sm">
                             ⏱️ 00:08:42 นาที
                         </td>

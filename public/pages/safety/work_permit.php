@@ -75,14 +75,14 @@ renderHeader();
 
     <!-- Active Work Permits List -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 รายการใบอนุญาตทำงานความปลอดภัย (Safety Work Permits Registry)</span>
             <span class="badge badge badge-error font-bold text-xs"><?= count($permits) ?> เอกสาร</span>
         </h3>
 
         <div class="overflow-x-auto">
             <table class="w-full text-xs text-left border-collapse">
-                <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                     <tr>
                         <th class="p-3">เลขที่ใบอนุญาต</th>
                         <th class="p-3">ประเภทงานเสี่ยง</th>
@@ -93,9 +93,9 @@ renderHeader();
                         <th class="p-3 text-center">ระยะเวลาคุ้มครอง</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($permits as $p): ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-rose-700 text-sm"><?= htmlspecialchars($p['permit_no']) ?></td>
                         <td class="p-3 font-bold">
                             <span class="badge <?= match($p['permit_type']) { 'hot_work'=>'priority-high', 'confined_space'=>'status-waiting_approval', 'high_work'=>'badge badge-warning', default=>'badge badge-info' } ?> font-bold text-[10px]">
@@ -103,7 +103,7 @@ renderHeader();
                             </span>
                         </td>
                         <td class="p-3 font-mono text-indigo-700 font-bold"><?= htmlspecialchars($p['work_order_no'] ?? 'EN-26-XXX') ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($p['location']) ?></td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($p['location']) ?></td>
                         <td class="p-3 text-center">
                             <div class="flex justify-center gap-1">
                                 <?php if ($p['loto_electrical']): ?><span class="badge status-active text-[9px] font-bold">⚡ ไฟฟ้า</span><?php endif; ?>
@@ -114,7 +114,7 @@ renderHeader();
                         <td class="p-3 text-center">
                             <span class="badge badge badge-success font-bold text-[10px]">✔ APPROVED (อนุมัติแล้ว)</span>
                         </td>
-                        <td class="p-3 text-center text-slate-500 font-mono text-[11px]">
+                        <td class="p-3 text-center text-muted font-mono text-[11px]">
                             8 ชั่วโมง (ถึง <?= date('H:i', strtotime($p['valid_until'])) ?> น.)
                         </td>
                     </tr>
@@ -130,15 +130,15 @@ renderHeader();
 <div id="permitModal" style="display:none;" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="card max-w-xl w-full p-6 space-y-4 shadow-2xl animate-fade-in">
         <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="font-extrabold text-slate-900 text-base">🛡️ สร้างใบอนุญาตทำงานความปลอดภัย & LOTO ใหม่</h3>
-            <button onclick="document.getElementById('permitModal').style.display='none'" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            <h3 class="font-extrabold text-primary text-base">🛡️ สร้างใบอนุญาตทำงานความปลอดภัย & LOTO ใหม่</h3>
+            <button onclick="document.getElementById('permitModal').style.display='none'" class="text-muted hover:text-secondary font-bold text-lg">&times;</button>
         </div>
 
         <form method="POST" class="space-y-4 text-xs">
             <input type="hidden" name="action" value="create_permit">
 
             <div>
-                <label class="block font-bold text-slate-700 mb-1">ประเภทงานที่ต้องขออนุญาตความปลอดภัย (Permit Type) *</label>
+                <label class="block font-bold text-secondary mb-1">ประเภทงานที่ต้องขออนุญาตความปลอดภัย (Permit Type) *</label>
                 <select name="permit_type" class="input input-bordered w-full bg-white font-bold">
                     <option value="hot_work">🔥 งานประกายไฟ / เชื่อมความร้อน (Hot Work Permit)</option>
                     <option value="confined_space">🛖 งานปฏิบัติงานในที่อับอากาศ (Confined Space Permit)</option>
@@ -148,14 +148,14 @@ renderHeader();
             </div>
 
             <div>
-                <label class="block font-bold text-slate-700 mb-1">สถานที่ / เครื่องจักรที่ปฏิบัติงาน *</label>
+                <label class="block font-bold text-secondary mb-1">สถานที่ / เครื่องจักรที่ปฏิบัติงาน *</label>
                 <input type="text" name="location" required value="เครื่องพิมพ์ A-PT-01 แผนกพิมพ์" class="input input-bordered w-full font-bold">
             </div>
 
             <!-- LOTO Isolation Checkboxes -->
             <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
                 <span class="font-extrabold text-rose-900 block text-xs">🔒 การตัดแยกพลังงานก่อนเริ่มซ่อม (LOTO Isolation Checkpoints)</span>
-                <div class="grid grid-cols-2 gap-2 text-slate-800 font-bold">
+                <div class="grid grid-cols-2 gap-2 text-primary font-bold">
                     <label class="flex items-center gap-2"><input type="checkbox" name="loto_electrical" checked> ⚡ ตัดระบบไฟฟ้า (Electrical Lockout)</label>
                     <label class="flex items-center gap-2"><input type="checkbox" name="loto_pneumatic" checked> 💨 ปิดวาล์วลม (Pneumatic Lockout)</label>
                     <label class="flex items-center gap-2"><input type="checkbox" name="loto_hydraulic" checked> 🛢️ ปล่อยแรงดันไฮดรอลิก (Hydraulic)</label>

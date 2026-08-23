@@ -146,7 +146,7 @@ renderHeader();
     <form method="POST" class="card cmms-card p-5">
         <input type="hidden" name="generate_batch" value="1">
 
-        <h3 class="font-bold text-slate-900 text-base border-b pb-2 flex justify-between">
+        <h3 class="font-bold text-primary text-base border-b pb-2 flex justify-between">
             <span>⚙️ ตัวเลือกการสร้างแผนงาน PM/AM (Batch Scheduler Controls)</span>
             <span class="text-xs text-indigo-600 font-bold">1-Click Automation</span>
         </h3>
@@ -154,7 +154,7 @@ renderHeader();
         <!-- Target Machine Selection -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">เครื่องจักรเป้าหมาย (Target Machine)</label>
+                <label class="font-bold text-secondary block mb-1">เครื่องจักรเป้าหมาย (Target Machine)</label>
                 <select name="asset_id" class="input input-bordered w-full">
                     <option value="0">🏭 ทั้งหมดทุกเครื่องจักรในโรงงาน (All Active Assets)</option>
                     <?php foreach ($assets as $a): ?>
@@ -164,7 +164,7 @@ renderHeader();
             </div>
 
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ปีที่ต้องการจัดทำแผน (Target Year)</label>
+                <label class="font-bold text-secondary block mb-1">ปีที่ต้องการจัดทำแผน (Target Year)</label>
                 <select name="schedule_year" class="input input-bordered w-full font-bold font-mono">
                     <option value="2026" selected>2026 (พ.ศ. 2569)</option>
                     <option value="2027">2027 (พ.ศ. 2570)</option>
@@ -173,8 +173,8 @@ renderHeader();
         </div>
 
         <!-- Frequencies Options Checkboxes -->
-        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-            <span class="font-bold text-slate-900 text-xs block border-b border-slate-200 pb-1">
+        <div class="p-4 bg-subtle border border-line rounded-xl space-y-3">
+            <span class="font-bold text-primary text-xs block border-b border-line pb-1">
                 📌 เลือกรอบความถี่งาน PM/AM ที่ต้องการสร้างเข้าปฏิทิน:
             </span>
 
@@ -182,32 +182,32 @@ renderHeader();
                 <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_daily" checked class="w-4 h-4 text-indigo-600">
                     <div>
-                        <span class="font-bold text-slate-900 block">☀️ เช็คประจำวัน (Daily Inspection - F-EN-07)</span>
-                        <span class="text-[11px] text-slate-500">สร้างงานเช็คประจำสัปดาห์/ประจำวันตลอด 365 วัน</span>
+                        <span class="font-bold text-primary block">☀️ เช็คประจำวัน (Daily Inspection - F-EN-07)</span>
+                        <span class="text-[11px] text-muted">สร้างงานเช็คประจำสัปดาห์/ประจำวันตลอด 365 วัน</span>
                     </div>
                 </label>
 
                 <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_monthly" checked class="w-4 h-4 text-indigo-600">
                     <div>
-                        <span class="font-bold text-slate-900 block">📅 เช็คประจำเดือน (Monthly Maintenance - F-EN-06)</span>
-                        <span class="text-[11px] text-slate-500">สร้างงานบำรุงรักษาทุกวันที่ 1 ของทุกเดือน (12 ครั้ง/ปี)</span>
+                        <span class="font-bold text-primary block">📅 เช็คประจำเดือน (Monthly Maintenance - F-EN-06)</span>
+                        <span class="text-[11px] text-muted">สร้างงานบำรุงรักษาทุกวันที่ 1 ของทุกเดือน (12 ครั้ง/ปี)</span>
                     </div>
                 </label>
 
                 <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_6month" checked class="w-4 h-4 text-indigo-600">
                     <div>
-                        <span class="font-bold text-slate-900 block">🗓️ เช็คประจำ 6 เดือน (Semi-Annual Maintenance - F-EN-14)</span>
-                        <span class="text-[11px] text-slate-500">สร้างงานตรวจใหญ่รอบครึ่งปี (มิ.ย. & ธ.ค.)</span>
+                        <span class="font-bold text-primary block">🗓️ เช็คประจำ 6 เดือน (Semi-Annual Maintenance - F-EN-14)</span>
+                        <span class="text-[11px] text-muted">สร้างงานตรวจใหญ่รอบครึ่งปี (มิ.ย. & ธ.ค.)</span>
                     </div>
                 </label>
 
                 <label class="card flex items-center gap-2 p-3 cursor-pointer hover:border-indigo-400">
                     <input type="checkbox" name="freq_annual" checked class="w-4 h-4 text-indigo-600">
                     <div>
-                        <span class="font-bold text-slate-900 block">🏆 เช็คบำรุงใหญ่ประจำปี (Annual Maintenance - F-EN-15)</span>
-                        <span class="text-[11px] text-slate-500">สร้างงาน Overhaul บำรุงรักษาใหญ่ปลายปี</span>
+                        <span class="font-bold text-primary block">🏆 เช็คบำรุงใหญ่ประจำปี (Annual Maintenance - F-EN-15)</span>
+                        <span class="text-[11px] text-muted">สร้างงาน Overhaul บำรุงรักษาใหญ่ปลายปี</span>
                     </div>
                 </label>
             </div>
@@ -216,7 +216,7 @@ renderHeader();
         <!-- Assignee & Template -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ช่างผู้รับผิดชอบ (Assigned Technician)</label>
+                <label class="font-bold text-secondary block mb-1">ช่างผู้รับผิดชอบ (Assigned Technician)</label>
                 <select name="assigned_to" class="input input-bordered w-full">
                     <?php foreach ($techs as $t): ?>
                     <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['full_name']) ?></option>
@@ -225,7 +225,7 @@ renderHeader();
             </div>
 
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ชุดเทมเพลตเช็คชีท ISO (Checksheet Template)</label>
+                <label class="font-bold text-secondary block mb-1">ชุดเทมเพลตเช็คชีท ISO (Checksheet Template)</label>
                 <select name="template_id" class="input input-bordered w-full">
                     <?php foreach ($templates as $tmpl): ?>
                     <option value="<?= $tmpl['id'] ?>"><?= htmlspecialchars($tmpl['code']) ?> - <?= htmlspecialchars($tmpl['name']) ?></option>

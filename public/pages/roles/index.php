@@ -25,8 +25,8 @@ $rows = $stmt->fetchAll();
 <div class="space-y-4">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">จัดการบทบาทผู้ใช้</h1>
-            <p class="mt-1 text-sm text-gray-500">กำหนดบทบาทและสิทธิ์การใช้งานระบบ</p>
+            <h1 class="text-2xl font-bold text-primary">จัดการบทบาทผู้ใช้</h1>
+            <p class="mt-1 text-sm text-muted">กำหนดบทบาทและสิทธิ์การใช้งานระบบ</p>
         </div>
         <a href="create.php" class="btn-primary">+ เพิ่มบทบาท</a>
     </div>
@@ -44,29 +44,29 @@ $rows = $stmt->fetchAll();
 
     <div class="card overflow-hidden">
         <table class="data-table cmms-stack-table">
-            <thead class="bg-gray-50">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อบทบาท</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">คำอธิบาย</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จำนวนผู้ใช้</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สร้างเมื่อ</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">#</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ชื่อบทบาท</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">คำอธิบาย</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จำนวนผู้ใช้</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">สร้างเมื่อ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จัดการ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="divide-y divide-line">
                 <?php foreach ($rows as $r): ?>
-                <tr class="hover:bg-gray-50">
-                    <td data-label="#" class="px-4 py-3 text-sm text-gray-500"><?= $r['id'] ?></td>
-                    <td data-label="ชื่อบทบาท" class="px-4 py-3 text-sm font-semibold text-gray-900"><?= htmlspecialchars($r['name']) ?></td>
-                    <td data-label="คำอธิบาย" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description'] ?? '-') ?></td>
+                <tr class="hover:bg-subtle">
+                    <td data-label="#" class="px-4 py-3 text-sm text-muted"><?= $r['id'] ?></td>
+                    <td data-label="ชื่อบทบาท" class="px-4 py-3 text-sm font-semibold text-primary"><?= htmlspecialchars($r['name']) ?></td>
+                    <td data-label="คำอธิบาย" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['description'] ?? '-') ?></td>
                     <td data-label="จำนวนผู้ใช้" class="px-4 py-3 text-sm">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            <?= $r['user_count'] > 0 ? 'badge badge-info' : 'bg-gray-100 text-gray-600' ?>">
+                            <?= $r['user_count'] > 0 ? 'badge badge-info' : 'bg-muted text-secondary' ?>">
                             <?= $r['user_count'] ?> คน
                         </span>
                     </td>
-                    <td data-label="สร้างเมื่อ" class="px-4 py-3 text-sm text-gray-500"><?= htmlspecialchars(substr($r['created_at'], 0, 10)) ?></td>
+                    <td data-label="สร้างเมื่อ" class="px-4 py-3 text-sm text-muted"><?= htmlspecialchars(substr($r['created_at'], 0, 10)) ?></td>
                     <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2">
                         <a href="edit.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a>
                         <?php if ($r['user_count'] == 0): ?>
@@ -74,7 +74,7 @@ $rows = $stmt->fetchAll();
                             class="text-red-600 hover:text-red-700"
                             onclick="return confirm('ลบบทบาท \"<?= htmlspecialchars($r['name']) ?>\" ใช่หรือไม่?')">ลบ</a>
                         <?php else: ?>
-                        <span class="text-gray-400 cursor-not-allowed" title="ไม่สามารถลบได้ เนื่องจากมีผู้ใช้งานอยู่">ลบ</span>
+                        <span class="text-muted cursor-not-allowed" title="ไม่สามารถลบได้ เนื่องจากมีผู้ใช้งานอยู่">ลบ</span>
                         <?php endif; ?>
                     </td>
                 </tr>

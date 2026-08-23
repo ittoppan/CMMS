@@ -88,13 +88,13 @@ renderHeader();
                 <a href="index.php" class="text-xs text-indigo-600 font-bold hover:underline">← ทะเบียนทรัพย์สิน</a>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Machine BOM Configurator</span>
             </div>
-            <h1 class="text-2xl font-black text-slate-900 mt-1">⚙️ ระบบกำหนดและจัดการอะไหล่ประจำเครื่อง (Machine BOM)</h1>
-            <p class="text-xs text-slate-500 mt-0.5">กำหนดโครงสร้างอะไหล่มาตรฐาน (Bill of Materials) เพื่อให้ช่างเห็นและขอเบิกได้รวดเร็วขณะซ่อมงาน</p>
+            <h1 class="text-2xl font-black text-primary mt-1">⚙️ ระบบกำหนดและจัดการอะไหล่ประจำเครื่อง (Machine BOM)</h1>
+            <p class="text-xs text-muted mt-0.5">กำหนดโครงสร้างอะไหล่มาตรฐาน (Bill of Materials) เพื่อให้ช่างเห็นและขอเบิกได้รวดเร็วขณะซ่อมงาน</p>
         </div>
         
         <!-- Machine Selector Dropdown -->
-        <form method="GET" class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-            <label class="text-xs font-bold text-slate-700">เลือกเครื่องจักร:</label>
+        <form method="GET" class="flex items-center gap-2 bg-subtle p-2 rounded-xl border border-line">
+            <label class="text-xs font-bold text-secondary">เลือกเครื่องจักร:</label>
             <select name="asset_id" onchange="this.form.submit()" class="input input-bordered w-full font-bold text-xs cursor-pointer">
                 <?php foreach ($assets as $a): ?>
                 <option value="<?= $a['id'] ?>" <?= $a['id'] === $assetId ? 'selected' : '' ?>>
@@ -142,7 +142,7 @@ renderHeader();
         
         <!-- Add Spare to BOM Form -->
         <div class="card cmms-card p-5">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                 <span>➕ เพิ่มผูกอะไหล่ประจำเครื่องนี้</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs">BOM Setup</span>
             </h3>
@@ -151,7 +151,7 @@ renderHeader();
                 <input type="hidden" name="add_bom_item" value="1">
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">เลือกรายการอะไหล่ (Sage 300 / คลังเก่า)</label>
+                    <label class="font-bold text-secondary block mb-1">เลือกรายการอะไหล่ (Sage 300 / คลังเก่า)</label>
                     <select name="spare_part_id" required class="input input-bordered w-full font-mono">
                         <option value="">-- ค้นหาและเลือกรายการอะไหล่ --</option>
                         <?php foreach ($allSpares as $sp): ?>
@@ -163,12 +163,12 @@ renderHeader();
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">จำนวนที่ใช้มาตรฐานต่อเครื่อง (Default Qty)</label>
+                    <label class="font-bold text-secondary block mb-1">จำนวนที่ใช้มาตรฐานต่อเครื่อง (Default Qty)</label>
                     <input type="number" step="0.01" min="0.01" name="default_qty" required value="1" class="input input-bordered w-full font-bold text-sm">
                 </div>
 
                 <div>
-                    <label class="font-bold text-slate-700 block mb-1">หมายเหตุ / รอบเปลี่ยนตามแผน (Remarks)</label>
+                    <label class="font-bold text-secondary block mb-1">หมายเหตุ / รอบเปลี่ยนตามแผน (Remarks)</label>
                     <input type="text" name="remarks" placeholder="เช่น อะไหล่เปลี่ยนประจำทุก 6 เดือน (Form F-EN-14)" class="input input-bordered w-full">
                 </div>
 
@@ -180,14 +180,14 @@ renderHeader();
 
         <!-- BOM Items Table -->
         <div class="lg:col-span-2 card overflow-hidden space-y-3">
-            <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center">
+            <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
                 <span>📋 ตารางโครงสร้างอะไหล่มาตรฐานประจำเครื่อง (Bill of Materials List)</span>
                 <span class="text-xs text-indigo-600 font-bold">รวม <?= count($bomItems) ?> รายการ</span>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="data-table cmms-stack-table text-sm">
-                    <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                    <thead class="bg-subtle text-muted uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">รหัสอะไหล่</th>
                             <th class="px-4 py-3 text-left">ชื่อรายการอะไหล่</th>
@@ -197,28 +197,28 @@ renderHeader();
                             <th class="px-4 py-3 text-center">ลบออก</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($bomItems as $b): 
                             $hasSage = !empty($b['sage_item_no']);
                         ?>
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-subtle">
                             <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs">
                                 <?= htmlspecialchars($b['spare_code']) ?>
                             </td>
-                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900">
+                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-primary">
                                 <?= htmlspecialchars($b['spare_name']) ?>
                                 <?php if (!empty($b['remarks'])): ?>
-                                <span class="text-xs text-slate-400 block font-normal"><?= htmlspecialchars($b['remarks']) ?></span>
+                                <span class="text-xs text-muted block font-normal"><?= htmlspecialchars($b['remarks']) ?></span>
                                 <?php endif; ?>
                             </td>
                             <td data-label="รหัส Sage 300" class="px-4 py-3 text-center">
                                 <?php if ($hasSage): ?>
                                 <span class="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200"><?= htmlspecialchars($b['sage_item_no']) ?></span>
                                 <?php else: ?>
-                                <span class="text-slate-400 text-xs italic">คลังเก่า</span>
+                                <span class="text-muted text-xs italic">คลังเก่า</span>
                                 <?php endif; ?>
                             </td>
-                            <td data-label="จำนวนมาตรฐาน" class="px-4 py-3 text-center font-bold text-slate-800">
+                            <td data-label="จำนวนมาตรฐาน" class="px-4 py-3 text-center font-bold text-primary">
                                 <?= number_format($b['default_qty'], 2) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?>
                             </td>
                             <td data-label="สต็อกปัจจุบัน" class="px-4 py-3 text-center font-bold text-emerald-600">

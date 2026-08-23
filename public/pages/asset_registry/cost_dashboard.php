@@ -42,7 +42,7 @@ renderHeader();
             <a href="index.php" class="h-9 px-3.5 bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-xs font-semibold inline-flex items-center gap-1.5 transition-colors">← ทะเบียนครุภัณฑ์</a>
             <a href="cost_dashboard.php?month=<?= $prevM ?>" class="h-9 w-9 items-center justify-center bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-sm font-bold inline-flex">‹</a>
             <form method="GET" class="flex items-center gap-1">
-                <input type="month" name="month" value="<?= $month ?>" class="h-9 px-2 rounded-md border border-border bg-white dark:bg-slate-900 text-xs font-semibold">
+                <input type="month" name="month" value="<?= $month ?>" class="h-9 px-2 rounded-md border border-border bg-white  text-xs font-semibold">
                 <button class="h-9 px-3 bg-accent text-white rounded-md text-xs font-bold">ดู</button>
             </form>
             <a href="cost_dashboard.php?month=<?= $nextM ?>" class="h-9 w-9 items-center justify-center bg-muted hover:bg-border/30 text-primary border border-border rounded-md text-sm font-bold inline-flex">›</a>

@@ -192,33 +192,33 @@ renderHeader();
                 <div class="border-b pb-3 flex justify-between items-center">
                     <div>
                         <span class="font-mono text-xs font-bold text-indigo-600"><?= htmlspecialchars($r['asset_code'] ?? 'MCH-SYS') ?></span>
-                        <h2 class="text-xl font-extrabold text-slate-900"><?= htmlspecialchars($r['asset_name'] ?? 'ไม่ระบุเครื่องจักร') ?></h2>
+                        <h2 class="text-xl font-extrabold text-primary"><?= htmlspecialchars($r['asset_name'] ?? 'ไม่ระบุเครื่องจักร') ?></h2>
                     </div>
-                    <span class="text-xs text-slate-500 font-bold">แผนก: <?= htmlspecialchars($r['department_name'] ?? '-') ?></span>
+                    <span class="text-xs text-muted font-bold">แผนก: <?= htmlspecialchars($r['department_name'] ?? '-') ?></span>
                 </div>
 
                 <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase">อาการเสีย / หัวข้อปัญหา</h3>
-                    <p class="text-base font-bold text-slate-900 mt-0.5"><?= htmlspecialchars($r['title']) ?></p>
+                    <h3 class="text-xs font-bold text-muted uppercase">อาการเสีย / หัวข้อปัญหา</h3>
+                    <p class="text-base font-bold text-primary mt-0.5"><?= htmlspecialchars($r['title']) ?></p>
                 </div>
 
                 <?php if ($r['description']): ?>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase">รายละเอียดอาการเพิ่มเติม</h3>
-                    <p class="text-sm text-slate-700 mt-0.5 bg-slate-50 p-3 rounded-lg border border-slate-100"><?= nl2br(htmlspecialchars($r['description'])) ?></p>
+                    <h3 class="text-xs font-bold text-muted uppercase">รายละเอียดอาการเพิ่มเติม</h3>
+                    <p class="text-sm text-secondary mt-0.5 bg-subtle p-3 rounded-lg border border-line"><?= nl2br(htmlspecialchars($r['description'])) ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($attachments)): ?>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-500 uppercase">📸 รูปถ่ายหน้างาน (ก่อน / หลังซ่อม)</h3>
+                    <h3 class="text-xs font-bold text-muted uppercase">📸 รูปถ่ายหน้างาน (ก่อน / หลังซ่อม)</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
                         <?php foreach ($attachments as $att):
                             $aPath = htmlspecialchars(ltrim($att['file_path'], '/'));
                             $aLabel = $att['category'] === 'after_image' ? 'หลังซ่อม' : ($att['category'] === 'failure_image' ? 'ก่อนซ่อม' : 'แนบ');
                             $aColor = $att['category'] === 'after_image' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600';
                         ?>
-                        <a href="/<?= $aPath ?>" target="_blank" class="group relative rounded-xl overflow-hidden border border-slate-200">
+                        <a href="/<?= $aPath ?>" target="_blank" class="group relative rounded-xl overflow-hidden border border-line">
                             <img src="/<?= $aPath ?>" alt="<?= htmlspecialchars($att['file_name']) ?>" class="w-full h-28 object-cover group-hover:scale-105 transition-transform" loading="lazy">
                             <span class="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full <?= $aColor ?>"><?= $aLabel ?></span>
                         </a>
@@ -231,7 +231,7 @@ renderHeader();
             <!-- Machine BOM Fast Spares List Preview -->
             <div class="card cmms-card p-5 space-y-3">
                 <div class="flex justify-between items-center border-b pb-2">
-                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <h3 class="font-bold text-primary text-sm flex items-center gap-2">
                         <span>⚙️ รายการอะไหล่มาตรฐานประจำเครื่องนี้ (Machine BOM Catalog)</span>
                         <span class="badge bg-indigo-100 text-indigo-800 text-[10px] font-bold"><?= count($bomSpares) ?> รายการ</span>
                     </h3>
@@ -240,11 +240,11 @@ renderHeader();
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <?php foreach ($bomSpares as $b): ?>
-                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
+                    <div class="p-3 bg-subtle rounded-lg border border-line flex justify-between items-center">
                         <div>
                             <span class="font-mono text-[10px] font-bold text-indigo-600"><?= htmlspecialchars($b['code']) ?></span>
-                            <span class="font-bold text-slate-900 block"><?= htmlspecialchars($b['name']) ?></span>
-                            <span class="text-[10px] text-slate-400">คงเหลือ: <?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></span>
+                            <span class="font-bold text-primary block"><?= htmlspecialchars($b['name']) ?></span>
+                            <span class="text-[10px] text-muted">คงเหลือ: <?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></span>
                         </div>
                         <button onclick="quickSelectBom(<?= $b['spare_part_id'] ?>, '<?= htmlspecialchars($b['name'], ENT_QUOTES) ?>')" class="btn btn-secondary btn-sm text-indigo-600 font-bold text-[11px]">
                             + เบิกชิ้นนี้
@@ -252,7 +252,7 @@ renderHeader();
                     </div>
                     <?php endforeach; ?>
                     <?php if (empty($bomSpares)): ?>
-                    <div class="col-span-2 text-center py-4 text-slate-400">ยังไม่ได้ตั้งค่าอะไหล่มาตรฐานประจำเครื่องนี้ (สามารถเลือกค้นหาเบิกอะไหล่ทั่วไปได้)</div>
+                    <div class="col-span-2 text-center py-4 text-muted">ยังไม่ได้ตั้งค่าอะไหล่มาตรฐานประจำเครื่องนี้ (สามารถเลือกค้นหาเบิกอะไหล่ทั่วไปได้)</div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -260,16 +260,16 @@ renderHeader();
             <!-- Existing Spare Parts Used Table -->
             <?php if ($spareParts): ?>
             <div class="card cmms-card p-6">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">รายการอะไหล่ที่เบิกใช้ในงานนี้</h2>
+                <h2 class="text-lg font-bold text-primary mb-4">รายการอะไหล่ที่เบิกใช้ในงานนี้</h2>
                 <table class="data-table cmms-stack-table text-sm">
-                    <thead class="bg-slate-50 text-xs text-slate-500 uppercase font-bold">
+                    <thead class="bg-subtle text-xs text-muted uppercase font-bold">
                         <tr><th class="text-left py-2 px-3">รหัส</th><th class="text-left py-2 px-3">ชื่ออะไหล่</th><th class="text-right py-2 px-3">จำนวน</th><th class="text-right py-2 px-3">ราคา/หน่วย</th></tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($spareParts as $sp): ?>
                         <tr>
                             <td data-label="รหัส" class="py-2 px-3 font-mono font-bold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                            <td data-label="ชื่ออะไหล่" class="py-2 px-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
+                            <td data-label="ชื่ออะไหล่" class="py-2 px-3 font-bold text-primary"><?= htmlspecialchars($sp['name']) ?></td>
                             <td data-label="จำนวน" class="py-2 px-3 text-right font-bold"><?= htmlspecialchars($sp['quantity_used']) ?></td>
                             <td data-label="ราคา/หน่วย" class="py-2 px-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price']??0,2) ?></td>
                         </tr>
@@ -283,7 +283,7 @@ renderHeader();
         <!-- Sidebar Actions & Info -->
         <div class="space-y-6">
             <div class="card cmms-card p-6">
-                <h2 class="text-base font-extrabold text-slate-900 mb-4 border-b pb-2">เปลี่ยนสถานะงานซ่อม</h2>
+                <h2 class="text-base font-extrabold text-primary mb-4 border-b pb-2">เปลี่ยนสถานะงานซ่อม</h2>
                 <div class="space-y-2">
                     <?php $actions = $nextStatusMap[$r['status']] ?? []; ?>
                     <?php if ($actions): ?>
@@ -297,7 +297,7 @@ renderHeader();
                     </form>
                     <?php endforeach; ?>
                     <?php else: ?>
-                    <p class="text-xs text-slate-400">งานอยู่ในสถานะสิ้นสุดแล้ว</p>
+                    <p class="text-xs text-muted">งานอยู่ในสถานะสิ้นสุดแล้ว</p>
                     <?php endif; ?>
                 </div>
             </div>
@@ -313,9 +313,9 @@ renderHeader();
         <div class="flex items-center justify-between border-b pb-3">
             <div>
                 <span class="badge bg-indigo-100 text-indigo-800 text-xs font-bold">Smart Machine BOM Requisition</span>
-                <h3 class="font-black text-slate-900 text-lg mt-0.5">📦 ขอเบิกอะไหล่ซ่อมเครื่อง: <?= htmlspecialchars($r['asset_name'] ?? 'เครื่องจักร') ?></h3>
+                <h3 class="font-black text-primary text-lg mt-0.5">📦 ขอเบิกอะไหล่ซ่อมเครื่อง: <?= htmlspecialchars($r['asset_name'] ?? 'เครื่องจักร') ?></h3>
             </div>
-            <button onclick="closeModal('smart-req-modal')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">✕</button>
+            <button onclick="closeModal('smart-req-modal')" class="text-muted hover:text-secondary font-bold text-xl">✕</button>
         </div>
 
         <!-- 2 Tab Selector -->
@@ -323,7 +323,7 @@ renderHeader();
             <button id="tab-btn-bom" onclick="switchReqTab('bom')" class="px-4 py-2 border-b-2 border-indigo-600 text-indigo-600">
                 ⚙️ 1. อะไหล่แนะนำประจำเครื่องนี้ (Machine BOM)
             </button>
-            <button id="tab-btn-all" onclick="switchReqTab('all')" class="px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700">
+            <button id="tab-btn-all" onclick="switchReqTab('all')" class="px-4 py-2 border-b-2 border-transparent text-muted hover:text-secondary">
                 🔍 2. ค้นหาอะไหล่ทั้งหมดในคลัง (Search All Spares)
             </button>
         </div>
@@ -334,30 +334,30 @@ renderHeader();
 
             <!-- TAB 1: Machine BOM List -->
             <div id="tab-content-bom" class="space-y-3">
-                <p class="text-slate-500">รายการอะไหล่มาตรฐานที่ผูกไว้กับเครื่องจักร <strong><?= htmlspecialchars($r['asset_code'] ?? '') ?></strong>:</p>
+                <p class="text-muted">รายการอะไหล่มาตรฐานที่ผูกไว้กับเครื่องจักร <strong><?= htmlspecialchars($r['asset_code'] ?? '') ?></strong>:</p>
                 <div class="max-h-60 overflow-y-auto space-y-2 pr-1">
                     <?php foreach ($bomSpares as $b): ?>
-                    <div onclick="selectModalSpare(<?= $b['spare_part_id'] ?>, '<?= htmlspecialchars($b['name'], ENT_QUOTES) ?>')" class="p-3 bg-slate-50 hover:bg-indigo-50 border rounded-xl cursor-pointer transition-all flex items-center justify-between">
+                    <div onclick="selectModalSpare(<?= $b['spare_part_id'] ?>, '<?= htmlspecialchars($b['name'], ENT_QUOTES) ?>')" class="p-3 bg-subtle hover:bg-indigo-50 border rounded-xl cursor-pointer transition-all flex items-center justify-between">
                         <div>
                             <span class="font-mono text-xs font-extrabold text-indigo-600"><?= htmlspecialchars($b['code']) ?></span>
-                            <span class="font-bold text-slate-900 block"><?= htmlspecialchars($b['name']) ?></span>
+                            <span class="font-bold text-primary block"><?= htmlspecialchars($b['name']) ?></span>
                             <span class="text-[10px] text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded font-mono">Sage: <?= htmlspecialchars($b['sage_item_no'] ?? '-') ?></span>
                         </div>
                         <div class="text-right">
-                            <span class="font-bold text-slate-800 block">คงเหลือ: <?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></span>
+                            <span class="font-bold text-primary block">คงเหลือ: <?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></span>
                             <span class="text-xs text-indigo-600 font-bold">กดเลือกชิ้นนี้ →</span>
                         </div>
                     </div>
                     <?php endforeach; ?>
                     <?php if (empty($bomSpares)): ?>
-                    <div class="text-center py-6 text-slate-400">ไม่มีรายการอะไหล่ประจำเครื่องนี้ กรุณากดแท็บที่ 2 เพื่อค้นหาอะไหล่อื่นๆ</div>
+                    <div class="text-center py-6 text-muted">ไม่มีรายการอะไหล่ประจำเครื่องนี้ กรุณากดแท็บที่ 2 เพื่อค้นหาอะไหล่อื่นๆ</div>
                     <?php endif; ?>
                 </div>
             </div>
 
             <!-- TAB 2: Search All Spares -->
             <div id="tab-content-all" style="display:none;" class="space-y-3">
-                <p class="text-slate-500">เลือกรายการอะไหล่อื่นๆ จากทั้งคลัง Sage 300 และคลังเก่า:</p>
+                <p class="text-muted">เลือกรายการอะไหล่อื่นๆ จากทั้งคลัง Sage 300 และคลังเก่า:</p>
                 <select id="modal-select-all" onchange="selectModalSpare(this.value, this.options[this.selectedIndex].text)" class="input input-bordered w-full font-mono">
                     <option value="">-- พิมพ์ค้นหาชื่อง่ายๆ หรือรหัสอะไหล่ --</option>
                     <?php foreach ($allSpares as $sp): ?>
@@ -374,7 +374,7 @@ renderHeader();
                     อะไหล่ที่เลือก: <span id="modal-selected-name" class="text-purple-700 font-extrabold">(ยังไม่ได้เลือกรายการ)</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <label class="font-bold text-slate-700">จำนวนที่ขอเบิก:</label>
+                    <label class="font-bold text-secondary">จำนวนที่ขอเบิก:</label>
                     <input type="number" step="0.01" min="0.01" name="qty" required value="1" class="input input-bordered w-full w-32 font-bold text-sm">
                 </div>
             </div>

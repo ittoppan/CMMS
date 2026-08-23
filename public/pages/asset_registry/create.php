@@ -71,7 +71,7 @@ renderHeader();
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปทะเบียนทรัพย์สิน</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มทรัพย์สินใหม่</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">เพิ่มทรัพย์สินใหม่</h1>
     </div>
 
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
@@ -79,23 +79,23 @@ renderHeader();
 
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-6">
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ข้อมูลพื้นฐาน</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลพื้นฐาน</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">รหัสทรัพย์สิน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">รหัสทรัพย์สิน <span class="text-red-500">*</span></label>
                 <input type="text" name="code" required class="input input-bordered w-full mt-1"
                     value="AST-<?= date('Ymd') ?>-">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ชื่อทรัพย์สิน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ชื่อทรัพย์สิน <span class="text-red-500">*</span></label>
                 <input type="text" name="name" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">หมวดหมู่</label>
+                <label class="block text-sm font-medium text-secondary">หมวดหมู่</label>
                 <input type="text" name="category" class="input input-bordered w-full mt-1" placeholder="Machine, Instrument, Vehicle...">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                <label class="block text-sm font-medium text-secondary">สถานะ</label>
                 <select name="status" class="input input-bordered w-full mt-1">
                     <option value="active">Active - ใช้งานอยู่</option>
                     <option value="inactive">Inactive - ไม่ได้ใช้งาน</option>
@@ -104,15 +104,15 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Barcode</label>
+                <label class="block text-sm font-medium text-secondary">Barcode</label>
                 <input type="text" name="barcode" class="input input-bordered w-full mt-1" placeholder="Barcode หรือ QR code value">
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ผู้รับผิดชอบ / ที่ตั้ง</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ผู้รับผิดชอบ / ที่ตั้ง</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">ผู้รับผิดชอบหลัก</label>
+                <label class="block text-sm font-medium text-secondary">ผู้รับผิดชอบหลัก</label>
                 <select name="responsible_user_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($users as $u): ?>
@@ -121,7 +121,7 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนก (จากระบบ)</label>
+                <label class="block text-sm font-medium text-secondary">แผนก (จากระบบ)</label>
                 <select name="department_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($departments as $d): ?>
@@ -130,7 +130,7 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานที่ (จากระบบ)</label>
+                <label class="block text-sm font-medium text-secondary">สถานที่ (จากระบบ)</label>
                 <select name="location_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($locations as $loc): ?>
@@ -139,7 +139,7 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">โซนงาน</label>
+                <label class="block text-sm font-medium text-secondary">โซนงาน</label>
                 <select name="work_zone_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($workZones as $wz): ?>
@@ -148,55 +148,55 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">สถานที่ (ข้อความ)</label>
+                <label class="block text-sm font-medium text-secondary">สถานที่ (ข้อความ)</label>
                 <input type="text" name="location" class="input input-bordered w-full mt-1" placeholder="เช่น อาคาร A ชั้น 2">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">แผนก (ข้อความ)</label>
+                <label class="block text-sm font-medium text-secondary">แผนก (ข้อความ)</label>
                 <input type="text" name="department" class="input input-bordered w-full mt-1" placeholder="เช่น แผนกช่าง">
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ข้อมูลทางเทคนิค</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ข้อมูลทางเทคนิค</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">ผู้ผลิต</label>
+                <label class="block text-sm font-medium text-secondary">ผู้ผลิต</label>
                 <input type="text" name="manufacturer" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">รุ่น</label>
+                <label class="block text-sm font-medium text-secondary">รุ่น</label>
                 <input type="text" name="model" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Serial Number</label>
+                <label class="block text-sm font-medium text-secondary">Serial Number</label>
                 <input type="text" name="serial_number" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">วันที่ซื้อ</label>
+                <label class="block text-sm font-medium text-secondary">วันที่ซื้อ</label>
                 <input type="date" name="purchase_date" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">หมดประกัน</label>
+                <label class="block text-sm font-medium text-secondary">หมดประกัน</label>
                 <input type="date" name="warranty_expiry" class="input input-bordered w-full mt-1">
             </div>
         </div>
 
-        <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">ไฟล์แนบ</h2>
+        <h2 class="text-lg font-semibold text-primary border-b pb-2">ไฟล์แนบ</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 font-bold text-blue-900">📸 ถ่ายภาพเครื่องจักรจากกล้อง / แนบรูปภาพทรัพย์สิน</label>
+                <label class="block text-sm font-medium text-secondary font-bold text-blue-900">📸 ถ่ายภาพเครื่องจักรจากกล้อง / แนบรูปภาพทรัพย์สิน</label>
                 <input type="file" name="image_file" accept="image/*" capture="environment" class="input input-bordered w-full mt-1">
                 <p class="text-xs text-blue-600 mt-1">กดที่กล่องเพื่อถ่ายภาพเครื่องจักรบนมือถือทันที (JPG, PNG, WebP)</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">คู่มือการใช้งาน (ไฟล์)</label>
+                <label class="block text-sm font-medium text-secondary">คู่มือการใช้งาน (ไฟล์)</label>
                 <input type="file" name="instruction_manual" accept=".pdf,.doc,.docx" class="input input-bordered w-full mt-1">
-                <p class="text-xs text-gray-400 mt-1">PDF, DOC, DOCX</p>
+                <p class="text-xs text-muted mt-1">PDF, DOC, DOCX</p>
             </div>
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700">คำอธิบาย</label>
+            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
             <textarea name="description" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
 

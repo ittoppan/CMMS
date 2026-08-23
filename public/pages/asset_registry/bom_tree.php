@@ -44,7 +44,7 @@ renderHeader();
 
         <!-- Tree View Structure Column -->
         <div class="card p-5 space-y-3">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2">🌳 โครงสร้างต้นไม้ (Asset Hierarchy Tree)</h3>
+            <h3 class="font-extrabold text-primary text-base border-b pb-2">🌳 โครงสร้างต้นไม้ (Asset Hierarchy Tree)</h3>
 
             <div class="space-y-2 text-xs font-bold">
                 <!-- Node Level 1: Machine -->
@@ -75,14 +75,14 @@ renderHeader();
 
         <!-- BOM Spares Table Column -->
         <div class="lg:col-span-2 card p-5 space-y-3">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                 <span>📦 รายการชิ้นส่วนอะไหล่ BOM (Machine Bill of Materials)</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($bomSpares) ?> รายการ</span>
             </h3>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-left border-collapse">
-                    <thead class="bg-slate-50 font-bold text-slate-700 uppercase border-b">
+                    <thead class="bg-subtle font-bold text-secondary uppercase border-b">
                         <tr>
                             <th class="p-3">รหัสอะไหล่ CMMS</th>
                             <th class="p-3">รหัส Sage 300</th>
@@ -92,13 +92,13 @@ renderHeader();
                             <th class="p-3 text-center">การจัดการ</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($bomSpares as $b): ?>
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-subtle">
                             <td class="p-3 font-mono font-bold text-indigo-700"><?= htmlspecialchars($b['code']) ?></td>
                             <td class="p-3 font-mono text-purple-700 font-bold"><?= htmlspecialchars($b['sage_item_no'] ?? '-') ?></td>
-                            <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($b['name']) ?></td>
-                            <td class="p-3 text-center font-bold text-slate-800"><?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></td>
+                            <td class="p-3 font-bold text-primary"><?= htmlspecialchars($b['name']) ?></td>
+                            <td class="p-3 text-center font-bold text-primary"><?= number_format($b['stock_qty']) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?></td>
                             <td class="p-3 text-right font-black text-indigo-700">฿<?= number_format($b['unit_price'], 2) ?></td>
                             <td class="p-3 text-center">
                                 <a href="/pages/repair/view.php?id=1" class="btn btn-primary bg-purple-700 border-purple-700 text-[11px] px-2.5 py-1 font-bold">

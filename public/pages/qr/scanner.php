@@ -22,7 +22,7 @@ renderHeader();
     <!-- Live Camera Scanner Card -->
     <div class="card p-6 shadow-lg space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
-            <span class="font-extrabold text-slate-900 text-base">กล้องสแกน QR Code (Scan Tag Code)</span>
+            <span class="font-extrabold text-primary text-base">กล้องสแกน QR Code (Scan Tag Code)</span>
             <span id="scanStatus" class="badge badge badge-success font-bold text-xs">พร้อมสแกน</span>
         </div>
 
@@ -85,11 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ).catch(err => {
         console.log("Camera access soft notice:", err);
         document.getElementById('qr-reader').innerHTML = `
-            <div class="p-8 text-center text-slate-400 font-bold space-y-2">
+            <div class="p-8 text-center text-muted font-bold space-y-2">
                 <div class="text-4xl">📷</div>
                 <p>กรุณาอนุญาตสิทธิ์การใช้งานกล้องบนมือถือ หรือพิมพ์รหัสเครื่องจักรในช่องด้านล่าง</p>
                 <div class="pt-2 flex justify-center gap-2">
-                    <input type="text" id="manualCode" placeholder="เช่น MCH-001, A-PT-01" class="px-4 py-2 border rounded-xl font-mono text-sm text-slate-900" />
+                    <input type="text" id="manualCode" placeholder="เช่น MCH-001, A-PT-01" class="px-4 py-2 border rounded-xl font-mono text-sm text-primary" />
                     <button type="button" onclick="manualSimulateScan()" class="btn btn-primary text-xs font-bold">ตกลง</button>
                 </div>
             </div>

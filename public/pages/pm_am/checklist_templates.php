@@ -30,8 +30,8 @@ renderHeader();
                 <a href="index.php" class="text-sm text-brand-600 hover:underline">&larr; กลับไปงาน PM</a>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">Touch Drag & Drop Master</span>
             </div>
-            <h1 class="mt-1 text-2xl font-extrabold text-slate-900">📋 ระบบจัดการเทมเพลตเช็คชีทเครื่องจักร (Checksheet Templates)</h1>
-            <p class="text-xs text-slate-500 mt-0.5">ลากสลับตำแหน่งการ์ดเทมเพลต (Drag & Drop Cards) เพื่อจัดลำดับความสำคัญสำหรับมือถือและแท็บเล็ต</p>
+            <h1 class="mt-1 text-2xl font-extrabold text-primary">📋 ระบบจัดการเทมเพลตเช็คชีทเครื่องจักร (Checksheet Templates)</h1>
+            <p class="text-xs text-muted mt-0.5">ลากสลับตำแหน่งการ์ดเทมเพลต (Drag & Drop Cards) เพื่อจัดลำดับความสำคัญสำหรับมือถือและแท็บเล็ต</p>
         </div>
         <div class="flex gap-2">
             <button onclick="document.getElementById('new-template-modal').style.display='flex'" class="btn btn-primary text-xs">
@@ -61,20 +61,20 @@ renderHeader();
             <div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="text-slate-400 hover:text-indigo-600 font-bold text-base cursor-grab">⋮⋮</span>
+                        <span class="text-muted hover:text-indigo-600 font-bold text-base cursor-grab">⋮⋮</span>
                         <span class="font-mono text-xs font-extrabold text-indigo-600"><?= htmlspecialchars($t['code']) ?></span>
                     </div>
                     <span class="cmms-banner info badge text-xs font-bold"><?= htmlspecialchars($t['category'] ?? 'General') ?></span>
                 </div>
-                <h3 class="font-bold text-slate-900 text-base mt-2"><?= htmlspecialchars($t['name']) ?></h3>
-                <p class="text-xs text-slate-500 mt-1"><?= htmlspecialchars($t['description'] ?? 'ไม่มีคำอธิบายเพิ่มเติม') ?></p>
+                <h3 class="font-bold text-primary text-base mt-2"><?= htmlspecialchars($t['name']) ?></h3>
+                <p class="text-xs text-muted mt-1"><?= htmlspecialchars($t['description'] ?? 'ไม่มีคำอธิบายเพิ่มเติม') ?></p>
             </div>
             
-            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-                <span class="text-slate-500 font-medium">รวม <strong><?= $itemCount ?></strong> รายการ</span>
+            <div class="mt-4 pt-3 border-t border-line flex items-center justify-between gap-2 text-xs">
+                <span class="text-muted font-medium">รวม <strong><?= $itemCount ?></strong> รายการ</span>
                 <div class="flex gap-1.5">
                     <a href="checklist_items.php?template_id=<?= $t['id'] ?>" class="btn btn-primary btn-sm text-[11px] font-bold">🖐️ ออกแบบ Drag & Drop</a>
-                    <a href="checksheet.php?id=1" class="btn btn-secondary btn-sm text-[11px] text-slate-700 font-bold">🖨️ พิมพ์ ISO</a>
+                    <a href="checksheet.php?id=1" class="btn btn-secondary btn-sm text-[11px] text-secondary font-bold">🖨️ พิมพ์ ISO</a>
                 </div>
             </div>
         </div>
@@ -85,19 +85,19 @@ renderHeader();
 <!-- Modal: New Template -->
 <div id="new-template-modal" style="display:none;" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="card shadow-2xl w-full max-w-md p-6 space-y-4">
-        <h3 class="font-bold text-slate-900 text-lg border-b pb-2">➕ สร้างเทมเพลตเช็คชีทใหม่</h3>
+        <h3 class="font-bold text-primary text-lg border-b pb-2">➕ สร้างเทมเพลตเช็คชีทใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="create_template" value="1">
             <div>
-                <label class="font-bold text-slate-700 block mb-1">รหัสเทมเพลต (Template Code)</label>
+                <label class="font-bold text-secondary block mb-1">รหัสเทมเพลต (Template Code)</label>
                 <input type="text" name="code" required placeholder="เช่น CHK-PUMP-01" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">ชื่อเทมเพลตเช็คชีท</label>
+                <label class="font-bold text-secondary block mb-1">ชื่อเทมเพลตเช็คชีท</label>
                 <input type="text" name="name" required placeholder="เช่น เช็คชีทปั๊มน้ำและระบบหล่อเย็นประจำเดือน" class="input input-bordered w-full">
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">หมวดหมู่</label>
+                <label class="font-bold text-secondary block mb-1">หมวดหมู่</label>
                 <select name="category" class="input input-bordered w-full">
                     <option value="Mechanical">Mechanical (งานเครื่องกล)</option>
                     <option value="Electrical">Electrical (งานระบบไฟฟ้า)</option>
@@ -106,7 +106,7 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="font-bold text-slate-700 block mb-1">คำอธิบายรายละเอียด</label>
+                <label class="font-bold text-secondary block mb-1">คำอธิบายรายละเอียด</label>
                 <textarea name="description" rows="2" class="input input-bordered w-full" placeholder="รายละเอียดเกณฑ์การตรวจ..."></textarea>
             </div>
 

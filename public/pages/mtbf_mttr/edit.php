@@ -36,7 +36,7 @@ function sel($a,$b){return $a===$b?'selected':'';} ?>
             <div><label class="block text-sm font-medium">จำนวนครั้งเสีย</label><input type="number" name="total_failures" min="0" value="<?=$row['total_failures']?>" class="input input-bordered w-full mt-1"></div>
             <div><label class="block text-sm font-medium">Downtime (นาที)</label><input type="number" name="total_downtime_minutes" min="0" value="<?=$row['total_downtime_minutes']?>" class="input input-bordered w-full mt-1"></div>
         </div>
-        <div class="bg-gray-50 rounded-md p-4 text-sm text-gray-600">MTBF = ชม.ทำงาน/จำนวนครั้งเสีย, MTTR = นาที Downtime/จำนวนครั้งเสีย</div>
+        <div class="bg-subtle rounded-md p-4 text-sm text-secondary">MTBF = ชม.ทำงาน/จำนวนครั้งเสีย, MTTR = นาที Downtime/จำนวนครั้งเสีย</div>
         <div class="flex gap-3"><button type="submit" class="btn-primary">บันทึก</button><a href="index.php" class="btn-secondary">ยกเลิก</a></div>
     </form>
 </div>

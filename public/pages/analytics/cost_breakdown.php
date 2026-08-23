@@ -31,7 +31,7 @@ renderHeader();
 
     <!-- Cost Breakdown Table -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 โครงสร้างต้นทุนซ่อมบำรุงรวมจำแนกรายใบงาน (Detailed Work Order Cost Breakdown Table)</span>
             <span class="badge badge badge-success font-bold text-xs"><?= count($repairs) ?> รายการ</span>
         </h3>
@@ -48,7 +48,7 @@ renderHeader();
                         <th class="p-3 text-right font-black text-amber-300">รวมต้นทุนซ่อมทั้งหมด</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200">
+                <tbody class="divide-y divide-line">
                     <?php foreach ($repairs as $r): ?>
                     <?php
                         $laborCost = (float)($r['cost_labor'] ?: 450.00);
@@ -56,10 +56,10 @@ renderHeader();
                         $downtimeLoss = (float)($r['downtime_minutes'] * 150); // 150 THB/min Downtime Loss Rate
                         $totalCost = $laborCost + $partsCost + $downtimeLoss;
                     ?>
-                    <tr class="hover:bg-slate-50">
+                    <tr class="hover:bg-subtle">
                         <td class="p-3 font-mono font-bold text-indigo-700 text-sm"><?= htmlspecialchars($r['work_order_no'] ?? 'WO') ?></td>
-                        <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($r['asset_code']) ?> — <?= htmlspecialchars($r['asset_name']) ?></td>
-                        <td class="p-3 text-right font-bold text-slate-700">฿<?= number_format($laborCost, 2) ?></td>
+                        <td class="p-3 font-bold text-primary"><?= htmlspecialchars($r['asset_code']) ?> — <?= htmlspecialchars($r['asset_name']) ?></td>
+                        <td class="p-3 text-right font-bold text-secondary">฿<?= number_format($laborCost, 2) ?></td>
                         <td class="p-3 text-right font-bold text-purple-700">฿<?= number_format($partsCost, 2) ?></td>
                         <td class="cmms-banner error p-3 text-right font-bold /50">฿<?= number_format($downtimeLoss, 2) ?></td>
                         <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/50 text-sm">฿<?= number_format($totalCost, 2) ?></td>

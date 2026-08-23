@@ -18,7 +18,7 @@ renderHeader();
                 <i data-lucide="layers" class="w-7 h-7 text-indigo-400"></i>
                 <span>Tailwind CSS + shadcn/ui + Lucide + Recharts + TanStack Table</span>
             </h1>
-            <p class="text-xs text-slate-400 mt-1">ชุดเครื่องมือพัฒนา UI มาตรฐานระดับโลกสำหรับ CMMS-TOPPAN รองรับ Responsive, Interactive Data Table, Live Analytics และ HSL Theme Tokens</p>
+            <p class="text-xs text-muted mt-1">ชุดเครื่องมือพัฒนา UI มาตรฐานระดับโลกสำหรับ CMMS-TOPPAN รองรับ Responsive, Interactive Data Table, Live Analytics และ HSL Theme Tokens</p>
         </div>
         <div class="flex gap-2">
             <span class="badge bg-indigo-500/20 text-indigo-300 border-indigo-500/30">Tailwind CSS</span>
@@ -36,35 +36,35 @@ renderHeader();
                 <i data-lucide="palette" class="w-4 h-4"></i>
                 <span>1. Tailwind CSS</span>
             </div>
-            <p class="text-xs text-slate-500">Utility-First CSS framework กำหนด layout และ HSL variable colors</p>
+            <p class="text-xs text-muted">Utility-First CSS framework กำหนด layout และ HSL variable colors</p>
         </div>
         <div class="card p-4 space-y-2 border-l-4 border-purple-500">
             <div class="flex items-center gap-2 text-purple-600 font-black text-sm">
                 <i data-lucide="layout" class="w-4 h-4"></i>
                 <span>2. shadcn/ui</span>
             </div>
-            <p class="text-xs text-slate-500">Accessible design system primitives (`Button`, `Card`, `Badge`, `Dialog`, `Sidebar-16`)</p>
+            <p class="text-xs text-muted">Accessible design system primitives (`Button`, `Card`, `Badge`, `Dialog`, `Sidebar-16`)</p>
         </div>
         <div class="card p-4 space-y-2 border-l-4 border-emerald-500">
             <div class="flex items-center gap-2 text-emerald-600 font-black text-sm">
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                 <span>3. Lucide Icons</span>
             </div>
-            <p class="text-xs text-slate-500">ชุดไอคอน SVG คุณภาพสูง เกลี้ยงเกลา ตรงตามมาตรฐาน Shadcn UI</p>
+            <p class="text-xs text-muted">ชุดไอคอน SVG คุณภาพสูง เกลี้ยงเกลา ตรงตามมาตรฐาน Shadcn UI</p>
         </div>
         <div class="card p-4 space-y-2 border-l-4 border-cyan-500">
             <div class="flex items-center gap-2 text-cyan-600 font-black text-sm">
                 <i data-lucide="line-chart" class="w-4 h-4"></i>
                 <span>4. Recharts</span>
             </div>
-            <p class="text-xs text-slate-500">Engine แสดงผลกราฟวิเคราะห์ OEE, MTBF/MTTR และ Downtime แบบ Realtime</p>
+            <p class="text-xs text-muted">Engine แสดงผลกราฟวิเคราะห์ OEE, MTBF/MTTR และ Downtime แบบ Realtime</p>
         </div>
         <div class="card p-4 space-y-2 border-l-4 border-amber-500">
             <div class="flex items-center gap-2 text-amber-600 font-black text-sm">
                 <i data-lucide="table" class="w-4 h-4"></i>
                 <span>5. TanStack Table</span>
             </div>
-            <p class="text-xs text-slate-500">Headless table engine รองรับการ Sort, Filter, และ Pagination ข้อมูลขนาดใหญ่</p>
+            <p class="text-xs text-muted">Headless table engine รองรับการ Sort, Filter, และ Pagination ข้อมูลขนาดใหญ่</p>
         </div>
     </div>
 
@@ -72,11 +72,11 @@ renderHeader();
     <div class="card p-6 space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
             <div>
-                <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                     <i data-lucide="bar-chart-3" class="w-5 h-5 text-cyan-600"></i>
                     <span>📊 Recharts Live Demo (OEE & MTBF Performance Chart)</span>
                 </h3>
-                <p class="text-xs text-slate-500">กราฟจำลองการวิเคราะห์ประสิทธิภาพเครื่องจักรประจำเดือน</p>
+                <p class="text-xs text-muted">กราฟจำลองการวิเคราะห์ประสิทธิภาพเครื่องจักรประจำเดือน</p>
             </div>
             <span class="badge status-open">Recharts v2 Active</span>
         </div>
@@ -89,11 +89,11 @@ renderHeader();
     <div class="card p-6 space-y-4">
         <div class="flex items-center justify-between border-b pb-3">
             <div>
-                <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+                <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                     <i data-lucide="table-properties" class="w-5 h-5 text-amber-600"></i>
                     <span>📋 TanStack Table Engine Demo (Interactive Sorting & Filtering Table)</span>
                 </h3>
-                <p class="text-xs text-slate-500">คลิกที่หัวตารางเพื่อจัดเรียงข้อมูลแบบพรีเมียม (Sort by Column)</p>
+                <p class="text-xs text-muted">คลิกที่หัวตารางเพื่อจัดเรียงข้อมูลแบบพรีเมียม (Sort by Column)</p>
             </div>
             <span class="badge badge badge-warning">TanStack Table v8</span>
         </div>
@@ -112,21 +112,21 @@ renderHeader();
                 <tbody>
                     <tr>
                         <td class="font-mono font-bold text-indigo-600">EN-26-001</td>
-                        <td class="font-bold text-slate-900">Extruder Machine Line #1</td>
+                        <td class="font-bold text-primary">Extruder Machine Line #1</td>
                         <td>มอเตอร์ขับสายพานลำเลียงร้อนจัด (Overheat)</td>
                         <td class="text-center font-mono font-bold text-emerald-600">420</td>
                         <td class="text-center"><span class="badge badge badge-warning">In Progress</span></td>
                     </tr>
                     <tr>
                         <td class="font-mono font-bold text-indigo-600">EN-26-002</td>
-                        <td class="font-bold text-slate-900">Slitter Rewinder Machine B-02</td>
+                        <td class="font-bold text-primary">Slitter Rewinder Machine B-02</td>
                         <td>เปลี่ยนลูกปืนแบริ่งแกนหมุนม้วนฟิล์ม</td>
                         <td class="text-center font-mono font-bold text-emerald-600">650</td>
                         <td class="text-center"><span class="badge badge badge-success">Completed</span></td>
                     </tr>
                     <tr>
                         <td class="font-mono font-bold text-indigo-600">EN-26-003</td>
-                        <td class="font-bold text-slate-900">Gravure Printing Press #3</td>
+                        <td class="font-bold text-primary">Gravure Printing Press #3</td>
                         <td>ระบบจ่ายหมึกพิมพ์แรงดันตก (Pressure Drop)</td>
                         <td class="text-center font-mono font-bold text-rose-600">180</td>
                         <td class="text-center"><span class="badge badge-destructive">Critical</span></td>

@@ -29,18 +29,18 @@ renderHeader();
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปคู่มือ</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">อัปโหลดคู่มือ</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">อัปโหลดคู่มือ</h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" enctype="multipart/form-data" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ชื่อเอกสาร <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ชื่อเอกสาร <span class="text-red-500">*</span></label>
                 <input type="text" name="title" required class="input input-bordered w-full mt-1">
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ทรัพย์สินที่เกี่ยวข้อง</label>
+                <label class="block text-sm font-medium text-secondary">ทรัพย์สินที่เกี่ยวข้อง</label>
                 <select name="asset_id" class="input input-bordered w-full mt-1">
                     <option value="">-- ไม่ระบุ --</option>
                     <?php foreach ($assets as $a): ?>
@@ -49,24 +49,24 @@ renderHeader();
                 </select>
             </div>
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">อัปโหลดไฟล์</label>
+                <label class="block text-sm font-medium text-secondary">อัปโหลดไฟล์</label>
                 <input type="file" name="file" class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">หรือ URL ไฟล์</label>
+                <label class="block text-sm font-medium text-secondary">หรือ URL ไฟล์</label>
                 <input type="text" name="file_path" class="input input-bordered w-full mt-1" placeholder="/uploads/manuals/file.pdf">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ประเภทไฟล์</label>
+                <label class="block text-sm font-medium text-secondary">ประเภทไฟล์</label>
                 <input type="text" name="file_type" class="input input-bordered w-full mt-1" placeholder="application/pdf">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">เวอร์ชัน</label>
+                <label class="block text-sm font-medium text-secondary">เวอร์ชัน</label>
                 <input type="text" name="version" class="input input-bordered w-full mt-1" placeholder="1.0">
             </div>
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700">คำอธิบาย</label>
+            <label class="block text-sm font-medium text-secondary">คำอธิบาย</label>
             <textarea name="description" rows="2" class="input input-bordered w-full mt-1"></textarea>
         </div>
         <div class="flex gap-3">

@@ -51,7 +51,7 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
-        <div><h1 class="text-2xl font-bold text-gray-900">ติดตาม PO การสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Purchase Order Tracking</p></div>
+        <div><h1 class="text-2xl font-bold text-primary">ติดตาม PO การสอบเทียบ</h1><p class="mt-1 text-sm text-muted">Purchase Order Tracking</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปสอบเทียบ</a>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
@@ -61,11 +61,11 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
         <form method="post" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">เลขที่ PO <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-secondary">เลขที่ PO <span class="text-red-500">*</span></label>
                     <input type="text" name="po_number" value="<?= htmlspecialchars($editRow['po_number'] ?? '') ?>" required class="input input-bordered w-full mt-1" placeholder="PO-XXXX">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ผู้จำหน่าย</label>
+                    <label class="block text-sm font-medium text-secondary">ผู้จำหน่าย</label>
                     <select name="supplier_id" class="input input-bordered w-full mt-1">
                         <option value="">-- ไม่ระบุ --</option>
                         <?php foreach ($suppliers as $s): ?>
@@ -74,15 +74,15 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">วันที่ PO</label>
+                    <label class="block text-sm font-medium text-secondary">วันที่ PO</label>
                     <input type="date" name="po_date" value="<?= htmlspecialchars($editRow['po_date'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">จำนวนเงิน</label>
+                    <label class="block text-sm font-medium text-secondary">จำนวนเงิน</label>
                     <input type="number" name="amount" step="0.01" value="<?= htmlspecialchars($editRow['amount'] ?? '') ?>" class="input input-bordered w-full mt-1" placeholder="0.00">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">สถานะ</label>
+                    <label class="block text-sm font-medium text-secondary">สถานะ</label>
                     <select name="status" class="input input-bordered w-full mt-1">
                         <option value="open" <?= (isset($editRow) && $editRow['status'] === 'open') ? 'selected' : '' ?>>เปิด</option>
                         <option value="partial" <?= (isset($editRow) && $editRow['status'] === 'partial') ? 'selected' : '' ?>>บางส่วน</option>
@@ -91,7 +91,7 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">การสอบเทียบที่เกี่ยวข้อง</label>
+                    <label class="block text-sm font-medium text-secondary">การสอบเทียบที่เกี่ยวข้อง</label>
                     <select name="calibration_id" class="input input-bordered w-full mt-1">
                         <option value="">-- ไม่ระบุ --</option>
                         <?php foreach ($calHistories as $ch): ?>
@@ -100,7 +100,7 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
                     </select>
                 </div>
                 <div class="sm:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
+                    <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
                     <input type="text" name="notes" value="<?= htmlspecialchars($editRow['notes'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
             </div>
@@ -112,27 +112,27 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
     </div>
     <div class="card overflow-hidden">
         <table class="data-table cmms-stack-table">
-            <thead class="bg-gray-50">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">เลขที่ PO</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ผู้จำหน่าย</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">วันที่</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จำนวนเงิน</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">การสอบเทียบ</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">เลขที่ PO</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ผู้จำหน่าย</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">วันที่</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จำนวนเงิน</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">การสอบเทียบ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">สถานะ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จัดการ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="divide-y divide-line">
                 <?php foreach ($rows as $r): ?>
-                <tr class="hover:bg-gray-50">
-                    <td data-label="เลขที่ PO" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['po_number']) ?></td>
-                    <td data-label="ผู้จำหน่าย" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['supplier_code'] ?? '') . ' - ' . ($r['supplier_name'] ?? '-')) ?></td>
-                    <td data-label="วันที่" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['po_date'] ?? '-') ?></td>
-                    <td data-label="จำนวนเงิน" class="px-4 py-3 text-sm text-gray-600"><?= $r['amount'] ? number_format((float)$r['amount'], 2) : '-' ?></td>
-                    <td data-label="การสอบเทียบ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars(($r['asset_name'] ?? '') . ($r['calibration_date'] ? ' (' . $r['calibration_date'] . ')' : '')) ?: '-' ?></td>
+                <tr class="hover:bg-subtle">
+                    <td data-label="เลขที่ PO" class="px-4 py-3 text-sm font-medium text-primary"><?= htmlspecialchars($r['po_number']) ?></td>
+                    <td data-label="ผู้จำหน่าย" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars(($r['supplier_code'] ?? '') . ' - ' . ($r['supplier_name'] ?? '-')) ?></td>
+                    <td data-label="วันที่" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($r['po_date'] ?? '-') ?></td>
+                    <td data-label="จำนวนเงิน" class="px-4 py-3 text-sm text-secondary"><?= $r['amount'] ? number_format((float)$r['amount'], 2) : '-' ?></td>
+                    <td data-label="การสอบเทียบ" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars(($r['asset_name'] ?? '') . ($r['calibration_date'] ? ' (' . $r['calibration_date'] . ')' : '')) ?: '-' ?></td>
                     <td data-label="สถานะ" class="px-4 py-3 text-sm">
-                        <span class="badge <?= $statusBadge[$r['status']] ?? 'bg-gray-100' ?>"><?= htmlspecialchars($statusLabel[$r['status']] ?? $r['status']) ?></span>
+                        <span class="badge <?= $statusBadge[$r['status']] ?? 'bg-muted' ?>"><?= htmlspecialchars($statusLabel[$r['status']] ?? $r['status']) ?></span>
                     </td>
                     <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2">
                         <a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a>

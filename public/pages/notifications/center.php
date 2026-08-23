@@ -93,20 +93,20 @@ renderHeader();
 
     <!-- Notification List -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
             <span>📋 รายการแจ้งเตือนล่าสุด (Recent System Notifications)</span>
             <button onclick="alert('อ่านแล้วทั้งหมด')" class="text-xs text-indigo-600 font-bold hover:underline">กำจัดตัวเลขแจ้งเตือนทั้งหมด</button>
         </h3>
 
-        <div class="divide-y divide-slate-100">
+        <div class="divide-y divide-line">
             <?php foreach ($notifications as $n): ?>
             <div class="py-3 flex items-center justify-between <?= !$n['read'] ? 'bg-indigo-50/50 p-3 rounded-xl border border-indigo-100' : '' ?>">
                 <div class="space-y-1">
-                    <span class="font-bold text-slate-900 text-xs block"><?= htmlspecialchars($n['title']) ?></span>
-                    <span class="text-[10px] text-slate-400 font-mono"><?= htmlspecialchars($n['time']) ?></span>
+                    <span class="font-bold text-primary text-xs block"><?= htmlspecialchars($n['title']) ?></span>
+                    <span class="text-[10px] text-muted font-mono"><?= htmlspecialchars($n['time']) ?></span>
                 </div>
                 <?php if ($n['type'] !== 'none'): ?>
-                <span class="badge font-bold text-[10px] <?= !$n['read'] ? 'badge badge-error animate-pulse' : 'bg-slate-100 text-slate-600' ?>">
+                <span class="badge font-bold text-[10px] <?= !$n['read'] ? 'badge badge-error animate-pulse' : 'bg-muted text-secondary' ?>">
                     <?= !$n['read'] ? '🔴 ยังไม่ได้อ่าน' : 'อ่านแล้ว' ?>
                 </span>
                 <?php endif; ?>

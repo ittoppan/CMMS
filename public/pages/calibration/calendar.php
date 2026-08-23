@@ -37,29 +37,29 @@ $curYear = (int)date('Y');
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between">
-        <div><h1 class="text-2xl font-bold text-gray-900">ปฏิทินสอบเทียบ</h1><p class="mt-1 text-sm text-gray-500">Calibration Calendar</p></div>
+        <div><h1 class="text-2xl font-bold text-primary">ปฏิทินสอบเทียบ</h1><p class="mt-1 text-sm text-muted">Calibration Calendar</p></div>
         <a href="index.php" class="btn-secondary">&larr; กลับไปรายการ</a>
     </div>
     <div class="card shadow p-4">
         <div class="flex items-center justify-between mb-4">
-            <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="px-3 py-1 text-sm border rounded hover:bg-gray-50">&larr; <?= $thaiMonths[$prevMonth] ?></a>
+            <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="px-3 py-1 text-sm border rounded hover:bg-subtle">&larr; <?= $thaiMonths[$prevMonth] ?></a>
             <h2 class="text-lg font-semibold"><?= $thaiMonths[$month] ?> <?= $year + 543 ?></h2>
-            <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="px-3 py-1 text-sm border rounded hover:bg-gray-50"><?= $thaiMonths[$nextMonth] ?> &rarr;</a>
+            <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="px-3 py-1 text-sm border rounded hover:bg-subtle"><?= $thaiMonths[$nextMonth] ?> &rarr;</a>
         </div>
         <div class="grid grid-cols-7 gap-px bg-gray-200 rounded overflow-hidden">
             <?php $dayNames = ['อา','จ','อ','พ','พฤ','ศ','ส']; ?>
             <?php foreach ($dayNames as $dn): ?>
-            <div class="bg-gray-50 px-2 py-2 text-center text-xs font-semibold text-gray-600"><?= $dn ?></div>
+            <div class="bg-subtle px-2 py-2 text-center text-xs font-semibold text-secondary"><?= $dn ?></div>
             <?php endforeach; ?>
             <?php for ($i = 0; $i < $startDow; $i++): ?>
-            <div class="bg-gray-100 min-h-[80px]"></div>
+            <div class="bg-muted min-h-[80px]"></div>
             <?php endfor; ?>
             <?php for ($d = 1; $d <= $daysInMonth; $d++):
                 $isToday = ($d === $today && $month === $curMonth && $year === $curYear);
                 $items = $calByDay[$d] ?? [];
             ?>
             <div class="bg-white min-h-[80px] p-1 <?= $isToday ? 'ring-2 ring-primary-500 ring-inset' : '' ?>">
-                <div class="text-xs font-medium <?= $isToday ? 'text-primary-600' : 'text-gray-700' ?> mb-1"><?= $d ?></div>
+                <div class="text-xs font-medium <?= $isToday ? 'text-primary-600' : 'text-secondary' ?> mb-1"><?= $d ?></div>
                 <?php foreach ($items as $cal): ?>
                 <a href="edit.php?id=<?= $cal['id'] ?>" class="block text-xs mb-0.5 px-1 py-0.5 rounded text-white truncate <?= $statusColor[$cal['status']] ?? 'bg-gray-500' ?>" title="<?= htmlspecialchars($cal['asset_name'] ?? '') ?>">
                     <?= htmlspecialchars(mb_substr($cal['asset_name'] ?? 'ไม่ระบุ', 0, 15)) ?>
@@ -69,7 +69,7 @@ $curYear = (int)date('Y');
             <?php endfor; ?>
         </div>
     </div>
-    <div class="flex gap-4 text-sm text-gray-600">
+    <div class="flex gap-4 text-sm text-secondary">
         <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-blue-500 inline-block"></span> รอดำเนินการ</span>
         <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-500 inline-block"></span> กำลังดำเนินการ</span>
         <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-500 inline-block"></span> เสร็จสิ้น</span>

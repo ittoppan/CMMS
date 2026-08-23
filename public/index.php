@@ -227,10 +227,10 @@ renderHeader();
 <!-- Local Chart.js -->
 <script src="<?= $relPrefix ?>js/chart.min.js"></script>
 
-<div class="space-y-6 bg-slate-50 dark:bg-slate-900 rounded-2xl sm:p-6 p-4 animate-fade-in-up">
+<div class="space-y-6 bg-subtle  rounded-2xl sm:p-6 p-4 animate-fade-in-up">
 
     <!-- Header Banner (Astryx PageHeader) -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/20 mt-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 rounded-2xl p-6 relative overflow-hidden">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-white/20 mt-2 bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 rounded-2xl p-6 relative overflow-hidden">
         <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl"></div>
         <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div class="relative z-10">
@@ -244,11 +244,11 @@ renderHeader();
             <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-indigo-800 dark:from-white dark:to-indigo-300 tracking-tight flex items-center gap-2">
                 ศูนย์วิเคราะห์และแดชบอร์ดซ่อมบำรุง
             </h1>
-            <p class="text-sm font-medium text-slate-600 dark:text-slate-300 mt-2 max-w-3xl leading-relaxed">วิเคราะห์ข้อมูล Operational, Tactical, Strategic, สต็อก Sage 300, ความเสี่ยงเครื่องจักร และ KPI ช่างครบถ้วน 15 ข้อ ด้วยดีไซน์อัจฉริยะ</p>
+            <p class="text-sm font-medium text-secondary  mt-2 max-w-3xl leading-relaxed">วิเคราะห์ข้อมูล Operational, Tactical, Strategic, สต็อก Sage 300, ความเสี่ยงเครื่องจักร และ KPI ช่างครบถ้วน 15 ข้อ ด้วยดีไซน์อัจฉริยะ</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3 shrink-0 relative z-10">
-            <a href="/pages/repair/kanban.php" class="h-10 inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl shadow-sm text-slate-700 dark:text-white">
+            <a href="/pages/repair/kanban.php" class="h-10 inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-white/70 /70 backdrop-blur-md border border-white/30 text-sm font-bold transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl shadow-sm text-secondary dark:text-white">
                 <i data-lucide="kanban-square" class="w-4 h-4 text-indigo-500"></i>
                 Kanban Board
             </a>
@@ -303,8 +303,8 @@ renderHeader();
                 <div class="p-3 bg-white rounded-xl border border-rose-200 text-xs shadow-sm flex items-center justify-between">
                     <div>
                         <span class="font-mono font-bold text-indigo-600"><?= formatWorkOrderNo($cu['id'], $cu['created_at'], $cu['work_order_no']) ?></span>
-                        <div class="font-bold text-slate-900 text-sm truncate max-w-[200px]"><?= htmlspecialchars($cu['title']) ?></div>
-                        <span class="text-slate-500">ค้างมาแล้ว <span class="font-bold text-rose-600"><?= number_format($cu['elapsed_hrs'], 1) ?></span> ชม.</span>
+                        <div class="font-bold text-primary text-sm truncate max-w-[200px]"><?= htmlspecialchars($cu['title']) ?></div>
+                        <span class="text-muted">ค้างมาแล้ว <span class="font-bold text-rose-600"><?= number_format($cu['elapsed_hrs'], 1) ?></span> ชม.</span>
                     </div>
                     <a href="/pages/repair/view.php?id=<?= $cu['id'] ?>" class="btn btn-primary bg-rose-600 border-rose-600 text-xs px-3 py-1.5 font-bold">รับงาน →</a>
                 </div>
@@ -345,14 +345,14 @@ renderHeader();
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md text-white"><?= $statusInProgress ?></span>
                 </a>
-                <a href="/pages/repair/?status=waiting_parts" class="p-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                <a href="/pages/repair/?status=waiting_parts" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
                     <div class="flex items-center justify-between text-orange-600 dark:text-orange-400 font-bold">
                         <span>4. Waiting Parts (รออะไหล่)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                     </div>
                     <span class="text-3xl font-black text-orange-600 dark:text-orange-400 block drop-shadow-sm"><?= $statusWaitingParts ?></span>
                 </a>
-                <a href="/pages/repair/?status=waiting_approval" class="p-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                <a href="/pages/repair/?status=waiting_approval" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
                     <div class="flex items-center justify-between text-purple-600 dark:text-purple-400 font-bold">
                         <span>5. Approval (รออนุมัติ)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -366,12 +366,12 @@ renderHeader();
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md"><?= $statusResolved ?></span>
                 </a>
-                <a href="/pages/repair/?status=closed" class="p-4 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
-                    <div class="flex items-center justify-between text-slate-600 dark:text-slate-300 font-bold">
+                <a href="/pages/repair/?status=closed" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                    <div class="flex items-center justify-between text-secondary  font-bold">
                         <span>7. Closed (ปิดงาน)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                     </div>
-                    <span class="text-3xl font-black text-slate-800 dark:text-white block drop-shadow-sm"><?= $statusClosed ?></span>
+                    <span class="text-3xl font-black text-primary dark:text-white block drop-shadow-sm"><?= $statusClosed ?></span>
                 </a>
                 <a href="/pages/repair/?status=cancelled" class="p-4 bg-gradient-to-br from-rose-400/90 to-red-500/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-rose-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold">
@@ -387,44 +387,44 @@ renderHeader();
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- My Assigned Work Orders List -->
-            <div class="card bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
-                <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center text-sm">
+            <div class="card bg-white rounded-2xl border border-line shadow-sm overflow-hidden space-y-3">
+                <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center text-sm">
                     <span>🔧 งานซ่อมค้างที่ได้รับมอบหมาย (My Assigned Tasks)</span>
                     <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= count($myWOList) ?> งาน</span>
                 </div>
-                <div class="divide-y divide-slate-200 text-xs">
+                <div class="divide-y divide-line text-xs">
                     <?php foreach ($myWOList as $myW): ?>
-                    <div class="p-3.5 hover:bg-slate-50 flex items-center justify-between">
+                    <div class="p-3.5 hover:bg-subtle flex items-center justify-between">
                         <div>
                             <span class="font-mono font-bold text-indigo-600"><?= formatWorkOrderNo($myW['id'], $myW['created_at'], $myW['work_order_no']) ?></span>
-                            <a href="/pages/repair/view.php?id=<?= $myW['id'] ?>" class="font-bold text-slate-900 block text-sm hover:underline"><?= htmlspecialchars($myW['title']) ?></a>
-                            <span class="text-slate-500">เครื่อง: <?= htmlspecialchars($myW['asset_code'] ?? '-') ?></span>
+                            <a href="/pages/repair/view.php?id=<?= $myW['id'] ?>" class="font-bold text-primary block text-sm hover:underline"><?= htmlspecialchars($myW['title']) ?></a>
+                            <span class="text-muted">เครื่อง: <?= htmlspecialchars($myW['asset_code'] ?? '-') ?></span>
                         </div>
                         <div class="text-right space-y-1">
-                            <span class="badge <?= match($myW['priority']) { 'critical'=>'badge badge-error', 'high'=>'badge badge-warning', default=>'bg-slate-100 text-slate-800' } ?> font-bold text-[10px]"><?= strtoupper($myW['priority']) ?></span>
+                            <span class="badge <?= match($myW['priority']) { 'critical'=>'badge badge-error', 'high'=>'badge badge-warning', default=>'bg-muted text-primary' } ?> font-bold text-[10px]"><?= strtoupper($myW['priority']) ?></span>
                             <span class="badge badge badge-info font-bold text-[10px] block"><?= strtoupper($myW['status']) ?></span>
                         </div>
                     </div>
                     <?php endforeach; ?>
                     <?php if (empty($myWOList)): ?>
-                    <div class="p-6 text-center text-slate-400 font-bold">✅ ไม่มีงานซ่อมค้างในขณะนี้</div>
+                    <div class="p-6 text-center text-muted font-bold">✅ ไม่มีงานซ่อมค้างในขณะนี้</div>
                     <?php endif; ?>
                 </div>
             </div>
 
             <!-- PM This Week Queue -->
-            <div class="card bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
-                <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center text-sm">
+            <div class="card bg-white rounded-2xl border border-line shadow-sm overflow-hidden space-y-3">
+                <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center text-sm">
                     <span>📋 คิวแผน PM ประจำสัปดาห์นี้ (This Week PM Schedule)</span>
                     <a href="/pages/pm_am/calendar.php" class="text-indigo-600 hover:underline text-xs">ดูปฏิทิน →</a>
                 </div>
-                <div class="divide-y divide-slate-200 text-xs">
+                <div class="divide-y divide-line text-xs">
                     <?php foreach ($pmThisWeek as $pw): ?>
-                    <div class="p-3.5 hover:bg-slate-50 flex items-center justify-between">
+                    <div class="p-3.5 hover:bg-subtle flex items-center justify-between">
                         <div>
                             <span class="font-mono text-indigo-600 font-bold"><?= htmlspecialchars($pw['asset_code']) ?></span>
-                            <span class="font-bold text-slate-900 block text-sm"><?= htmlspecialchars($pw['title']) ?></span>
-                            <span class="text-slate-500">กำหนด: <?= date('d/m/Y', strtotime($pw['due_date'])) ?></span>
+                            <span class="font-bold text-primary block text-sm"><?= htmlspecialchars($pw['title']) ?></span>
+                            <span class="text-muted">กำหนด: <?= date('d/m/Y', strtotime($pw['due_date'])) ?></span>
                         </div>
                         <div class="text-right space-y-1">
                             <span class="badge bg-purple-100 text-purple-800 font-bold text-[10px]"><?= strtoupper($pw['frequency_type']) ?></span>
@@ -433,7 +433,7 @@ renderHeader();
                     </div>
                     <?php endforeach; ?>
                     <?php if (empty($pmThisWeek)): ?>
-                    <div class="p-6 text-center text-slate-400 font-bold">✅ ไม่มีแผน PM ในสัปดาห์นี้</div>
+                    <div class="p-6 text-center text-muted font-bold">✅ ไม่มีแผน PM ในสัปดาห์นี้</div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -449,29 +449,29 @@ renderHeader();
 
         <!-- 4 KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-colors"></div>
-                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i> AVAILABILITY RATE</span>
+                <span class="text-xs font-bold text-muted uppercase flex items-center gap-2"><i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i> AVAILABILITY RATE</span>
                 <div class="text-4xl font-black text-emerald-600 drop-shadow-sm"><span class="count-up"><?= $availability ?></span>%</div>
-                <span class="text-[11px] text-slate-400 font-medium">คำนวณจาก Total Time - Downtime</span>
+                <span class="text-[11px] text-muted font-medium">คำนวณจาก Total Time - Downtime</span>
             </div>
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition-colors"></div>
-                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> MTBF</span>
+                <span class="text-xs font-bold text-muted uppercase flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-indigo-500"></i> MTBF</span>
                 <div class="text-4xl font-black text-indigo-600 drop-shadow-sm"><span class="count-up"><?= $mtbfHrs ?></span> ชม.</div>
-                <span class="text-[11px] text-slate-400 font-medium">เป้าหมาย > 720 ชม.</span>
+                <span class="text-[11px] text-muted font-medium">เป้าหมาย > 720 ชม.</span>
             </div>
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-colors"></div>
-                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="tool" class="w-4 h-4 text-purple-500"></i> MTTR</span>
+                <span class="text-xs font-bold text-muted uppercase flex items-center gap-2"><i data-lucide="tool" class="w-4 h-4 text-purple-500"></i> MTTR</span>
                 <div class="text-4xl font-black text-purple-600 drop-shadow-sm"><span class="count-up"><?= $mttrHrs ?></span> ชม.</div>
-                <span class="text-[11px] text-slate-400 font-medium">เป้าหมาย < 2.0 ชม.</span>
+                <span class="text-[11px] text-muted font-medium">เป้าหมาย < 2.0 ชม.</span>
             </div>
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-5 rounded-2xl space-y-2 relative overflow-hidden group">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-colors"></div>
-                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-rose-500"></i> OVERDUE PM</span>
+                <span class="text-xs font-bold text-muted uppercase flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-rose-500"></i> OVERDUE PM</span>
                 <div class="text-4xl font-black text-rose-600 drop-shadow-sm"><span class="count-up"><?= count($overduePMList) ?></span> แผน</div>
-                <span class="text-[11px] text-slate-400 font-medium">แผน PM เกินกำหนดชำระ</span>
+                <span class="text-[11px] text-muted font-medium">แผน PM เกินกำหนดชำระ</span>
             </div>
         </div>
 
@@ -479,10 +479,10 @@ renderHeader();
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Pareto 80/20 Table & Graph -->
-            <div class="lg:col-span-2 card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <div class="lg:col-span-2 card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>📊 วิเคราะห์สาเหตุการเสีย Pareto 80/20 (Failure Mode Pareto Analysis)</span>
-                    <span class="text-xs text-slate-400">เรียงตามความถี่สะสม %</span>
+                    <span class="text-xs text-muted">เรียงตามความถี่สะสม %</span>
                 </h3>
 
                 <div class="h-60">
@@ -491,19 +491,19 @@ renderHeader();
             </div>
 
             <!-- Reorder Point Low Stock Inventory -->
-            <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <div class="card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>📦 สต็อกต่ำกว่า Reorder Point (Low Stock)</span>
                     <a href="/pages/spare_parts/" class="text-xs text-indigo-600 font-bold">คลังทั้งหมด →</a>
                 </h3>
 
-                <div class="divide-y divide-slate-200 text-xs">
+                <div class="divide-y divide-line text-xs">
                     <?php foreach ($reorderStockList as $rsItem): ?>
                     <div class="py-2.5 flex items-center justify-between">
                         <div>
                             <span class="font-mono font-bold text-indigo-600"><?= htmlspecialchars($rsItem['item_code']) ?></span>
-                            <div class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($rsItem['item_name']) ?></div>
-                            <span class="text-slate-500">คงเหลือ <span class="font-bold text-rose-600"><?= $rsItem['stock_qty'] ?></span> / ขั้นต่ำ <?= $rsItem['min_stock'] ?></span>
+                            <div class="font-bold text-primary text-sm"><?= htmlspecialchars($rsItem['item_name']) ?></div>
+                            <span class="text-muted">คงเหลือ <span class="font-bold text-rose-600"><?= $rsItem['stock_qty'] ?></span> / ขั้นต่ำ <?= $rsItem['min_stock'] ?></span>
                         </div>
                         <span class="badge badge badge-error font-bold text-[10px]">สั่งซื้อด่วน</span>
                     </div>
@@ -514,23 +514,23 @@ renderHeader();
         </div>
 
         <!-- Technician Workload Load Board -->
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <div class="card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+            <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                 <span>👥 ภาระงานช่างซ่อมบำรุงแต่ละคน (Technician Workload Load Board)</span>
-                <span class="text-xs text-slate-400">กรองเฉพาะ WO ที่กำลังดำเนินการ</span>
+                <span class="text-xs text-muted">กรองเฉพาะ WO ที่กำลังดำเนินการ</span>
             </h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                 <?php foreach ($techWorkload as $tw): ?>
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <div class="p-4 bg-subtle border border-line rounded-xl space-y-2">
                     <div class="flex items-center justify-between">
-                        <span class="font-bold text-slate-900 text-sm">👤 <?= htmlspecialchars($tw['full_name']) ?></span>
+                        <span class="font-bold text-primary text-sm">👤 <?= htmlspecialchars($tw['full_name']) ?></span>
                         <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= $tw['active_wo_count'] ?> งาน</span>
                     </div>
                     <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                         <div class="h-full bg-indigo-600 rounded-full" style="width: <?= min(100, $tw['active_wo_count'] * 20) ?>%;"></div>
                     </div>
-                    <div class="flex justify-between text-[11px] text-slate-500">
+                    <div class="flex justify-between text-[11px] text-muted">
                         <span>งานวิกฤต: <strong class="text-rose-600"><?= $tw['critical_count'] ?></strong></span>
                         <span class="text-indigo-600 font-bold">Active Load</span>
                     </div>
@@ -548,11 +548,11 @@ renderHeader();
 
         <!-- Top Strategic Hero Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-6 rounded-3xl space-y-3 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-6 rounded-3xl space-y-3 relative overflow-hidden group">
                 <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-slate-500/10 rounded-full blur-2xl group-hover:bg-slate-500/20 transition-colors"></div>
-                <span class="text-xs font-extrabold text-slate-500 tracking-widest uppercase flex items-center gap-2"><i data-lucide="power-off" class="w-4 h-4 text-slate-400"></i> DOWNTIME รวมทั้งโรงงาน</span>
-                <div class="text-5xl font-black text-slate-900 dark:text-white drop-shadow-sm"><span class="count-up"><?= number_format($totalDowntime, 1) ?></span> <span class="text-2xl text-slate-400 font-bold">ชม.</span></div>
-                <span class="text-xs text-slate-400 font-medium">สะสมประจำเดือนนี้</span>
+                <span class="text-xs font-extrabold text-muted tracking-widest uppercase flex items-center gap-2"><i data-lucide="power-off" class="w-4 h-4 text-muted"></i> DOWNTIME รวมทั้งโรงงาน</span>
+                <div class="text-5xl font-black text-primary dark:text-white drop-shadow-sm"><span class="count-up"><?= number_format($totalDowntime, 1) ?></span> <span class="text-2xl text-muted font-bold">ชม.</span></div>
+                <span class="text-xs text-muted font-medium">สะสมประจำเดือนนี้</span>
             </div>
 
             <div class="bg-gradient-to-br from-indigo-500/90 to-purple-600/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-indigo-500/20 text-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-6 rounded-3xl space-y-3 relative overflow-hidden group">
@@ -568,24 +568,24 @@ renderHeader();
                 </div>
             </div>
 
-            <div class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-6 rounded-3xl space-y-3 relative overflow-hidden group">
+            <div class="bg-white/80 /80 backdrop-blur-xl border border-white/20 /50 shadow-lg shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl p-6 rounded-3xl space-y-3 relative overflow-hidden group">
                 <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
-                <span class="text-xs font-extrabold text-slate-500 tracking-widest uppercase flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i> PLANNED VS UNPLANNED RATIO</span>
+                <span class="text-xs font-extrabold text-muted tracking-widest uppercase flex items-center gap-2"><i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-500"></i> PLANNED VS UNPLANNED RATIO</span>
                 <div class="text-5xl font-black text-purple-600 drop-shadow-sm"><span class="count-up"><?= $plannedRatio ?></span>%</div>
-                <span class="text-xs text-slate-400 font-medium">สัดส่วนงาน PM วางแผนล่วงหน้า</span>
+                <span class="text-xs text-muted font-medium">สัดส่วนงาน PM วางแผนล่วงหน้า</span>
             </div>
         </div>
 
         <!-- Top 10 Most Expensive / Breakdown Machines Table -->
-        <div class="card bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-3">
-            <div class="p-4 border-b border-slate-200 font-bold text-slate-900 flex justify-between items-center text-sm">
+        <div class="card bg-white rounded-2xl border border-line shadow-sm overflow-hidden space-y-3">
+            <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center text-sm">
                 <span>🏭 10 อันดับเครื่องจักรที่เสียบ่อยและค่าซ่อมสูงสุด (Top 10 Expensive Machines)</span>
-                <span class="text-xs text-slate-400">เรียงตามมูลค่าซ่อมบำรุงรวม</span>
+                <span class="text-xs text-muted">เรียงตามมูลค่าซ่อมบำรุงรวม</span>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-xs">
-                    <thead class="bg-slate-50 text-slate-500 uppercase font-bold">
+                <table class="min-w-full divide-y divide-line text-xs">
+                    <thead class="bg-subtle text-muted uppercase font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">รหัสเครื่องจักร</th>
                             <th class="px-4 py-3 text-left">ชื่อเครื่องจักร</th>
@@ -595,13 +595,13 @@ renderHeader();
                             <th class="px-4 py-3 text-center">บัตรประวัติ</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($top10Machines as $m10): ?>
-                        <tr class="hover:bg-slate-50">
+                        <tr class="hover:bg-subtle">
                             <td class="px-4 py-3 font-mono font-bold text-indigo-600 text-sm"><?= htmlspecialchars($m10['asset_code']) ?></td>
-                            <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($m10['asset_name']) ?></td>
+                            <td class="px-4 py-3 font-bold text-primary"><?= htmlspecialchars($m10['asset_name']) ?></td>
                             <td class="px-4 py-3 text-center font-black text-rose-600"><?= $m10['wo_count'] ?> ครั้ง</td>
-                            <td class="px-4 py-3 text-center font-bold text-slate-700"><?= number_format($m10['total_downtime'], 1) ?> ชม.</td>
+                            <td class="px-4 py-3 text-center font-bold text-secondary"><?= number_format($m10['total_downtime'], 1) ?> ชม.</td>
                             <td class="px-4 py-3 text-right font-black text-indigo-700 text-sm">฿<?= number_format($m10['total_cost'], 2) ?></td>
                             <td class="px-4 py-3 text-center">
                                 <a href="/pages/asset_registry/history.php?id=<?= $m10['asset_id'] ?>" class="btn btn-secondary btn-sm text-indigo-600 font-bold text-[11px]">📑 บัตร F-EN-01</a>
@@ -621,16 +621,16 @@ renderHeader();
     <div id="tab-advanced" class="tab-content hidden space-y-6">
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
-                <span class="text-slate-500 font-bold block">10. REPEAT FAILURE RATE (30 วัน)</span>
+            <div class="p-4 bg-white border border-line rounded-2xl shadow-sm space-y-1">
+                <span class="text-muted font-bold block">10. REPEAT FAILURE RATE (30 วัน)</span>
                 <span class="text-2xl font-black text-rose-600"><span class="count-up"><?= $repeatFailureRate ?></span>%</span>
-                <span class="text-[10px] text-slate-400 block">สัดส่วนงานซ่อมซ้ำเครื่องเดิม</span>
+                <span class="text-[10px] text-muted block">สัดส่วนงานซ่อมซ้ำเครื่องเดิม</span>
             </div>
 
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
-                <span class="text-slate-500 font-bold block">11. FIRST-TIME-FIX RATE (FTFR)</span>
+            <div class="p-4 bg-white border border-line rounded-2xl shadow-sm space-y-1">
+                <span class="text-muted font-bold block">11. FIRST-TIME-FIX RATE (FTFR)</span>
                 <span class="text-2xl font-black text-emerald-600"><span class="count-up"><?= $ftfrRate ?></span>%</span>
-                <span class="text-[10px] text-slate-400 block">ซ่อมเสร็จในครั้งแรกโดยไม่ถูก Reopen</span>
+                <span class="text-[10px] text-muted block">ซ่อมเสร็จในครั้งแรกโดยไม่ถูก Reopen</span>
             </div>
 
             <?php
@@ -639,27 +639,27 @@ renderHeader();
                 $syncStatus = $syncOk ? '🟢 ONLINE' : ($lastSync ? '🔴 OFFLINE' : '⚪ NO DATA');
                 $syncColor = $syncOk ? 'text-emerald-600' : 'text-rose-600';
             ?>
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
-                <span class="text-slate-500 font-bold block">14. SAGE 300 DSN HEALTH</span>
+            <div class="p-4 bg-white border border-line rounded-2xl shadow-sm space-y-1">
+                <span class="text-muted font-bold block">14. SAGE 300 DSN HEALTH</span>
                 <span class="text-2xl font-black <?= $syncColor ?>"><?= $syncStatus ?></span>
-                <span class="text-[10px] text-slate-400 block"><?= $lastSync ? ('ล่าสุด: ' . htmlspecialchars((string)($lastSync['created_at'] ?? ''))) : 'ยังไม่มีข้อมูล sync' ?></span>
+                <span class="text-[10px] text-muted block"><?= $lastSync ? ('ล่าสุด: ' . htmlspecialchars((string)($lastSync['created_at'] ?? ''))) : 'ยังไม่มีข้อมูล sync' ?></span>
             </div>
 
             <?php
                 $reconDiff = $lastSync && isset($lastSync['diff_count']) ? (int)$lastSync['diff_count'] : 0;
             ?>
-            <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-1">
-                <span class="text-slate-500 font-bold block">15. RECONCILIATION DIFF</span>
+            <div class="p-4 bg-white border border-line rounded-2xl shadow-sm space-y-1">
+                <span class="text-muted font-bold block">15. RECONCILIATION DIFF</span>
                 <span class="text-2xl font-black <?= $reconDiff > 0 ? 'text-rose-600' : 'text-emerald-600' ?>"><?= $reconDiff ?> DIFF</span>
-                <span class="text-[10px] text-slate-400 block">CMMS vs Sage 300 Deductions Match</span>
+                <span class="text-[10px] text-muted block">CMMS vs Sage 300 Deductions Match</span>
             </div>
         </div>
 
         <!-- 6. Failure Prediction Risk Heatmap Matrix -->
-        <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+        <div class="card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+            <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                 <span>🔥 6. แผนผังประเมินความเสี่ยงเครื่องจักรเสียล่วงหน้า (Failure Prediction Risk Heatmap Matrix)</span>
-                <span class="text-xs text-slate-400">คำนวณจาก MTBF & ระยะเวลาตั้งแต่เสียครั้งล่าสุด</span>
+                <span class="text-xs text-muted">คำนวณจาก MTBF & ระยะเวลาตั้งแต่เสียครั้งล่าสุด</span>
             </h3>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
@@ -694,19 +694,19 @@ renderHeader();
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Top Parts Consumption -->
-            <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <div class="card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>📦 4.1 อะไหล่ที่ถูกเบิกซ่อมสูงสุด (Spare Parts Consumption Analytics)</span>
-                    <span class="text-xs text-slate-400">Sage 300 Item Cost</span>
+                    <span class="text-xs text-muted">Sage 300 Item Cost</span>
                 </h3>
 
-                <div class="divide-y divide-slate-200 text-xs">
+                <div class="divide-y divide-line text-xs">
                     <?php foreach ($topPartsUsed as $pu): ?>
                     <div class="py-2.5 flex items-center justify-between">
                         <div>
                             <span class="font-mono font-bold text-indigo-600"><?= htmlspecialchars($pu['item_code']) ?></span>
-                            <div class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($pu['item_name']) ?></div>
-                            <span class="text-slate-500">จำนวนเบิก <span class="font-bold text-indigo-600"><?= $pu['total_issued_qty'] ?></span> ชิ้น</span>
+                            <div class="font-bold text-primary text-sm"><?= htmlspecialchars($pu['item_name']) ?></div>
+                            <span class="text-muted">จำนวนเบิก <span class="font-bold text-indigo-600"><?= $pu['total_issued_qty'] ?></span> ชิ้น</span>
                         </div>
                         <span class="font-black text-emerald-700 text-sm">฿<?= number_format($pu['total_issued_val'], 2) ?></span>
                     </div>
@@ -715,22 +715,22 @@ renderHeader();
             </div>
 
             <!-- Technician Speed & Quality Index -->
-            <div class="card p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                <h3 class="font-extrabold text-slate-900 text-base border-b pb-2 flex items-center justify-between">
+            <div class="card p-5 bg-white rounded-2xl border border-line shadow-sm space-y-3">
+                <h3 class="font-extrabold text-primary text-base border-b pb-2 flex items-center justify-between">
                     <span>🏆 5. ดัชนีความเร็วและคุณภาพช่าง (Technician Speed & Quality Index)</span>
-                    <span class="text-xs text-slate-400">แสดงเวลาซ่อมควบคู่จำนวนงาน</span>
+                    <span class="text-xs text-muted">แสดงเวลาซ่อมควบคู่จำนวนงาน</span>
                 </h3>
 
-                <div class="divide-y divide-slate-200 text-xs">
+                <div class="divide-y divide-line text-xs">
                     <?php foreach ($techSpeedQuality as $tsq): ?>
                     <div class="py-2.5 flex items-center justify-between">
                         <div>
-                            <span class="font-bold text-slate-900 text-sm">👤 <?= htmlspecialchars($tsq['full_name']) ?></span>
-                            <span class="text-slate-500 block">งานซ่อมเสร็จสมบูรณ์: <strong class="text-emerald-600"><?= $tsq['completed_jobs'] ?></strong> งาน</span>
+                            <span class="font-bold text-primary text-sm">👤 <?= htmlspecialchars($tsq['full_name']) ?></span>
+                            <span class="text-muted block">งานซ่อมเสร็จสมบูรณ์: <strong class="text-emerald-600"><?= $tsq['completed_jobs'] ?></strong> งาน</span>
                         </div>
                         <div class="text-right">
                             <span class="font-black text-indigo-600 text-sm"><?= $tsq['avg_repair_hrs'] ?> ชม./งาน</span>
-                            <span class="text-[10px] text-slate-400 block font-bold">เวลาซ่อมเฉลี่ย</span>
+                            <span class="text-[10px] text-muted block font-bold">เวลาซ่อมเฉลี่ย</span>
                         </div>
                     </div>
                     <?php endforeach; ?>

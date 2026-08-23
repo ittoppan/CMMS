@@ -33,10 +33,10 @@ renderHeader();
         <div>
             <div class="flex items-center gap-2">
                 <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-xs font-bold text-gray-500 uppercase">Executive Single-Page View</span>
+                <span class="text-xs font-bold text-muted uppercase">Executive Single-Page View</span>
             </div>
-            <h1 class="text-2xl font-extrabold text-gray-900 mt-1">📊 Executive Management Dashboard (สำหรับผู้บริหารโรงงาน)</h1>
-            <p class="text-xs text-gray-500 mt-0.5">ภาพรวมค่าใช้จ่าย Cost breakdown, RCA 5Ms, SLA Downtime Timeline & KPI สรุปผล</p>
+            <h1 class="text-2xl font-extrabold text-primary mt-1">📊 Executive Management Dashboard (สำหรับผู้บริหารโรงงาน)</h1>
+            <p class="text-xs text-muted mt-0.5">ภาพรวมค่าใช้จ่าย Cost breakdown, RCA 5Ms, SLA Downtime Timeline & KPI สรุปผล</p>
         </div>
         <div class="flex gap-2">
             <button onclick="window.print()" class="btn btn-primary text-xs">🖨️ พิมพ์รายงานสรุปผู้บริหาร</button>
@@ -46,19 +46,19 @@ renderHeader();
     <!-- Cost Breakdown Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">รวมค่าแรง (Labor Cost)</span>
+            <span class="text-xs font-bold text-muted uppercase block">รวมค่าแรง (Labor Cost)</span>
             <span class="text-2xl font-extrabold text-brand-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_labor) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
         </div>
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">รวมค่าอะไหล่ (Parts Cost)</span>
+            <span class="text-xs font-bold text-muted uppercase block">รวมค่าอะไหล่ (Parts Cost)</span>
             <span class="text-2xl font-extrabold text-amber-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_parts) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
         </div>
         <div class="card p-5 text-center">
-            <span class="text-xs font-bold text-gray-500 uppercase block">รวม Outsource</span>
+            <span class="text-xs font-bold text-muted uppercase block">รวม Outsource</span>
             <span class="text-2xl font-extrabold text-indigo-600 mt-1 block">
                 ฿<?= number_format($pdo->query("SELECT SUM(cost_outsource) FROM repair")->fetchColumn() ?: 0, 2) ?>
             </span>
@@ -77,7 +77,7 @@ renderHeader();
         
         <!-- Chart 1: Cost by Machine -->
         <div class="card p-5">
-            <h3 class="font-bold text-gray-900 text-sm mb-3">💰 5 อันดับเครื่องจักรที่มีค่าใช้จ่ายซ่อมบำรุงสูงสุด</h3>
+            <h3 class="font-bold text-primary text-sm mb-3">💰 5 อันดับเครื่องจักรที่มีค่าใช้จ่ายซ่อมบำรุงสูงสุด</h3>
             <div style="height:220px;" class="relative">
                 <canvas id="chartCostMachine"></canvas>
             </div>
@@ -85,7 +85,7 @@ renderHeader();
 
         <!-- Chart 2: RCA 5Ms Pareto -->
         <div class="card p-5">
-            <h3 class="font-bold text-gray-900 text-sm mb-3">🔍 Root Cause Analysis 5Ms Breakdown</h3>
+            <h3 class="font-bold text-primary text-sm mb-3">🔍 Root Cause Analysis 5Ms Breakdown</h3>
             <div style="height:220px;" class="relative">
                 <canvas id="chartRCA"></canvas>
             </div>
@@ -95,39 +95,39 @@ renderHeader();
 
     <!-- Downtime SLA Timeline Example Widget -->
     <div class="card p-5 space-y-4">
-        <h3 class="font-bold text-gray-900 text-base">⏱️ ตัวอย่างวิเคราะห์ Downtime Timeline & SLA Response</h3>
+        <h3 class="font-bold text-primary text-base">⏱️ ตัวอย่างวิเคราะห์ Downtime Timeline & SLA Response</h3>
         
-        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs overflow-x-auto gap-4">
+        <div class="flex items-center justify-between p-4 bg-subtle rounded-xl border border-line text-xs overflow-x-auto gap-4">
             <div class="text-center">
-                <span class="font-bold text-slate-800 block">08:10</span>
+                <span class="font-bold text-primary block">08:10</span>
                 <span class="badge badge badge-error mt-1">Stop (เครื่องหยุด)</span>
             </div>
-            <div class="text-slate-400">➔</div>
+            <div class="text-muted">➔</div>
             <div class="text-center">
-                <span class="font-bold text-slate-800 block">08:13</span>
+                <span class="font-bold text-primary block">08:13</span>
                 <span class="badge badge badge-info mt-1">แจ้งซ่อม (Reported)</span>
             </div>
-            <div class="text-slate-400">➔</div>
+            <div class="text-muted">➔</div>
             <div class="text-center">
-                <span class="font-bold text-slate-800 block">08:15</span>
+                <span class="font-bold text-primary block">08:15</span>
                 <span class="badge bg-indigo-100 text-indigo-800 mt-1">Accept (ช่างรับงาน)</span>
             </div>
-            <div class="text-slate-400">➔</div>
+            <div class="text-muted">➔</div>
             <div class="text-center">
-                <span class="font-bold text-slate-800 block">08:20</span>
+                <span class="font-bold text-primary block">08:20</span>
                 <span class="badge badge badge-warning mt-1">Repair (เริ่มซ่อม)</span>
             </div>
-            <div class="text-slate-400">➔</div>
+            <div class="text-muted">➔</div>
             <div class="text-center">
-                <span class="font-bold text-slate-800 block">09:01</span>
+                <span class="font-bold text-primary block">09:01</span>
                 <span class="badge badge badge-success mt-1">Complete (ซ่อมเสร็จ)</span>
             </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-center pt-2">
-            <div class="p-3 bg-gray-100 rounded">Response Time: <strong>2 นาที (SLA Pass ✔)</strong></div>
-            <div class="p-3 bg-gray-100 rounded">Waiting Time: <strong>5 นาที</strong></div>
-            <div class="p-3 bg-gray-100 rounded">Repair Time: <strong>41 นาที</strong></div>
+            <div class="p-3 bg-muted rounded">Response Time: <strong>2 นาที (SLA Pass ✔)</strong></div>
+            <div class="p-3 bg-muted rounded">Waiting Time: <strong>5 นาที</strong></div>
+            <div class="p-3 bg-muted rounded">Repair Time: <strong>41 นาที</strong></div>
             <div class="p-3 badge badge-success font-bold rounded">Total Downtime: <strong>51 นาที</strong></div>
         </div>
     </div>

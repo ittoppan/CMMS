@@ -45,26 +45,26 @@ renderHeader();
             <div class="flex items-center justify-between">
                 <div>
                     <span class="cmms-banner info font-mono text-xs font-bold px-2 py-0.5 rounded border"><?= htmlspecialchars($dev['device_code']) ?></span>
-                    <h3 class="font-black text-slate-900 text-base mt-1"><?= htmlspecialchars($dev['asset_code']) ?> - <?= htmlspecialchars($dev['asset_name']) ?></h3>
+                    <h3 class="font-black text-primary text-base mt-1"><?= htmlspecialchars($dev['asset_code']) ?> - <?= htmlspecialchars($dev['asset_name']) ?></h3>
                 </div>
                 <span class="badge font-bold text-xs <?= $statusBadge ?>"><?= strtoupper($dev['status']) ?></span>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-center">
                 <div class="card p-3 border space-y-1">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase block">VIBRATION (ความสั่น)</span>
+                    <span class="text-[10px] font-bold text-muted uppercase block">VIBRATION (ความสั่น)</span>
                     <div id="vib-<?= $dev['id'] ?>" class="text-2xl font-black <?= $isAlarm ? 'text-rose-600' : 'text-indigo-900' ?>">
                         <?= $isAlarm ? '4.8' : '1.4' ?> <span class="text-xs font-normal">mm/s</span>
                     </div>
-                    <span class="text-[9px] text-slate-400 font-bold">เกณฑ์เตือน: > <?= $dev['vibration_threshold'] ?> mm/s</span>
+                    <span class="text-[9px] text-muted font-bold">เกณฑ์เตือน: > <?= $dev['vibration_threshold'] ?> mm/s</span>
                 </div>
 
                 <div class="card p-3 border space-y-1">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase block">TEMP (อุณหภูมิ)</span>
+                    <span class="text-[10px] font-bold text-muted uppercase block">TEMP (อุณหภูมิ)</span>
                     <div id="temp-<?= $dev['id'] ?>" class="text-2xl font-black text-purple-700">
                         <?= $isAlarm ? '68.5' : '48.2' ?> <span class="text-xs font-normal">°C</span>
                     </div>
-                    <span class="text-[9px] text-slate-400 font-bold">เกณฑ์เตือน: > <?= $dev['temp_threshold'] ?> °C</span>
+                    <span class="text-[9px] text-muted font-bold">เกณฑ์เตือน: > <?= $dev['temp_threshold'] ?> °C</span>
                 </div>
             </div>
 

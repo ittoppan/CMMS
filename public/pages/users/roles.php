@@ -197,7 +197,7 @@ renderHeader();
                     <i data-lucide="shield-check" class="w-6 h-6 text-indigo-400"></i>
                     <span>ตั้งค่าสิทธิ์การใช้งานแบบละเอียด (Granular Access Control)</span>
                 </h1>
-                <p class="text-xs text-slate-400 mt-1"><?= $totalPerms ?> สิทธิ์ทั้งหมด × <?= count($roles) ?> บทบาท = <?= $totalPerms * count($roles) ?> จุดควบคุม — ครอบคลุม <?= count($modules) ?> โมดูลระบบ</p>
+                <p class="text-xs text-muted mt-1"><?= $totalPerms ?> สิทธิ์ทั้งหมด × <?= count($roles) ?> บทบาท = <?= $totalPerms * count($roles) ?> จุดควบคุม — ครอบคลุม <?= count($modules) ?> โมดูลระบบ</p>
             </div>
             <div class="flex gap-2">
                 <form method="POST" class="inline">
@@ -247,34 +247,34 @@ renderHeader();
             <?php foreach ($modules as $mKey => $mod): ?>
             <div class="cmms-card overflow-hidden">
                 <!-- Module Header (Collapsible) -->
-                <button type="button" onclick="toggleModule('mod-<?= $mKey ?>')" class="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-all">
+                <button type="button" onclick="toggleModule('mod-<?= $mKey ?>')" class="w-full flex items-center justify-between p-4 hover:bg-subtle transition-all">
                     <div class="flex items-center gap-3">
                         <span class="w-8 h-8 rounded-xl bg-<?= $mod['color'] ?>-100 text-<?= $mod['color'] ?>-700 flex items-center justify-center text-sm font-black"><?= count($mod['perms']) ?></span>
                         <div class="text-left">
-                            <span class="font-black text-slate-900 text-sm block"><?= $mod['label'] ?></span>
-                            <span class="text-[10px] text-slate-400 font-medium"><?= $mod['desc'] ?></span>
+                            <span class="font-black text-primary text-sm block"><?= $mod['label'] ?></span>
+                            <span class="text-[10px] text-muted font-medium"><?= $mod['desc'] ?></span>
                         </div>
                     </div>
-                    <svg id="chevron-mod-<?= $mKey ?>" class="w-5 h-5 text-slate-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                    <svg id="chevron-mod-<?= $mKey ?>" class="w-5 h-5 text-muted transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
                 </button>
 
                 <!-- Permission Rows -->
-                <div id="mod-<?= $mKey ?>" class="border-t border-slate-100">
+                <div id="mod-<?= $mKey ?>" class="border-t border-line">
                     <table class="w-full text-xs">
-                        <thead class="bg-slate-50">
+                        <thead class="bg-subtle">
                             <tr>
-                                <th class="p-3 text-left font-bold text-slate-600 w-2/5">สิทธิ์การทำงาน</th>
+                                <th class="p-3 text-left font-bold text-secondary w-2/5">สิทธิ์การทำงาน</th>
                                 <?php foreach ($roles as $rKey => $r): ?>
-                                <th class="p-3 text-center font-bold text-slate-600 w-[15%]">
+                                <th class="p-3 text-center font-bold text-secondary w-[15%]">
                                     <span class="block"><?= $r['icon'] ?></span>
                                     <span class="block text-[10px] mt-0.5"><?= $r['label'] ?></span>
                                 </th>
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-line">
                             <!-- Select All Row -->
-                            <tr class="bg-slate-50/50">
+                            <tr class="bg-subtle/50">
                                 <td class="p-3 font-bold text-indigo-700 text-[11px]">✅ เลือกทั้งหมดในโมดูลนี้</td>
                                 <?php foreach ($roles as $rKey => $r): ?>
                                 <td class="p-3 text-center">
@@ -283,10 +283,10 @@ renderHeader();
                                 <?php endforeach; ?>
                             </tr>
                             <?php foreach ($mod['perms'] as $pKey => $pLabel): ?>
-                            <tr class="hover:bg-slate-50/80 transition-colors">
+                            <tr class="hover:bg-subtle/80 transition-colors">
                                 <td class="p-3">
-                                    <span class="font-bold text-slate-800 block"><?= htmlspecialchars($pLabel) ?></span>
-                                    <code class="text-[9px] text-slate-400 font-mono"><?= $pKey ?></code>
+                                    <span class="font-bold text-primary block"><?= htmlspecialchars($pLabel) ?></span>
+                                    <code class="text-[9px] text-muted font-mono"><?= $pKey ?></code>
                                 </td>
                                 <?php foreach ($roles as $rKey => $r): ?>
                                 <td class="p-3 text-center <?= $r['bgCell'] ?>">
@@ -311,26 +311,26 @@ renderHeader();
         <!-- ═══ TAB 2: User Role Assignment ═══ -->
         <div id="panel-users" class="pt-4" style="display:none;">
             <div class="cmms-card overflow-hidden">
-                <div class="p-4 border-b border-slate-100">
-                    <h3 class="font-black text-slate-900 text-sm">👥 กำหนดบทบาทให้พนักงานแต่ละคน</h3>
-                    <p class="text-[10px] text-slate-400 mt-0.5">เลือกบทบาทที่เหมาะสมกับตำแหน่งงาน — สิทธิ์จะเปลี่ยนตามบทบาทที่เลือกไว้ในตารางด้านบน</p>
+                <div class="p-4 border-b border-line">
+                    <h3 class="font-black text-primary text-sm">👥 กำหนดบทบาทให้พนักงานแต่ละคน</h3>
+                    <p class="text-[10px] text-muted mt-0.5">เลือกบทบาทที่เหมาะสมกับตำแหน่งงาน — สิทธิ์จะเปลี่ยนตามบทบาทที่เลือกไว้ในตารางด้านบน</p>
                 </div>
                 <table class="w-full text-xs">
-                    <thead class="bg-slate-50">
+                    <thead class="bg-subtle">
                         <tr>
-                            <th class="p-3 text-left font-bold text-slate-600 w-12">#</th>
-                            <th class="p-3 text-left font-bold text-slate-600">ชื่อผู้ใช้</th>
-                            <th class="p-3 text-left font-bold text-slate-600">ชื่อ-นามสกุล</th>
-                            <th class="p-3 text-center font-bold text-slate-600">บทบาทปัจจุบัน</th>
-                            <th class="p-3 text-center font-bold text-slate-600">เปลี่ยนบทบาท</th>
+                            <th class="p-3 text-left font-bold text-secondary w-12">#</th>
+                            <th class="p-3 text-left font-bold text-secondary">ชื่อผู้ใช้</th>
+                            <th class="p-3 text-left font-bold text-secondary">ชื่อ-นามสกุล</th>
+                            <th class="p-3 text-center font-bold text-secondary">บทบาทปัจจุบัน</th>
+                            <th class="p-3 text-center font-bold text-secondary">เปลี่ยนบทบาท</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($users as $u): ?>
-                        <tr class="hover:bg-slate-50/80">
-                            <td class="p-3 text-center font-bold text-slate-400"><?= $u['id'] ?></td>
+                        <tr class="hover:bg-subtle/80">
+                            <td class="p-3 text-center font-bold text-muted"><?= $u['id'] ?></td>
                             <td class="p-3 font-mono font-bold text-indigo-700">@<?= htmlspecialchars($u['username']) ?></td>
-                            <td class="p-3 font-bold text-slate-900"><?= htmlspecialchars($u['full_name']) ?></td>
+                            <td class="p-3 font-bold text-primary"><?= htmlspecialchars($u['full_name']) ?></td>
                             <td class="p-3 text-center">
                                 <?php
                                 $roleBadge = match($u['role']) {
@@ -344,7 +344,7 @@ renderHeader();
                                 <span class="inline-block px-2.5 py-1 rounded-lg text-[10px] font-black <?= $roleBadge ?>"><?= $roleLabel ?> <?= $roles[$u['role']]['label'] ?? $u['role'] ?></span>
                             </td>
                             <td class="p-3 text-center">
-                                <select name="user_roles[<?= $u['id'] ?>]" class="text-xs font-bold bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <select name="user_roles[<?= $u['id'] ?>]" class="text-xs font-bold bg-subtle border border-line rounded-lg px-3 py-1.5 cursor-pointer focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                     <?php foreach ($roles as $rKey => $r): ?>
                                     <option value="<?= $rKey ?>" <?= $u['role'] === $rKey ? 'selected' : '' ?>><?= $r['icon'] ?> <?= $r['label'] ?></option>
                                     <?php endforeach; ?>
@@ -363,16 +363,16 @@ renderHeader();
                 <?php foreach ($roles as $rKey => $r): ?>
                 <div class="cmms-card p-5 space-y-3">
                     <div class="text-2xl text-center"><?= $r['icon'] ?></div>
-                    <h3 class="font-black text-slate-900 text-sm text-center"><?= $r['label'] ?></h3>
+                    <h3 class="font-black text-primary text-sm text-center"><?= $r['label'] ?></h3>
                     <?php
                     $count = count($matrix[$rKey] ?? $defaults[$rKey] ?? []);
                     $pct = round(($count / $totalPerms) * 100);
                     ?>
                     <div class="text-center">
                         <span class="text-2xl font-black text-indigo-700"><?= $count ?></span>
-                        <span class="text-xs text-slate-400 block">/ <?= $totalPerms ?> สิทธิ์ (<?= $pct ?>%)</span>
+                        <span class="text-xs text-muted block">/ <?= $totalPerms ?> สิทธิ์ (<?= $pct ?>%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div class="w-full bg-muted h-2 rounded-full overflow-hidden">
                         <div class="bg-indigo-600 h-full rounded-full" style="width:<?= $pct ?>%"></div>
                     </div>
                 </div>

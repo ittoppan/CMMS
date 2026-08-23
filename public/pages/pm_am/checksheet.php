@@ -150,8 +150,8 @@ renderHeader();
                 <a href="index.php" class="text-sm font-bold text-indigo-600 hover:underline">&larr; กลับไปปฏิทิน PM</a>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold">ISO F-EN-02 Checksheet</span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-slate-900 mt-1">📋 แบบฟอร์มตรวจเช็คเครื่องจักร PM/AM (Inspection Checksheet)</h1>
-            <p class="text-xs text-slate-500">รองรับการตรวจผ่านคอมพิวเตอร์ Desktop และมือถือ Smartphone / Tablet / LINE LIFF</p>
+            <h1 class="text-xl md:text-2xl font-black text-primary mt-1">📋 แบบฟอร์มตรวจเช็คเครื่องจักร PM/AM (Inspection Checksheet)</h1>
+            <p class="text-xs text-muted">รองรับการตรวจผ่านคอมพิวเตอร์ Desktop และมือถือ Smartphone / Tablet / LINE LIFF</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -172,7 +172,7 @@ renderHeader();
         <input type="hidden" name="action" value="save_checksheet">
 
         <!-- Official Printable ISO PM Checksheet Document Container -->
-        <div id="printable-checksheet" class="card p-6 md:p-8 shadow-xl text-slate-900 space-y-6 max-w-5xl mx-auto">
+        <div id="printable-checksheet" class="card p-6 md:p-8 shadow-xl text-primary space-y-6 max-w-5xl mx-auto">
             
             <!-- Checksheet Header Block -->
             <div class="border-2 border-slate-900 p-4 rounded-xl">
@@ -180,8 +180,8 @@ renderHeader();
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-indigo-900 text-white font-extrabold flex items-center justify-center rounded-lg text-xl shadow-md">T</div>
                         <div>
-                            <h2 class="text-base md:text-lg font-black tracking-tight text-slate-900">บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</h2>
-                            <p class="text-[11px] font-bold text-slate-600">TOPPAN FLEXIBLE PACKAGING (THAILAND) CO., LTD. — PM INSPECTION CHECKSHEET</p>
+                            <h2 class="text-base md:text-lg font-black tracking-tight text-primary">บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด</h2>
+                            <p class="text-[11px] font-bold text-secondary">TOPPAN FLEXIBLE PACKAGING (THAILAND) CO., LTD. — PM INSPECTION CHECKSHEET</p>
                         </div>
                     </div>
                     <div class="text-right text-xs font-mono font-bold">
@@ -193,17 +193,17 @@ renderHeader();
 
                 <!-- Machine Specs Summary Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                    <div><span class="text-slate-500 block">ชื่อเครื่องจักร:</span> <strong class="text-slate-900 text-sm"><?= htmlspecialchars($pm['asset_name'] ?? '-') ?></strong></div>
-                    <div><span class="text-slate-500 block">รหัสเครื่องจักร:</span> <strong class="font-mono text-indigo-700 text-sm"><?= htmlspecialchars($pm['asset_code'] ?? '-') ?></strong></div>
-                    <div><span class="text-slate-500 block">แผนก / สถานที่:</span> <strong><?= htmlspecialchars($pm['dept_name'] ?? '-') ?></strong></div>
-                    <div><span class="text-slate-500 block">ช่างผู้ตรวจเช็ค:</span> <strong><?= htmlspecialchars($pm['assigned_name'] ?? 'ผู้ตรวจเช็ค') ?></strong></div>
+                    <div><span class="text-muted block">ชื่อเครื่องจักร:</span> <strong class="text-primary text-sm"><?= htmlspecialchars($pm['asset_name'] ?? '-') ?></strong></div>
+                    <div><span class="text-muted block">รหัสเครื่องจักร:</span> <strong class="font-mono text-indigo-700 text-sm"><?= htmlspecialchars($pm['asset_code'] ?? '-') ?></strong></div>
+                    <div><span class="text-muted block">แผนก / สถานที่:</span> <strong><?= htmlspecialchars($pm['dept_name'] ?? '-') ?></strong></div>
+                    <div><span class="text-muted block">ช่างผู้ตรวจเช็ค:</span> <strong><?= htmlspecialchars($pm['assigned_name'] ?? 'ผู้ตรวจเช็ค') ?></strong></div>
                 </div>
             </div>
 
             <!-- DESKTOP TABLE VIEW (Visible on Screens >= md) -->
             <div class="hidden md:block overflow-x-auto border-2 border-slate-900 rounded-xl">
                 <table class="w-full text-xs text-left border-collapse">
-                    <thead class="bg-slate-100 font-bold border-b-2 border-slate-900 text-slate-900 uppercase">
+                    <thead class="bg-muted font-bold border-b-2 border-slate-900 text-primary uppercase">
                         <tr>
                             <th class="p-2.5 border-r border-slate-400 text-center w-10">ลำดับ</th>
                             <th class="p-2.5 border-r border-slate-400">หมวดการตรวจเช็ค</th>
@@ -214,33 +214,33 @@ renderHeader();
                             <th class="p-2.5">หมายเหตุ</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-300">
+                    <tbody class="divide-y divide-line">
                         <?php foreach ($defaultChecklist as $item): ?>
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-2.5 border-r border-slate-300 text-center font-bold"><?= $item['no'] ?></td>
-                            <td class="p-2.5 border-r border-slate-300 font-bold text-indigo-900"><?= htmlspecialchars($item['category']) ?></td>
-                            <td class="p-2.5 border-r border-slate-300 font-semibold"><?= htmlspecialchars($item['item']) ?></td>
-                            <td class="p-2.5 border-r border-slate-300 text-slate-600">
+                        <tr class="hover:bg-subtle">
+                            <td class="p-2.5 border-r border-line text-center font-bold"><?= $item['no'] ?></td>
+                            <td class="p-2.5 border-r border-line font-bold text-indigo-900"><?= htmlspecialchars($item['category']) ?></td>
+                            <td class="p-2.5 border-r border-line font-semibold"><?= htmlspecialchars($item['item']) ?></td>
+                            <td class="p-2.5 border-r border-line text-secondary">
                                 <div><?= htmlspecialchars($item['method']) ?></div>
-                                <div class="font-bold text-slate-900">เกณฑ์: <?= htmlspecialchars($item['standard']) ?></div>
+                                <div class="font-bold text-primary">เกณฑ์: <?= htmlspecialchars($item['standard']) ?></div>
                             </td>
-                            <td class="p-2.5 border-r border-slate-300 text-center">
-                                <div class="inline-flex rounded-lg shadow-sm border border-slate-300 overflow-hidden" role="group">
+                            <td class="p-2.5 border-r border-line text-center">
+                                <div class="inline-flex rounded-lg shadow-sm border border-line overflow-hidden" role="group">
                                     <input type="radio" id="pass-dt-<?= $item['no'] ?>" name="check_results[<?= $item['no'] ?>]" value="pass" checked class="hidden check-pass">
-                                    <label for="pass-dt-<?= $item['no'] ?>" class="px-2.5 py-1 text-[11px] font-bold cursor-pointer bg-white text-slate-700 border-r hover:bg-emerald-50">✔ PASS</label>
+                                    <label for="pass-dt-<?= $item['no'] ?>" class="px-2.5 py-1 text-[11px] font-bold cursor-pointer bg-white text-secondary border-r hover:bg-emerald-50">✔ PASS</label>
                                     
                                     <input type="radio" id="fail-dt-<?= $item['no'] ?>" name="check_results[<?= $item['no'] ?>]" value="fail" class="hidden check-fail">
-                                    <label for="fail-dt-<?= $item['no'] ?>" class="px-2.5 py-1 text-[11px] font-bold cursor-pointer bg-white text-slate-700 border-r hover:bg-rose-50">✖ FAIL</label>
+                                    <label for="fail-dt-<?= $item['no'] ?>" class="px-2.5 py-1 text-[11px] font-bold cursor-pointer bg-white text-secondary border-r hover:bg-rose-50">✖ FAIL</label>
 
                                     <input type="radio" id="na-dt-<?= $item['no'] ?>" name="check_results[<?= $item['no'] ?>]" value="na" class="hidden check-na">
-                                    <label for="na-dt-<?= $item['no'] ?>" class="px-2 py-1 text-[11px] font-bold cursor-pointer bg-white text-slate-700 hover:bg-slate-100">N/A</label>
+                                    <label for="na-dt-<?= $item['no'] ?>" class="px-2 py-1 text-[11px] font-bold cursor-pointer bg-white text-secondary hover:bg-muted">N/A</label>
                                 </div>
                             </td>
-                            <td class="p-2.5 border-r border-slate-300 text-center font-mono">
-                                <input type="text" name="check_values[<?= $item['no'] ?>]" value="<?= htmlspecialchars($item['default_value']) ?>" class="w-full text-center text-xs font-bold border border-slate-300 rounded p-1 bg-slate-50 focus:bg-white text-indigo-700" />
+                            <td class="p-2.5 border-r border-line text-center font-mono">
+                                <input type="text" name="check_values[<?= $item['no'] ?>]" value="<?= htmlspecialchars($item['default_value']) ?>" class="w-full text-center text-xs font-bold border border-line rounded p-1 bg-subtle focus:bg-white text-indigo-700" />
                             </td>
                             <td class="p-2.5">
-                                <input type="text" name="check_remarks[<?= $item['no'] ?>]" placeholder="ระบุเพิ่มเติม..." class="w-full text-xs border border-slate-300 rounded p-1" />
+                                <input type="text" name="check_remarks[<?= $item['no'] ?>]" placeholder="ระบุเพิ่มเติม..." class="w-full text-xs border border-line rounded p-1" />
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -251,33 +251,33 @@ renderHeader();
             <!-- MOBILE CARDS VIEW (Visible on Screens < md) -->
             <div class="block md:hidden space-y-4">
                 <?php foreach ($defaultChecklist as $item): ?>
-                <div class="p-4 bg-slate-50 border border-slate-300 rounded-xl space-y-3 shadow-sm">
-                    <div class="flex items-center justify-between border-b pb-2 border-slate-200">
+                <div class="p-4 bg-subtle border border-line rounded-xl space-y-3 shadow-sm">
+                    <div class="flex items-center justify-between border-b pb-2 border-line">
                         <span class="font-mono font-bold text-xs bg-indigo-900 text-white px-2 py-0.5 rounded">ข้อที่ <?= $item['no'] ?></span>
                         <span class="font-bold text-indigo-900 text-xs"><?= htmlspecialchars($item['category']) ?></span>
                     </div>
 
                     <div>
-                        <h4 class="font-extrabold text-slate-900 text-sm mb-1"><?= htmlspecialchars($item['item']) ?></h4>
-                        <p class="text-xs text-slate-500">วิธีตรวจ: <?= htmlspecialchars($item['method']) ?></p>
-                        <p class="text-xs font-bold text-slate-700">เกณฑ์มาตรฐาน: <?= htmlspecialchars($item['standard']) ?></p>
+                        <h4 class="font-extrabold text-primary text-sm mb-1"><?= htmlspecialchars($item['item']) ?></h4>
+                        <p class="text-xs text-muted">วิธีตรวจ: <?= htmlspecialchars($item['method']) ?></p>
+                        <p class="text-xs font-bold text-secondary">เกณฑ์มาตรฐาน: <?= htmlspecialchars($item['standard']) ?></p>
                     </div>
 
                     <!-- Result Selector Buttons -->
                     <div class="space-y-1">
-                        <label class="block text-[11px] font-bold text-slate-600">ผลการตรวจเช็ค:</label>
+                        <label class="block text-[11px] font-bold text-secondary">ผลการตรวจเช็ค:</label>
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <input type="radio" id="pass-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="pass" checked class="hidden check-pass" onchange="syncMobileResult(<?= $item['no'] ?>, 'pass')">
-                                <label for="pass-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">✔ PASS</label>
+                                <label for="pass-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-secondary">✔ PASS</label>
                             </div>
                             <div>
                                 <input type="radio" id="fail-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="fail" class="hidden check-fail" onchange="syncMobileResult(<?= $item['no'] ?>, 'fail')">
-                                <label for="fail-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">✖ FAIL</label>
+                                <label for="fail-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-secondary">✖ FAIL</label>
                             </div>
                             <div>
                                 <input type="radio" id="na-mb-<?= $item['no'] ?>" name="check_results_mb[<?= $item['no'] ?>]" value="na" class="hidden check-na" onchange="syncMobileResult(<?= $item['no'] ?>, 'na')">
-                                <label for="na-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-slate-700">N/A</label>
+                                <label for="na-mb-<?= $item['no'] ?>" class="card block text-center py-2 text-xs font-black text-secondary">N/A</label>
                             </div>
                         </div>
                     </div>
@@ -285,11 +285,11 @@ renderHeader();
                     <!-- Value & Remark Input -->
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">ค่าที่วัดได้:</label>
+                            <label class="block text-[10px] font-bold text-muted mb-1">ค่าที่วัดได้:</label>
                             <input type="text" value="<?= htmlspecialchars($item['default_value']) ?>" class="card w-full text-xs font-bold p-2 text-indigo-700" onchange="document.getElementsByName('check_values[<?= $item['no'] ?>]')[0].value = this.value" />
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">หมายเหตุ:</label>
+                            <label class="block text-[10px] font-bold text-muted mb-1">หมายเหตุ:</label>
                             <input type="text" placeholder="ระบุ..." class="card w-full text-xs p-2" onchange="document.getElementsByName('check_remarks[<?= $item['no'] ?>]')[0].value = this.value" />
                         </div>
                     </div>
@@ -299,14 +299,14 @@ renderHeader();
 
             <!-- Checksheet Signatures Stamp Block -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 text-xs text-center border-t-2 border-slate-900">
-                <div class="border border-slate-300 p-4 rounded-xl space-y-3">
-                    <span class="font-bold block text-slate-700">ผู้ตรวจเช็ค / เซ็นชื่อดิจิทัล (Inspector Signature) *</span>
+                <div class="border border-line p-4 rounded-xl space-y-3">
+                    <span class="font-bold block text-secondary">ผู้ตรวจเช็ค / เซ็นชื่อดิจิทัล (Inspector Signature) *</span>
                     
-                    <div class="no-print bg-slate-50 p-2 rounded-xl border border-slate-300 space-y-2">
+                    <div class="no-print bg-subtle p-2 rounded-xl border border-line space-y-2">
                         <canvas id="sigCanvas" width="280" height="110" class="card w-full h-24 cursor-crosshair touch-none"></canvas>
                         <div class="flex items-center justify-between text-[11px]">
                             <button type="button" onclick="clearSignature()" class="text-rose-600 font-bold hover:underline">🧹 ล้างลายเซ็น</button>
-                            <span class="text-slate-400">เซ็นด้วยนิ้วหรือเมาส์</span>
+                            <span class="text-muted">เซ็นด้วยนิ้วหรือเมาส์</span>
                         </div>
                     </div>
                     <input type="hidden" id="inspector_signature" name="inspector_signature">
@@ -315,24 +315,24 @@ renderHeader();
                         <img id="sigPreviewImg" class="max-h-10 object-contain hidden" alt="Signature Preview">
                     </div>
 
-                    <div class="font-bold text-slate-900">(<?= htmlspecialchars($pm['assigned_name'] ?? 'ช่างตรวจเช็ค') ?>)</div>
-                    <span class="text-slate-500 block text-[11px]">วันที่: <?= date('d/m/Y') ?></span>
+                    <div class="font-bold text-primary">(<?= htmlspecialchars($pm['assigned_name'] ?? 'ช่างตรวจเช็ค') ?>)</div>
+                    <span class="text-muted block text-[11px]">วันที่: <?= date('d/m/Y') ?></span>
                 </div>
 
-                <div class="border border-slate-300 p-4 rounded-xl space-y-6">
-                    <span class="font-bold block text-slate-700">ผู้ทบทวนงาน (Maintenance Engineer)</span>
-                    <div class="h-14 border-b border-dashed border-slate-400 flex items-center justify-center italic text-slate-400">
+                <div class="border border-line p-4 rounded-xl space-y-6">
+                    <span class="font-bold block text-secondary">ผู้ทบทวนงาน (Maintenance Engineer)</span>
+                    <div class="h-14 border-b border-dashed border-slate-400 flex items-center justify-center italic text-muted">
                         (วิศวกรซ่อมบำรุง)
                     </div>
-                    <span class="text-slate-500 block">วันที่: ____/____/2026</span>
+                    <span class="text-muted block">วันที่: ____/____/2026</span>
                 </div>
 
-                <div class="border border-slate-300 p-4 rounded-xl space-y-6">
-                    <span class="font-bold block text-slate-700">หัวหน้าฝ่ายซ่อมบำรุง (Maintenance Manager)</span>
-                    <div class="h-14 border-b border-dashed border-slate-400 flex items-center justify-center italic text-slate-400">
+                <div class="border border-line p-4 rounded-xl space-y-6">
+                    <span class="font-bold block text-secondary">หัวหน้าฝ่ายซ่อมบำรุง (Maintenance Manager)</span>
+                    <div class="h-14 border-b border-dashed border-slate-400 flex items-center justify-center italic text-muted">
                         (อนุมัติเช็คชีท)
                     </div>
-                    <span class="text-slate-500 block">วันที่: ____/____/2026</span>
+                    <span class="text-muted block">วันที่: ____/____/2026</span>
                 </div>
             </div>
 

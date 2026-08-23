@@ -23,14 +23,14 @@ renderHeader();
 <div class="max-w-2xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไป MTBF/MTTR</a>
-        <h1 class="mt-2 text-2xl font-bold text-gray-900">เพิ่มข้อมูล MTBF/MTTR</h1>
+        <h1 class="mt-2 text-2xl font-bold text-primary">เพิ่มข้อมูล MTBF/MTTR</h1>
     </div>
     <?php if ($error): ?><div class="cmms-banner error text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <?php if ($success): ?><div class="cmms-banner success text-sm rounded-md p-3 mb-4"><?= htmlspecialchars($success) ?></div><?php endif; ?>
     <form method="post" class="card p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">ทรัพย์สิน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ทรัพย์สิน <span class="text-red-500">*</span></label>
                 <select name="asset_id" required class="input input-bordered w-full mt-1">
                     <option value="">-- เลือกทรัพย์สิน --</option>
                     <?php foreach ($assets as $a): ?>
@@ -39,27 +39,27 @@ renderHeader();
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ปี <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">ปี <span class="text-red-500">*</span></label>
                 <input type="number" name="year" value="<?= date('Y') ?>" min="2000" max="2099" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">เดือน <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-secondary">เดือน <span class="text-red-500">*</span></label>
                 <input type="number" name="month" value="<?= date('n') ?>" min="1" max="12" required class="input input-bordered w-full mt-1">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">ชั่วโมงทำงาน</label>
+                <label class="block text-sm font-medium text-secondary">ชั่วโมงทำงาน</label>
                 <input type="number" name="operating_hours" step="0.5" class="input input-bordered w-full mt-1" value="0">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">จำนวนครั้งที่เสีย</label>
+                <label class="block text-sm font-medium text-secondary">จำนวนครั้งที่เสีย</label>
                 <input type="number" name="total_failures" min="0" class="input input-bordered w-full mt-1" value="0">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Downtime (นาที)</label>
+                <label class="block text-sm font-medium text-secondary">Downtime (นาที)</label>
                 <input type="number" name="total_downtime_minutes" min="0" class="input input-bordered w-full mt-1" value="0">
             </div>
         </div>
-        <div class="bg-gray-50 rounded-md p-4 text-sm text-gray-600">
+        <div class="bg-subtle rounded-md p-4 text-sm text-secondary">
             MTBF และ MTTR จะคำนวณอัตโนมัติเมื่อบันทึก (MTBF = ชม.ทำงาน/จำนวนครั้งเสีย, MTTR = Downtime นาที/จำนวนครั้งเสีย)
         </div>
         <div class="flex gap-3">

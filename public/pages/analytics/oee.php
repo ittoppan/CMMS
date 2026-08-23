@@ -54,8 +54,8 @@ renderHeader();
                 <span class="font-extrabold text-indigo-900 text-sm">⏱️ 1. Availability Rate (อัตราความพร้อมใช้งาน)</span>
                 <span class="badge bg-indigo-100 text-indigo-800 font-bold text-xs"><?= $avail !== null ? $avail . '%' : 'N/A' ?></span>
             </div>
-            <p class="text-xs text-slate-600">คำนวณจาก downtime จริง 30 วันที่ผ่านมา (จากตาราง repair) เทียบกับเวลาเดินเครื่องตามแผน</p>
-            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+            <p class="text-xs text-secondary">คำนวณจาก downtime จริง 30 วันที่ผ่านมา (จากตาราง repair) เทียบกับเวลาเดินเครื่องตามแผน</p>
+            <div class="w-full bg-muted h-3 rounded-full overflow-hidden">
                 <div class="bg-indigo-600 h-full rounded-full" style="width: <?= $avail !== null ? $avail : 0 ?>%;"></div>
             </div>
         </div>
@@ -66,8 +66,8 @@ renderHeader();
                 <span class="font-extrabold text-purple-900 text-sm">⚡ 2. Performance Rate (สมรรถนะการเดินเครื่อง)</span>
                 <span class="badge bg-purple-100 text-purple-800 font-bold text-xs"><?= $perf !== null ? $perf . '%' : 'N/A' ?></span>
             </div>
-            <p class="text-xs text-slate-600">ยังไม่มีข้อมูลการผลิตจริง (Ideal Cycle Time) ในระบบ — รอเชื่อมข้อมูลฝ่ายผลิต</p>
-            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+            <p class="text-xs text-secondary">ยังไม่มีข้อมูลการผลิตจริง (Ideal Cycle Time) ในระบบ — รอเชื่อมข้อมูลฝ่ายผลิต</p>
+            <div class="w-full bg-muted h-3 rounded-full overflow-hidden">
                 <div class="bg-purple-600 h-full rounded-full" style="width: <?= $perf !== null ? $perf : 0 ?>%;"></div>
             </div>
         </div>
@@ -78,8 +78,8 @@ renderHeader();
                 <span class="font-extrabold text-emerald-900 text-sm">🎯 3. Quality Rate (คุณภาพชิ้นงานดี)</span>
                 <span class="badge badge badge-success font-bold text-xs"><?= $qual !== null ? $qual . '%' : 'N/A' ?></span>
             </div>
-            <p class="text-xs text-slate-600">ยังไม่มีข้อมูล QC ในระบบ — รอเชื่อมข้อมูลฝ่ายประกันคุณภาพ</p>
-            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+            <p class="text-xs text-secondary">ยังไม่มีข้อมูล QC ในระบบ — รอเชื่อมข้อมูลฝ่ายประกันคุณภาพ</p>
+            <div class="w-full bg-muted h-3 rounded-full overflow-hidden">
                 <div class="bg-emerald-600 h-full rounded-full" style="width: <?= $qual !== null ? $qual : 0 ?>%;"></div>
             </div>
         </div>

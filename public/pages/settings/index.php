@@ -130,7 +130,7 @@ foreach ($groups as $g) { $totalItems += count($g['items']); }
                 <i data-lucide="sliders" class="w-7 h-7 text-indigo-400"></i>
                 <span>ศูนย์รวมการตั้งค่าทั้งหมด (Control Panel Hub)</span>
             </h1>
-            <p class="text-xs text-slate-400 mt-1">รวมเมนูการตั้งค่า <?= $totalItems ?> รายการใน <?= count($groups) ?> หมวดหมู่ — ควบคุมระบบ Masters, Governance, Security และ Integrations</p>
+            <p class="text-xs text-muted mt-1">รวมเมนูการตั้งค่า <?= $totalItems ?> รายการใน <?= count($groups) ?> หมวดหมู่ — ควบคุมระบบ Masters, Governance, Security และ Integrations</p>
         </div>
         <a href="/pages/settings/health.php" class="btn btn-primary bg-emerald-600 hover:bg-emerald-500 text-white text-xs gap-2">
             <i data-lucide="activity" class="w-4 h-4"></i>
@@ -141,7 +141,7 @@ foreach ($groups as $g) { $totalItems += count($g['items']); }
     <!-- Live Search Filter Box -->
     <div class="card p-4">
         <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            <i data-lucide="search" class="w-4 h-4 text-muted absolute left-3 top-3"></i>
             <input type="text" id="settingSearchInput" onkeyup="filterSettings()" placeholder="🔍 ค้นหารายการตั้งค่าด่วน (เช่น Failure Codes, Sage 300, ISO, Backup, Security)..." class="input input-bordered w-full pl-10 text-xs font-bold">
         </div>
     </div>
@@ -151,7 +151,7 @@ foreach ($groups as $g) { $totalItems += count($g['items']); }
         <?php foreach ($groups as $gTitle => $g): ?>
         <div class="card p-5 space-y-3 setting-group-card">
             <div class="flex items-center justify-between border-b pb-3">
-                <h3 class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <h3 class="font-extrabold text-primary text-sm flex items-center gap-2">
                     <i data-lucide="<?= $g['icon'] ?>" class="w-4 h-4 text-indigo-600"></i>
                     <span><?= htmlspecialchars($gTitle) ?></span>
                 </h3>
@@ -160,12 +160,12 @@ foreach ($groups as $g) { $totalItems += count($g['items']); }
 
             <div class="space-y-1.5 setting-item-list">
                 <?php foreach ($g['items'] as $item): ?>
-                <a href="<?= htmlspecialchars($item['url']) ?>" class="setting-item-link block p-2.5 rounded-lg border border-slate-100 hover:border-indigo-200 hover:bg-slate-50/80 transition-all group">
+                <a href="<?= htmlspecialchars($item['url']) ?>" class="setting-item-link block p-2.5 rounded-lg border border-line hover:border-indigo-200 hover:bg-subtle/80 transition-all group">
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-xs text-indigo-700 group-hover:text-indigo-900 transition-colors"><?= htmlspecialchars($item['label']) ?></span>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors"></i>
                     </div>
-                    <span class="text-[11px] text-slate-500 block mt-0.5"><?= htmlspecialchars($item['desc']) ?></span>
+                    <span class="text-[11px] text-muted block mt-0.5"><?= htmlspecialchars($item['desc']) ?></span>
                 </a>
                 <?php endforeach; ?>
             </div>

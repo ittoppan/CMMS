@@ -33,17 +33,17 @@ renderHeader();
             </div>
 
             <div>
-                <h3 class="font-black text-slate-900 text-lg mb-1"><?= htmlspecialchars($st['site_name']) ?></h3>
-                <p class="text-xs text-slate-500 line-clamp-2"><?= htmlspecialchars($st['location_address']) ?></p>
+                <h3 class="font-black text-primary text-lg mb-1"><?= htmlspecialchars($st['site_name']) ?></h3>
+                <p class="text-xs text-muted line-clamp-2"><?= htmlspecialchars($st['location_address']) ?></p>
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-2 border-t text-xs">
-                <div class="p-2 bg-slate-50 rounded-xl text-center">
-                    <span class="text-slate-400 font-bold text-[10px] block">เครื่องจักรสะสม</span>
+                <div class="p-2 bg-subtle rounded-xl text-center">
+                    <span class="text-muted font-bold text-[10px] block">เครื่องจักรสะสม</span>
                     <span class="font-black text-indigo-900 text-base">5 เครื่อง</span>
                 </div>
-                <div class="p-2 bg-slate-50 rounded-xl text-center">
-                    <span class="text-slate-400 font-bold text-[10px] block">สถานะการซ่อม</span>
+                <div class="p-2 bg-subtle rounded-xl text-center">
+                    <span class="text-muted font-bold text-[10px] block">สถานะการซ่อม</span>
                     <span class="font-black text-emerald-600 text-base">ปกติ</span>
                 </div>
             </div>

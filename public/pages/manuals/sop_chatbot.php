@@ -28,15 +28,15 @@ renderHeader();
                 <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>🤖 AI Maintenance Copilot (TOPPAN SOP Intelligence)</span>
             </div>
-            <span class="text-[10px] text-slate-400 font-mono">Knowledge Base v3.2</span>
+            <span class="text-[10px] text-muted font-mono">Knowledge Base v3.2</span>
         </div>
 
         <!-- Chat Messages Box -->
-        <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs font-medium">
+        <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-3 bg-subtle text-xs font-medium">
             <!-- AI Welcome Message -->
             <div class="flex gap-2 max-w-lg">
                 <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-black shrink-0 text-xs">AI</div>
-                <div class="card p-3.5 text-slate-800 leading-relaxed">
+                <div class="card p-3.5 text-primary leading-relaxed">
                     สวัสดีครับผมคือ **AI ผู้ช่วยตอบคู่มือการซ่อมบำรุง (Maintenance SOP Chatbot)** 🤖<br><br>
                     สามารถสอบถามวิธีแก้ไข Error Code หรือขั้นตอนซ่อมได้เลยครับ เช่น:<br>
                     - *"วิธีแก้ไข Error Code E-402 มอเตอร์อุณหภูมิสูง"*<br>
@@ -47,7 +47,7 @@ renderHeader();
         </div>
 
         <!-- Chat Input Bar -->
-        <form onsubmit="sendChat(event)" class="p-3 bg-white border-t border-slate-200 flex gap-2">
+        <form onsubmit="sendChat(event)" class="p-3 bg-white border-t border-line flex gap-2">
             <input type="text" id="chatInput" placeholder="พิมพ์ข้อความคำถามเกี่ยวกับคู่มือหรืออาการเสียของเครื่องจักร..." class="input input-bordered w-full text-xs flex-1 rounded-xl">
             <button type="submit" class="btn btn-primary bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-5 rounded-xl gap-2">
                 <i data-lucide="send" class="w-4 h-4"></i>
@@ -81,7 +81,7 @@ function sendChat(e) {
         aiDiv.className = 'flex gap-2 max-w-lg';
         aiDiv.innerHTML = `
             <div class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-black shrink-0 text-xs">AI</div>
-            <div class="card p-3.5 text-slate-800 leading-relaxed">
+            <div class="card p-3.5 text-primary leading-relaxed">
                 🔍 <strong>คำแนะนำการแก้ไขตามคู่มือ ISO SOP:</strong><br><br>
                 สำหรับคำถาม <em>"${escapeHtml(txt)}"</em><br>
                 1. ตรวจสอบระดับน้ำมันหล่อลื่นและแรงดันลมในระบบ<br>

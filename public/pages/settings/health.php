@@ -121,8 +121,8 @@ renderHeader();
 <div class="max-w-4xl mx-auto space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">🩺 ตรวจสอบสุขภาพระบบ (System Health Diagnostics)</h1>
-            <p class="mt-1 text-sm text-gray-500">รายงานความสมบูรณ์ของฐานข้อมูล เซิร์ฟเวอร์ IIS และการเชื่อมต่อ LINE</p>
+            <h1 class="text-2xl font-bold text-primary">🩺 ตรวจสอบสุขภาพระบบ (System Health Diagnostics)</h1>
+            <p class="mt-1 text-sm text-muted">รายงานความสมบูรณ์ของฐานข้อมูล เซิร์ฟเวอร์ IIS และการเชื่อมต่อ LINE</p>
         </div>
         <a href="health.php" class="btn btn-secondary">🔄 รีเฟรชสถานะ</a>
     </div>
@@ -130,29 +130,29 @@ renderHeader();
     <!-- Server Disk Summary -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="card p-4">
-            <span class="text-xs font-bold text-gray-500 block">พื้นที่ว่างฮาร์ดดิสก์ (Drive C:)</span>
+            <span class="text-xs font-bold text-muted block">พื้นที่ว่างฮาร์ดดิสก์ (Drive C:)</span>
             <span class="text-2xl font-extrabold text-brand-600 mt-1 block"><?= $freeSpace ?> GB / <?= $totalSpace ?> GB</span>
         </div>
         <div class="card p-4">
-            <span class="text-xs font-bold text-gray-500 block">เวอร์ชัน PHP</span>
+            <span class="text-xs font-bold text-muted block">เวอร์ชัน PHP</span>
             <span class="text-2xl font-extrabold text-emerald-600 mt-1 block">PHP <?= phpversion() ?></span>
         </div>
         <div class="card p-4">
-            <span class="text-xs font-bold text-gray-500 block">Web Server Host</span>
-            <span class="text-lg font-bold text-gray-800 mt-1 block truncate"><?= $_SERVER['HTTP_HOST'] ?></span>
+            <span class="text-xs font-bold text-muted block">Web Server Host</span>
+            <span class="text-lg font-bold text-primary mt-1 block truncate"><?= $_SERVER['HTTP_HOST'] ?></span>
         </div>
     </div>
 
     <!-- Automation Status -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-            <h2 class="font-bold text-gray-900 text-base">🤖 ระบบอัตโนมัติ (Watchdog / Tunnel / Backup)</h2>
+        <div class="p-4 border-b border-line">
+            <h2 class="font-bold text-primary text-base">🤖 ระบบอัตโนมัติ (Watchdog / Tunnel / Backup)</h2>
         </div>
-        <div class="divide-y divide-gray-200">
+        <div class="divide-y divide-line">
             <div class="p-4 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-gray-900 text-sm">Tunnel URL (Cloudflare)</div>
-                    <div class="text-xs text-gray-500 mt-0.5 break-all"><?= htmlspecialchars($tunnelUrl ?: 'ยังไม่มี (รัน scripts\tunnel-quick.ps1)') ?></div>
+                    <div class="font-bold text-primary text-sm">Tunnel URL (Cloudflare)</div>
+                    <div class="text-xs text-muted mt-0.5 break-all"><?= htmlspecialchars($tunnelUrl ?: 'ยังไม่มี (รัน scripts\tunnel-quick.ps1)') ?></div>
                 </div>
                 <?php if ($tunnelUrl): ?>
                     <?php if ($tunnelOk): ?>
@@ -166,33 +166,33 @@ renderHeader();
             </div>
             <div class="p-4 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-gray-900 text-sm">Watchdog (restart อัตโนมัติทุก 1 นาที)</div>
-                    <div class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($watchdogLast) ?></div>
+                    <div class="font-bold text-primary text-sm">Watchdog (restart อัตโนมัติทุก 1 นาที)</div>
+                    <div class="text-xs text-muted mt-0.5"><?= htmlspecialchars($watchdogLast) ?></div>
                 </div>
                 <span class="badge badge badge-info font-bold px-3 py-1 text-xs">⏱ ตรวจทุกนาที</span>
             </div>
             <div class="p-4 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-gray-900 text-sm">แจ้งเตือนอัตโนมัติ (PM + สต็อกต่ำ)</div>
-                    <div class="text-xs text-gray-500 mt-0.5">ตรวจครั้งล่าสุด: <?= htmlspecialchars($alertCheckDate) ?> (รันวันละ 1 ครั้ง)</div>
+                    <div class="font-bold text-primary text-sm">แจ้งเตือนอัตโนมัติ (PM + สต็อกต่ำ)</div>
+                    <div class="text-xs text-muted mt-0.5">ตรวจครั้งล่าสุด: <?= htmlspecialchars($alertCheckDate) ?> (รันวันละ 1 ครั้ง)</div>
                 </div>
                 <span class="badge badge badge-info font-bold px-3 py-1 text-xs">📅 รายวัน</span>
             </div>
             <div class="p-4 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-gray-900 text-sm">Backup ฐานข้อมูล + uploads</div>
-                    <div class="text-xs text-gray-500 mt-0.5">ล่าสุด: <?= htmlspecialchars($backupLast) ?></div>
+                    <div class="font-bold text-primary text-sm">Backup ฐานข้อมูล + uploads</div>
+                    <div class="text-xs text-muted mt-0.5">ล่าสุด: <?= htmlspecialchars($backupLast) ?></div>
                 </div>
                 <span class="badge badge badge-info font-bold px-3 py-1 text-xs">🌙 กลางคืน</span>
             </div>
             <div class="p-4">
-                <div class="font-bold text-gray-900 text-sm mb-2">🔔 การแจ้งเตือนล่าสุด (notification_logs)</div>
+                <div class="font-bold text-primary text-sm mb-2">🔔 การแจ้งเตือนล่าสุด (notification_logs)</div>
                 <?php if (empty($recentNotifs)): ?>
-                    <div class="text-xs text-gray-500">ยังไม่มี log การแจ้งเตือน</div>
+                    <div class="text-xs text-muted">ยังไม่มี log การแจ้งเตือน</div>
                 <?php else: ?>
                     <div class="overflow-x-auto">
                         <table class="table table-sm w-full text-xs">
-                            <thead><tr class="text-gray-500"><th>เวลา</th><th>ช่องทาง</th><th>สถานะ</th><th>ข้อความ</th></tr></thead>
+                            <thead><tr class="text-muted"><th>เวลา</th><th>ช่องทาง</th><th>สถานะ</th><th>ข้อความ</th></tr></thead>
                             <tbody>
                             <?php foreach ($recentNotifs as $n): ?>
                                 <tr>
@@ -219,15 +219,15 @@ renderHeader();
 
     <!-- Diagnostic Checks Table -->
     <div class="card overflow-hidden">
-        <div class="p-4 border-b border-gray-200">
-            <h2 class="font-bold text-gray-900 text-base">📋 รายงานผลการตรวจสอบ 4 จุดสำคัญ</h2>
+        <div class="p-4 border-b border-line">
+            <h2 class="font-bold text-primary text-base">📋 รายงานผลการตรวจสอบ 4 จุดสำคัญ</h2>
         </div>
-        <div class="divide-y divide-gray-200">
+        <div class="divide-y divide-line">
             <?php foreach ($checks as $c): ?>
             <div class="p-4 flex items-center justify-between">
                 <div>
-                    <div class="font-bold text-gray-900 text-sm"><?= htmlspecialchars($c['name']) ?></div>
-                    <div class="text-xs text-gray-500 mt-0.5"><?= htmlspecialchars($c['detail']) ?></div>
+                    <div class="font-bold text-primary text-sm"><?= htmlspecialchars($c['name']) ?></div>
+                    <div class="text-xs text-muted mt-0.5"><?= htmlspecialchars($c['detail']) ?></div>
                 </div>
                 <div>
                     <?php if ($c['status'] === 'pass'): ?>

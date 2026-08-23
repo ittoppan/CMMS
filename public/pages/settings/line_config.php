@@ -78,7 +78,7 @@ renderHeader();
             <p class="text-xs text-emerald-100 mt-1">กำหนดค่า LINE Notify Token, Messaging API และอีเมลผู้อนุมัติเอกสาร 1-Click Approval</p>
         </div>
         <div class="flex gap-2">
-            <a href="flex_builder.php" class="btn bg-amber-400 text-slate-900 font-extrabold text-xs shadow hover:bg-amber-300 gap-1">
+            <a href="flex_builder.php" class="btn bg-amber-400 text-primary font-extrabold text-xs shadow hover:bg-amber-300 gap-1">
                 <i data-lucide="sparkles" class="w-4 h-4"></i>
                 <span>🎨 ออกแบบข้อความ LINE Flex →</span>
             </a>
@@ -103,34 +103,34 @@ renderHeader();
 
         <!-- Section 1: LINE Notify Token -->
         <div class="space-y-3 border-b pb-5">
-            <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+            <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                 <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">1</span>
                 <span>LINE Notify Access Token (สำหรับการส่งแจ้งเตือนกลุ่มช่าง & Breakdown Alert)</span>
             </h3>
-            <p class="text-xs text-slate-500">Token สำหรับส่งแจ้งเตือนงานซ่อมด่วน, แจ้งเตือน Overdue PM และแจ้งเตือนอะไหล่ต่ำกว่า Reorder Point เข้ากลุ่ม LINE</p>
+            <p class="text-xs text-muted">Token สำหรับส่งแจ้งเตือนงานซ่อมด่วน, แจ้งเตือน Overdue PM และแจ้งเตือนอะไหล่ต่ำกว่า Reorder Point เข้ากลุ่ม LINE</p>
             
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">LINE Notify Token:</label>
+                <label class="text-xs font-bold text-secondary">LINE Notify Token:</label>
                 <input type="text" name="line_notify_token" value="<?= htmlspecialchars($notifyToken) ?>" placeholder="วาง LINE Notify Token ที่ได้จาก notify-bot.line.me" class="input input-bordered w-full text-xs font-mono font-bold">
             </div>
         </div>
 
         <!-- Section 2: LINE Messaging API -->
         <div class="space-y-3 border-b pb-5">
-            <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+            <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                 <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">2</span>
                 <span>LINE Official Account (Messaging API Access Token & Secret)</span>
             </h3>
-            <p class="text-xs text-slate-500">ข้อมูลสำหรับส่งการ์ด Flex Message ปุ่ม 1-Click อนุมัติเอกสารผ่าน LINE Official Account (`@823cenqj`)</p>
+            <p class="text-xs text-muted">ข้อมูลสำหรับส่งการ์ด Flex Message ปุ่ม 1-Click อนุมัติเอกสารผ่าน LINE Official Account (`@823cenqj`)</p>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-700">Channel Access Token:</label>
+                    <label class="text-xs font-bold text-secondary">Channel Access Token:</label>
                     <input type="text" name="line_channel_access_token" value="<?= htmlspecialchars($channelToken) ?>" placeholder="Channel Access Token (Long-lived)" class="input input-bordered w-full text-xs font-mono">
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-700">Channel Secret:</label>
+                    <label class="text-xs font-bold text-secondary">Channel Secret:</label>
                     <input type="password" name="line_channel_secret" value="<?= htmlspecialchars($channelSec) ?>" placeholder="Channel Secret Key" class="input input-bordered w-full text-xs font-mono">
                 </div>
             </div>
@@ -138,14 +138,14 @@ renderHeader();
 
         <!-- Section 3: Default Approver Settings -->
         <div class="space-y-3 pb-2">
-            <h3 class="font-extrabold text-slate-900 text-base flex items-center gap-2">
+            <h3 class="font-extrabold text-primary text-base flex items-center gap-2">
                 <span class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">3</span>
                 <span>อีเมลและช่องทางผู้อนุมัติหลัก (Default Approval Recipient)</span>
             </h3>
-            <p class="text-xs text-slate-500">กำหนดอีเมลผู้จัดการหรือหัวหน้าแผนกที่จะได้รับคำขออนุมัติ 1-Click Approval</p>
+            <p class="text-xs text-muted">กำหนดอีเมลผู้จัดการหรือหัวหน้าแผนกที่จะได้รับคำขออนุมัติ 1-Click Approval</p>
 
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-700">อีเมลผู้อนุมัติเอกสาร (Approver Email):</label>
+                <label class="text-xs font-bold text-secondary">อีเมลผู้อนุมัติเอกสาร (Approver Email):</label>
                 <input type="email" name="line_default_approver" value="<?= htmlspecialchars($defaultAppr) ?>" placeholder="manager@toppan.co.th" class="input input-bordered w-full text-xs font-mono font-bold">
             </div>
         </div>

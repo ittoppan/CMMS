@@ -4,10 +4,10 @@ $pageTitle = 'จุดสอบเทียบ - CMMS-TPT';
 renderHeader();
 $pdo = getDb();
 $calibrationId = (int)($_GET['calibration_id'] ?? 0);
-if (!$calibrationId) { echo '<div class="text-center py-8 text-gray-500">ไม่ระบุรหัสการสอบเทียบ</div><a href="history.php" class="btn-secondary">กลับ</a>'; renderFooter(); exit; }
+if (!$calibrationId) { echo '<div class="text-center py-8 text-muted">ไม่ระบุรหัสการสอบเทียบ</div><a href="history.php" class="btn-secondary">กลับ</a>'; renderFooter(); exit; }
 $cal = $pdo->prepare('SELECT h.*, a.name AS asset_name, a.code AS asset_code FROM calibration_history h LEFT JOIN asset_registry a ON h.asset_id = a.id WHERE h.id=?');
 $cal->execute([$calibrationId]); $cal = $cal->fetch();
-if (!$cal) { echo '<div class="text-center py-8 text-gray-500">ไม่พบข้อมูลการสอบเทียบ</div>'; renderFooter(); exit; }
+if (!$cal) { echo '<div class="text-center py-8 text-muted">ไม่พบข้อมูลการสอบเทียบ</div>'; renderFooter(); exit; }
 $error = '';
 $success = '';
 $editId = (int)($_GET['edit'] ?? 0);
@@ -56,8 +56,8 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
 <div class="space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">จุดสอบเทียบ</h1>
-            <p class="mt-1 text-sm text-gray-500">Calibration Points — <?= htmlspecialchars(($cal['asset_code'] ?? '') . ' - ' . ($cal['asset_name'] ?? '')) ?> (<?= htmlspecialchars($cal['calibration_date']) ?>)</p>
+            <h1 class="text-2xl font-bold text-primary">จุดสอบเทียบ</h1>
+            <p class="mt-1 text-sm text-muted">Calibration Points — <?= htmlspecialchars(($cal['asset_code'] ?? '') . ' - ' . ($cal['asset_name'] ?? '')) ?> (<?= htmlspecialchars($cal['calibration_date']) ?>)</p>
         </div>
         <a href="history.php?asset_id=<?= $cal['asset_id'] ?>" class="btn-secondary">&larr; กลับไปประวัติ</a>
     </div>
@@ -68,31 +68,31 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
         <form method="post" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">จุดวัด <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-secondary">จุดวัด <span class="text-red-500">*</span></label>
                     <input type="text" name="point_label" value="<?= htmlspecialchars($editRow['point_label'] ?? '') ?>" required class="input input-bordered w-full mt-1" placeholder="เช่น จุดที่ 1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ค่า nominal</label>
+                    <label class="block text-sm font-medium text-secondary">ค่า nominal</label>
                     <input type="number" name="nominal_value" step="any" value="<?= htmlspecialchars($editRow['nominal_value'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ค่าที่วัดได้</label>
+                    <label class="block text-sm font-medium text-secondary">ค่าที่วัดได้</label>
                     <input type="number" name="measured_value" step="any" value="<?= htmlspecialchars($editRow['measured_value'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Correction</label>
+                    <label class="block text-sm font-medium text-secondary">Correction</label>
                     <input type="number" name="correction" step="any" value="<?= htmlspecialchars($editRow['correction'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Uncertainty</label>
+                    <label class="block text-sm font-medium text-secondary">Uncertainty</label>
                     <input type="number" name="uncertainty" step="any" value="<?= htmlspecialchars($editRow['uncertainty'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ค่า MPE</label>
+                    <label class="block text-sm font-medium text-secondary">ค่า MPE</label>
                     <input type="number" name="mpe_value" step="any" value="<?= htmlspecialchars($editRow['mpe_value'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">ผลการตรวจสอบ</label>
+                    <label class="block text-sm font-medium text-secondary">ผลการตรวจสอบ</label>
                     <select name="conformance" class="input input-bordered w-full mt-1">
                         <option value="pass" <?= (isset($editRow) && $editRow['conformance'] === 'pass') ? 'selected' : '' ?>>ผ่าน</option>
                         <option value="fail" <?= (isset($editRow) && $editRow['conformance'] === 'fail') ? 'selected' : '' ?>>ไม่ผ่าน</option>
@@ -100,7 +100,7 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
                     </select>
                 </div>
                 <div class="sm:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700">หมายเหตุ</label>
+                    <label class="block text-sm font-medium text-secondary">หมายเหตุ</label>
                     <input type="text" name="notes" value="<?= htmlspecialchars($editRow['notes'] ?? '') ?>" class="input input-bordered w-full mt-1">
                 </div>
             </div>
@@ -112,27 +112,27 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
     </div>
     <div class="card overflow-hidden">
         <table class="data-table cmms-stack-table">
-            <thead class="bg-gray-50">
+            <thead class="bg-subtle">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จุดวัด</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Measured</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Correction</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uncertainty</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">MPE</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ผล</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จุดวัด</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Nominal</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Measured</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Correction</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">Uncertainty</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">MPE</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">ผล</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-muted uppercase">จัดการ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody class="divide-y divide-line">
                 <?php foreach ($points as $p): ?>
-                <tr class="hover:bg-gray-50">
-                    <td data-label="จุดวัด" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($p['point_label']) ?></td>
-                    <td data-label="Nominal" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['nominal_value'] ?? '-') ?></td>
-                    <td data-label="Measured" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['measured_value'] ?? '-') ?></td>
-                    <td data-label="Correction" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['correction'] ?? '-') ?></td>
-                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['uncertainty'] ?? '-') ?></td>
-                    <td data-label="MPE" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['mpe_value'] ?? '-') ?></td>
+                <tr class="hover:bg-subtle">
+                    <td data-label="จุดวัด" class="px-4 py-3 text-sm font-medium text-primary"><?= htmlspecialchars($p['point_label']) ?></td>
+                    <td data-label="Nominal" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($p['nominal_value'] ?? '-') ?></td>
+                    <td data-label="Measured" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($p['measured_value'] ?? '-') ?></td>
+                    <td data-label="Correction" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($p['correction'] ?? '-') ?></td>
+                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($p['uncertainty'] ?? '-') ?></td>
+                    <td data-label="MPE" class="px-4 py-3 text-sm text-secondary"><?= htmlspecialchars($p['mpe_value'] ?? '-') ?></td>
                     <td data-label="ผล" class="px-4 py-3 text-sm">
                         <span class="badge <?= $p['conformance'] === 'pass' ? 'status-pass' : ($p['conformance'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($conformanceLabel[$p['conformance']] ?? $p['conformance']) ?>
