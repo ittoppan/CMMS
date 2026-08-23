@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
-import { ArrowPathIcon, HomeIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
+import { Button } from "@/components/ui/button";
+import { Home, RefreshCw, TriangleAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 /**
@@ -27,58 +25,45 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-      <div
-        className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-        style={{
-          background: "var(--cmms-danger-light)",
-          color: "var(--cmms-danger)",
-        }}
-      >
-        <Icon icon={ExclamationTriangleIcon} size="lg" />
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "เกิดข้อผิดพลาด" },
+      ]}
+      title="เกิดข้อผิดพลาดในการแสดงหน้านี้"
+    >
+      <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)]">
+          <TriangleAlert size={32} strokeWidth={1.75} aria-hidden="true" />
+        </div>
 
-      <Heading level={2}>เกิดข้อผิดพลาดในการแสดงหน้านี้</Heading>
-      <Text
-        type="body"
-        color="secondary"
-        style={{ maxWidth: 440, margin: "10px auto 0", lineHeight: 1.7 }}
-      >
-        ระบบพบปัญหาขณะโหลดข้อมูล กรุณาลองใหม่อีกครั้ง หากยังเกิดซ้ำ ติดต่อทีม IT
-        พร้อมรหัสข้อผิดพลาดด้านล่าง
-      </Text>
-
-      {error?.digest && (
-        <code
-          className="mt-4 px-3 py-1.5 rounded-lg text-xs"
-          style={{
-            background: "var(--cmms-bg-muted)",
-            border: "1px solid var(--cmms-border)",
-            color: "var(--cmms-text-muted)",
-          }}
+        <p
+          className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground"
+          style={{ margin: "10px auto 0", lineHeight: 1.7 }}
         >
-          Error ID: {error.digest}
-        </code>
-      )}
+          ระบบพบปัญหาขณะโหลดข้อมูล กรุณาลองใหม่อีกครั้ง หากยังเกิดซ้ำ ติดต่อทีม IT
+          พร้อมรหัสข้อผิดพลาดด้านล่าง
+        </p>
 
-      <HStack gap={3} wrap="wrap" hAlign="center" style={{ marginTop: 28 }}>
-        <Button
-          label="ลองใหม่อีกครั้ง"
-          variant="primary"
-          onClick={reset}
-          icon={<Icon icon={ArrowPathIcon} size="sm" />}
-        />
-        <Button
-          label="กลับหน้าแรก"
-          variant="secondary"
-          onClick={() => router.push("/dashboard")}
-          icon={<Icon icon={HomeIcon} size="sm" />}
-        />
-      </HStack>
+        {error?.digest && (
+          <code className="mt-4 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs text-muted-foreground">
+            Error ID: {error.digest}
+          </code>
+        )}
 
-      <VStack gap={1} hAlign="center" style={{ marginTop: 48 }}>
-        <Text type="supporting" color="secondary">CMMS-TOPPAN Enterprise Suite</Text>
-      </VStack>
-    </div>
+        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <Button onClick={reset}>
+            <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+            ลองใหม่อีกครั้ง
+          </Button>
+          <Button variant="secondary" onClick={() => router.push("/dashboard")}>
+            <Home size={16} strokeWidth={1.75} aria-hidden="true" />
+            กลับหน้าแรก
+          </Button>
+        </div>
+
+        <p className="mt-12 text-xs text-muted-foreground">CMMS-TOPPAN Enterprise Suite</p>
+      </div>
+    </PageShell>
   );
 }

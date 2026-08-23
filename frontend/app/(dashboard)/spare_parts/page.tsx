@@ -1,23 +1,31 @@
 "use client";
 
-// spare_parts — migrate ui kit (ui/Tabs, ui/Dialog, ui/Pagination, Lucide, MiniBar progressbar)
+// spare_parts — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Select, ui/Tabs, ui/Dialog,
+// ui/Pagination, ui/Badge, Lucide, MiniBar progressbar)
 // business logic ครบเดิม: batch image upload, Sage 300 sync, tab filter, side panel สรุปคลัง
 
 import { useState, useEffect, useMemo, type CSSProperties } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
+import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select-native";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  ArrowLeft,
   PanelRight,
   Database,
   Plus,
@@ -58,10 +66,10 @@ function getStockStatus(item: SparePart): "ok" | "low" | "out" {
   return "ok";
 }
 
-const stockBadge: Record<string, { label: string; andon: "ok" | "warn" | "down" }> = {
-  ok: { label: "ปกติ", andon: "ok" },
-  low: { label: "ใกล้หมด", andon: "warn" },
-  out: { label: "หมด", andon: "down" },
+const stockBadge: Record<string, { label: string; variant: "success" | "warning" | "danger" }> = {
+  ok: { label: "ปกติ", variant: "success" },
+  low: { label: "ใกล้หมด", variant: "warning" },
+  out: { label: "หมด", variant: "danger" },
 };
 
 const PAGE_SIZE = 15;
@@ -75,7 +83,7 @@ function partThumbSrc(item: SparePart): string | undefined {
     : "/" + cleaned;
 }
 
-// ── แทน @astryxdesign/core/hooks useMediaQuery ──
+// ── local matchMedia hook (max-width 1024px) ──
 function useIsNarrow(): boolean {
   const [isNarrow, setIsNarrow] = useState(false);
   useEffect(() => {
@@ -88,7 +96,7 @@ function useIsNarrow(): boolean {
   return isNarrow;
 }
 
-// ── MiniBar — inline role="progressbar" แทน Astryx ProgressBar ──
+// ── MiniBar — inline role="progressbar" ──
 function MiniBar({ value, max, label }: { value: number; max: number; label: string }) {
   const pct = Math.min(100, Math.max(0, max > 0 ? (value / max) * 100 : 0));
   return (
@@ -98,9 +106,9 @@ function MiniBar({ value, max, label }: { value: number; max: number; label: str
       aria-valuenow={value}
       aria-valuemin={0}
       aria-valuemax={max}
-      className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--cmms-bg-muted)]"
+      className="h-1.5 w-full overflow-hidden rounded-full bg-secondary"
     >
-      <div className="h-full rounded-full bg-[var(--cmms-primary)]" style={{ width: `${pct}%` }} />
+      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -126,44 +134,44 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
 
   return (
     <div className="space-y-4">
-      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
-        <summary className="cursor-pointer font-bold">สรุปคลัง</summary>
+      <details className="rounded-[var(--cmms-radius)] border border-border p-4" open>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">สรุปคลัง</summary>
         <dl className="mt-3 space-y-2 text-sm">
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[var(--cmms-text-secondary)]">รายการอะไหล่ทั้งหมด</dt>
-            <dd className="font-bold">{kpis.total}</dd>
+            <dt className="text-muted-foreground">รายการอะไหล่ทั้งหมด</dt>
+            <dd className="font-semibold tabular-nums">{kpis.total}</dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[var(--cmms-text-secondary)]">ใกล้หมด (Min Stock)</dt>
-            <dd className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-warning)" }}>
+            <dt className="text-muted-foreground">ใกล้หมด (Min Stock)</dt>
+            <dd className="flex items-center gap-2 font-semibold tabular-nums text-[var(--cmms-warning-dark)]">
               <AndonLamp status="warn" size="sm" />
               {kpis.lowCount}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[var(--cmms-text-secondary)]">หมดคลัง (Out of Stock)</dt>
-            <dd className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-danger)" }}>
+            <dt className="text-muted-foreground">หมดคลัง (Out of Stock)</dt>
+            <dd className="flex items-center gap-2 font-semibold tabular-nums text-destructive">
               <AndonLamp status="down" size="sm" />
               {kpis.outCount}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-[var(--cmms-text-secondary)]">มูลค่าคลังรวม</dt>
-            <dd className="font-bold">฿{kpis.totalValue.toLocaleString()}</dd>
+            <dt className="text-muted-foreground">มูลค่าคลังรวม</dt>
+            <dd className="font-semibold tabular-nums">฿{kpis.totalValue.toLocaleString()}</dd>
           </div>
         </dl>
       </details>
 
-      <hr style={{ borderColor: "var(--cmms-border)" }} />
+      <hr className="border-border" />
 
-      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
-        <summary className="cursor-pointer font-bold">ประเภทสต็อก (Sage 300)</summary>
+      <details className="rounded-[var(--cmms-radius)] border border-border p-4" open>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">ประเภทสต็อก (Sage 300)</summary>
         <div className="mt-3 space-y-3">
           {categories.slice(0, 6).map(([cat, count]) => (
             <div key={cat} className="space-y-1">
               <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="truncate text-[var(--cmms-text-secondary)]">{cat}</span>
-                <span className="shrink-0 text-[var(--cmms-text-secondary)]">{count} รายการ</span>
+                <span className="truncate text-muted-foreground">{cat}</span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">{count} รายการ</span>
               </div>
               <MiniBar value={count} max={Math.max(...categories.map(([, c]) => c))} label={cat} />
             </div>
@@ -171,16 +179,16 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
         </div>
       </details>
 
-      <hr style={{ borderColor: "var(--cmms-border)" }} />
+      <hr className="border-border" />
 
-      <details className="rounded-[var(--cmms-radius)] border p-4" style={{ borderColor: "var(--cmms-border)" }} open>
-        <summary className="cursor-pointer font-bold">สถานะ Sage 300 Sync</summary>
+      <details className="rounded-[var(--cmms-radius)] border border-border p-4" open>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">สถานะ Sage 300 Sync</summary>
         <div className="mt-3 space-y-1 text-sm">
           <p className="flex items-center gap-2">
-            <Database size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+            <Database size={16} strokeWidth={1.75} aria-hidden="true" className="text-muted-foreground" />
             เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control)
           </p>
-          <p className="text-[var(--cmms-text-secondary)]">
+          <p className="text-muted-foreground">
             กดปุ่ม &quot;Restock from Sage&quot; ที่หัวหน้ากระดานเพื่อดึงข้อมูลล่าสุด
           </p>
         </div>
@@ -308,13 +316,13 @@ function ItemsCard({
         {/* Header row */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-            <div className="cmms-icon-tile h-8 w-8 rounded-lg">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
               <Box size={16} strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <h3 className="cmms-kpi-value m-0 text-xl font-bold">รายการอะไหล่</h3>
-            <span className="cmms-count-pill">{filtered.length} รายการ</span>
+            <h3 className="m-0 text-base font-semibold text-foreground">รายการอะไหล่</h3>
+            <Badge variant="neutral">{filtered.length} รายการ</Badge>
             {selectMode && (
-              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-[var(--cmms-text-secondary)]">
+              <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={paged.length > 0 && paged.every((p) => selectedIds.has(p.rawId))}
@@ -352,7 +360,7 @@ function ItemsCard({
         {/* Search + filter */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-[220px] flex-1">
-            <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+            <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               label="ค้นหา"
               isLabelHidden
@@ -363,12 +371,20 @@ function ItemsCard({
             />
           </div>
           <div className="w-full sm:w-[240px]">
-            <Select label="ประเภทสต็อก Sage" isLabelHidden value={sageTypeFilter} onChange={(e) => setSageTypeFilter(e.target.value)}>
-              <option value="">ทุกประเภทสต็อก Sage 300</option>
-              <option value="Spare Parts">อะไหล่ซ่อมบำรุง</option>
-              <option value="Raw Materials">วัตถุดิบการผลิต</option>
-              <option value="Consumables">วัสดุสิ้นเปลือง</option>
-              <option value="Tools">เครื่องมือช่าง</option>
+            <Select
+              value={sageTypeFilter || "__all__"}
+              onValueChange={(v) => setSageTypeFilter(v === "__all__" ? "" : v)}
+            >
+              <SelectTrigger aria-label="ประเภทสต็อก Sage" className="w-full">
+                <SelectValue placeholder="ทุกประเภทสต็อก Sage 300" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">ทุกประเภทสต็อก Sage 300</SelectItem>
+                <SelectItem value="Spare Parts">อะไหล่ซ่อมบำรุง</SelectItem>
+                <SelectItem value="Raw Materials">วัตถุดิบการผลิต</SelectItem>
+                <SelectItem value="Consumables">วัสดุสิ้นเปลือง</SelectItem>
+                <SelectItem value="Tools">เครื่องมือช่าง</SelectItem>
+              </SelectContent>
             </Select>
           </div>
         </div>
@@ -377,7 +393,7 @@ function ItemsCard({
         {paged.length === 0 ? (
           <EmptyState
             icon={<Box size={24} strokeWidth={1.75} aria-hidden="true" />}
-            title="ไม่มีข้อมูล"
+            title="ไม่พบข้อมูล"
             description="ไม่พบรายการอะไหล่ในคลัง (ลองปรับตัวกรอง)"
           />
         ) : (
@@ -397,8 +413,7 @@ function ItemsCard({
                       selectMode ? toggleSelect(item.rawId) : onEdit(item);
                     }
                   }}
-                  className="flex cursor-pointer flex-wrap items-start justify-between gap-3 rounded-[10px] border p-3 transition-colors duration-300 hover:bg-[var(--cmms-bg-wash)]"
-                  style={{ borderColor: "var(--cmms-border)" }}
+                  className="flex cursor-pointer flex-wrap items-start justify-between gap-3 rounded-[10px] border border-border bg-card p-3 transition-colors duration-300 hover:bg-accent"
                 >
                   {/* start */}
                   <div className="flex items-center gap-2">
@@ -416,7 +431,7 @@ function ItemsCard({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={thumb} alt={item.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                     ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                         <Box size={16} strokeWidth={1.75} aria-hidden="true" />
                       </div>
                     )}
@@ -424,17 +439,14 @@ function ItemsCard({
 
                   {/* middle */}
                   <div className="min-w-[200px] flex-1 space-y-1">
-                    <p className="font-semibold">{item.name}</p>
+                    <p className="text-sm font-semibold text-foreground">{item.name}</p>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{item.code}</span>
-                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>{item.sageItemNo}</span>
-                      <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}>{item.sageCategory || "Spare Parts"}</span>
-                      <span className={`cmms-status ${badge.andon}`}>
-                        <span className="cmms-status-dot" />
-                        {badge.label}
-                      </span>
+                      <Badge variant="neutral">{item.code}</Badge>
+                      <Badge variant="primary">{item.sageItemNo}</Badge>
+                      <Badge variant="success">{item.sageCategory || "Spare Parts"}</Badge>
+                      <Badge variant={badge.variant} dot>{badge.label}</Badge>
                     </div>
-                    <p className="text-xs text-[var(--cmms-text-secondary)]">
+                    <p className="text-xs text-muted-foreground">
                       ที่เก็บ: {item.location || "-"} ・ ราคา: ฿{item.price.toLocaleString()}/{item.unit}
                     </p>
                   </div>
@@ -444,7 +456,7 @@ function ItemsCard({
                     <div className="w-[140px] space-y-1">
                       <div className="flex items-baseline justify-end gap-1">
                         <span
-                          className="text-base font-bold"
+                          className="text-base font-bold tabular-nums"
                           style={{
                             color:
                               status === "out"
@@ -456,31 +468,31 @@ function ItemsCard({
                         >
                           {item.stock}
                         </span>
-                        <span className="text-xs text-[var(--cmms-text-secondary)]">/ {item.maxStock} {item.unit}</span>
+                        <span className="text-xs text-muted-foreground">/ {item.maxStock} {item.unit}</span>
                       </div>
                       <MiniBar value={item.stock} max={item.maxStock} label={`สต็อก ${item.name}`} />
                     </div>
                     <div className="flex gap-1">
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
                         onClick={(e) => { e.stopPropagation(); onEdit(item); }}
                         aria-label="แก้ไข"
                         title="แก้ไข"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
-                        style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                       >
                         <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
                         onClick={(e) => { e.stopPropagation(); onDelete(item); }}
                         aria-label="ลบ"
                         title="ลบ"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
-                        style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                       >
                         <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -509,7 +521,7 @@ function ItemsCard({
           {batchMsg && (
             <Alert variant={batchMsg.kind === "ok" ? "success" : "danger"} title={batchMsg.kind === "ok" ? "สำเร็จ" : "มีข้อผิดพลาด"} description={batchMsg.text} />
           )}
-          <p className="text-sm text-[var(--cmms-text-secondary)]">
+          <p className="text-sm text-muted-foreground">
             เลือกไฟล์รูปให้แต่ละรายการ (png/jpg/gif/webp/svg สูงสุด 6 MB ต่อไฟล์) แล้วกดอัปโหลดทั้งหมด
           </p>
           <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
@@ -517,18 +529,18 @@ function ItemsCard({
               const thumb = partThumbSrc(p);
               const chosen = batchFiles[p.rawId];
               return (
-                <div key={p.rawId} className="flex flex-wrap items-center gap-3 rounded-[10px] border p-2.5" style={{ borderColor: "var(--cmms-border)" }}>
+                <div key={p.rawId} className="flex flex-wrap items-center gap-3 rounded-[10px] border border-border p-2.5">
                   {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={thumb} alt={p.name} className="h-10 w-10 shrink-0 rounded-md object-cover" />
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
                       <Box size={16} strokeWidth={1.75} aria-hidden="true" />
                     </div>
                   )}
                   <div className="min-w-[160px] flex-1">
                     <p className="text-sm font-bold">{p.code}</p>
-                    <p className="text-sm text-[var(--cmms-text-secondary)]">{p.name}</p>
+                    <p className="text-sm text-muted-foreground">{p.name}</p>
                   </div>
                   <label className="cursor-pointer">
                     <input
@@ -537,7 +549,7 @@ function ItemsCard({
                       className="hidden"
                       onChange={(e) => pickFile(p.rawId, e.target.files?.[0] || null)}
                     />
-                    <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--cmms-primary)] px-3.5 py-2 text-xs font-semibold text-white transition-all duration-300 hover:opacity-90">
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white transition-all duration-300 hover:opacity-90">
                       {chosen ? "เปลี่ยนรูป" : "เลือกไฟล์"}
                     </span>
                   </label>
@@ -545,7 +557,7 @@ function ItemsCard({
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={chosen.preview} alt="preview" className="h-10 w-10 rounded-md object-cover" />
-                      <span className="max-w-[160px] truncate text-sm text-[var(--cmms-text-secondary)]">
+                      <span className="max-w-[160px] truncate text-sm text-muted-foreground">
                         {chosen.file.name}
                       </span>
                     </>
@@ -554,7 +566,7 @@ function ItemsCard({
               );
             })}
           </div>
-          <div className="flex justify-end gap-2 border-t pt-3" style={{ borderColor: "var(--cmms-border)" }}>
+          <div className="flex justify-end gap-2 border-t border-border pt-3">
             <Button variant="secondary" disabled={batchUploading} onClick={() => setBatchOpen(false)}>
               ยกเลิก
             </Button>
@@ -570,6 +582,7 @@ function ItemsCard({
     </Card>
   );
 }
+
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function SparePartsPage() {
@@ -733,207 +746,169 @@ export default function SparePartsPage() {
     router.push(`/spare_parts/edit?id=${item.rawId}`);
   };
 
+  const sageSyncButton = (
+    <Button variant="secondary" onClick={handleSageSync} disabled={syncingSage}>
+      <Database size={16} strokeWidth={1.75} aria-hidden="true" />
+      {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
+    </Button>
+  );
+  const createButton = (
+    <Button onClick={() => router.push("/spare_parts/create")}>
+      <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+      เพิ่มรายการ
+    </Button>
+  );
+
   return (
-    <>
-      <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-6">
-        {/* Hero */}
-        <div style={layoutStyle("hero")}>
-          <div className="cmms-page-hero flex flex-col gap-5">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0 flex-1 space-y-1">
-                <a href="/dashboard" className="inline-flex items-center gap-1.5 text-sm transition-colors" style={{ color: "rgba(255,255,255,0.75)" }}>
-                  <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
-                  แดชบอร์ด
-                </a>
-                <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
-                <h2 className="mt-1 text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
-                  {hero.title}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-                    {kpis.total} รายการในคลัง
-                  </span>
-                  <span className="cmms-andon-chip" style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }}>
-                    ซิงค์สดกับ Sage 300
-                  </span>
-                </div>
-                <p style={{ color: "rgba(255,255,255,0.78)" }}>
-                  {hero.desc}
-                </p>
-              </div>
-              {!isNarrow && (
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleSageSync}
-                    disabled={syncingSage}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20 disabled:opacity-60"
-                  >
-                    <Database size={16} strokeWidth={1.75} aria-hidden="true" />
-                    {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/spare_parts/create")}
-                    className="cmms-btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-                  >
-                    <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-                    เพิ่มรายการ
-                  </button>
-                </div>
-              )}
-            </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "คลังอะไหล่", href: "/spare_parts" },
+        { label: hero.title },
+      ]}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <>
+          <Badge variant="primary">{kpis.total} รายการในคลัง</Badge>
+          <Badge variant="success">ซิงค์สดกับ Sage 300</Badge>
+          {!isNarrow && sageSyncButton}
+          {!isNarrow && createButton}
+        </>
+      }
+    >
+      {isNarrow && (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {sageSyncButton}
+          {createButton}
+        </div>
+      )}
 
-            {isNarrow && (
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={handleSageSync}
-                  disabled={syncingSage}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20 disabled:opacity-60"
-                >
-                  <Database size={16} strokeWidth={1.75} aria-hidden="true" />
-                  {syncingSage ? "กำลังดึง..." : "ดึงสต็อกจาก Sage"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/spare_parts/create")}
-                  className="cmms-btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-                >
-                  <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-                  เพิ่มรายการ
-                </button>
-              </div>
-            )}
-
-            {/* Tabs + panel toggle */}
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                <Tabs value={activeTab} onValueChange={handleTabChange}>
-                  <TabsList>
-                    <TabsTrigger value="all">ทั้งหมด ({kpis.total})</TabsTrigger>
-                    <TabsTrigger value="low">ใกล้หมด ({kpis.lowCount})</TabsTrigger>
-                    <TabsTrigger value="out">หมดคลัง ({kpis.outCount})</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <a href="/spare_parts/sage_sync" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
-                    ตั้งค่าการดึง Sage 300
-                  </a>
-                  <a href="/spare_parts/issue_center" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
-                    ศูนย์เบิก-จ่าย
-                  </a>
-                  <a href="/spare_parts/optimization" className="cmms-andon-chip inline-flex items-center transition-opacity hover:opacity-80" style={{ background: "rgba(255,255,255,0.12)" }}>
-                    AI คำนวณ EOQ และสต็อกค้าง
-                  </a>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={togglePanel}
-                aria-label={isPanelShown ? "Hide panel" : "Show panel"}
-                title={isPanelShown ? "Hide panel" : "Show panel"}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white transition-all duration-300 hover:bg-white/20"
-              >
-                <PanelRight size={16} strokeWidth={1.75} aria-hidden="true" />
-              </button>
-            </div>
+      {/* Tabs + quick links + panel toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList>
+              <TabsTrigger value="all">ทั้งหมด ({kpis.total})</TabsTrigger>
+              <TabsTrigger value="low">ใกล้หมด ({kpis.lowCount})</TabsTrigger>
+              <TabsTrigger value="out">หมดคลัง ({kpis.outCount})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/sage_sync")}>
+              ตั้งค่าการดึง Sage 300
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/issue_center")}>
+              ศูนย์เบิก-จ่าย
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/optimization")}>
+              AI คำนวณ EOQ และสต็อกค้าง
+            </Button>
           </div>
         </div>
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={togglePanel}
+          aria-label={isPanelShown ? "Hide panel" : "Show panel"}
+          title={isPanelShown ? "Hide panel" : "Show panel"}
+        >
+          <PanelRight size={16} strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+      </div>
 
-        {/* Content + side panel */}
-        <div className="flex w-full items-start gap-6">
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            {error && (
-              <Alert variant="danger" title="Error" description={error} />
-            )}
-            {syncNotice && (
-              <Alert variant="success" title="Success" description={syncNotice} />
-            )}
-
-            {/* KPI row */}
-            <div style={layoutStyle("kpi")}>
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <Card className="cmms-kpi-card blue">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="cmms-icon-tile h-12 w-12">
-                      <Box size={20} strokeWidth={1.75} aria-hidden="true" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-[var(--cmms-text-secondary)]">รายการอะไหล่ทั้งหมด</p>
-                      <h2 className="cmms-kpi-value">{kpis.total} <span className="text-sm font-normal">รายการ</span></h2>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="cmms-kpi-card amber">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="cmms-icon-tile amber h-12 w-12">
-                      <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-[var(--cmms-text-secondary)]">ใกล้หมด (Min Stock)</p>
-                      <h2 className="cmms-kpi-value">{kpis.lowCount} <span className="text-sm font-normal">รายการ</span></h2>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="cmms-kpi-card red">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="cmms-icon-tile red h-12 w-12">
-                      <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-[var(--cmms-text-secondary)]">หมดคลัง (Out of Stock)</p>
-                      <h2 className="cmms-kpi-value">{kpis.outCount} <span className="text-sm font-normal">รายการ</span></h2>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="cmms-kpi-card green">
-                  <CardContent className="flex items-center gap-3 p-4">
-                    <div className="cmms-icon-tile green h-12 w-12">
-                      <Banknote size={20} strokeWidth={1.75} aria-hidden="true" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm text-[var(--cmms-text-secondary)]">มูลค่าคลังรวม</p>
-                      <h2 className="cmms-kpi-value">฿{kpis.totalValue.toLocaleString()}</h2>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            <div style={layoutStyle("content")}>
-              {loading && parts.length === 0 ? (
-                <Card>
-                  <CardContent className="space-y-3 p-6">
-                    {[0, 1, 2].map((i) => (
-                      <Skeleton key={i} className="h-14 w-full rounded-[10px]" />
-                    ))}
-                  </CardContent>
-                </Card>
-              ) : (
-                <ItemsCard
-                  parts={parts}
-                  filtered={filtered}
-                  search={search}
-                  setSearch={setSearch}
-                  sageTypeFilter={sageTypeFilter}
-                  setSageTypeFilter={setSageTypeFilter}
-                  page={page}
-                  setPage={setPage}
-                  onEdit={handleEdit}
-                  onDelete={setDeleteTarget}
-                  onRefresh={fetchParts}
-                />
-              )}
-            </div>
-          </div>
-
-          {!isNarrow && showSidePanel && (
-            <aside className="w-[320px] shrink-0" aria-label="สรุปคลังอะไหล่">
-              <PanelContent parts={parts} />
-            </aside>
+      {/* Content + side panel */}
+      <div className="flex w-full items-start gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {error && (
+            <Alert variant="danger" title="Error" description={error} />
           )}
+          {syncNotice && (
+            <Alert variant="success" title="Success" description={syncNotice} />
+          )}
+
+          {/* KPI row */}
+          <div style={layoutStyle("kpi")}>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
+                    <Box size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">รายการอะไหล่ทั้งหมด</p>
+                    <p className="cmms-kpi-value tabular-nums">{kpis.total} <span className="text-sm font-normal">รายการ</span></p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
+                    <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">ใกล้หมด (Min Stock)</p>
+                    <p className="cmms-kpi-value tabular-nums">{kpis.lowCount} <span className="text-sm font-normal">รายการ</span></p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
+                    <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">หมดคลัง (Out of Stock)</p>
+                    <p className="cmms-kpi-value tabular-nums">{kpis.outCount} <span className="text-sm font-normal">รายการ</span></p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
+                    <Banknote size={20} strokeWidth={1.75} aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">มูลค่าคลังรวม</p>
+                    <p className="cmms-kpi-value tabular-nums">฿{kpis.totalValue.toLocaleString()}</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          <div style={layoutStyle("content")}>
+            {loading && parts.length === 0 ? (
+              <Card>
+                <CardContent className="space-y-3 p-6">
+                  {[0, 1, 2].map((i) => (
+                    <Skeleton key={i} className="h-14 w-full rounded-[10px]" />
+                  ))}
+                </CardContent>
+              </Card>
+            ) : (
+              <ItemsCard
+                parts={parts}
+                filtered={filtered}
+                search={search}
+                setSearch={setSearch}
+                sageTypeFilter={sageTypeFilter}
+                setSageTypeFilter={setSageTypeFilter}
+                page={page}
+                setPage={setPage}
+                onEdit={handleEdit}
+                onDelete={setDeleteTarget}
+                onRefresh={fetchParts}
+              />
+            )}
+          </div>
         </div>
+
+        {!isNarrow && showSidePanel && (
+          <aside className="w-[320px] shrink-0" aria-label="สรุปคลังอะไหล่">
+            <PanelContent parts={parts} />
+          </aside>
+        )}
       </div>
 
       {/* Mobile: side panel เป็น fullscreen dialog */}
@@ -954,20 +929,20 @@ export default function SparePartsPage() {
         {deleteTarget && (
           <div className="space-y-4">
             {deleteSuccess ? (
-              <p className="flex items-center gap-2 font-bold" style={{ color: "var(--cmms-success)" }}>
+              <p className="flex items-center gap-2 font-semibold text-[var(--cmms-success)]">
                 <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden="true" />
                 ลบรายการอะไหล่สำเร็จแล้ว
               </p>
             ) : (
               <>
-                <p>
+                <p className="text-sm text-foreground">
                   คุณแน่ใจหรือไม่ว่าต้องการลบรายการอะไหล่{" "}
                   <strong>
                     &quot;{deleteTarget.code} ({deleteTarget.sageItemNo}) - {deleteTarget.name}&quot;
                   </strong>{" "}
                   ออกจากระบบ?
                 </p>
-                <p className="text-sm text-[var(--cmms-text-secondary)]">
+                <p className="text-sm text-muted-foreground">
                   การลบนี้จะทำการลบข้อมูลจาก MySQL Database และไม่สามารถย้อนคืนได้
                 </p>
                 <div className="mt-3 flex justify-end gap-2">
@@ -983,7 +958,6 @@ export default function SparePartsPage() {
           </div>
         )}
       </Dialog>
-
-    </>
+    </PageShell>
   );
 }

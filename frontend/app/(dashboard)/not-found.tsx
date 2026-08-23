@@ -1,54 +1,42 @@
 "use client";
 
-import { HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
-import { HomeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
+import { Button } from "@/components/ui/button";
+import { Home, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function DashboardNotFound() {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-      <div
-        className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
-        style={{
-          background: "var(--cmms-bg-muted)",
-          color: "var(--cmms-text-muted)",
-        }}
-      >
-        <Icon icon={MagnifyingGlassIcon} size="lg" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "ไม่พบหน้านี้" },
+      ]}
+      title="ไม่พบหน้านี้"
+    >
+      <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+          <Search size={32} strokeWidth={1.75} aria-hidden="true" />
+        </div>
+
+        <p className="text-5xl font-bold tracking-tight tabular-nums text-foreground">404</p>
+
+        <p className="mt-3 max-w-[400px] text-sm leading-relaxed text-muted-foreground">
+          หน้าที่คุณค้นหาอาจถูกย้าย ลบ หรือไม่มีสิทธิ์เข้าถึง — ลองกลับไปหน้าแรกหรือใช้เมนูนำทาง
+        </p>
+
+        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <Button onClick={() => router.push("/dashboard")}>
+            <Home size={16} strokeWidth={1.75} aria-hidden="true" />
+            กลับหน้าแรก
+          </Button>
+          <Button variant="secondary" onClick={() => router.back()}>
+            ย้อนกลับ
+          </Button>
+        </div>
       </div>
-
-      <Text type="display-2" weight="bold" style={{ letterSpacing: "-0.03em" }}>
-        404
-      </Text>
-      <Heading level={2} style={{ marginTop: 4 }}>
-        ไม่พบหน้านี้
-      </Heading>
-      <Text
-        type="body"
-        color="secondary"
-        style={{ maxWidth: 400, margin: "10px auto 0", lineHeight: 1.7 }}
-      >
-        หน้าที่คุณค้นหาอาจถูกย้าย ลบ หรือไม่มีสิทธิ์เข้าถึง — ลองกลับไปหน้าแรกหรือใช้เมนูนำทาง
-      </Text>
-
-      <HStack gap={3} wrap="wrap" hAlign="center" style={{ marginTop: 28 }}>
-        <Button
-          label="กลับหน้าแรก"
-          variant="primary"
-          onClick={() => router.push("/dashboard")}
-          icon={<Icon icon={HomeIcon} size="sm" />}
-        />
-        <Button
-          label="ย้อนกลับ"
-          variant="secondary"
-          onClick={() => router.back()}
-        />
-      </HStack>
-    </div>
+    </PageShell>
   );
 }

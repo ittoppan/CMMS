@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
+import { PageShell } from "@/components/PageShell";
+import { HStack, Grid } from "@/components/layout";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
 import {
-  CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  DocumentCheckIcon,
-} from "@heroicons/react/24/outline";
+  CheckCircle2,
+  XCircle,
+  Clock,
+  FileCheck,
+  RefreshCw,
+} from "lucide-react";
 
 interface ApprovalItem extends Record<string, unknown> {
   id: string;
@@ -35,6 +36,12 @@ const typeLabels: Record<string, string> = {
   work_permit: "ใบอนุญาตทำงาน",
   pm: "แผนบำรุงรักษา",
   spare_issue: "ใบเบิกอะไหล่",
+};
+
+const statusBadge: Record<ApprovalItem["status"], { label: string; variant: "success" | "danger" | "warning" }> = {
+  approved: { label: "อนุมัติแล้ว", variant: "success" },
+  rejected: { label: "ไม่อนุมัติ", variant: "danger" },
+  pending: { label: "รออนุมัติ", variant: "warning" },
 };
 
 export default function ApprovalCenterPage() {
@@ -109,167 +116,146 @@ export default function ApprovalCenterPage() {
     }
   };
 
-  const columns: TableColumn<ApprovalItem>[] = [
-    { key: "documentNo", header: "เลขที่เอกสาร", width: proportional(1.2) },
+  const columns: SimpleColumn<ApprovalItem>[] = [
+    { key: "documentNo", header: "เลขที่เอกสาร" },
     {
       key: "requestType",
       header: "ประเภทรายการ",
-      width: proportional(1.4),
       renderCell: (item) => (
-        <Text type="body" size="sm">{typeLabels[item.requestType] || item.requestType}</Text>
+        <span className="text-sm text-foreground">{typeLabels[item.requestType] || item.requestType}</span>
       ),
     },
-    { key: "requester", header: "ผู้ยื่นคำขอ", width: proportional(1.2) },
-    { key: "detail", header: "รายละเอียดคำขอ", width: proportional(2.5) },
-    { key: "createdAt", header: "วันที่ยื่น", width: proportional(1.2) },
+    { key: "requester", header: "ผู้ยื่นคำขอ" },
+    { key: "detail", header: "รายละเอียดคำขอ" },
+    { key: "createdAt", header: "วันที่ยื่น" },
     {
       key: "status",
       header: "สถานะ",
-      width: proportional(1),
       renderCell: (item) => (
-        <span
-          className="cmms-andon-chip"
-          style={{
-            background: item.status === 'approved' ? 'rgba(16,185,129,0.12)' : item.status === 'rejected' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-            color: item.status === 'approved' ? 'var(--cmms-success)' : item.status === 'rejected' ? 'var(--cmms-danger)' : 'var(--cmms-warning)',
-            fontSize: '0.75rem',
-            padding: '4px 10px',
-          }}
-        >
-          {item.status === 'approved' ? 'อนุมัติแล้ว' : item.status === 'rejected' ? 'ไม่อนุมัติ' : 'รออนุมัติ'}
-        </span>
+        <Badge variant={statusBadge[item.status].variant}>{statusBadge[item.status].label}</Badge>
       ),
     },
     {
       key: "actions",
       header: "การอนุมัติ",
-      width: proportional(1.8),
       renderCell: (item) =>
         item.status === "pending" ? (
           <HStack gap={2} wrap="wrap">
-            <button
-              type="button"
+            <Button
+              size="sm"
               disabled={processingId !== null && processingId !== item.id}
               onClick={() => handleAction(item, "approve")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-success"
             >
-              <CheckCircleIcon className="w-3.5 h-3.5" />
+              <CheckCircle2 size={14} strokeWidth={1.75} aria-hidden="true" />
               {processingId === item.id ? "กำลัง..." : "อนุมัติ"}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
               disabled={processingId !== null}
               onClick={() => handleAction(item, "reject")}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white cmms-btn-danger"
             >
-              <XCircleIcon className="w-3.5 h-3.5" />
+              <XCircle size={14} strokeWidth={1.75} aria-hidden="true" />
               ปฏิเสธ
-            </button>
+            </Button>
           </HStack>
         ) : (
-          <Text type="body" size="sm" color="disabled">ดำเนินการแล้ว</Text>
+          <span className="text-sm text-muted-foreground">ดำเนินการแล้ว</span>
         ),
     },
   ];
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>APPROVAL CENTER · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ศูนย์อนุมัติเอกสารและคำขอ</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <DocumentCheckIcon className="w-3.5 h-3.5" /> จัดการขั้นตอนการอนุมัติ
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            อนุมัติปิดงานซ่อม การเบิกอะไหล่ และใบอนุญาตทำงานเสี่ยงสำหรับหัวหน้างานและผู้จัดการ
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={fetchApprovals}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <ClockIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "อนุมัติ" },
+      ]}
+      title="ศูนย์อนุมัติเอกสารและคำขอ"
+      description="อนุมัติปิดงานซ่อม การเบิกอะไหล่ และใบอนุญาตทำงานเสี่ยงสำหรับหัวหน้างานและผู้จัดการ"
+      actions={
+        <Button variant="secondary" onClick={fetchApprovals}>
+          <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
-        </button>
-      </div>
-
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
+        </Button>
+      }
+    >
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       {actionMsg && (
-        <div style={{
-          padding: '12px 20px', borderRadius: 8,
-          background: actionMsg.isError ? 'var(--cmms-danger-light, #fef2f2)' : 'var(--cmms-success-light)',
-          border: `1px solid ${actionMsg.isError ? 'var(--cmms-danger, #ef4444)' : 'var(--cmms-success)'}`,
-          color: actionMsg.isError ? 'var(--cmms-danger, #ef4444)' : 'var(--cmms-success)',
-          fontWeight: 600,
-        }}>
-          {actionMsg.isError ? "❌ " : "✅ "}{actionMsg.text}
-        </div>
+        <Alert
+          variant={actionMsg.isError ? "danger" : "success"}
+          description={`${actionMsg.isError ? "❌ " : "✅ "}${actionMsg.text}`}
+          className="font-semibold"
+        />
       )}
 
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
-        <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-warning)' }}>
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile amber">
-              <ClockIcon className="w-6 h-6" />
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
+              <Clock className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">รายการรอการอนุมัติ</Text>
-              <Heading level={3} className="cmms-kpi-value">{summary.pending} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">รายการรอการอนุมัติ</p>
+              <p className="cmms-kpi-value tabular-nums">
+                {summary.pending} <span className="text-sm font-normal">รายการ</span>
+              </p>
+            </div>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-success)' }}>
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile green">
-              <CheckCircleIcon className="w-6 h-6" />
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
+              <CheckCircle2 className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">อนุมัติแล้วทั้งหมด</Text>
-              <Heading level={3} className="cmms-kpi-value">{summary.approved} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">อนุมัติแล้วทั้งหมด</p>
+              <p className="cmms-kpi-value tabular-nums">
+                {summary.approved} <span className="text-sm font-normal">รายการ</span>
+              </p>
+            </div>
+          </div>
         </Card>
 
-        <Card padding={4} className="cmms-kpi-card" style={{ borderLeft: '4px solid var(--cmms-danger)' }}>
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile red">
-              <XCircleIcon className="w-6 h-6" />
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
+              <XCircle className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">ปฏิเสธ / ส่งกลับแก้ไข</Text>
-              <Heading level={3} className="cmms-kpi-value">{summary.rejected} <span style={{ fontSize: 14 }}>รายการ</span></Heading>
-            </VStack>
-          </HStack>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">ปฏิเสธ / ส่งกลับแก้ไข</p>
+              <p className="cmms-kpi-value tabular-nums">
+                {summary.rejected} <span className="text-sm font-normal">รายการ</span>
+              </p>
+            </div>
+          </div>
         </Card>
       </Grid>
 
-      <Card padding={0} style={{ overflow: 'hidden' }}>
+      <Card className="overflow-hidden">
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 48 }}>
+          <div className="flex justify-center p-12">
             <Spinner />
           </div>
         ) : items.length === 0 ? (
           <EmptyState
             title="ยังไม่มีคำขออนุมัติ"
             description="เมื่อมีเอกสารที่ต้องอนุมัติ (เช่น ปิดงานซ่อม ใบเบิกอะไหล่ LOTO) จะแสดงที่นี่"
-            icon={<DocumentCheckIcon className="w-8 h-8" />}
+            icon={<FileCheck className="h-8 w-8" strokeWidth={1.75} aria-hidden="true" />}
           />
         ) : (
-          <Table<ApprovalItem>
-            data={items}
+          <SimpleDataTable<ApprovalItem>
             columns={columns}
+            data={items}
             idKey="id"
-            density="balanced"
-            dividers="rows"
+            pageSize={10}
+            emptyTitle="ยังไม่มีคำขออนุมัติ"
+            emptyDescription="เมื่อมีเอกสารที่ต้องอนุมัติจะแสดงที่นี่"
           />
         )}
       </Card>
-    </VStack>
+    </PageShell>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Button } from "@astryxdesign/core/Button";
-import { Icon } from "@astryxdesign/core/Icon";
-import { ArrowPathIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
+import { VStack, HStack } from "@/components/layout";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { RefreshCw, Maximize2 } from "lucide-react";
 import AndonLamp from "@/components/AndonLamp";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 
@@ -206,24 +207,25 @@ export default function AndonBoardPage() {
 
   if (!canShow("andon-board")) {
     return (
-      <Card padding={8} style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
+      <Card className="mx-auto max-w-[560px] p-8 text-center">
         <VStack gap={3} hAlign="center">
           <AndonLamp status="idle" size="lg" />
-          <Heading level={3}>ไม่มีสิทธิ์ดูจอ Andon</Heading>
-          <Text type="body" color="secondary">ติดต่อผู้ดูแลระบบเพื่อเปิดสิทธิ์เมนู “จอ Andon TV (โรงงาน)”</Text>
+          <h2 className="text-base font-semibold text-foreground">ไม่มีสิทธิ์ดูจอ Andon</h2>
+          <p className="text-sm text-muted-foreground">ติดต่อผู้ดูแลระบบเพื่อเปิดสิทธิ์เมนู “จอ Andon TV (โรงงาน)”</p>
         </VStack>
       </Card>
     );
   }
 
   return (
-    <VStack gap={5}>
-      {/* ── Header ── */}
-      <HStack hAlign="between" vAlign="center" wrap="wrap" gap={3}>
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow">ANDON BOARD · CMMS-TOPPAN</Text>
-          <Heading level={2}>จอ Andon TV (โรงงาน)</Heading>
-        </VStack>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "Andon Board", href: "/andon-board" },
+        { label: "จอ Andon TV (โรงงาน)" },
+      ]}
+      title="จอ Andon TV (โรงงาน)"
+      actions={
         <HStack gap={2} vAlign="center" wrap="wrap">
           <div
             style={{
@@ -235,47 +237,34 @@ export default function AndonBoardPage() {
           >
             {now ? now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }) : "--:--:--"}
           </div>
-          <div
-            style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "4px 12px", borderRadius: 8, background: "var(--cmms-bg-wash)",
-              fontSize: "0.78rem", fontWeight: 600, color: "var(--cmms-text-secondary)",
-            }}
-          >
-            <ArrowPathIcon className="w-3.5 h-3.5" />
+          <Badge variant="neutral" className="gap-1.5 px-3 py-1">
+            <RefreshCw size={12} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช {countdown}s · ล่าสุด {lastSync}
-          </div>
-          <Button label="เต็มจอ" variant="secondary" icon={<Icon icon={ArrowsPointingOutIcon} size="sm" />} onClick={goFullscreen} />
+          </Badge>
+          <Button variant="secondary" onClick={goFullscreen} aria-label="เต็มจอ">
+            <Maximize2 size={16} strokeWidth={1.75} aria-hidden="true" />
+            เต็มจอ
+          </Button>
         </HStack>
-      </HStack>
-
-      {error && (
-        <div style={{ padding: "10px 14px", borderRadius: 8, background: "var(--cmms-danger-light)", color: "var(--cmms-danger)", fontSize: "0.85rem", fontWeight: 600 }}>
-          {error}
-        </div>
-      )}
+      }
+    >
+      {error && <Alert variant="danger" description={error} />}
 
       {/* ── KPI ไฟ Andon ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {kpiCards.map((k) => (
-          <div
-            key={k.label}
-            style={{
-              background: "#FFFFFF", border: "1px solid var(--cmms-border)", borderRadius: 14,
-              padding: "18px 20px", display: "flex", flexDirection: "column", gap: 6,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Card key={k.label} className="flex flex-col gap-1.5 p-5">
+            <div className="flex items-center gap-2.5">
               <AndonLamp status={k.tone} size="sm" />
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--cmms-text-muted)" }}>
+              <span className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">
                 {k.label}
               </span>
             </div>
-            <div className="cmms-display" style={{ fontSize: "2.6rem", lineHeight: 1, color: "var(--cmms-text-primary)" }}>
+            <div className="cmms-display tabular-nums" style={{ fontSize: "2.6rem", lineHeight: 1, color: "var(--cmms-text-primary)" }}>
               {k.value}
             </div>
-            <span style={{ fontSize: "0.74rem", color: "var(--cmms-text-secondary)" }}>{k.sub}</span>
-          </div>
+            <span className="text-xs text-muted-foreground">{k.sub}</span>
+          </Card>
         ))}
       </div>
 
@@ -283,19 +272,19 @@ export default function AndonBoardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* งานด่วน / เครื่องหยุด */}
         <div className="lg:col-span-2">
-          <Card padding={5} style={{ height: "100%" }}>
+          <Card className="h-full p-5">
             <VStack gap={4}>
               <HStack hAlign="between" vAlign="center">
-                <Heading level={4} className="flex items-center gap-2">
+                <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
                   <span className="cmms-status-dot down" style={{ display: "inline-block" }} />
                   งานด่วน / เครื่องหยุด
-                </Heading>
-                <Text type="body" size="sm" color="secondary">{urgentRepairs.length} รายการ</Text>
+                </h3>
+                <span className="text-sm text-muted-foreground">{urgentRepairs.length} รายการ</span>
               </HStack>
               {urgentRepairs.length === 0 ? (
-                <div style={{ padding: "32px 0", textAlign: "center", color: "var(--cmms-text-muted)" }}>
+                <div className="py-8 text-center text-[var(--cmms-text-muted)]">
                   <AndonLamp status="ok" size="lg" />
-                  <Text type="body" size="sm" style={{ marginTop: 10, display: "block" }}>ไม่มีงานด่วน — ทุกเครื่องทำงานปกติ</Text>
+                  <span className="mt-2.5 block text-sm">ไม่มีงานด่วน — ทุกเครื่องทำงานปกติ</span>
                 </div>
               ) : (
                 <VStack gap={2}>
@@ -330,19 +319,19 @@ export default function AndonBoardPage() {
         </div>
 
         {/* PM วันนี้ */}
-        <Card padding={5} style={{ height: "100%" }}>
+        <Card className="h-full p-5">
           <VStack gap={4}>
             <HStack hAlign="between" vAlign="center">
-              <Heading level={4} className="flex items-center gap-2">
+              <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
                 <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
                 PM วันนี้ / ค้าง
-              </Heading>
-              <Text type="body" size="sm" color="secondary">{todayPms.length} รายการ</Text>
+              </h3>
+              <span className="text-sm text-muted-foreground">{todayPms.length} รายการ</span>
             </HStack>
             {todayPms.length === 0 ? (
-              <Text type="body" size="sm" color="secondary" style={{ padding: "20px 0", textAlign: "center" }}>
+              <span className="py-5 text-center text-sm text-muted-foreground">
                 ไม่มีแผน PM ค้างวันนี้
-              </Text>
+              </span>
             ) : (
               <VStack gap={2}>
                 {todayPms.map((p) => (
@@ -365,19 +354,19 @@ export default function AndonBoardPage() {
 
         {/* อะไหล่ต่ำสต็อก */}
         <div className="lg:col-span-2">
-          <Card padding={5}>
+          <Card className="p-5">
             <VStack gap={4}>
               <HStack hAlign="between" vAlign="center">
-                <Heading level={4} className="flex items-center gap-2">
+                <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
                   <span className="cmms-status-dot warn" style={{ display: "inline-block" }} />
                   อะไหล่ต่ำกว่าจุดสั่งซื้อ
-                </Heading>
-                <Text type="body" size="sm" color="secondary">{lowStock.length} รายการ</Text>
+                </h3>
+                <span className="text-sm text-muted-foreground">{lowStock.length} รายการ</span>
               </HStack>
               {lowStock.length === 0 ? (
-                <Text type="body" size="sm" color="secondary" style={{ padding: "20px 0", textAlign: "center" }}>
+                <span className="py-5 text-center text-sm text-muted-foreground">
                   สต็อกอะไหล่ปกติทั้งหมด
-                </Text>
+                </span>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                   {lowStock.map((s) => (
@@ -400,14 +389,14 @@ export default function AndonBoardPage() {
         </div>
 
         {/* สถานะงานรวม */}
-        <Card padding={5}>
+        <Card className="p-5">
           <VStack gap={4}>
-            <Heading level={4} className="flex items-center gap-2">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
               <span className="cmms-status-dot ok" style={{ display: "inline-block" }} />
               สถานะงานทั้งหมด
-            </Heading>
+            </h3>
             {!kpi?.status_dist?.length ? (
-              <Text type="body" size="sm" color="secondary">ยังไม่มีข้อมูลงานซ่อม</Text>
+              <span className="text-sm text-muted-foreground">ยังไม่มีข้อมูลงานซ่อม</span>
             ) : (
               <VStack gap={2}>
                 {kpi.status_dist.map((s: any) => {
@@ -422,7 +411,7 @@ export default function AndonBoardPage() {
                       <span style={{ flex: 1, fontSize: "0.85rem", fontWeight: 600, color: "var(--cmms-text-primary)" }}>
                         {s.status}
                       </span>
-                      <span className="cmms-display" style={{ fontSize: "1.3rem", color: "var(--cmms-text-primary)" }}>{s.cnt}</span>
+                      <span className="cmms-display tabular-nums" style={{ fontSize: "1.3rem", color: "var(--cmms-text-primary)" }}>{s.cnt}</span>
                     </div>
                   );
                 })}
@@ -432,9 +421,9 @@ export default function AndonBoardPage() {
         </Card>
       </div>
 
-      <Text type="body" size="sm" color="secondary">
+      <p className="text-sm text-muted-foreground">
         อัปเดตอัตโนมัติทุก {refreshSec} วินาที · ตั้งค่าได้ที่ ระบบ & ตั้งค่า → “จอ Andon TV — รีเฟรชอัตโนมัติ”
-      </Text>
-    </VStack>
+      </p>
+    </PageShell>
   );
 }

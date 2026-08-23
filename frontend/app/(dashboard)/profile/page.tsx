@@ -2,26 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Card } from "@astryxdesign/core/Card";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Avatar } from "@astryxdesign/core/Avatar";
+import { VStack, HStack, Grid } from "@/components/layout";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Spinner } from "@/components/ui/spinner";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { PageShell } from "@/components/PageShell";
 import { useToast } from "../../../components/ToastProvider";
 import {
-  UserCircleIcon,
-  ChatBubbleLeftRightIcon,
-  LinkIcon,
-  CameraIcon,
-  KeyIcon,
-  ShieldCheckIcon,
-  IdentificationIcon,
-  LanguageIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
+  User,
+  MessageSquare,
+  Link2,
+  Camera,
+  Key,
+  ShieldCheck,
+  CalendarDays,
+  Languages,
+  Trash2,
+} from "lucide-react";
 import { useLang, setUserLang } from "../../../lib/i18n";
 
 interface Profile {
@@ -180,74 +181,51 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <HStack hAlign="center" style={{ padding: 60 }}>
-        <Spinner size="md" />
-        <Text type="body" color="secondary">กำลังโหลดโปรไฟล์...</Text>
+      <HStack hAlign="center" vAlign="center" className="py-16">
+        <Spinner />
+        <span className="text-sm text-muted-foreground">กำลังโหลดโปรไฟล์...</span>
       </HStack>
     );
   }
 
   return (
-    <VStack gap={6}>
-      {error && <Banner status="error" title="เกิดข้อผิดพลาด" description={error} isDismissable={false} />}
-
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PROFILE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>โปรไฟล์ของฉัน</Heading>
-            {profile && (
-              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-                <UserCircleIcon className="w-3.5 h-3.5" /> ผู้ใช้: {profile.username}
-              </span>
-            )}
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            จัดการข้อมูลส่วนตัว เปลี่ยนรูปโปรไฟล์ รหัสผ่าน และการผูกบัญชี LINE สำหรับการแจ้งเตือน
-          </Text>
-        </VStack>
-      </div>
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "โปรไฟล์" },
+      ]}
+      title="โปรไฟล์ของฉัน"
+      description="จัดการข้อมูลส่วนตัว เปลี่ยนรูปโปรไฟล์ รหัสผ่าน และการผูกบัญชี LINE สำหรับการแจ้งเตือน"
+    >
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
       <Grid columns={{ minWidth: 300 }} gap={6} style={{ alignItems: "start" }}>
         {/* ═══ การ์ดซ้าย: รูป + ข้อมูลหลัก + LINE ═══ */}
-        <Card padding={5}>
-          <VStack gap={4} hAlign="center" style={{ textAlign: "center" }}>
-            <div style={{ position: "relative", width: 96, height: 96 }}>
-              {avatarSrc ? (
-                <Avatar name={form.full_name || profile?.username || "User"} src={avatarSrc} size="lg" style={{ width: 96, height: 96, fontSize: 36 }} />
-              ) : (
-                <div style={{ width: 96, height: 96, borderRadius: "50%", background: "var(--cmms-primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, fontWeight: 800 }}>
-                  {(form.full_name || profile?.username || "U").charAt(0).toUpperCase()}
-                </div>
-              )}
+        <Card className="p-5">
+          <VStack gap={4} hAlign="center" className="text-center">
+            <div className="relative h-24 w-24">
+              <Avatar className="h-24 w-24 text-3xl">
+                {avatarSrc ? <AvatarImage src={avatarSrc} alt={form.full_name || profile?.username || "User"} /> : null}
+                <AvatarFallback>{(form.full_name || profile?.username || "U").charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
               <button
                 type="button"
                 title="เปลี่ยนรูปโปรไฟล์"
+                aria-label="เปลี่ยนรูปโปรไฟล์"
                 onClick={() => fileRef.current?.click()}
-                style={{
-                  position: "absolute", bottom: 0, right: 0,
-                  width: 30, height: 30, borderRadius: "50%",
-                  background: "var(--cmms-primary)", color: "#fff",
-                  border: "2px solid #fff", cursor: "pointer",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
+                className="absolute bottom-0 right-0 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-[var(--cmms-primary)] text-white transition-opacity hover:opacity-90"
               >
-                {uploading ? <Spinner size="sm" /> : <CameraIcon className="w-4 h-4" />}
+                {uploading ? <Spinner size={14} label="" /> : <Camera className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
               </button>
               {avatarSrc && !uploading && (
                 <button
                   type="button"
                   title="ลบรูปโปรไฟล์"
+                  aria-label="ลบรูปโปรไฟล์"
                   onClick={handleDeleteAvatar}
-                  style={{
-                    position: "absolute", bottom: 0, left: 0,
-                    width: 30, height: 30, borderRadius: "50%",
-                    background: "var(--cmms-danger)", color: "#fff",
-                    border: "2px solid #fff", cursor: "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
+                  className="absolute bottom-0 left-0 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-destructive text-white transition-opacity hover:opacity-90"
                 >
-                  {deletingAvatar ? <Spinner size="sm" /> : <TrashIcon className="w-4 h-4" />}
+                  {deletingAvatar ? <Spinner size={14} label="" /> : <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
                 </button>
               )}
               <input
@@ -260,43 +238,31 @@ export default function ProfilePage() {
             </div>
 
             <VStack gap={0}>
-              <Heading level={3}>{form.full_name || profile?.full_name || "—"}</Heading>
-              <Text type="body" size="sm" color="secondary">
+              <h2 className="text-base font-semibold text-foreground">{form.full_name || profile?.full_name || "—"}</h2>
+              <p className="text-sm text-muted-foreground">
                 {profile?.position || profile?.role || "—"}
                 {profile?.employee_code ? ` · ${profile.employee_code}` : ""}
-              </Text>
+              </p>
             </VStack>
 
-            <span
-              className="cmms-andon-chip"
-              style={{
-                background: profile?.line_user_id ? "rgba(16,185,129,0.12)" : "rgba(100,116,139,0.12)",
-                color: profile?.line_user_id ? "var(--cmms-success)" : "var(--cmms-text-muted)",
-                fontSize: "0.75rem",
-                padding: "4px 10px",
-              }}
-            >
+            <Badge variant={profile?.line_user_id ? "success" : "neutral"}>
               {profile?.line_user_id ? "ผูกบัญชี LINE แล้ว" : "ยังไม่ผูกบัญชี LINE"}
-            </span>
+            </Badge>
             {!profile?.line_user_id && (
-              <button
-                type="button"
-                onClick={() => router.push("/register")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
-                <LinkIcon className="w-3.5 h-3.5" />
+              <Button variant="secondary" size="sm" onClick={() => router.push("/register")}>
+                <Link2 size={14} strokeWidth={1.75} aria-hidden="true" />
                 ผูกบัญชี LINE
-              </button>
+              </Button>
             )}
 
-            <VStack gap={1} style={{ width: "100%", textAlign: "left" }}>
+            <VStack gap={1} className="w-full text-left">
               <HStack gap={2} vAlign="center">
-                <IdentificationIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
-                <Text type="body" size="sm" color="secondary">สมาชิกตั้งแต่: {profile?.created_at ? String(profile.created_at).slice(0, 10) : "—"}</Text>
+                <CalendarDays className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+                <span className="text-sm text-muted-foreground">สมาชิกตั้งแต่: {profile?.created_at ? String(profile.created_at).slice(0, 10) : "—"}</span>
               </HStack>
               <HStack gap={2} vAlign="center">
-                <ShieldCheckIcon className="w-4 h-4" style={{ color: "var(--cmms-secondary)" }} />
-                <Text type="body" size="sm" color="secondary">บทบาท: {profile?.role || "—"}</Text>
+                <ShieldCheck className="h-4 w-4 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+                <span className="text-sm text-muted-foreground">บทบาท: {profile?.role || "—"}</span>
               </HStack>
             </VStack>
           </VStack>
@@ -304,61 +270,54 @@ export default function ProfilePage() {
 
         {/* ═══ การ์ดขวา: ข้อมูล + รหัสผ่าน ═══ */}
         <VStack gap={6} style={{ gridColumn: "span 2" }}>
-          <Card padding={5}>
+          <Card className="p-5">
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <UserCircleIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={3}>ข้อมูลส่วนตัว</Heading>
+                <User className="h-5 w-5 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="text-base font-semibold text-foreground">ข้อมูลส่วนตัว</h3>
               </HStack>
 
-              <TextInput
+              <Input
                 label="ชื่อ-นามสกุล"
                 value={form.full_name}
-                onChange={(v) => setForm((f) => ({ ...f, full_name: v }))}
+                onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
               />
-              <TextInput
+              <Input
                 label="อีเมล"
                 type="email"
                 value={form.email}
-                onChange={(v) => setForm((f) => ({ ...f, email: v }))}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
               />
-              <TextInput
+              <Input
                 label="เบอร์โทร"
                 value={form.phone}
-                onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
+                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               />
-              <TextInput
+              <Input
                 label="ตำแหน่ง"
                 value={form.position}
-                onChange={(v) => setForm((f) => ({ ...f, position: v }))}
+                onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
               />
 
               <HStack hAlign="end">
-                <button
-                  type="button"
-                  disabled={saving}
-                  onClick={handleSave}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-                >
+                <Button disabled={saving} onClick={handleSave}>
                   {saving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-                </button>
+                </Button>
               </HStack>
             </VStack>
           </Card>
 
-          <Card padding={5}>
+          <Card className="p-5">
             <VStack gap={4}>
               <HStack gap={2} vAlign="center" wrap="wrap">
-                <LanguageIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={3}>ภาษาประจำตัว</Heading>
-                {langSaving && <Spinner size="sm" />}
-                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                  บันทึกไว้ที่บัญชีของคุณ — ใช้เหมือนกันทุกเครื่อง
-                </span>
+                <Languages className="h-5 w-5 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="text-base font-semibold text-foreground">ภาษาประจำตัว</h3>
+                {langSaving && <Spinner size={14} label="" />}
+                <Badge variant="neutral">บันทึกไว้ที่บัญชีของคุณ — ใช้เหมือนกันทุกเครื่อง</Badge>
               </HStack>
-              <Text type="body" size="sm" color="secondary">
+              <p className="text-sm text-muted-foreground">
                 เลือกภาษาที่ใช้แสดงผลในระบบ ระบบจะจำไว้ให้ตามบัญชีผู้ใช้ (ไม่ขึ้นกับเครื่อง/เบราว์เซอร์)
-              </Text>
+              </p>
               <HStack gap={2} vAlign="center" wrap="wrap">
                 {[
                   { value: "th", short: "ไทย", label: "ไทย (Thai)" },
@@ -372,18 +331,14 @@ export default function ProfilePage() {
                       title={opt.label}
                       disabled={langSaving}
                       onClick={() => handleLangChange(opt.value as "th" | "en")}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 6,
-                        padding: "8px 18px", borderRadius: 10,
-                        border: active ? "1px solid var(--cmms-primary)" : "1px solid var(--cmms-border)",
-                        background: active ? "var(--cmms-primary)" : "var(--cmms-bg-wash)",
-                        color: active ? "#fff" : "var(--cmms-text-secondary)",
-                        fontSize: 13, fontWeight: 700, cursor: "pointer",
-                        transition: "all 150ms ease",
-                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-[13px] font-bold transition-colors duration-150 ${
+                        active
+                          ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)] text-white"
+                          : "border-border bg-secondary text-muted-foreground hover:bg-accent"
+                      }`}
                     >
                       {opt.short}
-                      <span style={{ fontWeight: 500, opacity: 0.85 }}>{opt.label}</span>
+                      <span className="font-medium opacity-85">{opt.label}</span>
                     </button>
                   );
                 })}
@@ -391,53 +346,49 @@ export default function ProfilePage() {
             </VStack>
           </Card>
 
-          <Card padding={5}>
+          <Card className="p-5">
             <VStack gap={4}>
               <HStack gap={2} vAlign="center">
-                <KeyIcon className="w-5 h-5" style={{ color: "var(--cmms-primary)" }} />
-                <Heading level={3}>เปลี่ยนรหัสผ่าน</Heading>
+                <Key className="h-5 w-5 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+                <h3 className="text-base font-semibold text-foreground">เปลี่ยนรหัสผ่าน</h3>
               </HStack>
-              <Text type="body" size="sm" color="secondary">
-                กรอกรหัสเดิม + รหัสใหม่ 2 ครั้ง แล้วกด "บันทึกข้อมูล" ด้านบน (รหัสใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร)
-              </Text>
-              <TextInput
+              <p className="text-sm text-muted-foreground">
+                กรอกรหัสเดิม + รหัสใหม่ 2 ครั้ง แล้วกด &quot;บันทึกข้อมูล&quot; ด้านบน (รหัสใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร)
+              </p>
+              <Input
                 label="รหัสผ่านปัจจุบัน"
                 type="password"
                 value={pw.current_password}
-                onChange={(v) => setPw((f) => ({ ...f, current_password: v }))}
+                onChange={(e) => setPw((f) => ({ ...f, current_password: e.target.value }))}
               />
-              <TextInput
+              <Input
                 label="รหัสผ่านใหม่"
                 type="password"
                 value={pw.new_password}
-                onChange={(v) => setPw((f) => ({ ...f, new_password: v }))}
+                onChange={(e) => setPw((f) => ({ ...f, new_password: e.target.value }))}
               />
-              <TextInput
+              <Input
                 label="ยืนยันรหัสผ่านใหม่"
                 type="password"
                 value={pw.confirm_password}
-                onChange={(v) => setPw((f) => ({ ...f, confirm_password: v }))}
+                onChange={(e) => setPw((f) => ({ ...f, confirm_password: e.target.value }))}
               />
             </VStack>
           </Card>
 
-          <Card padding={4}>
+          <Card className="p-4">
             <HStack gap={2} vAlign="center" wrap="wrap">
-              <ChatBubbleLeftRightIcon className="w-4 h-4" style={{ color: "var(--cmms-primary)" }} />
-              <Text type="body" size="sm" color="secondary">
+              <MessageSquare className="h-4 w-4 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+              <span className="text-sm text-muted-foreground">
                 ต้องการรับการแจ้งเตือนทาง LINE หรือไม่? ไปที่หน้า
-              </Text>
-              <button
-                type="button"
-                onClick={() => router.push("/register")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+              </span>
+              <Button variant="secondary" size="sm" onClick={() => router.push("/register")}>
                 ลงทะเบียนผูกบัญชี LINE
-              </button>
+              </Button>
             </HStack>
           </Card>
         </VStack>
       </Grid>
-    </VStack>
+    </PageShell>
   );
 }

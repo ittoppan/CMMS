@@ -2,29 +2,30 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Selector } from "@astryxdesign/core/Selector";
-import { TextInput } from "@astryxdesign/core/TextInput";
-
-import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { PageShell } from "@/components/PageShell";
+import { HStack, VStack, Grid } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
+import { Dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import CountUp from "react-countup";
-import { 
-  ShieldCheckIcon,
-  PlusIcon,
-  CheckCircleIcon,
-  LockClosedIcon,
-  ExclamationTriangleIcon,
-  DocumentCheckIcon
-} from "@heroicons/react/24/outline";
+import {
+  Plus,
+  FileCheck,
+  Lock,
+  TriangleAlert,
+} from "lucide-react";
 
 interface PermitItem extends Record<string, unknown> {
   id: string;
@@ -100,171 +101,179 @@ export default function WorkPermitPage() {
   const lockedCount = permits.filter(p => p.lotoStatus === "Locked Out").length;
   const pendingCount = permits.filter(p => p.status === "pending_safety").length;
 
-
-
-  const columns: TableColumn<PermitItem>[] = [
-    { key: "id", header: "เลขที่ใบอนุญาต", width: proportional(1.5) },
-    { 
-      key: "permitType", 
-      header: "ประเภทงานเสี่ยง", 
-      width: proportional(2),
+  const columns: SimpleColumn<PermitItem>[] = [
+    { key: "id", header: "เลขที่ใบอนุญาต" },
+    {
+      key: "permitType",
+      header: "ประเภทงานเสี่ยง",
       renderCell: (item) => (
-        <span className="cmms-andon-chip" style={{ background: "rgba(239,68,68,0.12)", color: "var(--cmms-danger)", fontSize: "0.7rem", padding: "3px 9px" }}>
-          {permitTypeLabels[item.permitType] || item.permitType}
-        </span>
+        <Badge variant="danger">{permitTypeLabels[item.permitType] || item.permitType}</Badge>
       )
     },
-    { key: "workOrder", header: "อ้างอิง WO/PM", width: proportional(1.5) },
-    { key: "location", header: "สถานที่ปฏิบัติงาน", width: proportional(2) },
-    { key: "applicant", header: "ผู้ขออนุญาต", width: proportional(1.5) },
-    { 
-      key: "lotoStatus", 
-      header: "สถานะ LOTO", 
-      width: proportional(1.5),
+    { key: "workOrder", header: "อ้างอิง WO/PM" },
+    { key: "location", header: "สถานที่ปฏิบัติงาน" },
+    { key: "applicant", header: "ผู้ขออนุญาต" },
+    {
+      key: "lotoStatus",
+      header: "สถานะ LOTO",
       renderCell: (item) => (
         item.lotoStatus === 'Locked Out' ? (
-          <span className="cmms-status ok"><span className="cmms-status-dot" />ล็อกตัดพลังงานแล้ว</span>
+          <Badge variant="success" dot>ล็อกตัดพลังงานแล้ว</Badge>
         ) : (
-          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ไม่ใช้ LOTO</span>
+          <Badge variant="neutral">ไม่ใช้ LOTO</Badge>
         )
       )
     },
-    { 
-      key: "status", 
-      header: "สถานะการอนุมัติ", 
-      width: proportional(1.5),
+    {
+      key: "status",
+      header: "สถานะการอนุมัติ",
       renderCell: (item) => (
         item.status === 'approved' ? (
-          <span className="cmms-status ok"><span className="cmms-status-dot" />อนุมัติแล้ว</span>
+          <Badge variant="success" dot>อนุมัติแล้ว</Badge>
         ) : item.status === 'pending_safety' ? (
-          <span className="cmms-status warn"><span className="cmms-status-dot" />รอ จป. อนุมัติ</span>
+          <Badge variant="warning" dot>รอ จป. อนุมัติ</Badge>
         ) : (
-          <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.7rem", padding: "3px 9px" }}>ปิดงานแล้ว</span>
+          <Badge variant="neutral">ปิดงานแล้ว</Badge>
         )
       )
     }
   ];
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAFETY WORK PERMIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ShieldCheckIcon className="w-3.5 h-3.5" /> ความปลอดภัยและอาชีวอนามัย
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            ควบคุมความปลอดภัยสำหรับงานซ่อมบำรุงในพื้นที่เสี่ยงอันตรายสูง (Work Permit & Lockout/Tagout)
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <PlusIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "ความปลอดภัย", href: "/safety/work_permit" },
+        { label: "ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO" },
+      ]}
+      title="ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO"
+      description="ควบคุมความปลอดภัยสำหรับงานซ่อมบำรุงในพื้นที่เสี่ยงอันตรายสูง (Work Permit & Lockout/Tagout)"
+      actions={
+        <Button onClick={() => setModalOpen(true)}>
+          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
           ออกใบอนุญาตทำงานเสี่ยงใหม่
-        </button>
-      </div>
-
+        </Button>
+      }
+    >
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
-         <Card elevation="low" padding={4} className="cmms-kpi-card">
-           <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 cmms-icon-tile red">
-               <LockClosedIcon className="w-6 h-6" />
-             </div>
-             <VStack gap={1}>
-               <Text type="supporting" color="secondary">กำลังล็อกตัดพลังงาน</Text>
-               <Heading level={2} className="cmms-kpi-value"><CountUp end={lockedCount} /> <Text type="body" size="sm">จุด</Text></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
+              <Lock className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">กำลังล็อกตัดพลังงาน</p>
+              <p className="cmms-kpi-value tabular-nums">
+                <CountUp end={lockedCount} /> <span className="text-sm font-normal">จุด</span>
+              </p>
+            </div>
+          </div>
+        </Card>
 
-         <Card elevation="low" padding={4} className="cmms-kpi-card">
-           <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 cmms-icon-tile amber">
-               <ExclamationTriangleIcon className="w-6 h-6" />
-             </div>
-             <VStack gap={1}>
-               <Text type="supporting" color="secondary">รอการอนุมัติจาก จป. วิชาชีพ</Text>
-               <Heading level={2} className="cmms-kpi-value"><CountUp end={pendingCount} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
+              <TriangleAlert className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">รอการอนุมัติจาก จป. วิชาชีพ</p>
+              <p className="cmms-kpi-value tabular-nums">
+                <CountUp end={pendingCount} /> <span className="text-sm font-normal">ฉบับ</span>
+              </p>
+            </div>
+          </div>
+        </Card>
 
-         <Card elevation="low" padding={4} className="cmms-kpi-card">
-           <HStack gap={3} vAlign="center">
-             <div className="w-12 h-12 cmms-icon-tile green">
-               <DocumentCheckIcon className="w-6 h-6" />
-             </div>
-             <VStack gap={1}>
-               <Text type="supporting" color="secondary">ใบอนุญาตทั้งหมดในระบบ</Text>
-               <Heading level={2} className="cmms-kpi-value"><CountUp end={permits.length} /> <Text type="body" size="sm">ฉบับ</Text></Heading>
-             </VStack>
-           </HStack>
-         </Card>
+        <Card className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
+              <FileCheck className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">ใบอนุญาตทั้งหมดในระบบ</p>
+              <p className="cmms-kpi-value tabular-nums">
+                <CountUp end={permits.length} /> <span className="text-sm font-normal">ฉบับ</span>
+              </p>
+            </div>
+          </div>
+        </Card>
       </Grid>
 
-      <Card elevation="low" padding={6}>
-        <Table<PermitItem> 
-          data={permits} 
-          columns={columns} 
-          idKey="id" 
-          density="balanced" 
-          dividers="rows" 
-        />
+      <Card>
+        <CardContent>
+          <SimpleDataTable<PermitItem>
+            columns={columns}
+            data={permits}
+            idKey="id"
+            pageSize={10}
+            emptyTitle="ยังไม่มีใบอนุญาตทำงาน"
+            emptyDescription="กดปุ่ม “ออกใบอนุญาตทำงานเสี่ยงใหม่” เพื่อสร้างรายการ"
+          />
+        </CardContent>
       </Card>
 
       {/* Modal ออกใบอนุญาต */}
-      <AnimatedDialog open={modalOpen} onClose={() => setModalOpen(false)}>
-        <DialogHeader title="ออกใบอนุญาตทำงานเสี่ยง" onOpenChange={(open) => setModalOpen(open)} />
-        <div style={{ padding: '16px 0' }}>
-           <FormLayout>
-             <VStack gap={4}>
-                <Field inputID="f-type" label="ประเภทงานเสี่ยง *" isRequired>
-                  <Selector label="ประเภทงานเสี่ยง" isLabelHidden 
-                    options={[
-                      { value: "electrical", label: "งานไฟฟ้า LOTO (ตัดระบบไฟฟ้าและพลังงาน)" },
-                      { value: "hot_work", label: "งานเชื่อมและเกิดความร้อน/ประกายไฟ" },
-                      { value: "confined_space", label: "งานในที่อับอากาศ" },
-                      { value: "high_work", label: "งานในที่สูงเกิน 2 เมตร" },
-                    ]}
-                    value={form.permit_type}
-                    onChange={(v) => setForm({ ...form, permit_type: String(v) })}
-                  />
-                </Field>
-                <Grid columns={2} gap={4}>
-                  <Field inputID="f-ref" label="อ้างอิงเลขใบสั่งงาน">
-                    <TextInput label="เลขใบสั่งงาน" isLabelHidden placeholder="เช่น EN-2612-013 (ไม่บังคับ)" value={form.repair_ref} onChange={(v) => setForm({ ...form, repair_ref: v })} />
-                  </Field>
-                  <Field inputID="f-loc" label="สถานที่ปฏิบัติงาน *" isRequired>
-                    <TextInput label="สถานที่" isLabelHidden placeholder="ระบุตำแหน่ง..." value={form.location} onChange={(v) => setForm({ ...form, location: v })} />
-                  </Field>
-                </Grid>
-                
-                <VStack gap={2} style={{ padding: 16, backgroundColor: 'var(--color-muted)', borderRadius: 8 }}>
-                   <Text type="body" weight="semibold">ขั้นตอนความปลอดภัย LOTO Mandatory Check</Text>
-                   <HStack gap={2} vAlign="center"><CheckboxInput label="ปลดเมนสวิตช์ไฟฟ้าและใส่กุญแจ Safety Lockout" value={form.loto_electrical} onChange={(v) => setForm({ ...form, loto_electrical: Boolean(v) })} /></HStack>
-                   <HStack gap={2} vAlign="center"><CheckboxInput label="ติดป้ายเตือนอันตราย (Danger Tagout) ระบุชื่อช่าง" value={form.loto_pneumatic} onChange={(v) => setForm({ ...form, loto_pneumatic: Boolean(v) })} /></HStack>
-                   <HStack gap={2} vAlign="center"><CheckboxInput label="วัดแรงดันไฟฟ้าด้วย Multimeter เพื่อยืนยัน Zero Energy State" value={form.loto_hydraulic} onChange={(v) => setForm({ ...form, loto_hydraulic: Boolean(v) })} /></HStack>
-                </VStack>
-                {formError && <Text type="body" size="sm" style={{ color: "var(--cmms-danger)" }}>{formError}</Text>}
-             </VStack>
-           </FormLayout>
-        </div>
-        <HStack hAlign="end" gap={3} style={{ paddingTop: 16, borderTop: '1px solid var(--color-border)' }}>
-          <button
-            type="button"
-            onClick={() => setModalOpen(false)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-          >
+      <Dialog
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="ออกใบอนุญาตทำงานเสี่ยง"
+        className="max-w-xl"
+      >
+        <VStack gap={4}>
+          <div className="space-y-1.5">
+            <Label htmlFor="f-type">
+              ประเภทงานเสี่ยง <span className="text-destructive">*</span>
+            </Label>
+            <Select
+              value={form.permit_type}
+              onValueChange={(v) => setForm({ ...form, permit_type: String(v) })}
+            >
+              <SelectTrigger aria-label="ประเภทงานเสี่ยง">
+                <SelectValue placeholder="เลือกประเภทงานเสี่ยง..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="electrical">งานไฟฟ้า LOTO (ตัดระบบไฟฟ้าและพลังงาน)</SelectItem>
+                <SelectItem value="hot_work">งานเชื่อมและเกิดความร้อน/ประกายไฟ</SelectItem>
+                <SelectItem value="confined_space">งานในที่อับอากาศ</SelectItem>
+                <SelectItem value="high_work">งานในที่สูงเกิน 2 เมตร</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Grid columns={2} gap={4}>
+            <div className="space-y-1.5">
+              <Label htmlFor="f-ref">อ้างอิงเลขใบสั่งงาน</Label>
+              <Input id="f-ref" placeholder="เช่น EN-2612-013 (ไม่บังคับ)" value={form.repair_ref} onChange={(e) => setForm({ ...form, repair_ref: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="f-loc">
+                สถานที่ปฏิบัติงาน <span className="text-destructive">*</span>
+              </Label>
+              <Input id="f-loc" placeholder="ระบุตำแหน่ง..." value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+            </div>
+          </Grid>
+
+          <VStack gap={2} className="rounded-lg bg-secondary p-4">
+            <p className="text-sm font-semibold text-foreground">ขั้นตอนความปลอดภัย LOTO Mandatory Check</p>
+            <HStack gap={2} vAlign="center">
+              <Checkbox id="loto-electrical" checked={form.loto_electrical} onCheckedChange={(v) => setForm({ ...form, loto_electrical: v === true })} />
+              <Label htmlFor="loto-electrical" className="font-normal">ปลดเมนสวิตช์ไฟฟ้าและใส่กุญแจ Safety Lockout</Label>
+            </HStack>
+            <HStack gap={2} vAlign="center">
+              <Checkbox id="loto-pneumatic" checked={form.loto_pneumatic} onCheckedChange={(v) => setForm({ ...form, loto_pneumatic: v === true })} />
+              <Label htmlFor="loto-pneumatic" className="font-normal">ติดป้ายเตือนอันตราย (Danger Tagout) ระบุชื่อช่าง</Label>
+            </HStack>
+            <HStack gap={2} vAlign="center">
+              <Checkbox id="loto-hydraulic" checked={form.loto_hydraulic} onCheckedChange={(v) => setForm({ ...form, loto_hydraulic: v === true })} />
+              <Label htmlFor="loto-hydraulic" className="font-normal">วัดแรงดันไฟฟ้าด้วย Multimeter เพื่อยืนยัน Zero Energy State</Label>
+            </HStack>
+          </VStack>
+          {formError && <p className="text-sm text-destructive">{formError}</p>}
+        </VStack>
+        <HStack hAlign="end" gap={3} className="mt-4 border-t border-border pt-4">
+          <Button variant="secondary" onClick={() => setModalOpen(false)}>
             ยกเลิก
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             disabled={submitting}
             onClick={async () => {
               if (!form.location.trim()) {
@@ -299,14 +308,12 @@ export default function WorkPermitPage() {
                 setSubmitting(false);
               }
             }}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
           >
-            <DocumentCheckIcon className="w-4 h-4" />
+            <FileCheck size={16} strokeWidth={1.75} aria-hidden="true" />
             {submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"}
-          </button>
+          </Button>
         </HStack>
-      </AnimatedDialog>
-
-    </VStack>
+      </Dialog>
+    </PageShell>
   );
 }
