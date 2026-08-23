@@ -324,56 +324,56 @@ renderHeader();
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                <a href="/pages/repair/?status=open" class="p-4 bg-gradient-to-br from-blue-400/90 to-indigo-500/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-blue-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
+                <a href="/pages/repair/?status=open" class="cmms-stat-tile cmms-stat-tile-open space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold">
                         <span>1. Open (เปิดใหม่)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md"><?= $statusOpen ?></span>
                 </a>
-                <a href="/pages/repair/?status=acknowledged" class="p-4 bg-gradient-to-br from-indigo-500/90 to-purple-600/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-indigo-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
+                <a href="/pages/repair/?status=acknowledged" class="cmms-stat-tile cmms-stat-tile-acknowledged space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold">
                         <span>2. Ack (รับทราบ)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md"><?= $statusAck ?></span>
                 </a>
-                <a href="/pages/repair/?status=in_progress" class="p-4 bg-gradient-to-br from-amber-400/90 to-orange-500/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-amber-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
+                <a href="/pages/repair/?status=in_progress" class="cmms-stat-tile cmms-stat-tile-in_progress space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold text-white">
                         <span>3. In Progress (กำลังซ่อม)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md text-white"><?= $statusInProgress ?></span>
                 </a>
-                <a href="/pages/repair/?status=waiting_parts" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                <a href="/pages/repair/?status=waiting_parts" class="cmms-stat-tile cmms-stat-tile-glass space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
                     <div class="flex items-center justify-between text-orange-600 dark:text-orange-400 font-bold">
                         <span>4. Waiting Parts (รออะไหล่)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                     </div>
                     <span class="text-3xl font-black text-orange-600 dark:text-orange-400 block drop-shadow-sm"><?= $statusWaitingParts ?></span>
                 </a>
-                <a href="/pages/repair/?status=waiting_approval" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                <a href="/pages/repair/?status=waiting_approval" class="cmms-stat-tile cmms-stat-tile-glass space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
                     <div class="flex items-center justify-between text-purple-600 dark:text-purple-400 font-bold">
                         <span>5. Approval (รออนุมัติ)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                     </div>
                     <span class="text-3xl font-black text-purple-600 dark:text-purple-400 block drop-shadow-sm"><?= $statusWaitingAppr ?></span>
                 </a>
-                <a href="/pages/repair/?status=resolved" class="p-4 bg-gradient-to-br from-emerald-400/90 to-teal-500/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-emerald-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
+                <a href="/pages/repair/?status=resolved" class="cmms-stat-tile cmms-stat-tile-resolved space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold">
                         <span>6. Resolved (ซ่อมเสร็จ)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                     <span class="text-3xl font-black block drop-shadow-md"><?= $statusResolved ?></span>
                 </a>
-                <a href="/pages/repair/?status=closed" class="p-4 bg-white/70 /70 backdrop-blur-md border border-white/30 rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
+                <a href="/pages/repair/?status=closed" class="cmms-stat-tile cmms-stat-tile-glass space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group shadow-sm">
                     <div class="flex items-center justify-between text-secondary  font-bold">
                         <span>7. Closed (ปิดงาน)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
                     </div>
                     <span class="text-3xl font-black text-primary dark:text-white block drop-shadow-sm"><?= $statusClosed ?></span>
                 </a>
-                <a href="/pages/repair/?status=cancelled" class="p-4 bg-gradient-to-br from-rose-400/90 to-red-500/90 backdrop-blur-lg border border-white/20 shadow-xl shadow-rose-500/20 text-white rounded-2xl space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
+                <a href="/pages/repair/?status=cancelled" class="cmms-stat-tile cmms-stat-tile-cancelled space-y-2 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl group">
                     <div class="flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity font-bold">
                         <span>8. Cancelled (ยกเลิก)</span>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
