@@ -95,6 +95,15 @@ This document outlines the current status of features and modules within the CMM
   - Command Palette (Ctrl/Cmd+K) `components/CommandPalette.tsx` — ค้นหาเมนูแบบสด จัดลำดับตามสิทธิ์ (ใช้ SideNav + bottom nav) + คีย์บอร์ด ↑↓/↵/ESC
   - `globals.css`: toast styles, skeleton shimmer, focus-visible ring, selection, route transition, print, reduced-motion, palette styles
   - ทดสอบจริงบน production build (`next build` + `next start`): toast 3 แบบ + auto-dismiss, palette เปิด/กรอง/คีย์บอร์ด/ปิด ผ่านทั้งหมด
+- [x] **UI Redesign Plan Steps 0–2, 7, 10, 12-partial (2026-08-23):**
+  - Step 0: `.form-section` family (ui-polish.css §11) + Playwright e2e smoke harness
+  - Step 1 (PWA): PageShell `eyebrow` prop + sweep 52 pages — design-audit `--strict` PASS 0 WARN; pre-push hook unblocked
+  - Step 7: `.status-*` / `.priority-*` semantic badge palette (ui-polish.css §12, light-dark aware) + `src/components/badge.php` helper + migrate ~30 PHP pages off raw Tailwind colors
+  - Step 2: ทุก listing table → `.data-table.cmms-stack-table` + `data-label` ครบทุก td (37 tables / 35 pages) — อ่านได้บน 360px
+  - Step 10: `.cmms-skeleton` / `.cmms-spinner` / `.cmms-empty-state(-cell)` + migrate 30 empty cells
+  - Step 12 partial: viewport เปิด pinch-zoom (WCAG 1.4.4) + input ≥16px กัน iOS auto-zoom
+  - Visual regression harness: screenshots 28 PWA routes × 2 viewports (authed shots env-gated)
+  - Dark-mode hex debt: assessed — hex ที่เหลือใน frontend เป็นของ legit (PDF/print docs, LINE template defaults, theme engine, GrapesJS canvas)
 
 ## [ ] Pending/Incomplete Features & Modules
 
