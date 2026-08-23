@@ -1,25 +1,27 @@
 ﻿"use client";
 
+// roles — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Alert)
+// business logic ครบเดิม: fetch/delete roles.php, client search filter
+
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Table, proportional } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Pagination } from "@astryxdesign/core/Pagination";
-import { Grid } from "@astryxdesign/core/Grid";
+import { PageShell } from "@/components/PageShell";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import {
+  SimpleDataTable,
+  type SimpleColumn,
+} from "@/components/ui/data-table-adapter";
 import CountUp from "react-countup";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { 
-  MagnifyingGlassIcon,
-  PlusIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ShieldCheckIcon,
-  UserGroupIcon,
-} from "@heroicons/react/24/outline";
+import { Plus, Search, SquarePen, Trash2, Users } from "lucide-react";
 
 interface Role extends Record<string, unknown> {
   rawId: number;
@@ -33,7 +35,6 @@ const PAGE_SIZE = 10;
 export default function RolesPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,111 +81,114 @@ export default function RolesPage() {
     });
   }, [search, roles]);
 
-  const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-
-  const columns: TableColumn<Role>[] = [
-    { key: "id", header: "รหัส", width: proportional(1) },
-    { key: "name", header: "ชื่อบทบาท", width: proportional(2) },
-    { key: "description", header: "รายละเอียด", width: proportional(4) },
+  const columns: SimpleColumn<Role>[] = [
+    { key: "id", header: "รหัส" },
+    { key: "name", header: "ชื่อบทบาท" },
+    { key: "description", header: "รายละเอียด" },
     {
       key: "actions",
       header: "จัดการ",
-      width: proportional(2),
+      align: "right",
       renderCell: (item) => (
-        <HStack gap={2}>
-          <button
-            type="button"
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => router.push(`/roles/edit?id=${item.rawId}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            className="gap-1.5"
           >
-            <PencilSquareIcon className="w-3.5 h-3.5" />
+            <SquarePen className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             แก้ไขสิทธิ์
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
             onClick={() => handleDelete(item.rawId)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+            className="gap-1.5"
           >
-            <TrashIcon className="w-3.5 h-3.5" />
+            <Trash2 className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             ลบ
-          </button>
-        </HStack>
+          </Button>
+        </div>
       ),
     },
   ];
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ROLES · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>จัดการสิทธิ์ (Roles & Permissions)</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ShieldCheckIcon className="w-3.5 h-3.5" /> ความปลอดภัยของระบบ
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            กำหนดบทบาทและจัดการสิทธิ์การเข้าถึงข้อมูลของระบบ
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/roles/create")}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <PlusIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "บุคลากร", href: "/roles" },
+        { label: "จัดการสิทธิ์ (Roles & Permissions)" },
+      ]}
+      title="จัดการสิทธิ์ (Roles & Permissions)"
+      description="กำหนดบทบาทและจัดการสิทธิ์การเข้าถึงข้อมูลของระบบ"
+      actions={
+        <Button onClick={() => router.push("/roles/create")}>
+          <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           สร้าง Role ใหม่
-        </button>
-      </div>
-
-      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
-        <Card elevation="low" padding={4} className="cmms-kpi-card">
-          <HStack gap={3} vAlign="center">
-            <div className="w-12 h-12 cmms-icon-tile">
-              <UserGroupIcon className="w-6 h-6" />
+        </Button>
+      }
+    >
+      {/* KPI */}
+      <Card className="p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
+            <Users className="w-6 h-6" strokeWidth={1.75} aria-hidden="true" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">จำนวนบทบาททั้งหมด</p>
+            <div className="cmms-kpi-value tabular-nums">
+              <CountUp end={filtered.length} /> <span className="text-sm font-normal">บทบาท</span>
             </div>
-            <VStack gap={1}>
-              <Text type="supporting" color="secondary">จำนวนบทบาททั้งหมด</Text>
-              <Heading level={2} className="cmms-kpi-value"><CountUp end={totalItems} /> <Text type="body" size="sm">บทบาท</Text></Heading>
-            </VStack>
-          </HStack>
-        </Card>
-      </Grid>
-
-      <Card elevation="low" padding={6}>
-        <VStack gap={4}>
-          <Toolbar label="ค้นหาบทบาท" startContent={<HStack gap={3} vAlign="center" style={{ width: "100%" }}>
-              <TextInput
-                label="ค้นหา"
-                isLabelHidden
-                placeholder="ค้นหาชื่อบทบาท..."
-                startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
-                value={search}
-                onChange={setSearch}
-                style={{ width: 300 }}
-              />
-            </HStack>} />
-
-          {error && <Text type="body" color="accent">{error}</Text>}
-
-          {loading ? (
-            <div style={{ padding: 40, textAlign: "center" }}>กำลังโหลดข้อมูล...</div>
-          ) : (
-            <Table columns={columns} data={paged} />
-          )}
-
-          {totalItems > PAGE_SIZE && (
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onChange={setPage}
-            />
-          )}
-        </VStack>
+          </div>
+        </div>
       </Card>
-    </VStack>
+
+      {/* Filter card */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-2 py-4">
+          <div className="relative min-w-[220px] flex-1 sm:max-w-[300px]">
+            <Search
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              label="ค้นหา"
+              isLabelHidden
+              placeholder="ค้นหาชื่อบทบาท..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span>รายการบทบาท</span>
+            {!loading && <Badge variant="primary">{filtered.length} รายการ</Badge>}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {error && <Alert variant="danger">{error}</Alert>}
+          <SimpleDataTable<Role>
+            columns={columns}
+            data={filtered}
+            idKey="id"
+            loading={loading}
+            pageSize={PAGE_SIZE}
+            caption="รายการบทบาทในระบบ"
+            emptyTitle="ไม่พบบทบาท"
+            emptyDescription="ลองเปลี่ยนคำค้นหา หรือสร้าง Role ใหม่"
+          />
+        </CardContent>
+      </Card>
+    </PageShell>
   );
 }

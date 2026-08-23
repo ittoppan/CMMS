@@ -1,18 +1,21 @@
 ﻿"use client";
 
+// roles/edit — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Textarea)
+// business logic ครบเดิม: GET/PUT roles.php?id=, validation
+
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { ShieldCheckIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { ArrowLeft, SquarePen } from "lucide-react";
+
 function EditRoleContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,88 +94,73 @@ function EditRoleContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>ROLES EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.roles_edit_title")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <ShieldCheckIcon className="w-3.5 h-3.5" /> Roles & Permissions
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.roles_edit_desc")}
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/roles")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <PencilSquareIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "บุคลากร", href: "/roles" },
+        { label: t("form.roles_edit_title") },
+      ]}
+      title={t("form.roles_edit_title")}
+      description={t("hero.roles_edit_desc")}
+      actions={
+        <Button variant="secondary" onClick={() => router.push("/roles")}>
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.back")}
-        </button>
-      </div>
-
-      <Card elevation="low" padding={6}>
+        </Button>
+      }
+    >
+      <Card className="mx-auto w-full max-w-[640px]">
         {loadingData ? (
-          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{t("common.loading_data")}</p>
+          </CardContent>
         ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-                {error}
-              </div>
-            )}
+          <>
+            <CardContent className="space-y-5">
+              {error && (
+                <Alert variant="danger">{error}</Alert>
+              )}
 
-            <FormLayout>
-              <Field label={t("form.role_name_req")} inputID="name" isRequired>
-                <TextInput 
-                  label={t("form.role_name")}
-                  isLabelHidden
+              <div className="space-y-1.5">
+                <Label htmlFor="role-edit-name">
+                  {t("form.role_name")} <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="role-edit-name"
                   value={name}
-                  onChange={setName}  />
-              </Field>
-
-              <Field label={t("field.description")} inputID="description">
-                <TextArea
-                  label={t("field.description")}
-                  isLabelHidden
-                  value={description}
-                  onChange={setDescription}
+                  onChange={(e) => setName(e.target.value)}
                 />
-              </Field>
-            </FormLayout>
+              </div>
 
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/roles")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+              <div className="space-y-1.5">
+                <Label htmlFor="role-edit-description">{t("field.description")}</Label>
+                <Textarea
+                  id="role-edit-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </CardContent>
+
+            <CardFooter className="justify-end gap-2">
+              <Button variant="secondary" onClick={() => router.push("/roles")}>
                 {t("action.cancel")}
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
+              </Button>
+              <Button disabled={submitting} onClick={handleSubmit}>
+                <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                 {submitting ? t("common.saving") : t("action.save_data")}
-              </button>
-            </HStack>
-          </VStack>
+              </Button>
+            </CardFooter>
+          </>
         )}
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditRolePage() {
   return (
-    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">{t("common.loading")}</p>}>
       <EditRoleContent />
     </Suspense>
   );

@@ -1,24 +1,29 @@
 "use client";
 
+// users/edit — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, ui/Switch, ui/Avatar)
+// business logic ครบเดิม: GET/PUT users.php?id=, avatar preset/upload + compressImage, must_change_password
+
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Avatar } from "@astryxdesign/core/Avatar";
-import { 
-  PencilSquareIcon,
-  ArrowLeftIcon,
-  PhotoIcon
-} from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
-import { compressImage } from "@/lib/imageCompress";
 import { t } from "@/lib/i18n";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, ImagePlus, SquarePen } from "lucide-react";
+import { compressImage } from "@/lib/imageCompress";
 
 const PRESET_AVATARS = [
   { label: t("form.avatar_tech1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
@@ -155,235 +160,233 @@ function EditUserContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.profile_edit_title")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <PencilSquareIcon className="w-3.5 h-3.5" /> {t("menu.users")}
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.profile_edit_desc")}
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/users")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "บุคลากร", href: "/users" },
+        { label: t("form.profile_edit_title") },
+      ]}
+      title={t("form.profile_edit_title")}
+      description={t("hero.profile_edit_desc")}
+      actions={
+        <Button variant="secondary" onClick={() => router.push("/users")}>
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.back")}
-        </button>
-      </div>
-
-      <Card elevation="low" padding={6}>
+        </Button>
+      }
+    >
+      <Card className="mx-auto w-full max-w-[880px]">
         {loading ? (
-          <Text type="body" color="secondary">{t("common.loading_users")}</Text>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{t("common.loading_users")}</p>
+          </CardContent>
         ) : (
-          <VStack gap={5}>
-            {errorMessage && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-                {errorMessage}
+          <>
+            <CardContent className="space-y-5">
+              {errorMessage && (
+                <Alert variant="danger">{errorMessage}</Alert>
+              )}
+
+              {/* Profile Avatar Upload & Selector */}
+              <div className="rounded-xl border border-border bg-muted/50 p-4">
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-foreground">{t("action.change_profile_image")}</p>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Avatar className="h-14 w-14">
+                      {form.avatar ? <AvatarImage src={form.avatar} alt={form.fullName || form.username || "User"} /> : null}
+                      <AvatarFallback className="text-base">{(form.fullName || form.username || "User").slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">{t("form.avatar_hint")}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {PRESET_AVATARS.map((av, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => update("avatar", av.url)}
+                            style={{
+                              padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
+                              border: `2px solid ${form.avatar === av.url ? 'var(--cmms-primary)' : 'var(--cmms-border)'}`,
+                              background: form.avatar === av.url ? 'var(--cmms-primary-light)' : 'var(--cmms-bg-card)',
+                              fontSize: '0.8rem', fontWeight: 600
+                            }}
+                          >
+                            {av.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <label style={{
+                          padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
+                          fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
+                        }}>
+                          <ImagePlus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" /> {t("common.uploading")}
+                          <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
 
-            {/* Profile Avatar Upload & Selector */}
-            <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
-              <VStack gap={3}>
-                <Text type="body" weight="bold">{t("action.change_profile_image")}</Text>
-                <HStack gap={4} vAlign="center" wrap="wrap">
-                  {form.avatar ? (
-                    <Avatar name={form.fullName || form.username || "User"} src={form.avatar} size="lg" />
-                  ) : (
-                    <Avatar name={form.fullName || form.username || "User"} size="lg" />
-                  )}
-                  <VStack gap={2}>
-                    <Text type="body" size="sm" color="secondary">{t("form.avatar_hint")}</Text>
-                    <HStack gap={2} wrap="wrap">
-                      {PRESET_AVATARS.map((av, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => update("avatar", av.url)}
-                          style={{
-                            padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
-                            border: `2px solid ${form.avatar === av.url ? 'var(--cmms-primary)' : 'var(--cmms-border)'}`,
-                            background: form.avatar === av.url ? 'var(--cmms-primary-light)' : 'var(--cmms-bg-card)',
-                            fontSize: '0.8rem', fontWeight: 600
-                          }}
-                        >
-                          {av.label}
-                        </button>
-                      ))}
-                    </HStack>
-
-                    <HStack gap={2} vAlign="center" style={{ marginTop: 4 }}>
-                      <label style={{
-                        padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
-                        fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
-                      }}>
-                        <PhotoIcon className="w-4 h-4" /> {t("common.uploading")}
-                        <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
-                      </label>
-                    </HStack>
-                  </VStack>
-                </HStack>
-              </VStack>
-            </div>
-
-            <FormLayout>
-              <Field label={t("form.username_req")} inputID="username" isRequired>
-                <TextInput
-                  label={t("field.username")}
-                  isLabelHidden
-                  value={form.username}
-                  onChange={(v: string) => update("username", v)}
-                />
-              </Field>
-
-              <Field label={t("form.full_name_req")} inputID="fullName" isRequired>
-                <TextInput
-                  label={t("field.full_name")}
-                  isLabelHidden
-                  value={form.fullName}
-                  onChange={(v: string) => update("fullName", v)}
-                />
-              </Field>
-
-              <Field label={t("field.employee_code")} inputID="employeeCode">
-                <TextInput
-                  label={t("field.employee_code")}
-                  isLabelHidden
-                  placeholder={t("placeholder.employee_code")}
-                  value={form.employeeCode}
-                  onChange={(v: string) => update("employeeCode", v.toUpperCase())}
-                />
-              </Field>
-
-              <Field label={t("form.new_password_optional")} inputID="password">
-                <TextInput
-                  label={t("form.new_password")}
-                  isLabelHidden
-                  type="password"
-                  placeholder={t("form.password_blank_hint")}
-                  value={form.password}
-                  onChange={(v: string) => update("password", v)}
-                />
-              </Field>
-
-              <Field label={t("field.email")} inputID="email">
-                <TextInput
-                  label={t("field.email")}
-                  isLabelHidden
-                  value={form.email}
-                  onChange={(v: string) => update("email", v)}
-                />
-              </Field>
-
-              <Field label={t("field.phone")} inputID="phone">
-                <TextInput
-                  label={t("field.phone")}
-                  isLabelHidden
-                  value={form.phone}
-                  onChange={(v: string) => update("phone", v)}
-                />
-              </Field>
-
-              <Field label={t("form.line_id_label")} inputID="lineUserId">
-                <TextInput
-                  label="LINE ID"
-                  isLabelHidden
-                  placeholder={t("placeholder.line_id")}
-                  value={form.lineUserId}
-                  onChange={(v: string) => update("lineUserId", v)}
-                />
-              </Field>
-
-              <Field label={t("field.position")} inputID="position">
-                <TextInput
-                  label={t("field.position")}
-                  isLabelHidden
-                  value={form.position}
-                  onChange={(v: string) => update("position", v)}
-                />
-              </Field>
-
-              <Field label={t("form.usage_role")} inputID="role">
-                <Selector
-                  label={t("form.usage_role")}
-                  isLabelHidden
-                  value={form.role}
-                  onChange={(v: string) => update("role", v)}
-                  options={[
-                    { value: "technician", label: t("form.technician") },
-                    { value: "engineer", label: t("field.engineer") },
-                    { value: "manager", label: t("form.manager") },
-                    { value: "operator", label: t("form.machine_operator") },
-                    { value: "admin", label: t("form.administrator") },
-                  ]}
-                />
-              </Field>
-
-              <Field label={t("form.account_status")} inputID="isActive">
-                <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
-                  <Switch
-                    label={t("form.activate_account")}
-                    value={form.isActive}
-                    onChange={(val: boolean) => update("isActive", val)}
+              <div className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-username">
+                    {t("field.username")} <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-username"
+                    value={form.username}
+                    onChange={(e) => update("username", e.target.value)}
                   />
-                  <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
-                    {form.isActive ? t("form.enabled") : t("form.suspend")}
-                  </Text>
-                </HStack>
-              </Field>
+                </div>
 
-              <Field label={t("form.force_password_change")} inputID="mustChange">
-                <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
-                  <Switch
-                    label={t("form.force_password_hint")}
-                    value={form.mustChange}
-                    onChange={(val: boolean) => update("mustChange", val)}
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-full-name">
+                    {t("field.full_name")} <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="edit-full-name"
+                    value={form.fullName}
+                    onChange={(e) => update("fullName", e.target.value)}
                   />
-                  <Text type="body" size="sm" color={form.mustChange ? "primary" : "secondary"}>
-                    {form.mustChange ? t("form.force_change_hint") : t("form.optional")}
-                  </Text>
-                </HStack>
-              </Field>
-            </FormLayout>
-          </VStack>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-employee-code">{t("field.employee_code")}</Label>
+                  <Input
+                    id="edit-employee-code"
+                    placeholder={t("placeholder.employee_code")}
+                    value={form.employeeCode}
+                    onChange={(e) => update("employeeCode", e.target.value.toUpperCase())}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="edit-password">{t("form.new_password")}</Label>
+                  <Input
+                    id="edit-password"
+                    type="password"
+                    placeholder={t("form.password_blank_hint")}
+                    value={form.password}
+                    onChange={(e) => update("password", e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("form.new_password_optional")}</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-email">{t("field.email")}</Label>
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => update("email", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-phone">{t("field.phone")}</Label>
+                    <Input
+                      id="edit-phone"
+                      type="tel"
+                      value={form.phone}
+                      onChange={(e) => update("phone", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-line-id">LINE ID</Label>
+                    <Input
+                      id="edit-line-id"
+                      placeholder={t("placeholder.line_id")}
+                      value={form.lineUserId}
+                      onChange={(e) => update("lineUserId", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-position">{t("field.position")}</Label>
+                    <Input
+                      id="edit-position"
+                      value={form.position}
+                      onChange={(e) => update("position", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label id="edit-role-label" htmlFor="edit-role">
+                    {t("form.usage_role")}
+                  </Label>
+                  <Select value={form.role} onValueChange={(v) => update("role", v)}>
+                    <SelectTrigger id="edit-role" aria-labelledby="edit-role-label">
+                      <SelectValue placeholder={t("form.usage_role")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="technician">{t("form.technician")}</SelectItem>
+                      <SelectItem value="engineer">{t("field.engineer")}</SelectItem>
+                      <SelectItem value="manager">{t("form.manager")}</SelectItem>
+                      <SelectItem value="operator">{t("form.machine_operator")}</SelectItem>
+                      <SelectItem value="admin">{t("form.administrator")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label id="edit-is-active-label">{t("form.account_status")}</Label>
+                  <div className="flex items-center gap-3 pt-1">
+                    <Switch
+                      id="edit-is-active"
+                      aria-labelledby="edit-is-active-label"
+                      label={t("form.activate_account")}
+                      checked={form.isActive}
+                      onChange={(val: boolean) => update("isActive", val)}
+                    />
+                    <span className={`text-sm ${form.isActive ? "font-medium text-[var(--cmms-primary)]" : "text-muted-foreground"}`}>
+                      {form.isActive ? t("form.enabled") : t("form.suspend")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label id="edit-must-change-label">{t("form.force_password_change")}</Label>
+                  <div className="flex items-center gap-3 pt-1">
+                    <Switch
+                      id="edit-must-change"
+                      aria-labelledby="edit-must-change-label"
+                      label={t("form.force_password_hint")}
+                      checked={form.mustChange}
+                      onChange={(val: boolean) => update("mustChange", val)}
+                    />
+                    <span className={`text-sm ${form.mustChange ? "font-medium text-[var(--cmms-primary)]" : "text-muted-foreground"}`}>
+                      {form.mustChange ? t("form.force_change_hint") : t("form.optional")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+
+            <CardFooter className="justify-end gap-2">
+              <Button variant="secondary" onClick={() => (window.location.href = "/users")}>
+                {t("action.cancel")}
+              </Button>
+              <Button disabled={submitting} onClick={handleSubmit}>
+                <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+                {submitting ? t("common.saving") : t("action.save_edit")}
+              </Button>
+            </CardFooter>
+          </>
         )}
       </Card>
-
-      {!loading && (
-        <HStack hAlign="end" gap={3}>
-          <button
-            type="button"
-            onClick={() => (window.location.href = "/users")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-          >
-            {t("action.cancel")}
-          </button>
-          <button
-            type="button"
-            disabled={submitting}
-            onClick={handleSubmit}
-            className="cmms-btn-primary"
-          >
-            <PencilSquareIcon className="w-4 h-4" />
-            {submitting ? t("common.saving") : t("action.save_edit")}
-          </button>
-        </HStack>
-      )}
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditUserPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}><Text type="body" color="secondary">{t("common.loading")}</Text></div>}>
+    <Suspense fallback={<div className="p-10 text-center text-sm text-muted-foreground">{t("common.loading")}</div>}>
       <EditUserContent />
     </Suspense>
   );

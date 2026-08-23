@@ -1,34 +1,47 @@
 "use client";
 
+// users — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, SimpleDataTable, ui/Dialog, ui/Badge, ui/Avatar)
+// business logic ครบเดิม: fetch/delete users.php, client filter (search + role), KPI counters
+
 import { useState, useMemo, useEffect } from "react";
-import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { Grid } from "@astryxdesign/core/Grid";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
-import { Table, proportional, useTablePagination } from "@astryxdesign/core/Table";
-import type { TableColumn } from "@astryxdesign/core/Table";
-import { DialogHeader } from "@astryxdesign/core/Dialog";
-import AnimatedDialog from "@/components/AnimatedDialog";
-import { EmptyState } from "@astryxdesign/core/EmptyState";
-import { Banner } from "@astryxdesign/core/Banner";
-import { Spinner } from "@astryxdesign/core/Spinner";
-import { Avatar } from "@astryxdesign/core/Avatar";
+import { PageShell } from "@/components/PageShell";
+import { Grid } from "@/components/layout";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { Dialog } from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  SimpleDataTable,
+  type SimpleColumn,
+} from "@/components/ui/data-table-adapter";
 import CountUp from "react-countup";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
-  PlusIcon,
-  ArrowPathIcon,
-  MagnifyingGlassIcon,
-  UsersIcon,
-  PencilSquareIcon,
-  TrashIcon,
-  ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline";
+  Plus,
+  RefreshCw,
+  Search,
+  Users,
+  SquarePen,
+  Trash2,
+  TriangleAlert,
+} from "lucide-react";
 
 interface User extends Record<string, unknown> {
   rawId: number;
@@ -46,13 +59,13 @@ interface User extends Record<string, unknown> {
   updatedAt: string;
 }
 
-const roleChipStyle: Record<string, React.CSSProperties> = {
-  admin: { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" },
-  manager: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
-  supervisor: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
-  technician: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
-  operator: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
-  viewer: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
+const roleBadgeVariant: Record<string, "danger" | "warning" | "primary" | "success" | "neutral"> = {
+  admin: "danger",
+  manager: "warning",
+  supervisor: "primary",
+  technician: "success",
+  operator: "neutral",
+  viewer: "neutral",
 };
 
 const roleLabels: Record<string, string> = {
@@ -66,6 +79,16 @@ const roleLabels: Record<string, string> = {
 
 const PAGE_SIZE = 10;
 
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
+
 export default function UsersPage() {
   const hero = usePageHero("users");
   const router = useRouter();
@@ -73,7 +96,6 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
-  const [page, setPage] = useState(1);
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
@@ -170,107 +192,90 @@ export default function UsersPage() {
     });
   }, [search, roleFilter, users]);
 
-  const totalItems = filtered.length;
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const pagination = useTablePagination<User>({
-    page,
-    onPageChange: setPage,
-    totalItems,
-    pageSize: PAGE_SIZE,
-  });
-
-  const columns: TableColumn<User>[] = [
-    { key: "username", header: t("tbl.username"), width: proportional(1) },
+  const columns: SimpleColumn<User>[] = [
+    { key: "username", header: t("tbl.username") },
     {
       key: "employeeCode",
       header: t("tbl.employee_code"),
-      width: proportional(1),
       renderCell: (item: User) => (
-        <Text type="body" weight="semibold" className="font-mono">
+        <span className="font-mono font-semibold">
           {item.employeeCode}
-        </Text>
+        </span>
       ),
     },
     {
       key: "fullName",
       header: t("tbl.full_name"),
-      width: proportional(2),
       renderCell: (item: User) => {
         const nameStr = (item.fullName && item.fullName !== '-') ? item.fullName : (item.username && item.username !== '-' ? item.username : "User");
         const avatarSrc = (typeof item.avatar === 'string' && item.avatar.trim().length > 0) ? item.avatar.trim() : null;
         return (
-          <HStack gap={2} vAlign="center">
-            {avatarSrc ? (
-              <Avatar name={nameStr} src={avatarSrc} size="sm" />
-            ) : (
-              <Avatar name={nameStr} size="sm" />
-            )}
-            <Text type="body" weight="semibold">{item.fullName}</Text>
-          </HStack>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              {avatarSrc ? <AvatarImage src={avatarSrc} alt={nameStr} /> : null}
+              <AvatarFallback>{initialsOf(nameStr)}</AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-semibold">{item.fullName}</span>
+          </div>
         );
       },
     },
-    { key: "email", header: t("tbl.email"), width: proportional(1.5) },
-    { key: "phone", header: t("tbl.phone"), width: proportional(1) },
+    { key: "email", header: t("tbl.email") },
+    { key: "phone", header: t("tbl.phone") },
     {
       key: "lineUserId",
       header: t("tbl.line_id"),
-      width: proportional(1.4),
       renderCell: (item: User) => (
-        <Text type="body" size="sm" color={item.lineUserId ? "primary" : "secondary"}>
+        <span className={item.lineUserId ? "text-sm" : "text-sm text-muted-foreground"}>
           {item.lineUserId
             ? `${item.lineUserId.slice(0, 12)}…`
             : "— ไม่ผูก —"}
-        </Text>
+        </span>
       ),
     },
     {
       key: "role",
       header: t("tbl.role"),
-      width: proportional(1),
       renderCell: (item: User) => (
-        <span className="cmms-andon-chip" style={roleChipStyle[item.role] || roleChipStyle.viewer}>
+        <Badge variant={roleBadgeVariant[item.role] || "neutral"}>
           {roleLabels[item.role] || item.role}
-        </span>
+        </Badge>
       ),
     },
     {
       key: "isActive",
       header: t("tbl.status"),
-      width: proportional(0.8),
       renderCell: (item: User) => (
-        <span
-          className="cmms-andon-chip"
-          style={item.isActive
-            ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
-            : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
-        >
+        <Badge variant={item.isActive ? "success" : "neutral"}>
           {item.isActive ? "ใช้งาน" : "ปิดใช้งาน"}
-        </span>
+        </Badge>
       ),
     },
     {
       key: "actions",
       header: t("tbl.actions"),
-      width: proportional(1.2),
+      align: "right",
       renderCell: (item: User) => (
-        <HStack gap={1}>
-          <button
-            type="button"
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => router.push(`/users/edit?id=${item.rawId}`)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
+            className="gap-1.5"
           >
-            <PencilSquareIcon className="w-3.5 h-3.5" />
+            <SquarePen className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             แก้ไข
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
             onClick={() => setDeleteTarget(item)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all duration-300"
+            className="gap-1.5"
           >
-            <TrashIcon className="w-3.5 h-3.5" />{t("action.delete")}</button>
-        </HStack>
+            <Trash2 className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.delete")}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -283,163 +288,167 @@ export default function UsersPage() {
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 24, width: "100%" }}>
-      {/* Header */}
-      <div style={layoutStyle("header")}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{hero.title}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <UsersIcon className="w-3.5 h-3.5" /> ผู้ใช้ {stats.total} คน
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {hero.desc}
-          </Text>
-        </VStack>
-        <HStack gap={2}>
-          <button
-            type="button"
-            onClick={fetchUsers}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-          >
-            <ArrowPathIcon className="w-4 h-4" />{t("action.refresh")}</button>
-          <a href="/users/create" className="cmms-btn-primary">
-            <PlusIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "บุคลากร", href: "/users" },
+        { label: hero.title },
+      ]}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <>
+          <Button variant="secondary" onClick={fetchUsers}>
+            <RefreshCw className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {t("action.refresh")}
+          </Button>
+          <Button onClick={() => router.push("/users/create")}>
+            <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
             เพิ่มผู้ใช้ใหม่
-          </a>
-        </HStack>
-      </div>
-      </div>
-
+          </Button>
+        </>
+      }
+    >
       {error && (
-        <Banner status="error" title="Error" description={error} isDismissable={false} />
+        <Alert variant="danger" title="Error" description={error} />
       )}
 
       {/* Stat badges -> KPI Grid */}
       <div style={layoutStyle("stats")}>
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">ผู้ใช้ทั้งหมด (Total Users)</Text>
-            <Heading level={2}><CountUp end={stats.total} /> <Text type="body" size="sm">คน</Text></Heading>
-          </VStack>
-        </Card>
+        <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
+          <Card className="p-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">ผู้ใช้ทั้งหมด (Total Users)</p>
+              <div className="cmms-kpi-value tabular-nums">
+                <CountUp end={stats.total} /> <span className="text-sm font-normal">คน</span>
+              </div>
+            </div>
+          </Card>
 
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" className="text-emerald-600">กำลังใช้งาน</Text>
-            <Heading level={2} className="text-emerald-600"><CountUp end={stats.active} /> <Text type="body" size="sm">คน</Text></Heading>
-          </VStack>
-        </Card>
+          <Card className="p-4">
+            <div className="space-y-1">
+              <p className="text-sm text-[var(--cmms-success-dark)]">กำลังใช้งาน</p>
+              <div className="cmms-kpi-value tabular-nums text-[var(--cmms-success-dark)]">
+                <CountUp end={stats.active} /> <span className="text-sm font-normal">คน</span>
+              </div>
+            </div>
+          </Card>
 
-        <Card elevation="low" padding={4}>
-          <VStack gap={1}>
-            <Text type="supporting" color="secondary">ระงับการใช้งาน (Inactive)</Text>
-            <Heading level={2} color="secondary"><CountUp end={stats.inactive} /> <Text type="body" size="sm">คน</Text></Heading>
-          </VStack>
-        </Card>
-      </Grid>
+          <Card className="p-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">ระงับการใช้งาน (Inactive)</p>
+              <div className="cmms-kpi-value tabular-nums text-muted-foreground">
+                <CountUp end={stats.inactive} /> <span className="text-sm font-normal">คน</span>
+              </div>
+            </div>
+          </Card>
+        </Grid>
       </div>
 
-      <div style={layoutStyle("content")}>
-      <Card elevation="low" padding={6}>
-        <VStack gap={4}>
-          {/* Filter Toolbar */}
-          <Toolbar
-            label="ตัวกรองผู้ใช้"
-            startContent={
-              <HStack gap={3} vAlign="center" style={{ width: "100%" }}>
-                <TextInput
-                  label="ค้นหา"
-                  isLabelHidden
-                  placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
-                  startIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
-                  value={search}
-                  onChange={setSearch}
-                  style={{ width: 350 }}
-                />
-                <Selector
-                  label="บทบาท"
-                  isLabelHidden
-                  placeholder="ทุกบทบาท"
-                  value={roleFilter}
-                  onChange={setRoleFilter}
-                  options={[{ value: "", label: "ทุกบทบาท" }, ...roles]}
-                />
-              </HStack>
-            }
-          />
-
-          {/* Table */}
-          {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
-              <Spinner />
+      <div style={layoutStyle("content")} className="space-y-4">
+        {/* Filter Toolbar */}
+        <Card>
+          <CardContent className="flex flex-wrap items-center gap-2 py-4">
+            <div className="relative min-w-[220px] flex-1 sm:max-w-[350px]">
+              <Search
+                size={16}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                label="ค้นหา"
+                isLabelHidden
+                placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          ) : paged.length === 0 ? (
-            <EmptyState title="ไม่พบผู้ใช้" description="ลองเปลี่ยนตัวกรองหรือเพิ่มผู้ใช้ใหม่" icon={<UsersIcon className="w-6 h-6" />} />
-          ) : (
-            <Table<User>
-              data={paged}
+            <Select
+              value={roleFilter || "__all__"}
+              onValueChange={(v) => setRoleFilter(v === "__all__" ? "" : v)}
+            >
+              <SelectTrigger className="w-full sm:w-[200px]" aria-label="บทบาท">
+                <SelectValue placeholder="ทุกบทบาท" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">ทุกบทบาท</SelectItem>
+                {roles.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+
+        {/* Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-5 w-5 text-[var(--cmms-primary-hover)]" strokeWidth={1.75} aria-hidden="true" />
+              <span>รายชื่อผู้ใช้</span>
+              {!loading && <Badge variant="primary">{filtered.length} รายการ</Badge>}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SimpleDataTable<User>
               columns={columns}
+              data={filtered}
               idKey="id"
-              density="balanced"
-              dividers="rows"
-              hasHover
-              plugins={{ pagination }}
+              loading={loading}
+              pageSize={PAGE_SIZE}
+              caption="รายชื่อผู้ใช้ในระบบ"
+              emptyTitle="ไม่พบผู้ใช้"
+              emptyDescription="ลองเปลี่ยนตัวกรองหรือเพิ่มผู้ใช้ใหม่"
             />
-          )}
-        </VStack>
-      </Card>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Delete Confirmation Modal */}
-      <AnimatedDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-          <DialogHeader title="ยืนยันการลบผู้ใช้" onOpenChange={(open) => { if (!open) setDeleteTarget(null); }} />
-          {deleteTarget && (
-          <div style={{ padding: '16px 0' }}>
-            <VStack gap={4}>
-              {deleteSuccess ? (
-                <div style={{
-                  padding: 16, borderRadius: 8, textAlign: 'center',
-                  background: 'var(--cmms-success-light)', color: 'var(--cmms-success)',
-                  fontWeight: 600,
-                }}>
-                  ลบผู้ใช้ {deleteTarget.fullName} เรียบร้อยแล้ว
-                </div>
-              ) : (
-                <>
-                  <HStack gap={3} vAlign="center">
-                    <ExclamationTriangleIcon className="w-5 h-5" style={{ color: "var(--cmms-danger)" }} />
-                    <Text type="body">
-                      คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ <strong>{deleteTarget.fullName} ({deleteTarget.username})</strong>? การดำเนินการนี้ไม่สามารถยกเลิกได้
-                    </Text>
-                  </HStack>
-                  <HStack hAlign="end" gap={2} style={{ marginTop: 12 }}>
-                    <button
-                      type="button"
-                      onClick={() => setDeleteTarget(null)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-                    >
-                      ยกเลิก
-                    </button>
-                    <button
-                      type="button"
-                      disabled={deleting}
-                      onClick={handleDelete}
-                      className="cmms-btn-danger"
-                    >
-                      {deleting ? "กำลังลบ..." : "ยืนยันลบผู้ใช้"}
-                    </button>
-                  </HStack>
-                </>
-              )}
-            </VStack>
+      <Dialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="ยืนยันการลบผู้ใช้"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>
+              ยกเลิก
+            </Button>
+            <Button variant="danger" disabled={deleting} onClick={handleDelete}>
+              {deleting ? "กำลังลบ..." : "ยืนยันลบผู้ใช้"}
+            </Button>
+          </>
+        }
+      >
+        {deleteTarget && (
+          <div className="space-y-4">
+            {deleteSuccess ? (
+              <div
+                className="rounded-lg p-4 text-center font-semibold"
+                style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success)" }}
+              >
+                ลบผู้ใช้ {deleteTarget.fullName} เรียบร้อยแล้ว
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <TriangleAlert
+                  className="w-5 h-5 shrink-0"
+                  style={{ color: "var(--cmms-danger)" }}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+                <p className="text-sm">
+                  คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ <strong>{deleteTarget.fullName} ({deleteTarget.username})</strong>? การดำเนินการนี้ไม่สามารถยกเลิกได้
+                </p>
+              </div>
+            )}
           </div>
-          )}
-        </AnimatedDialog>
-    </div>
+        )}
+      </Dialog>
+    </PageShell>
   );
 }

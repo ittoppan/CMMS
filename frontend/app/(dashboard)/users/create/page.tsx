@@ -1,24 +1,29 @@
 "use client";
 
+// users/create — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, ui/Switch, ui/Avatar)
+// business logic ครบเดิม: POST users.php, avatar preset/upload + compressImage, validation
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Heading, Text } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { Selector } from "@astryxdesign/core/Selector";
-import { Switch } from "@astryxdesign/core/Switch";
-import { Avatar } from "@astryxdesign/core/Avatar";
-import { 
-  UserPlusIcon,
-  ArrowLeftIcon,
-  PhotoIcon
-} from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
-import { compressImage } from "@/lib/imageCompress";
 import { t } from "@/lib/i18n";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowLeft, ImagePlus, UserPlus } from "lucide-react";
+import { compressImage } from "@/lib/imageCompress";
 
 const PRESET_AVATARS = [
   { label: t("form.avatar_tech1"), url: "https://api.dicebear.com/7.x/bottts/svg?seed=tech1" },
@@ -120,51 +125,39 @@ export default function CreateUserPage() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>USERS CREATE · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.users_create_title")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <UserPlusIcon className="w-3.5 h-3.5" /> {t("menu.users")}
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.users_create_desc")}
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/users")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "บุคลากร", href: "/users" },
+        { label: t("form.users_create_title") },
+      ]}
+      title={t("form.users_create_title")}
+      description={t("hero.users_create_desc")}
+      actions={
+        <Button variant="secondary" onClick={() => router.push("/users")}>
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.back")}
-        </button>
-      </div>
-
-      <Card elevation="low" padding={6}>
-        <VStack gap={5}>
+        </Button>
+      }
+    >
+      <Card className="mx-auto w-full max-w-[880px]">
+        <CardContent className="space-y-5">
           {errorMessage && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-              {errorMessage}
-            </div>
+            <Alert variant="danger">{errorMessage}</Alert>
           )}
 
           {/* Profile Picture Upload & Avatar Preview */}
-          <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
-            <VStack gap={3}>
-              <Text type="body" weight="bold">{t("form.choose_upload_avatar")}</Text>
-              <HStack gap={4} vAlign="center" wrap="wrap">
-                {form.avatar ? (
-                  <Avatar name={form.fullName || form.username || "User"} src={form.avatar} size="lg" />
-                ) : (
-                  <Avatar name={form.fullName || form.username || "User"} size="lg" />
-                )}
-                <VStack gap={2}>
-                  <Text type="body" size="sm" color="secondary">{t("form.avatar_hint")}</Text>
-                  <HStack gap={2} wrap="wrap">
+          <div className="rounded-xl border border-border bg-muted/50 p-4">
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-foreground">{t("form.choose_upload_avatar")}</p>
+              <div className="flex flex-wrap items-center gap-4">
+                <Avatar className="h-14 w-14">
+                  {form.avatar ? <AvatarImage src={form.avatar} alt={form.fullName || form.username || "User"} /> : null}
+                  <AvatarFallback className="text-base">{(form.fullName || form.username || "User").slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{t("form.avatar_hint")}</p>
+                  <div className="flex flex-wrap gap-2">
                     {PRESET_AVATARS.map((av, idx) => (
                       <button
                         key={idx}
@@ -180,155 +173,162 @@ export default function CreateUserPage() {
                         {av.label}
                       </button>
                     ))}
-                  </HStack>
+                  </div>
 
-                  <HStack gap={2} vAlign="center" style={{ marginTop: 4 }}>
+                  <div className="flex items-center gap-2 pt-1">
                     <label style={{
                       padding: '6px 14px', borderRadius: 8, background: 'var(--cmms-primary)', color: '#fff',
                       fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6
                     }}>
-                      <PhotoIcon className="w-4 h-4" /> {t("common.uploading")}
+                      <ImagePlus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" /> {t("common.uploading")}
                       <input type="file" accept="image/*" onChange={handleFileUpload} style={{ display: 'none' }} />
                     </label>
-                  </HStack>
-                </VStack>
-              </HStack>
-            </VStack>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <FormLayout>
-            <Field label={t("form.username_req")} inputID="username" isRequired>
-              <TextInput
-                label={t("field.username")}
-                isLabelHidden
+          <div className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="create-username">
+                {t("field.username")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="create-username"
                 placeholder={t("placeholder.username")}
                 value={form.username}
-                onChange={(v: string) => update("username", v)}
+                onChange={(e) => update("username", e.target.value)}
               />
-            </Field>
+            </div>
 
-              <Field label={t("form.full_name_req")} inputID="fullName" isRequired>
-                <TextInput
-                  label={t("field.full_name")}
-                  isLabelHidden
-                  placeholder={t("placeholder.full_name")}
-                  value={form.fullName}
-                  onChange={(v: string) => update("fullName", v)}
-                />
-              </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-full-name">
+                {t("field.full_name")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="create-full-name"
+                placeholder={t("placeholder.full_name")}
+                value={form.fullName}
+                onChange={(e) => update("fullName", e.target.value)}
+              />
+            </div>
 
-              <Field label={t("form.employee_code_req")} inputID="employeeCode" isRequired>
-                <TextInput
-                  label={t("field.employee_code")}
-                  isLabelHidden
-                  placeholder={t("placeholder.employee_code_line")}
-                  value={form.employeeCode}
-                  onChange={(v: string) => update("employeeCode", v.toUpperCase())}
-                />
-              </Field>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-employee-code">
+                {t("field.employee_code")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="create-employee-code"
+                placeholder={t("placeholder.employee_code_line")}
+                value={form.employeeCode}
+                onChange={(e) => update("employeeCode", e.target.value.toUpperCase())}
+              />
+            </div>
 
-
-            <Field label={t("form.password_req")} inputID="password" isRequired>
-              <TextInput
-                label={t("field.password")}
-                isLabelHidden
+            <div className="space-y-1.5">
+              <Label htmlFor="create-password">
+                {t("field.password")} <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="create-password"
                 type="password"
                 placeholder={t("form.set_password")}
                 value={form.password}
-                onChange={(v: string) => update("password", v)}
+                onChange={(e) => update("password", e.target.value)}
               />
-            </Field>
+            </div>
 
-            <Field label={t("field.email")} inputID="email">
-              <TextInput
-                label={t("field.email")}
-                isLabelHidden
-                placeholder={t("placeholder.email")}
-                value={form.email}
-                onChange={(v: string) => update("email", v)}
-              />
-            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="create-email">{t("field.email")}</Label>
+                <Input
+                  id="create-email"
+                  type="email"
+                  placeholder={t("placeholder.email")}
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-phone">{t("field.phone")}</Label>
+                <Input
+                  id="create-phone"
+                  type="tel"
+                  placeholder={t("placeholder.phone")}
+                  value={form.phone}
+                  onChange={(e) => update("phone", e.target.value)}
+                />
+              </div>
+            </div>
 
-            <Field label={t("field.phone")} inputID="phone">
-              <TextInput
-                label={t("field.phone")}
-                isLabelHidden
-                placeholder={t("placeholder.phone")}
-                value={form.phone}
-                onChange={(v: string) => update("phone", v)}
-              />
-            </Field>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="create-line-id">LINE ID</Label>
+                <Input
+                  id="create-line-id"
+                  placeholder={t("placeholder.line_id")}
+                  value={form.lineUserId}
+                  onChange={(e) => update("lineUserId", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="create-position">{t("field.position")}</Label>
+                <Input
+                  id="create-position"
+                  placeholder={t("placeholder.position")}
+                  value={form.position}
+                  onChange={(e) => update("position", e.target.value)}
+                />
+              </div>
+            </div>
 
-            <Field label={t("form.line_id_label")} inputID="lineUserId">
-              <TextInput
-                label="LINE ID"
-                isLabelHidden
-                placeholder={t("placeholder.line_id")}
-                value={form.lineUserId}
-                onChange={(v: string) => update("lineUserId", v)}
-              />
-            </Field>
+            <div className="space-y-1.5">
+              <Label id="create-role-label" htmlFor="create-role">
+                {t("form.usage_role")}
+              </Label>
+              <Select value={form.role} onValueChange={(v) => update("role", v)}>
+                <SelectTrigger id="create-role" aria-labelledby="create-role-label">
+                  <SelectValue placeholder={t("form.usage_role")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="technician">{t("form.technician")}</SelectItem>
+                  <SelectItem value="engineer">{t("field.engineer")}</SelectItem>
+                  <SelectItem value="manager">{t("form.manager")}</SelectItem>
+                  <SelectItem value="operator">{t("form.machine_operator")}</SelectItem>
+                  <SelectItem value="admin">{t("form.administrator")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Field label={t("field.position")} inputID="position">
-              <TextInput
-                label={t("field.position")}
-                isLabelHidden
-                placeholder={t("placeholder.position")}
-                value={form.position}
-                onChange={(v: string) => update("position", v)}
-              />
-            </Field>
-
-            <Field label={t("form.usage_role")} inputID="role">
-              <Selector
-                label={t("form.usage_role")}
-                isLabelHidden
-                value={form.role}
-                onChange={(v: string) => update("role", v)}
-                options={[
-                  { value: "technician", label: t("form.technician") },
-                  { value: "engineer", label: t("field.engineer") },
-                  { value: "manager", label: t("form.manager") },
-                  { value: "operator", label: t("form.machine_operator") },
-                  { value: "admin", label: t("form.administrator") },
-                ]}
-              />
-            </Field>
-
-            <Field label={t("form.account_status")} inputID="isActive">
-              <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
+            <div className="space-y-1.5">
+              <Label id="create-is-active-label">{t("form.account_status")}</Label>
+              <div className="flex items-center gap-3 pt-1">
                 <Switch
+                  id="create-is-active"
+                  aria-labelledby="create-is-active-label"
                   label={t("form.activate_account")}
-                  value={form.isActive}
+                  checked={form.isActive}
                   onChange={(val: boolean) => update("isActive", val)}
                 />
-                <Text type="body" size="sm" color={form.isActive ? "primary" : "secondary"}>
+                <span className={`text-sm ${form.isActive ? "font-medium text-[var(--cmms-primary)]" : "text-muted-foreground"}`}>
                   {form.isActive ? t("form.enabled") : t("form.suspend")}
-                </Text>
-              </HStack>
-            </Field>
-          </FormLayout>
-        </VStack>
-      </Card>
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
 
-      <HStack hAlign="end" gap={3}>
-        <button
-          type="button"
-          onClick={() => (window.location.href = "/users")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-        >
-          {t("action.cancel")}
-        </button>
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={handleSubmit}
-          className="cmms-btn-primary"
-        >
-          <UserPlusIcon className="w-4 h-4" />
-          {submitting ? t("common.creating") : t("form.users_create_short")}
-        </button>
-      </HStack>
-    </VStack>
+        <CardFooter className="justify-end gap-2">
+          <Button variant="secondary" onClick={() => (window.location.href = "/users")}>
+            {t("action.cancel")}
+          </Button>
+          <Button disabled={submitting} onClick={handleSubmit}>
+            <UserPlus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
+            {submitting ? t("common.creating") : t("form.users_create_short")}
+          </Button>
+        </CardFooter>
+      </Card>
+    </PageShell>
   );
 }

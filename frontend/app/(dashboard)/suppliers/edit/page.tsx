@@ -1,19 +1,21 @@
 "use client";
 
+// suppliers/edit — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Textarea, ui/Switch)
+// business logic ครบเดิม: GET/PUT suppliers.php?id=, validation
+
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { VStack, HStack } from "@astryxdesign/core/Layout";
-import { Text, Heading } from "@astryxdesign/core/Text";
-import { Card } from "@astryxdesign/core/Card";
-import { TextInput } from "@astryxdesign/core/TextInput";
-import { TextArea } from "@astryxdesign/core/TextArea";
-import { FormLayout } from "@astryxdesign/core/FormLayout";
-import { Field } from "@astryxdesign/core/Field";
-import { Breadcrumbs, BreadcrumbItem } from "@astryxdesign/core/Breadcrumbs";
-import { Switch } from "@astryxdesign/core/Switch";
-import { HomeIcon, TruckIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, SquarePen } from "lucide-react";
 
 function EditSupplierContent() {
   const router = useRouter();
@@ -111,150 +113,142 @@ function EditSupplierContent() {
   }
 
   return (
-    <VStack gap={6}>
-      <div className="cmms-page-hero flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-        <VStack gap={1}>
-          <Text type="body" size="sm" className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SUPPLIERS EDIT · CMMS-TOPPAN</Text>
-          <HStack gap={3} vAlign="center" wrap="wrap">
-            <Heading level={2} style={{ color: "#fff" }}>{t("form.manufacturer_edit_title")}</Heading>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <TruckIcon className="w-3.5 h-3.5" /> Supplier
-            </span>
-          </HStack>
-          <Text type="body" style={{ color: "rgba(255,255,255,0.78)" }}>
-            {t("hero.manufacturer_edit_desc")}
-          </Text>
-        </VStack>
-        <button
-          type="button"
-          onClick={() => router.push("/suppliers")}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300"
-        >
-          <HomeIcon className="w-4 h-4" />
+    <PageShell
+      breadcrumbs={[
+        { label: "หน้าแรก", href: "/dashboard" },
+        { label: "ผู้จำหน่าย", href: "/suppliers" },
+        { label: t("form.manufacturer_edit_title") },
+      ]}
+      title={t("form.manufacturer_edit_title")}
+      description={t("hero.manufacturer_edit_desc")}
+      actions={
+        <Button variant="secondary" onClick={() => router.push("/suppliers")}>
+          <ArrowLeft className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           {t("action.back")}
-        </button>
-      </div>
-
-      <Card elevation="low" padding={6}>
+        </Button>
+      }
+    >
+      <Card className="mx-auto w-full max-w-[640px]">
         {loadingData ? (
-          <Text type="body" color="secondary">{t("common.loading_data")}</Text>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{t("common.loading_data")}</p>
+          </CardContent>
         ) : (
-          <VStack gap={5} style={{ maxWidth: 640 }}>
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm font-semibold">
-                {error}
-              </div>
-            )}
+          <>
+            <CardContent className="space-y-5">
+              {error && (
+                <Alert variant="danger">{error}</Alert>
+              )}
 
-            <FormLayout>
-              <HStack gap={4}>
-                <Field label={t("form.reference_code_req")} inputID="code" isRequired style={{ flex: 1 }}>
-                  <TextInput 
-                    label={t("form.reference_code")}
-                    isLabelHidden
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5 sm:col-span-1">
+                  <Label htmlFor="supplier-edit-code">
+                    {t("form.reference_code")} <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="supplier-edit-code"
                     value={code}
-                    onChange={setCode}
+                    onChange={(e) => setCode(e.target.value)}
                   />
-                </Field>
-                <Field label={t("form.company_name_req")} inputID="name" isRequired style={{ flex: 2 }}>
-                  <TextInput 
-                    label={t("field.company_name")}
-                    isLabelHidden
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="supplier-edit-name">
+                    {t("field.company_name")} <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="supplier-edit-name"
                     value={name}
-                    onChange={setName}
+                    onChange={(e) => setName(e.target.value)}
                   />
-                </Field>
-              </HStack>
-              
-              <HStack gap={4}>
-                <Field label={t("field.contact_person")} inputID="contact" style={{ flex: 1 }}>
-                  <TextInput 
-                    label={t("field.contact_person")}
-                    isLabelHidden
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="supplier-edit-contact">{t("field.contact_person")}</Label>
+                  <Input
+                    id="supplier-edit-contact"
                     value={contact}
-                    onChange={setContact}
+                    onChange={(e) => setContact(e.target.value)}
                   />
-                </Field>
-                <Field label={t("field.phone")} inputID="phone" style={{ flex: 1 }}>
-                  <TextInput 
-                    label={t("field.phone")}
-                    isLabelHidden
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="supplier-edit-phone">{t("field.phone")}</Label>
+                  <Input
+                    id="supplier-edit-phone"
+                    type="tel"
                     value={phone}
-                    onChange={setPhone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
-                </Field>
-              </HStack>
+                </div>
+              </div>
 
-              <HStack gap={4}>
-                <Field label={t("field.email")} inputID="email" style={{ flex: 1 }}>
-                  <TextInput 
-                    label={t("field.email")}
-                    isLabelHidden
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="supplier-edit-email">{t("field.email")}</Label>
+                  <Input
+                    id="supplier-edit-email"
+                    type="email"
                     value={email}
-                    onChange={setEmail}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
-                </Field>
-                <Field label={t("field.tax_id")} inputID="taxId" style={{ flex: 1 }}>
-                  <TextInput 
-                    label={t("field.tax_id")}
-                    isLabelHidden
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="supplier-edit-tax-id">{t("field.tax_id")}</Label>
+                  <Input
+                    id="supplier-edit-tax-id"
+                    inputMode="numeric"
                     value={taxId}
-                    onChange={setTaxId}
+                    onChange={(e) => setTaxId(e.target.value)}
                   />
-                </Field>
-              </HStack>
+                </div>
+              </div>
 
-              <Field label={t("field.address")} inputID="address">
-                <TextArea
-                  label={t("field.address")}
-                  isLabelHidden
+              <div className="space-y-1.5">
+                <Label htmlFor="supplier-edit-address">{t("field.address")}</Label>
+                <Textarea
+                  id="supplier-edit-address"
                   value={address}
-                  onChange={setAddress}
+                  onChange={(e) => setAddress(e.target.value)}
                 />
-              </Field>
+              </div>
 
-              <Field label={t("form.usage_status")} inputID="isActive">
-                <HStack gap={3} vAlign="center" style={{ paddingTop: 8 }}>
+              <div className="space-y-1.5">
+                <Label id="supplier-edit-status-label">{t("form.usage_status")}</Label>
+                <div className="flex items-center gap-3 pt-1">
                   <Switch
+                    id="supplier-edit-status"
+                    aria-labelledby="supplier-edit-status-label"
                     label={t("field.active")}
-                    value={isActive}
-                    onChange={setIsActive}
+                    checked={isActive}
+                    onChange={(val: boolean) => setIsActive(val)}
                   />
-                  <Text type="body" size="sm" color={isActive ? "primary" : "secondary"}>
+                  <span className={`text-sm ${isActive ? "font-medium text-[var(--cmms-primary)]" : "text-muted-foreground"}`}>
                     {isActive ? t("form.enabled") : t("form.suspend")}
-                  </Text>
-                </HStack>
-              </Field>
-            </FormLayout>
+                  </span>
+                </div>
+              </div>
+            </CardContent>
 
-            <HStack gap={3} hAlign="end">
-              <button
-                type="button"
-                onClick={() => router.push("/suppliers")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-all duration-300"
-              >
+            <CardFooter className="justify-end gap-2">
+              <Button variant="secondary" onClick={() => router.push("/suppliers")}>
                 {t("action.cancel")}
-              </button>
-              <button
-                type="button"
-                disabled={submitting}
-                onClick={handleSubmit}
-                className="cmms-btn-primary"
-              >
-                <PencilSquareIcon className="w-4 h-4" />
+              </Button>
+              <Button disabled={submitting} onClick={handleSubmit}>
+                <SquarePen className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
                 {submitting ? t("common.saving") : t("action.save_data")}
-              </button>
-            </HStack>
-          </VStack>
+              </Button>
+            </CardFooter>
+          </>
         )}
       </Card>
-    </VStack>
+    </PageShell>
   );
 }
 
 export default function EditSupplierPage() {
   return (
-    <Suspense fallback={<Text type="body">{t("common.loading")}</Text>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">{t("common.loading")}</p>}>
       <EditSupplierContent />
     </Suspense>
   );
