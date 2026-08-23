@@ -186,7 +186,7 @@ renderHeader();
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <table class="data-table cmms-stack-table text-sm">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">รหัสอะไหล่</th>
@@ -202,29 +202,29 @@ renderHeader();
                             $hasSage = !empty($b['sage_item_no']);
                         ?>
                         <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs">
+                            <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs">
                                 <?= htmlspecialchars($b['spare_code']) ?>
                             </td>
-                            <td class="px-4 py-3 font-bold text-slate-900">
+                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900">
                                 <?= htmlspecialchars($b['spare_name']) ?>
                                 <?php if (!empty($b['remarks'])): ?>
                                 <span class="text-xs text-slate-400 block font-normal"><?= htmlspecialchars($b['remarks']) ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-center">
+                            <td data-label="รหัส Sage 300" class="px-4 py-3 text-center">
                                 <?php if ($hasSage): ?>
                                 <span class="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200"><?= htmlspecialchars($b['sage_item_no']) ?></span>
                                 <?php else: ?>
                                 <span class="text-slate-400 text-xs italic">คลังเก่า</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-center font-bold text-slate-800">
+                            <td data-label="จำนวนมาตรฐาน" class="px-4 py-3 text-center font-bold text-slate-800">
                                 <?= number_format($b['default_qty'], 2) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?>
                             </td>
-                            <td class="px-4 py-3 text-center font-bold text-emerald-600">
+                            <td data-label="สต็อกปัจจุบัน" class="px-4 py-3 text-center font-bold text-emerald-600">
                                 <?= number_format($b['stock_qty'], 2) ?> <?= htmlspecialchars($b['unit'] ?? 'ชิ้น') ?>
                             </td>
-                            <td class="px-4 py-3 text-center text-xs">
+                            <td data-label="ลบออก" class="px-4 py-3 text-center text-xs">
                                 <a href="bom.php?asset_id=<?= $assetId ?>&delete_bom_id=<?= $b['id'] ?>" 
                                    onclick="return confirm('ยืนยันลบอะไหล่ &quot;<?= htmlspecialchars($b['spare_name'], ENT_QUOTES) ?>&quot; ออกจาก BOM ใช่หรือไม่?')"
                                    class="text-rose-600 font-bold hover:underline">

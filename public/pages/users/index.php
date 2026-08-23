@@ -27,7 +27,7 @@ $rows = $stmt->fetchAll();
         <?php include __DIR__ . '/../../../src/components/search_form.php'; ?>
     </div>
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อผู้ใช้</th>
@@ -43,29 +43,29 @@ $rows = $stmt->fetchAll();
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['username']) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-700">
+                    <td data-label="ชื่อผู้ใช้" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['username']) ?></td>
+                    <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 text-sm text-gray-700">
                         <div class="flex items-center gap-3">
                             <img src="<?= getImageUrl($r['avatar_path'] ?? '', 'avatar') ?>" class="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm flex-shrink-0">
                             <span class="font-bold text-gray-900"><?= htmlspecialchars($r['full_name']) ?></span>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['email']) ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="อีเมล" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['email']) ?></td>
+                    <td data-label="บทบาท" class="px-4 py-3 text-sm">
                         <span class="badge bg-primary-100 text-primary-800"><?= htmlspecialchars($r['role_name'] ?? '-') ?></span>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['phone'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="เบอร์โทร" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['phone'] ?? '-') ?></td>
+                    <td data-label="สถานะ LINE" class="px-4 py-3 text-sm">
                         <?php if (!empty($r['line_user_id'])): ?>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium badge badge-success">🟢 ผูก LINE แล้ว</span>
                         <?php else: ?>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium status-inactive">⚪ ยังไม่ผูก LINE</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="สถานะ" class="px-4 py-3 text-sm">
                         <span class="badge <?= $r['is_active'] ? 'status-active' : 'status-inactive' ?>"><?= $r['is_active'] ? 'Active' : 'Inactive' ?></span>
                     </td>
-                    <td class="px-4 py-3 text-sm space-x-2"><a href="edit.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="delete.php?id=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td>
+                    <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2"><a href="edit.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="delete.php?id=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>

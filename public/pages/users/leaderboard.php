@@ -71,7 +71,7 @@ renderHeader();
             <h2 class="font-bold text-gray-900 text-base">📊 ตารางเปรียบเทียบผลงานทีมช่างทั้งหมด</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase font-semibold text-xs">
                     <tr>
                         <th class="px-4 py-3 text-left">อันดับ</th>
@@ -89,16 +89,16 @@ renderHeader();
                         $rate = $t['total_assigned'] > 0 ? round(($t['completed_count'] / $t['total_assigned']) * 100) : 0;
                     ?>
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-bold text-center"><?= $rank + 1 ?></td>
-                        <td class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($t['full_name']) ?></td>
-                        <td class="px-4 py-3 text-gray-600"><?= htmlspecialchars($t['position'] ?? '-') ?> (<?= htmlspecialchars($t['dept_name'] ?? '-') ?>)</td>
-                        <td class="px-4 py-3 text-center font-bold count-up"><?= $t['total_assigned'] ?></td>
-                        <td class="px-4 py-3 text-center text-amber-600 font-bold count-up"><?= $t['in_progress_count'] ?></td>
-                        <td class="px-4 py-3 text-center text-emerald-600 font-bold count-up"><?= $t['completed_count'] ?></td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="อันดับ" class="px-4 py-3 font-bold text-center"><?= $rank + 1 ?></td>
+                        <td data-label="ชื่อ-นามสกุล" class="px-4 py-3 font-medium text-gray-900"><?= htmlspecialchars($t['full_name']) ?></td>
+                        <td data-label="ตำแหน่ง/แผนก" class="px-4 py-3 text-gray-600"><?= htmlspecialchars($t['position'] ?? '-') ?> (<?= htmlspecialchars($t['dept_name'] ?? '-') ?>)</td>
+                        <td data-label="งานที่รับมอบหมาย" class="px-4 py-3 text-center font-bold count-up"><?= $t['total_assigned'] ?></td>
+                        <td data-label="กำลังซ่อม" class="px-4 py-3 text-center text-amber-600 font-bold count-up"><?= $t['in_progress_count'] ?></td>
+                        <td data-label="ปิดงานแล้ว" class="px-4 py-3 text-center text-emerald-600 font-bold count-up"><?= $t['completed_count'] ?></td>
+                        <td data-label="อัตราสำเร็จ (%)" class="px-4 py-3 text-center">
                             <span class="badge badge badge-info"><span class="count-up"><?= $rate ?></span>%</span>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-amber-500">
+                        <td data-label="คะแนนเฉลี่ย" class="px-4 py-3 text-center font-bold text-amber-500">
                             ⭐ <?= number_format($t['avg_rating'] ?: 5.0, 1) ?>
                         </td>
                     </tr>

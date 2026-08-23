@@ -105,7 +105,7 @@ renderHeader();
     <!-- Table List -->
     <div class="card overflow-hidden bg-white border border-slate-200 rounded-xl shadow-sm">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
                         <th class="px-4 py-3 text-left">ประเภทระบบ</th>
@@ -123,33 +123,33 @@ renderHeader();
                         $hasSage = !empty($sp['sage_item_no']);
                     ?>
                     <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-3 text-xs font-bold">
+                        <td data-label="ประเภทระบบ" class="px-4 py-3 text-xs font-bold">
                             <?php if ($hasSage): ?>
                             <span class="badge bg-purple-100 text-purple-800">🟣 Sage 300</span>
                             <?php else: ?>
                             <span class="badge badge badge-warning">🟠 คลังเก่าภายใน</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3">
+                        <td data-label="รูปภาพอะไหล่" class="px-4 py-3">
                             <img src="<?= getImageUrl($sp['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50">
                         </td>
-                        <td class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                        <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
+                        <td data-label="ชื่ออะไหล่ / รายละเอียด" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
+                        <td data-label="Sage 300 Item No" class="px-4 py-3 text-center">
                             <?php if ($hasSage): ?>
                             <span class="font-mono text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200"><?= htmlspecialchars($sp['sage_item_no']) ?></span>
                             <?php else: ?>
                             <span class="text-slate-400 text-xs italic">ยังไม่ได้ผูก Sage</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-slate-800">
+                        <td data-label="คงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-slate-800">
                             <?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?>
                             <?php if (($sp['reserved_qty'] ?? 0) > 0): ?>
                             <span class="text-[10px] text-amber-600 block">(จอง <?= number_format($sp['reserved_qty']) ?>)</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price'], 2) ?></td>
-                        <td class="px-4 py-3 text-center text-xs space-x-1">
+                        <td data-label="ราคา/หน่วย" class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price'], 2) ?></td>
+                        <td data-label="จัดการ" class="px-4 py-3 text-center text-xs space-x-1">
                             <a href="edit.php?id=<?= $sp['id'] ?>" class="btn btn-outline btn-sm text-indigo-600 border-indigo-200 hover:bg-indigo-50 font-bold text-[11px] inline-flex items-center gap-1">
                                 <i data-lucide="pencil" class="w-3 h-3"></i>
                                 <span>แก้ไข</span>

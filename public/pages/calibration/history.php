@@ -80,7 +80,7 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
         </form>
     </div>
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ทรัพย์สิน</th>
@@ -98,16 +98,16 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['asset_code'] ?? '') . ' - ' . ($r['asset_name'] ?? '-')) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['calibration_date']) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['next_calibration_date'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($typeLabel[$r['type']] ?? $r['type'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="ทรัพย์สิน" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['asset_code'] ?? '') . ' - ' . ($r['asset_name'] ?? '-')) ?></td>
+                    <td data-label="วันที่สอบเทียบ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['calibration_date']) ?></td>
+                    <td data-label="สอบเทียบครั้งถัดไป" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['next_calibration_date'] ?? '-') ?></td>
+                    <td data-label="ประเภท" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($typeLabel[$r['type']] ?? $r['type'] ?? '-') ?></td>
+                    <td data-label="ผลลัพธ์" class="px-4 py-3 text-sm">
                         <span class="badge <?= $r['result'] === 'pass' ? 'status-pass' : ($r['result'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($resultLabel[$r['result']] ?? $r['result']) ?>
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="ใบรับรอง" class="px-4 py-3 text-sm">
                         <?php if ($r['certificate_number']): ?>
                             <?= htmlspecialchars($r['certificate_number']) ?>
                             <?php if ($r['certificate_file']): ?>
@@ -117,10 +117,10 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                         <span class="text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['correction_value'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['uncertainty_value'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= $r['cost'] ? number_format((float)$r['cost'], 2) : '-' ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['performer_name'] ?? '-') ?></td>
+                    <td data-label="Correction" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['correction_value'] ?? '-') ?></td>
+                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['uncertainty_value'] ?? '-') ?></td>
+                    <td data-label="ค่าใช้จ่าย" class="px-4 py-3 text-sm text-gray-600"><?= $r['cost'] ? number_format((float)$r['cost'], 2) : '-' ?></td>
+                    <td data-label="ผู้ดำเนินการ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['performer_name'] ?? '-') ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?>

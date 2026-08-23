@@ -168,7 +168,7 @@ renderHeader();
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <table class="data-table cmms-stack-table text-sm">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">รหัสอะไหล่</th>
@@ -182,12 +182,12 @@ renderHeader();
                     <tbody class="divide-y divide-slate-200">
                         <?php foreach ($issuedParts as $p): ?>
                         <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($p['code']) ?></td>
-                            <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($p['name']) ?></td>
-                            <td class="px-4 py-3 text-center"><span class="badge bg-purple-50 text-purple-700 text-xs font-mono font-bold"><?= htmlspecialchars($p['sage_item_no'] ?? '-') ?></span></td>
-                            <td class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($p['total_qty_issued']) ?> <?= htmlspecialchars($p['unit'] ?? 'ชิ้น') ?></td>
-                            <td class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($p['unit_price'], 2) ?></td>
-                            <td class="px-4 py-3 text-right font-mono font-bold text-purple-700">฿<?= number_format($p['total_parts_cost'], 2) ?></td>
+                            <td data-label="รหัสอะไหล่" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($p['code']) ?></td>
+                            <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($p['name']) ?></td>
+                            <td data-label="รหัส Sage 300" class="px-4 py-3 text-center"><span class="badge bg-purple-50 text-purple-700 text-xs font-mono font-bold"><?= htmlspecialchars($p['sage_item_no'] ?? '-') ?></span></td>
+                            <td data-label="จำนวนที่เบิก" class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($p['total_qty_issued']) ?> <?= htmlspecialchars($p['unit'] ?? 'ชิ้น') ?></td>
+                            <td data-label="ราคา/หน่วย" class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($p['unit_price'], 2) ?></td>
+                            <td data-label="รวมมูลค่า (บาท)" class="px-4 py-3 text-right font-mono font-bold text-purple-700">฿<?= number_format($p['total_parts_cost'], 2) ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($issuedParts)): ?>
@@ -216,7 +216,7 @@ renderHeader();
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">เลขที่ WO</th>
@@ -231,13 +231,13 @@ renderHeader();
                 <tbody class="divide-y divide-slate-200">
                     <?php foreach ($repairs as $r): ?>
                     <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-3 font-mono font-bold text-indigo-600 text-xs">#WO-<?= $r['id'] ?></td>
-                        <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($r['title']) ?></td>
-                        <td class="px-4 py-3 text-center"><span class="badge badge badge-error text-xs font-bold"><?= htmlspecialchars($r['priority'] ?? 'Medium') ?></span></td>
-                        <td class="px-4 py-3 text-center"><span class="badge badge badge-success text-xs font-bold"><?= htmlspecialchars($r['status']) ?></span></td>
-                        <td class="px-4 py-3 text-slate-700 font-medium"><?= htmlspecialchars($r['tech_name'] ?? 'ไม่ระบุ') ?></td>
-                        <td class="px-4 py-3 text-right font-mono font-bold text-indigo-700">฿<?= number_format(($r['cost_labor']+$r['cost_parts']+$r['cost_outsource']), 2) ?></td>
-                        <td class="px-4 py-3 text-center"><a href="../repair/view.php?id=<?= $r['id'] ?>" class="btn btn-secondary btn-sm text-xs text-indigo-600 font-bold">ดูงาน →</a></td>
+                        <td data-label="เลขที่ WO" class="px-4 py-3 font-mono font-bold text-indigo-600 text-xs">#WO-<?= $r['id'] ?></td>
+                        <td data-label="อาการเสีย / ปัญหา" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($r['title']) ?></td>
+                        <td data-label="ระดับความด่วน" class="px-4 py-3 text-center"><span class="badge badge badge-error text-xs font-bold"><?= htmlspecialchars($r['priority'] ?? 'Medium') ?></span></td>
+                        <td data-label="สถานะ" class="px-4 py-3 text-center"><span class="badge badge badge-success text-xs font-bold"><?= htmlspecialchars($r['status']) ?></span></td>
+                        <td data-label="ช่างผู้ดูแล" class="px-4 py-3 text-slate-700 font-medium"><?= htmlspecialchars($r['tech_name'] ?? 'ไม่ระบุ') ?></td>
+                        <td data-label="ค่าซ่อมรวม" class="px-4 py-3 text-right font-mono font-bold text-indigo-700">฿<?= number_format(($r['cost_labor']+$r['cost_parts']+$r['cost_outsource']), 2) ?></td>
+                        <td data-label="ดูงาน" class="px-4 py-3 text-center"><a href="../repair/view.php?id=<?= $r['id'] ?>" class="btn btn-secondary btn-sm text-xs text-indigo-600 font-bold">ดูงาน →</a></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

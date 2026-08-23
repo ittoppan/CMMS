@@ -320,7 +320,7 @@ renderHeader();
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">รหัสอะไหล่ (Sage Item No)</th>
@@ -335,13 +335,13 @@ renderHeader();
                 <tbody class="divide-y divide-slate-200">
                     <?php foreach ($spares as $sp): ?>
                     <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                        <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
-                        <td class="px-4 py-3 text-xs text-slate-600"><?= htmlspecialchars($sp['category'] ?? 'General') ?></td>
-                        <td class="px-4 py-3 text-center text-xs text-slate-600"><?= htmlspecialchars($sp['location'] ?? '-') ?></td>
-                        <td class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?></td>
-                        <td class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price'], 2) ?></td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="รหัสอะไหล่ (Sage Item No)" class="px-4 py-3 font-mono font-extrabold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
+                        <td data-label="ชื่อรายการอะไหล่" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
+                        <td data-label="หมวดหมู่" class="px-4 py-3 text-xs text-slate-600"><?= htmlspecialchars($sp['category'] ?? 'General') ?></td>
+                        <td data-label="สถานที่เก็บ" class="px-4 py-3 text-center text-xs text-slate-600"><?= htmlspecialchars($sp['location'] ?? '-') ?></td>
+                        <td data-label="คงเหลือ (On Hand)" class="px-4 py-3 text-center font-bold text-slate-800"><?= number_format($sp['stock_qty']) ?> <?= htmlspecialchars($sp['unit'] ?? 'ชิ้น') ?></td>
+                        <td data-label="ราคาเฉลี่ย/หน่วย" class="px-4 py-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price'], 2) ?></td>
+                        <td data-label="สถานะ" class="px-4 py-3 text-center">
                             <span class="badge bg-purple-100 text-purple-800 text-xs font-bold">Sage 300</span>
                         </td>
                     </tr>

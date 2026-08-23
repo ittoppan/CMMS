@@ -181,7 +181,7 @@ $pbadge = ['low'=>'badge-low','medium'=>'badge-medium','high'=>'badge-high','cri
 
 <!-- Data Table -->
 <div class="table-wrap">
-    <table class="data-table">
+    <table class="data-table cmms-stack-table">
         <thead>
             <tr>
                 <th class="row-num">#</th>
@@ -210,8 +210,8 @@ $pbadge = ['low'=>'badge-low','medium'=>'badge-medium','high'=>'badge-high','cri
             <?php else: ?>
             <?php foreach ($repairs as $i => $r): ?>
             <tr>
-                <td class="row-num"><?= $i + 1 ?></td>
-                <td class="col-primary">
+                <td data-label="#" class="row-num"><?= $i + 1 ?></td>
+                <td data-label="หัวข้องาน" class="col-primary">
                     <div class="flex items-center gap-2 mb-0.5">
                         <span class="badge bg-indigo-100 text-indigo-800 font-mono font-bold text-[11px]"><?= formatWorkOrderNo($r['id'], $r['created_at'], $r['work_order_no'] ?? null) ?></span>
                         <a href="view.php?id=<?= $r['id'] ?>" style="color:var(--text-primary);text-decoration:none;font-weight:600;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-primary)'">
@@ -222,20 +222,20 @@ $pbadge = ['low'=>'badge-low','medium'=>'badge-medium','high'=>'badge-high','cri
                     <span style="display:block;font-size:11px;color:var(--text-muted);margin-top:1px;"><?= htmlspecialchars($r['repair_type_name']) ?></span>
                     <?php endif; ?>
                 </td>
-                <td>
+                <td data-label="ทรัพย์สิน">
                     <?php if ($r['asset_code']): ?>
                     <span class="font-mono" style="font-size:11px;color:var(--accent-cyan);"><?= htmlspecialchars($r['asset_code']) ?></span>
                     <span style="display:block;font-size:12px;"><?= htmlspecialchars($r['asset_name'] ?? '—') ?></span>
                     <?php else: ?>—<?php endif; ?>
                 </td>
-                <td><?= htmlspecialchars($r['assigned_name'] ?? '—') ?></td>
-                <td><span class="badge <?= $sbadge[$r['status']] ?? 'badge-info' ?>"><?= $statusOptions[$r['status']] ?? $r['status'] ?></span></td>
-                <td><span class="badge <?= $pbadge[$r['priority']] ?? 'badge-info' ?>"><?= ucfirst($r['priority']) ?></span></td>
-                <td style="text-align:center;">
+                <td data-label="ผู้รับผิดชอบ"><?= htmlspecialchars($r['assigned_name'] ?? '—') ?></td>
+                <td data-label="สถานะ"><span class="badge <?= $sbadge[$r['status']] ?? 'badge-info' ?>"><?= $statusOptions[$r['status']] ?? $r['status'] ?></span></td>
+                <td data-label="ความสำคัญ"><span class="badge <?= $pbadge[$r['priority']] ?? 'badge-info' ?>"><?= ucfirst($r['priority']) ?></span></td>
+                <td data-label="Safety" style="text-align:center;">
                     <?= $r['safety_related'] ? '<span style="font-size:16px;" title="Safety Related">⚠️</span>' : '<span style="color:var(--text-muted);">—</span>' ?>
                 </td>
-                <td style="white-space:nowrap;font-size:12px;color:var(--text-muted);"><?= date('d M Y', strtotime($r['created_at'])) ?></td>
-                <td>
+                <td data-label="วันที่" style="white-space:nowrap;font-size:12px;color:var(--text-muted);"><?= date('d M Y', strtotime($r['created_at'])) ?></td>
+                <td data-label="จัดการ">
                     <div style="display:flex;gap:4px;flex-wrap:wrap;">
                         <a href="view.php?id=<?= $r['id'] ?>" class="action-link action-link-view btn-sm btn">ดู</a>
                         <a href="edit.php?id=<?= $r['id'] ?>" class="action-link action-link-edit btn-sm btn">แก้ไข</a>

@@ -59,7 +59,7 @@ renderHeader();
         </div>
         
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">รูปภาพอะไหล่</th>
@@ -73,23 +73,23 @@ renderHeader();
                 <tbody class="divide-y divide-gray-200">
                     <?php foreach ($parts as $p): ?>
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
+                        <td data-label="รูปภาพอะไหล่" class="px-4 py-3">
                             <img src="<?= getImageUrl($p['image_url'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50" title="<?= htmlspecialchars($p['name']) ?>">
                         </td>
-                        <td class="px-4 py-3">
+                        <td data-label="รหัส / ชื่ออะไหล่" class="px-4 py-3">
                             <span class="font-mono font-bold text-indigo-600 block text-xs"><?= htmlspecialchars($p['code']) ?></span>
                             <span class="font-bold text-gray-900"><?= htmlspecialchars($p['name']) ?></span>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-gray-800">
+                        <td data-label="คลังคงเหลือ (Stock)" class="px-4 py-3 text-center font-bold text-gray-800">
                             <?= number_format($p['stock_qty'], 2) ?> <?= htmlspecialchars($p['unit_name'] ?? 'PCS') ?>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-amber-600">
+                        <td data-label="ถูกจองแล้ว (Reserved)" class="px-4 py-3 text-center font-bold text-amber-600">
                             <?= number_format($p['reserved_qty'], 2) ?> <?= htmlspecialchars($p['unit_name'] ?? 'PCS') ?>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-emerald-600">
+                        <td data-label="พร้อมใช้งาน (Available)" class="px-4 py-3 text-center font-bold text-emerald-600">
                             <?= number_format($p['available_qty'], 2) ?> <?= htmlspecialchars($p['unit_name'] ?? 'PCS') ?>
                         </td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="สถานะการจอง" class="px-4 py-3 text-center">
                             <?php if ($p['reserved_qty'] > 0): ?>
                             <span class="badge badge badge-warning font-bold px-2.5 py-1">⚠️ มีรายการจอง</span>
                             <?php else: ?>

@@ -261,17 +261,17 @@ renderHeader();
             <?php if ($spareParts): ?>
             <div class="card cmms-card p-6">
                 <h2 class="text-lg font-bold text-slate-900 mb-4">รายการอะไหล่ที่เบิกใช้ในงานนี้</h2>
-                <table class="min-w-full text-sm divide-y divide-slate-200">
+                <table class="data-table cmms-stack-table text-sm">
                     <thead class="bg-slate-50 text-xs text-slate-500 uppercase font-bold">
                         <tr><th class="text-left py-2 px-3">รหัส</th><th class="text-left py-2 px-3">ชื่ออะไหล่</th><th class="text-right py-2 px-3">จำนวน</th><th class="text-right py-2 px-3">ราคา/หน่วย</th></tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200">
                         <?php foreach ($spareParts as $sp): ?>
                         <tr>
-                            <td class="py-2 px-3 font-mono font-bold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
-                            <td class="py-2 px-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
-                            <td class="py-2 px-3 text-right font-bold"><?= htmlspecialchars($sp['quantity_used']) ?></td>
-                            <td class="py-2 px-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price']??0,2) ?></td>
+                            <td data-label="รหัส" class="py-2 px-3 font-mono font-bold text-indigo-600 text-xs"><?= htmlspecialchars($sp['code']) ?></td>
+                            <td data-label="ชื่ออะไหล่" class="py-2 px-3 font-bold text-slate-900"><?= htmlspecialchars($sp['name']) ?></td>
+                            <td data-label="จำนวน" class="py-2 px-3 text-right font-bold"><?= htmlspecialchars($sp['quantity_used']) ?></td>
+                            <td data-label="ราคา/หน่วย" class="py-2 px-3 text-right font-mono text-xs">฿<?= number_format($sp['unit_price']??0,2) ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

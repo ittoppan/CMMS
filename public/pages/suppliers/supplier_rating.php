@@ -43,7 +43,7 @@ renderHeader();
         </h3>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-xs">
+            <table class="data-table cmms-stack-table text-xs">
                 <thead class="bg-slate-50 font-bold text-slate-600 uppercase">
                     <tr>
                         <th class="px-4 py-3 text-left">ผู้จำหน่าย / ผู้รับเหมา</th>
@@ -62,14 +62,14 @@ renderHeader();
                         };
                     ?>
                     <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-3">
+                        <td data-label="ผู้จำหน่าย / ผู้รับเหมา" class="px-4 py-3">
                             <span class="font-bold text-slate-900 block"><?= htmlspecialchars($sup['name']) ?></span>
                             <span class="text-[11px] text-slate-500">📞 <?= htmlspecialchars($sup['phone'] ?? '-') ?> | ✉️ <?= htmlspecialchars($sup['email'] ?? '-') ?></span>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold font-mono text-slate-800"><?= $sup['spare_count'] ?> รายการ</td>
-                        <td class="px-4 py-3 text-center font-bold text-emerald-600">98.5%</td>
-                        <td class="px-4 py-3 text-center font-bold text-indigo-600">99.0%</td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="จำนวนอะไหล่ในคลัง" class="px-4 py-3 text-center font-bold font-mono text-slate-800"><?= $sup['spare_count'] ?> รายการ</td>
+                        <td data-label="การส่งตรงเวลา (On-Time Rate)" class="px-4 py-3 text-center font-bold text-emerald-600">98.5%</td>
+                        <td data-label="ผ่านเกณฑ์คุณภาพ (Quality Pass)" class="px-4 py-3 text-center font-bold text-indigo-600">99.0%</td>
+                        <td data-label="เกรดผู้ขาย (Grade)" class="px-4 py-3 text-center">
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black border <?= $grade['bg'] ?>">
                                 เกรด <?= $grade['code'] ?>
                             </span>

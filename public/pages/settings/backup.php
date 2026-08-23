@@ -76,7 +76,7 @@ renderHeader();
             <h2 class="font-bold text-gray-900 text-base">📁 ไฟล์สำรองข้อมูลทั้งหมด (Backup Files History)</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <table class="data-table cmms-stack-table text-sm">
                 <thead class="bg-gray-50 text-gray-500 uppercase font-semibold text-xs">
                     <tr>
                         <th class="px-4 py-3 text-left">ชื่อไฟล์ .sql</th>
@@ -92,10 +92,10 @@ renderHeader();
                         $fDate = date('d/m/Y H:i:s', filemtime($f));
                     ?>
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-mono font-bold text-brand-600"><?= htmlspecialchars($bName) ?></td>
-                        <td class="px-4 py-3 text-gray-600"><?= $fDate ?></td>
-                        <td class="px-4 py-3 text-gray-600"><?= $fSize ?> KB</td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="ชื่อไฟล์ .sql" class="px-4 py-3 font-mono font-bold text-brand-600"><?= htmlspecialchars($bName) ?></td>
+                        <td data-label="วันที่สำรอง" class="px-4 py-3 text-gray-600"><?= $fDate ?></td>
+                        <td data-label="ขนาดไฟล์" class="px-4 py-3 text-gray-600"><?= $fSize ?> KB</td>
+                        <td data-label="ดาวน์โหลด" class="px-4 py-3 text-center">
                             <a href="/backups/<?= urlencode($bName) ?>" download class="btn btn-secondary btn-sm">⬇️ Download SQL</a>
                         </td>
                     </tr>

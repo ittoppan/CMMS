@@ -161,7 +161,7 @@ renderHeader();
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-xs">
+            <table class="data-table cmms-stack-table text-xs">
                 <thead class="bg-slate-50 text-slate-500 uppercase font-bold">
                     <tr>
                         <th class="px-4 py-3 text-left">เลขที่งาน</th>
@@ -175,21 +175,21 @@ renderHeader();
                 <tbody class="divide-y divide-slate-200">
                     <?php foreach ($requests as $req): ?>
                     <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-4 py-3 font-mono font-bold text-indigo-600 text-sm">
+                        <td data-label="เลขที่งาน" class="px-4 py-3 font-mono font-bold text-indigo-600 text-sm">
                             #WO-<?= str_pad($req['id'], 5, '0', STR_PAD_LEFT) ?>
                         </td>
-                        <td class="px-4 py-3">
+                        <td data-label="เครื่องจักร / อาการเสีย" class="px-4 py-3">
                             <div class="font-extrabold text-slate-900 text-sm mb-0.5"><?= htmlspecialchars($req['title']) ?></div>
                             <div class="text-slate-500 text-[11px]">เครื่อง: <span class="font-bold text-indigo-600"><?= htmlspecialchars($req['asset_code'] ?? '-') ?></span> - <?= htmlspecialchars($req['asset_name'] ?? '-') ?></div>
                         </td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="สถานะเครื่อง" class="px-4 py-3 text-center">
                             <?php if ($req['machine_status'] === 'หยุดทำงาน'): ?>
                             <span class="badge badge badge-error font-bold text-[10px]">🔴 หยุดทำงาน</span>
                             <?php else: ?>
                             <span class="badge badge badge-info font-bold text-[10px]">🔵 ยังทำงานได้</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="สถานะงานซ่อม" class="px-4 py-3 text-center">
                             <span class="badge <?= match($req['status']) {
                                 'in_progress' => 'badge badge-warning',
                                 'resolved'    => 'badge badge-success',
@@ -197,10 +197,10 @@ renderHeader();
                                 default       => 'badge badge-info'
                             } ?> font-bold text-xs"><?= strtoupper($req['status']) ?></span>
                         </td>
-                        <td class="px-4 py-3 font-bold text-slate-700">
+                        <td data-label="ช่างผู้ซ่อม" class="px-4 py-3 font-bold text-slate-700">
                             <?= htmlspecialchars($req['assigned_name'] ?? 'กำลังจัดสรรช่าง') ?>
                         </td>
-                        <td class="px-4 py-3 text-center space-x-1">
+                        <td data-label="การกระทำ" class="px-4 py-3 text-center space-x-1">
                             <a href="view.php?id=<?= $req['id'] ?>" class="btn btn-secondary btn-sm text-xs font-bold">
                                 👁️ ดูรายละเอียด
                             </a>

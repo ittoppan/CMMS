@@ -43,7 +43,7 @@ $rows = $stmt->fetchAll();
     </div>
 
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
@@ -57,17 +57,17 @@ $rows = $stmt->fetchAll();
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm text-gray-500"><?= $r['id'] ?></td>
-                    <td class="px-4 py-3 text-sm font-semibold text-gray-900"><?= htmlspecialchars($r['name']) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="#" class="px-4 py-3 text-sm text-gray-500"><?= $r['id'] ?></td>
+                    <td data-label="ชื่อบทบาท" class="px-4 py-3 text-sm font-semibold text-gray-900"><?= htmlspecialchars($r['name']) ?></td>
+                    <td data-label="คำอธิบาย" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description'] ?? '-') ?></td>
+                    <td data-label="จำนวนผู้ใช้" class="px-4 py-3 text-sm">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                             <?= $r['user_count'] > 0 ? 'badge badge-info' : 'bg-gray-100 text-gray-600' ?>">
                             <?= $r['user_count'] ?> คน
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-500"><?= htmlspecialchars(substr($r['created_at'], 0, 10)) ?></td>
-                    <td class="px-4 py-3 text-sm space-x-2">
+                    <td data-label="สร้างเมื่อ" class="px-4 py-3 text-sm text-gray-500"><?= htmlspecialchars(substr($r['created_at'], 0, 10)) ?></td>
+                    <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2">
                         <a href="edit.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a>
                         <?php if ($r['user_count'] == 0): ?>
                         <a href="delete.php?id=<?= $r['id'] ?>"

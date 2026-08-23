@@ -123,7 +123,7 @@ try {
     </div>
 
     <div class="bg-white shadow rounded-lg overflow-hidden overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">หัวข้อ</th>
@@ -143,24 +143,24 @@ try {
                 <?php else: ?>
                 <?php foreach ($repairs as $r): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-3 py-3 text-sm font-medium"><a href="view.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:underline"><?= htmlspecialchars($r['title']) ?></a></td>
-                    <td class="px-3 py-3 text-sm text-gray-600"><?= htmlspecialchars(($r['asset_code']??'').' - '.($r['asset_name']??'-')) ?></td>
-                    <td class="px-3 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['assigned_name']??'-') ?></td>
-                    <td class="px-3 py-3 text-sm"><?php $sc=['open'=>'status-open','acknowledged'=>'status-acknowledged','in_progress'=>'status-in_progress','waiting_parts'=>'status-waiting_parts','waiting_approval'=>'status-waiting_approval','resolved'=>'status-resolved','closed'=>'status-closed','cancelled'=>'status-cancelled','rejected'=>'status-rejected']; ?><span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <?= $sc[$r['status']]??'status-closed' ?>"><?= htmlspecialchars($statusOptions[$r['status']]??$r['status']) ?></span></td>
-                    <td class="px-3 py-3 text-sm"><?php $pm=['low'=>'priority-low','medium'=>'priority-medium','high'=>'priority-high','critical'=>'priority-critical']; ?><span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <?= $pm[$r['priority']]??'priority-low' ?>"><?= htmlspecialchars($r['priority']) ?></span></td>
-                    <td class="px-3 py-3 text-sm text-center"><?= $r['safety_related'] ? '<span class="text-red-500">&#9888;</span>' : '-' ?></td>
-                    <td class="px-3 py-3 text-sm">
+                    <td data-label="หัวข้อ" class="px-3 py-3 text-sm font-medium"><a href="view.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:underline"><?= htmlspecialchars($r['title']) ?></a></td>
+                    <td data-label="ทรัพย์สิน" class="px-3 py-3 text-sm text-gray-600"><?= htmlspecialchars(($r['asset_code']??'').' - '.($r['asset_name']??'-')) ?></td>
+                    <td data-label="ช่าง" class="px-3 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['assigned_name']??'-') ?></td>
+                    <td data-label="สถานะ" class="px-3 py-3 text-sm"><?php $sc=['open'=>'status-open','acknowledged'=>'status-acknowledged','in_progress'=>'status-in_progress','waiting_parts'=>'status-waiting_parts','waiting_approval'=>'status-waiting_approval','resolved'=>'status-resolved','closed'=>'status-closed','cancelled'=>'status-cancelled','rejected'=>'status-rejected']; ?><span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <?= $sc[$r['status']]??'status-closed' ?>"><?= htmlspecialchars($statusOptions[$r['status']]??$r['status']) ?></span></td>
+                    <td data-label="สำคัญ" class="px-3 py-3 text-sm"><?php $pm=['low'=>'priority-low','medium'=>'priority-medium','high'=>'priority-high','critical'=>'priority-critical']; ?><span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <?= $pm[$r['priority']]??'priority-low' ?>"><?= htmlspecialchars($r['priority']) ?></span></td>
+                    <td data-label="Safety" class="px-3 py-3 text-sm text-center"><?= $r['safety_related'] ? '<span class="text-red-500">&#9888;</span>' : '-' ?></td>
+                    <td data-label="คะแนน" class="px-3 py-3 text-sm">
                         <?php if ($r['rating_score']): ?>
                         <span class="text-yellow-500"><?= str_repeat('&#9733;', (int)$r['rating_score']) ?></span>
                         <?php else: ?>
                         <span class="text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-3 py-3 text-xs text-gray-500">
+                    <td data-label="เวลา" class="px-3 py-3 text-xs text-gray-500">
                         <?php if ($r['resolve_time_hrs']): ?>ซ่อม: <?= htmlspecialchars($r['resolve_time_hrs']) ?>ชม.<?php endif; ?>
                         <?php if ($r['downtime_hrs']): ?><br>DT: <?= htmlspecialchars($r['downtime_hrs']) ?>ชม.<?php endif; ?>
                     </td>
-                    <td class="px-3 py-3 text-sm text-gray-500"><?= htmlspecialchars(date('d/m/Y', strtotime($r['created_at']))) ?></td>
+                    <td data-label="วันที่" class="px-3 py-3 text-sm text-gray-500"><?= htmlspecialchars(date('d/m/Y', strtotime($r['created_at']))) ?></td>
                 </tr>
                 <?php endforeach; ?>
                 <?php endif; ?>

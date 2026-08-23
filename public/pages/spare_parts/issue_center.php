@@ -345,7 +345,7 @@ renderHeader();
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm cmms-stack-table">
+                <table class="data-table cmms-stack-table text-sm">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
                         <tr>
                             <th class="px-4 py-3 text-left">เลขที่ใบเบิก / WO</th>
@@ -360,11 +360,11 @@ renderHeader();
                     <tbody class="divide-y divide-slate-200">
                         <?php foreach ($requests as $rq): ?>
                         <tr class="hover:bg-slate-50">
-                            <td class="px-4 py-3 font-mono text-xs" data-label="ใบเบิก / WO">
+                            <td class="px-4 py-3 font-mono text-xs" data-label="เลขที่ใบเบิก / WO">
                                 <span class="font-extrabold text-indigo-600 block">#REQ-<?= $rq['id'] ?></span>
                                 <span class="text-slate-400 block font-bold">#WO-<?= $rq['work_order_id'] ?></span>
                             </td>
-                            <td class="px-4 py-3" data-hide-label>
+                            <td data-label="รูปอะไหล่" class="px-4 py-3" data-hide-label>
                                 <img src="<?= getImageUrl($rq['spare_image'] ?? null, 'spare') ?>" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shadow-sm bg-slate-50" title="<?= htmlspecialchars($rq['spare_name'] ?? 'อะไหล่') ?>">
                             </td>
                             <td class="px-4 py-3" data-label="เครื่องจักร / อาการเสีย">
@@ -390,14 +390,14 @@ renderHeader();
                                     <?= htmlspecialchars($rq['status']) ?>
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-center font-mono text-xs" data-label="เอกสาร Sage">
+                            <td class="px-4 py-3 text-center font-mono text-xs" data-label="เอกสาร Sage 300">
                                 <?php if (!empty($rq['sage_doc_no'])): ?>
                                 <span class="badge bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px]"><?= htmlspecialchars($rq['sage_doc_no']) ?></span>
                                 <?php else: ?>
                                 <span class="text-slate-400 text-xs italic">-</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-center space-x-1 text-xs" data-label="การดำเนินการ">
+                            <td class="px-4 py-3 text-center space-x-1 text-xs" data-label="การดำเนินการ (Actions)">
                                 <form method="POST" class="inline-block">
                                     <input type="hidden" name="request_id" value="<?= $rq['id'] ?>">
 

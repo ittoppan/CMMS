@@ -111,7 +111,7 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
         </form>
     </div>
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">เลขที่ PO</th>
@@ -126,15 +126,15 @@ $statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($rows as $r): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['po_number']) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['supplier_code'] ?? '') . ' - ' . ($r['supplier_name'] ?? '-')) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['po_date'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= $r['amount'] ? number_format((float)$r['amount'], 2) : '-' ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars(($r['asset_name'] ?? '') . ($r['calibration_date'] ? ' (' . $r['calibration_date'] . ')' : '')) ?: '-' ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="เลขที่ PO" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['po_number']) ?></td>
+                    <td data-label="ผู้จำหน่าย" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars(($r['supplier_code'] ?? '') . ' - ' . ($r['supplier_name'] ?? '-')) ?></td>
+                    <td data-label="วันที่" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['po_date'] ?? '-') ?></td>
+                    <td data-label="จำนวนเงิน" class="px-4 py-3 text-sm text-gray-600"><?= $r['amount'] ? number_format((float)$r['amount'], 2) : '-' ?></td>
+                    <td data-label="การสอบเทียบ" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars(($r['asset_name'] ?? '') . ($r['calibration_date'] ? ' (' . $r['calibration_date'] . ')' : '')) ?: '-' ?></td>
+                    <td data-label="สถานะ" class="px-4 py-3 text-sm">
                         <span class="badge <?= $statusBadge[$r['status']] ?? 'bg-gray-100' ?>"><?= htmlspecialchars($statusLabel[$r['status']] ?? $r['status']) ?></span>
                     </td>
-                    <td class="px-4 py-3 text-sm space-x-2">
+                    <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2">
                         <a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a>
                         <a href="?delete=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบ PO นี้?')">ลบ</a>
                     </td>

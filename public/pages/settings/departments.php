@@ -42,11 +42,11 @@ $rows = $pdo->query('SELECT * FROM departments ORDER BY code')->fetchAll();
         </form>
     </div>
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">รหัส</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อแผนก</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">คำอธิบาย</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">สถานะ</th><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จัดการ</th></tr></thead>
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($rows as $r): ?>
-                <tr class="hover:bg-gray-50"><td class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['code']) ?></td><td class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars($r['name']) ?></td><td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description']??'-') ?></td><td class="px-4 py-3 text-sm"><span class="badge <?= $r['is_active']?'status-active':'status-inactive' ?>"><?= $r['is_active']?'Active':'Inactive' ?></span></td><td class="px-4 py-3 text-sm space-x-2"><a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="?delete=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td></tr>
+                <tr class="hover:bg-gray-50"><td data-label="รหัส" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($r['code']) ?></td><td data-label="ชื่อแผนก" class="px-4 py-3 text-sm text-gray-700"><?= htmlspecialchars($r['name']) ?></td><td data-label="คำอธิบาย" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['description']??'-') ?></td><td data-label="สถานะ" class="px-4 py-3 text-sm"><span class="badge <?= $r['is_active']?'status-active':'status-inactive' ?>"><?= $r['is_active']?'Active':'Inactive' ?></span></td><td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2"><a href="?edit=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="?delete=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td></tr>
                 <?php endforeach; ?>
                 <?php if (empty($rows)): ?><tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">ไม่มีข้อมูลแผนก</td></tr><?php endif; ?>
             </tbody>

@@ -136,15 +136,15 @@ renderHeader();
                 <div class="border rounded-md p-4">
                     <h3 class="font-medium text-gray-800 mb-2"><?= htmlspecialchars($t['code'] . ' - ' . $t['name']) ?></h3>
                     <?php if (isset($templateItems[$t['id']]) && count($templateItems[$t['id']])): ?>
-                    <table class="min-w-full text-sm">
+                    <table class="data-table cmms-stack-table text-sm">
                         <thead><tr class="border-b"><th class="text-left py-2">à¸£à¸²à¸¢à¸à¸²à¸£</th><th class="text-left py-2">à¸„à¹ˆà¸²</th><th class="text-left py-2">à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œ</th><th class="text-left py-2">à¸«à¸¡à¸²à¸¢à¹€à¸«à¸•à¸¸</th></tr></thead>
                         <tbody>
                             <?php foreach ($templateItems[$t['id']] as $item): ?>
                             <?php $res = $resultMap[$t['id'].'_'.$item['id']] ?? null; ?>
                             <tr class="border-b">
-                                <td class="py-2"><?= htmlspecialchars($item['description']) ?></td>
-                                <td class="py-2"><?= htmlspecialchars($res['value'] ?? '-') ?></td>
-                                <td class="py-2">
+                                <td data-label="à¸£à¸²à¸¢à¸à¸²à¸£" class="py-2"><?= htmlspecialchars($item['description']) ?></td>
+                                <td data-label="à¸„à¹ˆà¸²" class="py-2"><?= htmlspecialchars($res['value'] ?? '-') ?></td>
+                                <td data-label="à¸œà¸¥à¸¥à¸±à¸žà¸˜à¹Œ" class="py-2">
                                     <?php if ($res): ?>
                                     <span class="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full <?= $res['result']==='pass'?'status-pass':($res['result']==='fail'?'status-fail':'status-closed') ?>">
                                         <?= $res['result'] ?>
@@ -153,7 +153,7 @@ renderHeader();
                                     <span class="text-gray-400">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="py-2 text-gray-500"><?= htmlspecialchars($res['notes'] ?? '-') ?></td>
+                                <td data-label="à¸«à¸¡à¸²à¸¢à¹€à¸«à¸•à¸¸" class="py-2 text-gray-500"><?= htmlspecialchars($res['notes'] ?? '-') ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>

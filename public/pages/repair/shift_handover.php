@@ -89,7 +89,7 @@ renderHeader();
         </h3>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-xs">
+            <table class="data-table cmms-stack-table text-xs">
                 <thead class="bg-slate-50 font-bold text-slate-600 uppercase">
                     <tr>
                         <th class="px-4 py-3 text-left">เลขที่ใบสั่งซ่อม</th>
@@ -103,16 +103,16 @@ renderHeader();
                 <tbody class="divide-y divide-slate-200 font-medium">
                     <?php foreach ($pendingTasks as $t): ?>
                     <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-3 font-mono font-bold text-indigo-600">#WO-<?= $t['id'] ?></td>
-                        <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($t['asset_code'] ?? '') ?> - <?= htmlspecialchars($t['asset_name'] ?? '') ?></td>
-                        <td class="px-4 py-3 text-slate-700"><?= htmlspecialchars($t['title']) ?></td>
-                        <td class="px-4 py-3 text-center">
+                        <td data-label="เลขที่ใบสั่งซ่อม" class="px-4 py-3 font-mono font-bold text-indigo-600">#WO-<?= $t['id'] ?></td>
+                        <td data-label="เครื่องจักร" class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($t['asset_code'] ?? '') ?> - <?= htmlspecialchars($t['asset_name'] ?? '') ?></td>
+                        <td data-label="อาการเสีย" class="px-4 py-3 text-slate-700"><?= htmlspecialchars($t['title']) ?></td>
+                        <td data-label="ความเร่งด่วน" class="px-4 py-3 text-center">
                             <span class="badge <?php echo match($t['priority']) { 'critical' => 'priority-critical font-bold', 'high' => 'priority-high', 'medium' => 'priority-medium', default => 'priority-low' }; ?>">
                                 <?= strtoupper($t['priority']) ?>
                             </span>
                         </td>
-                        <td class="px-4 py-3 text-center font-bold text-amber-600"><?= htmlspecialchars($t['status']) ?></td>
-                        <td class="px-4 py-3 text-slate-800 font-semibold"><?= htmlspecialchars($t['assigned_name'] ?? 'ยังไม่ได้มอบหมาย') ?></td>
+                        <td data-label="สถานะปัจจุบัน" class="px-4 py-3 text-center font-bold text-amber-600"><?= htmlspecialchars($t['status']) ?></td>
+                        <td data-label="ช่างผู้รับผิดชอบ" class="px-4 py-3 text-slate-800 font-semibold"><?= htmlspecialchars($t['assigned_name'] ?? 'ยังไม่ได้มอบหมาย') ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

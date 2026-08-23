@@ -111,7 +111,7 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
         </form>
     </div>
     <div class="card overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
+        <table class="data-table cmms-stack-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">จุดวัด</th>
@@ -127,18 +127,18 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
             <tbody class="divide-y divide-gray-200">
                 <?php foreach ($points as $p): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($p['point_label']) ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['nominal_value'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['measured_value'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['correction'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['uncertainty'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['mpe_value'] ?? '-') ?></td>
-                    <td class="px-4 py-3 text-sm">
+                    <td data-label="จุดวัด" class="px-4 py-3 text-sm font-medium text-gray-900"><?= htmlspecialchars($p['point_label']) ?></td>
+                    <td data-label="Nominal" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['nominal_value'] ?? '-') ?></td>
+                    <td data-label="Measured" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['measured_value'] ?? '-') ?></td>
+                    <td data-label="Correction" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['correction'] ?? '-') ?></td>
+                    <td data-label="Uncertainty" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['uncertainty'] ?? '-') ?></td>
+                    <td data-label="MPE" class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['mpe_value'] ?? '-') ?></td>
+                    <td data-label="ผล" class="px-4 py-3 text-sm">
                         <span class="badge <?= $p['conformance'] === 'pass' ? 'status-pass' : ($p['conformance'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($conformanceLabel[$p['conformance']] ?? $p['conformance']) ?>
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm space-x-2">
+                    <td data-label="จัดการ" class="px-4 py-3 text-sm space-x-2">
                         <a href="?calibration_id=<?= $calibrationId ?>&edit=<?= $p['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a>
                         <a href="?calibration_id=<?= $calibrationId ?>&delete=<?= $p['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบจุดนี้?')">ลบ</a>
                     </td>
