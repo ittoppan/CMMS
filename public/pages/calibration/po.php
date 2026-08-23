@@ -47,7 +47,7 @@ $editRow = null;
 if ($editId) { $er = $pdo->prepare('SELECT * FROM po_calibration WHERE id=?'); $er->execute([$editId]); $editRow = $er->fetch(); }
 $calHistories = $pdo->query('SELECT h.id, a.code, a.name, h.calibration_date FROM calibration_history h LEFT JOIN asset_registry a ON h.asset_id = a.id ORDER BY h.calibration_date DESC LIMIT 100')->fetchAll();
 $statusLabel = ['open'=>'เปิด','partial'=>'บางส่วน','completed'=>'เสร็จสิ้น','cancelled'=>'ยกเลิก'];
-$statusBadge = ['open'=>'bg-blue-100 text-blue-800','partial'=>'bg-yellow-100 text-yellow-800','completed'=>'bg-green-100 text-green-800','cancelled'=>'bg-gray-100 text-gray-800'];
+$statusBadge = ['open'=>'status-open','partial'=>'status-in_progress','completed'=>'status-completed','cancelled'=>'status-cancelled'];
 ?>
 <div class="space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">

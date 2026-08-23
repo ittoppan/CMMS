@@ -103,7 +103,7 @@ foreach ($costStmt->fetchAll() as $cs) { $costSummary[$cs['asset_id']] = $cs; }
                     <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($r['next_calibration_date'] ?? '-') ?></td>
                     <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($typeLabel[$r['type']] ?? $r['type'] ?? '-') ?></td>
                     <td class="px-4 py-3 text-sm">
-                        <span class="badge <?= $r['result'] === 'pass' ? 'bg-green-100 text-green-800' : ($r['result'] === 'fail' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') ?>">
+                        <span class="badge <?= $r['result'] === 'pass' ? 'status-pass' : ($r['result'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($resultLabel[$r['result']] ?? $r['result']) ?>
                         </span>
                     </td>

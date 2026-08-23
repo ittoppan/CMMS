@@ -59,11 +59,11 @@ $rows = $stmt->fetchAll();
                         <?php if (!empty($r['line_user_id'])): ?>
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium badge badge-success">🟢 ผูก LINE แล้ว</span>
                         <?php else: ?>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">⚪ ยังไม่ผูก LINE</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium status-inactive">⚪ ยังไม่ผูก LINE</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-sm">
-                        <span class="badge <?= $r['is_active'] ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' ?>"><?= $r['is_active'] ? 'Active' : 'Inactive' ?></span>
+                        <span class="badge <?= $r['is_active'] ? 'status-active' : 'status-inactive' ?>"><?= $r['is_active'] ? 'Active' : 'Inactive' ?></span>
                     </td>
                     <td class="px-4 py-3 text-sm space-x-2"><a href="edit.php?id=<?= $r['id'] ?>" class="text-primary-600 hover:text-primary-700">แก้ไข</a><a href="delete.php?id=<?= $r['id'] ?>" class="text-red-600 hover:text-red-700" onclick="return confirm('ลบรายการนี้?')">ลบ</a></td>
                 </tr>

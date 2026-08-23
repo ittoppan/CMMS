@@ -56,9 +56,9 @@ renderHeader();
                 <tbody class="divide-y divide-slate-200 font-medium">
                     <?php foreach ($suppliers as $idx => $sup): 
                         $grade = match($idx % 3) {
-                            0 => ['code' => 'A+', 'bg' => 'bg-emerald-100 text-emerald-800 border-emerald-300'],
-                            1 => ['code' => 'A',  'bg' => 'bg-indigo-100 text-indigo-800 border-indigo-300'],
-                            default => ['code' => 'B+', 'bg' => 'bg-amber-100 text-amber-800 border-amber-300']
+                            0 => ['code' => 'A+', 'bg' => 'status-pass'],
+                            1 => ['code' => 'A',  'bg' => 'status-active'],
+                            default => ['code' => 'B+', 'bg' => 'priority-medium']
                         };
                     ?>
                     <tr class="hover:bg-slate-50">

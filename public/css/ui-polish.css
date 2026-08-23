@@ -539,3 +539,68 @@ html.dark .theme-icon-sun  { display: block; }
   .form-actions { flex-direction: column; }
   .form-actions .btn { width: 100%; min-height: 48px; }
 }
+
+/* ------------------------------------------------------------
+   12. Status & priority badge system (Redesign Plan Sec.3 Step 7)
+   One semantic class per business state. Works standalone
+   (.status-x) and on .badge (badge status-x). Palette = Astryx
+   token families; indigo added here (not in compiled bundle).
+   ------------------------------------------------------------ */
+:root {
+  --color-background-indigo: light-dark(#4f46e533, #4f46e533);
+  --color-text-indigo: light-dark(#3730a3, #c7d2fe);
+  --color-border-indigo: light-dark(#6366f1, #818cf8);
+}
+.status-open,
+.status-acknowledged,
+.status-in_progress,
+.status-waiting_parts,
+.status-waiting_approval,
+.status-resolved,
+.status-closed,
+.status-cancelled,
+.status-rejected,
+.status-pending,
+.status-completed,
+.status-overdue,
+.status-active,
+.status-inactive,
+.status-under_repair,
+.status-disposed,
+.status-in_stock,
+.status-low_stock,
+.status-pass,
+.status-fail,
+.priority-low,
+.priority-medium,
+.priority-high,
+.priority-critical {
+  background-color: var(--_badge-bg, var(--color-background-gray));
+  color: var(--_badge-fg, var(--color-text-gray));
+  border-color: var(--_badge-bd, var(--color-border));
+}
+.status-open { --_badge-bg: var(--color-background-blue); --_badge-fg: var(--color-text-blue); --_badge-bd: var(--color-border-blue); }
+.status-acknowledged { --_badge-bg: var(--color-background-indigo); --_badge-fg: var(--color-text-indigo); --_badge-bd: var(--color-border-indigo); }
+.status-in_progress { --_badge-bg: var(--color-background-yellow); --_badge-fg: var(--color-text-yellow); --_badge-bd: var(--color-border-yellow); }
+.status-waiting_parts { --_badge-bg: var(--color-background-orange); --_badge-fg: var(--color-text-orange); --_badge-bd: var(--color-border-orange); }
+.status-waiting_approval { --_badge-bg: var(--color-background-purple); --_badge-fg: var(--color-text-purple); --_badge-bd: var(--color-border-purple); }
+.status-resolved { --_badge-bg: var(--color-background-green); --_badge-fg: var(--color-text-green); --_badge-bd: var(--color-border-green); }
+.status-closed { --_badge-bg: var(--color-background-gray); --_badge-fg: var(--color-text-gray); --_badge-bd: var(--color-border-gray); }
+.status-cancelled { --_badge-bg: var(--color-background-gray); --_badge-fg: var(--color-text-disabled); --_badge-bd: var(--color-border); }
+.status-rejected { --_badge-bg: var(--color-background-red); --_badge-fg: var(--color-text-red); --_badge-bd: var(--color-border-red); }
+.status-pending { --_badge-bg: var(--color-background-blue); --_badge-fg: var(--color-text-blue); --_badge-bd: var(--color-border-blue); }
+.status-completed { --_badge-bg: var(--color-background-green); --_badge-fg: var(--color-text-green); --_badge-bd: var(--color-border-green); }
+.status-overdue { --_badge-bg: var(--color-background-red); --_badge-fg: var(--color-text-red); --_badge-bd: var(--color-border-red); }
+.status-active { --_badge-bg: var(--color-background-green); --_badge-fg: var(--color-text-green); --_badge-bd: var(--color-border-green); }
+.status-inactive { --_badge-bg: var(--color-background-gray); --_badge-fg: var(--color-text-gray); --_badge-bd: var(--color-border-gray); }
+.status-under_repair { --_badge-bg: var(--color-background-yellow); --_badge-fg: var(--color-text-yellow); --_badge-bd: var(--color-border-yellow); }
+.status-disposed { --_badge-bg: var(--color-background-gray); --_badge-fg: var(--color-text-disabled); --_badge-bd: var(--color-border); }
+.status-in_stock { --_badge-bg: var(--color-background-green); --_badge-fg: var(--color-text-green); --_badge-bd: var(--color-border-green); }
+.status-low_stock { --_badge-bg: var(--color-background-orange); --_badge-fg: var(--color-text-orange); --_badge-bd: var(--color-border-orange); }
+.status-pass { --_badge-bg: var(--color-background-green); --_badge-fg: var(--color-text-green); --_badge-bd: var(--color-border-green); }
+.status-fail { --_badge-bg: var(--color-background-red); --_badge-fg: var(--color-text-red); --_badge-bd: var(--color-border-red); }
+.priority-low { --_badge-bg: var(--color-background-gray); --_badge-fg: var(--color-text-gray); --_badge-bd: var(--color-border-gray); }
+.priority-medium { --_badge-bg: var(--color-background-blue); --_badge-fg: var(--color-text-blue); --_badge-bd: var(--color-border-blue); }
+.priority-high { --_badge-bg: var(--color-background-orange); --_badge-fg: var(--color-text-orange); --_badge-bd: var(--color-border-orange); }
+.priority-critical { --_badge-bg: var(--color-background-red); --_badge-fg: var(--color-text-red); --_badge-bd: var(--color-border-red); }
+

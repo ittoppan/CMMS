@@ -107,7 +107,7 @@ renderHeader();
                         <td class="px-4 py-3 font-bold text-slate-900"><?= htmlspecialchars($t['asset_code'] ?? '') ?> - <?= htmlspecialchars($t['asset_name'] ?? '') ?></td>
                         <td class="px-4 py-3 text-slate-700"><?= htmlspecialchars($t['title']) ?></td>
                         <td class="px-4 py-3 text-center">
-                            <span class="badge <?= $t['priority'] === 'critical' ? 'badge badge-error font-bold' : 'bg-slate-100 text-slate-700' ?>">
+                            <span class="badge <?php echo match($t['priority']) { 'critical' => 'priority-critical font-bold', 'high' => 'priority-high', 'medium' => 'priority-medium', default => 'priority-low' }; ?>">
                                 <?= strtoupper($t['priority']) ?>
                             </span>
                         </td>

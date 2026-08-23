@@ -193,7 +193,7 @@ renderHeader();
                             <span class="badge <?= match($req['status']) {
                                 'in_progress' => 'badge badge-warning',
                                 'resolved'    => 'badge badge-success',
-                                'closed'      => 'bg-slate-100 text-slate-800',
+                                'closed'      => 'status-closed',
                                 default       => 'badge badge-info'
                             } ?> font-bold text-xs"><?= strtoupper($req['status']) ?></span>
                         </td>

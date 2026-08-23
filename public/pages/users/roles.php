@@ -334,10 +334,10 @@ renderHeader();
                             <td class="p-3 text-center">
                                 <?php
                                 $roleBadge = match($u['role']) {
-                                    'admin'      => 'bg-rose-100 text-rose-800',
-                                    'engineer'   => 'bg-purple-100 text-purple-800',
-                                    'technician' => 'bg-indigo-100 text-indigo-800',
-                                    default      => 'bg-blue-100 text-blue-800',
+                                    'admin'      => 'priority-critical',
+                                    'engineer'   => 'status-waiting_approval',
+                                    'technician' => 'status-acknowledged',
+                                    default      => 'status-open',
                                 };
                                 $roleLabel = $roles[$u['role']]['icon'] ?? '👤';
                                 ?>

@@ -134,7 +134,7 @@ $conformanceLabel = ['pass'=>'ผ่าน','fail'=>'ไม่ผ่าน','con
                     <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['uncertainty'] ?? '-') ?></td>
                     <td class="px-4 py-3 text-sm text-gray-600"><?= htmlspecialchars($p['mpe_value'] ?? '-') ?></td>
                     <td class="px-4 py-3 text-sm">
-                        <span class="badge <?= $p['conformance'] === 'pass' ? 'bg-green-100 text-green-800' : ($p['conformance'] === 'fail' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') ?>">
+                        <span class="badge <?= $p['conformance'] === 'pass' ? 'status-pass' : ($p['conformance'] === 'fail' ? 'status-fail' : 'status-pending') ?>">
                             <?= htmlspecialchars($conformanceLabel[$p['conformance']] ?? $p['conformance']) ?>
                         </span>
                     </td>

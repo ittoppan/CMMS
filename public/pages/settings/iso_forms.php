@@ -108,7 +108,7 @@ renderHeader();
                             <span><?= htmlspecialchars($file['file_name']) ?></span>
                         </td>
                         <td class="p-3 text-center">
-                            <span class="badge uppercase text-[10px] font-bold <?= match($file['ext']) { 'xlsx'=>'badge badge-success', 'xls'=>'bg-emerald-100 text-emerald-800', 'pdf'=>'badge badge-error', default=>'badge badge-info' } ?>">
+                            <span class="badge uppercase text-[10px] font-bold <?= match($file['ext']) { 'xlsx'=>'status-pass', 'xls'=>'status-pass', 'pdf'=>'status-fail', default=>'status-open' } ?>">
                                 <?= strtoupper($file['ext']) ?>
                             </span>
                         </td>

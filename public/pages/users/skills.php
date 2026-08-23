@@ -55,7 +55,7 @@ renderHeader();
                             <span class="text-[10px] text-slate-400 block font-mono">@<?= htmlspecialchars($t['username']) ?></span>
                         </td>
                         <td class="p-3 text-center">
-                            <span class="badge font-black text-[10px] <?= str_contains($level, 'Master') ? 'badge badge-warning' : (str_contains($level, 'Senior') ? 'bg-indigo-100 text-indigo-800' : 'badge badge-info') ?>">
+                            <span class="badge font-black text-[10px] <?= str_contains($level, 'Master') ? 'badge badge-warning' : (str_contains($level, 'Senior') ? 'status-acknowledged' : 'badge badge-info') ?>">
                                 <?= $level ?>
                             </span>
                         </td>

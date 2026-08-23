@@ -380,12 +380,12 @@ renderHeader();
                             </td>
                             <td class="px-4 py-3 text-center" data-label="สถานะ">
                                 <span class="badge <?= match($rq['status']) {
-                                    'Requested' => 'badge badge-warning',
-                                    'Approved'  => 'badge badge-info',
-                                    'Issued'    => 'badge badge-success',
-                                    'Returned'  => 'bg-purple-100 text-purple-800',
-                                    'Cancelled' => 'badge badge-error',
-                                    default     => 'bg-slate-100 text-slate-800'
+                                    'Requested' => 'status-pending',
+                                    'Approved'  => 'status-waiting_parts',
+                                    'Issued'    => 'status-completed',
+                                    'Returned'  => 'status-resolved',
+                                    'Cancelled' => 'status-cancelled',
+                                    default     => 'status-closed'
                                 } ?>">
                                     <?= htmlspecialchars($rq['status']) ?>
                                 </span>

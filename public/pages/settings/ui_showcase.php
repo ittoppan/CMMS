@@ -78,7 +78,7 @@ renderHeader();
                 </h3>
                 <p class="text-xs text-slate-500">กราฟจำลองการวิเคราะห์ประสิทธิภาพเครื่องจักรประจำเดือน</p>
             </div>
-            <span class="badge bg-cyan-100 text-cyan-800">Recharts v2 Active</span>
+            <span class="badge status-open">Recharts v2 Active</span>
         </div>
         <div class="h-64">
             <canvas id="rechartsDemoCanvas" class="w-full h-full"></canvas>

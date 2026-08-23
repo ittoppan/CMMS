@@ -134,7 +134,7 @@ renderHeader();
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-sm font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">DSN: TFPT2C</span>
                         <?php if ($isTestingEnv): ?>
-                        <span class="badge bg-amber-500 text-white font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
+                        <span class="badge status-active font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
                         <?php endif; ?>
                     </div>
                     <h4 class="font-extrabold text-slate-900 text-base mt-2">🧪 ฐานข้อมูลสำหรับทดสอบ (TFPT2C Testing)</h4>
@@ -149,7 +149,7 @@ renderHeader();
                     <div class="flex items-center justify-between">
                         <span class="font-mono text-sm font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">DSN: TFPT1C</span>
                         <?php if (!$isTestingEnv): ?>
-                        <span class="badge bg-emerald-600 text-white font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
+                        <span class="badge status-active font-extrabold text-xs">✔ ใช้งานอยู่นี้</span>
                         <?php endif; ?>
                     </div>
                     <h4 class="font-extrabold text-slate-900 text-base mt-2">🚀 ฐานข้อมูลใช้งานจริง (TFPT1C Production)</h4>

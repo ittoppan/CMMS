@@ -142,10 +142,10 @@ if (!empty($r['asset_id'])) {
 $allSpares = $pdo->query("SELECT id, code, name, unit, stock_qty, unit_price, sage_item_no FROM spare_parts ORDER BY code ASC LIMIT 200")->fetchAll();
 
 $statusColors = [
-    'open'=>'bg-blue-100 text-blue-800','acknowledged'=>'bg-indigo-100 text-indigo-800',
-    'in_progress'=>'bg-yellow-100 text-yellow-800','waiting_parts'=>'bg-orange-100 text-orange-800',
-    'waiting_approval'=>'bg-purple-100 text-purple-800','resolved'=>'bg-green-100 text-green-800',
-    'closed'=>'bg-gray-100 text-gray-800','cancelled'=>'bg-red-100 text-red-800','rejected'=>'bg-rose-100 text-rose-800'
+    'open'=>'status-open','acknowledged'=>'status-acknowledged',
+    'in_progress'=>'status-in_progress','waiting_parts'=>'status-waiting_parts',
+    'waiting_approval'=>'status-waiting_approval','resolved'=>'status-resolved',
+    'closed'=>'status-closed','cancelled'=>'status-cancelled','rejected'=>'status-rejected'
 ];
 $statusLabels = [
     'open'=>'Open','acknowledged'=>'Acknowledged','in_progress'=>'In Progress',
