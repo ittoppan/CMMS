@@ -300,7 +300,7 @@ export default function MyTasksPage() {
   };
 
   const reportOutcome = (out: SendOutcome, label: string) => {
-    if (out === "queued") showToast("info", `📴 ${label} — บันทึกไว้ในเครื่องแล้ว จะส่งเมื่อกลับมาออนไลน์`);
+    if (out === "queued") showToast("info", `${label} — บันทึกไว้ในเครื่องแล้ว จะส่งเมื่อกลับมาออนไลน์`);
     if (out === "failed") showToast("error", `${label} ไม่สำเร็จ — เซิร์ฟเวอร์ปฏิเสธคำขอ`);
   };
 
