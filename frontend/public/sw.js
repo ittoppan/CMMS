@@ -12,7 +12,7 @@
  *    SW à¹ƒà¸«à¸¡à¹ˆ activate â†’ à¸¥à¹‰à¸²à¸‡ cache à¹€à¸à¹ˆà¸²à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” (activate handler) â†’ à¸žà¸™à¸±à¸à¸‡à¸²à¸™à¹€à¸«à¹‡à¸™à¸‚à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¸—à¸±à¸™à¸—à¸µ
  *    à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¥à¹‰à¸²à¸‡ cache à¹€à¸­à¸‡ (PwaRegister reload à¸«à¸™à¹‰à¸²à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´à¸œà¹ˆà¸²à¸™ SKIP_WAITING)
  */
-const SW_VERSION = "v12-20260823-1537";
+const SW_VERSION = "v13-20260824-0708";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
