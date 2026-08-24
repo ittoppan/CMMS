@@ -87,6 +87,11 @@ export async function flushQueue(): Promise<{ ok: number; failed: number }> {
       if (res.ok) {
         ok++;
         writeQueue(readQueue().filter((x) => x.id !== item.id));
+      } else if (res.status >= 400 && res.status < 500) {
+        // 4xx = server permanently rejected (bad payload / permission) —
+        // retrying will never succeed; drop instead of looping forever.
+        failed++;
+        writeQueue(readQueue().filter((x) => x.id !== item.id));
       } else {
         failed++;
       }
@@ -95,6 +100,44 @@ export async function flushQueue(): Promise<{ ok: number; failed: number }> {
     }
   }
   return { ok, failed };
+}
+
+export type SendOutcome = "sent" | "queued" | "failed";
+
+/**
+ * Try a mutation now; if the device is offline or the network fails,
+ * persist it in the queue for automatic replay on reconnect.
+ *
+ *  - "queued": saved locally, will be flushed by subscribeOnline
+ *  - "sent"  : delivered and acknowledged by the server
+ *  - "failed": server rejected permanently (4xx) — do not retry
+ */
+export async function sendOrEnqueue(opts: {
+  url: string;
+  method: "POST" | "PUT";
+  body: Record<string, unknown>;
+  kind: string;
+  label: string;
+}): Promise<SendOutcome> {
+  const offline = typeof navigator !== "undefined" && navigator.onLine === false;
+  if (offline) {
+    enqueue(opts);
+    return "queued";
+  }
+  try {
+    const res = await fetch(opts.url, {
+      method: opts.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(opts.body),
+    });
+    if (res.ok) return "sent";
+    if (res.status >= 400 && res.status < 500) return "failed";
+    enqueue(opts); // 5xx / gateway hiccup — retry later
+    return "queued";
+  } catch {
+    enqueue(opts);
+    return "queued";
+  }
 }
 
 /** ฟัง event online + คืนจำนวนค้างส่งล่าสุดผ่าน callback */

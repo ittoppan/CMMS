@@ -6,9 +6,11 @@ import { usePageHero, t } from "@/lib/i18n";
 import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
+import { sendOrEnqueue, subscribeOnline, type SendOutcome } from "@/lib/offlineQueue";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
 import AnimatedDialog from "@/components/AnimatedDialog";
+import { useToast } from "@/components/ToastProvider";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
@@ -73,6 +75,7 @@ interface TaskItem extends Record<string, unknown> {
 export default function MyTasksPage() {
   const hero = usePageHero("repair/my_tasks");
   const router = useRouter();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"new" | "in_progress" | "completed">("new");
   const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -231,27 +234,37 @@ export default function MyTasksPage() {
       return mapped;
     };
 
-    fetch("/api/v1/repair.php")
-      .then((r) => r.json())
-      .then((rows) =>
-        fetch("/api/v1/index.php?resource=pm-plans")
-          .then((r) => r.json())
-          .then((pmJson) => {
-            applyRows(Array.isArray(rows) ? rows : [], pmJson);
-            snapshotSave("my_tasks", { rows: Array.isArray(rows) ? rows : [], pm: pmJson, savedAt: Date.now() });
-          })
-      )
-      .catch(async (e) => {
-        console.error("Fetch tasks error", e);
-        const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
-        if (snap && Array.isArray(snap.rows) && snap.rows.length > 0) {
-          applyRows(snap.rows, snap.pm);
-          setOffline(true);
-          if (snap.savedAt) setSnapshotTime(snap.savedAt);
-        } else {
-          setError(true);
-        }
-      });
+    const loadTasks = () =>
+      fetch("/api/v1/repair.php")
+        .then((r) => r.json())
+        .then((rows) =>
+          fetch("/api/v1/index.php?resource=pm-plans")
+            .then((r) => r.json())
+            .then((pmJson) => {
+              applyRows(Array.isArray(rows) ? rows : [], pmJson);
+              snapshotSave("my_tasks", { rows: Array.isArray(rows) ? rows : [], pm: pmJson, savedAt: Date.now() });
+            })
+        )
+        .catch(async (e) => {
+          console.error("Fetch tasks error", e);
+          const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
+          if (snap && Array.isArray(snap.rows) && snap.rows.length > 0) {
+            applyRows(snap.rows, snap.pm);
+            setOffline(true);
+            if (snap.savedAt) setSnapshotTime(snap.savedAt);
+          } else {
+            setError(true);
+          }
+        });
+
+    loadTasks();
+
+    // flush คิวงานที่ค้างไว้ตอนกลับมาออนไลน์ แล้วดึงข้อมูลใหม่
+    const unsubOnline = subscribeOnline((pending) => {
+      showToast("success", pending > 0 ? `ส่งงานที่ค้างในเครื่องแล้ว (เหลือ ${pending})` : "ส่งงานที่ค้างในเครื่องหมดแล้ว");
+      loadTasks();
+    });
+    return unsubOnline;
   }, []);
 
   const startDrawing = (e: any) => {
@@ -286,61 +299,77 @@ export default function MyTasksPage() {
     setReceiverSignature("");
   };
 
-  const handleStartTask = (task: TaskItem) => {
+  const reportOutcome = (out: SendOutcome, label: string) => {
+    if (out === "queued") showToast("info", `📴 ${label} — บันทึกไว้ในเครื่องแล้ว จะส่งเมื่อกลับมาออนไลน์`);
+    if (out === "failed") showToast("error", `${label} ไม่สำเร็จ — เซิร์ฟเวอร์ปฏิเสธคำขอ`);
+  };
+
+  const handleStartTask = async (task: TaskItem) => {
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-    fetch(`/api/v1/repair.php?id=${task.rawId}`, {
+    const out = await sendOrEnqueue({
+      url: `/api/v1/repair.php?id=${task.rawId}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress", actual_start_at: now, acknowledged_at: now }),
-    }).then(() => {
+      body: { status: "in_progress", actual_start_at: now, acknowledged_at: now },
+      kind: "repair_action",
+      label: `เริ่มงาน ${task.woNumber}`,
+    });
+    if (out !== "failed") {
       setTasks((prev) =>
         prev.map((t) => (t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t))
       );
-    });
+    }
+    reportOutcome(out, `เริ่มงาน ${task.woNumber}`);
   };
 
-  const handleAcceptTask = (task: TaskItem) => {
+  const handleAcceptTask = async (task: TaskItem) => {
     const endpoint = task.kind === "repair" ? "/api/v1/repair.php" : "/api/v1/pm_am.php";
-    fetch(`${endpoint}?id=${task.rawId}`, {
+    const out = await sendOrEnqueue({
+      url: `${endpoint}?id=${task.rawId}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assignee_accept: true }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && currentUserId !== null) {
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === task.id
-                ? { ...t, team: [...(t.team || []).filter((m) => m.user_id !== currentUserId), { user_id: currentUserId, status: "accepted" }] }
-                : t
-            )
-          );
-        }
-      })
-      .catch(() => {});
-  };
-
-  const handleWaitParts = (task: TaskItem) => {
-    fetch(`/api/v1/repair.php?id=${task.rawId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "waiting_parts" }),
-    }).then(() => {
-      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: "pending_parts" } : t)));
+      body: { assignee_accept: true },
+      kind: "repair_action",
+      label: `รับงาน ${task.woNumber}`,
     });
+    if (out !== "failed" && currentUserId !== null) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id
+            ? { ...t, team: [...(t.team || []).filter((m) => m.user_id !== currentUserId), { user_id: currentUserId, status: "accepted" }] }
+            : t
+        )
+      );
+    }
+    reportOutcome(out, `รับงาน ${task.woNumber}`);
   };
 
-  const handleResumeTask = (task: TaskItem) => {
-    fetch(`/api/v1/repair.php?id=${task.rawId}`, {
+  const handleWaitParts = async (task: TaskItem) => {
+    const out = await sendOrEnqueue({
+      url: `/api/v1/repair.php?id=${task.rawId}`,
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "in_progress" }),
-    }).then(() => {
+      body: { status: "waiting_parts" },
+      kind: "repair_action",
+      label: `แจ้งรออะไหล่ ${task.woNumber}`,
+    });
+    if (out !== "failed") {
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: "pending_parts" } : t)));
+    }
+    reportOutcome(out, `แจ้งรออะไหล่ ${task.woNumber}`);
+  };
+
+  const handleResumeTask = async (task: TaskItem) => {
+    const out = await sendOrEnqueue({
+      url: `/api/v1/repair.php?id=${task.rawId}`,
+      method: "PUT",
+      body: { status: "in_progress" },
+      kind: "repair_action",
+      label: `กลับมาซ่อมต่อ ${task.woNumber}`,
+    });
+    if (out !== "failed") {
       setTasks((prev) =>
         prev.map((t) => (t.id === task.id ? { ...t, status: "in_progress", overdue: isRepairOverdue(t.estimatedCompletion, "in_progress") } : t))
       );
-    });
+    }
+    reportOutcome(out, `กลับมาซ่อมต่อ ${task.woNumber}`);
   };
 
   const openCloseModal = (task: TaskItem) => {
@@ -372,10 +401,10 @@ export default function MyTasksPage() {
     }
     setClosing(true);
     try {
-      await fetch(`/api/v1/repair.php?id=${selectedTask.rawId}`, {
+      const out = await sendOrEnqueue({
+        url: `/api/v1/repair.php?id=${selectedTask.rawId}`,
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           status: "completed",
           root_cause: rootCause,
           solution: solution,
@@ -391,12 +420,17 @@ export default function MyTasksPage() {
           downtime_minutes: downtimeMinutes ? Number(downtimeMinutes) : null,
           outsource_by: outsourceBy.trim() ? outsourceBy.trim() : null,
           completed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
-        }),
+        },
+        kind: "repair_action",
+        label: `ปิดใบงาน ${selectedTask.woNumber}`,
       });
 
-      setTasks((prev) =>
-        prev.map((t) => (t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature } : t))
-      );
+      if (out !== "failed") {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === selectedTask.id ? { ...t, status: "completed", afterImg, receiverName, receiverSignature } : t))
+        );
+      }
+      reportOutcome(out, `ปิดใบงาน ${selectedTask.woNumber}`);
       setCloseModalOpen(false);
     } catch (e) {
       console.error("Close WO error", e);
