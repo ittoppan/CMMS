@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { e2eCreds, hasCreds } from "./creds";
+
+const creds = e2eCreds();
 
 /**
  * PHP-page smoke: reuse the PWA session cookie (same host, port 8081)
@@ -22,10 +25,10 @@ test.describe.configure({ mode: "serial" });
 let done = false;
 
 test("php pages render without fatal errors", async ({ page }) => {
-  test.skip(process.env.E2E_USERNAME === undefined || process.env.E2E_PASSWORD === undefined);
+  test.skip(!hasCreds(), "needs creds");
   await page.goto("/login");
-  await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(process.env.E2E_USERNAME!);
-  await page.getByLabel(/รหัสผ่าน|Password/i).fill(process.env.E2E_PASSWORD!);
+  await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
+  await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
   await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 

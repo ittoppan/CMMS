@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { e2eCreds, hasCreds } from "./creds";
+const creds = e2eCreds();
 
 /**
  * Smoke specs that work WITHOUT credentials.
@@ -51,15 +53,15 @@ test.describe("public pages render", () => {
  *   E2E_USERNAME=<real user>  E2E_PASSWORD=<password>
  */
 test.describe("authenticated flow", () => {
-  test.skip(
-    !process.env.E2E_USERNAME || !process.env.E2E_PASSWORD,
+  test.skip(() =>
+    !hasCreds(),
     "set E2E_USERNAME/E2E_PASSWORD to run"
   );
 
   test("login → dashboard shell visible", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(process.env.E2E_USERNAME!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(process.env.E2E_PASSWORD!);
+    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
+    await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
 
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
@@ -70,8 +72,8 @@ test.describe("authenticated flow", () => {
 
   test("repair module list loads after login", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(process.env.E2E_USERNAME!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(process.env.E2E_PASSWORD!);
+    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
+    await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 

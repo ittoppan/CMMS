@@ -27,3 +27,6 @@ frontend/.next-verify/
 
 # visual regression baselines (local artifacts)
 visual-baseline/
+
+# transient e2e fixture creds
+frontend/.e2e-auth.json

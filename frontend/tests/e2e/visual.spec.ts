@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { e2eCreds, hasCreds } from "./creds";
+const creds = e2eCreds();
 import fs from "node:fs";
 import path from "node:path";
 
@@ -77,8 +79,8 @@ test.describe("public route screenshots", () => {
 });
 
 test.describe("dashboard route screenshots", () => {
-  test.skip(
-    !process.env.E2E_USERNAME || !process.env.E2E_PASSWORD,
+  test.skip(() =>
+    !hasCreds(),
     "set E2E_USERNAME/E2E_PASSWORD to run"
   );
 
@@ -89,8 +91,8 @@ test.describe("dashboard route screenshots", () => {
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(process.env.E2E_USERNAME!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(process.env.E2E_PASSWORD!);
+    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
+    await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
     savedStorage = JSON.stringify(await ctx.storageState());
