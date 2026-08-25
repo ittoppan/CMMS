@@ -219,7 +219,11 @@ $defaultUserFullName = $_SESSION['user_name'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แบบฟอร์มแจ้งซ่อม (MAINTENANCE JOB REQUEST) — CMMS-TPT</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Compiled Tailwind bundle + app tokens (replaces runtime cdn.tailwindcss.com JIT) -->
+    <link rel="stylesheet" href="/css/daisy-compat.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/app.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/mobile-shell.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="/css/ui-polish.css?v=<?= time() ?>">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
