@@ -24,3 +24,6 @@ frontend/test-results/
 frontend/playwright-report/
 # alternate build dir (NEXT_DIST_DIR escape hatch)
 frontend/.next-verify/
+
+# visual regression baselines (local artifacts)
+visual-baseline/
