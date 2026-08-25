@@ -154,4 +154,130 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- ============================================================
+     Design System v2 — canonical components (living style guide)
+     CSS: ui-polish.css §11–§20. Copy these, never re-invent.
+     ============================================================ -->
+<div class="card p-6 space-y-6" id="shot-element">
+    <div class="border-b border-line pb-3">
+        <h2 class="text-xl font-black text-primary flex items-center gap-2">
+            <span class="badge status-open text-xs">DS v2</span>
+            Canonical Components — ใช้ชุดนี้เท่านั้น (ui-polish.css §11–§20)
+        </h2>
+        <p class="text-sm text-muted mt-1">Status badges · Banners · Stat tiles · Forms · Data table · Loading/Empty · Modal · Tokens</p>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">1) Status / Priority badges — <code>.badge.status-* / .priority-*</code></h3>
+        <div class="flex flex-wrap gap-1.5">
+            <?php foreach (['open','acknowledged','in_progress','waiting_parts','waiting_approval','resolved','closed','cancelled','rejected','pending','completed','overdue','active','inactive','under_repair','disposed','in_stock','low_stock','pass','fail'] as $k): ?>
+                <span class="badge status-<?= $k ?>"><?= $k ?></span>
+            <?php endforeach; ?>
+            <?php foreach (['low','medium','high','critical'] as $k): ?>
+                <span class="badge priority-<?= $k ?>"><?= $k ?></span>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">2) Banners — <code>.cmms-banner.{success|error|warning|info}</code></h3>
+        <div class="space-y-2">
+            <div class="cmms-banner success">บันทึกเรียบร้อย — ข้อมูลอัปเดตแล้ว</div>
+            <div class="cmms-banner error">เกิดข้อผิดพลาด — กรุณาตรวจสอบข้อมูลอีกครั้ง</div>
+            <div class="cmms-banner warning">อะไหล่ใกล้หมด — คงเหลือ 3 ชิ้น ต่ำกว่า min stock</div>
+            <div class="cmms-banner info">ระบบจะปิดปรับปรุง ศุกร์ 22:00–23:00</div>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">3) Pipeline stat tiles — <code>.cmms-stat-tile.{key|glass}</code></h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-open space-y-1"><span class="font-bold opacity-80">Open</span><span class="text-2xl font-black block">12</span></a>
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-acknowledged space-y-1"><span class="font-bold opacity-80">Ack</span><span class="text-2xl font-black block">8</span></a>
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-in_progress space-y-1"><span class="font-bold opacity-80">In Progress</span><span class="text-2xl font-black block">5</span></a>
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-resolved space-y-1"><span class="font-bold opacity-80">Resolved</span><span class="text-2xl font-black block">21</span></a>
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-cancelled space-y-1"><span class="font-bold opacity-80">Cancelled</span><span class="text-2xl font-black block">2</span></a>
+            <a href="#" class="cmms-stat-tile cmms-stat-tile-glass space-y-1"><span class="font-bold opacity-70">Glass</span><span class="text-2xl font-black block">7</span></a>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">4) Form system — <code>.form-section/.form-grid/.form-label/.form-actions</code></h3>
+        <form class="form-section" onsubmit="return false">
+            <div class="form-section-title">ตัวอย่างฟอร์มมาตรฐาน</div>
+            <p class="form-required-legend"><span class="req">*</span> ฟิลด์ที่มีเครื่องหมายดอกจันจำเป็นต้องกรอก</p>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label" for="ds-demo-name">ชื่อเครื่องจักร <span class="req">*</span></label>
+                    <input class="input input-bordered w-full" id="ds-demo-name" name="name" required aria-required="true" placeholder="MCH-001">
+                    <span class="form-hint">รหัสเครื่องจาก asset registry</span>
+                </div>
+                <div>
+                    <label class="form-label" for="ds-demo-prio">ความสำคัญ</label>
+                    <select class="select-field w-full" id="ds-demo-prio" name="priority">
+                        <option>low</option><option selected>medium</option><option>high</option><option>critical</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" for="ds-demo-note">หมายเหตุ</label>
+                    <textarea class="textarea-field" id="ds-demo-note" rows="2" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+                </div>
+            </div>
+            <div class="form-error">ตัวอย่างข้อความ error (.form-error)</div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">บันทึก</button>
+                <button type="reset" class="btn btn-secondary">ยกเลิก</button>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">5) Data table — <code>.data-table.cmms-stack-table</code> + <code>data-label</code></h3>
+        <div class="table-wrap">
+            <table class="data-table cmms-stack-table">
+                <thead><tr><th>WO</th><th>เครื่อง</th><th>สถานะ</th></tr></thead>
+                <tbody>
+                    <tr><td data-label="WO">EN-2608-001</td><td data-label="เครื่อง">Injection #3</td><td data-label="สถานะ"><span class="badge status-in_progress">in_progress</span></td></tr>
+                    <tr><td data-label="WO">EN-2608-002</td><td data-label="เครื่อง">Aging Room</td><td data-label="สถานะ"><span class="badge priority-critical">critical</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">6) Loading / Empty — <code>.cmms-skeleton/.cmms-spinner/.cmms-empty-state</code></h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+            <div class="space-y-2"><div class="cmms-skeleton h-4 w-3/4"></div><div class="cmms-skeleton h-4 w-full"></div><div class="cmms-skeleton h-4 w-1/2"></div></div>
+            <div><span class="cmms-spinner"></span> <span class="text-sm text-secondary">กำลังโหลด…</span></div>
+            <div class="cmms-empty-state">ยังไม่มีรายการ — ตัวอย่าง empty state</div>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">7) Modal — <code>.cmms-modal-backdrop/.cmms-modal-panel</code> + <code>CMMS_UI.openModal/closeModal</code></h3>
+        <button class="btn btn-primary" onclick="openModal('ds-demo-modal')">เปิด modal ตัวอย่าง</button>
+        <div id="ds-demo-modal" class="cmms-modal-backdrop" onclick="if (event.target === this) closeModal('ds-demo-modal')">
+            <div class="cmms-modal-panel p-5 space-y-3">
+                <div class="flex items-center justify-between border-b border-line pb-2">
+                    <strong class="text-primary">ตัวอย่าง Modal มาตรฐาน</strong>
+                    <button class="btn btn-ghost btn-sm" onclick="closeModal('ds-demo-modal')">✕</button>
+                </div>
+                <p class="text-sm text-secondary">Focus trap + ESC + คืน focus อัตโนมัติ — ทำงานผ่าน cmms-ui-engine.js</p>
+                <div class="flex justify-end gap-2"><button class="btn btn-primary" onclick="closeModal('ds-demo-modal')">ตกลง</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h3 class="font-extrabold text-primary text-sm mb-2">8) Semantic color tokens — <code>.text-primary/.text-secondary/.text-muted/.bg-subtle/.bg-muted</code></h3>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <div class="p-3 rounded-lg bg-subtle border border-line text-primary">text-primary<br>bg-subtle</div>
+            <div class="p-3 rounded-lg bg-muted border border-line text-secondary">text-secondary<br>bg-muted</div>
+            <div class="p-3 rounded-lg bg-muted border border-line text-muted">text-muted<br>bg-muted</div>
+            <div class="p-3 rounded-lg bg-subtle border border-line"><span class="badge status-pass">pass</span> <span class="badge status-fail">fail</span></div>
+            <div class="p-3 rounded-lg bg-subtle border border-line"><span class="badge priority-high">high</span> <span class="badge priority-low">low</span></div>
+        </div>
+    </div>
+</div>
+
 <?php renderFooter(); ?>
