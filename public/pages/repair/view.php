@@ -216,7 +216,7 @@ renderHeader();
                         <?php foreach ($attachments as $att):
                             $aPath = htmlspecialchars(ltrim($att['file_path'], '/'));
                             $aLabel = $att['category'] === 'after_image' ? 'หลังซ่อม' : ($att['category'] === 'failure_image' ? 'ก่อนซ่อม' : 'แนบ');
-                            $aColor = $att['category'] === 'after_image' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600';
+                            $aColor = $att['category'] === 'after_image' ? 'bg-green-100 text-green-800' : 'bg-muted text-secondary';
                         ?>
                         <a href="/<?= $aPath ?>" target="_blank" class="group relative rounded-xl overflow-hidden border border-line">
                             <img src="/<?= $aPath ?>" alt="<?= htmlspecialchars($att['file_name']) ?>" class="w-full h-28 object-cover group-hover:scale-105 transition-transform" loading="lazy">
@@ -394,11 +394,11 @@ function switchReqTab(tab) {
         document.getElementById('tab-content-bom').style.display = 'block';
         document.getElementById('tab-content-all').style.display = 'none';
         document.getElementById('tab-btn-bom').className = 'px-4 py-2 border-b-2 border-indigo-600 text-indigo-600 font-bold';
-        document.getElementById('tab-btn-all').className = 'px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700';
+        document.getElementById('tab-btn-all').className = 'px-4 py-2 border-b-2 border-transparent text-muted hover:text-secondary';
     } else {
         document.getElementById('tab-content-bom').style.display = 'none';
         document.getElementById('tab-content-all').style.display = 'block';
-        document.getElementById('tab-btn-bom').className = 'px-4 py-2 border-b-2 border-transparent text-slate-500 hover:text-slate-700';
+        document.getElementById('tab-btn-bom').className = 'px-4 py-2 border-b-2 border-transparent text-muted hover:text-secondary';
         document.getElementById('tab-btn-all').className = 'px-4 py-2 border-b-2 border-indigo-600 text-indigo-600 font-bold';
     }
 }

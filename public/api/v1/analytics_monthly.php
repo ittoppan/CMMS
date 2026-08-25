@@ -146,7 +146,7 @@ try {
 
     $topPerformers = [];
     $rank = 1;
-    $colors = ["bg-amber-100 text-amber-700 border-amber-300", "bg-slate-100 text-slate-700 border-slate-300", "bg-orange-100 text-orange-800 border-orange-300"];
+    $colors = ["bg-amber-100 text-amber-700 border-amber-300", "bg-muted text-secondary border-slate-300", "bg-orange-100 text-orange-800 border-orange-300"];
     foreach ($topPerformersRaw as $t) {
         $avatarUrl = resolveAvatarUrl($t['avatar_path'], $t['avatar'], $t['name']);
         $topPerformers[] = [

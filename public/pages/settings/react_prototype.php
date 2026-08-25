@@ -107,8 +107,8 @@ function showView(type) {
     document.getElementById('view-desktop').style.display = type === 'desktop' ? 'block' : 'none';
     document.getElementById('view-mobile').style.display = type === 'mobile' ? 'block' : 'none';
     
-    document.getElementById('btn-desktop').className = type === 'desktop' ? 'px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2' : 'px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-2';
-    document.getElementById('btn-mobile').className = type === 'mobile' ? 'px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2' : 'px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-2';
+    document.getElementById('btn-desktop').className = type === 'desktop' ? 'px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2' : 'px-4 py-2 bg-muted dark:bg-slate-700 text-secondary dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-2';
+    document.getElementById('btn-mobile').className = type === 'mobile' ? 'px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2' : 'px-4 py-2 bg-muted dark:bg-slate-700 text-secondary dark:text-slate-200 rounded-xl text-xs font-bold flex items-center gap-2';
 }
 </script>
 

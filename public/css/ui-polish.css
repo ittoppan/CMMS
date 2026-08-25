@@ -863,3 +863,5 @@ html.dark .theme-icon-sun  { display: block; }
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
+
+.hover\:text-secondary:hover { color: var(--color-text-secondary, #475569); }
