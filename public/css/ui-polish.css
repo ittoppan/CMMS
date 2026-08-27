@@ -865,3 +865,50 @@ html.dark .theme-icon-sun  { display: block; }
 }
 
 .hover\:text-secondary:hover { color: var(--color-text-secondary, #475569); }
+
+/* ------------------------------------------------------------
+   21. Page header (Redesign Plan §3 Step 1)
+   Canonical header for every PHP page: eyebrow + title +
+   description + actions + optional breadcrumb.
+   ------------------------------------------------------------ */
+.cp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+@media (min-width: 640px) {
+  .cp-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
+}
+.cp-header-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--color-text-primary);
+}
+.cp-header-desc {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+.cp-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.cp-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+.cp-breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
+.cp-breadcrumb a:hover { color: var(--color-text-primary); }
+.cp-breadcrumb-sep { color: var(--color-text-disabled); }
+.cp-breadcrumb-current { color: var(--color-text-primary); font-weight: 600; }
