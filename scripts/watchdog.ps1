@@ -78,13 +78,33 @@ try {
         # 1.1) ตรวจ tunnel เพิ่ม (ถ้ามี tunnel-url.txt) - เว็บ local ดี แต่คนนอกเข้าไม่ได้ก็พังเหมือนกัน
         #      ไม่ restart cloudflared อัตโนมัติ (restart = URL เปลี่ยน = ลิงก์ภายนอกใช้ไม่ได้)
         #      แจ้งเตือนเฉพาะเมื่อ URL เปลี่ยน หรือห่างจากครั้งลาสุดเกิน 60 นาที (state: logs	unnel-alert.state)
-        $urlFile  = Join-Path $logDir "tunnel-url.txt"
+$urlFile  = Join-Path $logDir "tunnel-url.txt"
         $stateFile = Join-Path $logDir "tunnel-alert.state"
+        $tunnelNgrokScript = Join-Path $root "scripts\tunnel-ngrok.ps1"
+        # ngrok เป็นตัวหลัก: ถ้ายังไม่มี tunnel-url.txt (และติดตั้ง ngrok) ให้ bootstrap สร้าง tunnel ก่อน
+        if (-not (Test-Path -LiteralPath $urlFile) -and (Test-Path -LiteralPath "C:\ngrok\ngrok.exe")) {
+            Write-Log "no tunnel-url.txt — bootstrapping ngrok tunnel (primary)"
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $tunnelNgrokScript | Out-Null
+        }
         if (Test-Path -LiteralPath $urlFile) {
             $tunnelUrl = ((Get-Content -LiteralPath $urlFile -Raw) -split "\s+")[0]
             if ($tunnelUrl -match "^https://") {
                 if (-not ((Test-Url "$tunnelUrl/login") -eq 200)) {
                     Write-Log "WARN tunnel URL ลง ($tunnelUrl)"
+                    # --- Primary tunnel: ngrok (static domain — restart ได้ปลอดภัย ไม่กระทบผู้ใช้ภายนอก) ---
+                    $isNgrok = ($tunnelUrl -match "\.ngrok-free\.app")
+                    if ($isNgrok) {
+                        Write-Log "ngrok tunnel down — auto-restart via tunnel-ngrok.ps1"
+                        & powershell -NoProfile -ExecutionPolicy Bypass -File $tunnelNgrokScript | Out-Null
+                        Start-Sleep -Seconds 10
+                        if ((Test-Url "$tunnelUrl/login") -eq 200) {
+                            Write-Log "ngrok tunnel RECOVERED ($tunnelUrl)"
+                            Send-Alert "✅ [CMMS Watchdog] tunnel กลับมาทำงานแล้ว ($tunnelUrl)"
+                            if (Test-Path -LiteralPath $stateFile) { Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue }
+                        } else {
+                            Write-Log "ngrok tunnel STILL DOWN after restart — alert (throttled)"
+                        }
+                    } else {
                     # --- Named tunnel: restart อัตโนมัติได้ (URL ถาวร ไม่กระทบผู้ใช้ภายนอก) ---
                     $namedCred = "C:\cloudflared\cmms-tpt.json"
                     $namedCfg  = "C:\cloudflared\config.yml"
@@ -97,10 +117,11 @@ try {
                             Send-Alert "✅ [CMMS Watchdog] tunnel กลับมาทำงานแล้ว ($tunnelUrl)"
                             if (Test-Path -LiteralPath $stateFile) { Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue }
                         } else {
-                            Write-Log "named tunnel STILL DOWN after restart — alert (throttled 24h)"
+                            Write-Log "named tunnel STILL DOWN after restart — alert (throttled)"
                         }
-                    } else {
+} else {
                         Write-Log "quick tunnel (trycloudflare) — ไม่ restart อัตโนมัติ (กัน URL เปลี่ยนกระทบผู้ใช้ภายนอก)"
+                    }
                     }
                     # --- อ่าน state: lastAlert|lastAlertUrl (unix ts) ---
                     $lastAlert = 0; $lastAlertUrl = ""

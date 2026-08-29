@@ -25,24 +25,64 @@ function lineToken(): string {
     } catch (Exception $e) { return getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: ''; }
 }
 
-// 1. อ่าน URL ปัจจุบันจาก tunnel-url.txt (ถ้าไม่มี -> ลอง cloudflared.log)
+// 1. หา public URL — เอา ngrok เป็นตัวหลัก (static domain ไม่เปลี่ยน):
+//    (a) admin API ของ ngrok ถ้ากำลังรัน (URL จริงที่ใช้งาน)
+//    (b) env NGROK_STATIC_URL
+//    (c) tunnel-url.txt (รองรับ url กึ่งกลาง: ngrok-free.app / trycloudflare / อื่นๆ)
+//    (d) cloudflared.log (trycloudflare — fallback เก่า)
+function isPublicUrl(string $u): bool {
+    if (!preg_match('#^https://([a-z0-9](?:[a-z0-9.-]*)\.(?:[a-z]{2,}))(?:/|$)#i', $u, $m)) return false;
+    $host = strtolower($m[1]);
+    if (in_array($host, ['localhost', '127.0.0.1'], true)) return false;
+    if (preg_match('/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/', $host)) return false;
+    return true;
+}
 $publicUrl = '';
-if (is_file($urlFile)) {
-    $raw = trim((string)file_get_contents($urlFile));
-    $first = preg_split('/\s+/', $raw)[0] ?? '';
-    if (preg_match('#^https://[a-z0-9.-]+\.trycloudflare\.com/?$#', $first)) {
-        $publicUrl = rtrim($first, '/');
+
+// (a) ngrok admin API — ตัวหลัก
+$body = @file_get_contents('http://127.0.0.1:4040/api/tunnels');
+if ($body !== false) {
+    $j = json_decode($body, true);
+    foreach (($j['tunnels'] ?? []) as $t) {
+        if (isset($t['public_url']) && isPublicUrl((string)$t['public_url'])) {
+            $publicUrl = rtrim((string)$t['public_url'], '/');
+            break;
+        }
     }
 }
+
+// (b) env NGROK_STATIC_URL (ใช้เมื่อ ngrok ยังไม่รัน — alive check ด้านล่างจะกัน URL ตาย)
+if ($publicUrl === '') {
+    $envUrl = trim((string)getenv('NGROK_STATIC_URL'));
+    if ($envUrl !== '' && isPublicUrl($envUrl)) $publicUrl = rtrim($envUrl, '/');
+}
+
+// (c) tunnel-url.txt
+if ($publicUrl === '') {
+    if (is_file($urlFile)) {
+        $raw = trim((string)file_get_contents($urlFile));
+        $first = preg_split('/\s+/', $raw)[0] ?? '';
+        if (isPublicUrl($first)) $publicUrl = rtrim($first, '/');
+    }
+}
+
+// (d) cloudflared.log (fallback เดิม — trycloudflare)
 if ($publicUrl === '' && is_file($root . '/logs/cloudflared.log')) {
     $log = (string)@file_get_contents($root . '/logs/cloudflared.log');
     if (preg_match_all('#https://[a-z0-9-]+\.trycloudflare\.com#', $log, $mm)) {
         $publicUrl = rtrim(end($mm[0]), '/');
     }
 }
+
 if ($publicUrl === '') {
     // ไม่มี tunnel URL -> ยังไม่ทำอะไร (ระบบใช้ web local อยู่)
     exit(0);
+}
+
+// ให้ tunnel-url.txt ตรงกับ URL ที่ใช้งานด้วย (ผู้บริโภครายอื่น เช่น watchdog/QR ใช้ไฟล์นี้)
+$storedUrlFile = is_file($urlFile) ? trim((string)file_get_contents($urlFile)) : '';
+if ($storedUrlFile === '' || rtrim(($storedUrlFile === '' ? '' : preg_split('/\s+/', $storedUrlFile)[0] ?? ''), '/') !== $publicUrl) {
+    @file_put_contents($urlFile, $publicUrl . PHP_EOL);
 }
 
 // ตรวจว่า URL ยัง alive ก่อนตั้ง (กันตั้ง webhook ชี้ URL ตาย)
