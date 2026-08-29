@@ -33,6 +33,18 @@ if (!$pm) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_checksheet') {
     header('Content-Type: application/json; charset=utf-8');
     try {
+        // ⛔ ทำ PM ได้เฉพาะวันครบกำหนด (due_date) พอดี — บังคับฝั่ง server
+        $dueDay = !empty($pm['due_date']) ? date('Y-m-d', strtotime((string)$pm['due_date'])) : '';
+        if ($dueDay === '') {
+            http_response_code(404);
+            echo json_encode(['status' => 'error', 'message' => 'ไม่พบแผน PM — ไม่สามารถบันทึกเช็คชีตได้']);
+            exit;
+        }
+        if ($dueDay !== date('Y-m-d')) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => "PM นี้กำหนดตรวจวันที่ {$dueDay} — ทำเช็คชีตได้เฉพาะวันครบกำหนดเท่านั้น"]);
+            exit;
+        }
         $results = $_POST['check_results'] ?? [];
         $values  = $_POST['check_values'] ?? [];
         $remarks = $_POST['check_remarks'] ?? [];

@@ -17,6 +17,7 @@ try {
 
     switch ($method) {
         case 'GET':
+            if (isset($_GET['today'])) { echo json_encode(['today' => date('Y-m-d')]); exit; }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             // รายการเอกสารแนบของแผน PM (ใบแจ้งหนี้/ใบเสนอราคา)
             if (isset($_GET['attachments']) && $id) {
@@ -65,6 +66,19 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // ⛔ ทำ PM ได้เฉพาะวันครบกำหนด (due_date) พอดี — บังคับฝั่ง server (กัน bypass / offline queue)
+            if (($data['status'] ?? null) === 'completed') {
+                $qDue = $pdo->prepare('SELECT due_date FROM pm_am WHERE id = ?');
+                $qDue->execute([$id]);
+                $dueRaw = $qDue->fetchColumn();
+                if ($dueRaw === false) { http_response_code(404); echo json_encode(['error' => 'PM not found']); exit; }
+                $dueDay = date('Y-m-d', strtotime((string)$dueRaw));
+                if ($dueDay !== date('Y-m-d')) {
+                    http_response_code(403);
+                    echo json_encode(['error' => "PM นี้กำหนดตรวจวันที่ {$dueDay} — ทำเช็คชีตได้เฉพาะวันครบกำหนดเท่านั้น"]);
+                    exit;
+                }
+            }
             // เพิ่มเอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) — { attach_file: {file_url, file_name, file_type, file_size} }
             if (isset($data['attach_file']) && is_array($data['attach_file'])) {
                 $af = $data['attach_file'];

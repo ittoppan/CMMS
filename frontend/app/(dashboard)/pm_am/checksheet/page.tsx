@@ -178,13 +178,28 @@ export default function PMChecksheetPage() {
       const res = await fetch("/api/v1/pm_am.php");
       const json = await res.json();
       if (Array.isArray(json)) {
-        const open = json.filter((p: any) => p.status === "pending" || p.status === "in_progress");
+        // ทำ PM ได้เฉพาะวันครบกำหนด (due_date) พอดี: แสดงเฉพาะแผนที่ครบกำหนดวันนี้เท่านั้น
+        const today = String(((await (await fetch("/api/v1/pm_am.php?today=1")).json())?.today) || new Date().toLocaleDateString("en-CA")).slice(0, 10);
+        const open = json.filter(
+          (p: any) => (p.status === "pending" || p.status === "in_progress") && String(p.due_date).slice(0, 10) === today
+        );
 
         // ถ้ามาจาก QR: filter เฉพาะเครื่องที่สแกน หรือเลือกแผนตรงตาม plan_id
         let list = open;
         const prefill = qrPrefillRef.current;
         if (prefill?.planId) {
           list = open.filter((p: any) => String(p.id) === prefill.planId);
+          if (list.length === 0) {
+            // แผนอาจไม่ใช่ของวันนี้ หรือไม่มีอยู่จริง → ค้นหาเพื่อแจ้งวันกำหนดที่แท้จริง
+            try {
+              const single = await (await fetch(`/api/v1/pm_am.php?id=${prefill.planId}`)).json();
+              if (single?.due_date) {
+                setError(`แผนนี้กำหนดตรวจวันที่ ${String(single.due_date).slice(0, 10)} — ทำเช็คชีตได้เฉพาะวันครบกำหนดเท่านั้น`);
+              } else if (single?.error === "Not found") {
+                setError("ไม่พบแผน PM ที่ระบุ");
+              }
+            } catch { /* ignore */ }
+          }
         } else if (prefill?.assetCode) {
           try {
             const assetRes = await fetch("/api/v1/index.php?resource=assets");
@@ -209,7 +224,7 @@ export default function PMChecksheetPage() {
           }))
         );
         if (list.length === 0 && prefill?.assetCode) {
-          setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่รอดำเนินการ (pending / in_progress)`);
+          setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่ครบกำหนดวันนี้ (ทำเช็คชีตได้เฉพาะวัน due_date เท่านั้น)`);
         }
         // บันทึกเวลา "อัปเดตล่าสุด" — ใช้แสดงบน banner offline (ข้อมูล ณ ... กี่นาทีที่แล้ว)
         snapshotSave("pm_checksheet", { savedAt: Date.now() });
@@ -598,10 +613,10 @@ export default function PMChecksheetPage() {
               disabled={plans.length === 0}
             >
               <SelectTrigger id="pm-plan" aria-label="เลือกแผน PM">
-                <SelectValue placeholder={plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."} />
+                <SelectValue placeholder={plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM..."} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__" disabled>{plans.length === 0 ? "ไม่มีแผน PM ที่รอดำเนินการ" : "เลือกแผน PM..."}</SelectItem>
+                <SelectItem value="__none__" disabled>{plans.length === 0 ? "วันนี้ไม่มีแผน PM ที่ครบกำหนด" : "เลือกแผน PM..."}</SelectItem>
                 {plans.map((p) => (
                   <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                 ))}
@@ -609,7 +624,7 @@ export default function PMChecksheetPage() {
             </Select>
           </div>
           {plans.length === 0 && (
-            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ไม่พบแผน PM ที่รอดำเนินการ (pending / in_progress)</p>
+            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ทำเช็คชีต PM ได้เฉพาะวันครบกำหนด (due date) ของแต่ละแผนเท่านั้น — แผนที่ยังไม่ถึงวัน / เลยวันกำหนด จะไม่ขึ้นในรายการ</p>
           )}
         </CardContent>
       </Card>
