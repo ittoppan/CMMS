@@ -30,11 +30,16 @@ return [
     ['key' => 'asset_registry/criticality','href' => '/asset_registry/criticality','label' => 'ลำดับความสำคัญ A/B/C',  'section' => 'PM & เครื่องจักร'],
     ['key' => 'equipment_borrowing',       'href' => '/equipment_borrowing',       'label' => 'ยืม-คืนอุปกรณ์',         'section' => 'PM & เครื่องจักร'],
     ['key' => 'calibration',               'href' => '/calibration',               'label' => 'สอบเทียบเครื่องมือวัด',  'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/calendar',      'href' => '/calibration/calendar',      'label' => 'ปฏิทินสอบเทียบ',         'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/po',            'href' => '/calibration/po',            'label' => 'PO งานสอบเทียบ',         'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/tracking',      'href' => '/calibration/tracking',      'label' => 'ติดตามงานสอบเทียบ',      'section' => 'PM & เครื่องจักร'],
     ['key' => 'inspections',               'href' => '/inspections',               'label' => 'ตรวจเช็ครอบ (Checklist)','section' => 'PM & เครื่องจักร'],
     ['key' => 'inspections/templates',     'href' => '/inspections/templates',     'label' => 'จัดการ Template ตรวจ',  'section' => 'PM & เครื่องจักร'],
 
     // ---- 3. คลังอะไหล่ ----
     ['key' => 'spare_parts',               'href' => '/spare_parts',               'label' => 'คลังสต็อกอะไหล่',        'section' => 'คลังอะไหล่'],
+    ['key' => 'spare_parts/balances',      'href' => '/spare_parts/balances',      'label' => 'ยอดคงเหลืออะไหล่',       'section' => 'คลังอะไหล่'],
+    ['key' => 'spare_parts/returns',       'href' => '/spare_parts/returns',       'label' => 'สต็อกอะไหล่คืนซาก',       'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/issue_center',  'href' => '/spare_parts/issue_center',  'label' => 'ศูนย์เบิก-จ่าย',         'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/sage_po',       'href' => '/spare_parts/sage_po',       'label' => 'รับอะไหล่จาก PO',        'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/optimization',  'href' => '/spare_parts/optimization',  'label' => 'AI EOQ & Dead Stock',    'section' => 'คลังอะไหล่'],

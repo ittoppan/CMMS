@@ -110,6 +110,9 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "asset_registry/criticality", labelKey: "menu.criticality", href: "/asset_registry/criticality", icon: Scale },
       { perm: "equipment_borrowing", labelKey: "menu.equipment_borrowing", href: "/equipment_borrowing", icon: ArrowLeftRight },
       { perm: "calibration", labelKey: "menu.calibration", href: "/calibration", icon: Scale },
+      { perm: "calibration/calendar", labelKey: "menu.calibration_calendar", href: "/calibration/calendar", icon: CalendarDays },
+      { perm: "calibration/po", labelKey: "menu.calibration_po", href: "/calibration/po", icon: FileCheck2 },
+      { perm: "calibration/tracking", labelKey: "menu.calibration_tracking", href: "/calibration/tracking", icon: ListChecks },
       { perm: "mtbf_mttr", labelKey: "menu.mtbf_mttr", href: "/mtbf_mttr", icon: FlaskConical },
     ],
   },
@@ -118,6 +121,8 @@ export const NAV_GROUPS: NavGroupDef[] = [
     pathPrefixes: ["/spare_parts", "/suppliers"],
     items: [
       { perm: "spare_parts", labelKey: "menu.spare_parts", href: "/spare_parts", icon: Box },
+      { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
+      { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History },
       { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },
       { perm: "spare_parts/sage_po", labelKey: "menu.sage_po", href: "/spare_parts/sage_po", icon: FileCheck2 },
       { perm: "spare_parts/sage_sync", labelKey: "menu.sage_sync", href: "/spare_parts/sage_sync", icon: Database },

@@ -115,6 +115,21 @@ try {
         ADD CONSTRAINT `fk_eb_reason` FOREIGN KEY (`reason_id`) REFERENCES `borrowing_reasons`(`id`) ON DELETE SET NULL ON UPDATE CASCADE");
     echo "OK: equipment_borrowing FKs added\n";
 
+    // Calibration: PO งานสอบเทียบ + ติดตามงาน (2026-08-29)
+    $pdo->exec("ALTER TABLE calibration
+        ADD COLUMN `po_file` VARCHAR(500) NULL AFTER `supplier_id`,
+        ADD COLUMN `po_cc` VARCHAR(500) NULL AFTER `po_file`,
+        ADD COLUMN `po_email_sent_at` DATETIME NULL AFTER `po_cc`,
+        ADD COLUMN `provider_confirm_date` DATE NULL AFTER `po_email_sent_at`");
+    echo "OK: calibration PO workflow columns added\n";
+
+    // spare_issue_items: รับคืนซากอะไหล่ (2026-08-29)
+    $pdo->exec("ALTER TABLE spare_issue_items
+        ADD COLUMN `return_reason` VARCHAR(255) NULL AFTER `qty_returned`,
+        ADD COLUMN `returned_at` DATETIME NULL AFTER `return_reason`,
+        ADD COLUMN `returned_by` INT UNSIGNED NULL AFTER `returned_at`");
+    echo "OK: spare_issue_items return columns added\n";
+
     $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
     echo "\nAll ALTER operations completed successfully!\n";
 

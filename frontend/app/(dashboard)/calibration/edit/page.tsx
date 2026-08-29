@@ -40,6 +40,42 @@ function EditCalibrationContent() {
   const [certNo, setCertNo] = useState("");
   const [status, setStatus] = useState("pending");
 
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [supplierId, setSupplierId] = useState("");
+  const [poNumber, setPoNumber] = useState("");
+  const [totalCost, setTotalCost] = useState("");
+  const [certFile, setCertFile] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/v1/calibration_tracking.php?suppliers=1")
+      .then(res => res.json())
+      .then(json => {
+        if (Array.isArray(json)) setSuppliers(json);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleCertFileUpload = async (file: File) => {
+    const fd = new FormData();
+    fd.append("folder", "calibration");
+    fd.append("file", file);
+    setUploading(true);
+    try {
+      const res = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
+      const json = await res.json();
+      if (json && json.url) {
+        setCertFile(json.url);
+      } else {
+        setError(json.error || t("msg.upload_fail"));
+      }
+} catch {
+        setError(t("msg.conn_fail_retry"));
+      } finally {
+        setUploading(false);
+      }
+  };
+
   useEffect(() => {
     fetch("/api/v1/asset_registry.php")
       .then(res => res.json())
@@ -67,6 +103,10 @@ function EditCalibrationContent() {
           setDueDate(json.next_calibration_date ? (json.next_calibration_date.substring(0, 10) as ISODate) : undefined);
           setCertNo(json.certificate_number || "");
           setStatus(json.status || "pending");
+          setSupplierId(json.supplier_id ? String(json.supplier_id) : "");
+          setPoNumber(json.po_number || "");
+          setTotalCost(json.total_cost != null ? String(json.total_cost) : "");
+          setCertFile(json.certificate_file || "");
         } else {
           setError(t("msg.calibration_not_found"));
         }
@@ -90,6 +130,10 @@ function EditCalibrationContent() {
         calibration_date: calDate,
         next_calibration_date: dueDate,
         certificate_number: certNo,
+        certificate_file: certFile || undefined,
+        supplier_id: supplierId ? Number(supplierId) : undefined,
+        po_number: poNumber || undefined,
+        total_cost: totalCost !== "" ? Number(totalCost) : undefined,
         status: status
       };
 
@@ -207,6 +251,72 @@ function EditCalibrationContent() {
                 value={certNo}
                 onChange={(e) => setCertNo(e.target.value)}
               />
+
+              <div className="space-y-1.5">
+                <Label htmlFor="cal-edit-supplier">ผู้ให้บริการสอบเทียบ</Label>
+                <Select value={supplierId || undefined} onValueChange={(v) => setSupplierId(v)}>
+                  <SelectTrigger id="cal-edit-supplier">
+                    <SelectValue placeholder="เลือกผู้ให้บริการ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  id="cal-edit-po-no"
+                  label="หมายเลข PO"
+                  placeholder="เช่น PO-2608-001"
+                  value={poNumber}
+                  onChange={(e) => setPoNumber(e.target.value)}
+                />
+                <Input
+                  id="cal-edit-cost"
+                  label="ค่าใช้จ่ายสอบเทียบ (บาท)"
+                  placeholder="0.00"
+                  value={totalCost}
+                  onChange={(e) => setTotalCost(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="cal-edit-cert-file">ใบรับรอง (ไฟล์ PDF)</Label>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="cal-edit-cert-file-input"
+                    className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent"
+                  >
+                    เลือกไฟล์ PDF…
+                    <input
+                      id="cal-edit-cert-file-input"
+                      type="file"
+                      accept=".pdf,.png,.jpg"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleCertFileUpload(f);
+                      }}
+                    />
+                  </label>
+                  {certFile && (
+                    <a
+                      href={certFile}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-10 items-center rounded-md bg-[var(--cmms-primary-light)] px-3 text-sm font-medium text-[var(--cmms-primary-hover)] hover:underline"
+                    >
+                      เปิดไฟล์ใบรับรอง ↗
+                    </a>
+                  )}
+                </div>
+                {uploading && <p className="text-sm text-muted-foreground">กำลังอัปโหลด…</p>}
+              </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="cal-edit-status">{t("field.status")}</Label>
