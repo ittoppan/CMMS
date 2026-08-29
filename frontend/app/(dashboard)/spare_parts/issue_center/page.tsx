@@ -18,6 +18,7 @@ import {
   Search,
   CheckCircle2,
   RefreshCw,
+  AlertTriangle,
 } from "lucide-react";
 
 interface CartItem {
@@ -140,32 +141,66 @@ export default function SageIssueCenterPage() {
     setSubmitting(true);
     setError(null);
     try {
-      let issued = 0;
-      for (const item of cart) {
-        if (item.qty > item.stockQty) {
-          showToast("error", `อะไหล่ ${item.code} เหลือในคลังไม่พอ (คงเหลือ ${item.stockQty} ${item.unit})`);
-          setSubmitting(false);
-          return;
-        }
-        const newQty = Math.max(0, item.stockQty - item.qty);
-        const res = await fetch(`/api/v1/spare_parts.php?id=${item.partId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stock_qty: newQty }),
-        });
-        const json = await res.json();
-        if (json.success) issued += 1;
+      // 1. สร้างคำขอเบิกอะไหล่ (spare_issue_requests)
+      const woLabel = workOrders.find((w) => w.value === workOrder)?.label || workOrder;
+      const techLabel = users.find((u) => u.value === technician)?.label || technician;
+      
+      const createRes = await fetch("/api/v1/spare_issue_request.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          work_order_id: parseInt(workOrder),
+          work_order_no: woLabel.split(" • ")[0],
+          technician_id: parseInt(technician),
+          technician_name: techLabel,
+          request_type: "withdrawal",
+          items: cart.map((item) => ({
+            spare_part_id: item.partId,
+            part_code: item.code,
+            part_name: item.name,
+            qty: item.qty,
+            unit: item.unit,
+            unit_price: item.unitPrice,
+            stock_qty_at_request: item.stockQty,
+          })),
+        }),
+      });
+      const createJson = await createRes.json();
+      
+      if (!createJson.success) {
+        throw new Error(createJson.error || "สร้างคำขอเบิกไม่สำเร็จ");
       }
-      if (issued > 0) {
-        showToast("success", `เบิก-จ่ายอะไหล่ ${issued} รายการ เรียบร้อยแล้ว (WO: ${workOrders.find((w) => w.value === workOrder)?.label.split(" • ")[0]})`);
-        setCart([]);
-        fetchData();
-      } else {
-        showToast("error", "ไม่สามารถบันทึกการเบิก-จ่ายได้");
+
+      const requestId = createJson.request_id;
+      
+      // 2. เรียก ApprovalService สร้างคำขออนุมัติ
+      const approvalRes = await fetch("/api/v1/approval.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_request",
+          request_type: "spare_issue",
+          target_id: requestId,
+          document_no: `SIR-${String(requestId).padStart(6, "0")}`,
+          title: `เบิกอะไหล่สำหรับ ${woLabel}`,
+          requester_name: techLabel,
+          details: cart.map((i) => `${i.code}: ${i.name} x${i.qty}`),
+        }),
+      });
+      const approvalJson = await approvalRes.json();
+      
+      if (!approvalJson.success) {
+        // ถ้าสร้าง approval ไม่ได้ ให้ลบ request ที่สร้างไป
+        await fetch(`/api/v1/spare_issue_request.php?id=${requestId}`, { method: "DELETE" });
+        throw new Error(approvalJson.message || "สร้างคำขออนุมัติไม่สำเร็จ");
       }
+
+      showToast("success", `สร้างคำขอเบิกอะไหล่เรียบร้อยแล้ว (เลขที่: SIR-${String(requestId).padStart(6, "0")}) รอการอนุมัติ`);
+      setCart([]);
+      fetchData();
     } catch (e) {
       console.error(e);
-      showToast("error", "เกิดข้อผิดพลาดในการเบิก-จ่าย กรุณาลองใหม่");
+      showToast("error", e instanceof Error ? e.message : "เกิดข้อผิดพลาดในการสร้างคำขอเบิก กรุณาลองใหม่");
     }
     setSubmitting(false);
   };

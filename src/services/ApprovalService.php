@@ -131,6 +131,27 @@ class ApprovalService {
         } elseif ($type === 'requisition' || $type === 'spare_issue') {
             $targetStatus = ($status === 'approved') ? 'Approved' : 'Rejected';
             $pdo->prepare("UPDATE spare_issue_requests SET status = ?, updated_at = NOW() WHERE id = ?")->execute([$targetStatus, $targetId]);
+            
+            // If approved, deduct stock for each item
+            if ($status === 'approved' && $type === 'spare_issue') {
+                $stmt = $pdo->prepare("SELECT spare_part_id, qty FROM spare_issue_request_items WHERE request_id = ?");
+                $stmt->execute([$targetId]);
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                foreach ($items as $item) {
+                    $partId = (int)$item['spare_part_id'];
+                    $qty = (float)$item['qty'];
+                    
+                    // Deduct stock
+                    $pdo->prepare("UPDATE spare_parts SET stock_qty = stock_qty - ?, updated_at = NOW() WHERE id = ?")->execute([$qty, $partId]);
+                    
+                    // Record transaction
+                    $pdo->prepare("
+                        INSERT INTO spare_part_transactions (spare_part_id, type, quantity, reference_type, reference_id, created_by, created_at)
+                        VALUES (?, 'withdrawal', ?, 'spare_issue_request', ?, ?, NOW())
+                    ")->execute([$partId, $qty, $targetId, $_SESSION['user']['id'] ?? 1]);
+                }
+            }
         }
     }
 

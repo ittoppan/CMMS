@@ -42,16 +42,59 @@ try {
 
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+            $action = trim((string)($data['action'] ?? ''));
+            
+            // Handle create_request action
+            if ($action === 'create_request') {
+                $requestType = trim((string)($data['request_type'] ?? ''));
+                $targetId = (int)($data['target_id'] ?? 0);
+                $documentNo = trim((string)($data['document_no'] ?? ''));
+                $title = trim((string)($data['title'] ?? ''));
+                $requesterName = trim((string)($data['requester_name'] ?? ''));
+                $details = $data['details'] ?? [];
+                $approverEmail = isset($data['approver_email']) ? trim((string)$data['approver_email']) : null;
+                $approverLineId = isset($data['approver_line_id']) ? trim((string)$data['approver_line_id']) : null;
+                
+                if (!$requestType || !$targetId || !$documentNo || !$title || !$requesterName) {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Missing required fields'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                
+                $validTypes = ['repair', 'requisition', 'loto', 'pm', 'spare_issue'];
+                if (!in_array($requestType, $validTypes)) {
+                    http_response_code(400);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid request type'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                
+                $result = ApprovalService::createApprovalRequest(
+                    $requestType,
+                    $targetId,
+                    $documentNo,
+                    $title,
+                    $requesterName,
+                    $details,
+                    $approverEmail,
+                    $approverLineId
+                );
+                
+                echo json_encode(['status' => 'success'] + $result, JSON_UNESCAPED_UNICODE);
+                break;
+            }
+            
+            // Original approve/reject logic
+            $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
             $token  = trim((string)($data['token'] ?? ''));
             $action = trim((string)($data['action'] ?? ''));
             $reason = isset($data['reason']) ? trim((string)$data['reason']) : null;
-
+            
             if ($token === '' || !in_array($action, ['approve', 'reject'], true)) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'ต้องระบุ token และ action (approve/reject)'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
-
+            
             $result = ApprovalService::processApproval($token, $action, $reason);
             if (empty($result['success'])) {
                 $code = !empty($result['already_processed']) ? 409 : 400;
@@ -59,7 +102,7 @@ try {
                 echo json_encode(array_merge(['status' => 'error'], $result), JSON_UNESCAPED_UNICODE);
                 exit;
             }
-
+            
             echo json_encode(array_merge(['status' => 'success'], $result), JSON_UNESCAPED_UNICODE);
             break;
 
