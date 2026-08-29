@@ -99,21 +99,25 @@ try {
             $placeholders = rtrim(str_repeat('?,', count($partIds)), ',');
             $stmt = $pdo->prepare("SELECT id, code, name, stock_qty FROM spare_parts WHERE id IN ($placeholders)");
             $stmt->execute($partIds);
-            $parts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+            $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $partsById = [];
+            foreach ($parts as $p) {
+                $partsById[$p['id']] = $p;
+            }
             
             foreach ($items as $item) {
                 $partId = (int)$item['spare_part_id'];
                 $qty = (float)$item['qty'];
                 
-                if (!isset($parts[$partId])) {
+                if (!isset($partsById[$partId])) {
                     http_response_code(400);
                     echo json_encode(['error' => "Part ID $partId not found"]);
                     exit;
                 }
                 
-                if ($qty > (float)$parts[$partId]['stock_qty']) {
+                if ($qty > (float)$partsById[$partId]['stock_qty']) {
                     http_response_code(400);
-                    echo json_encode(['error' => "Insufficient stock for {$parts[$partId]['code']}: need $qty, available {$parts[$partId]['stock_qty']}"]);
+                    echo json_encode(['error' => "Insufficient stock for {$partsById[$partId]['code']}: need $qty, available {$partsById[$partId]['stock_qty']}"]);
                     exit;
                 }
             }
