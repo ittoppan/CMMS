@@ -105,14 +105,26 @@ $endpoint = $publicUrl . '/api/v1/line_webhook.php';
 try {
     $pdo = getDb();
     $stored = (string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_webhook_url'")->fetchColumn();
-    if ($stored === $endpoint) {
-        exit(0); // URL เดิม — ไม่ต้องเปลี่ยน
-    }
 
     $token = lineToken();
     if ($token === '') {
         error_log("[line_webhook] no channel access token");
         exit(1);
+    }
+
+    // ตรวจกับ LINE API จริงด้วย (กันมีคนไปแก้ console แล้ว DB ไม่ทัน)
+    $live = '';
+    $ch = curl_init('https://api.line.me/v2/bot/channel/webhook/endpoint');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    $liveResp = curl_exec($ch);
+    curl_close($ch);
+    $liveJson = json_decode((string)$liveResp, true);
+    if (isset($liveJson['endpoint'])) $live = rtrim((string)$liveJson['endpoint'], '/');
+
+    if ($stored === $endpoint && $live === $endpoint) {
+        exit(0); // DB กับ LINE ตรงกันแล้ว — ไม่ต้องเปลี่ยน
     }
 
     // 2. PUT endpoint ไป LINE API

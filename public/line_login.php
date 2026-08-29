@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/config/db.php';
 $envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) loadEnv($envPath);
 
-$channelId = getenv('LINE_CHANNEL_ID') ?: getenv('LINE_CLIENT_ID');
+$channelId = getenv('LINE_LOGIN_CHANNEL_ID') ?: getenv('LINE_CHANNEL_ID') ?: getenv('LINE_CLIENT_ID');
 $callbackUrl = getenv('LINE_CALLBACK_URL') ?: ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/line_callback.php');
 
 if (!$channelId) {

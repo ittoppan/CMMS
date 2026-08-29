@@ -5,8 +5,8 @@ require_once __DIR__ . '/../src/config/db.php';
 $envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) loadEnv($envPath);
 
-$channelId     = getenv('LINE_CHANNEL_ID') ?: getenv('LINE_CLIENT_ID');
-$channelSecret = getenv('LINE_CHANNEL_SECRET') ?: getenv('LINE_CLIENT_SECRET');
+$channelId     = getenv('LINE_LOGIN_CHANNEL_ID') ?: getenv('LINE_CHANNEL_ID') ?: getenv('LINE_CLIENT_ID');
+$channelSecret = getenv('LINE_LOGIN_CHANNEL_SECRET') ?: getenv('LINE_CHANNEL_SECRET') ?: getenv('LINE_CLIENT_SECRET');
 $callbackUrl   = getenv('LINE_CALLBACK_URL') ?: ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/line_callback.php');
 
 // ตรวจว่าผู้ใช้มาจาก UI ไหน: ผ่าน Next.js proxy (React = ตัวหลัก) หรือเข้าตรง PHP (หลังบ้าน)
