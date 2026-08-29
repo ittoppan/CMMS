@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 import { StageBadge } from "@/components/calibration/StageBadge";
 import {
   SimpleDataTable,
@@ -74,6 +75,10 @@ export default function CalibrationTrackingPage() {
     }
     return s;
   }, [rows]);
+
+  const total = rows.length;
+  const doneCount = stats.done;
+  const progressPct = total ? Math.round((doneCount / total) * 100) : 0;
 
   const stageCounts = useMemo(() => {
     const map: Record<string, number> = {};
@@ -253,6 +258,18 @@ export default function CalibrationTrackingPage() {
           </Card>
         ))}
       </Grid>
+
+      {total > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between gap-4 pb-2">
+            <p className="text-sm font-semibold">ความคืบหน้ารวมของงานสอบเทียบ</p>
+            <p className="text-xs text-muted-foreground">
+              เสร็จสิ้นแล้ว {doneCount} จาก {total} รายการ ({progressPct}%)
+            </p>
+          </div>
+          <Progress value={progressPct} />
+        </Card>
+      )}
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-2 py-4">

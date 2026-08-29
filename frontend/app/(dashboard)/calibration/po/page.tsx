@@ -14,6 +14,7 @@ import {
   UploadCloud,
   Save,
   RotateCw,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StageBadge } from "@/components/calibration/StageBadge";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 interface Supplier {
   id: number;
@@ -262,6 +268,7 @@ function PoRowCard({
   const [cost, setCost] = useState("");
   const [std, setStd] = useState("");
   const [result, setResult] = useState("pass");
+  const [closeOpen, setCloseOpen] = useState(row.stage === "sent_out");
 
   const post = async (payload: Record<string, unknown>) => {
     setBusy(true);
@@ -435,11 +442,21 @@ function PoRowCard({
       </div>
 
       <div className="mt-4 border-t border-border pt-3">
-        <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-          <ShieldCheck className="h-4 w-4 text-[var(--cmms-success)]" />
-          ปิดงานสอบเทียบ (เมื่อได้ใบรับรอง)
-        </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Collapsible open={closeOpen} onOpenChange={setCloseOpen}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 rounded-md py-0.5 text-left">
+            <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <ShieldCheck className="h-4 w-4 text-[var(--cmms-success)]" />
+              ปิดงานสอบเทียบ (เมื่อได้ใบรับรอง)
+            </p>
+            <ChevronDown
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className={`shrink-0 text-muted-foreground transition-transform ${closeOpen ? "rotate-180" : ""}`}
+            />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+        <div className="grid grid-cols-1 gap-3 pt-3 sm:grid-cols-2 lg:grid-cols-4">
           <Input label="เลขใบรับรอง" placeholder="Cert No." value={certNo} onChange={(e) => setCertNo(e.target.value)} />
           <Input label="วันที่สอบเทียบ" type="date" value={calDate} onChange={(e) => setCalDate(e.target.value)} />
           <Input label="ครบกำหนดครั้งถัดไป" type="date" value={nextDate} onChange={(e) => setNextDate(e.target.value)} />
@@ -514,6 +531,8 @@ function PoRowCard({
             ปิดงานสอบเทียบ
           </Button>
         </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </Card>
   );

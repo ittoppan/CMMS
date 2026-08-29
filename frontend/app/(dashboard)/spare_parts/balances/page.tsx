@@ -1,15 +1,28 @@
 "use client";
 
-import { useMemo, useState, useEffect, Fragment } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import CountUp from "react-countup";
-import { Search, Boxes, TriangleAlert, CircleDollarSign } from "lucide-react";
+import { Search, Boxes, TriangleAlert, CircleDollarSign, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StockPill } from "@/components/spare-parts/StockPill";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/ui/hover-card";
 
 interface Part {
   id: number;
@@ -50,7 +63,8 @@ export default function SpareBalancesPage() {
   const [parts, setParts] = useState<Part[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [openPart, setOpenPart] = useState<Part | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
   const [txLoading, setTxLoading] = useState(false);
 
@@ -69,15 +83,18 @@ export default function SpareBalancesPage() {
     loadParts();
   }, []);
 
-  const expand = async (id: number) => {
-    if (expandedId === id) {
-      setExpandedId(null);
+  const openHistory = async (part: Part) => {
+    if (openPart?.id === part.id) {
+      setOpenId(null);
+      setOpenPart(null);
       return;
     }
-    setExpandedId(id);
+    setOpenPart(part);
+    setOpenId(part.id);
     setTxLoading(true);
+    setTxs([]);
     try {
-      const res = await fetch(`/api/v1/spare_issue.php?part_id=${id}`);
+      const res = await fetch(`/api/v1/spare_issue.php?part_id=${part.id}`);
       const json = await res.json();
       if (Array.isArray(json)) setTxs(json);
     } catch {
@@ -123,7 +140,7 @@ export default function SpareBalancesPage() {
         { label: "ยอดคงเหลือ" },
       ]}
       title="ยอดคงเหลืออะไหล่"
-      description="ภาพรวมยอดคงเหลือและมูลค่าคลัง รายการละเอียดต่อชิ้น (เบิก-จ่าย ย้อนหลัง)"
+      description="ภาพรวมยอดคงเหลือและมูลค่าคลัง กดแถวเพื่อดูประวัติเบิก-จ่ายย้อนหลังต่อชิ้น"
       actions={
         <Button variant="secondary" onClick={() => { loadParts(); setSearch(""); }}>
           รีโหลดข้อมูล
@@ -231,115 +248,66 @@ export default function SpareBalancesPage() {
               <tbody>
                 {filtered.map((p) => {
                   const stk = num(p.stock_qty);
-                  const isExpanded = expandedId === p.id;
                   return (
-                    <Fragment key={p.id}>
-                      <tr
-                        className="cursor-pointer border-b border-border transition-colors hover:bg-accent/40"
-                        onClick={() => expand(p.id)}
-                      >
-                        <td className="py-2.5 pr-2 font-mono text-xs font-medium">{p.code}</td>
-                        <td className="py-2.5 pr-2">
-                          <p className="font-semibold">{p.name}</p>
-                          {p.description && (
-                            <p className="text-xs text-muted-foreground">{p.description}</p>
-                          )}
-                        </td>
-                        <td className="py-2.5 pr-2">{p.category || "-"}</td>
-                        <td className="py-2.5 pr-2">{p.location || "-"}</td>
-                        <td className="py-2.5 pr-2 text-right font-semibold">
-                          {stk.toLocaleString("th-TH")} {p.unit || ""}
-                        </td>
-                        <td className="py-2.5 pr-2 text-muted-foreground">
-                          {num(p.min_stock).toLocaleString("th-TH")} /{" "}
-                          {num(p.max_stock).toLocaleString("th-TH")}
-                        </td>
-                        <td className="py-2.5 pr-2">
-                          <StockPill stock={stk} min={p.min_stock != null ? num(p.min_stock) : null} />
-                        </td>
-                        <td className="py-2.5 pr-2 text-right">{fmt(num(p.unit_price))}</td>
-                        <td className="py-2.5 text-right font-semibold">
-                          {fmt(stk * num(p.unit_price))}
-                        </td>
-                      </tr>
-                      {isExpanded && (
-                        <tr key="tx-row" className="border-b border-border bg-accent/20">
-                          <td colSpan={9} className="px-2 py-3">
-                            <div className="flex items-center justify-between pb-2">
-                              <h4 className="text-sm font-semibold">
-                                ประวัติเบิก-จ่าย: {p.code} — {p.name}
-                              </h4>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setExpandedId(null)}
-                              >
-                                ปิด
-                              </Button>
-                            </div>
-                            {txLoading ? (
-                              <Skeleton className="h-20 w-full" />
-                            ) : txs.length === 0 ? (
-                              <p className="text-sm text-muted-foreground">
-                                ยังไม่มีรายการเบิก-จ่ายของอะไหล่ชิ้นนี้
+                    <tr
+                      key={p.id}
+                      className="cursor-pointer border-b border-border transition-colors hover:bg-accent/40"
+                      onClick={() => openHistory(p)}
+                    >
+                      <td className="py-2.5 pr-2">
+                        <HoverCard openDelay={120}>
+                          <HoverCardTrigger asChild>
+                            <span className="font-mono text-xs font-medium">{p.code}</span>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-60">
+                            <p className="mb-1 font-semibold">{p.name}</p>
+                            <div className="space-y-1 text-xs text-muted-foreground">
+                              <p>
+                                คงเหลือ:{" "}
+                                <span className="font-semibold text-foreground">
+                                  {stk.toLocaleString("th-TH")} {p.unit || ""}
+                                </span>
                               </p>
-                            ) : (
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="text-left text-xs uppercase text-muted-foreground">
-                                      <th className="py-1 pr-2 font-semibold">ใบแจ้งซ่อม</th>
-                                      <th className="py-1 pr-2 font-semibold">งาน</th>
-                                      <th className="py-1 pr-2 text-right font-semibold">เบิก</th>
-                                      <th className="py-1 pr-2 text-right font-semibold">คืนซาก</th>
-                                      <th className="py-1 pr-2 font-semibold">สถานะใบเบิก</th>
-                                      <th className="py-1 font-semibold">เหตุผลคืนซาก</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {txs.map((tx) => (
-                                      <tr key={tx.item_id} className="border-b border-border/60">
-                                        <td className="py-1.5 pr-2 font-mono text-xs">
-                                          {tx.work_order_no || "-"}
-                                        </td>
-                                        <td className="py-1.5 pr-2">{tx.wo_title || "-"}</td>
-                                        <td className="py-1.5 pr-2 text-right">
-                                          {tx.qty_issued.toLocaleString("th-TH")}
-                                        </td>
-                                        <td className="py-1.5 pr-2 text-right">
-                                          {tx.qty_returned > 0 ? (
-                                            <span className="font-semibold text-[var(--cmms-warning-dark)]">
-                                              {tx.qty_returned.toLocaleString("th-TH")}
-                                            </span>
-                                          ) : (
-                                            "-"
-                                          )}
-                                        </td>
-                                        <td className="py-1.5 pr-2">{tx.request_status || "-"}</td>
-                                        <td className="py-1.5 text-xs text-muted-foreground">
-                                          {tx.return_reason ? (
-                                            <div>
-                                              {tx.return_reason}
-                                              {tx.returned_by_name && (
-                                                <span className="block text-[var(--cmms-primary-hover)]">
-                                                  {tx.returned_by_name} · {tx.returned_at || ""}
-                                                </span>
-                                              )}
-                                            </div>
-                                          ) : (
-                                            "-"
-                                          )}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
+                              <p>
+                                Min/Max: {num(p.min_stock).toLocaleString("th-TH")} /{" "}
+                                {num(p.max_stock).toLocaleString("th-TH")}
+                              </p>
+                              <p>
+                                มูลค่า:{" "}
+                                <span className="font-semibold text-foreground">
+                                  {fmt(stk * num(p.unit_price))} บาท
+                                </span>
+                              </p>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
+                      </td>
+                      <td className="py-2.5 pr-2">
+                        <p className="font-semibold">{p.name}</p>
+                        {p.description && (
+                          <p className="text-xs text-muted-foreground">{p.description}</p>
+                        )}
+                      </td>
+                      <td className="py-2.5 pr-2">{p.category || "-"}</td>
+                      <td className="py-2.5 pr-2">{p.location || "-"}</td>
+                      <td className="py-2.5 pr-2 text-right font-semibold">
+                        {stk.toLocaleString("th-TH")} {p.unit || ""}
+                      </td>
+                      <td className="py-2.5 pr-2 text-muted-foreground">
+                        {num(p.min_stock).toLocaleString("th-TH")} /{" "}
+                        {num(p.max_stock).toLocaleString("th-TH")}
+                      </td>
+                      <td className="py-2.5 pr-2">
+                        <StockPill stock={stk} min={p.min_stock != null ? num(p.min_stock) : null} />
+                      </td>
+                      <td className="py-2.5 pr-2 text-right">{fmt(num(p.unit_price))}</td>
+                      <td className="py-2.5 text-right">
+                        <span className="inline-flex items-center gap-1 font-semibold">
+                          {fmt(stk * num(p.unit_price))}
+                          <ChevronRight size={14} className="text-muted-foreground" aria-hidden="true" />
+                        </span>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -347,6 +315,80 @@ export default function SpareBalancesPage() {
           </div>
         )}
       </Card>
+
+      <Sheet open={openId !== null} onOpenChange={(o) => { if (!o) setOpenId(null); }}>
+        <SheetContent side="right" showCloseButton className="w-[min(720px,94vw)] max-w-[94vw] gap-0 p-0 sm:w-[min(720px,94vw)]">
+          {openPart && (
+            <>
+              <SheetHeader className="border-b border-border pb-3">
+                <SheetTitle>
+                  <span className="font-mono text-sm">{openPart.code}</span> — {openPart.name}
+                </SheetTitle>
+                <SheetDescription>ประวัติเบิก-จ่ายและคืนซากของอะไหล่ชิ้นนี้</SheetDescription>
+              </SheetHeader>
+              <ScrollArea className="h-[min(65vh,480px)]">
+                <div className="p-4">
+                  {txLoading ? (
+                    <Skeleton className="h-32 w-full" />
+                  ) : txs.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      ยังไม่มีรายการเบิก-จ่ายของอะไหล่ชิ้นนี้
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
+                            <th className="py-1 pr-2 font-semibold">ใบแจ้งซ่อม</th>
+                            <th className="py-1 pr-2 font-semibold">งาน</th>
+                            <th className="py-1 pr-2 text-right font-semibold">เบิก</th>
+                            <th className="py-1 pr-2 text-right font-semibold">คืนซาก</th>
+                            <th className="py-1 pr-2 font-semibold">สถานะใบเบิก</th>
+                            <th className="py-1 font-semibold">เหตุผลคืนซาก</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {txs.map((tx) => (
+                            <tr key={tx.item_id} className="border-b border-border/60">
+                              <td className="py-1.5 pr-2 font-mono text-xs">{tx.work_order_no || "-"}</td>
+                              <td className="py-1.5 pr-2">{tx.wo_title || "-"}</td>
+                              <td className="py-1.5 pr-2 text-right">{tx.qty_issued.toLocaleString("th-TH")}</td>
+                              <td className="py-1.5 pr-2 text-right">
+                                {tx.qty_returned > 0 ? (
+                                  <span className="font-semibold text-[var(--cmms-warning-dark)]">
+                                    {tx.qty_returned.toLocaleString("th-TH")}
+                                  </span>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                              <td className="py-1.5 pr-2">{tx.request_status || "-"}</td>
+                              <td className="py-1.5 text-xs text-muted-foreground">
+                                {tx.return_reason ? (
+                                  <div>
+                                    {tx.return_reason}
+                                    {tx.returned_by_name && (
+                                      <span className="block text-[var(--cmms-primary-hover)]">
+                                        {tx.returned_by_name} · {tx.returned_at || ""}
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </PageShell>
   );
 }

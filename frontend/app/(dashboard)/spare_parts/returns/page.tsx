@@ -10,6 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
 
 interface ReturnItem {
   item_id: number;
@@ -125,95 +131,89 @@ export default function SpareReturnsPage() {
         </Card>
       </Grid>
 
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={tab === "pending" ? "primary" : "secondary"}
-          size="sm"
-          onClick={() => switchTab("pending")}
-        >
-          เตรียมคืนซาก ({pending.length})
-        </Button>
-        <Button
-          variant={tab === "returned" ? "primary" : "secondary"}
-          size="sm"
-          onClick={() => switchTab("returned")}
-        >
-          ประวัติคืนซาก ({returned.length})
-        </Button>
-      </div>
+      <Tabs value={tab} onValueChange={(v) => switchTab(v as "pending" | "returned")}>
+        <TabsList>
+          <TabsTrigger value="pending">เตรียมคืนซาก ({pending.length})</TabsTrigger>
+          <TabsTrigger value="returned">ประวัติคืนซาก ({returned.length})</TabsTrigger>
+        </TabsList>
 
-      {error && <Alert variant="danger">{error}</Alert>}
+        {error && <Alert variant="danger" className="mt-4">{error}</Alert>}
 
-      {tab === "pending" ? (
-        loading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-28 w-full" />
-            <Skeleton className="h-28 w-full" />
-          </div>
-        ) : pending.length === 0 ? (
-          <Card className="p-8 text-center text-sm text-muted-foreground">
-            ไม่มีอะไหล่ที่เบิกแล้วรอคืนซาก
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {pending.map((it) => (
-              <ReturnEntryCard
-                key={it.item_id}
-                item={it}
-                onSaved={() => load("pending")}
-              />
-            ))}
-          </div>
-        )
-      ) : loading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ) : returned.length === 0 ? (
-        <Card className="p-8 text-center text-sm text-muted-foreground">
-          ยังไม่มีประวัติคืนซาก
-        </Card>
-      ) : (
-        <Card className="p-4">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
-                  <th className="py-2 pr-2 font-semibold">รหัส / ชื่ออะไหล่</th>
-                  <th className="py-2 pr-2 font-semibold">ใบแจ้งซ่อม</th>
-                  <th className="py-2 pr-2 text-right font-semibold">เบิก</th>
-                  <th className="py-2 pr-2 text-right font-semibold">คืนซาก</th>
-                  <th className="py-2 pr-2 font-semibold">เหตุผล</th>
-                  <th className="py-2 pr-2 font-semibold">ผู้บันทึก</th>
-                  <th className="py-2 font-semibold">วันที่</th>
-                </tr>
-              </thead>
-              <tbody>
-                {returned.map((it) => (
-                  <tr key={it.item_id} className="border-b border-border/60">
-                    <td className="py-2 pr-2">
-                      <p className="font-mono text-xs font-medium">{it.part_code}</p>
-                      <p className="font-semibold">{it.part_name}</p>
-                    </td>
-                    <td className="py-2 pr-2">
-                      <p className="font-mono text-xs">{it.work_order_no || "-"}</p>
-                      <p className="text-xs text-muted-foreground">{it.wo_title || ""}</p>
-                    </td>
-                    <td className="py-2 pr-2 text-right">{it.qty_issued.toLocaleString("th-TH")}</td>
-                    <td className="py-2 pr-2 text-right font-semibold text-[var(--cmms-danger-dark)]">
-                      {it.qty_returned.toLocaleString("th-TH")}
-                    </td>
-                    <td className="py-2 pr-2 text-xs">{it.return_reason || "-"}</td>
-                    <td className="py-2 pr-2">{it.returned_by_name || "-"}</td>
-                    <td className="py-2">{it.returned_at || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
+        <TabsContent value="pending">
+          {loading ? (
+            <div className="space-y-3">
+              <Skeleton className="h-28 w-full" />
+              <Skeleton className="h-28 w-full" />
+            </div>
+          ) : pending.length === 0 ? (
+            <Card className="p-8 text-center text-sm text-muted-foreground">
+              ไม่มีอะไหล่ที่เบิกแล้วรอคืนซาก
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {pending.map((it) => (
+                <ReturnEntryCard
+                  key={it.item_id}
+                  item={it}
+                  onSaved={() => load("pending")}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="returned">
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : returned.length === 0 ? (
+            <Card className="p-8 text-center text-sm text-muted-foreground">
+              ยังไม่มีประวัติคืนซาก
+            </Card>
+          ) : (
+            <Card className="p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
+                      <th className="py-2 pr-2 font-semibold">รหัส / ชื่ออะไหล่</th>
+                      <th className="py-2 pr-2 font-semibold">ใบแจ้งซ่อม</th>
+                      <th className="py-2 pr-2 text-right font-semibold">เบิก</th>
+                      <th className="py-2 pr-2 text-right font-semibold">คืนซาก</th>
+                      <th className="py-2 pr-2 font-semibold">เหตุผล</th>
+                      <th className="py-2 pr-2 font-semibold">ผู้บันทึก</th>
+                      <th className="py-2 font-semibold">วันที่</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {returned.map((it) => (
+                      <tr key={it.item_id} className="border-b border-border/60">
+                        <td className="py-2 pr-2">
+                          <p className="font-mono text-xs font-medium">{it.part_code}</p>
+                          <p className="font-semibold">{it.part_name}</p>
+                        </td>
+                        <td className="py-2 pr-2">
+                          <p className="font-mono text-xs">{it.work_order_no || "-"}</p>
+                          <p className="text-xs text-muted-foreground">{it.wo_title || ""}</p>
+                        </td>
+                        <td className="py-2 pr-2 text-right">{it.qty_issued.toLocaleString("th-TH")}</td>
+                        <td className="py-2 pr-2 text-right font-semibold text-[var(--cmms-danger-dark)]">
+                          {it.qty_returned.toLocaleString("th-TH")}
+                        </td>
+                        <td className="py-2 pr-2 text-xs">{it.return_reason || "-"}</td>
+                        <td className="py-2 pr-2">{it.returned_by_name || "-"}</td>
+                        <td className="py-2">{it.returned_at || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </PageShell>
   );
 }
