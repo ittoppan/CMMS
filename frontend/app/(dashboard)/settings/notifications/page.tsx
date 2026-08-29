@@ -142,6 +142,7 @@ const SETTING_FIELDS: { key: string; label: string; hint: string; secret?: boole
   { key: "line_channel_secret", label: "Channel Secret", hint: "สำหรับ LINE Login / Webhook signature", secret: true },
   { key: "line_channel_id", label: "Channel ID / Client ID", hint: "สำหรับ LINE Login (OAuth)" },
   { key: "line_liff_id", label: "LIFF App ID", hint: "เปิดระบบใน LINE บนมือถือผ่าน LIFF — วาง LIFF ID ที่นี่" },
+  { key: "line_liff_register_id", label: "LIFF App ID (หน้า /register)", hint: "LIFF App ของหน้า \"ผูกบัญชี LINE\" — สร้างใน LINE Developers console โดยตั้ง endpoint URL เป็น https://<tunnel>.ngrok-free.app/register แล้ววาง LIFF ID ที่นี่ (เว้นว่าง = ใช้ fallback ผ่านปุ่มล็อกอิน LINE)" },
   { key: "line_callback_url", label: "LINE Callback URL", hint: "URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)" },
   { key: "line_maintenance_group_id", label: "Group ID กลุ่มช่าง (LINE)", hint: "เพิ่มบอทเข้าห้อง LINE กลุ่มช่าง แล้วพิมพ์ \"แจ้งเตือนที่นี่\" ในกลุ่ม — ระบบจะบันทึก Group ID ให้อัตโนมัติ (หรือกรอกเอง)" },
   { key: "maintenance_alert_days", label: "แจ้งเตือนล่วงหน้า (วัน)", hint: "จำนวนวันแจ้งเตือนก่อนถึงกำหนดบำรุงรักษา" },

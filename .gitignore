@@ -30,3 +30,30 @@ visual-baseline/
 
 # transient e2e fixture creds
 frontend/.e2e-auth.json
+
+# OS / editor junk
+Thumbs.db
+.DS_Store
+~$*
+
+# Playwright / audit scratch (repo root)
+test-results/
+playwright-report/
+
+# opencode tooling (project skills, design-extract scratch, lock)
+.agents/
+.extract-design-system/
+skills-lock.json
+
+# Sensitive local copies (DB dumps, backups) — อย่า commit
+backups/
+
+# runtime placeholder avatars
+public/uploads/spares/placeholders/
+
+# เอกสารฟอร์มเก่า (Excel/Word/PDF) ใน docs/EN — เก็บไว้บนดิสก์ ไม่ track ลง git
+docs/EN/*.xls*
+docs/EN/*.od?
+docs/EN/*.docx
+docs/EN/*.pdf
+docs/EN/*.doc

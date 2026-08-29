@@ -39,7 +39,8 @@ export default function RegisterPage() {
       try {
         const res = await fetch("/api/v1/line_register.php?liff_id=1");
         const json = await res.json().catch(() => ({}));
-        liffId = (json?.line_liff_id || "") as string;
+        // LIFF App ของหน้า /register (line_liff_register_id) ก่อน ถ้ายังไม่ได้ตั้ง → ใช้ตัวเดิม (frontend จะ fallback เป็น external)
+        liffId = (json?.line_liff_register_id || json?.line_liff_id || "") as string;
       } catch { /* ignore */ }
       if (cancelled) return;
 

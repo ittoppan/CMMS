@@ -25,12 +25,16 @@ try {
             // สาธารณะ (ไม่ต้อง login): คืนเฉพาะ LIFF App ID ให้หน้า /register และ /repair/request
             // ใช้แทน line_notify.php (ซึ่งมี secrets + ต้อง login) — ไม่ออก secret ใดๆ
             if (isset($_GET['liff_id'])) {
-                $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'line_liff_id'");
-                $stmt->execute();
-                $row = $stmt->fetch();
-                $liffId = $row ? trim($row['setting_value']) : '';
-                if ($liffId === '') { $liffId = (string)(getenv('LINE_LIFF_ID') ?: ''); }
-                echo json_encode(['line_liff_id' => $liffId]);
+                $stmt = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('line_liff_id','line_liff_register_id')");
+                $rows = [];
+                foreach ($stmt->fetchAll() as $r) { $rows[$r['setting_key']] = trim($r['setting_value']); }
+                $liffId = $rows['line_liff_id'] ?? (string)(getenv('LINE_LIFF_ID') ?: '');
+                $regId  = $rows['line_liff_register_id'] ?? (string)(getenv('LINE_LIFF_REGISTER_ID') ?: '');
+                if ($liffId === '' && $regId !== '') { $liffId = $regId; }
+                echo json_encode([
+                    'line_liff_id'             => $liffId,
+                    'line_liff_register_id'    => $regId !== '' ? $regId : $liffId,
+                ]);
                 exit;
             }
 
