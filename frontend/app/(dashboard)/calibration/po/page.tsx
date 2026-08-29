@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StageBadge } from "@/components/calibration/StageBadge";
+import FileAttachment from "@/components/calibration/FileAttachment";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -255,6 +256,7 @@ function PoRowCard({
   const [cc, setCc] = useState(row.po_cc ?? "");
   const [confirmDate, setConfirmDate] = useState(row.provider_confirm_date ?? "");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [notice, setNotice] = useState("");
   const [noticeErr, setNoticeErr] = useState("");
 
@@ -299,6 +301,7 @@ function PoRowCard({
     fd.append("folder", "calibration");
     fd.append("file", file);
     setBusy(true);
+    setUploading(true);
     try {
       const res = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
       const json = await res.json();
@@ -313,6 +316,7 @@ function PoRowCard({
       setNoticeErr("อัปโหลดไม่สำเร็จ");
     } finally {
       setBusy(false);
+      setUploading(false);
     }
   };
 
@@ -393,16 +397,14 @@ function PoRowCard({
             }}
           />
         </label>
-        {poFile && (
-          <a
-            href={poFile}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-medium text-[var(--cmms-primary-hover)] hover:underline"
-          >
-            เปิดไฟล์ PO ↗
-          </a>
-        )}
+        {poFile || uploading ? (
+          <FileAttachment
+            url={poFile}
+            state={uploading && !poFile ? "uploading" : "done"}
+            label="ไฟล์ PO งานสอบเทียบ"
+            onRemove={() => setPoFile("")}
+          />
+        ) : null}
         <Button
           variant="primary"
           size="sm"
@@ -497,16 +499,14 @@ function PoRowCard({
               }}
             />
           </label>
-          {certFile && (
-            <a
-              href={certFile}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium text-[var(--cmms-primary-hover)] hover:underline"
-            >
-              เปิดไฟล์ใบรับรอง ↗
-            </a>
-          )}
+          {certFile || uploading ? (
+            <FileAttachment
+              url={certFile}
+              state={uploading && !certFile ? "uploading" : "done"}
+              label="ใบรับรองการสอบเทียบ"
+              onRemove={() => setCertFile("")}
+            />
+          ) : null}
           <Button
             variant="primary"
             size="sm"
