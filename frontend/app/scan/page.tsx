@@ -37,6 +37,14 @@ export default function ScanLandingPage() {
   const [pmLoading, setPmLoading] = useState(false);
   const [repairHistory, setRepairHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [manual, setManual] = useState("");
+
+  const handleManualLookup = () => {
+    const code = manual.trim().toUpperCase();
+    if (!code) return;
+    setAssetCode(code);
+    setLoading(true);
+  };
 
   useEffect(() => {
     try {
@@ -158,6 +166,33 @@ export default function ScanLandingPage() {
               <div className="flex flex-col items-center gap-4 py-10">
                 <Spinner />
                 <p className="text-[var(--cmms-text-secondary)]">{tliff("liff.scan_loading")}</p>
+              </div>
+            ) : !assetCode ? (
+              <div className="flex flex-col items-center gap-4 py-6">
+                <Badge variant="info">QR SCAN</Badge>
+                <p style={{ fontSize: 40, marginBottom: 0 }}>?</p>
+                <p className="font-bold m-0" style={{ color: "var(--cmms-text-primary)" }}>
+                  ใส่รหัสเครื่องจักรเพื่อดูข้อมูล
+                </p>
+                <p className="text-sm text-[var(--cmms-text-secondary)] m-0">
+                  สแกน QR ที่ตัวเครื่อง หรือกรอกรหัสได้ด้านล่างนี้
+                </p>
+                <form
+                  className="w-full flex gap-2"
+                  onSubmit={(e) => { e.preventDefault(); handleManualLookup(); }}
+                >
+                  <input
+                    value={manual}
+                    onChange={(e) => setManual(e.target.value)}
+                    placeholder="เช่น EN-2608-064"
+                    className="flex-1 min-w-0 rounded-lg border px-4 py-3 text-base outline-none"
+                    style={{ borderColor: "var(--cmms-border)", color: "var(--cmms-text-primary)", background: "var(--cmms-bg)" }}
+                  />
+                  <Button type="submit">ดูข้อมูล</Button>
+                </form>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
+                  {tliff("liff.scan_repair_anyway")}<Link href="/repair/request">{tliff("liff.scan_to_form")}</Link>
+                </p>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center gap-4">
