@@ -3,6 +3,7 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
+import ToastProvider from "./ToastProvider";
 
 /**
  * Providers — ครอบทั้งแอป
@@ -10,6 +11,7 @@ import { useState } from "react";
  * - react-query: cache/data fetching มาตรฐาน (lib/api.ts ใช้ร่วม)
  * - disableTransitionOnChange: กัน transition กระตุกตอนสลับธีม
  * - suppressHydrationWarning อยู่ที่ <html> ใน root layout แล้ว (กัน FOUC warning)
+ * - ToastProvider: toast notifications ทั้งแอป
  */
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -32,7 +34,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>{children}</ToastProvider>
+      </QueryClientProvider>
     </NextThemesProvider>
   );
 }

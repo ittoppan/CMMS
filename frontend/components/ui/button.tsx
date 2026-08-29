@@ -3,11 +3,13 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
+import { Loader2 } from "lucide-react";
 
 /**
  * Button — ปุ่มมาตรฐานของระบบ (tokens + cva)
  * variants: primary / secondary / outline / ghost / danger
- * sizes: sm (32px) / md (40px) / lg (48px) / icon (40px)
+ * sizes: sm (32px) / md (40px) / lg (48px) / icon (40px) / icon-xs (32px)
+ * loading state: แสดง spinner + disable ปุ่ม
  * ใช้ Lucide icon เป็น children (strokeWidth 1.75 ตาม guideline)
  */
 const buttonVariants = cva(
@@ -43,17 +45,36 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {}
+    VariantProps<typeof buttonVariants> {
+  loading?: boolean;
+  loadingText?: string;
+}
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, type = "button", ...props }, ref) => (
-    <button
-      ref={ref}
-      type={type}
-      className={cn(buttonVariants({ variant, size }), className)}
-      {...props}
-    />
-  )
+  ({ className, variant, size, type = "button", loading, loadingText, children, disabled, ...props }, ref) => {
+    const isLoading = loading || disabled;
+    return (
+      <button
+        ref={ref}
+        type={type}
+        className={cn(buttonVariants({ variant, size }), className)}
+        disabled={isLoading}
+        aria-busy={loading}
+        aria-disabled={isLoading}
+        {...props}
+      >
+        {loading && (
+          <Loader2
+            className="h-4 w-4 animate-spin"
+            aria-hidden="true"
+            strokeWidth={2.5}
+          />
+        )}
+        {!loading && children}
+        {loading && loadingText && <span>{loadingText}</span>}
+      </button>
+    );
+  }
 );
 Button.displayName = "Button";
 

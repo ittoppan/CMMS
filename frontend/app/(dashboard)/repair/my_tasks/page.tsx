@@ -95,6 +95,7 @@ export default function MyTasksPage() {
 
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   // Close Work Order Form State
   const [failureCode, setFailureCode] = useState("");
@@ -305,6 +306,7 @@ export default function MyTasksPage() {
   };
 
   const handleStartTask = async (task: TaskItem) => {
+    setActionLoading((prev) => ({ ...prev, [task.id]: true }));
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
     const out = await sendOrEnqueue({
       url: `/api/v1/repair.php?id=${task.rawId}`,
@@ -319,9 +321,11 @@ export default function MyTasksPage() {
       );
     }
     reportOutcome(out, `เริ่มงาน ${task.woNumber}`);
+    setActionLoading((prev) => ({ ...prev, [task.id]: false }));
   };
 
   const handleAcceptTask = async (task: TaskItem) => {
+    setActionLoading((prev) => ({ ...prev, [task.id]: true }));
     const endpoint = task.kind === "repair" ? "/api/v1/repair.php" : "/api/v1/pm_am.php";
     const out = await sendOrEnqueue({
       url: `${endpoint}?id=${task.rawId}`,
@@ -340,9 +344,11 @@ export default function MyTasksPage() {
       );
     }
     reportOutcome(out, `รับงาน ${task.woNumber}`);
+    setActionLoading((prev) => ({ ...prev, [task.id]: false }));
   };
 
   const handleWaitParts = async (task: TaskItem) => {
+    setActionLoading((prev) => ({ ...prev, [task.id]: true }));
     const out = await sendOrEnqueue({
       url: `/api/v1/repair.php?id=${task.rawId}`,
       method: "PUT",
@@ -354,9 +360,11 @@ export default function MyTasksPage() {
       setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: "pending_parts" } : t)));
     }
     reportOutcome(out, `แจ้งรออะไหล่ ${task.woNumber}`);
+    setActionLoading((prev) => ({ ...prev, [task.id]: false }));
   };
 
   const handleResumeTask = async (task: TaskItem) => {
+    setActionLoading((prev) => ({ ...prev, [task.id]: true }));
     const out = await sendOrEnqueue({
       url: `/api/v1/repair.php?id=${task.rawId}`,
       method: "PUT",
@@ -370,6 +378,7 @@ export default function MyTasksPage() {
       );
     }
     reportOutcome(out, `กลับมาซ่อมต่อ ${task.woNumber}`);
+    setActionLoading((prev) => ({ ...prev, [task.id]: false }));
   };
 
   const openCloseModal = (task: TaskItem) => {
@@ -388,15 +397,15 @@ export default function MyTasksPage() {
   const handleConfirmClose = async () => {
     if (!selectedTask) return;
     if (!rootCause.trim() || !solution.trim()) {
-      alert("กรุณากรอกสาเหตุของปัญหา และวิธีการแก้ไข ก่อนปิดใบงาน");
+      showToast("error", "กรุณากรอกสาเหตุของปัญหา และวิธีการแก้ไข ก่อนปิดใบงาน");
       return;
     }
     if (!["clean", "contaminated", "not_applicable"].includes(contaminateChecking)) {
-      alert("กรุณาระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม");
+      showToast("error", "กรุณาระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม");
       return;
     }
     if (!receiverName.trim() || !receiverSignature) {
-      alert("กรุณากรอกชื่อผู้รับมอบงาน และวาดลายเซ็นผู้รับมอบงาน");
+      showToast("error", "กรุณากรอกชื่อผู้รับมอบงาน และวาดลายเซ็นผู้รับมอบงาน");
       return;
     }
     setClosing(true);
@@ -434,6 +443,7 @@ export default function MyTasksPage() {
       setCloseModalOpen(false);
     } catch (e) {
       console.error("Close WO error", e);
+      showToast("error", "เกิดข้อผิดพลาดในการปิดใบงาน");
     } finally {
       setClosing(false);
     }
@@ -586,14 +596,14 @@ export default function MyTasksPage() {
               currentUserId !== null &&
               (task.assignedTo === currentUserId || (task.teamIds || []).includes(currentUserId)) &&
               !task.team?.some((m: any) => m.user_id === currentUserId && m.status === "accepted") && (
-                <Button variant="outline" size="sm" onClick={() => handleAcceptTask(task)} className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50">
+                <Button variant="outline" size="sm" onClick={() => handleAcceptTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-emerald-600 border-emerald-300 hover:bg-emerald-50">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>รับงาน</span>
                 </Button>
               )}
 
             {task.status === "new" && (
-              <Button variant="primary" size="sm" onClick={() => handleStartTask(task)} className="gap-1.5">
+              <Button variant="primary" size="sm" onClick={() => handleStartTask(task)} loading={actionLoading[task.id]} className="gap-1.5">
                 <Play className="w-3.5 h-3.5" />
                 <span>เริ่มซ่อม</span>
               </Button>
@@ -601,7 +611,7 @@ export default function MyTasksPage() {
 
             {task.status === "in_progress" && (
               <>
-                <Button variant="outline" size="sm" onClick={() => handleWaitParts(task)} className="gap-1.5 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100">
+                <Button variant="outline" size="sm" onClick={() => handleWaitParts(task)} loading={actionLoading[task.id]} className="gap-1.5 text-amber-700 border-amber-300 bg-amber-50 hover:bg-amber-100">
                   <Clock className="w-3.5 h-3.5" />
                   <span>รออะไหล่</span>
                 </Button>
@@ -614,7 +624,7 @@ export default function MyTasksPage() {
 
             {task.status === "pending_parts" && (
               <>
-                <Button variant="outline" size="sm" onClick={() => handleResumeTask(task)} className="gap-1.5 text-sky-600 border-sky-300 hover:bg-sky-50">
+                <Button variant="outline" size="sm" onClick={() => handleResumeTask(task)} loading={actionLoading[task.id]} className="gap-1.5 text-sky-600 border-sky-300 hover:bg-sky-50">
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>กลับมาซ่อมต่อ</span>
                 </Button>
@@ -970,6 +980,7 @@ export default function MyTasksPage() {
           <Button
             variant="primary"
             disabled={closing}
+            loading={closing}
             onClick={handleConfirmClose}
             className="gap-2"
           >

@@ -15,11 +15,42 @@ import {
   Mail,
   X,
   Paperclip,
+  Link,
+  Printer,
+  Droplets,
+  RotateCcw,
+  Scissors,
+  ShoppingBag,
+  Factory,
+  Cog,
+  Wrench,
+  Hammer,
+  FileText,
+  HardHat,
+  Zap,
+  CircleHelp,
+  Check,
+  ShieldAlert,
+  Loader2,
+  Info,
+  AlertCircle,
+  CircleCheck,
+  CircleX,
+  Minus,
+  MessageSquare,
+  Send,
+  Lock,
+  Key,
+  RefreshCw,
+  Home,
+  ChevronRight,
+  ListChecks,
 } from "lucide-react";
 import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { serverResponds } from "@/lib/server-check";
+import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,50 +94,94 @@ interface RepairOption {
   is_active: boolean;
 }
 
+// Icon mapping for fallback constants
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string; size?: number; strokeWidth?: number }>> = {
+  printer: Printer,
+  droplets: Droplets,
+  "rotate-ccw": RotateCcw,
+  scissors: Scissors,
+  "shopping-bag": ShoppingBag,
+  factory: Factory,
+  cog: Cog,
+  wrench: Wrench,
+  hammer: Hammer,
+  file: FileText,
+  "hard-hat": HardHat,
+  zap: Zap,
+  "circle-help": CircleHelp,
+  check: Check,
+  "shield-alert": ShieldAlert,
+  info: Info,
+  "alert-circle": AlertCircle,
+  "circle-check": CircleCheck,
+  "circle-x": CircleX,
+  minus: Minus,
+  message: MessageSquare,
+  send: Send,
+  lock: Lock,
+  key: Key,
+  "refresh-cw": RefreshCw,
+  home: Home,
+  chevron: ChevronRight,
+  camera: Camera,
+  phone: Phone,
+  mail: Mail,
+  user: User,
+  clock: Clock,
+  building: Building2,
+  shield: ShieldCheck,
+  triangle: AlertTriangle,
+};
+
+function Icon({ name, className, size = 16, strokeWidth = 1.75 }: { name: string; className?: string; size?: number; strokeWidth?: number }) {
+  const Comp = ICON_MAP[name] || CircleHelp;
+  return <Comp className={className} size={size} strokeWidth={strokeWidth} aria-hidden="true" />;
+}
+
 // Default machine groups (fallback if API fails)
 const MACHINE_GROUPS = [
-  { label: "เครื่องพิมพ์", emoji: "🖨️", prefix: "A-PT" },
-  { label: "ลามิเนต", emoji: "🧴", prefix: "A-DL" },
-  { label: "รีไวเดอร์", emoji: "🌀", prefix: "A-RW" },
-  { label: "สลิตเตอร์", emoji: "✂️", prefix: "A-ST" },
-  { label: "เครื่องทำถุง", emoji: "🛍️", prefix: "A-BM" },
+  { label: "เครื่องพิมพ์", iconName: "printer", prefix: "A-PT" },
+  { label: "ลามิเนต", iconName: "droplets", prefix: "A-DL" },
+  { label: "รีไวเดอร์", iconName: "rotate-ccw", prefix: "A-RW" },
+  { label: "สลิตเตอร์", iconName: "scissors", prefix: "A-ST" },
+  { label: "เครื่องทำถุง", iconName: "shopping-bag", prefix: "A-BM" },
 ];
 
 // Default options (fallback if API fails)
 const DEFAULT_MACHINE_STATUS = [
-  { value: "breakdown", label: "Break Down", th: "เครื่องหยุดทำงาน", emoji: "🔴", color: "var(--cmms-danger)" },
-  { value: "wait", label: "Wait for Maintenance", th: "ยังทำงานได้ รอการซ่อม", emoji: "🟡", color: "var(--cmms-warning)" },
-  { value: "running", label: "Still working", th: "รอโอกาสหยุดเครื่อง (เร็วๆ นี้)", emoji: "🟢", color: "var(--cmms-success)" },
+  { value: "breakdown", label: "Break Down", th: "เครื่องหยุดทำงาน", iconName: "alert-circle", color: "var(--cmms-danger)" },
+  { value: "wait", label: "Wait for Maintenance", th: "ยังทำงานได้ รอการซ่อม", iconName: "info", color: "var(--cmms-warning)" },
+  { value: "running", label: "Still working", th: "รอโอกาสหยุดเครื่อง (เร็วๆ นี้)", iconName: "circle-check", color: "var(--cmms-success)" },
 ];
 
 const DEFAULT_JOB_TYPES = [
-  { value: "Machinery", label: "เครื่องจักร", en: "Machinery", emoji: "⚙️", desc: "งานเครื่องจักรผลิต" },
-  { value: "Equipment Support", label: "อุปกรณ์สนับสนุน", en: "Equipment Support", emoji: "🛠️", desc: "อุปกรณ์ประกอบการผลิต" },
-  { value: "Facilities", label: "โครงสร้างพื้นฐาน", en: "Facilities", emoji: "🏭", desc: "อาคาร / สาธารณูปโภค" },
-  { value: "Other", label: "อื่นๆ", en: "Other", emoji: "📦", desc: "งานอื่นที่ไม่อยู่หมวดข้างต้น" },
+  { value: "Machinery", label: "เครื่องจักร", en: "Machinery", iconName: "cog", desc: "งานเครื่องจักรผลิต" },
+  { value: "Equipment Support", label: "อุปกรณ์สนับสนุน", en: "Equipment Support", iconName: "wrench", desc: "อุปกรณ์ประกอบการผลิต" },
+  { value: "Facilities", label: "โครงสร้างพื้นฐาน", en: "Facilities", iconName: "factory", desc: "อาคาร / สาธารณูปโภค" },
+  { value: "Other", label: "อื่นๆ", en: "Other", iconName: "message", desc: "งานอื่นที่ไม่อยู่หมวดข้างต้น" },
 ];
 
 const DEFAULT_JOB_DESCRIPTIONS = [
-  { value: "Maintenance", label: "ซ่อมบำรุง", en: "Maintenance", emoji: "🔧" },
-  { value: "PM", label: "บำรุงเชิงป้องกัน", en: "PM / Preventive", emoji: "📋" },
-  { value: "Modify", label: "ปรับปรุง / ดัดแปลง", en: "Modify", emoji: "🔄" },
-  { value: "Build", label: "สร้าง / จัดทำใหม่", en: "Build", emoji: "🏗️" },
+  { value: "Maintenance", label: "ซ่อมบำรุง", en: "Maintenance", iconName: "hammer" },
+  { value: "PM", label: "บำรุงเชิงป้องกัน", en: "PM / Preventive", iconName: "file" },
+  { value: "Modify", label: "ปรับปรุง / ดัดแปลง", en: "Modify", iconName: "rotate-ccw" },
+  { value: "Build", label: "สร้าง / จัดทำใหม่", en: "Build", iconName: "hard-hat" },
 ];
 
 const DEFAULT_CONTAMINATE_CHECK = [
-  { value: "not_checked", label: "ยังไม่ตรวจ", emoji: "❓" },
-  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)", emoji: "✅" },
-  { value: "contaminated", label: "พบการปนเปื้อน", emoji: "⚠️" },
-  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้", emoji: "➖" },
+  { value: "not_checked", label: "ยังไม่ตรวจ", iconName: "circle-help" },
+  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)", iconName: "circle-check" },
+  { value: "contaminated", label: "พบการปนเปื้อน", iconName: "shield-alert" },
+  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้", iconName: "minus" },
 ];
 
 const OFFICES = ["โรงงานอมตะซิตี้ (ระยอง)"];
 
 const STEPS = [
-  { key: "machine", label: "เครื่องจักร", icon: "⚙️" },
-  { key: "details", label: "รายละเอียดงาน", icon: "📝" },
-  { key: "reporter", label: "ผู้แจ้ง & รูป", icon: "🧑‍🔧" },
-  { key: "confirm", label: "ยืนยัน", icon: "✅" },
+  { key: "machine", label: "เครื่องจักร", iconName: "cog" },
+  { key: "details", label: "รายละเอียดงาน", iconName: "file" },
+  { key: "reporter", label: "ผู้แจ้ง & รูป", iconName: "user" },
+  { key: "confirm", label: "ยืนยัน", iconName: "circle-check" },
 ];
 
 /** ย่อรูปให้พอดีกับ LINE แล้วคืน data URI (max 1000px, JPEG 0.72) */
@@ -190,6 +265,7 @@ function queueRemove(id: number): Promise<void> {
 
 export default function RepairRequestForm() {
   useLiffLang();
+  const { showToast } = useToast();
   const [step, setStep] = useState(0);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [depts, setDepts] = useState<Dept[]>([]);
@@ -314,7 +390,7 @@ export default function RepairRequestForm() {
             value: o.option_value,
             label: o.option_label,
             th: o.option_label,
-            emoji: o.option_emoji || '❓',
+            iconName: o.option_emoji || 'circle-help',
             color: o.option_value === 'breakdown' ? 'var(--cmms-danger)' :
                    o.option_value === 'wait' ? 'var(--cmms-warning)' : 'var(--cmms-success)'
           }));
@@ -326,7 +402,7 @@ export default function RepairRequestForm() {
             value: o.option_value,
             label: o.option_label,
             en: o.option_label_en || o.option_label,
-            emoji: o.option_emoji || '📦',
+            iconName: o.option_emoji || 'message',
             desc: o.option_label
           }));
         if (jobTypes.length > 0) setJobTypeOptions(jobTypes);
@@ -337,7 +413,7 @@ export default function RepairRequestForm() {
             value: o.option_value,
             label: o.option_label,
             en: o.option_label_en || o.option_label,
-            emoji: o.option_emoji || '📋'
+            iconName: o.option_emoji || 'file'
           }));
         if (jobDescs.length > 0) setJobDescriptionOptions(jobDescs);
 
@@ -346,7 +422,7 @@ export default function RepairRequestForm() {
           .map(o => ({
             value: o.option_value,
             label: o.option_label,
-            emoji: o.option_emoji || '❓'
+            iconName: o.option_emoji || 'circle-help'
           }));
         if (contamChecks.length > 0) setContaminateCheckOptions(contamChecks);
 
@@ -355,7 +431,7 @@ export default function RepairRequestForm() {
           .map(o => ({
             value: o.option_value,
             label: o.option_label,
-            emoji: o.option_emoji || '❓'
+            iconName: o.option_emoji || 'circle-help'
           }));
         setRootCauseOptions(rootCauses);
       })
@@ -519,6 +595,7 @@ export default function RepairRequestForm() {
         setLineBound(true);
         setBindGate("bound");
         setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
+        showToast("success", "ผูกบัญชี LINE สำเร็จ");
       } else {
         setBindError(j?.error || "ผูกไม่สำเร็จ — ตรวจรหัสพนักงานแล้วลองอีกครั้ง");
       }
@@ -552,7 +629,7 @@ export default function RepairRequestForm() {
     } catch { /* ลบไม่สำเร็จ */ }
   };
 
-  const flushQueue = async () => {
+const flushQueue = async () => {
     if (!navigator.onLine) return;
     setFlushingQueue(true);
     try {
@@ -572,8 +649,8 @@ export default function RepairRequestForm() {
           }
         } catch { /* ยังส่งไม่ได้ */ }
       }
+      refreshQueueItems();
     } catch { /* ยังออฟไลน์อยู่ */ }
-    refreshQueueItems();
     setFlushingQueue(false);
   };
 
@@ -668,8 +745,9 @@ export default function RepairRequestForm() {
           try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           setSubmitted(true);
           setCreatedWoNo("SAVED-OFFLINE");
+          showToast("info", "ไม่มีอินเทอร์เน็ต — บันทึกงานไว้ในเครื่องแล้ว จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์");
         } catch {
-          setSubmitError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ และบันทึก offline ก็ไม่สำเร็จ");
+          showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ และบันทึก offline ก็ไม่สำเร็จ");
         }
         setSubmitting(false);
         return;
@@ -678,12 +756,13 @@ export default function RepairRequestForm() {
       if (json.success || json.id) {
         setCreatedWoNo(json.work_order_no || `WO-${json.id}`);
         setSubmitted(true);
+        showToast("success", "ส่งแจ้งซ่อมสำเร็จ");
       } else {
-        setSubmitError(json.error || "ส่งไม่สำเร็จ ลองอีกครั้ง");
+        showToast("error", json.error || "ส่งไม่สำเร็จ ลองอีกครั้ง");
       }
     } catch (e) {
       console.error("Submit failed", e);
-      setSubmitError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
     setSubmitting(false);
   };
@@ -703,11 +782,11 @@ export default function RepairRequestForm() {
           <div className="cmms-success-wo">{createdWoNo}</div>
           <p className="text-xs text-[var(--cmms-text-secondary)] text-center mb-5">
             {selectedAsset?.code} · {machineStatusOptions.find((s) => s.value === form.machineStatus)?.label}
-            {"\n"}{offlineQueued > 0 ? "📴 ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว 📲"}
+            {"\n"}{offlineQueued > 0 ? "ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว"}
           </p>
           <div className="flex flex-col gap-2 w-full">
             <Button className="w-full" onClick={() => (window.location.href = "/repair")}>
-              📋 ดูรายการงานซ่อม
+              <ListChecks className="w-4 h-4" /> ดูรายการงานซ่อม
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
@@ -725,10 +804,9 @@ export default function RepairRequestForm() {
   if (bindGate !== "bound") {
     return (
       <div className="cmms-mobile-page">
-        <div className="cmms-page-header">
-          <div className="flex items-center gap-3">
-            <LiffLangToggle />
-            <div className="cmms-header-emoji">🚨</div>
+<div className="cmms-page-header">
+        <div className="flex items-center gap-3">
+          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
             <div className="flex flex-col flex-1">
               <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
               <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
@@ -739,7 +817,7 @@ export default function RepairRequestForm() {
         <Card className="cmms-card-flat mx-4 my-4 p-5">
           {bindGate === "checking" && (
             <div className="flex flex-col gap-4 py-2 items-center text-center">
-              <div className="cmms-header-emoji mb-1">⏳</div>
+              <div className="cmms-header-emoji mb-1"><Loader2 size={24} strokeWidth={1.75} className="animate-spin" /></div>
               <h4 className="text-base font-bold m-0">{tliff("liff.repair_checking")}</h4>
               <p className="text-sm text-[var(--cmms-text-secondary)]">{tliff("liff.repair_wait")}</p>
             </div>
@@ -748,14 +826,14 @@ export default function RepairRequestForm() {
           {bindGate === "anonymous" && (
             <div className="flex flex-col gap-4">
               <div className="text-center">
-                <div className="cmms-header-emoji mb-2">🔗</div>
+                <div className="cmms-header-emoji mb-2"><Link size={24} strokeWidth={1.75} /></div>
                 <h4 className="text-base font-bold m-0 mb-1.5">{tliff("liff.repair_need_login")}</h4>
                 <p className="text-sm text-[var(--cmms-text-secondary)]">
                   {tliff("liff.repair_need_login_desc")}
                 </p>
               </div>
               <Button className="w-full" onClick={() => (window.location.href = "/line_login.php")}>
-                🔗 {tliff("liff.repair_line_login_btn")}
+                <Link className="w-4 h-4" /> {tliff("liff.repair_line_login_btn")}
               </Button>
               <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
                 {tliff("liff.repair_after_login")}
@@ -766,21 +844,21 @@ export default function RepairRequestForm() {
           {bindGate === "webchoice" && (
             <div className="flex flex-col gap-4">
               <div className="text-center">
-                <div className="cmms-header-emoji mb-2">🔐</div>
+                <div className="cmms-header-emoji mb-2"><Lock size={24} strokeWidth={1.75} /></div>
                 <h4 className="text-base font-bold m-0 mb-1.5">{tliff("liff.repair_confirm_identity")}</h4>
                 <p className="text-sm text-[var(--cmms-text-secondary)]">
                   {tliff("liff.repair_confirm_desc")}
                 </p>
               </div>
               <Button className="w-full" onClick={() => (window.location.href = "/login?next=/repair/request")}>
-                👤 {tliff("liff.repair_userpass_btn")}
+                <User className="w-4 h-4" /> {tliff("liff.repair_userpass_btn")}
               </Button>
               <Button
                 variant="secondary"
                 className="w-full bg-[#06C755] text-white border-none hover:bg-[#05b34c]"
                 onClick={() => (window.location.href = "/line_login.php")}
               >
-                🔗 เข้าด้วย LINE
+                <Link className="w-4 h-4" /> เข้าด้วย LINE
               </Button>
             </div>
           )}
@@ -788,10 +866,10 @@ export default function RepairRequestForm() {
           {bindGate === "unbound" && (
             <div className="flex flex-col gap-4">
               <div className="text-center">
-                <div className="cmms-header-emoji mb-2">🔗</div>
+                <div className="cmms-header-emoji mb-2"><Link size={24} strokeWidth={1.75} /></div>
                 <h4 className="text-base font-bold m-0 mb-1.5">ผูกบัญชี LINE กับเลขพนักงาน</h4>
                 <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name} 👋` : "สวัสดี 👋"}
+                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name}` : "สวัสดี"}
                   {"\n"}กรอกรหัสพนักงานเพื่อเริ่มแจ้งซ่อม (ครั้งเดียวจบ)
                 </p>
               </div>
@@ -803,16 +881,18 @@ export default function RepairRequestForm() {
                 onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}
               />
               {bindError && (
-                <div className="bg-[#FEE2E2] text-[#B91C1C] rounded-lg px-3 py-2 text-sm">
-                  ❌ {bindError}
+                <div className="bg-[#FEE2E2] text-[#B91C1C] rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                  <AlertCircle size={16} strokeWidth={1.75} /> {bindError}
                 </div>
               )}
               <Button
                 className="w-full"
                 disabled={bindSubmitting || !effectiveUid}
+                loading={bindSubmitting}
+                loadingText="กำลังผูก…"
                 onClick={handleInlineBind}
               >
-                {bindSubmitting ? "กำลังผูก…" : "ผูกบัญชีและไปแจ้งซ่อม"}
+                ผูกบัญชีและไปแจ้งซ่อม
               </Button>
               {!effectiveUid && (
                 <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
@@ -831,9 +911,10 @@ export default function RepairRequestForm() {
   return (
     <div className="cmms-mobile-page">
       {/* Header */}
-      <div className="cmms-page-header">
+<div className="cmms-page-header">
         <div className="flex items-center gap-3">
-          <div className="cmms-header-emoji">🚨</div>
+          <LiffLangToggle />
+          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
           <div className="flex flex-col flex-1">
             <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
             <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
@@ -849,13 +930,13 @@ export default function RepairRequestForm() {
 
       {/* Step Indicator */}
       <div className="cmms-steps">
-        {STEPS.map((s, i) => (
-          <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
-            onClick={() => { if (i < step) setStep(i); }}>
-            <div className="cmms-step-number">{i < step ? "✓" : s.icon}</div>
-            <span className="cmms-step-label">{tliff(`liff.step_${s.key}`)}</span>
-          </div>
-        ))}
+{STEPS.map((s, i) => (
+            <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
+              onClick={() => { if (i < step) setStep(i); }}>
+              <div className="cmms-step-number">{i < step ? <Check size={14} strokeWidth={2} /> : <Icon name={s.iconName} size={14} />}</div>
+              <span className="cmms-step-label">{tliff(`liff.step_${s.key}`)}</span>
+            </div>
+          ))}
       </div>
 
       {/* Offline status */}
@@ -864,8 +945,8 @@ export default function RepairRequestForm() {
           <div className="flex items-center justify-between gap-2.5 flex-wrap">
             <span>
               {onlineBack
-                ? "✅ เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
-                : "📴 ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์"}
+                ? "เชื่อมต่อกลับมาแล้ว — ข้อมูลยังไม่ทันสมัย"
+                : "ไม่มีอินเทอร์เน็ต — ยังกรอกฟอร์มได้ ระบบจะส่งงานให้อัตโนมัติเมื่อกลับมาออนไลน์"}
             </span>
             <Button
               variant={onlineBack ? "primary" : "ghost"}
@@ -895,7 +976,7 @@ export default function RepairRequestForm() {
       {offlineQueued > 0 && (
         <div className="cmms-offline-banner">
           <div className="flex items-center justify-between gap-2.5 flex-wrap">
-            <span>📴 มีงานแจ้งซ่อมที่ยังไม่ได้ส่ง <b>{offlineQueued}</b> รายการ</span>
+            <span>มีงานแจ้งซ่อมที่ยังไม่ได้ส่ง <b>{offlineQueued}</b> รายการ</span>
             <Button
               variant="primary"
               size="sm"
@@ -924,7 +1005,7 @@ export default function RepairRequestForm() {
                     onClick={() => removeQueuedItem(it.id)}
                     className="bg-none border-none cursor-pointer text-[var(--cmms-danger,#DC2626)] text-sm font-extrabold px-1.5 py-0.5 rounded-md shrink-0 leading-none hover:bg-[var(--cmms-danger-light)]"
                   >
-                    ✕
+                    <X size={14} strokeWidth={2} />
                   </button>
                 </div>
               ))}
@@ -941,7 +1022,7 @@ export default function RepairRequestForm() {
       {lineBound === false && (
         <div className="cmms-bind-banner" onClick={() => (window.location.href = "/register")}>
           <div>
-            <b>🔗 ผูกบัญชี LINE กับเลขพนักงาน</b>
+            <b><Link className="w-4 h-4 inline align-middle" /> ผูกบัญชี LINE กับเลขพนักงาน</b>
             <div className="cmms-bind-sub">ครั้งแรก? ลงทะเบียน 1 ครั้ง — ระบบจำชื่อคุณ และแจ้งเตือนช่างได้ตรงคน</div>
           </div>
           <span className="cmms-bind-arrow">›</span>
@@ -962,7 +1043,9 @@ export default function RepairRequestForm() {
               if (groupMachines.length === 0) return null;
               return (
                 <div key={g.prefix} className="flex flex-col gap-2">
-                  <p className="text-xs font-bold text-[var(--cmms-text-secondary)]">{g.emoji} {g.label} ({groupMachines.length})</p>
+                  <p className="text-xs font-bold text-[var(--cmms-text-secondary)]">
+                    <Icon name={g.iconName} size={14} className="inline" /> {g.label} ({groupMachines.length})
+                  </p>
                   <div className="cmms-chip-grid">
                     {groupMachines.map((m) => (
                       <button key={m.id} type="button"
@@ -1002,7 +1085,7 @@ export default function RepairRequestForm() {
                     className={`cmms-option-row ${form.machineStatus === s.value ? "selected" : ""}`}
                     style={{ ["--opt-color" as any]: s.color }}
                     onClick={() => update("machineStatus", s.value)}>
-                    <span className="cmms-option-emoji">{s.emoji}</span>
+                    <span className="cmms-option-emoji"><Icon name={s.iconName} size={16} /></span>
                     <div className="flex flex-col flex-1">
                       <p className="text-sm font-bold m-0">{s.label}</p>
                       <p className="text-xs text-[var(--cmms-text-secondary)] m-0">{s.th}</p>
@@ -1027,7 +1110,7 @@ export default function RepairRequestForm() {
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobType === j.value ? "selected" : ""}`}
                     onClick={() => update("jobType", j.value)}>
-                    <span className="cmms-job-emoji">{j.emoji}</span>
+                    <span className="cmms-job-emoji"><Icon name={j.iconName} size={18} /></span>
                     <p className="text-sm font-bold m-0">{j.label}</p>
                     <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">{j.en}</p>
                   </button>
@@ -1042,7 +1125,7 @@ export default function RepairRequestForm() {
                   <button key={j.value} type="button"
                     className={`cmms-job-card ${form.jobDescription === j.value ? "selected" : ""}`}
                     onClick={() => update("jobDescription", j.value)}>
-                    <span className="cmms-job-emoji">{j.emoji}</span>
+                    <span className="cmms-job-emoji"><Icon name={j.iconName} size={18} /></span>
                     <p className="text-sm font-bold m-0">{j.label}</p>
                     <p className="text-2xs text-[var(--cmms-text-secondary)] m-0">{j.en}</p>
                   </button>
@@ -1089,7 +1172,9 @@ export default function RepairRequestForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {contaminateCheckOptions.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      <SelectItem key={o.value} value={o.value}>
+                        <Icon name={o.iconName} size={14} className="mr-2" /> {o.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1218,7 +1303,7 @@ export default function RepairRequestForm() {
                     onChange={(c) => update("contaminationRisk", c)}
                   />
                   <p className="text-sm m-0" style={{ color: form.contaminationRisk ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
-                    {form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่มีความเสี่ยงปนเปื้อน"}
+                    {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่มีความเสี่ยงปนเปื้อน"}
                   </p>
                 </div>
               </div>
@@ -1255,7 +1340,7 @@ export default function RepairRequestForm() {
                     onChange={(c) => update("isUrgent", c)}
                   />
                   <p className="text-sm m-0" style={{ color: form.isUrgent ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
-                    {form.isUrgent ? "🚨 แจ้งด่วน — ส่ง LINE + Telegram ทันที" : "ปกติ"}
+                    {form.isUrgent ? "แจ้งด่วน — ส่ง LINE + Telegram ทันที" : "ปกติ"}
                   </p>
                 </div>
               </div>
@@ -1321,10 +1406,10 @@ export default function RepairRequestForm() {
 
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={form.contaminationRisk ? "danger" : "success"}>
-                {form.contaminationRisk ? "⚠️ มีความเสี่ยงปนเปื้อน" : "✅ ไม่ปนเปื้อน"}
+                {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่ปนเปื้อน"}
               </Badge>
-              {form.safetyRelated && <Badge variant="danger">🛡️ Safety</Badge>}
-              <Badge variant="info">📷 {form.photos.length} รูป</Badge>
+              {form.safetyRelated && <Badge variant="danger">Safety</Badge>}
+              <Badge variant="info">{form.photos.length} รูป</Badge>
             </div>
 
             {submitError && (
@@ -1358,9 +1443,11 @@ export default function RepairRequestForm() {
               <Button
                 className="w-full"
                 disabled={submitting}
+                loading={submitting}
+                loadingText="กำลังส่ง…"
                 onClick={handleSubmit}
               >
-                <CheckCircle size={16} strokeWidth={1.75} /> {submitting ? "กำลังส่ง…" : "ยืนยัน & ส่งแจ้งซ่อม"}
+                <CheckCircle size={16} strokeWidth={1.75} /> ยืนยัน & ส่งแจ้งซ่อม
               </Button>
             )}
           </div>

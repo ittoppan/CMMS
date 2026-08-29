@@ -5,11 +5,11 @@ import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import CountUp from "react-countup";
 import { Undo2, Clock3, History, Save } from "lucide-react";
+import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert } from "@/components/ui/alert";
 import {
   Tabs,
   TabsList,
@@ -35,6 +35,7 @@ interface ReturnItem {
 }
 
 export default function SpareReturnsPage() {
+  const { showToast } = useToast();
   const [tab, setTab] = useState<"pending" | "returned">("pending");
   const [pending, setPending] = useState<ReturnItem[]>([]);
   const [returned, setReturned] = useState<ReturnItem[]>([]);
@@ -43,7 +44,6 @@ export default function SpareReturnsPage() {
 
   const load = async (scope: "pending" | "returned") => {
     setLoading(true);
-    setError("");
     try {
       const res = await fetch(
         scope === "pending"
@@ -55,10 +55,10 @@ export default function SpareReturnsPage() {
         if (scope === "pending") setPending(json);
         else setReturned(json);
       } else {
-        setError(json.error || "โหลดข้อมูลไม่สำเร็จ");
+        showToast("error", json.error || "โหลดข้อมูลไม่สำเร็จ");
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setLoading(false);
     }
@@ -136,8 +136,6 @@ export default function SpareReturnsPage() {
           <TabsTrigger value="pending">เตรียมคืนซาก ({pending.length})</TabsTrigger>
           <TabsTrigger value="returned">ประวัติคืนซาก ({returned.length})</TabsTrigger>
         </TabsList>
-
-        {error && <Alert variant="danger" className="mt-4">{error}</Alert>}
 
         <TabsContent value="pending">
           {loading ? (
@@ -225,25 +223,22 @@ function ReturnEntryCard({
   item: ReturnItem;
   onSaved: () => void;
 }) {
+  const { showToast } = useToast();
   const [qty, setQty] = useState("");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [noticeErr, setNoticeErr] = useState("");
 
   const submit = async () => {
     if (!reason.trim()) {
-      setNoticeErr("กรุณาระบุเหตุผลการคืนซาก");
+      showToast("error", "กรุณาระบุเหตุผลการคืนซาก");
       return;
     }
     const q = Number(qty);
     if (!q || q <= 0) {
-      setNoticeErr("กรุณาระบุจำนวนที่มากกว่า 0");
+      showToast("error", "กรุณาระบุจำนวนที่มากกว่า 0");
       return;
     }
     setBusy(true);
-    setNotice("");
-    setNoticeErr("");
     try {
       const res = await fetch("/api/v1/spare_issue.php", {
         method: "POST",
@@ -252,13 +247,13 @@ function ReturnEntryCard({
       });
       const json = await res.json();
       if (json.success) {
-        setNotice(json.message);
+        showToast("success", json.message);
         onSaved();
       } else {
-        setNoticeErr(json.error || `ผิดพลาด (HTTP ${res.status})`);
+        showToast("error", json.error || `ผิดพลาด (HTTP ${res.status})`);
       }
     } catch {
-      setNoticeErr("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setBusy(false);
     }
@@ -285,13 +280,6 @@ function ReturnEntryCard({
         )}
       </div>
 
-      {(notice || noticeErr) && (
-        <div className="pt-3">
-          {notice && <Alert variant="success">{notice}</Alert>}
-          {noticeErr && <Alert variant="danger">{noticeErr}</Alert>}
-        </div>
-      )}
-
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <div className="w-full max-w-[160px] space-y-1">
           <p className="text-xs font-semibold text-muted-foreground">จำนวนคืนซาก</p>
@@ -312,7 +300,7 @@ function ReturnEntryCard({
             onChange={(e) => setReason(e.target.value)}
           />
         </div>
-        <Button variant="primary" size="sm" disabled={busy} onClick={submit}>
+        <Button variant="primary" size="sm" disabled={busy} loading={busy} loadingText="กำลังบันทึก..." onClick={submit}>
           <Save className="h-4 w-4" />
           บันทึกคืนซาก
         </Button>

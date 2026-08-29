@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { StageBadge } from "@/components/calibration/StageBadge";
 import FileAttachment from "@/components/calibration/FileAttachment";
+import { useToast } from "@/components/ToastProvider";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -79,6 +79,7 @@ const FILTERS = [
 
 export default function CalibrationPoPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [rows, setRows] = useState<CalRow[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +100,7 @@ export default function CalibrationPoPage() {
       }
       if (Array.isArray(sups)) setSuppliers(sups);
     } catch {
-      setError("โหลดข้อมูลไม่สำเร็จ");
+      showToast("error", "โหลดข้อมูลไม่สำเร็จ");
     } finally {
       setLoading(false);
     }
@@ -219,7 +220,7 @@ export default function CalibrationPoPage() {
         ))}
       </div>
 
-      {error && <Alert variant="danger">{error}</Alert>}
+      
 
       {loading ? (
         <div className="space-y-3">
@@ -250,6 +251,7 @@ function PoRowCard({
   suppliers: Supplier[];
   onChanged: () => void;
 }) {
+  const { showToast } = useToast();
   const [supId, setSupId] = useState(row.supplier_id ? String(row.supplier_id) : "");
   const [poNo, setPoNo] = useState(row.po_number ?? "");
   const [poFile, setPoFile] = useState(row.po_file ?? "");
@@ -257,8 +259,6 @@ function PoRowCard({
   const [confirmDate, setConfirmDate] = useState(row.provider_confirm_date ?? "");
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [noticeErr, setNoticeErr] = useState("");
 
   // ฟอร์มปิดงาน
   const [certNo, setCertNo] = useState("");
@@ -274,8 +274,6 @@ function PoRowCard({
 
   const post = async (payload: Record<string, unknown>) => {
     setBusy(true);
-    setNotice("");
-    setNoticeErr("");
     try {
       const res = await fetch("/api/v1/calibration_tracking.php", {
         method: "POST",
@@ -284,13 +282,13 @@ function PoRowCard({
       });
       const json = await res.json();
       if (json.message) {
-        setNotice(json.message + (json.email_sent === false ? " (อีเมล์ยังไม่ได้ส่ง)" : ""));
+        showToast("success", json.message + (json.email_sent === false ? " (อีเมล์ยังไม่ได้ส่ง)" : ""));
         onChanged();
       } else {
-        setNoticeErr(json.error || `ผิดพลาด (HTTP ${res.status})`);
+        showToast("error", json.error || `ผิดพลาด (HTTP ${res.status})`);
       }
     } catch {
-      setNoticeErr("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setBusy(false);
     }
@@ -308,12 +306,12 @@ function PoRowCard({
       if (json.url) {
         if (kind === "po") setPoFile(json.url);
         else setCertFile(json.url);
-        setNotice("อัปโหลดไฟล์สำเร็จ — กดบันทึกด้วย");
+        showToast("success", "อัปโหลดไฟล์สำเร็จ — กดบันทึกด้วย");
       } else {
-        setNoticeErr(json.error || "อัปโหลดไม่สำเร็จ");
+        showToast("error", json.error || "อัปโหลดไม่สำเร็จ");
       }
     } catch {
-      setNoticeErr("อัปโหลดไม่สำเร็จ");
+      showToast("error", "อัปโหลดไม่สำเร็จ");
     } finally {
       setBusy(false);
       setUploading(false);
@@ -341,13 +339,6 @@ function PoRowCard({
           )}
         </div>
       </div>
-
-      {(notice || noticeErr) && (
-        <div className="pt-3">
-          {notice ? <Alert variant="success">{notice}</Alert> : null}
-          {noticeErr ? <Alert variant="danger">{noticeErr}</Alert> : null}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-3 pt-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-1.5">

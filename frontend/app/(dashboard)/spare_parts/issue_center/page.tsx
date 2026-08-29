@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
@@ -79,7 +78,7 @@ export default function SageIssueCenterPage() {
       }
     } catch (e) {
       console.error(e);
-      setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+      showToast("error", "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   };
@@ -144,7 +143,7 @@ export default function SageIssueCenterPage() {
       let issued = 0;
       for (const item of cart) {
         if (item.qty > item.stockQty) {
-          setError(`อะไหล่ ${item.code} เหลือในคลังไม่พอ (คงเหลือ ${item.stockQty} ${item.unit})`);
+          showToast("error", `อะไหล่ ${item.code} เหลือในคลังไม่พอ (คงเหลือ ${item.stockQty} ${item.unit})`);
           setSubmitting(false);
           return;
         }
@@ -162,11 +161,11 @@ export default function SageIssueCenterPage() {
         setCart([]);
         fetchData();
       } else {
-        setError("ไม่สามารถบันทึกการเบิก-จ่ายได้");
+        showToast("error", "ไม่สามารถบันทึกการเบิก-จ่ายได้");
       }
     } catch (e) {
       console.error(e);
-      setError("เกิดข้อผิดพลาดในการเบิก-จ่าย กรุณาลองใหม่");
+      showToast("error", "เกิดข้อผิดพลาดในการเบิก-จ่าย กรุณาลองใหม่");
     }
     setSubmitting(false);
   };
@@ -244,7 +243,6 @@ export default function SageIssueCenterPage() {
 
   return (
     <div className="space-y-6">
-      {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
@@ -398,10 +396,12 @@ export default function SageIssueCenterPage() {
           <Button
             className="w-full"
             disabled={submitting || !workOrder || !technician || cart.length === 0}
+            loading={submitting}
+            loadingText="กำลังเบิกจ่าย..."
             onClick={handleSubmit}
           >
             <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            {submitting ? "กำลังเบิกจ่าย..." : "ยืนยันการเบิก-จ่ายอะไหล่"}
+            ยืนยันการเบิก-จ่ายอะไหล่
           </Button>
         </div>
       </div>
