@@ -19,11 +19,14 @@ function publicBaseUrl() {
     $appUrl = getenv('APP_URL');
     if (!empty($appUrl)) return rtrim($appUrl, '/');
 
-    // 3. Cloudflare Tunnel (dev) — อ่านจาก log ของ cloudflared เฉพาะเมื่อตั้ง CLOUDFLARE_LOG_PATH
-    $logPath = getenv('CLOUDFLARE_LOG_PATH');
-    if (!empty($logPath) && file_exists($logPath)) {
-        $log = (string)@file_get_contents($logPath);
-        if (preg_match('#https://[a-z0-9\-]+\.trycloudflare\.com#', $log, $m)) return rtrim($m[0], '/');
+    // 3. logs/tunnel-url.txt (canonical — เขียนโดย tunnel-ngrok.ps1 / watchdog)
+    $urlFile = dirname(__DIR__, 2) . '/logs/tunnel-url.txt';
+    if (is_file($urlFile)) {
+        $t = (string)@file_get_contents($urlFile);
+        if (preg_match('#https://[^\s]+#', $t, $m)) {
+            $u = rtrim($m[0], '/');
+            if (!preg_match('#localhost|127\.0\.0\.1|^http://#', $u)) return $u;
+        }
     }
 
     // 4. ngrok (dev) — อ่านจาก local API (port 4040) เฉพาะเมื่อตั้ง NGROK_ENABLED=1
@@ -38,11 +41,18 @@ function publicBaseUrl() {
         }
     }
 
-    // 5. env LINE_CALLBACK_URL (ตัด .php ต่อท้าย)
+    // 5. Cloudflare Tunnel (dev) fallback — อ่านจาก log เฉพาะเมื่อตั้ง CLOUDFLARE_LOG_PATH
+    $logPath = getenv('CLOUDFLARE_LOG_PATH');
+    if (!empty($logPath) && file_exists($logPath)) {
+        $log = (string)@file_get_contents($logPath);
+        if (preg_match('#https://[a-z0-9\-]+\.trycloudflare\.com#', $log, $m)) return rtrim($m[0], '/');
+    }
+
+    // 6. env LINE_CALLBACK_URL (ตัด .php ต่อท้าย)
     $env = getenv('LINE_CALLBACK_URL');
     if (!empty($env)) return rtrim(preg_replace('#/[^/]*\.php$#', '', rtrim($env, '/')), '/');
 
-    // 6. fallback สุดท้าย: host ปัจจุบัน (ไม่ใช่ URL tunnel ที่ฝังตายตัว)
+    // 7. fallback สุดท้าย: host ปัจจุบัน (ไม่ใช่ URL tunnel ที่ฝังตายตัว)
     if (!empty($_SERVER['HTTP_HOST'])) {
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         return $scheme . '://' . $_SERVER['HTTP_HOST'];

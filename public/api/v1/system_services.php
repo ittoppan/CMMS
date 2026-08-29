@@ -133,11 +133,17 @@ function getServiceStatuses(PDO $pdo): array {
     $mysqlOk = false;
     try { $pdo->query('SELECT 1'); $mysqlOk = true; } catch (Exception $e) {}
 
-    // 5. LINE Webhook (ผ่าน Cloudflare ก่อน ngrok ถ้ามี)
-    $publicUrl = $cfUrl ?: $ngrokUrl;
+    // 5. LINE Webhook (ใช้ tunnel-url.txt → ngrok ก่อน cloudflared)
+    $tunnelUrlFile = dirname(__DIR__, 3) . '/logs/tunnel-url.txt';
+    $fileUrl = '';
+    if (file_exists($tunnelUrlFile)) {
+        $raw = (string)@file_get_contents($tunnelUrlFile);
+        if (preg_match('#https://[^\s]+#', $raw, $m)) $fileUrl = rtrim($m[0], '/');
+    }
+    $publicUrl = $fileUrl ?: ($ngrokUrl ?: $cfUrl);
     $lineWebhook = ['reachable' => false, 'http_code' => 0];
     if ($publicUrl) {
-        $lineWebhook = httpCheck(rtrim($publicUrl, '/') . '/line_callback.php', 6);
+        $lineWebhook = httpCheck(rtrim($publicUrl, '/') . '/api/v1/line_webhook.php', 6);
     }
 
     $services = [];
