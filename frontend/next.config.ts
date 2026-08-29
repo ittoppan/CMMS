@@ -23,6 +23,40 @@ const nextConfig: NextConfig = {
     "ommatophorous-robert-fortifyingly.ngrok-free.app",
     "*.trycloudflare.com",
   ],
+  async headers() {
+    // ตรงข้ามกับที่ Next ส่ง (SSG prerender => Cache-Control: s-maxage=31536000 = 1 ปี)
+    // LINE in-app browser (ผ่าน shared cache/relay) เชื่อ s-maxage แล้วแคชหน้า HTML เก่า
+    // ทั้งปี => สาเหตุหลัก "เปิดใน LINE เห็นระบบตัวเก่า" ขณะที่นอก LINE เห็นของใหม่
+    return [
+      // 1) HTML / navigation / API — ห้ามแคชทุก shared cache (สั่ง no-store ก่อน -> ข้อ 2-4 ยกเว้นให้)
+      {
+        source: "/:path*",
+        headers: [{ key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" }],
+      },
+      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/icons/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      // 3) SW / manifest / offline page — ให้ revalidate ทุกครั้งที่เปิด (กัน SW เก่าจุก)
+      {
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" }],
+      },
+      {
+        source: "/manifest.webmanifest",
+        headers: [{ key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" }],
+      },
+      {
+        source: "/offline.html",
+        headers: [{ key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" }],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
