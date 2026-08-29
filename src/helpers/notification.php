@@ -90,6 +90,47 @@ function sendNotificationToUser($userId, $title, $message, $targetUrl = '') {
 }
 
 /* ============================================================
+ * 1.5 BIND SUCCESS — แจ้งเตือนเมื่อผูกบัญชี LINE สำเร็จ
+ * ============================================================ */
+/**
+ * ส่งการแจ้งเตือน "ผูกบัญชีสำเร็จ" หลัง bind LINE สำเร็จทุกช่องทาง:
+ *   1) LINE Push ยืนยันถึงผู้ใช้ที่เพิ่งผูก
+ *   2) Telegram แจ้ง admin (เปิด/ปิดผ่าน telegram_enabled)
+ * @param int    $userId     users.id ของผู้ใช้ที่ถูกผูก
+ * @param string $lineUserId LINE User ID ที่ถูกผูก
+ */
+function notifyLineBinding($userId, $lineUserId) {
+    $pdo = getDb();
+    $stmt = $pdo->prepare("SELECT id, full_name, employee_code, username FROM users WHERE id = ?");
+    $stmt->execute([(int)$userId]);
+    $u = $stmt->fetch();
+    if (!$u) return false;
+
+    $fullName = (string)$u['full_name'];
+    $empCode  = trim((string)$u['employee_code']) !== '' ? (string)$u['employee_code'] : (string)$u['username'];
+
+    // 1) LINE push ถึงผู้ใช้ (ยืนยันผูกสำเร็จ)
+    $lineOk = false;
+    if (!empty($lineUserId)) {
+        $lineOk = sendLinePushMessage(
+            $lineUserId,
+            '🎉 ผูกบัญชี LINE สำเร็จ',
+            "คุณ {$fullName}\nLINE ID นี้เชื่อมต่อกับเลขพนักงาน {$empCode} แล้ว\nต่อไปแจ้งซ่อม / ทำ PM ระบบจะจำชื่อคุณได้ทันที",
+            publicBaseUrl(),
+            [],
+            '#15803d',
+            '✅ CMMS-TPT BINDING',
+            'เปิดระบบ CMMS'
+        );
+    }
+
+    // 2) Telegram แจ้ง admin
+    sendTelegramMessage("<b>[CMMS] ผูกบัญชี LINE ใหม่</b>" . PHP_EOL . "ผู้ใช้: {$fullName} (เลขพนักงาน {$empCode})");
+
+    return $lineOk;
+}
+
+/* ============================================================
  * 2. LINE PUSH (Flex Message via Messaging API)
  * ============================================================ */
 

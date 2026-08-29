@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../src/helpers/notification.php';
 
 $envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) loadEnv($envPath);
@@ -91,6 +92,7 @@ try {
     if (!empty($_SESSION['user_id'])) {
         $stmt = $pdo->prepare('UPDATE users SET line_user_id = ? WHERE id = ?');
         $stmt->execute([$lineUserId, $_SESSION['user_id']]);
+        notifyLineBinding((int)$_SESSION['user_id'], $lineUserId);
         $bindTarget = $isReactUi ? '/settings' : '/pages/settings/';
         header('Location: ' . $bindTarget . '?msg=' . urlencode('ผูกบัญชี LINE เรียบร้อยแล้ว'));
         exit;

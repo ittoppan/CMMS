@@ -25,6 +25,66 @@ export default function RegisterPage() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    let profile: { userId: string; displayName?: string; pictureUrl?: string } | null = null;
+
+    // UID/ชื่อจาก LINE Login callback ( /register?uid=..&name=.. ) — ใช้ได้ทั้งในและนอก LINE
+    const sp = new URLSearchParams(window.location.search);
+    const uid = (sp.get("uid") || "").trim();
+    const name = (sp.get("name") || "").trim();
+
+    async function boot() {
+      let liffId = "";
+      try {
+        const res = await fetch("/api/v1/line_register.php?liff_id=1");
+        const json = await res.json().catch(() => ({}));
+        liffId = (json?.line_liff_id || "") as string;
+      } catch { /* ignore */ }
+      if (cancelled) return;
+
+      // ลอง init LIFF (ปกติ open จากใน LINE โดยตรง จะ init ไม่ได้เพราะ endpoint ไม่ตรง → fallback)
+      if (liffId) {
+        try {
+          if (!window.liff) {
+            await new Promise<void>((resolve, reject) => {
+              const s = document.createElement("script");
+              s.src = "https://static.line-scdn.net/liff/edge/2/sdk.js";
+              s.onload = () => resolve();
+              s.onerror = () => reject(new Error("LIFF SDK failed to load"));
+              document.head.appendChild(s);
+            });
+          }
+          await window.liff.init({ liffId });
+          if (window.liff.isInClient?.()) {
+            profile = await window.liff.getProfile();
+          }
+        } catch { /* non-LIFF endpoint → ใช้ uid จาก callback แทน */ }
+      }
+      if (cancelled) return;
+
+      const pUid = profile?.userId || uid;
+      if (profile?.displayName) setLineName(profile.displayName);
+      else if (name) setLineName(name);
+      if (profile?.pictureUrl) setLinePic(profile.pictureUrl);
+
+      if (pUid) {
+        setLineUserId(pUid);
+        setLiffStatus(profile?.userId ? "ready" : "external");
+        try {
+          const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
+          const json = await res.json().catch(() => ({}));
+          if (!cancelled && json?.bound && json?.user) setBoundUser(json.user);
+        } catch { /* ignore */ }
+      } else {
+        setLiffStatus("external");
+      }
+    }
+
+    boot();
+    return () => { cancelled = true; };
+  }, []);
+
   const [lineUserId, setLineUserId] = useState("");
   const [lineName, setLineName] = useState("");
   const [linePic, setLinePic] = useState("");
@@ -97,6 +157,10 @@ export default function RegisterPage() {
             เลขพนักงาน {boundUser.employee_code} · ต่อไปแจ้งซ่อมจะรู้ชื่ออัตโนมัติ
             <br />
             และช่างจะได้รับแจ้งเตือนทาง LINE
+            <br />
+            <span style={{ fontSize: "0.92em", opacity: 0.85 }}>
+              ระบบส่งข้อความยืนยันผูกสำเร็จทาง LINE และแจ้งผู้ดูแลแล้ว
+            </span>
           </p>
         </SuccessDialog>
       </main>
@@ -182,16 +246,17 @@ export default function RegisterPage() {
                       margin: "10px 0 0",
                       padding: "10px 14px",
                       borderRadius: "var(--cmms-radius)",
-                      background: "var(--cmms-info-light)",
-                      border: "1px solid var(--cmms-primary-light)",
-                      color: "var(--cmms-primary)",
+                      background: lineUserId ? "var(--cmms-success-light)" : "var(--cmms-info-light)",
+                      border: `1px solid ${lineUserId ? "var(--cmms-success)" : "var(--cmms-primary-light)"}`,
+                      color: lineUserId ? "var(--cmms-success)" : "var(--cmms-primary)",
                       fontSize: "0.8rem",
                       fontWeight: 600,
                       lineHeight: 1.5,
                     }}
                   >
-                    ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี
-                    (หรือเปิดลิงก์นี้จากแชท LINE เพื่อผูกอัตโนมัติ)
+                    {lineUserId
+                      ? "LINE ID ของคุณพร้อมแล้ว — กรอกรหัสพนักงาน แล้วกดปุ่มผูกบัญชีด้านล่าง"
+                      : "ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี (หรือเปิดลิงก์นี้จากแชท LINE เพื่อผูกอัตโนมัติ)"}
                   </div>
                 )}
 

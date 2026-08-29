@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../src/includes/layout.php';
+require_once __DIR__ . '/../src/helpers/notification.php';
 $pageTitle = 'ผูกบัญชี LINE (LINE Binding) - CMMS-TPT';
 $pdo = getDb();
 
@@ -21,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['line_user_id'])) {
     try {
         $pdo->prepare("UPDATE users SET line_user_id = ? WHERE id = ?")->execute([$lineId, $userId]);
         $user['line_user_id'] = $lineId;
+        notifyLineBinding($userId, $lineId);
         $successMsg = 'บันทึกข้อมูล LINE User ID เรียบร้อยแล้ว!';
     } catch (Exception $e) {
         $errorMsg = 'เกิดข้อผิดพลาด: ' . $e->getMessage();

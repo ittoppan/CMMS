@@ -164,6 +164,7 @@ try {
             if (!empty($data['bind_liff_user_id'])) {
                 $liffUid = mb_substr(trim($data['bind_liff_user_id']), 0, 100);
                 $pdo->prepare("UPDATE users SET line_user_id = ? WHERE id = ?")->execute([$liffUid, $userId]);
+                notifyLineBinding($userId, $liffUid);
                 echo json_encode(['success' => true, 'bound' => true, 'line_user_id' => $liffUid]);
                 exit;
             }

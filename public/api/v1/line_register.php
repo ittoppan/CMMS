@@ -12,6 +12,7 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/helpers/notification.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -119,6 +120,9 @@ try {
                 ->execute([$user['id'], $lineUid, $empCode, $ip]);
 
             $pdo->commit();
+
+            // แจ้งเตือน "ผูกบัญชีสำเร็จ" (LINE push ถึงผู้ใช้ + Telegram admin)
+            notifyLineBinding($user['id'], $lineUid);
 
             echo json_encode([
                 'success' => true,
