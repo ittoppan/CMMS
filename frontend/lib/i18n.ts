@@ -71,6 +71,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.spare_returns": { th: "สต็อกอะไหล่คืนซาก", en: "Part Returns (Scrap)" },
   "menu.issue_center": { th: "ศูนย์เบิก-จ่าย Sage", en: "Issue Center (Sage)" },
   "menu.sage_po": { th: "รับอะไหล่จาก PO", en: "Receive from PO" },
+  "menu.sage_shipments": { th: "Sage 300 I/C Shipments", en: "Sage 300 I/C Shipments" },
   "menu.sage_sync": { th: "ซิงค์สต็อก Sage 300", en: "Sync Stock (Sage 300)" },
   "menu.optimization": { th: "AI EOQ & สต็อกค้าง", en: "AI EOQ & Dead Stock" },
   "menu.stock_take": { th: "นับสต็อกจริง", en: "Stock Take" },
@@ -715,6 +716,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "spare_parts/sage_po": {
     th: { eyebrow: "SPARE PARTS SAGE PO · CMMS-TOPPAN", title: "รับอะไหล่จาก PO (Sage PO Receipt)", desc: "บันทึกการรับเข้าคลังเมื่ออะไหล่ตามใบสั่งซื้อมาถึง" },
     en: { eyebrow: "SPARE PARTS SAGE PO · CMMS-TOPPAN", title: "Receive from PO (Sage)", desc: "Record stock receipt when ordered parts arrive" },
+  },
+  "spare_parts/sage_shipments": {
+    th: { eyebrow: "SAGE 300 I/C SHIPMENTS · CMMS-TOPPAN", title: "Sage 300 I/C Shipments Reconciliation", desc: "ตรวจสอบและบันทึกการตัดสต็อกใน Sage 300 I/C Shipments สำหรับใบเบิกที่อนุมัติแล้ว" },
+    en: { eyebrow: "SAGE 300 I/C SHIPMENTS · CMMS-TOPPAN", title: "Sage 300 I/C Shipments Reconciliation", desc: "Verify and record stock deduction in Sage 300 I/C Shipments for approved issue requests" },
   },
   analytics: {
     th: { eyebrow: "ANALYTICS · CMMS-TOPPAN", title: "วิเคราะห์ประสิทธิภาพการซ่อมบำรุง", desc: "ติดตาม MTBF, MTTR, งานซ่อม และค่าใช้จ่ายรายเดือนของโรงงาน" },

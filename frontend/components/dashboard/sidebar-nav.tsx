@@ -124,6 +124,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
       { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History },
       { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },
+      { perm: "spare_parts/sage_shipments", labelKey: "menu.sage_shipments", href: "/spare_parts/sage_shipments", icon: Truck },
       { perm: "spare_parts/sage_po", labelKey: "menu.sage_po", href: "/spare_parts/sage_po", icon: FileCheck2 },
       { perm: "spare_parts/sage_sync", labelKey: "menu.sage_sync", href: "/spare_parts/sage_sync", icon: Database },
       { perm: "spare_parts/optimization", labelKey: "menu.optimization", href: "/spare_parts/optimization", icon: Sparkles },

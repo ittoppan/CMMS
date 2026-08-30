@@ -41,6 +41,7 @@ return [
     ['key' => 'spare_parts/balances',      'href' => '/spare_parts/balances',      'label' => 'ยอดคงเหลืออะไหล่',       'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/returns',       'href' => '/spare_parts/returns',       'label' => 'สต็อกอะไหล่คืนซาก',       'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/issue_center',  'href' => '/spare_parts/issue_center',  'label' => 'ศูนย์เบิก-จ่าย',         'section' => 'คลังอะไหล่'],
+    ['key' => 'spare_parts/sage_shipments','href' => '/spare_parts/sage_shipments', 'label' => 'Sage 300 I/C Shipments',   'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/sage_po',       'href' => '/spare_parts/sage_po',       'label' => 'รับอะไหล่จาก PO',        'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/optimization',  'href' => '/spare_parts/optimization',  'label' => 'AI EOQ & Dead Stock',    'section' => 'คลังอะไหล่'],
 
