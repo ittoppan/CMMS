@@ -18,6 +18,7 @@ $root   = "C:\inetpub\wwwroot\cmms-tpt"
 $logDir = Join-Path $root "logs"
 $log    = Join-Path $logDir "watchdog.log"
 $lock   = Join-Path $logDir "watchdog.lock"
+$state  = Join-Path $logDir "watchdog-escalation.state"
 $phpExe = $null
 $cmdPhp = Get-Command php -ErrorAction SilentlyContinue
 if ($cmdPhp) { $phpExe = $cmdPhp.Source }
@@ -347,13 +348,35 @@ $urlFile  = Join-Path $logDir "tunnel-url.txt"
     if ((Test-Url "http://127.0.0.1:$Port/login") -eq 200) {
         Write-Log "RECOVERED — server is back up on :$Port"
         Send-Alert "✅ [CMMS Watchdog] เว็บกลับมาใช้งานได้แล้ว (port $Port)"
+        # --- Escalation: reset consecutive failures on recovery ---
+        if (Test-Path -LiteralPath $state) { Remove-Item -LiteralPath $state -Force -ErrorAction SilentlyContinue }
         exit 0
     }
 
     # 5) ยังไม่ขึ้น -> แจ้งเตือนอีกครั้ง (เรื่องจริงจัง)
     $hostname = $env:COMPUTERNAME
     Write-Log "FAIL server still DOWN after restart (ensure exit $ensureExit)"
-    Send-Alert "🔴 [CMMS Watchdog] RESTART ล้มเหลว — เว็บยังไม่กลับมา (port $Port, host $hostname) กรุณาตรวจสอบทันที"
+
+    # --- Escalation: track consecutive failures ---
+    $failCount = 1
+    if (Test-Path -LiteralPath $state) {
+        try {
+            $st = (Get-Content -LiteralPath $state -Raw).Trim().Split('|')
+            $lastFailTs = [long]$st[0]
+            $failCount  = [int]$st[1] + 1
+            $lastCritical = if ($st.Count -ge 3) { [long]$st[2] } else { 0 }
+        } catch {}
+    }
+    $now = [long]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())
+    Set-Content -LiteralPath $state -Value "$now|$failCount|$lastCritical" -Encoding ascii -ErrorAction SilentlyContinue
+
+    # Critical alert threshold: 3 consecutive failures, throttle 30 min (1800s)
+    if ($failCount -ge 3 -and ($now - $lastCritical -ge 1800)) {
+        Send-Alert "🚨 [CMMS Watchdog] CRITICAL: :$Port down > 10min ($failCount consecutive fails, host $hostname) — MANUAL INTERVENTION REQUIRED"
+        Set-Content -LiteralPath $state -Value "$now|$failCount|$now" -Encoding ascii -ErrorAction SilentlyContinue
+    } else {
+        Send-Alert "🔴 [CMMS Watchdog] RESTART ล้มเหลว — เว็บยังไม่กลับมา (port $Port, host $hostname) กรุณาตรวจสอบทันที"
+    }
     exit 1
 }
 finally {
