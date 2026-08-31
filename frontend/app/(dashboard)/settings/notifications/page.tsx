@@ -790,6 +790,28 @@ export default function NotificationsSettingsPage() {
             </CardContent>
           </Card>
 
+          {/* PWA Web Push toggle */}
+          <Card>
+            <CardContent className="space-y-4 p-5">
+              <HStack gap={2} vAlign="center">
+                <BoltIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                <VStack gap={0}>
+                  <h3 className="text-base font-semibold">แจ้งเตือนป๊อปอัปเบราว์เซอร์ (PWA Web Push)</h3>
+                  <p className="text-sm text-muted-foreground">แจ้งเตือนผ่าน Chrome/Edge — ผู้ใช้ต้องเปิดการแจ้งเตือนเบราว์เซอร์และ subscribe ผ่านเว็บ HTTPS</p>
+                </VStack>
+              </HStack>
+
+              <Switch
+                label="เปิดใช้งาน PWA Web Push"
+                value={(settings.push_alert_enabled ?? "1") === "1"}
+                onChange={(c) => setSettingField("push_alert_enabled", c ? "1" : "0")}
+              />
+              <p className="text-sm text-muted-foreground">
+                เมื่อเปิดและเข้าสู่ระบบผ่าน HTTPS ระบบจะขอสิทธิ์แจ้งเตือนและส่งงานด่วน/PM/สต็อกต่ำเป็นป๊อปอัปเบราว์เซอร์ — ปิดแล้วผู้ใช้จะไม่ถูก subscribe
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Template editor */}
           <Card>
             <CardContent className="space-y-4 p-5">

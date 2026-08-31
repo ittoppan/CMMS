@@ -55,7 +55,19 @@ export default function PwaRegister() {
     const registerPush = async (reg: ServiceWorkerRegistration) => {
       try {
         const vapidResp = await fetch("/api/v1/push_subscribe.php", { credentials: "include" });
-        const vapidJson = (await vapidResp.json()) as { publicKey?: string };
+        const vapidJson = (await vapidResp.json()) as { publicKey?: string; enabled?: string };
+        // ถ้า admin ปิด PWA Web Push (push_alert_enabled=0) → ยกเลิก subscription ที่มีอยู่ ไม่ subscribe ใหม่
+        if (vapidJson.enabled === "0") {
+          const existing = await reg.pushManager.getSubscription();
+          if (existing) {
+            await existing.unsubscribe();
+            await fetch(`/api/v1/push_subscribe.php?endpoint=${encodeURIComponent(existing.endpoint)}`, {
+              method: "DELETE",
+              credentials: "include",
+            }).catch(() => {});
+          }
+          return;
+        }
         if (!vapidJson.publicKey) return;
 
         let sub = await reg.pushManager.getSubscription();

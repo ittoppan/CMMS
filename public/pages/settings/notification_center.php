@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     enforceCsrf();
     try {
         if (isset($_POST['save_toggles'])) {
-            $toggles = ['telegram_enabled', 'line_system_alerts', 'daily_summary_enabled', 'line_weekly_report', 'low_stock_alert', 'escalation_alert'];
+            $toggles = ['line_notify_enabled', 'telegram_enabled', 'push_alert_enabled', 'line_system_alerts', 'daily_summary_enabled', 'line_weekly_report', 'low_stock_alert', 'escalation_alert'];
             foreach ($toggles as $k) {
                 $v = isset($_POST[$k]) ? '1' : '0';
                 $pdo->prepare("INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?,?,'Notifications','') ON DUPLICATE KEY UPDATE setting_value=?")
@@ -72,6 +72,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $msgType = 'error';
             }
         }
+
+        if (isset($_POST['test_push'])) {
+            require_once __DIR__ . '/../../../src/services/WebPushService.php';
+            $subs = 0;
+            try { $subs = (int)$pdo->query('SELECT COUNT(*) FROM push_subscriptions')->fetchColumn(); } catch (Throwable $e) {}
+            if ($subs === 0) {
+                $msg = 'ยังไม่มีอุปกรณ์ที่สมัครรับ Web Push — เปิดเว็บผ่าน HTTPS แล้วเปิดการแจ้งเตือนเบราว์เซอร์ เพื่อให้มีการ subscribe';
+                $msgType = 'error';
+            } else {
+                $ok = '0';
+                try { $ok = (string)WebPushService::sendToUsers($pdo, null, '🔔 [ทดสอบ Web Push] CMMS-TPT ' . date('d/m/Y H:i:s'), 'ระบบแจ้งเตือน PWA ทำงานปกติ', '/'); } catch (Throwable $e) { $ok = '0'; }
+                $msg = $ok !== '0' && (int)$ok > 0 ? 'ส่ง Web Push ทดสอบถึง ' . $ok . ' อุปกรณ์สำเร็จ' : 'ไม่สามารถส่ง Web Push ได้ (ไม่มี subscription ที่ใช้ได้)';
+                $msgType = $ok !== '0' && (int)$ok > 0 ? 'success' : 'error';
+            }
+        }
     } catch (Exception $e) {
         $msg = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
         $msgType = 'error';
@@ -79,12 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ═══════════ โหลดค่าปัจจุบัน ═══════════
-$keys = ['telegram_enabled', 'line_system_alerts', 'daily_summary_enabled', 'line_weekly_report', 'low_stock_alert', 'escalation_alert', 'maintenance_alert_days'];
+$keys = ['line_notify_enabled', 'telegram_enabled', 'push_alert_enabled', 'line_system_alerts', 'daily_summary_enabled', 'line_weekly_report', 'low_stock_alert', 'escalation_alert', 'maintenance_alert_days'];
 $vals = [];
 foreach ($keys as $k) {
     $vals[$k] = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = '$k'")->fetchColumn() ?: '';
 }
-$defaults = ['telegram_enabled' => '1', 'line_system_alerts' => '0', 'daily_summary_enabled' => '1', 'line_weekly_report' => '1', 'low_stock_alert' => '1', 'escalation_alert' => '1', 'maintenance_alert_days' => '7'];
+$defaults = ['line_notify_enabled' => '1', 'telegram_enabled' => '1', 'push_alert_enabled' => '1', 'line_system_alerts' => '0', 'daily_summary_enabled' => '1', 'line_weekly_report' => '1', 'low_stock_alert' => '1', 'escalation_alert' => '1', 'maintenance_alert_days' => '7'];
 foreach ($defaults as $k => $d) {
     if ($vals[$k] === '') $vals[$k] = $d;
 }
@@ -108,6 +123,7 @@ $channels = [
     'LINE'   => ['label' => 'LINE Push (Messaging API)', 'icon' => 'message-circle'],
     'TELEGRAM' => ['label' => 'Telegram (Admin Alerts)', 'icon' => 'send'],
     'EMAIL'  => ['label' => 'Email', 'icon' => 'mail'],
+    'PWA'    => ['label' => 'PWA Web Push', 'icon' => 'bell'],
 ];
 
 renderHeader();
@@ -155,12 +171,14 @@ renderHeader();
 
         <?php
         $toggleDefs = [
-            'telegram_enabled'      => ['Telegram (Admin Alerts)', 'แจ้งเตือนระบบ/process ผ่าน Telegram (watchdog, tunnel, backup) — ใช้ TELEGRAM_BOT_TOKEN/CHAT_ID'],
-            'line_system_alerts'    => ['LINE System Alerts', 'แจ้งเตือนระบบผ่าน LINE Push (Messaging API)'],
-            'daily_summary_enabled' => ['สรุปสถานะประจำวัน (Daily Summary)', 'ส่งสรุปงานประจำวันเข้า LINE ทุกวัน (สคริปต์ daily_summary.php)'],
-            'line_weekly_report'    => ['รายงานประจำสัปดาห์ (Weekly Report)', 'ส่งสรุปงานซ่อมบำรุงประจำสัปดาห์เข้า LINE (ทุกวันจันทร์)'],
-            'low_stock_alert'       => ['แจ้งเตือนสต็อกต่ำ (Low Stock)', 'แจ้งเตือนอะไหล่ต่ำกว่าจุดสั่งซื้อ (alert_check.php) — ปิดชั่วคราวระหว่างรอกรอก min_stock จริง'],
-            'escalation_alert'      => ['Escalation งานค้างเกินกำหนด', 'แจ้งเตือนงานซ่อมค้างเกิน escalation_hours (alert_check.php)'],
+            'line_notify_enabled'    => ['LINE Notification (Master)', 'เปิด/ปิดการแจ้งเตือน LINE ทั้งหมด (งานซ่อม, PM, อะไหล่, อนุมัติ) — ส่งผ่าน Messaging API + Notify'],
+            'telegram_enabled'       => ['Telegram (Admin Alerts)', 'แจ้งเตือนระบบ/process ผ่าน Telegram (watchdog, tunnel, backup) — ใช้ TELEGRAM_BOT_TOKEN/CHAT_ID'],
+            'push_alert_enabled'     => ['PWA Web Push', 'แจ้งเตือนป๊อปอัปเบราว์เซอร์ Chrome/Edge (Web Push) — ผู้ใช้ต้องเปิดการแจ้งเตือนและ subscribe ผ่านเว็บ HTTPS'],
+            'line_system_alerts'     => ['LINE System Alerts', 'แจ้งเตือนระบบผ่าน LINE Push (Messaging API)'],
+            'daily_summary_enabled'  => ['สรุปสถานะประจำวัน (Daily Summary)', 'ส่งสรุปงานประจำวันเข้า LINE ทุกวัน (สคริปต์ daily_summary.php)'],
+            'line_weekly_report'     => ['รายงานประจำสัปดาห์ (Weekly Report)', 'ส่งสรุปงานซ่อมบำรุงประจำสัปดาห์เข้า LINE (ทุกวันจันทร์)'],
+            'low_stock_alert'        => ['แจ้งเตือนสต็อกต่ำ (Low Stock)', 'แจ้งเตือนอะไหล่ต่ำกว่าจุดสั่งซื้อ (alert_check.php) — ปิดชั่วคราวระหว่างรอกรอก min_stock จริง'],
+            'escalation_alert'       => ['Escalation งานค้างเกินกำหนด', 'แจ้งเตือนงานซ่อมค้างเกิน escalation_hours (alert_check.php)'],
         ];
         foreach ($toggleDefs as $k => [$label, $desc]): ?>
         <label class="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted/40 transition-colors cursor-pointer">
@@ -241,6 +259,19 @@ renderHeader();
                     <button type="submit" name="test_email" value="1" class="h-9 px-3 rounded-md bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold whitespace-nowrap">ส่งทดสอบ</button>
                 </div>
             </form>
+
+            <!-- PWA Web Push -->
+            <form method="POST" class="p-4 rounded-xl border border-border space-y-2">
+                <?= csrfField() ?>
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 flex items-center justify-center text-sm">🔔</span>
+                    <div>
+                        <div class="text-xs font-semibold text-primary">PWA Web Push</div>
+                        <div class="text-[10px] text-secondary">ป๊อปอัป Chrome/Edge — ต้องเปิดเว็บผ่าน HTTPS</div>
+                    </div>
+                </div>
+                <button type="submit" name="test_push" value="1" class="w-full h-9 rounded-md bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold">ส่ง Web Push ทดสอบ</button>
+            </form>
         </div>
     </div>
 
@@ -251,7 +282,7 @@ renderHeader();
             <p class="text-xs text-secondary mt-0.5">จำนวนข้อความที่ส่งสำเร็จ/ล้มเหลวใน 24 ชม.ที่ผ่านมา แยกตามช่องทาง</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <?php foreach ($channels as $ch => $meta): $s = $stats[$ch] ?? []; $sent = $s['SENT'] ?? 0; $fail = $s['FAILED'] ?? 0; ?>
             <div class="p-4 rounded-xl border border-border">
                 <div class="flex items-center justify-between">

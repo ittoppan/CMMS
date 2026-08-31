@@ -26,7 +26,9 @@ try {
 
     if ($method === 'GET') {
         $keys = WebPushService::loadKeys($pdo);
-        echo json_encode(['publicKey' => WebPushService::base64url_encode($keys['public_raw'])]);
+        $enabled = '1';
+        try { $enabled = (string)($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'push_alert_enabled'")->fetchColumn() ?: '1'); } catch (Throwable $e) {}
+        echo json_encode(['publicKey' => WebPushService::base64url_encode($keys['public_raw']), 'enabled' => $enabled]);
         exit;
     }
 
