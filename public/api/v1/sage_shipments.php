@@ -31,9 +31,13 @@ try {
     switch ($method) {
         case 'GET':
             $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+            $reqStatus = isset($_GET['status_filter']) ? trim((string)$_GET['status_filter']) : '';
             $workOrderId = isset($_GET['work_order_id']) ? (int)$_GET['work_order_id'] : 0;
             $requestId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $showItems = isset($_GET['items']) && $_GET['items'] === '1';
+            $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 0;
+            $perPage = isset($_GET['per_page']) ? min(200, max(1, (int)$_GET['per_page'])) : 200;
+            $paginate = $requestId === 0 && $page > 0;
 
             // Detect schema variants
             $hasCreatedBy = hasColumn($pdo, 'spare_issue_requests', 'created_by');
@@ -165,6 +169,11 @@ try {
                     $where[] = "sir.sage_shipment_status = ?";
                     $params[] = $status;
                 }
+                $reqStatuses = ['Requested','Approved','Waiting Issue','Issued','Returned','Cancelled'];
+                if ($reqStatus !== '' && in_array($reqStatus, $reqStatuses, true)) {
+                    $where[] = "sir.status = ?";
+                    $params[] = $reqStatus;
+                }
                 if ($workOrderId > 0) {
                     $where[] = "sir.work_order_id = ?";
                     $params[] = $workOrderId;
@@ -232,7 +241,21 @@ try {
 
                 $extraSelect = $selectExtras ? ", " . implode(", ", $selectExtras) : "";
                 $joinSql = $joins ? " " . implode(" ", $joins) : "";
-                $sql = "SELECT sir.* $extraSelect FROM spare_issue_requests sir $joinSql $aggJoin $whereClause ORDER BY sir.created_at DESC LIMIT 200";
+                $sql = "SELECT sir.* $extraSelect FROM spare_issue_requests sir $joinSql $aggJoin $whereClause";
+
+                $totalCount = null;
+                if ($paginate) {
+                    $countSql = "SELECT COUNT(*) FROM spare_issue_requests sir $whereClause";
+                    $cstmt = $pdo->prepare($countSql);
+                    $cstmt->execute($params);
+                    $totalCount = (int)$cstmt->fetchColumn();
+                }
+                $sql .= " ORDER BY sir.created_at DESC";
+                if ($paginate) {
+                    $sql .= " LIMIT $perPage OFFSET " . (($page - 1) * $perPage);
+                } else {
+                    $sql .= " LIMIT 200";
+                }
 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute($params);
@@ -290,7 +313,16 @@ try {
                     unset($r);
                 }
 
-                echo json_encode($requests, JSON_UNESCAPED_UNICODE);
+                if ($paginate) {
+                    echo json_encode([
+                        'data'  => $requests,
+                        'total' => $totalCount,
+                        'page'  => $page,
+                        'per_page' => $perPage,
+                    ], JSON_UNESCAPED_UNICODE);
+                } else {
+                    echo json_encode($requests, JSON_UNESCAPED_UNICODE);
+                }
             }
             break;
 

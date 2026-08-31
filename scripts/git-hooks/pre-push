@@ -62,6 +62,21 @@ else
   echo "[pre-push] ⚠️ ไม่พบ scripts/tsc-check.sh — ข้ามการตรวจ TypeScript"
 fi
 
+# ── Next build check: จับ build พัง (Turbopack parse error) ที่ tsc ตรวจไม่เจอ ──
+# เหตุการณ์ 2026-08-30: build fail (Unterminated regexp) → .next ไม่มี standalone
+#   → :3001 ล่ม → เข้าใช้งานระบบไม่ได้ แต่ tsc ผ่านเพราะไม่ได้ตรวจ parse/build
+NEXT_BUILD_CHECK="$REPO_ROOT/scripts/next-build-check.sh"
+if [ -f "$NEXT_BUILD_CHECK" ]; then
+  echo ""
+  echo "[pre-push] next build (output:standalone) — กัน deploy พัง"
+  if ! bash "$NEXT_BUILD_CHECK"; then
+    echo "[pre-push] ❌ BLOCKED: next build/standalone ไม่ผ่าน — แก้ให้ build สำเร็จก่อน push"
+    FAILED=1
+  fi
+else
+  echo "[pre-push] ⚠️ ไม่พบ scripts/next-build-check.sh — ข้ามการตรวจ next build"
+fi
+
 if [ "$FAILED" -ne 0 ]; then
   echo ""
   echo "[pre-push] 🚫 push ถูกยกเลิก — แก้ให้ audit ผ่าน แล้ว push ใหม่"

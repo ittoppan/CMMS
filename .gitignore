@@ -24,6 +24,8 @@ frontend/test-results/
 frontend/playwright-report/
 # alternate build dir (NEXT_DIST_DIR escape hatch)
 frontend/.next-verify/
+# pre-push build-validation dir (next-build-check.sh) — แยกจาก .next ที่ server ใช้
+frontend/.next-verify-check/
 
 # visual regression baselines (local artifacts)
 visual-baseline/

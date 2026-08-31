@@ -71,7 +71,27 @@ function Test-Url([string]$url) {
     }
 }
 
+function Send-Telegram([string]$message) {
+    # เก็บ token/chat ไว้ใน environment variables เสมอ (AGENTS.md) — อย่า commit จริง
+    $token = $env:TELEGRAM_BOT_TOKEN
+    $chat  = $env:TELEGRAM_CHAT_ID
+    if (-not $token -or -not $chat) { return }
+    try {
+        Invoke-RestMethod -Uri "https://api.telegram.org/bot$token/sendMessage" `
+            -Method Post -Body @{ chat_id = $chat; text = $message } -TimeoutSec 15 | Out-Null
+    } catch {
+        Write-Host "Telegram notify failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
+
 Write-Host "=== CMMS-TPT Next.js deploy ==="
+
+# 0. fail fast: ถ้า -SkipBuild โดยไม่มี prebuilt ที่มี server.js จริง → หยุดเลย
+#    (กัน deploy .next ที่พัง/เก่าเงียบ ๆ — เหตุการณ์ 2026-08-30)
+if ($SkipBuild -and -not $Prebuilt) {
+    Write-Host "FAIL: -SkipBuild ต้องระบุ -Prebuilt <dir> ที่มี .next\standalone\server.js ด้วย" -ForegroundColor Red
+    exit 1
+}
 
 # 1. stop current server (releases the standalone folder lock)
 Stop-NextServer
@@ -97,6 +117,17 @@ if (-not $SkipBuild) {
     }
 }
 
+# 2b. post-build sanity: ต้องมี standalone/server.js + BUILD_ID เสมอ (กัน deploy เก่า)
+if (-not (Test-Path (Join-Path $standalone "server.js"))) {
+    throw "server.js not found at $standalone - build ยังไม่สมบูรณ์ (output:standalone/ turbopack.root)"
+}
+$buildIdFile = Join-Path $frontend ".next\BUILD_ID"
+if (-not (Test-Path $buildIdFile)) {
+    throw "BUILD_ID not found at $buildIdFile - build ไม่สมบูรณ์"
+}
+$deployedBuildId = (Get-Content $buildIdFile -Raw).Trim()
+Write-Host "Deploying BUILD_ID=$deployedBuildId"
+
 # 3. stage standalone: copy .next/static + public (Next standalone does NOT do this)
 Write-Host "Staging standalone output..."
 Copy-Item -Recurse -Force -LiteralPath (Join-Path $frontend ".next\static") -Destination (Join-Path $standalone ".next\static")
@@ -116,6 +147,17 @@ if (-not (Wait-ServerReady)) {
     Write-Host "FAIL server did not become ready on port $Port within 30s"
     exit 1
 }
+
+# 5b. ยืนยัน server ที่รันอยู่เสิร์ฟ BUILD_ID ตัวที่ deploy (กันรันของเก่า/พัง)
+#     Next 16 Turbopack: static paths ใช้ hash ต่อไฟล์ (ไม่ฝัง BUILD_ID)
+#     → ตรวจตรง ๆ ว่า /_next/static/<BUILD_ID>/_buildManifest.js สมัคร 200
+Write-Host "Verifying deployed BUILD_ID is being served..."
+$buildManifestUrl = "http://localhost:$Port/_next/static/$deployedBuildId/_buildManifest.js"
+if ((Test-Url $buildManifestUrl) -ne 200) {
+    Write-Host "FAIL: server ไม่เสิร์ฟ BUILD_ID=$deployedBuildId ($buildManifestUrl -> 404/ไม่เจอ รันของเก่ายังค้างอยู่?)" -ForegroundColor Red
+    exit 1
+}
+Write-Host "OK live server serves BUILD_ID=$deployedBuildId"
 $hostUrl = "http://localhost:$Port"
 $ok = 0; $total = 0
 foreach ($page in @("/login", "/dashboard")) {
@@ -138,4 +180,8 @@ foreach ($f in @("/logo.png", "/manifest.webmanifest", "/sw.js")) {
 
 Write-Host ""
 Write-Host "=== Deploy finished: $ok/$total checks passed ==="
-if ($ok -ne $total) { exit 1 }
+if ($ok -ne $total) {
+    Send-Telegram "[CMMS] DEPLOY FAIL :3001 ($ok/$total checks)"
+    exit 1
+}
+Send-Telegram "[CMMS] DEPLOY OK :3001 BUILD_ID=$deployedBuildId ($ok/$total checks)"
