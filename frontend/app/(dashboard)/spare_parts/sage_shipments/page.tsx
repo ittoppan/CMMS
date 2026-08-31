@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { Dialog } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   Search,
   RefreshCw,
@@ -19,6 +21,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronUp,
+  X,
 } from "lucide-react";
 
 interface SageShipmentItem {
@@ -95,6 +98,18 @@ export default function SageShipmentsPage() {
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
   const [showOnlyPending, setShowOnlyPending] = useState(false);
 
+  type ModalType = "request-shipment" | "item-qty" | "item-shipment";
+  interface ModalState {
+    type: ModalType | null;
+    requestId?: number;
+    item?: SageShipmentItem;
+    onSubmit: (data: { shipmentNo?: string; qty?: number }) => void;
+  }
+  const [modal, setModal] = useState<ModalState>({ type: null, onSubmit: () => {} });
+
+  const openModal = useCallback((state: ModalState) => setModal(state), []);
+  const closeModal = useCallback(() => setModal({ type: null, onSubmit: () => {} }), []);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -144,87 +159,98 @@ export default function SageShipmentsPage() {
 
   const handleUpdateSageStatus = async (request: SageRequest, newStatus: string) => {
     const key = String(request.id);
-    const shipmentNo = window.prompt("เลขที่ Shipment ใน Sage 300 (ถ้ามี):", request.sage_shipment_no || "");
-    if (shipmentNo === null) return;
-    setUpdating((prev) => ({ ...prev, [key]: true }));
-    try {
-      const csrf = getCsrfToken();
-      const res = await fetch("/api/v1/sage_shipments.php", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrf ? { "X-CSRF-Token": csrf } : {}),
-        },
-        body: JSON.stringify({
-          action: "update_sage_status",
-          request_id: request.id,
-          sage_shipment_status: newStatus,
-          sage_shipment_no: shipmentNo,
-          sage_shipment_note: `เปลี่ยนสถานะเป็น ${STATUS_LABELS[newStatus]?.label || newStatus}`,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
-      showToast("success", json.message || "อัปเดตสถานะ Sage 300 เรียบร้อยแล้ว");
-      fetchData();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "อัปเดตสถานะไม่สำเร็จ";
-      showToast("error", msg);
-    } finally {
-      setUpdating((prev) => ({ ...prev, [key]: false }));
-    }
+    openModal({
+      type: "request-shipment",
+      requestId: request.id,
+      onSubmit: async ({ shipmentNo }) => {
+        setUpdating((prev) => ({ ...prev, [key]: true }));
+        try {
+          const csrf = getCsrfToken();
+          const res = await fetch("/api/v1/sage_shipments.php", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              ...(csrf ? { "X-CSRF-Token": csrf } : {}),
+            },
+            body: JSON.stringify({
+              action: "update_sage_status",
+              request_id: request.id,
+              sage_shipment_status: newStatus,
+              sage_shipment_no: shipmentNo,
+              sage_shipment_note: `เปลี่ยนสถานะเป็น ${STATUS_LABELS[newStatus]?.label || newStatus}`,
+            }),
+          });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
+          showToast("success", json.message || "อัปเดตสถานะ Sage 300 เรียบร้อยแล้ว");
+          fetchData();
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : "อัปเดตสถานะไม่สำเร็จ";
+          showToast("error", msg);
+        } finally {
+          setUpdating((prev) => ({ ...prev, [key]: false }));
+        }
+      },
+    });
   };
 
   const handleUpdateItemSage = async (item: SageShipmentItem) => {
     const key = `item-${item.id}`;
     const maxRemaining = Math.max(0, Number(item.qty) - Number(item.sage_qty ?? 0));
     const defaultQty = maxRemaining > 0 ? String(maxRemaining) : String(item.qty);
-    const rawQty = window.prompt(`จำนวนที่ตัดใน Sage 300 (คงเหลือ ${fmt(maxRemaining)} ${item.unit}):`, String(item.sage_qty ?? defaultQty));
-    if (rawQty === null) return;
-    const qty = parseFloat(rawQty);
-    if (isNaN(qty) || qty < 0) {
-      showToast("error", "จำนวนไม่ถูกต้อง");
-      return;
-    }
-    if (qty > Number(item.qty)) {
-      showToast("error", `จำนวนเกินที่เบิก (${fmt(item.qty)} ${item.unit})`);
-      return;
-    }
-    const shipmentNo = window.prompt("เลขที่ Shipment ใน Sage 300:", item.sage_shipment_no || "");
-    if (shipmentNo === null) return;
 
-    setUpdating((prev) => ({ ...prev, [key]: true }));
-    try {
-      const csrf = getCsrfToken();
-      const status = qty >= Number(item.qty) ? "completed" : qty > 0 ? "partial" : "pending";
-      const res = await fetch("/api/v1/sage_shipments.php", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrf ? { "X-CSRF-Token": csrf } : {}),
-        },
-        body: JSON.stringify({
-          action: "update_item_sage_status",
-          item_id: item.id,
-          sage_qty: qty,
-          sage_shipment_no: shipmentNo || "",
-          status,
-          sage_shipment_date: new Date().toISOString().slice(0, 19).replace("T", " "),
-          sage_note: `ตัดใน Sage 300 จำนวน ${qty} ${item.unit}`,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
-      showToast("success", json.message || "อัปเดตรายการ Sage 300 เรียบร้อยแล้ว");
-      fetchData();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "อัปเดตไม่สำเร็จ";
-      showToast("error", msg);
-    } finally {
-      setUpdating((prev) => ({ ...prev, [key]: false }));
-    }
+    openModal({
+      type: "item-qty",
+      item,
+      onSubmit: ({ qty = 0 }) => {
+        if (isNaN(qty) || qty < 0) {
+          showToast("error", "จำนวนไม่ถูกต้อง");
+          return;
+        }
+        if (qty > Number(item.qty)) {
+          showToast("error", `จำนวนเกินที่เบิก (${fmt(item.qty)} ${item.unit})`);
+          return;
+        }
+        // qty validated -> open shipment number modal
+        openModal({
+          type: "item-shipment",
+          item,
+          onSubmit: ({ shipmentNo = "" }) => {
+            setUpdating((prev) => ({ ...prev, [key]: true }));
+            const status = qty >= Number(item.qty) ? "completed" : qty > 0 ? "partial" : "pending";
+            const csrf = getCsrfToken();
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            if (csrf) headers["X-CSRF-Token"] = csrf;
+            fetch("/api/v1/sage_shipments.php", {
+              method: "POST",
+              credentials: "include",
+              headers,
+              body: JSON.stringify({
+                action: "update_item_sage_status",
+                item_id: item.id,
+                sage_qty: qty,
+                sage_shipment_no: shipmentNo || "",
+                status,
+                sage_shipment_date: new Date().toISOString().slice(0, 19).replace("T", " "),
+                sage_note: `ตัดใน Sage 300 จำนวน ${qty} ${item.unit}`,
+              }),
+            })
+              .then((r) => r.json())
+              .then((json) => {
+                if (!json.success && json.error) throw new Error(json.error);
+                showToast("success", json.message || "อัปเดตรายการ Sage 300 เรียบร้อยแล้ว");
+                fetchData();
+              })
+              .catch((e: unknown) => {
+                const msg = e instanceof Error ? e.message : "อัปเดตไม่สำเร็จ";
+                showToast("error", msg);
+              })
+              .finally(() => setUpdating((prev) => ({ ...prev, [key]: false })));
+          },
+        });
+      },
+    });
   };
 
   return (
@@ -485,6 +511,169 @@ export default function SageShipmentsPage() {
           </CardContent>
         </Card>
       )}
+      {modal.type === "request-shipment" && (
+        <Dialog
+          open={true}
+          onClose={closeModal}
+          title="เลขที่ Shipment ใน Sage 300"
+          description="กรอกรหัส Shipment (ถ้ามี) สำหรับใบเบิกนี้"
+        >
+          <RequestShipmentModal requestId={modal.requestId!} onSubmit={modal.onSubmit} onCancel={closeModal} />
+        </Dialog>
+      )}
+      {modal.type === "item-qty" && (
+        <Dialog
+          open={true}
+          onClose={closeModal}
+          title="จำนวนที่ตัดใน Sage 300"
+          description={modal.item ? `คงเหลือ ${fmt(Math.max(0, Number(modal.item.qty) - Number(modal.item.sage_qty ?? 0)))} ${modal.item.unit}` : ""}
+        >
+          <ItemQtyModal item={modal.item!} onSubmit={modal.onSubmit} onCancel={closeModal} />
+        </Dialog>
+      )}
+      {modal.type === "item-shipment" && (
+        <Dialog
+          open={true}
+          onClose={closeModal}
+          title="เลขที่ Shipment ใน Sage 300"
+          description="กรอกรหัส Shipment (ถ้ามี) สำหรับรายการนี้"
+        >
+          <ItemShipmentModal item={modal.item!} onSubmit={modal.onSubmit} onCancel={closeModal} />
+        </Dialog>
+      )}
     </PageShell>
+  );
+}
+
+function RequestShipmentModal({
+  requestId,
+  onSubmit,
+  onCancel,
+}: {
+  requestId: number;
+  onSubmit: (data: { shipmentNo: string }) => void;
+  onCancel: () => void;
+}) {
+  const [shipmentNo, setShipmentNo] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    onSubmit({ shipmentNo: shipmentNo.trim() });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <Input
+          value={shipmentNo}
+          onChange={(e) => setShipmentNo(e.target.value)}
+          placeholder="เช่น SHP-2024-00123"
+          autoFocus
+          disabled={submitting}
+        />
+        <p className="text-xs text-muted-foreground">เว้นว่างได้ หากยังไม่มีเลขที่ Shipment</p>
+      </div>
+      <DialogPrimitive.Close asChild>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
+          ยกเลิก
+        </Button>
+      </DialogPrimitive.Close>
+      <Button type="submit" disabled={submitting}>
+        {submitting ? "กำลังบันทึก..." : "บันทึก"}
+      </Button>
+    </form>
+  );
+}
+
+function ItemQtyModal({
+  item,
+  onSubmit,
+  onCancel,
+}: {
+  item: SageShipmentItem;
+  onSubmit: (data: { qty: number }) => void;
+  onCancel: () => void;
+}) {
+  const [qty, setQty] = useState(String(item.sage_qty ?? 0));
+  const [submitting, setSubmitting] = useState(false);
+  const maxRemaining = Math.max(0, Number(item.qty) - Number(item.sage_qty ?? 0));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseFloat(qty);
+    if (isNaN(parsed) || parsed < 0) return;
+    setSubmitting(true);
+    onSubmit({ qty: parsed });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          max={item.qty}
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          placeholder={`สูงสุด ${fmt(item.qty)} ${item.unit}`}
+          autoFocus
+          disabled={submitting}
+        />
+        <p className="text-xs text-muted-foreground">คงเหลือ: {fmt(maxRemaining)} {item.unit} / ทั้งหมด: {fmt(item.qty)} {item.unit}</p>
+      </div>
+      <DialogPrimitive.Close asChild>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
+          ยกเลิก
+        </Button>
+      </DialogPrimitive.Close>
+      <Button type="submit" disabled={submitting}>
+        {submitting ? "กำลังบันทึก..." : "ถัดไป"}
+      </Button>
+    </form>
+  );
+}
+
+function ItemShipmentModal({
+  item,
+  onSubmit,
+  onCancel,
+}: {
+  item: SageShipmentItem;
+  onSubmit: (data: { shipmentNo: string }) => void;
+  onCancel: () => void;
+}) {
+  const [shipmentNo, setShipmentNo] = useState(item.sage_shipment_no ?? "");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    onSubmit({ shipmentNo: shipmentNo.trim() });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <Input
+          value={shipmentNo}
+          onChange={(e) => setShipmentNo(e.target.value)}
+          placeholder="เช่น SHP-2024-00123"
+          autoFocus
+          disabled={submitting}
+        />
+        <p className="text-xs text-muted-foreground">เว้นว่างได้</p>
+      </div>
+      <DialogPrimitive.Close asChild>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
+          ย้อนกลับ
+        </Button>
+      </DialogPrimitive.Close>
+      <Button type="submit" disabled={submitting}>
+        {submitting ? "กำลังบันทึก..." : "บันทึก"}
+      </Button>
+    </form>
   );
 }
