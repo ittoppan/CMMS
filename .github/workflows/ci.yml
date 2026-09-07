@@ -48,3 +48,21 @@ jobs:
         run: |
           python -m pip install --quiet --upgrade pip
           python scripts/design-audit.py --diff ${{ github.event.before }} --strict
+
+  phplint:
+    name: PHP Syntax Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Lint all PHP files (php -l)
+        run: |
+          set -e
+          find src public scripts database -name '*.php' -print0 | xargs -0 -n1 php -l
