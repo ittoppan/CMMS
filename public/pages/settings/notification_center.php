@@ -33,8 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (isset($_POST['test_line_notify'])) {
-            $token = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_token'")->fetchColumn() ?: '';
-            if ($token !== '') {
+            // Master switch
+            $masterOn = (string)($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'")->fetchColumn() ?: '0');
+            if ($masterOn !== '1') {
+                $msg = 'การแจ้งเตือน LINE ปิดอยู่ (line_notify_enabled = 0) — ไม่สามารถทดสอบได้';
+                $msgType = 'error';
+            } else {
+                $token = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_token'")->fetchColumn() ?: '';
+                if ($token !== '') {
                 $ch = curl_init('https://notify-api.line.me/api/notify');
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(['message' => "\n🔔 [ทดสอบ LINE Notify]\nเวลา: " . date('d/m/Y H:i:s')]));
@@ -74,26 +80,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (isset($_POST['test_push'])) {
-            require_once __DIR__ . '/../../../src/services/WebPushService.php';
-            $subs = 0;
-            try { $subs = (int)$pdo->query('SELECT COUNT(*) FROM push_subscriptions')->fetchColumn(); } catch (Throwable $e) {}
-            if ($subs === 0) {
-                $msg = 'ยังไม่มีอุปกรณ์ที่สมัครรับ Web Push — เปิดเว็บผ่าน HTTPS แล้วเปิดการแจ้งเตือนเบราว์เซอร์ เพื่อให้มีการ subscribe';
+            // Master switch
+            $pushOn = (string)($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'push_alert_enabled'")->fetchColumn() ?: '1');
+            if ($pushOn !== '1') {
+                $msg = 'PWA Web Push ปิดอยู่ (push_alert_enabled = 0) — ไม่สามารถทดสอบได้';
                 $msgType = 'error';
             } else {
-                $ok = '0';
-                try { $ok = (string)WebPushService::sendToUsers($pdo, null, '🔔 [ทดสอบ Web Push] CMMS-TPT ' . date('d/m/Y H:i:s'), 'ระบบแจ้งเตือน PWA ทำงานปกติ', '/'); } catch (Throwable $e) { $ok = '0'; }
-                $msg = $ok !== '0' && (int)$ok > 0 ? 'ส่ง Web Push ทดสอบถึง ' . $ok . ' อุปกรณ์สำเร็จ' : 'ไม่สามารถส่ง Web Push ได้ (ไม่มี subscription ที่ใช้ได้)';
-                $msgType = $ok !== '0' && (int)$ok > 0 ? 'success' : 'error';
+                require_once __DIR__ . '/../../../src/services/WebPushService.php';
+                $subs = 0;
+                try { $subs = (int)$pdo->query('SELECT COUNT(*) FROM push_subscriptions')->fetchColumn(); } catch (Throwable $e) {}
+                if ($subs === 0) {
+                    $msg = 'ยังไม่มีอุปกรณ์ที่สมัครรับ Web Push — เปิดเว็บผ่าน HTTPS แล้วเปิดการแจ้งเตือนเบราว์เซอร์ เพื่อให้มีการ subscribe';
+                    $msgType = 'error';
+                } else {
+                    $ok = '0';
+                    try { $ok = (string)WebPushService::sendToUsers($pdo, null, '🔔 [ทดสอบ Web Push] CMMS-TPT ' . date('d/m/Y H:i:s'), 'ระบบแจ้งเตือน PWA ทำงานปกติ', '/'); } catch (Throwable $e) { $ok = '0'; }
+                    $msg = $ok !== '0' && (int)$ok > 0 ? 'ส่ง Web Push ทดสอบถึง ' . $ok . ' อุปกรณ์สำเร็จ' : 'ไม่สามารถส่ง Web Push ได้ (ไม่มี subscription ที่ใช้ได้)';
+                    $msgType = $ok !== '0' && (int)$ok > 0 ? 'success' : 'error';
+                }
             }
+}
         }
+
     } catch (Exception $e) {
         $msg = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
         $msgType = 'error';
     }
 }
-
-// ═══════════ โหลดค่าปัจจุบัน ═══════════
 $keys = ['line_notify_enabled', 'telegram_enabled', 'push_alert_enabled', 'line_system_alerts', 'daily_summary_enabled', 'line_weekly_report', 'low_stock_alert', 'escalation_alert', 'maintenance_alert_days'];
 $vals = [];
 foreach ($keys as $k) {

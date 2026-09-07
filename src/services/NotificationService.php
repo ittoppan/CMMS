@@ -11,6 +11,14 @@ class NotificationService {
      * (LINE Notify ปิดบริการแล้วตั้งแต่ มี.ค. 2025 — เหลือไว้เป็น fallback ถ้ายังมี token เก่า)
      */
     public static function sendLineMessage(string $message, ?string $token = null): bool {
+        // Master switch: ปิดการแจ้งเตือน LINE ทั้งหมด (ตั้งค่าที่ /settings/notifications)
+        try {
+            $pdo = getDb();
+            if ($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'")->fetchColumn() !== '1') {
+                return false;
+            }
+        } catch (Throwable $e) {}
+
         $pdo = getDb();
 
         // 1) Messaging API (channel access token จาก settings หรือ .env)
@@ -83,6 +91,14 @@ class NotificationService {
      * ส่งเทมเพลต Flex (line_tpl_*) ให้ทุกคนที่ผูก LINE — เคารพปุ่มเปิด/ปิดของเทมเพลต
      */
     public static function sendLineTemplateToAll(string $tplKey, array $vars, string $targetUrl = '', array $photos = []): void {
+        // Master switch: ปิดการแจ้งเตือน LINE ทั้งหมด
+        try {
+            $pdo = getDb();
+            if ($pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_notify_enabled'")->fetchColumn() !== '1') {
+                return;
+            }
+        } catch (Throwable $e) {}
+
         try {
             $pdo = getDb();
             $uids = $pdo->query("SELECT line_user_id FROM users WHERE is_active = 1 AND line_user_id IS NOT NULL AND line_user_id != ''")->fetchAll(PDO::FETCH_COLUMN);
