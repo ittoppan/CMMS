@@ -174,6 +174,10 @@ function repairPhotoUrls($repairId, $category = 'failure_image', $limit = 3) {
  *   - [url, url, ...] (array ธรรมดา)              → backward compat แสดงเป็นรูปแนบ (สูงสุด 4 รูป)
  */
 function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $photos = [], $headerColor = '#1d4ed8', $headerText = '🔔 CMMS-TPT NOTIFICATION', $btnLabel = 'ดูรายละเอียดในระบบ', $opts = []) {
+    // Master switch: ปิด LINE ทั้งหมด (ทุกผู้เรียก — แม้เรียกตรงไม่ผ่าน NotificationService)
+    if (getSettingValue('line_notify_enabled', '1') !== '1') {
+        return false;
+    }
     $channelAccessToken = getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: getenv('LINE_CHANNEL_SECRET');
     if (empty($channelAccessToken)) {
         error_log("LINE_CHANNEL_ACCESS_TOKEN is missing in .env");
