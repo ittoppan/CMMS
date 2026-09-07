@@ -17,7 +17,8 @@ type Asset = {
 
 const APP_BASE =
   (typeof window !== "undefined" && window.location.origin) ||
-  "https://ommatophorous-robert-fortifyingly.ngrok-free.app";
+  process.env.NEXT_PUBLIC_APP_URL ||
+  "http://localhost:3001";
 
 export default function QrSheetPage() {
   const [machines, setMachines] = useState<Asset[]>([]);

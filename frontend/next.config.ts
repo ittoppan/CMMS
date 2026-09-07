@@ -16,13 +16,11 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   // Allow ngrok, Cloudflare tunnels, and local IPs for HMR
-  allowedDevOrigins: [
-    "127.0.0.1",
-    "localhost",
-    "192.168.1.9",
-    "ommatophorous-robert-fortifyingly.ngrok-free.app",
-    "*.trycloudflare.com",
-  ],
+  // รายการจาก env ALLOWED_DEV_ORIGINS (คั่นด้วย comma) — ค่าที่เป็น dev-specific เก็บใน .env.local ไม่ฝังในโค้ด
+  allowedDevOrigins: (process.env.ALLOWED_DEV_ORIGINS ?? "127.0.0.1,localhost")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
   async headers() {
     // ตรงข้ามกับที่ Next ส่ง (SSG prerender => Cache-Control: s-maxage=31536000 = 1 ปี)
     // LINE in-app browser (ผ่าน shared cache/relay) เชื่อ s-maxage แล้วแคชหน้า HTML เก่า

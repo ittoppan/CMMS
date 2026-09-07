@@ -1,6 +1,7 @@
 node_modules/
 vendor/
 .env
+frontend/.env.local
 *.log
 
 # Runtime data (watchdog, tunnel, pids)

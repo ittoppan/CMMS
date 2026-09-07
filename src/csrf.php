@@ -84,7 +84,12 @@ function csrfTrustedOrigin(string $url): bool {
 
     $pattern = strtolower(trim((string)getenv('ALLOWED_ORIGINS')));
     if ($pattern === '') {
-        $pattern = '*.ngrok-free.app,*.ngrok.io,*.trycloudflare.com';
+        // Fallback จาก settings table (ตั้งค่าผ่านหน้า Settings แทนการฝังไว้ในโค้ด)
+        try {
+            $pdo = getDb();
+            $s = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'allowed_origins'")->fetchColumn();
+            if ($s) $pattern = strtolower(trim((string)$s));
+        } catch (Throwable $e) {}
     }
     foreach (explode(',', $pattern) as $p) {
         $p = strtolower(trim($p));
