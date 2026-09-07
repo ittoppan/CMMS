@@ -76,8 +76,9 @@
 ### Spare Parts (อะไหล่)
 ```
 /spare_parts
-/spare_parts/create
 /spare_parts/balances
+/spare_parts/create
+/spare_parts/edit
 /spare_parts/issue_center
 /spare_parts/optimization
 /spare_parts/returns
@@ -85,8 +86,8 @@
 /spare_parts/sage_shipments
 /spare_parts/sage_sync
 /spare_parts/stock_take
-/spare_parts/edit
 ```
+> หมายเหตุ: `/spare_parts/reorder`, `/spare_parts/reservations` มีเฉพาะใน PHP legacy (ดูด้านล่าง), **ไม่มีหน้า PWA**
 
 ### Calibration (สอบเทียบ)
 ```
@@ -130,6 +131,7 @@
 /manuals/create
 /manuals/edit
 ```
+> หมายเหตุ: `/manuals/knowledge_base`, `/manuals/sop_chatbot` มีเฉพาะใน PHP legacy — ไม่มีหน้า PWA
 
 ### Forms / Designer
 ```
@@ -168,6 +170,7 @@
 /users/create
 /users/edit
 ```
+> หมายเหตุ: `/users/skills`, `/users/leaderboard` มีเฉพาะใน PHP legacy — ไม่มีหน้า PWA
 
 ### Roles
 ```
@@ -203,7 +206,7 @@
 ---
 
 ## PHP Legacy Routes (http://localhost:8081) — กลุ่มหลัก
-> ทุกหน้าอยู่ในรูป /{module}/{page}.php
+> ทุกหน้าอยู่ในรูป /pages/{module}/{page}.php (NOT /{module}/{page}.php — IIS root ชี้ที่ public/)
 
 ### Auth
 ```
@@ -332,11 +335,11 @@
 
 ### Suppliers
 ```
-/suppliers/index.php
-/suppliers/create.php
-/suppliers/edit.php
-/suppliers/supplier_rating.php
+/suppliers
+/suppliers/create
+/suppliers/edit
 ```
+> หมายเหตุ: `/suppliers/supplier_rating` มีเฉพาะใน PHP legacy — ไม่มีหน้า PWA
 
 ### Safety
 ```

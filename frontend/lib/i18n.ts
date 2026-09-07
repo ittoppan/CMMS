@@ -635,6 +635,13 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/suppliers/edit": { th: "แก้ไขผู้ผลิต", en: "Edit Supplier" },
   "/users/create": { th: "สร้างบัญชีผู้ใช้ใหม่", en: "Create User" },
   "/users/edit": { th: "แก้ไขบัญชีผู้ใช้", en: "Edit User" },
+  // ── routes ที่เพิ่มเติมเพื่อ tab title / breadcrumb ไม่หลุดเป็นชื่อ route ──
+  "/calibration/calendar": { th: "ปฏิทินสอบเทียบ", en: "Calibration Calendar" },
+  "/calibration/po": { th: "สอบเทียบตามใบสั่งซื้อ (PO)", en: "Calibration by PO" },
+  "/calibration/tracking": { th: "ติดตามการสอบเทียบ", en: "Calibration Tracking" },
+  "/spare_parts/balances": { th: "ยอดคงเหลืออะไหล่", en: "Stock Balances" },
+  "/spare_parts/returns": { th: "อะไหล่คืนคลัง", en: "Part Returns" },
+  "/spare_parts/sage_shipments": { th: "ตัดสต็อก Sage 300 (Shipments)", en: "Sage 300 Shipments" },
 };
 
 // หมวด breadcrumb
