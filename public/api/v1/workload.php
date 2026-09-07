@@ -44,13 +44,44 @@ try {
     }
     unset($t);
 
+    // งานเปิดที่ยังไม่มีช่างรับผิดชอบ (assigned_to NULL และไม่มี work_assignees) →
+    // รวมเป็นแถว "ยังไม่มอบหมายช่าง" เพื่อให้ตารางเห็นงานค้างที่ค้างอยู่ระหว่างรอการมอบหมาย
+    $unassigned = $pdo->query("
+        SELECT
+               COUNT(DISTINCT r.id) AS open_count,
+               COUNT(DISTINCT CASE WHEN r.estimated_completion_date IS NOT NULL
+                         AND r.estimated_completion_date < NOW() THEN r.id END)                          AS overdue_count,
+               COUNT(DISTINCT CASE WHEN r.status IN ('In Progress','in_progress','open') THEN r.id END)  AS active_count,
+               COUNT(DISTINCT CASE WHEN r.estimated_completion_date IS NOT NULL
+                         AND r.estimated_completion_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
+                         THEN r.id END)                                                                  AS due_7d_count,
+               0                                                                                          AS done_7d_count,
+               COUNT(DISTINCT CASE WHEN r.priority IN ('high','critical') THEN r.id END) AS urgent_count
+        FROM repair r
+        LEFT JOIN work_assignees wa ON wa.ref_type = 'repair' AND wa.ref_id = r.id
+        WHERE r.status NOT IN ('completed','closed','resolved','cancelled')
+          AND r.assigned_to IS NULL
+          AND wa.user_id IS NULL
+    ")->fetch(PDO::FETCH_ASSOC);
+
+    if ((int)$unassigned['open_count'] > 0) {
+        foreach (['open_count','overdue_count','active_count','due_7d_count','done_7d_count','urgent_count'] as $k) {
+            $unassigned[$k] = (int)$unassigned[$k];
+        }
+        $unassigned['user_id']   = 0;
+        $unassigned['full_name'] = 'ยังไม่มอบหมายช่าง';
+        array_unshift($techs, $unassigned);
+    }
+
     // สรุปภาพรวม (ต้องใช้ alias เดียวกับเงื่อนไข openCond)
     $openCondNoAlias = str_replace('r.status', 'status', $openCond);
+    $techCount = count(array_filter($techs, fn($t) => (int)$t['user_id'] > 0));
     $summary = [
         'total_open'    => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias}")->fetchColumn(),
         'total_overdue' => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias} AND estimated_completion_date IS NOT NULL AND estimated_completion_date < NOW()")->fetchColumn(),
         'total_urgent'  => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias} AND priority IN ('high','critical')")->fetchColumn(),
-        'technicians'   => count($techs),
+        'unassigned'    => (int)$unassigned['open_count'],
+        'technicians'   => $techCount,
         'done_7d'       => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('completed','closed','resolved') AND updated_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn(),
     ];
 

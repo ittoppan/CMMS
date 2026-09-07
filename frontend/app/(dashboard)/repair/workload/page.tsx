@@ -31,6 +31,7 @@ export default function WorkloadPage() {
     total_open: 0,
     total_overdue: 0,
     total_urgent: 0,
+    unassigned: 0,
     technicians: 0,
     done_7d: 0,
   });
@@ -173,7 +174,7 @@ export default function WorkloadPage() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
         <Card className="cmms-kpi-card blue">
           <CardContent className="space-y-2">
             <div className="flex items-center gap-2">
@@ -194,6 +195,18 @@ export default function WorkloadPage() {
             </div>
             <div className="cmms-kpi-value">
               <CountUp end={summary.total_open} />
+              <span className="cmms-kpi-unit">งาน</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="cmms-kpi-card cyan">
+          <CardContent className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AndonLamp status="idle" size="sm" />
+              <span className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มอบหมายช่าง</span>
+            </div>
+            <div className="cmms-kpi-value">
+              <CountUp end={summary.unassigned} />
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
