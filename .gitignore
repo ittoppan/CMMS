@@ -10,6 +10,8 @@ logs/
 # Next.js build artifacts
 frontend/.next/
 frontend/tsconfig.tsbuildinfo
+# Next.js generates this per-build (path depends on the distDir used last) — untracked
+frontend/next-env.d.ts
 
 # OpenWork app data (chat attachments, inbox)
 .opencode/openwork/
