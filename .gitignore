@@ -30,6 +30,9 @@ frontend/.next-verify/
 # pre-push build-validation dir (next-build-check.sh) — แยกจาก .next ที่ server ใช้
 frontend/.next-verify-check/
 
+# Third-party agent skills (install via npx skills add, do not commit)
+.agents/skills/
+
 # visual regression baselines (local artifacts)
 visual-baseline/
 
@@ -46,7 +49,8 @@ test-results/
 playwright-report/
 
 # opencode tooling (project skills, design-extract scratch, lock)
-.agents/
+# Third-party agent skills (install via npx skills add, do not commit)
+.agents/skills/
 .extract-design-system/
 skills-lock.json
 
