@@ -259,26 +259,41 @@ try {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
                         sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
                     }
-
-                    // แจ้งเตือนแอดมินผ่าน Telegram เมื่อเป็นงานด่วน CRITICAL หรือเครื่องหยุด หรือ is_urgent
-                    $isUrgent = !empty($data['is_urgent']) || $priority === 'CRITICAL' || strtolower((string)($data['machine_status'] ?? '')) === 'down';
-                    if ($isUrgent) {
-                        $urgentMsg = "🚨 แจ้งซ่อมด่วน $wo\n" .
-                            "เครื่อง: " . ($assetCode ?: '-') . ($assetName ? " $assetName" : '') . "\n" .
-                            "อาการ: $title\n" .
-                            "ความเร่งด่วน: $priority\n" .
-                            "ผู้แจ้ง: " . (string)($data['receiver_name'] ?? '-') . "\n" .
-                            "สถานะเครื่อง: " . (string)($data['machine_status'] ?? '-');
-                        telegramAdminAlert(
-                            "แจ้งซ่อมด่วน $wo",
-                            $urgentMsg,
-                            $detailUrl,
-                            'ERROR'
-                        );
-                    }
                 }
             } catch (Exception $e) {
                 error_log("[repair.php] LINE notify failed: " . $e->getMessage());
+            }
+
+            // ---- Telegram แจ้งงานซ่อมใหม่ (เหมือน LINE — อิสระจากสวิตช์ LINE เพื่อถนอม quota LINE ระหว่างทดสอบ) ----
+            try {
+                if (getSettingValue('telegram_enabled', '1') === '1') {
+                    $assetCode = ''; $assetName = '';
+                    if (!empty($data['asset_id'])) {
+                        $st = $pdo->prepare("SELECT code, name FROM asset_registry WHERE id = ?");
+                        $st->execute([(int)$data['asset_id']]);
+                        $a = $st->fetch();
+                        if ($a) { $assetCode = $a['code']; $assetName = $a['name']; }
+                    }
+                    $wo = $data['work_order_no'] ?? 'EN-????-???';
+                    $priority = strtoupper((string)($data['priority'] ?? 'NORMAL'));
+                    $isUrgent = !empty($data['is_urgent']) || $priority === 'CRITICAL' || strtolower((string)($data['machine_status'] ?? '')) === 'down';
+                    $msg = ($isUrgent ? "เครื่องจักรหยุดทำงานด่วน!\n" : "มีงานซ่อมใหม่เข้า\n") .
+                        "ใบงาน: $wo\n" .
+                        "เครื่อง: " . ($assetCode ?: '-') . ($assetName ? " $assetName" : '') . "\n" .
+                        "อาการ: " . mb_substr((string)($data['title'] ?? 'งานซ่อมใหม่'), 0, 200) . "\n" .
+                        "ความเร่งด่วน: $priority\n" .
+                        "สถานะ: " . (string)($data['status'] ?? 'PENDING') . "\n" .
+                        "ผู้แจ้ง: " . (string)($data['receiver_name'] ?? '-') . "\n" .
+                        "สถานะเครื่อง: " . (string)($data['machine_status'] ?? '-');
+                    telegramAdminAlert(
+                        $isUrgent ? "แจ้งซ่อมด่วน $wo" : "งานซ่อมใหม่ $wo",
+                        $msg,
+                        publicBaseUrl() . '/repair/view?id=' . $newId,
+                        $isUrgent ? 'ERROR' : 'INFO'
+                    );
+                }
+            } catch (Exception $e) {
+                error_log("[repair.php] Telegram notify failed: " . $e->getMessage());
             }
             break;
         case 'PUT':
@@ -333,27 +348,32 @@ try {
                     error_log('[repair.php] spare_parts failed: ' . $e->getMessage());
                 }
             }
-            // ---- LINE แจ้งเตือน: งานถูกมอบหมาย → ช่างผู้รับ + ขอเบิกอะไหล่ → หัวหน้าอนุมัติ ----
+            // ---- แจ้งเตือน: งานถูกมอบหมาย → ช่างผู้รับ + ขอเบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ (LINE + Telegram เหมือนกัน) ----
             try {
-                if (getSettingValue('line_notify_enabled', '0') === '1') {
-                    $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
-                                        FROM repair r
-                                        LEFT JOIN asset_registry a ON a.id = r.asset_id
-                                        LEFT JOIN users u ON u.id = r.assigned_to
-                                        WHERE r.id = ?");
-                    $q->execute([$id]);
-                    $row = $q->fetch(PDO::FETCH_ASSOC);
-                    if ($row) {
-                        $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
-                        // 1) งานถูกมอบหมาย → บันทึกทีม (lead + ทีม) + แจ้ง LINE ถึงผู้ถูกเพิ่มทุกคน
-                        $teamChanged = (isset($data['team_ids']) && is_array($data['team_ids'])) || (isset($data['assigned_to']) && (int)$data['assigned_to'] !== $oldAssignedTo);
-                        if ($teamChanged) {
-                            // ถ้าไม่ได้ส่ง team_ids มาด้วย (แก้หัวหน้าชุดเฉย ๆ) → รักษาทีมเดิมไว้
-                            $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'repair', $id));
-                            $cu = currentUser($pdo);
-                            $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
-                            if (!empty($res['added'])) {
-                                foreach ($res['added'] as $uid) {
+                $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
+                                    FROM repair r
+                                    LEFT JOIN asset_registry a ON a.id = r.asset_id
+                                    LEFT JOIN users u ON u.id = r.assigned_to
+                                    WHERE r.id = ?");
+                $q->execute([$id]);
+                $row = $q->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
+                    // 1) งานถูกมอบหมาย → บันทึกทีม (lead + ทีม) + แจ้งถึงผู้ถูกเพิ่มทุกคน
+                    $teamChanged = (isset($data['team_ids']) && is_array($data['team_ids'])) || (isset($data['assigned_to']) && (int)$data['assigned_to'] !== $oldAssignedTo);
+                    if ($teamChanged) {
+                        $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'repair', $id));
+                        $cu = currentUser($pdo);
+                        $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
+
+                        if (!empty($res['added'])) {
+                            $names = [];
+                            foreach ((array)$res['added'] as $uid) {
+                                $st = $pdo->prepare("SELECT full_name FROM users WHERE id = ? AND is_active = 1");
+                                $st->execute([(int)$uid]);
+                                $n = $st->fetchColumn();
+                                if ($n) $names[] = (string)$n;
+                                if (getSettingValue('line_notify_enabled', '0') === '1') {
                                     lineNotifyAssigned((int)$uid, [
                                         '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
                                         '{asset_code}' => (string)($row['asset_code'] ?? '-'),
@@ -365,28 +385,42 @@ try {
                                     ], $detailUrl);
                                 }
                             }
-                        }
-                        // 2) เบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ
-                        if (isset($data['spare_parts']) && is_array($data['spare_parts']) && !empty($data['spare_parts'])) {
-                            $sumParts = [];
-                            $spareItems = [];
-                            $gInfo = $pdo->prepare('SELECT code, image_url FROM spare_parts WHERE id = ?');
-                            foreach ($data['spare_parts'] as $sp) {
-                                $gInfo->execute([(int)($sp['spare_part_id'] ?? 0)]);
-                                $info = $gInfo->fetch(PDO::FETCH_ASSOC);
-                                $qty = (float)($sp['quantity_used'] ?? 0);
-                                $cd = trim((string)($info['code'] ?? ''));
-                                if ($cd !== '') $sumParts[] = $cd . ' x ' . $qty;
-                                $iu = (string)($info['image_url'] ?? '');
-                                if ($iu !== '') {
-                                    $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
-                                } else {
-                                    // ไม่มีรูปจริง — ใช้รูป placeholder อัตโนมัติ (รหัสอะไหล่บนพื้นสี)
-                                    $iu = publicBaseUrl() . '/api/v1/spare_image.php?id=' . (int)($sp['spare_part_id'] ?? 0);
-                                }
-                                $name = $cd !== '' ? $cd . ' x ' . rtrim(rtrim(number_format($qty, 2), '0'), '.') : '';
-                                if ($name !== '' || $iu !== '') $spareItems[] = ['name' => $name, 'url' => $iu];
+                            // Telegram — เหมือน LINE งานถูกมอบหมาย
+                            if (getSettingValue('telegram_enabled', '1') === '1') {
+                                telegramAdminAlert(
+                                    "งานถูกมอบหมาย " . ($row['work_order_no'] ?? ''),
+                                    "ใบงาน: " . ($row['work_order_no'] ?? '') . "\n" .
+                                    "เครื่อง: " . ($row['asset_code'] ?? '-') . ($row['asset_name'] ? " {$row['asset_name']}" : '') . "\n" .
+                                    "มอบหมายให้: " . (implode(', ', $names) ?: '-') . "\n" .
+                                    "โดย: " . ($cu['full_name'] ?? '-'),
+                                    $detailUrl,
+                                    'INFO'
+                                );
                             }
+                        }
+                    }
+                    // 2) เบิกอะไหล่ → หัวหน้า/แอดมินอนุมัติ
+                    if (isset($data['spare_parts']) && is_array($data['spare_parts']) && !empty($data['spare_parts'])) {
+                        $sumParts = [];
+                        $spareItems = [];
+                        $gInfo = $pdo->prepare('SELECT code, image_url FROM spare_parts WHERE id = ?');
+                        foreach ($data['spare_parts'] as $sp) {
+                            $gInfo->execute([(int)($sp['spare_part_id'] ?? 0)]);
+                            $info = $gInfo->fetch(PDO::FETCH_ASSOC);
+                            $qty = (float)($sp['quantity_used'] ?? 0);
+                            $cd = trim((string)($info['code'] ?? ''));
+                            if ($cd !== '') $sumParts[] = $cd . ' x ' . $qty;
+                            $iu = (string)($info['image_url'] ?? '');
+                            if ($iu !== '') {
+                                $iu = preg_match('#^https?://#i', $iu) ? $iu : linePhotoUrl($iu);
+                            } else {
+                                // ไม่มีรูปจริง — ใช้รูป placeholder อัตโนมัติ (รหัสอะไหล่บนพื้นสี)
+                                $iu = publicBaseUrl() . '/api/v1/spare_image.php?id=' . (int)($sp['spare_part_id'] ?? 0);
+                            }
+                            $name = $cd !== '' ? $cd . ' x ' . rtrim(rtrim(number_format($qty, 2), '0'), '.') : '';
+                            if ($name !== '' || $iu !== '') $spareItems[] = ['name' => $name, 'url' => $iu];
+                        }
+                        if (getSettingValue('line_notify_enabled', '0') === '1') {
                             lineNotifySpareRequest([
                                 '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
                                 '{items_summary}' => implode(', ', $sumParts),
@@ -394,17 +428,29 @@ try {
                                 '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
                             ], $detailUrl, ['items' => $spareItems]);
                         }
+                        // Telegram — เหมือน LINE ขออนุมัติเบิกอะไหล่
+                        if (getSettingValue('telegram_enabled', '1') === '1') {
+                            telegramAdminAlert(
+                                "ขออนุมัติเบิกอะไหล่ " . ($row['work_order_no'] ?? ''),
+                                "ใบงาน: " . ($row['work_order_no'] ?? '') . "\n" .
+                                "รายการ: " . (implode(', ', $sumParts) ?: '-') . "\n" .
+                                "ผู้ขอเบิก: " . ($row['assigned_name'] ?? '-') . "\n" .
+                                "รวมมูลค่า: " . number_format((float)($r['cost_parts'] ?? 0)) . " บาท",
+                                $detailUrl,
+                                'WARN'
+                            );
+                        }
                     }
                 }
             } catch (Exception $e) {
-                error_log("[repair.php] LINE assign/spare notify failed: " . $e->getMessage());
+                error_log("[repair.php] assign/spare notify failed: " . $e->getMessage());
             }
             echo json_encode(['success' => true]);
 
-            // ---- LINE แจ้งเตือนเมื่อปิดงานซ่อม (completed) — ใช้เทมเพลต line_tpl_completed ----
+            // ---- แจ้งเตือนเมื่อปิดงานซ่อม (completed) — LINE เทมเพลต line_tpl_completed + Telegram เหมือน LINE ----
             try {
                 $isCompleted = (isset($data['status']) && $data['status'] === 'completed') || isset($data['completed_at']);
-                if ($isCompleted && getSettingValue('line_notify_enabled', '0') === '1') {
+                if ($isCompleted) {
                     $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
                                         FROM repair r
                                         LEFT JOIN asset_registry a ON a.id = r.asset_id
@@ -418,33 +464,51 @@ try {
                             $dt = round((strtotime($row['downtime_end']) - strtotime($row['downtime_start'])) / 3600, 1);
                         }
                         $totalCost = (float)($row['cost_parts'] ?? 0) + (float)($row['cost_labor'] ?? 0);
-                        $cv = [
-                            '{work_order_id}' => (string)($row['work_order_no'] ?? 'EN-????-???'),
-                            '{asset_code}' => (string)($row['asset_code'] ?? '-'),
-                            '{asset_name}' => (string)($row['asset_name'] ?? ''),
-                            '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
-                            '{downtime_hours}' => number_format($dt, 1),
-                            '{total_cost}' => number_format($totalCost),
-                            '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
-                        ];
                         $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
-                        $targets = [];
-                        if (!empty($row['assigned_to'])) {
-                            $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
-                            $st->execute([(int)$row['assigned_to']]);
-                            $lid = $st->fetchColumn();
-                            if ($lid) $targets[] = (string)$lid;
+
+                        if (getSettingValue('line_notify_enabled', '0') === '1') {
+                            $cv = [
+                                '{work_order_id}' => (string)($row['work_order_no'] ?? 'EN-????-???'),
+                                '{asset_code}' => (string)($row['asset_code'] ?? '-'),
+                                '{asset_name}' => (string)($row['asset_name'] ?? ''),
+                                '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                                '{downtime_hours}' => number_format($dt, 1),
+                                '{total_cost}' => number_format($totalCost),
+                                '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
+                            ];
+                            $targets = [];
+                            if (!empty($row['assigned_to'])) {
+                                $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
+                                $st->execute([(int)$row['assigned_to']]);
+                                $lid = $st->fetchColumn();
+                                if ($lid) $targets[] = (string)$lid;
+                            }
+                            $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
+                            if ($grp && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$grp;
+                            $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
+                            foreach (array_unique($targets) as $tid) {
+                                sendLineTemplatePush($tid, 'line_tpl_completed', $cv, $detailUrl, $photos);
+                            }
                         }
-                        $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
-                        if ($grp && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$grp;
-                        $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
-                        foreach (array_unique($targets) as $tid) {
-                            sendLineTemplatePush($tid, 'line_tpl_completed', $cv, $detailUrl, $photos);
+
+                        // Telegram — เหมือน LINE ปิดงานซ่อม
+                        if (getSettingValue('telegram_enabled', '1') === '1') {
+                            telegramAdminAlert(
+                                "ซ่อมเสร็จเรียบร้อย " . ($row['work_order_no'] ?? 'EN-????-???'),
+                                "ใบงาน: " . ($row['work_order_no'] ?? 'EN-????-???') . "\n" .
+                                "เครื่อง: " . ($row['asset_code'] ?? '-') . ($row['asset_name'] ? " {$row['asset_name']}" : '') . "\n" .
+                                "อาการ: " . mb_substr((string)($row['title'] ?? ''), 0, 200) . "\n" .
+                                "Downtime: " . number_format($dt, 1) . " ชม.\n" .
+                                "ค่าซ่อมรวม: " . number_format($totalCost) . " บาท\n" .
+                                "ช่างผู้ปิดงาน: " . ($row['assigned_name'] ?? '-'),
+                                $detailUrl,
+                                'SUCCESS'
+                            );
                         }
                     }
                 }
             } catch (Exception $e) {
-                error_log("[repair.php] completed LINE notify failed: " . $e->getMessage());
+                error_log("[repair.php] completed notify failed: " . $e->getMessage());
             }
             break;
         case 'DELETE':
