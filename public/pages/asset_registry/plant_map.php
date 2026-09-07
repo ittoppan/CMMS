@@ -85,7 +85,7 @@ renderHeader();
                 </div>
 
                 <div class="pt-2 flex justify-between items-center">
-                    <a href="view.php?id=<?= $a['id'] ?>" class="text-[11px] font-bold text-indigo-300 hover:text-white underline">ดูประวัติเครื่อง &rarr;</a>
+                    <a href="history.php?id=<?= $a['id'] ?>" class="text-[11px] font-bold text-indigo-300 hover:text-white underline">ดูประวัติเครื่อง &rarr;</a>
                     <a href="../repair/request.php?asset_id=<?= $a['id'] ?>" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded text-[10px] font-bold text-white transition-all">🔧 แจ้งซ่อมด่วน</a>
                 </div>
             </div>

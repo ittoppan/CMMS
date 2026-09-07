@@ -66,3 +66,6 @@ docs/EN/*.od?
 docs/EN/*.docx
 docs/EN/*.pdf
 docs/EN/*.doc
+
+# Playwright MCP audit scratch
+.playwright-mcp/

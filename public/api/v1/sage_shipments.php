@@ -14,9 +14,9 @@ function hasColumn(PDO $pdo, string $table, string $col): bool {
     $key = $table . '.' . $col;
     if (isset($cache[$key])) return $cache[$key];
     try {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `$table` LIKE ?");
-        $stmt->execute([$col]);
-        $cache[$key] = (bool)$stmt->fetch();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+        $stmt->execute([$table, $col]);
+        $cache[$key] = (int)$stmt->fetchColumn() > 0;
     } catch (Exception $e) {
         $cache[$key] = false;
     }
