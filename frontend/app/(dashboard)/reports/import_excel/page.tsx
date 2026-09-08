@@ -19,7 +19,7 @@ import AndonLamp from "@/components/AndonLamp";
 import {
   Upload, Download, PackageOpen, Wrench, ClipboardCheck, Gauge, Syringe,
   FileSpreadsheet, FileDown, CheckCircle2, TriangleAlert, RotateCcw, ArrowRight,
-  ShieldAlert, History, ChevronLeft, ChevronRight,
+  ShieldAlert, History, ChevronLeft, ChevronRight, Eye,
 } from "lucide-react";
 
 const PAGE_SIZE = 25;
@@ -70,6 +70,7 @@ interface DatasetMeta {
   icon: React.ComponentType<{ className?: string; size?: number; strokeWidth?: number }>;
   required: string[];
   columns: string[];
+  sample: Record<string, string>;
 }
 
 const DATASETS: DatasetMeta[] = [
@@ -81,6 +82,7 @@ const DATASETS: DatasetMeta[] = [
     icon: Wrench,
     required: ["รหัสเครื่องจักร", "หัวข้อแจ้งซ่อม"],
     columns: ["รหัสเครื่องจักร", "หัวข้อแจ้งซ่อม", "หมายเลขงาน", "รายละเอียด / อาการ", "ความเร่งด่วน", "สถานะ", "ประเภทงาน", "รหัสช่างผู้รับงาน", "แผนก", "เวลาเสีย (นาที)", "วันที่เริ่มซ่อม", "กำหนดแล้วเสร็จ", "วันที่แล้วเสร็จ", "วันที่แจ้งงาน", "ค่าอะไหล่", "ค่าแรง", "ค่าจ้างภายนอก", "วิธีการแก้ไข / หมายเหตุ"],
+    sample: { "รหัสเครื่องจักร": "MCH-001", "หัวข้อแจ้งซ่อม": "มอเตอร์สายพานมีเสียงดัง", "ความเร่งด่วน": "medium", "สถานะ": "open", "ประเภทงาน": "breakdown", "เวลาเสีย (นาที)": "45", "ค่าอะไหล่": "500", "ค่าแรง": "300" },
   },
   {
     key: "asset",
@@ -90,6 +92,7 @@ const DATASETS: DatasetMeta[] = [
     icon: Gauge,
     required: ["รหัสเครื่องจักร", "ชื่อเครื่องจักร"],
     columns: ["รหัสเครื่องจักร", "ชื่อเครื่องจักร", "หมวดหมู่", "รายละเอียด", "สถานที่ติดตั้ง", "ความสำคัญ (A/B/C)", "แผนกที่ดูแล", "ผู้ผลิต", "รุ่น", "เลขซีเรียล", "วันที่ซื้อ", "หมดประกัน", "สถานะเครื่อง", "ตำแหน่ง X", "ตำแหน่ง Y", "ชั่วโมงเดินเครื่อง/เดือน"],
+    sample: { "รหัสเครื่องจักร": "MCH-001", "ชื่อเครื่องจักร": "เครื่องพิมพ์บรรจุภัณฑ์ 10 สี", "หมวดหมู่": "Machine", "ความสำคัญ (A/B/C)": "B", "สถานะเครื่อง": "active", "ผู้ผลิต": "TOPPAN", "ชั่วโมงเดินเครื่อง/เดือน": "720" },
   },
   {
     key: "pm_am",
@@ -99,6 +102,7 @@ const DATASETS: DatasetMeta[] = [
     icon: ClipboardCheck,
     required: ["รหัสเครื่องจักร", "หัวข้อ PM"],
     columns: ["รหัสเครื่องจักร", "หัวข้อ PM", "รายละเอียด", "ความถี่", "จำนวนรอบ", "กำหนดตรวจครั้งถัดไป", "สถานะ", "รหัสช่างผู้รับผิดชอบ", "แผนก", "หมายเหตุ"],
+    sample: { "รหัสเครื่องจักร": "MCH-001", "หัวข้อ PM": "PM ประจำเดือน ตรวจสอบระบบไฟฟ้า", "ความถี่": "monthly", "จำนวนรอบ": "1", "สถานะ": "pending", "กำหนดตรวจครั้งถัดไป": "2026-10-01" },
   },
   {
     key: "spare_parts",
@@ -108,6 +112,7 @@ const DATASETS: DatasetMeta[] = [
     icon: PackageOpen,
     required: ["รหัสอะไหล่", "ชื่ออะไหล่"],
     columns: ["รหัสอะไหล่", "ชื่ออะไหล่", "หมวดหมู่", "รายละเอียด", "หน่วยนับ", "คงคลัง", "จำนวนสำรอง", "ขั้นต่ำ", "สูงสุด", "ตำแหน่งจัดเก็บ", "ราคาต่อหน่วย", "ซัพพลายเออร์"],
+    sample: { "รหัสอะไหล่": "SP-0001", "ชื่ออะไหล่": "O-RING NBR 640131", "หน่วยนับ": "ชิ้น", "คงคลัง": "50", "ขั้นต่ำ": "10", "สูงสุด": "100", "ราคาต่อหน่วย": "120.50" },
   },
   {
     key: "calibration",
@@ -117,6 +122,7 @@ const DATASETS: DatasetMeta[] = [
     icon: Syringe,
     required: ["รหัสเครื่องจักร", "วันที่สอบเทียบ"],
     columns: ["รหัสเครื่องจักร", "วันที่สอบเทียบ", "สอบเทียบครั้งถัดไป", "ประเภท", "ผลสอบเทียบ", "สถานะ", "เลขที่ใบรับรอง", "ค่าใช้จ่าย", "เลขที่ PO", "ซัพพลายเออร์", "มาตรฐานที่ใช้", "หมายเหตุ"],
+    sample: { "รหัสเครื่องจักร": "MCH-001", "วันที่สอบเทียบ": "2026-09-15", "ประเภท": "full", "ผลสอบเทียบ": "pass", "สถานะ": "completed", "ค่าใช้จ่าย": "2500" },
   },
 ];
 
@@ -147,6 +153,7 @@ export default function ImportExcelPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [page, setPage] = useState(1);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [history, setHistory] = useState<HistoryItem[] | null>(null);
 
   const meta = DATASETS.find((d) => d.key === datasetKey) ?? DATASETS[0];
@@ -371,11 +378,61 @@ export default function ImportExcelPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="font-bold">2. ดาวน์โหลดแม่แบบ และอัปโหลดไฟล์ Excel (.xlsx)</h3>
-                <Button variant="secondary" onClick={handleTemplate}>
-                  <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-                  ดาวน์โหลดแม่แบบ {meta.label}
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="outline" onClick={() => setShowPreview((v) => !v)} aria-expanded={showPreview}>
+                    <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
+                    {showPreview ? "ซ่อนตัวอย่าง" : "ดูตัวอย่างแม่แบบ"}
+                  </Button>
+                  <Button variant="secondary" onClick={handleTemplate}>
+                    <Download size={16} strokeWidth={1.75} aria-hidden="true" />
+                    ดาวน์โหลดแม่แบบ {meta.label}
+                  </Button>
+                </div>
               </div>
+
+              {showPreview && (
+                <div className="space-y-2">
+                  <div className="overflow-x-auto rounded-xl border border-[var(--cmms-border)]">
+                    <table className="w-full min-w-[720px] text-sm">
+                      <thead>
+                        <tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left">
+                          <th className="px-3 py-2 font-semibold">คอลัมน์ในแม่แบบ</th>
+                          {meta.columns.map((c) => (
+                            <th
+                              key={c}
+                              className={"whitespace-nowrap px-3 py-2 font-semibold " + (meta.required.includes(c) ? "text-[var(--cmms-danger)]" : "")}
+                            >
+                              {c}{meta.required.includes(c) ? " *" : ""}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-[var(--cmms-bg-card)]">
+                          <td className="px-3 py-2 font-semibold text-[var(--cmms-text-secondary)]">ตัวอย่าง</td>
+                          {meta.columns.map((c) => (
+                            <td
+                              key={c}
+                              className={
+                                "max-w-[180px] truncate px-3 py-2 " +
+                                (meta.required.includes(c)
+                                  ? "font-medium text-[var(--cmms-text-primary)]"
+                                  : "text-[var(--cmms-text-secondary)]")
+                              }
+                            >
+                              {meta.sample[c] ?? (meta.required.includes(c) ? "ต้องระบุ" : "—")}
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="flex items-center gap-2 text-sm text-[var(--cmms-text-secondary)]">
+                    <TriangleAlert size={14} strokeWidth={1.75} aria-hidden="true" />
+                    แสดงคอลัมน์และรูปแบบข้อมูลในแม่แบบ — คอลัมน์ที่ติดเครื่องหมาย * จำเป็นต้องกรอก ส่วนคอลัมน์อื่นเว้นว่างได้
+                  </p>
+                </div>
+              )}
 
               <div className="rounded-xl border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] p-5">
                 <label
