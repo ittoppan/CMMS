@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import AndonLamp from "@/components/AndonLamp";
 import {
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -155,7 +156,7 @@ export default function AnalyticsAdvancedPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
-              <CheckCircle2 size={14} strokeWidth={2} aria-hidden="true" /> ข้อมูลจริง
+              <AndonLamp status="ok" size="sm" /> ข้อมูลจริง
             </span>
           </div>
           <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
@@ -227,7 +228,7 @@ function DowntimeTab({ d }: { d: AdvData["downtime"] | undefined }) {
               formatter={(v: any) => Number(v).toLocaleString("th-TH")}
               contentStyle={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)", borderRadius: 12 }}
             />
-            <Bar dataKey="minutes" name="นาทีหยุด" radius={[6, 6, 0, 0]} fill="#ef4444" />
+            <Bar dataKey="minutes" name="นาทีหยุด" radius={[6, 6, 0, 0]} fill="var(--cmms-danger)" />
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
@@ -310,9 +311,9 @@ function CostTab({ d }: { d: AdvData["cost"] | undefined }) {
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip formatter={(v: any) => Number(v).toLocaleString("th-TH")} contentStyle={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)", borderRadius: 12 }} />
               <Legend />
-              <Bar dataKey="ชิ้นส่วน" stackId="a" fill="#6366f1" />
-              <Bar dataKey="ค่าแรง" stackId="a" fill="#f59e0b" />
-              <Bar dataKey="จ้างภายนอก" stackId="a" fill="#ef4444" />
+              <Bar dataKey="ชิ้นส่วน" stackId="a" fill="var(--cmms-info)" />
+              <Bar dataKey="ค่าแรง" stackId="a" fill="var(--cmms-warning)" />
+              <Bar dataKey="จ้างภายนอก" stackId="a" fill="var(--cmms-danger)" />
             </BarChart>
           </ResponsiveContainer>
         )}
@@ -686,8 +687,8 @@ function InspectionTab({ d }: { d: AdvData["inspection"] | undefined }) {
               <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
               <Tooltip contentStyle={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)", borderRadius: 12 }} />
               <Legend />
-              <Bar dataKey="pass" name="ผ่าน" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="fail" name="ไม่ผ่าน" stackId="a" fill="#ef4444" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="pass" name="ผ่าน" stackId="a" fill="var(--cmms-success)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="fail" name="ไม่ผ่าน" stackId="a" fill="var(--cmms-danger)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
