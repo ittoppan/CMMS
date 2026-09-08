@@ -93,6 +93,7 @@ export const PAGE_CATEGORIES: PageCategory[] = [
       { value: "/reports", label: "ศูนย์รวมรายงาน" },
       { value: "/reports/monthly_pdf", label: "รายงาน PDF ผู้บริหาร" },
       { value: "/reports/export_excel", label: "ส่งออก Excel / CSV" },
+      { value: "/reports/import_excel", label: "นำเข้าข้อมูล Excel" },
     ],
   },
   {

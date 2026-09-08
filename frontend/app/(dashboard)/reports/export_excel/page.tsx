@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Download, Table, CheckCircle2, Database } from "lucide-react";
+import { Download, Table, CheckCircle2, Database, Upload } from "lucide-react";
 
 export default function ExportExcelReportPage() {
   const [reportType, setReportType] = useState("repair_all");
@@ -72,6 +72,9 @@ export default function ExportExcelReportPage() {
           <p style={{ color: "rgba(255,255,255,0.78)" }}>
             ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน
           </p>
+          <Button variant="ghost" size="sm" className="self-start" onClick={() => (window.location.href = "/reports/import_excel")}>
+            <Upload size={14} strokeWidth={1.75} aria-hidden="true" /> นำเข้าข้อมูล Excel
+          </Button>
         </div>
       </div>
 

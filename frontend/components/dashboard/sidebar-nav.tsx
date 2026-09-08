@@ -45,6 +45,7 @@ import {
   Smartphone,
   Paintbrush,
   Search,
+  Upload,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -141,6 +142,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "reports", labelKey: "menu.reports", href: "/reports", icon: BarChart3 },
       { perm: "reports/monthly_pdf", labelKey: "menu.reports_pdf", href: "/reports/monthly_pdf", icon: FileDown },
       { perm: "reports/export_excel", labelKey: "menu.reports_excel", href: "/reports/export_excel", icon: FileDown },
+      { perm: "reports/import_excel", labelKey: "menu.reports_import", href: "/reports/import_excel", icon: Upload },
       { perm: "andon-board", labelKey: "menu.andon_board", href: "/andon-board", icon: Zap },
     ],
   },

@@ -3,7 +3,7 @@
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, Table, ChartPie } from "lucide-react";
+import { FileDown, Table, ChartPie, Upload } from "lucide-react";
 
 export default function ReportsHubPage() {
   const hero = usePageHero("reports");
@@ -86,6 +86,28 @@ export default function ReportsHubPage() {
 
             <Button variant="secondary" onClick={() => (window.location.href = "/analytics/advanced")}>
               เปิดหน้าวิเคราะห์เจาะลึก
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="cmms-icon-tile blue h-12 w-12 rounded-xl">
+                <Upload size={24} strokeWidth={1.75} aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="font-bold">นำเข้าข้อมูล Excel (Import)</h3>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">ดาวน์โหลดแม่แบบ ตรวจสอบ แล้วยืนยันนำเข้า</p>
+              </div>
+            </div>
+
+            <p className="text-[var(--cmms-text-secondary)]">
+              นำเข้าใบสั่งงานซ่อม ทะเบียนเครื่องจักร แผน PM/AM อะไหล่ และสอบเทียบเป็นชุด — ระบบตรวจสอบทีละแถวก่อนบันทึกตามแม่แบบ
+            </p>
+
+            <Button variant="secondary" onClick={() => (window.location.href = "/reports/import_excel")}>
+              เปิดหน้านำเข้า Excel
             </Button>
           </CardContent>
         </Card>
