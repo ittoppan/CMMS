@@ -78,6 +78,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.suppliers": { th: "ผู้ผลิต & คะแนนผู้ขาย", en: "Suppliers & Scores" },
   "menu.analytics_kpi": { th: "KPI ผู้บริหาร", en: "Executive KPI" },
   "menu.analytics_bi": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
+  "menu.analytics_advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
   "menu.reports": { th: "ศูนย์รวมรายงาน", en: "Reports Center" },
   "menu.reports_pdf": { th: "รายงาน PDF ผู้บริหาร", en: "Executive PDF Report" },
   "menu.reports_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel / CSV" },
@@ -574,6 +575,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/spare_parts/optimization": { th: "AI คำนวณ EOQ และสต็อกค้าง", en: "AI EOQ & Dead Stock" },
   "/analytics": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
   "/analytics/kpi": { th: "แดชบอร์ด KPI ผู้บริหาร", en: "Executive KPI" },
+  "/analytics/advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
   "/reports/monthly_pdf": { th: "รายงาน PDF", en: "PDF Report" },
   "/reports/export_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel" },
   "/safety/work_permit": { th: "ใบอนุญาต LOTO", en: "LOTO Permits" },
@@ -659,6 +661,8 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "/suppliers": { th: "คลังอะไหล่", en: "Spare Parts" },
   "/analytics": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "/analytics/kpi": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "/analytics/advanced": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/andon-board": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/safety": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
@@ -735,6 +739,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "analytics/kpi": {
     th: { eyebrow: "EXECUTIVE KPI · CMMS-TOPPAN", title: "KPI ผู้บริหาร (Executive Dashboard)", desc: "MTTR/MTBF · %PM ทันกำหนด · %งานปิดใน SLA · ค่าใช้จ่ายซ่อม — ข้อมูลจากฐานข้อมูลจริง" },
     en: { eyebrow: "EXECUTIVE KPI · CMMS-TOPPAN", title: "Executive KPI", desc: "MTTR/MTBF · on-time PM · SLA closure · repair costs — from real database data" },
+  },
+  "analytics/advanced": {
+    th: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "วิเคราะห์เจาะลึก (Drill-down)", desc: "8 มุมวิเคราะห์จากข้อมูลจริง — Downtime & ความพร้อม · ค่าใช้จ่าย · SLA · PM vs Breakdown · สต็อก · ช่าง · Inspection · สอบเทียบ" },
+    en: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "8 analysis views from real data — Downtime & Availability · Cost · SLA · PM vs Breakdown · Stock · Technicians · Inspection · Calibration" },
   },
   users: {
     th: { eyebrow: "USER MANAGEMENT · CMMS-TOPPAN", title: "ผู้ใช้งานระบบ (User Management)", desc: "จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS" },

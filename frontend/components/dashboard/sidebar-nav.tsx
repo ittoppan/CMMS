@@ -137,6 +137,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
     items: [
       { perm: "analytics", labelKey: "menu.analytics_kpi", href: "/analytics/kpi", icon: ChartPie },
       { perm: "analytics", labelKey: "menu.analytics_bi", href: "/analytics", icon: BarChart3 },
+      { perm: "analytics", labelKey: "menu.analytics_advanced", href: "/analytics/advanced", icon: Activity },
       { perm: "reports", labelKey: "menu.reports", href: "/reports", icon: BarChart3 },
       { perm: "reports/monthly_pdf", labelKey: "menu.reports_pdf", href: "/reports/monthly_pdf", icon: FileDown },
       { perm: "reports/export_excel", labelKey: "menu.reports_excel", href: "/reports/export_excel", icon: FileDown },

@@ -3,7 +3,7 @@
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, Table } from "lucide-react";
+import { FileDown, Table, ChartPie } from "lucide-react";
 
 export default function ReportsHubPage() {
   const hero = usePageHero("reports");
@@ -64,6 +64,28 @@ export default function ReportsHubPage() {
 
             <Button onClick={() => (window.location.href = "/reports/export_excel")}>
               เปิดหน้าส่งออก Excel &amp; CSV
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="cmms-icon-tile warning h-12 w-12 rounded-xl">
+                <ChartPie size={24} strokeWidth={1.75} aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="font-bold">วิเคราะห์เจาะลึก (Drill-down Analytics)</h3>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">วิเคราะห์ 8 มุมจากข้อมูลจริง</p>
+              </div>
+            </div>
+
+            <p className="text-[var(--cmms-text-secondary)]">
+              Downtime &amp; ความพร้อม · ค่าใช้จ่าย · SLA · PM vs Breakdown · สต็อก · ภาระงานช่าง · Inspection · สอบเทียบ
+            </p>
+
+            <Button variant="secondary" onClick={() => (window.location.href = "/analytics/advanced")}>
+              เปิดหน้าวิเคราะห์เจาะลึก
             </Button>
           </CardContent>
         </Card>

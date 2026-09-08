@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -141,6 +142,12 @@ export default function AnalyticsDashboardPage() {
           <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link
+            href="/analytics/advanced"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20"
+          >
+            วิเคราะห์เจาะลึก 8 มุม
+          </Link>
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
             <SelectTrigger
               aria-label="ปี"
