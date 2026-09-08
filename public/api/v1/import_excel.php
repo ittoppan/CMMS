@@ -12,7 +12,9 @@ session_start();
  * กระแสการทำงาน (แม่แบบ + ตรวจสอบ + ยืนยัน):
  *   1. GET  ?action=template&dataset=repair        → ดาวน์โหลดแม่แบบ .xlsx
  *   2. POST ?action=validate  (multipart file)      → อ่านไฟล์ ตรวจรายแถว คืน preview (ไม่บันทึก)
- *   3. POST ?action=import    (JSON rows)           → ตรวจซ้ำบนเซิร์ฟเวอร์ แล้ว insert (transaction)
+ *   3. POST ?action=errors_xlsx (JSON rows)         → สร้างไฟล์ .xlsx เฉพาะแถวที่มี error (แก้แล้วอัปโหลดใหม่)
+ *   4. POST ?action=import    (JSON rows)           → ตรวจซ้ำบนเซิร์ฟเวอร์ แล้ว insert (transaction + lock)
+ *   5. GET  ?action=history                         → รายการนำเข้าย้อนหลัง (audit trail)
  *
  * dataset ที่รองรับ: repair | asset | pm_am | spare_parts | calibration
  */
@@ -289,6 +291,22 @@ function imp_is_example_row(array $cells, array $examples): bool {
     return true;
 }
 
+/** บันทึก audit trail ของการนำเข้าแต่ละครั้ง */
+function imp_history_log(PDO $pdo, string $dataset, int $userId, array $m): void {
+    $st = $pdo->prepare("INSERT INTO import_history
+        (dataset, file_name, total, inserted, failed, note, created_by)
+        VALUES (:dataset, :file_name, :total, :inserted, :failed, :note, :created_by)");
+    $st->execute([
+        'dataset' => $dataset,
+        'file_name' => substr((string)($m['file_name'] ?? ''), 0, 255),
+        'total' => (int)$m['total'],
+        'inserted' => (int)$m['inserted'],
+        'failed' => (int)$m['failed'],
+        'note' => $m['note'] ?? null,
+        'created_by' => $userId,
+    ]);
+}
+
 /* ====================== build lookup tables ====================== */
 function imp_build_lookups(PDO $pdo): array {
     $lk = ['assets' => [], 'users' => [], 'depts' => [], 'suppliers' => []];
@@ -448,10 +466,22 @@ try {
     $action = $_GET['action'] ?? ($_SERVER['REQUEST_METHOD'] === 'POST' ? 'validate' : '');
     $dataset = $_POST['dataset'] ?? $_GET['dataset'] ?? '';
     $body = null;
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'import') {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['import', 'errors_xlsx'], true)) {
         $body = json_decode((string)file_get_contents('php://input'), true);
         if (!is_array($body)) $body = [];
         if (empty($dataset)) $dataset = $body['dataset'] ?? '';
+    }
+
+    /* ---------- ประวัติการนำเข้า (audit trail) ---------- */
+    if ($action === 'history') {
+        $rows = $pdo->query(
+            "SELECT h.id, h.dataset, h.file_name, h.total, h.inserted, h.failed, h.note, h.created_at,
+                    IFNULL(u.full_name, '') AS who
+             FROM import_history h
+             LEFT JOIN users u ON u.id = h.created_by
+             ORDER BY h.id DESC LIMIT 30"
+        )->fetchAll(PDO::FETCH_ASSOC);
+        imp_json(200, ['status' => 'success', 'history' => $rows]);
     }
 
     if (!isset($IMPORT_DATASETS[$dataset])) {
@@ -471,8 +501,26 @@ try {
         xlsx_download('CMMS_import_' . $dataset . '_template.xlsx', $labels, [$exampleRow]);
     }
 
+    /* ---------- ดาวน์โหลด .xlsx เฉพาะแถว error ---------- */
+    if ($action === 'errors_xlsx') {
+        $body = json_decode((string)file_get_contents('php://input'), true);
+        $rowsIn = is_array($body) && is_array($body['rows'] ?? null) ? $body['rows'] : null;
+        if ($rowsIn === null) imp_json(400, ['error' => 'ไม่มีแถว error ให้ดาวน์โหลด']);
+        if (count($rowsIn) > IMP_MAX_ROWS) imp_json(400, ['error' => 'จำนวนแถวเกิน ' . IMP_MAX_ROWS]);
+
+        $labels = array_map(fn($c) => $c['label'], $cfg['columns']);
+        $out = [];
+        foreach ($rowsIn as $it) {
+            $cells = is_array($it['cells'] ?? null) ? $it['cells'] : [];
+            $vals = [];
+            foreach ($labels as $L) $vals[] = array_key_exists($L, $cells) ? (string)$cells[$L] : '';
+            $out[] = $vals;
+        }
+        xlsx_download('CMMS_import_' . $dataset . '_errors.xlsx', $labels, $out);
+    }
+
     if (!in_array($action, ['validate', 'import'], true)) {
-        imp_json(400, ['error' => 'action ต้องเป็น template / validate / import']);
+        imp_json(400, ['error' => 'action ต้องเป็น template / validate / import / errors_xlsx / history']);
     }
 
     $lk = imp_build_lookups($pdo);
@@ -597,30 +645,48 @@ try {
             $grid[] = ['row' => (int)($it['row'] ?? ($i + 2)), 'cells' => $cells, 'data' => $data, 'errors' => $errors];
         }
 
-        // unique + insert แบบ transaction
-        $pdo->beginTransaction();
-        try {
-            $okRows = []; foreach ($grid as $g) if (empty($g['errors'])) $okRows[] = $g;
-            $checked = imp_unique_checks($okRows, $cfg, $pdo);
-            $ucMap = []; foreach ($checked as $g) $ucMap[$g['row']] = $g['errors'];
-            unset($checked);
+        // lock เฉพาะการนำเข้า (กันคน 2 คนอัปโหลดพร้อมกัน) — GET_LOCK ระดับ connection เดียวกับ transaction
+        $got = $pdo->query("SELECT GET_LOCK('cmms_import', 10)")->fetchColumn();
+        if ((int)$got !== 1) {
+            imp_json(429, ['error' => 'กำลังมีการนำเข้าอยู่ กรุณาลองอีกครั้งในไม่กี่วินาที']);
+        }
 
-            $inserted = 0; $failedXml = [];
-            $fn = $IMP_INSERT[$dataset];
-            foreach ($grid as $g) {
-                $errs = $g['errors'];
-                if (isset($ucMap[$g['row']])) $errs = array_merge($errs, $ucMap[$g['row']]);
-                if (!empty($errs)) {
-                    $failedXml[] = ['row' => $g['row'], 'errors' => $errs];
-                    continue;
+        try {
+            // unique + insert แบบ transaction
+            $pdo->beginTransaction();
+            try {
+                $okRows = []; foreach ($grid as $g) if (empty($g['errors'])) $okRows[] = $g;
+                $checked = imp_unique_checks($okRows, $cfg, $pdo);
+                $ucMap = []; foreach ($checked as $g) $ucMap[$g['row']] = $g['errors'];
+                unset($checked);
+
+                $inserted = 0; $failedXml = [];
+                $fn = $IMP_INSERT[$dataset];
+                foreach ($grid as $g) {
+                    $errs = $g['errors'];
+                    if (isset($ucMap[$g['row']])) $errs = array_merge($errs, $ucMap[$g['row']]);
+                    if (!empty($errs)) {
+                        $failedXml[] = ['row' => $g['row'], 'errors' => $errs];
+                        continue;
+                    }
+                    $fn($pdo, $g['data'], (int)$user['id']);
+                    $inserted++;
                 }
-                $fn($pdo, $g['data'], (int)$user['id']);
-                $inserted++;
+
+                // audit trail ใน same transaction
+                imp_history_log($pdo, $dataset, (int)$user['id'], [
+                    'file_name' => $body['file_name'] ?? '',
+                    'total' => count($grid),
+                    'inserted' => $inserted,
+                    'failed' => count($failedXml),
+                ]);
+                $pdo->commit();
+            } catch (Throwable $e) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                imp_json(500, ['error' => 'นำเข้าไม่สำเร็จ: ' . $e->getMessage()]);
             }
-            $pdo->commit();
-        } catch (Throwable $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            imp_json(500, ['error' => 'นำเข้าไม่สำเร็จ: ' . $e->getMessage()]);
+        } finally {
+            $pdo->exec("SELECT RELEASE_LOCK('cmms_import')");
         }
 
         imp_json(200, [

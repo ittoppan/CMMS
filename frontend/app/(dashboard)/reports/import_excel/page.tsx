@@ -1,15 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import AndonLamp from "@/components/AndonLamp";
 import {
   Upload, Download, PackageOpen, Wrench, ClipboardCheck, Gauge, Syringe,
-  FileSpreadsheet, CheckCircle2, TriangleAlert, RotateCcw, ArrowRight, ShieldAlert,
+  FileSpreadsheet, FileDown, CheckCircle2, TriangleAlert, RotateCcw, ArrowRight,
+  ShieldAlert, History, ChevronLeft, ChevronRight,
 } from "lucide-react";
+
+const PAGE_SIZE = 25;
 
 interface ValRow {
   row: number;
@@ -35,6 +48,18 @@ interface ImportResult {
   failed: number;
   total: number;
   errors: { row: number; errors: string[] }[];
+}
+
+interface HistoryItem {
+  id: string;
+  dataset: string;
+  file_name: string | null;
+  total: number;
+  inserted: number;
+  failed: number;
+  note: string | null;
+  created_at: string;
+  who: string;
 }
 
 interface DatasetMeta {
@@ -103,6 +128,15 @@ const getCsrfToken = (): string | null => {
   return v ? decodeURIComponent(v) : null;
 };
 
+const fmtDateTime = (iso: string): string => {
+  const d = new Date(iso.replace(" ", "T"));
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("th-TH", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+};
+
 export default function ImportExcelPage() {
   const [datasetKey, setDatasetKey] = useState("repair");
   const [file, setFile] = useState<File | null>(null);
@@ -111,10 +145,58 @@ export default function ImportExcelPage() {
   const [val, setVal] = useState<ValResp | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [page, setPage] = useState(1);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[] | null>(null);
 
   const meta = DATASETS.find((d) => d.key === datasetKey) ?? DATASETS[0];
   const okCount = val?.summary.ok ?? 0;
   const unrecognizedHeaders = (val?.headers ?? []).filter((h) => !h.recognized);
+  const totalPages = Math.max(1, Math.ceil((val?.rows.length ?? 0) / PAGE_SIZE));
+  const pageRows = useMemo(() => {
+    if (!val) return [];
+    const from = (page - 1) * PAGE_SIZE;
+    return val.rows.slice(from, from + PAGE_SIZE);
+  }, [val, page]);
+
+  const loadHistory = () => {
+    fetch("/api/v1/import_excel.php?action=history", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then((json) => setHistory(Array.isArray(json.history) ? json.history : []))
+      .catch(() => setHistory([]));
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  };
+
+  const handleTemplate = async () => {
+    setErrorMsg("");
+    try {
+      const res = await fetch(
+        `/api/v1/import_excel.php?action=template&dataset=${datasetKey}`,
+        { credentials: "include" }
+      );
+      if (!res.ok) {
+        try { const j = await res.json(); throw new Error(j?.error || `HTTP ${res.status}`); } catch { throw new Error("ดาวน์โหลดแม่แบบไม่สำเร็จ (อาจ session หมด) — ลองเข้าสู่ระบบใหม่อีกครั้ง"); }
+      }
+      const blob = await res.blob();
+      downloadBlob(blob, `CMMS_import_${datasetKey}_template.xlsx`);
+    } catch (e: unknown) {
+      setErrorMsg(e instanceof Error ? e.message : "ดาวน์โหลดแม่แบบไม่สำเร็จ");
+    }
+  };
 
   const handleValidate = async () => {
     if (!file) {
@@ -138,6 +220,7 @@ export default function ImportExcelPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
       setVal(json as ValResp);
+      setPage(1);
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "ตรวจสอบไฟล์ไม่สำเร็จ";
       setErrorMsg(msg);
@@ -147,9 +230,8 @@ export default function ImportExcelPage() {
     }
   };
 
-  const handleImport = async () => {
+  const performImport = async () => {
     if (!val) return;
-    if (!window.confirm(`ยืนยันนำเข้า ${okCount} รายการที่ผ่านการตรวจสอบ?`)) return;
     setErrorMsg("");
     setImporting(true);
     try {
@@ -161,11 +243,16 @@ export default function ImportExcelPage() {
           "Content-Type": "application/json",
           ...(csrf ? { "X-CSRF-Token": csrf } : {}),
         },
-        body: JSON.stringify({ dataset: val.dataset, rows: val.rows.filter((r) => r.ok) }),
+        body: JSON.stringify({
+          dataset: val.dataset,
+          file_name: file?.name ?? "",
+          rows: val.rows.filter((r) => r.ok),
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
       setResult(json as ImportResult);
+      loadHistory();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "นำเข้าไม่สำเร็จ";
       setErrorMsg(msg);
@@ -174,11 +261,36 @@ export default function ImportExcelPage() {
     }
   };
 
+  const handleErrorsXlsx = async () => {
+    if (!val || val.summary.error === 0) return;
+    setErrorMsg("");
+    try {
+      const csrf = getCsrfToken();
+      const res = await fetch("/api/v1/import_excel.php?action=errors_xlsx", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrf ? { "X-CSRF-Token": csrf } : {}),
+        },
+        body: JSON.stringify({ dataset: val.dataset, rows: val.rows.filter((r) => !r.ok) }),
+      });
+      if (!res.ok) {
+        try { const j = await res.json(); throw new Error(j?.error || `HTTP ${res.status}`); } catch { throw new Error("สร้างไฟล์แถว error ไม่สำเร็จ"); }
+      }
+      const blob = await res.blob();
+      downloadBlob(blob, `CMMS_import_${val.dataset}_errors.xlsx`);
+    } catch (e: unknown) {
+      setErrorMsg(e instanceof Error ? e.message : "สร้างไฟล์แถว error ไม่สำเร็จ");
+    }
+  };
+
   const resetAll = () => {
     setVal(null);
     setResult(null);
     setFile(null);
     setErrorMsg("");
+    setPage(1);
     const inp = document.getElementById("imp-file") as HTMLInputElement | null;
     if (inp) inp.value = "";
   };
@@ -222,6 +334,7 @@ export default function ImportExcelPage() {
                         setVal(null);
                         setResult(null);
                         setErrorMsg("");
+                        setPage(1);
                       }}
                       className={
                         "text-left rounded-xl border p-4 transition-colors " +
@@ -258,10 +371,7 @@ export default function ImportExcelPage() {
             <CardContent className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="font-bold">2. ดาวน์โหลดแม่แบบ และอัปโหลดไฟล์ Excel (.xlsx)</h3>
-                <Button
-                  variant="secondary"
-                  onClick={() => (window.location.href = `/api/v1/import_excel.php?action=template&dataset=${datasetKey}`)}
-                >
+                <Button variant="secondary" onClick={handleTemplate}>
                   <Download size={16} strokeWidth={1.75} aria-hidden="true" />
                   ดาวน์โหลดแม่แบบ {meta.label}
                 </Button>
@@ -292,6 +402,7 @@ export default function ImportExcelPage() {
                     setVal(null);
                     setResult(null);
                     setErrorMsg("");
+                    setPage(1);
                   }}
                 />
               </div>
@@ -326,7 +437,7 @@ export default function ImportExcelPage() {
                 </div>
               ))}
             </div>
-            <div className="rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg)] p-3">
+            <div className="rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-wash)] p-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-[var(--cmms-warning)]">
                 <ShieldAlert size={15} strokeWidth={1.75} aria-hidden="true" />
                 คำแนะนำสำคัญ
@@ -350,12 +461,18 @@ export default function ImportExcelPage() {
                   Sheet: {val.sheet} · {val.summary.total} แถว · ผ่าน {val.summary.ok} · มีปัญหา {val.summary.error}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <AndonLamp status={val.summary.error > 0 ? "warn" : "ok"} showLabel size="sm" />
+                {val.summary.error > 0 && (
+                  <Button variant="secondary" onClick={handleErrorsXlsx}>
+                    <FileDown size={16} strokeWidth={1.75} aria-hidden="true" />
+                    ดาวน์โหลดแถว error ({val.summary.error})
+                  </Button>
+                )}
                 {okCount > 0 && (
-                  <Button disabled={importing} onClick={handleImport}>
+                  <Button disabled={importing} onClick={() => setConfirmOpen(true)}>
                     <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" />
-                    {importing ? "กำลังนำเข้า..." : `ยืนยันนำเข้า ${okCount} รายการ`}
+                    ยืนยันนำเข้า {okCount} รายการ
                   </Button>
                 )}
               </div>
@@ -390,7 +507,7 @@ export default function ImportExcelPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {val.rows.map((r) => (
+                  {pageRows.map((r) => (
                     <tr
                       key={r.row}
                       className={
@@ -419,9 +536,32 @@ export default function ImportExcelPage() {
                 </tbody>
               </table>
             </div>
+
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
+                  หน้า {page} จาก {totalPages} · แสดงแถว {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, val.rows.length)} จาก {val.rows.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(1)}>
+                    <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" /> หน้าแรก
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                    <ChevronLeft size={14} strokeWidth={1.75} aria-hidden="true" /> ก่อนหน้า
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                    ถัดไป <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
+                  </Button>
+                  <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(totalPages)}>
+                    สุดท้าย <ChevronRight size={14} strokeWidth={1.75} aria-hidden="true" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <p className="text-sm text-[var(--cmms-text-secondary)]">
               <TriangleAlert size={14} strokeWidth={1.75} className="mr-1 inline" aria-hidden="true" />
-              ระบบจะนำเข้าเฉพาะแถวที่สถานะเป็นไฟเขียวเท่านั้น ({okCount} รายการ) และข้ามแถวที่มีปัญหาไว้ก่อน
+              ระบบจะนำเข้าเฉพาะแถวที่สถานะเป็นไฟเขียวเท่านั้น ({okCount} รายการ) และข้ามแถวที่มีปัญหาไว้ก่อน — กด "ดาวน์โหลดแถว error" เพื่อเอาเฉพาะแถวที่แก้ไปเป็นไฟล์ใหม่
             </p>
           </CardContent>
         </Card>
@@ -482,6 +622,71 @@ export default function ImportExcelPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* ── ประวัติการนำเข้าล่าสุด (audit trail) ── */}
+      {history && history.length > 0 && (
+        <Card>
+          <CardContent className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="cmms-icon-tile h-9 w-9">
+                <History size={16} strokeWidth={1.75} aria-hidden="true" />
+              </div>
+              <h3 className="font-bold">ประวัติการนำเข้าล่าสุด</h3>
+            </div>
+            <div className="overflow-x-auto rounded-xl border border-[var(--cmms-border)]">
+              <table className="w-full min-w-[720px] text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-left">
+                    <th className="px-3 py-2 font-semibold">ชุดข้อมูล</th>
+                    <th className="px-3 py-2 font-semibold">ไฟล์</th>
+                    <th className="px-3 py-2 font-semibold">นำเข้า</th>
+                    <th className="px-3 py-2 font-semibold">ข้าม</th>
+                    <th className="px-3 py-2 font-semibold">ผู้ทำรายการ</th>
+                    <th className="px-3 py-2 font-semibold">เวลา</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h) => {
+                    const d = DATASETS.find((x) => x.key === h.dataset);
+                    return (
+                      <tr key={h.id} className="border-b border-[var(--cmms-border)] last:border-0">
+                        <td className="px-3 py-2">{d?.label ?? h.dataset}</td>
+                        <td className="max-w-[240px] truncate px-3 py-2 text-[var(--cmms-text-secondary)]">
+                          {h.file_name || "—"}
+                        </td>
+                        <td className="px-3 py-2 font-semibold text-[var(--cmms-success)]">{h.inserted}</td>
+                        <td className={"px-3 py-2 " + (h.failed > 0 ? "font-semibold text-[var(--cmms-danger)]" : "text-[var(--cmms-text-secondary)]")}>
+                          {h.failed}
+                        </td>
+                        <td className="px-3 py-2 text-[var(--cmms-text-secondary)]">{h.who || "—"}</td>
+                        <td className="px-3 py-2 text-[var(--cmms-text-secondary)]">{fmtDateTime(h.created_at)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── ยืนยันก่อนนำเข้า (AlertDialog) ── */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ยืนยันนำเข้าข้อมูล</AlertDialogTitle>
+            <AlertDialogDescription>
+              ต้องการนำเข้า {okCount} รายการจากไฟล์ "{file?.name ?? ""}" เข้าสู่ชุดข้อมูล {val?.dataset_label}? ระบบจะข้ามแถวที่มีปัญหาไปและบันทึกเป็น transaction เดียวกันทั้งหมด
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction onClick={performImport}>
+              {importing ? "กำลังนำเข้า..." : `ยืนยันนำเข้า ${okCount} รายการ`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
