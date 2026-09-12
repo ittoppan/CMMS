@@ -115,7 +115,7 @@ export default function SupervisorQueuePage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        eyebrow={hero.eyebrow}
+        eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
         actions={

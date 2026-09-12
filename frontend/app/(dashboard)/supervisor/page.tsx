@@ -61,7 +61,7 @@ export default function SupervisorDeskPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={hero.eyebrow}
+        eyebrow={<span className="cmms-eyebrow">{hero.eyebrow}</span>}
         title={hero.title}
         description={hero.desc}
         actions={
