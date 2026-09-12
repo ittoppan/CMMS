@@ -54,6 +54,13 @@ return [
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
 
     // ---- 4.5 การอนุมัติ & เอกสาร ----
+    ['key' => 'supervisor',                 'href' => '/supervisor',                 'label' => 'คิวงานหัวหน้างาน',      'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'supervisor/queue',           'href' => '/supervisor/queue',           'label' => 'คิวงานทั้งหมด',          'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'supervisor/review',          'href' => '/supervisor/review',          'label' => 'ทบทวนคำขอแจ้งซ่อม',       'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'supervisor/plan',            'href' => '/supervisor/plan',            'label' => 'วางแผน & จัดตาราง',      'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'supervisor/verify',          'href' => '/supervisor/verify',          'label' => 'ตรวจรับงาน (Verify)',     'section' => 'ควบคุมงาน & วางแผน'],
+
+    // ---- 4.6 การอนุมัติ & เอกสาร ----
     ['key' => 'approval',                  'href' => '/approval',                  'label' => 'ศูนย์อนุมัติเอกสาร',     'section' => 'การอนุมัติ & เอกสาร'],
     ['key' => 'forms',                     'href' => '/forms',                     'label' => 'ศูนย์แบบฟอร์ม (F-EN)',   'section' => 'การอนุมัติ & เอกสาร'],
     ['key' => 'forms/designer',            'href' => '/forms/designer',            'label' => 'ออกแบบแบบฟอร์มดิจิทัล', 'section' => 'การอนุมัติ & เอกสาร'],

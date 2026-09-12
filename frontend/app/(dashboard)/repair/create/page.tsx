@@ -70,16 +70,29 @@ export default function CreateWorkOrderPage() {
 
   useEffect(() => {
     setLoadingAssets(true);
+    const assetCodeParam = (() => {
+      try {
+        return new URLSearchParams(window.location.search).get("asset_code")?.trim() || "";
+      } catch {
+        return "";
+      }
+    })();
     fetch("/api/v1/asset_registry.php")
       .then((res) => res.json())
       .then((json) => {
         if (Array.isArray(json)) {
           setAssets(json);
+          if (assetCodeParam && json.length > 0) {
+            const match = json.find((a) => String(a.code).toUpperCase() === assetCodeParam.toUpperCase());
+            if (match) {
+              setValue("asset_id", String(match.id), { shouldValidate: true });
+            }
+          }
         }
       })
       .catch((e) => console.error("Failed to load assets", e))
       .finally(() => setLoadingAssets(false));
-  }, []);
+  }, [setValue]);
 
   const onSubmit = async (values: CreateRepairFormValues) => {
     setLoading(true);

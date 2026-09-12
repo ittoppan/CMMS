@@ -134,62 +134,131 @@ class Sage300Service {
     }
 
     /**
-     * Push Inventory Issue Transaction to Sage 300 ERP IC
+     * Record Maintenance Usage (Inventory Issue) onto a Work Order.
+     *
+     * Phase 12: Sage 300 is the single source of truth for stock. This method NO LONGER
+     * deducts stock from the CMMS cache (previously it faked a Sage posting by subtracting
+     * spare_parts.stock_qty and minting S300-ISS-* documents). Since CMMS is only the
+     * maintenance layer, actual inventory posting happens in Sage 300 (manual / CSV) and the
+     * real document number is recorded later by the warehouse via sage_shipments reconciliation.
+     * Here we only accumulate the maintenance material cost snapshot and keep an audit trail.
      */
     public static function postInventoryIssue($workOrderId, $items, $issuedBy) {
         $pdo = getDb();
-        $sageDocNo = 'S300-ISS-' . date('Ymd') . '-' . sprintf('%04d', $workOrderId);
 
         $totalIssueCost = 0;
         foreach ($items as $item) {
-            $totalIssueCost += ($item['qty_issued'] * $item['unit_cost']);
-
-            // Deduct stock in CMMS
-            $stmt = $pdo->prepare("UPDATE spare_parts SET stock_qty = stock_qty - ?, reserved_qty = GREATEST(0, reserved_qty - ?) WHERE id = ?");
-            $stmt->execute([$item['qty_issued'], $item['qty_issued'], $item['spare_part_id']]);
+            $qty = (float)($item['qty_issued'] ?? $item['qty'] ?? 0);
+            $cost = (float)($item['unit_cost'] ?? $item['unit_price'] ?? 0);
+            $totalIssueCost += $qty * $cost;
         }
 
-        // Update Work Order cost
+        // Update Work Order material cost (maintenance cost tracking — not a stock deduction)
         $stmt = $pdo->prepare("UPDATE repair SET cost_parts = cost_parts + ? WHERE id = ?");
         $stmt->execute([$totalIssueCost, $workOrderId]);
 
-        // Audit Trail Log
-        self::logAudit($issuedBy, 'Sage300_Integration', 'Inventory_Issue', null, "Sage Doc: $sageDocNo | WO #$workOrderId | Total: ฿" . number_format($totalIssueCost, 2));
+        // Audit Trail Log — helps the warehouse know the actual Sage posting is done out-of-band
+        self::logAudit($issuedBy, 'Sage300_Integration', 'Inventory_Issue', null,
+            "WO #$workOrderId | Maintenance usage recorded (Pending Issue) | Total: ฿" . number_format($totalIssueCost, 2) .
+            " | Actual Sage 300 stock posting done by warehouse, then doc# recorded via sage_shipments");
 
         return [
             'success' => true,
-            'sage_doc_no' => $sageDocNo,
+            'sage_doc_no' => null,
+            'records_pending' => true,
+            'message' => 'บันทึกการเบิกจ่าย (Maintenance Usage) เรียบร้อย — สต็อกตัดจริงที่ Sage 300 โดยคลัง แล้วบันทึกเลขที่เอกสารผ่านการกระทบยอด',
             'total_cost' => $totalIssueCost
         ];
     }
 
     /**
-     * Push Inventory Return Transaction to Sage 300 ERP IC
+     * Record Maintenance Usage (Inventory Return) back onto a Work Order.
+     *
+     * Phase 12: no longer restocks the CMMS cache or mints S300-RET-* documents. CMMS records
+     * the maintenance usage snapshot only; the real Sage 300 return is posted by the warehouse
+     * out-of-band and the document number is recorded via sage_shipments reconciliation.
      */
     public static function postInventoryReturn($workOrderId, $items, $returnedBy) {
         $pdo = getDb();
-        $sageDocNo = 'S300-RET-' . date('Ymd') . '-' . sprintf('%04d', $workOrderId);
         $totalReturnCost = 0;
 
         foreach ($items as $item) {
-            $totalReturnCost += ($item['qty_returned'] * $item['unit_cost']);
-
-            // Restock in CMMS
-            $stmt = $pdo->prepare("UPDATE spare_parts SET stock_qty = stock_qty + ? WHERE id = ?");
-            $stmt->execute([$item['qty_returned'], $item['spare_part_id']]);
+            $qty = (float)($item['qty_returned'] ?? $item['qty'] ?? 0);
+            $cost = (float)($item['unit_cost'] ?? $item['unit_price'] ?? 0);
+            $totalReturnCost += $qty * $cost;
         }
 
-        // Deduct Work Order parts cost
+        // Deduct the maintenance material cost snapshot from the Work Order (not a stock restock)
         $stmt = $pdo->prepare("UPDATE repair SET cost_parts = GREATEST(0, cost_parts - ?) WHERE id = ?");
         $stmt->execute([$totalReturnCost, $workOrderId]);
 
-        self::logAudit($returnedBy, 'Sage300_Integration', 'Inventory_Return', null, "Sage Doc: $sageDocNo | WO #$workOrderId | Total Return: ฿" . number_format($totalReturnCost, 2));
+        self::logAudit($returnedBy, 'Sage300_Integration', 'Inventory_Return', null,
+            "WO #$workOrderId | Maintenance return recorded | Total Return: ฿" . number_format($totalReturnCost, 2) .
+            " | Actual Sage 300 stock return posted by warehouse, then doc# recorded via sage_shipments");
 
         return [
             'success' => true,
-            'sage_doc_no' => $sageDocNo,
+            'sage_doc_no' => null,
+            'records_pending' => true,
+            'message' => 'บันทึกการคืน (Maintenance Usage) เรียบร้อย — สต็อกคืนจริงที่ Sage 300 โดยคลัง แล้วบันทึกเลขที่เอกสารผ่านการกระทบยอด',
             'total_return_cost' => $totalReturnCost
         ];
+    }
+
+    /**
+     * Search Item Master in Sage 300 by Item No / Description (LIKE, CP874→UTF-8).
+     * Phase 12: reference key = Item Code; description never used as a key.
+     */
+    public static function searchItems($query, $limit = 30) {
+        $connObj = self::connectOdbc();
+        if (empty($connObj['success']) || $connObj['driver'] !== 'PDO_ODBC') {
+            error_log("Sage300 searchItems: ODBC ไม่พร้อมใช้งาน (driver=" . ($connObj['driver'] ?? 'none') . ") — คืนค่าว่าง");
+            return [];
+        }
+        try {
+            $pdoOdbc = $connObj['connection'];
+            $q = trim((string)$query);
+            // เปรียบเทียบกับคอลัมน์ CP874 ใน Sage → แปลง query จาก UTF-8 เป็น CP874 ก่อน
+            $qRaw = $q;
+            if ($q !== '' && function_exists('iconv')) {
+                $conv = @iconv('UTF-8', 'CP874//TRANSLIT', $q);
+                if ($conv !== false) $qRaw = $conv;
+            }
+            $qRaw = str_replace("'", "''", $qRaw);
+            // กัน wildcard ผู้ใช้เจาะ LIKE pattern
+            $like = '%' . str_replace(['%', '_'], ['[%]', '[_]'], $qRaw) . '%';
+            $sql = "
+                SELECT TOP " . (int)$limit . " i.ITEMNO AS item_no,
+                       MAX(i.[DESC]) AS description,
+                       RTRIM(MAX(i.CATEGORY)) AS category,
+                       MAX(i.STOCKUNIT) AS unit,
+                       MAX(l.LOCATION) AS location,
+                       SUM(ISNULL(l.QTYONHAND, 0)) AS qty_on_hand,
+                       MAX(ISNULL(l.RECENTCOST, l.LASTCOST)) AS avg_cost
+                FROM ICITEM i
+                LEFT JOIN ICILOC l ON i.ITEMNO = l.ITEMNO
+                WHERE RTRIM(i.ITEMNO) LIKE '$like'
+                   OR RTRIM(i.[DESC]) LIKE '$like'
+                GROUP BY i.ITEMNO
+                ORDER BY i.ITEMNO ASC
+            ";
+            $stmt = $pdoOdbc->query($sql);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as &$r) {
+                if (!empty($r['item_no'])) $r['item_no'] = trim($r['item_no']);
+                foreach (['description', 'unit', 'location'] as $f) {
+                    if (!empty($r[$f])) {
+                        $conv = @iconv("CP874", "UTF-8//IGNORE", $r[$f]);
+                        if ($conv) $r[$f] = trim($conv);
+                    }
+                }
+                $r['source'] = 'sage';
+            }
+            return $rows;
+        } catch (Exception $e) {
+            error_log("Sage300 searchItems error: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**

@@ -5,8 +5,12 @@ require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
+require_once __DIR__ . '/../../../src/helpers/roles.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
+
+// สถานะเฉพาะของ Phase 14 (Supervisor workflow) — จัดการผ่าน /api/v1/supervisor.php เท่านั้น
+$P14_ONLY_STATUSES = ['draft', 'pending_approval', 'approved', 'assigned', 'accepted', 'paused', 'waiting_external', 'pending_verification', 'verified'];
 
 try {
     $pdo = getDb();
@@ -301,16 +305,40 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // Phase 14: สถานะใน Supervisor workflow ต้องจัดการผ่าน supervisor.php เท่านั้น
+            if (isset($data['status'])) {
+                $wantedStatus = trim((string)$data['status']);
+                if (in_array($wantedStatus, $P14_ONLY_STATUSES, true) && !canSupervisor()) {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'สถานะนี้จัดการผ่าน Supervisor Workflow หน้า /supervisor เท่านั้น (ห้ามข้ามขั้นตอน)'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
             // ช่างกด "รับงาน" — ทำงานก่อนเช็คฟิลด์อื่น (ส่งมาแค่ assignee_accept ตัวเดียวก็ได้)
             $accepted = false;
             if (!empty($data['assignee_accept'])) {
                 $cu = currentUser($pdo);
                 if ($cu && $cu['id']) {
                     acceptWorkAssignment($pdo, 'repair', $id, (int)$cu['id']);
+                    // Phase 14: รับงานแล้ว → ยกระดับใบงาน assigned/approved → accepted
+                    try {
+                        $qc = $pdo->prepare('SELECT status FROM repair WHERE id = ?');
+                        $qc->execute([$id]);
+                        $curStatus = $qc->fetchColumn();
+                        if (in_array($curStatus, ['pending_approval', 'approved', 'assigned'], true)) {
+                            $pdo->prepare('UPDATE repair SET status = "accepted", status_changed_at = NOW() WHERE id = ?')->execute([$id]);
+                        }
+                    } catch (Exception $e) {
+                        error_log('[repair.php] accept status upgrade failed: ' . $e->getMessage());
+                    }
                     $accepted = true;
                 }
             }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            // Phase 14: ฟิลด์วางแผนเปิดเฉพาะหัวหน้างาน (Admin/Manager/ASST Manager/Foreman)
+            if (canSupervisor()) {
+                $allowed = array_merge($allowed, ['work_order_type', 'planned_start_at', 'planned_end_at', 'estimated_duration_minutes', 'required_skill', 'required_tools', 'safety_requirement', 'instructions', 'sla_due_at']);
+            }
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }

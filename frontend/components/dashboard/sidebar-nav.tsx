@@ -118,10 +118,22 @@ export const NAV_GROUPS: NavGroupDef[] = [
     ],
   },
   {
+    titleKey: "nav.supervisor",
+    pathPrefixes: ["/supervisor"],
+    items: [
+      { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck },
+      { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks },
+      { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck },
+      { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays },
+      { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck },
+    ],
+  },
+  {
     titleKey: "nav.spare_parts",
     pathPrefixes: ["/spare_parts", "/suppliers"],
     items: [
       { perm: "spare_parts", labelKey: "menu.spare_parts", href: "/spare_parts", icon: Box },
+      { perm: "spare_parts/overview", labelKey: "menu.spare_overview", href: "/spare_parts/overview", icon: ChartPie },
       { perm: "spare_parts/balances", labelKey: "menu.spare_balances", href: "/spare_parts/balances", icon: Database },
       { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History },
       { perm: "spare_parts/issue_center", labelKey: "menu.issue_center", href: "/spare_parts/issue_center", icon: ShoppingCart },

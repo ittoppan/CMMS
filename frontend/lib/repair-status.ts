@@ -13,7 +13,21 @@
 import { t } from "./i18n";
 import type { AndonStatus } from "@/components/AndonLamp";
 
-export type RepairStatusKey = "open" | "in_progress" | "waiting_parts" | "completed" | "closed";
+export type RepairStatusKey =
+  | "open"
+  | "in_progress"
+  | "waiting_parts"
+  | "waiting_external"
+  | "paused"
+  | "completed"
+  | "closed"
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "assigned"
+  | "accepted"
+  | "pending_verification"
+  | "verified";
 
 const DONE_RAW = new Set(["completed", "closed", "resolved", "done", "cancelled", "rejected", "skipped"]);
 
@@ -22,8 +36,17 @@ export function normalizeRepairStatus(s: string | null | undefined): RepairStatu
   const v = String(s || "").trim().toLowerCase().replace(/\s+/g, "_");
   if (v === "completed" || v === "resolved" || v === "done") return "completed";
   if (v === "closed") return "closed";
-  if (v === "in_progress" || v === "working" || v === "acknowledged" || v === "assigned") return "in_progress";
+  if (v === "draft") return "draft";
+  if (v === "pending_approval") return "pending_approval";
+  if (v === "approved") return "approved";
+  if (v === "assigned") return "assigned";
+  if (v === "accepted") return "accepted";
+  if (v === "paused") return "paused";
   if (v === "waiting_parts" || v === "pending_parts") return "waiting_parts";
+  if (v === "waiting_external" || v === "waiting_contractor") return "waiting_external";
+  if (v === "pending_verification") return "pending_verification";
+  if (v === "verified") return "verified";
+  if (v === "in_progress" || v === "working" || v === "acknowledged" || v === "started") return "in_progress";
   return "open"; // new / pending / open / ว่าง
 }
 
@@ -57,8 +80,8 @@ export function repairStatusAndon(
 ): AndonStatus {
   if (isOverdue) return "down";
   const k = normalizeRepairStatus(status);
-  if (k === "completed" || k === "closed") return "ok";
-  if (k === "in_progress" || k === "waiting_parts") return "warn";
+  if (k === "completed" || k === "closed" || k === "verified") return "ok";
+  if (k === "in_progress" || k === "waiting_parts" || k === "waiting_external" || k === "paused" || k === "accepted") return "warn";
   return "idle";
 }
 

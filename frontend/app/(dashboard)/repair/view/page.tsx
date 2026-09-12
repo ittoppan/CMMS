@@ -31,22 +31,20 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PageShell } from "@/components/PageShell";
 
 interface PartRow {
+  id: number;
   spare_part_id: number;
   code: string;
   name: string;
   image_url?: string;
   quantity_used: number;
   unit_price: number;
+  issued_qty?: number;
+  remaining?: number;
+  request_status?: string;
+  sage_doc_no?: string;
 }
 
 interface WorkOrderDetail {
@@ -103,6 +101,13 @@ const statusLabels: Record<string, string> = {
   open: "รอดำเนินการ", pending: "รอดำเนินการ", overdue: "เกินกำหนด", rejected: "ตีกลับ",
 };
 const statusLabel = (s: string) => statusText(s, s || "—");
+const requestStatusLabel = (s: string) => {
+  const m: Record<string, string> = {
+    pending: "Pending Issue — รอคลังจัดของ", Requested: "รออนุมัติ", Approved: "อนุมัติแล้ว", "Waiting Issue": "รอจ่ายของ",
+    Issued: "จ่ายของแล้ว", Returned: "คืนอะไหล่แล้ว", rejected: "ตีกลับ", Cancelled: "ยกเลิก",
+  };
+  return m[String(s || "")] || (String(s || "") ? String(s) : "Pending Issue");
+};
 
 // ผลตรวจการปนเปื้อน (เหมือนหน้า /repair + PDF F-EN-03)
 const contamLabel: Record<string, string> = {
@@ -156,14 +161,16 @@ export default function RepairViewDetailsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<any>(null);
-  // ── เบิกอะไหล่จากใบซ่อม (Feature: ใบเบิก + ตัดสต็อก) ──
-  const [catalog, setCatalog] = useState<any[]>([]);
+  // ── เบิกอะไหล่จากใบซ่อม (Phase 12: Sage 300 = source of truth ของสต็อก; CMMS เก็บบันทึกการเบิก Pending Issue) ──
   const [partRows, setPartRows] = useState<PartRow[]>([]);
-  const [newPartId, setNewPartId] = useState("");
-  const [newQty, setNewQty] = useState("1");
   const [partsSaving, setPartsSaving] = useState(false);
   const [partsMsg, setPartsMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [deductStock, setDeductStock] = useState(true);
+  const [sageQuery, setSageQuery] = useState("");
+  const [sageResults, setSageResults] = useState<any[]>([]);
+  const [sageSearching, setSageSearching] = useState(false);
+  const [sageSource, setSageSource] = useState<"sage" | "cache">("sage");
+  const [lastStockInfo, setLastStockInfo] = useState<{ last_synced_at?: string; request_count: number; request_status?: string }>({ request_count: 0 });
+  const [sageMsg, setSageMsg] = useState<string | null>(null);
   // โหมด offline — แสดง banner + เวลา "ข้อมูล ณ" จาก snapshot (IndexedDB)
   const [offline, setOffline] = useState(false);
   const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
@@ -261,46 +268,8 @@ export default function RepairViewDetailsPage() {
       })
       .finally(() => setLoading(false));
 
-    // อะไหล่ที่ใช้ซ่อม (สำหรับตารางในเอกสาร F-EN-03 + ใบเบิก)
-    fetch(`/api/v1/repair.php?parts=1&id=${idParam}`)
-      .then(res => res.json())
-      .then(partsJson => {
-        if (Array.isArray(partsJson)) {
-          const mapped = partsJson.map((p: any) => ({
-            code: p.code || "",
-            name: p.name || "",
-            quantity_used: Number(p.quantity_used) || 0,
-            unit_price: Number(p.unit_price) || 0,
-          }));
-          setParts(mapped);
-          setPartRows(partsJson.map((p: any) => ({
-            spare_part_id: Number(p.spare_part_id) || 0,
-            code: p.code || "",
-            name: p.name || "",
-            image_url: p.image_url || "",
-            quantity_used: Number(p.quantity_used) || 0,
-            unit_price: Number(p.unit_price) || 0,
-          })));
-        }
-      })
-      .catch(e => console.error("Fetch WO parts error", e));
-
-    // รายการอะไหล่ในคลัง (สำหรับเลือกเบิก)
-    fetch("/api/v1/spare_parts.php")
-      .then(res => res.json())
-      .then((list: any[]) => { if (Array.isArray(list)) setCatalog(list); })
-      .catch(e => console.error("Fetch spare catalog error", e));
-
-    // ตรวจว่าตัดสต็อกอัตโนมัติเปิดอยู่หรือไม่
-    fetch("/api/v1/settings.php")
-      .then(res => res.json())
-      .then((rows: any[]) => {
-        if (Array.isArray(rows)) {
-          const row = rows.find((x) => x.setting_key === "spare_deduct_stock");
-          if (row) setDeductStock(String(row.setting_value) === "1");
-        }
-      })
-      .catch(() => { /* default true */ });
+    // อะไหล่ที่ใช้ซ่อม + สถานะใบเบิก Pending Issue (Phase 12: มาจาก spare_usage.php)
+    loadParts(idParam);
 
     // ไทม์ไลน์การซ่อม (repair_activity_log)
     fetch(`/api/v1/repair.php?activity=1&id=${idParam}`)
@@ -402,56 +371,134 @@ export default function RepairViewDetailsPage() {
     pdfRef.current = null;
   };
 
-  // ── เบิกอะไหล่จากใบซ่อม ──
-  const addPart = () => {
-    const spId = Number(newPartId);
-    if (!spId) { setPartsMsg({ kind: "err", text: "กรุณาเลือกอะไหล่ก่อนเพิ่ม" }); return; }
-    const qty = Math.max(1, Number(newQty) || 1);
-    const sp = catalog.find((c) => Number(c.id) === spId);
-    if (!sp) return;
-    const existing = partRows.find((r) => r.spare_part_id === spId);
-    if (existing) {
-      setPartRows(partRows.map((r) => (r.spare_part_id === spId ? { ...r, quantity_used: r.quantity_used + qty } : r)));
-    } else {
-      setPartRows([...partRows, {
-        spare_part_id: spId,
-        code: sp.code || "",
-        name: sp.name || "",
-        quantity_used: qty,
-        unit_price: Number(sp.unit_price) || 0,
-      }]);
+  // ── เบิกอะไหล่จากใบซ่อม (Phase 12) ──
+  const loadParts = async (idParam: string) => {
+    try {
+      const res = await fetch(`/api/v1/spare_usage.php?work_order_id=${idParam}`, { credentials: "include" });
+      const json = await res.json();
+      if (json && Array.isArray(json.parts)) {
+        const mapped: PartRow[] = json.parts.map((p: any) => ({
+          id: Number(p.id) || 0,
+          spare_part_id: Number(p.spare_part_id) || 0,
+          code: p.item_code || p.sage_item_code || "",
+          name: p.item_description || "",
+          quantity_used: Number(p.quantity_used) || Number(p.qty) || 0,
+          unit_price: Number(p.unit_price) || 0,
+          issued_qty: Number(p.issued_qty) || 0,
+          remaining: Number(p.remaining) || 0,
+          request_status: String(p.request_status || ""),
+          sage_doc_no: p.sage_doc_no || "",
+        }));
+        setParts(mapped.map((m) => ({ code: m.code, name: m.name, quantity_used: m.quantity_used, unit_price: m.unit_price })));
+        setPartRows(mapped);
+        setLastStockInfo({
+          last_synced_at: json.last_synced_at || (json.parts as any[]).find((x) => x.last_synced_at)?.last_synced_at || undefined,
+          request_count: (json.parts as any[]).filter((x) => x.request_id).length,
+          request_status: String((json.parts as any[]).find((x) => x.request_status)?.request_status || ""),
+        });
+        setPartsMsg(null);
+      }
+      return json;
+    } catch (e) {
+      console.error("Fetch WO usage error", e);
+      return null;
     }
-    setNewPartId("");
-    setNewQty("1");
-    setPartsMsg(null);
   };
 
-  const removePart = (spId: number) => setPartRows(partRows.filter((r) => r.spare_part_id !== spId));
-
-  const saveParts = async () => {
+  const addSagePart = async (item: any) => {
+    const qty = Math.max(1, Number(sageQtyRef.current || 1));
+    if (!item?.item_no) { setSageMsg("เลือกอะไหล่จากรายการค้นหาก่อน"); return; }
     setPartsSaving(true);
+    setSageMsg(null);
     setPartsMsg(null);
     try {
-      const res = await fetch(`/api/v1/repair.php?id=${woId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          spare_parts: partRows.map((r) => ({ spare_part_id: r.spare_part_id, quantity_used: r.quantity_used, unit_price: r.unit_price })),
-        }),
+      const csrf = await (await fetch("/api/v1/csrf.php", { credentials: "include" })).json();
+      const res = await fetch("/api/v1/spare_usage.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf.csrf_token },
+        body: JSON.stringify({ action: "add", work_order_id: Number(woId), items: [{ item_code: item.item_no, qty }] }),
       });
       const json = await res.json();
       if (json.success) {
-        setParts(partRows.map((r) => ({ code: r.code, name: r.name, quantity_used: r.quantity_used, unit_price: r.unit_price })));
-        setPartsMsg({ kind: "ok", text: deductStock ? "บันทึกรายการอะไหล่แล้ว — สต็อกถูกตัดอัตโนมัติแล้ว" : "บันทึกรายการอะไหล่แล้ว (ไม่ตัดสต็อก — ปิดการตั้งค่า spare_deduct_stock)" });
+        setSageMsg(`เพิ่ม ${item.item_no} — ${item.description} (${qty} ${item.unit || "PCS"}) แล้ว · ใบเบิก #${json.request_id} (Pending Issue)`);
+        setSageQuery("");
+        setSageResults([]);
+        await loadParts(String(woId));
       } else {
-        setPartsMsg({ kind: "err", text: json.error || "บันทึกรายการอะไหล่ไม่สำเร็จ" });
+        setPartsMsg({ kind: "err", text: json.error || "เพิ่มอะไหล่ไม่สำเร็จ" });
       }
     } catch (e) {
       console.error(e);
-      setPartsMsg({ kind: "err", text: "ไม่สามารถบันทึกรายการอะไหล่ได้ (เน็ตหลุด?) — ลองอีกครั้ง" });
+      setPartsMsg({ kind: "err", text: "ไม่สามารถเพิ่มอะไหล่ได้ (เน็ตหลุด?) — ลองอีกครั้ง" });
     }
     setPartsSaving(false);
   };
+
+  const removePart = async (rowId: number) => {
+    if (!rowId) return;
+    try {
+      const csrf = await (await fetch("/api/v1/csrf.php", { credentials: "include" })).json();
+      const res = await fetch("/api/v1/spare_usage.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf.csrf_token },
+        body: JSON.stringify({ action: "remove", id: rowId }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setPartRows(partRows.filter((r) => r.id !== rowId));
+        await loadParts(String(woId));
+      } else {
+        setPartsMsg({ kind: "err", text: json.error || "ลบรายการไม่สำเร็จ" });
+      }
+    } catch (e) {
+      console.error(e);
+      setPartsMsg({ kind: "err", text: "ไม่สามารถลบรายการได้ (เน็ตหลุด?)" });
+    }
+  };
+
+  const updateQty = async (rowId: number, qty: number) => {
+    if (!rowId || qty <= 0) return;
+    try {
+      const csrf = await (await fetch("/api/v1/csrf.php", { credentials: "include" })).json();
+      await fetch("/api/v1/spare_usage.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf.csrf_token },
+        body: JSON.stringify({ action: "set_qty", id: rowId, qty }),
+      });
+      loadParts(String(woId));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const sageQtyRef = useRef("1");
+
+  // ค้นหา Item ใน Sage 300 (debounce) — ผลลัพธ์โชว์สต็อกจริงจาก Sage 300
+  useEffect(() => {
+    const q = sageQuery.trim();
+    if (!q) { setSageResults([]); return; }
+    setSageSearching(true);
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/sage_items.php?q=${encodeURIComponent(q)}`, { credentials: "include" });
+        const json = await res.json();
+        if (Array.isArray(json.items)) {
+          setSageResults(json.items);
+          setSageSource(json.source === "cache" ? "cache" : "sage");
+        } else {
+          setSageResults([]);
+        }
+      } catch (e) {
+        console.error("Sage search error", e);
+        setSageResults([]);
+      }
+      setSageSearching(false);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [sageQuery]);
 
   const partsTotal = partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0);
 
@@ -708,33 +755,30 @@ export default function RepairViewDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* ── เบิกอะไหล่ที่ใช้ซ่อม (ใบเบิก + ตัดสต็อก) ── */}
+        {/* ── เบิกอะไหล่ที่ใช้ซ่อม (Phase 12: Pending Issue — สต็อกอ้างอิง Sage 300) ── */}
         <Card className="mb-6">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                SPARE PARTS USED · F-EN-03
+                SPARE PARTS USED · F-EN-03 · PENDING ISSUE
               </span>
               <CardTitle className="text-base">อะไหล่ที่ใช้ซ่อม (ใบเบิก)</CardTitle>
             </div>
             <div className="flex items-center gap-2 flex-wrap text-xs">
-              {wo.spareApprovalStatus === "approved" && (
+              {lastStockInfo.request_status === "Issued" && (
                 <Badge variant="success">
-                  ✅ อนุมัติแล้ว{wo.spareApprovedBy ? ` โดย ${wo.spareApprovedBy}` : ""}{wo.spareApprovedAt ? ` · ${String(wo.spareApprovedAt).slice(0, 10)}` : ""}
+                  ✅ จ่ายของแล้ว{partRows[0]?.sage_doc_no ? ` · เอกสาร ${partRows.find((r) => r.sage_doc_no)?.sage_doc_no}` : ""}
                 </Badge>
               )}
-              {wo.spareApprovalStatus === "rejected" && (
-                <Badge variant="danger">
-                  ❌ ไม่อนุมัติ{wo.spareApprovedBy ? ` โดย ${wo.spareApprovedBy}` : ""}{wo.spareApprovedAt ? ` · ${String(wo.spareApprovedAt).slice(0, 10)}` : ""}
-                </Badge>
+              {lastStockInfo.request_status && lastStockInfo.request_status !== "Issued" && lastStockInfo.request_status !== "Returned" && (
+                <Badge variant="warning">⏳ {requestStatusLabel(lastStockInfo.request_status)} {lastStockInfo.request_count > 0 ? `(${lastStockInfo.request_count} ใบเบิก)` : ""}</Badge>
               )}
-              {wo.spareApprovalStatus === "pending" && (
-                <Badge variant="warning">
-                  ⏳ รอหัวหน้าอนุมัติ (กดปุ่มใน LINE)
-                </Badge>
+              {lastStockInfo.request_status === "Returned" && (
+                <Badge variant="info">คืนอะไหล่แล้ว</Badge>
               )}
               <span className="text-muted-foreground">
-                รวม {partsTotal.toLocaleString()} บาท · {deductStock ? "ตัดสต็อกอัตโนมัติ" : "ไม่ตัดสต็อก (ปิดการตั้งค่า)"}
+                รวม {partsTotal.toLocaleString()} บาท · สต็อกอ้างอิงรายการ: <span className="font-semibold text-foreground">Sage 300 (Last known)</span>
+                {lastStockInfo.last_synced_at ? ` · ข้อมูล ณ ${String(lastStockInfo.last_synced_at).slice(0, 16)}` : partRows.length ? " (ยังไม่เคยซิงก์)" : " · ยังไม่มีการเบิกในใบนี้"}
               </span>
             </div>
           </CardHeader>
@@ -748,36 +792,44 @@ export default function RepairViewDetailsPage() {
 
             {/* รายการที่เลือกแล้ว */}
             {partRows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">ยังไม่มีอะไหล่ในใบเบิก — เลือกจากคลังด้านล่าง</p>
+              <p className="text-sm text-muted-foreground">ยังไม่มีอะไหล่ในใบเบิก — ค้นหา Item Code ใน Sage 300 แล้วกด "เพิ่ม" ด้านล่าง</p>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted/60 text-left border-b border-border">
-                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รูป</th>
                       <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
                       <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
                       <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวน</th>
                       <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ราคา/หน่วย</th>
                       <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รวม</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">สถานะเบิก</th>
                       <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {partRows.map((r) => (
-                      <tr key={r.spare_part_id} className="transition-colors hover:bg-primary-light/60">
+                      <tr key={`${r.id}-${r.code}`} className="transition-colors hover:bg-primary-light/60">
                         <td className="p-3">
-                          <img
-                            src={r.image_url || `/api/v1/spare_image.php?id=${r.spare_part_id}`}
-                            onError={(e) => {
-                              const t = e.currentTarget;
-                              if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${r.spare_part_id}`;
-                            }}
-                            alt={r.code}
-                            className="w-10 h-10 rounded-lg object-cover border border-border"
-                          />
+                          <div className="flex items-center gap-2">
+                            {r.image_url ? (
+                              <img
+                                src={r.image_url}
+                                onError={(e) => {
+                                  const t = e.currentTarget;
+                                  if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${r.spare_part_id}`;
+                                }}
+                                alt={r.code}
+                                className="w-8 h-8 rounded-lg object-cover border border-border"
+                              />
+                            ) : (
+                              <span className="w-8 h-8 rounded-lg bg-primary-light/50 border border-border flex items-center justify-center text-xs font-bold text-primary uppercase">
+                                {(r.name || r.code || "?").charAt(0)}
+                              </span>
+                            )}
+                            <span className="font-semibold">{r.code}</span>
+                          </div>
                         </td>
-                        <td className="p-3 font-semibold">{r.code}</td>
                         <td className="p-3">{r.name}</td>
                         <td className="p-3">
                           <input
@@ -785,20 +837,33 @@ export default function RepairViewDetailsPage() {
                             min={1}
                             value={r.quantity_used}
                             onChange={(e) =>
-                              setPartRows(partRows.map((x) => (x.spare_part_id === r.spare_part_id ? { ...x, quantity_used: Math.max(1, Number(e.target.value) || 1) } : x)))
+                              setPartRows(partRows.map((x) => (x.id === r.id ? { ...x, quantity_used: Math.max(1, Number(e.target.value) || 1) } : x)))
                             }
-                            className="w-20 px-2 py-1 rounded-lg border border-input bg-card text-sm"
+                            onBlur={(e) => updateQty(r.id, Math.max(1, Number(e.target.value) || 1))}
+                            disabled={Number(r.issued_qty) > 0}
+                            className="w-20 px-2 py-1 rounded-lg border border-input bg-card text-sm disabled:opacity-50"
                           />
                         </td>
                         <td className="p-3 tabular-nums">{(r.unit_price || 0).toLocaleString()}</td>
                         <td className="p-3 font-semibold tabular-nums">{(r.quantity_used * (r.unit_price || 0)).toLocaleString()}</td>
+                        <td className="p-3 text-xs">
+                          {r.request_status === "Issued" ? (
+                            <Badge variant="success">จ่ายแล้ว {Number(r.issued_qty || 0).toLocaleString()}{Number(r.remaining) > 0 ? ` · เหลือ ${r.remaining}` : ""}</Badge>
+                          ) : r.request_status === "Returned" ? (
+                            <Badge variant="info">คืนแล้ว</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">ยังไม่จ่าย (Pending)</span>
+                          )}
+                          {r.sage_doc_no && <span className="block mt-0.5 text-[11px] text-muted-foreground tabular-nums">อ้างอิง {r.sage_doc_no}</span>}
+                        </td>
                         <td className="p-3 text-right">
                           <Button
                             variant="ghost"
                             size="sm"
                             aria-label={`นำอะไหล่ ${r.code} ออก`}
-                            onClick={() => removePart(r.spare_part_id)}
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => removePart(r.id)}
+                            disabled={Number(r.issued_qty) > 0}
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -810,51 +875,82 @@ export default function RepairViewDetailsPage() {
               </div>
             )}
 
-            {/* เพิ่มอะไหล่จากคลัง */}
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="space-y-1.5 min-w-[240px] flex-1">
-                <Label htmlFor="repair-view-new-part">เลือกอะไหล่จากคลัง</Label>
-                <Select
-                  value={newPartId || "__none__"}
-                  onValueChange={(v) => setNewPartId(v === "__none__" ? "" : v)}
-                >
-                  <SelectTrigger id="repair-view-new-part">
-                    <SelectValue placeholder="— เลือกอะไหล่จากคลัง —" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">— เลือกอะไหล่จากคลัง —</SelectItem>
-                    {catalog.map((sp) => (
-                      <SelectItem key={sp.id} value={String(sp.id)}>
-                        {sp.code} — {sp.name} (คงเหลือ {Number(sp.stock_qty ?? 0)})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* ค้นหา & เพิ่มอะไหล่ — สต็อกจริงจาก Sage 300 (Item Code เป็น reference key) */}
+            <div className="rounded-xl border border-border p-3 space-y-3">
+              <Label htmlFor="repair-view-sage-q">ค้นหาอะไหล่ใน Sage 300 (รหัส Item / ชื่อไทย-อังกฤษ)</Label>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="space-y-1.5 min-w-[220px] flex-1">
+                  <Input
+                    id="repair-view-sage-q"
+                    placeholder="เช่น SUP001 · O-RING · ตลับลูกปืน"
+                    value={sageQuery}
+                    onChange={(e) => setSageQuery(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5 w-24">
+                  <Label htmlFor="repair-view-new-qty">จำนวน</Label>
+                  <Input
+                    id="repair-view-new-qty"
+                    type="number"
+                    min={1}
+                    defaultValue="1"
+                    onChange={(e) => (sageQtyRef.current = e.target.value)}
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5 w-20">
-                <Label htmlFor="repair-view-new-qty">จำนวนที่เบิก</Label>
-                <Input
-                  id="repair-view-new-qty"
-                  type="number"
-                  min={1}
-                  value={newQty}
-                  onChange={(e) => setNewQty(e.target.value)}
-                />
-              </div>
-              <Button variant="outline" onClick={addPart} className="gap-1.5">
-                <Plus className="w-4 h-4" />
-                <span>เพิ่ม</span>
-              </Button>
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <Button
-                variant="primary"
-                onClick={saveParts}
-                disabled={partsSaving || partRows.length === 0}
-              >
-                {partsSaving ? "กำลังบันทึก..." : "บันทึกรายการอะไหล่"}
-              </Button>
+              {sageSearching ? (
+                <p className="text-xs text-muted-foreground">กำลังค้นหาบน Sage 300…</p>
+              ) : sageResults.length > 0 ? (
+                <div className="overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-muted/60 text-left border-b border-border">
+                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Item Code</th>
+                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่อรายการ</th>
+                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">คงเหลือ (Sage 300)</th>
+                        <th className="p-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">ราคา/หน่วย</th>
+                        <th className="p-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">เพิ่ม</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {sageResults.map((it) => (
+                        <tr key={it.item_no} className="transition-colors hover:bg-primary-light/60">
+                          <td className="p-2.5 font-semibold">{it.item_no}</td>
+                          <td className="p-2.5">
+                            {it.description}
+                            <span className="text-[10px] text-muted-foreground"> ({it.unit})</span>
+                          </td>
+                          <td className="p-2.5">
+                            <span className={`inline-flex items-center gap-1 font-semibold tabular-nums ${Number(it.available) > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
+                              {Number(it.available).toLocaleString()}
+                            </span>
+                            {it.stock_status === "low" && <Badge variant="warning" className="ml-1.5">น้อย</Badge>}
+                            {it.stock_status === "out_of_stock" && <Badge variant="danger" className="ml-1.5">หมด</Badge>}
+                          </td>
+                          <td className="p-2.5 tabular-nums">{(Number(it.avg_cost) || 0).toLocaleString()}</td>
+                          <td className="p-2.5 text-right">
+                            <Button size="sm" variant="outline" onClick={() => addSagePart(it)} disabled={partsSaving} className="gap-1.5">
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>เพิ่ม</span>
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : sageQuery.trim() ? (
+                <p className="text-xs text-muted-foreground">ไม่พบรายการ "{sageQuery.trim()}" — ลองเปลี่ยนคำค้น หรือ Sage 300 ไม่พร้อม (แสดงผลจาก cache เท่านั้น)</p>
+              ) : null}
+
+              <p className="text-[11px] text-muted-foreground">
+                แหล่งข้อมูล: {sageSource === "cache" ? "แคชล่าสุด (Last known stock — Sage 300 ไม่พร้อมใช้งาน)" : "อัปเดตสดจาก Sage 300"}
+                <span className="ml-1">
+                  · การเพิ่มจะสร้าง <span className="font-semibold">Pending Issue</span> ให้คลังจัดของจริงใน Sage 300 · ค่าอะไหล่ใช้ต้นทุนล่าสุดบันทึกในใบสั่งซ่อม
+                </span>
+              </p>
+              {sageMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{sageMsg}</p>}
             </div>
           </CardContent>
         </Card>

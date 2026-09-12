@@ -311,6 +311,15 @@ export default function PMSchedulePage() {
             )}
             <button
               type="button"
+              onClick={() => router.push(`/pm_am/view?id=${item.rawId}`)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}
+            >
+              <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
+              รายละเอียด
+            </button>
+            <button
+              type="button"
               onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
               style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}

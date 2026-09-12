@@ -27,6 +27,7 @@ import {
   Search,
   SquarePen,
   Trash2,
+  Eye,
 } from "lucide-react";
 
 interface AssetRecord extends Record<string, unknown> {
@@ -231,6 +232,16 @@ export default function AssetRegistryPage() {
       align: "right",
       renderCell: (item) => (
         <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label="ดูรายละเอียด"
+            title="ดูรายละเอียด"
+            onClick={() => router.push(`/asset_registry/view?id=${item.rawId || item.id}`)}
+          >
+            <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"

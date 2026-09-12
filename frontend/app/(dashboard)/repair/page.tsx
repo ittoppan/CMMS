@@ -142,6 +142,11 @@ export default function WorkOrdersPage() {
     setError(null);
   }, []);
 
+  useEffect(() => {
+    const wo = new URLSearchParams(window.location.search).get("wo")?.trim();
+    if (wo) setSearch(wo);
+  }, []);
+
   const filtered = useMemo(() => {
     const statusGroup = (s: string) => {
       const v = String(s || "").toLowerCase();

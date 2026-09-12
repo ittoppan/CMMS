@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
@@ -22,9 +24,24 @@ const FREQ_LABELS: Record<string, string> = {
   quarterly: "รายไตรมาส", yearly: "รายปี", one_time: "ครั้งเดียว",
 };
 
+const ITEM_TYPES: { value: string; label: string }[] = [
+  { value: "check", label: "ตรวจ (ผ่าน/ไม่ผ่าน)" },
+  { value: "yes_no", label: "ใช่/ไม่ใช่" },
+  { value: "pass_fail", label: "ผ่าน/ไม่ผ่าน" },
+  { value: "numeric", label: "# ตัวเลข (เกณฑ์ min-max)" },
+  { value: "measurement", label: "# วัดค่า (บันทึกเป็นข้อมูล)" },
+  { value: "text", label: "ข้อความ" },
+  { value: "dropdown", label: "ตัวเลือก (dropdown)" },
+  { value: "date_time", label: "วัน/เวลา" },
+];
+
+const NUMERIC_TYPES = ["numeric", "measurement", "value"];
+
 interface Item {
-  id?: number; task: string; type: "check" | "value";
+  id?: number; task: string; type: string;
   standard: string; min_value: string; max_value: string; unit: string;
+  options: string; is_required: boolean; photo_required: boolean; remark_required: boolean;
+  failure_action: string; pass_criteria: string;
 }
 
 export default function InspectionTemplatesPage() {
@@ -72,6 +89,12 @@ export default function InspectionTemplatesPage() {
         id: i.id, task: i.task, type: i.type, standard: i.standard || "",
         min_value: i.min_value != null ? String(i.min_value) : "", max_value: i.max_value != null ? String(i.max_value) : "",
         unit: i.unit || "",
+        options: i.options ? (Array.isArray(i.options) ? i.options.join("\n") : String(i.options)) : "",
+        is_required: Number(i.is_required ?? 1) === 1,
+        photo_required: Number(i.photo_required ?? 0) === 1,
+        remark_required: Number(i.remark_required ?? 0) === 1,
+        failure_action: i.failure_action || "",
+        pass_criteria: i.pass_criteria || "",
       })));
     } catch { setItems([]); }
   };
@@ -98,7 +121,16 @@ export default function InspectionTemplatesPage() {
       const keepIds = new Set(items.map((it) => it.id).filter(Boolean));
       for (const idx of items.keys()) {
         const it = items[idx];
-        const body = JSON.stringify({ task: it.task, type: it.type, standard: it.standard, min_value: it.min_value || null, max_value: it.max_value || null, unit: it.unit, seq: idx });
+        const body = JSON.stringify({
+          task: it.task, type: it.type, standard: it.standard,
+          min_value: it.min_value || null, max_value: it.max_value || null, unit: it.unit, seq: idx,
+          options: it.type === "dropdown" ? it.options.split(/\r?\n/).map((s) => s.trim()).filter(Boolean) : null,
+          is_required: it.is_required ? 1 : 0,
+          photo_required: it.photo_required ? 1 : 0,
+          remark_required: it.remark_required ? 1 : 0,
+          failure_action: it.failure_action || "",
+          pass_criteria: it.pass_criteria || "",
+        });
         if (it.id) {
           await fetch(`/api/v1/inspections.php?item=${it.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body });
         } else {
@@ -134,7 +166,7 @@ export default function InspectionTemplatesPage() {
   };
 
   const addItem = () => {
-    setItems((prev) => [...prev, { task: "", type: "check", standard: "", min_value: "", max_value: "", unit: "" }]);
+    setItems((prev) => [...prev, { task: "", type: "check", standard: "", min_value: "", max_value: "", unit: "", options: "", is_required: true, photo_required: false, remark_required: false, failure_action: "", pass_criteria: "" }]);
   };
 
   const removeItem = (idx: number) => {
@@ -241,16 +273,17 @@ export default function InspectionTemplatesPage() {
                         onChange={(e) => updateItem(idx, { task: e.target.value })}
                       />
                     </div>
-                    <div className="w-[130px]">
+                    <div className="w-[190px]">
                       <div className="space-y-1.5">
                         <Label className="sr-only">ประเภท</Label>
-                        <Select value={it.type} onValueChange={(v) => updateItem(idx, { type: v === "value" ? "value" : "check" })}>
+                        <Select value={it.type} onValueChange={(v) => updateItem(idx, { type: v })}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="check">ตรวจ</SelectItem>
-                            <SelectItem value="value"># ค่าตัวเลข</SelectItem>
+                            {ITEM_TYPES.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -266,7 +299,7 @@ export default function InspectionTemplatesPage() {
                       <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                     </button>
                   </div>
-                  {it.type === "value" && (
+                  {NUMERIC_TYPES.includes(it.type) && (
                     <div className="flex flex-wrap gap-2 pl-[34px]">
                       <div className="w-[160px]">
                         <Input label="เกณฑ์อ้างอิง" placeholder="เช่น อุณหภูมิมอเตอร์" value={it.standard} onChange={(e) => updateItem(idx, { standard: e.target.value })} />
@@ -282,6 +315,44 @@ export default function InspectionTemplatesPage() {
                       </div>
                     </div>
                   )}
+                  {it.type === "dropdown" && (
+                    <div className="pl-[34px]">
+                      <Textarea
+                        label="ตัวเลือก (บรรทัดละ 1 ตัวเลือก)"
+                        placeholder={"ตัวอย่าง:\nปกติ\nผิดปกติ (จุดหลอดไฟแดง)"}
+                        value={it.options}
+                        onChange={(e) => updateItem(idx, { options: e.target.value })}
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pl-[34px] pt-1">
+                    <label className="flex items-center gap-2 text-sm" style={{ color: "var(--cmms-text-secondary)" }}>
+                      <Checkbox checked={it.is_required} onCheckedChange={(v) => updateItem(idx, { is_required: v === true })} />
+                      จําเป็นต้องตอบ
+                    </label>
+                    <label className="flex items-center gap-2 text-sm" style={{ color: "var(--cmms-text-secondary)" }}>
+                      <Checkbox checked={it.photo_required} onCheckedChange={(v) => updateItem(idx, { photo_required: v === true })} />
+                      ต้องถ่ายรูปหลักฐาน
+                    </label>
+                    <label className="flex items-center gap-2 text-sm" style={{ color: "var(--cmms-text-secondary)" }}>
+                      <Checkbox checked={it.remark_required} onCheckedChange={(v) => updateItem(idx, { remark_required: v === true })} />
+                      ต้องระบุหมายเหตุ
+                    </label>
+                    <div className="w-[180px]">
+                      <div className="space-y-1.5">
+                        <Label className="sr-only">การจัดการเมื่อไม่ผ่าน</Label>
+                        <Select value={it.failure_action || "none"} onValueChange={(v) => updateItem(idx, { failure_action: v === "none" ? "" : v })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="ผลเมื่อไม่ผ่าน..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">ผลเมื่อไม่ผ่าน: ปกติ</SelectItem>
+                            <SelectItem value="critical">วิกฤต (หยุดเครื่อง/สร้างงานด่วน)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

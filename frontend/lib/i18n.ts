@@ -24,6 +24,7 @@ export type Lang = "th" | "en";
 const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
   "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
+  "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
@@ -44,6 +45,11 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.kanban": { th: "กระดานคัมบัง", en: "Kanban Board" },
   "menu.history": { th: "ประวัติงานซ่อม", en: "Repair History" },
   "menu.approval": { th: "ศูนย์อนุมัติเอกสาร", en: "Approval Center" },
+  "menu.supervisor": { th: "คิวงานหัวหน้างาน", en: "Supervisor Desk" },
+  "menu.supervisor_queue": { th: "คิวงานทั้งหมด", en: "Work Queue" },
+  "menu.supervisor_review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
+  "menu.supervisor_plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
+  "menu.supervisor_verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
   "menu.forms": { th: "ศูนย์แบบฟอร์ม", en: "Forms Center (F-EN)" },
   "menu.forms_designer": { th: "ออกแบบแบบฟอร์มดิจิทัล", en: "Form Designer" },
   "menu.manuals": { th: "คู่มือการใช้งาน", en: "User Manuals" },
@@ -67,6 +73,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.calibration_tracking": { th: "ติดตามงานสอบเทียบ", en: "Calibration Tracking" },
   "menu.mtbf_mttr": { th: "วิเคราะห์ MTBF/MTTR", en: "MTBF/MTTR Analysis" },
   "menu.spare_parts": { th: "คลังสต็อกอะไหล่", en: "Spare Parts Stock" },
+  "menu.spare_overview": { th: "ภาพรวมสต็อก & การเบิก", en: "Stock & Usage Overview" },
   "menu.spare_balances": { th: "ยอดคงเหลืออะไหล่", en: "Stock Balances" },
   "menu.spare_returns": { th: "สต็อกอะไหล่คืนซาก", en: "Part Returns (Scrap)" },
   "menu.issue_center": { th: "ศูนย์เบิก-จ่าย Sage", en: "Issue Center (Sage)" },
@@ -131,7 +138,16 @@ const DICT: Record<string, { th: string; en: string }> = {
   "status.skipped": { th: "ข้ามรอบ", en: "Skipped" },
   "status.overdue": { th: "เกินกำหนด", en: "Overdue" },
   "status.approved": { th: "อนุมัติแล้ว", en: "Approved" },
+  "status.pending_approval": { th: "รออนุมัติ/วางแผน", en: "Pending Approval" },
   "status.waiting_approval": { th: "รออนุมัติ", en: "Waiting Approval" },
+  "status.draft": { th: "ร่างแผนงาน", en: "Draft" },
+  "status.accepted": { th: "รับงานแล้ว", en: "Accepted" },
+  "status.paused": { th: "หยุดชั่วคราว", en: "Paused" },
+  "status.waiting_external": { th: "รอหน่วยภายนอก", en: "Waiting External" },
+  "status.pending_verification": { th: "รอตรวจรับ", en: "Pending Verification" },
+  "status.verified": { th: "ตรวจรับแล้ว", en: "Verified" },
+  "status.pending_review": { th: "รอทบทวน", en: "Pending Review" },
+  "status.pending_plan": { th: "รอวางแผน", en: "Pending Plan" },
 
   // ── ปุ่ม / แอคชันกลาง ──
   "action.save": { th: "บันทึก", en: "Save" },
@@ -517,6 +533,7 @@ const _tbl: Record<string, { th: string; en: string }> = {
 for (const k in _tbl) { DICT["tbl." + k] = _tbl[k]; }
 
 // ── ปุ่มเพิ่มเติม ──
+DICT["dashboard.footer"] = { th: "© CMMS-TOPPAN — ระบบบริหารงานซ่อมบำรุง", en: "© CMMS-TOPPAN — Maintenance Suite" };
 DICT["action.download_pdf"] = { th: "ดาวน์โหลด PDF", en: "Download PDF" };
 DICT["action.building_pdf"] = { th: "กำลังสร้าง PDF...", en: "Building PDF..." };
 DICT["action.update_status"] = { th: "อัปเดตสถานะ", en: "Update Status" };
@@ -554,6 +571,11 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/repair/kanban": { th: "กระดานคัมบัง", en: "Kanban Board" },
   "/repair/history": { th: "ประวัติงานซ่อม", en: "Repair History" },
   "/repair/create": { th: "สร้างใบสั่งงาน", en: "Create Work Order" },
+  "/supervisor": { th: "คิวงานหัวหน้างาน", en: "Supervisor Desk" },
+  "/supervisor/queue": { th: "คิวงานทั้งหมด", en: "Work Queue" },
+  "/supervisor/review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
+  "/supervisor/plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
+  "/supervisor/verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
   "/pm_am/calendar": { th: "ปฏิทิน PM/AM", en: "PM/AM Calendar" },
   "/pm_am/create": { th: "สร้างแผน PM", en: "Create PM Plan" },
   "/pm_am/batch_schedule": { th: "สร้างแผนแบบกลุ่ม", en: "Batch Schedule" },
@@ -562,7 +584,9 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/inspections": { th: "ตรวจเช็ครอบ", en: "Round Inspections" },
   "/inspections/templates": { th: "จัดการ Template ตรวจ", en: "Inspection Templates" },
   "/inspections/run": { th: "ทำรายการตรวจเช็ค", en: "Run Inspection" },
+  "/inspections/history": { th: "ประวัติการตรวจเช็ค", en: "Inspection History" },
   "/asset_registry": { th: "ทะเบียนเครื่องจักร", en: "Machine Registry" },
+  "/asset_registry/view": { th: "รายละเอียดเครื่องจักร", en: "Machine Detail" },
   "/qr-sheet": { th: "QR Sheet เครื่องจักร", en: "Machine QR Sheets" },
   "/asset_registry/bom_tree": { th: "BOM Tree ชิ้นส่วน", en: "Parts Tree (BOM)" },
   "/asset_registry/criticality": { th: "ลำดับความสำคัญ A/B/C", en: "Criticality A/B/C" },
@@ -646,6 +670,12 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/spare_parts/balances": { th: "ยอดคงเหลืออะไหล่", en: "Stock Balances" },
   "/spare_parts/returns": { th: "อะไหล่คืนคลัง", en: "Part Returns" },
   "/spare_parts/sage_shipments": { th: "ตัดสต็อก Sage 300 (Shipments)", en: "Sage 300 Shipments" },
+  "/pm_am/dashboard": { th: "แดชบอร์ด PM", en: "PM Dashboard" },
+  "/pm_am/plans": { th: "แผนแม่แบบ PM", en: "PM Master Plans" },
+  "/pm_am/plans/create": { th: "สร้างแผนแม่แบบ PM", en: "Create PM Master Plan" },
+  "/pm_am/plans/[id]": { th: "รายละเอียดแผนแม่แบบ PM", en: "PM Master Plan Detail" },
+  "/pm_am/checklists": { th: "จัดการ Checklist Templates", en: "Checklist Templates" },
+  "/pm_am/view": { th: "รายละเอียดรอบ PM", en: "PM Cycle Detail" },
 };
 
 // หมวด breadcrumb
@@ -690,6 +720,26 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     th: { eyebrow: "Work Order Board · CMMS-TOPPAN", title: "ใบสั่งงานซ่อม", desc: "สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด" },
     en: { eyebrow: "Work Order Board · CMMS-TOPPAN", title: "Work Orders", desc: "Repair status from work orders — yellow is pending, blinking red is overdue" },
   },
+  supervisor: {
+    th: { eyebrow: "SUPERVISOR DESK · CMMS-TOPPAN", title: "คิวงานหัวหน้างาน", desc: "ภาพรวมคิวงาน คิวเกิน SLA คำขอที่รอทบทวน และภาระงานช่าง — ศูนย์กลางควบคุมงานซ่อม" },
+    en: { eyebrow: "SUPERVISOR DESK · CMMS-TOPPAN", title: "Supervisor Desk", desc: "Work queue, SLA overdue, pending review requests and workload — command center for maintenance" },
+  },
+  "supervisor/queue": {
+    th: { eyebrow: "WORK QUEUE · CMMS-TOPPAN", title: "คิวงานทั้งหมด (Work Queue)", desc: "ใบสั่งงานทุกสถานะ กรอง ค้นหา และดำเนินการรวม (มากกว่า 1 รายการ)" },
+    en: { eyebrow: "WORK QUEUE · CMMS-TOPPAN", title: "Work Queue", desc: "All work orders with filters, search and bulk actions" },
+  },
+  "supervisor/review": {
+    th: { eyebrow: "REQUEST REVIEW · CMMS-TOPPAN", title: "ทบทวนคำขอแจ้งซ่อม", desc: "ตรวจสอบคำขอซ่อม อนุมัติเพื่อแปลงเป็นใบสั่งงาน หรือปฏิเสธพร้อมเหตุผล" },
+    en: { eyebrow: "REQUEST REVIEW · CMMS-TOPPAN", title: "Request Review", desc: "Review repair requests — approve to convert to a work order, or reject with reason" },
+  },
+  "supervisor/plan": {
+    th: { eyebrow: "PLAN & SCHEDULE · CMMS-TOPPAN", title: "วางแผน & จัดตาราง", desc: "กำหนดแผนงาน มอบหมายช่าง พร้อมตรวจสอบภาระงานและความซ้ำซ้อนของตาราง" },
+    en: { eyebrow: "PLAN & SCHEDULE · CMMS-TOPPAN", title: "Plan & Schedule", desc: "Plan work, assign technicians with workload and schedule-conflict checks" },
+  },
+  "supervisor/verify": {
+    th: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "ตรวจรับงาน (Verify)", desc: "ตรวจสอบงานที่ทำเสร็จแล้ว ตรวจรับ ปิดใบงาน หรือส่งกลับแก้ไข (Reopen)" },
+    en: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "Work Verification", desc: "Verify completed work, close work orders, or reopen for rework" },
+  },
   "repair/my_tasks": {
     th: { eyebrow: "My Tasks · CMMS-TOPPAN", title: "งานของฉัน (ซ่อม + PM)", desc: 'งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย' },
     en: { eyebrow: "My Tasks · CMMS-TOPPAN", title: "My Tasks (Repair + PM)", desc: 'Repairs and PM plans assigned to you — tap "Run PM" then scan the machine QR' },
@@ -717,6 +767,18 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "pm_am/calendar": {
     th: { eyebrow: "PM CALENDAR · CMMS-TOPPAN", title: "ปฏิทินงานซ่อมบำรุง (PM Calendar)", desc: "ติดตามแผนงานซ่อมบำรุงเชิงป้องกัน — ไฟแดงคืองานเลยกำหนด ไฟเหลืองคือต้องทำ" },
     en: { eyebrow: "PM CALENDAR · CMMS-TOPPAN", title: "PM Calendar", desc: "Track PM plans — red is overdue, yellow is due" },
+  },
+  "pm_am/dashboard": {
+    th: { eyebrow: "PM DASHBOARD · CMMS-TOPPAN", title: "แดชบอร์ด PM (PM Dashboard)", desc: "สรุปงาน PM วันนี้ อีก 7 วัน งานเลยกำหนด และอัตราการปฏิบัติตามแผน" },
+    en: { eyebrow: "PM DASHBOARD · CMMS-TOPPAN", title: "PM Dashboard", desc: "PM summary — due today, next 7 days, overdue and compliance" },
+  },
+  "pm_am/plans": {
+    th: { eyebrow: "PM MASTER PLANS · CMMS-TOPPAN", title: "แผนแม่แบบ PM (PM Master Plans)", desc: "สร้างแผนบำรุงรักษาแม่แบบ ผูกเครื่องจักร เช็คชีท และความถี่ — สร้างรอบอัตโนมัติเป็น Work Order" },
+    en: { eyebrow: "PM MASTER PLANS · CMMS-TOPPAN", title: "PM Master Plans", desc: "Create reusable PM plans with assets, checklists and frequency — generate cycles and work orders" },
+  },
+  "pm_am/checklists": {
+    th: { eyebrow: "PM CHECKLIST TEMPLATES · CMMS-TOPPAN", title: "จัดการ Checklist Templates", desc: "ออกแบบชุดรายการตรวจเช็ค PM — Yes/No, ผ่าน/ไม่ผ่าน, ค่าวัด Min–Max, บังคับ และแนบรูป" },
+    en: { eyebrow: "PM CHECKLIST TEMPLATES · CMMS-TOPPAN", title: "Checklist Templates", desc: "Design PM checklist templates — Yes/No, Pass/Fail, Min–Max readings, required and photos" },
   },
   spare_parts: {
     th: { eyebrow: "SPARE PARTS · CMMS-TOPPAN", title: "คลังสต็อกอะไหล่ (เชื่อมต่อ Sage 300 ERP)", desc: "ระบบบริหารคลังอะไหล่ที่เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control) สำหรับ TOPPAN" },
@@ -880,8 +942,16 @@ export function t(key: string, lang?: Lang): string {
 export function tPage(route: string, lang?: Lang): string {
   const l = lang ?? currentLang();
   const entry = PAGE_TITLES[route];
-  if (!entry) return route.split("/").pop() || "";
-  return entry[l] ?? entry.th;
+  if (entry) return entry[l] ?? entry.th;
+  // dynamic route เช่น "/pages/hello" → "/pages/[slug]", "/pm_am/plans/5" → "/pm_am/plans/[id]"
+  for (const [key, value] of Object.entries(PAGE_TITLES)) {
+    if (!key.includes("[")) continue;
+    const parts = key.split("/");
+    if (parts.length !== route.split("/").length) continue;
+    const rx = new RegExp("^" + parts.map((p) => (p.startsWith("[") ? "[^/]+" : p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))).join("/") + "$");
+    if (rx.test(route)) return value[l] ?? value.th;
+  }
+  return route.split("/").pop() || "";
 }
 
 /** หมวด breadcrumb — route เช่น "/repair" */

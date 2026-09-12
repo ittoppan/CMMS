@@ -80,6 +80,11 @@ try {
         $data = $pdo->query("SELECT * FROM spare_parts ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode(['status' => 'success', 'code' => 200, 'count' => count($data), 'data' => $data], JSON_UNESCAPED_UNICODE);
     } elseif ($resource === 'pm-plans') {
+        // sync สถานะ overdue ตาม due_date จริง ก่อนคืนรายการ
+        try {
+            $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([date('Y-m-d')]);
+            $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([date('Y-m-d')]);
+        } catch (Exception $e) {}
         // join ผู้รับผิดชอบ (assigned_to) และชื่อเครื่องจักร — ข้อมูลจริง
         $data = $pdo->query(
             "SELECT p.*, u.full_name AS assigned_to_name, a.name AS asset_name, a.code AS asset_code

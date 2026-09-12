@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_direct_issue']
             if ($sageRes['success']) {
                 $pdo->prepare("UPDATE spare_issue_requests SET sage_doc_no = ? WHERE id = ?")
                     ->execute([$sageRes['sage_doc_no'], $reqId]);
-                $msg = "⚡ จ่ายอะไหล่ด่วนสำเร็จ และสั่งตัดสต็อก Sage 300 เรียบร้อย! เอกสาร Sage: " . $sageRes['sage_doc_no'];
+                $msg = "⚡ จ่ายอะไหล่ด่วนบันทึกแล้ว (Pending Issue) — เสนอคลังจ่ายของจริงใน Sage 300 รอดำเนินการ" . (!empty($sageRes['sage_doc_no']) ? " · เอกสาร Sage: " . $sageRes['sage_doc_no'] : "");
             }
         }
 
@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if ($sageRes['success']) {
                 $pdo->prepare("UPDATE spare_issue_requests SET status = 'Issued', issued_by = ?, sage_doc_no = ?, updated_at = NOW() WHERE id = ?")
                     ->execute([$userId, $sageRes['sage_doc_no'], $reqId]);
-                $msg = "จ่ายอะไหล่และตัดสต็อกใน Sage 300 เรียบร้อย! เอกสาร Sage: " . $sageRes['sage_doc_no'];
+                $msg = "จ่ายอะไหล่บันทึกแล้ว (Pending Issue) — เสนอคลังจ่ายของจริงใน Sage 300 รอดำเนินการ" . (!empty($sageRes['sage_doc_no']) ? " · เอกสาร Sage: " . $sageRes['sage_doc_no'] : "");
             }
         }
         elseif ($action === 'return') {
@@ -243,7 +243,7 @@ renderHeader();
                 <span class="text-xs text-purple-200">Sage 300 ODBC: <?= htmlspecialchars($dsn) ?></span>
             </div>
             <h1 class="text-2xl font-black">📦 ศูนย์บริการเบิก-จ่ายอะไหล่ & Sage 300 (Unified Issue Center 360)</h1>
-            <p class="text-xs text-purple-100 mt-1">รวมศูนย์จัดการคำขอเบิกจากช่าง, จ่ายของด่วนหน้าเคาน์เตอร์สโตร์, ตัดสต็อกและส่งบัญชี Sage 300 ในหน้าเดียว</p>
+            <p class="text-xs text-purple-100 mt-1">รวมศูนย์จัดการคำขอเบิกจากช่าง, จ่ายของด่วนหน้าเคาน์เตอร์สโตร์, บันทึกการเบิก (Pending Issue) เสนอคลังจ่ายของจริงใน Sage 300 ในหน้าเดียว</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             <a href="?export=csv" class="btn bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow">
@@ -277,7 +277,7 @@ renderHeader();
         <div class="card cmms-card cmms-stat-card p-4">
             <span class="cmms-stat-label text-emerald-600">จ่ายแล้ว (Sage)</span>
             <span class="cmms-stat-value text-emerald-600"><?= count(array_filter($requests, fn($r) => $r['status'] === 'Issued')) ?></span>
-            <span class="cmms-stat-hint">ตัดสต็อกแล้ว</span>
+            <span class="cmms-stat-hint">จ่ายจริงใน Sage 300 (Pending Issue)</span>
         </div>
         <div class="card cmms-card cmms-stat-card p-4">
             <span class="cmms-stat-label text-purple-600">คืนอะไหล่</span>
@@ -331,8 +331,8 @@ renderHeader();
                     <input type="number" step="0.01" min="0.01" name="qty" required value="1" class="input input-bordered w-full font-bold text-sm">
                 </div>
 
-                <button type="submit" onclick="return confirm('ยืนยันจ่ายของด่วนและสั่งตัดสต็อกเข้า Sage 300 ใช่หรือไม่?')" class="btn btn-primary bg-purple-700 border-purple-700 hover:bg-purple-800 text-xs w-full py-3 font-extrabold shadow-md">
-                    ⚡ จ่ายของทันที & ตัดสต็อก Sage 300
+                <button type="submit" onclick="return confirm('ยืนยันจ่ายของทันที? (จะบันทึก Pending Issue เสนอคลังจ่ายของจริงใน Sage 300)')" class="btn btn-primary bg-purple-700 border-purple-700 hover:bg-purple-800 text-xs w-full py-3 font-extrabold shadow-md">
+                    ⚡ จ่ายของทันที (Pending Issue)
                 </button>
             </form>
         </div>
@@ -340,7 +340,7 @@ renderHeader();
         <!-- Table: คิวรายการขอเบิกจากช่าง & สถานะการจ่ายของ (Requisitions Queue) -->
         <div class="lg:col-span-2 card overflow-hidden space-y-3">
             <div class="p-4 border-b border-line font-bold text-primary flex justify-between items-center">
-                <span>📋 คิวรายการขอเบิกจากช่าง & ประวัติการตัดสต็อก (Requisitions Queue)</span>
+                <span>📋 คิวรายการขอเบิกจากช่าง & สถานะ Pending Issue (Requisitions Queue)</span>
                 <span class="text-xs text-muted">เรียงตามวันที่ล่าสุด</span>
             </div>
 
@@ -407,7 +407,7 @@ renderHeader();
                                     <?php endif; ?>
 
                                     <?php if (in_array($rq['status'], ['Requested', 'Approved'])): ?>
-                                    <button type="submit" name="action" value="issue" onclick="return confirm('ยืนยันจ่ายของให้ช่างและตัดสต็อก Sage 300 ใช่หรือไม่?')" class="btn btn-primary btn-sm bg-purple-700 border-purple-700 hover:bg-purple-800 font-bold">
+                                    <button type="submit" name="action" value="issue" onclick="return confirm('ยืนยันจ่ายของให้ช่าง? (จะบันทึก Pending Issue เสนอคลังจ่ายของจริงใน Sage 300)')" class="btn btn-primary btn-sm bg-purple-700 border-purple-700 hover:bg-purple-800 font-bold">
                                         📦 สโตร์จ่ายของ (Issue)
                                     </button>
                                     <?php endif; ?>
