@@ -105,6 +105,8 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.settings_pwa": { th: "ไอคอนแอปมือถือ", en: "PWA Icons (Mobile App)" },
   "menu.settings_design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
   "menu.settings_repair_options": { th: "ตัวเลือกฟอร์มแจ้งซ่อม", en: "Repair Form Options" },
+  "menu.settings_notification_prefs": { th: "การแจ้งเตือนของฉัน", en: "My Notification Preferences" },
+  "menu.settings_notification_rules": { th: "กฎการแจ้งเตือนอัตโนมัติ", en: "Notification Rules" },
   "menu.builder": { th: "สร้างหน้าเว็บแบบลากวาง", en: "Visual Page Builder" },
   "menu.pages": { th: "หน้าเว็บที่สร้างเอง", en: "Custom Pages" },
   "menu.profile": { th: "โปรไฟล์", en: "Profile" },
@@ -563,6 +565,7 @@ DICT["priority.low"] = { th: "ต่ำ", en: "Low" };
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
+  "/dashboard/list": { th: "วิเคราะห์ลงลึก", en: "Drill-down" },
   "/repair": { th: "ใบสั่งงานซ่อม", en: "Work Orders" },
   "/repair/request": { th: "ฟอร์มแจ้งซ่อมด่วน", en: "Quick Repair Request" },
   "/repair/assign": { th: "แจกงานซ่อม", en: "Assign Jobs" },
@@ -613,6 +616,8 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/settings": { th: "ตั้งค่าระบบ", en: "System Settings" },
   "/settings/services": { th: "บริการและสถานะการรันระบบ", en: "Services & Status" },
   "/settings/notifications": { th: "รูปแบบการแจ้งเตือน LINE", en: "LINE Notification Templates" },
+  "/settings/notification-prefs": { th: "การแจ้งเตือนของฉัน", en: "My Notification Preferences" },
+  "/settings/notification-rules": { th: "กฎการแจ้งเตือนอัตโนมัติ", en: "Notification Rules" },
   "/settings/menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
   "/settings/repair-options": { th: "ตัวเลือกงานซ่อม", en: "Repair Options" },
   "/settings/pwa": { th: "ตั้งค่าไอคอน PWA", en: "PWA Settings" },
@@ -713,8 +718,12 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
 export type PageHero = { eyebrow: string; title: string; desc: string };
 const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   dashboard: {
-    th: { eyebrow: "Plant Status Board · CMMS-TOPPAN", title: "แผงควบคุมโรงงาน", desc: "สถานะเครื่องจักรแบบเรียลไทม์ — ไฟเขียวคือพร้อมเดิน ไฟแดงคือต้องการความสนใจทันที" },
-    en: { eyebrow: "Plant Status Board · CMMS-TOPPAN", title: "Plant Status Board", desc: "Real-time machine status — green is ready to run, red needs immediate attention" },
+    th: { eyebrow: "PLANT COMMAND CENTER · CMMS-TOPPAN", title: "แดชบอร์ดภาพรวม (KPI)", desc: "KPI งานซ่อม สิ่งที่ต้องสนใจ Downtime ค่าใช้จ่าย และภาพรวมเครื่องจักร — ตามขอบเขตบทบาทของคุณ" },
+    en: { eyebrow: "PLANT COMMAND CENTER · CMMS-TOPPAN", title: "Dashboard (KPI Overview)", desc: "Maintenance KPIs, attention alerts, downtime, cost and machine health — scoped to your role" },
+  },
+  "dashboard/list": {
+    th: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "วิเคราะห์ลงลึก", desc: "ลงลึกจาก KPI บนแดชบอร์ด — รายการงานซ่อม งานค้างเกินกำหนด PM และวิเคราะห์แนวโน้ม" },
+    en: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "Dig deeper from dashboard KPIs — work order lists, overdue items, PM and trend analysis" },
   },
   repair: {
     th: { eyebrow: "Work Order Board · CMMS-TOPPAN", title: "ใบสั่งงานซ่อม", desc: "สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด" },

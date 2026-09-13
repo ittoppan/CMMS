@@ -24,7 +24,9 @@ require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
+require_once __DIR__ . '/../../../src/helpers/kpi.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -127,33 +129,11 @@ function p14_done_statuses(): array {
 }
 
 function p14_is_overdue(array $r): bool {
-    if (in_array($r['status'] ?? '', p14_done_statuses(), true)) return false;
-    $now = time();
-    foreach (['sla_due_at', 'estimated_completion_date'] as $f) {
-        $v = (string)($r[$f] ?? '');
-        if ($v !== '' && $v !== '0000-00-00 00:00:00' && $v !== 'NULL') {
-            $t = strtotime($v);
-            if ($t !== false && $t < $now) return true;
-        }
-    }
-    $created = strtotime((string)($r['created_at'] ?? ''));
-    if ($created !== false && in_array(($r['status'] ?? ''), ['open', 'acknowledged', 'assigned', 'accepted', 'approved', 'pending_approval'], true)) {
-        if (($now - $created) > 7 * 86400) return true;
-    }
-    return false;
+    return kpi_is_overdue($r);
 }
 
 function p14_overdue_days(array $r): int {
-    if (in_array($r['status'] ?? '', p14_done_statuses(), true)) return 0;
-    $now = time();
-    foreach (['sla_due_at', 'estimated_completion_date'] as $f) {
-        $v = (string)($r[$f] ?? '');
-        if ($v !== '' && $v !== '0000-00-00 00:00:00' && $v !== 'NULL') {
-            $t = strtotime($v);
-            if ($t !== false && $t < $now) return (int)ceil(($now - $t) / 86400);
-        }
-    }
-    return 0;
+    return kpi_overdue_days($r);
 }
 
 function p14_log_repair(PDO $pdo, int $id, string $action, string $desc, $oldValue, $newValue, ?int $uid = null): void {
@@ -245,6 +225,28 @@ function p14_notify_user(PDO $pdo, int $uid, string $title, string $message, str
     }
 }
 
+/** ลง Notification Center (inbox) — channels=['app'] เสมอ (external channel ยังใช้ workflow เดิม) */
+function p14_center(PDO $pdo, string $module, string $event, string $type, array $vars = [], array $users = [], array $roles = [1, 2, 6], ?string $url = null, int $refId = 0, string $refType = ''): void {
+    try {
+        $reasonLabels = ['waiting_parts' => 'รออะไหล่', 'waiting_spare' => 'รออะไหล่', 'production_stop' => 'หยุดผลิต', 'contractor' => 'รอผู้รับเหมา', 'waiting_approval' => 'รอการอนุมัติ', 'other' => 'อื่น ๆ'];
+        if (!empty($vars['reason'])) $vars['reason'] = $reasonLabels[$vars['reason']] ?? $vars['reason'];
+        NotificationCenterService::notify($pdo, [
+            'module' => $module, 'event' => $event, 'type' => $type,
+            'ref_type' => $refType, 'ref_id' => $refId,
+            'template' => $module . ':' . $event,
+            'vars' => $vars,
+            'users' => $users,
+            'roles' => $roles,
+            'exclude_users' => [p14_uid()],
+            'channels' => ['app'],
+            'dedup_hours' => 1,
+            'url' => (string)($url ?? ''),
+        ]);
+    } catch (Exception $e) {
+        error_log('[supervisor.php] center notify: ' . $e->getMessage());
+    }
+}
+
 function p14_require_mr_open(PDO $pdo, int $id): array {
     $st = $pdo->prepare('SELECT mr.*, u.full_name AS requested_name, a.code AS asset_code, a.name AS asset_name
                          FROM maintenance_requests mr
@@ -273,96 +275,32 @@ function p14_sync_mr_status(PDO $pdo, int $woId, string $status): void {
 }/* ─────────────────────────── GET ─────────────────────────── */
 
 function apiGetKpis(PDO $pdo): void {
-    $counts = [
-        'requests_open'    => (int)$pdo->query("SELECT COUNT(*) FROM maintenance_requests WHERE status = 'open'")->fetchColumn(),
-        'pending_approval' => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('pending_approval','approved') AND assigned_to IS NULL")->fetchColumn(),
-        'unassigned'       => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('open','acknowledged') AND assigned_to IS NULL")->fetchColumn(),
-        'assigned'         => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('assigned','accepted')")->fetchColumn(),
-        'active'           => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('in_progress','paused','waiting_parts','waiting_external','waiting_approval')")->fetchColumn(),
-        'pending_verification' => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('completed','pending_verification','resolved')")->fetchColumn(),
-        'verified'         => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE status IN ('verified','closed')")->fetchColumn(),
-        'critical_active'  => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE priority='critical' AND status IN ('open','acknowledged','pending_approval','approved','assigned','accepted','in_progress','paused','waiting_parts','waiting_external','waiting_approval')")->fetchColumn(),
+    // KPI ทั้งหมดคำนวณจากสูตรกลางใน src/helpers/kpi.php (ห้าม replicate)
+    $opts = [
+        'role_id' => currentRoleId(),
+        'user_id' => (int)($_SESSION['user_id'] ?? 0),
+        'range' => (string)($_GET['range'] ?? ''),
+        'range_start' => (string)($_GET['range_start'] ?? ''),
+        'range_end' => (string)($_GET['range_end'] ?? ''),
+        'department_id' => '',
+        'location_id' => '',
+        'asset_id' => '',
+        'asset_category' => '',
+        'technician_id' => '',
+        'source_type' => '',
+        'priority' => '',
+        'status' => '',
     ];
-    $backlog = $pdo->query('SELECT status, created_at, sla_due_at, estimated_completion_date, id FROM repair WHERE status IN ("open","acknowledged","pending_approval","approved","assigned","accepted","in_progress","paused","waiting_parts","waiting_external","waiting_approval","completed","pending_verification","resolved")')->fetchAll(PDO::FETCH_ASSOC);
-    $overdue = array_filter($backlog, 'p14_is_overdue');
-    $counts['overdue'] = count($overdue);
-    $counts['completed_today'] = (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE completed_at >= CURDATE()")->fetchColumn();
-
-    // MTTR — ชั่วโมงเฉลี่ยซ่อมจริง 30 วันล่าสุด
-    $mttr = null;
-    $row = $pdo->query("SELECT AVG(repair_time_minutes) AS v FROM repair
-                        WHERE repair_time_minutes IS NOT NULL AND repair_time_minutes > 0
-                          AND (status IN ('closed','verified') OR completed_at IS NOT NULL)
-                          AND completed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetch();
-    if ($row && $row['v'] !== null) $mttr = round((float)$row['v'] / 60, 2);
-
-    // MTBF — ชั่วโมงเฉลี่ยระหว่างการชำรุด (ช่วงระหว่างรอบซ่อมของเครื่องเดียวกัน)
-    $mtbf = null;
-    $broken = $pdo->query("SELECT asset_id, completed_at FROM repair
-                           WHERE source_type='breakdown' AND completed_at IS NOT NULL
-                             AND completed_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
-                             AND status IN ('closed','verified','completed','resolved')
-                           ORDER BY asset_id, completed_at ASC")->fetchAll(PDO::FETCH_ASSOC);
-    $byAsset = [];
-    foreach ($broken as $b) $byAsset[(int)$b['asset_id']][] = strtotime($b['completed_at']);
-    $intervals = [];
-    foreach ($byAsset as $times) {
-        sort($times);
-        for ($i = 1; $i < count($times); $i++) {
-            $intervals[] = ($times[$i] - $times[$i - 1]) / 3600;
-        }
-    }
-    if ($intervals) $mtbf = round(array_sum($intervals) / count($intervals), 2);
-
-    // เวลาตอบสนองเฉลี่ย (นาที)
-    $resp = $pdo->query("SELECT AVG(response_time_minutes) FROM repair WHERE response_time_minutes IS NOT NULL AND response_time_minutes > 0")->fetchColumn();
-    $avg_response_minutes = ($resp !== null && $resp !== false) ? round((float)$resp, 1) : null;
-
-    // % งานปิดใน SLA / กำหนดเสร็จ (30 วัน)
-    $closed30 = $pdo->query("SELECT completed_at, sla_due_at, estimated_completion_date, planned_end_at FROM repair
-                             WHERE completed_at IS NOT NULL AND completed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)")->fetchAll(PDO::FETCH_ASSOC);
-    $slaDone = 0; $slaTotal = 0;
-    foreach ($closed30 as $c) {
-        $due = $c['sla_due_at'] ?? $c['estimated_completion_date'] ?? $c['planned_end_at'] ?? null;
-        if (!$due) continue;
-        $slaTotal++;
-        if (strtotime((string)$c['completed_at']) <= strtotime((string)$due)) $slaDone++;
-    }
-    $sla_compliance_pct = $slaTotal > 0 ? round($slaDone / $slaTotal * 100, 1) : null;
-
-    // อัตราการทำ PM (จาก inspection checklists)
-    $pmCompliance = null;
-    try {
-        $v = $pdo->query('SELECT compliance_pct FROM v_inspection_dashboard_kpis')->fetchColumn();
-        if ($v !== null && $v !== false) $pmCompliance = round((float)$v, 1);
-    } catch (Exception $e) { /* ข้าม */ }
-
-    // งานที่ค้างเกินกำหนด 5 อันดับแรก
-    usort($overdue, function ($a, $b) {
-        return p14_overdue_days($b) <=> p14_overdue_days($a);
-    });
-    $topOverdue = [];
-    foreach (array_slice($overdue, 0, 5) as $o) {
-        $r = $pdo->prepare('SELECT id, work_order_no, title, priority, asset_id, status FROM repair WHERE id = ?');
-        $r->execute([(int)$o['id']]);
-        $w = $r->fetch(PDO::FETCH_ASSOC);
-        if (!$w) continue;
-        $a = $pdo->prepare('SELECT code FROM asset_registry WHERE id = ?');
-        $a->execute([(int)$w['asset_id']]);
-        $w['asset_code'] = (string)$a->fetchColumn();
-        $w['overdue_days'] = p14_overdue_days($o);
-        unset($w['asset_id']);
-        $topOverdue[] = $w;
-    }
+    $core = kpi_core_metrics($pdo, $opts);
 
     echo json_encode([
-        'counts' => $counts,
-        'mttr_hours' => $mttr,
-        'mtbf_hours' => $mtbf,
-        'avg_response_minutes' => $avg_response_minutes,
-        'sla_compliance_pct' => $sla_compliance_pct,
-        'pm_compliance_pct' => $pmCompliance,
-        'top_overdue' => $topOverdue,
+        'counts' => $core['counts'],
+        'mttr_hours' => $core['mttr_hours'],
+        'mtbf_hours' => $core['mtbf_hours'],
+        'avg_response_minutes' => $core['avg_response_minutes'],
+        'sla_compliance_pct' => $core['sla_compliance_pct'],
+        'pm_compliance_pct' => $core['pm_compliance_pct'],
+        'top_overdue' => kpi_top_overdue($pdo, $opts, 5),
         'can' => [
             'review' => canReviewRequest(),
             'plan' => canPlanWork(),
@@ -766,6 +704,10 @@ function apiCreateRequest(PDO $pdo): void {
     foreach ($pdo->query('SELECT id FROM users WHERE is_active = 1 AND role_id IN (1,2,6)')->fetchAll(PDO::FETCH_COLUMN) as $su) {
         p14_notify_user($pdo, (int)$su, $subject, $message, $url);
     }
+    p14_center($pdo, 'maintenance_requests', 'created', 'request', [
+        'request_code' => $code, 'title' => $title, 'asset_code' => (string)($a['code'] ?? ''),
+        'asset_name' => (string)($a['name'] ?? ''), 'priority' => $priority,
+    ], [], [1, 2, 6], '/supervisor/review?id=' . $reqId, $reqId, 'maintenance_requests');
 
     echo json_encode(['success' => true, 'id' => $reqId, 'code' => $code], JSON_UNESCAPED_UNICODE);
 }
@@ -807,6 +749,10 @@ function apiApproveRequest(PDO $pdo): void {
     $sub = 'คำขอ ' . $mr['request_code'] . ' อนุมัติแล้ว';
     $msg = 'สร้างใบสั่งงาน: ' . $woNo . "\nเครื่อง: " . $mr['asset_code'] . ($note ? "\nหมายเหตุ: {$note}" : '');
     p14_notify_user($pdo, (int)$mr['requested_by'], $sub, $msg, publicBaseUrl() . '/repair/view?id=' . $repairId);
+    p14_center($pdo, 'maintenance_requests', 'approved', 'request', [
+        'request_code' => $mr['request_code'], 'asset_code' => (string)($mr['asset_code'] ?? ''),
+        'work_order_no' => $woNo, 'repair_id' => $repairId, 'title' => $title,
+    ], [(int)$mr['requested_by']], [], '/repair/view?id=' . $repairId, $repairId, 'repair');
 
     echo json_encode(['success' => true, 'request_id' => $id, 'repair_id' => $repairId, 'work_order_no' => $woNo], JSON_UNESCAPED_UNICODE);
 }
@@ -825,6 +771,10 @@ function apiRejectRequest(PDO $pdo): void {
         ->execute([$reason, p14_uid(), $reason, $id]);
     p14_log_mr($pdo, $id, 'reject', 'ไม่อนุมัติคำขอ', $mr['status'], 'rejected');
     p14_notify_user($pdo, (int)$mr['requested_by'], 'คำขอ ' . $mr['request_code'] . ' ไม่อนุมัติ', $reason, publicBaseUrl() . '/supervisor/review?id=' . $id);
+    p14_center($pdo, 'maintenance_requests', 'rejected', 'request', [
+        'request_code' => $mr['request_code'], 'asset_code' => (string)($mr['asset_code'] ?? ''),
+        'title' => (string)($mr['title'] ?? ''), 'reason' => $reason,
+    ], [(int)$mr['requested_by']], [], '/supervisor/review?id=' . $id, $id, 'maintenance_requests');
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
 }
 
@@ -965,6 +915,11 @@ function apiAssignWork(PDO $pdo, bool $bulk): void {
             p14_log_repair($pdo, $rid, 'assigned', 'มอบหมายงานให้ ' . p14_name($pdo, $leadId) . ($note !== '' ? ' — ' . $note : ''), $from, 'assigned');
             foreach ($set['added'] as $uid) {
                 p14_notify_user($pdo, (int)$uid, 'คุณได้รับมอบหมายงาน ' . $wo['work_order_no'], $wo['title'], publicBaseUrl() . '/repair/view?id=' . $rid);
+                p14_center($pdo, 'repair', 'assigned', 'work_order', [
+                    'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+                    'asset_code' => (string)$wo['asset_code'], 'asset_name' => (string)$wo['asset_name'],
+                    'priority' => (string)$wo['priority'], 'assigner_name' => p14_name($pdo, $assigner),
+                ], [(int)$uid], [], '/repair/view?id=' . $rid, $rid, 'repair');
             }
             p14_sync_mr_status($pdo, $rid, 'in_progress');
             $results[] = [
@@ -1051,6 +1006,10 @@ function apiPauseWork(PDO $pdo): void {
         ->execute([$id, p14_uid(), 'pause', $reason, $note]);
     p14_sync_mr_status($pdo, $id, $newStatus === 'paused' ? 'in_progress' : 'waiting_parts');
     p14_log_repair($pdo, $id, 'paused', 'หยุดพักงาน: ' . $reason . ($note !== '' ? ' — ' . $note : ''), $wo['status'], $newStatus);
+    p14_center($pdo, 'repair', 'paused', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'], 'reason' => $reason,
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => $newStatus], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1070,6 +1029,10 @@ function apiResumeWork(PDO $pdo): void {
     $pdo->prepare('INSERT INTO work_pause_logs (repair_id, user_id, action, reason, note) VALUES (?,?,?,?,?)')
         ->execute([$id, p14_uid(), 'resume', $d['reason'] ?? 'resumed', $note]);
     p14_log_repair($pdo, $id, 'resumed', 'กลับมาทำงานต่อ' . ($note !== '' ? ' — ' . $note : ''), $wo['status'], 'in_progress');
+    p14_center($pdo, 'repair', 'resumed', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'],
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'in_progress'], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1121,6 +1084,10 @@ function apiCompleteWork(PDO $pdo): void {
         if ($dur > 0) $pdo->prepare('UPDATE repair SET repair_time_minutes = ? WHERE id = ?')->execute([(int)round($dur), $id]);
     }
     p14_log_repair($pdo, $id, 'completed', 'ช่างทำงานเสร็จ รอหัวหน้าตรวจรับ', $wo['status'], 'completed');
+    p14_center($pdo, 'repair', 'completed', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'], 'downtime_hours' => number_format(isset($dur) && $dur > 0 ? $dur / 60 : 0, 1),
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'completed'], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1150,6 +1117,10 @@ function apiVerifyWork(PDO $pdo): void {
         ]);
         p14_sync_mr_status($pdo, $id, 'in_progress');
         p14_log_repair($pdo, $id, 'reopened', 'เปิดงานใหม่: ' . $reason, $wo['status'], 'in_progress');
+        p14_center($pdo, 'repair', 'reopened', 'work_order', [
+            'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+            'asset_code' => (string)$wo['asset_code'], 'reason' => $reason,
+        ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
         echo json_encode(['success' => true, 'status' => 'in_progress', 'reopened' => true], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -1177,6 +1148,10 @@ function apiVerifyWork(PDO $pdo): void {
     ]);
     p14_sync_mr_status($pdo, $id, $autoClose ? 'closed' : 'resolved');
     p14_log_repair($pdo, $id, 'verified', 'ตรวจรับงานผ่าน' . ($note !== '' ? ': ' . $note : ''), $wo['status'], $finalStatus);
+    p14_center($pdo, 'repair', 'verified', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'], 'verified_by_name' => p14_name($pdo, p14_uid()),
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => $finalStatus], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1193,6 +1168,10 @@ function apiCloseWork(PDO $pdo): void {
     p14_set_status($pdo, $id, 'closed', ['closed_by' => p14_uid(), 'closed_at' => date('Y-m-d H:i:s')]);
     p14_sync_mr_status($pdo, $id, 'closed');
     p14_log_repair($pdo, $id, 'closed', 'ปิดใบงานเรียบร้อย', 'verified', 'closed');
+    p14_center($pdo, 'repair', 'closed', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'],
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'closed'], JSON_UNESCAPED_UNICODE);
 }
 
@@ -1217,5 +1196,9 @@ function apiReopenWork(PDO $pdo): void {
     ]);
     p14_sync_mr_status($pdo, $id, 'in_progress');
     p14_log_repair($pdo, $id, 'reopened', 'เปิดงานใหม่ (ปิดแล้ว): ' . $reason, $wo['status'], 'in_progress');
+    p14_center($pdo, 'repair', 'reopened', 'work_order', [
+        'work_order_no' => $wo['work_order_no'], 'title' => (string)$wo['title'],
+        'asset_code' => (string)$wo['asset_code'], 'reason' => $reason,
+    ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'in_progress'], JSON_UNESCAPED_UNICODE);
 }

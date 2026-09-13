@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
+require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -299,6 +300,35 @@ try {
             } catch (Exception $e) {
                 error_log("[repair.php] Telegram notify failed: " . $e->getMessage());
             }
+            // ---- Notification Center inbox (app channel — LINE/Telegram ส่งไปแล้วข้างบน) ----
+            try {
+                $cuCreate = currentUser($pdo);
+                $createdUsers = [];
+                if (!empty($data['assigned_to'])) $createdUsers[] = (int)$data['assigned_to'];
+                if (!empty($data['team_ids']) && is_array($data['team_ids'])) {
+                    foreach ($data['team_ids'] as $tm) if ((int)$tm > 0) $createdUsers[] = (int)$tm;
+                }
+                NotificationCenterService::notify($pdo, [
+                    'module' => 'repair', 'event' => 'created', 'type' => 'work_order',
+                    'ref_type' => 'repair', 'ref_id' => $newId,
+                    'template' => 'repair:created',
+                    'vars' => [
+                        'work_order_no' => (string)($data['work_order_no'] ?? ''),
+                        'title' => (string)($data['title'] ?? 'งานซ่อมใหม่'),
+                        'asset_code' => (string)($assetCode ?? ''), 'asset_name' => (string)($assetName ?? ''),
+                        'priority' => (string)($data['priority'] ?? 'normal'),
+                        'status' => (string)($data['status'] ?? 'open'),
+                        'reporter_name' => (string)($data['receiver_name'] ?? ''),
+                    ],
+                    'users' => $createdUsers,
+                    'roles' => [1, 2, 6],
+                    'exclude_users' => $cuCreate && (int)$cuCreate['id'] ? [(int)$cuCreate['id']] : [],
+                    'channels' => ['app'],
+                    'url' => '/repair/view?id=' . $newId,
+                ]);
+            } catch (Exception $e) {
+                error_log('[repair.php] center notify create failed: ' . $e->getMessage());
+            }
             break;
         case 'PUT':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -332,6 +362,33 @@ try {
                         error_log('[repair.php] accept status upgrade failed: ' . $e->getMessage());
                     }
                     $accepted = true;
+                    // Notification Center inbox — งานถูกช่างรับแล้ว (มีช่องทาง LINE/SMS เดิมหรือไม่ก็ตาม)
+                    try {
+                        $aw = $pdo->prepare("SELECT r.work_order_no, r.title, r.priority, r.assigned_to, a.code AS asset_code, a.name AS asset_name
+                                              FROM repair r LEFT JOIN asset_registry a ON a.id = r.asset_id WHERE r.id = ?");
+                        $aw->execute([$id]);
+                        $awRow = $aw->fetch(PDO::FETCH_ASSOC);
+                        if ($awRow) {
+                            NotificationCenterService::notify($pdo, [
+                                'module' => 'repair', 'event' => 'accepted', 'type' => 'work_order',
+                                'ref_type' => 'repair', 'ref_id' => $id,
+                                'template' => 'repair:accepted',
+                                'vars' => [
+                                    'work_order_no' => (string)$awRow['work_order_no'],
+                                    'title' => (string)$awRow['title'],
+                                    'asset_code' => (string)$awRow['asset_code'],
+                                    'assignee_name' => (string)($cu['full_name'] ?? ''),
+                                ],
+                                'users' => [(int)$awRow['assigned_to'], (int)$cu['id']],
+                                'roles' => [1, 2, 6],
+                                'exclude_users' => [(int)$cu['id']],
+                                'channels' => ['app'],
+                                'url' => '/repair/view?id=' . $id,
+                            ]);
+                        }
+                    } catch (Exception $e) {
+                        error_log('[repair.php] center notify accept failed: ' . $e->getMessage());
+                    }
                 }
             }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];

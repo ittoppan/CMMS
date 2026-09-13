@@ -24,6 +24,7 @@ import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
 import ThemeModeToggle from "../../components/ThemeModeToggle";
 import CommandPalette from "../../components/CommandPalette";
+import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
@@ -44,7 +45,7 @@ const MENU_HREFS: string[] = [
   "/analytics/kpi", "/analytics", "/analytics/advanced", "/reports", "/reports/monthly_pdf", "/reports/export_excel", "/reports/import_excel",
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
-  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options",
+  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",
   "/editor/builder", "/pages",
 ];
 
@@ -281,15 +282,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <FileText size={17} strokeWidth={1.75} aria-hidden="true" />
               </button>
-              <button
-                type="button"
-                aria-label={t("action.notifications")}
-                title={t("action.notifications")}
-                onClick={() => { router.push("/notifications"); }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              >
-                <Bell size={17} strokeWidth={1.75} aria-hidden="true" />
-              </button>
+              <NotificationBell variant="popover" />
               <ThemeModeToggle lang={lang} />
               <button
                 type="button"
@@ -359,6 +352,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </span>
         </a>
+        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" />
       </header>
 
       {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}

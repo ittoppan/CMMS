@@ -73,6 +73,7 @@ function settingsDefaultValues(): array {
         'calibration_alert_days'  => '30',
 
         // ── notification ──
+        'notification_inbox_retention_days' => '30', // เก็บข้อมูล inbox (ตาราง notifications) กี่วัน - default 30
         'line_notify_enabled'   => '1',
         'line_system_alerts'   => '0',  // ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE - default ปิด (กัน LINE เต็ม)
         'line_weekly_report'   => '1',  // ส่งรายงานสรุปประจำสัปดาห์ (ทุกวันจันทร์) เข้า LINE

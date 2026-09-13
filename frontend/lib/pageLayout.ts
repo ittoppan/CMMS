@@ -130,6 +130,8 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     pages: [
       { value: "/notifications", label: "ศูนย์แจ้งเตือน" },
       { value: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE" },
+      { value: "/settings/notification-prefs", label: "การแจ้งเตือนของฉัน" },
+      { value: "/settings/notification-rules", label: "กฎการแจ้งเตือนอัตโนมัติ" },
       { value: "/settings", label: "ตั้งค่าระบบทั้งหมด" },
       { value: "/settings/menus", label: "สิทธิ์เมนูตามบทบาท" },
       { value: "/settings/services", label: "บริการและสถานะการรัน" },
