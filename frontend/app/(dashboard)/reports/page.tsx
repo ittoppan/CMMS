@@ -26,7 +26,6 @@ export default function ReportsHubPage() {
       {/* CTA → Report Center ใหม่ */}
       <div
         className="cmms-page-hero flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
-        style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)" }}
       >
         <div className="flex items-start gap-4">
           <div className="cmms-icon-tile h-12 w-12 shrink-0 rounded-xl" style={{ background: "rgba(255,255,255,0.16)" }}>
