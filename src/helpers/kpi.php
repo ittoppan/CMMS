@@ -369,10 +369,10 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
 
     // ---------- MTBF (180 วัน, ระหว่างรอบซ่อมของเครื่องเดียวกัน) ----------
     $mtbf = null;
-    $st = $pdo->prepare("SELECT asset_id, completed_at FROM repair
-                         WHERE source_type='breakdown' AND completed_at IS NOT NULL
-                           AND completed_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
-                           AND status IN ('closed','verified','completed','resolved')" . $scope['sql'] . " ORDER BY asset_id, completed_at ASC");
+    $st = $pdo->prepare("SELECT r.asset_id, r.completed_at FROM repair r
+                         WHERE r.source_type='breakdown' AND r.completed_at IS NOT NULL
+                           AND r.completed_at >= DATE_SUB(NOW(), INTERVAL 180 DAY)
+                           AND r.status IN ('closed','verified','completed','resolved')" . $scope['sql'] . " ORDER BY r.asset_id, r.completed_at ASC");
     $st->execute($scope['params']);
     $byAsset = [];
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $b) $byAsset[(int)$b['asset_id']][] = strtotime($b['completed_at']);

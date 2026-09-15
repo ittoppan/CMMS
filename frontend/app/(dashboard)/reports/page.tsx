@@ -3,7 +3,7 @@
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, Table, ChartPie, Upload } from "lucide-react";
+import { BarChart3, FileDown, Table, ChartPie, Upload } from "lucide-react";
 
 export default function ReportsHubPage() {
   const hero = usePageHero("reports");
@@ -21,6 +21,31 @@ export default function ReportsHubPage() {
           </div>
           <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
         </div>
+      </div>
+
+      {/* CTA → Report Center ใหม่ */}
+      <div
+        className="cmms-page-hero flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
+        style={{ background: "linear-gradient(135deg, #0ea5e9, #2563eb)" }}
+      >
+        <div className="flex items-start gap-4">
+          <div className="cmms-icon-tile h-12 w-12 shrink-0 rounded-xl" style={{ background: "rgba(255,255,255,0.16)" }}>
+            <BarChart3 size={24} strokeWidth={1.75} aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold" style={{ color: "#fff" }}>ศูนย์ออกรายงานใหม่ (Report Center)</h2>
+            <p style={{ color: "rgba(255,255,255,0.85)" }}>
+              12 หมวดรายงานจากข้อมูลจริง — กรองช่วงเวลา/เครื่องจักร/แผนก แล้วส่งออก CSV, Excel หรือพิมพ์ PDF ได้ทันที
+            </p>
+          </div>
+        </div>
+        <Button
+          size="lg"
+          className="shrink-0 bg-white text-[var(--cmms-primary)] hover:bg-white/90"
+          onClick={() => (window.location.href = "/reports/report-center")}
+        >
+          เปิด Report Center
+        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

@@ -656,6 +656,19 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/repair/view": { th: "รายละเอียดใบสั่งงานซ่อม", en: "Work Order Detail" },
   "/repair/workload": { th: "ภาระงานช่าง", en: "Technician Workload" },
   "/reports": { th: "ศูนย์รวมรายงาน", en: "Reports Hub" },
+  "/reports/report-center": { th: "ศูนย์ออกรายงาน (Report Center)", en: "Report Center" },
+  "/reports/work-orders": { th: "รายงานใบสั่งงานซ่อม", en: "Work Orders Report" },
+  "/reports/requests": { th: "รายงานใบแจ้งซ่อม", en: "Repair Requests Report" },
+  "/reports/pm": { th: "รายงานงาน PM", en: "PM Report" },
+  "/reports/inspections": { th: "รายงานตรวจเช็ครอบ", en: "Inspections Report" },
+  "/reports/assets": { th: "รายงานเครื่องจักร & ความพร้อม", en: "Assets & Availability Report" },
+  "/reports/spare-parts": { th: "รายงานคลังอะไหล่", en: "Spare Parts Report" },
+  "/reports/cost": { th: "รายงานค่าใช้จ่ายซ่อมบำรุง", en: "Maintenance Cost Report" },
+  "/reports/downtime": { th: "รายงาน Downtime", en: "Downtime Report" },
+  "/reports/technicians": { th: "รายงานผลงานช่าง", en: "Technician Performance" },
+  "/reports/sla": { th: "รายงาน SLA", en: "SLA Compliance Report" },
+  "/reports/mttr-mtbf": { th: "รายงาน MTTR / MTBF", en: "MTTR / MTBF Report" },
+  "/reports/scheduled": { th: "รายงานอัตโนมัติ (กำหนดเวลา)", en: "Scheduled Reports" },
   "/roles": { th: "บทบาทผู้ใช้งาน", en: "Roles" },
   "/roles/create": { th: "สร้างบทบาทใหม่", en: "Create Role" },
   "/roles/edit": { th: "แก้ไขบทบาท", en: "Edit Role" },
@@ -844,6 +857,58 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   reports: {
     th: { eyebrow: "REPORTS HUB · CMMS-TOPPAN", title: "ศูนย์รวมรายงาน & การส่งออกข้อมูล", desc: "รายงานสรุปผลการซ่อมบำรุงประจำเดือน PDF สำหรับผู้บริหาร และการส่งออกไฟล์ Excel/CSV" },
     en: { eyebrow: "REPORTS HUB · CMMS-TOPPAN", title: "Reports Center & Data Export", desc: "Monthly maintenance summary PDF for executives and Excel/CSV export" },
+  },
+  "reports/report-center": {
+    th: { eyebrow: "REPORT CENTER · CMMS-TOPPAN", title: "ศูนย์ออกรายงาน (Report Center)", desc: "ออกรายงานทุกหมวดจากข้อมูลจริง — กรองตามช่วงเวลา/แผนก/เครื่องจักร แล้วส่งออก CSV, Excel หรือพิมพ์ PDF ได้ทันที" },
+    en: { eyebrow: "REPORT CENTER · CMMS-TOPPAN", title: "Report Center", desc: "Generate every report from real data — filter by period/department/machine, then export CSV, Excel or print to PDF" },
+  },
+  "reports/work-orders": {
+    th: { eyebrow: "REPORT · WORK ORDERS · CMMS-TOPPAN", title: "รายงานใบสั่งงานซ่อม", desc: "จำนวนงานซ่อม งานตามแผน/เบรกดาวน์ อัตราการปิดงาน และรายการงานทั้งหมดตามสถานะ" },
+    en: { eyebrow: "REPORT · WORK ORDERS · CMMS-TOPPAN", title: "Work Orders Report", desc: "Repair counts, planned vs breakdown, closure rate and full work order list by status" },
+  },
+  "reports/requests": {
+    th: { eyebrow: "REPORT · REQUESTS · CMMS-TOPPAN", title: "รายงานใบแจ้งซ่อม", desc: "ใบแจ้งซ่อมทั้งหมด อัตราแปลงเป็นงานซ่อม และสถานะการรับงานตามประเภท/สายการผลิต" },
+    en: { eyebrow: "REPORT · REQUESTS · CMMS-TOPPAN", title: "Repair Requests Report", desc: "All repair requests, conversion rate into work orders and acceptance status" },
+  },
+  "reports/pm": {
+    th: { eyebrow: "REPORT · PM · CMMS-TOPPAN", title: "รายงานงาน PM/AM", desc: "ประสิทธิภาพแผน PM งานตามแผน ระหว่างซ่อม งานล่าช้า และรายการเช็คชีท PM" },
+    en: { eyebrow: "REPORT · PM · CMMS-TOPPAN", title: "PM/AM Report", desc: "PM plan performance, in-progress jobs, late jobs and PM checksheet listing" },
+  },
+  "reports/inspections": {
+    th: { eyebrow: "REPORT · INSPECTIONS · CMMS-TOPPAN", title: "รายงานตรวจเช็ครอบ", desc: "ผลการตรวจเช็ค ผ่าน/ข้อสังเกต/ไม่ผ่าน และสถานะรอบตรวจแบ่งตามเครื่องจักร" },
+    en: { eyebrow: "REPORT · INSPECTIONS · CMMS-TOPPAN", title: "Round Inspections Report", desc: "Inspection results — pass / observation / fail and round status by machine" },
+  },
+  "reports/assets": {
+    th: { eyebrow: "REPORT · ASSETS · CMMS-TOPPAN", title: "รายงานเครื่องจักร & ความพร้อมใช้งาน", desc: "MTBF, MTTR, ความพร้อมใช้งาน และจำนวนงานซ่อมรายเครื่องจักร" },
+    en: { eyebrow: "REPORT · ASSETS · CMMS-TOPPAN", title: "Assets & Availability Report", desc: "MTBF, MTTR, availability and repair counts per machine" },
+  },
+  "reports/spare-parts": {
+    th: { eyebrow: "REPORT · SPARE PARTS · CMMS-TOPPAN", title: "รายงานคลังอะไหล่ (Stock)", desc: "ยอดคงคลัง รายการต่ำกว่า Safety Stock และสต็อกเดิมจาก Sage 300" },
+    en: { eyebrow: "REPORT · SPARE PARTS · CMMS-TOPPAN", title: "Spare Parts Stock Report", desc: "Stock balances, below safety-stock items and legacy stock imported from Sage 300" },
+  },
+  "reports/cost": {
+    th: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "รายงานค่าใช้จ่ายซ่อมบำรุง", desc: "ค่าใช้จ่ายอะไหล่และค่าแรง รวมเป็นยอดรายเดือน และรายการค่าใช้จ่ายละเอียด (เฉพาะผู้บริหาร)" },
+    en: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "Maintenance Cost Report", desc: "Parts & labour cost, monthly totals and cost line items (managers only)" },
+  },
+  "reports/downtime": {
+    th: { eyebrow: "REPORT · DOWNTIME · CMMS-TOPPAN", title: "รายงาน Downtime", desc: "เวลาหยุดเครื่อง จำนวนเหตุการณ์ และDowntime รวมรายเครื่องจักร/แผนก เพื่อจัดลำดับการลงทุน" },
+    en: { eyebrow: "REPORT · DOWNTIME · CMMS-TOPPAN", title: "Downtime Report", desc: "Machine stop hours, event counts and total downtime by machine/department to prioritize investments" },
+  },
+  "reports/technicians": {
+    th: { eyebrow: "REPORT · TECHNICIANS · CMMS-TOPPAN", title: "รายงานผลงานช่าง (Operational Performance)", desc: "จำนวนงานที่ช่างทำ งานภายใน SLA เวลาที่ใช้ งานล่าช้า และความเร็วเฉลี่ยต่องาน" },
+    en: { eyebrow: "REPORT · TECHNICIANS · CMMS-TOPPAN", title: "Technician Performance", desc: "Jobs completed per technician, in-SLA rate, hours spent, overdue jobs and avg. speed" },
+  },
+  "reports/sla": {
+    th: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "รายงานการปฏิบัติตาม SLA", desc: "อัตรางานที่ปิดภายใน SLA จำแนกตามแผนก/ระดับความเร่งด่วน ย้อนหลังหลายเดือน" },
+    en: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "SLA Compliance Report", desc: "SLA closure rate by department/priority over recent months" },
+  },
+  "reports/mttr-mtbf": {
+    th: { eyebrow: "REPORT · MTTR/MTBF · CMMS-TOPPAN", title: "รายงาน MTTR & MTBF", desc: "แนวโน้มระยะเวลาซ่อมเฉลี่ยและระยะเวลาเฉลี่ยก่อนชำรุด รายเดือน ตามเครื่องจักร และการพยากรณ์" },
+    en: { eyebrow: "REPORT · MTTR/MTBF · CMMS-TOPPAN", title: "MTTR & MTBF Report", desc: "MTTR/MTBF trends for each month, per machine, with reliability forecast" },
+  },
+  "reports/scheduled": {
+    th: { eyebrow: "REPORT · SCHEDULED · CMMS-TOPPAN", title: "รายงานอัตโนมัติ (กำหนดเวลา)", desc: "ตั้งค่ารายงานส่งอัตโนมัติตามรอบเวลา ผ่าน Telegram / LINE / Email — จัดการได้จากหน้าเดียว" },
+    en: { eyebrow: "REPORT · SCHEDULED · CMMS-TOPPAN", title: "Scheduled Reports", desc: "Automate report delivery on a schedule via Telegram / LINE / Email — manage from one page" },
   },
   scan: {
     th: { eyebrow: "MACHINE SCAN · CMMS-TOPPAN", title: "สแกนเครื่องจักร (QR Scan)", desc: "สแกน QR ที่เครื่องจักร แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM" },
