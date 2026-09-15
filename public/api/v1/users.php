@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -60,7 +62,9 @@ try {
             $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
             $stmt = $pdo->prepare("INSERT INTO users (" . implode(',', $cols) . ") VALUES ($placeholders)");
             $stmt->execute($vals);
-            echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+            $newId = (int)$pdo->lastInsertId();
+            audit_log($pdo, 'USER_CREATE', 'user', (string)$newId, 'สร้างผู้ใช้ใหม่: ' . ($data['username'] ?? $newId), null, ['id' => $newId, 'username' => $data['username'] ?? '', 'role_id' => $data['role_id'] ?? null]);
+            echo json_encode(['success' => true, 'id' => $newId]);
             break;
         case 'PUT':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -101,6 +105,14 @@ try {
             $values[] = $id;
             $stmt = $pdo->prepare("UPDATE users SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // audit: บันทึกเฉพาะชื่อฟิลด์ที่แก้ (password เก็บแค่ flag ว่าเปลี่ยน — ไม่เก็บ hash / ค่า)
+            $changedFields = [];
+            foreach ($allowed as $col) {
+                if ($col === 'password') { if (!empty($data[$col] ?? null)) $changedFields['password'] = true; continue; }
+                if (array_key_exists($col, $data)) $changedFields[$col] = $data[$col];
+            }
+            audit_log($pdo, 'USER_UPDATE', 'user', (string)$id, 'แก้ไขผู้ใช้ #' . $id, null, ['id' => $id, 'changed' => $changedFields], 'info');
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
@@ -114,6 +126,7 @@ try {
             $stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');
             $stmt->execute([$id]);
             if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+            audit_log($pdo, 'USER_DELETE', 'user', (string)$id, 'ลบผู้ใช้ #' . $id, null, ['id' => $id], 'info');
             echo json_encode(['success' => true, 'message' => 'Deleted']);
             break;
         default:

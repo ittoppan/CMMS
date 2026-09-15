@@ -23,6 +23,7 @@ require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/kpi.php';
 require_once __DIR__ . '/../../../src/helpers/reports.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 
 header('Content-Type: application/json; charset=utf-8');
 session_start();
@@ -63,6 +64,9 @@ try {
     }
     if ($export === 'xlsx') {
         rpt_export_xlsx($pdo, $user, $resource, $opts, '');
+    }
+    if ($export !== '') {
+        audit_log($pdo, 'REPORT_EXPORT', 'report', $resource, 'ส่งออกรายงาน ' . $resource . ' (' . $export . ')', null, ['resource' => $resource, 'format' => $export, 'range' => $opts['range'] ?? null], 'info');
     }
 
     $data = rpt_dispatch($pdo, $user, $resource, $opts);

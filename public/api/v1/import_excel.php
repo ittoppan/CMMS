@@ -5,6 +5,10 @@ require_once __DIR__ . '/../../../src/helpers/xlsx.php';
 require_once __DIR__ . '/../../../src/helpers/xlsx_read.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
+require_once __DIR__ . '/../../../src/csrf.php';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    enforceCsrf();
+}
 
 /**
  * import_excel.php — นำเข้าข้อมูลจากไฟล์ Excel (.xlsx)
@@ -21,6 +25,11 @@ session_start();
 
 const IMP_MAX_ROWS = 5000;
 const IMP_MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+/** Defense-in-depth: ยอมรับเฉพาะชื่อคอลัมน์/ตารางที่ผ่าน whitelist ก่อนแทรกเข้า SQL */
+function imp_valid_identifier(string $name): bool {
+    return (bool)preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name);
+}
 
 /* ====================== ข้อมูลชุดแต่ละชนิด ====================== */
 $IMPORT_DATASETS = [
@@ -251,6 +260,7 @@ function imp_unique_checks(array $okRows, array $cfg, PDO $pdo): array {
     // $okRows: [ [rowNo, cells, data] ]
     if (empty($cfg['unique']) || empty($okRows)) return $okRows;
     $field = $cfg['unique'][0];
+    if (!imp_valid_identifier((string)$field)) return $okRows;
 
     $used = [];
     $st = $pdo->query("SELECT `$field` FROM `{$cfg['table']}`");
@@ -488,6 +498,21 @@ try {
         imp_json(400, ['error' => 'ไม่พบชุดข้อมูล "' . $dataset . '" — เลือก: repair, asset, pm_am, spare_parts, calibration']);
     }
     $cfg = $IMPORT_DATASETS[$dataset];
+
+    /* whitelist ชื่อตาราง/คอลัมน์ (มาจาก config ภายใน แต่กันการแก้ ± ป้องกัน injection ซ้ำชั้น) */
+    if (!imp_valid_identifier($cfg['table'] ?? '')) {
+        imp_json(500, ['error' => 'dataset config ไม่ถูกต้อง (table)']);
+    }
+    foreach ($cfg['columns'] ?? [] as $col) {
+        if (!imp_valid_identifier((string)($col['field'] ?? ''))) {
+            imp_json(500, ['error' => 'dataset config ไม่ถูกต้อง (column)']);
+        }
+    }
+    foreach ($cfg['unique'] ?? [] as $uf) {
+        if (!imp_valid_identifier((string)$uf)) {
+            imp_json(500, ['error' => 'dataset config ไม่ถูกต้อง (unique)']);
+        }
+    }
 
     /* ---------- ดาวน์โหลดแม่แบบ ---------- */
     if ($action === 'template') {

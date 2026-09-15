@@ -1,64 +1,87 @@
 <?php
 require_once __DIR__ . '/../../../src/includes/layout.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 $pageTitle = 'การตั้งค่าและสลับสภาพแวดล้อม Sage 300 (TFPT2C Testing vs TFPT1C Production) - CMMS-TPT';
 $pdo = getDb();
+
+// Phase 18: หน้าเก็บบันทึกการเชื่อมต่อ ERP = เฉพาะ Admin เท่านั้น (เดิมเปิดทุกคนที่ login ได้)
+if (empty($_SESSION['user_id']) || (int)($_SESSION['role_id'] ?? 0) !== 1) {
+    header('Location: /login.php');
+    exit;
+}
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    enforceCsrf();
+}
+
+/** อ่านค่าจาก .env ตรง ๆ (ไม่เปิดเผยผ่าน env ของ process — พิมพ์ค่าจริงเฉพาะชื่อผู้ใช้) */
+function sageEnvFromFile(): array {
+    $envPath = __DIR__ . '/../../../.env';
+    $vals = ['dsn' => '', 'user' => '', 'comp' => ''];
+    if (!file_exists($envPath)) return $vals;
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#')) continue;
+        if (str_contains($line, '=')) {
+            [$k, $v] = explode('=', $line, 2);
+            $k = trim($k); $v = trim($v);
+            if ($k === 'SAGE300_ODBC_DSN')   $vals['dsn'] = $v;
+            if ($k === 'SAGE300_DB_USER')    $vals['user'] = $v;
+            if ($k === 'SAGE300_COMPANY_ID') $vals['comp'] = $v;
+        }
+    }
+    return $vals;
+}
+
+function sagePersistEnv(array $changes): void {
+    $envPath = __DIR__ . '/../../../.env';
+    if (!file_exists($envPath)) { file_put_contents($envPath, ''); }
+    $envContent = file_get_contents($envPath);
+    foreach ($changes as $key => $val) {
+        if (preg_match("/^$key=.*$/m", $envContent)) {
+            $envContent = preg_replace("/^$key=.*$/m", "$key=" . addcslashes((string)$val, "\\=#") , $envContent);
+        } else {
+            $envContent = rtrim($envContent) . PHP_EOL . "$key=$val";
+        }
+        putenv("$key=$val");
+    }
+    file_put_contents($envPath, $envContent);
+}
 
 $msg = '';
 $error = '';
 $testResult = null;
+$envFromFile = sageEnvFromFile();
 
-// Handle Environment Preset Switcher
+// Handle Environment Preset Switcher — สลับเฉพาะ DSN/Company ไม่แตะ user/password ที่ตั้งไว้
 if (isset($_POST['switch_env'])) {
-    $targetEnv = $_POST['switch_env']; // 'TFPT2C' or 'TFPT1C'
-    
-    $dsn = $targetEnv;
-    $comp = $targetEnv;
-    $user = trim($_POST['sage_user'] ?? 'ADMIN');
-    $pass = trim($_POST['sage_pass'] ?? 'ADMIN');
-
-    // Update .env file
-    $envPath = __DIR__ . '/../../../.env';
-    if (file_exists($envPath)) {
-        $envContent = file_get_contents($envPath);
-        $envContent = preg_replace('/^SAGE300_ODBC_DSN=.*$/m', "SAGE300_ODBC_DSN=$dsn", $envContent);
-        $envContent = preg_replace('/^SAGE300_DB_USER=.*$/m', "SAGE300_DB_USER=$user", $envContent);
-        $envContent = preg_replace('/^SAGE300_DB_PASS=.*$/m', "SAGE300_DB_PASS=$pass", $envContent);
-        $envContent = preg_replace('/^SAGE300_COMPANY_ID=.*$/m', "SAGE300_COMPANY_ID=$comp", $envContent);
-        file_put_contents($envPath, $envContent);
+    $targetEnv = $_POST['switch_env'];
+    if (!in_array($targetEnv, ['TFPT2C', 'TFPT1C'], true)) {
+        $error = 'ค่าสภาพแวดล้อมไม่ถูกต้อง';
+    } else {
+        try {
+            $changes = ['SAGE300_ODBC_DSN' => $targetEnv, 'SAGE300_COMPANY_ID' => $targetEnv];
+            sagePersistEnv($changes);
+            $envFromFile['dsn'] = $targetEnv;
+            $envFromFile['comp'] = $targetEnv;
+            $msg = "สลับสภาพแวดล้อมไปยัง DSN: $targetEnv (" . ($targetEnv === 'TFPT2C' ? 'ตัวทดสอบ Testing' : 'ตัวจริง Production') . ") เรียบร้อยแล้ว!";
+        } catch (Exception $e) {
+            $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
+        }
     }
-
-    putenv("SAGE300_ODBC_DSN=$dsn");
-    putenv("SAGE300_DB_USER=$user");
-    putenv("SAGE300_DB_PASS=$pass");
-    putenv("SAGE300_COMPANY_ID=$comp");
-
-    $msg = "สลับสภาพแวดล้อมไปยัง DSN: $dsn (" . ($targetEnv === 'TFPT2C' ? 'ตัวทดสอบ Testing' : 'ตัวจริง Production') . ") เรียบร้อยแล้ว!";
 }
 
-// Handle Manual Form Save
+// Handle Manual Form Save — ฟิลด์รหัสผ่านว่าง/เป็น mask = เก็บค่าเดิมไว้ (ไม่เขียนทับ)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_sage_config'])) {
     try {
-        $dsn = trim($_POST['sage_dsn']);
-        $user = trim($_POST['sage_user']);
-        $pass = trim($_POST['sage_pass']);
-        $comp = trim($_POST['sage_comp']);
-
-        $envPath = __DIR__ . '/../../../.env';
-        if (file_exists($envPath)) {
-            $envContent = file_get_contents($envPath);
-            $envContent = preg_replace('/^SAGE300_ODBC_DSN=.*$/m', "SAGE300_ODBC_DSN=$dsn", $envContent);
-            $envContent = preg_replace('/^SAGE300_DB_USER=.*$/m', "SAGE300_DB_USER=$user", $envContent);
-            $envContent = preg_replace('/^SAGE300_DB_PASS=.*$/m', "SAGE300_DB_PASS=$pass", $envContent);
-            $envContent = preg_replace('/^SAGE300_COMPANY_ID=.*$/m', "SAGE300_COMPANY_ID=$comp", $envContent);
-            file_put_contents($envPath, $envContent);
-        }
-
-        putenv("SAGE300_ODBC_DSN=$dsn");
-        putenv("SAGE300_DB_USER=$user");
-        putenv("SAGE300_DB_PASS=$pass");
-        putenv("SAGE300_COMPANY_ID=$comp");
-
+        $changes = ['SAGE300_ODBC_DSN' => trim($_POST['sage_dsn'] ?? ''), 'SAGE300_COMPANY_ID' => trim($_POST['sage_comp'] ?? '')];
+        $newUser = trim($_POST['sage_user'] ?? '');
+        $newPass = (string)($_POST['sage_pass'] ?? '');
+        if ($newUser !== '') $changes['SAGE300_DB_USER'] = $newUser;
+        if ($newPass !== '' && $newPass !== "••••••••") $changes['SAGE300_DB_PASS'] = $newPass; // mask/ว่าง = ไม่เปลี่ยน
+        sagePersistEnv($changes);
+        $envFromFile = sageEnvFromFile();
         $msg = 'บันทึกการตั้งค่าการเชื่อมต่อ Sage 300 ODBC DSN เรียบร้อยแล้ว';
     } catch (Exception $e) {
         $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
@@ -70,10 +93,11 @@ if (isset($_POST['test_connection'])) {
     $testResult = Sage300Service::connectOdbc();
 }
 
-$dsn = getenv('SAGE300_ODBC_DSN') ?: 'TFPT2C';
-$user = getenv('SAGE300_DB_USER') ?: 'sa';
-$pass = getenv('SAGE300_DB_PASS') ?: 'sql2u';
-$comp = getenv('SAGE300_COMPANY_ID') ?: 'TFPT2C';
+// ค่าที่ใช้แสดง: จาก .env เท่านั้น — ไม่มีค่า default ฮาร์ดโค้ด (ลบ 'sa'/'sql2u' เดิมแล้ว)
+$dsn = $envFromFile['dsn'] !== '' ? $envFromFile['dsn'] : (getenv('SAGE300_ODBC_DSN') ?: 'TFPT2C');
+$user = $envFromFile['user'] !== '' ? $envFromFile['user'] : (getenv('SAGE300_DB_USER') ?: '');
+$comp = $envFromFile['comp'] !== '' ? $envFromFile['comp'] : (getenv('SAGE300_COMPANY_ID') ?: $dsn);
+$pass = ''; // ห้ามนำรหัสผ่านจริงมาแสดง/ฝังใน HTML
 
 $isTestingEnv = ($dsn === 'TFPT2C');
 
@@ -125,8 +149,8 @@ renderHeader();
         </h3>
 
         <form method="POST" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input type="hidden" name="sage_user" value="<?= htmlspecialchars($user) ?>">
-            <input type="hidden" name="sage_pass" value="<?= htmlspecialchars($pass) ?>">
+            <?= csrfField() ?>
+            <!-- สลับสภาพแวดล้อมไม่ต้องรับ user/password อีกต่อไป (เก็บเครดิตเดิมใน .env) -->
 
             <!-- Option 1: TFPT2C (Testing) -->
             <button type="submit" name="switch_env" value="TFPT2C" class="card p-4 border-2 text-left transition-all flex flex-col justify-between <?= $isTestingEnv ? 'border-amber-500 bg-amber-50/60 shadow-md ring-2 ring-amber-400/30' : ' hover:border-amber-300 ' ?>">
@@ -183,6 +207,7 @@ renderHeader();
     <!-- Config Form -->
     <form method="POST" class="card p-6 space-y-6">
         <input type="hidden" name="save_sage_config" value="1">
+        <?= csrfField() ?>
 
         <h3 class="font-bold text-primary text-base border-b pb-2 flex justify-between items-center">
             <span>⚙️ รายละเอียดพารามิเตอร์ ODBC DSN (<?= htmlspecialchars($dsn) ?>)</span>
@@ -204,12 +229,12 @@ renderHeader();
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
                 <label class="font-bold text-secondary block mb-1">Sage 300 DB Username</label>
-                <input type="text" name="sage_user" value="<?= htmlspecialchars($user) ?>" required class="input input-bordered w-full font-mono">
+                <input type="text" name="sage_user" value="<?= htmlspecialchars($user) ?>" class="input input-bordered w-full font-mono">
             </div>
 
             <div>
-                <label class="font-bold text-secondary block mb-1">Sage 300 DB Password</label>
-                <input type="password" name="sage_pass" value="<?= htmlspecialchars($pass) ?>" required class="input input-bordered w-full font-mono">
+                <label class="font-bold text-secondary block mb-1">Sage 300 DB Password <span class="text-muted font-normal">(เว้นว่าง = เก็บค่าเดิม)</span></label>
+                <input type="password" name="sage_pass" value="<?= $pass !== '' ? htmlspecialchars("••••••••") : '' ?>" autocomplete="new-password" class="input input-bordered w-full font-mono">
             </div>
         </div>
 

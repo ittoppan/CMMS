@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
-
-// CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 require_once __DIR__ . '/../../../src/csrf.php';
+// CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
     enforceCsrf();
 }
@@ -72,8 +73,14 @@ function sampleVars(): array {
 
 try {
     $pdo = getDb();
+    $user = requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
-    $userId = (int)$_SESSION['user_id'];
+    $userId = (int)($user['id'] ?? 0);
+
+    // การแก้ไขการตั้งค่า SMTP / ทดสอบส่งอีเมล = งานจัดการระบบ (admin โดย default)
+    if (in_array($method, ['PUT', 'POST'], true)) {
+        requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการการแจ้งเตือนอีเมล');
+    }
 
     $envPath = __DIR__ . '/../../../.env';
     if (file_exists($envPath) && function_exists('loadEnv')) loadEnv($envPath);
@@ -85,6 +92,8 @@ try {
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
             $stmt->execute(EMAIL_SETTING_KEYS);
             foreach ($stmt->fetchAll() as $r) { $settings[$r['setting_key']] = $r['setting_value']; }
+            // Phase 18: ห้ามคืน SMTP password จริง
+            $settings = apiMaskSecretArray($settings);
 
             $stmt = $pdo->prepare("SELECT id, full_name, email FROM users WHERE id = ?");
             $stmt->execute([$userId]);
@@ -125,6 +134,8 @@ try {
             ];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, EMAIL_SETTING_KEYS, true)) continue;
+                // mask ที่ UI ส่งกลับคืน = ผู้ใช้ไม่ได้ตั้ง password ใหม่ → ข้าม
+                if (apiIsSecretKey((string)$k) && (string)$v === SETTING_MASKED) continue;
                 $upsert->execute([$k, (string)$v, $desc[$k] ?? '']);
                 $count++;
             }

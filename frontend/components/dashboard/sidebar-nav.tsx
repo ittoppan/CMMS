@@ -177,10 +177,11 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.system",
-    pathPrefixes: ["/notifications", "/settings", "/pages", "/editor"],
+    pathPrefixes: ["/notifications", "/settings", "/pages", "/editor", "/audit-log"],
     items: [
       { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
       { perm: "notifications/history", labelKey: "menu.notifications_history", href: "/notifications/history", icon: ClipboardList },
+      { perm: "audit_log", labelKey: "menu.audit_log", href: "/audit-log", icon: History },
       { perm: "settings/notifications", labelKey: "menu.settings_notifications", href: "/settings/notifications", icon: Bell },
       { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
       { perm: "settings", labelKey: "menu.settings_menus", href: "/settings/menus", icon: ShieldCheck },

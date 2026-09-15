@@ -27,6 +27,7 @@ require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/kpi.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -755,6 +756,7 @@ function apiApproveRequest(PDO $pdo): void {
     ], [(int)$mr['requested_by']], [], '/repair/view?id=' . $repairId, $repairId, 'repair');
 
     echo json_encode(['success' => true, 'request_id' => $id, 'repair_id' => $repairId, 'work_order_no' => $woNo], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'REQUEST_APPROVE', 'request', (string)$id, 'อนุมัติคำขอ #' . $id . ' → ใบสั่งงาน ' . $woNo, ['status' => 'approved'], ['repair_id' => $repairId, 'work_order_no' => $woNo], 'info');
 }
 
 function apiRejectRequest(PDO $pdo): void {
@@ -776,6 +778,7 @@ function apiRejectRequest(PDO $pdo): void {
         'title' => (string)($mr['title'] ?? ''), 'reason' => $reason,
     ], [(int)$mr['requested_by']], [], '/supervisor/review?id=' . $id, $id, 'maintenance_requests');
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'REQUEST_REJECT', 'request', (string)$id, 'ไม่อนุมัติคำขอ #' . $id . ' — ' . mb_substr($reason, 0, 200), ['status' => 'rejected'], ['reason' => $reason], 'warning');
 }
 
 function apiCancelRequest(PDO $pdo): void {
@@ -794,6 +797,7 @@ function apiCancelRequest(PDO $pdo): void {
     $pdo->prepare('UPDATE maintenance_requests SET status = "cancelled", review_note = ? WHERE id = ?')->execute([trim((string)($d['note'] ?? '')), $id]);
     p14_log_mr($pdo, $id, 'cancel', 'ยกเลิกคำขอ', $mr['status'], 'cancelled');
     echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'REQUEST_CANCEL', 'request', (string)$id, 'ยกเลิกคำขอ #' . $id, ['status' => $mr['status']], ['status' => 'cancelled'], 'info');
 }
 
 function apiSavePlan(PDO $pdo): void {
@@ -1089,6 +1093,7 @@ function apiCompleteWork(PDO $pdo): void {
         'asset_code' => (string)$wo['asset_code'], 'downtime_hours' => number_format(isset($dur) && $dur > 0 ? $dur / 60 : 0, 1),
     ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'completed'], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'WORK_ORDER_COMPLETE', 'repair', (string)$id, 'ช่างปิดงานซ่อม ' . $wo['work_order_no'], ['status' => $wo['status']], ['status' => 'completed'], 'info');
 }
 
 function apiVerifyWork(PDO $pdo): void {
@@ -1153,6 +1158,7 @@ function apiVerifyWork(PDO $pdo): void {
         'asset_code' => (string)$wo['asset_code'], 'verified_by_name' => p14_name($pdo, p14_uid()),
     ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => $finalStatus], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'WORK_ORDER_VERIFY', 'repair', (string)$id, 'ตรวจรับงาน ' . $wo['work_order_no'] . ' (' . $finalStatus . ')', ['status' => $wo['status']], ['status' => $finalStatus, 'auto_close' => $autoClose], 'info');
 }
 
 function apiCloseWork(PDO $pdo): void {
@@ -1173,6 +1179,7 @@ function apiCloseWork(PDO $pdo): void {
         'asset_code' => (string)$wo['asset_code'],
     ], [], [1, 2, 6], '/repair/view?id=' . $id, $id, 'repair');
     echo json_encode(['success' => true, 'status' => 'closed'], JSON_UNESCAPED_UNICODE);
+    audit_log($pdo, 'WORK_ORDER_CLOSE', 'repair', (string)$id, 'ปิดใบงาน ' . $wo['work_order_no'], ['status' => 'verified'], ['status' => 'closed'], 'info');
 }
 
 function apiReopenWork(PDO $pdo): void {

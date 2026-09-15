@@ -10,14 +10,17 @@ class Sage300Service {
 
     /**
      * Connect to Sage 300 via ODBC DSN (TFPT2C or TFPT1C)
+     *
+     * Phase 18: ไม่มี default user/pass ฮาร์ดโค้ดอีกต่อไป (เดิมมี 'sa'/'sql2u'
+     * ฝังอยู่) — ต้องมาจาก .env หรือ environment จริงเท่านั้น
      */
     public static function connectOdbc() {
-        $dsn = getenv('SAGE300_ODBC_DSN') ?: 'TFPT2C';
-        $user = getenv('SAGE300_DB_USER') ?: 'sa';
-        $pass = getenv('SAGE300_DB_PASS') ?: 'sql2u';
+        $dsn = getenv('SAGE300_ODBC_DSN') ?: '';
+        $user = getenv('SAGE300_DB_USER') ?: '';
+        $pass = getenv('SAGE300_DB_PASS') ?: '';
 
         $envPath = __DIR__ . '/../../.env';
-        if (file_exists($envPath)) {
+        if (file_exists($envPath) && ($dsn === '' || $user === '' || $pass === '')) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 if (str_starts_with(trim($line), '#')) continue;
@@ -30,6 +33,10 @@ class Sage300Service {
                     if ($k === 'SAGE300_DB_PASS' && $v) $pass = $v;
                 }
             }
+        }
+
+        if ($dsn === '' || $user === '' || $pass === '') {
+            return ['success' => false, 'error' => 'Sage 300 credentials ไม่ถูกตั้งค่า — ระบุ SAGE300_ODBC_DSN / SAGE300_DB_USER / SAGE300_DB_PASS ใน .env'];
         }
 
         try {

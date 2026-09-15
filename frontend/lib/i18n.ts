@@ -101,6 +101,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.settings_notifications": { th: "รูปแบบการแจ้งเตือน LINE", en: "LINE Notification Templates" },
   "menu.settings": { th: "ตั้งค่าระบบทั้งหมด", en: "System Settings" },
   "menu.settings_menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
+  "menu.audit_log": { th: "บันทึกการตรวจสอบ", en: "Audit Log" },
   "menu.settings_services": { th: "บริการและสถานะการรัน", en: "Services & Status" },
   "menu.settings_pwa": { th: "ไอคอนแอปมือถือ", en: "PWA Icons (Mobile App)" },
   "menu.settings_design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
@@ -111,6 +112,10 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.pages": { th: "หน้าเว็บที่สร้างเอง", en: "Custom Pages" },
   "menu.profile": { th: "โปรไฟล์", en: "Profile" },
   "menu.logout": { th: "ออกจากระบบ", en: "Log out" },
+  "access_denied.title": { th: "ไม่มีสิทธิ์เข้าถึงหน้านี้", en: "Access Denied" },
+  "access_denied.desc": { th: "บทบาทของคุณไม่มีสิทธิ์ดูเนื้อหานี้ หากจำเป็นต้องใช้ กรุณาติดต่อผู้ดูแลระบบ", en: "Your role does not have permission to view this content. Contact an administrator if you need access." },
+  "access_denied.back": { th: "กลับหน้าแรก", en: "Back to dashboard" },
+  "access_denied.retry": { th: "ลองใหม่", en: "Retry" },
 
   // ── Bottom nav มือถือ ──
   "bottom.dashboard": { th: "หน้าแรก", en: "Home" },
@@ -619,6 +624,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/settings/notification-prefs": { th: "การแจ้งเตือนของฉัน", en: "My Notification Preferences" },
   "/settings/notification-rules": { th: "กฎการแจ้งเตือนอัตโนมัติ", en: "Notification Rules" },
   "/settings/menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
+  "/audit-log": { th: "บันทึกการตรวจสอบ", en: "Audit Log" },
   "/settings/repair-options": { th: "ตัวเลือกงานซ่อม", en: "Repair Options" },
   "/settings/pwa": { th: "ตั้งค่าไอคอน PWA", en: "PWA Settings" },
   "/settings/design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
@@ -723,6 +729,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/notifications": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/settings": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/pages": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
+  "/audit-log": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/editor": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
 };
 
@@ -901,6 +908,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "reports/sla": {
     th: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "รายงานการปฏิบัติตาม SLA", desc: "อัตรางานที่ปิดภายใน SLA จำแนกตามแผนก/ระดับความเร่งด่วน ย้อนหลังหลายเดือน" },
     en: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "SLA Compliance Report", desc: "SLA closure rate by department/priority over recent months" },
+  },
+  "audit-log": {
+    th: { eyebrow: "SECURITY · AUDIT LOG · CMMS-TOPPAN", title: "บันทึกการตรวจสอบ", desc: "ประวัติการใช้งานระบบทั้งหมด ตามเวลา ผู้ใช้งาน การกระทำ และค่าก่อน/หลังการแก้ไข" },
+    en: { eyebrow: "SECURITY · AUDIT LOG · CMMS-TOPPAN", title: "Audit Log", desc: "Full system activity trail by time, user, action, and before/after values" },
   },
   "reports/mttr-mtbf": {
     th: { eyebrow: "REPORT · MTTR/MTBF · CMMS-TOPPAN", title: "รายงาน MTTR & MTBF", desc: "แนวโน้มระยะเวลาซ่อมเฉลี่ยและระยะเวลาเฉลี่ยก่อนชำรุด รายเดือน ตามเครื่องจักร และการพยากรณ์" },

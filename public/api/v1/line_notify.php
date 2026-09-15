@@ -1,11 +1,12 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
-
-// CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 require_once __DIR__ . '/../../../src/csrf.php';
 if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
     enforceCsrf();
@@ -13,8 +14,18 @@ if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'],
 
 try {
     $pdo = getDb();
-    $method = $_SERVER['REQUEST_METHOD'];
+    requireLogin($pdo);
     $userId = (int)$_SESSION['user_id'];
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    // การตั้งค่าการแจ้งเตือน / ทดสอบส่งข้อความ = งานจัดการระบบ (admin โดย default)
+    if ($method === 'PUT' || $method === 'POST') {
+        $body = json_decode(file_get_contents('php://input'), true) ?? [];
+        // ยกเว้น: ผู้ใช้จับคู่ LINE ของตัวเอง (ไม่กระทบ config)
+        if (!($method === 'POST' && !empty($body['bind_liff_user_id']))) {
+            requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการการแจ้งเตือน');
+        }
+    }
 
     // Load .env LINE vars so helpers can use them
     $envPath = __DIR__ . '/../../../.env';
@@ -29,6 +40,8 @@ try {
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
             $stmt->execute($keys);
             foreach ($stmt->fetchAll() as $r) { $settings[$r['setting_key']] = $r['setting_value']; }
+            // Phase 18: ห้ามคืนค่าลับจริงสู่นัก client — ส่ง mask แทน
+            $settings = apiMaskSecretArray($settings);
 
             // 2) Notification templates (settings key prefix line_tpl_)
             $tplRows = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'line_tpl_%'")->fetchAll();
@@ -91,6 +104,8 @@ try {
             $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','line_system_alerts','line_weekly_report','push_alert_enabled'];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, $allowedSettings, true)) continue;
+                // ค่าลับที่ UI ส่งคืนแบบ "••••••••" = ผู้ใช้ไม่ได้ตั้งใหม่ → ข้าม (ห้ามเขียนทับด้วย mask)
+                if (apiIsSecretKey((string)$k) && (string)$v === SETTING_MASKED) continue;
                 $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_liff_register_id' => 'LIFF App ID ของหน้า /register (ผูกบัญชี — เปิดใน LINE แล้วได้ LINE ID อัตโนมัติ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'line_group_enabled' => 'ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (0=ปิด,1=เปิด - default เปิด)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน', 'line_system_alerts' => 'ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE (0=ปิด,1=เปิด - default ปิด)', 'line_weekly_report' => 'ส่งรายงานสรุปประจำสัปดาห์เข้า LINE (0=ปิด,1=เปิด - default เปิด)', 'push_alert_enabled' => 'เปิด/ปิดการแจ้งเตือน PWA Web Push (0=ปิด,1=เปิด)'][$k] ?? '';
                 $upsert->execute([$k, (string)$v, $desc]);
                 $count++;

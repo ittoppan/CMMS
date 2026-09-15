@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -65,6 +67,7 @@ try {
             }
 
             echo json_encode(['success' => true, 'message' => 'Permissions updated']);
+            audit_log($pdo, 'PERMISSION_CHANGE', 'role', (string)$roleId, 'แก้ไขสิทธิ์ (user_permissions) บทบาท #' . $roleId, null, ['role_id' => $roleId, 'count' => count($permissions)], 'info');
             exit;
         }
     }
@@ -98,7 +101,9 @@ try {
             $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
             $stmt = $pdo->prepare("INSERT INTO roles (" . implode(',', $cols) . ") VALUES ($placeholders)");
             $stmt->execute($vals);
-            echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+            $newId = (int)$pdo->lastInsertId();
+            audit_log($pdo, 'ROLE_CREATE', 'role', (string)$newId, 'สร้างบทบาทใหม่: ' . ($data['name'] ?? ''), null, ['id' => $newId, 'name' => $data['name'] ?? '']);
+            echo json_encode(['success' => true, 'id' => $newId]);
             break;
         case 'PUT':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -118,6 +123,7 @@ try {
             $values[] = $id;
             $stmt = $pdo->prepare("UPDATE roles SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+            audit_log($pdo, 'ROLE_UPDATE', 'role', (string)$id, 'แก้ไขบทบาท #' . $id, null, ['id' => $id, 'changed' => array_keys(array_intersect_key($data, array_flip($allowed)))], 'info');
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
@@ -131,6 +137,7 @@ try {
             $stmt = $pdo->prepare('DELETE FROM roles WHERE id = ?');
             $stmt->execute([$id]);
             if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+            audit_log($pdo, 'ROLE_DELETE', 'role', (string)$id, 'ลบบทบาท #' . $id, null, ['id' => $id], 'info');
             echo json_encode(['success' => true, 'message' => 'Deleted']);
             break;
         default:
