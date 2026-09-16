@@ -29,6 +29,8 @@ import { SidebarNav } from "../../components/dashboard/sidebar-nav";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { t, useLang, setUserLang, tPage, tSection, applyUserLang } from "../../lib/i18n";
+import { ConnectivityProvider } from "../../lib/offline/connectivity";
+import { ConnectivityStatus } from "../../components/ConnectivityStatus";
 
 // Page title mapping for breadcrumb
 
@@ -209,6 +211,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ToastProvider>
       <ThemeProvider />
+      <ConnectivityProvider>
       <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
       <LiffBridge />
 
@@ -283,6 +286,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <FileText size={17} strokeWidth={1.75} aria-hidden="true" />
               </button>
               <NotificationBell variant="popover" />
+              <ConnectivityStatus variant="chip" />
               <ThemeModeToggle lang={lang} />
               <button
                 type="button"
@@ -352,6 +356,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </span>
         </a>
+        <ConnectivityStatus variant="icon" />
         <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" />
       </header>
 
@@ -393,6 +398,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
         })}
       </nav>
+      </ConnectivityProvider>
     </ToastProvider>
   );
 }

@@ -12,7 +12,7 @@
  *    SW à¹ƒà¸«à¸¡à¹ˆ activate â†’ à¸¥à¹‰à¸²à¸‡ cache à¹€à¸à¹ˆà¸²à¸—à¸±à¹‰à¸‡à¸«à¸¡à¸” (activate handler) â†’ à¸žà¸™à¸±à¸à¸‡à¸²à¸™à¹€à¸«à¹‡à¸™à¸‚à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¸—à¸±à¸™à¸—à¸µ
  *    à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¥à¹‰à¸²à¸‡ cache à¹€à¸­à¸‡ (PwaRegister reload à¸«à¸™à¹‰à¸²à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´à¸œà¹ˆà¸²à¸™ SKIP_WAITING)
  */
-const SW_VERSION = "v36-20260913-0904";
+const SW_VERSION = "v37-20260916-phase19";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -36,6 +36,7 @@ const OFFLINE_ROUTES = [
   "/repair/my_tasks",
   "/repair/view",
   "/pm_am/checksheet",
+  "/sync-center",
 ];
 
 /* API à¸—à¸µà¹ˆ precache à¸•à¸­à¸™ install â€” à¸Ÿà¸­à¸£à¹Œà¸¡à¹à¸ˆà¹‰à¸‡à¸‹à¹ˆà¸­à¸¡à¹‚à¸«à¸¥à¸”à¸‚à¹‰à¸­à¸¡à¸¹à¸¥ (à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸ˆà¸±à¸à¸£/à¹à¸œà¸™à¸) */

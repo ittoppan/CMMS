@@ -7,6 +7,7 @@ import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/rep
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { sendOrEnqueue, subscribeOnline, type SendOutcome } from "@/lib/offlineQueue";
+import { syncEngine } from "@/lib/offline/engine";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
 import AnimatedDialog from "@/components/AnimatedDialog";
@@ -87,6 +88,34 @@ export default function MyTasksPage() {
   const [onlineBack, setOnlineBack] = useState(false);
   const offlineRef = useRef(false);
   const [now, setNow] = useState(() => Date.now());
+
+  // ── จำนวนคิว offline ต่อใบงาน (รอซิงก์ badge) ──
+  const [pendingQueueMap, setPendingQueueMap] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const map: Record<string, number> = {};
+        for (const it of syncEngine.unstable_items()) {
+          if (it.status === "SUCCESS") continue;
+          if (it.entity_id != null && it.entity_id !== "") {
+            const k = String(it.entity_id);
+            map[k] = (map[k] || 0) + 1;
+          }
+        }
+        setPendingQueueMap(map);
+      } catch {
+        /* engine ไม่พร้อม */
+      }
+    };
+    void syncEngine.ensureLoaded().then(refresh);
+    window.addEventListener("cmms:sync-changed", refresh);
+    window.addEventListener("cmms:offline-queued", refresh);
+    return () => {
+      window.removeEventListener("cmms:sync-changed", refresh);
+      window.removeEventListener("cmms:offline-queued", refresh);
+    };
+  }, []);
+  const pendingForTask = (rawId: number) => pendingQueueMap[String(rawId)] || 0;
 
   useEffect(() => {
     const iv = setInterval(() => setNow(Date.now()), 30000);
@@ -485,6 +514,14 @@ export default function MyTasksPage() {
           <div className="flex items-center gap-2">
             <Badge variant="info">{task.kind === "pm" ? "PM" : "ซ่อม"}</Badge>
             <span className="font-semibold">{task.woNumber}</span>
+            {pendingForTask(task.rawId) > 0 && (
+              <Badge
+                variant="warning"
+                title={t("sync.badge.tooltip").replace("{n}", String(pendingForTask(task.rawId)))}
+              >
+                {t("sync.chip.pending")} · {pendingForTask(task.rawId)}
+              </Badge>
+            )}
           </div>
         );
       },

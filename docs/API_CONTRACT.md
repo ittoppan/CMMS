@@ -1,6 +1,7 @@
 # API CONTRACT — CMMS-TPT (REST / JSON)
 
-> เวอร์ชัน: 2026-09-15 · ดูนโยบายที่เกี่ยวข้องใน `docs/SECURITY.md`
+> เวอร์ชัน: 2026-09-16 · ดูนโยบายที่เกี่ยวข้องใน `docs/SECURITY.md`
+> (Phase 19 เพิ่ม idempotency/conflict ของ offline sync — §12-13)
 
 API ทั้งหมดเป็น PHP ภายใต้ `public/api/v1/*.php` เซิร์ฟโดย IIS (port 8081)
 และผ่าน proxy ฝั่ง Next.js ที่ `/api/*` (ดู `frontend/next.config.ts` rewrites)
@@ -204,3 +205,74 @@ permModuleAliases($module)                       // map เมนู key → โ
 8. เพิ่ม เมนูใน `src/menu_catalog.php` + `menu_permissions` seed (ถ้าจำเป็น)
 9. ตรวจด้วย `php scripts/security_check.php` (ต้องผ่าน 0 failed) + lint PHP +
    `npm run typecheck` ฝั่ง frontend
+
+---
+
+## 12. Idempotency / Offline Sync (Phase 19)
+
+จุดประสงค์: ทนสายเครือข่ายกับใช้ซ้ำ (double-submit) โดยไม่ทำงานซ้ำสอง
+client ส่ง **`X-Client-Action-Id`** (UUID v4 เช่น `action_<ulid>`) กับทุก
+request ที่เปลี่ยนข้อมูล แล้ว backend ตอบสำเร็จแบบ idempotent
+
+### 12.1 กลไก
+
+- `src/helpers/idempotency.php` — `idempotency_guard(...)`, `find_prev_result(...)`,
+  `has_processed(...)` ตรวจ `client_action_log` table:
+  - `client_action_id UNIQUE` + index บน `(client_action_id, action_type, entity_type, entity_id)`
+  - รายการสำเร็จ → ตอบ **ผลเดิมซ้ำ (replay)** ด้วย HTTP 200 พร้อม
+    `X-Idempotent-Replay: 1`, `success: true` — client เห็นว่าส่งสำเร็จโดยไม่ทำงานซ้ำ
+  - รายการค้าง `processing` → **425 `TOO_EARLY`** (รอให้ฝั่งเก่า/ใหม่จบก่อน)
+- ใช้กับ: `repair.php` (create WO), `spare_usage.php` (add spare ส่วนล็อกกันคู่),
+  `repair_attachment.php` (upload)
+- **รายการซ้ำจริง** (ไม่มี client_action_id หรือซ้ำแต่ payload ต่าง → ทะเบียน
+  ล็อก) → ตอบ `VALIDATION_ERROR`/`CONFLICT` (409) ตามปกติ
+
+### 12.2 Conflict detection (stale `base_updated_at`)
+
+- API หลักที่แก้ข้อมูลพร้อมกัน (`repair.php` PUT, `spare_usage.php` add):
+  - client ส่ง `base_updated_at` (ค่า `updated_at` ตอนโหลด) ใน payload
+  - backend เปรียบเทียบกับ `updated_at` ปัจจุบันของบันทึกฝั่ง server
+  - ต่างกัน → **409 `CONFLICT`** `{ code, server_updated_at }` + บันทึก
+    `SYNC_CONFLICT` audit (severity warning)
+- Client (SyncEngine) ตอบสนอง 409 อย่างไร: ทำเครื่องหมาย item
+  `CONFLICT` → หยุด retry อัตโนมัติ เหลือให้คนจัดการใน Sync Center
+  (ดู `docs/PWA.md`)
+
+### 12.3 Header/response ที่เกี่ยวข้องกับ sync
+
+| Header | ฝั่ง | ความหมาย |
+|---|---|---|
+| `X-Client-Action-Id` | request | idempotency key ของ action |
+| `X-Request-Id` | success | ระบุ request เดียวกันข้าม retry (audit) |
+| `X-Idempotent-Replay: 1` | success | response นี้คือ replay ของผลเดิม |
+
+Migration: `database/migration_20260916_phase19_pwa_offline.sql`
+(run via `scripts/apply_phase19_offline.php`)
+
+---
+
+## 13. `repair_attachment.php` (เพิ่ม GET — Phase 19)
+
+อัปโหลดรูปงานซ่อม (ก่อน/หลัง) สำหรับ offline technician flow
+
+| Method | เส้นทาง | สิทธิ์ | หมายเหตุ |
+|---|---|---|---|
+| POST | `?work_order_id=` | ช่างที่ได้รับงาน/ผู้ดูแล | multipart `file` |
+| GET | `?work_order_id=` | ช่างที่ได้รับงาน/ผู้ดูแล | รายการไฟล์ของ WO นั้น |
+
+### GET response 200
+```json
+{
+  "items": [
+    {
+      "id": 3, "work_order_id": 12,
+      "uploaded_by": "E01117", "file_path": "uploads/repair/12/abcd.jpg",
+      "file_name": "img_1.jpg", "file_size": 123456, "mime_type": "image/jpeg",
+      "created_at": "2026-09-16 10:00:00"
+    }
+  ]
+}
+```
+- input `work_order_id` ตรวจเป็น int เท่านั้น; ไม่มี → `VALIDATION_ERROR`
+- รายการปรากฏเฉพาะ user ที่เป็นผู้รับผิดชอบงาน (assigned) หรือ supervisor
+- POST ไม่มีไฟล์ / เกิน `MAX_FILE_SIZE` / ชนิดไม่ใช่ภาพ → `VALIDATION_ERROR`
