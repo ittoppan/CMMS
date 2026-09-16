@@ -134,7 +134,11 @@ export default function SyncCenterPage() {
   const offline = net === "OFFLINE";
 
   return (
-    <PageShell title={t("sync.menu")} description={t("sync.status.offline")}>
+    <PageShell
+      title={t("sync.menu")}
+      description={t("sync.status.offline")}
+      eyebrow={<p className="cmms-eyebrow">SYNC CENTER · CMMS-TOPPAN</p>}
+    >
       <div className="grid gap-4 lg:grid-cols-3">
         {/* สถานะเครือข่าย */}
         <Card>
