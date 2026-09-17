@@ -177,11 +177,12 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.system",
-    pathPrefixes: ["/notifications", "/settings", "/pages", "/editor", "/audit-log"],
+    pathPrefixes: ["/notifications", "/settings", "/pages", "/editor", "/audit-log", "/feedback", "/settings/health"],
     items: [
       { perm: "notifications", labelKey: "menu.notifications", href: "/notifications", icon: Bell },
       { perm: "notifications/history", labelKey: "menu.notifications_history", href: "/notifications/history", icon: ClipboardList },
       { perm: "audit_log", labelKey: "menu.audit_log", href: "/audit-log", icon: History },
+      { perm: "feedback", labelKey: "menu.feedback", href: "/feedback", icon: MessageSquareText },
       { perm: "settings/notifications", labelKey: "menu.settings_notifications", href: "/settings/notifications", icon: Bell },
       { perm: "settings", labelKey: "menu.settings", href: "/settings", icon: Settings },
       { perm: "settings", labelKey: "menu.settings_menus", href: "/settings/menus", icon: ShieldCheck },
@@ -189,6 +190,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone },
       { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush },
       { perm: "settings", labelKey: "menu.settings_repair_options", href: "/settings/repair-options", icon: Wrench },
+      { perm: "system_health", labelKey: "menu.system_health", href: "/settings/health", icon: Activity },
       { perm: "editor/builder", labelKey: "menu.builder", href: "/editor/builder", icon: LayoutGrid },
       { perm: "pages", labelKey: "menu.pages", href: "/pages", icon: FileText },
     ],

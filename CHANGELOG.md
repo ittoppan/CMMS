@@ -1,9 +1,30 @@
 # Changelog — CMMS-TOPPAN
 
-รูปแบบ: [Keep a Changelog](https://keepachangelog.com/) · ตัวเลขเวอร์ชันตรงกับ `frontend/package.json` (ตอนนี้ `1.0.0`) และ tag ใน git (เช่น `v1.0.0`)
+รูปแบบ: [Keep a Changelog](https://keepachangelog.com/) · ตัวเลขเวอร์ชันตรงกับ `frontend/package.json` (ตอนนี้ `1.0.1`) และ tag ใน git (เช่น `v1.0.1`)
 
 ## [Unreleased]
-- (ว่าง — อยู่ระหว่างการเก็บฟีเจอร์ของ Phase 21 จนกว่าจะตัดสินใจเปิดถัดไป ซึ่งต้องทำเป็น controlled release)
+- (ว่าง — อยู่ระหว่างการเก็บฟีเจอร์ของ Phase 22 จนกว่าจะตัดสินใจเปิดถัดไป)
+
+## [1.0.1] — 2026-09-17 — POST-GO-LIVE MONITORING (Phase 22)
+
+Commit: โปรดดูที่ commit ของสาย `main` หลัง Phase 22 · DB migration: `migration_20260917_phase22_monitoring.sql` (ระบบ monitoring/feedback ใหม่ทั้งหมดเป็น additive)
+ตัวชี้วัดจริง (ไม่ได้จำลอง): ระบบยังไม่ได้ใช้งานจริงในสายการผลิต — ข้อมูลปัจจุบันคือ seed/setup/test
+
+### Added
+- **system_health** — `GET /api/v1/system_health.php` (admin เท่านั้น): สแนปชอตสถานะจริง DB ping, Sage 300 probe จริง, พื้นที่ disk, ขนาด php-error.log, ข้อผิดพลาด 30 วัน, ผล client_action_log (success/conflict/capped), สถานะงานซ่อม/PM/MR/ตรวจรอบ/เบิกอะไหล่, การแจ้งเตือน 30 วัน (LINE quota ล้มเหลว), audit, คุณภาพข้อมูล (9 วันที่ผิด, 78 WO เสร็จไม่มีช่าง, 9 assignee ไร้เจ้าของ) — หน้า UI `/settings/health` + การ์ด ในเมนู "ระบบ & ตั้งค่า"
+- **system_errors + centralized error capture** — `src/helpers/errors.php` (request_id, redact secret, record_error) เชื่อม `api_safe_catch()` ทุก endpoint + `public/api/health.php` (เมื่อ DB ล้ม เก็บได้เท่าที่ทำได้)
+- **feedback** — `GET/POST/PUT /api/v1/feedback.php`: ผู้ใช้ทุกคนส่งได้ (CSRF+Origin บังคับ), admin ดูทั้งหมด/ปรับสถานะ, ผู้ใช้เห็นของตัวเอง — หน้า UI `/feedback`
+- **menu_permissions**: `system_health` (role 1 เท่านั้น), `feedback` (ทุกบทบาท) — เพิ่ม sidebar/labels i18n
+- **Index**: `sage_sync_log(status, created_at)` ใช้หน้า health/ประวัติ sync
+
+### Changed
+- `api_safe_catch()` ตอนนี้บันทึกลง `system_errors` (ด้วย) ก่อนตอบ 500 — ยังไม่เปิดเผย stack แก่ client
+
+### Deprecated / Known limits (คงสภาพเหมือนเดิม; ไม่ใช่ regression)
+- ยังไม่มี HTTPS/TLS (blocker B-1 Phase 21 — ต้องติดตั้ง cert + bind ภายนอก)
+- Sage 300: ไม่มีการตัดสต็อกอัตโนมัติจาก CMMS — การเบิกต้องผ่านฝ่ายดูแล Sage (PENDING_ISSUE / wait ฝ่ายจัดการ) ตามสัญญาเดิม
+
+<br/>
 
 ## [1.0.0] — 2026-09-17 — RELEASE CANDIDATE (Go-Live)
 

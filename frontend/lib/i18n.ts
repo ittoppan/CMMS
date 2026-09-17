@@ -102,6 +102,8 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.settings": { th: "ตั้งค่าระบบทั้งหมด", en: "System Settings" },
   "menu.settings_menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
   "menu.audit_log": { th: "บันทึกการตรวจสอบ", en: "Audit Log" },
+  "menu.feedback": { th: "ส่งความคิดเห็น / แจ้งปัญหา", en: "Feedback & Issues" },
+  "menu.system_health": { th: "สุขภาพระบบ (มอนิเตอร์)", en: "System Health" },
   "menu.settings_services": { th: "บริการและสถานะการรัน", en: "Services & Status" },
   "menu.settings_pwa": { th: "ไอคอนแอปมือถือ", en: "PWA Icons (Mobile App)" },
   "menu.settings_design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
