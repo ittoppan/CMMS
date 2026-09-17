@@ -186,6 +186,8 @@ const DICT: Record<string, { th: string; en: string }> = {
   "sync.badge.tooltip": { th: "มีงานค้างซิงก์ {n} รายการ", en: "{n} item(s) waiting to sync" },
   "sync.chip.pending": { th: "รอซิงก์", en: "Pending sync" },
   "sync.saved_offline_note": { th: "บันทึกลงเครื่องแล้ว — จะส่งเข้าสู่ระบบเมื่อกลับมาออนไลน์", en: "Saved on this device — will sync when online" },
+  "sync.browser_cache": { th: "พื้นที่เบราว์เซอร์ที่ใช้: {mb} MB", en: "Browser storage used: {mb} MB" },
+  "sync.more_items": { th: "… อีก {n} รายการ", en: "… {n} more" },
 
   // ── ปุ่ม / แอคชันกลาง ──
   "action.save": { th: "บันทึก", en: "Save" },

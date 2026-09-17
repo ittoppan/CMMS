@@ -65,6 +65,32 @@ class Sage300Service {
     }
 
     /**
+     * พิสูจน์เส้นเชื่อมต่อจริง (ไม่ใช่ flag ฮาร์ดโค้ด) — ใช้หน้า Settings > ERP status
+     * พยายามต่อ ODBC + query SELECT 1 ภายใน timeout 5 วิ (ตั้งไว้ใน connectOdbc)
+     */
+    public static function probeConnection(): array {
+        $connObj = self::connectOdbc();
+        if (empty($connObj['success'])) {
+            return ['connected' => false, 'driver' => $connObj['driver'] ?? 'none', 'detail' => 'connection_unavailable'];
+        }
+        try {
+            $conn = $connObj['connection'];
+            if ($connObj['driver'] === 'PDO_ODBC') {
+                $conn->query('SELECT 1');
+            } else {
+                $r = @odbc_exec($conn, 'SELECT 1');
+                if (!$r) {
+                    throw new Exception(odbc_error() ?: 'ODBC exec failed');
+                }
+            }
+            return ['connected' => true, 'driver' => $connObj['driver']];
+        } catch (Exception $e) {
+            error_log('Sage300 probeConnection: ' . $e->getMessage());
+            return ['connected' => false, 'driver' => $connObj['driver'] ?? 'none', 'detail' => 'query_failed'];
+        }
+    }
+
+    /**
      * Read Item Master & Available Stock from Sage 300 ERP IC (Inventory Control)
      * Filters specifically for configured allowed categories in settings table
      */

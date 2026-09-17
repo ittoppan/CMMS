@@ -131,11 +131,14 @@ try {
 
         $config = loadSyncConfig($pdo);
         $allowedCats = loadAllowedCategories($pdo);
+        $probe = Sage300Service::probeConnection();
 
         echo json_encode([
             'status' => 'success',
-            'sage300_connected' => true,
-            'erp_database' => 'SAGE300_TOPPAN_LIVE',
+            'sage300_connected' => $probe['connected'],
+            'sage300_driver' => $probe['driver'],
+            'sage300_probe_detail' => $probe['detail'] ?? '',
+            'erp_database' => getenv('SAGE300_ODBC_DSN') ?: '(ไม่ได้ตั้งค่า SAGE300_ODBC_DSN)',
             'stats' => $stats,
             'logs' => $logs,
             'sync_config' => $config,
@@ -295,5 +298,5 @@ try {
     echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

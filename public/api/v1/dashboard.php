@@ -158,8 +158,7 @@ try {
             exit;
     }
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    api_safe_catch($e);
 }
 exit;
 

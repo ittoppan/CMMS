@@ -136,7 +136,7 @@ try {
                 $pdo->commit();
             } catch (Exception $e) {
                 $pdo->rollBack();
-                http_response_code(500); echo json_encode(['error' => 'ปรับสต็อกไม่สำเร็จ: ' . $e->getMessage()]);
+                http_response_code(500); error_log('[stock_take.php] ' . get_class($e) . ': ' . $e->getMessage()); echo json_encode(['error' => 'ปรับสต็อกไม่สำเร็จ']);
                 exit;
             }
             echo json_encode(['success' => true, 'message' => 'ปิดรอบนับสต็อก + ปรับ stock_qty ตามจำนวนจริงเรียบร้อย']);
@@ -169,5 +169,5 @@ try {
 
     http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => 'Server Error: ' . $e->getMessage()]);
+    api_safe_catch($e);
 }

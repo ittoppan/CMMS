@@ -14,6 +14,21 @@ if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'],
 
 try {
     $pdo = getDb();
+
+    // ยังไม่ login + GET → คืนเฉพาะคีย์สาธารณะที่หน้า login / ธีมต้องใช้
+    // (เขียน/ดูคีย์อื่นทั้งหมดยังต้อง login เหมือนเดิม — ไม่เปิดช่องโหว่)
+    if (empty($_SESSION['user_id']) && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+        if (isset($_GET['defaults']) || isset($_GET['audit']) || isset($_GET['id'])) {
+            api_fail(401, 'UNAUTHENTICATED', 'ต้องเข้าสู่ระบบก่อนใช้งาน');
+        }
+        $public = ['theme_preset', 'theme_primary_hex', 'theme_secondary_hex', 'site_name', 'company_name'];
+        $ph = implode(',', array_fill(0, count($public), '?'));
+        $stmt = $pdo->prepare("SELECT * FROM settings WHERE setting_key IN ($ph)");
+        $stmt->execute($public);
+        echo json_encode(apiMaskSettingsRows($stmt->fetchAll()), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     requireLogin($pdo);
 
     // คืนค่าเริ่มต้นของทุกคีย์ (สำหรับปุ่มรีเซ็ตค่าเริ่มต้นใน UI) — อ่านได้ทุกคนที่ login

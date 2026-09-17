@@ -75,5 +75,5 @@ try {
     echo json_encode(array_merge($meta, $data), JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Report error: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    api_safe_catch($e);
 }

@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+              "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
           },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
         ],
@@ -72,36 +72,43 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    // ปลายทาง PHP Backend (IIS) — อ่านจาก env CMMS_BACKEND_URL (ค่าเริ่มต้น localhost:8081)
+    const apiUrl = process.env.CMMS_BACKEND_URL || "http://localhost:8081";
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8081/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
+      },
+      // Health check (public, ไม่มี auth) → PHP endpoint ที่ IIS
+      {
+        source: "/health",
+        destination: `${apiUrl}/api/health.php`,
       },
       // LINE Login / bind flow ยังใช้ PHP ฝั่ง IIS (8081)
       {
         source: "/line_callback.php",
-        destination: "http://localhost:8081/line_callback.php",
+        destination: `${apiUrl}/line_callback.php`,
       },
       {
         source: "/line_login.php",
-        destination: "http://localhost:8081/line_login.php",
+        destination: `${apiUrl}/line_login.php`,
       },
       {
         source: "/bind_line.php",
-        destination: "http://localhost:8081/bind_line.php",
+        destination: `${apiUrl}/bind_line.php`,
       },
       {
         source: "/login.php",
-        destination: "http://localhost:8081/login.php",
+        destination: `${apiUrl}/login.php`,
       },
       {
         source: "/logout.php",
-        destination: "http://localhost:8081/logout.php",
+        destination: `${apiUrl}/logout.php`,
       },
       // รูปอัปโหลด (avatar, รูปซ่อม) — เสิร์ฟจาก IIS (8081) ให้แสดงใน PWA ได้ทันที
       {
         source: "/uploads/:path*",
-        destination: "http://localhost:8081/uploads/:path*",
+        destination: `${apiUrl}/uploads/:path*`,
       },
     ];
   },

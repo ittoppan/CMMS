@@ -45,5 +45,8 @@ function getDb(): PDO {
     ];
 
     $pdo = new PDO($dsn, $user, $pass, $options);
+    // ให้ SQL NOW()/CURRENT_TIMESTAMP ตรงกับเวลาประเทศไทยของ PHP (date()) เสมอ
+    // (เคยเป็น SYSTEM/UTC ทำให้ created_at ที่ default จาก DB คลาดจากที่ PHP เขียน +7 ชม.)
+    $pdo->exec("SET time_zone = '+07:00'");
     return $pdo;
 }

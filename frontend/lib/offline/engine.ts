@@ -220,9 +220,22 @@ export class SyncEngine {
     this.emit("cmms:sync-changed");
     this.emit("cmms:synced", this.lastRun);
     if (this.lastRun.retryable > 0) {
-      this.schedule(0);
+      // ใช้ backoff ตามรอบ retry (8s → 20s → 45s) แทนการยิง 0ms ซ้ำทันที
+      this.schedule(this.nextRetryDelay());
     }
+    // ตัดทิ้ง attachment ที่ sync สำเร็จเกิน 7 วัน (กัน IndexedDB โต)
+    void cleanupFinishedAttachments();
     return this.lastRun;
+  }
+
+  private nextRetryDelay(): number {
+    let maxTries = 0;
+    for (const it of this.pendingInOrder()) {
+      if (it.retry_count > maxTries) maxTries = it.retry_count;
+    }
+    if (maxTries <= 0) return 0;
+    const idx = Math.min(maxTries - 1, RETRY_SCHEDULE_MS.length - 1);
+    return RETRY_SCHEDULE_MS[idx];
   }
 
   private async drain(): Promise<SyncRunResult> {
@@ -400,7 +413,7 @@ export class SyncEngine {
   }
 }
 
-export { MAX_RETRIES };
+export { MAX_RETRIES, RETRY_SCHEDULE_MS };
 
 export function makeId(action: string): string {
   const r = Math.random().toString(36).slice(2, 6);

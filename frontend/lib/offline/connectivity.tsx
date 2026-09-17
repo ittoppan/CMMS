@@ -50,8 +50,10 @@ const PROBE_INTERVAL_MS = 10_000;
 const PROBE_TIMEOUT_MS = 6_000;
 
 function useConnectivityImpl(): ConnectivityValue {
-  const [net, setNet] = useState<NetState>(() => (typeof navigator !== "undefined" && navigator.onLine) ? "ONLINE" : "OFFLINE");
-  const [navigatorOnline, setNavigatorOnline] = useState(() => (typeof navigator !== "undefined" ? navigator.onLine : true));
+  // ตั้งต้นเป็นค่า static เท่ากันทั้ง server/client (กัน hydration mismatch) —
+  // ค่าจริงของ navigator.onLine จะอัปเดตหลัง mount ใน effect ด้านล่าง
+  const [net, setNet] = useState<NetState>("OFFLINE");
+  const [navigatorOnline, setNavigatorOnline] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [stats, setStats] = useState<SyncStats>({
     pending: 0,
@@ -68,18 +70,22 @@ function useConnectivityImpl(): ConnectivityValue {
   const probeFailsRef = useRef(0);
 
   const applyNet = useCallback((next: NetState) => {
-    setNet((cur) => {
-      if (cur !== next) {
-        // ขึ้น ONLINE เมื่อกลับมา → สั่ง sync
-        if (next === "ONLINE" && (cur === "OFFLINE" || cur === "RECONNECTING")) {
-          void syncEngine.sync();
-        }
-      }
-      return next;
-    });
+    const cur = netRef.current;
+    if (cur === next) return;
+    // ขึ้น ONLINE เมื่อกลับมา → สั่ง sync (รองรับ StrictMode: ไม่อยู่ใน updater)
+    if (next === "ONLINE" && (cur === "OFFLINE" || cur === "RECONNECTING")) {
+      void syncEngine.sync();
+    }
+    netRef.current = next;
+    setNet(next);
   }, []);
 
   useEffect(() => {
+    // หลัง mount ค่อยสะท้อนสถานะจริง (SSR/hydration ใช้ค่า static ข้างบนอยู่แล้ว)
+    const isOnline = typeof navigator !== "undefined" && navigator.onLine;
+    setNavigatorOnline(isOnline);
+    applyNet(isOnline ? "ONLINE" : "OFFLINE");
+
     const onOnline = () => {
       setNavigatorOnline(true);
       probeFailsRef.current = 0;

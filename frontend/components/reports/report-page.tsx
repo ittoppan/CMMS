@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { RefreshCcw } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
@@ -12,7 +13,19 @@ import { useApiQuery } from "@/lib/api";
 import type { DashboardOptions } from "@/lib/dashboard";
 import type { PageHero } from "@/lib/i18n";
 
-import { ReportChart } from "./report-chart";
+// recharts แยกเป็น chunk ต่างหาก (กันหน้า report-center/PDF โหลด ~400KB ตั้งต้น)
+const ReportChart = dynamic(
+  () => import("./report-chart").then((m) => m.ReportChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="rounded-xl border border-border p-5">
+        <Skeleton className="mb-3 h-4 w-40" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ),
+  }
+);
 import { ReportFilters } from "./report-filters";
 import { ReportTableCard } from "./report-table";
 import {

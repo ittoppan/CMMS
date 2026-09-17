@@ -97,3 +97,9 @@ function api_forbidden(?PDO $pdo, string $code, string $message): void {
     }
     api_fail(403, $code, $message);
 }
+
+/** ย่อ catch{} กลาง API: log exception จริงฝั่ง server + ตอบ generic 500 ให้ client (ไม่ leak $e->getMessage()) */
+function api_safe_catch(Throwable $e, string $message = 'เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่ภายหลัง'): void {
+    error_log(sprintf('[CMMS API] %s: %s @ %s:%d', get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()));
+    api_fail(500, 'INTERNAL_ERROR', $message);
+}

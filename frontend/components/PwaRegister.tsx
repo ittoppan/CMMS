@@ -55,6 +55,7 @@ export default function PwaRegister() {
     const registerPush = async (reg: ServiceWorkerRegistration) => {
       try {
         const vapidResp = await fetch("/api/v1/push_subscribe.php", { credentials: "include" });
+        if (vapidResp.status === 401 || vapidResp.status === 403) return; // ยังไม่ login → ข้ามเงียบ ๆ
         const vapidJson = (await vapidResp.json()) as { publicKey?: string; enabled?: string };
         // ถ้า admin ปิด PWA Web Push (push_alert_enabled=0) → ยกเลิก subscription ที่มีอยู่ ไม่ subscribe ใหม่
         if (vapidJson.enabled === "0") {
@@ -102,6 +103,9 @@ export default function PwaRegister() {
     // PWA Web Push: register สำเร็จแล้วค่อย subscribe push
     const initPush = async () => {
       if (!("Notification" in window) || !("PushManager" in window)) return;
+      // ยังไม่ login (login.php อยู่ root layout) → ไม่ควรขอสิทธิ์/ subscribe push
+      // (กัน console error 401 บนหน้า login และกัน browser สุ่มถามสิทธิ์แจ้งเตือน)
+      if (!document.cookie.split(";").some((c) => c.trim().startsWith("PHPSESSID="))) return;
       try {
         const perm = await Notification.requestPermission();
         if (perm !== "granted") return;

@@ -12,20 +12,17 @@
  *   POST (CSRF) { action:'set_qty', id, qty } → แก้จำนวน
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
 require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
 
     $resolvePart = function (PDO $pdo, array $item): array {
@@ -261,7 +258,8 @@ try {
                 $pdo->rollBack();
                 clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
                 http_response_code(400);
-                echo json_encode(['error' => $e->getMessage()]);
+                error_log('[spare_usage.php add] ' . get_class($e) . ': ' . $e->getMessage());
+                echo json_encode(['error' => 'เพิ่มอะไหล่ไม่สำเร็จ กรุณาลองใหม่']);
             }
             exit;
         }
@@ -299,9 +297,7 @@ try {
                 $pdo->commit();
             } catch (Exception $e) {
                 $pdo->rollBack();
-                http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
-                exit;
+                api_safe_catch($e);
             }
             echo json_encode(['success' => true, 'message' => 'ลบรายการอะไหล่ออกจากใบสั่งซ่อมแล้ว']);
             exit;
@@ -325,5 +321,5 @@ try {
     echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

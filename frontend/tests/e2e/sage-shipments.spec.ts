@@ -54,9 +54,17 @@ test.describe("sage shipments", () => {
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("main h1")).toBeVisible();
 
-    // Table should exist (even if empty)
-    await expect(page.locator("table")).toBeVisible();
-    await expect(page.locator("thead")).toBeVisible();
+    // Table should exist (even if empty). ถ้าไม่มีใบเบิกที่อนุมัติ ระบบแสดง empty-state
+    // ("ไม่พบรายการที่ต้องตัดใน Sage 300") แทน <table> — ยอมรับทั้งสองสถานะ
+    const table = page.locator("table");
+    const emptyState = page.locator('text="ไม่พบรายการที่ต้องตัดใน Sage 300"');
+    const hasTable = await table.count();
+    if (hasTable > 0) {
+      await expect(table).toBeVisible();
+      await expect(page.locator("thead")).toBeVisible();
+    } else {
+      await expect(emptyState).toBeVisible();
+    }
   });
 
   test("request status update modal opens and submits", async ({ page }) => {

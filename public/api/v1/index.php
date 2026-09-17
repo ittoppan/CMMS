@@ -138,5 +138,6 @@ try {
         echo json_encode(['status' => 'error', 'code' => 404, 'message' => 'Resource not found'], JSON_UNESCAPED_UNICODE);
     }
 } catch (Exception $e) {
-    echo json_encode(['status' => 'error', 'code' => 500, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    error_log(sprintf('[CMMS API index] %s: %s @ %s:%d', get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()));
+    echo json_encode(['status' => 'error', 'code' => 500, 'message' => 'Internal server error'], JSON_UNESCAPED_UNICODE);
 }

@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { t } from "@/lib/i18n";
 import { useConnectivity } from "@/lib/offline/connectivity";
-import { syncEngine } from "@/lib/offline/engine";
+import { syncEngine, RETRY_SCHEDULE_MS } from "@/lib/offline/engine";
 import { idbGetAll, idbEstimateBytes, estimateTotalStorage } from "@/lib/offline/idb";
 import type { OfflineAttachmentRecord, SyncQueueItem, SyncStatusType } from "@/lib/offline/types";
 import {
@@ -224,7 +224,7 @@ export default function SyncCenterPage() {
               />
             </div>
             <div className="text-xs">
-              browser cache: {((storageUsed || attBytes) / (1024 * 1024)).toFixed(1)} MB
+              {t("sync.browser_cache").replace("{mb}", ((storageUsed || attBytes) / (1024 * 1024)).toFixed(1))}
             </div>
           </CardContent>
         </Card>
@@ -294,7 +294,7 @@ export default function SyncCenterPage() {
                 ))}
                 {visible.length > 12 && (
                   <div className="text-xs text-muted-foreground">
-                    … {visible.length - 12} รายการ
+                    {t("sync.more_items").replace("{n}", String(visible.length - 12))}
                   </div>
                 )}
               </>
@@ -310,7 +310,7 @@ export default function SyncCenterPage() {
       )}
       <div className="mt-4 text-xs text-muted-foreground">
         <Clock3 size={12} className="mr-1 inline" aria-hidden="true" />
-        {offline ? t("sync.status.offline") : t("sync.retrying_in").replace("{s}", "8")}
+        {offline ? t("sync.status.offline") : t("sync.retrying_in").replace("{s}", String(Math.round(RETRY_SCHEDULE_MS[0] / 1000)))}
       </div>
     </PageShell>
   );

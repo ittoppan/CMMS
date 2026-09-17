@@ -565,7 +565,8 @@ try {
         try {
             $book = xlsx_read($tmp);
         } catch (Throwable $e) {
-            imp_json(400, ['error' => $e->getMessage()]);
+            error_log('[import_excel.php] xlsx parse: ' . get_class($e) . ': ' . $e->getMessage());
+            imp_json(400, ['error' => 'อ่านไฟล์ Excel ไม่สำเร็จ ตรวจสอบว่ามีชีตข้อมูลตามรูปแบบ']);
         }
         $allRows = $book['rows'];
         if (empty($allRows)) imp_json(400, ['error' => 'ไฟล์ไม่มีข้อมูล (ต้องมีแถวหัวข้อ + ข้อมูล)']);
@@ -708,7 +709,8 @@ try {
                 $pdo->commit();
             } catch (Throwable $e) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
-                imp_json(500, ['error' => 'นำเข้าไม่สำเร็จ: ' . $e->getMessage()]);
+                error_log('[import_excel.php] import: ' . get_class($e) . ': ' . $e->getMessage());
+                imp_json(500, ['error' => 'นำเข้าไม่สำเร็จ (Error อยู่ฝั่งระบบ)']);
             }
         } finally {
             $pdo->exec("SELECT RELEASE_LOCK('cmms_import')");
@@ -725,7 +727,8 @@ try {
 
     imp_json(400, ['error' => 'action ต้องเป็น template / validate / import']);
 } catch (Throwable $e) {
-    imp_json(500, ['error' => $e->getMessage()]);
+    error_log('[import_excel.php] top: ' . get_class($e) . ': ' . $e->getMessage());
+    imp_json(500, ['error' => 'เกิดข้อผิดพลาดภายในระบบ กรุณาลองใหม่']);
 }
 
 /* JSON_UNESCAPED_UNICODE ปลอดภัยอยู่แล้ว แต่กันค่าแปลก ๆ (null byte) */

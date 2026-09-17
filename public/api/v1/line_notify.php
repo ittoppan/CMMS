@@ -270,5 +270,5 @@ try {
             http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

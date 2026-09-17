@@ -4,22 +4,18 @@
  * GET  -> status: รันอยู่ไหม, public URL, reachable check
  * POST { action: start | stop }
  */
-session_start();
 require_once __DIR__ . '/../../../src/config/db.php';
-require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
+session_start();
 
-// --- auth: ต้อง login แล้ว ---
-if (empty($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-// --- CSRF: POST (start/stop tunnel) ต้องผ่านการตรวจ ---
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
-    enforceCsrf();
+// --- auth: admin เท่านั้น (ควบคุม tunnel)
+try {
+    $pdo = getDb();
+    requireLogin($pdo, true);
+} catch (Throwable $e) {
+    api_safe_catch($e);
 }
 
 // Static URL อ่านจาก env (NGROK_STATIC_URL) — กัน URL ฝังตายตัว

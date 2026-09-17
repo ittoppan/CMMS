@@ -70,8 +70,7 @@ try {
             exit;
     }
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }
 
 /** รายการตรวจ — supervisor/admin เห็นทั้งหมด, ช่างเห็นเฉพาะที่มอบหมาย/รับผิดชอบเครื่อง */

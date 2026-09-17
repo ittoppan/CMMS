@@ -96,8 +96,7 @@ try {
             echo json_encode(['error' => 'Method not allowed'], JSON_UNESCAPED_UNICODE);
     }
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    api_safe_catch($e);
 }
 exit;
 
@@ -931,7 +930,8 @@ function apiAssignWork(PDO $pdo, bool $bulk): void {
                 'added' => $set['added'], 'conflicts' => $conflicts,
             ];
         } catch (Exception $e) {
-            $results[] = ['id' => $rid, 'success' => false, 'error' => $e->getMessage()];
+            error_log('[supervisor.php] batch assign WO ' . $rid . ': ' . $e->getMessage());
+            $results[] = ['id' => $rid, 'success' => false, 'error' => 'ดำเนินการไม่สำเร็จ'];
         }
     }
 

@@ -12,13 +12,14 @@
  * source('sage'|'cache'), last_synced_at, sage_item_no, cache_id.
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
     if ($method !== 'GET') { http_response_code(405); echo json_encode(['error' => 'Method not allowed']); exit; }
 
@@ -183,5 +184,5 @@ try {
     ]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

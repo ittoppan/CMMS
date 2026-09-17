@@ -15,18 +15,15 @@
  *                               certificate_number, certificate_file, total_cost, result, standard_used }
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -251,5 +248,5 @@ try {
 } catch (Exception $e) {
     if (isset($pdo) && $pdo->inTransaction()) { $pdo->rollBack(); }
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }
