@@ -1,9 +1,34 @@
 # Changelog — CMMS-TOPPAN
 
-รูปแบบ: [Keep a Changelog](https://keepachangelog.com/) · ตัวเลขเวอร์ชันตรงกับ `frontend/package.json` (ตอนนี้ `1.0.1`) และ tag ใน git (เช่น `v1.0.1`)
+รูปแบบ: [Keep a Changelog](https://keepachangelog.com/) · ตัวเลขเวอร์ชันตรงกับ `frontend/package.json` (ตอนนี้ `1.1.0`) และ tag ใน git (เช่น `v1.1.0`)
 
 ## [Unreleased]
-- (ว่าง — อยู่ระหว่างการเก็บฟีเจอร์ของ Phase 22 จนกว่าจะตัดสินใจเปิดถัดไป)
+- (ว่าง — ฟีเจอร์ถัดไปจะเริ่มหลัง Phase 23)
+
+## [1.1.0] — 2026-09-18 — ADVANCED INTELLIGENCE & ANALYTICS (Phase 23)
+
+Commit: โปรดดู commit ของสาย `main` หลัง Phase 23 · DB migration: **ไม่มี** (อ่านตารางที่มีอยู่เดิมทั้งหมด)
+ตัวชี้วัดจริง (ไม่ได้จำลอง): ข้อมูลปัจจุบันเป็น seed/setup/test — KPI ที่ข้อมูลไม่พอแสดง INSUFFICIENT DATA ไม่ใช่ 0
+
+### Added
+- **Intelligence Center** — หน้า `/analytics/intelligence` (10 แท็บ: ภาพรวมผู้บริหาร · Reliability · สถานะเครื่อง · เสียซ้ำ · Downtime · PM · ภาระงานช่าง · สต็อก & อะไหล่ · ต้นทุน · คิวงาน & ความเร่งด่วน) + แถบเตือนคุณภาพข้อมูล + กราฟแนวโน้มรายเดือน (งานเสร็จ · ฉุกเฉิน · MTBF) + เมนู/i18n TH-EN
+- **`GET /api/v1/intelligence.php`** — 13 sections (`overview, reliability, trend, asset_health, repeat_failures, downtime_pareto, priority, pm, planned_unplanned, technicians, spare, cost, data_quality`) พร้อม `meta` (user/range/filters/can_cost/generated_at); RBAC server-side
+- **`src/helpers/analytics.php`** — engine Phase 23 ที่ **reuse** KPI กลาง `src/helpers/kpi.php` (ไม่คำนวณสูตรซ้ำ) ครอบคลุม MTBF/MTTR จาก operating hours จริง, สถานะเครื่องแบบอธิบายได้, การเสียซ้ำ + drill-down, downtime Pareto, PM compliance, planned vs unplanned, ภาระงานช่าง, สต็อก Sage vs การใช้ CMMS, ต้นทุน + coverage, คุณภาพข้อมูล
+- **e2e** `frontend/tests/e2e/intelligence.spec.ts` — 5 เคส (API 401, หน้า+แท็บ+KPI, reliability, drill-down, filter+search)
+- **เอกสาร** `docs/KPI_DEFINITIONS.md`, `docs/ANALYTICS_DATA_MODEL.md`, `docs/ADVANCED_ANALYTICS.md`, `docs/ANALYTICS_PERFORMANCE.md`, `docs/PHASE_23_REPORT.md`
+
+### Changed
+- `public/api/v1/analytics_monthly.php` — ลบ section ที่แต่งข้อมูล (predictive health / energy waste) ที่ไม่มีข้อมูลรองรับ และแก้ join bug
+- ตัวเลขผู้บริหารใช้ Reliability จากตาราง `mtbf_mttr` (operating hours จริง) และติดป้ายที่มา/INSUFFICIENT DATA ทุกจุด
+
+### Fixed
+- `ana_asset_health` คืน `summary: []` เมื่อไม่มีเครื่องตามตัวกรอง → ทำให้หน้าจอ crash (`Cannot convert undefined or null to object`); คืน shape ว่างที่ถูกต้อง + frontend guard
+
+### Deprecated / Known limits (คงสภาพเหมือนเดิม; ไม่ใช่ regression)
+- ยังไม่มี HTTPS/TLS (blocker B-1 Phase 21 — ต้องติดตั้ง cert + bind ภายนอก)
+- ฟิลด์ต้นทุน / เวลาตอบสนอง / RCA / failure code ในใบงานยังกรอก 0% → KPI เหล่านี้แสดง INSUFFICIENT DATA
+- Sage 300: ไม่มีการตัดสต็อกอัตโนมัติจาก CMMS — การเบิกต้องผ่านฝ่ายดูแล Sage ตามสัญญาเดิม
+- MTBF/MTTR และ PM compliance มีสองนิยาม/แหล่ง (อธิบายใน `docs/KPI_DEFINITIONS.md` §12)
 
 ## [1.0.1] — 2026-09-17 — POST-GO-LIVE MONITORING (Phase 22)
 

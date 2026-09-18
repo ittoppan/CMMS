@@ -125,12 +125,15 @@ try {
     // ตัดหมวดที่ไม่มีค่าใช้จ่ายออก (ไม่โชว์ 0% ให้เข้าใจผิด)
     $costBreakdown = array_values(array_filter($costBreakdown, fn($c) => $c['value'] > 0));
 
-    // 7. ESG / Energy Waste (Mock based on downtime_minutes)
-    $downtimeSql = "SELECT SUM(downtime_minutes) as total_downtime FROM repair WHERE YEAR(created_at) = ?";
+    // 7. Downtime (ข้อมูลจริงเท่านั้น — เดิมเคยใช้สมมุติ base 5 บาท/นาที สำหรับ energy waste ให้ถอดออกตามนโยบาย Phase 23: งดตัวเลขแต่ง)
+    $downtimeSql = "SELECT
+                        SUM(downtime_minutes) AS total_downtime,
+                        SUM(CASE WHEN COALESCE(downtime_minutes,0) > 0 THEN 1 ELSE 0 END) AS wo_with_downtime,
+                        COUNT(*) AS total_wo
+                    FROM repair WHERE YEAR(created_at) = ?";
     $dtStmt = $pdo->prepare($downtimeSql);
     $dtStmt->execute([$year]);
     $dtData = $dtStmt->fetch(PDO::FETCH_ASSOC);
-    $energyWasteCost = ($dtData['total_downtime'] ?? 0) * 5; // 5 THB per minute of downtime
 
     // 8. Top Performers (Real Data)
     $topSql = "SELECT u.full_name as name, u.avatar, u.avatar_path, COUNT(r.id) as jobs, IFNULL(ROUND(AVG(r.repair_time_minutes)/60, 1), 0) as mttr
@@ -179,10 +182,15 @@ try {
         ];
     }, $liveTechData);
 
-    // 10. Live Activity Feed (Timeline)
-    $feedSql = "SELECT u.full_name as user, r.title as text, r.status, r.updated_at
+    // 10. Live Activity Feed (Timeline) — JOIN แบบ OR เดิมทำ row ซ้ำ/ชื่อผิด ให้แก้เป็น correlated lookup
+    $feedSql = "SELECT
+                    COALESCE(NULLIF(ua.full_name,''), uc.full_name, '') AS user,
+                    r.title AS text,
+                    r.status,
+                    r.updated_at
                 FROM repair r
-                JOIN users u ON r.created_by = u.id OR r.assigned_to = u.id
+                LEFT JOIN users uc ON uc.id = r.created_by
+                LEFT JOIN users ua ON ua.id = r.assigned_to
                 ORDER BY r.updated_at DESC LIMIT 5";
     $feedStmt = $pdo->query($feedSql);
     $feedData = $feedStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -217,25 +225,24 @@ try {
         ];
     }, $criticalAssets);
 
-    // 12. Predictive Health Score (Mock logic based on MTBF)
-    // Identify 3 assets with the highest repair count to simulate predictive failure
-    $predSql = "SELECT a.code as id, a.name, COUNT(r.id) as fail_count
-                FROM asset_registry a
-                JOIN repair r ON a.id = r.asset_id
-                GROUP BY a.id
-                ORDER BY fail_count DESC
-                LIMIT 3";
-    $predStmt = $pdo->query($predSql);
-    $predAssets = $predStmt->fetchAll(PDO::FETCH_ASSOC);
-    $predictiveHealth = array_map(function($p) {
-        $health = max(10, 100 - ($p['fail_count'] * 15)); // Mock formula
-        return [
-            'id' => $p['id'],
-            'name' => $p['name'],
-            'health_score' => $health,
-            'status' => $health < 50 ? 'critical' : ($health < 80 ? 'warning' : 'healthy')
-        ];
-    }, $predAssets);
+    // 12. Asset Health (ข้อมูลจริงจากสถานะใบงาน + asset_registry)
+    //     — เดิมเป็น Predictive Health Score แบบ Mock (100 - fail_count*15) ให้ถอดออกตาม Phase 23 (งด "พยากรณ์" ที่ไม่ได้ implement)
+    $asSql = "SELECT
+                    (SELECT COUNT(*) FROM asset_registry WHERE status <> 'disposed') AS total_assets,
+                    (SELECT COUNT(*) FROM asset_registry WHERE status = 'active') AS running,
+                    (SELECT COUNT(DISTINCT asset_id) FROM repair
+                      WHERE asset_id IS NOT NULL AND status IN ('open','assigned','in_progress','pending_approval')) AS down_assets,
+                    (SELECT COUNT(*) FROM asset_registry WHERE status = 'under_repair') AS under_maintenance,
+                    (SELECT COUNT(*) FROM asset_registry WHERE criticality = 'A' AND status <> 'disposed') AS critical_assets,
+                    (SELECT COUNT(*) FROM (
+                        SELECT r.asset_id FROM repair r
+                        WHERE r.source_type = 'breakdown' AND r.created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY)
+                        GROUP BY r.asset_id HAVING COUNT(*) > 1) t) AS repeated_failure_assets";
+    $asStmt = $pdo->query($asSql);
+    $assetHealth = $asStmt->fetch(PDO::FETCH_ASSOC);
+    $assetHealth = array_map('intval', $assetHealth);
+    $assetHealth['is_predictive'] = false;
+    $assetHealth['note'] = 'สถานะจากข้อมูลจริง ไม่ใช่คะแนนพยากรณ์ (เดิม predictive_health แบบ Mock ถูกถอดออกแล้ว)';
 
     echo json_encode([
         'status' => 'success',
@@ -255,15 +262,22 @@ try {
                 'cost_breakdown' => $costBreakdown
             ],
             'esg' => [
-                'total_downtime_minutes' => (int)$dtData['total_downtime'],
-                'energy_waste_thb' => $energyWasteCost
+                'total_downtime_minutes' => (int)($dtData['total_downtime'] ?? 0),
+                'wo_with_downtime' => (int)($dtData['wo_with_downtime'] ?? 0),
+                'total_wo' => (int)($dtData['total_wo'] ?? 0),
+                'note' => 'ตัวเลข downtime มาจากใบงานจริงที่กรอกค่าเท่านั้น ไม่มีการประมาณค่าเพิ่มเติม (ถอด energy_waste_thb แบบสมมุติออกแล้ว)'
             ],
             'top_performers' => $topPerformers,
             'live_ops' => [
                 'technicians' => $liveTrackers,
                 'timeline' => $timeline,
                 'critical_assets' => $criticalAssetsData,
-                'predictive_health' => $predictiveHealth
+                'asset_health' => $assetHealth
+            ],
+            'data_quality' => [
+                'repair_cost_coverage' => (int)$costData['total_wo'] . ' ใบงาน — ต้นทุนทุกใบเป็น 0 (ยังไม่มีการบันทึก cost)',
+                'reliability_source' => 'MTBF/MTTR ของแต่ละเดือนมาจากตาราง mtbf_mttr ที่บันทึก operating hours + failures จริงรายเดือน',
+                'predictive_note' => 'ไม่มีการพยากรณ์ใดๆ ในระบบ (ถอด mock predictive_health ออกแล้ว)'
             ]
         ]
     ]);

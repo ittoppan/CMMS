@@ -86,6 +86,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.analytics_kpi": { th: "KPI ผู้บริหาร", en: "Executive KPI" },
   "menu.analytics_bi": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
   "menu.analytics_advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
+  "menu.analytics_intelligence": { th: "ศูนย์วิเคราะห์อัจฉริยะ", en: "Intelligence Center" },
   "menu.reports": { th: "ศูนย์รวมรายงาน", en: "Reports Center" },
   "menu.reports_pdf": { th: "รายงาน PDF ผู้บริหาร", en: "Executive PDF Report" },
   "menu.reports_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel / CSV" },
@@ -644,6 +645,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/analytics": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
   "/analytics/kpi": { th: "แดชบอร์ด KPI ผู้บริหาร", en: "Executive KPI" },
   "/analytics/advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
+  "/analytics/intelligence": { th: "ศูนย์วิเคราะห์อัจฉริยะ", en: "Intelligence Center" },
   "/reports/monthly_pdf": { th: "รายงาน PDF", en: "PDF Report" },
   "/reports/export_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel" },
   "/reports/import_excel": { th: "นำเข้า Excel", en: "Import Excel" },
@@ -755,6 +757,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/analytics": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/analytics/kpi": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/analytics/advanced": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "/analytics/intelligence": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/andon-board": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/safety": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
@@ -873,6 +876,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "analytics/advanced": {
     th: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "วิเคราะห์เจาะลึก (Drill-down)", desc: "8 มุมวิเคราะห์จากข้อมูลจริง — Downtime & ความพร้อม · ค่าใช้จ่าย · SLA · PM vs Breakdown · สต็อก · ช่าง · Inspection · สอบเทียบ" },
     en: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "8 analysis views from real data — Downtime & Availability · Cost · SLA · PM vs Breakdown · Stock · Technicians · Inspection · Calibration" },
+  },
+  "analytics/intelligence": {
+    th: { eyebrow: "INTELLIGENCE CENTER · CMMS-TOPPAN", title: "ศูนย์วิเคราะห์อัจฉริยะ (Intelligence)", desc: "Executive dashboard — MTBF/MTTR จาก operating time จริง · สถานะเครื่องอธิบายได้ · การเสียซ้ำ · Pareto Downtime · PM · ภาระงานช่าง · สต็อก Sage vs การใช้งาน · ต้นทุน (ตามสิทธิ์) พร้อมตรวจสอบคุณภาพข้อมูลทุกตัวเลข" },
+    en: { eyebrow: "INTELLIGENCE CENTER · CMMS-TOPPAN", title: "Intelligence Center", desc: "Executive dashboard — MTBF/MTTR from real operating time · explainable asset health · repeat failures · Downtime Pareto · PM · technician load · Sage stock vs usage · cost (role-gated) with data-quality checks on every figure" },
   },
   users: {
     th: { eyebrow: "USER MANAGEMENT · CMMS-TOPPAN", title: "ผู้ใช้งานระบบ (User Management)", desc: "จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS" },

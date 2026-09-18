@@ -46,6 +46,7 @@ import {
   Paintbrush,
   Search,
   Upload,
+  LayoutDashboard,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -148,6 +149,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
     titleKey: "nav.analytics_reports",
     pathPrefixes: ["/analytics", "/reports", "/andon-board"],
     items: [
+      { perm: "analytics", labelKey: "menu.analytics_intelligence", href: "/analytics/intelligence", icon: LayoutDashboard },
       { perm: "analytics", labelKey: "menu.analytics_kpi", href: "/analytics/kpi", icon: ChartPie },
       { perm: "analytics", labelKey: "menu.analytics_bi", href: "/analytics", icon: BarChart3 },
       { perm: "analytics", labelKey: "menu.analytics_advanced", href: "/analytics/advanced", icon: Activity },
