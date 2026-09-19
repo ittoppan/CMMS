@@ -13,6 +13,7 @@ import {
   Search,
   BarChart3,
   Bell,
+  Scan,
   FileDown,
   FileText,
   Settings,
@@ -38,6 +39,7 @@ import { ConnectivityStatus } from "../../components/ConnectivityStatus";
 const MENU_HREFS: string[] = [
   "/dashboard",
   "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
+  "/field", "/field/work",
   "/approval", "/forms", "/manuals",
   "/pm_am", "/pm_am/dashboard", "/pm_am/plans", "/pm_am/plans/create", "/pm_am/view", "/pm_am/checklists", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
   "/inspections", "/inspections/run", "/inspections/templates",
@@ -64,6 +66,7 @@ function getPageTitle(pathname: string): string {
 const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: React.ComponentType<{ className?: string; size?: number | string; strokeWidth?: number }> }> = {
   dashboard:             { labelKey: "bottom.dashboard",       href: "/dashboard",            icon: Home },
   "repair/my_tasks":     { labelKey: "bottom.my_tasks",        href: "/repair/my_tasks",      icon: ClipboardCheck },
+  field:                 { labelKey: "menu.field_work",        href: "/field",               icon: Scan },
   "repair/request":      { labelKey: "bottom.repair_request",  href: "/repair/request",       icon: Wrench },
   "repair/tracking":     { labelKey: "bottom.tracking",        href: "/repair/tracking",      icon: Map },
   "pm_am/checksheet":    { labelKey: "bottom.checksheet",      href: "/pm_am/checksheet",     icon: ClipboardCheck },
@@ -81,7 +84,7 @@ const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: R
 const BOTTOM_NAV_ROLE_ORDER: Record<string, string[]> = {
   Admin:      ["dashboard", "repair/request", "pm_am/calendar", "asset_registry", "settings"],
   Manager:    ["dashboard", "pm_am/checksheet", "pm_am/calendar", "repair/my_tasks", "asset_registry"],
-  Technician: ["dashboard", "repair/my_tasks", "pm_am/checksheet", "repair/request", "asset_registry"],
+  Technician: ["dashboard", "field", "repair/my_tasks", "pm_am/checksheet", "repair/request"],
   Operator:   ["dashboard", "repair/request", "repair/tracking", "qr-sheet", "notifications"],
   Viewer:     ["dashboard", "analytics", "notifications", "reports/export_excel", "reports/monthly_pdf"],
 };

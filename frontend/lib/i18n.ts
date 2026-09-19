@@ -40,6 +40,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.repair_request": { th: "แจ้งซ่อมด่วน", en: "Quick Repair Request" },
   "menu.repair_assign": { th: "แจกงานซ่อม", en: "Assign Jobs" },
   "menu.my_tasks": { th: "งานของฉัน (ซ่อม + PM)", en: "My Tasks (Repair + PM)" },
+  "menu.field_work": { th: "โหมดภาคสนาม", en: "Field Work" },
   "menu.tracking": { th: "ติดตามงานซ่อม", en: "Repair Tracking" },
   "menu.workload": { th: "ภาระงานช่าง", en: "Technician Workload" },
   "menu.kanban": { th: "กระดานคัมบัง", en: "Kanban Board" },

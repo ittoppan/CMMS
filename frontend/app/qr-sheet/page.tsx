@@ -10,9 +10,10 @@ type Asset = {
   id: number;
   code: string;
   name: string;
-  department: string;
-  criticality: string;
-  status: string;
+  department: string | null;
+  criticality: string | null;
+  status: string | null;
+  payload: string;
 };
 
 const APP_BASE =
@@ -25,13 +26,15 @@ export default function QrSheetPage() {
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [printed, setPrinted] = useState(false);
 
   useEffect(() => {
-    fetch("/api/v1/asset_registry.php")
+    fetch("/api/v1/scan.php?action=labels", { credentials: "include" })
       .then((r) => r.json())
-      .then((rows: Asset[]) => {
+      .then((json) => {
+        const rows = json?.items ?? [];
         const list = (Array.isArray(rows) ? rows : [])
-          .filter((a) => /^A-[A-Z]{2}-\\d{2}$/.test(a.code))
+          .filter((a) => /^A-[A-Z]{2}-\d{2}$/.test(a.code))
           .sort((a, b) => a.code.localeCompare(b.code));
         setMachines(list);
       })
@@ -46,8 +49,9 @@ export default function QrSheetPage() {
       const map: Record<string, string> = {};
       for (const m of machines) {
         try {
-          const url = `${APP_BASE}/scan?asset_code=${encodeURIComponent(m.code)}`;
-          map[m.code] = await QRCode.toDataURL(url, {
+          // ใช้ payload มาตรฐาน CMMS-A-<token> — resolver รองรับทั้งในแอปและ LINE
+          const payload = m.payload && m.payload.startsWith("CMMS-") ? m.payload : m.code;
+          map[m.code] = await QRCode.toDataURL(payload, {
             width: 300,
             margin: 1,
             color: { dark: "var(--cmms-primary)", light: "#FFFFFF" },
@@ -61,6 +65,23 @@ export default function QrSheetPage() {
     })();
     return () => { cancelled = true; };
   }, [machines]);
+
+  const handlePrint = async () => {
+    const firstLog = !printed;
+    setPrinted(true);
+    window.print();
+    if (!firstLog || machines.length === 0) return;
+    try {
+      await fetch("/api/v1/scan.php?action=print_log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ asset_ids: machines.map((m) => m.id), template: "a4-sheet" }),
+      });
+    } catch {
+      /* การบันทึกประวัติพิมพ์ไม่บล็อกการพิมพ์ */
+    }
+  };
 
   return (
     <div style={{ fontFamily: "'Inter', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
@@ -91,7 +112,7 @@ export default function QrSheetPage() {
           <Button
             className="w-full"
             disabled={generating}
-            onClick={() => window.print()}
+            onClick={() => void handlePrint()}
           >
             ปริ้นติกเกอร์
           </Button>
