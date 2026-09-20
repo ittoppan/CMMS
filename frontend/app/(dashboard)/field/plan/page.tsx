@@ -16,6 +16,7 @@ import { AccessDenied } from "@/components/access-denied";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AndonLamp from "@/components/AndonLamp";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { RefreshCw, CalendarDays, CalendarClock, Clock, AlertTriangle, ClipboardList } from "lucide-react";
@@ -49,9 +50,21 @@ function WoRow({ w, showInfo }: { w: PlanningWo; showInfo?: boolean }) {
           {w.readiness ? (
             <Badge variant={readinessVariant(w.readiness.state)} dot>{READINESS_LABEL[w.readiness.state]}</Badge>
           ) : null}
-          {w.sla_risk === "at_risk" && <Badge variant="warning">SLA เสี่ยง</Badge>}
-          {w.sla_risk === "breached" && <Badge variant="danger">SLA เกินกำหนด</Badge>}
-          {w.overdue && <Badge variant="danger" dot>เกินกำหนด</Badge>}
+          {w.sla_risk === "at_risk" && (
+            <span className="inline-flex items-center gap-1 text-[var(--cmms-andon-warn)]">
+              <AndonLamp status="warn" size="sm" />SLA เสี่ยง
+            </span>
+          )}
+          {w.sla_risk === "breached" && (
+            <span className="inline-flex items-center gap-1 text-[var(--cmms-andon-down)]">
+              <AndonLamp status="down" size="sm" />SLA เกินกำหนด
+            </span>
+          )}
+          {w.overdue && (
+            <span className="inline-flex items-center gap-1 text-[var(--cmms-andon-down)]">
+              <AndonLamp status="down" size="sm" />เกินกำหนด
+            </span>
+          )}
         </div>
       </div>
       <p className="mt-0.5 truncate text-sm text-[var(--cmms-text-secondary)]">{w.title}</p>

@@ -24,6 +24,7 @@ import { AccessDenied } from "@/components/access-denied";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AndonLamp from "@/components/AndonLamp";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Dialog } from "@/components/ui/dialog";
@@ -269,9 +270,9 @@ export default function PlanningCalendarPage() {
             วันนี้
           </Button>
           <div className="ml-auto flex flex-wrap items-center gap-3 text-xs text-[var(--cmms-text-muted)]">
-            <span className="flex items-center gap-1"><Badge variant="success" dot>พร้อม</Badge></span>
-            <span className="flex items-center gap-1"><Badge variant="warning" dot>พร้อมบางส่วน</Badge></span>
-            <span className="flex items-center gap-1"><Badge variant="danger" dot>ไม่พร้อม</Badge></span>
+            <span className="flex items-center gap-1"><AndonLamp status="ok" size="sm" />พร้อม</span>
+            <span className="flex items-center gap-1"><AndonLamp status="warn" size="sm" />พร้อมบางส่วน</span>
+            <span className="flex items-center gap-1"><AndonLamp status="down" size="sm" />ไม่พร้อม</span>
           </div>
         </CardContent>
       </Card>
@@ -392,7 +393,7 @@ export default function PlanningCalendarPage() {
                 {conflicts.map((c, i) => (
                   <div key={i} className="rounded-lg border border-border px-3 py-2 text-sm">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="warning" dot>{c.type}</Badge>
+                      <span className="inline-flex items-center gap-1.5"><AndonLamp status="warn" size="sm" />{c.type}</span>
                       <span className="font-bold">{c.user_name || "—"}</span>
                       <span className="text-[var(--cmms-text-muted)]">×</span>
                       <span className="font-semibold">{c.wo?.work_order_no || c.wo_no || (c.wo?.id ?? "")}</span>
@@ -489,13 +490,18 @@ export default function PlanningCalendarPage() {
                       <div className="flex items-center justify-between">
                         <span className="font-bold">{uns?.work_order_no || `WO ${r.id}`}</span>
                         {"success" in r && r.success ? (
-                          <Badge variant="success">จะวางแผนได้</Badge>
+                          <span className="inline-flex items-center gap-1.5">
+                            <AndonLamp status="ok" size="sm" />จะวางแผนได้
+                          </span>
                         ) : "preview" in r && r.preview ? (
-                          <Badge variant={r.conflicts.length > 0 ? "warning" : "success"}>
+                          <span className="inline-flex items-center gap-1.5">
+                            <AndonLamp status={r.conflicts.length > 0 ? "warn" : "ok"} size="sm" />
                             {r.conflicts.length > 0 ? `ขัดแย้ง ${r.conflicts.length}` : "พร้อม"}
-                          </Badge>
+                          </span>
                         ) : "error" in r ? (
-                          <Badge variant="danger">ไม่สามารถวางแผนได้</Badge>
+                          <span className="inline-flex items-center gap-1.5">
+                            <AndonLamp status="down" size="sm" />ไม่สามารถวางแผนได้
+                          </span>
                         ) : null}
                       </div>
                       {"error" in r && r.error ? (

@@ -36,6 +36,7 @@ import { AccessDenied } from "@/components/access-denied";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import AndonLamp from "@/components/AndonLamp";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Dialog } from "@/components/ui/dialog";
@@ -812,13 +813,18 @@ export default function PlanningCenterPage() {
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-bold">{w?.work_order_no || `WO ${r.id}`}</span>
                       {"success" in r && r.success ? (
-                        <Badge variant="success">จะวางแผนได้</Badge>
+                        <span className="inline-flex items-center gap-1.5">
+                          <AndonLamp status="ok" size="sm" />จะวางแผนได้
+                        </span>
                       ) : "error" in r ? (
-                        <Badge variant="danger">ไม่สามารถวางแผนได้</Badge>
+                        <span className="inline-flex items-center gap-1.5">
+                          <AndonLamp status="down" size="sm" />ไม่สามารถวางแผนได้
+                        </span>
                       ) : "preview" in r && r.preview ? (
-                        <Badge variant={r.conflicts.length > 0 ? "warning" : "success"}>
+                        <span className="inline-flex items-center gap-1.5">
+                          <AndonLamp status={r.conflicts.length > 0 ? "warn" : "ok"} size="sm" />
                           {r.conflicts.length > 0 ? `ขัดแย้ง ${r.conflicts.length}` : "พร้อม"}
-                        </Badge>
+                        </span>
                       ) : null}
                     </div>
                     {"error" in r && r.error ? (
