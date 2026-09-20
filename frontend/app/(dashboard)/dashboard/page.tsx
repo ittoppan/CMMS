@@ -6,6 +6,7 @@ import {
   Activity,
   Archive,
   CalendarCheck,
+  CalendarClock,
   CheckCircle2,
   ClipboardCheck,
   Cpu,
@@ -47,6 +48,7 @@ import {
   RefreshBlock,
 } from "@/components/dashboard/kit";
 import * as D from "@/lib/dashboard";
+import { getPlanningKpis, type PlanningKpis } from "@/lib/planning";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("th-TH");
 const fmtBaht = (n: number) => (n >= 10000 ? `${Math.round(n / 1000).toLocaleString("th-TH")}k` : fmt(n));
@@ -102,6 +104,7 @@ export default function DashboardPage() {
   const [failure, setFailure] = useState<D.FailureResponse | null>(null);
   const [prio, setPrio] = useState<{ name: string; value: number }[] | null>(null);
   const [openWo, setOpenWo] = useState<D.WoItem[] | null>(null);
+  const [planKpis, setPlanKpis] = useState<PlanningKpis | null>(null);
   const didAnal = useRef(false);
 
   const role = data?.dashboard_role ?? "manager";
@@ -128,6 +131,14 @@ export default function DashboardPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Phase 25: KPI การวางแผน — โหลดแยก ไม่รบกวนโหลดหลัก
+  useEffect(() => {
+    if (!data || planKpis) return;
+    getPlanningKpis()
+      .then(setPlanKpis)
+      .catch(() => { /* ไม่บังคับ — ถ้า endpoint ล่มไม่ทำให้หน้าเด้ง */ });
+  }, [data, planKpis]);
 
   const analysis = useCallback(async () => {
     if (!data || !isMgr) return;
@@ -382,6 +393,30 @@ export default function DashboardPage() {
                   <>
                     <KpiCard label="คำขอที่ยังเปิดอยู่" value={core.counts.requests_open} unit="รายการ" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" />
                     <KpiCard label="งานในรอบนี้" value={core.total_wo_created} unit="ใบ" icon={<Wrench size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" />
+                  </>
+                )}
+              </Grid>
+            </section>
+          )}
+
+          {/* ── การวางแผนซ่อมบำรุง (Phase 25) ── */}
+          {planKpis && (
+            <section aria-label="การวางแผนซ่อมบำรุง" className="space-y-3">
+              <SectionHeading title="การวางแผนซ่อมบำรุง" sub="คิวงานที่ต้องวางแผน/จัดตาราง (ตามขอบเขตบทบาท)" />
+              <Grid columns={{ minWidth: 200, max: isTech ? 3 : 5 }} gap={3}>
+                {isMgr ? (
+                  <>
+                    <KpiCard label="ยังไม่วางแผน" value={planKpis.groups.unplanned ?? 0} unit="ใบ" icon={<CalendarClock size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unplanned > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="ยังไม่มีรอบเวลา" value={planKpis.groups.unscheduled ?? 0} unit="ใบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unscheduled > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="วางแผนแล้ว" value={planKpis.groups.scheduled ?? 0} unit="ใบ" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/planning/calendar" />
+                    <KpiCard label="SLA เสี่ยง" value={planKpis.sla.at_risk ?? 0} unit="ใบ" icon={<TriangleAlert size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.sla.at_risk > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="เกินกำหนด (SLA)" value={planKpis.sla.breached ?? 0} unit="ใบ" icon={<TriangleAlert size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.sla.breached > 0 ? "red" : "green"} href="/planning" />
+                  </>
+                ) : (
+                  <>
+                    <KpiCard label="งานของฉัน (เปิด)" value={planKpis.total_open} unit="ใบ" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/field/plan" />
+                    <KpiCard label="งานสัปดาห์ฉัน" value={planKpis.groups.scheduled ?? 0} unit="ใบ" icon={<CalendarClock size={18} strokeWidth={1.9} aria-hidden="true" />} tone="green" href="/field/plan" />
+                    <KpiCard label="ยังไม่มีรอบเวลา" value={planKpis.groups.unscheduled ?? 0} unit="ใบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unscheduled > 0 ? "amber" : "green"} href="/field/plan" />
                   </>
                 )}
               </Grid>

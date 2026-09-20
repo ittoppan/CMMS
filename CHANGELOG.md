@@ -5,6 +5,31 @@
 ## [Unreleased]
 - (ว่าง — ฟีเจอร์ถัดไปจะเริ่มหลัง Phase 23)
 
+## [1.2.0] — 2026-09-20 — ADVANCED MAINTENANCE PLANNING & SCHEDULING (Phase 25)
+
+Commit: สรุปการทำงาน Phase 25 ทั้งหมด -> main (includes database/migration_20260919_phase25_planning.sql + scripts/apply_phase25_planning.php idempotent 5 ขั้น รวม menu_permissions seed 21 แถว)
+
+### Added (Feature)
+- **Planning Center** /planning + **API** GET /api/v1/planning.php (center/queue/calendar/technicians/conflicts/readiness/duration_history/schedule_log/kpis/my_plan) + **PUT** (schedule/reschedule/priority/assign/emergency/skill) + **POST** bulk (schedule|assign, dry_run preview, <=100 ใบ)
+- **Engine** src/helpers/planning.php: pln_config/group/priority_explanation/duration_estimate/skill_match/technician_workload/detect_conflicts/readiness/sla_risk/prepare/log_schedule — คลาดทุกอย่างฝั่ง backend (RBAC re-validate + CSRF + idempotency + audit + NotificationCenter)
+- **คิววางแผนรวม NEW requests** (maintenance_requests.status='open') -> กลุ่ม 
+ew_request แยกจากใบงาน; แสดง badge + ลิงก์รีวิวคำขอ; ไม่ถูก select-all/bulk
+- **Skills matrix UI** (Dialog) + PUT ?action=skill upsert 	echnician_skills (ระดับ 1-5/cert/valid_until/area)
+- **Workload/Capacity** ต่อช่าง, **Readiness** 4 ด้าน (schedule/assignee/skill/parts — Sage-based), **Conflicts** 3 ประเภท (technician/asset/pm + force confirm), **SLA risk** (safe/at_risk/breached), **Emergency** (critical + slot 10 นาที + แจ้งหัวหน้า)
+- **เมนู** planning + planning/calendar (roles 1,2,6,7) / field/plan (1,2,3,6,7); Dashboard card (kpis); sidebar/i18n TH-EN
+- **Docs**: PLANNING_CENTER, SCHEDULING_RULES, TECHNICIAN_CAPACITY, WORK_READINESS, SCHEDULING_CONFLICTS, PHASE_25_REPORT
+
+### Changed
+- public/api/v1/planning.php queue -> ผสาน requests (pln_queue_rows + pln_open_requests), pln_prepare สาขา kind='request'
+- scripts/security_check.php: settings.php?defaults (หน้า login เปิด public theme โดยออกแบบ — protected read ต้อง 401) + เพิ่ม planning.php ใน auth/CSRF checks; ผล 34/34 PASS
+- หน้า /planning/calendar/field-PLAN ผ่าน design-audit (0 FAIL, 3 WARN Badge andon เดิม Phase 23/24)
+
+### Fixed
+- ย้าย test probe เก่า (public/_probe6.php) ออก + ลบ .opencode/opencode.json ว่าง
+
+### Deprecated / Known limits
+- TLS/HTTPS ยัง pending (blocker เดิม Phase 21)
+- Skill ระดับ 1-5 แสดงแต่ไม่บังคับ; capacity เป็นแบบวันรวม; ยังไม่มี auto-scheduling (AI) — ตัดสินใจโดยคน
 ## [1.1.0] — 2026-09-18 — ADVANCED INTELLIGENCE & ANALYTICS (Phase 23)
 
 Commit: โปรดดู commit ของสาย `main` หลัง Phase 23 · DB migration: **ไม่มี** (อ่านตารางที่มีอยู่เดิมทั้งหมด)

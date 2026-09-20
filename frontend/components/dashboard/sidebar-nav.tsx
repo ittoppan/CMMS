@@ -17,6 +17,7 @@ import {
   FileText,
   BookOpen,
   CalendarDays,
+  CalendarClock,
   ClipboardList,
   RectangleHorizontal,
   ListChecks,
@@ -129,6 +130,15 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck },
       { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays },
       { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck },
+    ],
+  },
+  {
+    titleKey: "nav.planning",
+    pathPrefixes: ["/planning", "/field/plan"],
+    items: [
+      { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
+      { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
+      { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
     ],
   },
   {

@@ -60,6 +60,11 @@ return [
     ['key' => 'supervisor/plan',            'href' => '/supervisor/plan',            'label' => 'วางแผน & จัดตาราง',      'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/verify',          'href' => '/supervisor/verify',          'label' => 'ตรวจรับงาน (Verify)',     'section' => 'ควบคุมงาน & วางแผน'],
 
+    // ---- 4.55 การวางแผนซ่อมบำรุง (Phase 25) ----
+    ['key' => 'planning',                   'href' => '/planning',                   'label' => 'ศูนย์วางแผนซ่อมบำรุง',   'section' => 'การวางแผนซ่อมบำรุง'],
+    ['key' => 'planning/calendar',          'href' => '/planning/calendar',          'label' => 'ตารางวางแผนงาน (เดือน)',  'section' => 'การวางแผนซ่อมบำรุง'],
+    ['key' => 'field/plan',                 'href' => '/field/plan',                 'label' => 'แผนงานของฉัน',          'section' => 'การวางแผนซ่อมบำรุง'],
+
     // ---- 4.6 การอนุมัติ & เอกสาร ----
     ['key' => 'approval',                  'href' => '/approval',                  'label' => 'ศูนย์อนุมัติเอกสาร',     'section' => 'การอนุมัติ & เอกสาร'],
     ['key' => 'forms',                     'href' => '/forms',                     'label' => 'ศูนย์แบบฟอร์ม (F-EN)',   'section' => 'การอนุมัติ & เอกสาร'],

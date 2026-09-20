@@ -53,7 +53,7 @@ echo "=" . str_repeat('=', 76) . "\n\n";
 echo "[1] Auth enforcement (no session → 401)\n";
 $protected = [
     '/api/v1/audit_logs.php',
-    '/api/v1/settings.php',
+    '/api/v1/settings.php?defaults', // หน้า login เปิดอ่าน public theme keys ได้ (by design) — protected read = ต้อง 401
     '/api/v1/line_notify.php',
     '/api/v1/email_notify.php',
     '/api/v1/users.php',
@@ -62,6 +62,7 @@ $protected = [
     '/api/v1/profile.php',
     '/api/v1/reports.php',
     '/api/v1/supervisor.php',
+    '/api/v1/planning.php',
     '/api/v1/pwa_settings.php',
     '/api/v1/import_excel.php?action=history',
 ];
@@ -84,6 +85,7 @@ $postEndpoints = [
     '/api/v1/settings.php',
     '/api/v1/line_notify.php',
     '/api/v1/profile.php',
+    '/api/v1/planning.php', // PUT/POST ต้อง CSRF (enforceCsrf ครอบทุก non-GET)
 ];
 foreach ($postEndpoints as $path) {
     [$code, $raw] = http_request($BASE . $path, 'POST', ['Content-Type: application/json'], '{}');

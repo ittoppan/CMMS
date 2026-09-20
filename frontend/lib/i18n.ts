@@ -24,6 +24,7 @@ export type Lang = "th" | "en";
 const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
   "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
+  "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
@@ -50,6 +51,9 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.supervisor_queue": { th: "คิวงานทั้งหมด", en: "Work Queue" },
   "menu.supervisor_review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
   "menu.supervisor_plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
+  "menu.planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
+  "menu.planning_calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
+  "menu.field_my_plan": { th: "แผนงานของฉัน", en: "My Plan" },
   "menu.supervisor_verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
   "menu.forms": { th: "ศูนย์แบบฟอร์ม", en: "Forms Center (F-EN)" },
   "menu.forms_designer": { th: "ออกแบบแบบฟอร์มดิจิทัล", en: "Form Designer" },
@@ -135,6 +139,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "bottom.reports_excel": { th: "ส่งออก Excel", en: "Export Excel" },
   "bottom.reports_pdf": { th: "รายงาน PDF", en: "PDF Report" },
   "bottom.settings": { th: "ตั้งค่า", en: "Settings" },
+  "bottom.planning_calendar": { th: "ตารางวางแผน", en: "Plan" },
 
   // ── สถานะ ──
   "status.open": { th: "รอดำเนินการ", en: "Open" },
@@ -621,6 +626,9 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/supervisor/review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
   "/supervisor/plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
   "/supervisor/verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
+  "/planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
+  "/planning/calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
+  "/field/plan": { th: "แผนงานของฉัน", en: "My Plan" },
   "/pm_am/calendar": { th: "ปฏิทิน PM/AM", en: "PM/AM Calendar" },
   "/pm_am/create": { th: "สร้างแผน PM", en: "Create PM Plan" },
   "/pm_am/batch_schedule": { th: "สร้างแผนแบบกลุ่ม", en: "Batch Schedule" },
@@ -744,6 +752,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
 // หมวด breadcrumb
 const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/repair": { th: "งานซ่อมบำรุง", en: "Maintenance" },
+  "/planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "/approval": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "/forms": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "/pm_am": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
@@ -809,6 +818,18 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "supervisor/verify": {
     th: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "ตรวจรับงาน (Verify)", desc: "ตรวจสอบงานที่ทำเสร็จแล้ว ตรวจรับ ปิดใบงาน หรือส่งกลับแก้ไข (Reopen)" },
     en: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "Work Verification", desc: "Verify completed work, close work orders, or reopen for rework" },
+  },
+  "planning": {
+    th: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "ศูนย์วางแผนซ่อมบำรุง", desc: "ภาพรวมคิววางแผน ภาระงานช่าง ความพร้อมงาน และความขัดแย้งของตาราง — จัดลำดับ มอบหมาย และวางแผนเป็นกลุ่ม" },
+    en: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "Maintenance Planning Center", desc: "Planning queue, technician workload, work readiness and schedule conflicts — prioritize, assign and bulk-plan" },
+  },
+  "planning/calendar": {
+    th: { eyebrow: "TIMELINE PLANNER · CMMS-TOPPAN", title: "ตารางวางแผนงาน (Monthly)", desc: "ดูรอบเวลาวางแผนบนไทม์ไลน์รายวัน/สัปดาห์/เดือน กันความซ้ำซ้อนของช่างและเครื่องจักร แล้ววางแผนแบบกลุ่มจากช่องว่างในตาราง" },
+    en: { eyebrow: "TIMELINE PLANNER · CMMS-TOPPAN", title: "Timeline Planner (Monthly)", desc: "View planned slots on a day/week/month timeline, avoid technician & asset conflicts, and bulk-plan into free slots" },
+  },
+  "field/plan": {
+    th: { eyebrow: "MY PLAN · CMMS-TOPPAN", title: "แผนงานของฉัน", desc: "งานที่ถูกวางแผน/มอบหมายให้คุณในสัปดาห์นี้ พร้อมเวลาวางแผนและความพร้อมของงาน" },
+    en: { eyebrow: "MY PLAN · CMMS-TOPPAN", title: "My Plan", desc: "Work scheduled/assigned to you this week, with planned slots and readiness" },
   },
   "repair/my_tasks": {
     th: { eyebrow: "My Tasks · CMMS-TOPPAN", title: "งานของฉัน (ซ่อม + PM)", desc: 'งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย' },

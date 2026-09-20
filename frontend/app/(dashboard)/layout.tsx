@@ -39,7 +39,8 @@ import { ConnectivityStatus } from "../../components/ConnectivityStatus";
 const MENU_HREFS: string[] = [
   "/dashboard",
   "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
-  "/field", "/field/work",
+  "/field", "/field/work", "/field/plan",
+  "/planning", "/planning/calendar",
   "/approval", "/forms", "/manuals",
   "/pm_am", "/pm_am/dashboard", "/pm_am/plans", "/pm_am/plans/create", "/pm_am/view", "/pm_am/checklists", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
   "/inspections", "/inspections/run", "/inspections/templates",
@@ -71,6 +72,7 @@ const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: R
   "repair/tracking":     { labelKey: "bottom.tracking",        href: "/repair/tracking",      icon: Map },
   "pm_am/checksheet":    { labelKey: "bottom.checksheet",      href: "/pm_am/checksheet",     icon: ClipboardCheck },
   "pm_am/calendar":      { labelKey: "bottom.pm_calendar",     href: "/pm_am/calendar",       icon: CalendarDays },
+  "planning/calendar":   { labelKey: "bottom.planning_calendar", href: "/planning/calendar",   icon: CalendarDays },
   asset_registry:        { labelKey: "bottom.asset_registry",  href: "/asset_registry",       icon: Building2 },
   "qr-sheet":            { labelKey: "bottom.qr_sheet",        href: "/qr-sheet",             icon: Search },
   analytics:             { labelKey: "bottom.analytics",       href: "/analytics",            icon: BarChart3 },
