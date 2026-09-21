@@ -30,6 +30,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "nav.cost_budget": { th: "ค่าใช้จ่าย & งบประมาณ", en: "Cost & Budget" },
   "nav.safety_iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "nav.people": { th: "บุคลากร", en: "People" },
   "nav.system": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
@@ -97,6 +98,8 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.reports_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel / CSV" },
   "menu.reports_import": { th: "นำเข้า Excel", en: "Import Excel" },
   "menu.andon_board": { th: "จอ Andon TV (โรงงาน)", en: "Andon TV Board" },
+  "menu.cost": { th: "ศูนย์วิเคราะห์ต้นทุน", en: "Cost Analysis Center" },
+  "menu.budget": { th: "จัดการงบประมาณ", en: "Budget Management" },
   "menu.loto": { th: "ใบอนุญาต LOTO", en: "LOTO Permits" },
   "menu.iot_monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
   "menu.users": { th: "ผู้ใช้งานระบบ", en: "Users" },
@@ -652,6 +655,8 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/spare_parts/sage_po": { th: "รับอะไหล่จาก PO", en: "Receive from PO" },
   "/spare_parts/optimization": { th: "AI คำนวณ EOQ และสต็อกค้าง", en: "AI EOQ & Dead Stock" },
   "/analytics": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
+  "/cost": { th: "ศูนย์วิเคราะห์ต้นทุน", en: "Cost Analysis Center" },
+  "/budget": { th: "จัดการงบประมาณ", en: "Budget Management" },
   "/analytics/kpi": { th: "แดชบอร์ด KPI ผู้บริหาร", en: "Executive KPI" },
   "/analytics/advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
   "/analytics/intelligence": { th: "ศูนย์วิเคราะห์อัจฉริยะ", en: "Intelligence Center" },
@@ -962,6 +967,14 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "reports/cost": {
     th: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "รายงานค่าใช้จ่ายซ่อมบำรุง", desc: "ค่าใช้จ่ายอะไหล่และค่าแรง รวมเป็นยอดรายเดือน และรายการค่าใช้จ่ายละเอียด (เฉพาะผู้บริหาร)" },
     en: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "Maintenance Cost Report", desc: "Parts & labour cost, monthly totals and cost line items (managers only)" },
+  },
+  cost: {
+    th: { eyebrow: "COST · CMMS-TOPPAN", title: "ศูนย์วิเคราะห์ต้นทุน", desc: "ค่าแรง + อะไหล่ + จ้างภายนอก คำนวณจากใบสั่งซ่อมจริง — ระบุจุดที่ค่าใช้จ่ายสูง และความครบถ้วนของข้อมูล (ไม่แสดงหน้าจอให้ช่าง)" },
+    en: { eyebrow: "COST · CMMS-TOPPAN", title: "Cost Analysis Center", desc: "Labour + parts + outsourced cost from real work orders — pinpoint what costs the most and data completeness (management only)" },
+  },
+  budget: {
+    th: { eyebrow: "BUDGET · CMMS-TOPPAN", title: "จัดการงบประมาณ", desc: "ตั้งงบประมาณรายเดือนรายแผนก อนุมัติ ปรับ และติดตามการใช้จ่ายจริงเทียบกับงบ (ผู้จัดการ/ผู้ดูแลระบบ)" },
+    en: { eyebrow: "BUDGET · CMMS-TOPPAN", title: "Budget Management", desc: "Set monthly budgets per department, approve, adjust and track actual spend vs budget (manager/admin only)" },
   },
   "reports/downtime": {
     th: { eyebrow: "REPORT · DOWNTIME · CMMS-TOPPAN", title: "รายงาน Downtime", desc: "เวลาหยุดเครื่อง จำนวนเหตุการณ์ และDowntime รวมรายเครื่องจักร/แผนก เพื่อจัดลำดับการลงทุน" },

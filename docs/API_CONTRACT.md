@@ -276,3 +276,64 @@ Migration: `database/migration_20260916_phase19_pwa_offline.sql`
 - input `work_order_id` ตรวจเป็น int เท่านั้น; ไม่มี → `VALIDATION_ERROR`
 - รายการปรากฏเฉพาะ user ที่เป็นผู้รับผิดชอบงาน (assigned) หรือ supervisor
 - POST ไม่มีไฟล์ / เกิน `MAX_FILE_SIZE` / ชนิดไม่ใช่ภาพ → `VALIDATION_ERROR`
+
+---
+
+## 14. `cost.php` — Maintenance Cost & Budget (Phase 26)
+
+Base `/api/v1/cost.php` · ดู (GET) ต้อง role **1, 2, 6** (`kpi_can_see_cost`) ·
+POST ต้อง **1, 2, 6** (`cost_can_manage_budget`) + CSRF + audit
+
+### 14.1 GET — ต้นทุน / งบประมาณ
+
+| `action` | params | response (ย่อ) |
+|---|---|---|
+| `settings` | — | `{ settings }` = `cost_config()` (currency, labor_rate, thresholds, other_available) |
+| `summary` | filter*, range* | `{ summary, range, filters_applied }` — ยอดต่อคอมโพเนนต์ + availability |
+| `work-order` | `id` (int) | `{ work_order }` — breakdown 4 คอมโพเนนต์ + flag `available` + `unavailable_components` |
+| `trend` | filter*, range* | `{ trend[] }` — เดือนจริง (label/month/wo_count/parts/labor/external/other/total) |
+| `by-type` | filter*, range* | `{ items[], preventive_total, corrective_total, pm_ratio }` |
+| `by-department` | +`limit` | `{ items[] }` |
+| `by-asset` | +`limit` | `{ items[] }` |
+| `high-assets` | +`high_cost_threshold` | `{ threshold, items[] }` |
+| `parts` | +`limit` | `{ items[] }` — อะไหล่ต้นทุนสูงสุด |
+| `repeat-parts` | +`limit` | `{ items[] }` — ใช้ซ้ำ ≥ 2 ใบ |
+| `pm` | filter*, range* | `{ preventive, corrective, preventive_total, corrective_total, preventive_ratio }` |
+| `breakdown` | filter*, range* | `{ wo_count, total, downtime_minutes, by_asset[] }` |
+| `emergency` | filter*, range* | `{ critical, high, critical_total, high_total, total, wo_count }` |
+| `forecast` | +`year` | `{ year, ytd_total, monthly_avg, full_year_projection, months_remaining, projection_remaining }` |
+| `data-quality` | filter*, range* | `{ currency, wo_count, warnings[], overall_ok }` |
+| `filters` | — | ตัวเลือกตัวกรอง + `maintenance_types` + `years` |
+| `budget` | +`year`, `department_id` | `{ currency, items[], alerts, config, can_manage }` |
+| `budget-vs-actual` | +`year`, `department_id` | `{ currency, years, year, series[], config }` |
+
+`filter*` = `range|range_start|range_end`, `department_id`, `asset_id`, `asset_category`,
+`source_type`, `priority`, `status`, `maintenance_type`
+
+### 14.2 POST — งบประมาณ (mutation)
+
+```jsonc
+// สถานะ: draft → submitted → active → closed · (ยกเลิกได้ draft/submitted)
+{ "action": "budget/create", "year": 2026, "month": 5, "department_id": null,
+  "allocated_budget": 350000, "currency": "THB", "notes": "งบค่าแรง" }
+{ "action": "budget/update", "id": 4, "allocated_budget": 400000, "notes": "" }   // draft/submitted
+{ "action": "budget/adjust", "id": 4, "adjustment_amount": -25000, "reason": "ลดงบเครื่องลม" }  // active
+{ "action": "budget/submit" | "budget/approve" | "budget/close" | "budget/cancel", "id": 4 }
+```
+
+- error กลาง: `VALIDATION_ERROR` (400) / `ACCESS_DENIED` (403) / `CONFLICT` (สถานะไม่ตรง)
+- ทุก action บันทึก audit `BUDGET_*`
+
+### 14.3 ตัวอย่าง `budget` GET (ย่อ)
+```json
+{ "currency": "THB", "can_manage": true,
+  "config": { "warning_pct": 80, "exceed_pct": 100 },
+  "alerts": { "counts": { "NORMAL": 6, "WARNING": 1, "EXCEEDED": 1 }, "has_warning": true, "has_exceeded": true },
+  "items": [ { "id": 5, "year": 2026, "month": 5, "month_name": "พ.ค.", "department_id": null,
+     "department_name": null, "status": "active", "allocated_budget": 350000, "adjustments": 0,
+     "effective_budget": 350000, "actual": 693800, "utilization_pct": 198.23,
+     "remaining": -343800, "alert": "EXCEEDED", "alert_label": "เกินงบประมาณ" } ] }
+```
+
+Migration: `database/migration_20260920_phase26_cost_budget.sql`
+(run via `scripts/apply_phase26_cost_budget.php` — idempotent)

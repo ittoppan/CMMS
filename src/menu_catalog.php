@@ -53,6 +53,10 @@ return [
     ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาต LOTO',          'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
 
+    // ---- 4.4 ค่าใช้จ่าย & งบประมาณ (Phase 26) ----
+    ['key' => 'cost',                      'href' => '/cost',                      'label' => 'ศูนย์วิเคราะห์ต้นทุน',   'section' => 'ค่าใช้จ่าย & งบประมาณ'],
+    ['key' => 'budget',                    'href' => '/budget',                    'label' => 'จัดการงบประมาณ',        'section' => 'ค่าใช้จ่าย & งบประมาณ'],
+
     // ---- 4.5 การอนุมัติ & เอกสาร ----
     ['key' => 'supervisor',                 'href' => '/supervisor',                 'label' => 'คิวงานหัวหน้างาน',      'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/queue',           'href' => '/supervisor/queue',           'label' => 'คิวงานทั้งหมด',          'section' => 'ควบคุมงาน & วางแผน'],

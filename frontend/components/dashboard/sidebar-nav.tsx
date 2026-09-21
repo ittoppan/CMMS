@@ -49,6 +49,8 @@ import {
   Search,
   Upload,
   LayoutDashboard,
+  CircleDollarSign,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -170,6 +172,14 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "reports/export_excel", labelKey: "menu.reports_excel", href: "/reports/export_excel", icon: FileDown },
       { perm: "reports/import_excel", labelKey: "menu.reports_import", href: "/reports/import_excel", icon: Upload },
       { perm: "andon-board", labelKey: "menu.andon_board", href: "/andon-board", icon: Zap },
+    ],
+  },
+  {
+    titleKey: "nav.cost_budget",
+    pathPrefixes: ["/cost", "/budget"],
+    items: [
+      { perm: "cost", labelKey: "menu.cost", href: "/cost", icon: CircleDollarSign },
+      { perm: "budget", labelKey: "menu.budget", href: "/budget", icon: Wallet },
     ],
   },
   {

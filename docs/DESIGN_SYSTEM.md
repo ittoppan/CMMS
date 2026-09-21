@@ -272,6 +272,22 @@ are converted). 16–20px, strokeWidth 1.75, `aria-hidden` when decorative.
 
 ---
 
+## 7.1 Phase 26 — Cost & Budget pages
+
+- `os-table` (`@/components/ui/os-table`) — primitive ตารางแบบง่าย (ไม่ sorting)
+  ใช้กับตารางที่ต้องควบคุม markup เอง (แถวรวม/ป้าย/ปุ่มต่อแถว) — ทุกส่วนผลักสไตล์ด้วย
+  token + class `.cmms-ui-table` เดียวกับ DataTable
+- Badge tone จาก state ของระบบ: `NORMAL→success`, `WARNING→warning`,
+  `EXCEEDED→danger`, `NO_BUDGET→neutral`; สถานะงบ `draft→neutral`,
+  `submitted→info`, `active→success`
+- ปุ่ม action ต่อแถวในตาราง = **ghost icon button** ขนาด 28px (ตาม column 8) —
+  ไม่อนุมัติปุ่มสีเต็มแถว
+- Modal จัดการงบเป็น overlay เดียว (`bg-black/50`) ขนาด max-w-md — ตาม AnimatedDialog แบบ light
+- ตัวเลขเงิน: `tabular-nums`, ใช้ `fmtMoney()`/`fmtMoneyShort()` จาก `@/lib/cost.ts`
+  (หน้าเว็บใช้ ฿/บาท ตาม `currency_symbol` จาก engine)
+
+---
+
 ## 8. Do / Don't
 
 | ✅ Do | ❌ Don't |
@@ -295,7 +311,7 @@ Pages may import ONLY from these (plus React/Next/lib code):
                          separator, breadcrumb, avatar, dropdown-menu,
                          popover, calendar, toggle-group, pagination,
                          skeleton, spinner, empty-state, page-header,
-                         form-field, table, tooltip, scroll-area, sheet,
+                         form-field, table, os-table, tooltip, scroll-area, sheet,
                          command
 @/components/layout/*    Stack, VStack, HStack, Grid, Center, Section
 @/components/DataTable   TanStack-based table wrapper (sticky header, mobile

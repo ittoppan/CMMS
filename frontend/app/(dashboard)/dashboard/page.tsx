@@ -49,10 +49,13 @@ import {
 } from "@/components/dashboard/kit";
 import * as D from "@/lib/dashboard";
 import { getPlanningKpis, type PlanningKpis } from "@/lib/planning";
+import { fetchBudgetVsActual as fetchBudgetVsActualApi, type BudgetVsActualResponse } from "@/lib/cost";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("th-TH");
 const fmtBaht = (n: number) => (n >= 10000 ? `${Math.round(n / 1000).toLocaleString("th-TH")}k` : fmt(n));
 const hours = (mins: number) => `${(mins / 60).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ชม.`;
+const fmtMoney = (n: number, symbol = "฿") => (n >= 10000 ? `${symbol} ${Math.round(n / 1000)}k` : `${symbol} ${fmt(n)}`);
+const MONTH_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
 
 const CHART_COLORS = [
   "var(--cmms-primary)",
@@ -101,6 +104,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [dt, setDt] = useState<D.DowntimeResponse | null>(null);
   const [cost, setCost] = useState<D.CostResponse | null>(null);
+  const [budget, setBudget] = useState<BudgetVsActualResponse | null>(null);
   const [failure, setFailure] = useState<D.FailureResponse | null>(null);
   const [prio, setPrio] = useState<{ name: string; value: number }[] | null>(null);
   const [openWo, setOpenWo] = useState<D.WoItem[] | null>(null);
@@ -143,11 +147,12 @@ export default function DashboardPage() {
   const analysis = useCallback(async () => {
     if (!data || !isMgr) return;
     didAnal.current = true;
-    const [d, f, wo, c] = await Promise.all([
+    const [d, f, wo, c, b] = await Promise.all([
       D.fetchDowntime(q),
       D.fetchFailure(q),
       D.fetchWoList({ ...q, group: "open", limit: 300 }),
       D.isCostVisible(data.can) ? D.fetchCost(q) : Promise.resolve(null),
+      D.isCostVisible(data.can) ? fetchBudgetVsActualApi(new Date().getFullYear()) : Promise.resolve(null),
     ]);
     const priorityRows = [
       { name: "วิกฤต", value: 0 },
@@ -165,6 +170,7 @@ export default function DashboardPage() {
     setOpenWo(wo.items);
     setPrio(priorityRows.filter((r) => r.value > 0));
     if (c) setCost(c);
+    if (b) setBudget(b);
   }, [data, isMgr, q]);
 
   useEffect(() => {
@@ -194,6 +200,7 @@ export default function DashboardPage() {
     setDt(null);
     setFailure(null);
     setCost(null);
+    setBudget(null);
     setPrio(null);
     setTick((t) => t + 1);
   }, []);
@@ -615,6 +622,64 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               )}
+            </section>
+          )}
+
+          {/* ── งบประมาณปีนี้ (มีสิทธิ์) ── */}
+          {isMgr && D.isCostVisible(data.can) && budget && (
+            <section aria-label="งบประมาณบำรุงรักษา" className="space-y-3">
+              <SectionHeading
+                title={`งบประมาณบำรุงรักษา ${budget.year}`}
+                sub="งบ (effective) vs ใช้จริงรายเดือน — จากศูนย์วิเคราะห์ต้นทุน"
+                right={
+                  <div className="flex items-center gap-3">
+                    <Link href="/budget" className="text-sm font-medium text-[var(--cmms-primary)]">
+                      จัดการงบ →
+                    </Link>
+                    <Link href="/cost" className="text-sm font-medium text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-primary)]">
+                      วิเคราะห์ต้นทุน →
+                    </Link>
+                  </div>
+                }
+              />
+              <Card>
+                <CardContent className="p-4">
+                  {budget.series.length === 0 ? (
+                    <EmptyState title="ยังไม่มีงบประมาณ" description={`ยังไม่ตั้งงบประมาณปี ${budget.year} — ไปที่หน้า จัดการงบประมาณ`} />
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {budget.series.map((m) => {
+                        const pct = m.utilization_pct;
+                        const warn = budget.config.warning_pct ?? 80;
+                        const exceed = budget.config.exceed_pct ?? 100;
+                        const hasBudget = m.budget > 0;
+                        const barColor = pct === null ? "var(--cmms-text-muted)" : pct >= exceed ? "var(--cmms-danger)" : pct >= warn ? "var(--cmms-warning)" : "var(--cmms-success)";
+                        return (
+                          <div key={m.month} className="rounded-xl border border-[var(--cmms-border)] p-3" style={{ background: "var(--cmms-bg-card)" }}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold">{m.month_name}</span>
+                              {pct === null ? (
+                                <span className="text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>{hasBudget ? "ยังไม่มีใช้จ่าย" : "ไม่มีงบ"}</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                  style={{ background: "var(--cmms-bg-muted)", color: barColor }}>
+                                  {pct >= exceed ? `${pct.toFixed(0)}% เกิน` : `${pct.toFixed(0)}%`}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                              งบ <strong>{fmtMoney(m.budget)}</strong> · ใช้ <strong>{fmtMoney(m.actual)}</strong>
+                            </p>
+                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--cmms-bg-muted)]">
+                              <div className="h-full rounded-full" style={{ width: `${pct === null ? 0 : Math.min(100, Math.max(pct, 3))}%`, background: barColor }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </section>
           )}
 

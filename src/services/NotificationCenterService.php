@@ -174,6 +174,9 @@ class NotificationCenterService
             ['module' => 'calibration', 'event' => 'due', 'priority' => 'medium', 'title_template' => 'เครื่องมือวัดใกล้ครบสอบเทียบ', 'message_template' => "เครื่องมือ: {asset_name}\nรอบถัดไป: {next_date}", 'url_template' => '/calibration'],
             ['module' => 'system', 'event' => 'sync_failed', 'priority' => 'high', 'title_template' => 'ซิงค์ Sage 300 ล้มเหลว', 'message_template' => "รายละเอียด: {detail}", 'url_template' => '/spare_parts/sage_sync'],
             ['module' => 'system', 'event' => 'error', 'priority' => 'critical', 'title_template' => 'ข้อผิดพลาดระบบ', 'message_template' => "{detail}", 'url_template' => ''],
+            ['module' => 'budget', 'event' => 'alert', 'priority' => 'high', 'title_template' => 'งบประมาณใกล้ถึงเกณฑ์: {period_label}', 'message_template' => "งบปี {year}: ใช้ไป {actual} จาก {budget} ({pct}%)\nแผนก: {department_name}\nเหลือ: {remaining}", 'url_template' => '/budget'],
+            ['module' => 'budget', 'event' => 'over', 'priority' => 'critical', 'title_template' => 'งบประมาณเกินกำหนด: {period_label}', 'message_template' => "งบปี {year}: ใช้ไป {actual} จาก {budget} ({pct}%)\nแผนก: {department_name}\nเกินไป: {remaining}", 'url_template' => '/budget'],
+            ['module' => 'budget', 'event' => 'approved', 'priority' => 'medium', 'title_template' => 'งบประมาณได้รับอนุมัติ: {period_label}', 'message_template' => "งบปี {year} แผนก: {department_name}", 'url_template' => '/budget'],
         ];
     }
 

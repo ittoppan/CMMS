@@ -48,6 +48,7 @@ const MENU_HREFS: string[] = [
   "/equipment_borrowing", "/calibration", "/calibration/calendar", "/calibration/po", "/calibration/tracking", "/mtbf_mttr",
   "/spare_parts", "/spare_parts/issue_center", "/spare_parts/balances", "/spare_parts/returns", "/spare_parts/sage_po", "/spare_parts/sage_sync", "/spare_parts/optimization", "/spare_parts/stock_take", "/suppliers",
   "/analytics/kpi", "/analytics", "/analytics/advanced", "/reports", "/reports/monthly_pdf", "/reports/export_excel", "/reports/import_excel",
+  "/cost", "/budget",
   "/safety/work_permit", "/iot/monitor",
   "/users", "/roles", "/register",
   "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",

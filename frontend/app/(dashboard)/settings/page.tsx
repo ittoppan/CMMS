@@ -208,6 +208,13 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   sidebar_style: { label: "สไตล์แถบเมนูข้าง" },
   standard_labor_rate: { label: "อัตราค่าแรงมาตรฐาน (บาท/ชม.)" },
   system_currency: { label: "สกุลเงินระบบ" },
+  // cost & budget (Phase 26)
+  cost_labor_enabled: { label: "คำนวณค่าแรงอัตโนมัติ", hint: "ปิด = ไม่นับค่าแรงเต็มจำนวน (แสดงค่าแรงที่บันทึกจริงในใบงานเท่านั้น)" },
+  cost_labor_rate_source: { label: "แหล่งอัตราค่าแรง", hint: "configured=ใช้ standard_labor_rate, recorded=ใช้ที่บันทึกในใบงานเท่านั้น" },
+  cost_external_source: { label: "แหล่งค่าใช้จ่ายงานจ้างภายนอก", hint: "wo_response=จากใบสั่งซ่อม (cost_outsource)" },
+  budget_warning_pct: { label: "เกณฑ์แจ้งเตือนงบใกล้ถึง (%)", hint: "ใช้จริงถึงกี่เปอร์เซ็นต์ถึงเป็น WARNING" },
+  budget_exceed_pct: { label: "เกณฑ์งบเกินกำหนด (%)", hint: "ถึงกี่เปอร์เซ็นต์ถึงเป็น EXCEEDED" },
+  budget_dept_filter_enabled: { label: "กรองงบประมาณรายแผนก", hint: "เปิด = งบผูกกับแผนกเท่านั้น (ไม่รวมทั้งบริษัท)" },
   system_mode: { label: "โหมดระบบ" },
   theme_font_family: { label: "ฟอนต์ของระบบ" },
   theme_preset: { label: "ธีมสี" },
@@ -273,6 +280,7 @@ const NUMBER_KEYS = new Set([
   "max_login_attempts", "session_timeout_mins", "work_hours_per_day", "standard_labor_rate",
   "escalation_hours", "maintenance_alert_days", "calibration_alert_days", "pm_lead_days",
   "pm_reminder_days", "smtp_port", "spare_approval_level",
+  "budget_warning_pct", "budget_exceed_pct",
 ]);
 
 const BOOLEAN_KEYS = new Set([
@@ -284,6 +292,7 @@ const BOOLEAN_KEYS = new Set([
   "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
   "daily_summary_enabled", "auto_req_low_stock", "pm_deferral_enabled",
   "animations_enabled",
+  "cost_labor_enabled", "budget_dept_filter_enabled",
 ]);
 
 const READONLY_KEYS = new Set(["app_name", "app_version", "system_currency"]);

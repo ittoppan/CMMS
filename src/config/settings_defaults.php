@@ -66,6 +66,15 @@ function settingsDefaultValues(): array {
         'timezone'              => 'Asia/Bangkok',
         'topbar_style'          => 'clean_white',
         'work_hours_per_day'    => '8',
+
+        // ── cost & budget (Phase 26) ──
+        'cost_labor_enabled'     => '1',    // คำนวณค่าแรงจากเวลา × อัตรา (0 = ใช้ที่บันทึกใบงานเท่านั้น)
+        'cost_labor_rate_source' => 'configured', // configured=standard_labor_rate / recorded=จากใบงาน
+        'cost_external_source'   => 'wo_response', // แหล่งค่าแรงภายนอก: wo_response
+        'budget_warning_pct'     => '80',   // ใช้จริงถึง 80% = WARNING
+        'budget_exceed_pct'      => '100',  // ใช้จริงถึง 100% = EXCEEDED
+        'budget_dept_filter_enabled' => '1', // งบผูกแผนก (0 = คิดทั้งบริษัท)
+
         'planning_shift_start'  => '08:00',  // Phase 25: จุดเริ่มกะทำงาน (คำนวณความพร้อม/capacity)
         'planning_shift_hours'  => '8',      // Phase 25: ชั่วโมงทำงานต่อวัน (fallback: work_hours_per_day)
         'planning_working_days' => '1,2,3,4,5', // Phase 25: วันทำงาน (1=จันทร์ ... 7=อาทิตย์)

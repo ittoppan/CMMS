@@ -251,6 +251,9 @@ requireLogin($pdo);
                 $total->execute([$reqId]);
                 $tt = $total->fetch(PDO::FETCH_NUM);
                 $pdo->prepare("UPDATE spare_issue_requests SET total_qty = ?, total_value = ? WHERE id = ?")->execute([(float)$tt[0], (float)$tt[1], $reqId]);
+                // Roll-up: sync repair.cost_parts snapshot from WO part usage (Phase 26 cost model)
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$woId, $woId]);
                 $pdo->commit();
                 clientActionFinish($pdo, $idemKey, 'success', 'spare_issue_request', $reqId, 200);
                 echo json_encode(['success' => true, 'request_id' => $reqId, 'message' => 'เพิ่มอะไหล่ในใบสั่งซ่อมและคำขอเบิก (Pending Issue) เรียบร้อย', 'added' => $added]);
@@ -280,6 +283,7 @@ requireLogin($pdo);
             try {
                 $pdo->prepare("DELETE FROM repair_spare_parts WHERE id = ?")->execute([$id]);
                 // เอารายการในใบเบิก Pending ออกด้วย + คำนวณยอดใหม่ (ลบใบเบิกถ้าไม่มีรายการเหลือ)
+                $repairId = (int)$rs['repair_id'];
                 $reqIds = $pdo->prepare("SELECT id FROM spare_issue_requests WHERE work_order_id = ? AND status IN ('pending','Requested')");
                 $reqIds->execute([(int)$rs['repair_id']]);
                 foreach ($reqIds->fetchAll(PDO::FETCH_COLUMN) as $rid) {
@@ -294,6 +298,9 @@ requireLogin($pdo);
                         $pdo->prepare("UPDATE spare_issue_requests SET total_qty = ?, total_value = ? WHERE id = ?")->execute([(float)$tt[0], (float)$tt[1], (int)$rid]);
                     }
                 }
+                // Roll-up: sync repair.cost_parts snapshot after removal (Phase 26 cost model)
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$repairId, $repairId]);
                 $pdo->commit();
             } catch (Exception $e) {
                 $pdo->rollBack();
@@ -308,6 +315,13 @@ requireLogin($pdo);
             $qty = (float)($data['qty'] ?? 0);
             if (!$id || $qty <= 0) { http_response_code(400); echo json_encode(['error' => 'Missing id or qty']); exit; }
             $pdo->prepare("UPDATE repair_spare_parts SET quantity_used = ? WHERE id = ?")->execute([$qty, $id]);
+            $row = $pdo->prepare("SELECT repair_id FROM repair_spare_parts WHERE id = ?");
+            $row->execute([$id]);
+            $rid2 = (int)($row->fetchColumn() ?: 0);
+            if ($rid2) {
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$rid2, $rid2]);
+            }
             echo json_encode(['success' => true, 'message' => 'อัปเดตจำนวนเรียบร้อย']);
             exit;
         }

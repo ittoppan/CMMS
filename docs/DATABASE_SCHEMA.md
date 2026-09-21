@@ -30,7 +30,7 @@
 - `calibration`, `calibration_history`, `calibration_points`, `po_calibration`, `calibration_tracking`
 
 **KPI / Analytics**
-- `monthly_kpi_snapshot`, `mtbf_mttr`, `production_hours`, `v_asset_inspection_history` (view), `v_inspection_dashboard_kpis` (view)
+- `monthly_kpi_snapshot`, `mtbf_mttr`, `production_hours`, `v_asset_inspection_history` (view), `v_inspection_dashboard_kpis` (view), `v_maintenance_cost` (view — ต้นทุนซ่อม Phase 26)
 
 **Notification / PWA**
 - `notifications`, `notification_events`, `notification_deliveries`, `notification_logs`, `notification_preferences`, `notification_rules`, `notification_templates`, `push_subscriptions`, `email_notifications`, `line_registrations`
@@ -52,3 +52,14 @@ Index ที่สำคัญเพิ่มเติม (มีอยู่แ
 1. เหล็กเส้น `audit_trail` (เก่า) ไม่ได้ใช้งานในโค้ดใหม่ — ยังไม่ลบ (ความเสี่ยงต่ำแต่ต้องวางแผน) อย่าเขียนโค้ดใหม่ไปใช้.
 2. ตารางที่ตั้งชื่อสลับกับความนิยม (`pm_am_plans`) — ตรวจด้วยโค้ด ไม่ใช่เดา.
 3. ทุก default timestamp ของ DB ต้องเป็น `CURRENT_TIMESTAMP` ใน session timezone +07 (ตอนนี้เป็นไปตาม session — ทำผ่าน `SET time_zone` ที่ `getDb()` แทนการเปลี่ยน global).
+
+## Phase 26 (Cost & Budget) — ผลต่างจากรอบก่อน
+
+- `budget_plan` เพิ่มคอลัมน์: `status` (draft/submitted/active/closed/cancelled), `currency`, `notes`, `created_by`, `approved_by`, `approved_at`, `updated_at` — 12 แถวเดิม backfill `status='active'` (อ่านจาก `allocated_budget` ที่ `public/index.php` / `monthly_pdf.php` ยังทำงานเหมือนเดิม)
+  - `budget_plan.id` เป็น **signed int** → FK/คอลัมน์อ้างอิงเป็น `INT` (ไม่ใช่ UNSIGNED)
+- `budget_adjustment` (ใหม่): `budget_id` FK → `budget_plan.id`, `adjustment_amount` (บวก/ลบ), `reason` (บังคับ), `created_by`, `created_at`
+- `v_maintenance_cost` (view ใหม่): ต่อใบสั่งซ่อม 1 แถว — คอลัมน์สำคัญ: `repair_id`, `created_at`, `maintenance_type`, `department_id/name`, `asset_id/code/name/category`, `priority/source_type/status`, `repair_time_minutes`, `parts_lines`, `parts_cost`, `cost_parts_snapshot`, `cost_labor_recorded`, `cost_outsource_recorded`, `outsource_by`
+- settings ใหม่: `cost_labor_enabled`, `cost_labor_rate_source`, `cost_external_source`, `budget_warning_pct`, `budget_exceed_pct`, `budget_dept_filter_enabled`
+- notif templates: `budget:alert`, `budget:over`, `budget:approved` (ใน `notification_templates`)
+- menu_permissions: เพิ่ม `cost`, `budget` (ทุก role ตาม policy)
+- **ไม่ลบ/ไม่แก้คอลัมน์เดิม** — migration additive เท่านั้น (ดู `database/migration_20260920_phase26_cost_budget.sql`)
