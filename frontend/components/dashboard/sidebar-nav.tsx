@@ -341,3 +341,15 @@ function SidebarGroup({
     </div>
   );
 }
+      { perm: "calibration/dashboard", labelKey: "menu.calibration_dashboard", href: "/calibration/dashboard", icon: LayoutDashboard },
+      { perm: "calibration/instruments", labelKey: "menu.calibration_instruments", href: "/calibration/instruments", icon: Ruler },
+      { perm: "calibration/plans", labelKey: "menu.calibration_plans", href: "/calibration/plans", icon: CalendarClock },
+      { perm: "calibration/schedule", labelKey: "menu.calibration_schedule", href: "/calibration/schedule", icon: CalendarDays },
+      { perm: "calibration/standards", labelKey: "menu.calibration_standards", href: "/calibration/standards", icon: Landmark },
+      { perm: "calibration/procedures", labelKey: "menu.calibration_procedures", href: "/calibration/procedures", icon: ListChecks },
+      { perm: "calibration/certificates", labelKey: "menu.calibration_certificates", href: "/calibration/certificates", icon: FileCheck2 },
+      { perm: "calibration/oot", labelKey: "menu.calibration_oot", href: "/calibration/oot", icon: Gauge },
+      { perm: "calibration/reports", labelKey: "menu.calibration_reports", href: "/calibration/reports", icon: BarChart3 },
+      { perm: "calibration/data-quality", labelKey: "menu.calibration_data_quality", href: "/calibration/data-quality", icon: BadgeCheck },
+      { perm: "calibration/mobile", labelKey: "menu.calibration_mobile", href: "/calibration/mobile", icon: Smartphone },
+      { perm: "calibration/config", labelKey: "menu.calibration_config", href: "/calibration/config", icon: Settings },

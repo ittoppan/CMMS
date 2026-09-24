@@ -16,14 +16,19 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
+require_once __DIR__ . '/../../../src/csrf.php';
+if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) enforceCsrf();
 
 
 try {
     $pdo = getDb();
 requireLogin($pdo);
+    // RBAC module 'calibration' (Phase 29): view / edit (การเปลี่ยนข้อมูล PO) / create
+    requirePerm($pdo, 'calibration', $_SERVER['REQUEST_METHOD'] === 'GET' ? 'view' : 'edit');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $method = $_SERVER['REQUEST_METHOD'];
 

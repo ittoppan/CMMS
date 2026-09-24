@@ -1142,3 +1142,15 @@ export function usePageHero(key: string, fallback?: Partial<PageHero>): PageHero
 export function hasTranslation(key: string): boolean {
   return key in DICT;
 }
+  "menu.calibration_dashboard": { th: "α╣üα╕öα╕èα╕Üα╕¡α╕úα╣îα╕öα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Dashboard" },
+  "menu.calibration_instruments": { th: "α╣Çα╕äα╕úα╕╖α╣êα╕¡α╕çα╕íα╕╖α╕¡α╕ºα╕▒α╕ö (Instrument Master)", en: "Instruments" },
+  "menu.calibration_plans": { th: "α╣üα╕£α╕Öα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Plans" },
+  "menu.calibration_schedule": { th: "α╕òα╕▓α╕úα╕▓α╕çα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Schedule" },
+  "menu.calibration_standards": { th: "α╕íα╕▓α╕òα╕úα╕Éα╕▓α╕Öα╕¡α╣ëα╕▓α╕çα╕¡α╕┤α╕ç", en: "Reference Standards" },
+  "menu.calibration_procedures": { th: "α╕éα╕▒α╣ëα╕Öα╕òα╕¡α╕Öα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Procedures" },
+  "menu.calibration_certificates": { th: "α╣âα╕Üα╕úα╕▒α╕Üα╕úα╕¡α╕çα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Certificates" },
+  "menu.calibration_oot": { th: "OOT / α╕Öα╕¡α╕üα╣Çα╕üα╕ôα╕æα╣î", en: "OOT Events" },
+  "menu.calibration_reports": { th: "α╕úα╕▓α╕óα╕çα╕▓α╕Öα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Reports" },
+  "menu.calibration_data_quality": { th: "α╕äα╕╕α╕ôα╕áα╕▓α╕₧α╕éα╣ëα╕¡α╕íα╕╣α╕Ñα╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Data Quality" },
+  "menu.calibration_mobile": { th: "α╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Üα╕Üα╕Öα╕íα╕╖α╕¡α╕ûα╕╖α╕¡", en: "Mobile Calibration" },
+  "menu.calibration_config": { th: "α╕òα╕▒α╣ëα╕çα╕äα╣êα╕▓α╕¬α╕¡α╕Üα╣Çα╕ùα╕╡α╕óα╕Ü", en: "Calibration Config" },
