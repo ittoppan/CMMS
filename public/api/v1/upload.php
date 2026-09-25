@@ -3,7 +3,7 @@
  * CMMS-TPT Upload API — รับไฟล์รูปจาก PWA (Next.js) เก็บที่ public/uploads/<folder>/
  *
  * POST /api/v1/upload.php  body (JSON):
- *   { "folder": "spares|assets|avatars|repair|pm_am|calibration",
+ *   { "folder": "spares|assets|avatars|repair|pm_am|calibration|rca",
  *     "data":   "data:image/png;base64,...." }
  *   หรือ multipart/form-data:  $_FILES['file'] + $_POST['folder']
  *
@@ -30,7 +30,7 @@ try {
         exit;
     }
 
-    $allowedFolders = ['spares', 'assets', 'avatars', 'repair', 'pm_am', 'calibration'];
+    $allowedFolders = ['spares', 'assets', 'avatars', 'repair', 'pm_am', 'calibration', 'rca', 'work_permit'];
     $maxBytes = 6 * 1024 * 1024; // 6 MB
 
     $folder = trim($_POST['folder'] ?? '');

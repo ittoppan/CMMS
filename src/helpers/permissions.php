@@ -52,6 +52,8 @@ const PERMISSION_MATRIX = [
         'settings'   => ['view'],
         'notification'=> ['view'],
         'sage'       => ['view'],
+        'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
+        'safety'     => ['view', 'create', 'edit', 'approve', 'execute', 'cancel'],
     ],
     6 => [ // ASST Manager — เช่นเดียวกับ Manager
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -70,6 +72,8 @@ const PERMISSION_MATRIX = [
         'settings'   => ['view'],
         'notification'=> ['view'],
         'sage'       => ['view'],
+        'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
+        'safety'     => ['view', 'create', 'edit', 'approve', 'execute', 'cancel'],
     ],
     7 => [ // Foreman — หัวหน้าชุด
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -83,6 +87,8 @@ const PERMISSION_MATRIX = [
         'report'     => ['view'],
         'dashboard'  => ['view'],
         'users'      => ['view'],
+        'failure'    => ['view', 'create', 'edit', 'investigate', 'actions'],
+        'safety'     => ['view', 'create', 'edit', 'execute'],
     ],
     3 => [ // Technician — ช่าง
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -93,12 +99,16 @@ const PERMISSION_MATRIX = [
         'spare_parts'=> ['view', 'request'],
         'report'     => ['view'],
         'dashboard'  => ['view'],
+        'failure'    => ['view', 'investigate', 'actions'],
+        'safety'     => ['view', 'edit', 'execute'],
     ],
     4 => [ // Operator
         'request'    => ['view', 'create'],
         'repair'     => ['view'],
         'asset'      => ['view'],
         'dashboard'  => ['view'],
+        'failure'    => ['view'],
+        'safety'     => ['view'],
     ],
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],
@@ -111,6 +121,8 @@ const PERMISSION_MATRIX = [
         'calibration'=> ['view'],
         'report'     => ['view'],
         'dashboard'  => ['view'],
+        'failure'    => ['view'],
+        'safety'     => ['view'],
     ],
 ];
 
@@ -189,6 +201,8 @@ function permModuleAliases(string $module): string {
         'audit_log'      => 'audit_log',
         'system'         => 'settings',
         'notification'   => 'notification',
+        'work_permit'    => 'safety',
+        'safety'         => 'safety',
     ];
     return $map[mb_strtolower(trim($module))] ?? mb_strtolower(trim($module));
 }

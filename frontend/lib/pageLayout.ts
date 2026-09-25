@@ -112,7 +112,7 @@ export const PAGE_CATEGORIES: PageCategory[] = [
   {
     name: "ความปลอดภัย & IoT",
     pages: [
-      { value: "/safety/work_permit", label: "ใบอนุญาต LOTO" },
+      { value: "/safety/work_permit", label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
       { value: "/iot/monitor", label: "มอนิเตอร์เซนเซอร์ IoT" },
     ],
   },

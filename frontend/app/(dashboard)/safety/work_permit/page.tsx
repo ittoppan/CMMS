@@ -1,320 +1,257 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useToast } from "@/components/ToastProvider";
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { HStack, VStack, Grid } from "@/components/layout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
-import { Dialog } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import CountUp from "react-countup";
+import { Input } from "@/components/ui/input";
+import { Search, ShieldCheck, Plus, PlayCircle, TriangleAlert, ClipboardCheck, Lock, Hourglass } from "lucide-react";
 import {
-  Plus,
-  FileCheck,
-  Lock,
-  TriangleAlert,
-} from "lucide-react";
+  fetchConfig, fetchOptions, fetchDashboard, fetchList,
+  type ConfigResponse, type OptionsResponse, type DashboardSummary, type PermitListItem, type PermitType,
+  statusLabel, typeName, RISK_LEVEL_LABELS, RISK_LEVEL_TONE, fmtDateTime, PATHS,
+} from "@/lib/safety";
 
-interface PermitItem extends Record<string, unknown> {
-  id: string;
-  permitType: "Hot Work" | "Confined Space" | "High Altitude" | "Electrical LOTO";
-  workOrder: string;
-  location: string;
-  applicant: string;
-  safetyOfficer: string;
-  lotoStatus: "Locked Out" | "Unlocked" | "N/A";
-  status: "approved" | "pending_safety" | "closed";
-  validUntil: string;
+const STATUS_ORDER: { value: string; label: string }[] = [
+  { value: "active", label: "กำลังปฏิบัติงาน" },
+  { value: "suspended", label: "ระงับชั่วคราว" },
+  { value: "approved", label: "อนุมัติแล้ว" },
+  { value: "requested", label: "รอพิจารณา" },
+  { value: "risk_review", label: "ทบทวนความเสี่ยง" },
+  { value: "draft", label: "ร่าง" },
+  { value: "completed", label: "ทำงานเสร็จ" },
+  { value: "closed", label: "ปิดใบอนุญาต" },
+  { value: "expired", label: "หมดเวลา" },
+  { value: "requires_review", label: "ต้องทบทวน" },
+  { value: "cancelled", label: "ยกเลิก" },
+  { value: "rejected", label: "ไม่อนุมัติ" },
+];
+
+function StatCard({ icon: Icon, label, value, sub, tone }: {
+  icon: React.ElementType; label: string; value: React.ReactNode; sub?: React.ReactNode; tone: string;
+}) {
+  return (
+    <Card>
+      <CardContent className="flex items-start justify-between gap-3 p-5">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--cmms-text-secondary)]">{label}</p>
+          <p className="mt-1.5 text-2xl font-bold tracking-tight text-[var(--cmms-text-primary)]">{value}</p>
+          {sub && <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">{sub}</p>}
+        </div>
+        <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tone}`}>
+          <Icon size={19} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+      </CardContent>
+    </Card>
+  );
 }
 
-const permitTypeLabels: Record<string, string> = {
-  "Electrical LOTO": "งานไฟฟ้า LOTO",
-  "Hot Work": "งานเชื่อม/ความร้อน",
-  "Confined Space": "งานในที่อับอากาศ",
-  "High Altitude": "งานที่สูง",
-  "Working at Height": "งานบนที่สูง",
-};
-
 export default function WorkPermitPage() {
-  const [permits, setPermits] = useState<PermitItem[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    permit_type: "electrical",
-    repair_ref: "",
-    location: "",
-    loto_electrical: true,
-    loto_pneumatic: false,
-    loto_hydraulic: false,
-    loto_chemical: false,
-    safety_signature: "",
-  });
-  const [formError, setFormError] = useState("");
-  const { showToast } = useToast();
+  const [cfg, setCfg] = useState<ConfigResponse | null>(null);
+  const [types, setTypes] = useState<PermitType[]>([]);
+  const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);
+  const [permits, setPermits] = useState<PermitListItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [filters, setFilters] = useState({ status: "", risk: "", type: "", search: "" });
 
-  const loadPermits = () => {
-    fetch("/api/v1/index.php?resource=work-permits")
-      .then(res => res.json())
-      .then(json => {
-        if (json.status === "success" && Array.isArray(json.data) && json.data.length > 0) {
-          const typeMap: Record<string, PermitItem['permitType']> = {
-            hot_work: "Hot Work",
-            confined_space: "Confined Space",
-            high_altitude: "High Altitude",
-            electrical_loto: "Electrical LOTO"
-          };
-          const fetched: PermitItem[] = json.data.map((row: any) => ({
-            id: row.permit_no || `WP-${row.id}`,
-            permitType: permitTypeLabels[typeMap[row.permit_type]] || permitTypeLabels[typeMap[row.permit_type] || ""] || "งานเสี่ยงอื่นๆ",
-            workOrder: row.repair_id ? `WO-${row.repair_id}` : "-",
-            location: row.location || "ไม่ระบุ",
-            applicant: row.requester_name || "-",
-            safetyOfficer: row.safety_officer_name || "-",
-            lotoStatus: row.loto_electrical || row.loto_pneumatic || row.loto_hydraulic ? "Locked Out" : "N/A",
-            status: row.status === "approved" ? "approved" : row.status === "active" ? "approved" : "pending_safety",
-            validUntil: row.valid_until || row.created_at || "-"
-          }));
-          setPermits(fetched);
-        } else {
-          setPermits([]);
-        }
-      })
-      .catch(e => console.error("Fetch work permits error:", e));
-  };
-
-  useEffect(() => {
-    loadPermits();
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [c, o, d, l] = await Promise.all([
+        fetchConfig(), fetchOptions(), fetchDashboard(), fetchList(),
+      ]);
+      setCfg(c);
+      setTypes(o.permit_types || []);
+      setDashboard(d.dashboard);
+      setPermits(l.permits || []);
+    } catch (e: any) {
+      setError(e?.message || "โหลดข้อมูลใบอนุญาตทำงานไม่สำเร็จ");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const lockedCount = permits.filter(p => p.lotoStatus === "Locked Out").length;
-  const pendingCount = permits.filter(p => p.status === "pending_safety").length;
+  useEffect(() => { load(); }, [load]);
 
-  const columns: SimpleColumn<PermitItem>[] = [
-    { key: "id", header: "เลขที่ใบอนุญาต" },
-    {
-      key: "permitType",
-      header: "ประเภทงานเสี่ยง",
-      renderCell: (item) => (
-        <Badge variant="danger">{permitTypeLabels[item.permitType] || item.permitType}</Badge>
-      )
-    },
-    { key: "workOrder", header: "อ้างอิง WO/PM" },
-    { key: "location", header: "สถานที่ปฏิบัติงาน" },
-    { key: "applicant", header: "ผู้ขออนุญาต" },
-    {
-      key: "lotoStatus",
-      header: "สถานะ LOTO",
-      renderCell: (item) => (
-        item.lotoStatus === 'Locked Out' ? (
-          <span className="cmms-status ok"><span className="cmms-status-dot" />ล็อกตัดพลังงานแล้ว</span>
-        ) : (
-          <Badge variant="neutral">ไม่ใช้ LOTO</Badge>
-        )
-      )
-    },
-    {
-      key: "status",
-      header: "สถานะการอนุมัติ",
-      renderCell: (item) => (
-        item.status === 'approved' ? (
-          <span className="cmms-status ok"><span className="cmms-status-dot" />อนุมัติแล้ว</span>
-        ) : item.status === 'pending_safety' ? (
-          <span className="cmms-status warn"><span className="cmms-status-dot" />รอ จป. อนุมัติ</span>
-        ) : (
-          <Badge variant="neutral">ปิดงานแล้ว</Badge>
-        )
-      )
-    }
-  ];
+  useEffect(() => {
+    if (!filters.status && !filters.risk && !filters.type && !filters.search) return;
+    let cancelled = false;
+    fetchList({
+      status: filters.status, risk: filters.risk, type: filters.type, search: filters.search,
+    }).then((l) => { if (!cancelled) setPermits(l.permits || []); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [filters]);
+
+  const ds = dashboard;
+  const highRisk = (ds?.high_risk || 0) + (ds?.critical_risk || 0);
 
   return (
     <PageShell
-      eyebrow={<p className="cmms-eyebrow">SAFETY WORK PERMIT · CMMS-TOPPAN</p>}
+      eyebrow={<p className="cmms-eyebrow">SAFETY · WORK PERMIT · PHASE 30</p>}
       breadcrumbs={[
         { label: "หน้าแรก", href: "/dashboard" },
-        { label: "ความปลอดภัย", href: "/safety/work_permit" },
-        { label: "ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO" },
+        { label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
       ]}
       title="ใบอนุญาตทำงานเสี่ยง & ระบบ LOTO"
-      description="ควบคุมความปลอดภัยสำหรับงานซ่อมบำรุงในพื้นที่เสี่ยงอันตรายสูง (Work Permit & Lockout/Tagout)"
+      description="วินิจฉัยความเสี่ยง ควบคุมการตัดพลังงาน (LOTO) และอนุมัติก่อนเริ่มงาน — ทุกขั้นตอนถูกบันทึกเป็นหลักฐานในระบบ"
       actions={
-        <Button onClick={() => setModalOpen(true)}>
-          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-          ออกใบอนุญาตทำงานเสี่ยงใหม่
-        </Button>
+        cfg?.can.create ? (
+          <Link href={PATHS.create}>
+            <Button><Plus size={16} strokeWidth={1.75} aria-hidden="true" /> ออกใบอนุญาตใหม่</Button>
+          </Link>
+        ) : undefined
       }
     >
-      <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
-              <Lock className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">กำลังล็อกตัดพลังงาน</p>
-              <p className="cmms-kpi-value tabular-nums">
-                <CountUp end={lockedCount} /> <span className="text-sm font-normal">จุด</span>
-              </p>
-            </div>
-          </div>
-        </Card>
+      {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
-              <TriangleAlert className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">รอการอนุมัติจาก จป. วิชาชีพ</p>
-              <p className="cmms-kpi-value tabular-nums">
-                <CountUp end={pendingCount} /> <span className="text-sm font-normal">ฉบับ</span>
-              </p>
-            </div>
-          </div>
-        </Card>
+      {loading && !dashboard && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        </div>
+      )}
 
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
-              <FileCheck className="h-6 w-6" strokeWidth={1.75} aria-hidden="true" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">ใบอนุญาตทั้งหมดในระบบ</p>
-              <p className="cmms-kpi-value tabular-nums">
-                <CountUp end={permits.length} /> <span className="text-sm font-normal">ฉบับ</span>
-              </p>
-            </div>
-          </div>
-        </Card>
-      </Grid>
+      {!loading && ds && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard icon={PlayCircle} label="กำลังปฏิบัติงาน" value={ds.active}
+            sub={`${ds.expiring_today} ฉบับครบกำหนดภายในวันนี้`} tone="bg-[var(--cmms-primary-soft)] text-[var(--cmms-primary)]" />
+          <StatCard icon={ShieldCheck} label="รออนุมัติ" value={ds.pending_approval}
+            sub={`${ds.draft} ฉบับเป็นร่าง / ${ds.suspended} ฉบับถูกระงับ`} tone="bg-[var(--cmms-warning-soft)] text-[var(--cmms-warning)]" />
+          <StatCard icon={Lock} label="จุด LOTO กำลังทำงาน" value={ds.loto_active}
+            sub="จุดตัดพลังงานที่ถูกล็อก/แยก/ตรวจแล้ว" tone="bg-[var(--cmms-info-soft)] text-[var(--cmms-info)]" />
+          <StatCard icon={TriangleAlert} label="งานเสี่ยงสูง/วิกฤต" value={highRisk}
+            sub={`${ds.stop_work_open} Stop Work ยังค้าง · ${ds.overdue_actions} action เกินกำหนด`} tone="bg-[var(--cmms-danger-soft)] text-[var(--cmms-danger)]" />
+        </div>
+      )}
 
       <Card>
-        <CardContent>
-          <SimpleDataTable<PermitItem>
-            columns={columns}
-            data={permits}
-            idKey="id"
-            pageSize={10}
-            emptyTitle="ยังไม่มีใบอนุญาตทำงาน"
-            emptyDescription="กดปุ่ม “ออกใบอนุญาตทำงานเสี่ยงใหม่” เพื่อสร้างรายการ"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Modal ออกใบอนุญาต */}
-      <Dialog
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title="ออกใบอนุญาตทำงานเสี่ยง"
-        className="max-w-xl"
-      >
-        <VStack gap={4}>
-          <div className="space-y-1.5">
-            <Label htmlFor="f-type">
-              ประเภทงานเสี่ยง <span className="text-destructive">*</span>
-            </Label>
-            <Select
-              value={form.permit_type}
-              onValueChange={(v) => setForm({ ...form, permit_type: String(v) })}
-            >
-              <SelectTrigger aria-label="ประเภทงานเสี่ยง">
-                <SelectValue placeholder="เลือกประเภทงานเสี่ยง..." />
-              </SelectTrigger>
+        <CardHeader>
+          <CardTitle>รายการใบอนุญาตทำงาน</CardTitle>
+          <CardDescription>
+            คลิกแถวเพื่อเปิดรายละเอียด — สถานะ = สถานะจริงจากระบบ (ไม่ใช่การจำลอง)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={filters.status} onValueChange={(v) => setFilters({ ...filters, status: v === "all" ? "" : v })}>
+              <SelectTrigger className="w-44"><SelectValue placeholder="ทุกสถานะ" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="electrical">งานไฟฟ้า LOTO (ตัดระบบไฟฟ้าและพลังงาน)</SelectItem>
-                <SelectItem value="hot_work">งานเชื่อมและเกิดความร้อน/ประกายไฟ</SelectItem>
-                <SelectItem value="confined_space">งานในที่อับอากาศ</SelectItem>
-                <SelectItem value="high_work">งานในที่สูงเกิน 2 เมตร</SelectItem>
+                <SelectItem value="all">ทุกสถานะ</SelectItem>
+                {STATUS_ORDER.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
               </SelectContent>
             </Select>
+            <Select value={filters.risk} onValueChange={(v) => setFilters({ ...filters, risk: v === "all" ? "" : v })}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="ทุกระดับเสี่ยง" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกระดับเสี่ยง</SelectItem>
+                {Object.entries(RISK_LEVEL_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={filters.type} onValueChange={(v) => setFilters({ ...filters, type: v === "all" ? "" : v })}>
+              <SelectTrigger className="w-52"><SelectValue placeholder="ทุกประเภทงาน" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกประเภทงาน</SelectItem>
+                {types.map((t) => <SelectItem key={t.code} value={t.code}>{t.name_th}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <div className="relative min-w-[220px] flex-1">
+              <Search size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--cmms-text-secondary)]" aria-hidden="true" />
+              <Input
+                className="pl-8"
+                placeholder="ค้นหาเลขใบอนุญาต / งาน / เครื่องจักร..."
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              />
+            </div>
           </div>
-          <Grid columns={2} gap={4}>
-            <div className="space-y-1.5">
-              <Label htmlFor="f-ref">อ้างอิงเลขใบสั่งงาน</Label>
-              <Input id="f-ref" placeholder="เช่น EN-2612-013 (ไม่บังคับ)" value={form.repair_ref} onChange={(e) => setForm({ ...form, repair_ref: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="f-loc">
-                สถานที่ปฏิบัติงาน <span className="text-destructive">*</span>
-              </Label>
-              <Input id="f-loc" placeholder="ระบุตำแหน่ง..." value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            </div>
-          </Grid>
 
-          <VStack gap={2} className="rounded-lg bg-secondary p-4">
-            <p className="text-sm font-semibold text-foreground">ขั้นตอนความปลอดภัย LOTO Mandatory Check</p>
-            <HStack gap={2} vAlign="center">
-              <Checkbox id="loto-electrical" checked={form.loto_electrical} onCheckedChange={(v) => setForm({ ...form, loto_electrical: v === true })} />
-              <Label htmlFor="loto-electrical" className="font-normal">ปลดเมนสวิตช์ไฟฟ้าและใส่กุญแจ Safety Lockout</Label>
-            </HStack>
-            <HStack gap={2} vAlign="center">
-              <Checkbox id="loto-pneumatic" checked={form.loto_pneumatic} onCheckedChange={(v) => setForm({ ...form, loto_pneumatic: v === true })} />
-              <Label htmlFor="loto-pneumatic" className="font-normal">ติดป้ายเตือนอันตราย (Danger Tagout) ระบุชื่อช่าง</Label>
-            </HStack>
-            <HStack gap={2} vAlign="center">
-              <Checkbox id="loto-hydraulic" checked={form.loto_hydraulic} onCheckedChange={(v) => setForm({ ...form, loto_hydraulic: v === true })} />
-              <Label htmlFor="loto-hydraulic" className="font-normal">วัดแรงดันไฟฟ้าด้วย Multimeter เพื่อยืนยัน Zero Energy State</Label>
-            </HStack>
-          </VStack>
-          {formError && <p className="text-sm text-destructive">{formError}</p>}
-        </VStack>
-        <HStack hAlign="end" gap={3} className="mt-4 border-t border-border pt-4">
-          <Button variant="secondary" onClick={() => setModalOpen(false)}>
-            ยกเลิก
-          </Button>
-          <Button
-            disabled={submitting}
-            onClick={async () => {
-              if (!form.location.trim()) {
-                setFormError("กรุณาระบุสถานที่ปฏิบัติงาน");
-                return;
-              }
-              setFormError("");
-              setSubmitting(true);
-              try {
-                const body = new FormData();
-                body.append("permit_type", form.permit_type);
-                body.append("location", form.location.trim());
-                body.append("repair_ref", form.repair_ref.trim());
-                if (form.loto_electrical) body.append("loto_electrical", "1");
-                if (form.loto_pneumatic) body.append("loto_pneumatic", "1");
-                if (form.loto_hydraulic) body.append("loto_hydraulic", "1");
-                if (form.loto_chemical) body.append("loto_chemical", "1");
-                body.append("safety_signature", form.safety_signature);
-                const res = await fetch("/api/v1/index.php?resource=work-permits", { method: "POST", body });
-                const json = await res.json();
-                if (json.status === "success") {
-                  showToast("success", json.message || "สร้างใบอนุญาตเรียบร้อยแล้ว");
-                  setModalOpen(false);
-                  setForm({ permit_type: "electrical", repair_ref: "", location: "", loto_electrical: true, loto_pneumatic: false, loto_hydraulic: false, loto_chemical: false, safety_signature: "" });
-                  loadPermits();
-                } else {
-                  setFormError(json.message || "ไม่สามารถสร้างใบอนุญาตได้");
-                }
-              } catch {
-                setFormError("ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง");
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            <FileCheck size={16} strokeWidth={1.75} aria-hidden="true" />
-            {submitting ? "กำลังส่งขออนุมัติ..." : "ส่งขออนุมัติ จป. วิชาชีพ"}
-          </Button>
-        </HStack>
-      </Dialog>
+          {loading ? (
+            <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-xl" />)}</div>
+          ) : permits.length === 0 ? (
+            <EmptyState
+              title="ยังไม่มีใบอนุญาต"
+              description="กดปุ่ม “ออกใบอนุญาตใหม่” เพื่อเริ่มงานเสี่ยงชิ้นแรก"
+              icon={<ShieldCheck size={40} />}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                    <th className="px-3 py-2">เลขที่ใบอนุญาต</th>
+                    <th className="px-3 py-2">ประเภท</th>
+                    <th className="px-3 py-2">ระดับเสี่ยง</th>
+                    <th className="px-3 py-2">เครื่องจักร / พื้นที่</th>
+                    <th className="px-3 py-2">ผู้ขอ</th>
+                    <th className="px-3 py-2">เวลาใช้งาน</th>
+                    <th className="px-3 py-2">สถานะ</th>
+                    <th className="px-3 py-2" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {permits.map((p) => (
+                    <tr
+                      key={p.id}
+                      onClick={() => { window.location.href = PATHS.detail(p.id); }}
+                      className="cursor-pointer border-b border-[var(--cmms-border)] last:border-0 hover:bg-[var(--cmms-bg-muted)]"
+                    >
+                      <td className="px-3 py-2.5">
+                        <span className="font-mono text-xs font-semibold text-[var(--cmms-primary)]">{p.permit_no || `#${p.id}`}</span>
+                        {p.open_stops > 0 && (
+                          <Badge variant="danger" className="ml-2"><TriangleAlert size={11} aria-hidden="true" /> Stop</Badge>
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5">{typeName(p.permit_type_code, types)}</td>
+                      <td className="px-3 py-2.5">
+                        {p.risk_level ? (
+                          <Badge variant={RISK_LEVEL_TONE[p.risk_level] || "neutral"}>{RISK_LEVEL_LABELS[p.risk_level]}</Badge>
+                        ) : <span className="text-[var(--cmms-text-tertiary)]">—</span>}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <div className="max-w-[240px]">
+                          {p.asset_name && <p className="truncate font-medium text-[var(--cmms-text-primary)]">{p.asset_code ? `${p.asset_code} — ` : ""}{p.asset_name}</p>}
+                          <p className="truncate text-xs text-[var(--cmms-text-secondary)]">{p.location_name || p.asset_name || "—"}</p>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5">{p.requester_name || "—"}</td>
+                      <td className="px-3 py-2.5">
+                        <span className="text-xs text-[var(--cmms-text-secondary)]">{fmtDateTime(p.start_at)}</span>
+                        {p.end_at && <>{" → "}<span className="text-xs text-[var(--cmms-text-secondary)]">{fmtDateTime(p.end_at)}</span></>}
+                      </td>
+                      <td className="px-3 py-2.5">
+                        <Badge variant={statusBadgeTone(p.status)} dot>{p.status_label || statusLabel(p.status)}</Badge>
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        <Link href={PATHS.detail(p.id)} className="text-xs font-medium text-[var(--cmms-primary)]">เปิด</Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </PageShell>
   );
+}
+
+function statusBadgeTone(s: string): "success" | "warning" | "danger" | "neutral" | "info" {
+  switch (s) {
+    case "active": return "success";
+    case "closed": case "completed": return "neutral";
+    case "expired": case "cancelled": case "rejected": return "danger";
+    case "suspended": case "requires_review": return "warning";
+    case "approved": case "requested": case "risk_review": case "draft": return "info";
+    default: return "neutral";
+  }
 }
