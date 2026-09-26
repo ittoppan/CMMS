@@ -32,6 +32,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "nav.cost_budget": { th: "ค่าใช้จ่าย & งบประมาณ", en: "Cost & Budget" },
   "nav.failure_rca": { th: "วิเคราะห์ความเสียหาย & Root Cause", en: "Failure Analysis & RCA" },
+  "nav.contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
   "nav.safety_iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "nav.people": { th: "บุคลากร", en: "People" },
   "nav.system": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
@@ -126,6 +127,9 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.rca": { th: "วิเคราะห์ความเสียหาย", en: "Failure Analysis" },
   "menu.rca_events": { th: "เหตุการณ์ความเสียหาย", en: "Failure Events" },
   "menu.rca_taxonomy": { th: "จัดการหมวดความเสียหาย", en: "Failure Taxonomy" },
+  "menu.contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "menu.contractors_registry": { th: "ทะเบียนผู้รับเหมา", en: "Contractor Registry" },
+  "menu.contractors_work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
   "menu.loto": { th: "ใบอนุญาตทำงานเสี่ยง (PTW)", en: "Work Permit (PTW)" },
   "menu.iot_monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
   "menu.users": { th: "ผู้ใช้งานระบบ", en: "Users" },
@@ -791,6 +795,11 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/asset-reliability/reports": { th: "รายงาน Reliability", en: "Reliability Reports" },
   "/asset-reliability/config": { th: "ตั้งค่า Reliability", en: "Reliability Settings" },
   "/asset-reliability/[id]": { th: "โปรไฟล์ Reliability", en: "Reliability Profile" },
+  // ── PHASE 31: Contractor Management ──
+  "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "/contractors/create": { th: "สร้างผู้รับเหมาใหม่", en: "Register Contractor" },
+  "/contractors/[id]": { th: "โปรไฟล์ผู้รับเหมา", en: "Contractor Profile" },
+  "/contractors/work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
 };
 
 // หมวด breadcrumb
@@ -817,6 +826,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/andon-board": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/safety": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "/iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
+  "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
   "/users": { th: "บุคลากร", en: "People" },
   "/roles": { th: "บุคลากร", en: "People" },
   "/manuals": { th: "เอกสารคู่มือ", en: "Manuals" },
@@ -1087,6 +1097,22 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "forms/run": {
     th: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "กรอกแบบฟอร์ม", desc: "กรอกข้อมูลแบบฟอร์มดิจิทัล — ฟิลด์ที่ผูกฐานข้อมูลเลือกค่าจริง แล้วพิมพ์เป็น PDF" },
     en: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "Fill Form", desc: "Complete the digital form — database-bound fields load live options, then print to PDF" },
+  },
+  contractors: {
+    th: { eyebrow: "CONTRACTOR MANAGEMENT · CMMS-TOPPAN", title: "ผู้รับเหมา & งานภายนอก", desc: "ทะเบียนผู้รับเหมา คุณสมบัติ เอกสาร ความปลอดภัย งานภายนอก และผลการปฏิบัติงาน — ข้อมูลจริง ระบบเดียว ตรวจย้อนได้" },
+    en: { eyebrow: "CONTRACTOR MANAGEMENT · CMMS-TOPPAN", title: "Contractors & External Work", desc: "Contractor registry, qualification, documents, safety, external work and performance — one source of truth, auditable" },
+  },
+  "contractors/create": {
+    th: { eyebrow: "NEW CONTRACTOR · CMMS-TOPPAN", title: "สร้างผู้รับเหมาใหม่", desc: "ลงทะเบียนบริษัทผู้รับเหมาใหม่ พร้อมข้อมูลทะเบียน ผู้ติดต่อ และหมวดงานบริการ" },
+    en: { eyebrow: "NEW CONTRACTOR · CMMS-TOPPAN", title: "Register Contractor", desc: "Register a new contractor company with registration details, contacts and service categories" },
+  },
+  "contractors/[id]": {
+    th: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "โปรไฟล์ผู้รับเหมา", desc: "คุณสมบัติ เอกสาร พนักงาน สัญญา ประวัติการทำงาน ใบอนุญาต และผลการปฏิบัติงาน" },
+    en: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "Contractor Profile", desc: "Qualification, documents, workers, contracts, work history, permits and performance" },
+  },
+  "contractors/work": {
+    th: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "งานภายนอก (External Work)", desc: "การมอบหมายงานภายนอก การขอใบอนุญาต (PTW) ตรวจรับงาน และความเสี่ยงด้านความปลอดภัย" },
+    en: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "External Work Board", desc: "External work assignments, permit-to-work (PTW), acceptance inspection and safety risks" },
   },
 };
 

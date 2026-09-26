@@ -113,4 +113,8 @@ return [
     ['key' => 'settings',                  'href' => '/settings',                  'label' => 'ตั้งค่าทั้งหมด',          'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'editor/builder',            'href' => '/editor/builder',            'label' => 'สร้างหน้าเว็บ (Visual Builder)', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'pages',                     'href' => '/pages',                     'label' => 'หน้าเว็บที่สร้างเอง',    'section' => 'ระบบ & ตั้งค่า'],
+
+    // ---- 4.95 ผู้รับเหมา & งานภายนอก (Phase 31) ----
+    ['key' => 'contractor/overview',       'href' => '/contractors',               'label' => 'ผู้รับเหมา & งานภายนอก', 'section' => 'ผู้รับเหมา & งานภายนอก'],
+    ['key' => 'contractor/work',           'href' => '/contractors/work',          'label' => 'งานภายนอก (External Work)','section' => 'ผู้รับเหมา & งานภายนอก'],
 ];

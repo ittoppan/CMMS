@@ -54,6 +54,7 @@ const PERMISSION_MATRIX = [
         'sage'       => ['view'],
         'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
         'safety'     => ['view', 'create', 'edit', 'approve', 'execute', 'cancel'],
+        'contractor' => ['view', 'create', 'edit', 'approve', 'execute'],
     ],
     6 => [ // ASST Manager — เช่นเดียวกับ Manager
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -74,6 +75,7 @@ const PERMISSION_MATRIX = [
         'sage'       => ['view'],
         'failure'    => ['view', 'create', 'edit', 'investigate', 'assign', 'approve', 'verify', 'close', 'taxonomy', 'actions'],
         'safety'     => ['view', 'create', 'edit', 'approve', 'execute', 'cancel'],
+        'contractor' => ['view', 'create', 'edit', 'approve', 'execute'],
     ],
     7 => [ // Foreman — หัวหน้าชุด
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -89,6 +91,7 @@ const PERMISSION_MATRIX = [
         'users'      => ['view'],
         'failure'    => ['view', 'create', 'edit', 'investigate', 'actions'],
         'safety'     => ['view', 'create', 'edit', 'execute'],
+        'contractor' => ['view', 'execute'],
     ],
     3 => [ // Technician — ช่าง
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -123,6 +126,7 @@ const PERMISSION_MATRIX = [
         'dashboard'  => ['view'],
         'failure'    => ['view'],
         'safety'     => ['view'],
+        'contractor' => ['view'],
     ],
 ];
 

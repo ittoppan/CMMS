@@ -52,6 +52,7 @@ const MENU_HREFS: string[] = [
   "/cost", "/budget",
   "/rca", "/rca/events", "/rca/taxonomy", "/rca/new",
   "/safety/work_permit", "/iot/monitor",
+  "/contractors", "/contractors/work", "/contractors/create", "/contractors",
   "/users", "/roles", "/register",
   "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",
   "/editor/builder", "/pages",

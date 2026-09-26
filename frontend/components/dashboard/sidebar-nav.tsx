@@ -59,6 +59,7 @@ import {
   Hourglass,
   Boxes,
   Hammer,
+  HardHat,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -218,6 +219,14 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "rca", labelKey: "menu.rca", href: "/rca", icon: Activity },
       { perm: "rca/events", labelKey: "menu.rca_events", href: "/rca/events", icon: History },
       { perm: "rca/taxonomy", labelKey: "menu.rca_taxonomy", href: "/rca/taxonomy", icon: ListChecks },
+    ],
+  },
+  {
+    titleKey: "nav.contractors",
+    pathPrefixes: ["/contractors"],
+    items: [
+      { perm: "contractor", labelKey: "menu.contractors", href: "/contractors", icon: HardHat },
+      { perm: "contractor/work", labelKey: "menu.contractors_work", href: "/contractors/work", icon: ClipboardList },
     ],
   },
   {

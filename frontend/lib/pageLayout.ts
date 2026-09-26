@@ -117,6 +117,14 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     ],
   },
   {
+    name: "ผู้รับเหมา & งานภายนอก",
+    pages: [
+      { value: "/contractors", label: "ผู้รับเหมา & งานภายนอก" },
+      { value: "/contractors/create", label: "สร้างผู้รับเหมาใหม่" },
+      { value: "/contractors/work", label: "งานภายนอก (External Work)" },
+    ],
+  },
+  {
     name: "บุคลากร",
     pages: [
       { value: "/users", label: "การจัดการผู้ใช้งาน" },
@@ -199,6 +207,20 @@ export const SETTINGS_SECTIONS: PageLayoutSection[] = [
   { id: "grid", label: "กลุ่มการตั้งค่า + ฟอร์ม", desc: "เมนูกลุ่มซ้าย + ฟอร์มแก้ไขค่า" },
 ];
 
+export const CONTRACTORS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างผู้รับเหมา / งานภายนอก" },
+  { id: "kpi", label: "การ์ดสรุปผู้รับเหมา (KPI)", desc: "เจ้าของ/ผ่าน/รอประเมิน/งานภายนอก/เตือน" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + หมวดงาน + ผู้ดูแล" },
+  { id: "content", label: "ตารางทะเบียนผู้รับเหมา", desc: "รายการผู้รับเหมา + สถานะ + คุณสมบัติ" },
+];
+
+export const CONTRACTOR_WORK_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างงานภายนอก" },
+  { id: "kpi", label: "การ์ดสรุปงานภายนอก (KPI)", desc: "งานที่ค้าง/เกิน SLA/รอใบอนุญาต/รอบทำซ้ำ" },
+  { id: "filters", label: "ตัวกรองงานภายนอก", desc: "ค้นหา + สถานะ + ผู้รับเหมา" },
+  { id: "content", label: "รายการงานภายนอก", desc: "ตารางงาน + ขั้นตอน workflow + PTW" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
@@ -209,6 +231,8 @@ export const PAGE_MODEL_OVERRIDES: Record<
   "/analytics/kpi": { sections: KPI_SECTIONS, wired: true },
   "/users": { sections: USERS_SECTIONS, wired: true },
   "/settings": { sections: SETTINGS_SECTIONS, wired: true },
+  "/contractors": { sections: CONTRACTORS_SECTIONS, wired: true },
+  "/contractors/work": { sections: CONTRACTOR_WORK_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>
