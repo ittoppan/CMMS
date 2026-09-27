@@ -117,4 +117,8 @@ return [
     // ---- 4.95 ผู้รับเหมา & งานภายนอก (Phase 31) ----
     ['key' => 'contractor/overview',       'href' => '/contractors',               'label' => 'ผู้รับเหมา & งานภายนอก', 'section' => 'ผู้รับเหมา & งานภายนอก'],
     ['key' => 'contractor/work',           'href' => '/contractors/work',          'label' => 'งานภายนอก (External Work)','section' => 'ผู้รับเหมา & งานภายนอก'],
+
+    // ---- 4.96 Engineering Change & เอกสารควบคุม (Phase 32) ----
+    ['key' => 'engineering_change/overview', 'href' => '/engineering-changes',      'label' => 'Engineering Change (ECR)', 'section' => 'ECR & เอกสารควบคุม'],
+    ['key' => 'document_control/overview',  'href' => '/documents',                 'label' => 'เอกสารควบคุม (Document Control)', 'section' => 'ECR & เอกสารควบคุม'],
 ];

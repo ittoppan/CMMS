@@ -125,6 +125,15 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     ],
   },
   {
+    name: "วิศวกรรม & เอกสารควบคุม",
+    pages: [
+      { value: "/engineering-changes", label: "Engineering Change Request (ECR)" },
+      { value: "/engineering-changes/create", label: "เปิด ECR ใหม่" },
+      { value: "/documents", label: "เอกสารควบคุม" },
+      { value: "/documents/create", label: "สร้างเอกสารควบคุม" },
+    ],
+  },
+  {
     name: "บุคลากร",
     pages: [
       { value: "/users", label: "การจัดการผู้ใช้งาน" },
@@ -221,6 +230,20 @@ export const CONTRACTOR_WORK_SECTIONS: PageLayoutSection[] = [
   { id: "content", label: "รายการงานภายนอก", desc: "ตารางงาน + ขั้นตอน workflow + PTW" },
 ];
 
+export const DOCUMENTS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มรีเฟรช / สร้างเอกสาร" },
+  { id: "kpi", label: "การ์ดสรุปเอกสาร (KPI)", desc: "ทั้งหมด/ไม่มีฉบับที่มีผล/รอรับทราบ/ครบกำหนดทบทวน" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + ประเภทเอกสาร + เจ้าของ" },
+  { id: "content", label: "ตารางทะเบียนเอกสาร + ฉลาก QR", desc: "รายการเอกสาร + ฉบับที่มีผล + ตาราง payload ฉลาก CMMS-D" },
+];
+
+export const ENGINEERING_CHANGES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มรีเฟรช / เปิด ECR ใหม่" },
+  { id: "kpi", label: "การ์ดสรุป ECR (KPI)", desc: "ทั้งหมด/รออนุมัติ/ผลกระทบค้าง/เกินกำหนด" },
+  { id: "filters", label: "ตัวกรอง ECR", desc: "ค้นหา + สถานะ + ประเภทการเปลี่ยนแปลง + ความสำคัญ + เฉพาะของฉัน" },
+  { id: "content", label: "ตารางรายการ ECR", desc: "เลขที่ + ประเภท + ความสำคัญ + สถานะ + SLA" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
@@ -233,6 +256,8 @@ export const PAGE_MODEL_OVERRIDES: Record<
   "/settings": { sections: SETTINGS_SECTIONS, wired: true },
   "/contractors": { sections: CONTRACTORS_SECTIONS, wired: true },
   "/contractors/work": { sections: CONTRACTOR_WORK_SECTIONS, wired: true },
+  "/documents": { sections: DOCUMENTS_SECTIONS, wired: true },
+  "/engineering-changes": { sections: ENGINEERING_CHANGES_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>

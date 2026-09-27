@@ -60,6 +60,8 @@ import {
   Boxes,
   Hammer,
   HardHat,
+  GitPullRequest,
+  BookMarked,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -227,6 +229,14 @@ export const NAV_GROUPS: NavGroupDef[] = [
     items: [
       { perm: "contractor", labelKey: "menu.contractors", href: "/contractors", icon: HardHat },
       { perm: "contractor/work", labelKey: "menu.contractors_work", href: "/contractors/work", icon: ClipboardList },
+    ],
+  },
+  {
+    titleKey: "nav.phase32_docs",
+    pathPrefixes: ["/documents", "/engineering-changes"],
+    items: [
+      { perm: "engineering_change/overview", labelKey: "menu.engineering_changes", href: "/engineering-changes", icon: GitPullRequest },
+      { perm: "document_control/overview", labelKey: "menu.documents", href: "/documents", icon: BookMarked },
     ],
   },
   {

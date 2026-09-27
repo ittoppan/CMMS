@@ -27,6 +27,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
+  "nav.phase32_docs": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
@@ -130,6 +131,8 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
   "menu.contractors_registry": { th: "ทะเบียนผู้รับเหมา", en: "Contractor Registry" },
   "menu.contractors_work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
+  "menu.documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
+  "menu.engineering_changes": { th: "Engineering Change (ECR)", en: "Engineering Change (ECR)" },
   "menu.loto": { th: "ใบอนุญาตทำงานเสี่ยง (PTW)", en: "Work Permit (PTW)" },
   "menu.iot_monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
   "menu.users": { th: "ผู้ใช้งานระบบ", en: "Users" },
@@ -800,6 +803,13 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/contractors/create": { th: "สร้างผู้รับเหมาใหม่", en: "Register Contractor" },
   "/contractors/[id]": { th: "โปรไฟล์ผู้รับเหมา", en: "Contractor Profile" },
   "/contractors/work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
+  // ── PHASE 32: Engineering Change & Controlled Documents ──
+  "/engineering-changes": { th: "Engineering Change Request", en: "Engineering Change Request" },
+  "/engineering-changes/create": { th: "เปิด ECR ใหม่", en: "Open Engineering Change" },
+  "/engineering-changes/[id]": { th: "รายละเอียด ECR", en: "ECR Detail" },
+  "/documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
+  "/documents/create": { th: "สร้างเอกสารควบคุม", en: "Register Controlled Document" },
+  "/documents/[id]": { th: "รายละเอียดเอกสาร", en: "Controlled Document Detail" },
 };
 
 // หมวด breadcrumb
@@ -827,6 +837,8 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/safety": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "/iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "/engineering-changes": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "/documents": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
   "/users": { th: "บุคลากร", en: "People" },
   "/roles": { th: "บุคลากร", en: "People" },
   "/manuals": { th: "เอกสารคู่มือ", en: "Manuals" },
@@ -1109,6 +1121,30 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "contractors/[id]": {
     th: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "โปรไฟล์ผู้รับเหมา", desc: "คุณสมบัติ เอกสาร พนักงาน สัญญา ประวัติการทำงาน ใบอนุญาต และผลการปฏิบัติงาน" },
     en: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "Contractor Profile", desc: "Qualification, documents, workers, contracts, work history, permits and performance" },
+  },
+  "documents": {
+    th: { eyebrow: "CONTROLLED DOCUMENTS · CMMS-TOPPAN", title: "เอกสารควบคุม", desc: "ทะเบียนเอกสารมาตรฐาน ประวัติการแก้ไข ฉบับที่มีผลบังคับใช้ การรับทราบ และการอบรม — ค้นหาฉบับที่ใช้งานได้เสมอในหน้างาน" },
+    en: { eyebrow: "CONTROLLED DOCUMENTS · CMMS-TOPPAN", title: "Controlled Documents", desc: "Standard document registry, revision history, effective release, acknowledgement and training — always find the version that is valid on the floor" },
+  },
+  "documents/create": {
+    th: { eyebrow: "NEW CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "สร้างเอกสารควบคุม", desc: "ลงทะเบียนเอกสารใหม่ กำหนดเจ้าของ ระดับการเข้าถึง รอบการทบทวน และการรับทราบ" },
+    en: { eyebrow: "NEW CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "Register Controlled Document", desc: "Register a new standard document with owner, confidentiality, review cycle and acknowledgement policy" },
+  },
+  "documents/[id]": {
+    th: { eyebrow: "CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "รายละเอียดเอกสาร", desc: "ประวัติ revision แบบ immutable ขั้นตอนอนุมัติ ผลกระทบ การรับทราบ และจุดระบุ QR สำหรับงานกระดาษ" },
+    en: { eyebrow: "CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "Document Detail", desc: "Immutable revision history, approval steps, impacts, acknowledgements and the CMMS-D QR tag for paper copies" },
+  },
+  "engineering-changes": {
+    th: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "Engineering Change Request", desc: "ติดตามการเปลี่ยนแปลงทางวิศวกรรม ตั้งแต่คำขอ ผลกระทบ การอนุมัติ การดำเนินงาน การตรวจสอบผล และการปิดงาน" },
+    en: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "Engineering Change Request", desc: "Track engineering changes from request through impact assessment, approval, implementation, verification and closure" },
+  },
+  "engineering-changes/create": {
+    th: { eyebrow: "NEW ECR · CMMS-TOPPAN", title: "เปิด Engineering Change ใหม่", desc: "บันทึกคำขอการเปลี่ยนแปลง ประเภท ระดับความสำคัญ เหตุผล และกำหนดเสร็จ เพื่อเข้าสู่กระบวนการอนุมัติ" },
+    en: { eyebrow: "NEW ECR · CMMS-TOPPAN", title: "Open Engineering Change", desc: "Record the change request, type, priority, reason and required-by date to enter the approval workflow" },
+  },
+  "engineering-changes/[id]": {
+    th: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "รายละเอียด ECR", desc: "สถานะแบบทางเดียว ผลกระทบ ความเชื่อมโยงไปยังเอกสาร/อะไหล่ ขั้นตอนอนุมัติ และผลตรวจสอบก่อนปิดงาน" },
+    en: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "ECR Detail", desc: "One-way status, impact items, traceability links to documents and parts, approval steps and verification before closure" },
   },
   "contractors/work": {
     th: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "งานภายนอก (External Work)", desc: "การมอบหมายงานภายนอก การขอใบอนุญาต (PTW) ตรวจรับงาน และความเสี่ยงด้านความปลอดภัย" },

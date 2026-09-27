@@ -6,7 +6,8 @@
  *   - QR payload เป็น "ตัวชี้ตำแหน่ง" ไม่ใช่การยืนยันตัวตน — ทุกครั้งที่ resolve
  *     ต้องผ่าน requireLogin + requirePerm/scope check เสมอ (payload = untrusted input)
  *   - รองรับทั้ง opaque token (CMMS-A-<token>), รหัสเดิม (legacy asset code),
- *     work order (CMMS-W-<id>), PM (CMMS-P-<id>), spare (CMMS-S-<code>)
+ *     work order (CMMS-W-<id>), PM (CMMS-P-<id>), spare (CMMS-S-<code>),
+ *     เอกสารควบคุม (CMMS-D-<token>, Phase 32), ECR (CMMS-E-<id>, Phase 32)
  *   - ไม่คืนข้อมูลต้นทุน (unit_price ฯลฯ) ให้บทบาทที่ไม่มีสิทธิ์ดูต้นทุน
  *
  * ใช้ร่วมกับ public/api/v1/scan.php
@@ -42,14 +43,22 @@ function scan_extract(string $raw): string {
     return $raw;
 }
 
-/** ระบุชนิดเป้าหมายจาก payload — คืน ['type' => asset|work_order|pm|spare|unknown, 'key' => string] */
+/** ระบุชนิดเป้าหมายจาก payload — คืน ['type' => asset|work_order|pm|spare|document|ecr|unknown, 'key' => string] */
 function scan_parse(string $code): array {
     $c = trim($code);
     if ($c === '') return ['type' => 'unknown', 'key' => ''];
     if (preg_match('/^CMMS-A-([A-Z0-9]{6,32})$/i', $c, $m)) return ['type' => 'asset', 'key' => strtoupper($m[1])];
+    // Phase 32: เอกสารควบคุม — token ไม่ซ้ำกับ CMMS-A (ตัวอักษร D)
+    if (preg_match('/^CMMS-D[-_]([A-Z0-9]{6,32})$/i', $c, $m)) return ['type' => 'document', 'key' => strtoupper($m[1])];
+    // Phase 32: ECR ใช้เลขที่เอกสาร (ECR-2026-0001) — resolve เป็น id ภายในตอน query
+    if (preg_match('/^CMMS-E[-_](.+)$/i', $c, $m)) return ['type' => 'ecr', 'key' => trim($m[1])];
     if (preg_match('/^CMMS-W(?:O)?[-_](\d+)$/i', $c, $m)) return ['type' => 'work_order', 'key' => $m[1]];
     if (preg_match('/^CMMS-P[-_](\d+)$/i', $c, $m)) return ['type' => 'pm', 'key' => $m[1]];
     if (preg_match('/^CMMS-S-(.+)$/i', $c, $m)) return ['type' => 'spare', 'key' => trim($m[1])];
+    // Phase 32: เลข ECR ตรง ๆ (ECR-2026-001) — ต้องเช็คก่อนรูปแบบเลขเอกสาร เพราะ ECR-2026-001 ก็ทำได้ตรงนี้
+    if (preg_match('/^ECR-\d{4}-\d{2,}$/i', $c)) return ['type' => 'ecr', 'key' => strtoupper($c)];
+    // Phase 32: เลขเอกสารควบคุมตรง ๆ (SOP-2026-001 / WIR-2026-001 — prefix มาจาก doc_type สูงสุด 4 ตัวอักษร)
+    if (preg_match('/^[A-Z0-9]{1,4}-\d{4}-\d{2,}$/i', $c)) return ['type' => 'document', 'key' => strtoupper($c)];
     // legacy: เลขใบสั่งงานที่มี prefix
     if (preg_match('/^(WO|WR|MR)[-_]?[A-Z0-9]+/i', $c)) return ['type' => 'work_order', 'key' => $c];
     // ค่าเริ่มต้น = รหัสเครื่องจักร (asset code)
@@ -141,6 +150,8 @@ function scan_resolve(PDO $pdo, string $raw, array $user): array {
         case 'work_order': return scan_resolve_work_order($pdo, $parsed['key'], $uid, $roleId);
         case 'pm':         return scan_resolve_pm($pdo, (int)$parsed['key'], $roleId);
         case 'spare':      return scan_resolve_spare($pdo, $parsed['key'], $roleId);
+        case 'document':   return scan_resolve_document($pdo, $parsed['key'], $uid, $roleId);
+        case 'ecr':        return scan_resolve_ecr($pdo, $parsed['key'], $uid, $roleId);
         default:           return ['type' => 'unknown', 'data' => null];
     }
 }
@@ -264,4 +275,213 @@ function scan_resolve_spare(PDO $pdo, string $key, int $roleId): array {
     // Sage = source of truth → คืนเป็น "สต็อกที่ระบบรู้ล่าสุด" เท่านั้น ไม่ตัดสต็อก
     $row['last_known_stock'] = (int)$row['stock_qty'];
     return ['type' => 'spare', 'data' => ['spare' => $row, 'stock_note' => 'last_known']];
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * Phase 32: เอกสารควบคุม (CMMS-D) + ECR (CMMS-E)
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/** prefix ของ QR เอกสาร (อ่านค่าจาก settings เหมือน doc_config แต่ไม่ดึง engine ทั้งตัวเข้ามา) */
+function scan_document_qr_prefix(PDO $pdo): string {
+    try {
+        $st = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+        $st->execute(['document_qr_prefix']);
+        $v = $st->fetchColumn();
+        return ($v === null || $v === false || trim((string)$v) === '') ? 'CMMS-D-' : (string)$v;
+    } catch (Throwable $e) {
+        return 'CMMS-D-';
+    }
+}
+
+/**
+ * Resolve CMMS-D → เอกสารควบคุม
+ * คืนฉบับที่มีผลบังคับใช้ (effective revision) เสมอ เพื่อให้คนในหน้างานเห็นฉบับที่ต้องใช้จริง
+ * พร้อมสถานะการรับทราบของผู้ใช้ที่สแกน แต่ "ไม่เขียนอะไร" — การรับทราบต้อง POST
+ * มาที่ document.php เท่านั้น (กันการรับทราบผิดฉบับจากการสแกน QR ที่ไม่ได้เปิดอ่าน)
+ */
+function scan_resolve_document(PDO $pdo, string $key, int $uid, int $roleId): array {
+    if (!canPerm($pdo, 'document', 'view')) {
+        return ['type' => 'document', 'restricted' => true, 'data' => null];
+    }
+    $token = strtoupper(trim($key));
+    if ($token === '') return ['type' => 'unknown', 'data' => null];
+
+    $row = null;
+    // ค้นด้วย qr_token ก่อน (token ไม่ซ้ำกับ doc_no) แล้วค่อย fallback เป็นเลขเอกสาร
+    $st = $pdo->prepare('SELECT d.id, d.doc_no, d.title, d.doc_type, d.status, d.confidentiality,
+                                d.owner_id, d.department_id, d.asset_id, d.requires_acknowledgement,
+                                d.requires_training, d.review_cycle_days, d.next_review_date,
+                                d.current_effective_revision_id, d.qr_token,
+                                o.full_name AS owner_name, dep.name AS department_name,
+                                a.code AS asset_code, a.name AS asset_name
+                         FROM controlled_documents d
+                         LEFT JOIN users o ON o.id = d.owner_id
+                         LEFT JOIN departments dep ON dep.id = d.department_id
+                         LEFT JOIN asset_registry a ON a.id = d.asset_id
+                         WHERE d.qr_token = ? LIMIT 1');
+    $st->execute([$token]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$row) {
+        $st = $pdo->prepare('SELECT d.id, d.doc_no, d.title, d.doc_type, d.status, d.confidentiality,
+                                    d.owner_id, d.department_id, d.asset_id, d.requires_acknowledgement,
+                                    d.requires_training, d.review_cycle_days, d.next_review_date,
+                                    d.current_effective_revision_id, d.qr_token,
+                                    o.full_name AS owner_name, dep.name AS department_name,
+                                    a.code AS asset_code, a.name AS asset_name
+                             FROM controlled_documents d
+                             LEFT JOIN users o ON o.id = d.owner_id
+                             LEFT JOIN departments dep ON dep.id = d.department_id
+                             LEFT JOIN asset_registry a ON a.id = d.asset_id
+                             WHERE d.doc_no = ? LIMIT 1');
+        $st->execute([$token]);
+        $row = $st->fetch(PDO::FETCH_ASSOC);
+    }
+    if (!$row) return ['type' => 'unknown', 'data' => null];
+
+    $docId = (int)$row['id'];
+
+    // ฉบับที่มีผลบังคับใช้ (อาจเป็น null ถ้ายังไม่มีฉบับ effective)
+    $effective = null;
+    if (!empty($row['current_effective_revision_id'])) {
+        $rs = $pdo->prepare('SELECT id, revision_no, revision_major, revision_minor, status, title,
+                                    change_summary, effective_date, next_review_date, effective_at,
+                                    file_name, file_type, file_size, content_hash
+                             FROM document_revisions WHERE id = ? LIMIT 1');
+        $rs->execute([(int)$row['current_effective_revision_id']]);
+        $effective = $rs->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    // ฉบับที่อยู่ระหว่างอนุมัติ (เตือนว่าฉบังที่จะมีผลกำลังมา)
+    $pending = null;
+    $ps = $pdo->prepare('SELECT id, revision_no, status, submitted_at FROM document_revisions
+                         WHERE document_id = ? AND status IN ("under_review","pending_approval","approved")
+                         ORDER BY id DESC LIMIT 1');
+    $ps->execute([$docId]);
+    $pending = $ps->fetch(PDO::FETCH_ASSOC) ?: null;
+
+    // สถานะการรับทราบของผู้ใช้ที่สแกน (ผูกกับ effective revision เท่านั้น)
+    $ack = null;
+    if ($uid > 0 && !empty($effective['id'])) {
+        $as = $pdo->prepare('SELECT id, revision_id, based_on_revision_id, status, method, due_at,
+                                    acknowledged_at, exception_reason
+                             FROM document_acknowledgements
+                             WHERE document_id = ? AND user_id = ? AND revision_id = ?
+                             LIMIT 1');
+        $as->execute([$docId, $uid, (int)$effective['id']]);
+        $ack = $as->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    // ต้องเปิดอ่านฉบับ effective ให้ครบก่อนจึงจะรับทราบได้ (กันกดรับทราบผ่าน ๆ)
+    $outstanding = 0;
+    if ($uid > 0 && !empty($effective['id'])) {
+        $os = $pdo->prepare('SELECT COUNT(*) FROM document_acknowledgements
+                             WHERE document_id = ? AND user_id = ? AND revision_id = ? AND status = "pending"');
+        $os->execute([$docId, $uid, (int)$effective['id']]);
+        $outstanding = (int)$os->fetchColumn();
+    }
+
+    $prefix = scan_document_qr_prefix($pdo);
+    $qrToken = (string)($row['qr_token'] ?? '');
+
+    return [
+        'type' => 'document',
+        'data' => [
+            'document' => [
+                'id' => $docId,
+                'doc_no' => (string)$row['doc_no'],
+                'title' => (string)$row['title'],
+                'doc_type' => (string)$row['doc_type'],
+                'status' => (string)$row['status'],
+                'confidentiality' => (string)$row['confidentiality'],
+                'owner_name' => $row['owner_name'],
+                'department_name' => $row['department_name'],
+                'asset_code' => $row['asset_code'],
+                'asset_name' => $row['asset_name'],
+                'requires_acknowledgement' => (bool)$row['requires_acknowledgement'],
+                'requires_training' => (bool)$row['requires_training'],
+                'next_review_date' => $row['next_review_date'],
+                'qr_payload' => $qrToken !== '' ? $prefix . $qrToken : null,
+            ],
+            'effective_revision' => $effective,
+            'pending_revision' => $pending,
+            'acknowledgement' => $ack,
+            'outstanding_ack' => $outstanding,
+            'can_acknowledge' => canPerm($pdo, 'document', 'acknowledge') && $outstanding > 0,
+            'review_due' => !empty($row['next_review_date'])
+                && strtotime((string)$row['next_review_date']) < strtotime('+30 days'),
+        ],
+    ];
+}
+
+/** Resolve CMMS-E → ECR (อ่านอย่างเดียว: ใครสแกน QR ก็ยังอนุมัติผ่าน scan ไม่ได้) */
+function scan_resolve_ecr(PDO $pdo, string $key, int $uid, int $roleId): array {
+    if (!canPerm($pdo, 'engineering_change', 'view')) {
+        return ['type' => 'ecr', 'restricted' => true, 'data' => null];
+    }
+    $ref = strtoupper(trim($key));
+    if ($ref === '') return ['type' => 'unknown', 'data' => null];
+
+    $st = $pdo->prepare('SELECT e.id, e.ecr_no, e.title, e.change_type, e.priority, e.status,
+                                e.requested_by, e.submitted_at, e.department_id, e.asset_id,
+                                e.required_by_date, e.approved_at, e.closed_at,
+                                e.verification_result, e.reason,
+                                u.full_name AS requested_name, d.name AS department_name,
+                                a.code AS asset_code
+                         FROM engineering_changes e
+                         LEFT JOIN users u ON u.id = e.requested_by
+                         LEFT JOIN departments d ON d.id = e.department_id
+                         LEFT JOIN asset_registry a ON a.id = e.asset_id
+                         WHERE e.ecr_no = ? LIMIT 1');
+    $st->execute([$ref]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$row) return ['type' => 'unknown', 'data' => null];
+
+    $ecrId = (int)$row['id'];
+    $imp = $pdo->prepare('SELECT COUNT(*) AS total,
+                                 SUM(CASE WHEN status NOT IN ("completed","not_applicable") THEN 1 ELSE 0 END) AS open_rows
+                          FROM engineering_change_impacts WHERE ecr_id = ?');
+    $imp->execute([$ecrId]);
+    $impacts = $imp->fetch(PDO::FETCH_ASSOC) ?: ['total' => 0, 'open_rows' => 0];
+
+    $ap = $pdo->prepare('SELECT step, step_key, approver_user_id, approver_role_id, decision, comment, decided_at
+                         FROM engineering_change_approvals WHERE ecr_id = ? ORDER BY step ASC');
+    $ap->execute([$ecrId]);
+    $approvals = array_map(function (array $a): array {
+        return [
+            'step' => (int)$a['step'],
+            'step_key' => (string)$a['step_key'],
+            'approver_user_id' => $a['approver_user_id'] !== null ? (int)$a['approver_user_id'] : null,
+            'approver_role_id' => $a['approver_role_id'] !== null ? (int)$a['approver_role_id'] : null,
+            'decision' => (string)$a['decision'],
+            'comment' => $a['comment'],
+            'decided_at' => $a['decided_at'],
+        ];
+    }, $ap->fetchAll(PDO::FETCH_ASSOC));
+
+    return [
+        'type' => 'ecr',
+        'data' => [
+            'ecr' => [
+                'id' => $ecrId,
+                'ecr_no' => (string)$row['ecr_no'],
+                'title' => (string)$row['title'],
+                'change_type' => (string)$row['change_type'],
+                'priority' => $row['priority'],
+                'status' => (string)$row['status'],
+                'requested_name' => $row['requested_name'],
+                'department_name' => $row['department_name'],
+                'asset_code' => $row['asset_code'],
+                'submitted_at' => $row['submitted_at'],
+                'required_by_date' => $row['required_by_date'],
+                'approved_at' => $row['approved_at'],
+                'closed_at' => $row['closed_at'],
+                'verification_result' => $row['verification_result'],
+            ],
+            'reason' => mb_substr((string)($row['reason'] ?? ''), 0, 500),
+            'impacts' => ['total' => (int)($impacts['total'] ?? 0), 'open' => (int)($impacts['open_rows'] ?? 0)],
+            'approvals' => $approvals,
+            'can_approve' => canPerm($pdo, 'engineering_change', 'approve'),
+            'can_implement' => canPerm($pdo, 'engineering_change', 'implement'),
+        ],
+    ];
 }

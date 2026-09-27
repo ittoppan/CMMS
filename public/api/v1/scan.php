@@ -55,6 +55,14 @@ try {
                 elseif (($result['type'] ?? '') === 'pm') $resolvedId = (int)($result['data']['pm']['id'] ?? 0) ?: null;
                 elseif (($result['type'] ?? '') === 'spare') $resolvedId = (int)($result['data']['spare']['id'] ?? 0) ?: null;
                 elseif (($result['type'] ?? '') === 'asset') $resolvedId = $assetId;
+                // Phase 32: เอกสารควบคุม / ECR ไม่ผูกกับ asset_id แต่ให้ asset จากเอกสารที่ผูกไว้ (ถ้ามี)
+                elseif (($result['type'] ?? '') === 'document') {
+                    $resolvedId = (int)($result['data']['document']['id'] ?? 0) ?: null;
+                    $assetId = null;
+                } elseif (($result['type'] ?? '') === 'ecr') {
+                    $resolvedId = (int)($result['data']['ecr']['id'] ?? 0) ?: null;
+                    $assetId = null;
+                }
 
                 scan_log_event(
                     $pdo,
@@ -106,6 +114,46 @@ try {
                 echo json_encode(['success' => true, 'items' => $items], JSON_UNESCAPED_UNICODE);
                 break;
             }
+            case 'document_labels': {
+                requirePerm($pdo, 'document', 'view', 'ไม่มีสิทธิ์ดูเอกสารควบคุม');
+                $status = (string)($_GET['status'] ?? '');
+                $sql = 'SELECT d.id, d.doc_no, d.title, d.doc_type, d.status, d.qr_token,
+                               d.current_effective_revision_id, d.owner_id,
+                               r.revision_no AS effective_revision_no,
+                               o.full_name AS owner_name
+                        FROM controlled_documents d
+                        LEFT JOIN document_revisions r ON r.id = d.current_effective_revision_id
+                        LEFT JOIN users o ON o.id = d.owner_id';
+                $args = [];
+                if ($status !== '' && in_array($status, ['draft', 'active', 'superseded_partially', 'obsolete', 'archived'], true)) {
+                    $sql .= ' WHERE d.status = ?';
+                    $args[] = $status;
+                }
+                $sql .= ' ORDER BY d.doc_no ASC LIMIT 2000';
+                $st = $pdo->prepare($sql);
+                $st->execute($args);
+                $prefix = scan_document_qr_prefix($pdo);
+                $items = array_map(function (array $r) use ($prefix): array {
+                    $token = trim((string)($r['qr_token'] ?? ''));
+                    return [
+                        'id' => (int)$r['id'],
+                        'doc_no' => (string)$r['doc_no'],
+                        'title' => (string)$r['title'],
+                        'doc_type' => (string)$r['doc_type'],
+                        'status' => (string)$r['status'],
+                        'owner_name' => $r['owner_name'],
+                        'effective_revision_no' => $r['effective_revision_no'],
+                        'has_effective' => !empty($r['current_effective_revision_id']),
+                        'payload' => $token !== '' ? $prefix . $token : null,
+                    ];
+                }, $st->fetchAll(PDO::FETCH_ASSOC));
+                echo json_encode([
+                    'success' => true,
+                    'prefix' => $prefix,
+                    'items' => $items,
+                ], JSON_UNESCAPED_UNICODE);
+                break;
+            }
             default:
                 api_fail(400, 'VALIDATION_ERROR', 'action ไม่ถูกต้อง');
         }
@@ -138,6 +186,27 @@ try {
                     }
                     audit_log($pdo, 'QR_LABEL_PRINTED', 'asset', (string)$count,
                         "พิมพ์ฉลาก QR $count รายการ", null, ['count' => $count, 'template' => $template], 'info');
+                }
+                echo json_encode(['success' => true, 'logged' => $count], JSON_UNESCAPED_UNICODE);
+                break;
+            }
+            case 'document_print_log': {
+                requirePerm($pdo, 'document', 'view', 'ไม่มีสิทธิ์ดูเอกสารควบคุม');
+                $ids = is_array($data['document_ids'] ?? null) ? $data['document_ids'] : [];
+                $template = mb_substr((string)($data['template'] ?? 'a4-sheet'), 0, 60);
+                $count = 0;
+                if ($ids) {
+                    $st = $pdo->prepare('SELECT id FROM controlled_documents WHERE id = ?');
+                    foreach ($ids as $id) {
+                        $did = (int)$id;
+                        if ($did <= 0) continue;
+                        $st->execute([$did]);
+                        if ($st->fetchColumn()) $count++;
+                    }
+                    // qr_print_log.asset_id เป็น NOT NULL และผูกกับเครื่องจักร → เอกสารใช้ audit_log แทน
+                    audit_log($pdo, 'DOC_QR_LABEL_PRINTED', 'controlled_document', (string)$count,
+                        "พิมพ์ฉลาก QR เอกสาร $count ฉบับ", null,
+                        ['count' => $count, 'template' => $template, 'document_ids' => array_slice(array_map('intval', $ids), 0, 50)], 'info');
                 }
                 echo json_encode(['success' => true, 'logged' => $count], JSON_UNESCAPED_UNICODE);
                 break;
