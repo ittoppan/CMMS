@@ -56,6 +56,8 @@ const MENU_HREFS: string[] = [
   "/users", "/roles", "/register",
   "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",
   "/editor/builder", "/pages",
+  "/knowledge", "/knowledge/search", "/knowledge/articles", "/knowledge/articles/create", "/knowledge/articles/[id]",
+  "/knowledge/gaps", "/knowledge/gaps/[id]", "/knowledge/reviews", "/knowledge/taxonomy", "/knowledge/usage",
 ];
 
 function getSection(pathname: string): string | null {

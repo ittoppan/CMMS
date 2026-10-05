@@ -58,6 +58,11 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'review', 'approve', 'implement', 'verify', 'close'],
         'document'   => ['view', 'create', 'revise', 'review', 'approve', 'publish'],
         'training'   => ['view', 'manage'],
+        // Knowledge (Phase 38) is read by everyone who touches maintenance, because
+        // a technician who cannot read the fix cannot do the job. Authoring,
+        // approving and publishing stay separated exactly like Phase 32 documents,
+        // so the person who wrote it is not the person who declared it true.
+        'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'review', 'approve', 'publish', 'feedback', 'manage_gaps', 'taxonomy', 'usage_view', 'export'],
     ],
     6 => [ // ASST Manager — เช่นเดียวกับ Manager
         'repair'     => ['view', 'create', 'edit', 'delete', 'approve', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -82,6 +87,10 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'review', 'approve', 'implement', 'verify', 'close'],
         'document'   => ['view', 'create', 'revise', 'review', 'approve', 'publish'],
         'training'   => ['view', 'manage'],
+        // Knowledge (Phase 38): the ASST Manager owns the knowledge program the
+        // same way they own documents. Author, review, approve and publish stay
+        // four separate steps so the writer is not the one who declares it true.
+        'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'review', 'approve', 'publish', 'feedback', 'manage_gaps', 'taxonomy', 'usage_view', 'export'],
     ],
     7 => [ // Foreman — หัวหน้าชุด
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
@@ -101,6 +110,10 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'implement'],
         'document'   => ['view', 'create', 'revise'],
         'training'   => ['view'],
+        // Foreman authors and submits knowledge for the equipment he runs, and he
+        // triages the gaps his crew keeps hitting. He cannot approve or publish —
+        // publishing is what tells the shop floor to trust it.
+        'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'feedback', 'manage_gaps'],
     ],
     3 => [ // Technician — ช่าง
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -116,6 +129,10 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],
+        // A technician reads knowledge and can tell the system whether it helped.
+        // Recording the verdict is what makes the usage data real; writing the
+        // knowledge is not theirs to do.
+        'knowledge'  => ['read', 'search', 'feedback'],
     ],
     4 => [ // Operator
         'request'    => ['view', 'create'],
@@ -126,6 +143,7 @@ const PERMISSION_MATRIX = [
         'safety'     => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],
+        'knowledge'  => ['read', 'search'],
     ],
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],
@@ -144,6 +162,7 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],
+        'knowledge'  => ['read', 'search'],
     ],
 ];
 

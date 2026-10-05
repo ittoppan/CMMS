@@ -121,4 +121,18 @@ return [
     // ---- 4.96 Engineering Change & เอกสารควบคุม (Phase 32) ----
     ['key' => 'engineering_change/overview', 'href' => '/engineering-changes',      'label' => 'Engineering Change (ECR)', 'section' => 'ECR & เอกสารควบคุม'],
     ['key' => 'document_control/overview',  'href' => '/documents',                 'label' => 'เอกสารควบคุม (Document Control)', 'section' => 'ECR & เอกสารควบคุม'],
+
+    // ---- 4.97 ศูนย์ความรู้ (Phase 38) ----
+    // โหลดความรู้ต้องง่ายเหมือนเปิดเอกสาร: roles 3/4/5 อ่านและค้นได้
+    // ส่วนการเขียน/อนุมัติ/เผยแพร่ แยกสิทธิ์เหมือนเอกสารควบคุม
+    ['key' => 'knowledge',                  'href' => '/knowledge',                 'label' => 'ศูนย์ความรู้ (Knowledge Center)', 'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/search',           'href' => '/knowledge/search',          'label' => 'ค้นหาความรู้',           'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/articles',         'href' => '/knowledge/articles',        'label' => 'บทความความรู้',          'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/articles/create',  'href' => '/knowledge/articles/create', 'label' => 'เขียนบทความใหม่',       'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/gaps',             'href' => '/knowledge/gaps',            'label' => 'ช่องว่างความรู้',        'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/reviews',          'href' => '/knowledge/reviews',         'label' => 'งานทบทวนความรู้',        'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/categories',       'href' => '/knowledge/taxonomy',        'label' => 'หมวดหมู่ความรู้',         'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/tags',             'href' => '/knowledge/taxonomy',        'label' => 'แท็กความรู้',            'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/usage',            'href' => '/knowledge/usage',           'label' => 'สถิติการใช้งาน',         'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/config',           'href' => '/knowledge/taxonomy',        'label' => 'ตั้งค่าศูนย์ความรู้',     'section' => 'ศูนย์ความรู้'],
 ];

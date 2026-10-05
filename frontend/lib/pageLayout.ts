@@ -134,6 +134,19 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     ],
   },
   {
+    name: "ศูนย์ความรู้",
+    pages: [
+      { value: "/knowledge", label: "ศูนย์ความรู้ (Knowledge Center)" },
+      { value: "/knowledge/search", label: "ค้นหาความรู้" },
+      { value: "/knowledge/articles", label: "บทความความรู้" },
+      { value: "/knowledge/articles/create", label: "เขียนบทความใหม่" },
+      { value: "/knowledge/gaps", label: "ช่องว่างความรู้" },
+      { value: "/knowledge/reviews", label: "งานทบทวนความรู้" },
+      { value: "/knowledge/taxonomy", label: "หมวดหมู่ & แท็กความรู้" },
+      { value: "/knowledge/usage", label: "สถิติการใช้งานความรู้" },
+    ],
+  },
+  {
     name: "บุคลากร",
     pages: [
       { value: "/users", label: "การจัดการผู้ใช้งาน" },
@@ -244,6 +257,30 @@ export const ENGINEERING_CHANGES_SECTIONS: PageLayoutSection[] = [
   { id: "content", label: "ตารางรายการ ECR", desc: "เลขที่ + ประเภท + ความสำคัญ + สถานะ + SLA" },
 ];
 
+export const KNOWLEDGE_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ช่องค้นหา", desc: "ชื่อหน้า + ช่องค้นหาความรู้ + ปุ่มเขียนบทความใหม่" },
+  { id: "kpi", label: "การ์ดสรุปความรู้ (KPI)", desc: "บทความที่เผยแพร่/ช่องว่างความรู้/งานทบทวน/เอกสารที่ล้าสมัย" },
+  { id: "content", label: "เนื้อหาหลัก", desc: "หมวดหมู่ + บทความที่ใช้งานจริง + ช่องว่างที่พบจากการค้นหา" },
+];
+
+export const KNOWLEDGE_SEARCH_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ช่องค้นหา", desc: "ช่องค้นหาอาการ/ข้อมูลเครื่อง + ตัวกรองหมวด/แท็ก" },
+  { id: "content", label: "ผลลัพธ์ความรู้", desc: "บทความที่ตรงคำค้น + เอกสารควบคุมที่เกี่ยวข้อง" },
+  { id: "charts", label: "ผลการค้นหาที่ยังไม่มีคำตอบ", desc: "ค้นที่ไม่เจอ → สร้างช่องว่างความรู้" },
+];
+
+export const KNOWLEDGE_ARTICLES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มเขียนบทความใหม่ + รีเฟรช" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + หมวดหมู่ + ระดับความลับ" },
+  { id: "content", label: "ตารางบทความความรู้", desc: "รายการ + สถานะ + เจ้าของ + วันทบททวนถัดไป" },
+];
+
+export const KNOWLEDGE_USAGE_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มส่งออก", desc: "ชื่อหน้า + ปุ่มส่งออก CSV" },
+  { id: "kpi", label: "การ์ดสรุปการใช้งาน", desc: "การใช้งาน/คำตอบความช่วยเหลือ/ผลค้นหา" },
+  { id: "content", label: "ตารางเหตุการณ์การใช้งาน", desc: "ตัวกรอง action/ผู้ใช้/อุปกรณ์ + ตาราง log จริง" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
@@ -258,6 +295,10 @@ export const PAGE_MODEL_OVERRIDES: Record<
   "/contractors/work": { sections: CONTRACTOR_WORK_SECTIONS, wired: true },
   "/documents": { sections: DOCUMENTS_SECTIONS, wired: true },
   "/engineering-changes": { sections: ENGINEERING_CHANGES_SECTIONS, wired: true },
+  "/knowledge": { sections: KNOWLEDGE_SECTIONS, wired: true },
+  "/knowledge/search": { sections: KNOWLEDGE_SEARCH_SECTIONS, wired: true },
+  "/knowledge/articles": { sections: KNOWLEDGE_ARTICLES_SECTIONS, wired: true },
+  "/knowledge/usage": { sections: KNOWLEDGE_USAGE_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>

@@ -28,6 +28,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "nav.phase32_docs": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "nav.knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
@@ -133,6 +134,16 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.contractors_work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
   "menu.documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
   "menu.engineering_changes": { th: "Engineering Change (ECR)", en: "Engineering Change (ECR)" },
+  "menu.knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
+  "menu.knowledge_search": { th: "ค้นหาความรู้", en: "Knowledge Search" },
+  "menu.knowledge_articles": { th: "บทความความรู้", en: "Knowledge Articles" },
+  "menu.knowledge_articles_create": { th: "เขียนบทความใหม่", en: "New Article" },
+  "menu.knowledge_gaps": { th: "ช่องว่างความรู้", en: "Knowledge Gaps" },
+  "menu.knowledge_reviews": { th: "งานทบทวนความรู้", en: "Knowledge Reviews" },
+  "menu.knowledge_categories": { th: "หมวดหมู่ความรู้", en: "Knowledge Categories" },
+  "menu.knowledge_tags": { th: "แท็กความรู้", en: "Knowledge Tags" },
+  "menu.knowledge_usage": { th: "สถิติการใช้งาน", en: "Usage Analytics" },
+  "menu.knowledge_config": { th: "ตั้งค่าศูนย์ความรู้", en: "Knowledge Settings" },
   "menu.loto": { th: "ใบอนุญาตทำงานเสี่ยง (PTW)", en: "Work Permit (PTW)" },
   "menu.iot_monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
   "menu.users": { th: "ผู้ใช้งานระบบ", en: "Users" },
@@ -810,6 +821,17 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
   "/documents/create": { th: "สร้างเอกสารควบคุม", en: "Register Controlled Document" },
   "/documents/[id]": { th: "รายละเอียดเอกสาร", en: "Controlled Document Detail" },
+  // ── PHASE 38: Knowledge Center ──
+  "/knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
+  "/knowledge/search": { th: "ค้นหาความรู้", en: "Knowledge Search" },
+  "/knowledge/articles": { th: "บทความความรู้", en: "Knowledge Articles" },
+  "/knowledge/articles/create": { th: "เขียนบทความใหม่", en: "New Knowledge Article" },
+  "/knowledge/articles/[id]": { th: "รายละเอียดบทความความรู้", en: "Knowledge Article Detail" },
+  "/knowledge/gaps": { th: "ช่องว่างความรู้", en: "Knowledge Gaps" },
+  "/knowledge/gaps/[id]": { th: "รายละเอียดช่องว่างความรู้", en: "Knowledge Gap Detail" },
+  "/knowledge/reviews": { th: "งานทบทวนความรู้", en: "Knowledge Reviews" },
+  "/knowledge/taxonomy": { th: "หมวดหมู่ & แท็กความรู้", en: "Knowledge Taxonomy" },
+  "/knowledge/usage": { th: "สถิติการใช้งานความรู้", en: "Knowledge Usage Analytics" },
 };
 
 // หมวด breadcrumb
@@ -839,6 +861,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
   "/engineering-changes": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
   "/documents": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "/knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
   "/users": { th: "บุคลากร", en: "People" },
   "/roles": { th: "บุคลากร", en: "People" },
   "/manuals": { th: "เอกสารคู่มือ", en: "Manuals" },
@@ -1149,6 +1172,47 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "contractors/work": {
     th: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "งานภายนอก (External Work)", desc: "การมอบหมายงานภายนอก การขอใบอนุญาต (PTW) ตรวจรับงาน และความเสี่ยงด้านความปลอดภัย" },
     en: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "External Work Board", desc: "External work assignments, permit-to-work (PTW), acceptance inspection and safety risks" },
+  },
+  // ── PHASE 38: Knowledge Center ──
+  "knowledge": {
+    th: { eyebrow: "KNOWLEDGE CENTER · CMMS-TOPPAN", title: "ศูนย์ความรู้", desc: "บทความอาการ–วิธีแก้ปัญหาจากเครื่องจริงในระบบ เชื่อมกับเครื่อง อะไหล่ ใบงาน และเอกสารควบคุม — ค้นแล้วได้ฉบับที่เผยแพร่แล้วเสมอ" },
+    en: { eyebrow: "KNOWLEDGE CENTER · CMMS-TOPPAN", title: "Knowledge Center", desc: "Symptom-to-remedy articles captured from real machines, linked to assets, parts, work orders and controlled documents — search always returns the published version" },
+  },
+  "knowledge/search": {
+    th: { eyebrow: "KNOWLEDGE SEARCH · CMMS-TOPPAN", title: "ค้นหาความรู้", desc: "พิมพ์อาการเบื้องต้นหรือข้อมูลเครื่อง ระบบจะค้นบทความความรู้และเอกสารควบคุมที่เกี่ยวข้อง และบันทึกคำค้นที่ยังไม่มีคำตอบเป็นช่องว่างความรู้" },
+    en: { eyebrow: "KNOWLEDGE SEARCH · CMMS-TOPPAN", title: "Knowledge Search", desc: "Type a symptom or asset hint — search knowledge articles together with controlled documents and record unanswered queries as knowledge gaps" },
+  },
+  "knowledge/articles": {
+    th: { eyebrow: "KNOWLEDGE ARTICLES · CMMS-TOPPAN", title: "บทความความรู้", desc: "ทะเบียนบทความทั้งหมด ตั้งแต่ร่าง รอทบทวน อนุมัติ ไปจนถึงเผยแพร่และถูกแทนที่ — ฉบับที่เผยแพร่แล้วแก้ไขไม่ได้" },
+    en: { eyebrow: "KNOWLEDGE ARTICLES · CMMS-TOPPAN", title: "Knowledge Articles", desc: "Full article registry from draft through review, approval, publication and supersession — published versions are immutable" },
+  },
+  "knowledge/articles/create": {
+    th: { eyebrow: "NEW KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "เขียนบทความใหม่", desc: "บันทึกอาการ การวินิจฉัย สาเหตุ วิธีแก้ ข้อควรระวัง และเชื่อมโยงกับเครื่องจักรหรือเอกสารควบคุม" },
+    en: { eyebrow: "NEW KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "Write a Knowledge Article", desc: "Capture symptoms, diagnosis, root cause, remedy, safety notes and traceability links to assets or controlled documents" },
+  },
+  "knowledge/articles/[id]": {
+    th: { eyebrow: "KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "รายละเอียดบทความความรู้", desc: "เนื้อหาตามหัวข้อ ความเชื่อมโยงไปยังเครื่อง/อะไหล่/เอกสาร ประวัติฉบับ ผลตอบรับการใช้งาน และวงจรอนุมัติแบบทางเดียว" },
+    en: { eyebrow: "KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "Knowledge Article Detail", desc: "Sectioned content, traceability links to assets/parts/documents, version history, real usage feedback and the one-way approval workflow" },
+  },
+  "knowledge/gaps": {
+    th: { eyebrow: "KNOWLEDGE GAPS · CMMS-TOPPAN", title: "ช่องว่างความรู้", desc: "รายการคำค้นที่ยังไม่มีคำตอบ พร้อมจำนวนครั้งที่พบและหลักฐานจริง — ตัดสินใจว่าจะเขียนความรู้หรือปิดเป็นไม่ต้องทำ" },
+    en: { eyebrow: "KNOWLEDGE GAPS · CMMS-TOPPAN", title: "Knowledge Gaps", desc: "Queries with no answer yet, their real occurrence counts and evidence — decide whether to write knowledge or close as not needed" },
+  },
+  "knowledge/gaps/[id]": {
+    th: { eyebrow: "KNOWLEDGE GAP · CMMS-TOPPAN", title: "รายละเอียดช่องว่างความรู้", desc: "หลักฐานจากบรรทัดค้นหาจริง ประวัติการดำเนินการ และการเชื่อมไปยังบทความที่ปิดช่องว่างนี้" },
+    en: { eyebrow: "KNOWLEDGE GAP · CMMS-TOPPAN", title: "Knowledge Gap Detail", desc: "Evidence from real search log rows, action history and the article that closed the gap" },
+  },
+  "knowledge/reviews": {
+    th: { eyebrow: "KNOWLEDGE REVIEWS · CMMS-TOPPAN", title: "งานทบทวนความรู้", desc: "รอบการทบทวนตามเวลาและตามเหตุการณ์ ผลการทบทวนกำหนดวันทบทวนถัดไปและอาจส่งบทความกลับไปแก้ไข" },
+    en: { eyebrow: "KNOWLEDGE REVIEWS · CMMS-TOPPAN", title: "Knowledge Reviews", desc: "Scheduled and event-driven review rounds — outcomes set the next review date and may send an article back for revision" },
+  },
+  "knowledge/taxonomy": {
+    th: { eyebrow: "KNOWLEDGE TAXONOMY · CMMS-TOPPAN", title: "หมวดหมู่ & แท็กความรู้", desc: "โครงสร้างหมวดหมู่และคำแท็กที่ใช้จัดกลุ่มบทความ เพื่อให้ค้นหาและทบทวนเป็นระบบ" },
+    en: { eyebrow: "KNOWLEDGE TAXONOMY · CMMS-TOPPAN", title: "Categories & Tags", desc: "Category structure and tags used to group articles so search and review stay systematic" },
+  },
+  "knowledge/usage": {
+    th: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "สถิติการใช้งานความรู้", desc: "เหตุการณ์การใช้งานและผลตอบรับจากผู้ใช้จริง พร้อมการค้นหาที่ไม่เจอคำตอบ เพื่อหาบทความที่ไม่มีคนใช้หรือยังไม่ช่วยเหลือใคร" },
+    en: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "Knowledge Usage Analytics", desc: "Real usage events and user feedback plus unanswered searches — find articles nobody uses or that still do not help" },
   },
 };
 

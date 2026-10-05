@@ -62,6 +62,10 @@ import {
   HardHat,
   GitPullRequest,
   BookMarked,
+  GraduationCap,
+  CircleAlert,
+  Hash,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -237,6 +241,22 @@ export const NAV_GROUPS: NavGroupDef[] = [
     items: [
       { perm: "engineering_change/overview", labelKey: "menu.engineering_changes", href: "/engineering-changes", icon: GitPullRequest },
       { perm: "document_control/overview", labelKey: "menu.documents", href: "/documents", icon: BookMarked },
+    ],
+  },
+  {
+    titleKey: "nav.knowledge",
+    pathPrefixes: ["/knowledge"],
+    items: [
+      { perm: "knowledge", labelKey: "menu.knowledge", href: "/knowledge", icon: GraduationCap },
+      { perm: "knowledge/search", labelKey: "menu.knowledge_search", href: "/knowledge/search", icon: Search },
+      { perm: "knowledge/articles", labelKey: "menu.knowledge_articles", href: "/knowledge/articles", icon: BookMarked },
+      { perm: "knowledge/articles/create", labelKey: "menu.knowledge_articles_create", href: "/knowledge/articles/create", icon: FilePlus2 },
+      { perm: "knowledge/gaps", labelKey: "menu.knowledge_gaps", href: "/knowledge/gaps", icon: CircleAlert },
+      { perm: "knowledge/reviews", labelKey: "menu.knowledge_reviews", href: "/knowledge/reviews", icon: GraduationCap },
+      { perm: "knowledge/categories", labelKey: "menu.knowledge_categories", href: "/knowledge/taxonomy", icon: ListChecks },
+      { perm: "knowledge/tags", labelKey: "menu.knowledge_tags", href: "/knowledge/taxonomy", icon: Hash },
+      { perm: "knowledge/usage", labelKey: "menu.knowledge_usage", href: "/knowledge/usage", icon: ChartPie },
+      { perm: "knowledge/config", labelKey: "menu.knowledge_config", href: "/knowledge/taxonomy", icon: SlidersHorizontal },
     ],
   },
   {
