@@ -149,11 +149,7 @@ export default function KnowledgeArticleCreatePage() {
       {error && <Alert variant="danger" title="โหลดข้อมูลตั้งต้นไม่สำเร็จ" description={error} />}
       {formError && <Alert variant="danger" title="บันทึกไม่สำเร็จ" description={formError} />}
       {!can?.create && (
-        <Alert
-          variant="warning"
-          title="คุณไม่มีสิทธิ์เขียนบทความ"
-          description="หน้านี้สำหรับผู้ที่ได้รับสิทธิ์ knowledge.create เท่านั้น"
-        />
+        <Alert variant="warning" title="คุณไม่มีสิทธิ์เขียนบทความ" description="หน้านี้สำหรับผู้ที่ได้รับสิทธิ์ knowledge.create เท่านั้น" />
       )}
 
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">

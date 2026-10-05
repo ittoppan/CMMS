@@ -139,11 +139,7 @@ export default function KnowledgeUsagePage() {
       {error && <Alert variant="danger" title="ทำรายการไม่สำเร็จ" description={error} />}
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
       {!can?.usage_view && (
-        <Alert
-          variant="warning"
-          title="คุณไม่มีสิทธิ์ดูสถิติการใช้งาน"
-          description="หน้านี้ต้องมีสิทธิ์ knowledge.usage_view"
-        />
+        <Alert variant="warning" title="คุณไม่มีสิทธิ์ดูสถิติการใช้งาน" description="หน้านี้ต้องมีสิทธิ์ knowledge.usage_view" />
       )}
 
       <div style={layoutStyle("hero")} className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">

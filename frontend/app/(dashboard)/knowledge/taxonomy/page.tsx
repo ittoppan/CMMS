@@ -184,8 +184,7 @@ export default function KnowledgeTaxonomyPage() {
       {notice && <Alert variant="success" title="สำเร็จ" description={notice} />}
       {!can?.taxonomy && (
         <Alert
-          variant="warning"
-          title="คุณมีสิทธิ์ดูอย่างเดียว"
+          variant="warning" title="คุณมีสิทธิ์ดูอย่างเดียว"
           description="การเพิ่ม/แก้ไขหมวดหมู่และแท็กต้องมีสิทธิ์ knowledge.taxonomy"
         />
       )}
@@ -207,8 +206,7 @@ export default function KnowledgeTaxonomyPage() {
 
       {cfg && !cfg.config.enabled && (
         <Alert
-          variant="warning"
-          title="ศูนย์ความรู้ถูกปิดใช้งานอยู่"
+          variant="warning" title="ศูนย์ความรู้ถูกปิดใช้งานอยู่"
           description="เปิดใช้งานที่หน้าตั้งค่าระบบก่อนบทความใหม่จะค้นหาเจอ"
         />
       )}
@@ -265,11 +263,15 @@ export default function KnowledgeTaxonomyPage() {
                             <td className="px-4 py-3 tabular-nums">{c.article_count ?? 0}</td>
                             <td className="px-4 py-3">
                               {Boolean(c.is_active) ? (
-                                <Badge variant="success">ใช้งาน</Badge>
+                                <span className="cmms-status ok">
+                                  <span className="cmms-status-dot" />
+                                  ใช้งาน
+                                </span>
                               ) : (
-                                <Badge variant="neutral">
+                                <span className="cmms-status idle">
+                                  <span className="cmms-status-dot" />
                                   ปิด
-                                </Badge>
+                                </span>
                               )}
                             </td>
                             <td className="px-4 py-3 text-right">
