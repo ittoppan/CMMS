@@ -176,6 +176,9 @@ body {
   --cmms-transition: 200ms ease;
   --cmms-transition-slow: 300ms ease;
 
+  /* Layout-safe transitions (no height/padding animation) */
+  --cmms-transition-layout: transform var(--cmms-transition), box-shadow var(--cmms-transition), opacity var(--cmms-transition);
+
   /* === Gradients === */
   --cmms-gradient-primary: linear-gradient(135deg, #0068B5, #0093FF);
   --cmms-gradient-success: linear-gradient(135deg, #059669, #10B981);
@@ -195,8 +198,15 @@ body {
    เพื่อให้ฟอนต์เหมือนกันทั้งระบบ ========================= */
 :root {
   --font-family-body: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-heading: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: 'Barlow Condensed', 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-display: 'Barlow Condensed', 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-code: 'SF Mono', Monaco, Consolas, 'Cascadia Code', monospace;
+}
+
+/* Layout-safe animated bars (no height transition) */
+.bar-animate {
+  transition: transform var(--cmms-transition-slow), opacity var(--cmms-transition);
+  transform-origin: bottom;
 }
 
 /* light เป็นค่าเริ่มต้นบน html; .dark จะ override เป็น dark (body สืบทอด)
@@ -380,6 +390,7 @@ html, body {
    Headings
    ================================================ */
 h1, h2, h3, h4 {
+  font-family: var(--font-family-heading);
   font-weight: 700 !important;
   letter-spacing: -0.02em;
   color: var(--cmms-text-primary);
@@ -394,7 +405,7 @@ h1, h2, h3, h4 {
   padding: 20px; background: var(--cmms-bg-card);
   border: 1px solid var(--cmms-border);
   box-shadow: var(--cmms-shadow);
-  transition: all var(--cmms-transition);
+  transition: var(--cmms-transition-layout);
 }
 .cmms-kpi-card:hover { box-shadow: var(--cmms-shadow-md); transform: translateY(-2px); }
 .cmms-kpi-card::before {
@@ -1570,16 +1581,16 @@ next-route-announcer {
   box-shadow: 0 10px 30px -12px rgba(0, 87, 168, 0.35);
 }
 
-/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) */
+/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) — reduced visual noise */
 .cmms-page-hero::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: auto, 48px 48px;
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.01) 0 1px, transparent 1px 4px);
+  background-size: auto;
+  opacity: 0.5;
 }
 
 /* วงกลมเรืองแสงมุมขวาล่าง */
@@ -1882,7 +1893,7 @@ next-route-announcer {
   }
 }
 
-/* ── การ์ด KPI สไตล์ใหม่ (เงียบ ใช้ไฟ Andon เป็นจุดสีเดียว) ── */
+/* ── การ์ด KPI สไตล์ใหม่ (เงียบ ใช้เส้นสีหลัก 2px) ── */
 .cmms-kpi-card {
   position: relative;
   overflow: hidden;
@@ -1894,9 +1905,9 @@ next-route-announcer {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  background: var(--cmms-kpi-accent, var(--color-accent));
-  opacity: 0.85;
+  width: 2px;
+  background: var(--color-primary);
+  opacity: 0.4;
 }
 
 .cmms-kpi-value {
