@@ -6,7 +6,6 @@ import { Users } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -25,6 +24,7 @@ import { sendOrEnqueueDetailed } from "@/lib/offlineQueue";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { WORKFORCE_API, type Crew, type CrewMember } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/crews/page.tsx — crew management (Phase 34)
@@ -146,11 +146,16 @@ export default function WorkforceCrewsPage() {
   const canManage = cfg?.can.crew_manage === true;
 
   const columns: SimpleColumn<Crew>[] = [
-    {
-      key: "code",
-      header: "รหัส",
-      renderCell: (c) => <Badge variant="neutral">{c.code}</Badge>,
-    },
+{
+          key: "code",
+          header: "รหัส",
+          renderCell: (c) => (
+            <span className="inline-flex items-center gap-1.5 text-xs">
+              <AndonLamp status="idle" size="sm" />
+              <span>{c.code}</span>
+            </span>
+          ),
+        },
     {
       key: "name_th",
       header: "ชื่อทีม",
@@ -186,12 +191,12 @@ export default function WorkforceCrewsPage() {
         </span>
       ),
     },
-    {
-      key: "is_active",
-      header: "สถานะ",
-      renderCell: (c) =>
-        c.is_active ? <Badge variant="success">ใช้งาน</Badge> : <Badge variant="neutral">ปิดใช้งาน</Badge>,
-    },
+{
+          key: "is_active",
+          header: "สถานะ",
+          renderCell: (c) =>
+            c.is_active ? <AndonLamp status="ok" size="sm" showLabel /> : <AndonLamp status="idle" size="sm" showLabel />,
+        },
     {
       key: "actions",
       header: "",

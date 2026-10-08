@@ -6,7 +6,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +29,7 @@ import {
   type LeaveRow,
   type ShiftRecord,
 } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/shifts/page.tsx — shifts & leave (Phase 34)
@@ -67,14 +67,14 @@ const LEAVE_STATUS: Array<{ v: LeaveRow["status"]; label: string }> = [
   { v: "cancelled", label: "ยกเลิก" },
 ];
 
-const LEAVE_STATUS_VARIANT: Record<
+const LEAVE_STATUS_ANDON: Record<
   LeaveRow["status"],
-  "neutral" | "success" | "danger" | "warning"
+  "ok" | "warn" | "down" | "idle"
 > = {
-  planned: "warning",
-  approved: "success",
-  rejected: "danger",
-  cancelled: "neutral",
+  planned: "warn",
+  approved: "ok",
+  rejected: "down",
+  cancelled: "idle",
 };
 
 function parseWorkDays(raw: string | undefined): number[] {
@@ -241,29 +241,30 @@ export default function WorkforceShiftsPage() {
         );
       },
     },
-    {
-      key: "work_days",
-      header: "วันทำงาน",
-      renderCell: (r) => {
-        const days = parseWorkDays(r.work_days);
-        return (
-          <div className="flex flex-wrap gap-1">
-            {DOW.map((d) => (
-              <Badge key={d.v} variant={days.includes(d.v) ? "info" : "neutral"}>
-                {d.label}
-              </Badge>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      key: "overtime_allowed",
-      header: "ล่วงเวลา",
-      align: "center",
-      renderCell: (r) =>
-        r.overtime_allowed ? <Badge variant="success">อนุญาต</Badge> : <Badge variant="neutral">ไม่อนุญาต</Badge>,
-    },
+{
+          key: "work_days",
+          header: "วันทำงาน",
+          renderCell: (r) => {
+            const days = parseWorkDays(r.work_days);
+            return (
+              <div className="flex flex-wrap gap-1">
+                {DOW.map((d) => (
+                  <span key={d.v} className="inline-flex items-center gap-1.5 text-xs">
+                    <AndonLamp status={days.includes(d.v) ? "ok" : "idle"} size="sm" />
+                    <span>{d.label}</span>
+                  </span>
+                ))}
+              </div>
+            );
+          },
+        },
+        {
+          key: "overtime_allowed",
+          header: "ล่วงเวลา",
+          align: "center",
+          renderCell: (r) =>
+            r.overtime_allowed ? <AndonLamp status="ok" size="sm" showLabel /> : <AndonLamp status="idle" size="sm" showLabel />,
+        },
     {
       key: "effective",
       header: "มีผล",
@@ -274,15 +275,16 @@ export default function WorkforceShiftsPage() {
         </div>
       ),
     },
-    {
-      key: "source",
-      header: "ที่มา",
-      renderCell: (r) => (
-        <Badge variant="info">
-          <span className="sr-only">ที่มา: </span>กะรายบุคคล
-        </Badge>
-      ),
-    },
+{
+          key: "source",
+          header: "ที่มา",
+          renderCell: (r) => (
+            <span className="inline-flex items-center gap-1.5 text-xs">
+              <AndonLamp status="idle" size="sm" />
+              <span>กะรายบุคคล</span>
+            </span>
+          ),
+        },
     {
       key: "actions",
       header: "",
@@ -324,20 +326,20 @@ export default function WorkforceShiftsPage() {
         </div>
       ),
     },
-    {
-      key: "status",
-      header: "สถานะ",
-      renderCell: (r) => (
-        <div className="space-y-1">
-          <Badge variant={LEAVE_STATUS_VARIANT[r.status]}>{LEAVE_STATUS.find((s) => s.v === r.status)?.label}</Badge>
-          {r.reduces_capacity ? (
-            <div className="text-xs text-muted-foreground">หักความจุ</div>
-          ) : r.status === "planned" ? (
-            <div className="text-xs text-amber-600">ยังไม่หัก (รออนุมัติ)</div>
-          ) : null}
-        </div>
-      ),
-    },
+{
+          key: "status",
+          header: "สถานะ",
+          renderCell: (r) => (
+            <div className="space-y-1">
+              <AndonLamp status={LEAVE_STATUS_ANDON[r.status]} size="sm" showLabel />
+              {r.reduces_capacity ? (
+                <div className="text-xs text-muted-foreground">หักความจุ</div>
+              ) : r.status === "planned" ? (
+                <div className="text-xs text-amber-600">ยังไม่หัก (รออนุมัติ)</div>
+              ) : null}
+            </div>
+          ),
+        },
     {
       key: "reason",
       header: "เหตุผล",

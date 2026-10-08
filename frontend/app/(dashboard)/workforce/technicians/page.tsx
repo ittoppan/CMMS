@@ -6,7 +6,6 @@ import { TriangleAlert, UserCog } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
@@ -14,6 +13,7 @@ import { KpiCard } from "@/components/dashboard/kit";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { WORKFORCE_API, type TechnicianRow } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/technicians/page.tsx — people directory (Phase 34)
@@ -81,64 +81,68 @@ export default function WorkforceTechniciansPage() {
       header: "แผนก",
       renderCell: (r) => r.department_name ?? "—",
     },
-    {
-      key: "role_name",
-      header: "บทบาท",
-      renderCell: (r) => <Badge variant="neutral">{r.role_name ?? "—"}</Badge>,
-    },
-    {
-      key: "top_skills",
-      header: "ทักษะ",
-      renderCell: (r) =>
-        r.skill_count === 0 ? (
-          <Badge variant="warning">ยังไม่มีข้อมูลทักษะ</Badge>
-        ) : (
-          <div className="flex flex-wrap gap-1">
-            {(r.top_skills ?? []).map((s) => (
-              <Badge key={s} variant="info">
-                {s}
-              </Badge>
-            ))}
-            {r.skill_count > (r.top_skills?.length ?? 0) && (
-              <Badge variant="neutral">+{r.skill_count - (r.top_skills?.length ?? 0)}</Badge>
-            )}
-          </div>
-        ),
-    },
+{
+          key: "role_name",
+          header: "บทบาท",
+          renderCell: (r) => <span className="inline-flex items-center gap-1.5 text-xs"><AndonLamp status="idle" size="sm" /><span>{r.role_name ?? "—"}</span></span>,
+        },
+        {
+          key: "top_skills",
+          header: "ทักษะ",
+          renderCell: (r) =>
+            r.skill_count === 0 ? (
+              <AndonLamp status="warn" size="sm" showLabel />
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {(r.top_skills ?? []).map((s) => (
+                  <span key={s} className="inline-flex items-center gap-1.5 text-xs">
+                    <AndonLamp status="idle" size="sm" />
+                    <span>{s}</span>
+                  </span>
+                ))}
+                {r.skill_count > (r.top_skills?.length ?? 0) && (
+                  <span className="inline-flex items-center gap-1.5 text-xs">
+                    <AndonLamp status="idle" size="sm" />
+                    <span>+{r.skill_count - (r.top_skills?.length ?? 0)}</span>
+                  </span>
+                )}
+              </div>
+            ),
+        },
     {
       key: "valid_cert_count",
       header: "ใบรับรองใช้งานได้",
       align: "right",
       renderCell: (r) => <span className="font-medium">{r.valid_cert_count}</span>,
     },
-    {
-      key: "expired_cert_count",
-      header: "หมดอายุ",
-      align: "right",
-      renderCell: (r) =>
-        r.expired_cert_count > 0 ? (
-          <Badge variant="danger">{r.expired_cert_count}</Badge>
-        ) : (
-          <span className="text-muted-foreground">0</span>
-        ),
-    },
-    {
-      key: "active_auth_count",
-      header: "สิทธิ์",
-      align: "right",
-      renderCell: (r) => <span>{r.active_auth_count}</span>,
-    },
-    {
-      key: "has_shift",
-      header: "กะ",
-      align: "center",
-      renderCell: (r) =>
-        r.has_shift ? (
-          <Badge variant="success">มีข้อมูล</Badge>
-        ) : (
-          <Badge variant="danger">ใช้ค่าเริ่มต้น</Badge>
-        ),
-    },
+{
+          key: "expired_cert_count",
+          header: "หมดอายุ",
+          align: "right",
+          renderCell: (r) =>
+            r.expired_cert_count > 0 ? (
+              <AndonLamp status="down" size="sm" showLabel />
+            ) : (
+              <span className="text-muted-foreground">0</span>
+            ),
+        },
+        {
+          key: "active_auth_count",
+          header: "สิทธิ์",
+          align: "right",
+          renderCell: (r) => <span>{r.active_auth_count}</span>,
+        },
+        {
+          key: "has_shift",
+          header: "กะ",
+          align: "center",
+          renderCell: (r) =>
+            r.has_shift ? (
+              <AndonLamp status="ok" size="sm" showLabel />
+            ) : (
+              <AndonLamp status="down" size="sm" showLabel />
+            ),
+        },
   ];
 
   const flagged =

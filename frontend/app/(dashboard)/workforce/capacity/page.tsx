@@ -5,7 +5,6 @@ import { Activity, TriangleAlert } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +13,7 @@ import { KpiCard } from "@/components/dashboard/kit";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { fmtMinutes, fmtPct, type CapacityResponse, type CapacityRow } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/capacity/page.tsx — capacity board (Phase 34)
@@ -135,39 +135,58 @@ export default function WorkforceCapacityPage() {
         </div>
       ),
     },
-    {
-      key: "deductions",
-      header: "หักออก",
-      renderCell: (r) => (
-        <div className="flex flex-wrap gap-1">
-          {r.approved_leave_days > 0 && (
-            <Badge variant="neutral">ลา {r.approved_leave_days} วัน</Badge>
-          )}
-          {r.training_days > 0 && (
-            <Badge variant="neutral">อบรม {r.training_days} วัน</Badge>
-          )}
-          {r.pending_leave_days > 0 && (
-            <Badge variant="warning">ลาวางแผน {r.pending_leave_days} วัน</Badge>
-          )}
-          {r.approved_leave_days === 0 &&
-            r.training_days === 0 &&
-            r.pending_leave_days === 0 && <span className="text-muted-foreground">—</span>}
-        </div>
-      ),
-    },
-    {
-      key: "flags",
-      header: "ข้อควรระวัง",
-      renderCell: (r) => (
-        <div className="flex flex-wrap gap-1">
-          {r.capacity_at_risk && <Badge variant="warning">เสี่ยงเกิน</Badge>}
-          {!r.has_shift_data && <Badge variant="danger">ไม่มีข้อมูลกะ</Badge>}
-          {!r.capacity_at_risk && r.has_shift_data && (
-            <span className="text-muted-foreground">—</span>
-          )}
-        </div>
-      ),
-    },
+{
+          key: "deductions",
+          header: "หักออก",
+          renderCell: (r) => (
+            <div className="flex flex-wrap gap-1">
+              {r.approved_leave_days > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="idle" size="sm" />
+                  <span>ลา {r.approved_leave_days} วัน</span>
+                </span>
+              )}
+              {r.training_days > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="idle" size="sm" />
+                  <span>อบรม {r.training_days} วัน</span>
+                </span>
+              )}
+              {r.pending_leave_days > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="warn" size="sm" />
+                  <span>ลาวางแผน {r.pending_leave_days} วัน</span>
+                </span>
+              )}
+              {r.approved_leave_days === 0 &&
+                r.training_days === 0 &&
+                r.pending_leave_days === 0 && <span className="text-muted-foreground">—</span>}
+            </div>
+          ),
+        },
+        {
+          key: "flags",
+          header: "ข้อควรระวัง",
+          renderCell: (r) => (
+            <div className="flex flex-wrap gap-1">
+              {r.capacity_at_risk && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="warn" size="sm" />
+                  <span>เสี่ยงเกิน</span>
+                </span>
+              )}
+              {!r.has_shift_data && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="down" size="sm" />
+                  <span>ไม่มีข้อมูลกะ</span>
+                </span>
+              )}
+              {!r.capacity_at_risk && r.has_shift_data && (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </div>
+          ),
+        },
   ];
 
   if (error) {

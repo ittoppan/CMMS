@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,13 +16,33 @@ import { ArrowLeft, FlaskConical, Plus, Save, Check, X, RotateCcw, Paperclip, Ru
 import {
   RcaDetailResponse, RcaWhyRow, RcaEvidence, RcaMeasurement, RcaAction, RcaLink, RcaEffectiveness, FailureEvent, EngineUser,
   fetchRca, fetchRcaUsers, rcaPost,
-  RCA_ACTION_TYPES, RCA_ACTION_STATUS_LABELS, RCA_EFFECTIVENESS_OPTIONS, RCA_EVIDENCE_TYPES, RCA_MEASUREMENT_TYPES,
+  RCA_ACTION_TYPES, RCA_ACTION_STATUS_LABELS, RCA_EFFECTIVENESS_OPTIONS, RCA_EVIDENCE_TYPES,
+  RCA_MEASUREMENT_TYPES,
   RCA_PRIORITY_OPTIONS, RCA_STATUS_LABELS, LINK_TYPE_LABELS, LINK_TYPE_OPTIONS, LINK_STATUS_LABELS,
   fmtDuration, severityTone, FAILURE_SEVERITIES,
 } from "@/lib/rca";
+import AndonLamp from "@/components/AndonLamp";
 
 const TOKENS: Record<string, string> = { success: "cmms-success", warning: "cmms-warning", danger: "cmms-danger", info: "cmms-info", primary: "cmms-primary" };
 const TONE: Record<string, any> = { success: "success", warning: "warning", danger: "danger", info: "info", primary: "primary", neutral: "neutral" };
+
+const SEV_ANDON: Record<string, "ok" | "warn" | "down" | "idle"> = {
+  minor: "ok",
+  major: "warn",
+  critical: "down",
+  catastrophic: "down",
+};
+
+const STATUS_ANDON: Record<string, "ok" | "warn" | "down" | "idle"> = {
+  open: "idle",
+  investigating: "warn",
+  root_cause_identified: "warn",
+  action_in_progress: "warn",
+  verification: "warn",
+  closed: "ok",
+  cancelled: "idle",
+  reopened: "warn",
+};
 
 const inputCls = "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
 const textareaCls = "w-full resize-none rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
@@ -36,6 +55,14 @@ function fmtDate(v: string | null | undefined): string {
 }
 
 const STATUS_FLOW = ["open", "investigating", "root_cause_identified", "action_in_progress", "verification", "closed"];
+
+function sevBadge(s: string) {
+  return <AndonLamp status={SEV_ANDON[s] ?? "idle"} size="sm" showLabel />;
+}
+
+function statusBadge(s: string) {
+  return <AndonLamp status={STATUS_ANDON[s] ?? "idle"} size="sm" showLabel />;
+}
 
 export default function RcaDetailPage() {
   const hero = usePageHero("rca");
@@ -188,12 +215,6 @@ export default function RcaDetailPage() {
     } catch (e: any) { showToast("error", e?.message || "อัปเดตไม่สำเร็จ"); } finally { setBusy(false); }
   };
 
-  const sevBadge = (s: string) => <Badge variant={(TONE[severityTone(s)] || "neutral") as never}>{FAILURE_SEVERITIES.find((x) => x.value === s)?.label ?? s}</Badge>;
-  const statusBadge = (s: string) => {
-    const lbl = RCA_STATUS_LABELS[s];
-    return <Badge variant={(TONE[lbl?.tone] || "neutral") as never} dot>{lbl?.th || s}</Badge>;
-  };
-
   if (loading) return <div className="space-y-6">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div>;
   if (error || !rca) return <Alert variant="danger" title="ไม่พบข้อมูล" description={error} />;
 
@@ -219,7 +240,7 @@ export default function RcaDetailPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{rca.rca_code} {/* title */}</h1>
             {statusBadge(rca.status)}
-            {rca.due_date && rca.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10) && !["closed", "cancelled"].includes(rca.status) ? <Badge variant="danger" dot>เกินกำหนด</Badge> : null}
+            {rca.due_date && rca.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10) && !["closed", "cancelled"].includes(rca.status) ? <AndonLamp status="down" size="sm" showLabel /> : null}
           </div>
           <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{rca.title}</p>
         </div>
@@ -295,7 +316,7 @@ export default function RcaDetailPage() {
               <CardContent className="space-y-3">
                 {rca.root_cause_category_name && <p><span className="font-semibold text-[var(--cmms-text-primary)]">หมวด: </span>{rca.root_cause_category_name}</p>}
                 {rca.root_cause_detail && <p className="text-sm leading-relaxed text-[var(--cmms-text-secondary)]">{rca.root_cause_detail}</p>}
-                {rca.root_cause_unknown ? <Badge variant="warning">Root cause ยังไม่แน่นอน (unknown)</Badge> : null}
+                {rca.root_cause_unknown ? <AndonLamp status="warn" size="sm" showLabel /> : null}
               </CardContent>
             </Card>
           )}
@@ -320,7 +341,7 @@ export default function RcaDetailPage() {
                     <li key={e.id} className="rounded-xl border border-[var(--cmms-border)] p-4">
                       <p className="flex items-center justify-between gap-2 text-sm font-semibold text-[var(--cmms-text-primary)]">
                         {e.title}
-                        <Badge variant="neutral">{RCA_EVIDENCE_TYPES.find((t) => t.value === e.evidence_type)?.label || e.evidence_type}</Badge>
+                        <AndonLamp status="idle" size="sm" showLabel />
                       </p>
                       {e.description && <p className="mt-1 text-sm leading-relaxed text-[var(--cmms-text-secondary)]">{e.description}</p>}
                       {e.source && <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">แหล่ง: {e.source}</p>}
@@ -389,9 +410,9 @@ export default function RcaDetailPage() {
                         <div className="min-w-0">
                           <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--cmms-text-primary)]">
                             {a.title}
-                            <Badge variant="neutral">{RCA_ACTION_TYPES.find((t) => t.value === a.action_type)?.label?.split(" (")[0] || a.action_type}</Badge>
-                            {a.is_mandatory ? <Badge variant="danger" dot>บังคับ</Badge> : null}
-                            {a.priority === "high" || a.priority === "critical" ? <Badge variant="warning">{RCA_PRIORITY_OPTIONS.find((p) => p.value === a.priority)?.label}</Badge> : null}
+                            <AndonLamp status="idle" size="sm" showLabel />
+                            {a.is_mandatory ? <AndonLamp status="down" size="sm" showLabel /> : null}
+                            {a.priority === "high" || a.priority === "critical" ? <AndonLamp status="warn" size="sm" showLabel /> : null}
                           </p>
                           {a.description && <p className="mt-1 text-sm text-[var(--cmms-text-secondary)]">{a.description}</p>}
                           <p className="mt-1.5 text-xs text-[var(--cmms-text-secondary)]">
@@ -458,7 +479,7 @@ export default function RcaDetailPage() {
                         <div className="min-w-0">
                           <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--cmms-text-primary)]">
                             {l.title}
-                            <Badge variant="neutral">{LINK_TYPE_LABELS[l.link_type] || l.link_type}</Badge>
+                            <AndonLamp status="idle" size="sm" showLabel />
                           </p>
                           {l.description && <p className="mt-1 text-sm text-[var(--cmms-text-secondary)]">{l.description}</p>}
                           <p className="mt-1.5 text-sm leading-relaxed text-[var(--cmms-text-primary)]"><span className="text-xs font-semibold text-[var(--cmms-text-secondary)]">การเปลี่ยนแปลง: </span>{l.proposed_change}</p>
@@ -508,7 +529,7 @@ export default function RcaDetailPage() {
                   {d.effectiveness.map((e: RcaEffectiveness) => (
                     <li key={e.id} className="rounded-xl border border-[var(--cmms-border)] p-4">
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-[var(--cmms-text-primary)]">{RCA_EFFECTIVENESS_OPTIONS.find((o) => o.value === e.effectiveness)?.label || e.effectiveness}</p>
+                        <AndonLamp status={e.effectiveness === "effective" ? "ok" : e.effectiveness === "partially_effective" ? "warn" : "down"} size="sm" showLabel />
                         <div className="flex items-center gap-3 text-xs text-[var(--cmms-text-secondary)]">
                           <span>ก่อน: <b className="text-[var(--cmms-text-primary)]">{e.before_failures}</b> ครั้ง{e.before_months ? ` / ${e.before_months} เดือน` : ""}</span>
                           <span>หลัง: <b className="text-[var(--cmms-text-primary)]">{e.after_failures}</b> ครั้ง{e.after_months ? ` / ${e.after_months} เดือน` : ""}</span>

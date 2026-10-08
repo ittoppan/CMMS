@@ -7,7 +7,6 @@ import { BookOpenCheck } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -26,6 +25,7 @@ import { sendOrEnqueueDetailed } from "@/lib/offlineQueue";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { WORKFORCE_API, type Course, type Skill, type TrainingRecord } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/training/page.tsx — courses, sessions, results (Phase 34)
@@ -42,17 +42,29 @@ interface Person {
   employee_code: string | null;
 }
 
-const TRAINING_STATUS: Array<{ v: string; label: string; tone: "neutral" | "success" | "danger" | "warning" }> = [
-  { v: "planned", label: "วางแผน", tone: "neutral" },
-  { v: "in_progress", label: "กำลังอบรม", tone: "warning" },
-  { v: "passed", label: "ผ่าน", tone: "success" },
-  { v: "failed", label: "ไม่ผ่าน", tone: "danger" },
-  { v: "expired", label: "หมดอายุ", tone: "danger" },
-  { v: "cancelled", label: "ยกเลิก", tone: "neutral" },
-];
+const TRAINING_STATUS_LABEL: Record<string, string> = {
+  planned: "วางแผน",
+  in_progress: "กำลังอบรม",
+  passed: "ผ่าน",
+  failed: "ไม่ผ่าน",
+  expired: "หมดอายุ",
+  cancelled: "ยกเลิก",
+};
+
+const TRAINING_STATUS_ANDON: Record<string, "ok" | "warn" | "down" | "idle"> = {
+  planned: "idle",
+  in_progress: "warn",
+  passed: "ok",
+  failed: "down",
+  expired: "down",
+  cancelled: "idle",
+};
 
 function statusMeta(v: string) {
-  return TRAINING_STATUS.find((s) => s.v === v) ?? { v, label: v, tone: "neutral" as const };
+  return {
+    andon: TRAINING_STATUS_ANDON[v] ?? "idle",
+    label: TRAINING_STATUS_LABEL[v] ?? v,
+  };
 }
 
 function isoToday(): string {
@@ -188,14 +200,11 @@ export default function WorkforceTrainingPage() {
         </div>
       ),
     },
-    {
-      key: "status",
-      header: "สถานะ",
-      renderCell: (r) => {
-        const m = statusMeta(r.status);
-        return <Badge variant={m.tone}>{m.label}</Badge>;
-      },
-    },
+{
+          key: "status",
+          header: "สถานะ",
+          renderCell: (r) => <AndonLamp status={statusMeta(r.status).andon} size="sm" showLabel />,
+        },
     {
       key: "score",
       header: "คะแนน",
@@ -224,23 +233,23 @@ export default function WorkforceTrainingPage() {
           <span className="text-muted-foreground">ไม่มีวันหมดอายุ</span>
         ),
     },
-    {
-      key: "granted",
-      header: "ออกหลักฐาน",
-      align: "center",
-      renderCell: (r) =>
-        r.granted ? (
-          <Badge variant="success">ออกแล้ว</Badge>
-        ) : r.status === "passed" ? (
-          <Badge variant="warning">รอออกหลักฐาน</Badge>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        ),
-    },
+{
+          key: "granted",
+          header: "ออกหลักฐาน",
+          align: "center",
+          renderCell: (r) =>
+            r.granted ? (
+              <AndonLamp status="ok" size="sm" showLabel />
+            ) : r.status === "passed" ? (
+              <AndonLamp status="warn" size="sm" showLabel />
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            ),
+        },
   ];
 
   const courseColumns: SimpleColumn<Course>[] = [
-    { key: "code", header: "รหัส", renderCell: (c) => <Badge variant="neutral">{c.code}</Badge> },
+    { key: "code", header: "รหัส", renderCell: (c) => <span className="font-mono text-sm">{c.code}</span> },
     {
       key: "name_th",
       header: "ชื่อหลักสูตร",
@@ -275,9 +284,10 @@ export default function WorkforceTrainingPage() {
       header: "ทักษะที่ให้",
       renderCell: (c) =>
         c.grants_skill_name ? (
-          <Badge variant="info">
-            {c.grants_skill_name} (ระดับ {c.grants_level ?? 1})
-          </Badge>
+          <span className="inline-flex items-center gap-1.5 text-xs">
+            <AndonLamp status="idle" size="sm" />
+            <span>{c.grants_skill_name} (ระดับ {c.grants_level ?? 1})</span>
+          </span>
         ) : (
           <span className="text-muted-foreground">ไม่ได้ให้ทักษะ</span>
         ),
@@ -286,7 +296,7 @@ export default function WorkforceTrainingPage() {
       key: "is_mandatory",
       header: "บังคับ",
       align: "center",
-      renderCell: (c) => (c.is_mandatory ? <Badge variant="warning">บังคับ</Badge> : "—"),
+      renderCell: (c) => (c.is_mandatory ? <AndonLamp status="warn" size="sm" showLabel /> : "—"),
     },
   ];
 
@@ -327,7 +337,7 @@ export default function WorkforceTrainingPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-1.5">
-              {(["", ...TRAINING_STATUS.map((s) => s.v)] as string[]).map((v) => (
+              {(["", ...Object.keys(TRAINING_STATUS_LABEL)] as string[]).map((v) => (
                 <button
                   key={v || "all"}
                   type="button"
@@ -770,9 +780,9 @@ function RecordDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TRAINING_STATUS.map((s) => (
-                  <SelectItem key={s.v} value={s.v}>
-                    {s.label}
+                {Object.entries(TRAINING_STATUS_LABEL).map(([v, label]) => (
+                  <SelectItem key={v} value={v}>
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>

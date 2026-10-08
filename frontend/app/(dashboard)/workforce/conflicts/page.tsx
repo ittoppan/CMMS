@@ -7,7 +7,6 @@ import { ShieldAlert, TriangleAlert } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -24,6 +23,7 @@ import {
   type ReadinessResponse,
   type RequiredSkill,
 } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/conflicts/page.tsx — readiness & candidate ranking (Phase 34)
@@ -51,10 +51,10 @@ const REASON_LABEL: Record<string, string> = {
   BELOW_MIN_LEVEL: "ระดับต่ำกว่าขั้นต่ำ",
 };
 
-const STATE_VARIANT: Record<string, "success" | "warning" | "danger"> = {
-  READY: "success",
-  PARTIAL: "warning",
-  BLOCKED: "danger",
+const STATE_ANDON: Record<string, "ok" | "warn" | "down" | "idle"> = {
+  READY: "ok",
+  PARTIAL: "warn",
+  BLOCKED: "down",
 };
 
 function isoToday(): string {
@@ -151,47 +151,48 @@ export default function WorkforceConflictsPage() {
         </div>
       ),
     },
-    {
-      key: "verdict",
-      header: "ผลการตรวจ",
-      renderCell: (c) => {
-        if (c.verdict === "ELIGIBLE") return <Badge variant="success">ผ่าน</Badge>;
-        if (c.verdict === "OVER_CAPACITY") return <Badge variant="warning">เกินความจุ</Badge>;
-        return <Badge variant="danger">ไม่ผ่าน</Badge>;
-      },
-    },
-    {
-      key: "reason_codes",
-      header: "เหตุผล",
-      renderCell: (c) =>
-        c.reason_codes.length === 0 ? (
-          <span className="text-muted-foreground">—</span>
-        ) : (
-          <ul className="space-y-0.5">
-            {c.reasons.map((r, i) => (
-              <li key={`${r.code}-${i}`} className="text-xs text-muted-foreground">
-                • {reasonText(r.code, r.detail)}
-              </li>
-            ))}
-          </ul>
-        ),
-    },
-    {
-      key: "matched_skills",
-      header: "ทักษะที่ผ่าน",
-      renderCell: (c) =>
-        c.matched_skills.length === 0 ? (
-          <span className="text-muted-foreground">—</span>
-        ) : (
-          <div className="flex flex-wrap gap-1">
-            {c.matched_skills.map((s) => (
-              <Badge key={s} variant="info">
-                {s}
-              </Badge>
-            ))}
-          </div>
-        ),
-    },
+{
+          key: "verdict",
+          header: "ผลการตรวจ",
+          renderCell: (c) => {
+            if (c.verdict === "ELIGIBLE") return <AndonLamp status="ok" size="sm" showLabel />;
+            if (c.verdict === "OVER_CAPACITY") return <AndonLamp status="warn" size="sm" showLabel />;
+            return <AndonLamp status="down" size="sm" showLabel />;
+          },
+        },
+        {
+          key: "reason_codes",
+          header: "เหตุผล",
+          renderCell: (c) =>
+            c.reason_codes.length === 0 ? (
+              <span className="text-muted-foreground">—</span>
+            ) : (
+              <ul className="space-y-0.5">
+                {c.reasons.map((r, i) => (
+                  <li key={`${r.code}-${i}`} className="text-xs text-muted-foreground">
+                    • {reasonText(r.code, r.detail)}
+                  </li>
+                ))}
+              </ul>
+            ),
+        },
+        {
+          key: "matched_skills",
+          header: "ทักษะที่ผ่าน",
+          renderCell: (c) =>
+            c.matched_skills.length === 0 ? (
+              <span className="text-muted-foreground">—</span>
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {c.matched_skills.map((s) => (
+                  <span key={s} className="inline-flex items-center gap-1.5 text-xs">
+                    <AndonLamp status="idle" size="sm" />
+                    <span>{s}</span>
+                  </span>
+                ))}
+              </div>
+            ),
+        },
     {
       key: "utilization_pct",
       header: "อัตราการใช้",
@@ -286,7 +287,7 @@ export default function WorkforceConflictsPage() {
           <Card>
             <CardHeader className="flex flex-wrap items-center justify-between gap-3">
               <CardTitle className="text-base">ความพร้อมของงาน #{readiness.work_order_id}</CardTitle>
-              <Badge variant={STATE_VARIANT[readiness.state] ?? "neutral"}>{readiness.state}</Badge>
+              <AndonLamp status={STATE_ANDON[readiness.state] ?? "idle"} size="sm" showLabel />
             </CardHeader>
             <CardContent className="space-y-4">
               {readiness.state !== "READY" && (
@@ -308,9 +309,7 @@ export default function WorkforceConflictsPage() {
               <ul className="divide-y divide-border">
                 {readiness.checks.map((c) => (
                   <li key={c.key} className="flex items-start gap-3 py-2.5">
-                    <Badge variant={c.ok ? "success" : "danger"} className="mt-0.5 shrink-0">
-                      {c.ok ? "ผ่าน" : "ไม่ผ่าน"}
-                    </Badge>
+                    <span className="mt-0.5 shrink-0"><AndonLamp status={c.ok ? "ok" : "down"} size="sm" /></span>
                     <div className="min-w-0">
                       <div className="font-medium">{c.label}</div>
                       <div className="text-sm text-muted-foreground">{c.detail}</div>
@@ -338,10 +337,23 @@ export default function WorkforceConflictsPage() {
                 <ul className="space-y-1 text-sm">
                   {gap.required.map((r) => (
                     <li key={r.skill_id} className="flex flex-wrap items-center gap-2">
-                      <Badge variant="info">{r.name}</Badge>
+                      <span className="inline-flex items-center gap-1.5 text-xs">
+                        <AndonLamp status="idle" size="sm" />
+                        <span>{r.name}</span>
+                      </span>
                       <span className="text-muted-foreground">ขั้นต่ำระดับ {r.min_level}</span>
-                      {r.require_any_of === 1 && <Badge variant="neutral">ทีมเพียงพอ 1 คน</Badge>}
-                      {!r.is_mandatory && <Badge variant="neutral">ไม่บังคับ</Badge>}
+                      {r.require_any_of === 1 && (
+                        <span className="inline-flex items-center gap-1.5 text-xs">
+                          <AndonLamp status="idle" size="sm" />
+                          <span>ทีมเพียงพอ 1 คน</span>
+                        </span>
+                      )}
+                      {!r.is_mandatory && (
+                        <span className="inline-flex items-center gap-1.5 text-xs">
+                          <AndonLamp status="idle" size="sm" />
+                          <span>ไม่บังคับ</span>
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -460,9 +472,10 @@ function AssignDialog({
           {candidate.matched_skills.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
               {candidate.matched_skills.map((s) => (
-                <Badge key={s} variant="info">
-                  {s}
-                </Badge>
+                <span key={s} className="inline-flex items-center gap-1.5 text-xs">
+                  <AndonLamp status="idle" size="sm" />
+                  <span>{s}</span>
+                </span>
               ))}
             </div>
           )}

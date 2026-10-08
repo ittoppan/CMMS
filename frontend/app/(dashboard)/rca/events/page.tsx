@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,13 +17,17 @@ import {
   FailureEvent, AssetOption, EventListResponse,
   fetchEvents, fetchAssetsWos, FAILURE_SEVERITIES, fmtDuration, severityTone,
 } from "@/lib/rca";
+import AndonLamp from "@/components/AndonLamp";
 
-const TONE: Record<string, string> = {
-  green: "success", amber: "warning", orange: "warning", red: "danger", neutral: "neutral", info: "info",
+const SEV_ANDON: Record<string, "ok" | "warn" | "down" | "idle"> = {
+  minor: "ok",
+  major: "warn",
+  critical: "down",
+  catastrophic: "down",
 };
 
 function sevBadge(s: string) {
-  return <Badge variant={(TONE[severityTone(s)] || "neutral") as never}>{FAILURE_SEVERITIES.find((x) => x.value === s)?.label ?? s}</Badge>;
+  return <AndonLamp status={SEV_ANDON[s] ?? "idle"} size="sm" showLabel />;
 }
 
 function fmtDate(v: string | null | undefined): string {
@@ -85,7 +88,7 @@ export default function RcaEventsPage() {
           <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
-            {data && <Badge variant="primary" dot>{data.total} รายการ</Badge>}
+            {data && <AndonLamp status="idle" size="sm" showLabel />}
           </div>
           <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{hero.desc}</p>
         </div>
@@ -174,7 +177,7 @@ export default function RcaEventsPage() {
                     <tr key={ev.id} className="border-b border-[var(--cmms-border)] last:border-0 hover:bg-[var(--cmms-bg-muted)]">
                       <td className="px-4 py-3">
                         <a href={`/rca/events?q=${ev.event_code}`} className="font-mono text-xs font-semibold text-[var(--cmms-primary)] hover:underline">{ev.event_code}</a>
-                        {ev.repeat_suspected ? <div><Badge variant="warning" dot>Repeat?</Badge></div> : null}
+                        {ev.repeat_suspected ? <div><AndonLamp status="warn" size="sm" showLabel /></div> : null}
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-[var(--cmms-text-primary)]">{ev.asset_name ?? "—"}</p>

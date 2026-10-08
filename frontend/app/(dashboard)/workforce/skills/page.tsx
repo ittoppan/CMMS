@@ -6,7 +6,6 @@ import { GraduationCap, TriangleAlert } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -29,6 +28,7 @@ import {
   type Skill,
   type SkillMatrixResponse,
 } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/skills/page.tsx — skill catalog + coverage matrix (Phase 34)
@@ -121,7 +121,7 @@ export default function WorkforceSkillsPage() {
   }, [matrix?.cells]);
 
   const catalogColumns: SimpleColumn<Skill>[] = [
-    { key: "code", header: "รหัส", renderCell: (s) => <Badge variant="neutral">{s.code}</Badge> },
+    { key: "code", header: "รหัส", renderCell: (s) => <span className="font-mono text-sm">{s.code}</span> },
     {
       key: "name_th",
       header: "ชื่อทักษะ",
@@ -132,7 +132,7 @@ export default function WorkforceSkillsPage() {
         </div>
       ),
     },
-    { key: "category", header: "หมวด", renderCell: (s) => <Badge variant="info">{s.category}</Badge> },
+    { key: "category", header: "หมวด", renderCell: (s) => <span className="inline-flex items-center gap-1.5 text-xs"><AndonLamp status="idle" size="sm" /><span>{s.category}</span></span> },
     {
       key: "min_level",
       header: "ขั้นต่ำ",
@@ -146,7 +146,10 @@ export default function WorkforceSkillsPage() {
         <div className="space-y-1 text-xs">
           {s.is_certification_required ? (
             <div>
-              <Badge variant="warning">ใบรับรอง</Badge>{" "}
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <AndonLamp status="warn" size="sm" />
+                <span>ใบรับรอง</span>
+              </span>{" "}
               <span className="text-muted-foreground">
                 {s.required_certification_code || "ไม่ระบุรหัส"}
               </span>
@@ -154,7 +157,10 @@ export default function WorkforceSkillsPage() {
           ) : null}
           {s.is_authorization_required ? (
             <div>
-              <Badge variant="warning">สิทธิ์</Badge>{" "}
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <AndonLamp status="warn" size="sm" />
+                <span>สิทธิ์</span>
+              </span>{" "}
               <span className="text-muted-foreground">
                 {s.required_authorization_code || "ไม่ระบุรหัส"}
               </span>
@@ -162,7 +168,10 @@ export default function WorkforceSkillsPage() {
           ) : null}
           {s.require_any_of ? (
             <div>
-              <Badge variant="info">ผ่านทั้งทีมเพียงพอ</Badge>
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                <AndonLamp status="idle" size="sm" />
+                <span>ผ่านทั้งทีมเพียงพอ</span>
+              </span>
             </div>
           ) : null}
           {!s.is_certification_required && !s.is_authorization_required && !s.require_any_of ? (

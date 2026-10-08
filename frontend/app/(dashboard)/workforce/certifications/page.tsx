@@ -7,7 +7,6 @@ import { BadgeCheck, TriangleAlert } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -25,6 +24,7 @@ import { sendOrEnqueueDetailed } from "@/lib/offlineQueue";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { WORKFORCE_API, type ExpiringCertification } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/certifications/page.tsx — expiry watchlist (Phase 34)
@@ -49,10 +49,10 @@ const CERT_STATUS = [
 ];
 
 function ExpiryBadge({ days, expired }: { days: number; expired: boolean }) {
-  if (expired) return <Badge variant="danger">หมดอายุแล้ว</Badge>;
-  if (days <= 0) return <Badge variant="danger">หมดอายุวันนี้</Badge>;
-  if (days <= 30) return <Badge variant="warning">อีก {days} วัน</Badge>;
-  return <Badge variant="neutral">อีก {days} วัน</Badge>;
+  if (expired) return <AndonLamp status="down" size="sm" showLabel />;
+  if (days <= 0) return <AndonLamp status="down" size="sm" showLabel />;
+  if (days <= 30) return <AndonLamp status="warn" size="sm" showLabel />;
+  return <AndonLamp status="ok" size="sm" showLabel />;
 }
 
 export default function WorkforceCertificationsPage() {

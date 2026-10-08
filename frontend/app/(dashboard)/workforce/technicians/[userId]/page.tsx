@@ -7,7 +7,6 @@ import { ArrowLeft, TriangleAlert } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -34,6 +33,7 @@ import {
   type TrainingRecord,
   type UserSkill,
 } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/technicians/[userId]/page.tsx — one person's record (Phase 34)
@@ -54,15 +54,11 @@ const SKILL_LEVELS = [
 ];
 
 function CertBadge({ c }: { c: Certification }) {
-  if (c.expired) return <Badge variant="danger">หมดอายุ</Badge>;
+  if (c.expired) return <AndonLamp status="down" size="sm" showLabel />;
   if (c.expiring_soon) {
-    return (
-      <Badge variant="warning">
-        ใกล้หมดอายุ{c.days_to_expiry != null ? ` ${c.days_to_expiry} วัน` : ""}
-      </Badge>
-    );
+    return <AndonLamp status="warn" size="sm" showLabel />;
   }
-  return <Badge variant="success">ใช้งานได้</Badge>;
+  return <AndonLamp status="ok" size="sm" showLabel />;
 }
 
 export default function TechnicianDetailPage({
@@ -204,14 +200,14 @@ export default function TechnicianDetailPage({
     {
       key: "level_label",
       header: "ระดับ",
-      renderCell: (s) => <Badge variant="info">{s.level_label}</Badge>,
+      renderCell: (s) => <span className="inline-flex items-center gap-1.5 text-xs"><AndonLamp status="idle" size="sm" /><span>{s.level_label}</span></span>,
     },
     {
       key: "valid_until",
       header: "ใช้ได้ถึง",
       renderCell: (s) =>
         s.expired ? (
-          <Badge variant="danger">หมดอายุ</Badge>
+          <AndonLamp status="down" size="sm" showLabel />
         ) : s.valid_until ? (
           s.valid_until
         ) : (
@@ -223,8 +219,8 @@ export default function TechnicianDetailPage({
       header: "เงื่อนไขกำกับ",
       renderCell: (s) => (
         <div className="flex flex-wrap gap-1">
-          {s.cert_required ? <Badge variant="neutral">ต้องมีใบรับรอง</Badge> : null}
-          {s.auth_required ? <Badge variant="neutral">ต้องมีสิทธิ์</Badge> : null}
+          {s.cert_required ? <span className="inline-flex items-center gap-1.5 text-xs"><AndonLamp status="idle" size="sm" /><span>ต้องมีใบรับรอง</span></span> : null}
+          {s.auth_required ? <span className="inline-flex items-center gap-1.5 text-xs"><AndonLamp status="idle" size="sm" /><span>ต้องมีสิทธิ์</span></span> : null}
           {!s.cert_required && !s.auth_required ? (
             <span className="text-muted-foreground">—</span>
           ) : null}
@@ -281,7 +277,7 @@ export default function TechnicianDetailPage({
       header: "ใช้ได้ถึง",
       renderCell: (a) =>
         a.expired ? (
-          <Badge variant="danger">หมดอายุ</Badge>
+          <AndonLamp status="down" size="sm" showLabel />
         ) : a.valid_until ? (
           a.valid_until
         ) : (
@@ -293,11 +289,11 @@ export default function TechnicianDetailPage({
       header: "สถานะ",
       renderCell: (a) =>
         a.expired ? (
-          <Badge variant="danger">หมดอายุ</Badge>
+          <AndonLamp status="down" size="sm" showLabel />
         ) : a.status === "active" ? (
-          <Badge variant="success">ใช้งานได้</Badge>
+          <AndonLamp status="ok" size="sm" showLabel />
         ) : (
-          <Badge variant="neutral">{a.status}</Badge>
+          <AndonLamp status="idle" size="sm" showLabel />
         ),
     },
   ];
@@ -312,7 +308,7 @@ export default function TechnicianDetailPage({
     {
       key: "status",
       header: "สถานะ",
-      renderCell: (t) => <Badge variant={t.status === "completed" ? "success" : "neutral"}>{t.status}</Badge>,
+      renderCell: (t) => <AndonLamp status={t.status === "completed" ? "ok" : "idle"} size="sm" showLabel />,
     },
     {
       key: "score",
@@ -325,7 +321,7 @@ export default function TechnicianDetailPage({
       header: "ทักษะที่ได้รับ",
       renderCell: (t) =>
         t.granted ? (
-          <Badge variant="info">ออกหลักฐานแล้ว</Badge>
+          <AndonLamp status="ok" size="sm" showLabel />
         ) : (
           <span className="text-muted-foreground">—</span>
         ),
@@ -380,7 +376,7 @@ export default function TechnicianDetailPage({
                       </div>
                     </Alert>
                   ) : (
-                    <Badge variant="success">จากกะรายบุคคล</Badge>
+                    <AndonLamp status="ok" size="sm" showLabel />
                   )}
                   {shiftEff.basis && (
                     <p className="text-xs text-muted-foreground">{shiftEff.basis}</p>
@@ -432,7 +428,7 @@ export default function TechnicianDetailPage({
                       >
                         {m.crew_name}
                       </Link>
-                      {m.member_role === "lead" && <Badge variant="info">หัวหน้าทีม</Badge>}
+                      {m.member_role === "lead" && <AndonLamp status="idle" size="sm" showLabel />}
                     </li>
                   ))}
                 </ul>
@@ -555,7 +551,7 @@ function SummaryLine({
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{label}</span>
       {tone === "danger" && value > 0 ? (
-        <Badge variant="danger">{value}</Badge>
+        <AndonLamp status="down" size="sm" showLabel />
       ) : (
         <span className="font-medium">{value}</span>
       )}

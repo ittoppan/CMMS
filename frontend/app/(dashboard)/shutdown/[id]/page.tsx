@@ -19,7 +19,6 @@ import {
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
@@ -72,6 +71,7 @@ import {
   type MutationResponse,
   type RawResult,
 } from "@/lib/shutdown";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/shutdown/[id]/page.tsx — รายละเอียดงานหยุดเครื่อง (Phase 35)
@@ -205,10 +205,8 @@ export default function ShutdownDetailPage() {
       title={
         <span className="flex flex-wrap items-center gap-3">
           {d.title}
-          <Badge variant={statusTone(d.status)} dot>
-            {d.status_label}
-          </Badge>
-          <Badge variant={riskTone(d.risk_level)}>ความเสี่ยง {opt?.risk_levels[d.risk_level] ?? d.risk_level}</Badge>
+          <AndonLamp status={statusTone(d.status) === "success" ? "ok" : statusTone(d.status) === "danger" ? "down" : "warn"} size="sm" showLabel />
+          <AndonLamp status={riskTone(d.risk_level) === "danger" ? "down" : riskTone(d.risk_level) === "warning" ? "warn" : "idle"} size="sm" showLabel />
         </span>
       }
       description={`${d.shutdown_no} · ${opt?.shutdown_types[d.shutdown_type] ?? d.shutdown_type}${d.facility ? ` · ${d.facility}` : ""}`}
@@ -423,7 +421,7 @@ export default function ShutdownDetailPage() {
                       { key: "title", header: "งาน" },
                       { key: "duration", header: "ระยะเวลา", align: "right", renderCell: (n) => fmtHours(n.duration) },
                       { key: "float", header: "Float", align: "right", renderCell: (n) => (n.float === null ? "—" : `${n.float} ชม.`) },
-                      { key: "critical", header: "วิกฤต", renderCell: (n) => (n.critical ? <Badge variant="danger">วิกฤต</Badge> : <Badge variant="neutral">ไม่วิกฤต</Badge>) },
+                      { key: "critical", header: "วิกฤต", renderCell: (n) => (n.critical ? <AndonLamp status="down" size="sm" showLabel /> : <AndonLamp status="ok" size="sm" showLabel />) },
                     ]}
                     data={cp.nodes}
                     idKey="scope_id"
@@ -522,14 +520,14 @@ export default function ShutdownDetailPage() {
               )}
               <h4 className="text-sm font-semibold">ผลประเมินสด (live)</h4>
               <SimpleDataTable<StartupCheck>
-                columns={[
-                  { key: "asset_code", header: "เครื่องจักร" },
-                  { key: "check_label", header: "รายการ" },
-                  { key: "state", header: "ผล", renderCell: (r) => <Badge variant={readinessStateTone(r.state)}>{r.state}</Badge> },
-                  { key: "reason_code", header: "รหัสเหตุผล" },
-                  { key: "detail", header: "รายละเอียด" },
-                  { key: "is_blocking", header: "ปิดกั้น", renderCell: (r) => (r.is_blocking ? <Badge variant="danger">ปิดกั้น</Badge> : "—") },
-                ]}
+columns={[
+                    { key: "asset_code", header: "เครื่องจักร" },
+                    { key: "check_label", header: "รายการ" },
+                    { key: "state", header: "ผล", renderCell: (r) => <AndonLamp status={readinessStateTone(r.state) === "success" ? "ok" : readinessStateTone(r.state) === "danger" ? "down" : "warn"} size="sm" showLabel /> },
+                    { key: "reason_code", header: "รหัสเหตุผล" },
+                    { key: "detail", header: "รายละเอียด" },
+                    { key: "is_blocking", header: "ปิดกั้น", renderCell: (r) => (r.is_blocking ? <AndonLamp status="down" size="sm" showLabel /> : "—") },
+                  ]}
                 data={su?.checks ?? []}
                 idKey="check_key"
                 pageSize={25}
@@ -539,27 +537,27 @@ export default function ShutdownDetailPage() {
               />
               <h4 className="text-sm font-semibold">บันทึกผลล่าสุด (ใช้สำหรับขออนุมัติยกเว้น)</h4>
               <SimpleDataTable<StartupStoredCheck>
-                columns={[
-                  { key: "asset_code", header: "เครื่องจักร" },
-                  { key: "check_label", header: "รายการ" },
-                  { key: "state", header: "ผล", renderCell: (r) => <Badge variant={readinessStateTone(r.state)}>{r.state}</Badge> },
-                  { key: "reason_label", header: "เหตุผล" },
-                  { key: "is_blocking", header: "ปิดกั้น", renderCell: (r) => (r.is_blocking ? <Badge variant="danger">ปิดกั้น</Badge> : "—") },
-                  {
-                    key: "act",
-                    header: "อนุมัติยกเว้น",
-                    renderCell: (r) =>
-                      can?.startup && r.waivable ? (
-                        <Button size="sm" variant="outline" onClick={() => setDlg({ t: "startup_waive", check: r })} disabled={busy}>
-                          ขอยกเว้น
-                        </Button>
-                      ) : r.waivable ? (
-                        <span className="text-xs text-muted-foreground">ไม่มีสิทธิ์</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">ยกเว้นไม่ได้</span>
-                      ),
-                  },
-                ]}
+columns={[
+                    { key: "asset_code", header: "เครื่องจักร" },
+                    { key: "check_label", header: "รายการ" },
+                    { key: "state", header: "ผล", renderCell: (r) => <AndonLamp status={readinessStateTone(r.state) === "success" ? "ok" : readinessStateTone(r.state) === "danger" ? "down" : "warn"} size="sm" showLabel /> },
+                    { key: "reason_label", header: "เหตุผล" },
+                    { key: "is_blocking", header: "ปิดกั้น", renderCell: (r) => (r.is_blocking ? <AndonLamp status="down" size="sm" showLabel /> : "—") },
+                    {
+                      key: "act",
+                      header: "อนุมัติยกเว้น",
+                      renderCell: (r) =>
+                        can?.startup && r.waivable ? (
+                          <Button size="sm" variant="outline" onClick={() => setDlg({ t: "startup_waive", check: r })} disabled={busy}>
+                            ขอยกเว้น
+                          </Button>
+                        ) : r.waivable ? (
+                          <span className="text-xs text-muted-foreground">ไม่มีสิทธิ์</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">ยกเว้นไม่ได้</span>
+                        ),
+                    },
+                  ]}
                 data={su?.stored_checks ?? []}
                 idKey="id"
                 pageSize={25}
@@ -718,13 +716,13 @@ function scopeColumns(
         </div>
       ),
     },
-    { key: "status", header: "สถานะ", renderCell: (s) => <Badge variant={s.status === "done" ? "success" : s.status === "in_progress" ? "warning" : "neutral"}>{opt?.scope_statuses[s.status] ?? s.status}</Badge> },
+    { key: "status", header: "สถานะ", renderCell: (s) => <AndonLamp status={s.status === "done" ? "ok" : s.status === "in_progress" ? "warn" : "idle"} size="sm" showLabel /> },
     { key: "estimate_hours", header: "ชั่วโมง", align: "right", renderCell: (s) => fmtHours(s.estimate_hours) },
     { key: "progress_pct", header: "คืบหน้า", align: "right", renderCell: (s) => `${s.progress_pct}%` },
     {
       key: "data",
       header: "ที่มา",
-      renderCell: (s) => (s.has_real_data ? <Badge variant="info">ใบงานจริง</Badge> : <Badge variant="neutral">ประมาณ</Badge>),
+      renderCell: (s) => (s.has_real_data ? <AndonLamp status="idle" size="sm" showLabel /> : <AndonLamp status="idle" size="sm" showLabel />),
     },
     {
       key: "act",
@@ -779,9 +777,9 @@ function assetColumns(onDelete: (a: SdAsset) => void, can: ConfigResponse["can"]
   return [
     { key: "asset_code", header: "รหัส", renderCell: (a) => <span className="font-mono text-xs">{a.asset_code}</span> },
     { key: "asset_name", header: "เครื่องจักร" },
-    { key: "is_critical", header: "วิกฤต", renderCell: (a) => (a.is_critical ? <Badge variant="danger">วิกฤต</Badge> : "—") },
-    { key: "isolation_required", header: "ต้องแยกพลัง", renderCell: (a) => (a.isolation_required ? <Badge variant="warning">ต้องแยก</Badge> : "—") },
-    { key: "loto", header: "LOTO", renderCell: (a) => (a.loto_live_count > 0 ? <Badge variant="danger">ล็อก {a.loto_live_count}</Badge> : <span className="text-muted-foreground">—</span>) },
+    { key: "is_critical", header: "วิกฤต", renderCell: (a) => (a.is_critical ? <AndonLamp status="down" size="sm" showLabel /> : "—") },
+    { key: "isolation_required", header: "ต้องแยกพลัง", renderCell: (a) => (a.isolation_required ? <AndonLamp status="warn" size="sm" showLabel /> : "—") },
+    { key: "loto", header: "LOTO", renderCell: (a) => (a.loto_live_count > 0 ? <AndonLamp status="down" size="sm" showLabel /> : <span className="text-muted-foreground">—</span>) },
     { key: "status", header: "สถานะ" },
     {
       key: "act",
@@ -801,9 +799,9 @@ function readinessColumns(canWaive: boolean, onWaive: (c: ReadinessCheck) => voi
     { key: "target_label", header: "เป้าหมาย" },
     { key: "category_label", header: "หมวด" },
     { key: "check_label", header: "รายการ" },
-    { key: "state", header: "ผล", renderCell: (c) => <Badge variant={readinessStateTone(c.state)}>{c.state}</Badge> },
+    { key: "state", header: "ผล", renderCell: (c) => <AndonLamp status={readinessStateTone(c.state) === "success" ? "ok" : readinessStateTone(c.state) === "danger" ? "down" : "warn"} size="sm" showLabel /> },
     { key: "reason_label", header: "เหตุผล" },
-    { key: "is_blocking", header: "ปิดกั้น", renderCell: (c) => (c.is_blocking ? <Badge variant="danger">ปิดกั้น</Badge> : "—") },
+    { key: "is_blocking", header: "ปิดกั้น", renderCell: (c) => (c.is_blocking ? <AndonLamp status="down" size="sm" showLabel /> : "—") },
     {
       key: "detail",
       header: "รายละเอียด",
@@ -841,7 +839,7 @@ function materialColumns(
     { key: "planned_qty", header: "แผน", align: "right", renderCell: (m) => `${fmtQty(m.planned_qty)} ${m.unit}` },
     { key: "available", header: "พร้อมใช้", align: "right", renderCell: (m) => fmtQty(m.available) },
     { key: "gap", header: "ขาด", align: "right", renderCell: (m) => (m.gap > 0 ? <span className="font-semibold text-danger">{fmtQty(m.gap)}</span> : "0") },
-    { key: "state", header: "สถานะ", renderCell: (m) => (m.state === "covered" ? <Badge variant="success">ครบ</Badge> : <Badge variant="danger">ขาด</Badge>) },
+    { key: "state", header: "สถานะ", renderCell: (m) => (m.state === "covered" ? <AndonLamp status="ok" size="sm" showLabel /> : <AndonLamp status="down" size="sm" showLabel />) },
     { key: "reserved", header: "จองแล้ว", align: "right", renderCell: (m) => `${m.reservation_count} ครั้ง` },
     {
       key: "act",

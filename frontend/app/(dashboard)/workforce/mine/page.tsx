@@ -6,7 +6,6 @@ import { CloudOff, Wifi, RefreshCw, UserCog } from "lucide-react";
 
 import { PageShell } from "@/components/PageShell";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useOnlineStatus, usePendingCount } from "@/lib/offlineQueue";
@@ -17,6 +16,7 @@ import {
   fmtMinutes,
   type MySkillsResponse,
 } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/mine/page.tsx — the technician's own record (Phase 34)
@@ -35,9 +35,9 @@ function isoToday(): string {
 }
 
 function CertState({ expired, expiringSoon }: { expired: boolean; expiringSoon?: boolean }) {
-  if (expired) return <Badge variant="danger">หมดอายุ</Badge>;
-  if (expiringSoon) return <Badge variant="warning">ใกล้หมดอายุ</Badge>;
-  return <Badge variant="success">ใช้งานได้</Badge>;
+  if (expired) return <AndonLamp status="down" size="sm" showLabel />;
+  if (expiringSoon) return <AndonLamp status="warn" size="sm" showLabel />;
+  return <AndonLamp status="ok" size="sm" showLabel />;
 }
 
 export default function MyWorkforcePage() {
@@ -173,9 +173,9 @@ export default function MyWorkforcePage() {
                 <>
                   <div>
                     {availability.available ? (
-                      <Badge variant="success">พร้อมรับงาน</Badge>
+                      <AndonLamp status="ok" size="sm" showLabel />
                     ) : (
-                      <Badge variant="danger">ไม่พร้อมรับงาน</Badge>
+                      <AndonLamp status="down" size="sm" showLabel />
                     )}
                   </div>
                   {availability.reasons.length > 0 && (
@@ -231,7 +231,7 @@ export default function MyWorkforcePage() {
                       </div>
                     </Alert>
                   ) : (
-                    <Badge variant="success">จากกะรายบุคคลของคุณ</Badge>
+                    <AndonLamp status="ok" size="sm" showLabel />
                   )}
                 </>
               ) : (
@@ -263,11 +263,11 @@ export default function MyWorkforcePage() {
                       </div>
                     </div>
                     {s.expired ? (
-                      <Badge variant="danger">หมดอายุ</Badge>
+                      <AndonLamp status="down" size="sm" showLabel />
                     ) : s.cert_required ? (
-                      <Badge variant="info">ต้องมีใบรับรอง</Badge>
+                      <AndonLamp status="idle" size="sm" showLabel />
                     ) : (
-                      <Badge variant="success">ใช้งานได้</Badge>
+                      <AndonLamp status="ok" size="sm" showLabel />
                     )}
                   </li>
                 ))}
@@ -320,17 +320,17 @@ export default function MyWorkforcePage() {
                           {t.score != null ? ` · คะแนน ${t.score}` : ""}
                         </div>
                       </div>
-                      <Badge
-                        variant={
+                      <AndonLamp
+                        status={
                           t.status === "passed"
-                            ? "success"
+                            ? "ok"
                             : t.status === "failed"
-                              ? "danger"
-                              : "neutral"
+                              ? "down"
+                              : "idle"
                         }
-                      >
-                        {t.status}
-                      </Badge>
+                        size="sm"
+                        showLabel
+                      />
                     </li>
                   ))}
                 </ul>

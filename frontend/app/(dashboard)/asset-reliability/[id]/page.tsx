@@ -12,7 +12,6 @@ import { useApiQuery } from "@/lib/api";
 import { Grid, VStack } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/ui/spinner";
@@ -30,6 +29,7 @@ import {
   Box, PackageOpen, ClipboardCheck, ShieldAlert, ArrowLeft, Plus, Trash2, RefreshCw,
   TriangleAlert, CheckCircle2, Info,
 } from "lucide-react";
+import AndonLamp from "@/components/AndonLamp";
 
 interface ReliabilityProfile {
   asset: Record<string, any>;
@@ -300,7 +300,7 @@ export default function AssetReliabilityProfilePage() {
     { key: "unit", header: "หน่วย", renderCell: (r) => r.unit || "—" },
     { key: "serial", header: "Serial ล่าสุด", renderCell: (r) => r.current_serial || r.serial_number || "—" },
     { key: "installed", header: "ติดตั้งเมื่อ", renderCell: (r) => r.install_date || r.installed_at || "—" },
-    { key: "status", header: "สถานะ", renderCell: (r) => <Badge variant={r.status === "active" ? "success" : "neutral"}>{r.status === "active" ? "ใช้งาน" : r.status === "spare" ? "อะไหล่สำรอง" : r.status}</Badge> },
+    { key: "status", header: "สถานะ", renderCell: (r) => <AndonLamp status={r.status === "active" ? "ok" : "idle"} size="sm" showLabel /> },
     {
       key: "actions", header: "จัดการ", align: "right",
       renderCell: (r) => (
@@ -357,7 +357,7 @@ export default function AssetReliabilityProfilePage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">ความสำคัญ (Criticality)</p>
               <p className="flex items-center gap-2">
-                <Badge variant={critBadgeVariant[data.criticality?.level || "B"] || "neutral"}>คลาส {data.criticality?.level || "?"}</Badge>
+                <AndonLamp status={data.criticality?.level === "A" ? "down" : data.criticality?.level === "B" ? "warn" : data.criticality?.level === "C" ? "idle" : "ok"} size="sm" showLabel />
                 <span className="text-xs text-muted-foreground">คะแนน: {data.criticality?.score ?? "—"}</span>
               </p>
             </div>
@@ -537,9 +537,11 @@ export default function AssetReliabilityProfilePage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-muted-foreground">ระดับสุขภาพ:</span>
-                    <Badge variant={data.health?.health === "good" ? "success" : data.health?.health === "fair" ? "warning" : data.health?.health === "poor" ? "danger" : "info"}>
-                      {data.health?.health || "—"}
-                    </Badge>
+                    <AndonLamp
+                      status={data.health?.health === "good" ? "ok" : data.health?.health === "fair" ? "warn" : data.health?.health === "poor" ? "down" : "idle"}
+                      size="sm"
+                      showLabel
+                    />
                     {data.health?.score != null && <span className="text-lg font-bold tabular-nums">{data.health.score}/100</span>}
                   </div>
                   <Progress value={data.health?.score ?? 0} className="h-2" />
@@ -601,7 +603,7 @@ export default function AssetReliabilityProfilePage() {
                     { key: "failure_date", header: "วันที่", renderCell: (r) => r.failure_date || "—" },
                     { key: "title", header: "คำอธิบาย", renderCell: (r) => r.title || r.notes || "—" },
                     { key: "type", header: "ประเภท", renderCell: (r) => <div className="flex flex-col"><span>{r.failure_type_name || "—"}</span>{r.failure_mode_name && <span className="text-xs text-muted-foreground">{r.failure_mode_name}</span>}</div> },
-                    { key: "rca", header: "RCA", renderCell: (r) => r.rca_status ? <Badge variant="info">{r.rca_status}</Badge> : <span className="text-muted-foreground">—</span> },
+                    { key: "rca", header: "RCA", renderCell: (r) => r.rca_status ? <AndonLamp status="idle" size="sm" showLabel /> : <span className="text-muted-foreground">—</span> },
                   ]}
                   data={data.failure_events.items}
                   idKey="id"
@@ -628,20 +630,20 @@ export default function AssetReliabilityProfilePage() {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="info" className="text-base">{data.lifecycle?.label || "ยังไม่ระบุ"}</Badge>
-                  {data.lifecycle?.changed_at && <span className="text-xs text-muted-foreground">เปลี่ยนเมื่อ {new Date(data.lifecycle.changed_at).toLocaleString("th-TH")}</span>}
-                  {data.lifecycle?.reason && <p className="w-full text-sm text-muted-foreground">เหตุผล: {data.lifecycle.reason}</p>}
-                </div>
+<div className="flex flex-wrap gap-2">
+                      <AndonLamp status="idle" size="sm" showLabel />
+                      {data.lifecycle?.changed_at && <span className="text-xs text-muted-foreground">เปลี่ยนเมื่อ {new Date(data.lifecycle.changed_at).toLocaleString("th-TH")}</span>}
+                      {data.lifecycle?.reason && <p className="w-full text-sm text-muted-foreground">เหตุผล: {data.lifecycle.reason}</p>}
+                    </div>
                 <div className="mt-4">
                   <p className="mb-2 text-sm font-semibold">สถานะที่เปลี่ยนไปได้: {canLifeChange.length === 0 ? <span className="font-normal text-muted-foreground">ไม่มี (ปลายทาง/ไม่สามารถ)</span> : null}</p>
-                  {canLifeChange.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {canLifeChange.map((s) => (
-                        <Badge key={s} variant="info">{LIFE_LABELS[s] || s}</Badge>
-                      ))}
-                    </div>
-                  )}
+{canLifeChange.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {canLifeChange.map((s) => (
+                          <AndonLamp key={s} status="idle" size="sm" showLabel />
+                        ))}
+                      </div>
+                    )}
                 </div>
               </CardContent>
             </Card>
@@ -654,7 +656,7 @@ export default function AssetReliabilityProfilePage() {
                     {data.lifecycle.history.map((h, i) => (
                       <div key={i} className="relative">
                         <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
-                        <p className="text-sm"><Badge variant="info">{LIFE_LABELS[h.to_status] || h.to_status}</Badge></p>
+                        <p className="text-sm"><AndonLamp status="idle" size="sm" showLabel /></p>
                         <p className="text-xs text-muted-foreground">{h.changed_at ? new Date(h.changed_at).toLocaleString("th-TH") : "—"} · โดย {h.changed_by_name || h.changed_by || "—"}</p>
                         {h.reason && <p className="text-sm text-muted-foreground">{h.reason}</p>}
                         {h.reference && <p className="text-xs text-muted-foreground">อ้างอิง: {h.reference}</p>}
@@ -719,8 +721,8 @@ export default function AssetReliabilityProfilePage() {
                     { key: "planned_start", header: "เริ่มตามแผน", renderCell: (r) => r.planned_start || r.actual_start || "—" },
                     { key: "completed", header: "ที่ทำจริง", renderCell: (r) => r.actual_start ? (r.actual_end || "ทำอยู่") : "—" },
                     { key: "status", header: "สถานะ", renderCell: (r) => {
-                        const m: Record<string, any> = { planned: <Badge variant="info">วางแผน</Badge>, in_progress: <Badge variant="warning">กำลังทำ</Badge>, completed: <Badge variant="success">เสร็จ</Badge>, cancelled: <Badge variant="neutral">ยกเลิก</Badge> };
-                        return m[r.status] || <Badge>{r.status}</Badge>;
+                        const m: Record<string, any> = { planned: <AndonLamp status="idle" size="sm" showLabel />, in_progress: <AndonLamp status="warn" size="sm" showLabel />, completed: <AndonLamp status="ok" size="sm" showLabel />, cancelled: <AndonLamp status="idle" size="sm" showLabel /> };
+                        return m[r.status] || <AndonLamp status="idle" size="sm" showLabel />;
                       } },
                     { key: "reason", header: "เหตุผล", renderCell: (r) => r.reason || "—" },
                   ]}
@@ -834,7 +836,7 @@ export default function AssetReliabilityProfilePage() {
           {lifeOk && <Alert variant="success" title="สำเร็จ" description={lifeOk} />}
           {lifeError && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={lifeError} />}
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">จาก: <Badge variant="info">{data.lifecycle?.label || "—"}</Badge></p>
+            <p className="text-sm text-muted-foreground">จาก: <AndonLamp status="idle" size="sm" showLabel /></p>
             <Select value={lifeTo} onValueChange={setLifeTo}>
               <SelectTrigger aria-label="สถานะใหม่"><SelectValue placeholder="เลือกสถานะใหม่" /></SelectTrigger>
               <SelectContent>

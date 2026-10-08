@@ -4,14 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, ShieldAlert } from "lucide-react";
 
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { SectionHeading, KpiCard, LoadingGrid } from "@/components/dashboard/kit";
 import { usePageHero } from "@/lib/i18n";
+import { PageShell } from "@/components/PageShell";
 import { describeReason, fmtMinutes, fmtPct, getConfig, getDashboard } from "@/lib/workforce";
 import type { CapabilityMap, ConfigResponse, Dashboard } from "@/lib/workforce";
+import AndonLamp from "@/components/AndonLamp";
 
 /**
  * app/(dashboard)/workforce/page.tsx — ภาพรวมกำลังคน (Phase 34)
@@ -79,17 +80,16 @@ export default function WorkforcePage() {
   const over = cfg?.config.capacity_over_pct ?? 100;
 
   return (
-    <div className="space-y-6">
-      <SectionHeading
-        title={hero.title}
-        sub={hero.desc}
-        right={
-          <Button variant="outline" size="sm" onClick={() => setToken((t) => t + 1)} disabled={loading}>
-            รีเฟรช
-          </Button>
-        }
-      />
-
+    <PageShell
+      eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
+      title={hero.title}
+      description={hero.desc}
+      actions={
+        <Button variant="outline" size="sm" onClick={() => setToken((t) => t + 1)} disabled={loading}>
+          รีเฟรช
+        </Button>
+      }
+    >
       {error && (
         <Alert variant="danger">
           <AlertTriangle className="h-4 w-4" />
@@ -143,11 +143,11 @@ export default function WorkforcePage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ต้องมีใบรับรอง</span>
-                  <Badge variant="neutral">{dash?.skills.cert_required ?? "—"}</Badge>
+                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills.cert_required ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ต้องมีสิทธิ์ (authorization)</span>
-                  <Badge variant="neutral">{dash?.skills.auth_required ?? "—"}</Badge>
+                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills.auth_required ?? "—"}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   ใบรับรองที่ยังใช้ได้เป็นหลักฐานความสามารถด้วยตัวเอง
@@ -163,21 +163,18 @@ export default function WorkforcePage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ใบรับรอง</span>
-                  <Badge variant={dash?.expiring.certificates ? "danger" : "neutral"}>
-                    {dash?.expiring.certificates ?? "—"}
-                  </Badge>
+                  <AndonLamp status={dash?.expiring.certificates ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring.certificates ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">สิทธิ์</span>
-                  <Badge variant={dash?.expiring.authorizations ? "danger" : "neutral"}>
-                    {dash?.expiring.authorizations ?? "—"}
-                  </Badge>
+                  <AndonLamp status={dash?.expiring.authorizations ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring.authorizations ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">บันทึกทักษะ</span>
-                  <Badge variant={dash?.expiring.skill_records ? "danger" : "neutral"}>
-                    {dash?.expiring.skill_records ?? "—"}
-                  </Badge>
+                  <AndonLamp status={dash?.expiring.skill_records ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring.skill_records ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">งานที่รออบรม / เกินกำหนด</span>
@@ -241,9 +238,7 @@ export default function WorkforcePage() {
               <CardContent className="space-y-2">
                 {dash.honesty.map((h) => (
                   <div key={h.key} className="flex items-start gap-2 text-sm">
-                    <Badge variant={h.measured ? "primary" : "neutral"}>
-                      {h.measured ? "วัดได้จริง" : "ยังไม่มีข้อมูล"}
-                    </Badge>
+                    <AndonLamp status={h.measured ? "ok" : "idle"} size="sm" />
                     <span className="text-muted-foreground">{h.note}</span>
                   </div>
                 ))}
@@ -257,17 +252,15 @@ export default function WorkforcePage() {
                 <CardTitle>กฎการบังคับใช้ที่มีผลต่อคุณ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span>ปฏิเสธคนที่ไม่ผ่านคุณสมบัติ</span>
-                  <Badge variant={cfg.config.block_unqualified ? "danger" : "neutral"}>
-                    {cfg.config.block_unqualified ? "เปิด" : "ปิด"}
-                  </Badge>
+                  <AndonLamp status={cfg.config.block_unqualified ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{cfg.config.block_unqualified ? "เปิด" : "ปิด"}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span>มอบหมายอัตโนมัติ</span>
-                  <Badge variant={cfg.config.auto_assign ? "danger" : "neutral"}>
-                    {cfg.config.auto_assign ? "เปิด" : "ปิด"}
-                  </Badge>
+                  <AndonLamp status={cfg.config.auto_assign ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{cfg.config.auto_assign ? "เปิด" : "ปิด"}</span>
                 </div>
                 {can && (
                   <div className="flex items-center justify-between">
@@ -285,6 +278,6 @@ export default function WorkforcePage() {
           )}
         </>
       )}
-    </div>
+    </PageShell>
   );
 }
