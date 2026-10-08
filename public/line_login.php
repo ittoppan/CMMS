@@ -1,4 +1,10 @@
 <?php
+// Ensure session cookie works across tunnel/proxy
+ini_set('session.cookie_domain', '');
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? '1' : '0');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
 
