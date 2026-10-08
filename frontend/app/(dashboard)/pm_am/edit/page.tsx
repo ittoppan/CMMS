@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { assetUrl } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -305,7 +306,7 @@ function EditPMContent() {
                     {attachments.map(a => (
                       <div key={a.id} className="flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2" style={{ background: "var(--cmms-bg-card)", borderColor: "var(--cmms-border)" }}>
                         <a
-                          href={a.file_path}
+                          href={assetUrl(a.file_path)}
                           target="_blank"
                           rel="noreferrer"
                           className="break-all text-[13px] font-semibold no-underline"

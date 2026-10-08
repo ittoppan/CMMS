@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t, statusText } from "@/lib/i18n";
+import { assetUrl } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -647,7 +648,7 @@ export default function PMSchedulePage() {
                   {detailAtts.map(a => (
                     <div key={a.id} className="flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
                       <a
-                        href={a.file_path}
+                        href={assetUrl(a.file_path)}
                         target="_blank"
                         rel="noreferrer"
                         className="break-all text-[13px] font-semibold no-underline"

@@ -53,7 +53,15 @@ try {
         $rows = $pdo->prepare("SELECT id, file_name, file_path, file_type, category, file_size, uploaded_by, created_at
                                FROM repair_attachments WHERE repair_id = ? ORDER BY id DESC");
         $rows->execute([$woId]);
-        echo json_encode(['success' => true, 'attachments' => $rows->fetchAll(PDO::FETCH_ASSOC)], JSON_UNESCAPED_UNICODE);
+        $atts = $rows->fetchAll(PDO::FETCH_ASSOC);
+        // file_path เก็บแบบ relative (uploads/repair/...) — ปรับให้เป็น '/'-นำหน้าเสมอ
+        // กันฝั่ง client ใช้ตรง ๆ แล้ว resolve ผิด path (เช่น /repair/uploads/...) ได้
+        foreach ($atts as &$a) {
+            $a['file_path'] = ($a['file_path'] && $a['file_path'] !== '' && $a['file_path'][0] !== '/' && $a['file_path'][0] !== 'h')
+                ? '/' . $a['file_path'] : $a['file_path'];
+        }
+        unset($a);
+        echo json_encode(['success' => true, 'attachments' => $atts], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

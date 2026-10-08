@@ -17,6 +17,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { useToast } from "@/components/ToastProvider";
 import { sendOrEnqueue } from "@/lib/offlineQueue";
 import { cn } from "@/lib/cn";
+import { assetUrl } from "@/lib/utils";
 import {
   ArrowLeft, FileText, History, TriangleAlert, Users, Link2, GraduationCap, Clock, QrCode,
   Upload, CheckCheck, Download, RefreshCw, Plus, Stamp, Ban, CalendarClock, ShieldAlert, Info,
@@ -506,7 +507,7 @@ export default function DocumentDetailPage() {
                       {rev.change_reason && <p className="text-xs text-muted-foreground">เหตุผล: {rev.change_reason}</p>}
 
                       <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-4">
-                        <span>ไฟล์: {rev.file_path ? <a className="text-[var(--cmms-primary)] underline" href={`/${rev.file_path}`} target="_blank" rel="noreferrer">{rev.file_name}</a> : "—"}</span>
+                        <span>ไฟล์: {rev.file_path ? <a className="text-[var(--cmms-primary)] underline" href={assetUrl(rev.file_path)} target="_blank" rel="noreferrer">{rev.file_name}</a> : "—"}</span>
                         <span>ผลกระทบ: {imps.length}{openImps > 0 ? ` (ค้าง ${openImps})` : ""}</span>
                         <span>รับทราบ: {rev.ack_done ?? 0}/{rev.ack_total ?? 0}</span>
                         <span>อนุมัติ: {rev.approval_done ?? 0}/{rev.approval_total ?? 0}</span>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { t, statusText, priorityText } from "@/lib/i18n";
+import { assetUrl } from "@/lib/utils";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { sendOrEnqueue } from "@/lib/offlineQueue";
@@ -1119,7 +1120,7 @@ export default function RepairViewDetailsPage() {
                   <div key={a.id} className="rounded-lg border border-border p-1">
                     {(a.file_type || "").startsWith("image") ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={a.file_path} alt={a.file_name} className="h-20 w-full rounded object-cover" />
+                      <img src={assetUrl(a.file_path)} alt={a.file_name} className="h-20 w-full rounded object-cover" />
                     ) : (
                       <div className="flex h-20 w-full items-center justify-center rounded bg-secondary/40 text-[10px] font-medium text-muted-foreground">
                         {a.file_name}
