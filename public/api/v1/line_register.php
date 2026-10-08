@@ -42,7 +42,7 @@ try {
             if ($lineUid === '') { http_response_code(400); echo json_encode(['error' => 'Missing line_user_id']); exit; }
 
             $stmt = $pdo->prepare(
-                "SELECT id, employee_code, full_name, role, department_id, phone FROM users WHERE line_user_id = ? AND is_active = 1"
+                "SELECT id, employee_code, full_name, role, department_id, phone, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1"
             );
             $stmt->execute([$lineUid]);
             $user = $stmt->fetch();
@@ -131,7 +131,7 @@ try {
             echo json_encode([
                 'success' => true,
                 'bound' => true,
-                'user' => ['id' => (int)$user['id'], 'full_name' => $user['full_name'], 'employee_code' => $user['employee_code']],
+                'user' => ['id' => (int)$user['id'], 'full_name' => $user['full_name'], 'employee_code' => $user['employee_code'], 'avatar_path' => $user['avatar_path'] ?? null],
                 'message' => "ลงทะเบียนสำเร็จ ยินดีต้อนรับ {$user['full_name']}",
             ]);
             break;

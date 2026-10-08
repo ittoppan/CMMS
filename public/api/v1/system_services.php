@@ -51,6 +51,23 @@ function processPidByName(string $name): ?int {
     return null;
 }
 
+function zrokInfo(): array {
+    // ดูจาก local zrok API (port 9191) — ถ้ามี
+    $ctx = stream_context_create(['http' => ['timeout' => 2]]);
+    $json = @file_get_contents('http://127.0.0.1:9191/api/tunnels', false, $ctx);
+    if ($json === false) return [];
+    $j = json_decode($json, true);
+    $tunnels = [];
+    foreach (($j['tunnels'] ?? []) as $t) {
+        $tunnels[] = [
+            'name' => $t['name'] ?? '',
+            'public_url' => $t['public_url'] ?? '',
+            'addr' => $t['config']['addr'] ?? '',
+        ];
+    }
+    return $tunnels;
+}
+
 function serviceStatus(string $svc): string {
     // sc query ไม่ต้อง admin (Get-Service ต้อง admin เมื่อรันผ่าน IIS AppPool)
     $out = shell_exec('sc query ' . $svc . ' 2>NUL');
@@ -122,6 +139,12 @@ function getServiceStatuses(PDO $pdo): array {
         $cfLog = (string)@file_get_contents($cfLogPath);
         if (preg_match('#https://[a-z0-9\-]+\.trycloudflare\.com#', $cfLog, $m)) $cfUrl = $m[0];
     }
+
+    // 2.7 zrok Tunnel
+    $zrokPid = processPidByName('zrok2.exe');
+    $zrokTunnels = zrokInfo();
+    $zrokUrl = '';
+    foreach ($zrokTunnels as $t) { if ($t['public_url']) { $zrokUrl = $t['public_url']; break; } }
 
     // 3. IIS site cmms-tpt (PHP API)
     $siteState = websiteStatus('cmms-tpt');
@@ -197,6 +220,23 @@ function getServiceStatuses(PDO $pdo): array {
         'url' => $cfUrl,
     ];
 
+    $zrokStatus = (!$zrokPid) ? 'stopped' : ($zrokUrl ? 'running' : 'warning');
+    $services[] = [
+        'key' => 'zrok',
+        'name' => 'zrok Tunnel',
+        'icon' => '🚇',
+        'desc' => 'URL สาธารณะ https ผ่าน zrok (share public 3001, 8081) — ใช้แทน ngrok/cloudflared',
+        'status' => $zrokStatus,
+        'running' => !empty($zrokPid),
+        'detail' => $zrokPid
+            ? ($zrokUrl
+                ? "กำลังรัน • {$zrokUrl} • PID $zrokPid"
+                : "process รันอยู่ (PID $zrokPid) แต่ยังไม่มี tunnel")
+            : 'หยุดอยู่ — กดรันเพื่อเปิด zrok Tunnel (share public 3001, 8081)',
+        'pid' => $zrokPid,
+        'url' => $zrokUrl,
+    ];
+
     $iisStatus = (!$iisListen) ? 'stopped' : ($apiHttp['http_code'] === 200 ? 'running' : 'warning');
     $services[] = [
         'key' => 'iis',
@@ -266,6 +306,9 @@ function startService(string $key): array {
         case 'cloudflared':
             shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'C:\\cloudflared\\cloudflared.exe\' -ArgumentList \'tunnel\',\'--url\',\'http://localhost:3001\',\'--no-autoupdate\',\'--protocol\',\'http2\' -WindowStyle Hidden -RedirectStandardOutput \'C:\\cloudflared\\cf_tunnel_out.log\' -RedirectStandardError \'C:\\cloudflared\\cf_tunnel_err.log\'"');
             break;
+        case 'zrok':
+            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'cmd\' -ArgumentList \'/c\',\'C:\\inetpub\\wwwroot\\cmms-tpt\\zrok2\\zrok2.bat\' -WorkingDirectory \'C:\\inetpub\\wwwroot\\cmms-tpt\\zrok2\' -WindowStyle Hidden"');
+            break;
         case 'iis':
             shell_exec('powershell -NoProfile -Command "Import-Module WebAdministration; Start-Website -Name \'cmms-tpt\'; if (-not (Get-Service W3SVC | Where-Object {$_.Status -ne \'Running\'})) { Start-Service W3SVC }"');
             break;
@@ -289,6 +332,9 @@ function stopService(string $key): array {
             break;
         case 'cloudflared':
             shell_exec('powershell -NoProfile -Command "Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue"');
+            break;
+        case 'zrok':
+            shell_exec('powershell -NoProfile -Command "Get-Process zrok2 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue"');
             break;
         case 'iis':
             shell_exec('powershell -NoProfile -Command "Import-Module WebAdministration; Stop-Website -Name \'cmms-tpt\'"');

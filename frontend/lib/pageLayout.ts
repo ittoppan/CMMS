@@ -147,6 +147,23 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     ],
   },
   {
+    // ── Phase 37: Reliability Engineering ──
+    name: "วิศวกรรมความเสียหาย",
+    pages: [
+      { value: "/reliability", label: "ภาพรวมความเสียหาย" },
+      { value: "/reliability/assets", label: "ความเสียหายรายเครื่อง" },
+      { value: "/reliability/failure-modes", label: "รูปแบบการเสีย & Pareto" },
+      { value: "/reliability/trend", label: "แนวโน้มความเสียหาย" },
+      { value: "/reliability/weibull", label: "การวิเคราะห์ Weibull" },
+      { value: "/reliability/bad-actors", label: "เครื่องที่มีปัญหาเป็นระบบ" },
+      { value: "/reliability/pm-effectiveness", label: "ประสิทธิผลของแผน PM" },
+      { value: "/reliability/growth", label: "การเติบโตของความเสียหาย" },
+      { value: "/reliability/studies", label: "งานวิเคราะห์เชิงวิศวกรรม" },
+      { value: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+      { value: "/reliability/config", label: "นิยาม & การตั้งค่า KPI" },
+    ],
+  },
+  {
     name: "บุคลากร",
     pages: [
       { value: "/users", label: "การจัดการผู้ใช้งาน" },
@@ -281,6 +298,41 @@ export const KNOWLEDGE_USAGE_SECTIONS: PageLayoutSection[] = [
   { id: "content", label: "ตารางเหตุการณ์การใช้งาน", desc: "ตัวกรอง action/ผู้ใช้/อุปกรณ์ + ตาราง log จริง" },
 ];
 
+/**
+ * ── Phase 37: Reliability Engineering ──
+ * Section ids mirror the DOM structure of the /reliability pages so the Layout
+ * Studio in /editor can toggle them.
+ */
+export const RELIABILITY_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ตัวกรองร่วม", desc: "ชื่อหน้า + ตัวกรองขอบเขต/ช่วงเวลา/ฐานเวลา ใช้ร่วมทั้งโมดูล" },
+  { id: "kpi", label: "การ์ด KPI หลัก (8 ตัว)", desc: "MTBF · MTTR · อัตราการเสีย · ความพร้อม · downtime · การเสียซ้ำ · แจ้งเหตุ · ต้นทุน" },
+  { id: "blocked", label: "แผง KPI ที่คำนวณไม่ได้", desc: "รายการที่ไม่ผ่านเกณฑ์ขั้นต่ำ พร้อมเหตุผลจากเอนจิน" },
+  { id: "lineage", label: "ที่มาของตัวเลข (Lineage)", desc: "ช่วงเวลา · ขอบเขต · ฐานเวลา · แหล่งข้อมูล · เวอร์ชันเอนจิน" },
+  { id: "charts", label: "แนวโน้ม & รูปแบบการเสีย", desc: "กราฟแนวโน้ม + ตาราง failure mode ชั้นนำ" },
+  { id: "content", label: "เนื้อหาหลักของหน้า", desc: "ตาราง/รายละเอียดเฉพาะของแต่ละหน้าในโมดูล" },
+  { id: "quality", label: "คุณภาพข้อมูล", desc: "ผลตรวจ DQ ที่อธิบายว่าทำไมบางค่าจึงคำนวณไม่ได้" },
+];
+
+export const RELIABILITY_ASSETS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ตัวกรองร่วม", desc: "ชื่อหน้า + ตัวกรองขอบเขต/ช่วงเวลา" },
+  { id: "summary", label: "สรุปผลการจัดอันดับ", desc: "จำนวนเครื่องในขอบเขต + หมายเหตุการมองเห็นต้นทุน" },
+  { id: "content", label: "ตารางจัดอันดับเครื่อง", desc: "MTBF · MTTR · downtime · ความพร้อม · ต้นทุน + ลิงก์ไปหน้าเครื่อง" },
+  { id: "lineage", label: "ที่มาของตัวเลข (Lineage)", desc: "ช่วงเวลา · ขอบเขต · ฐานเวลา" },
+];
+
+export const RELIABILITY_STUDIES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างงานวิเคราะห์ (ตามสิทธิ์)" },
+  { id: "filters", label: "ตัวกรองงานวิเคราะห์", desc: "สถานะ + คำค้น + ช่วงเวลา" },
+  { id: "content", label: "ตารางงานวิเคราะห์", desc: "รหัส · ชื่อเรื่อง · วิธีการ · ผู้วิเคราะห์ · สถานะ" },
+  { id: "actions", label: "การดำเนินการที่ตั้งไว้", desc: "งานที่ถูกสร้างต่อจากงานวิเคราะห์ + สถานะ" },
+];
+
+export const RELIABILITY_CONFIG_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + สิทธิ์", desc: "ชื่อหน้า + สถานะสิทธิ์ (อ่าน/เขียน/ผู้ดูแล)" },
+  { id: "config", label: "นโยบายเอนจิน", desc: "เกณฑ์ขั้นต่ำ · ฐานเวลา · ขอบเขตสูงสุด (อ่านอย่างเดียว)" },
+  { id: "definitions", label: "นิยาม KPI", desc: "สูตร · หน่วย · แหล่งข้อมูล · ข้อจำกัด · เวอร์ชัน" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
@@ -299,6 +351,11 @@ export const PAGE_MODEL_OVERRIDES: Record<
   "/knowledge/search": { sections: KNOWLEDGE_SEARCH_SECTIONS, wired: true },
   "/knowledge/articles": { sections: KNOWLEDGE_ARTICLES_SECTIONS, wired: true },
   "/knowledge/usage": { sections: KNOWLEDGE_USAGE_SECTIONS, wired: true },
+  // ── Phase 37: Reliability Engineering ──
+  "/reliability": { sections: RELIABILITY_SECTIONS, wired: true },
+  "/reliability/assets": { sections: RELIABILITY_ASSETS_SECTIONS, wired: true },
+  "/reliability/studies": { sections: RELIABILITY_STUDIES_SECTIONS, wired: true },
+  "/reliability/config": { sections: RELIABILITY_CONFIG_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>

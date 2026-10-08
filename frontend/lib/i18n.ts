@@ -25,6 +25,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
   "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
   "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
+  "nav.shutdown": { th: "หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
   "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "nav.phase32_docs": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
@@ -59,6 +60,17 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
   "menu.planning_calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
   "menu.field_my_plan": { th: "แผนงานของฉัน", en: "My Plan" },
+  "menu.shutdown": { th: "ศูนย์หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
+  "menu.workforce": { th: "กำลังคนและคุณสมบัติ", en: "Workforce & Competency" },
+  "menu.workforce_people": { th: "ข้อมูลช่าง", en: "People Records" },
+  "menu.workforce_skills": { th: "ทะเบียนทักษะ", en: "Skill Catalog" },
+  "menu.workforce_certs": { th: "ใบรับรองและสิทธิ์", en: "Certifications" },
+  "menu.workforce_training": { th: "หลักสูตรและอบรม", en: "Courses & Training" },
+  "menu.workforce_capacity": { th: "ความจุและภาระงาน", en: "Capacity Board" },
+  "menu.workforce_shifts": { th: "กะและการลา", en: "Shifts & Leave" },
+  "menu.workforce_crews": { th: "ทีมงาน", en: "Crews" },
+  "menu.workforce_mine": { th: "ข้อมูลของฉัน", en: "My Competency" },
+  "menu.workforce_conflicts": { th: "ความพร้อมและการจัดช่าง", en: "Readiness & Crewing" },
   "menu.supervisor_verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
   "menu.forms": { th: "ศูนย์แบบฟอร์ม", en: "Forms Center (F-EN)" },
   "menu.forms_designer": { th: "ออกแบบแบบฟอร์มดิจิทัล", en: "Form Designer" },
@@ -655,6 +667,20 @@ DICT["priority.high"] = { th: "สูง", en: "High" };
 DICT["priority.medium"] = { th: "ปานกลาง", en: "Medium" };
 DICT["priority.low"] = { th: "ต่ำ", en: "Low" };
 
+// ── Phase 37: Reliability Engineering (nav + menu) ──
+DICT["nav.reliability"] = { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" };
+DICT["menu.reliability"] = { th: "ภาพรวมความเสียหาย", en: "Reliability Overview" };
+DICT["menu.reliability_assets"] = { th: "ความเสียหายรายเครื่อง", en: "Asset Reliability" };
+DICT["menu.reliability_failure_modes"] = { th: "รูปแบบการเสีย & Pareto", en: "Failure Modes & Pareto" };
+DICT["menu.reliability_trend"] = { th: "แนวโน้มความเสียหาย", en: "Reliability Trend" };
+DICT["menu.reliability_weibull"] = { th: "การวิเคราะห์ Weibull", en: "Weibull Analysis" };
+DICT["menu.reliability_bad_actors"] = { th: "เครื่องที่มีปัญหาเป็นระบบ", en: "Bad Actors" };
+DICT["menu.reliability_pm_effectiveness"] = { th: "ประสิทธิผลของแผน PM", en: "PM Effectiveness" };
+DICT["menu.reliability_growth"] = { th: "การเติบโตของความเสียหาย", en: "Reliability Growth" };
+DICT["menu.reliability_studies"] = { th: "งานวิเคราะห์เชิงวิศวกรรม", en: "Engineering Studies" };
+DICT["menu.reliability_data_quality"] = { th: "คุณภาพข้อมูล", en: "Data Quality" };
+DICT["menu.reliability_config"] = { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions" };
+
 // ════════════════
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
@@ -676,6 +702,8 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
   "/planning/calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
   "/field/plan": { th: "แผนงานของฉัน", en: "My Plan" },
+  "/shutdown": { th: "ศูนย์หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
+  "/shutdown/[id]": { th: "รายละเอียดงานหยุดเครื่อง", en: "Shutdown Detail" },
   "/pm_am/calendar": { th: "ปฏิทิน PM/AM", en: "PM/AM Calendar" },
   "/pm_am/create": { th: "สร้างแผน PM", en: "Create PM Plan" },
   "/pm_am/batch_schedule": { th: "สร้างแผนแบบกลุ่ม", en: "Batch Schedule" },
@@ -832,6 +860,20 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/knowledge/reviews": { th: "งานทบทวนความรู้", en: "Knowledge Reviews" },
   "/knowledge/taxonomy": { th: "หมวดหมู่ & แท็กความรู้", en: "Knowledge Taxonomy" },
   "/knowledge/usage": { th: "สถิติการใช้งานความรู้", en: "Knowledge Usage Analytics" },
+  // ── Phase 37: Reliability Engineering ──
+  "/reliability": { th: "วิศวกรรมความเสียหายเชิงวิเคราะห์", en: "Reliability Engineering" },
+  "/reliability/assets": { th: "ความเสียหายรายเครื่อง", en: "Asset Reliability" },
+  "/reliability/assets/[id]": { th: "รายละเอียดความเสียหายของเครื่อง", en: "Asset Reliability Detail" },
+  "/reliability/failure-modes": { th: "รูปแบบการเสีย & Pareto", en: "Failure Modes & Pareto" },
+  "/reliability/trend": { th: "แนวโน้มความเสียหาย", en: "Reliability Trend" },
+  "/reliability/weibull": { th: "การวิเคราะห์ Weibull", en: "Weibull Analysis" },
+  "/reliability/bad-actors": { th: "เครื่องที่มีปัญหาเป็นระบบ", en: "Bad Actors" },
+  "/reliability/pm-effectiveness": { th: "ประสิทธิผลของแผน PM", en: "PM Effectiveness" },
+  "/reliability/growth": { th: "การเติบโตของความเสียหาย", en: "Reliability Growth" },
+  "/reliability/studies": { th: "งานวิเคราะห์เชิงวิศวกรรม", en: "Engineering Studies" },
+  "/reliability/studies/[id]": { th: "รายละเอียดงานวิเคราะห์", en: "Study Detail" },
+  "/reliability/data-quality": { th: "คุณภาพข้อมูลความเสียหาย", en: "Reliability Data Quality" },
+  "/reliability/config": { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions & Settings" },
 };
 
 // หมวด breadcrumb
@@ -871,6 +913,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/pages": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/audit-log": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/editor": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
+  "/reliability": { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" },
 };
 
 // ════════════════ Hero หน้า (หัวข้อหลัก) ════════════════
@@ -912,6 +955,50 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "planning": {
     th: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "ศูนย์วางแผนซ่อมบำรุง", desc: "ภาพรวมคิววางแผน ภาระงานช่าง ความพร้อมงาน และความขัดแย้งของตาราง — จัดลำดับ มอบหมาย และวางแผนเป็นกลุ่ม" },
     en: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "Maintenance Planning Center", desc: "Planning queue, technician workload, work readiness and schedule conflicts — prioritize, assign and bulk-plan" },
+  },
+  "shutdown": {
+    th: { eyebrow: "SHUTDOWN & TURNAROUND · CMMS-TOPPAN", title: "ศูนย์หยุดเครื่อง & Turnaround", desc: "วางแผนขอบเขตงาน ความสัมพันธ์ และ Critical Path ตรวจความพร้อมเป็นรายการพร้อมเหตุผล และควบคุมการกลับเข้าสู่ระบบ — ไม่มีคะแนนรวม และไม่ปลด LOTO อัตโนมัติ" },
+    en: { eyebrow: "SHUTDOWN & TURNAROUND · CMMS-TOPPAN", title: "Shutdown & Turnaround", desc: "Plan scope, dependencies and the critical path, check readiness item-by-item with reasons, and control startup — no aggregate score and no automatic LOTO release" },
+  },
+  "workforce": {
+    th: { eyebrow: "WORKFORCE · CMMS-TOPPAN", title: "กำลังคนและคุณสมบัติ", desc: "ทักษะ ใบรับรอง สิทธิ์ ความพร้อมตามกะ และปริมาณงานเทียบความจุ — ทุกการมอบหมายตรวจสอบคุณสมบัติจริงก่อนเสมอ" },
+    en: { eyebrow: "WORKFORCE · CMMS-TOPPAN", title: "Workforce & Competency", desc: "Skills, certifications, authorizations, shift availability and workload versus capacity — every assignment is checked against real evidence" },
+  },
+  "workforce/capacity": {
+    th: { eyebrow: "CAPACITY BOARD · CMMS-TOPPAN", title: "ความจุและภาระงาน", desc: "เทียบเวลาที่วางแผนกับเวลาที่บันทึกจริงต่อช่าง — หักวันลาอนุมัติแล้วและเวลาที่งานถูกหยุด" },
+    en: { eyebrow: "CAPACITY BOARD · CMMS-TOPPAN", title: "Capacity & Workload", desc: "Planned versus recorded hours per technician — approved leave and paused time are deducted" },
+  },
+  "workforce/skills": {
+    th: { eyebrow: "SKILL CATALOG · CMMS-TOPPAN", title: "ทะเบียนทักษะ", desc: "กำหนดทักษะ ระดับขั้นต่ำ และเงื่อนไขใบรับรอง/สิทธิ์ที่ต้องมีครบก่อนรับงาน" },
+    en: { eyebrow: "SKILL CATALOG · CMMS-TOPPAN", title: "Skill Catalog", desc: "Define skills, minimum levels and the certificate or authorization each one requires" },
+  },
+  "workforce/certifications": {
+    th: { eyebrow: "CERTIFICATIONS · CMMS-TOPPAN", title: "ใบรับรองและสิทธิ์", desc: "บันทึกใบรับรองของพนักงานและผู้รับเหมา พร้อมแจ้งเตือนก่อนหมดอายุ" },
+    en: { eyebrow: "CERTIFICATIONS · CMMS-TOPPAN", title: "Certifications & Authorizations", desc: "Record employee and contractor credentials with expiry warnings" },
+  },
+  "workforce/training": {
+    th: { eyebrow: "TRAINING · CMMS-TOPPAN", title: "หลักสูตรและการอบรม", desc: "หลักสูตร ตารางอบรม และผลการอบรม — ผ่านการอบรมแล้วจะออกหลักฐานทักษะให้อัตโนมัติ" },
+    en: { eyebrow: "TRAINING · CMMS-TOPPAN", title: "Courses & Training", desc: "Course catalog, scheduled training and results — passing grants skill evidence automatically" },
+  },
+  "workforce/crews": {
+    th: { eyebrow: "CREWS · CMMS-TOPPAN", title: "ทีมงาน", desc: "จัดกลุ่มช่างเป็นทีม กำหนดหัวหน้าทีม และใช้ทีมเป็นเงื่อนไขระดับทีมในการมอบหมายงาน" },
+    en: { eyebrow: "CREWS · CMMS-TOPPAN", title: "Crews", desc: "Group technicians into crews, set crew leads, and use crews as team-level assignment clauses" },
+  },
+  "workforce/shifts": {
+    th: { eyebrow: "SHIFTS & LEAVE · CMMS-TOPPAN", title: "กะทำงานและการลา", desc: "กะรายบุคคลและวันลาที่อนุมัติแล้ว — วันลาอนุมัติจะถูกหักออกจากความจุโดยอัตโนมัติ" },
+    en: { eyebrow: "SHIFTS & LEAVE · CMMS-TOPPAN", title: "Shifts & Leave", desc: "Per-technician shifts and leave — approved leave is deducted from capacity automatically" },
+  },
+  "workforce/technicians": {
+    th: { eyebrow: "PEOPLE · CMMS-TOPPAN", title: "ข้อมูลช่าง", desc: "ทักษะ ใบรับรอง สิทธิ์ และหลักฐานที่มีอยู่ของแต่ละคน แบบละรายคน" },
+    en: { eyebrow: "PEOPLE · CMMS-TOPPAN", title: "People Records", desc: "Skills, certificates, authorizations and evidence held by each person" },
+  },
+  "workforce/conflicts": {
+    th: { eyebrow: "ความพร้อมและการจัดช่าง � CMMS-TOPPAN", title: "ความพร้อมและการจัดช่าง", desc: "ตรวจคุณสมบัติก่อนรับงาน — ระบบจัดอันดับผู้สมัครพร้อมเหตุผลประกอบ แต่ไม่มอบหมายงานให้อัตโนมัติ" },
+    en: { eyebrow: "READINESS & CREWING � CMMS-TOPPAN", title: "Readiness & Crewing", desc: "Qualification before work starts - candidates are ranked with reasons, but nothing is ever auto-assigned" },
+  },
+  "workforce/mine": {
+    th: { eyebrow: "MY RECORD · CMMS-TOPPAN", title: "คุณสมบัติของฉัน", desc: "ทักษะ ใบรับรอง สิทธิ์ และประวัติการอบรมของคุณเอง — ใช้ได้บนมือถือแบบออฟไลน์" },
+    en: { eyebrow: "MY RECORD · CMMS-TOPPAN", title: "My Competency", desc: "Your own skills, certificates, authorizations and training history — works offline on mobile" },
   },
   "planning/calendar": {
     th: { eyebrow: "TIMELINE PLANNER · CMMS-TOPPAN", title: "ตารางวางแผนงาน (Monthly)", desc: "ดูรอบเวลาวางแผนบนไทม์ไลน์รายวัน/สัปดาห์/เดือน กันความซ้ำซ้อนของช่างและเครื่องจักร แล้ววางแผนแบบกลุ่มจากช่องว่างในตาราง" },
@@ -1213,6 +1300,51 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "knowledge/usage": {
     th: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "สถิติการใช้งานความรู้", desc: "เหตุการณ์การใช้งานและผลตอบรับจากผู้ใช้จริง พร้อมการค้นหาที่ไม่เจอคำตอบ เพื่อหาบทความที่ไม่มีคนใช้หรือยังไม่ช่วยเหลือใคร" },
     en: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "Knowledge Usage Analytics", desc: "Real usage events and user feedback plus unanswered searches — find articles nobody uses or that still do not help" },
+  },
+  // ── Phase 37: Reliability Engineering ──
+  reliability: {
+    th: { eyebrow: "RELIABILITY ENGINEERING · CMMS-TOPPAN", title: "วิศวกรรมความเสียหายเชิงวิเคราะห์", desc: "MTBF · MTTR · ความพร้อม · รูปแบบการเสีย คำนวณทั้งหมดโดย Reliability Engine ฝั่งเซิร์ฟเวอร์ ค่าที่ไม่ผ่านเกณฑ์ข้อมูลจะแสดงเป็นช่องว่าง ไม่ใช่ 0" },
+    en: { eyebrow: "RELIABILITY ENGINEERING · CMMS-TOPPAN", title: "Reliability Engineering", desc: "MTBF, MTTR, availability and failure modes — every number computed by the server-side Reliability Engine; values that fail the minimum-data threshold stay blank, never zero" },
+  },
+  "reliability/assets": {
+    th: { eyebrow: "ASSET RELIABILITY · CMMS-TOPPAN", title: "ความเสียหายรายเครื่อง", desc: "จัดอันดับเครื่องจักรจาก downtime · จำนวนเหตุ · MTBF · MTTR · ความพร้อม ตามขอบเขตและช่วงเวลาที่เลือก" },
+    en: { eyebrow: "ASSET RELIABILITY · CMMS-TOPPAN", title: "Asset Reliability", desc: "Rank assets by downtime, failures, MTBF, MTTR and availability within the selected scope and period" },
+  },
+  "reliability/failure-modes": {
+    th: { eyebrow: "FAILURE MODES · CMMS-TOPPAN", title: "รูปแบบการเสีย & Pareto", desc: "สัดส่วนของแต่ละ failure mode พร้อมการจัดกลุ่ม ABC จาก downtime และจำนวนเหตุ — สะสมเป็นร้อยละโดยเอนจิน" },
+    en: { eyebrow: "FAILURE MODES · CMMS-TOPPAN", title: "Failure Modes & Pareto", desc: "Share per failure mode with ABC classification by downtime and count — cumulative percentages come from the engine" },
+  },
+  "reliability/trend": {
+    th: { eyebrow: "RELIABILITY TREND · CMMS-TOPPAN", title: "แนวโน้มความเสียหาย", desc: "MTBF · MTTR · ความพร้อม · จำนวนเหตุ แยกตามช่วงเวลา เห็นช่องว่างได้ตรงที่เอนจินคำนวณไม่ได้" },
+    en: { eyebrow: "RELIABILITY TREND · CMMS-TOPPAN", title: "Reliability Trend", desc: "MTBF, MTTR, availability and failures per bucket — gaps appear exactly where the engine could not compute a value" },
+  },
+  "reliability/weibull": {
+    th: { eyebrow: "WEIBULL ANALYSIS · CMMS-TOPPAN", title: "การวิเคราะห์ Weibull", desc: "พารามิเตอร์รูป Weibull (β · η) เมื่อมีเหตุเสียเพียงพอเท่านั้น พร้อมเส้นโค้งความน่าเชื่อถือและข้อจำกัดของแบบจำลอง" },
+    en: { eyebrow: "WEIBULL ANALYSIS · CMMS-TOPPAN", title: "Weibull Analysis", desc: "Weibull shape and scale parameters only when the failure count is sufficient, with reliability curves and model limitations" },
+  },
+  "reliability/bad-actors": {
+    th: { eyebrow: "BAD ACTORS · CMMS-TOPPAN", title: "เครื่องที่มีปัญหาเป็นระบบ", desc: "คะแนนจากเกณฑ์ที่ผู้ดูแลกำหนด พร้อมหลักฐานและเงื่อนไขขั้นต่ำที่แต่ละเกณฑ์ต้องผ่าน" },
+    en: { eyebrow: "BAD ACTORS · CMMS-TOPPAN", title: "Bad Actors", desc: "Scores from administrator-defined criteria, with the evidence and minimum sample each criterion had to satisfy" },
+  },
+  "reliability/pm-effectiveness": {
+    th: { eyebrow: "PM EFFECTIVENESS · CMMS-TOPPAN", title: "ประสิทธิผลของแผน PM", desc: "เปรียบเทียบอัตราการเสียในหน้าต่างก่อน–หลังการซ่อมบำรุง เป็นการสังเกตเชิงสถิติ ไม่ใช่ข้อสรุปเชิงเหตุผล" },
+    en: { eyebrow: "PM EFFECTIVENESS · CMMS-TOPPAN", title: "PM Effectiveness", desc: "Compare failure rates in the pre- and post-maintenance windows — an observed comparison, not a causal claim" },
+  },
+  "reliability/growth": {
+    th: { eyebrow: "RELIABILITY GROWTH · CMMS-TOPPAN", title: "การเติบโตของความเสียหาย", desc: "ผลสังเกตก่อน–หลัง Engineering Change โดยไม่สรุปว่าเป็นเพราะของการเปลี่ยนแปลง" },
+    en: { eyebrow: "RELIABILITY GROWTH · CMMS-TOPPAN", title: "Reliability Growth", desc: "Observed results before and after an engineering change, without claiming the change caused them" },
+  },
+  "reliability/studies": {
+    th: { eyebrow: "ENGINEERING STUDIES · CMMS-TOPPAN", title: "งานวิเคราะห์เชิงวิศวกรรม", desc: "บันทึกวิธีการ · สมมติฐาน · หลักฐาน และผลสรุป พร้อมส่งต่อเป็นการดำเนินการได้" },
+    en: { eyebrow: "ENGINEERING STUDIES · CMMS-TOPPAN", title: "Engineering Studies", desc: "Record method, assumptions, evidence and conclusions, then carry them forward as actions" },
+  },
+  "reliability/data-quality": {
+    th: { eyebrow: "DATA QUALITY · CMMS-TOPPAN", title: "คุณภาพข้อมูลความเสียหาย", desc: "ตรวจสอบข้อมูลต้นทางที่ทำให้ KPI คำนวณไม่ได้ พร้อมระดับความรุนแรงและผลกระทบต่อตัวชี้วัด" },
+    en: { eyebrow: "DATA QUALITY · CMMS-TOPPAN", title: "Reliability Data Quality", desc: "Source-data checks that block KPI computation, with severity and the affected indicators" },
+  },
+  "reliability/config": {
+    th: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "นิยาม & การตั้งค่า KPI", desc: "สูตร · หน่วย · แหล่งข้อมูล และข้อจำกัดของแต่ละ KPI พร้อมนโยบายเกณฑ์ขั้นต่ำของเอนจิน" },
+    en: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "KPI Definitions & Settings", desc: "Formula, unit, data sources and limitations of each KPI, plus the engine's minimum-data thresholds" },
   },
 };
 

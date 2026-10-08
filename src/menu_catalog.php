@@ -86,6 +86,21 @@ return [
     ['key' => 'rca/events',                'href' => '/rca/events',                'label' => 'เหตุการณ์ความเสียหาย',  'section' => 'วิเคราะห์ความเสียหาย & Root Cause'],
     ['key' => 'rca/taxonomy',              'href' => '/rca/taxonomy',              'label' => 'จัดการหมวดความเสียหาย', 'section' => 'วิเคราะห์ความเสียหาย & Root Cause'],
 
+    // ---- 4.46 วิศวกรรมความเสียหาย (Phase 37) ----
+    // ค่าทุกตัวคำนวณมาจาก Reliability Engine ฝั่ง PHP เท่านั้น หน้าเว็บเป็นตัวแสดงผลอย่างเดียว
+    // (ดู RELIABILITY_ENGINEERING.md — NULL = คำนวณไม่ได้ ห้ามแทนด้วย 0)
+    ['key' => 'reliability',                  'href' => '/reliability',                       'label' => 'ภาพรวมความเสียหาย',            'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/assets',           'href' => '/reliability/assets',                'label' => 'ตารางความเสียหายรายเครื่อง',      'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/failure-modes',    'href' => '/reliability/failure-modes',         'label' => 'การวิเคราะห์โหมดการเสีย',        'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/trend',            'href' => '/reliability/trend',                 'label' => 'แนวโน้มตามเวลา',                  'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/weibull',          'href' => '/reliability/weibull',               'label' => 'การวิเคราะห์ Weibull',           'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/bad-actors',       'href' => '/reliability/bad-actors',            'label' => 'Bad Actors',                     'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/pm-effectiveness', 'href' => '/reliability/pm-effectiveness',      'label' => 'ประสิทธิผลแผน PM',               'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/growth',           'href' => '/reliability/growth',                'label' => 'การเติบโต & ต้นทุน',              'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/studies',          'href' => '/reliability/studies',               'label' => 'งานวิจัยเชิงวิศวกรรม',            'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/data-quality',     'href' => '/reliability/data-quality',          'label' => 'คุณภาพข้อมูล',                  'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/config',           'href' => '/reliability/config',                'label' => 'ตั้งค่าความเสียหาย',             'section' => 'วิศวกรรมความเสียหาย'],
+
     // ---- 4.5 การอนุมัติ & เอกสาร ----
     ['key' => 'supervisor',                 'href' => '/supervisor',                 'label' => 'คิวงานหัวหน้างาน',      'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/queue',           'href' => '/supervisor/queue',           'label' => 'คิวงานทั้งหมด',          'section' => 'ควบคุมงาน & วางแผน'],

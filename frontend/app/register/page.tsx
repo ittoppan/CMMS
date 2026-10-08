@@ -72,11 +72,15 @@ export default function RegisterPage() {
       if (pUid) {
         setLineUserId(pUid);
         setLiffStatus(profile?.userId ? "ready" : "external");
-        try {
-          const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
-          const json = await res.json().catch(() => ({}));
-          if (!cancelled && json?.bound && json?.user) setBoundUser(json.user);
-        } catch { /* ignore */ }
+try {
+            const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
+            const json = await res.json().catch(() => ({}));
+            if (!cancelled && json?.bound && json?.user) setBoundUser({
+              full_name: json.user.full_name,
+              employee_code: json.user.employee_code,
+              avatar_path: json.user.avatar_path ?? null,
+            });
+          } catch { /* ignore */ }
       } else {
         setLiffStatus("external");
       }
@@ -90,7 +94,7 @@ export default function RegisterPage() {
   const [lineName, setLineName] = useState("");
   const [linePic, setLinePic] = useState("");
   const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
-  const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string } | null>(null);
+  const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
 
   const [empCode, setEmpCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -117,7 +121,11 @@ export default function RegisterPage() {
       });
       const json = await res.json().catch(() => ({}));
       if (json.success && json.user) {
-        setBoundUser(json.user);
+        setBoundUser({
+          full_name: json.user.full_name,
+          employee_code: json.user.employee_code,
+          avatar_path: json.user.avatar_path ?? null,
+        });
         setDone(true);
         try { localStorage.setItem("cmms_line_bound", "1"); } catch { /* ignore */ }
       } else {
@@ -154,6 +162,43 @@ export default function RegisterPage() {
           onPrimary={() => (window.location.href = "/repair/request")}
           onSecondary={() => { setDone(false); setEmpCode(""); }}
         >
+          <div style={{ textAlign: "center", marginBottom: 12 }}>
+            {boundUser.avatar_path ? (
+              <img
+                src={boundUser.avatar_path}
+                alt={boundUser.full_name}
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "3px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  marginBottom: 8,
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  background: "var(--cmms-primary)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "2rem",
+                  fontWeight: 700,
+                  margin: "0 auto 8px",
+                  border: "3px solid #fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                }}
+              >
+                {boundUser.full_name.charAt(0)}
+              </div>
+            )}
+          </div>
           <p className="text-sm text-[var(--cmms-text-secondary)]" style={{ textAlign: "center" }}>
             เลขพนักงาน {boundUser.employee_code} · ต่อไปแจ้งซ่อมจะรู้ชื่ออัตโนมัติ
             <br />
@@ -199,7 +244,41 @@ export default function RegisterPage() {
               <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>ลงทะเบียนผูกบัญชี LINE</h3>
               <p className="text-sm text-[var(--cmms-text-secondary)]">CMMS-TOPPAN · LINE REGISTRATION</p>
             </div>
-            {linePic ? (
+            {boundUser && boundUser.avatar_path ? (
+              <img
+                src={boundUser.avatar_path}
+                alt={boundUser.full_name}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "2px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  flexShrink: 0,
+                }}
+              />
+            ) : boundUser ? (
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%",
+                  background: "var(--cmms-primary)",
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.2rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  border: "2px solid #fff",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                }}
+              >
+                {boundUser.full_name.charAt(0)}
+              </div>
+            ) : linePic ? (
               <img
                 src={linePic}
                 alt="LINE profile"
@@ -262,33 +341,72 @@ export default function RegisterPage() {
                 )}
 
                 {boundUser ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: "50%",
-                          flexShrink: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 700,
-                          fontSize: "0.85rem",
-                          background: "var(--cmms-success)",
-                          border: "2px solid var(--cmms-success)",
-                          color: "#fff",
-                        }}
-                      >
-                        ✓
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      {boundUser.avatar_path ? (
+                        <img
+                          src={boundUser.avatar_path}
+                          alt={boundUser.full_name}
+                          style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #fff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            background: "var(--cmms-primary)",
+                            color: "#fff",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "1.5rem",
+                            fontWeight: 700,
+                            flexShrink: 0,
+                            border: "2px solid #fff",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                          }}
+                        >
+                          {boundUser.full_name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <div
+                            style={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: "50%",
+                              flexShrink: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 700,
+                              fontSize: "0.85rem",
+                              background: "var(--cmms-success)",
+                              border: "2px solid var(--cmms-success)",
+                              color: "#fff",
+                            }}
+                          >
+                            ✓
+                          </div>
+                          <span className="text-sm font-semibold" style={{ color: "var(--cmms-success)" }}>
+                            บัญชีนี้ผูกกับ {boundUser.full_name} แล้ว
+                          </span>
+                        </div>
+                        <p className="text-sm text-[var(--cmms-text-secondary)]">
+                          เลขพนักงาน {boundUser.employee_code} — ไปแจ้งซ่อมได้เลย
+                        </p>
                       </div>
-                      <span className="text-sm font-semibold" style={{ color: "var(--cmms-success)" }}>
-                        บัญชีนี้ผูกกับ {boundUser.full_name} แล้ว
-                      </span>
                     </div>
-                    <p className="text-sm text-[var(--cmms-text-secondary)]">
-                      LINE ID นี้ผูกกับเลขพนักงาน {boundUser.employee_code} อยู่แล้ว — ไปแจ้งซ่อมได้เลย
-                    </p>
                     <Button
                       className="w-full"
                       onClick={() => (window.location.href = "/repair/request")}

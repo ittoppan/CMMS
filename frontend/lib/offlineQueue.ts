@@ -1,5 +1,9 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { apiJson } from "./api";
+import { syncEngine, makeId } from "./offline/engine";
+
 /**
  * offlineQueue — legacy queue API (compatibility bridge ไปยัง Sync Engine, Phase 19)
  *
@@ -11,7 +15,6 @@
  *   - retry 3 ครั้ง / ไม่ retry 4xx / conflict → CONFLICT
  * ดู lib/offline/engine.ts สำหรับรายละเอียด
  */
-import { syncEngine, makeId } from "./offline/engine";
 
 const LEGACY_QUEUE_KEY = "cmms_offline_queue_v1";
 let legacyDrained = false;
@@ -135,4 +138,78 @@ export function subscribeOnline(onSync: (count: number) => void): () => void {
   window.addEventListener("online", handler);
   void syncEngine.ensureLoaded().then(refresh);
   return () => window.removeEventListener("online", handler);
+}
+
+export interface DetailedSendResult {
+  outcome: SendOutcome;
+  message?: string;
+}
+
+/**
+ * ส่งทันทีผ่าน API ปกติก่อน แล้วค่อย fallback เข้าคิวเมื่อออฟไลน์/เน็ตพัง
+ * ต่างจาก sendOrEnqueue() ตรงที่คืนข้อความ error จริงจาก server ให้หน้าแสดงผลได้
+ */
+export async function sendOrEnqueueDetailed(opts: {
+  url: string;
+  method: "POST" | "PUT";
+  body: Record<string, unknown>;
+  kind: string;
+  label: string;
+}): Promise<DetailedSendResult> {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    await drainLegacyLocalStorage();
+    await syncEngine.enqueue(toEngine(opts));
+    return { outcome: "queued" };
+  }
+  const headers: Record<string, string> = { "X-Client-Action-Id": makeId("q") };
+  try {
+    await apiJson(opts.url, {
+      method: opts.method,
+      headers,
+      body: JSON.stringify(opts.body ?? {}),
+    });
+    return { outcome: "sent" };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    // 5xx/timeout = น่าจะเป็นปัญหาเครือข่าย → เข้าคิวรอ replay (server จะกันซ้ำด้วย X-Client-Action-Id)
+    if (err instanceof TypeError) {
+      await drainLegacyLocalStorage();
+      await syncEngine.enqueue(toEngine(opts));
+      return { outcome: "queued" };
+    }
+    return { outcome: "failed", message };
+  }
+}
+
+/** true เมื่อเบราว์เซอร์ online (reactive — ฟัง event online/offline) */
+export function useOnlineStatus(): boolean {
+  const [online, setOnline] = useState(true);
+  useEffect(() => {
+    const read = () => setOnline(navigator.onLine !== false);
+    read();
+    window.addEventListener("online", read);
+    window.addEventListener("offline", read);
+    return () => {
+      window.removeEventListener("online", read);
+      window.removeEventListener("offline", read);
+    };
+  }, []);
+  return online;
+}
+
+/** จำนวนรายการที่ค้างในคิว (reactive — อัปเดตเมื่อ sync เสร็จ/มีของใหม่) */
+export function usePendingCount(): number {
+  const [count, setCount] = useState(0);
+  const refresh = useCallback(() => setCount(syncEngine.pendingCount()), []);
+  useEffect(() => {
+    void syncEngine.ensureLoaded().then(refresh);
+    const handler = () => void syncEngine.onOnline().then(refresh);
+    window.addEventListener("online", handler);
+    window.addEventListener("cmms:offline-queued", handler);
+    return () => {
+      window.removeEventListener("online", handler);
+      window.removeEventListener("cmms:offline-queued", handler);
+    };
+  }, [refresh]);
+  return count;
 }

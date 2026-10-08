@@ -58,6 +58,10 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'review', 'approve', 'implement', 'verify', 'close'],
         'document'   => ['view', 'create', 'revise', 'review', 'approve', 'publish'],
         'training'   => ['view', 'manage'],
+        'workforce'  => ['view', 'manage', 'technician_manage', 'skill_manage', 'skill_assign', 'certification_manage', 'training_manage', 'crew_manage', 'capacity_view', 'capacity_manage', 'assignment_manage', 'analytics'],
+        'shutdown'   => ['view', 'plan', 'readiness_manage', 'baseline_create', 'execute', 'startup', 'closeout', 'cancel'],
+        'iot'        => ['view', 'read', 'write', 'ingest', 'alarm_ack', 'alarm_resolve', 'alarm_close', 'config', 'admin'],
+        'reliability'=> ['read', 'write', 'export'],
         // Knowledge (Phase 38) is read by everyone who touches maintenance, because
         // a technician who cannot read the fix cannot do the job. Authoring,
         // approving and publishing stay separated exactly like Phase 32 documents,
@@ -87,11 +91,15 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'review', 'approve', 'implement', 'verify', 'close'],
         'document'   => ['view', 'create', 'revise', 'review', 'approve', 'publish'],
         'training'   => ['view', 'manage'],
+        'workforce'  => ['view', 'manage', 'technician_manage', 'skill_manage', 'skill_assign', 'certification_manage', 'training_manage', 'crew_manage', 'capacity_view', 'capacity_manage', 'assignment_manage', 'analytics'],
+        'shutdown'   => ['view', 'plan', 'readiness_manage', 'baseline_create', 'execute', 'startup', 'closeout', 'cancel'],
+        'reliability'=> ['read', 'write', 'export'],
         // Knowledge (Phase 38): the ASST Manager owns the knowledge program the
         // same way they own documents. Author, review, approve and publish stay
         // four separate steps so the writer is not the one who declares it true.
         'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'review', 'approve', 'publish', 'feedback', 'manage_gaps', 'taxonomy', 'usage_view', 'export'],
     ],
+
     7 => [ // Foreman — หัวหน้าชุด
         'repair'     => ['view', 'create', 'edit', 'assign', 'schedule', 'start', 'pause', 'resume', 'complete', 'verify', 'cancel', 'close'],
         'request'    => ['view', 'create'],
@@ -114,6 +122,10 @@ const PERMISSION_MATRIX = [
         // triages the gaps his crew keeps hitting. He cannot approve or publish —
         // publishing is what tells the shop floor to trust it.
         'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'feedback', 'manage_gaps'],
+        'workforce'  => ['view', 'skill_assign', 'capacity_view', 'assignment_manage'],
+        // Foreman plans and executes, but startup/closeout/cancel stay with an
+        // approver: startup restores equipment, so it is not a foreman-level action.
+        'shutdown'   => ['view', 'plan', 'readiness_manage', 'execute'],
     ],
     3 => [ // Technician — ช่าง
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -129,6 +141,11 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],
+        'workforce'  => ['view', 'capacity_view'],
+        // A technician records execution progress only. They cannot re-plan the
+        // shutdown, cannot edit readiness, and cannot touch startup/closeout.
+        'shutdown'   => ['view', 'execute'],
+        'reliability'=> ['read', 'export'],
         // A technician reads knowledge and can tell the system whether it helped.
         // Recording the verdict is what makes the usage data real; writing the
         // knowledge is not theirs to do.
@@ -162,6 +179,11 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view'],
         'document'   => ['view'],
         'training'   => ['view'],
+        'workforce'  => ['view', 'capacity_view'],
+        // Viewer sees the shutdown board but the page must degrade to read-only:
+        // there is no cost permission on this module by design.
+        'shutdown'   => ['view'],
+        'reliability'=> ['read'],
         'knowledge'  => ['read', 'search'],
     ],
 ];
@@ -243,6 +265,9 @@ function permModuleAliases(string $module): string {
         'notification'   => 'notification',
         'work_permit'    => 'safety',
         'safety'         => 'safety',
+        'shutdown'       => 'shutdown',
+        'turnaround'     => 'shutdown',
+        'outage'         => 'shutdown',
         'engineering_changes' => 'engineering_change',
         'engineering_change'  => 'engineering_change',
         'ecr'            => 'engineering_change',

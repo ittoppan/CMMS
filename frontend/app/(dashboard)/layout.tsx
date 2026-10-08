@@ -58,6 +58,12 @@ const MENU_HREFS: string[] = [
   "/editor/builder", "/pages",
   "/knowledge", "/knowledge/search", "/knowledge/articles", "/knowledge/articles/create", "/knowledge/articles/[id]",
   "/knowledge/gaps", "/knowledge/gaps/[id]", "/knowledge/reviews", "/knowledge/taxonomy", "/knowledge/usage",
+  // ── Phase 37: Reliability Engineering ──
+  "/reliability", "/reliability/assets", "/reliability/assets/[id]",
+  "/reliability/failure-modes", "/reliability/trend", "/reliability/weibull",
+  "/reliability/bad-actors", "/reliability/pm-effectiveness", "/reliability/growth",
+  "/reliability/studies", "/reliability/studies/[id]",
+  "/reliability/data-quality", "/reliability/config",
 ];
 
 function getSection(pathname: string): string | null {

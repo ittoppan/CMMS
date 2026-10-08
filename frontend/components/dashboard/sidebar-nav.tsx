@@ -62,7 +62,12 @@ import {
   HardHat,
   GitPullRequest,
   BookMarked,
+  UserCog,
   GraduationCap,
+  BookOpenCheck,
+  ShieldAlert,
+  IdCard,
+  Power,
   CircleAlert,
   Hash,
   SlidersHorizontal,
@@ -172,11 +177,28 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.planning",
-    pathPrefixes: ["/planning", "/field/plan"],
+    pathPrefixes: ["/planning", "/field/plan", "/workforce"],
     items: [
-      { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
-      { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
-      { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
+        { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
+        { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
+        { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
+        { perm: "workforce", labelKey: "menu.workforce", href: "/workforce", icon: Users },
+        { perm: "workforce/technicians", labelKey: "menu.workforce_people", href: "/workforce/technicians", icon: UserCog },
+        { perm: "workforce/skills", labelKey: "menu.workforce_skills", href: "/workforce/skills", icon: GraduationCap },
+        { perm: "workforce/certifications", labelKey: "menu.workforce_certs", href: "/workforce/certifications", icon: BadgeCheck },
+        { perm: "workforce/training", labelKey: "menu.workforce_training", href: "/workforce/training", icon: BookOpenCheck },
+        { perm: "workforce/capacity", labelKey: "menu.workforce_capacity", href: "/workforce/capacity", icon: Activity },
+        { perm: "workforce/shifts", labelKey: "menu.workforce_shifts", href: "/workforce/shifts", icon: CalendarClock },
+        { perm: "workforce/crews", labelKey: "menu.workforce_crews", href: "/workforce/crews", icon: Users },
+        { perm: "workforce/conflicts", labelKey: "menu.workforce_conflicts", href: "/workforce/conflicts", icon: ShieldAlert },
+        { perm: "workforce/mine", labelKey: "menu.workforce_mine", href: "/workforce/mine", icon: IdCard },
+      ],
+    },
+  {
+    titleKey: "nav.shutdown",
+    pathPrefixes: ["/shutdown"],
+    items: [
+      { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
     ],
   },
   {
@@ -241,6 +263,26 @@ export const NAV_GROUPS: NavGroupDef[] = [
     items: [
       { perm: "engineering_change/overview", labelKey: "menu.engineering_changes", href: "/engineering-changes", icon: GitPullRequest },
       { perm: "document_control/overview", labelKey: "menu.documents", href: "/documents", icon: BookMarked },
+    ],
+  },
+  {
+    // ── Phase 37: Reliability Engineering ──
+    // perm keys match src/menu_catalog.php entries exactly, so menu
+    // permissions granted per role in menu_permissions.php apply here.
+    titleKey: "nav.reliability",
+    pathPrefixes: ["/reliability"],
+    items: [
+      { perm: "reliability", labelKey: "menu.reliability", href: "/reliability", icon: Gauge },
+      { perm: "reliability/assets", labelKey: "menu.reliability_assets", href: "/reliability/assets", icon: Boxes },
+      { perm: "reliability/failure-modes", labelKey: "menu.reliability_failure_modes", href: "/reliability/failure-modes", icon: Flame },
+      { perm: "reliability/trend", labelKey: "menu.reliability_trend", href: "/reliability/trend", icon: BarChart3 },
+      { perm: "reliability/weibull", labelKey: "menu.reliability_weibull", href: "/reliability/weibull", icon: ChartPie },
+      { perm: "reliability/bad-actors", labelKey: "menu.reliability_bad_actors", href: "/reliability/bad-actors", icon: ShieldAlert },
+      { perm: "reliability/pm-effectiveness", labelKey: "menu.reliability_pm_effectiveness", href: "/reliability/pm-effectiveness", icon: CalendarDays },
+      { perm: "reliability/growth", labelKey: "menu.reliability_growth", href: "/reliability/growth", icon: GitPullRequest },
+      { perm: "reliability/studies", labelKey: "menu.reliability_studies", href: "/reliability/studies", icon: BookOpenCheck },
+      { perm: "reliability/data-quality", labelKey: "menu.reliability_data_quality", href: "/reliability/data-quality", icon: CircleAlert },
+      { perm: "reliability/config", labelKey: "menu.reliability_config", href: "/reliability/config", icon: SlidersHorizontal },
     ],
   },
   {
