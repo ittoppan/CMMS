@@ -157,7 +157,7 @@ export default function FieldHomePage() {
             const st = STATUS_LABEL[w.status] || { label: w.status, variant: "neutral" as const };
             return (
               <Link key={w.id} href={`/field/work/${w.id}`} className="no-underline">
-                <Card style={{ borderLeft: "4px solid var(--cmms-primary)" }}>
+                <Card className="cmms-side-accent primary">
                   <CardContent className="flex items-center justify-between gap-3 p-4">
                     <div className="min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -180,7 +180,7 @@ export default function FieldHomePage() {
         <section className="flex flex-col gap-2">
           <h2 className="m-0 text-base font-bold text-[var(--cmms-warning)]">PM เกินกำหนด ({pmDue.length})</h2>
           {pmDue.map((p) => (
-            <Card key={p.id} style={{ borderLeft: "4px solid var(--cmms-warning)" }}>
+            <Card key={p.id} className="cmms-side-accent warning">
               <CardContent className="flex items-center justify-between gap-3 p-3">
                 <div className="min-w-0">
                   <p className="m-0 truncate text-sm font-semibold">{p.title}</p>

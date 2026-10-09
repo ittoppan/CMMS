@@ -89,7 +89,7 @@ export default function QrSheetPage() {
         .qr-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .qr-sheet-card { text-align: center; break-inside: avoid; }
         .qr-sheet-card img { width: 100%; max-width: 170px; }
-        .qr-sheet-note { border-left: 4px solid #0068B5; border-radius: 0 6px 6px 0; }
+        .qr-sheet-note { border-left: 2px solid var(--color-primary); border-radius: 0 6px 6px 0; opacity: 0.4; }
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }

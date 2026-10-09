@@ -896,8 +896,8 @@ export default function SettingsPage() {
                 return (
                   <Card
                     key={topicId}
-                    className="cursor-pointer transition-shadow hover:shadow-md"
-                    style={{ borderLeft: `4px solid ${topic.color}` }}
+                    className="cursor-pointer transition-shadow hover:shadow-md cmms-side-accent"
+                    style={{ borderLeftColor: topic.color }}
                     onClick={() => {
                       if (topic.link) {
                         router.push(topic.link);

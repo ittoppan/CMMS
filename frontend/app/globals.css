@@ -418,6 +418,22 @@ h1, h2, h3, h4 {
 .cmms-kpi-card.red::before { background: var(--cmms-danger); }
 .cmms-kpi-card.cyan::before { background: var(--cmms-info); }
 
+/* Side accent borders (2px, subtle) — replaces inline borderLeft */
+.cmms-side-accent {
+  border-left: 2px solid var(--color-primary);
+  opacity: 0.4;
+}
+.cmms-side-accent.primary { border-left-color: var(--color-primary); }
+.cmms-side-accent.warning { border-left-color: var(--color-warning); }
+.cmms-side-accent.danger { border-left-color: var(--color-danger); }
+.cmms-side-accent.success { border-left-color: var(--color-success); }
+.cmms-side-accent.info { border-left-color: var(--color-info); }
+
+.cmms-side-accent {
+  transition: opacity var(--cmms-transition);
+}
+.cmms-side-accent:hover { opacity: 0.7; }
+
 .cmms-kpi-icon {
   width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -1753,17 +1769,16 @@ next-route-announcer {
   padding: 18px 20px 16px;
 }
 
-/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) */
+/* เส้นตารางแบบหน้าจอโรงงาน (scanlines) — reduced visual noise */
 .cmms-andon-board::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 3px),
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: auto, 56px 56px, 56px 56px;
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.01) 0 1px, transparent 1px 4px);
+  background-size: auto;
+  opacity: 0.3;
 }
 
 .cmms-andon-tile {
@@ -1924,7 +1939,7 @@ next-route-announcer {
 }
 
 .cmms-kpi-value .cmms-kpi-unit {
-  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+  font-family: 'Barlow Condensed', 'Noto Sans Thai', sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-secondary);

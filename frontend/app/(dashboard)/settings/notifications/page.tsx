@@ -638,9 +638,9 @@ export default function NotificationsSettingsPage() {
                       CMMS-TOPPAN BOT · แอดมิน · {new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                     </div>
                     <div
+                      className="cmms-side-accent danger"
                       style={{
                         background: "#182533",
-                        borderLeft: "3px solid #e11d48",
                         borderRadius: 8,
                         padding: "10px 12px",
                         maxWidth: 280,
