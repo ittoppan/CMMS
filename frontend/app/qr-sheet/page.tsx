@@ -84,11 +84,12 @@ export default function QrSheetPage() {
   };
 
   return (
-    <div style={{ fontFamily: "'Inter', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
+    <div style={{ fontFamily: "'Roboto', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
       <style>{`
         .qr-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .qr-sheet-card { text-align: center; break-inside: avoid; }
         .qr-sheet-card img { width: 100%; max-width: 170px; }
+        /* impeccable-disable-next-line side-tab: print-only note accent */
         .qr-sheet-note { border-left: 2px solid var(--color-primary); border-radius: 0 6px 6px 0; opacity: 0.4; }
         @media print {
           body { margin: 0; }
