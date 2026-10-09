@@ -137,14 +137,16 @@ export default function SystemServicesPage() {
 
   const allRunning = services.every((s) => s.running);
 
-  // URL ภายนอกสำหรับ LINE (Cloudflare ก่อน ngrok)
+  // URL ภายนอกสำหรับ LINE (Cloudflare ก่อน ngrok ก่อน zrok)
   const cfService = services.find((s) => s.key === "cloudflared");
   const ngrokService = services.find((s) => s.key === "ngrok");
+  const zrokService = services.find((s) => s.key === "zrok");
   const cfUrl = cfService?.url || "";
   const ngrokUrl = ngrokService?.url || "";
-  const baseUrl = cfUrl || ngrokUrl;
+  const zrokUrl = zrokService?.url || "";
+  const baseUrl = cfUrl || ngrokUrl || zrokUrl;
   const webhookUrl = baseUrl ? `${baseUrl.replace(/\/+$/, "")}/api/v1/line_webhook.php` : "";
-  const liffUrl = cfUrl || "";
+  const liffUrl = cfUrl || ngrokUrl || "";
 
   return (
     <PageShell
@@ -262,6 +264,12 @@ export default function SystemServicesPage() {
                 value={ngrokUrl}
                 copied={copiedKey === "ngrok"}
                 onCopy={() => copyText("ngrok", ngrokUrl)}
+              />
+              <LinkRow
+                label="zrok Tunnel URL"
+                value={zrokUrl}
+                copied={copiedKey === "zrok"}
+                onCopy={() => copyText("zrok", zrokUrl)}
               />
               <p className="text-sm text-muted-foreground">
                 Tunnel URL เปลี่ยนทุกครั้งที่รัน Cloudflare ใหม่ — หลังกด "รัน" ให้รีเฟรชหน้านี้เพื่อดึง URL ล่าสุดมาใส่ Console

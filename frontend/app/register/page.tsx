@@ -97,9 +97,36 @@ try {
   const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
 
   const [empCode, setEmpCode] = useState("");
+  const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  // Preview user by employee code (debounced)
+  useEffect(() => {
+    const code = empCode.trim().toUpperCase();
+    if (code.length < 3) { setPreviewUser(null); return; }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/users.php?employee_code=${encodeURIComponent(code)}`);
+        if (res.ok) {
+          const json = await res.json();
+          setPreviewUser({
+            full_name: json.full_name,
+            employee_code: json.employee_code,
+            avatar_path: json.avatar_path ?? null,
+            position: json.position ?? null,
+            department: json.role ?? null,
+          });
+        } else {
+          setPreviewUser(null);
+        }
+      } catch {
+        setPreviewUser(null);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [empCode]);
 
   const handleBind = async () => {
     const code = empCode.trim().toUpperCase();
@@ -459,6 +486,66 @@ try {
                           }}
                         />
                       </div>
+
+                      {previewUser && (
+                        <div
+                          style={{
+                            margin: "12px 0 0",
+                            padding: "12px",
+                            borderRadius: "var(--cmms-radius)",
+                            background: "var(--cmms-success-light)",
+                            border: "1px solid var(--cmms-success)",
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            {previewUser.avatar_path ? (
+                              <img
+                                src={previewUser.avatar_path}
+                                alt={previewUser.full_name}
+                                style={{
+                                  width: 48,
+                                  height: 48,
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                  border: "2px solid #fff",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                                  flexShrink: 0,
+                                }}
+                              />
+                            ) : (
+                              <div
+                                style={{
+                                  width: 48,
+                                  height: 48,
+                                  borderRadius: "50%",
+                                  background: "var(--cmms-primary)",
+                                  color: "#fff",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "1.3rem",
+                                  fontWeight: 700,
+                                  flexShrink: 0,
+                                  border: "2px solid #fff",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                                }}
+                              >
+                                {previewUser.full_name.charAt(0)}
+                              </div>
+                            )}
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm" style={{ color: "var(--cmms-success)" }}>
+                                พบผู้ใช้: {previewUser.full_name}
+                              </span>
+                              <span className="text-sm text-[var(--cmms-text-secondary)]">
+                                เลขพนักงาน {previewUser.employee_code}
+                                {previewUser.position && ` · ตำแหน่ง ${previewUser.position}`}
+                                {previewUser.department && ` · ${previewUser.department}`}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {error && (
                         <div

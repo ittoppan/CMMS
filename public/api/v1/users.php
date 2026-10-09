@@ -23,11 +23,18 @@ try {
     switch ($method) {
         case 'GET':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
             if ($id) {
                 $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+                echo json_encode($row);
+            } elseif ($empCode !== '') {
+                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE employee_code = ? AND is_active = 1');
+                $stmt->execute([$empCode]);
+                $row = $stmt->fetch();
+                if (!$row) { http_response_code(404); echo json_encode(['error' => 'ไม่พบผู้ใช้งาน']); exit; }
                 echo json_encode($row);
             } else {
                 $stmt = $pdo->query('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users ORDER BY created_at DESC');
