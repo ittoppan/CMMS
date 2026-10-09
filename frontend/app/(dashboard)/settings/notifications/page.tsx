@@ -581,7 +581,7 @@ export default function NotificationsSettingsPage() {
                   {tgTestResult && (
                     <Card style={{
                       background: tgTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
-                      border: `1px solid ${tgTestResult.ok ? "var(--cmms-success)" : "#f87171"}`,
+                      border: `1px solid ${tgTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                     }}>
                       <CardContent className="p-3">
                         <span className="text-sm font-bold" style={{ color: tgTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
@@ -1289,7 +1289,7 @@ export default function NotificationsSettingsPage() {
               {testResult && (
                 <Card style={{
                   background: testResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
-                  border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "#f87171"}`,
+                  border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                 }}>
                   <CardContent className="p-3">
                     <span className="text-sm font-bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>

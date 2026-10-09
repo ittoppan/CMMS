@@ -273,7 +273,7 @@ export default function RepairAssignPage() {
             <TechAvatar name={item.assignee} src={item.assigneeAvatar} />
             <span className="text-sm">{item.assignee}</span>
             {(item.teamIds || []).length > 1 && (
-              <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>
+              <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>
                 +{(item.teamIds || []).length - 1} ทีม
               </span>
             )}

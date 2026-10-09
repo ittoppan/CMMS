@@ -40,7 +40,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  new: { background: "var(--cmms-info-light, #dbeafe)", color: "var(--cmms-info-dark, #1d4ed8)" },
+  new: { background: "var(--cmms-info-light)", color: "var(--cmms-info)" },
   triaged: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
   in_progress: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
   resolved: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },

@@ -88,7 +88,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "#3B82F6" }}>{wo.workOrderNo}</div>
+          <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--cmms-primary)" }}>{wo.workOrderNo}</div>
           <div style={{ fontSize: "0.8rem", color: "#64748B", marginTop: 2 }}>วันที่ปิดงาน: {wo.completedAt}</div>
           <div style={{ fontSize: "0.8rem", color: "#64748B", marginTop: 2 }}>วันที่แจ้ง: {wo.createdDate}</div>
         </div>

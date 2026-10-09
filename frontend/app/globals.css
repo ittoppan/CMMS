@@ -257,7 +257,7 @@ html, body {
   --color-track: #2E3D52;
 
   /* === CMMS tokens (dark) === */
-  --cmms-primary-hover: #1E88E5;
+  --cmms-primary-hover: #5aa8de;
   --cmms-primary-light: var(--color-background-blue);
   --cmms-primary-glow: rgba(0, 104, 181, 0.28);
 
@@ -512,7 +512,7 @@ h1, h2, h3, h4 {
 .cmms-mp-href { font-size: 0.68rem; color: var(--cmms-text-muted); font-family: monospace; }
 .cmms-mp-cell { display: flex; justify-content: center; align-items: center; padding: 4px; }
 .cmms-mp-check {
-  width: 18px; height: 18px; cursor: pointer; accent-color: var(--cmms-primary, #0D4785);
+  width: 18px; height: 18px; cursor: pointer; accent-color: var(--cmms-primary);
   border-radius: 4px;
 }
 .cmms-step { display: flex; align-items: center; gap: 10px; flex: 1; position: relative; }
@@ -723,7 +723,7 @@ html.cmms-no-anim *::after {
 .cmms-liff-page {
   background:
     radial-gradient(900px 380px at 50% -120px, rgba(56,189,248,0.28), transparent 60%),
-    linear-gradient(165deg, #0F1E3D 0%, #0057A8 45%, #1E88E5 100%);
+    linear-gradient(165deg, #0F1E3D 0%, #0057A8 45%, #0093FF 100%);
   min-height: 100vh;
 }
 .cmms-liff-page .cmms-page-header {
@@ -1322,7 +1322,7 @@ html, body {
 }
 .cmms-toast.success .cmms-toast-icon { background: var(--cmms-success-light, #d1fae5); }
 .cmms-toast.error   .cmms-toast-icon { background: var(--cmms-danger-light, #fee2e2); }
-.cmms-toast.info    .cmms-toast-icon { background: var(--cmms-primary-light, #dbeafe); }
+.cmms-toast.info    .cmms-toast-icon { background: var(--cmms-primary-light); }
 .cmms-toast-body { min-width: 0; flex: 1; }
 .cmms-toast-title { font-weight: 700; font-size: 13px; }
 .cmms-toast-msg { font-size: 12px; color: var(--cmms-text-secondary, #475569); margin-top: 1px; }
@@ -1344,7 +1344,7 @@ html, body {
   left: 0;
   bottom: 0;
   height: 3px;
-  background: var(--cmms-primary, #0D4785);
+  background: var(--cmms-primary);
   opacity: 0.65;
   animation-name: cmmsToastTimer;
   animation-timing-function: linear;
@@ -1382,12 +1382,12 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--cmms-primary, #0D4785);
+  outline: 2px solid var(--cmms-primary);
   outline-offset: 2px;
-  border-radius: var(--cmms-radius-sm, 6px);
+  border-radius: var(--cmms-radius-sm);
 }
 ::selection {
-  background: var(--cmms-primary-glow, rgba(13, 71, 133, 0.22));
+  background: var(--cmms-primary-glow);
 }
 
 /* ---- Command Palette (Ctrl+K) ---- */
@@ -1438,13 +1438,13 @@ textarea:focus-visible,
 }
 .cmms-palette-item:hover,
 .cmms-palette-item.active {
-  background: var(--cmms-primary-light, #dbeafe);
+  background: var(--cmms-primary-light);
 }
 .cmms-palette-arrow {
   opacity: 0;
   font-size: 11px;
   font-weight: 700;
-  color: var(--cmms-primary, #0D4785);
+  color: var(--cmms-primary);
   flex-shrink: 0;
   transition: opacity 0.12s ease;
 }
@@ -1591,7 +1591,7 @@ next-route-announcer {
 .cmms-page-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0F1E3D 0%, #0057A8 72%, #1E88E5 100%);
+  background: linear-gradient(135deg, #0F1E3D 0%, #0057A8 72%, #0093FF 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--cmms-radius-xl);
   padding: 24px 28px;
@@ -2066,7 +2066,7 @@ next-route-announcer {
 
 /* ── Live preview mockups (ใช้เฉพาะหน้า /settings/design) ── */
 .cmms-design-grad {
-  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #1E88E5));
+  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #0093FF));
   border-radius: var(--cmms-radius-lg);
 }
 .cmms-design-sidenav {
@@ -2097,7 +2097,7 @@ next-route-announcer {
   border: 1px solid var(--cmms-border);
 }
 .cmms-design-login-hero {
-  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #1E88E5));
+  background: linear-gradient(135deg, var(--design-grad-a, #0068B5), var(--design-grad-b, #0093FF));
   border-radius: var(--cmms-radius-lg);
 }
 

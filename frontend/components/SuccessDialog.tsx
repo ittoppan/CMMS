@@ -56,7 +56,7 @@ export default function SuccessDialog({
       <div
         className="flex flex-col items-center gap-6 bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 text-center max-w-[420px] w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
-      >
+      >{/* impeccable-disable-next-line bounce-easing: success checkmark flourish */}
         <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-bounce-short">
           <CheckCircle2 className="w-9 h-9" />
         </div>

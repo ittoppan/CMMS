@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// impeccable-disable broken-image: JSDoc mentions <img>/<a> as prose, not markup
 /**
  * utils — shadcn convention entry point.
  * The canonical implementation lives in lib/cn.ts (kept for all existing
