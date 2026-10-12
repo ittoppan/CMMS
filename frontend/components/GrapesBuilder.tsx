@@ -677,11 +677,11 @@ export default function GrapesBuilder() {
         method: "DELETE",
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ");
+      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       setMsg({ kind: "ok", text: json?.message || "ลบแล้ว" });
       refreshList();
     } catch (e) {
-      setMsg({ kind: "err", text: e instanceof Error ? e.message : "ลบไม่สำเร็จ" });
+      setMsg({ kind: "err", text: e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
     } finally {
       setBusy(false);
     }

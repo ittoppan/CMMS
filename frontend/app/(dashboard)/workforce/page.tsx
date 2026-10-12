@@ -48,7 +48,7 @@ export default function WorkforcePage() {
     } catch (e) {
       const status = (e as { status?: number })?.status;
       if (status === 403 || status === 401) setDenied(true);
-      else setError(e instanceof Error ? e.message : "ไม่สามารถโหลดข้อมูลได้");
+      else setError(e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

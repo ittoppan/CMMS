@@ -191,11 +191,11 @@ export default function StockTakePage() {
     try {
       const res = await fetch(`/api/v1/stock_take.php?id=${id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ");
+      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       showToast("success", "ลบรอบแล้ว");
       await fetchRounds();
     } catch (e: any) {
-      showToast("error", e.message || "ลบไม่สำเร็จ");
+      showToast("error", e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   };
 

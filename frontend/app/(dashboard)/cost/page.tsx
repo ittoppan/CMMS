@@ -152,7 +152,7 @@ export default function CostPage() {
       if (j?.error) setWoErr(j.error);
       else setWoDetail(j.work_order);
     } catch {
-      setWoErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setWoErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setWoBusy(false);
     }
@@ -383,7 +383,7 @@ export default function CostPage() {
               <Card>
                 <CardHeader><CardTitle>แนวโน้มค่าใช้จ่ายรายเดือน</CardTitle><CardDescription>เฉพาะเดือนที่มีใบสั่งซ่อม (ข้อมูลจริง ไม่รวมเดือนว่าง)</CardDescription></CardHeader>
                 <CardContent className="h-[380px]">
-                  {trend.length === 0 ? <EmptyState icon={<RefreshCw size={22} aria-hidden="true" />} title="ไม่มีข้อมูล" /> : (
+                  {trend.length === 0 ? <EmptyState icon={<RefreshCw size={22} aria-hidden="true" />} title="ยังไม่มีข้อมูลแนวโน้ม" description="เดือนที่เลือกยังไม่มีใบสั่งซ่อม — ลองขยายช่วงเวลา" /> : (
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={trend}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
@@ -510,7 +510,7 @@ export default function CostPage() {
                 <Card>
                   <CardHeader><CardTitle>อะไหล่ที่ใช้ซ้ำข้ามใบงาน (≥ 2)</CardTitle><CardDescription>สัญญาณเสียซ้ำจากชิ้นส่วนเดิม</CardDescription></CardHeader>
                   <CardContent>
-                    {repeatParts.length === 0 ? <EmptyState icon={<Package size={22} aria-hidden="true" />} title="ไม่พบอะไหล่ที่ใช้ซ้ำ" /> : (
+                    {repeatParts.length === 0 ? <EmptyState icon={<Package size={22} aria-hidden="true" />} title="ไม่พบอะไหล่ที่ใช้ซ้ำ" description="ยังไม่มีชิ้นส่วนที่ถูกเบิกซ้ำตั้งแต่ 2 ครั้งขึ้นไปในช่วงนี้" /> : (
                       <Output>
                         <OsTable>
                           <OsTHead><OsRow><OsHeadCell>รายการ</OsHeadCell><OsHeadCell right>ครั้ง</OsHeadCell><OsHeadCell right>ค่าใช้จ่าย</OsHeadCell></OsRow></OsTHead>

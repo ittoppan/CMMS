@@ -158,7 +158,7 @@ export default function InspectionTemplatesPage() {
       if (editingId === t.id) resetForm();
       flash("ลบ Template แล้ว");
       fetchTemplates();
-    } catch { setError("ลบไม่สำเร็จ"); }
+    } catch { setError("ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const updateItem = (idx: number, patch: Partial<Item>) => {

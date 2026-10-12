@@ -68,7 +68,7 @@ function EditAssetContent() {
           setErrorMessage("ไม่พบข้อมูลเครื่องจักร");
         }
       })
-      .catch(() => setErrorMessage("เกิดข้อผิดพลาดในการโหลดข้อมูลเครื่องจักร"))
+      .catch(() => setErrorMessage("เกิดข้อผิดพลาดในการโหลดข้อมูลเครื่องจักร กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoading(false));
   }, [assetId]);
 

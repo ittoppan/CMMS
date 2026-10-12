@@ -47,7 +47,7 @@ export default function PMPlanViewPage() {
       if (j?.status === "success" && j.data) setPlan(j.data);
       else setError(j?.error || "โหลดแผนไม่สำเร็จ");
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้");
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function PMPlanViewPage() {
         setActionErr(j.error || "สร้างรอบไม่สำเร็จ");
       }
     } catch {
-      setActionErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setActionErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }
@@ -90,9 +90,9 @@ export default function PMPlanViewPage() {
       const res = await fetch(`/api/v1/pm_plans.php?id=${planId}`, { method: "DELETE" });
       const j = await res.json();
       if (j.success) { router.push("/pm_am/plans"); return; }
-      setActionErr(j.error || "ลบไม่สำเร็จ");
+      setActionErr(j.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } catch {
-      setActionErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setActionErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }

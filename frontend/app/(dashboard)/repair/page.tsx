@@ -132,7 +132,7 @@ export default function WorkOrdersPage() {
       }
     } catch (e) {
       console.error("Failed to fetch WO", e);
-      setError("Failed to fetch work orders. Please try again.");
+      setError("โหลดใบแจ้งซ่อมไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   };

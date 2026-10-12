@@ -133,7 +133,7 @@ function EditWorkOrderContent() {
           setError("ไม่พบข้อมูลใบแจ้งซ่อม");
         }
       })
-      .catch(() => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(() => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoadingData(false));
   }, [woId]);
 

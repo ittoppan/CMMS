@@ -174,7 +174,7 @@ export default function ScheduledReportsPage() {
       await refetch();
     } catch (err) {
       const e = err as ApiError;
-      alert(String(e?.message ?? "ลบไม่สำเร็จ"));
+      alert(e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   };
 

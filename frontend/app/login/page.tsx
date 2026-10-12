@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import ThemeProvider from '../../components/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/cn';
 import { Wrench, ChartBar, Clock, Box } from 'lucide-react';
 
 const LINE_SVG = (
@@ -17,6 +18,23 @@ const FEATURES = [
   { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF/MTTR' },
   { icon: Box, text: 'บริหารคลังอะไหล่อัจฉริยะ' },
 ];
+
+// แปลงข้อความ error จากฝั่ง PHP/query → ภาษาไทยที่เข้าใจได้
+// (ห้ามโชว์ internal code หรือข้อความ System Error ดิบๆ ให้ผู้ใช้)
+function friendlyAuthError(raw: string): string {
+  const s = (raw || '').trim();
+  const lower = s.toLowerCase();
+  if (lower.includes('invalid_credentials')) return 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+  if (lower.includes('validation_error')) return 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+  if (lower.includes('cancelled')) return 'คุณยกเลิกการเข้าสู่ระบบด้วย LINE';
+  if (lower.includes('profile') || lower.includes('line login')) {
+    return 'เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — กรุณาลองอีกครั้งหรือล็อกอินด้วยชื่อผู้ใช้';
+  }
+  if (/system error|failed|unable|expired|error/.test(lower)) {
+    return 'ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง';
+  }
+  return s;
+}
 
 export default function LoginPage() {
   return (
@@ -34,21 +52,20 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const bindLine =
-    typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search).get('bind_line') === '1'
-      : false;
+  const [bindLine, setBindLine] = useState(false);
+  const [nextPath, setNextPath] = useState('');
 
-  const nextPath =
-    typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search).get('next') || ''
-      : '';
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setBindLine(params.get('bind_line') === '1');
+    setNextPath(params.get('next') || '');
+  }, []);
 
   useEffect(() => {
     const e = new URLSearchParams(window.location.search).get('error');
     if (e) {
       setLoginFailed(true);
-      setErrorMessage(e);
+      setErrorMessage(friendlyAuthError(e));
     }
   }, []);
 
@@ -76,7 +93,7 @@ function LoginContent() {
         window.location.href = bindLine ? '/line_login.php' : nextPath ? nextPath : '/';
       } else {
         setLoginFailed(true);
-        setErrorMessage(data.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+        setErrorMessage(friendlyAuthError(data.error || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'));
       }
     } catch {
       setLoginFailed(true);
@@ -180,7 +197,7 @@ function LoginContent() {
           <div className="flex flex-col gap-3">
             <Input
               label="ชื่อผู้ใช้"
-              placeholder="กรอกชื่อผู้ใช้"
+              placeholder="เช่น E01117"
               value={username}
               error={loginFailed ? errorMessage : undefined}
               onChange={(e) => {
@@ -194,15 +211,13 @@ function LoginContent() {
             />
             <Input
               label="รหัสผ่าน"
-              placeholder="กรอกรหัสผ่าน"
               type="password"
               value={password}
-              error={loginFailed ? errorMessage : undefined}
               onChange={(e) => {
                 setPassword(e.target.value);
                 setLoginFailed(false);
               }}
-              className="h-11"
+              className={cn('h-11', loginFailed && '!border-[var(--cmms-danger)]')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleLogin();
               }}
@@ -232,8 +247,8 @@ function LoginContent() {
             {LINE_SVG} เข้าสู่ระบบด้วย LINE
           </Button>
           <p style={{ textAlign: 'center', color: 'var(--cmms-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-            ครั้งแรก: ล็อกอินด้วยชื่อผู้ใช้/รหัสผ่านด้านบนก่อน แล้วกดปุ่ม LINE อีกครั้ง
-            ระบบจะผูกบัญชีให้อัตโนมัติ — ครั้งต่อไปล็อกอินผ่าน LINE ได้ทันที (รับการแจ้งเตือน LINE)
+            ครั้งแรก: ล็อกอินด้วยชื่อผู้ใช้/รหัสผ่านก่อน แล้วกด LINE อีกครั้งเพื่อผูกบัญชีให้อัตโนมัติ —
+            ครั้งถัดไปล็อกอินผ่าน LINE ได้ทันที พร้อมรับการแจ้งเตือนงาน
           </p>
         </div>
       </div>

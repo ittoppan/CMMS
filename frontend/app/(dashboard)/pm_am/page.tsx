@@ -108,7 +108,7 @@ export default function PMSchedulePage() {
       }
     } catch (e) {
       console.error("Failed to fetch PMs", e);
-      setError("Failed to fetch PM tasks");
+      setError("โหลดงาน PM ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

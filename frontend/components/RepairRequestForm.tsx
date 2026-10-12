@@ -762,7 +762,7 @@ const flushQueue = async () => {
       }
     } catch (e) {
       console.error("Submit failed", e);
-      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
     setSubmitting(false);
   };

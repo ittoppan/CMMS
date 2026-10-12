@@ -537,7 +537,7 @@ export default function DashboardPage() {
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายแผนก" />
                       {dt.by_department.length === 0 ? (
-                        <EmptyState title="ไม่มีข้อมูล" />
+                        <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
                           {dt.by_department.map((r) => (
@@ -554,7 +554,7 @@ export default function DashboardPage() {
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายประเภทย่อย" />
                       {dt.by_failure_type.length === 0 ? (
-                        <EmptyState title="ไม่มีข้อมูล" />
+                        <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
                           {dt.by_failure_type.map((r) => (

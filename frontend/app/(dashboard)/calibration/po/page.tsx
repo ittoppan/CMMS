@@ -288,7 +288,7 @@ function PoRowCard({
         showToast("error", json.error || `ผิดพลาด (HTTP ${res.status})`);
       }
     } catch {
-      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }

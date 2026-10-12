@@ -27,10 +27,6 @@ export default function ChangePasswordPage() {
       setError('รหัสผ่านใหม่ต้องยาวอย่างน้อย 6 ตัวอักษร');
       return;
     }
-    if (next !== confirm) {
-      setError('รหัสผ่านใหม่ไม่ตรงกับการยืนยัน');
-      return;
-    }
     setLoading(true);
     try {
       const res = await fetch('/api/v1/profile.php', {
@@ -45,8 +41,9 @@ export default function ChangePasswordPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || 'เปลี่ยนรหัสผ่านไม่สำเร็จ');
       window.location.href = '/';
-    } catch (e: any) {
-      setError(e.message || 'ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      setError(/failed|network|fetch|system|unable/i.test(msg) ? 'ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง' : msg);
       setLoading(false);
     }
   };
@@ -99,8 +96,8 @@ export default function ChangePasswordPage() {
         </div>
 
         <p style={{ margin: '10px 0 22px', fontSize: 13.5, lineHeight: 1.6, color: 'var(--cmms-text-secondary, #475569)' }}>
-          ระบบขอให้คุณตั้งรหัสผ่านใหม่ เพราะบัญชีนี้ใช้รหัสเริ่มต้นจากผู้ดูแล
-          กรอกรหัสเดิม (รหัสเริ่มต้น) แล้วตั้งรหัสใหม่ส่วนตัว — เสร็จแล้วใช้งานได้ทันที
+          ระบบขอให้ตั้งรหัสผ่านใหม่ครั้งแรก เพราะบัญชีนี้ใช้รหัสเริ่มต้นจากผู้ดูแล —
+          กรอกรหัสเดิม แล้วตั้งรหัสใหม่ส่วนตัว เสร็จแล้วใช้งานได้ทันที
         </p>
 
         <div className="flex flex-col gap-4">
@@ -135,6 +132,7 @@ export default function ChangePasswordPage() {
 
         {error && (
           <div
+            role="alert"
             style={{
               marginTop: 14, padding: '10px 14px', borderRadius: 10, fontSize: 13,
               background: 'var(--cmms-danger-light, #FEE2E2)', color: 'var(--cmms-danger, #DC2626)',

@@ -87,7 +87,7 @@ function EditPMContent() {
           setError("ไม่พบข้อมูลแผน PM");
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoadingData(false));
   }, [pmId]);
 
@@ -135,7 +135,7 @@ function EditPMContent() {
       setAttachments(prev => prev.filter(a => a.id !== attId));
       setAttMsg({ kind: "ok", text: "ลบเอกสารแล้ว" });
     } else {
-      setAttMsg({ kind: "err", text: json.error || "ลบไม่สำเร็จ" });
+      setAttMsg({ kind: "err", text: json.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
     }
   };
 

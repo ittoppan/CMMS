@@ -123,7 +123,7 @@ export default function NotificationRulesPage() {
       setRules(r as RuleRow[]);
       setMeta(m);
     } catch {
-      setError("ไม่สามารถโหลดกฎการแจ้งเตือนได้");
+      setError("ไม่สามารถโหลดกฎการแจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   }, []);
@@ -182,7 +182,7 @@ export default function NotificationRulesPage() {
       setSavedMsg(editingId ? "อัปเดตกฎแล้ว" : "สร้างกฎใหม่แล้ว");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch {
-      setError("บันทึกกฎไม่สำเร็จ");
+      setError("บันทึกกฎไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
     setSaving(false);
   };
@@ -197,7 +197,7 @@ export default function NotificationRulesPage() {
       setSavedMsg("ลบกฎแล้ว");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch {
-      setError("ลบกฎไม่สำเร็จ");
+      setError("ลบกฎไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   };
 

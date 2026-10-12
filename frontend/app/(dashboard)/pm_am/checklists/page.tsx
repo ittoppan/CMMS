@@ -112,7 +112,7 @@ export default function PMChecklistsPage() {
         setFormOpen(false); setFormEditId(0); setForm({ code: "", name: "", category: "pm_am", description: "", is_active: 1 });
         await loadTemplates();
       } else setError(j.error || "บันทึกไม่สำเร็จ");
-    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้"); }
+    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const deleteTemplate = async (tpl: Template) => {
@@ -124,8 +124,8 @@ export default function PMChecklistsPage() {
         setMsg("ลบ Template แล้ว");
         if (activeTpl?.id === tpl.id) { setActiveTpl(null); setItems([]); }
         await loadTemplates();
-      } else setError(j.error || "ลบไม่สำเร็จ");
-    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้"); }
+      } else setError(j.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const saveItem = async () => {
@@ -156,7 +156,7 @@ export default function PMChecklistsPage() {
         setItemFormOpen(false); setItemEditId(0); resetItemForm();
         if (activeTpl) { await loadItems(activeTpl.id); await loadTemplates(); }
       } else setError(j.error || "บันทึกไม่สำเร็จ");
-    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้"); }
+    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const deleteItem = async (itemId: number) => {
@@ -164,7 +164,7 @@ export default function PMChecklistsPage() {
     try {
       await fetch(`/api/v1/checklist_templates.php?action=item&item_id=${itemId}`, { method: "DELETE" });
       if (activeTpl) { await loadItems(activeTpl.id); await loadTemplates(); }
-    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้"); }
+    } catch { setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const resetItemForm = () => setItemForm({
@@ -311,7 +311,7 @@ export default function PMChecklistsPage() {
       {/* ── Modal: สร้าง/แก้ Template ── */}
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setFormOpen(false)}>
-          <div className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md space-y-4 rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold">{formEditId ? "แก้ไข Template" : "สร้าง Template ใหม่"}</h3>
             <div className="space-y-3">
               <Input label="รหัส Template *" placeholder="เช่น CHK-PUMP-01" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
@@ -348,7 +348,7 @@ export default function PMChecklistsPage() {
       {/* ── Modal: เพิ่ม/แก้ รายการตรวจ ── */}
       {itemFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm" onClick={() => setItemFormOpen(false)}>
-          <div className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-[var(--cmms-radius)] bg-[var(--cmms-bg-card)] p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold">{itemEditId ? "แก้ไขรายการตรวจ" : "เพิ่มรายการตรวจ"}</h3>
             <div className="space-y-3">
               <Input label="รายการตรวจ *" placeholder="เช่น เช็ครอยรั่วของวาล์ว" value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} />

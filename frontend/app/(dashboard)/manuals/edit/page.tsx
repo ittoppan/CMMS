@@ -74,7 +74,7 @@ function EditManualContent() {
           setError("ไม่พบข้อมูลเอกสาร");
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoadingData(false));
   }, [manualId]);
 

@@ -143,7 +143,7 @@ export default function FormRunPage() {
       setBindOptions(binds);
     } catch (e) {
       console.error("Load form error", e);
-      setError("ไม่สามารถเชื่อมต่อระบบได้");
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
@@ -326,7 +326,7 @@ export default function FormRunPage() {
       }
     } catch (e) {
       console.error("Submit error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     } finally {
       setSaving(false);
     }
@@ -377,7 +377,7 @@ export default function FormRunPage() {
       if (json.status === "success") {
         load();
       } else {
-        setMsg({ text: json.message || "ลบไม่สำเร็จ", isError: true });
+        setMsg({ text: json.message || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", isError: true });
       }
     } catch (e) {
       console.error("Delete submission error", e);

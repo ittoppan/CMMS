@@ -46,7 +46,7 @@ export default function PMDetailPage() {
         if (j?.error) setError(j.error);
         else setPm(j);
       })
-      .catch(() => setError("ไม่สามารถเชื่อมต่อระบบได้"))
+      .catch(() => setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoading(false));
   }, [pmId]);
 
@@ -89,7 +89,7 @@ export default function PMDetailPage() {
         setWoErr(j.error || "สร้าง WO ไม่สำเร็จ");
       }
     } catch {
-      setWoErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setWoErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }

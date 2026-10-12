@@ -159,7 +159,7 @@ try {
         setError(json.error || "ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง");
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
     setSubmitting(false);
   };
@@ -469,7 +469,6 @@ try {
                           <User className="w-5 h-5" />
                         </div>
                         <div style={{ flex: 1 }}>
-                          <p className="font-semibold text-sm">เลขพนักงาน (Employee Code)</p>
                           <p className="text-sm text-[var(--cmms-text-secondary)]">
                             {lineName ? `สำหรับ ${lineName}` : "ต้องผูกกับผู้ใช้ที่แอดมินสร้างไว้ในระบบ"}
                           </p>
@@ -478,11 +477,13 @@ try {
 
                       <div className="mt-3">
                         <Input
+                          label="เลขพนักงาน"
                           placeholder="เช่น E01117"
+                          maxLength={10}
                           value={empCode}
                           onChange={(e) => {
                             const upper = e.target.value.toUpperCase();
-                            setEmpCode(upper.length > 6 ? upper.slice(0, 6) : upper);
+                            setEmpCode(upper.length > 10 ? upper.slice(0, 10) : upper);
                           }}
                         />
                       </div>
@@ -549,6 +550,7 @@ try {
 
                       {error && (
                         <div
+                          role="alert"
                           style={{
                             margin: "10px 0 0",
                             padding: "10px 14px",
@@ -588,7 +590,7 @@ try {
                               {submitting ? "กำลังตรวจสอบ..." : "ผูกบัญชีกับเลขพนักงานนี้"}
                             </Button>
                             <p className="text-sm text-[var(--cmms-text-secondary)]" style={{ textAlign: "center" }}>
-                              ตรวจเลขพนักงานกับฐานข้อมูลระบบหลังบ้านอัตโนมัติ
+                              ระบบตรวจสอบเลขพนักงานอัตโนมัติ
                             </p>
                           </>
                         )}

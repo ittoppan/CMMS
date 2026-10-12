@@ -49,7 +49,7 @@ export default function CalibrationCalendar() {
       .then((json) => {
         if (Array.isArray(json)) setRows(json);
       })
-      .catch(() => setError("โหลดข้อมูลสอบเทียบไม่สำเร็จ"))
+      .catch(() => setError("โหลดข้อมูลสอบเทียบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoading(false));
   }, []);
 

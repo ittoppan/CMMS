@@ -125,7 +125,7 @@ export default function InspectionsPage() {
       if (Array.isArray(loc)) setLocations(loc);
     } catch (e) {
       console.error(e);
-      setError("ไม่สามารถโหลดข้อมูลได้");
+      setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   }, [apiUrl]);
@@ -168,7 +168,7 @@ export default function InspectionsPage() {
       await fetch(`/api/v1/inspections.php?schedule=${s.id}`, { method: "DELETE" });
       flash("ลบรอบตรวจแล้ว");
       fetchAll();
-    } catch { setError("ลบไม่สำเร็จ"); }
+    } catch { setError("ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   if (loading) {

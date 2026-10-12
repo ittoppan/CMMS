@@ -102,7 +102,7 @@ export default function PMPlansPage() {
       if (json?.status === "success" && Array.isArray(json.data)) setPlans(json.data);
       else setError(json?.error || "โหลดข้อมูลไม่สำเร็จ");
     } catch (e) {
-      setError("ไม่สามารถเชื่อมต่อระบบได้");
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

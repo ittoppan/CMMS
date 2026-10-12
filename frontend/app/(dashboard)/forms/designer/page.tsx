@@ -92,7 +92,7 @@ export default function FormDesignerPage() {
       }
     } catch (e) {
       console.error("Fetch templates error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     } finally {
       setTemplatesLoading(false);
     }
@@ -232,7 +232,7 @@ export default function FormDesignerPage() {
       }
     } catch (e) {
       console.error("Save template error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     } finally {
       setSaving(false);
     }
@@ -252,11 +252,11 @@ export default function FormDesignerPage() {
         handleSelect(0);
         fetchTemplates();
       } else {
-        setMsg({ text: json.message || "ลบไม่สำเร็จ", isError: true });
+        setMsg({ text: json.message || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", isError: true });
       }
     } catch (e) {
       console.error("Delete template error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     }
   }, [selectedId, handleSelect, fetchTemplates]);
 
