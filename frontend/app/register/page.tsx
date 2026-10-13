@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ThemeProvider from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, ArrowRight, LinkIcon, User } from "lucide-react";
+import { ShieldCheck, LinkIcon, User, AlertCircle } from "lucide-react";
 import SuccessDialog from "@/components/SuccessDialog";
 
 declare global {
@@ -17,13 +17,47 @@ declare global {
 const apiFetch = (url: string, init?: RequestInit) =>
   fetch(url, { ...init });
 
+function LineAvatar({
+  src,
+  name,
+  className = "",
+}: {
+  src?: string | null;
+  name?: string;
+  className?: string;
+}) {
+  const initial = (name || "U").charAt(0).toUpperCase();
+  if (src) return <img src={src} alt={name || ""} className={`cmms-reg-avatar ${className}`} />;
+  return <div className={`cmms-reg-avatar ${className}`}>{initial}</div>;
+}
+
 export default function RegisterPage() {
+  return (
+    <>
+      <ThemeProvider />
+      <RegisterContent />
+    </>
+  );
+}
+
+function RegisterContent() {
   useEffect(() => {
-    const t = setTimeout(() => {
-      document.title = "ลงทะเบียนผูกบัญชี LINE · CMMS-TOPPAN";
-    }, 350);
-    return () => clearTimeout(t);
+    const prev = document.title;
+    document.title = "ลงทะเบียนผูกบัญชี LINE · CMMS-TOPPAN";
+    return () => { document.title = prev; };
   }, []);
+
+  const [lineUserId, setLineUserId] = useState("");
+  const [lineName, setLineName] = useState("");
+  const [linePic, setLinePic] = useState("");
+  const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
+  const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
+
+  const [empCode, setEmpCode] = useState("");
+  const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,15 +106,15 @@ export default function RegisterPage() {
       if (pUid) {
         setLineUserId(pUid);
         setLiffStatus(profile?.userId ? "ready" : "external");
-try {
-            const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
-            const json = await res.json().catch(() => ({}));
-            if (!cancelled && json?.bound && json?.user) setBoundUser({
-              full_name: json.user.full_name,
-              employee_code: json.user.employee_code,
-              avatar_path: json.user.avatar_path ?? null,
-            });
-          } catch { /* ignore */ }
+        try {
+          const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
+          const json = await res.json().catch(() => ({}));
+          if (!cancelled && json?.bound && json?.user) setBoundUser({
+            full_name: json.user.full_name,
+            employee_code: json.user.employee_code,
+            avatar_path: json.user.avatar_path ?? null,
+          });
+        } catch { /* ignore */ }
       } else {
         setLiffStatus("external");
       }
@@ -89,18 +123,6 @@ try {
     boot();
     return () => { cancelled = true; };
   }, []);
-
-  const [lineUserId, setLineUserId] = useState("");
-  const [lineName, setLineName] = useState("");
-  const [linePic, setLinePic] = useState("");
-  const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
-  const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
-
-  const [empCode, setEmpCode] = useState("");
-  const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   // Preview user by employee code (debounced)
   useEffect(() => {
@@ -164,462 +186,195 @@ try {
     setSubmitting(false);
   };
 
+  const heroAvatar = boundUser
+    ? { src: boundUser.avatar_path, name: boundUser.full_name }
+    : linePic
+      ? { src: linePic, name: lineName || "LINE" }
+      : null;
+
   if (done && boundUser) {
     return (
-      <main
-        className="min-h-screen"
-        style={{
-          background: "var(--cmms-bg-muted)",
-          padding: "20px 16px 0",
-        }}
-      >
-        <SuccessDialog
-          title="ผูกบัญชีสำเร็จ!"
-          message={
-            <>
-              ลงทะเบียน LINE ID กับ{" "}
-              <span style={{ fontWeight: "bold", color: "var(--cmms-primary)" }}>
-                {boundUser.full_name}
-              </span>
-            </>
-          }
-          primaryLabel="ไปแจ้งซ่อมเลย"
-          secondaryLabel="แจ้งซ่อมอีกทีหลัง"
-          stackButtons
-          onPrimary={() => (window.location.href = "/repair/request")}
-          onSecondary={() => { setDone(false); setEmpCode(""); }}
-        >
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            {boundUser.avatar_path ? (
-              <img
+      <main className="cmms-gate-page">
+        <div className="cmms-gate-wrap cmms-reg-wrap">
+          <SuccessDialog
+            title="ผูกบัญชีสำเร็จ!"
+            message={
+              <>
+                ลงทะเบียน LINE ID กับ{" "}
+                <span style={{ fontWeight: "bold", color: "var(--cmms-primary)" }}>
+                  {boundUser.full_name}
+                </span>
+              </>
+            }
+            primaryLabel="ไปแจ้งซ่อมเลย"
+            secondaryLabel="แจ้งซ่อมอีกทีหลัง"
+            stackButtons
+            onPrimary={() => (window.location.href = "/repair/request")}
+            onSecondary={() => { setDone(false); setEmpCode(""); }}
+          >
+            <div className="text-center mb-3">
+              <LineAvatar
                 src={boundUser.avatar_path}
-                alt={boundUser.full_name}
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "3px solid #fff",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  marginBottom: 8,
-                }}
+                name={boundUser.full_name}
+                className="cmms-reg-avatar-lg"
               />
-            ) : (
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  background: "var(--cmms-primary)",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "2rem",
-                  fontWeight: 700,
-                  margin: "0 auto 8px",
-                  border: "3px solid #fff",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                }}
-              >
-                {boundUser.full_name.charAt(0)}
-              </div>
-            )}
-          </div>
-          <p className="text-sm text-[var(--cmms-text-secondary)]" style={{ textAlign: "center" }}>
-            เลขพนักงาน {boundUser.employee_code} · ต่อไปแจ้งซ่อมจะรู้ชื่ออัตโนมัติ
-            <br />
-            และช่างจะได้รับแจ้งเตือนทาง LINE
-            <br />
-            <span style={{ fontSize: "0.92em", opacity: 0.85 }}>
-              ระบบส่งข้อความยืนยันผูกสำเร็จทาง LINE และแจ้งผู้ดูแลแล้ว
-            </span>
-          </p>
-        </SuccessDialog>
+            </div>
+            <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
+              เลขพนักงาน {boundUser.employee_code} · ต่อไปแจ้งซ่อมจะรู้ชื่ออัตโนมัติ
+              <br />
+              และช่างจะได้รับแจ้งเตือนทาง LINE
+              <br />
+              <span className="text-[0.92em] opacity-85">
+                ระบบส่งข้อความยืนยันผูกสำเร็จทาง LINE และแจ้งผู้ดูแลแล้ว
+              </span>
+            </p>
+          </SuccessDialog>
+        </div>
       </main>
     );
   }
 
   return (
-    <main
-      className="min-h-screen"
-      style={{
-        background: "var(--cmms-bg-muted)",
-        padding: "20px 16px 0",
-      }}
-    >
-      <div style={{ maxWidth: 560, margin: "0 auto", paddingBottom: 100 }}>
-        <div style={{ padding: "4px 0 16px" }}>
+    <main className="cmms-gate-page">
+      <div className="cmms-gate-wrap cmms-reg-wrap">
+        <section className="cmms-reg-hero">
           <div className="flex items-center gap-3">
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 14,
-                flexShrink: 0,
-                background: "var(--cmms-danger-light)",
-                border: "1px solid var(--cmms-danger-light)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "1.5rem",
-              }}
-            >
-              <LinkIcon className="w-6 h-6" />
+            <div className="cmms-reg-mark">
+              <LinkIcon className="w-6 h-6" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600 }}>ลงทะเบียนผูกบัญชี LINE</h3>
-              <p className="text-sm text-[var(--cmms-text-secondary)]">CMMS-TOPPAN · LINE REGISTRATION</p>
+            <div className="flex-1">
+              <h1 className="cmms-reg-hero-title">ลงทะเบียนผูกบัญชี LINE</h1>
+              <p className="cmms-reg-hero-sub">CMMS-TOPPAN · LINE REGISTRATION</p>
             </div>
-            {boundUser && boundUser.avatar_path ? (
-              <img
-                src={boundUser.avatar_path}
-                alt={boundUser.full_name}
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid #fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  flexShrink: 0,
-                }}
-              />
-            ) : boundUser ? (
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: "var(--cmms-primary)",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "1.2rem",
-                  fontWeight: 700,
-                  flexShrink: 0,
-                  border: "2px solid #fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                }}
-              >
-                {boundUser.full_name.charAt(0)}
-              </div>
-            ) : linePic ? (
-              <img
-                src={linePic}
-                alt="LINE profile"
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid #fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  flexShrink: 0,
-                }}
-              />
+            {heroAvatar ? (
+              <LineAvatar src={heroAvatar.src} name={heroAvatar.name} />
             ) : (
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  background: "var(--cmms-primary)",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <User className="w-5 h-5" />
+              <div className="cmms-reg-avatar">
+                <User className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        <div style={{ padding: 16 }}>
-          <Card style={{ borderRadius: 16, boxShadow: "0 1px 3px rgba(15,23,42,0.06)", border: "1px solid rgba(255,255,255,0.6)" }}>
-            <CardContent className="p-5">
-              <div className="flex flex-col gap-4">
-                {liffStatus === "loading" && (
-                  <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล LINE...</p>
-                )}
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex flex-col gap-4">
+              {liffStatus === "loading" && (
+                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล LINE...</p>
+              )}
 
-                {liffStatus === "external" && (
-                  <div
-                    style={{
-                      margin: "10px 0 0",
-                      padding: "10px 14px",
-                      borderRadius: "var(--cmms-radius)",
-                      background: lineUserId ? "var(--cmms-success-light)" : "var(--cmms-info-light)",
-                      border: `1px solid ${lineUserId ? "var(--cmms-success)" : "var(--cmms-primary-light)"}`,
-                      color: lineUserId ? "var(--cmms-success)" : "var(--cmms-primary)",
-                      fontSize: "0.8rem",
-                      fontWeight: 600,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {lineUserId
-                      ? "LINE ID ของคุณพร้อมแล้ว — กรอกรหัสพนักงาน แล้วกดปุ่มผูกบัญชีด้านล่าง"
-                      : "ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี (หรือเปิดลิงก์นี้จากแชท LINE เพื่อผูกอัตโนมัติ)"}
-                  </div>
-                )}
+              {liffStatus === "external" && (
+                <div className={`cmms-reg-status${lineUserId ? " ok" : ""}`}>
+                  {lineUserId
+                    ? "LINE ID ของคุณพร้อมแล้ว — กรอกรหัสพนักงาน แล้วกดปุ่มผูกบัญชีด้านล่าง"
+                    : "ยังไม่ได้ล็อกอินด้วย LINE — กดปุ่มด้านล่างเพื่อเริ่มผูกบัญชี (หรือเปิดลิงก์นี้จากแชท LINE เพื่อผูกอัตโนมัติ)"}
+                </div>
+              )}
 
-                {boundUser ? (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3">
-                      {boundUser.avatar_path ? (
-                        <img
-                          src={boundUser.avatar_path}
-                          alt={boundUser.full_name}
-                          style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "2px solid #fff",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                            flexShrink: 0,
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: "50%",
-                            background: "var(--cmms-primary)",
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "1.5rem",
-                            fontWeight: 700,
-                            flexShrink: 0,
-                            border: "2px solid #fff",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                          }}
-                        >
-                          {boundUser.full_name.charAt(0)}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <div
-                            style={{
-                              width: 28,
-                              height: 28,
-                              borderRadius: "50%",
-                              flexShrink: 0,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontWeight: 700,
-                              fontSize: "0.85rem",
-                              background: "var(--cmms-success)",
-                              border: "2px solid var(--cmms-success)",
-                              color: "#fff",
-                            }}
-                          >
-                            ✓
-                          </div>
-                          <span className="text-sm font-semibold" style={{ color: "var(--cmms-success)" }}>
-                            บัญชีนี้ผูกกับ {boundUser.full_name} แล้ว
-                          </span>
-                        </div>
-                        <p className="text-sm text-[var(--cmms-text-secondary)]">
-                          เลขพนักงาน {boundUser.employee_code} — ไปแจ้งซ่อมได้เลย
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => (window.location.href = "/repair/request")}
-                    >
-                      ไปแจ้งซ่อม
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    <div
-                      style={{
-                        background: "var(--cmms-bg-muted)",
-                        border: "1px dashed var(--cmms-border)",
-                        borderRadius: "var(--cmms-radius)",
-                        padding: 14,
-                      }}
-                    >
+              {boundUser ? (
+                <div className="flex flex-col gap-4">
+                  <div className="cmms-reg-tile ok">
+                    <LineAvatar src={boundUser.avatar_path} name={boundUser.full_name} className="cmms-reg-avatar-md" />
+                    <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <div
-                          style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 14,
-                            flexShrink: 0,
-                            background: "var(--cmms-danger-light)",
-                            border: "1px solid var(--cmms-danger-light)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 20,
-                          }}
-                        >
-                          <User className="w-5 h-5" />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <p className="text-sm text-[var(--cmms-text-secondary)]">
-                            {lineName ? `สำหรับ ${lineName}` : "ต้องผูกกับผู้ใช้ที่แอดมินสร้างไว้ในระบบ"}
-                          </p>
-                        </div>
+                        <div className="cmms-reg-check">✓</div>
+                        <span className="cmms-reg-tile-title">บัญชีนี้ผูกกับ {boundUser.full_name} แล้ว</span>
                       </div>
-
-                      <div className="mt-3">
-                        <Input
-                          label="เลขพนักงาน"
-                          placeholder="เช่น E01117"
-                          maxLength={10}
-                          value={empCode}
-                          onChange={(e) => {
-                            const upper = e.target.value.toUpperCase();
-                            setEmpCode(upper.length > 10 ? upper.slice(0, 10) : upper);
-                          }}
-                        />
-                      </div>
-
-                      {previewUser && (
-                        <div
-                          style={{
-                            margin: "12px 0 0",
-                            padding: "12px",
-                            borderRadius: "var(--cmms-radius)",
-                            background: "var(--cmms-success-light)",
-                            border: "1px solid var(--cmms-success)",
-                          }}
-                        >
-                          <div className="flex items-center gap-3">
-                            {previewUser.avatar_path ? (
-                              <img
-                                src={previewUser.avatar_path}
-                                alt={previewUser.full_name}
-                                style={{
-                                  width: 48,
-                                  height: 48,
-                                  borderRadius: "50%",
-                                  objectFit: "cover",
-                                  border: "2px solid #fff",
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                                  flexShrink: 0,
-                                }}
-                              />
-                            ) : (
-                              <div
-                                style={{
-                                  width: 48,
-                                  height: 48,
-                                  borderRadius: "50%",
-                                  background: "var(--cmms-primary)",
-                                  color: "#fff",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontSize: "1.3rem",
-                                  fontWeight: 700,
-                                  flexShrink: 0,
-                                  border: "2px solid #fff",
-                                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                                }}
-                              >
-                                {previewUser.full_name.charAt(0)}
-                              </div>
-                            )}
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-sm" style={{ color: "var(--cmms-success)" }}>
-                                พบผู้ใช้: {previewUser.full_name}
-                              </span>
-                              <span className="text-sm text-[var(--cmms-text-secondary)]">
-                                เลขพนักงาน {previewUser.employee_code}
-                                {previewUser.position && ` · ตำแหน่ง ${previewUser.position}`}
-                                {previewUser.department && ` · ${previewUser.department}`}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {error && (
-                        <div
-                          role="alert"
-                          style={{
-                            margin: "10px 0 0",
-                            padding: "10px 14px",
-                            borderRadius: "var(--cmms-radius)",
-                            background: "var(--cmms-danger-light)",
-                            border: "1px solid var(--cmms-danger-light)",
-                            color: "var(--cmms-danger)",
-                            fontSize: "0.8rem",
-                            fontWeight: 600,
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {error}
-                        </div>
-                      )}
-
-                      <div className="flex flex-col gap-2 mt-3">
-                        {liffStatus === "external" && !lineUserId ? (
-                          <>
-                            <Button
-                              className="w-full"
-                              onClick={() => (window.location.href = "/line_login.php")}
-                            >
-                              ล็อกอินด้วย LINE เพื่อผูกบัญชี
-                            </Button>
-                            <p className="text-sm text-[var(--cmms-text-secondary)]" style={{ textAlign: "center" }}>
-                              ระบบจะพากลับมาที่หน้านี้พร้อม LINE ID ของคุณ — กรอกเลขพนักงานแล้วกดผูก
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              className="w-full"
-                              disabled={submitting || !lineUserId}
-                              onClick={handleBind}
-                            >
-                              {submitting ? "กำลังตรวจสอบ..." : "ผูกบัญชีกับเลขพนักงานนี้"}
-                            </Button>
-                            <p className="text-sm text-[var(--cmms-text-secondary)]" style={{ textAlign: "center" }}>
-                              ระบบตรวจสอบเลขพนักงานอัตโนมัติ
-                            </p>
-                          </>
-                        )}
-                      </div>
+                      <p className="cmms-reg-tile-sub">เลขพนักงาน {boundUser.employee_code} — ไปแจ้งซ่อมได้เลย</p>
                     </div>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  <Button
+                    className="w-full"
+                    onClick={() => (window.location.href = "/repair/request")}
+                  >
+                    ไปแจ้งซ่อม
+                  </Button>
+                </div>
+              ) : (
+                <div className="cmms-register-box">
+                  <div className="flex items-center gap-2">
+                    <div className="cmms-reg-mark-soft">
+                      <User className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+                    </div>
+                    <p className="cmms-reg-tile-sub flex-1">
+                      {lineName ? `สำหรับ ${lineName}` : "ต้องผูกกับผู้ใช้ที่แอดมินสร้างไว้ในระบบ"}
+                    </p>
+                  </div>
 
-          <Card
-            className="mt-3"
-            style={{
-              borderRadius: 16,
-              boxShadow: "0 8px 24px -8px rgba(15,23,42,0.12)",
-              border: "1px solid rgba(255,255,255,0.6)",
-            }}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="w-5 h-5" style={{ color: "var(--cmms-success)", flexShrink: 0 }} />
-                <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  <b>ทำไมต้องผูก?</b> ผูกครั้งเดียวจบ — ระบบจะจำชื่อคุณได้ งานที่แจ้งจะมีชื่อผู้แจ้ง
-                  และช่าง/กลุ่ม LINE จะได้รับแจ้งเตือนพร้อมรูปและรายละเอียดทันที
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="mt-3">
+                    <Input
+                      label="เลขพนักงาน"
+                      placeholder="เช่น E01117"
+                      maxLength={10}
+                      value={empCode}
+                      onChange={(e) => {
+                        const upper = e.target.value.toUpperCase();
+                        setEmpCode(upper.length > 10 ? upper.slice(0, 10) : upper);
+                      }}
+                    />
+                  </div>
+
+                  {previewUser && (
+                    <div className="cmms-reg-tile ok mt-3">
+                      <LineAvatar src={previewUser.avatar_path} name={previewUser.full_name} className="cmms-reg-avatar-sm" />
+                      <div className="flex flex-col">
+                        <span className="cmms-reg-tile-title">พบผู้ใช้: {previewUser.full_name}</span>
+                        <span className="cmms-reg-tile-sub">
+                          เลขพนักงาน {previewUser.employee_code}
+                          {previewUser.position && ` · ตำแหน่ง ${previewUser.position}`}
+                          {previewUser.department && ` · ${previewUser.department}`}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {error && (
+                    <div className="cmms-reg-status error mt-3" role="alert" aria-live="assertive">
+                      <AlertCircle size={15} strokeWidth={1.75} aria-hidden="true" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2 mt-3">
+                    {liffStatus === "external" && !lineUserId ? (
+                      <>
+                        <Button
+                          className="w-full"
+                          onClick={() => (window.location.href = "/line_login.php")}
+                        >
+                          ล็อกอินด้วย LINE เพื่อผูกบัญชี
+                        </Button>
+                        <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
+                          ระบบจะพากลับมาที่หน้านี้พร้อม LINE ID ของคุณ — กรอกเลขพนักงานแล้วกดผูก
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          className="w-full"
+                          disabled={submitting || !lineUserId}
+                          onClick={handleBind}
+                        >
+                          {submitting ? "กำลังตรวจสอบ..." : "ผูกบัญชีกับเลขพนักงานนี้"}
+                        </Button>
+                        <p className="text-sm text-[var(--cmms-text-secondary)] text-center">
+                          ระบบตรวจสอบเลขพนักงานอัตโนมัติ
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="cmms-reg-note">
+          <ShieldCheck className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
+          <p>
+            <b>ทำไมต้องผูก?</b> ผูกครั้งเดียวจบ — ระบบจะจำชื่อคุณได้ งานที่แจ้งจะมีชื่อผู้แจ้ง
+            และช่าง/กลุ่ม LINE จะได้รับแจ้งเตือนพร้อมรูปและรายละเอียดทันที
+          </p>
         </div>
       </div>
     </main>

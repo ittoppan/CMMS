@@ -686,8 +686,9 @@ h1, h2, h3, h4 {
   display: flex; align-items: flex-start; gap: 9px;
   padding: 11px 13px; border-radius: var(--cmms-radius);
   background: var(--cmms-danger-light); border: 1px solid var(--cmms-danger);
-  color: var(--cmms-danger-dark); font-size: 0.82rem; font-weight: 600; line-height: 1.5;
+  color: var(--cmms-text-primary); font-size: 0.82rem; font-weight: 600; line-height: 1.5;
 }
+.cmms-login-error svg { color: var(--cmms-danger); }
 
 .cmms-login-peek {
   position: absolute; right: 2px; bottom: 0; width: 44px; height: 44px;
@@ -721,6 +722,107 @@ h1, h2, h3, h4 {
   0%, 100% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(-2.5%, -2%, 0); }
 }
+
+/* ================================================
+   Auth gate pages — change-password / register
+   (ต่อยอดสไตล์ login: token ล้วน ไม่มี hex/emoji ใน tsx)
+   ================================================ */
+.cmms-gate-page {
+  min-height: 100vh; background: var(--cmms-bg-page);
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 44px 20px 72px;
+}
+.cmms-gate-wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 18px; }
+.cmms-gate-brand { display: flex; align-items: center; gap: 11px; }
+.cmms-gate-card {
+  background: var(--cmms-bg-card); border: 1px solid var(--cmms-border);
+  border-radius: var(--cmms-radius-lg); box-shadow: var(--cmms-shadow-md);
+  padding: 26px 24px; display: flex; flex-direction: column; gap: 18px;
+}
+.cmms-gate-title {
+  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-size: 1.55rem; font-weight: 700; letter-spacing: 0.004em;
+  color: var(--cmms-text-primary); margin: 0; line-height: 1.2;
+}
+.cmms-gate-lede { font-size: 0.85rem; line-height: 1.65; color: var(--cmms-text-secondary); margin: 0; }
+.cmms-gate-note {
+  display: flex; align-items: center; gap: 8px; margin: 0;
+  font-size: 0.75rem; line-height: 1.5; color: var(--cmms-text-muted);
+}
+.cmms-gate-note svg { flex-shrink: 0; color: var(--cmms-success); }
+
+/* ---- Register (LIFF) — brand hero + status tiles ---- */
+.cmms-reg-wrap { max-width: 560px; }
+.cmms-reg-hero {
+  position: relative; overflow: hidden; color: #fff;
+  border-radius: var(--cmms-radius-lg); padding: 20px;
+  /* ข้อยกเว้นที่ตั้งใจ: register/LIFF hero palette (DESIGN.md §7) */
+  background: linear-gradient(150deg, var(--tp-navy-dark) 0%, #0E2A5C 50%, var(--cmms-primary) 100%);
+}
+.cmms-reg-hero::before {
+  content: ''; position: absolute; inset: 0; opacity: 0.5; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(120% 90% at 88% 6%, #000, transparent 78%);
+  mask-image: radial-gradient(120% 90% at 88% 6%, #000, transparent 78%);
+}
+.cmms-reg-hero > * { position: relative; z-index: 1; }
+.cmms-reg-hero-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0; }
+.cmms-reg-hero-sub { font-size: 0.78rem; color: rgba(255,255,255,0.72); margin: 3px 0 0; letter-spacing: 0.03em; }
+.cmms-reg-mark {
+  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.24);
+}
+.cmms-reg-avatar {
+  width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; object-fit: cover;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.85); background: var(--cmms-primary);
+  color: #fff; font-weight: 700; font-size: 1.1rem;
+}
+.cmms-reg-avatar-lg { width: 80px; height: 80px; font-size: 1.9rem; border-width: 3px; box-shadow: var(--cmms-shadow-md); margin: 0 auto 8px; }
+.cmms-reg-avatar-md { width: 56px; height: 56px; font-size: 1.4rem; }
+.cmms-reg-avatar-sm { width: 48px; height: 48px; font-size: 1.2rem; }
+.cmms-reg-mark-soft {
+  width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--cmms-primary-light); color: var(--cmms-primary);
+}
+.cmms-reg-tile {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--cmms-radius);
+  border: 1px solid var(--cmms-border); background: var(--cmms-bg-muted);
+}
+.cmms-reg-tile.ok { background: var(--cmms-success-light); border-color: var(--cmms-success); }
+.cmms-reg-tile-title { font-size: 0.85rem; font-weight: 600; color: var(--cmms-text-primary); margin: 0; }
+.cmms-reg-tile.ok .cmms-reg-tile-title { color: var(--cmms-text-primary); }
+.cmms-reg-tile-sub { font-size: 0.78rem; color: var(--cmms-text-secondary); margin: 2px 0 0; }
+.cmms-reg-check {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem; color: #fff;
+  background: var(--cmms-success); border: 2px solid var(--cmms-success);
+}
+.cmms-reg-status {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 13px; border-radius: var(--cmms-radius);
+  background: var(--cmms-info-light); border: 1px solid var(--cmms-primary-light);
+  color: var(--cmms-text-primary); font-size: 0.8rem; font-weight: 600; line-height: 1.5;
+}
+.cmms-reg-status svg { flex-shrink: 0; margin-top: 1px; color: var(--cmms-text-secondary); }
+.cmms-reg-status.ok { background: var(--cmms-success-light); border-color: var(--cmms-success); }
+.cmms-reg-status.error { background: var(--cmms-danger-light); border-color: var(--cmms-danger); }
+.cmms-reg-status.error svg { color: var(--cmms-danger); }
+.cmms-reg-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 13px 15px; border-radius: var(--cmms-radius);
+  background: var(--cmms-bg-card); border: 1px solid var(--cmms-border);
+  box-shadow: var(--cmms-shadow-sm);
+  font-size: 0.8rem; line-height: 1.6; color: var(--cmms-text-secondary);
+}
+.cmms-reg-note svg { flex-shrink: 0; color: var(--cmms-success); margin-top: 1px; }
 
 /* ================================================
    Animations
