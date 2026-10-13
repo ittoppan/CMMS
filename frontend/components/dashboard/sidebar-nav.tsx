@@ -71,6 +71,7 @@ import {
   CircleAlert,
   Hash,
   SlidersHorizontal,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { ChevronRight } from "lucide-react";
@@ -194,6 +195,13 @@ export const NAV_GROUPS: NavGroupDef[] = [
         { perm: "workforce/mine", labelKey: "menu.workforce_mine", href: "/workforce/mine", icon: IdCard },
       ],
     },
+  {
+    titleKey: "nav.process_flows",
+    pathPrefixes: ["/process-flows"],
+    items: [
+      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow },
+    ],
+  },
   {
     titleKey: "nav.shutdown",
     pathPrefixes: ["/shutdown"],

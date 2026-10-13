@@ -29,6 +29,7 @@ import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
+import { useUnreadCount } from "../../lib/notifications";
 import { t, useLang, setUserLang, tPage, tSection, applyUserLang } from "../../lib/i18n";
 import { ConnectivityProvider } from "../../lib/offline/connectivity";
 import { ConnectivityStatus } from "../../components/ConnectivityStatus";
@@ -40,7 +41,7 @@ const MENU_HREFS: string[] = [
   "/dashboard",
   "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
   "/field", "/field/work", "/field/plan",
-  "/planning", "/planning/calendar",
+  "/planning", "/planning/calendar", "/process-flows",
   "/approval", "/forms", "/manuals",
   "/pm_am", "/pm_am/dashboard", "/pm_am/plans", "/pm_am/plans/create", "/pm_am/view", "/pm_am/checklists", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
   "/inspections", "/inspections/run", "/inspections/templates",
@@ -108,7 +109,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const lang = useLang();
-  const { canShow, roleName, userFullName, simulated, bottomNavKeys } = useMenuPermission();
+  const { canShow, roleName, userFullName, avatar, simulated, bottomNavKeys, refresh } = useMenuPermission();
+  const unreadCount = useUnreadCount(60000);
 
   // Bottom nav มือถือ: API order → fallback preset ตามบทบาท → filter สิทธิ์
   const bottomNav = (bottomNavKeys.length > 0 ? bottomNavKeys : (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER))
@@ -118,67 +120,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [pendingCount, setPendingCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Auth guard: session invalid (401) → /login (online only)
-  const loadProfile = () => {
-    fetch("/api/v1/menu_permissions.php?user=1")
-      .then((res) => {
-        if (res.status === 401) {
-          router.replace("/login");
-          return null;
-        }
-        return res.json();
-      })
-      .then((json) => {
-        if (json?.user?.must_change_password) {
-          router.replace("/change-password");
-          return null;
-        }
-        if (json?.user?.full_name) {
-          const full = String(json.user.full_name).split("(")[0].trim();
-          const rawAvatar = json.user.avatar || json.user.avatar_path || "";
-          let avatar: string | null = null;
-          if (rawAvatar) {
-            const cleaned = String(rawAvatar).replace(/\\/g, "/");
-            avatar = cleaned.startsWith("data:") || cleaned.startsWith("/")
-              ? cleaned
-              : "/" + cleaned;
-          }
-          setCurrentUser({
-            name: full,
-            initial: full.trim().charAt(0).toUpperCase() || "U",
-            avatar,
-          });
-        }
-      })
-      .catch(() => {
-        /* offline — ไม่ redirect */
-      });
-  };
-
+  // Auth guard: 401 → /login และ must_change_password → /change-password
+  // โดยตรงใน useMenuPermission (รวม fetch โปรไฟล์เป็น request เดียว กับสิทธิ์เมนู)
   useEffect(() => {
-    loadProfile();
     applyUserLang();
-    const onProfileUpdated = () => loadProfile();
+    const onProfileUpdated = () => refresh();
     window.addEventListener("cmms:profile-updated", onProfileUpdated);
     return () => window.removeEventListener("cmms:profile-updated", onProfileUpdated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- รันครั้งเดียวตอน mount
-  }, []);
+  }, [refresh]);
 
   // badge งานแจ้งซ่อมค้างส่ง (offline queue)
   useEffect(() => {
-    const refresh = () => {
+    const refreshPending = () => {
       offlineQueueCount().then(setPendingCount).catch(() => setPendingCount(0));
     };
-    runQueueMigrationOnce().finally(refresh);
-    window.addEventListener("online", refresh);
-    window.addEventListener("cmms:offline-queued", refresh);
+    runQueueMigrationOnce().finally(refreshPending);
+    window.addEventListener("online", refreshPending);
+    window.addEventListener("cmms:offline-queued", refreshPending);
     return () => {
-      window.removeEventListener("online", refresh);
-      window.removeEventListener("cmms:offline-queued", refresh);
+      window.removeEventListener("online", refreshPending);
+      window.removeEventListener("cmms:offline-queued", refreshPending);
     };
   }, []);
 
-  // ชื่อผู้ใช้จาก hook (merge ไม่ทับ avatar ที่ fetch ตั้งไว้)
+  // ชื่อ + รูปโปรไฟล์จาก hook (fetch ครั้งเดียวเดียวกับ permission)
   useEffect(() => {
     if (userFullName && !simulated) {
       const full = userFullName.split("(")[0].trim();
@@ -186,6 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ...(prev || {}),
         name: full,
         initial: full.trim().charAt(0).toUpperCase() || "U",
+        avatar: avatar ?? prev?.avatar ?? null,
       }));
     } else if (simulated) {
       setCurrentUser((prev) => ({
@@ -194,7 +160,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         initial: (roleName || "R").charAt(0).toUpperCase(),
       }));
     }
-  }, [userFullName, simulated, roleName]);
+  }, [userFullName, simulated, roleName, avatar]);
 
   // "เมนูที่ตรงสุด" highlight rule
   const isSelected = (href: string) => {
@@ -231,6 +197,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <ConnectivityProvider>
       <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
       <LiffBridge />
+
+      {/* Skip link — ให้คีย์บอร์ด/Screen reader ข้าม sidebar+topbar ไปเนื้อหา */}
+      <a
+        href="#cmms-main-scroll"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[100] focus:rounded-lg focus:border focus:border-border focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg"
+      >
+        ข้ามไปยังเนื้อหา
+      </a>
 
       {/* ═══════════ DESKTOP SHELL (≥1024px): sidebar + topbar ═══════════ */}
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
@@ -302,7 +276,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <FileText size={17} strokeWidth={1.75} aria-hidden="true" />
               </button>
-              <NotificationBell variant="popover" />
+              <NotificationBell variant="popover" unreadCount={unreadCount} />
               <ConnectivityStatus variant="chip" />
               <ThemeModeToggle lang={lang} />
               <button
@@ -374,7 +348,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </span>
         </a>
         <ConnectivityStatus variant="icon" />
-        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" />
+        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
       </header>
 
       {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}

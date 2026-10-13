@@ -681,6 +681,10 @@ DICT["menu.reliability_studies"] = { th: "งานวิเคราะห์�
 DICT["menu.reliability_data_quality"] = { th: "คุณภาพข้อมูล", en: "Data Quality" };
 DICT["menu.reliability_config"] = { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions" };
 
+// ── Visual Process Flows (nav + menu) ──
+DICT["nav.process_flows"] = { th: "ผังกระบวนการ", en: "Process Flows" };
+DICT["menu.process_flows"] = { th: "ผังกระบวนการซ่อมบำรุง", en: "Visual Process Flows" };
+
 // ════════════════
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
@@ -874,6 +878,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/reliability/studies/[id]": { th: "รายละเอียดงานวิเคราะห์", en: "Study Detail" },
   "/reliability/data-quality": { th: "คุณภาพข้อมูลความเสียหาย", en: "Reliability Data Quality" },
   "/reliability/config": { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions & Settings" },
+  "/process-flows": { th: "ผังกระบวนการซ่อมบำรุง", en: "Visual Process Flows" },
 };
 
 // หมวด breadcrumb
@@ -914,6 +919,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/audit-log": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/editor": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/reliability": { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" },
+  "/process-flows": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
 };
 
 // ════════════════ Hero หน้า (หัวข้อหลัก) ════════════════
@@ -927,6 +933,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "dashboard/list": {
     th: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "วิเคราะห์ลงลึก", desc: "ลงลึกจาก KPI บนแดชบอร์ด — รายการงานซ่อม งานค้างเกินกำหนด PM และวิเคราะห์แนวโน้ม" },
     en: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "Dig deeper from dashboard KPIs — work order lists, overdue items, PM and trend analysis" },
+  },
+  "process_flows": {
+    th: { eyebrow: "PROCESS FLOWS · CMMS-TOPPAN", title: "ผังกระบวนการซ่อมบำรุง", desc: "ภาพรวมขั้นตอนการทำงานของแต่ละกระบวนการหลัก ตั้งแต่เริ่มจนปิดงาน พร้อมสถานะแยกจากสายหลัก" },
+    en: { eyebrow: "PROCESS FLOWS · CMMS-TOPPAN", title: "Visual Process Flows", desc: "End-to-end visual overview of the core maintenance processes, main steps and their branch statuses" },
   },
   repair: {
     th: { eyebrow: "Work Order Board · CMMS-TOPPAN", title: "ใบสั่งงานซ่อม", desc: "สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด" },
