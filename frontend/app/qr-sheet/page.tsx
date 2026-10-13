@@ -16,10 +16,10 @@ type Asset = {
   payload: string;
 };
 
-const APP_BASE =
-  (typeof window !== "undefined" && window.location.origin) ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3001";
+const getAppBase = () =>
+  typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
 
 export default function QrSheetPage() {
   const [machines, setMachines] = useState<Asset[]>([]);

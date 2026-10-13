@@ -251,11 +251,12 @@ export default function DocumentsPage() {
                   <tbody>
                     {items.map((doc) => {
                       const tone = DOC_STATUS_TONE[doc.status] ?? "neutral";
+                      const isPublished = !!doc.effective_revision_no;
                       const days = doc.next_review_date
                         ? Math.ceil((new Date(`${doc.next_review_date}T18:00:00`).getTime() - Date.now()) / 86400000)
                         : null;
                       return (
-                        <tr key={doc.id} className="border-b last:border-0 hover:bg-[var(--cmms-bg-muted)]">
+                        <tr key={doc.id} className={cn("border-b last:border-0 hover:bg-[var(--cmms-bg-muted)]", isPublished && "bg-[var(--cmms-success-light)]/30")}>
                           <td className="px-4 py-3">
                             <Link href={`/documents/${doc.id}`} className="font-medium text-foreground hover:underline">
                               {doc.title}
@@ -268,9 +269,9 @@ export default function DocumentsPage() {
                           </td>
                           <td className="px-4 py-3">
                             {doc.effective_revision_no ? (
-                              <span className="inline-flex items-center gap-1 text-xs">
-                                <CheckCheck size={13} aria-hidden="true" className="text-[var(--cmms-success)]" />
-                                <span className="font-medium">rev {doc.effective_revision_no}</span>
+                              <span className="inline-flex items-center gap-2 text-xs">
+                                <AndonLamp status="ok" size="sm" showLabel />
+                                <span className="font-bold text-[var(--cmms-success)]">rev {doc.effective_revision_no}</span>
                                 <span className="text-muted-foreground">{fmtDocDate(doc.effective_date)}</span>
                               </span>
                             ) : (
@@ -460,7 +461,9 @@ function QrLabelPanel() {
                 <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{x.payload ?? "—"}</td>
                 <td className="px-3 py-2">
                   {x.has_effective ? (
-                    <Pill tone="ok">พร้อมใช้งาน</Pill>
+                    <span className="inline-flex items-center gap-1">
+                      <AndonLamp status="ok" size="sm" showLabel />
+                    </span>
                   ) : (
                     <Pill tone="idle">ยังไม่มีฉบับที่มีผล</Pill>
                   )}

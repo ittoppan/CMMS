@@ -208,6 +208,7 @@ export default function KnowledgePage() {
                 sub={`บทความทั้งหมดในระบบ ${cat.total_articles}`}
                 lamp={cat.published_articles > 0 ? "ok" : "warn"}
               />
+              <AndonLamp status={cat.published_articles > 0 ? "ok" : "warn"} size="sm" showLabel />
               <Kpi
                 label="ช่องว่างความรู้ที่ยังค้ง"
                 value={cat.gaps_open}
@@ -287,7 +288,7 @@ export default function KnowledgePage() {
                       {c.total > c.published && (
                         <span className="text-muted-foreground">ร่าง/รอตรวจ {c.total - c.published}</span>
                       )}
-                      <span className="rounded-full bg-secondary px-2.5 py-1 font-semibold tabular-nums">
+                      <span className="rounded-full bg-[var(--cmms-success-light)] text-[var(--cmms-success)] px-2.5 py-1 font-semibold tabular-nums">
                         {c.published} ฉบับ
                       </span>
                     </div>
@@ -310,7 +311,8 @@ export default function KnowledgePage() {
                 <>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-muted-foreground">บทความที่ผูกกับเครื่อง/งาน</span>
-                    <span className="font-semibold tabular-nums">
+                    <span className="inline-flex items-center gap-1 font-semibold tabular-nums text-[var(--cmms-success)]">
+                      <AndonLamp status="ok" size="sm" />
                       {trace.published_with_relation}/{cat?.published_articles ?? 0}
                     </span>
                   </div>
@@ -391,17 +393,21 @@ export default function KnowledgePage() {
             <CardDescription>ฉบับที่เผยแพร่แล้วแก้ไขไม่ได้ ต้องสร้างฉบับใหม่เสมอ</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            {Object.entries(cat.status_counts).map(([k, v]) => (
-              <Link
-                key={k}
-                href={`/knowledge/articles?status=${k}`}
-                className="inline-flex items-center gap-2"
-              >
-                <Pill tone={lampTone(KN_STATUS_TONE[k])}>
-                  {knStatusLabel(k)} {v}
-                </Pill>
-              </Link>
-            ))}
+            {Object.entries(cat.status_counts).map(([k, v]) => {
+              const isPublished = k === "published";
+              return (
+                <Link
+                  key={k}
+                  href={`/knowledge/articles?status=${k}`}
+                  className="inline-flex items-center gap-2"
+                >
+                  <span className={cn("cmms-status", lampTone(KN_STATUS_TONE[k]), isPublished && "bg-[var(--cmms-success-light)] text-[var(--cmms-success)] ring-2 ring-[var(--cmms-success)]/30")}>
+                    <span className="cmms-status-dot" />
+                    {knStatusLabel(k)} {v}
+                  </span>
+                </Link>
+              );
+            })}
           </CardContent>
         </Card>
       )}

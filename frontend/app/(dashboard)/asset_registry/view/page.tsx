@@ -216,10 +216,10 @@ interface ScheduleRow {
   [k: string]: unknown;
 }
 
-const APP_BASE =
-  (typeof window !== "undefined" && window.location.origin) ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3001";
+const getAppBase = () =>
+  typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
 
 export default function AssetRegistryViewPage() {
   const router = useRouter();
@@ -424,7 +424,7 @@ export default function AssetRegistryViewPage() {
     if (!asset?.code || qrGenerating) return;
     setQrGenerating(true);
     try {
-      const url = `${APP_BASE}/scan?asset_code=${encodeURIComponent(asset.code)}`;
+      const url = `${getAppBase()}/scan?asset_code=${encodeURIComponent(asset.code)}`;
       const dataUrl = await QRCode.toDataURL(url, {
         width: 280,
         margin: 1,
