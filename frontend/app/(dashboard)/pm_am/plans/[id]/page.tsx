@@ -253,7 +253,7 @@ export default function PMPlanViewPage() {
                   description='กดปุ่ม "สร้างรอบ PM" เพื่อสร้างรอบแรกให้เครื่องจักรในแผน' />
               ) : (
                 <div className="space-y-2">
-                  {plan.history.map((h: any) => {
+                  {(plan.history ?? []).map((h: any) => {
                     const woCount = h.wo_count || 0;
                     return (
                       <div key={h.id} className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"

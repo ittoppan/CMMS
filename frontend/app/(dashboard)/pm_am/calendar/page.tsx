@@ -157,6 +157,7 @@ export default function PMCalendarPage() {
   const hero = usePageHero("pm_am/calendar");
   const [selectedDate, setSelectedDate] = useState<string>(todayStr);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewAll, setViewAll] = useState(false);
   const [assetMap, setAssetMap] = useState<Record<number, { location: string; department: string }>>({});
 
@@ -189,8 +190,9 @@ export default function PMCalendarPage() {
           }));
           setTasks(fetched);
         }
+        setLoading(false);
       })
-      .catch(e => console.error("Fetch PM plans error:", e));
+      .catch(e => { console.error("Fetch PM plans error:", e); setLoading(false); });
     // แผนที่ asset_id → ตำแหน่ง/แผนก สำหรับกรองตาม Location / Department
     fetch("/api/v1/index.php?resource=assets")
       .then(res => res.json())
@@ -473,7 +475,9 @@ export default function PMCalendarPage() {
                 <span className="cmms-count-pill">{filteredTasks.length} งาน</span>
               </div>
 
-              {filteredTasks.length === 0 ? (
+              {loading ? (
+                <div className="space-y-3 py-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลดแผน PM…</div>
+              ) : filteredTasks.length === 0 ? (
                 <EmptyState
                   icon={<CalendarDays size={28} strokeWidth={1.5} aria-hidden="true" />}
                   title={viewAll ? "ยังไม่มีแผน PM ในระบบ" : "ไม่มีแผน PM สำหรับวันนี้"}

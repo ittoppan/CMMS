@@ -5,6 +5,7 @@ import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import AndonLamp from "@/components/AndonLamp";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,7 +52,7 @@ interface WoBreakdown {
   unavailable_components: string[];
 }
 
-const PERCENT_COLORS = ["#2563eb", "#16a34a", "#f59e0b", "#dc2626", "#8b5cf6", "#06b6d4"];
+const PERCENT_COLORS = ["var(--cmms-primary)", "var(--cmms-success)", "var(--cmms-warning)", "var(--cmms-danger)", "var(--cmms-accent)", "var(--cmms-info)"];
 
 function moneyTooltip({ active, payload, label }: any, symbol: string) {
   if (!active || !payload?.length) return null;
@@ -294,7 +295,7 @@ export default function CostPage() {
                               { name: "อะไหล่", value: Math.round(summary.parts) },
                               { name: "จ้างภายนอก", value: Math.round(summary.external) },
                             ]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={92} innerRadius={52} label={({ name, percent }: any) => `${name} ${Math.round((percent ?? 0) * 100)}%`}>
-                              {["#2563eb", "#06b6d4", "#f59e0b"].map((c) => <Cell key={c} fill={c} />)}
+                              {["var(--cmms-primary)", "var(--cmms-info)", "var(--cmms-warning)"].map((c) => <Cell key={c} fill={c} />)}
                             </Pie>
                             <Tooltip formatter={(v: any) => fmtMoney(Number(v), symbol)} />
                           </PieChart>
@@ -311,10 +312,10 @@ export default function CostPage() {
                           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                           <YAxis tick={{ fontSize: 11 }} />
                           <Tooltip content={({ active, payload, label }: any) => moneyTooltip({ active, payload, label }, symbol)} />
-                          <Bar dataKey="parts" name="อะไหล่" stackId="a" fill="#06b6d4" />
-                          <Bar dataKey="labor" name="ค่าแรง" stackId="a" fill="#2563eb" />
-                          <Bar dataKey="external" name="จ้างภายนอก" stackId="a" fill="#f59e0b" />
-                          <Line type="monotone" dataKey="total" name="รวม" stroke="#dc2626" strokeWidth={2} dot={false} />
+                          <Bar dataKey="parts" name="อะไหล่" stackId="a" fill="var(--cmms-info)" />
+                          <Bar dataKey="labor" name="ค่าแรง" stackId="a" fill="var(--cmms-primary)" />
+                          <Bar dataKey="external" name="จ้างภายนอก" stackId="a" fill="var(--cmms-warning)" />
+                          <Line type="monotone" dataKey="total" name="รวม" stroke="var(--cmms-danger)" strokeWidth={2} dot={false} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </CardContent>
@@ -352,7 +353,7 @@ export default function CostPage() {
                             <XAxis type="number" tick={{ fontSize: 11 }} />
                             <YAxis type="category" dataKey="department_name" width={110} tick={{ fontSize: 11 }} />
                             <Tooltip formatter={(v: any) => fmtMoney(Number(v), symbol)} />
-                            <Bar dataKey="total" name="รวม" fill="#2563eb" radius={[0, 6, 6, 0]} />
+                            <Bar dataKey="total" name="รวม" fill="var(--cmms-primary)" radius={[0, 6, 6, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </CardContent>
@@ -368,7 +369,7 @@ export default function CostPage() {
                             <XAxis type="number" tick={{ fontSize: 11 }} />
                             <YAxis type="category" dataKey="asset_code" width={70} tick={{ fontSize: 11 }} />
                             <Tooltip formatter={(v: any) => fmtMoney(Number(v), symbol)} />
-                            <Bar dataKey="total" name="รวม" fill="#8b5cf6" radius={[0, 6, 6, 0]} />
+                            <Bar dataKey="total" name="รวม" fill="var(--cmms-accent)" radius={[0, 6, 6, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </CardContent>
@@ -391,10 +392,10 @@ export default function CostPage() {
                         <YAxis tick={{ fontSize: 11 }} />
                         <Tooltip content={({ active, payload, label }: any) => moneyTooltip({ active, payload, label }, symbol)} />
                         <Legend />
-                        <Bar dataKey="parts" name="อะไหล่" stackId="a" fill="#06b6d4" />
-                        <Bar dataKey="labor" name="ค่าแรง" stackId="a" fill="#2563eb" />
-                        <Bar dataKey="external" name="จ้างภายนอก" stackId="a" fill="#f59e0b" />
-                        <Line type="monotone" dataKey="total" name="รวม" stroke="#dc2626" strokeWidth={2} />
+                        <Bar dataKey="parts" name="อะไหล่" stackId="a" fill="var(--cmms-info)" />
+                        <Bar dataKey="labor" name="ค่าแรง" stackId="a" fill="var(--cmms-primary)" />
+                        <Bar dataKey="external" name="จ้างภายนอก" stackId="a" fill="var(--cmms-warning)" />
+                        <Line type="monotone" dataKey="total" name="รวม" stroke="var(--cmms-danger)" strokeWidth={2} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   )}
@@ -429,8 +430,8 @@ export default function CostPage() {
                             { name: "PM", value: Math.max(0, pm?.preventive_total ?? 0) },
                             { name: "Corrective", value: Math.max(0, pm?.corrective_total ?? 0) },
                           ]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={62} innerRadius={38}>
-                            <Cell fill="#16a34a" />
-                            <Cell fill="#dc2626" />
+                            <Cell fill="var(--cmms-success)" />
+                            <Cell fill="var(--cmms-danger)" />
                           </Pie>
                           <Tooltip formatter={(v: any) => fmtMoney(Number(v), symbol)} />
                         </PieChart>
@@ -607,29 +608,29 @@ export default function CostPage() {
                                 <OsCell>{c.name}</OsCell>
                                 <OsCell right className="font-semibold tabular-nums">{fmtMoney(c.value, symbol)}</OsCell>
                                 <OsCell>
-                                  {c.available ? <Badge variant="success" dot>แสดงค่าได้</Badge> : <Badge variant="warning" dot>Not Available</Badge>}
+                                  {c.available ? <span className="inline-flex items-center gap-1.5"><AndonLamp status="ok" size="sm" />แสดงค่าได้</span> : <span className="inline-flex items-center gap-1.5"><AndonLamp status="warn" size="sm" />Not Available</span>}
                                 </OsCell>
                               </OsRow>
                             ))}
                             <OsRow>
                               <OsCell className="font-semibold">รวมทั้งสิ้น</OsCell>
                               <OsCell right className="font-bold tabular-nums">{fmtMoney(woDetail.total, symbol)}</OsCell>
-                              <OsCell>{woDetail.unavailable_components.length === 0 ? <Badge variant="success" dot>ครบถ้วน</Badge> : <Badge variant="warning" dot>ไม่ครบถ้วน</Badge>}</OsCell>
+                              <OsCell>{(woDetail.unavailable_components ?? []).length === 0 ? <span className="inline-flex items-center gap-1.5"><AndonLamp status="ok" size="sm" />ครบถ้วน</span> : <span className="inline-flex items-center gap-1.5"><AndonLamp status="warn" size="sm" />ไม่ครบถ้วน</span>}</OsCell>
                             </OsRow>
                           </OsTBody>
                         </OsTable>
                       </Output>
-                      {woDetail.parts.lines.length > 0 && (
+                      {(woDetail.parts.lines ?? []).length > 0 && (
                         <Output>
                           <OsTable>
                             <OsTHead><OsRow><OsHeadCell>รายการอะไหล่</OsHeadCell><OsHeadCell right>จำนวน</OsHeadCell><OsHeadCell right>ราคา/หน่วย</OsHeadCell><OsHeadCell right>รวม</OsHeadCell></OsRow></OsTHead>
                             <OsTBody>
-                              {woDetail.parts.lines.map((l: any) => (
+                              {(woDetail.parts.lines ?? []).map((l: any) => (
                                 <OsRow key={l.id}>
                                   <OsCell><span className="font-medium">{l.description}</span><span className="block text-xs" style={{ color: "var(--cmms-text-muted)" }}>{l.item_code}</span></OsCell>
                                   <OsCell right className="tabular-nums">{l.qty} {l.unit}</OsCell>
                                   <OsCell right className="tabular-nums">{l.cost_missing ? "ไม่ระบุ" : fmtMoney(l.unit_price, symbol)}</OsCell>
-                                  <OsCell right className="tabular-nums">{l.cost_missing ? <Badge variant="warning">ไม่มีราคา</Badge> : fmtMoney(l.cost, symbol)}</OsCell>
+                                  <OsCell right className="tabular-nums">{l.cost_missing ? <span className="inline-flex items-center gap-1.5"><AndonLamp status="warn" size="sm" />ไม่มีราคา</span> : fmtMoney(l.cost, symbol)}</OsCell>
                                 </OsRow>
                               ))}
                             </OsTBody>

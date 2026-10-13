@@ -169,11 +169,11 @@ export default function FieldMyPlanPage() {
         <CardContent>
           {loading ? (
             <p className="py-6 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
-          ) : !data || data.today.length === 0 ? (
+          ) : !data || (data.today ?? []).length === 0 ? (
             <p className="py-8 text-center text-sm text-[var(--cmms-text-muted)]">ยังไม่มีงานวางแผนสำหรับวันนี้</p>
           ) : (
             <div className="space-y-2">
-              {data.today.map((w) => (
+              {(data.today ?? []).map((w) => (
                 <WoRow key={w.id} w={w} showInfo />
               ))}
             </div>
@@ -192,9 +192,9 @@ export default function FieldMyPlanPage() {
           <CardContent>
             {loading ? (
               <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
-            ) : data && data.week.length > 0 ? (
+            ) : data && (data.week ?? []).length > 0 ? (
               <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
-                {data.week.map((w) => (
+                {(data.week ?? []).map((w) => (
                   <WoRow key={w.id} w={w} />
                 ))}
               </div>
@@ -214,9 +214,9 @@ export default function FieldMyPlanPage() {
           <CardContent>
             {loading ? (
               <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</p>
-            ) : data && data.unplanned.length > 0 ? (
+            ) : data && (data.unplanned ?? []).length > 0 ? (
               <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
-                {data.unplanned.map((w) => (
+                {(data.unplanned ?? []).map((w) => (
                   <WoRow key={w.id} w={w} />
                 ))}
               </div>

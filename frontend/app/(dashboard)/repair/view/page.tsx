@@ -755,18 +755,18 @@ export default function RepairViewDetailsPage() {
                 ผู้รับผิดชอบหลัก (หัวหน้าชุด) + สมาชิกในทีม — ใครในทีมก็ปิดงานได้
               </p>
             </div>
-            {wo.team.length > 0 && (
-              <Badge variant="info">{wo.team.length} คน</Badge>
+            {(wo.team ?? []).length > 0 && (
+              <Badge variant="info">{(wo.team ?? []).length} คน</Badge>
             )}
           </CardHeader>
           <CardContent>
-            {wo.team.length === 0 ? (
+            {(wo.team ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 ยังไม่มีการมอบหมายทีมซ่อม — ไปที่หน้า "แจกงานซ่อม" เพื่อเลือกทีม
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {wo.team.map((m) => (
+                {(wo.team ?? []).map((m) => (
                   <div
                     key={m.user_id}
                     className={`flex items-center gap-3 p-3 rounded-xl border ${

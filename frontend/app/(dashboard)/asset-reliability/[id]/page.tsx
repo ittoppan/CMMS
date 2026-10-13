@@ -471,8 +471,8 @@ export default function AssetReliabilityProfilePage() {
                     <div key={m.ym} className="space-y-1 border-r border-border/60 pr-3 last:border-r-0">
                       <p className="text-[0.7rem] font-semibold uppercase text-muted-foreground">{m.ym}</p>
                       <p className="text-sm"><TriangleAlert size={13} strokeWidth={1.75} aria-hidden="true" className="mr-1 inline text-[var(--cmms-danger)]" />{m.failures}</p>
-                      <p className="text-xs text-muted-foreground">{m.downtime_minutes.toLocaleString("th-TH")} นาที</p>
-                      <p className="text-xs tabular-nums">{m.cost.toLocaleString("th-TH")} ฿</p>
+                      <p className="text-xs text-muted-foreground">{(m.downtime_minutes ?? 0).toLocaleString("th-TH")} นาที</p>
+                      <p className="text-xs tabular-nums">{(m.cost ?? 0).toLocaleString("th-TH")} ฿</p>
                     </div>
                   ))}
                 </div>

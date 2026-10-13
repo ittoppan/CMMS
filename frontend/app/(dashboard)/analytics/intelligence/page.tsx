@@ -513,7 +513,7 @@ export default function IntelligencePage() {
                 <CardHeader className="pb-2"><CardTitle className="text-sm">ตารางรายเดือน</CardTitle></CardHeader>
                 <CardContent>
                   <Tbl headers={["เดือน", "ครั้งที่เสีย", "Operating (ชม.)", "Downtime (นาที)", "MTBF (ชม.)", "MTTR (นาที)", "Availability", "เครื่องที่ครอบคลุม"]}>
-                    {reliability.months.map((m) => (
+                    {(reliability.months ?? []).map((m) => (
                       <tr key={m.ym} className="border-t" style={{ borderColor: "var(--cmms-border)" }}>
                         <td className="px-3 py-2 font-medium">{m.ym}</td>
                         <td className="px-3 py-2">{fmtNum(m.failures, 0)}</td>
@@ -557,7 +557,7 @@ export default function IntelligencePage() {
               </div>
 
               <Tbl headers={["เครื่อง", "หมวด", "ฝ่าย", "ระดับ", "สถานะ", "คะแนน", "เหตุผล (ทำไมถึงเป็นระดับนี้)", ""]}>
-                {assetHealth.assets.map((a) => (
+                {(assetHealth.assets ?? []).map((a) => (
                   <tr key={a.asset_id} className="border-t" style={{ borderColor: "var(--cmms-border)" }}>
                     <td className="px-3 py-2 font-medium">{a.code}<div className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{a.name}</div></td>
                     <td className="px-3 py-2 text-xs">{a.category || "—"}</td>
@@ -567,7 +567,7 @@ export default function IntelligencePage() {
                     </td>
                     <td className="px-3 py-2"><HealthChip health={a.health} /></td>
                     <td className="px-3 py-2 text-lg font-bold" style={{ color: a.score == null ? "var(--cmms-text-secondary)" : HEALTH_TONE[a.health] }}>{a.score ?? "—"}</td>
-                    <td className="px-3 py-2 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{a.reasons.join(" · ")}</td>
+                    <td className="px-3 py-2 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{(a.reasons ?? []).join(" · ")}</td>
                     <td className="px-3 py-2 text-right">
                       <button type="button" onClick={() => { setF("asset_id", String(a.asset_id)); fetchAll({ asset_id: String(a.asset_id) }); }}
                         className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--cmms-primary)" }}>
@@ -591,7 +591,7 @@ export default function IntelligencePage() {
               </div>
 
               <Tbl headers={["เครื่อง", "ระดับ", "ใบงาน", "ฉุกเฉิน", "Downtime (นาที)", "ระยะห่างเฉลี่ย (ชม.)", "ห่างน้อยสุด (ชม.)", "ล่าสุด", ""]}>
-                {repeat.assets.map((r) => (
+                {(repeat.assets ?? []).map((r) => (
                   <tr key={r.asset_id} className="border-t" style={{ borderColor: "var(--cmms-border)" }}>
                     <td className="px-3 py-2 font-medium">{r.code}<div className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{r.name}</div></td>
                     <td className="px-3 py-2">{r.criticality ? <Badge variant={criticalityBadgeVariant[r.criticality] || "neutral"}>{r.criticality}</Badge> : "—"}</td>

@@ -225,7 +225,7 @@ export default function ContractorsPage() {
                       })();
                       return (
                         <tr key={c.id} className="border-b last:border-0 hover:bg-[var(--cmms-bg-muted)]/50">
-                          <td className="px-4 py-3">
+                          <td className="break-words px-4 py-3">
                             <Link href={`/contractors/${c.id}`} className="font-semibold text-[var(--cmms-primary)] hover:underline">
                               {c.company_name}
                             </Link>
@@ -254,9 +254,9 @@ export default function ContractorsPage() {
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <UserCog size={14} aria-hidden="true" className="text-muted-foreground" />
-                              {owners.get(String(c.internal_owner_id)) ?? "—"}
+                            <div className="flex min-w-0 items-center gap-1.5 text-xs">
+                              <UserCog size={14} aria-hidden="true" className="shrink-0 text-muted-foreground" />
+                              <span className="truncate">{owners.get(String(c.internal_owner_id)) ?? "—"}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3 text-right">

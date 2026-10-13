@@ -536,11 +536,11 @@ export default function DashboardPage() {
                   <Card>
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายแผนก" />
-                      {dt.by_department.length === 0 ? (
+                      {(dt.by_department ?? []).length === 0 ? (
                         <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
-                          {dt.by_department.map((r) => (
+                          {(dt.by_department ?? []).map((r) => (
                             <li key={r.department} className="flex items-center justify-between gap-2 text-sm">
                               <span className="truncate text-[var(--cmms-text-secondary)]">{r.department}</span>
                               <span className="shrink-0 font-semibold tabular-nums">{hours(r.dt)}</span>
@@ -553,11 +553,11 @@ export default function DashboardPage() {
                   <Card>
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายประเภทย่อย" />
-                      {dt.by_failure_type.length === 0 ? (
+                      {(dt.by_failure_type ?? []).length === 0 ? (
                         <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
-                          {dt.by_failure_type.map((r) => (
+                          {(dt.by_failure_type ?? []).map((r) => (
                             <li key={`${r.failure_code}-${r.failure_name}`} className="flex items-center justify-between gap-2 text-sm">
                               <span className="truncate text-[var(--cmms-text-secondary)]">
                                 {r.failure_code ? `${r.failure_code} · ` : ""}{r.failure_name}{" "}
@@ -605,12 +605,12 @@ export default function DashboardPage() {
                 <KpiCard label="ค่าจ้างภายนอก" value={fmtBaht(cost.outsource)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="amber" count={false} />
                 <KpiCard label="รวมทั้งสิ้น" value={fmtBaht(cost.total)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="red" count={false} />
               </Grid>
-              {cost.top_spare_parts.length > 0 && (
+              {(cost.top_spare_parts ?? []).length > 0 && (
                 <Card>
                   <CardContent className="space-y-3 p-4">
                     <SectionHeading title="อะไหล่ที่มีค่าใช้จ่ายสูงสุด" />
                     <ul className="space-y-2">
-                      {cost.top_spare_parts.slice(0, 5).map((p) => (
+                      {(cost.top_spare_parts ?? []).slice(0, 5).map((p) => (
                         <li key={p.code ?? p.part_name} className="flex items-center justify-between gap-2 text-sm">
                           <span className="truncate text-[var(--cmms-text-secondary)]">
                             {p.part_name} <span className="text-xs text-[var(--cmms-text-muted)]">({p.qty} ชิ้น)</span>

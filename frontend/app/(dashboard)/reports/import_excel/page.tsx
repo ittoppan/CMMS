@@ -681,7 +681,11 @@ export default function ImportExcelPage() {
       )}
 
       {/* ── ประวัติการนำเข้าล่าสุด (audit trail) ── */}
-      {history && history.length > 0 && (
+      {history === null ? (
+        <p className="text-sm text-[var(--cmms-text-muted)]">กำลังโหลดประวัติการนำเข้า…</p>
+      ) : history.length === 0 ? (
+        <p className="text-sm text-[var(--cmms-text-muted)]">ยังไม่มีประวัติการนำเข้าล่าสุด</p>
+      ) : (
         <Card>
           <CardContent className="space-y-3">
             <div className="flex items-center gap-2">

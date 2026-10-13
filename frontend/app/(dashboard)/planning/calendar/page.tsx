@@ -319,7 +319,7 @@ export default function PlanningCalendarPage() {
                                   <p className="truncate text-[10px] text-[var(--cmms-text-muted)]">{w.title}</p>
                                   <div className="mt-0.5 flex flex-wrap gap-1">
                                     <Badge variant={readinessVariant(w.readiness?.state)}>{w.readiness ? READINESS_LABEL[w.readiness.state] : w.group}</Badge>
-                                    {w.team_ids.length > 0 && <Badge variant="neutral">{w.team_ids.length} คน</Badge>}
+                                    {(w.team_ids ?? []).length > 0 && <Badge variant="neutral">{(w.team_ids ?? []).length} คน</Badge>}
                                   </div>
                                 </div>
                               ))
@@ -353,7 +353,7 @@ export default function PlanningCalendarPage() {
                 return (
                   <div key={t.id} className="rounded-lg border border-border px-3 py-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{t.full_name}</span>
+                      <span className="min-w-0 truncate text-sm font-semibold">{t.full_name}</span>
                       {w ? (
                         <span className="text-xs text-[var(--cmms-text-muted)]">
                           {w.active_jobs} งาน · {Math.round(w.utilization * 100)}%
@@ -566,7 +566,7 @@ function DayTimeline({ items }: { items: PlanningWo[] }) {
           <p className="truncate text-[11px] text-[var(--cmms-text-secondary)]">{w.work_order_no} · {w.title}</p>
           <div className="mt-0.5 flex gap-1">
             <Badge variant={readinessVariant(w.readiness?.state)}>{w.readiness ? READINESS_LABEL[w.readiness.state] : w.group}</Badge>
-            {w.team_ids.length > 0 && <Badge variant="neutral">{w.team_ids.length} คน</Badge>}
+            {(w.team_ids ?? []).length > 0 && <Badge variant="neutral">{(w.team_ids ?? []).length} คน</Badge>}
           </div>
         </div>
       ))}

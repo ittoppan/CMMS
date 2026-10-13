@@ -277,13 +277,13 @@ export default function DashboardListPage() {
       {!loading && !error && action === "downtime" && dt && (
         <div className="space-y-3">
           <Grid columns={{ minWidth: 200, max: 3 }} gap={3}>
-            <MiniStat label="Downtime รวม" value={`${dt.total_minutes.toLocaleString("th-TH")} นาที`} />
-            <MiniStat label="จำนวนครั้ง" value={`${dt.events} ครั้ง`} />
-            <MiniStat label="คิดเป็นชั่วโมง" value={`${dt.avy_hours.toLocaleString("th-TH")} ชม.`} />
+            <MiniStat label="Downtime รวม" value={`${(dt.total_minutes ?? 0).toLocaleString("th-TH")} นาที`} />
+            <MiniStat label="จำนวนครั้ง" value={`${dt.events ?? 0} ครั้ง`} />
+            <MiniStat label="คิดเป็นชั่วโมง" value={`${(dt.avy_hours ?? 0).toLocaleString("th-TH")} ชม.`} />
           </Grid>
           <RankLists
             title="Downtime รายเครื่องจักร"
-            rows={dt.by_asset.map((r) => ({
+            rows={(dt.by_asset ?? []).map((r) => ({
               key: `${r.id ?? ""}-${r.code}`,
               label: `${r.code ?? "ไม่ระบุ"} · ${r.name ?? ""}${r.criticality ? ` (${r.criticality})` : ""}`,
               value: `${(r.dt / 60).toLocaleString("th-TH", { maximumFractionDigits: 1 })} ชม. (${r.cnt} ครั้ง)`,
@@ -292,7 +292,7 @@ export default function DashboardListPage() {
           <Grid columns={{ minWidth: 320, max: 2 }} gap={3}>
             <RankLists
               title="รายแผนก"
-              rows={dt.by_department.map((r) => ({
+              rows={(dt.by_department ?? []).map((r) => ({
                 key: r.department ?? "",
                 label: r.department ?? "ไม่ระบุ",
                 value: `${(r.dt / 60).toLocaleString("th-TH", { maximumFractionDigits: 1 })} ชม.`,
@@ -300,7 +300,7 @@ export default function DashboardListPage() {
             />
             <RankLists
               title="รายประเภทย่อย"
-              rows={dt.by_failure_type.map((r) => ({
+              rows={(dt.by_failure_type ?? []).map((r) => ({
                 key: `${r.failure_code}-${r.failure_name}`,
                 label: r.failure_code ? `${r.failure_code} · ${r.failure_name}` : r.failure_name ?? "ไม่ระบุ",
                 value: `${(r.dt / 60).toLocaleString("th-TH", { maximumFractionDigits: 1 })} ชม. (${r.cnt} ครั้ง)`,
@@ -320,7 +320,7 @@ export default function DashboardListPage() {
           </Grid>
           <RankLists
             title="ค่าใช้จ่ายรายเครื่องจักร"
-            rows={cost.by_asset.map((r) => ({
+            rows={(cost.by_asset ?? []).map((r) => ({
               key: `${r.id ?? ""}-${r.code}`,
               label: `${r.code ?? "ไม่ระบุ"} · ${r.name ?? ""}`,
               value: `${fmtBaht(r.cost)} บาท`,
@@ -328,7 +328,7 @@ export default function DashboardListPage() {
           />
           <RankLists
             title="อะไหล่ยอดสูงสุด"
-            rows={cost.top_spare_parts.map((r) => ({
+            rows={(cost.top_spare_parts ?? []).map((r) => ({
               key: `${r.code}-${r.part_name}`,
               label: r.part_name ?? r.code ?? "ไม่ระบุ",
               value: `${r.qty ?? 0} ชิ้น · ${fmtBaht(r.cost)} บาท`,
@@ -341,11 +341,11 @@ export default function DashboardListPage() {
         <div className="space-y-3">
           <Grid columns={{ minWidth: 200, max: 3 }} gap={3}>
             <MiniStat label="Breakdown รวม" value={`${failure.total_breakdown} ครั้ง`} />
-            <MiniStat label="เครื่องเสียซ้ำ" value={`${failure.repeated_assets.length} เครื่อง`} />
+            <MiniStat label="เครื่องเสียซ้ำ" value={`${(failure.repeated_assets ?? []).length} เครื่อง`} />
           </Grid>
           <RankLists
             title="เครื่องที่เสียบ่อย"
-            rows={failure.by_asset.map((r) => ({
+            rows={(failure.by_asset ?? []).map((r) => ({
               key: `${r.id ?? ""}-${r.code}`,
               label: `${r.code ?? "ไม่ระบุ"} · ${r.name ?? ""}`,
               value: `${r.cnt} ครั้ง${r.dt ? ` · ${(r.dt / 60).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ชม.` : ""}`,
@@ -353,7 +353,7 @@ export default function DashboardListPage() {
           />
           <RankLists
             title="ประเภทย่อยที่พบบ่อย"
-            rows={failure.by_type.map((r) => ({
+            rows={(failure.by_type ?? []).map((r) => ({
               key: `${r.failure_code}-${r.failure_name}`,
               label: r.failure_code ? `${r.failure_code} · ${r.failure_name}` : r.failure_name ?? "ไม่ระบุ",
               value: `${r.cnt} ครั้ง`,

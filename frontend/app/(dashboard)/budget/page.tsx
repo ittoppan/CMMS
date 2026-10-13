@@ -207,9 +207,9 @@ export default function BudgetPage() {
                   <YAxis yAxisId="p" orientation="right" domain={[0, 200]} tickFormatter={(v: any) => `${v}%`} tick={{ fontSize: 11 }} />
                   <Tooltip content={({ active, payload, label }: any) => moneyT({ active, payload, label, symbol: data.currency === "THB" ? "฿" : data.currency })} />
                   <Legend />
-                  <Bar yAxisId="b" dataKey="budget" name="งบ" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  <Bar yAxisId="b" dataKey="actual" name="ใช้จริง" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  <Line yAxisId="p" type="monotone" dataKey="utilization_pct" name="%ใช้จริง" stroke="#dc2626" strokeWidth={2} dot={{ r: 3 }} />
+                  <Bar yAxisId="b" dataKey="budget" name="งบ" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="b" dataKey="actual" name="ใช้จริง" fill="var(--cmms-warning)" radius={[4, 4, 0, 0]} />
+                  <Line yAxisId="p" type="monotone" dataKey="utilization_pct" name="%ใช้จริง" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             )}
@@ -222,10 +222,10 @@ export default function BudgetPage() {
         <Card>
           <CardHeader>
             <CardTitle>รายการงบประมาณ</CardTitle>
-            <CardDescription>ทั้งหมด {data.items.length} รายการ · ประจำปี {year || "ทั้งหมด"}{deptId ? " · เฉพาะแผนกที่เลือก" : ""}</CardDescription>
+            <CardDescription>ทั้งหมด {(data.items ?? []).length} รายการ · ประจำปี {year || "ทั้งหมด"}{deptId ? " · เฉพาะแผนกที่เลือก" : ""}</CardDescription>
           </CardHeader>
           <CardContent>
-            {data.items.length === 0 ? (
+            {(data.items ?? []).length === 0 ? (
               <EmptyState icon={<Wallet size={22} aria-hidden="true" />} title="ไม่พบงบประมาณในช่วงนี้"
                 description={manage ? "กดปุ่ม “สร้างงบประมาณ” ที่มุมขวาบนเพื่อเริ่ม" : "ยังไม่มีรายการงบ"} />
             ) : (
@@ -246,10 +246,10 @@ export default function BudgetPage() {
                     </OsRow>
                   </OsTHead>
                   <OsTBody>
-                    {data.items.map((it) => {
+                    {(data.items ?? []).map((it) => {
                       const pct = it.utilization_pct ?? 0;
-                      const warn = data.config.warning_pct ?? 80;
-                      const exceed = data.config.exceed_pct ?? 100;
+                      const warn = data.config?.warning_pct ?? 80;
+                      const exceed = data.config?.exceed_pct ?? 100;
                       const barColor = pct >= exceed ? "var(--cmms-danger)" : pct >= warn ? "var(--cmms-warning)" : "var(--cmms-success)";
                       const isDraft = it.status === "draft";
                       const isSubmitted = it.status === "submitted";

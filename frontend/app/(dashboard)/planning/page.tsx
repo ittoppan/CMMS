@@ -695,7 +695,7 @@ export default function PlanningCenterPage() {
                               {w.planned_start_at ? `${fmtSlot(w.planned_start_at)} – ${fmtSlot(w.planned_end_at)}` : "ยังไม่มีรอบเวลา"}
                             </span>
                             <span className="block text-[var(--cmms-text-muted)]">
-                              {w.team_ids.length ? `${w.team_ids.length} คน` : (w.assigned_name || "ยังไม่มอบหมาย")}
+                              {(w.team_ids ?? []).length ? `${(w.team_ids ?? []).length} คน` : (w.assigned_name || "ยังไม่มอบหมาย")}
                             </span>
                           </div>
                         )}

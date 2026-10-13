@@ -483,10 +483,10 @@ export default function DocumentDetailPage() {
 
         {tab === "revisions" && (
           <div className="space-y-3">
-            {d.revisions.length === 0 ? (
+            {(d.revisions ?? []).length === 0 ? (
               <EmptyState title="ยังไม่มี revision" description="สร้าง revision แรกเพื่อเริ่มกระบวนการควบคุม" icon={<History size={40} />} />
             ) : (
-              d.revisions.map((rev) => {
+              (d.revisions ?? []).map((rev) => {
                 const imps = (d.impacts_by_revision?.[String(rev.id)] ?? []) as DocumentImpact[];
                 const openImps = imps.filter((i) => i.status !== "completed" && i.status !== "not_applicable").length;
                 const approvals = (d.approvals ?? []).filter((a) => a.revision_id === rev.id);
@@ -763,10 +763,10 @@ export default function DocumentDetailPage() {
           <Card>
             <CardHeader><CardTitle>ประวัติการใช้งาน (audit trail)</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              {d.activity.length === 0 ? (
+              {(d.activity ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">ยังไม่มีกิจกรรม</p>
               ) : (
-                d.activity.map((a) => (
+                (d.activity ?? []).map((a) => (
                   <div key={a.id} className="flex flex-wrap items-baseline gap-2 border-b border-border/60 py-2 last:border-0">
                     <span className="text-xs text-muted-foreground">{fmtDocDateTime(a.created_at)}</span>
                     <span className="text-sm">{a.description ?? a.action}</span>

@@ -523,16 +523,16 @@ export default function KnowledgeArticleDetailPage() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                  <Link2 size={13} aria-hidden="true" /> เครื่อง / อะไหล่ / งาน ({article.relations.length})
+                  <Link2 size={13} aria-hidden="true" /> เครื่อง / อะไหล่ / งาน ({(article.relations ?? []).length})
                 </h3>
-                {article.relations.length === 0 ? (
+                {(article.relations ?? []).length === 0 ? (
                   <Hint>
                     ยังไม่มีความเชื่อมโยง — ควรเพิ่มอย่างน้อย 1 รายการก่อนเผยแพร่
                     {cfg?.config.publish_requires_relation ? " (ระบบบังคับ)" : ""}
                   </Hint>
                 ) : (
                   <ul className="space-y-1.5">
-                    {article.relations.map((r) => (
+                    {(article.relations ?? []).map((r) => (
                       <li
                         key={r.id}
                         className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
@@ -574,13 +574,13 @@ export default function KnowledgeArticleDetailPage() {
 
               <div>
                 <h3 className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                  <FileText size={13} aria-hidden="true" /> เอกสารควบคุม ({article.documents.length})
+                  <FileText size={13} aria-hidden="true" /> เอกสารควบคุม ({(article.documents ?? []).length})
                 </h3>
-                {article.documents.length === 0 ? (
+                {(article.documents ?? []).length === 0 ? (
                   <Hint>ยังไม่ได้อ้างอิงเอกสารควบคุมฉบับใด</Hint>
                 ) : (
                   <ul className="space-y-1.5">
-                    {article.documents.map((d) => (
+                    {(article.documents ?? []).map((d) => (
                       <li
                         key={d.id}
                         className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
@@ -702,7 +702,7 @@ export default function KnowledgeArticleDetailPage() {
             </CardHeader>
             <CardContent className="space-y-2.5 text-sm">
               <Row label="หมวดหมู่" value={article.category_name_th ?? article.category_code ?? "—"} />
-              <Row label="แท็ก" value={article.tags.length ? article.tags.join(", ") : "—"} />
+              <Row label="แท็ก" value={(article.tags ?? []).length ? (article.tags ?? []).join(", ") : "—"} />
               <Row
                 label="ใช้เวลาประมาณ"
                 value={
@@ -775,12 +775,12 @@ export default function KnowledgeArticleDetailPage() {
           {/* ประวัติฉบับ */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">ประวัติฉบับ ({article.versions.length})</CardTitle>
+              <CardTitle className="text-base">ประวัติฉบับ ({(article.versions ?? []).length})</CardTitle>
               <CardDescription>ฉบับที่เผยแพร่แล้วแก้ไขไม่ได้</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-1.5">
-                {article.versions.map((v) => (
+                {(article.versions ?? []).map((v) => (
                   <li key={v.id} className="flex items-center justify-between gap-2 text-sm">
                     <div className="min-w-0">
                       <Link href={`/knowledge/articles/${v.id}`} className="font-medium hover:underline">

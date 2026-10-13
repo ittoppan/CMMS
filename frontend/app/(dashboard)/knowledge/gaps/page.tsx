@@ -364,11 +364,11 @@ export default function KnowledgeGapsPage() {
                   <li key={t.normalized_query} className="flex items-center justify-between gap-3 text-sm">
                     <Link
                       href={`/knowledge/search?q=${encodeURIComponent(t.normalized_query)}`}
-                      className="hover:underline"
+                      className="min-w-0 truncate hover:underline"
                     >
                       {t.normalized_query}
                     </Link>
-                    <span className="tabular-nums text-muted-foreground">{t.c} ครั้ง</span>
+                    <span className="shrink-0 tabular-nums text-muted-foreground">{t.c} ครั้ง</span>
                   </li>
                 ))}
               </ul>

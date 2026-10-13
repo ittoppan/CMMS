@@ -438,10 +438,10 @@ export default function EngineeringChangeDetailPage() {
 
         {tab === "impacts" && (
           <div className="space-y-3">
-            {d.impacts.length === 0 ? (
+            {(d.impacts ?? []).length === 0 ? (
               <EmptyState title="ยังไม่มีผลกระทบ" description="ประเมินผลกระทบก่อนขออนุมัติ — งานระดับ critical ต้องมีผู้รับผิดชอบและ action ที่ต้องทำ" icon={<TriangleAlert size={40} />} />
             ) : (
-              d.impacts.map((i) => (
+              (d.impacts ?? []).map((i) => (
                 <Card key={i.id}>
                   <CardContent className="space-y-2 pt-6">
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -627,10 +627,10 @@ export default function EngineeringChangeDetailPage() {
           <Card>
             <CardHeader><CardTitle>ประวัติการใช้งาน (audit trail)</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              {d.activity.length === 0 ? (
+              {(d.activity ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">ยังไม่มีกิจกรรม</p>
               ) : (
-                d.activity.map((a) => (
+                (d.activity ?? []).map((a) => (
                   <div key={a.id} className="flex flex-wrap items-baseline gap-2 border-b border-border/60 py-2 last:border-0">
                     <span className="text-xs text-muted-foreground">{fmtEcrDateTime(a.created_at)}</span>
                     <span className="text-sm">{a.description ?? a.action}</span>

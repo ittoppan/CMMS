@@ -70,7 +70,9 @@ export default function DataQualityPage() {
             {fleet.error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={fleet.error.message} />}
             {!fleet.isLoading && !fleet.error && fleet.data && (
               <VStack gap={3}>
-                {(fleet.data.fields ?? []).map((f) => (
+                {(fleet.data.fields ?? []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลคุณภาพใบงานซ่อม</p>
+                ) : (fleet.data.fields ?? []).map((f) => (
                   <div key={f.key} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">{f.label}</span>
@@ -114,7 +116,9 @@ export default function DataQualityPage() {
                   </Badge>
                   <span className="text-sm text-muted-foreground">ความครบถ้วนโดยรวม</span>
                 </div>
-                {(asset.data.quality.checks ?? []).map((c) => (
+                {(asset.data.quality.checks ?? []).length === 0 ? (
+                  <p className="text-sm text-muted-foreground">ไม่มีรายการตรวจสำหรับเครื่องนี้</p>
+                ) : (asset.data.quality.checks ?? []).map((c) => (
                   <div key={c.key} className="flex items-start justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm">
                     <span>{c.label}{c.detail ? <span className="block text-xs text-muted-foreground">{c.detail}</span> : null}</span>
                     {c.ok ? (

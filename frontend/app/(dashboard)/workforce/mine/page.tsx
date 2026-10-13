@@ -178,9 +178,9 @@ export default function MyWorkforcePage() {
                       <AndonLamp status="down" size="sm" showLabel />
                     )}
                   </div>
-                  {availability.reasons.length > 0 && (
+                  {(availability.reasons ?? []).length > 0 && (
                     <ul className="space-y-1 text-sm">
-                      {availability.reasons.map((r) => (
+                      {(availability.reasons ?? []).map((r) => (
                         <li key={r} className="text-muted-foreground">
                           • {REASON_LABEL[r] ?? r}
                         </li>

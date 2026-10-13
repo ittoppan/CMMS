@@ -35,9 +35,9 @@ function EmptyState({
           {icon}
         </div>
       )}
-      <h3 className="text-base font-bold text-[var(--cmms-text-primary)]">{title}</h3>
+      <h3 className="max-w-full break-words text-balance text-base font-bold text-[var(--cmms-text-primary)]">{title}</h3>
       {description && (
-        <p className="mt-1 max-w-sm text-sm text-[var(--cmms-text-secondary)]">
+        <p className="mt-1 max-w-sm break-words text-sm text-[var(--cmms-text-secondary)]">
           {description}
         </p>
       )}
