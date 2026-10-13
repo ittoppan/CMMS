@@ -324,6 +324,13 @@ export default function RepairRequestForm() {
 
   const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
 
+  /* เติมชื่อ-นามสกุลจากฐานข้อมูล ถ้าผู้ใช้ยังไม่ได้กรอก/แก้เอง */
+  const seedReporter = (name?: string | null) => {
+    const n = (name || "").trim();
+    if (!n) return;
+    setForm((prev) => (prev.reporterName.trim() ? prev : { ...prev, reporterName: n }));
+  };
+
   const qrPrefillRef = useRef<string | null>(null);
   useEffect(() => {
     try {
@@ -441,6 +448,7 @@ export default function RepairRequestForm() {
       .then((r) => r.json())
       .then((j) => {
         setSessionName(j?.me?.full_name || "");
+        seedReporter(j?.me?.full_name);
         if (j?.me?.id) setBindGate("bound");
       })
       .catch(() => {});
@@ -494,6 +502,7 @@ export default function RepairRequestForm() {
               .then((j) => {
                 if (j?.me?.id) {
                   setSessionName(j.me.full_name || "");
+                  seedReporter(j.me.full_name);
                   setBindGate("bound");
                 } else if ((window as any).liff?.isInClient?.()) {
                   setBindGate("unbound");
