@@ -129,7 +129,7 @@ class ApprovalService {
             $targetStatus = ($status === 'approved') ? 'approved' : 'rejected';
             $pdo->prepare("UPDATE work_permits SET status = ?, updated_at = NOW() WHERE id = ?")->execute([$targetStatus, $targetId]);
         } elseif ($type === 'requisition' || $type === 'spare_issue') {
-            $targetStatus = ($status === 'approved') ? 'Approved' : 'Rejected';
+            $targetStatus = ($status === 'approved') ? 'Approved' : 'rejected';
             $pdo->prepare("UPDATE spare_issue_requests SET status = ?, updated_at = NOW() WHERE id = ?")->execute([$targetStatus, $targetId]);
             
             // If approved, deduct stock for each item
@@ -147,7 +147,7 @@ class ApprovalService {
                     
                     // Record transaction
                     $pdo->prepare("
-                        INSERT INTO spare_part_transactions (spare_part_id, type, quantity, reference_type, reference_id, created_by, created_at)
+                        INSERT INTO spare_part_transactions (spare_part_id, type, quantity, reference_type, reference_no, created_by, created_at)
                         VALUES (?, 'withdrawal', ?, 'spare_issue_request', ?, ?, NOW())
                     ")->execute([$partId, $qty, $targetId, $_SESSION['user']['id'] ?? 1]);
                 }
