@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
+import { sendOrEnqueueDetailed } from "@/lib/offlineQueue";
+import { QrScanner } from "@/components/field/QrScanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,6 +21,7 @@ import {
   CheckCircle2,
   RefreshCw,
   AlertTriangle,
+  Camera,
 } from "lucide-react";
 
 interface CartItem {
@@ -47,6 +50,16 @@ export default function SageIssueCenterPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [partSearch, setPartSearch] = useState("");
   const [selectedPart, setSelectedPart] = useState("");
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScanResult = useCallback((text: string) => {
+    setPartSearch(text);
+    setShowScanner(false);
+  }, []);
+
+  const handleCloseScanner = useCallback(() => {
+    setShowScanner(false);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -104,7 +117,13 @@ export default function SageIssueCenterPage() {
     if (!selectedPart) return;
     const part = parts.find((p) => String(p.id) === selectedPart);
     if (!part) return;
+    const stockQty = parseFloat(part.stock_qty) || 0;
     const existing = cart.find((i) => i.partId === part.id);
+    const currentQty = existing ? existing.qty : 0;
+    if (currentQty >= stockQty) {
+      showToast("info", `เกินสต็อกคงเหลือ (เหลือ ${stockQty} ${part.unit})`);
+      return;
+    }
     if (existing) {
       setCart(cart.map((i) => (i.partId === part.id ? { ...i, qty: i.qty + 1 } : i)));
     } else {
@@ -118,7 +137,7 @@ export default function SageIssueCenterPage() {
           qty: 1,
           unit: part.unit || "ชิ้น",
           unitPrice: parseFloat(part.unit_price) || 0,
-          stockQty: parseFloat(part.stock_qty) || 0,
+          stockQty: stockQty,
         },
       ]);
     }
@@ -130,6 +149,12 @@ export default function SageIssueCenterPage() {
   };
 
   const handleQtyChange = (id: string, qty: number) => {
+    if (qty < 1) return;
+    const item = cart.find((i) => i.id === id);
+    if (item && qty > item.stockQty) {
+      showToast("info", `เกินสต็อกคงเหลือ (เหลือ ${item.stockQty} ${item.unit})`);
+      return;
+    }
     setCart(cart.map((i) => (i.id === id ? { ...i, qty: Math.max(1, qty) } : i)));
   };
 
@@ -141,38 +166,56 @@ export default function SageIssueCenterPage() {
     setSubmitting(true);
     setError(null);
     try {
-      // 1. สร้างคำขอเบิกอะไหล่ (spare_issue_requests)
       const woLabel = workOrders.find((w) => w.value === workOrder)?.label || workOrder;
       const techLabel = users.find((u) => u.value === technician)?.label || technician;
-      
+
+      const payload = {
+        work_order_id: parseInt(workOrder),
+        work_order_no: woLabel.split(" • ")[0],
+        technician_id: parseInt(technician),
+        technician_name: techLabel,
+        request_type: "withdrawal",
+        items: cart.map((item) => ({
+          spare_part_id: item.partId,
+          part_code: item.code,
+          part_name: item.name,
+          qty: item.qty,
+          unit: item.unit,
+          unit_price: item.unitPrice,
+          stock_qty_at_request: item.stockQty,
+        })),
+      };
+
+      // ออฟไลน์ → บันทึกคำขอเบิกเข้าคิว (คำขออนุมัติต้องมี request_id จึงสร้างได้เฉพาะตอนออนไลน์)
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        await sendOrEnqueueDetailed({
+          url: "/api/v1/spare_issue_request.php",
+          method: "POST",
+          body: payload,
+          kind: "spare_issue",
+          label: `เบิกอะไหล่สำหรับ ${woLabel}`,
+        });
+        showToast("info", "ออฟไลน์ — บันทึกคำขอเบิกไว้ จะส่งอัตโนมัติเมื่อมีอินเทอร์เน็ต");
+        setCart([]);
+        fetchData();
+        setSubmitting(false);
+        return;
+      }
+
+      // 1. สร้างคำขอเบิกอะไหล่ (spare_issue_requests)
       const createRes = await fetch("/api/v1/spare_issue_request.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          work_order_id: parseInt(workOrder),
-          work_order_no: woLabel.split(" • ")[0],
-          technician_id: parseInt(technician),
-          technician_name: techLabel,
-          request_type: "withdrawal",
-          items: cart.map((item) => ({
-            spare_part_id: item.partId,
-            part_code: item.code,
-            part_name: item.name,
-            qty: item.qty,
-            unit: item.unit,
-            unit_price: item.unitPrice,
-            stock_qty_at_request: item.stockQty,
-          })),
-        }),
+        body: JSON.stringify(payload),
       });
       const createJson = await createRes.json();
-      
+
       if (!createJson.success) {
         throw new Error(createJson.error || "สร้างคำขอเบิกไม่สำเร็จ");
       }
 
       const requestId = createJson.request_id;
-      
+
       // 2. เรียก ApprovalService สร้างคำขออนุมัติ
       const approvalRes = await fetch("/api/v1/approval.php", {
         method: "POST",
@@ -188,7 +231,7 @@ export default function SageIssueCenterPage() {
         }),
       });
       const approvalJson = await approvalRes.json();
-      
+
       if (!approvalJson.success) {
         // ถ้าสร้าง approval ไม่ได้ ให้ลบ request ที่สร้างไป
         await fetch(`/api/v1/spare_issue_request.php?id=${requestId}`, { method: "DELETE" });
@@ -220,20 +263,27 @@ export default function SageIssueCenterPage() {
       id: "qty",
       header: t("tbl.qty"),
       cell: ({ row }: { row: { original: CartItem } }) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             disabled={row.original.qty <= 1}
             onClick={() => handleQtyChange(row.original.id, row.original.qty - 1)}
             aria-label="ลดจำนวน"
-            className="h-7 w-7 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-sm font-bold text-[var(--cmms-text-secondary)] transition-all hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40"
+            className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] text-base font-bold text-[var(--cmms-text-secondary)] transition-all hover:bg-[var(--cmms-bg-wash)] disabled:opacity-40 active:scale-[0.98]"
           >−</button>
-          <span className="text-sm font-bold">{row.original.qty}</span>
+          <input
+            type="number"
+            min="1"
+            max={row.original.stockQty}
+            value={row.original.qty}
+            onChange={(e) => handleQtyChange(row.original.id, parseInt(e.target.value) || 1)}
+            className="w-16 h-12 text-center text-base font-bold text-[var(--cmms-text-primary)] border border-[var(--cmms-border)] rounded-[var(--cmms-radius)] focus:outline-none focus:border-[var(--cmms-border-focus)]"
+          />
           <button
             type="button"
             onClick={() => handleQtyChange(row.original.id, row.original.qty + 1)}
             aria-label="เพิ่มจำนวน"
-            className="cmms-btn-primary h-7 w-7 rounded-lg text-sm font-bold text-white"
+            className="h-12 w-12 rounded-lg bg-[var(--cmms-primary)] text-white text-base font-bold transition-all hover:bg-[var(--cmms-primary-hover)] active:scale-[0.98]"
           >+</button>
         </div>
       ),
@@ -259,10 +309,11 @@ export default function SageIssueCenterPage() {
         <button
           type="button"
           onClick={() => handleRemove(row.original.id)}
-          className="inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-all"
+          className="inline-flex items-center gap-1.5 h-10 px-3 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all"
           style={{ color: "var(--cmms-danger)", background: "var(--cmms-danger-light)", borderColor: "color-mix(in srgb, var(--cmms-danger) 25%, transparent)" }}
         >
-          <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.delete")}
+          <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+          <span className="hidden sm:inline">{t("action.delete")}</span>
         </button>
       ),
     },
@@ -316,7 +367,7 @@ export default function SageIssueCenterPage() {
                   value={workOrder || "__none__"}
                   onValueChange={(v) => setWorkOrder(v === "__none__" ? "" : v)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger size="lg">
                     <SelectValue placeholder="เลือกใบสั่งงาน..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,7 +384,7 @@ export default function SageIssueCenterPage() {
                   value={technician || "__none__"}
                   onValueChange={(v) => setTechnician(v === "__none__" ? "" : v)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger size="lg">
                     <SelectValue placeholder="เลือกช่าง..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -360,8 +411,17 @@ export default function SageIssueCenterPage() {
                   placeholder="ค้นหารหัส / ชื่ออะไหล่..."
                   value={partSearch}
                   onChange={(e) => setPartSearch(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 pr-14"
+                  inputSize="lg"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowScanner(true)}
+                  aria-label="สแกนบาร์โค้ด/QR"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-12 w-12 rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary)] flex items-center justify-center transition-colors hover:bg-[var(--cmms-primary)]/20 active:bg-[var(--cmms-primary)]/30"
+                >
+                  <Camera size={20} strokeWidth={1.75} aria-hidden="true" />
+                </button>
               </div>
               <div className="flex items-center gap-2">
                 <div className="min-w-0 flex-1">
@@ -371,7 +431,7 @@ export default function SageIssueCenterPage() {
                       value={selectedPart || "__none__"}
                       onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger size="lg">
                         <SelectValue placeholder="เลือกอะไหล่..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -383,8 +443,8 @@ export default function SageIssueCenterPage() {
                     </Select>
                   </div>
                 </div>
-                <Button disabled={!selectedPart} onClick={handleAddPart}>
-                  <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+                <Button disabled={!selectedPart} onClick={handleAddPart} size="lg">
+                  <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
                   เพิ่ม
                 </Button>
               </div>
@@ -430,6 +490,7 @@ export default function SageIssueCenterPage() {
 
           <Button
             className="w-full"
+            size="lg"
             disabled={submitting || !workOrder || !technician || cart.length === 0}
             loading={submitting}
             loadingText="กำลังเบิกจ่าย..."
@@ -441,6 +502,14 @@ export default function SageIssueCenterPage() {
         </div>
       </div>
 
+    {showScanner && (
+        <QrScanner
+          onResult={handleScanResult}
+          onClose={handleCloseScanner}
+          title="สแกนบาร์โค้ด / QR อะไหล่"
+          hint="วางบาร์โค้ด/QR อยู่ตรงกลางกรอบ สแกนเสร็จจะกรอกอัตโนมัติ"
+        />
+      )}
     </div>
   );
 }
