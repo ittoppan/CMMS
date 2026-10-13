@@ -47,7 +47,7 @@ colors:
   # Text (light)
   text-primary: "#18181B"
   text-secondary: "#52525B"
-  text-muted: "#A1A1AA"
+  text-muted: "#64748B"  # AA 4.76:1 — ใช้กับ muted text (เดิม #A1A1AA 2.56:1 ตก AA)
   text-disabled: "#9AA4B8"
   text-soft: "#22262E"
   text-soft-alt: "#475569"
@@ -71,6 +71,7 @@ colors:
   info-darkmode: "#38BDF8"
   text-primary-dark: "#F4F4F5"
   text-secondary-dark: "#A1A1AA"
+  text-muted-dark: "#8AA0B8"  # AA ≈5.1:1 บน surface-dark — muted text (theme มืด)
 
 typography:
   body:
@@ -166,6 +167,16 @@ rounded:
 - Motion: 120–200ms, `ease-out`, respect `prefers-reduced-motion`
 - Animations ต้องไม่กระตุก layout — ใช้ `transform` / `opacity`
   (`--cmms-transition-layout`), ห้าม animate `height`/`padding`
+
+### Tables
+
+| Variant | เมื่อไร | API |
+|---|---|---|
+| `table` (default) | ตารางทั่วไป บนมือถือแถวเป็นแถบการ์ด (label ข้าง · ค่าขวา) ที่ 640px | `<DataTable variant="table">` / `OsTable` (`.cmms-ui-table`) |
+| `cards` | ตารางที่มือถือต้องการการ์ดอ่านง่าย: label เหนือค่า, cell หัวข้อเด่น, ปุ่มเต็มความกว้าง ที่ 767.98px | `<DataTable variant="cards">` + `meta: { cardTitle: true }` ที่คอลัมน์ "หัวการ์ด" / `<OsTable card>` (cell ต้องมี `data-label`; หัวการ์ดใช้ `className="cmms-card-title"`) |
+
+- หัวการ์ด (`cmms-card-title`) = ตัวหนา ไม่มีป้าย label เหนือค่า และเว้นที่ให้ checkbox ลอยมุมขวาบน (`.cmms-card-table`)
+- ห้ามใช้ hex ล้วนในตาราง — ใช้ `var(--cmms-*)` (ดู §8)
 
 ## 7. ข้อยกเว้นที่ตั้งใจ (intentional exceptions)
 
