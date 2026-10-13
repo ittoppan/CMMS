@@ -19,15 +19,26 @@ const SelectGroup = SelectPrimitive.Group;
 
 const SelectValue = SelectPrimitive.Value;
 
+interface SelectTriggerProps extends React.ComponentProps<typeof SelectPrimitive.Trigger> {
+  size?: "sm" | "md" | "lg";
+}
+
 function SelectTrigger({
   className,
   children,
+  size = "md",
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
+}: SelectTriggerProps) {
+  const sizeClasses = {
+    sm: "h-8 px-2 py-1.5 text-xs",
+    md: "h-10 px-3 py-2 text-sm",
+    lg: "h-12 px-4 py-3 text-base",
+  };
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "flex h-10 w-full items-center justify-between gap-2 whitespace-nowrap rounded-lg border border-input bg-card px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 data-[placeholder]:text-muted-foreground",
+        "flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-lg border border-input bg-card transition-colors placeholder:text-muted-foreground focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 data-[placeholder]:text-muted-foreground",
+        sizeClasses[size],
         className
       )}
       {...props}

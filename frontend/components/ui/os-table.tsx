@@ -14,8 +14,17 @@ export function Output({ className, ...props }: HTMLAttributes<HTMLDivElement>) 
   );
 }
 
-export function OsTable({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
-  return <table className={cn("cmms-ui-table", className)} {...props} />;
+export function OsTable({
+  className,
+  card,
+  ...props
+}: HTMLAttributes<HTMLTableElement> & { card?: boolean }) {
+  return (
+    <table
+      className={cn(card ? "cmms-card-table" : "cmms-ui-table", className)}
+      {...props}
+    />
+  );
 }
 
 export function OsTHead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {

@@ -21,7 +21,8 @@ import { Pagination } from "./pagination";
  * UI Kit DataTable — TanStack Table v9 (headless) + tokens + a11y
  * - sorting (หัวคอลัมน์กดได้ + aria-sort)
  * - client pagination (ใช้ Pagination component)
- * - mobile → การ์ดสไลด์ (CSS .cmms-ui-table + data-label)
+ * - mobile → การ์ดสไลด์ (CSS .cmms-ui-table + data-label ·
+ *   variant="cards" ใช้ .cmms-card-table + meta: { cardTitle })
  * - loading → Skeleton rows · empty → EmptyState ตัวเดียวทั้งระบบ
  *
  * ตัวอย่าง:
@@ -58,6 +59,9 @@ export interface DataTableProps<TData extends RowData> {
   emptyDescription?: string;
   emptyAction?: ReactNode;
   className?: string;
+  /** "table" = card-slice เดิม (640px, label ข้าง-ค่าขวา) · "cards" = Card Table Variant
+   *  (767.98px, label เหนือค่า, meta.cardTitle = หัวการ์ด) */
+  variant?: "table" | "cards";
 }
 
 export function DataTable<TData extends RowData>({
@@ -74,6 +78,7 @@ export function DataTable<TData extends RowData>({
   emptyDescription,
   emptyAction,
   className,
+  variant = "table",
 }: DataTableProps<TData>) {
   const stableData = useMemo(() => data, [data]);
 
@@ -121,7 +126,7 @@ export function DataTable<TData extends RowData>({
 
   return (
     <div className={cn("w-full overflow-x-auto rounded-xl border border-border bg-card shadow-sm", className)}>
-      <table className="cmms-ui-table">
+      <table className={variant === "cards" ? "cmms-card-table" : "cmms-ui-table"}>
         {caption && <caption>{caption}</caption>}
         <thead>
           {headerGroups.map((group) => (
@@ -193,18 +198,44 @@ export function DataTable<TData extends RowData>({
             rows.map((row) => (
               <tr
                 key={row.id}
+                tabIndex={onRowClick ? 0 : undefined}
+                role={onRowClick ? "button" : undefined}
+                aria-label={onRowClick ? `${caption ?? "แถว"} ${row.id}` : undefined}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                className={cn(onRowClick && "cursor-pointer")}
+                onKeyDown={
+                  onRowClick
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onRowClick(row.original);
+                        }
+                      }
+                    : undefined
+                }
+                className={cn(
+                  onRowClick && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
+                )}
               >
-                {row.getAllCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    data-label={headerLabels.get(cell.column.id)}
-                    className="[&:has([type=checkbox])]:w-px"
-                  >
-                    <table.FlexRender cell={cell} />
-                  </td>
-                ))}
+                {row.getAllCells().map((cell) => {
+                  const cardTitle =
+                    (cell.column.columnDef as {
+                      meta?: { cardTitle?: boolean };
+                    }).meta?.cardTitle === true;
+                  return (
+                    <td
+                      key={cell.id}
+                      data-label={
+                        cardTitle ? undefined : headerLabels.get(cell.column.id)
+                      }
+                      className={cn(
+                        cardTitle && "cmms-card-title",
+                        "[&:has([type=checkbox])]:w-px"
+                      )}
+                    >
+                      <table.FlexRender cell={cell} />
+                    </td>
+                  );
+                })}
               </tr>
             ))
           )}
