@@ -22,24 +22,30 @@ const nextConfig: NextConfig = {
     .map((s) => s.trim())
     .filter(Boolean),
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
     // ตรงข้ามกับที่ Next ส่ง (SSG prerender => Cache-Control: s-maxage=31536000 = 1 ปี)
     // LINE in-app browser (ผ่าน shared cache/relay) เชื่อ s-maxage แล้วแคชหน้า HTML เก่า
     // ทั้งปี => สาเหตุหลัก "เปิดใน LINE เห็นระบบตัวเก่า" ขณะที่นอก LINE เห็นของใหม่
-    return [
+    // ใน dev mode: ไม่ใส่ Cache-Control header สำหรับ _next/static เพื่อไม่ให้ชนกับ Turbopack dev server
+    const headers = [
       // 1) HTML / navigation / API — ห้ามแคชทุก shared cache (สั่ง no-store ก่อน -> ข้อ 2-4 ยกเว้นให้)
       {
         source: "/:path*",
         headers: [{ key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" }],
       },
-      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย
-      {
-        source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
-      {
-        source: "/icons/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
+      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย (production only)
+      ...(isDev
+        ? []
+        : [
+            {
+              source: "/_next/static/:path*",
+              headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+            },
+            {
+              source: "/icons/:path*",
+              headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+            },
+          ]),
       // 3) SW / manifest / offline page — ให้ revalidate ทุกครั้งที่เปิด (กัน SW เก่าจุก)
       {
         source: "/sw.js",
@@ -65,12 +71,15 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+              "default-src 'self'; script-src 'self' 'unsafe-inline'" +
+              (isDev ? " 'unsafe-eval'" : "") +
+              "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
           },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
         ],
       },
     ];
+    return headers;
   },
   async rewrites() {
     // ปลายทาง PHP Backend (IIS) — อ่านจาก env CMMS_BACKEND_URL (ค่าเริ่มต้น localhost:8081)
