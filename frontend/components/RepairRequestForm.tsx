@@ -804,15 +804,15 @@ const flushQueue = async () => {
   if (bindGate !== "bound") {
     return (
       <div className="cmms-mobile-page">
-<div className="cmms-page-header">
+<div className="cmms-liff-hero">
         <div className="flex items-center gap-3">
-          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
-            <div className="flex flex-col flex-1">
-              <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
-              <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
-            </div>
+          <div className="cmms-liff-logo"><Wrench size={20} strokeWidth={1.75} /></div>
+          <div className="flex-1 min-w-0">
+            <p className="cmms-liff-eyebrow">MAINTENANCE JOB REQUEST · F-EN-03</p>
+            <h1 className="cmms-liff-title">{tliff("liff.repair_header")}</h1>
           </div>
         </div>
+      </div>
 
         <Card className="cmms-card-flat mx-4 my-4 p-5">
           {bindGate === "checking" && (
@@ -881,7 +881,7 @@ const flushQueue = async () => {
                 onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}
               />
               {bindError && (
-                <div className="bg-[#FEE2E2] text-[#B91C1C] rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2">
                   <AlertCircle size={16} strokeWidth={1.75} /> {bindError}
                 </div>
               )}
@@ -911,13 +911,12 @@ const flushQueue = async () => {
   return (
     <div className="cmms-mobile-page">
       {/* Header */}
-<div className="cmms-page-header">
+<div className="cmms-liff-hero">
         <div className="flex items-center gap-3">
-          <LiffLangToggle />
-          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
-          <div className="flex flex-col flex-1">
-            <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
-            <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
+          <div className="cmms-liff-logo"><Wrench size={20} strokeWidth={1.75} /></div>
+          <div className="flex-1 min-w-0">
+            <p className="cmms-liff-eyebrow">MAINTENANCE JOB REQUEST · F-EN-03</p>
+            <h1 className="cmms-liff-title">{tliff("liff.repair_header")}</h1>
           </div>
           <LiffLangToggle />
           {lineProfile?.pic ? (
@@ -926,10 +925,14 @@ const flushQueue = async () => {
             <div className="cmms-avatar cmms-avatar-fallback"><User size={18} strokeWidth={1.75} /></div>
           )}
         </div>
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <span className="cmms-liff-chip"><FileText size={13} strokeWidth={1.75} /> ใบแจ้งซ่อม F-EN-03</span>
+          <span className="cmms-liff-chip"><HardHat size={13} strokeWidth={1.75} /> แผนกซ่อมบำรุง</span>
+        </div>
       </div>
 
       {/* Step Indicator */}
-      <div className="cmms-steps">
+      <div className="cmms-stepper">
 {STEPS.map((s, i) => (
             <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
               onClick={() => { if (i < step) setStep(i); }}>
@@ -1424,6 +1427,14 @@ const flushQueue = async () => {
 
       {/* Sticky bottom bar */}
       <div className="cmms-mobile-bottom-bar">
+        <div className="cmms-bottom-meta">
+          <span>{step + 1}/4 · {tliff(`liff.step_${STEPS[step].key}`)}</span>
+          <div className="cmms-bottom-progress" aria-hidden="true">
+            {STEPS.map((_, i) => (
+              <span key={i} className={i <= step ? "on" : ""} />
+            ))}
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           {step > 0 ? (
             <Button variant="secondary" onClick={() => setStep(step - 1)}>
