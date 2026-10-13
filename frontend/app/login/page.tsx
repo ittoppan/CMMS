@@ -5,7 +5,7 @@ import ThemeProvider from '../../components/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
-import { Wrench, ChartBar, Clock, Box } from 'lucide-react';
+import { Wrench, ChartBar, Clock, Box, Eye, EyeOff, AlertCircle, ShieldCheck } from 'lucide-react';
 
 const LINE_SVG = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -18,6 +18,8 @@ const FEATURES = [
   { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF/MTTR' },
   { icon: Box, text: 'บริหารคลังอะไหล่อัจฉริยะ' },
 ];
+
+const STATUS = ['ระบบ', 'ฐานข้อมูล', 'LINE แจ้งเตือน'];
 
 // แปลงข้อความ error จากฝั่ง PHP/query → ภาษาไทยที่เข้าใจได้
 // (ห้ามโชว์ internal code หรือข้อความ System Error ดิบๆ ให้ผู้ใช้)
@@ -48,6 +50,8 @@ export default function LoginPage() {
 function LoginContent() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -68,6 +72,13 @@ function LoginContent() {
       setErrorMessage(friendlyAuthError(e));
     }
   }, []);
+
+  const clearError = () => {
+    if (loginFailed) {
+      setLoginFailed(false);
+      setErrorMessage('');
+    }
+  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -103,155 +114,165 @@ function LoginContent() {
     }
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isLoading) handleLogin();
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] min-h-screen bg-[var(--color-background-body)]">
-      {/* Left Hero Panel */}
-      <div
-        className="hidden lg:flex flex-col justify-end overflow-hidden"
-        style={{
-          position: 'relative',
-          padding: 48,
-          background: 'linear-gradient(135deg, var(--tp-navy-dark) 0%, var(--cmms-bg-sidebar) 55%, var(--cmms-primary) 100%)',
-        }}
-      >
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 0, opacity: 0.32,
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)',
-          backgroundSize: '46px 46px',
-        }} />
-        <div style={{ position: 'absolute', top: 36, right: 36, width: 84, height: 84, zIndex: 0, opacity: 0.5 }}>
-          <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(255,255,255,0.4)', borderRadius: 10 }} />
-          <div style={{ position: 'absolute', top: 8, left: 8, width: 26, height: 26, border: '1px solid rgba(255,255,255,0.4)', borderRadius: 5 }} />
-          <div style={{ position: 'absolute', top: 16, left: 16, width: 10, height: 10, background: 'rgba(255,255,255,0.75)', borderRadius: 2 }} />
+    <div className="cmms-login-container">
+      {/* Mobile compact brand band */}
+      <div className="cmms-login-band">
+        <div className="cmms-login-brand">
+          <div className="cmms-login-brand-mark"><Wrench size={22} strokeWidth={1.75} /></div>
+          <div>
+            <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
+            <div className="cmms-login-brand-sub">Enterprise Maintenance Suite</div>
+          </div>
+        </div>
+        <div className="cmms-login-status">
+          {STATUS.map((s) => (
+            <span key={s} className="cmms-login-status-item">
+              <span className="cmms-login-lamp" />{s}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop brand hero */}
+      <aside className="cmms-login-hero">
+        <div className="cmms-login-hero-mark" aria-hidden="true"><span /><span /><span /></div>
+
+        <div className="cmms-login-brand">
+          <div className="cmms-login-brand-mark"><Wrench size={22} strokeWidth={1.75} /></div>
+          <div>
+            <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
+            <div className="cmms-login-brand-sub">Enterprise Maintenance Suite</div>
+          </div>
         </div>
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 40 }}>
-            {FEATURES.map((f, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 12,
-                padding: '10px 16px', borderRadius: 12,
-                background: 'rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                width: 'fit-content',
-              }}>
-                <f.icon style={{ width: 20, height: 20, color: 'rgba(255,255,255,0.8)' }} strokeWidth={1.75} />
-                <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.85rem', fontWeight: 500 }}>
-                  {f.text}
-                </span>
-              </div>
-            ))}
+        <div className="cmms-login-hero-body">
+          <div>
+            <p className="cmms-login-hero-eyebrow">CMMS · Enterprise Maintenance</p>
+            <h1>ระบบจัดการ<br />งานซ่อมบำรุง</h1>
           </div>
-
-          <div style={{
-            fontFamily: "'Barlow Condensed','Inter',sans-serif",
-            fontWeight: 600, letterSpacing: '0.18em', textTransform: 'uppercase',
-            fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', marginBottom: 14,
-          }}>
-            CMMS · Enterprise Maintenance
-          </div>
-          <h1 style={{ color: '#fff', fontSize: '2.2rem', fontWeight: 800, lineHeight: 1.3, margin: 0 }}>ระบบจัดการ<br />งานซ่อมบำรุง</h1>
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', lineHeight: 1.6, maxWidth: 440, margin: '12px 0 0' }}>
+          <p className="cmms-login-hero-lede">
             CMMS-TOPPAN — Computerized Maintenance Management System สำหรับ TOPPAN Flexible Packaging (Thailand)
           </p>
-
-          <div style={{ marginTop: 32, display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-            {[
-              { label: 'ระบบ', color: 'var(--cmms-success)' },
-              { label: 'ฐานข้อมูล', color: 'var(--cmms-success)' },
-              { label: 'LINE แจ้งเตือน', color: 'var(--cmms-success)' },
-            ].map((s) => (
-              <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, color: 'rgba(255,255,255,0.72)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em' }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: '0 0 8px rgba(16,185,129,0.7)' }} />
-                {s.label}
+          <ul className="cmms-login-features">
+            {FEATURES.map((f) => (
+              <li key={f.text} className="cmms-login-feature">
+                <span className="cmms-login-feature-icon"><f.icon size={18} strokeWidth={1.75} /></span>
+                <span className="cmms-login-feature-text">{f.text}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="cmms-login-status">
+            {STATUS.map((s) => (
+              <span key={s} className="cmms-login-status-item">
+                <span className="cmms-login-lamp" />{s}
               </span>
             ))}
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Right Login Form */}
-      <div
-        className="flex flex-col justify-center"
-        style={{ padding: '48px 56px', maxWidth: 480, margin: '0 auto', width: '100%' }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 40 }}>
-          <img src="/logo.png" alt="TOPPAN" style={{ height: 36, objectFit: 'contain' }} />
-          <span style={{ fontSize: '1.1rem', letterSpacing: '-0.02em', fontWeight: 'bold', color: 'var(--cmms-text-primary)' }}>
-            CMMS-TOPPAN
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <h2 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--cmms-text-primary)' }}>
-              เข้าสู่ระบบ
-            </h2>
-            <p style={{ color: 'var(--cmms-text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-              กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน
-            </p>
+      {/* Login form */}
+      <main className="cmms-login-panel">
+        <form className="cmms-login-form" onSubmit={onSubmit} noValidate>
+          <div className="cmms-login-logo">
+            <div className="cmms-login-logo-icon"><Wrench size={20} strokeWidth={1.75} /></div>
+            <div>
+              <div className="cmms-login-logo-text">CMMS-TOPPAN</div>
+              <div className="cmms-login-logo-sub">Enterprise Maintenance</div>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <header className="flex flex-col gap-1.5">
+            <p className="cmms-eyebrow">Secure Sign-in</p>
+            <h2 className="cmms-login-title">เข้าสู่ระบบ</h2>
+            <p className="cmms-login-subtitle">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน</p>
+          </header>
+
+          {loginFailed && errorMessage && (
+            <div className="cmms-login-error" role="alert" aria-live="assertive">
+              <AlertCircle size={16} strokeWidth={1.75} className="mt-0.5 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-4">
             <Input
               label="ชื่อผู้ใช้"
               placeholder="เช่น E01117"
               value={username}
-              error={loginFailed ? errorMessage : undefined}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setLoginFailed(false);
-              }}
-              className="h-11"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleLogin();
-              }}
-            />
-            <Input
-              label="รหัสผ่าน"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setLoginFailed(false);
-              }}
+              autoFocus
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-invalid={loginFailed || undefined}
+              onChange={(e) => { setUsername(e.target.value); clearError(); }}
               className={cn('h-11', loginFailed && '!border-[var(--cmms-danger)]')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleLogin();
-              }}
             />
+
+            <div className="relative">
+              <Input
+                label="รหัสผ่าน"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                autoComplete="current-password"
+                aria-invalid={loginFailed || undefined}
+                onChange={(e) => { setPassword(e.target.value); clearError(); }}
+                onKeyUp={(e) => { if (typeof e.getModifierState === 'function') setCapsOn(e.getModifierState('CapsLock')); }}
+                onBlur={() => setCapsOn(false)}
+                className={cn('h-11 pr-11', loginFailed && '!border-[var(--cmms-danger)]')}
+              />
+              <button
+                type="button"
+                className="cmms-login-peek"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
+              </button>
+            </div>
+
+            {capsOn && !showPassword && (
+              <p className="cmms-login-caps"><AlertCircle size={13} strokeWidth={2} /> Caps Lock เปิดอยู่ — รหัสผ่านอาจพิมพ์ผิด</p>
+            )}
           </div>
 
-          <Button
-            className="w-full h-11"
-            disabled={isLoading}
-            onClick={handleLogin}
-          >
-            {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+          <Button type="submit" className="w-full h-11" loading={isLoading} loadingText="กำลังเข้าสู่ระบบ…">
+            <ShieldCheck size={18} strokeWidth={1.75} /> เข้าสู่ระบบ
           </Button>
 
-          <div className="flex items-center gap-2 my-1">
-            <div className="flex-1 h-px bg-[var(--cmms-border)]" />
+          <div className="flex items-center gap-3">
+            <span className="cmms-login-rule" />
             <span className="text-xs text-[var(--cmms-text-muted)]">หรือ</span>
-            <div className="flex-1 h-px bg-[var(--cmms-border)]" />
+            <span className="cmms-login-rule" />
           </div>
 
-          <Button
-            variant="secondary"
-            className="w-full h-11"
-            onClick={() => { window.location.href = '/line_login.php'; }}
-            style={{ backgroundColor: 'var(--cmms-line-green)', color: '#fff', border: 'none' }}
-          >
-            {LINE_SVG} เข้าสู่ระบบด้วย LINE
-          </Button>
-          <p style={{ textAlign: 'center', color: 'var(--cmms-text-secondary)', fontSize: '0.75rem', margin: 0 }}>
-            ครั้งแรก: ล็อกอินด้วยชื่อผู้ใช้/รหัสผ่านก่อน แล้วกด LINE อีกครั้งเพื่อผูกบัญชีให้อัตโนมัติ —
-            ครั้งถัดไปล็อกอินผ่าน LINE ได้ทันที พร้อมรับการแจ้งเตือนงาน
-          </p>
-        </div>
-      </div>
+          <div className="flex flex-col gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full h-11 cmms-login-line"
+              onClick={() => { window.location.href = '/line_login.php'; }}
+            >
+              {LINE_SVG} เข้าสู่ระบบด้วย LINE
+            </Button>
+            {bindLine && (
+              <p className="cmms-login-note">ล็อกอินสำเร็จแล้วระบบจะพาไปผูกบัญชี LINE เพื่อรับการแจ้งเตือนงาน</p>
+            )}
+            <p className="cmms-login-note">
+              ครั้งแรก: ล็อกอินด้วยชื่อผู้ใช้/รหัสผ่านก่อน แล้วกด LINE อีกครั้งเพื่อผูกบัญชีให้อัตโนมัติ —
+              ครั้งถัดไปล็อกอินผ่าน LINE ได้ทันที พร้อมรับการแจ้งเตือนงาน
+            </p>
+          </div>
+        </form>
+      </main>
     </div>
   );
 }

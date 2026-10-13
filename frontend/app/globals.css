@@ -559,47 +559,168 @@ h1, h2, h3, h4 {
 .cmms-step.done .cmms-step-label { color: var(--cmms-success); }
 
 /* ================================================
-   Login Page
+   Login Page — Secure sign-in (แบรนด์ hero + ฟอร์ม)
    ================================================ */
 .cmms-login-container {
-  display: grid; grid-template-columns: 1.2fr 1fr; min-height: 100vh; background: white;
+  display: grid; grid-template-columns: 1fr; min-height: 100vh;
+  background: var(--cmms-bg-page);
 }
-@media (max-width: 768px) {
-  .cmms-login-container { grid-template-columns: 1fr; }
-  .cmms-login-hero { display: none !important; }
+@media (min-width: 1024px) {
+  .cmms-login-container { grid-template-columns: 1.15fr 1fr; }
 }
-.cmms-login-hero {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-end;
-  padding: 48px; background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #1E40AF 100%); overflow: hidden;
-}
-.cmms-login-hero::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 30% 70%, rgba(37,99,235,0.3), transparent 60%),
-              radial-gradient(circle at 70% 30%, rgba(124,58,237,0.2), transparent 50%);
-}
-.cmms-login-hero-content { position: relative; z-index: 1; }
-.cmms-login-hero h1 { font-size: 2.2rem; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 12px; }
-.cmms-login-hero p { font-size: 1rem; color: rgba(255,255,255,0.7); max-width: 400px; line-height: 1.6; }
-.cmms-login-form {
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 48px 56px; max-width: 480px; margin: 0 auto; width: 100%;
-}
-.cmms-login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
-.cmms-login-logo-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--cmms-gradient-primary);
-  display: flex; align-items: center; justify-content: center; color: white;
-}
-.cmms-login-logo-text { font-size: 1.1rem; font-weight: 800; color: var(--cmms-text-primary); letter-spacing: -0.02em; }
 
-/* Floating shapes decoration for login hero */
-.cmms-login-shapes { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
-.cmms-login-shape {
-  position: absolute; border-radius: 50%; opacity: 0.08; background: white;
+/* ---- Brand hero (desktop) ---- */
+.cmms-login-hero {
+  position: relative; display: none; flex-direction: column; justify-content: space-between;
+  padding: 46px 52px; overflow: hidden; color: #fff;
+  /* ข้อยกเว้นที่ตั้งใจ: login hero palette (DESIGN.md §7) */
+  background: linear-gradient(150deg, var(--tp-navy-dark) 0%, #0E2A5C 46%, var(--cmms-primary) 100%);
 }
-.cmms-login-shape:nth-child(1) { width: 300px; height: 300px; top: -50px; right: -80px; animation: cmms-float 20s ease-in-out infinite; }
-.cmms-login-shape:nth-child(2) { width: 200px; height: 200px; bottom: 20%; left: -40px; animation: cmms-float 15s ease-in-out infinite reverse; }
-.cmms-login-shape:nth-child(3) { width: 150px; height: 150px; top: 40%; right: 20%; animation: cmms-float 18s ease-in-out infinite 2s; }
+@media (min-width: 1024px) { .cmms-login-hero { display: flex; } }
+.cmms-login-hero::before {
+  content: ''; position: absolute; inset: 0; opacity: 0.55; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(125% 95% at 82% 8%, #000, transparent 76%);
+  mask-image: radial-gradient(125% 95% at 82% 8%, #000, transparent 76%);
+}
+.cmms-login-hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(58% 48% at 12% 100%, rgba(0,147,255,0.34), transparent 70%);
+}
+.cmms-login-hero > * { position: relative; z-index: 1; }
+.cmms-login-hero-mark { position: absolute; top: 42px; right: 46px; width: 92px; height: 92px; z-index: 1; opacity: 0.5; }
+.cmms-login-hero-mark span { position: absolute; border: 1px solid rgba(255,255,255,0.45); border-radius: 8px; }
+.cmms-login-hero-mark span:nth-child(1) { inset: 0; }
+.cmms-login-hero-mark span:nth-child(2) { inset: 13px; border-radius: 6px; }
+.cmms-login-hero-mark span:nth-child(3) { inset: 32px; border: none; border-radius: 3px; background: rgba(255,255,255,0.7); }
+
+.cmms-login-brand { display: inline-flex; align-items: center; gap: 12px; }
+.cmms-login-brand-mark {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+}
+.cmms-login-brand-name { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.cmms-login-brand-sub { font-size: 0.7rem; color: rgba(255,255,255,0.62); margin-top: 4px; letter-spacing: 0.04em; }
+
+.cmms-login-hero-body { display: flex; flex-direction: column; gap: 26px; max-width: 540px; }
+.cmms-login-hero-eyebrow {
+  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em;
+  font-size: 0.72rem; color: rgba(255,255,255,0.6); margin: 0 0 12px;
+}
+.cmms-login-hero h1 {
+  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-size: clamp(2rem, 3.4vw, 3rem); font-weight: 700; line-height: 1.1;
+  letter-spacing: 0.004em; color: #fff; margin: 0;
+}
+.cmms-login-hero-lede { font-size: 0.95rem; line-height: 1.7; color: rgba(255,255,255,0.75); margin: 0; max-width: 46ch; }
+
+.cmms-login-features { list-style: none; margin: 0; padding: 0; }
+.cmms-login-feature { display: flex; align-items: center; gap: 13px; padding: 13px 0; border-top: 1px solid rgba(255,255,255,0.12); }
+.cmms-login-feature:last-child { border-bottom: 1px solid rgba(255,255,255,0.12); }
+.cmms-login-feature-icon {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); color: rgba(255,255,255,0.9);
+}
+.cmms-login-feature-text { font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.92); }
+
+.cmms-login-status { display: flex; flex-wrap: wrap; gap: 22px; }
+.cmms-login-status-item {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.78); letter-spacing: 0.02em;
+}
+.cmms-login-lamp {
+  width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--cmms-success);
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.22), 0 0 9px rgba(22,163,74,0.8);
+}
+
+/* ---- Mobile compact brand band ---- */
+.cmms-login-band {
+  display: flex; flex-direction: column; gap: 18px;
+  padding: 30px 22px calc(30px - 1px);
+  color: #fff;
+  background: linear-gradient(150deg, var(--tp-navy-dark) 0%, #0E2A5C 48%, var(--cmms-primary) 100%);
+}
+@media (min-width: 1024px) { .cmms-login-band { display: none; } }
+
+/* ---- Form panel ---- */
+.cmms-login-panel {
+  display: flex; flex-direction: column; justify-content: center;
+  min-height: 100vh; padding: 40px 22px; background: var(--cmms-bg-page);
+}
+@media (min-width: 1024px) { .cmms-login-panel { padding: 48px 56px; } }
+.cmms-login-panel ::selection { background: color-mix(in srgb, var(--cmms-primary) 26%, transparent); }
+.cmms-login-form {
+  width: 100%; max-width: 404px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 26px; caret-color: var(--cmms-primary);
+}
+.cmms-login-form input:-webkit-autofill,
+.cmms-login-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--cmms-text-primary);
+  box-shadow: 0 0 0 1000px var(--cmms-bg-card) inset;
+  transition: background-color 9999s ease-out 0s;
+}
+.cmms-login-logo { display: none; align-items: center; gap: 11px; }
+@media (min-width: 1024px) { .cmms-login-logo { display: flex; } }
+.cmms-login-logo-icon {
+  width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: var(--cmms-gradient-primary); box-shadow: var(--cmms-shadow-md);
+}
+.cmms-login-logo-text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; color: var(--cmms-text-primary); line-height: 1.1; }
+.cmms-login-logo-sub { font-size: 0.7rem; color: var(--cmms-text-muted); margin-top: 2px; }
+
+.cmms-login-title {
+  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-size: 1.7rem; font-weight: 700; letter-spacing: 0.004em;
+  color: var(--cmms-text-primary); margin: 0;
+}
+.cmms-login-subtitle { font-size: 0.875rem; color: var(--cmms-text-secondary); margin: 0; }
+
+.cmms-login-error {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 11px 13px; border-radius: var(--cmms-radius);
+  background: var(--cmms-danger-light); border: 1px solid var(--cmms-danger);
+  color: var(--cmms-danger-dark); font-size: 0.82rem; font-weight: 600; line-height: 1.5;
+}
+
+.cmms-login-peek {
+  position: absolute; right: 2px; bottom: 0; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--cmms-text-muted); border-radius: var(--cmms-radius-sm);
+  transition: color var(--cmms-transition-fast);
+}
+.cmms-login-peek:hover { color: var(--cmms-text-primary); }
+.cmms-login-peek:focus-visible { outline: none; box-shadow: var(--cmms-shadow-focus); }
+
+.cmms-login-caps { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 0.72rem; font-weight: 600; color: var(--cmms-warning-dark); }
+
+.cmms-login-rule { flex: 1; height: 1px; background: var(--cmms-border); }
+
+.cmms-login-line { background-color: var(--cmms-line-green) !important; color: #fff !important; border: none !important; }
+.cmms-login-line:hover { filter: brightness(0.95); }
+
+.cmms-login-note { font-size: 0.72rem; line-height: 1.6; color: var(--cmms-text-secondary); text-align: center; margin: 0; }
+
+/* Entrance: one authored moment, respects reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .cmms-login-hero-body > * { animation: cmms-fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .cmms-login-hero-body > *:nth-child(2) { animation-delay: 0.06s; }
+  .cmms-login-hero-body > *:nth-child(3) { animation-delay: 0.12s; }
+  .cmms-login-hero-body > *:nth-child(4) { animation-delay: 0.18s; }
+  .cmms-login-band, .cmms-login-form { animation: cmms-fadeIn 0.5s ease-out both; }
+  .cmms-login-hero::after { animation: cmms-login-drift 20s ease-in-out infinite; }
+}
+@keyframes cmms-login-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-2.5%, -2%, 0); }
+}
 
 /* ================================================
    Animations
