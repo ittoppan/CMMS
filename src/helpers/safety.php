@@ -71,16 +71,17 @@ function wp_roles_manage(): array { return [1, 2, 6]; }
 function wp_roles_approve(): array { return [1, 2, 6, 7]; }
 function wp_roles_safety(): array { return [1, 2, 6]; }
 
-/** สร้างหมายเลขใบอนุญาต {prefix}-{YYYYMM}-{NNN} (เร่งลำดับจริง ไม่ใช้ rand) */
+/** สร้างหมายเลขใบอนุญาต {prefix}-{YYYYMMDD}-{NNN} (เร่งลำดับจริง ไม่ใช้ rand) */
 function wp_next_permit_no(PDO $pdo): string {
     $prefix = wp_config($pdo)['permit_no_prefix'];
-    $key = substr($prefix . date('Ymd'), 0, 40);
-    $st = $pdo->prepare('SELECT MAX(NULLIF(permit_no, \'\')) FROM work_permits WHERE permit_no LIKE ?');
-    $st->execute(["$prefix-" . date('Ymd') . '%']);
-    $max = (string)$st->fetchColumn();
-    $seq = 1;
-    if ($max !== '' && preg_match('/\d{3}$/', $max, $m)) $seq = (int)$m[0] + 1;
-    return $prefix . '-' . date('Ymd') . '-' . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
+    $base = $prefix . '-' . date('Ymd') . '-';
+    // เทียบเฉพาะเลขท้ายแบบตัวเลข — MAX() แบบ lexical จะเรียง '999' เกิน '1000'
+    // (และ regex \d{3}$ อ่าน '1000' ได้แค่ '000') ทำให้ออกรหัสซ้ำ (permit_no ไม่มี UNIQUE)
+    $st = $pdo->prepare('SELECT MAX(CAST(SUBSTRING(permit_no, ?) AS UNSIGNED)) FROM work_permits WHERE permit_no LIKE ?');
+    $st->execute([strlen($base) + 1, $base . '%']);
+    $max = $st->fetchColumn();
+    $seq = ($max === null || $max === false) ? 1 : ((int)$max + 1);
+    return $base . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
 }
 
 /** อ่านใบอนุญาต + join (detail) */
