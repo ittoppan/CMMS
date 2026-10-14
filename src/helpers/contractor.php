@@ -85,10 +85,16 @@ function ctr_contractor(PDO $pdo, int $id): array {
 
 function ctr_next_no(PDO $pdo, string $table, string $prefix, string $column = ''): string {
     // รูปแบบ {PREFIX}-{YYYY}-{NNN}
+    $table = preg_replace('/[^a-z_]/i', '', $table);
+    $column = preg_replace('/[^a-z_]/i', '', $column);
     $year = date('Y');
-    $st = $pdo->prepare("SELECT COUNT(*) FROM `$table` WHERE `$column` LIKE ?");
-    $st->execute([$prefix . '-' . $year . '-%']);
-    return sprintf('%s-%s-%03d', $prefix, $year, ((int)$st->fetchColumn()) + 1);
+    $base = $prefix . '-' . $year . '-';
+    // COUNT(*)+1 จะได้รหัสซ้ำเมื่อมีแถวถูกลบ (COUNT ลดแต่รหัสเดิมยังอยู่) — ใช้ MAX ของเลขท้ายแทน
+    $st = $pdo->prepare("SELECT MAX(CAST(SUBSTRING(`$column`, ?) AS UNSIGNED)) FROM `$table` WHERE `$column` LIKE ?");
+    $st->execute([strlen($base) + 1, $base . '%']);
+    $max = $st->fetchColumn();
+    $seq = ($max === null || $max === false) ? 1 : ((int)$max + 1);
+    return sprintf('%s-%s-%03d', $prefix, $year, $seq);
 }
 
 /** สถานะที่มีสิทธิ์อนุมัติระดับ admin (ใช้ guard ที่ API แยกจากกัน) */
