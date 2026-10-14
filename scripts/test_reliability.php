@@ -175,11 +175,13 @@ check('rolling_12m not clamped', $p['clamped'] === false);
 check('rolling_12m start < end', $p['start_ts'] < $p['end_ts']);
 
 $p3 = rel_period(['range' => 'rolling_3m'], $cfg);
-check('rolling_3m ~2 months span', $p3['days'] >= 58 && $p3['days'] <= 66, (string)$p3['days']);
+check('rolling_3m ~3 months span', $p3['days'] >= 88 && $p3['days'] <= 94, (string)$p3['days']);
 check('rolling_3m reports 3 months', $p3['months'] === 3);
 $p6 = rel_period(['range' => 'rolling_6m'], $cfg);
+check('rolling_6m ~6 months span', $p6['days'] >= 178 && $p6['days'] <= 186, (string)$p6['days']);
 check('rolling_6m reports 6 months', $p6['months'] === 6, (string)$p6['months']);
 $p1 = rel_period(['range' => 'rolling_1m'], $cfg);
+check('rolling_1m ~1 month span', $p1['days'] >= 28 && $p1['days'] <= 33, (string)$p1['days']);
 check('rolling_1m reports 1 month', $p1['months'] === 1);
 $p30 = rel_period(['range' => 'rolling_30d'], $cfg);
 check('rolling_30d = 30', $p30['days'] === 30, (string)$p30['days']);

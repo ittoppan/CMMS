@@ -180,14 +180,12 @@ function rel_period(array $opts, array $cfg = []): array {
     $end = null;
     $note = '';
     $custom = false;
+    $presetMonths = null;
 
     $dayStart = static fn(string $d): string => $d . ' 00:00:00';
     $dayEnd = static fn(string $d): string => $d . ' 23:59:59';
 
-    if ($preset === 'rolling_12m') {
-        $start = date('Y-m-d 00:00:00', strtotime('-12 months +1 day'));
-        $end = date('Y-m-d 23:59:59');
-    } elseif (str_starts_with($preset, 'rolling_')) {
+    if (str_starts_with($preset, 'rolling_')) {
         $digits = (int)substr($preset, 8);
         $unit = 'months';
         if (str_ends_with($preset, 'd')) {
@@ -195,9 +193,15 @@ function rel_period(array $opts, array $cfg = []): array {
             $unit = 'days';
         }
         $digits = max(1, min(120, $digits));
-        $start = $unit === 'days'
-            ? date('Y-m-d 00:00:00', strtotime('-' . ($digits - 1) . ' day'))
-            : date('Y-m-d 00:00:00', strtotime('-' . ($digits - 1) . ' month'));
+        if ($unit === 'days') {
+            $start = date('Y-m-d 00:00:00', strtotime('-' . ($digits - 1) . ' day'));
+        } else {
+            // rolling_Nm must span N full months (same shape as rolling_12m).
+            // The old "-(N-1) months" made rolling_1m a single day and
+            // rolling_6m a ~5-month window.
+            $presetMonths = $digits;
+            $start = date('Y-m-d 00:00:00', strtotime('-' . $digits . ' month +1 day'));
+        }
         $end = date('Y-m-d 23:59:59');
     } elseif ($preset === 'custom') {
         $custom = true;
@@ -274,7 +278,7 @@ function rel_period(array $opts, array $cfg = []): array {
         'note'           => $note,
         'start_ts'       => $startTs,
         'end_ts'         => $endTs,
-        'months'         => max(1, (int)ceil($days / 30.44)),
+        'months'         => (!$clamped && $presetMonths !== null) ? $presetMonths : max(1, (int)ceil($days / 30.44)),
     ];
 }
 
