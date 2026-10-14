@@ -568,6 +568,7 @@ function iot_retention_targets(): array {
 function iot_retention_policies(PDO $pdo): array {
     try {
         $st = $pdo->prepare('SELECT * FROM iot_retention_policies ORDER BY policy_code ASC');
+        $st->execute();
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
     } catch (Throwable $e) {
         return [];

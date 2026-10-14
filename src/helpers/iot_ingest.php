@@ -279,6 +279,7 @@ function iot_gateway_list(PDO $pdo): array {
                                 (SELECT COUNT(*) FROM iot_points p JOIN iot_devices d ON d.id = p.device_id
                                           WHERE d.gateway_id = g.id) AS point_count
                          FROM iot_gateways g ORDER BY g.gateway_code ASC');
+    $st->execute();
     return $st->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -343,6 +344,7 @@ function iot_connector_list(PDO $pdo): array {
                          FROM iot_connectors c
                          LEFT JOIN iot_sources s ON s.id = c.source_id
                          ORDER BY c.connector_code ASC');
+    $st->execute();
     $rows = $st->fetchAll(PDO::FETCH_ASSOC);
     foreach ($rows as &$r) {
         // Same rule as sources: a secret is a NAME, never a value.

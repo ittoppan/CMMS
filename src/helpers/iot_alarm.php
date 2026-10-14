@@ -667,6 +667,7 @@ function iot_alarm_decorate(PDO $pdo, array $row): array {
 /** Counts for the overview, plus the honest note about what is NOT counted. */
 function iot_alarm_counts(PDO $pdo): array {
     $st = $pdo->prepare('SELECT status, severity, COUNT(*) AS n FROM iot_alarms GROUP BY status, severity');
+    $st->execute();
     $byStatus = [];
     $bySeverity = [];
     foreach (array_keys(iot_alarm_statuses()) as $s) {
@@ -676,7 +677,7 @@ function iot_alarm_counts(PDO $pdo): array {
         $bySeverity[$s] = 0;
     }
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) {
-        $byStatus[(string)$r['status']] = (int)$r['n'];
+        $byStatus[(string)$r['status']] = ($byStatus[(string)$r['status']] ?? 0) + (int)$r['n'];
         $bySeverity[(string)$r['severity']] = ($bySeverity[(string)$r['severity']] ?? 0) + (int)$r['n'];
     }
     $openStatuses = ['detected', 'acknowledged', 'investigating', 'action_required', 'suppressed'];
@@ -906,6 +907,7 @@ function iot_sweep_offline_devices(PDO $pdo): array {
                                 (SELECT MAX(r.received_at) FROM iot_readings r WHERE r.device_id = d.id) AS last_reading
                          FROM iot_devices d
                          WHERE d.lifecycle_status IN ("commissioned","active")');
+    $st->execute();
     $offline = [];
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $d) {
         // last_ping is updated by intake; last_reading is the raw-data truth. Prefer the
