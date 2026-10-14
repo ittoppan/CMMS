@@ -675,6 +675,10 @@ function kn_category_save(PDO $pdo, array $in, int $userId): array {
     if ($nameTh === null && $nameEn === null) {
         return ['ok' => false, 'code' => 'KN_CATEGORY_NAME_REQUIRED'];
     }
+    // name_th/name_en are NOT NULL columns: a category may be labelled in only one
+    // language, so the missing side is stored as an empty string, never null.
+    $nameTh = $nameTh ?? '';
+    $nameEn = $nameEn ?? '';
     $parentId = (int)($in['parent_id'] ?? 0);
     if ($parentId > 0) {
         $chk = $pdo->prepare('SELECT id FROM knowledge_category WHERE id = ?');
