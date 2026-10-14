@@ -1032,8 +1032,15 @@ function budget_create(PDO $pdo, array $in, int $uid): array {
     if ($month < 1 || $month > 12) throw new DomainException('เดือนต้องอยู่ระหว่าง 1-12');
     if ($allocated < 0) throw new DomainException('งบประมาณต้องไม่ติดลบ');
 
-    $dup = $pdo->prepare('SELECT id FROM budget_plan WHERE year = ? AND month = ? AND department_id = ?');
-    $dup->execute([$year, $month, $deptId > 0 ? $deptId : null]);
+    // department_id = NULL ต้องเทียบด้วย IS NULL (เป็น NULL-safe guard);
+    // MySQL UNIQUE index ไม่กัน NULL ซ้ำ จึงต้องเช็คฝั่งโค้ดให้ครบ
+    if ($deptId > 0) {
+        $dup = $pdo->prepare('SELECT id FROM budget_plan WHERE year = ? AND month = ? AND department_id = ?');
+        $dup->execute([$year, $month, $deptId]);
+    } else {
+        $dup = $pdo->prepare('SELECT id FROM budget_plan WHERE year = ? AND month = ? AND department_id IS NULL');
+        $dup->execute([$year, $month]);
+    }
     if ($dup->fetchColumn()) throw new DomainException('งบประมาณของเดือน/แผนกนี้มีอยู่แล้ว');
 
     $stmt = $pdo->prepare('INSERT INTO budget_plan (year, month, department_id, allocated_budget, currency, notes, status, created_by)
