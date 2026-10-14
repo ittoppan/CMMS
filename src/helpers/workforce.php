@@ -918,6 +918,7 @@ function wf_is_working_day(PDO $pdo, string $date, ?array $cfg = null): bool {
     if (!in_array($dow, $days, true)) return false;
 
     $st = $pdo->prepare('SELECT holiday_date, is_recurring FROM holidays');
+    $st->execute();
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $h) {
         $hd = (string)$h['holiday_date'];
         $match = ((int)$h['is_recurring'] === 1)
