@@ -67,13 +67,14 @@ function failure_next_code(PDO $pdo, string $prefix, string $table, string $colu
     $column = preg_replace('/[^a-z_]/i', '', $column);
     $date = date('Ymd');
     $base = $prefix . '-' . $date . '-';
-    $st = $pdo->prepare("SELECT MAX(NULLIF(`$column`, '')) FROM `$table` WHERE `$column` LIKE ?");
-    $st->execute([$base . '%']);
-    $max = (string)$st->fetchColumn();
-    $seq = 1;
-    if ($max !== '' && strpos($max, $base) === 0) {
-        $seq = (int)substr($max, strlen($base)) + 1;
-    }
+    // Compare only the NUMERIC suffix. A lexical MAX() would order '999' above
+    // '1000' and any non-numeric suffix (manual code) would poison the sequence,
+    // both of which re-issue an existing code — a UNIQUE violation on insert.
+    $st = $pdo->prepare("SELECT MAX(CAST(SUBSTRING(`$column`, ?) AS UNSIGNED))
+                         FROM `$table` WHERE `$column` LIKE ?");
+    $st->execute([strlen($base) + 1, $base . '%']);
+    $max = $st->fetchColumn();
+    $seq = ($max === null || $max === false) ? 1 : ((int)$max + 1);
     return $base . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
 }
 
