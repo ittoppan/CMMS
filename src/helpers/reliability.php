@@ -4009,13 +4009,12 @@ function rel_snapshot_get(PDO $pdo, string $calcUid): ?array {
 function rel_study_next_code(PDO $pdo): string {
     $base = 'REL-' . date('Ymd') . '-';
     try {
-        $st = $pdo->prepare('SELECT study_code FROM reliability_studies WHERE study_code LIKE ? ORDER BY study_code DESC LIMIT 1');
-        $st->execute([$base . '%']);
-        $max = (string)$st->fetchColumn();
-        $seq = 1;
-        if ($max !== '' && str_starts_with($max, $base)) {
-            $seq = (int)substr($max, strlen($base)) + 1;
-        }
+        // เทียบเฉพาะเลขท้ายแบบตัวเลข — ORDER BY study_code DESC แบบ lexical จะเรียง
+        // '...-999' เกิน '...-1000' ทำให้ออกรหัสซ้ำ (study_code มี UNIQUE)
+        $st = $pdo->prepare('SELECT MAX(CAST(SUBSTRING(study_code, ?) AS UNSIGNED)) FROM reliability_studies WHERE study_code LIKE ?');
+        $st->execute([strlen($base) + 1, $base . '%']);
+        $max = $st->fetchColumn();
+        $seq = ($max === null || $max === false) ? 1 : ((int)$max + 1);
         return $base . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
     } catch (Throwable $e) {
         return $base . '001';

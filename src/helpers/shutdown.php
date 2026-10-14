@@ -205,11 +205,12 @@ function sd_activity(PDO $pdo, int $shutdownId, string $action, string $desc = '
 /** SD-YYYYMM-NNN, monotonic within the month. */
 function sd_next_no(PDO $pdo): string {
     $prefix = 'SD-' . date('Ym') . '-';
-    $st = $pdo->prepare('SELECT shutdown_no FROM sd_shutdowns WHERE shutdown_no LIKE ? ORDER BY shutdown_no DESC LIMIT 1');
-    $st->execute([$prefix . '%']);
-    $last = (string)$st->fetchColumn();
-    $seq = 1;
-    if ($last !== '' && preg_match('/(\d+)$/', $last, $m)) $seq = (int)$m[1] + 1;
+    // เทียบเฉพาะเลขท้ายแบบตัวเลข — ORDER BY shutdown_no DESC แบบ lexical จะเรียง
+    // '...-999' เกิน '...-1000' และ regex (\d+)$ อ่าน '1000' ได้ถูกแต่ลำดับยังเพี้ยน
+    $st = $pdo->prepare('SELECT MAX(CAST(SUBSTRING(shutdown_no, ?) AS UNSIGNED)) FROM sd_shutdowns WHERE shutdown_no LIKE ?');
+    $st->execute([strlen($prefix) + 1, $prefix . '%']);
+    $max = $st->fetchColumn();
+    $seq = ($max === null || $max === false) ? 1 : ((int)$max + 1);
     return $prefix . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
 }
 
