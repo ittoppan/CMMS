@@ -4053,7 +4053,7 @@ function rel_studies(PDO $pdo, array $opts = []): array {
         $sql = 'SELECT s.*,
                        (SELECT COUNT(*) FROM reliability_study_links l WHERE l.study_id = s.id) AS link_count,
                        (SELECT COUNT(*) FROM reliability_actions a WHERE a.study_id = s.id) AS action_count,
-                       u.display_name AS analyst_name, rv.display_name AS reviewer_name
+                       u.full_name AS analyst_name, rv.full_name AS reviewer_name
                   FROM reliability_studies s
              LEFT JOIN users u ON u.id = s.analyst_id
              LEFT JOIN users rv ON rv.id = s.reviewer_id
