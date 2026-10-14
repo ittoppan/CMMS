@@ -299,7 +299,7 @@ $createTable('document_links', "CREATE TABLE `document_links` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `document_id` INT UNSIGNED NOT NULL,
   `revision_id` INT UNSIGNED NULL COMMENT 'null = applies to the whole document',
-  `entity_type` ENUM('asset','pm','work_order','rca','bom','spare_part','engineering_change','failure_event','manual') NOT NULL,
+  `entity_type` ENUM('asset','pm','work_order','rca','bom','spare_part','engineering_change','failure_event','manual','document','revision','department') NOT NULL,
   `entity_id` INT UNSIGNED NOT NULL,
   `link_type` ENUM('governs','supersedes','implements','affects','evidenced_by','reference') NOT NULL DEFAULT 'reference',
   `note` VARCHAR(500) NULL,
@@ -313,8 +313,7 @@ $createTable('document_links', "CREATE TABLE `document_links` (
   KEY `idx_dl_rev` (`revision_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='document traceability links (no master data is ever modified)'");
 
-// ---------- 8b) repair uk_dl_link on an already-migrated DB ----------
-// revision_id NULL ไม่ถูกนับซ้ำใน UNIQUE index ของ MySQL -> link ระดับทั้งเอกสารจะซ้ำได้
+// ---------- 8b) repair uk_dl_link on an already-migrated DB ----------// revision_id NULL ไม่ถูกนับซ้ำใน UNIQUE index ของ MySQL -> link ระดับทั้งเอกสารจะซ้ำได้
 if ($hasIndex('document_links', 'uk_dl_link') && !$indexHasColumn('document_links', 'uk_dl_link', 'revision_guard')) {
     $hasRevGuard = $hasColumn('document_links', 'revision_guard');
     if (!$hasRevGuard) {
@@ -337,6 +336,16 @@ if ($hasIndex('document_links', 'uk_dl_link') && !$indexHasColumn('document_link
     $pdo->exec("ALTER TABLE `document_links` DROP INDEX `uk_dl_link`");
     $pdo->exec("ALTER TABLE `document_links` RENAME INDEX `uk_dl_link_v2` TO `uk_dl_link`");
     $log('ALTER document_links replace uk_dl_link with revision_guard based unique key'); $changed++;
+}
+
+// ---------- 8c) widen entity_type enum (document / revision / department) ----------
+// doc_entity_labels() + doc_assert_entity_exists() already support these targets,
+// but the original ENUM omitted them -> doc_link_add() crashed on insert (500).
+$dlEnum = $pdo->query("SHOW COLUMNS FROM `document_links` LIKE 'entity_type'")->fetch(PDO::FETCH_ASSOC);
+if ($dlEnum && strpos((string)$dlEnum['Type'], "'department'") === false) {
+    $pdo->exec("ALTER TABLE `document_links` MODIFY COLUMN `entity_type`
+        ENUM('asset','pm','work_order','rca','bom','spare_part','engineering_change','failure_event','manual','document','revision','department') NOT NULL");
+    $log('ALTER document_links widen entity_type enum'); $changed++;
 }
 
 // ---------- 9) document_activity ----------

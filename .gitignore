@@ -60,6 +60,10 @@ backups/
 # runtime placeholder avatars
 public/uploads/spares/placeholders/
 
+# throwaway fixtures created by test harnesses
+public/uploads/documents/harness_doc_*
+public/uploads/documents/harness_*
+
 # เอกสารฟอร์มเก่า (Excel/Word/PDF) ใน docs/EN — เก็บไว้บนดิสก์ ไม่ track ลง git
 docs/EN/*.xls*
 docs/EN/*.od?
