@@ -31,13 +31,17 @@ function cal_config(PDO $pdo): array {
         'cal_default_interval_months'    => 12,
         'cal_reference_expiry_warn_days' => 30,
         'cal_compliance_mode'            => 'all_points_pass', // all_points_pass | critical_points_only
-        'cal_require_review'             => 1,
-        'cal_require_certificate'        => 1,
-        'cal_rca_on_fail'                => 1,
-        'cal_interval_change_requires_approval' => 1,
-        'cal_allow_usage_basis'          => 0,
-        'cal_block_oo_against_expired_std' => 0,
-        'cal_data_completeness_required' => 1,
+        // Policy flags are stored as strings ('1'/'0') and read with strict
+        // string comparisons, so the defaults MUST be strings too — an int
+        // default would never match `=== '1'` and would silently disable the
+        // policy whenever the settings row is absent (fresh install).
+        'cal_require_review'             => '1',
+        'cal_require_certificate'        => '1',
+        'cal_rca_on_fail'                => '1',
+        'cal_interval_change_requires_approval' => '1',
+        'cal_allow_usage_basis'          => '0',
+        'cal_block_oo_against_expired_std' => '0',
+        'cal_data_completeness_required' => '1',
         'cal_years_validity_default'     => 2,
         'calibration_alert_days'         => 30, // เดิมของระบบ (มีทั้งสอง)
     ];
