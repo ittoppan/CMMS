@@ -211,16 +211,25 @@ function perm_allowed(PDO $pdo, int $roleId, string $module, string $action, ?in
 
     // 1) user_permissions overrides (ถ้ามีแถวสำหรับ role/user นั้น ให้เคารพเสมอ)
     try {
-        $rows = [];
-        $uq = $pdo->prepare("SELECT permission, is_granted FROM user_permissions
+        $roleRows = [];   // role-level overrides
+        $userRows = [];   // user-specific overrides (เฉพาะบุคคล ชนะบทบาท)
+        $uq = $pdo->prepare("SELECT role_id, user_id, permission, is_granted FROM user_permissions
                              WHERE module = ? AND (role_id = ? OR (user_id IS NOT NULL AND user_id = ?))");
         $uq->execute([$module, $roleId, $userId ?? 0]);
         foreach ($uq->fetchAll(PDO::FETCH_ASSOC) as $r) {
-            $rows[mb_strtolower((string)$r['permission'])] = (int)$r['is_granted'];
+            $perm = mb_strtolower((string)$r['permission']);
+            if (!empty($r['user_id']) && $userId !== null && (int)$r['user_id'] === $userId) {
+                $userRows[$perm] = (int)$r['is_granted'];
+            } else {
+                $roleRows[$perm] = (int)$r['is_granted'];
+            }
         }
         // user_id override ชนะ role_id override (หลักการ "เฉพาะบุคคล" อยู่เหนือ "บทบาท")
-        if (array_key_exists($action, $rows)) {
-            return $rows[$action] === 1;
+        if (array_key_exists($action, $userRows)) {
+            return $userRows[$action] === 1;
+        }
+        if (array_key_exists($action, $roleRows)) {
+            return $roleRows[$action] === 1;
         }
     } catch (Throwable $e) {
         error_log('[permissions] user_permissions read failed: ' . $e->getMessage());
