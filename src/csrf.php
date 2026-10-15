@@ -63,7 +63,8 @@ function csrfSubmittedToken(): string {
 function csrfCurrentHost(): string {
     $h = $_SERVER['HTTP_HOST'] ?? '';
     $h = (string)preg_replace('/:\d+$/', '', $h);
-    return strtolower(trim($h));
+    // IPv6 host ถูกห่อด้วย [] (เช่น [::1]) — ตัดออกให้เทียบกับ ::1 ได้
+    return strtolower(trim($h, '[]'));
 }
 
 /**
@@ -77,7 +78,7 @@ function csrfTrustedOrigin(string $url): bool {
     $parts = parse_url($url);
     $scheme = strtolower((string)($parts['scheme'] ?? ''));
     if (!in_array($scheme, ['http', 'https'], true)) return false;
-    $host = strtolower((string)($parts['host'] ?? ''));
+    $host = strtolower(trim((string)($parts['host'] ?? ''), '[]'));
     if ($host === '') return false;
 
     if ($host === csrfCurrentHost()) return true;
