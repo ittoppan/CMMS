@@ -38,8 +38,13 @@ function cmms_secure_session(): void {
 function cmms_session_timeout_mins(PDO $pdo): int {
     static $mins = null;
     if ($mins !== null) return $mins;
+    $mins = 60;
     try {
-        $mins = (int)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'session_timeout_mins'")->fetchColumn();
+        $raw = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'session_timeout_mins'")->fetchColumn();
+        // แถวหาย/ค่าว่าง ต้อง fallback เป็น 60 (fail-closed) ไม่ใช่ 0 = ปิด timeout
+        if ($raw !== false && $raw !== null && trim((string)$raw) !== '') {
+            $mins = (int)$raw;
+        }
     } catch (Throwable $e) {
         $mins = 60;
     }
