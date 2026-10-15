@@ -573,7 +573,8 @@ class NotificationCenterService
         $reference = $jsonOr($d['reference'] ?? null, '[]');
         $roles     = is_array($d['recipients_role'] ?? null) ? json_encode(array_values(array_map('intval', $d['recipients_role'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['recipients_role'] ?? null, '[]');
         $uids      = is_array($d['recipients_user'] ?? null) ? json_encode(array_values(array_map('intval', $d['recipients_user'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['recipients_user'] ?? null, '[]');
-        $chs       = is_array($d['channels'] ?? ['app']) ? json_encode(array_values(array_intersect(self::CHANNELS, $d['channels'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['channels'] ?? null, '["app"]');
+        $chsIn     = $d['channels'] ?? null;
+        $chs       = is_array($chsIn) ? json_encode(array_values(array_intersect(self::CHANNELS, $chsIn)), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($chsIn, '["app"]');
         $fields = [
             'name = ?', 'module = ?', 'event = ?', 'priority = ?', '`reference` = ?',
             'recipients_role = ?', 'recipients_user = ?', 'channels = ?',
