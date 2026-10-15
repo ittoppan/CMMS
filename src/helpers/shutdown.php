@@ -908,7 +908,12 @@ function sd_critical_path(PDO $pdo, int $shutdownId): array {
     // BACKWARD
     $ls = []; $lf = [];
     foreach (array_reverse($topo) as $id) {
-        $bound = isset($succs[$id]) ? null : $project;
+        // A sink node's late finish is the project duration, so its late start is
+        // project - duration. Seeding $bound with $project instead made LS = project
+        // (LF = project + duration), which inflated every terminal float and left
+        // critical_path permanently empty. Leave the bound null and let the
+        // candidate loop refine it; the fallback below applies project - duration.
+        $bound = null;
         foreach ($succs[$id] ?? [] as $d) {
             $su = (int)$d['successor_scope_id'];
             if (!isset($ls[$su])) continue;
@@ -2051,14 +2056,21 @@ function sd_cost_summary(PDO $pdo, int $shutdownId): array {
     $comp = cost_comp_sql($pdo, 'r');
 
     $in = implode(',', array_fill(0, count($repairIds), '?'));
-    $q = $pdo->prepare("SELECT r.id, r.work_order_no, r.asset_id, r.status,
+    // cost_comp_sql() fragments are written against the Phase 26 cost read-model
+    // (v_maintenance_cost), where parts_cost/parts_lines/cost_parts_snapshot/
+    // cost_labor_recorded/cost_outsource_recorded exist. Reading them from the base
+    // `repair` table raised "Unknown column" and broke the whole summary, so the join
+    // to repair is only for the estimate the view does not carry.
+    $q = $pdo->prepare("SELECT r.repair_id AS id, r.work_order_no, r.asset_id, r.status,
                                 ({$comp['parts']}) AS parts_cost,
                                 ({$comp['labor']}) AS labor_cost,
                                 ({$comp['external']}) AS outsource_cost,
                                 ({$comp['total']}) AS total_cost,
                                 COALESCE(r.repair_time_minutes, 0) AS actual_minutes,
-                                COALESCE(r.estimated_duration_minutes, 0) AS estimated_minutes
-                         FROM repair r WHERE r.id IN ($in)");
+                                COALESCE(rr.estimated_duration_minutes, 0) AS estimated_minutes
+                         FROM v_maintenance_cost r
+                         JOIN repair rr ON rr.id = r.repair_id
+                         WHERE r.repair_id IN ($in)");
     $q->execute($repairIds);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
 
