@@ -283,6 +283,8 @@ function ar_criticality_assess(PDO $pdo, int $assetId, array $in, int $uid): arr
     $autoApply = !empty($cfg['ar_criticality_auto_apply']);
     $apply = $autoApply ? 1 : (!empty($in['apply']) ? 1 : 0);
     $note = mb_substr((string)($in['note'] ?? ''), 0, 500);
+    $method = (string)($in['method'] ?? 'weighted');
+    if (!in_array($method, ['weighted', 'scored', 'manual'], true)) $method = 'weighted';
     $nextReview = trim((string)($in['next_review_date'] ?? ''));
     if (!$nextReview) {
         $nextReview = date('Y-m-d', time() + (int)$cfg['ar_criticality_review_days'] * 86400);
@@ -300,7 +302,7 @@ function ar_criticality_assess(PDO $pdo, int $assetId, array $in, int $uid): arr
             ->execute([
                 $assetId, $version, $calc['level'], $calc['score'],
                 json_encode($factors, JSON_UNESCAPED_UNICODE),
-                in_array($in['method'] ?? 'weighted', ['weighted', 'scored', 'manual'], true) ? $in['method'] : 'weighted',
+                $method,
                 $note, $uid, $nextReview,
             ]);
         if ($apply) {
@@ -667,8 +669,9 @@ function ar_component_add(PDO $pdo, int $assetId, array $in, int $uid): array {
             !empty($in['expected_life_months']) ? (int)$in['expected_life_months'] : null,
             mb_substr((string)($in['notes'] ?? ''), 0, 1000) ?: null, $uid,
         ]);
+    $newId = (int)$pdo->lastInsertId();
     audit_log($pdo, 'ASSET_COMPONENT_ADD', 'asset', $assetId, "เพิ่ม component $code ($name)");
-    return ['success' => true, 'id' => (int)$pdo->lastInsertId()];
+    return ['success' => true, 'id' => $newId];
 }
 
 function ar_component_delete(PDO $pdo, int $componentId, int $uid): void {
@@ -770,6 +773,8 @@ function ar_overhaul_create(PDO $pdo, int $assetId, array $in, int $uid): array 
     if ($title === '') { api_fail(400, 'REQUIRED', 'ระบุหัวข้อการยกเครื่อง'); }
     $code = trim((string)($in['overhaul_code'] ?? ''));
     if ($code === '') { $code = 'OH-' . str_pad((string)mt_rand(0, 99999), 5, '0', STR_PAD_LEFT); }
+    $status = (string)($in['status'] ?? 'planned');
+    if (!in_array($status, ['planned', 'in_progress', 'completed', 'cancelled', 'on_hold'], true)) $status = 'planned';
     try {
         $pdo->prepare('INSERT INTO asset_overhauls (asset_id, overhaul_code, title, reason, scope, planned_start, planned_end, status, wo_id, created_by)
                 VALUES (?,?,?,?,?,?,?,?,?,?)')
@@ -779,12 +784,13 @@ function ar_overhaul_create(PDO $pdo, int $assetId, array $in, int $uid): array 
                 (string)($in['scope'] ?? '') !== '' ? $in['scope'] : null,
                 (string)($in['planned_start'] ?? '') !== '' ? $in['planned_start'] : null,
                 (string)($in['planned_end'] ?? '') !== '' ? $in['planned_end'] : null,
-                in_array($in['status'] ?? 'planned', ['planned', 'in_progress', 'completed', 'cancelled', 'on_hold'], true) ? $in['status'] : 'planned',
+                $status,
                 !empty($in['wo_id']) ? (int)$in['wo_id'] : null,
                 $uid,
             ]);
+        $newId = (int)$pdo->lastInsertId();
         audit_log($pdo, 'ASSET_OVERHAUL_CREATE', 'asset', $assetId, "สร้างแผนยกเครื่อง $code: $title");
-        return ['success' => true, 'id' => (int)$pdo->lastInsertId(), 'overhaul_code' => $code];
+        return ['success' => true, 'id' => $newId, 'overhaul_code' => $code];
     } catch (Throwable $e) {
         if ($e instanceof PDOException && str_contains($e->getMessage(), 'uk_oh_code')) {
             api_fail(409, 'DUPLICATE', 'รหัสยกเครื่องซ้ำ — ลองใหม่');
@@ -857,8 +863,9 @@ function ar_measurement_add(PDO $pdo, int $assetId, array $in, int $uid): array 
             (string)($in['measured_at'] ?? date('Y-m-d H:i:s')),
             $uid, (string)($in['notes'] ?? '') !== '' ? $in['notes'] : null,
         ]);
+    $newId = (int)$pdo->lastInsertId();
     audit_log($pdo, 'ASSET_MEASUREMENT_ADD', 'asset', $assetId, "บันทึกค่าวัด $param = " . $in['value_numeric']);
-    return ['success' => true, 'id' => (int)$pdo->lastInsertId()];
+    return ['success' => true, 'id' => $newId];
 }
 
 function ar_measurement_delete(PDO $pdo, int $id, int $uid): void {
