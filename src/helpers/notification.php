@@ -186,6 +186,8 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
 
     $url = 'https://api.line.me/v2/bot/message/push';
 
+    $defaultTapUrl = !empty($targetUrl) ? $targetUrl : publicBaseUrl();
+
     // Normalize รูป: รองรับ 1) items (รูป+ชื่อทีละรายการ เช่น ใบเบิกอะไหล่) 2) before/after 3) array ธรรมดา
     $beforeUrls = []; $afterUrls = []; $flatUrls = []; $spareItemRows = [];
     if (isset($photos['items']) && is_array($photos['items'])) {
@@ -223,8 +225,6 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     } else {
         $flatUrls = array_values(array_filter(array_slice((array)$photos, 0, 4)));
     }
-
-    $defaultTapUrl = !empty($targetUrl) ? $targetUrl : publicBaseUrl();
 
     // สร้างบล็อกรูปภายใน Flex body (เต็มความกว้าง พร้อม label สีน้ำเงิน)
     $photoBoxes = [];
