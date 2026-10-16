@@ -205,6 +205,8 @@ check('mark_implemented -> verification', $ecr['status'] === 'verification');
 
 $ver = ecr_record_verification($pdo, $eid, ['result' => 'pass', 'verification_method' => 'functional_test', 'notes' => 'ทำงานปกติ'], $approver);
 check('verification pass recorded round 1', $ver['round'] === 1 && $ver['result'] === 'pass' && $ver['status'] === 'verification', json_encode($ver));
+$verRowId = (int)$pdo->query("SELECT id FROM engineering_change_verifications WHERE ecr_id=$eid AND round=1")->fetchColumn();
+check('verification return id matches verification row (not audit/log row)', (int)$ver['id'] === $verRowId && $verRowId > 0, "ret=" . $ver['id'] . " row=$verRowId");
 $ecr = ecr_get($pdo, $eid);
 $cb = ecr_close_blockers($pdo, $ecr);
 check('close blockers empty after pass', $cb === [], json_encode($cb));

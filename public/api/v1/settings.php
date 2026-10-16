@@ -133,8 +133,9 @@ try {
                 $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
                 $stmt = $pdo->prepare("INSERT INTO settings (" . implode(',', $cols) . ") VALUES ($placeholders)");
                 $stmt->execute($vals);
+                $newSettingId = (int)$pdo->lastInsertId();
                 audit_log($pdo, 'SETTING_ADD', 'settings', (string)($data['setting_key'] ?? ''), 'เพิ่มการตั้งค่าระบบใหม่', null, ['key' => $data['setting_key'] ?? ''], 'info');
-                echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+                echo json_encode(['success' => true, 'id' => $newSettingId]);
             }
             break;
 

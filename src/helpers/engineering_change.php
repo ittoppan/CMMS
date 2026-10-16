@@ -578,6 +578,7 @@ function ecr_record_verification(PDO $pdo, int $id, array $in, int $uid): array 
         (ecr_id, round, result, verification_method, notes, failure_reason, follow_up_required, verified_by)
         VALUES (?,?,?,?,?,?,?,?)');
     $st->execute([$id, $round, $result, $method, $notes, $failReason ?: null, $result === 'pass' ? 0 : 1, $uid]);
+    $verificationId = (int)$pdo->lastInsertId();
 
     $followUp = $result !== 'pass';
     $pdo->prepare('UPDATE engineering_changes SET verification_result = ?, verified_at = NOW(), verified_by = ?,
@@ -595,7 +596,7 @@ function ecr_record_verification(PDO $pdo, int $id, array $in, int $uid): array 
     ], ['users' => array_values(array_filter([(int)($ecr['requested_by'] ?? 0)])),
         'ref_type' => 'engineering_change', 'ref_id' => $id, 'source_user_id' => $uid,
         'priority' => $result === 'fail' ? 'critical' : 'high']);
-    return ['id' => (int)$pdo->lastInsertId(), 'ecr_id' => $id, 'round' => $round, 'result' => $result,
+    return ['id' => $verificationId, 'ecr_id' => $id, 'round' => $round, 'result' => $result,
         'status' => $followUp ? 'implementation' : 'verification'];
 }
 
