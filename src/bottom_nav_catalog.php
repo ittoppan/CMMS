@@ -32,6 +32,7 @@ return [
         'admin'      => ['dashboard', 'repair/request', 'pm_am/calendar', 'asset_registry', 'settings'],
         'manager'    => ['dashboard', 'pm_am/checksheet', 'pm_am/calendar', 'repair/my_tasks', 'asset_registry'],
         'technician' => ['dashboard', 'repair/my_tasks', 'pm_am/checksheet', 'repair/request', 'asset_registry'],
+        'operate'    => ['dashboard', 'repair/my_tasks', 'pm_am/checksheet', 'repair/request', 'asset_registry'],
         'operator'   => ['dashboard', 'repair/request', 'repair/tracking', 'qr-sheet', 'notifications'],
         'viewer'     => ['dashboard', 'analytics', 'notifications', 'reports/export_excel', 'reports/monthly_pdf'],
     ],

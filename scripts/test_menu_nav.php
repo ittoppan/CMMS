@@ -129,6 +129,8 @@ check('roleId 0 → preset', resolveBottomNavKeys($pdo, 0, 'technician') === $bn
 check('slug case-insensitive', resolveBottomNavKeys(null, 5, 'ADMIN') === $bnCat['defaults']['admin']);
 check('unknown slug → generic fallback', resolveBottomNavKeys(null, 9, 'nobody') === $GENERIC);
 check('technician preset defined', $bnCat['defaults']['technician'] === ['dashboard', 'repair/my_tasks', 'pm_am/checksheet', 'repair/request', 'asset_registry']);
+check('operate preset defined & equals technician', ($bnCat['defaults']['operate'] ?? null) === $bnCat['defaults']['technician']);
+check('role 3 (Operate) → operate preset', resolveBottomNavKeys($pdo, 3, 'Operate') === $bnCat['defaults']['operate']);
 
 /* ================================================================= 5. resolveBottomNavKeys — DB */
 echo "\n[5] resolveBottomNavKeys() — bottom_nav_config\n";
@@ -151,7 +153,7 @@ echo "\n[6] resolveBottomNavKeys() — DB error fallback\n";
 $pdo->exec('RENAME TABLE bottom_nav_config TO bottom_nav_config_bak');
 $res = null;
 try { $res = resolveBottomNavKeys($pdo, 3, 'operate'); } catch (Throwable $e) { $res = 'THREW:' . $e->getMessage(); }
-check('missing table → generic fallback (no throw)', $res === $GENERIC, is_array($res) ? json_encode($res) : (string)$res);
+check('missing table → slug preset fallback (no throw)', $res === $bnCat['defaults']['operate'], is_array($res) ? json_encode($res) : (string)$res);
 $pdo->exec('RENAME TABLE bottom_nav_config_bak TO bottom_nav_config');
 
 /* ================================================================= summary */
