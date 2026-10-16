@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { qrDarkColor } from "@/lib/qr-color";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
@@ -47,6 +48,7 @@ export default function QrSheetPage() {
     let cancelled = false;
     (async () => {
       const map: Record<string, string> = {};
+      const dark = qrDarkColor();
       for (const m of machines) {
         try {
           // ใช้ payload มาตรฐาน CMMS-A-<token> — resolver รองรับทั้งในแอปและ LINE
@@ -54,7 +56,7 @@ export default function QrSheetPage() {
           map[m.code] = await QRCode.toDataURL(payload, {
             width: 300,
             margin: 1,
-            color: { dark: "var(--cmms-primary)", light: "#FFFFFF" },
+            color: { dark, light: "#FFFFFF" },
           });
         } catch {
           /* ข้ามเครื่องที่ generate ไม่ได้ */

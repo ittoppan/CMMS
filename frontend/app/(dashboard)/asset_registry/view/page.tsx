@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
+import { qrDarkColor } from "@/lib/qr-color";
 import { usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { Grid, VStack, HStack } from "@/components/layout";
@@ -429,7 +430,7 @@ export default function AssetRegistryViewPage() {
         width: 280,
         margin: 1,
         errorCorrectionLevel: "M",
-        color: { dark: "var(--cmms-primary, #0068B5)", light: "#FFFFFF" },
+        color: { dark: qrDarkColor(), light: "#FFFFFF" },
       });
       setQrUrl(dataUrl);
       setQrOpen(true);
