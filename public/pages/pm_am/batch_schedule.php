@@ -28,9 +28,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
         $includeAnnual = isset($_POST['freq_annual']);
 
         $stmt = $pdo->prepare("
-            INSERT INTO pm_am (title, description, asset_id, frequency, scheduled_date, assigned_to, status, checklist)
+            INSERT INTO pm_am (title, description, asset_id, frequency_type, due_date, assigned_to, status, checklist)
             VALUES (?, ?, ?, ?, ?, ?, 'pending', '[]')
         ");
+        $linkTemplate = $pdo->prepare("INSERT INTO pm_am_checklist_results (pm_am_id, template_id) VALUES (?, ?)");
+
+        // สร้าง PM 1 รายการ + ผูก template ที่เลือกไว้ (ถ้ามี) เข้ากับแผน
+        $createPm = function (array $row) use ($pdo, $stmt, $linkTemplate, $templateId, &$countCreated) {
+            $stmt->execute($row);
+            $pmId = (int)$pdo->lastInsertId();
+            if ($pmId > 0 && $templateId > 0) {
+                $linkTemplate->execute([$pmId, $templateId]);
+            }
+            $countCreated++;
+        };
 
         $targetAssets = ($assetId === 0) ? $assets : array_filter($assets, fn($a) => $a['id'] === $assetId);
 
@@ -43,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
                     // Sample every Monday of the month for manageable daily PMs or all days
                     for ($d = 1; $d <= $daysInMonth; $d += 7) {
                         $dateStr = sprintf('%04d-%02d-%02d', $year, $m, $d);
-                        $stmt->execute([
+                        $createPm([
                             "PM ประจำวัน (Daily): {$asset['name']}",
                             "ตรวจเช็คการหล่อลื่น ระดับน้ำมัน และระบบลมประจำวัน (Form F-EN-07)",
                             $asset['id'],
@@ -51,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
                             $dateStr,
                             $assignedTo
                         ]);
-                        $countCreated++;
                     }
                 }
             }
@@ -60,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
             if ($includeMonthly) {
                 for ($m = 1; $m <= 12; $m++) {
                     $dateStr = sprintf('%04d-%02d-01', $year, $m);
-                    $stmt->execute([
+                    $createPm([
                         "PM ประจำเดือน {$m}/{$year}: {$asset['name']}",
                         "การตรวจเช็คและเปลี่ยนถ่ายน้ำมันหล่อลื่นประจำเดือน (Form F-EN-06)",
                         $asset['id'],
@@ -68,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
                         $dateStr,
                         $assignedTo
                     ]);
-                    $countCreated++;
                 }
             }
 
@@ -76,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
             if ($include6Month) {
                 foreach ([6, 12] as $m) {
                     $dateStr = sprintf('%04d-%02d-15', $year, $m);
-                    $stmt->execute([
+                    $createPm([
                         "PM ครอบคลุม 6 เดือน: {$asset['name']}",
                         "การตรวจเช็คใหญ่ครึ่งปี ตู้คอนโทรลและระบบไฟฟ้า (Form F-EN-14)",
                         $asset['id'],
@@ -84,22 +93,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['generate_batch'])) {
                         $dateStr,
                         $assignedTo
                     ]);
-                    $countCreated++;
                 }
             }
 
             // 4. Annual Check (1 time per year: December)
             if ($includeAnnual) {
                 $dateStr = sprintf('%04d-12-25', $year);
-                $stmt->execute([
+                $createPm([
                     "🏆 PM บำรุงรักษาใหญ่ประจำปี {$year}: {$asset['name']}",
                     "การตรวจเช็คและ Overhaul ใหญ่ประจำปี (Form F-EN-15)",
                     $asset['id'],
-                    'annual',
+                    'yearly',
                     $dateStr,
                     $assignedTo
                 ]);
-                $countCreated++;
             }
 
         }

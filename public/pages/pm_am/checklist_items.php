@@ -5,6 +5,16 @@ $pdo = getDb();
 
 $templateId = (int)($_GET['template_id'] ?? 1);
 
+// ประเภทผลการตรวจที่ถูกต้องตรงกับ ENUM ของคอลัมน์ checklist_template_items.item_type
+$itemTypeLabels = [
+    'yes_no'      => 'Yes / No (ใช่–ไม่ใช่)',
+    'pass_fail'   => 'Pass / Fail (ผ่าน–ไม่ผ่าน)',
+    'text'        => 'Text (ข้อความ)',
+    'number'      => 'Number (ตัวเลข)',
+    'measurement' => 'Measurement (ค่าวัด + หน่วย)',
+    'dropdown'    => 'Dropdown (ตัวเลือก)',
+];
+
 // Fetch Template Info
 $stmt = $pdo->prepare("SELECT * FROM checklist_templates WHERE id = ?");
 $stmt->execute([$templateId]);
@@ -19,21 +29,56 @@ if (!$template) {
 $msg = '';
 $error = '';
 
+// Persist Drag & Drop Reordering (AJAX — ส่งผ่าน X-CSRF-Token)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'reorder') {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        $order = $_POST['order'] ?? [];
+        if (!is_array($order)) $order = [];
+        $upd = $pdo->prepare("UPDATE checklist_template_items SET item_order = ? WHERE id = ? AND template_id = ?");
+        $pos = 0;
+        foreach ($order as $itemId) {
+            $upd->execute([$pos++, (int)$itemId, $templateId]);
+        }
+        echo json_encode(['status' => 'success']);
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
 // Handle Add New Item
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_item'])) {
     try {
-        $maxOrder = (int)$pdo->query("SELECT MAX(item_order) FROM checklist_template_items WHERE template_id = $templateId")->fetchColumn();
-        $stmt = $pdo->prepare("INSERT INTO checklist_template_items (template_id, category, item_name, method, standard_criteria, input_type, min_value, max_value, item_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $description = trim($_POST['description'] ?? '');
+        if ($description === '') {
+            throw new Exception('กรุณาระบุรายการที่ต้องตรวจ');
+        }
+        $itemType = array_key_exists($_POST['item_type'] ?? '', $itemTypeLabels) ? $_POST['item_type'] : 'yes_no';
+        $maxOrder = (int)$pdo->query("SELECT IFNULL(MAX(item_order), 0) FROM checklist_template_items WHERE template_id = " . $templateId)->fetchColumn();
+
+        // ตัวเลข/ค่าพิกัด: ว่างได้ แต่ถ้ากรอกต้องเป็นตัวเลขจริง
+        $num = function ($v) {
+            $v = is_string($v) ? trim($v) : $v;
+            return ($v !== '' && $v !== null && is_numeric($v)) ? $v : null;
+        };
+        $str = function ($v) {
+            $v = is_string($v) ? trim($v) : $v;
+            return ($v !== '') ? $v : null;
+        };
+
+        $stmt = $pdo->prepare("INSERT INTO checklist_template_items (template_id, item_order, item_type, description, expected_value, tolerance_min, tolerance_max, unit, is_required, photo_required) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $templateId,
-            $_POST['category'],
-            $_POST['item_name'],
-            $_POST['method'],
-            $_POST['standard_criteria'],
-            $_POST['input_type'] ?? 'pass_fail',
-            ($_POST['min_value'] ?? '') === '' ? null : $_POST['min_value'],
-            ($_POST['max_value'] ?? '') === '' ? null : $_POST['max_value'],
-            $maxOrder + 1
+            $maxOrder + 1,
+            $itemType,
+            $description,
+            $str($_POST['expected_value'] ?? ''),
+            $num($_POST['tolerance_min'] ?? ''),
+            $num($_POST['tolerance_max'] ?? ''),
+            $str($_POST['unit'] ?? ''),
+            isset($_POST['is_required']) ? 1 : 0,
+            isset($_POST['photo_required']) ? 1 : 0,
         ]);
         $msg = 'เพิ่มรายการตรวจเช็คเรียบร้อยแล้ว';
     } catch (Exception $e) {
@@ -105,7 +150,17 @@ renderHeader();
 
             <!-- Drag & Drop Sortable Container -->
             <div id="sortable-checklist" class="space-y-3">
-                <?php foreach ($items as $idx => $it): ?>
+                <?php foreach ($items as $idx => $it):
+                    $orderMinMax = [];
+                    if ($it['tolerance_min'] !== null || $it['tolerance_max'] !== null) {
+                        $orderMinMax[] = 'พิกัด: ' . ($it['tolerance_min'] ?? '-') . ' ถึง ' . ($it['tolerance_max'] ?? '-') . ($it['unit'] ? ' ' . $it['unit'] : '');
+                    } elseif (!empty($it['unit'])) {
+                        $orderMinMax[] = 'หน่วย: ' . $it['unit'];
+                    }
+                    if (!empty($it['expected_value'])) {
+                        $orderMinMax[] = 'เกณฑ์: ' . $it['expected_value'];
+                    }
+                ?>
                 <div draggable="true" data-id="<?= $it['id'] ?>" class="checklist-card cmms-card p-4 hover:border-indigo-400 transition-all flex items-center justify-between gap-4 cursor-grab active:cursor-grabbing">
                     
                     <div class="flex items-center gap-3">
@@ -115,19 +170,23 @@ renderHeader();
                             <?= $idx + 1 ?>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <span class="badge bg-muted text-secondary text-[10px] font-bold"><?= htmlspecialchars($it['category'] ?? 'ทั่วไป') ?></span>
-                                <h4 class="font-bold text-primary text-sm"><?= htmlspecialchars($it['item_name']) ?></h4>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="badge bg-purple-50 text-purple-700 text-[10px] font-mono font-bold"><?= htmlspecialchars($it['item_type']) ?></span>
+                                <h4 class="font-bold text-primary text-sm"><?= htmlspecialchars($it['description']) ?></h4>
+                                <?php if ($it['is_required']): ?>
+                                <span class="badge bg-rose-50 text-rose-600 text-[10px] font-bold">จำเป็น</span>
+                                <?php endif; ?>
+                                <?php if ($it['photo_required']): ?>
+                                <span class="badge bg-amber-50 text-amber-700 text-[10px] font-bold">📷 ต้องมีรูป</span>
+                                <?php endif; ?>
                             </div>
-                            <div class="text-xs text-muted mt-0.5">
-                                วิธีตรวจ: <span class="text-primary font-medium"><?= htmlspecialchars($it['method'] ?? '-') ?></span> | 
-                                เกณฑ์: <strong class="text-indigo-700"><?= htmlspecialchars($it['standard_criteria'] ?? 'ปกติ') ?></strong>
-                            </div>
+                            <?php if ($orderMinMax): ?>
+                            <div class="text-xs text-muted mt-0.5"><?= htmlspecialchars(implode(' | ', $orderMinMax)) ?></div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <span class="badge bg-purple-50 text-purple-700 text-xs font-mono font-bold"><?= htmlspecialchars($it['input_type'] ?? 'pass_fail') ?></span>
                         <a href="checklist_items.php?template_id=<?= $templateId ?>&delete_item=<?= $it['id'] ?>" onclick="return confirm('ลบรายการนี้ใช่หรือไม่?')" class="text-rose-600 font-bold hover:underline text-xs p-1">
                             🗑️
                         </a>
@@ -166,16 +225,34 @@ renderHeader();
 
                     <!-- Simulator Items List -->
                     <div class="space-y-3">
-                        <?php foreach ($items as $idx => $it): ?>
+                        <?php foreach ($items as $idx => $it):
+                            $type = $it['item_type'] ?: 'yes_no';
+                            $opts = [];
+                            if (!empty($it['options'])) {
+                                $decoded = json_decode((string)$it['options'], true);
+                                if (is_array($decoded)) $opts = $decoded;
+                            }
+                        ?>
                         <div class="cmms-card p-3 space-y-2">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-primary"><?= $idx + 1 ?>. <?= htmlspecialchars($it['item_name']) ?></span>
-                                <span class="text-[10px] text-muted font-bold"><?= htmlspecialchars($it['category'] ?? 'General') ?></span>
+                                <span class="font-bold text-primary"><?= $idx + 1 ?>. <?= htmlspecialchars($it['description']) ?></span>
+                                <span class="text-[10px] text-muted font-bold font-mono"><?= htmlspecialchars($type) ?></span>
                             </div>
-                            <div class="text-[11px] text-muted">เกณฑ์: <strong><?= htmlspecialchars($it['standard_criteria'] ?? 'ปกติ') ?></strong></div>
+                            <?php if (!empty($it['expected_value'])): ?>
+                            <div class="text-[11px] text-muted">เกณฑ์: <strong><?= htmlspecialchars($it['expected_value']) ?></strong><?= $it['unit'] ? ' (' . htmlspecialchars($it['unit']) . ')' : '' ?></div>
+                            <?php endif; ?>
                             
                             <!-- Interactive Touch Inputs -->
-                            <?php if (($it['input_type'] ?? 'pass_fail') === 'pass_fail'): ?>
+                            <?php if ($type === 'yes_no'): ?>
+                            <div class="flex gap-2 pt-1">
+                                <label class="cmms-banner success flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-emerald-100">
+                                    <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden" checked> ✔ ใช่
+                                </label>
+                                <label class="cmms-banner error flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-rose-100">
+                                    <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden"> ✖ ไม่ใช่
+                                </label>
+                            </div>
+                            <?php elseif ($type === 'pass_fail'): ?>
                             <div class="flex gap-2 pt-1">
                                 <label class="cmms-banner success flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-emerald-100">
                                     <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden" checked> ✔ PASS (ปกติ)
@@ -183,6 +260,19 @@ renderHeader();
                                 <label class="cmms-banner error flex-1 py-1.5 border rounded font-bold text-center text-xs cursor-pointer hover:bg-rose-100">
                                     <input type="radio" name="sim_<?= $it['id'] ?>" class="hidden"> ❌ FAIL (ผิดปกติ)
                                 </label>
+                            </div>
+                            <?php elseif ($type === 'dropdown' && $opts): ?>
+                            <div class="pt-1">
+                                <select class="w-full p-2 bg-subtle border border-line rounded text-xs">
+                                    <?php foreach ($opts as $opt): ?>
+                                    <option><?= htmlspecialchars(is_array($opt) ? ($opt['label'] ?? $opt['value'] ?? json_encode($opt)) : (string)$opt) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <?php elseif ($type === 'number' || $type === 'measurement'): ?>
+                            <div class="pt-1 flex items-center gap-2">
+                                <input type="number" step="any" placeholder="กรอกค่าที่วัดได้จริง..." class="w-full p-2 bg-subtle border border-line rounded text-xs">
+                                <?php if (!empty($it['unit'])): ?><span class="text-muted text-[11px] font-bold whitespace-nowrap"><?= htmlspecialchars($it['unit']) ?></span><?php endif; ?>
                             </div>
                             <?php else: ?>
                             <div class="pt-1">
@@ -211,29 +301,44 @@ renderHeader();
         <h3 class="font-bold text-primary text-lg border-b pb-2">➕ เพิ่มรายการตรวจเช็คใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="add_item" value="1">
+            <?= csrfField() ?>
             <div>
-                <label class="font-bold text-secondary block mb-1">หมวดการตรวจเช็ค (Category)</label>
-                <input type="text" name="category" required placeholder="เช่น การหล่อลื่น, ระบบไฟฟ้า, ระบบลม" class="input input-bordered w-full">
+                <label class="font-bold text-secondary block mb-1">รายการที่ต้องตรวจ (Check Item) <span class="text-rose-600">*</span></label>
+                <textarea name="description" required rows="2" placeholder="เช่น ตรวจสอบระดับน้ำมันหล่อลื่นในเกียร์" class="input input-bordered w-full"></textarea>
             </div>
             <div>
-                <label class="font-bold text-secondary block mb-1">รายการที่ต้องตรวจ (Check Item)</label>
-                <input type="text" name="item_name" required placeholder="เช่น ตรวจสอบระดับน้ำมันหล่อลื่นในเกียร์" class="input input-bordered w-full">
-            </div>
-            <div>
-                <label class="font-bold text-secondary block mb-1">วิธีการตรวจเช็ค (Inspection Method)</label>
-                <input type="text" name="method" placeholder="เช่น สายตาดูช่องระดับน้ำมัน (Sight Glass)" class="input input-bordered w-full">
-            </div>
-            <div>
-                <label class="font-bold text-secondary block mb-1">เกณฑ์มาตรฐาน (Standard Criteria)</label>
-                <input type="text" name="standard_criteria" placeholder="เช่น อยู่ระหว่างขีด Min-Max หรือ 5.5 - 6.5 Bar" class="input input-bordered w-full">
-            </div>
-            <div>
-                <label class="font-bold text-secondary block mb-1">ประเภทการกรอกผลการตรวจ</label>
-                <select name="input_type" class="input input-bordered w-full">
-                    <option value="pass_fail">Pass / Fail (ปุ่มกด ปกติ / ผิดปกติ)</option>
-                    <option value="numeric">Numerical Value (ช่องกรอกตัวเลขค่าที่วัดได้จริง)</option>
-                    <option value="text">Text Remark (ช่องระบุข้อความเพิ่มเติม)</option>
+                <label class="font-bold text-secondary block mb-1">ประเภทการกรอกผลการตรวจ (Item Type)</label>
+                <select name="item_type" class="input input-bordered w-full">
+                    <?php foreach ($itemTypeLabels as $val => $label): ?>
+                    <option value="<?= $val ?>" <?= $val === 'pass_fail' ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                    <?php endforeach; ?>
                 </select>
+            </div>
+            <div>
+                <label class="font-bold text-secondary block mb-1">เกณฑ์มาตรฐาน (Expected Value)</label>
+                <input type="text" name="expected_value" placeholder="เช่น อยู่ระหว่างขีด Min-Max หรือ 5.5 - 6.5 Bar" class="input input-bordered w-full">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="font-bold text-secondary block mb-1">ค่าต่ำสุด</label>
+                    <input type="number" step="any" name="tolerance_min" placeholder="Min" class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label class="font-bold text-secondary block mb-1">ค่าสูงสุด</label>
+                    <input type="number" step="any" name="tolerance_max" placeholder="Max" class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label class="font-bold text-secondary block mb-1">หน่วย</label>
+                    <input type="text" name="unit" placeholder="เช่น Bar, °C" class="input input-bordered w-full">
+                </div>
+            </div>
+            <div class="flex items-center gap-4 pt-1">
+                <label class="flex items-center gap-2 font-bold text-secondary">
+                    <input type="checkbox" name="is_required" value="1" checked class="w-4 h-4 text-indigo-600"> ต้องตรวจ (Required)
+                </label>
+                <label class="flex items-center gap-2 font-bold text-secondary">
+                    <input type="checkbox" name="photo_required" value="1" class="w-4 h-4 text-indigo-600"> ต้องแนบรูป (Photo)
+                </label>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
@@ -244,10 +349,11 @@ renderHeader();
     </div>
 </div>
 
-<!-- Touch & Mouse Drag & Drop Reordering Script -->
+<!-- Touch & Mouse Drag & Drop Reordering Script (persists item_order) -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('sortable-checklist');
+    if (!container) return;
     let draggedItem = null;
 
     container.addEventListener('dragstart', (e) => {
@@ -261,7 +367,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (draggedItem) {
             e.target.style.opacity = '1';
             draggedItem = null;
-            showToast('success', 'ปรับลำดับรายการเช็คชีทเรียบร้อยแล้ว!');
+            renumberItems();
+            persistOrder();
         }
     });
 
@@ -278,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.checklist-card:not(.active)')];
+        const draggableElements = [...container.querySelectorAll('.checklist-card')];
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
@@ -288,6 +395,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 return closest;
             }
         }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // อัปเดตเลขลำดับบนการ์ดหลังลากสลับตำแหน่ง
+    function renumberItems() {
+        [...container.querySelectorAll('.checklist-card')].forEach((el, i) => {
+            const num = el.querySelector('.cmms-banner.info');
+            if (num) num.textContent = i + 1;
+        });
+    }
+
+    // บันทึกลำดับใหม่ลงฐานข้อมูล (checklist_template_items.item_order)
+    function persistOrder() {
+        const ids = [...container.querySelectorAll('.checklist-card')].map(el => el.dataset.id).filter(Boolean);
+        const token = document.querySelector('input[name="_csrf"]');
+        const params = new URLSearchParams();
+        params.append('action', 'reorder');
+        ids.forEach(id => params.append('order[]', id));
+
+        fetch(window.location.pathname + window.location.search, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-CSRF-Token': token ? token.value : ''
+            },
+            body: params.toString()
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d && d.status === 'success') {
+                showToast('success', 'บันทึกลำดับรายการเช็คชีทเรียบร้อยแล้ว!');
+            } else {
+                showToast('error', (d && d.message) ? d.message : 'บันทึกลำดับไม่สำเร็จ');
+            }
+        })
+        .catch(() => showToast('error', 'บันทึกลำดับไม่สำเร็จ กรุณาลองใหม่'));
     }
 });
 </script>

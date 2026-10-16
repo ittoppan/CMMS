@@ -5,11 +5,21 @@ $pdo = getDb();
 $msg = '';
 $error = '';
 
+// หมวดหมู่ที่ถูกต้องตรงกับ ENUM ของคอลัมน์ checklist_templates.category
+$categoryLabels = [
+    'pm_am'       => 'PM/AM (งานบำรุงรักษา)',
+    'calibration' => 'Calibration (งานสอบเทียบ)',
+    'safety'      => 'Safety (ความปลอดภัย)',
+    'quality'     => 'Quality (คุณภาพ)',
+    'other'       => 'Other (อื่น ๆ)',
+];
+
 // Handle Template Creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_template'])) {
     try {
+        $category = array_key_exists($_POST['category'] ?? '', $categoryLabels) ? $_POST['category'] : 'pm_am';
         $stmt = $pdo->prepare("INSERT INTO checklist_templates (code, name, category, description) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$_POST['code'], $_POST['name'], $_POST['category'] ?? 'PM', $_POST['description'] ?? null]);
+        $stmt->execute([$_POST['code'], $_POST['name'], $category, $_POST['description'] ?: null]);
         $msg = 'สร้างเทมเพลตเช็คชีทเรียบร้อยแล้ว';
     } catch (Exception $e) {
         $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage();
@@ -28,10 +38,10 @@ renderHeader();
         <div>
             <div class="flex items-center gap-2">
                 <a href="index.php" class="text-sm text-brand-600 hover:underline">&larr; กลับไปงาน PM</a>
-                <span class="badge bg-indigo-100 text-indigo-800 font-bold">Touch Drag & Drop Master</span>
+                <span class="badge bg-indigo-100 text-indigo-800 font-bold">Checksheet Master</span>
             </div>
             <h1 class="mt-1 text-2xl font-extrabold text-primary">📋 ระบบจัดการเทมเพลตเช็คชีทเครื่องจักร (Checksheet Templates)</h1>
-            <p class="text-xs text-muted mt-0.5">ลากสลับตำแหน่งการ์ดเทมเพลต (Drag & Drop Cards) เพื่อจัดลำดับความสำคัญสำหรับมือถือและแท็บเล็ต</p>
+            <p class="text-xs text-muted mt-0.5">สร้างและจัดการเทมเพลตเช็คชีท แล้วเข้าไปออกแบบรายการตรวจและจัดลำดับได้ในหน้า Drag &amp; Drop Builder</p>
         </div>
         <div class="flex gap-2">
             <button onclick="document.getElementById('new-template-modal').style.display='flex'" class="btn btn-primary text-xs">
@@ -52,19 +62,18 @@ renderHeader();
     </div>
     <?php endif; ?>
 
-    <!-- Drag & Drop Sortable Cards Grid -->
-    <div id="sortable-template-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Templates Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <?php foreach ($templates as $t): 
             $itemCount = (int)$pdo->query("SELECT COUNT(*) FROM checklist_template_items WHERE template_id = " . (int)$t['id'])->fetchColumn();
         ?>
-        <div draggable="true" data-id="<?= $t['id'] ?>" class="template-card card p-5 flex flex-col justify-between hover:border-indigo-400 transition-all cursor-grab active:cursor-grabbing">
+        <div class="card p-5 flex flex-col justify-between hover:border-indigo-400 transition-all">
             <div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="text-muted hover:text-indigo-600 font-bold text-base cursor-grab">⋮⋮</span>
                         <span class="font-mono text-xs font-extrabold text-indigo-600"><?= htmlspecialchars($t['code']) ?></span>
                     </div>
-                    <span class="cmms-banner info badge text-xs font-bold"><?= htmlspecialchars($t['category'] ?? 'General') ?></span>
+                    <span class="cmms-banner info badge text-xs font-bold"><?= htmlspecialchars($categoryLabels[$t['category']] ?? $t['category'] ?? 'General') ?></span>
                 </div>
                 <h3 class="font-bold text-primary text-base mt-2"><?= htmlspecialchars($t['name']) ?></h3>
                 <p class="text-xs text-muted mt-1"><?= htmlspecialchars($t['description'] ?? 'ไม่มีคำอธิบายเพิ่มเติม') ?></p>
@@ -88,6 +97,7 @@ renderHeader();
         <h3 class="font-bold text-primary text-lg border-b pb-2">➕ สร้างเทมเพลตเช็คชีทใหม่</h3>
         <form method="POST" class="space-y-3 text-xs">
             <input type="hidden" name="create_template" value="1">
+            <?= csrfField() ?>
             <div>
                 <label class="font-bold text-secondary block mb-1">รหัสเทมเพลต (Template Code)</label>
                 <input type="text" name="code" required placeholder="เช่น CHK-PUMP-01" class="input input-bordered w-full">
@@ -99,10 +109,9 @@ renderHeader();
             <div>
                 <label class="font-bold text-secondary block mb-1">หมวดหมู่</label>
                 <select name="category" class="input input-bordered w-full">
-                    <option value="Mechanical">Mechanical (งานเครื่องกล)</option>
-                    <option value="Electrical">Electrical (งานระบบไฟฟ้า)</option>
-                    <option value="Pneumatics">Pneumatics & Hydraulics (งานลม/ไฮดรอลิก)</option>
-                    <option value="General">General 5S & Inspection (ทั่วไป)</option>
+                    <?php foreach ($categoryLabels as $val => $label): ?>
+                    <option value="<?= $val ?>"><?= htmlspecialchars($label) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
             <div>
@@ -117,53 +126,5 @@ renderHeader();
         </form>
     </div>
 </div>
-
-<!-- Touch & Mouse Drag & Drop Cards Script -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const grid = document.getElementById('sortable-template-grid');
-    let draggedCard = null;
-
-    grid.addEventListener('dragstart', (e) => {
-        draggedCard = e.target.closest('.template-card');
-        if (draggedCard) {
-            e.target.style.opacity = '0.5';
-        }
-    });
-
-    grid.addEventListener('dragend', (e) => {
-        if (draggedCard) {
-            e.target.style.opacity = '1';
-            draggedCard = null;
-            showToast('success', 'สลับตำแหน่งการ์ดเทมเพลตเรียบร้อยแล้ว!');
-        }
-    });
-
-    grid.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        const afterElement = getDragAfterElement(grid, e.clientX, e.clientY);
-        if (draggedCard) {
-            if (afterElement == null) {
-                grid.appendChild(draggedCard);
-            } else {
-                grid.insertBefore(draggedCard, afterElement);
-            }
-        }
-    });
-
-    function getDragAfterElement(container, x, y) {
-        const elements = [...container.querySelectorAll('.template-card:not(.active)')];
-        return elements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
-            const offset = x - box.left - box.width / 2;
-            if (offset < 0 && offset > closest.offset) {
-                return { offset: offset, element: child };
-            } else {
-                return closest;
-            }
-        }, { offset: Number.NEGATIVE_INFINITY }).element;
-    }
-});
-</script>
 
 <?php renderFooter(); ?>
