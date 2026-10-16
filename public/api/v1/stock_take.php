@@ -78,7 +78,10 @@ try {
 
         // รหัสรอบ: ST-YYYYMMDD-NNN
         $prefix = 'ST-' . date('Ymd') . '-';
-        $seq = (int)$pdo->query("SELECT COUNT(*) FROM stock_take WHERE code LIKE '$prefix%'")->fetchColumn() + 1;
+        // ใช้ค่าสูงสุดเชิงตัวเลขของ suffix (ไม่ใช่ COUNT ซึ่งจะ reuse เลขเดิมเมื่อมีการลบรอบ)
+        $stSeq = $pdo->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(code, '-', -1) AS UNSIGNED)) FROM stock_take WHERE code LIKE ?");
+        $stSeq->execute([$prefix . '%']);
+        $seq = (int)$stSeq->fetchColumn() + 1;
         $code = $prefix . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
 
         $pdo->prepare('INSERT INTO stock_take (code, note, status, created_by) VALUES (?, ?, \'draft\', ?)')
