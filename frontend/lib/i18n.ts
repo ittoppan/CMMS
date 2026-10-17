@@ -122,6 +122,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.calibration_po": { th: "PO งานสอบเทียบ", en: "Calibration PO" },
   "menu.calibration_tracking": { th: "ติดตามงานสอบเทียบ", en: "Calibration Tracking" },
   "menu.mtbf_mttr": { th: "วิเคราะห์ MTBF/MTTR", en: "MTBF/MTTR Analysis" },
+  "menu.production_hours": { th: "ชั่วโมงการผลิต", en: "Production Hours" },
   "menu.spare_parts": { th: "คลังสต็อกอะไหล่", en: "Spare Parts Stock" },
   "menu.spare_overview": { th: "ภาพรวมสต็อก & การเบิก", en: "Stock & Usage Overview" },
   "menu.spare_balances": { th: "ยอดคงเหลืออะไหล่", en: "Stock Balances" },
@@ -790,6 +791,9 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/manuals/edit": { th: "แก้ไขคู่มือ", en: "Edit Manual" },
   "/mtbf_mttr/create": { th: "บันทึกข้อมูล MTBF/MTTR", en: "Add MTBF/MTTR" },
   "/mtbf_mttr/edit": { th: "แก้ไข MTBF/MTTR", en: "Edit MTBF/MTTR" },
+  "/mtbf_mttr/production_hours": { th: "ชั่วโมงการผลิต", en: "Production Hours" },
+  "/mtbf_mttr/production_hours/create": { th: "บันทึกชั่วโมงการผลิต", en: "Add Production Hours" },
+  "/mtbf_mttr/production_hours/edit": { th: "แก้ไขชั่วโมงการผลิต", en: "Edit Production Hours" },
   "/pages/[slug]": { th: "หน้าเว็บ", en: "Custom Page" },
   "/pm_am": { th: "แผน PM/AM", en: "PM/AM Plans" },
   "/pm_am/edit": { th: "แก้ไขแผน PM", en: "Edit PM Plan" },
@@ -1115,6 +1119,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   mtbf_mttr: {
     th: { eyebrow: "MTBF MTTR · CMMS-TOPPAN", title: "รายงานดัชนีชี้วัด MTBF & MTTR (Reliability KPI)", desc: "ติดตามค่าระยะเวลาเฉลี่ยก่อนการชำรุด (MTBF) และระยะเวลาเฉลี่ยในการซ่อม (MTTR)" },
     en: { eyebrow: "MTBF MTTR · CMMS-TOPPAN", title: "MTBF & MTTR Report (Reliability KPI)", desc: "Track mean time between failures (MTBF) and mean time to repair (MTTR)" },
+  },
+  production_hours: {
+    th: { eyebrow: "PRODUCTION HOURS · CMMS-TOPPAN", title: "ชั่วโมงการผลิต (Production Hours)", desc: "บันทึกเวลาทำงานจริงของเครื่องจักร — ใช้เป็นฐานคำนวณ MTBF / MTTR / OEE / Availability" },
+    en: { eyebrow: "PRODUCTION HOURS · CMMS-TOPPAN", title: "Production Hours", desc: "Record real machine run hours — the basis for MTBF / MTTR / OEE / Availability" },
   },
   "asset-reliability": {
     th: { eyebrow: "ASSET RELIABILITY & LIFECYCLE · CMMS-TOPPAN", title: "ความน่าเชื่อถือและวงจรชีวิตเครื่องจักร", desc: "Reliability, Health, Criticality (A-D), Lifecycle, Failure history, Cost และ Decision Support จากข้อมูลจริงในระบบ — ไม่ใช้ค่าคาดเดา" },

@@ -20,6 +20,8 @@
  *   - สต็อก = Sage 300 (ผ่าน spare_parts cache) — ห้ามตัด/จองของเองตอนวางแผน
  */
 
+require_once __DIR__ . '/calendar.php';
+
 /** เกณฑ์ของหลัก (อ่าน settings — มี default ครบ ไม่มีฮาร์ดโค้ดค่าในโค้ด) */
 function pln_config(PDO $pdo): array {
     return [
@@ -231,13 +233,14 @@ function pln_technician_workload(PDO $pdo, DateTimeInterface $from, DateTimeInte
     $fromStr = $from->format('Y-m-d 00:00:00');
     $toStr = $to->format('Y-m-d 00:00:00');
 
-    // จำนวนวันทำงานตาม calendar จริง (เฉพาะวันที่ตั้งไว้ใน planning_working_days)
+    // จำนวนวันทำงานตาม calendar จริง (เฉพาะวันที่ตั้งไว้ใน planning_working_days และไม่ใช่วันหยุด)
     $workDays = 0;
+    $holidays = cal_holidays($pdo);
     $cursor = DateTimeImmutable::createFromInterface($from)->setTime(0, 0);
     $endDay = DateTimeImmutable::createFromInterface($to)->setTime(0, 0);
     $step = new DateInterval('P1D');
     while ($cursor < $endDay) {
-        if (in_array((int)$cursor->format('N'), $cfg['working_days'], true)) $workDays++;
+        if (cal_is_working_day($pdo, $cursor->format('Y-m-d'), $cfg['working_days'], $holidays)) $workDays++;
         $cursor = $cursor->add($step);
     }
     if ($workDays <= 0) $workDays = 1;

@@ -237,6 +237,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "reliability/bad-actors", labelKey: "menu.reliability_bad_actors", href: "/reliability/bad-actors", icon: ShieldAlert },
       { perm: "asset_reliability", labelKey: "menu.asset_reliability", href: "/asset-reliability", icon: Gauge },
       { perm: "mtbf_mttr", labelKey: "menu.mtbf_mttr", href: "/mtbf_mttr", icon: FlaskConical },
+      { perm: "mtbf_mttr", labelKey: "menu.production_hours", href: "/mtbf_mttr/production_hours", icon: Hourglass },
       { perm: "rca", labelKey: "menu.rca", href: "/rca", icon: Activity },
       { perm: "reliability/trend", labelKey: "menu.reliability_trend", href: "/reliability/trend", icon: BarChart3, secondary: true },
       { perm: "reliability/weibull", labelKey: "menu.reliability_weibull", href: "/reliability/weibull", icon: ChartPie, secondary: true },

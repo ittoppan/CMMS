@@ -17,6 +17,7 @@ require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
+require_once __DIR__ . '/../../../src/helpers/calendar.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -169,6 +170,10 @@ requireLogin($pdo);
                     while ($dueDate < $now && $guard < 60) {
                         $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], (int)$plan['frequency_interval']);
                         $guard++;
+                    }
+                    // เว้นวันหยุด/วันไม่ทำงาน: เลื่อนกำหนด PM ไปวันทำงานถัดไป
+                    if (cal_skip_holidays_enabled($pdo)) {
+                        $dueDate = cal_next_working_day($pdo, $dueDate);
                     }
 
                     $title = $plan['name'] . ($plan['plan_type'] === 'single' ? " — {$asset['name']}" : '');

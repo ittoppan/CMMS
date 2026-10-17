@@ -78,6 +78,7 @@ function settingsDefaultValues(): array {
         'planning_shift_start'  => '08:00',  // Phase 25: จุดเริ่มกะทำงาน (คำนวณความพร้อม/capacity)
         'planning_shift_hours'  => '8',      // Phase 25: ชั่วโมงทำงานต่อวัน (fallback: work_hours_per_day)
         'planning_working_days' => '1,2,3,4,5', // Phase 25: วันทำงาน (1=จันทร์ ... 7=อาทิตย์)
+        'planning_skip_holidays' => '1',    // Phase 25: เลื่อนกำหนด PM ไปวันทำงานถัดไปถ้าตรงวันหยุด/วันหยุดประจำปี (0 = ปิด)
         'planning_sla_risk_hours' => '24',   // Phase 25: เหลือ SLA ภายในกี่ชม. = At Risk
         'planner_break_hour'    => '12.5',   // Phase 25: ช่วงพักกลางวันที่ buffer (0 = ไม่นับ)
         'lang_default'          => 'th',  // ภาษาหลักของระบบ: th (ไทย) / en (English) — ฐาน i18n

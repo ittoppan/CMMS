@@ -79,7 +79,7 @@ renderHeader();
     <div class="cmms-card p-10 text-center">
         <div class="text-4xl mb-3">📭</div>
         <p class="text-secondary font-medium">ยังไม่มีข้อมูล downtime หรือ production hours ในเดือนนี้</p>
-        <p class="text-xs text-secondary mt-1">Downtime มาจากใบงานซ่อมที่กรอก downtime_start/end — production hours มาจากหน้า Production Hours</p>
+        <p class="text-xs text-secondary mt-1">Downtime มาจากใบงานซ่อมที่กรอก downtime_start/end — production hours มาจากหน้า <a href="/pages/mtbf_mttr/production_hours.php" class="text-primary-600 hover:underline">Production Hours</a></p>
     </div>
     <?php else: ?>
 

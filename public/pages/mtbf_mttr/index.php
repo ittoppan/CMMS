@@ -29,6 +29,7 @@ $rows = $stmt->fetchAll();
         <p class="page-desc">Mean Time Between Failures & Mean Time To Repair (ทั้งหมด <?= count($rows) ?> รายการ)</p>
     </div>
     <div>
+        <a href="production_hours.php" class="btn btn-secondary">⏱️ ชั่วโมงการผลิต</a>
         <a href="create.php" class="btn btn-primary">+ บันทึกข้อมูล MTBF/MTTR</a>
     </div>
 </div>
