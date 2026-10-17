@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../src/includes/layout.php';
+require_once __DIR__ . '/../../../src/helpers/repair.php';
 $pageTitle = 'แก้ไขงานซ่อม - CMMS-TPT';
 $pdo = getDb();
 $id = (int)($_GET['id'] ?? 0);
@@ -19,17 +20,12 @@ $existingTagIds = $pdo->prepare('SELECT tag_id FROM repair_tag_pivot WHERE repai
 $attachments = $pdo->prepare('SELECT * FROM repair_attachments WHERE repair_id = ?'); $attachments->execute([$id]); $attachments = $attachments->fetchAll();
 $rejectionReasons = $pdo->query('SELECT id, code, name FROM rejection_reasons WHERE module = "repair" ORDER BY name')->fetchAll();
 
-function logActivity($pdo, $repairId, $action, $desc) {
-    $pdo->prepare('INSERT INTO repair_activity_log (repair_id, user_id, action, description) VALUES (?,?,?,?)')
-        ->execute([$repairId, $_SESSION['user_id'], $action, $desc]);
-}
-
 $error = ''; $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
-        $toZero = fn($v) => (float)($v ?? 0);
+
+
         $safety = (int)(!empty($_POST['safety_related']));
         $oldStatus = $row['status'];
         $newStatus = $_POST['status'] ?? $oldStatus;
@@ -48,15 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->prepare('UPDATE repair SET asset_id=?, assigned_to=?, priority=?, status=?, title=?, description=?, failure_report=?, diagnosis=?, resolution=?, downtime_start=?, downtime_end=?, cost_parts=?, cost_labor=?, notes=?, repair_type_id=?, failure_code_id=?, repair_code_id=?, work_zone_id=?, location_id=?, department_id=?, safety_related=?, product_lot_no=?, machine_status=?, production_line_status=?, estimated_completion_date=?, root_cause=?, solution=?, rejection_reason_id=?, rejection_note=? WHERE id=?')
             ->execute([
-            $_POST['asset_id'], $toNull($_POST['assigned_to']), $_POST['priority'] ?? 'medium', $newStatus, $_POST['title'],
-            $toNull($_POST['description']), $toNull($_POST['failure_report']), $toNull($_POST['diagnosis']), $toNull($_POST['resolution']),
-            $toNull($_POST['downtime_start']), $toNull($_POST['downtime_end']), $toZero($_POST['cost_parts']), $toZero($_POST['cost_labor']),
-            $toNull($_POST['notes']), $toNull($_POST['repair_type_id']), $toNull($_POST['failure_code_id']),
-            $toNull($_POST['repair_code_id']), $toNull($_POST['work_zone_id']), $toNull($_POST['location_id']),
-            $toNull($_POST['department_id']), $safety, $toNull($_POST['product_lot_no']),
-            $toNull($_POST['machine_status']), $toNull($_POST['production_line_status']),
-            $toNull($_POST['estimated_completion_date']), $toNull($_POST['root_cause']), $toNull($_POST['solution']),
-            $toNull($_POST['rejection_reason_id']), $toNull($_POST['rejection_note']), $id
+            $_POST['asset_id'], form_null($_POST['assigned_to']), $_POST['priority'] ?? 'medium', $newStatus, $_POST['title'],
+            form_null($_POST['description']), form_null($_POST['failure_report']), form_null($_POST['diagnosis']), form_null($_POST['resolution']),
+            form_null($_POST['downtime_start']), form_null($_POST['downtime_end']), form_zero($_POST['cost_parts']), form_zero($_POST['cost_labor']),
+            form_null($_POST['notes']), form_null($_POST['repair_type_id']), form_null($_POST['failure_code_id']),
+            form_null($_POST['repair_code_id']), form_null($_POST['work_zone_id']), form_null($_POST['location_id']),
+            form_null($_POST['department_id']), $safety, form_null($_POST['product_lot_no']),
+            form_null($_POST['machine_status']), form_null($_POST['production_line_status']),
+            form_null($_POST['estimated_completion_date']), form_null($_POST['root_cause']), form_null($_POST['solution']),
+            form_null($_POST['rejection_reason_id']), form_null($_POST['rejection_note']), $id
         ]);
 
         $pdo->prepare('DELETE FROM repair_tag_pivot WHERE repair_id = ?')->execute([$id]);
@@ -165,9 +161,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($oldStatus !== $newStatus) {
-            logActivity($pdo, $id, $newStatus, 'เปลี่ยนสถานะจาก ' . $oldStatus . ' เป็น ' . $newStatus);
+            repair_log_activity($pdo, $id, $newStatus, 'เปลี่ยนสถานะจาก ' . $oldStatus . ' เป็น ' . $newStatus);
         }
-        logActivity($pdo, $id, 'updated', 'แก้ไขข้อมูลงานซ่อม');
+        repair_log_activity($pdo, $id, 'updated', 'แก้ไขข้อมูลงานซ่อม');
         $pdo->commit();
         $success = 'บันทึกการแก้ไขเรียบร้อย';
         $row = $pdo->prepare('SELECT * FROM repair WHERE id = ?'); $row->execute([$id]); $row = $row->fetch();
@@ -175,7 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 renderHeader();
 function opt($v, $o) { return $v === $o ? 'selected' : ''; }
-function chk($id, $list) { return in_array($id, $list) ? 'checked' : ''; }
 ?>
 <div class="max-w-4xl mx-auto">
     <div class="mb-6">

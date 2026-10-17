@@ -17,8 +17,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $row=$pdo->prepare('SELECT * FROM mtbf_mttr WHERE id=?'); $row->execute([$id]); $row=$row->fetch();
     }catch(Exception $e){$error=$e->getMessage();}
 }
-renderHeader();
-function sel($a,$b){return $a===$b?'selected':'';} ?>
+renderHeader(); ?>
 <div class="max-w-2xl mx-auto">
     <div class="mb-6"><a href="index.php" class="text-sm text-primary-600">&larr; กลับ</a><h1 class="mt-2 text-2xl font-bold">แก้ไข MTBF/MTTR #<?=$id?></h1></div>
     <?php if($error):?><div class="cmms-banner error text-sm rounded p-3 mb-4"><?=htmlspecialchars($error)?></div><?php endif;?>

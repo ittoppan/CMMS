@@ -21,22 +21,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $certificateFile = uniqid('cert_') . '.' . $ext;
             move_uploaded_file($_FILES['certificate_file']['tmp_name'], $uploadDir . $certificateFile);
         }
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
         $pdo->prepare('UPDATE calibration SET asset_id=?,performed_by=?,calibration_date=?,next_calibration_date=?,standard_used=?,result=?,certificate_number=?,certificate_file=?,calibration_type=?,total_cost=?,po_number=?,supplier_id=?,status=?,notes=? WHERE id=?')->execute([
             $_POST['asset_id'],
-            $toNull($_POST['performed_by']),
+            form_null($_POST['performed_by']),
             $_POST['calibration_date'],
-            $toNull($_POST['next_calibration_date']),
-            $toNull($_POST['standard_used']),
+            form_null($_POST['next_calibration_date']),
+            form_null($_POST['standard_used']),
             $_POST['result'] ?? 'pass',
-            $toNull($_POST['certificate_number']),
+            form_null($_POST['certificate_number']),
             $certificateFile,
             $_POST['calibration_type'] ?? 'full',
-            $toNull($_POST['total_cost']),
-            $toNull($_POST['po_number']),
-            $toNull($_POST['supplier_id']),
+            form_null($_POST['total_cost']),
+            form_null($_POST['po_number']),
+            form_null($_POST['supplier_id']),
             $_POST['status'] ?? 'scheduled',
-            $toNull($_POST['notes']),
+            form_null($_POST['notes']),
             $id
         ]);
         $success = 'บันทึกเรียบร้อย';
@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) { $error = $e->getMessage(); }
 }
 renderHeader();
-function sel($a, $b) { return $a === $b ? 'selected' : ''; }
 ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">

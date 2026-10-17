@@ -13,7 +13,7 @@ $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
 
         // Handle image upload
         $imagePath = null;
@@ -45,17 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
         $stmt->execute([
             $_POST['code'], $_POST['name'],
-            $toNull($_POST['description'] ?? null), $toNull($_POST['category'] ?? null),
-            $toNull($_POST['location'] ?? null),    $toNull($_POST['department'] ?? null),
-            $toNull($_POST['manufacturer'] ?? null),$toNull($_POST['model'] ?? null),
-            $toNull($_POST['serial_number'] ?? null),
-            $toNull($_POST['purchase_date'] ?? null), $toNull($_POST['warranty_expiry'] ?? null),
+            form_null($_POST['description'] ?? null), form_null($_POST['category'] ?? null),
+            form_null($_POST['location'] ?? null),    form_null($_POST['department'] ?? null),
+            form_null($_POST['manufacturer'] ?? null),form_null($_POST['model'] ?? null),
+            form_null($_POST['serial_number'] ?? null),
+            form_null($_POST['purchase_date'] ?? null), form_null($_POST['warranty_expiry'] ?? null),
             $_POST['status'] ?? 'active',
-            $toNull($_POST['responsible_user_id'] ?? null),
-            $toNull($_POST['department_id'] ?? null),
-            $toNull($_POST['location_id'] ?? null),
-            $toNull($_POST['work_zone_id'] ?? null),
-            $toNull($_POST['barcode'] ?? null),
+            form_null($_POST['responsible_user_id'] ?? null),
+            form_null($_POST['department_id'] ?? null),
+            form_null($_POST['location_id'] ?? null),
+            form_null($_POST['work_zone_id'] ?? null),
+            form_null($_POST['barcode'] ?? null),
             $imagePath,
             $manualPath,
         ]);

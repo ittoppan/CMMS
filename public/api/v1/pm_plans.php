@@ -172,8 +172,8 @@ requireLogin($pdo);
                         $guard++;
                     }
                     // เว้นวันหยุด/วันไม่ทำงาน: เลื่อนกำหนด PM ไปวันทำงานถัดไป
-                    if (cal_skip_holidays_enabled($pdo)) {
-                        $dueDate = cal_next_working_day($pdo, $dueDate);
+                    if (workday_skip_holidays_enabled($pdo)) {
+                        $dueDate = workday_next_working_day($pdo, $dueDate);
                     }
 
                     $title = $plan['name'] . ($plan['plan_type'] === 'single' ? " — {$asset['name']}" : '');

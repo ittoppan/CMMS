@@ -11,6 +11,11 @@
 - Node.js Frontend
 - Astryx Design System
 
+## Architecture Decision (2026-10-17)
+- **Next.js (`frontend/app`) คือ UI หลัก (canonical)** — ฟีเจอร์ใหม่/ฟีเจอร์ที่ต้องแก้ทำบน Next.js เป็นที่แรก ผ่าน `/api/v1/*.php` เสมอ
+- หน้า PHP (`public/pages/*`) ถือเป็น legacy — แก้เฉพาะเมื่อจำเป็น (bug/deploy) ไม่เพิ่มฟีเจอร์ใหม่ใน PHP
+- Logic ใหม่ต้องอยู่ใน `src/helpers/*` เดียว ห้ามก๊อปซ้ำข้ามไฟล์ (เช่น วันทำงานใช้ `src/helpers/calendar.php`, form helpers ใช้ `src/includes/layout.php`)
+
 ## Automation Rules
 - **Telegram Notifications:**
   - Send `curl` notification to Telegram when a task starts.

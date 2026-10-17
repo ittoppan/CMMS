@@ -9,19 +9,19 @@ $reasons = $pdo->query('SELECT id, code, name FROM borrowing_reasons WHERE is_ac
 $error = ''; $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
         $stmt = $pdo->prepare('INSERT INTO equipment_borrowing (asset_id, borrower_id, processed_by, borrowing_type, reason_id, reason_detail, borrow_date, expected_return_date, purpose, condition_before, status, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)');
         $stmt->execute([
             $_POST['asset_id'], $_POST['borrower_id'], $_SESSION['user_id'],
             $_POST['borrowing_type'] ?? 'single',
-            $toNull($_POST['reason_id'] ?? null),
-            $toNull($_POST['reason_detail'] ?? null),
+            form_null($_POST['reason_id'] ?? null),
+            form_null($_POST['reason_detail'] ?? null),
             $_POST['borrow_date'] ?: date('Y-m-d H:i:s'),
-            $toNull($_POST['expected_return_date'] ?? null),
-            $toNull($_POST['purpose'] ?? null),
-            $toNull($_POST['condition_before'] ?? null),
+            form_null($_POST['expected_return_date'] ?? null),
+            form_null($_POST['purpose'] ?? null),
+            form_null($_POST['condition_before'] ?? null),
             $_POST['status'] ?? 'borrowed',
-            $toNull($_POST['notes'] ?? null)
+            form_null($_POST['notes'] ?? null)
         ]);
         $success = 'บันทึกการยืมเรียบร้อย';
     } catch (Exception $e) { $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage(); }

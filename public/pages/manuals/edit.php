@@ -8,7 +8,7 @@ $assets=$pdo->query('SELECT id,code,name FROM asset_registry ORDER BY name')->fe
 $error='';$success='';
 if($_SERVER['REQUEST_METHOD']==='POST'){
     try{
-        $toNull=fn($v)=>($v??'')===''?null:$v;
+
         $filePath=$row['file_path'];
         if(!empty($_FILES['file']['name'])&&$_FILES['file']['error']===UPLOAD_ERR_OK){
             $dir=__DIR__.'/../../../public/uploads/manuals/';
@@ -19,15 +19,14 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $filePath='/uploads/manuals/'.$fileName;
         }
         $pdo->prepare('UPDATE manuals SET asset_id=?,title=?,description=?,file_path=?,file_type=?,version=? WHERE id=?')->execute([
-            $_POST['asset_id']?:null,$_POST['title'],$toNull($_POST['description']),
-            $filePath,$_FILES['file']['type']??$row['file_type'],$toNull($_POST['version']),$id
+            $_POST['asset_id']?:null,$_POST['title'],form_null($_POST['description']),
+            $filePath,$_FILES['file']['type']??$row['file_type'],form_null($_POST['version']),$id
         ]);
         $success='บันทึกเรียบร้อย';
         $row=$pdo->prepare('SELECT * FROM manuals WHERE id=?'); $row->execute([$id]); $row=$row->fetch();
     }catch(Exception $e){$error=$e->getMessage();}
 }
-renderHeader();
-function sel($a,$b){return $a===$b?'selected':'';} ?>
+renderHeader(); ?>
 <div class="max-w-2xl mx-auto">
     <div class="mb-6"><a href="index.php" class="text-sm text-primary-600">&larr; กลับ</a><h1 class="mt-2 text-2xl font-bold">แก้ไขคู่มือ #<?=$id?></h1></div>
     <?php if($error):?><div class="cmms-banner error text-sm rounded p-3 mb-4"><?=htmlspecialchars($error)?></div><?php endif;?>

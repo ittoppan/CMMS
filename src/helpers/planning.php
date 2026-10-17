@@ -235,12 +235,12 @@ function pln_technician_workload(PDO $pdo, DateTimeInterface $from, DateTimeInte
 
     // จำนวนวันทำงานตาม calendar จริง (เฉพาะวันที่ตั้งไว้ใน planning_working_days และไม่ใช่วันหยุด)
     $workDays = 0;
-    $holidays = cal_holidays($pdo);
+    $holidays = workday_holidays($pdo);
     $cursor = DateTimeImmutable::createFromInterface($from)->setTime(0, 0);
     $endDay = DateTimeImmutable::createFromInterface($to)->setTime(0, 0);
     $step = new DateInterval('P1D');
     while ($cursor < $endDay) {
-        if (cal_is_working_day($pdo, $cursor->format('Y-m-d'), $cfg['working_days'], $holidays)) $workDays++;
+        if (workday_is_working_day($pdo, $cursor->format('Y-m-d'), $cfg['working_days'], $holidays)) $workDays++;
         $cursor = $cursor->add($step);
     }
     if ($workDays <= 0) $workDays = 1;

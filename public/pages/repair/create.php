@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../src/includes/layout.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
+require_once __DIR__ . '/../../../src/helpers/repair.php';
 $pageTitle = 'สร้างงานซ่อม — CMMS-TPT';
 $pdo = getDb();
 
@@ -16,34 +17,29 @@ $tags         = $pdo->query('SELECT id, name, color FROM repair_tags ORDER BY na
 
 $error = ''; $success = '';
 
-function logActivity($pdo, $repairId, $action, $desc) {
-    $pdo->prepare('INSERT INTO repair_activity_log (repair_id, user_id, action, description) VALUES (?,?,?,?)')
-        ->execute([$repairId, $_SESSION['user_id'], $action, $desc]);
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
-        $toZero = fn($v) => (float)($v ?? 0);
+
+
         $safety = (int)(!empty($_POST['safety_related']));
 
         $stmt = $pdo->prepare('INSERT INTO repair (asset_id, assigned_to, created_by, priority, status, title, description, failure_report, diagnosis, resolution, downtime_start, downtime_end, cost_parts, cost_labor, notes, repair_type_id, failure_code_id, repair_code_id, work_zone_id, location_id, department_id, safety_related, product_lot_no, machine_status, production_line_status, estimated_completion_date, root_cause, solution) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
         $stmt->execute([
-            $_POST['asset_id'], $toNull($_POST['assigned_to'] ?? null), $_SESSION['user_id'],
+            $_POST['asset_id'], form_null($_POST['assigned_to'] ?? null), $_SESSION['user_id'],
             $_POST['priority'] ?? 'medium', $_POST['status'] ?? 'open', $_POST['title'],
-            $toNull($_POST['description'] ?? null), $toNull($_POST['failure_report'] ?? null),
-            $toNull($_POST['diagnosis'] ?? null), $toNull($_POST['resolution'] ?? null),
-            $toNull($_POST['downtime_start'] ?? null), $toNull($_POST['downtime_end'] ?? null),
-            $toZero($_POST['cost_parts'] ?? 0), $toZero($_POST['cost_labor'] ?? 0),
-            $toNull($_POST['notes'] ?? null),
-            $toNull($_POST['repair_type_id'] ?? null), $toNull($_POST['failure_code_id'] ?? null),
-            $toNull($_POST['repair_code_id'] ?? null), $toNull($_POST['work_zone_id'] ?? null),
-            $toNull($_POST['location_id'] ?? null), $toNull($_POST['department_id'] ?? null),
-            $safety, $toNull($_POST['product_lot_no'] ?? null),
-            $toNull($_POST['machine_status'] ?? null), $toNull($_POST['production_line_status'] ?? null),
-            $toNull($_POST['estimated_completion_date'] ?? null),
-            $toNull($_POST['root_cause'] ?? null), $toNull($_POST['solution'] ?? null)
+            form_null($_POST['description'] ?? null), form_null($_POST['failure_report'] ?? null),
+            form_null($_POST['diagnosis'] ?? null), form_null($_POST['resolution'] ?? null),
+            form_null($_POST['downtime_start'] ?? null), form_null($_POST['downtime_end'] ?? null),
+            form_zero($_POST['cost_parts'] ?? 0), form_zero($_POST['cost_labor'] ?? 0),
+            form_null($_POST['notes'] ?? null),
+            form_null($_POST['repair_type_id'] ?? null), form_null($_POST['failure_code_id'] ?? null),
+            form_null($_POST['repair_code_id'] ?? null), form_null($_POST['work_zone_id'] ?? null),
+            form_null($_POST['location_id'] ?? null), form_null($_POST['department_id'] ?? null),
+            $safety, form_null($_POST['product_lot_no'] ?? null),
+            form_null($_POST['machine_status'] ?? null), form_null($_POST['production_line_status'] ?? null),
+            form_null($_POST['estimated_completion_date'] ?? null),
+            form_null($_POST['root_cause'] ?? null), form_null($_POST['solution'] ?? null)
         ]);
         $repairId = $pdo->lastInsertId();
         $woNo = generateWorkOrderNo($pdo);
@@ -86,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        logActivity($pdo, $repairId, 'created', 'สร้างงานซ่อมใหม่');
+        repair_log_activity($pdo, $repairId, 'created', 'สร้างงานซ่อมใหม่');
         $pdo->commit();
         $success = 'สร้างงานซ่อมเรียบร้อย';
         echo '<script>setTimeout(function(){ window.location.href="view.php?id=' . $repairId . '"; }, 1000);</script>';

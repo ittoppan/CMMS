@@ -17,16 +17,16 @@ if ($deleteId && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$deleteId) {
     try {
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
-        $nominal = $toNull($_POST['nominal_value']);
-        $measured = $toNull($_POST['measured_value']);
-        $mpe = $toNull($_POST['mpe_value']);
-        $correction = $toNull($_POST['correction']);
-        $uncertainty = $toNull($_POST['uncertainty']);
+
+        $nominal = form_null($_POST['nominal_value']);
+        $measured = form_null($_POST['measured_value']);
+        $mpe = form_null($_POST['mpe_value']);
+        $correction = form_null($_POST['correction']);
+        $uncertainty = form_null($_POST['uncertainty']);
         if ($editId) {
             $conformance = $_POST['conformance'] ?? 'conditional';
             $pdo->prepare('UPDATE calibration_points SET point_label=?, nominal_value=?, measured_value=?, correction=?, uncertainty=?, mpe_value=?, conformance=?, notes=? WHERE id=? AND calibration_id=?')->execute([
-                $_POST['point_label'], $nominal, $measured, $correction, $uncertainty, $mpe, $conformance, $toNull($_POST['notes']), $editId, $calibrationId
+                $_POST['point_label'], $nominal, $measured, $correction, $uncertainty, $mpe, $conformance, form_null($_POST['notes']), $editId, $calibrationId
             ]);
             $success = 'บันทึกจุดสอบเทียบเรียบร้อย';
         } else {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$deleteId) {
             }
             $conformance = $_POST['conformance'] ?? $autoConformance;
             $pdo->prepare('INSERT INTO calibration_points (calibration_id, point_label, nominal_value, measured_value, correction, uncertainty, mpe_value, conformance, notes) VALUES (?,?,?,?,?,?,?,?,?)')->execute([
-                $calibrationId, $_POST['point_label'], $nominal, $measured, $correctionVal, $uncertainty, $mpe, $conformance, $toNull($_POST['notes'])
+                $calibrationId, $_POST['point_label'], $nominal, $measured, $correctionVal, $uncertainty, $mpe, $conformance, form_null($_POST['notes'])
             ]);
             $success = 'เพิ่มจุดสอบเทียบเรียบร้อย';
         }

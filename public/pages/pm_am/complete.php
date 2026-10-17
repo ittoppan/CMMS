@@ -80,8 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-renderHeader();
-function sel($a,$b){return $a===$b?'selected':'';} ?>
+renderHeader(); ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="view.php?id=<?= $id ?>" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปรายละเอียด</a>

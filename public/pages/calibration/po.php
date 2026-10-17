@@ -13,16 +13,16 @@ if ($deleteId && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$deleteId) {
     try {
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
         if ($editId) {
             $pdo->prepare('UPDATE po_calibration SET calibration_id=?, po_number=?, supplier_id=?, po_date=?, amount=?, status=?, notes=? WHERE id=?')->execute([
                 $_POST['calibration_id'] ?: null,
                 $_POST['po_number'],
                 $_POST['supplier_id'] ?: null,
                 $_POST['po_date'] ?: null,
-                $toNull($_POST['amount']),
+                form_null($_POST['amount']),
                 $_POST['status'] ?? 'open',
-                $toNull($_POST['notes']),
+                form_null($_POST['notes']),
                 $editId
             ]);
             $success = 'บันทึก PO เรียบร้อย';
@@ -32,9 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$deleteId) {
                 $_POST['po_number'],
                 $_POST['supplier_id'] ?: null,
                 $_POST['po_date'] ?: null,
-                $toNull($_POST['amount']),
+                form_null($_POST['amount']),
                 $_POST['status'] ?? 'open',
-                $toNull($_POST['notes']),
+                form_null($_POST['notes']),
                 $_SESSION['user_id'] ?? null
             ]);
             $success = 'เพิ่ม PO เรียบร้อย';

@@ -12,18 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['password'];
         if (strlen($password) < 4) throw new Exception('รหัสผ่านต้องอย่างน้อย 4 ตัวอักษร');
         $hash = password_hash($password, PASSWORD_BCRYPT);
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
         $stmt = $pdo->prepare('INSERT INTO users (role_id, department_id, username, email, password, full_name, phone, employee_code, position, is_active) VALUES (?,?,?,?,?,?,?,?,?,?)');
         $stmt->execute([
-            $toNull($_POST['role_id'] ?? null),
-            $toNull($_POST['department_id'] ?? null),
+            form_null($_POST['role_id'] ?? null),
+            form_null($_POST['department_id'] ?? null),
             $_POST['username'],
             $_POST['email'],
             $hash,
             $_POST['full_name'],
-            $toNull($_POST['phone'] ?? null),
-            $toNull($_POST['employee_code'] ?? null),
-            $toNull($_POST['position'] ?? null),
+            form_null($_POST['phone'] ?? null),
+            form_null($_POST['employee_code'] ?? null),
+            form_null($_POST['position'] ?? null),
             $_POST['is_active'] ?? 1
         ]);
         $success = 'เพิ่มผู้ใช้เรียบร้อย';

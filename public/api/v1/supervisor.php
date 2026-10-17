@@ -46,12 +46,12 @@ try {
     switch ($method) {
         case 'GET':
             switch ($action) {
-                case 'kpis':        apiGetKpis($pdo); break;
-                case 'queue':       apiGetQueue($pdo); break;
+                case 'kpis':        supGetKpis($pdo); break;
+                case 'queue':       supGetQueue($pdo); break;
                 case 'requests':    apiGetRequests($pdo); break;
                 case 'workorders':  apiGetWorkOrders($pdo); break;
                 case 'schedule':    apiGetSchedule($pdo); break;
-                case 'technicians': apiGetTechnicians($pdo); break;
+                case 'technicians': supGetTechnicians($pdo); break;
                 case 'pause_log':   apiGetPauseLog($pdo); break;
                 case 'request_log': apiGetRequestLog($pdo); break;
                 default:
@@ -274,7 +274,7 @@ function p14_sync_mr_status(PDO $pdo, int $woId, string $status): void {
         ->execute([$status, $woId]);
 }/* ─────────────────────────── GET ─────────────────────────── */
 
-function apiGetKpis(PDO $pdo): void {
+function supGetKpis(PDO $pdo): void {
     // KPI ทั้งหมดคำนวณจากสูตรกลางใน src/helpers/kpi.php (ห้าม replicate)
     $opts = [
         'role_id' => currentRoleId(),
@@ -311,7 +311,7 @@ function apiGetKpis(PDO $pdo): void {
     ], JSON_UNESCAPED_UNICODE);
 }
 
-function apiGetQueue(PDO $pdo): void {
+function supGetQueue(PDO $pdo): void {
     $g = (string)($_GET['group'] ?? 'all');
     $search = trim((string)($_GET['search'] ?? ''));
     $priority = trim((string)($_GET['priority'] ?? ''));
@@ -618,7 +618,7 @@ function apiGetSchedule(PDO $pdo): void {
     ], JSON_UNESCAPED_UNICODE);
 }
 
-function apiGetTechnicians(PDO $pdo): void {
+function supGetTechnicians(PDO $pdo): void {
     $rows = $pdo->query('SELECT u.id, u.full_name, u.role_id, r.name AS role_name
                          FROM users u
                          LEFT JOIN roles r ON r.id = u.role_id

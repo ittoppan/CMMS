@@ -225,7 +225,7 @@ function apiGetCenter(PDO $pdo): void {
 }
 
 /** คิววางแผน โดยรวมหรือตามกลุ่ม (ค้นหา/กรอง/เรียง) */
-function apiGetQueue(PDO $pdo): void {
+function plnGetQueue(PDO $pdo): void {
     requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
     $cfg = pln_config($pdo);
     $group = (string)($_GET['group'] ?? 'all');
@@ -332,7 +332,7 @@ function apiGetCalendar(PDO $pdo): void {
 }
 
 /** รายชื่อช่าง + ทักษะ + workload ในช่วงเวลาที่ส่ง */
-function apiGetTechnicians(PDO $pdo): void {
+function plnGetTechnicians(PDO $pdo): void {
     requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
     $from = new DateTime((string)($_GET['from'] ?? 'today 00:00:00'));
     $to = new DateTime((string)($_GET['to'] ?? '+1 day 00:00:00'));
@@ -430,7 +430,7 @@ function apiGetScheduleLog(PDO $pdo): void {
 }
 
 /** KPI วางแผนสำหรับ Dashboard (ทุกคนที่ล็อกอินได้ — scope ตาม role) */
-function apiGetKpis(PDO $pdo): void {
+function plnGetKpis(PDO $pdo): void {
     $cfg = pln_config($pdo);
     $roleId = currentRoleId();
     $uid = pln_uid();
@@ -803,14 +803,14 @@ try {
         case 'GET':
             switch ($action) {
                 case 'center':          apiGetCenter($pdo); break;
-                case 'queue':           apiGetQueue($pdo); break;
+                case 'queue':           plnGetQueue($pdo); break;
                 case 'calendar':        apiGetCalendar($pdo); break;
-                case 'technicians':     apiGetTechnicians($pdo); break;
+                case 'technicians':     plnGetTechnicians($pdo); break;
                 case 'conflicts':       apiGetConflicts($pdo); break;
                 case 'readiness':       apiGetReadiness($pdo); break;
                 case 'duration_history': apiGetDurationHistory($pdo); break;
                 case 'schedule_log':    apiGetScheduleLog($pdo); break;
-                case 'kpis':            apiGetKpis($pdo); break;
+                case 'kpis':            plnGetKpis($pdo); break;
                 case 'my_plan':         apiGetMyPlan($pdo); break;
                 default:
                     http_response_code(400);

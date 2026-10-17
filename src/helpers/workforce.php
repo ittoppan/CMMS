@@ -910,23 +910,12 @@ function wf_shift_minutes(string $start, string $end, int $breakMinutes): int {
     return max(0, (int)$diff - $breakMinutes);
 }
 
-/** Non-working days: recurring holidays in the year plus working days from settings. */
+/** Non-working days: recurring holidays in the year plus working days from settings.
+ *  Delegates to src/helpers/calendar.php (single source of truth, shared with PM scheduling). */
 function wf_is_working_day(PDO $pdo, string $date, ?array $cfg = null): bool {
+    require_once __DIR__ . '/calendar.php';
     $cfg = $cfg ?? wf_config($pdo);
-    $dow = (int)date('N', strtotime($date));
-    $days = $cfg['default_working_days'] ?: [1, 2, 3, 4, 5];
-    if (!in_array($dow, $days, true)) return false;
-
-    $st = $pdo->prepare('SELECT holiday_date, is_recurring FROM holidays');
-    $st->execute();
-    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $h) {
-        $hd = (string)$h['holiday_date'];
-        $match = ((int)$h['is_recurring'] === 1)
-            ? substr($hd, 5) === substr($date, 5)                 // same month-day
-            : $hd === $date;
-        if ($match) return false;
-    }
-    return true;
+    return workday_is_working_day($pdo, $date, $cfg['default_working_days'] ?: [1, 2, 3, 4, 5]);
 }
 
 /** Approved/planned leave overlapping a date. */

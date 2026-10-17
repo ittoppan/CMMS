@@ -55,8 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $success = 'เพิ่มแผน PM เรียบร้อย';
     } catch (Exception $e) { $error = 'เกิดข้อผิดพลาด: ' . $e->getMessage(); }
 }
-renderHeader();
-function sel($a,$b){return $a===$b?'selected':'';} ?>
+renderHeader(); ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6 page-heading">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>

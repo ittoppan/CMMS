@@ -15,7 +15,7 @@ $error = '';
 $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $toNull = fn($v) => ($v ?? '') === '' ? null : $v;
+
 
         // Process profile avatar image upload
         $avatarPath = $row['avatar_path'] ?? null;
@@ -32,18 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hash = password_hash($_POST['password'], PASSWORD_BCRYPT);
             $pdo->prepare('UPDATE users SET role_id=?, department_id=?, username=?, email=?, password=?, full_name=?, phone=?, employee_code=?, position=?, line_user_id=?, avatar_path=?, is_active=? WHERE id=?')
                 ->execute([
-                    $toNull($_POST['role_id'] ?? null), $toNull($_POST['department_id'] ?? null),
+                    form_null($_POST['role_id'] ?? null), form_null($_POST['department_id'] ?? null),
                     $_POST['username'], $_POST['email'], $hash, $_POST['full_name'],
-                    $toNull($_POST['phone'] ?? null), $toNull($_POST['employee_code'] ?? null),
-                    $toNull($_POST['position'] ?? null), $toNull($_POST['line_user_id'] ?? null), $avatarPath, $_POST['is_active'] ?? 1, $id
+                    form_null($_POST['phone'] ?? null), form_null($_POST['employee_code'] ?? null),
+                    form_null($_POST['position'] ?? null), form_null($_POST['line_user_id'] ?? null), $avatarPath, $_POST['is_active'] ?? 1, $id
                 ]);
         } else {
             $pdo->prepare('UPDATE users SET role_id=?, department_id=?, username=?, email=?, full_name=?, phone=?, employee_code=?, position=?, line_user_id=?, avatar_path=?, is_active=? WHERE id=?')
                 ->execute([
-                    $toNull($_POST['role_id'] ?? null), $toNull($_POST['department_id'] ?? null),
+                    form_null($_POST['role_id'] ?? null), form_null($_POST['department_id'] ?? null),
                     $_POST['username'], $_POST['email'], $_POST['full_name'],
-                    $toNull($_POST['phone'] ?? null), $toNull($_POST['employee_code'] ?? null),
-                    $toNull($_POST['position'] ?? null), $toNull($_POST['line_user_id'] ?? null), $avatarPath, $_POST['is_active'] ?? 1, $id
+                    form_null($_POST['phone'] ?? null), form_null($_POST['employee_code'] ?? null),
+                    form_null($_POST['position'] ?? null), form_null($_POST['line_user_id'] ?? null), $avatarPath, $_POST['is_active'] ?? 1, $id
                 ]);
         }
         $success = 'บันทึกข้อมูลเรียบร้อย';

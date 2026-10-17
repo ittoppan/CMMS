@@ -20,7 +20,7 @@ $selectedTplIds = array_column($selectedTemplates->fetchAll(), 'template_id');
 $error = ''; $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $toNull = fn($v)=>($v??'')===''?null:$v;
+
         $uploadPath = $row['work_instruction_file'];
         if (!empty($_FILES['work_instruction_file']['name'])) {
             $uploadDir = __DIR__ . '/../../../uploads/pm_am/';
@@ -32,22 +32,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->prepare('UPDATE pm_am SET asset_id=?, assigned_to=?, plan_id=?, department_id=?, location_id=?, work_zone_id=?, title=?, description=?, frequency_type=?, frequency_interval=?, due_date=?, last_done_date=?, status=?, checklist=?, notes=?, work_instruction_file=?, reschedule_reason=? WHERE id=?')->execute([
             $_POST['asset_id'],
-            $toNull($_POST['assigned_to']),
-            $toNull($_POST['plan_id']),
-            $toNull($_POST['department_id']),
-            $toNull($_POST['location_id']),
-            $toNull($_POST['work_zone_id']),
+            form_null($_POST['assigned_to']),
+            form_null($_POST['plan_id']),
+            form_null($_POST['department_id']),
+            form_null($_POST['location_id']),
+            form_null($_POST['work_zone_id']),
             $_POST['title'],
-            $toNull($_POST['description']),
+            form_null($_POST['description']),
             $_POST['frequency_type'],
             $_POST['frequency_interval'] ?: 1,
-            $toNull($_POST['due_date']),
-            $toNull($_POST['last_done_date']),
+            form_null($_POST['due_date']),
+            form_null($_POST['last_done_date']),
             $_POST['status'] ?? 'pending',
             $_POST['checklist'] ? json_encode(explode("\n", $_POST['checklist'])) : $row['checklist'],
-            $toNull($_POST['notes']),
+            form_null($_POST['notes']),
             $uploadPath,
-            $toNull($_POST['reschedule_reason']),
+            form_null($_POST['reschedule_reason']),
             $id
         ]);
 
@@ -63,9 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $pdo->prepare('SELECT * FROM pm_am WHERE id=?'); $row->execute([$id]); $row = $row->fetch();
     } catch (Exception $e) { $error = $e->getMessage(); }
 }
-renderHeader();
-function sel($a,$b){return $a===$b?'selected':'';}
-function chk($arr,$val){return in_array($val,$arr)?'checked':'';} ?>
+renderHeader(); ?>
 <div class="max-w-3xl mx-auto">
     <div class="mb-6">
         <a href="index.php" class="text-sm text-primary-600 hover:text-primary-700">&larr; กลับไปแผน PM</a>
