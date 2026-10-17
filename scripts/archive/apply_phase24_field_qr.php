@@ -10,7 +10,7 @@
  * วิธีเรียก:  php scripts/apply_phase24_field_qr.php
  */
 
-require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../../src/config/db.php';
 
 $pdo = getDb();
 $changed = 0;

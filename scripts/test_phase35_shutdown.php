@@ -4,7 +4,7 @@
  *
  * Runs against a THROWAWAY database whose name is the live DB name + "_sdtest".
  * It clones the live structure (CREATE TABLE ... LIKE, no FK constraints, no rows),
- * runs scripts/apply_phase35_shutdown.php on that copy, then drives the engine through
+ * runs scripts/archive/apply_phase35_shutdown.php on that copy, then drives the engine through
  * the invariants that matter: lifecycle gates, readiness explainability, baseline
  * immutability, CPM, and the hard-coded LOTO startup interlock.
  *
@@ -131,7 +131,7 @@ function mkPoint(PDO $pdo, int $permitId, int $seq, string $label, string $statu
 /* ------------------------------------------------------------------ 1. migration */
 echo "\n[1] Migration\n";
 ob_start();
-require __DIR__ . '/apply_phase35_shutdown.php';
+require __DIR__ . '/archive/apply_phase35_shutdown.php';
 $mig1 = ob_get_clean();
 
 foreach (['sd_shutdowns', 'sd_assets', 'sd_scopes', 'sd_dependencies', 'sd_baselines',
@@ -164,7 +164,7 @@ $st = $pdo->query("SELECT COUNT(*) FROM menu_permissions WHERE menu_key LIKE 'sh
 check('menu_permissions shutdown seeded', (int)$st->fetchColumn() > 0);
 
 /* idempotency: re-run and confirm no error and stable table count */
-ob_start(); require __DIR__ . '/apply_phase35_shutdown.php'; $mig2 = ob_get_clean();
+ob_start(); require __DIR__ . '/archive/apply_phase35_shutdown.php'; $mig2 = ob_get_clean();
 $st = $pdo->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME LIKE 'sd\\_%'");
 check('migration is idempotent (re-run ok, sd_* table count stable)', (int)$st->fetchColumn() === 9, "count=" . (int)$st->fetchColumn());
 

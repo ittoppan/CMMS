@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/settings.php';
 
 /**
  * CMMS-TPT Notification Helpers
@@ -903,19 +904,7 @@ function sendHtmlEmail($toEmail, $toName, $subject, $htmlBody) {
 
 /** Read a setting from `settings` table (cached per request). */
 function getSettingValue($key, $default = '') {
-    static $cache = null;
-    if ($cache === null) {
-        $cache = [];
-        try {
-            $pdo = getDb();
-            foreach ($pdo->query("SELECT setting_key, setting_value FROM settings")->fetchAll() as $r) {
-                $cache[$r['setting_key']] = $r['setting_value'];
-            }
-        } catch (Exception $e) {
-            $cache = [];
-        }
-    }
-    return isset($cache[$key]) && $cache[$key] !== '' ? $cache[$key] : $default;
+    return setting_value($key, (string)$default);
 }
 
 /** RFC2047 header encoding for UTF-8 */

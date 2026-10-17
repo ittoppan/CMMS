@@ -39,7 +39,7 @@
  * Run: php scripts/apply_phase32_engineering_change.php (idempotent)
  */
 
-require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../../src/config/db.php';
 
 $pdo = getDb();
 $changed = 0;

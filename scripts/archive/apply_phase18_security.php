@@ -10,8 +10,8 @@
  *           (อ่าน DB creds จาก .env ผ่าน src/config/db.php)
  */
 
-require_once __DIR__ . '/../src/config/db.php';
-require_once __DIR__ . '/../src/config/settings_defaults.php';
+require_once __DIR__ . '/../../src/config/db.php';
+require_once __DIR__ . '/../../src/config/settings_defaults.php';
 
 $pdo = getDb();
 $changed = 0;

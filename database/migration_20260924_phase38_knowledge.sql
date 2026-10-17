@@ -49,7 +49,7 @@
 -- 7. MySQL COMMENTs are ASCII-only on purpose (multi-byte COMMENT strings are
 --    rejected on some connections). Thai copy lives in docs/*.md and PHP seeds.
 --
--- Run: php scripts/apply_phase38_knowledge.php --apply
+-- Run: php scripts/archive/apply_phase38_knowledge.php --apply
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------

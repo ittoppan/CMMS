@@ -14,7 +14,7 @@
  *            (อ่าน DB creds จาก .env ผ่าน src/config/db.php)
  */
 
-require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../../src/config/db.php';
 
 $pdo = getDb();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

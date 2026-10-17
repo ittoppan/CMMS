@@ -4,7 +4,7 @@
  * Turnaround engine (src/helpers/shutdown.php).
  *
  * The sd_* tables are NOT in the live schema yet, so this harness reuses
- * scripts/apply_phase35_shutdown.php to create them in the THROWAWAY database
+ * scripts/archive/apply_phase35_shutdown.php to create them in the THROWAWAY database
  * = live DB name + "_sdtest".
  *
  *   php scripts/test_shutdown.php [--keep]
@@ -91,7 +91,7 @@ if ($cur !== $scratch) { fwrite(STDERR, "GUARD: connected to '$cur', expected '$
 $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
 
 ob_start();
-require __DIR__ . '/apply_phase35_shutdown.php';
+require __DIR__ . '/archive/apply_phase35_shutdown.php';
 $migLog = ob_get_clean();
 foreach (['sd_shutdowns', 'sd_assets', 'sd_scopes', 'sd_dependencies', 'sd_baselines', 'sd_readiness_checks', 'sd_startup_checks', 'sd_planned_parts', 'sd_activity'] as $t) {
     $ok = (int)$pdo->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='$t'")->fetchColumn() > 0;

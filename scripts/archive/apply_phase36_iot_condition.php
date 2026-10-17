@@ -91,7 +91,7 @@ if (!isset($argvFlags['apply'])) {
     exit(2);
 }
 
-require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../../src/config/db.php';
 
 $pdo = getDb();
 $targetDb = (string)$pdo->query('SELECT DATABASE()')->fetchColumn();

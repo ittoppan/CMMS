@@ -12,16 +12,11 @@
  */
 
 if (!function_exists('workday_setting')) {
-    /** อ่านค่า setting แบบ query ตรง ๆ (ไม่พึ่ง getSettingValue เพื่อให้ใช้ได้ทุกบริบท) */
+    /** อ่านค่า setting (delegate → src/helpers/settings.php; รองรับ scratch PDO ใน test) */
     function workday_setting(PDO $pdo, string $key, ?string $default = null): ?string {
-        try {
-            $st = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
-            $st->execute([$key]);
-            $v = $st->fetchColumn();
-            return ($v === false || $v === null) ? $default : (string)$v;
-        } catch (Throwable $e) {
-            return $default;
-        }
+        require_once __DIR__ . '/settings.php';
+        $v = setting_value($key, (string)($default ?? ''), $pdo);
+        return $v === '' ? $default : $v;
     }
 }
 

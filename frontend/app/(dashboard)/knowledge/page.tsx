@@ -190,7 +190,7 @@ export default function KnowledgePage() {
           title={feature.label}
           description={
             status?.state === "SCHEMA_MISSING"
-              ? "รัน scripts/apply_phase38_knowledge.php เพื่อติดตั้งตารางและค่าตั้งตั้งต้น"
+              ? "รัน scripts/archive/apply_phase38_knowledge.php เพื่อติดตั้งตารางและค่าตั้งตั้งต้น"
               : "เมื่อมีการใช้งานจริง ตัวเลขและช่องว่างความรู้จะอัปเดตอัตโนมัติ"
           }
         />

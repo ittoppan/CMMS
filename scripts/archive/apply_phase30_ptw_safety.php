@@ -27,7 +27,7 @@
  * รัน: php scripts/apply_phase30_ptw_safety.php (แก้ได้เรื่อย ๆ — idempotent)
  */
 
-require_once __DIR__ . '/../src/config/db.php';
+require_once __DIR__ . '/../../src/config/db.php';
 
 $pdo = getDb();
 $changed = 0;
