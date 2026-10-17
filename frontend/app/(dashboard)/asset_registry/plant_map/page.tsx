@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Factory, RefreshCw, Wrench } from "lucide-react";
 
 interface MapRow {
   id: number;
@@ -89,7 +89,7 @@ export default function PlantMapPage() {
               <Card key={zone}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-base">
-                    <span>🏭 โซน {zone}</span>
+                    <span className="flex items-center gap-2"><Factory className="w-4 h-4" aria-hidden="true" />โซน {zone}</span>
                     <Badge variant="neutral" className="font-mono">
                       {items.length} เครื่อง · {openCount} งานเปิด
                     </Badge>
@@ -113,7 +113,7 @@ export default function PlantMapPage() {
                           <div className="text-sm font-semibold leading-snug line-clamp-2">{r.name}</div>
                           <div className="mt-1 text-[11px] opacity-70">{r.location_name || "ไม่ระบุตำแหน่ง"}</div>
                           {Number(r.active_repairs) > 0 ? (
-                            <div className="mt-1 text-[11px] font-bold text-rose-600">🔧 {r.active_repairs} งานเปิด</div>
+                            <div className="mt-1 text-[11px] font-bold text-rose-600 flex items-center gap-1"><Wrench className="w-3.5 h-3.5" aria-hidden="true" />{r.active_repairs} งานเปิด</div>
                           ) : (
                             <div className="mt-1 text-[11px] opacity-60">ไม่มีงานค้าง</div>
                           )}

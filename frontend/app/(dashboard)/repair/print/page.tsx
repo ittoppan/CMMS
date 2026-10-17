@@ -69,6 +69,7 @@ export default function RepairPrintPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6 print:p-0">
+      <p className="cmms-eyebrow no-print">repair / พิมพ์ใบบันทึกงานซ่อม</p>
       <div className="no-print mb-4 flex items-center justify-between">
         <Button variant="secondary" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4" aria-hidden="true" /> ย้อนกลับ

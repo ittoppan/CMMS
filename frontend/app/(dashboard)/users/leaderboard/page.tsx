@@ -4,7 +4,7 @@
 // data: GET /api/v1/users.php?action=leaderboard (aggregate users + repair + repair_ratings)
 
 import { useEffect, useState, useCallback } from "react";
-import { Trophy, RefreshCw, Award } from "lucide-react";
+import { Trophy, RefreshCw } from "lucide-react";
 import { usePageHero, t } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
     <PageShell
       eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ผู้ใช้", href: "/users" }, { label: "KPI Leaderboard" }]}
-      title="🏆 KPI Leaderboard"
+      title={hero.title || "KPI Leaderboard"}
       description="จัดอันดับช่างตามงานที่เสร็จและคะแนนประเมินจากหัวหน้า (เฉพาะผู้ใช้ที่ active)"
       actions={
         <Button variant="secondary" onClick={fetchBoard}>
@@ -166,10 +166,9 @@ export default function LeaderboardPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Trophy className="w-4 h-4 text-amber-500" aria-hidden="true" />
-            ตารางจัดอันดับ
-            <Award className="w-4 h-4 text-muted-foreground ml-auto" aria-hidden="true" />
-          </CardTitle>
+          <Trophy className="w-4 h-4 text-amber-500" aria-hidden="true" />
+          ตารางจัดอันดับ
+        </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
