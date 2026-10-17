@@ -22,6 +22,24 @@ try {
 
     switch ($method) {
         case 'GET':
+            if (($_GET['action'] ?? '') === 'leaderboard') {
+                $stmt = $pdo->query("
+                    SELECT u.id, u.full_name, u.employee_code, u.position, u.avatar_path, d.name AS dept_name,
+                           COUNT(r.id) AS total_assigned,
+                           SUM(CASE WHEN r.status IN ('resolved','closed') THEN 1 ELSE 0 END) AS completed_count,
+                           SUM(CASE WHEN r.status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress_count,
+                           COALESCE(AVG(rr.rating_score), 0) AS avg_rating
+                    FROM users u
+                    LEFT JOIN departments d ON u.department_id = d.id
+                    LEFT JOIN repair r ON r.assigned_to = u.id
+                    LEFT JOIN repair_ratings rr ON r.id = rr.repair_id
+                    WHERE u.is_active = 1
+                    GROUP BY u.id, u.full_name, u.employee_code, u.position, u.avatar_path, d.name
+                    ORDER BY completed_count DESC, avg_rating DESC
+                ");
+                echo json_encode($stmt->fetchAll());
+                break;
+            }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
             if ($id) {

@@ -12,10 +12,10 @@
 - Astryx Design System
 
 ## Architecture Decision (2026-10-17)
-- **Next.js (`frontend/app`) คือ UI หลัก (canonical)** — ฟีเจอร์ใหม่/ฟีเจอร์ที่ต้องแก้ทำบน Next.js เป็นที่แรก ผ่าน `/api/v1/*.php` เสมอ
-- หน้า PHP (`public/pages/*`) ถือเป็น legacy — แก้เฉพาะเมื่อจำเป็น (bug/deploy) ไม่เพิ่มฟีเจอร์ใหม่ใน PHP
+- **Next.js (`frontend/app`) คือ UI หลัก (canonical) 100%** — พอร์ตครบทุกโมดูลแล้ว, หน้า PHP ทั้งหมดใน `public/pages/*` เป็น stub 302 ไปยังหน้า Next.js ที่เทียบเท่า (ผ่าน `src/includes/gone_next.php`, ทางผ่าน query string, ใช้ `NEXTJS_PORT` env)
+- ไม่เพิ่มฟีเจอร์ใหม่ใน PHP pages — แก้ใน `frontend/app` ผ่าน `/api/v1/*.php` เสมอ (+ API ใหม่: `/api/v1/master_data.php` รวม CRUD master/config, `/api/v1/asset_stats.php` ข้อมูลรวม downtime/TCO/plant_map/energy)
 - Logic ใหม่ต้องอยู่ใน `src/helpers/*` เดียว ห้ามก๊อปซ้ำข้ามไฟล์ (เช่น วันทำงานใช้ `src/helpers/calendar.php`, form helpers ใช้ `src/includes/layout.php`)
-- **หน้า PHP ที่ retire แล้ว** (stub redirect ต่อ Next.js ผ่าน `src/includes/gone_next.php`): `mtbf_mttr/*`, `equipment_borrowing/*`, `roles/*`, `approval/center.php`, `notifications/center.php`, `iot/monitor.php`, `safety/work_permit.php` — feature ถาวรอยู่ที่ Next.js, API `/api/v1/*` ไม่ถูก retire
+- API เดิมทุกตัวยังทำงานเหมือนเดิม — ห้าม retire `/api/v1/*`
 
 ## Automation Rules
 - **Telegram Notifications:**

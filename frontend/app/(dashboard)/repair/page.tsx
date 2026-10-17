@@ -16,6 +16,7 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   TableCellsIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -439,13 +440,35 @@ export default function WorkOrdersPage() {
       header: t("tbl.actions"),
       enableSorting: false,
       cell: ({ row }) => (
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => router.push(`/repair/edit?id=${row.original.rawId || row.original.id}`)}
-        >
-          อัปเดตสถานะ
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => router.push(`/repair/edit?id=${row.original.rawId || row.original.id}`)}
+          >
+            แก้ไข
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-rose-600 hover:bg-rose-50"
+            aria-label="ลบงานซ่อม"
+            onClick={async () => {
+              const delId = row.original.rawId || row.original.id;
+              if (!confirm(`ยืนยันการลบงานซ่อม #${delId}? ข้อมูลที่เกี่ยวข้อง (spare parts / attachments / ratings) จะถูกลบด้วย`)) return;
+              try {
+                const res = await fetch(`/api/v1/repair.php?id=${delId}`, { method: "DELETE" });
+                if (!res.ok && res.status !== 204) throw new Error(await res.text());
+                await fetchWO();
+              } catch (e) {
+                console.error("Delete repair failed", e);
+                alert("ลบงานซ่อมไม่สำเร็จ กรุณาลองใหม่");
+              }
+            }}
+          >
+            <TrashIcon className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        </div>
       ),
     },
   ];
