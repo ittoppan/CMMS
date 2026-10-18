@@ -2218,6 +2218,8 @@ next-route-announcer {
 
 .cmms-kpi-value {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   align-items: baseline;
   gap: 8px;
   font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif;

@@ -836,8 +836,8 @@ export default function SparePartsPage() {
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
                     <Box size={20} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">รายการอะไหล่ทั้งหมด</p>
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm text-muted-foreground">รายการอะไหล่ทั้งหมด</p>
                     <p className="cmms-kpi-value tabular-nums">{kpis.total} <span className="text-sm font-normal">รายการ</span></p>
                   </div>
                 </div>
@@ -847,8 +847,8 @@ export default function SparePartsPage() {
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
                     <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">ใกล้หมด (Min Stock)</p>
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm text-muted-foreground">ใกล้หมด (Min Stock)</p>
                     <p className="cmms-kpi-value tabular-nums">{kpis.lowCount} <span className="text-sm font-normal">รายการ</span></p>
                   </div>
                 </div>
@@ -858,8 +858,8 @@ export default function SparePartsPage() {
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
                     <TriangleAlert size={20} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">หมดคลัง (Out of Stock)</p>
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm text-muted-foreground">หมดคลัง (Out of Stock)</p>
                     <p className="cmms-kpi-value tabular-nums">{kpis.outCount} <span className="text-sm font-normal">รายการ</span></p>
                   </div>
                 </div>
@@ -869,9 +869,14 @@ export default function SparePartsPage() {
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
                     <Banknote size={20} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">มูลค่าคลังรวม</p>
-                    <p className="cmms-kpi-value tabular-nums">฿{kpis.totalValue.toLocaleString()}</p>
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm text-muted-foreground">มูลค่าคลังรวม</p>
+                    <p
+                      className="cmms-kpi-value tabular-nums"
+                      style={{ fontSize: kpis.totalValue >= 9_000_000 ? "1.15rem" : kpis.totalValue >= 1_000_000 ? "1.35rem" : undefined }}
+                    >
+                      ฿{kpis.totalValue.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </Card>
