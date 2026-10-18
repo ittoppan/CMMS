@@ -306,7 +306,7 @@ function DoneNode({ index, label, note }: { index: number; label: string; note?:
       </span>
       <span className="min-w-0">
         <span className="block text-sm font-medium leading-tight">{label}</span>
-        {note && <span className="mt-0.5 block text-xs leading-snug text-white/80">{note}</span>}
+        {note && <span className="mt-0.5 block text-xs leading-snug text-white/90">{note}</span>}
       </span>
     </div>
   );

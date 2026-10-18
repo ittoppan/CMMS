@@ -75,7 +75,7 @@ export default function OeePage() {
                 </>
               ) : (
                 <>
-                  <div className="text-5xl font-black text-slate-400">N/A</div>
+                  <div className="text-5xl font-black text-slate-500">N/A</div>
                   <p className="mt-2 text-xs text-muted-foreground">ยังไม่มีข้อมูล downtime — ใช้ค่าเริ่มต้น 100%</p>
                 </>
               )}
@@ -87,7 +87,7 @@ export default function OeePage() {
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase">Performance / Quality</CardTitle>
             </CardHeader>
             <CardContent className="pt-0 text-center py-4">
-              <div className="text-5xl font-black text-slate-400">N/A</div>
+              <div className="text-5xl font-black text-slate-500">N/A</div>
               <p className="mt-2 text-xs text-muted-foreground">ต้องมีข้อมูล KPI ผลิตจริง + อัตรา QC ผ่าน จากระบบผลิตาภิบาล</p>
             </CardContent>
           </Card>
@@ -97,7 +97,7 @@ export default function OeePage() {
               <CardTitle className="text-sm font-semibold text-muted-foreground uppercase">OEE รวม</CardTitle>
             </CardHeader>
             <CardContent className="pt-0 text-center py-4">
-              <div className="text-5xl font-black text-slate-400">N/A</div>
+              <div className="text-5xl font-black text-slate-500">N/A</div>
               <p className="mt-2 text-xs text-muted-foreground">OEE = A × P × Q (พร้อมแสดงเมื่อครบทั้ง 3 ตัวแปร)</p>
               <Badge className="mt-2 bg-amber-100 text-amber-700">ต้องเชื่อมข้อมูลผลิต</Badge>
             </CardContent>

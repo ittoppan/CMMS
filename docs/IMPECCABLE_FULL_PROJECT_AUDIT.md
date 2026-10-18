@@ -537,15 +537,17 @@ The following pages require visual/behavioral verification in browser (cannot be
 ## 14. PROPOSED IMPLEMENTATION PLAN
 
 ### Sprint 1 (Week 1-2): Critical Fixes
-- [ ] Fix all hydration mismatches
-- [ ] Add offline queue to Spare Parts Issue Center
-- [ ] Add offline queue to Repair/My Tasks
-- [ ] Add offline queue to PM Checksheet
+- [x] Fix all hydration mismatches — verified 2026-10-18: จุดเดียวที่เป็น render-time (`getAppBase` ใน qr-sheet = dead code) ลบออกแล้ว (commit `510130a`); อีก 13 จุดเป็น guard ใน function/effect ซึ่งปลอดภัย
+- [x] Add offline queue to Spare Parts Issue Center — มีอยู่แล้ว (`sendOrEnqueueDetailed` จาก `lib/offlineQueue`)
+- [x] Add offline queue to Repair/My Tasks — มีอยู่แล้ว (`sendOrEnqueue` ×5 action)
+- [x] Add offline queue to PM Checksheet — มีอยู่แล้ว (`enqueue` + snapshot + offline banner)
+
+> หมายเหตุ: รายการที่รายงานว่า "ยังไม่ทำ" ในเอกสารนี้ถูกเขียนเมื่อ 2026-10-09 ระบบ offline-first ได้ถูก implement ครบก่อนหน้านั้นแล้ว
 
 ### Sprint 2 (Week 3-4): Touch & Accessibility
-- [ ] Increase all touch targets to ≥48px
+- [x] Increase all touch targets to ≥48px — แก้ระดับราก (commit `510130a`): Button ทุกขนาดย่อย (sm/icon-xs/icon/md) ขยาย hit-area เป็น ≥48px ด้วย pseudo-element โดยคงขนาดภาพเดิม (ไม่กระทบ layout) — ครอบคลุมอัตโนมัติทุกจุดที่ใช้ Button
 - [ ] Add form labels + error announcements
-- [ ] Fix color contrast violations
+- [x] Fix color contrast violations — ยืนยัน 2026-10-18: สแกน raw low-contrast classes ทั้ง app เหลือ 2 จุดที่วัดแล้วล้ม AA (oee "N/A" slate-400 = 2.5:1 และ process-flows note text-white/80 = 4.27:1) แก้เป็น slate-500 (4.7:1) / white/90 (5.0:1) แล้ว; global tokens: muted/secondary ประเมินตาม `docs/ANALYTICS_PERFORMANCE.md` และ TASKS.md G8 ผ่านอยู่แล้ว
 - [ ] Add inline form validation
 
 ### Sprint 3 (Week 5-6): Component Consistency
