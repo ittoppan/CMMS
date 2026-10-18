@@ -7,9 +7,9 @@
  * the IIS default document and old bookmarks/links keep working.
  */
 
-$host    = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$port    = getenv('NEXTJS_PORT') ?: '3001';
-$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost') ?: 'localhost';
+$port = getenv('NEXTJS_PORT') ?: '3001';
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 
 header('Location: ' . $scheme . '://' . $host . ':' . $port . '/dashboard', true, 302);
 exit;

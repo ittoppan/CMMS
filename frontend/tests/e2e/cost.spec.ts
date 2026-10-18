@@ -19,16 +19,16 @@ const root = path.resolve(__dirname, "..", "..");
 
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login");
-  await page.getByLabel(/Username|ชื่อผู้ใช้/i).fill(creds.username!);
-  await page.getByLabel(/Password|รหัสผ่าน/i).fill(creds.password!);
+  await page.getByRole("textbox", { name: /Username|ชื่อผู้ใช้/i }).fill(creds.username!);
+  await page.getByRole("textbox", { name: /Password|รหัสผ่าน/i }).fill(creds.password!);
   await page.getByRole("button", { name: /Login|เข้าสู่ระบบ/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 }
 
 async function loginAs(page: import("@playwright/test").Page, username: string, password: string) {
   await page.goto("/login");
-  await page.getByLabel(/Username|ชื่อผู้ใช้/i).fill(username);
-  await page.getByLabel(/Password|รหัสผ่าน/i).fill(password);
+  await page.getByRole("textbox", { name: /Username|ชื่อผู้ใช้/i }).fill(username);
+  await page.getByRole("textbox", { name: /Password|รหัสผ่าน/i }).fill(password);
   await page.getByRole("button", { name: /Login|เข้าสู่ระบบ/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 }

@@ -17,8 +17,8 @@ test.beforeAll(async ({ browser }) => {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto("/login");
-  await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
-  await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
+  await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
+  await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
   await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
   savedStorage = JSON.stringify(await ctx.storageState());
