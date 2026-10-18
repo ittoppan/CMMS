@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,15 +42,6 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
   { key: "verifications", label: "ผลตรวจสอบ", icon: CircleCheck },
   { key: "activity", label: "ประวัติ", icon: Clock },
 ];
-
-function Pill({ tone, children }: { tone: "ok" | "warn" | "down" | "idle"; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", tone)}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
-  );
-}
 
 function lampOf(tone: Tone | "ok" | "warn" | "down" | "idle" | undefined): "ok" | "warn" | "down" | "idle" {
   switch (tone) {
@@ -219,7 +211,7 @@ export default function EngineeringChangeDetailPage() {
           <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{d.title}</h1>
-            <Pill tone={lampOf(ECR_STATUS_TONE[d.status])}>{ecrStatusLabel(d.status)}</Pill>
+            <AndonBadge tone={lampOf(ECR_STATUS_TONE[d.status])}>{ecrStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.priority === "critical" ? "danger" : d.priority === "high" ? "warning" : "neutral"}>
               {ecrPriorityLabel(d.priority)}
             </Badge>
@@ -447,12 +439,12 @@ export default function EngineeringChangeDetailPage() {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{impactAreas[i.impact_area] ?? i.impact_area}</span>
-                        <Pill tone={lampOf(i.severity === "critical" ? "danger" : i.severity === "high" ? "warning" : "info")}>
+                        <AndonBadge tone={lampOf(i.severity === "critical" ? "danger" : i.severity === "high" ? "warning" : "info")}>
                           {SEVERITY_LABELS[i.severity] ?? i.severity}
-                        </Pill>
-                        <Pill tone={lampOf(i.status === "completed" ? "success" : i.status === "in_progress" ? "info" : i.status === "not_applicable" ? "idle" : "warn")}>
+                        </AndonBadge>
+                        <AndonBadge tone={lampOf(i.status === "completed" ? "success" : i.status === "in_progress" ? "info" : i.status === "not_applicable" ? "idle" : "warn")}>
                           {ECR_IMPACT_STATUS_LABELS[i.status] ?? ecrImpactStatusLabel(i.status)}
-                        </Pill>
+                        </AndonBadge>
                       </div>
                       {i.target_type && i.target_type !== "none" && (
                         <span className="text-xs text-muted-foreground">{targetTypes[i.target_type] ?? i.target_type} #{i.target_id}</span>
@@ -493,9 +485,9 @@ export default function EngineeringChangeDetailPage() {
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="neutral">{ECR_LINK_TYPE_LABELS[l.link_type] ?? l.link_type}</Badge>
-                        <Pill tone={lampOf(l.action_status === "done" ? "success" : l.action_status === "in_progress" ? "info" : l.action_status === "not_applicable" ? "idle" : "warn")}>
+                        <AndonBadge tone={lampOf(l.action_status === "done" ? "success" : l.action_status === "in_progress" ? "info" : l.action_status === "not_applicable" ? "idle" : "warn")}>
                           {ECR_LINK_STATUS_LABELS[l.action_status] ?? ecrLinkStatusLabel(l.action_status)}
-                        </Pill>
+                        </AndonBadge>
                       </div>
                       <p className="text-sm font-mono">#{l.entity_id}</p>
                       {l.action_required && <p className="text-xs text-muted-foreground">สิ่งที่ต้องทำ: {l.action_required}</p>}
@@ -559,9 +551,9 @@ export default function EngineeringChangeDetailPage() {
                           </td>
                           <td className="px-4 py-2.5">{a.approver_name ?? "—"}</td>
                           <td className="px-4 py-2.5">
-                            <Pill tone={lampOf(a.decision === "approved" ? "success" : a.decision === "rejected" ? "danger" : a.decision === "pending" ? "warn" : "idle")}>
+                            <AndonBadge tone={lampOf(a.decision === "approved" ? "success" : a.decision === "rejected" ? "danger" : a.decision === "pending" ? "warn" : "idle")}>
                               {ecrDecisionLabel(a.decision)}
-                            </Pill>
+                            </AndonBadge>
                           </td>
                           <td className="px-4 py-2.5 text-xs text-muted-foreground">{fmtEcrDate(a.due_at)}</td>
                           <td className="px-4 py-2.5 text-xs text-muted-foreground">{fmtEcrDateTime(a.decided_at)}</td>
@@ -601,9 +593,9 @@ export default function EngineeringChangeDetailPage() {
                         <tr key={v.id} className="border-b last:border-0">
                           <td className="px-4 py-2.5">#{v.round}</td>
                           <td className="px-4 py-2.5">
-                            <Pill tone={lampOf(v.result === "pass" ? "success" : v.result === "fail" ? "danger" : "warn")}>
+                            <AndonBadge tone={lampOf(v.result === "pass" ? "success" : v.result === "fail" ? "danger" : "warn")}>
                               {ECR_VERIFY_LABELS[v.result] ?? v.result}
-                            </Pill>
+                            </AndonBadge>
                           </td>
                           <td className="px-4 py-2.5 text-muted-foreground">{verifyMethods[v.verification_method ?? ""] ?? v.verification_method ?? "—"}</td>
                           <td className="px-4 py-2.5">

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -48,15 +49,6 @@ function Kpi({ label, value, sub, lamp }: { label: string; value: number; sub?: 
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
     </Card>
-  );
-}
-
-function Pill({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", tone)}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
   );
 }
 
@@ -265,7 +257,7 @@ export default function DocumentsPage() {
                           </td>
                           <td className="px-4 py-3 text-muted-foreground">{docTypeLabel(doc.doc_type, types)}</td>
                           <td className="px-4 py-3">
-                            <Pill tone={lampTone(tone)}>{docStatusLabel(doc.status)}</Pill>
+                            <AndonBadge tone={lampTone(tone)}>{docStatusLabel(doc.status)}</AndonBadge>
                           </td>
                           <td className="px-4 py-3">
                             {doc.effective_revision_no ? (
@@ -364,7 +356,7 @@ function MyAcks() {
             เปิดอ่านฉบับที่มีผลบังคับใช้ก่อน แล้วกดยืนยันรับทราบในหน้าเอกสาร — ระบบผูกการรับทราบกับฉบับที่อ่านจริง
           </CardDescription>
         </div>
-        {items.some((x) => Number(x.overdue ?? 0) > 0) && <Pill tone="down">บางรายการเกินกำหนด</Pill>}
+        {items.some((x) => Number(x.overdue ?? 0) > 0) && <AndonBadge tone="down">บางรายการเกินกำหนด</AndonBadge>}
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -465,7 +457,7 @@ function QrLabelPanel() {
                       <AndonLamp status="ok" size="sm" showLabel />
                     </span>
                   ) : (
-                    <Pill tone="idle">ยังไม่มีฉบับที่มีผล</Pill>
+                    <AndonBadge tone="idle">ยังไม่มีฉบับที่มีผล</AndonBadge>
                   )}
                 </td>
               </tr>

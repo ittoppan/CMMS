@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -51,15 +52,6 @@ function Kpi({ label, value, sub, lamp }: { label: string; value: number; sub?: 
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
     </Card>
-  );
-}
-
-function Pill({ tone, children }: { tone: "ok" | "warn" | "down" | "idle"; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", tone)}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
   );
 }
 
@@ -292,7 +284,7 @@ export default function EngineeringChangesPage() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <Pill tone={lampOf(tone)}>{ecrStatusLabel(e.status)}</Pill>
+                            <AndonBadge tone={lampOf(tone)}>{ecrStatusLabel(e.status)}</AndonBadge>
                           </td>
                           <td className="px-4 py-3">
                             {openImp > 0 ? (

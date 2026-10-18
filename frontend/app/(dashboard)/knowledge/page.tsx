@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
 import { usePageLayout } from "@/lib/pageLayout";
+import AndonBadge from "@/components/AndonBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,15 +54,6 @@ function Kpi({
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
     </Card>
-  );
-}
-
-function Pill({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", tone)}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
   );
 }
 

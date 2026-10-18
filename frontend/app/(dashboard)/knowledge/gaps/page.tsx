@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
 import { usePageLayout } from "@/lib/pageLayout";
+import AndonBadge from "@/components/AndonBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
@@ -59,15 +60,6 @@ function lampTone(tone: Tone | undefined): "ok" | "warn" | "down" | "idle" {
     default:
       return "idle";
   }
-}
-
-function Pill({ tone, children }: { tone: Tone | undefined; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", lampTone(tone))}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
-  );
 }
 
 export default function KnowledgeGapsPage() {
@@ -313,10 +305,10 @@ export default function KnowledgeGapsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <Pill tone={KN_GAP_STATUS_TONE[g.status]}>{knGapStatusLabel(g.status)}</Pill>
+                          <AndonBadge tone={lampTone(KN_GAP_STATUS_TONE[g.status])}>{knGapStatusLabel(g.status)}</AndonBadge>
                         </td>
                         <td className="px-4 py-3">
-                          <Pill tone={KN_GAP_PRIORITY_TONE[g.priority]}>{knGapPriorityLabel(g.priority)}</Pill>
+                          <AndonBadge tone={lampTone(KN_GAP_PRIORITY_TONE[g.priority])}>{knGapPriorityLabel(g.priority)}</AndonBadge>
                         </td>
                         <td className="px-4 py-3 text-xs text-muted-foreground">
                           {g.priority_reason || "—"}

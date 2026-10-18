@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,15 +47,6 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
 
 const inputCls =
   "h-10 w-full rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none transition-colors focus:border-[var(--cmms-border-focus)] focus:ring-2 focus:ring-[var(--cmms-border-focus)]";
-
-function Pill({ tone, children }: { tone: "ok" | "warn" | "down" | "idle"; children: React.ReactNode }) {
-  return (
-    <span className={cn("cmms-status", tone)}>
-      <span className="cmms-status-dot" />
-      {children}
-    </span>
-  );
-}
 
 /** tone จาก Phase 32 (neutral/success/warning/danger/info) → .cmms-status */
 function lampOf(tone: Tone | "ok" | "warn" | "down" | "idle" | undefined): "ok" | "warn" | "down" | "idle" {
@@ -305,7 +297,7 @@ export default function DocumentDetailPage() {
           <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{d.title}</h1>
-            <Pill tone={lampOf(DOC_STATUS_TONE[d.status])}>{docStatusLabel(d.status)}</Pill>
+            <AndonBadge tone={lampOf(DOC_STATUS_TONE[d.status])}>{docStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.confidentiality === "confidential" ? "danger" : d.confidentiality === "restricted" ? "warning" : "neutral"}>
               {CONFIDENTIALITY_LABELS[d.confidentiality] ?? d.confidentiality}
             </Badge>
@@ -398,9 +390,9 @@ export default function DocumentDetailPage() {
                     <div className="h-full rounded-full bg-[var(--cmms-success)]" style={{ width: `${prog.percent ?? 0}%` }} />
                   </div>
                   <div className="flex flex-wrap gap-2 pt-1 text-xs">
-                    <Pill tone="warn">ค้าง {prog.pending}</Pill>
-                    <Pill tone="down">เกินกำหนด {prog.overdue}</Pill>
-                    {prog.exception > 0 && <Pill tone="down">ข้อยกเว้น {prog.exception}</Pill>}
+                    <AndonBadge tone="warn">ค้าง {prog.pending}</AndonBadge>
+                    <AndonBadge tone="down">เกินกำหนด {prog.overdue}</AndonBadge>
+                    {prog.exception > 0 && <AndonBadge tone="down">ข้อยกเว้น {prog.exception}</AndonBadge>}
                   </div>
                 </div>
                 {can?.manage_acks && (
@@ -497,7 +489,7 @@ export default function DocumentDetailPage() {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="text-base font-semibold">rev {rev.revision_no}</span>
-                          <Pill tone={lampOf(REV_STATUS_TONE[rev.status])}>{revStatusLabel(rev.status)}</Pill>
+                          <AndonBadge tone={lampOf(REV_STATUS_TONE[rev.status])}>{revStatusLabel(rev.status)}</AndonBadge>
                           {rev.id === d.current_effective_revision_id && <Badge variant="success">มีผลบังคับใช้</Badge>}
                         </div>
                         <span className="text-xs text-muted-foreground">สร้าง {fmtDocDateTime(rev.created_at)}{rev.created_name ? ` · ${rev.created_name}` : ""}</span>
@@ -598,10 +590,10 @@ export default function DocumentDetailPage() {
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">{impactAreaLabel(i.impact_area, impactAreas)}</span>
-                          <Pill tone={lampOf(i.severity === "critical" ? "danger" : i.severity === "high" ? "warning" : "info")}>{severityLabel(i.severity)}</Pill>
-                          <Pill tone={lampOf(i.status === "completed" ? "success" : i.status === "in_progress" ? "info" : i.status === "not_applicable" ? "idle" : "warn")}>
+                          <AndonBadge tone={lampOf(i.severity === "critical" ? "danger" : i.severity === "high" ? "warning" : "info")}>{severityLabel(i.severity)}</AndonBadge>
+                          <AndonBadge tone={lampOf(i.status === "completed" ? "success" : i.status === "in_progress" ? "info" : i.status === "not_applicable" ? "idle" : "warn")}>
                             {IMPACT_STATUS_LABELS[i.status] ?? i.status}
-                          </Pill>
+                          </AndonBadge>
                         </div>
                         {rev && <span className="text-xs text-muted-foreground">rev {rev.revision_no}</span>}
                       </div>
@@ -656,9 +648,9 @@ export default function DocumentDetailPage() {
                           <tr key={a.id} className="border-b last:border-0">
                             <td className="px-4 py-2.5">{u?.full_name ?? `#${a.user_id}`}</td>
                             <td className="px-4 py-2.5">
-                              <Pill tone={lampOf(a.status === "acknowledged" ? "success" : a.status === "exception" ? "danger" : "warn")}>
+                              <AndonBadge tone={lampOf(a.status === "acknowledged" ? "success" : a.status === "exception" ? "danger" : "warn")}>
                                 {ACK_STATUS_LABELS[a.status] ?? a.status}
-                              </Pill>
+                              </AndonBadge>
                               {a.exception_reason && <p className="mt-1 text-xs text-muted-foreground">{a.exception_reason}</p>}
                             </td>
                             <td className="px-4 py-2.5 text-muted-foreground">{ACK_METHOD_LABELS[a.method] ?? a.method}</td>
