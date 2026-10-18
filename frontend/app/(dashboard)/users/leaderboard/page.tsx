@@ -86,7 +86,7 @@ export default function LeaderboardPage() {
     { key: "rank", header: "#", renderCell: (r) => <span className="font-mono font-semibold">{r.rank}</span> },
     {
       key: "fullName",
-      header: t("tbl.name") || "ชื่อ",
+      header: "ชื่อ",
       renderCell: (r) => (
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
@@ -100,7 +100,7 @@ export default function LeaderboardPage() {
         </div>
       ),
     },
-    { key: "deptName", header: t("tbl.department") || "แผนก" },
+    { key: "deptName", header: t("field.department") },
     { key: "totalAssigned", header: "งานทั้งหมด", renderCell: (r) => <span className="font-mono">{r.totalAssigned}</span> },
     {
       key: "completedCount",

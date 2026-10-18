@@ -303,7 +303,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Content */}
           <main id="cmms-main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-4 lg:px-6 lg:pb-10 lg:pt-6">
+            <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-[calc(56px+env(safe-area-inset-top)+12px)] lg:px-6 lg:pb-10 lg:pt-6">
               {children}
             </div>
           </main>

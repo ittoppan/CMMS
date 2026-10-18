@@ -320,7 +320,7 @@ export default function MasterDataPage() {
     })),
     {
       key: "__actions",
-      header: t("action.actions") || "จัดการ",
+      header: t("tbl.actions"),
       renderCell: (r: Row) => (
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" onClick={() => openEdit(r)} aria-label="แก้ไข">
