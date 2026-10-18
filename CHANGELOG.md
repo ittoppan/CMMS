@@ -2,8 +2,26 @@
 
 รูปแบบ: [Keep a Changelog](https://keepachangelog.com/) · ตัวเลขเวอร์ชันตรงกับ `frontend/package.json` (ตอนนี้ `1.1.0`) และ tag ใน git (เช่น `v1.1.0`)
 
-## [Unreleased]
-- (ว่าง — ฟีเจอร์ถัดไปจะเริ่มหลัง Phase 23)
+## [Unreleased] — 2026-10-18 — UX/UI Hardening + Production Deploy Fix
+
+Commit: polish/a11y session จาก Impeccable audit backlog (45f2034, 86234b9, ed6d413, 038c4c9)
+
+### Fixed (Critical)
+- **Deploy bug ที่ทำให้ :3001 เห็นหน้าเปล่า/ไร้ CSS**: `next output:standalone` ไม่ copy `.next/static` และ `public` — เพิ่ม `Sync-StandaloneAssets` ใน `scripts/ensure-next.ps1` (CSS/JS/logo/manifest/sw.js โหลดครบแล้ว); ระหว่างที่ไม่แก้ ผู้ใช้เวอร์ชัน production เห็น HTML คลื่น ไม่มีรป
+- **e2e suite พัง 35/146**: (1) login ปุ่ม "แสดงรหัสผ่าน" ชน `getByLabel` strict-mode → ใช้ `getByRole("textbox")` ทั้ง 11 spec; (2) 3 spec เก่ายังคาดหวัง PHP เรนเดอร์ → เขียนใหม่เป็น assert stub mapping 302 (10/10) ตามสถาปัตยกรรม retired-stubs
+- **`public/index.php` Location ผิด**: ไม่ strip port จาก HTTP_HOST → `localhost:8081:3001` (แก้ให้เท่า gone_next.php)
+- บั๊กซ่อน: spare_parts/edit ซ่อนฟอร์มทั้งหมดเมื่อ submit ล้มเหลว (แยก loadFailed ออกจาก validation)
+- notifications page: content HTML ปนใน log preview → strip tags
+
+### Added (Feature)
+- **Touch targets ≥48px** โดยไม่กระทบดีไซน์: hit-area pseudo-element ใน Button (sm/icon-xs/icon/md) ขึ้นจากความต้องการสวมถุงมือ (WCAG 2.5.8) — ครอบคลุมอัตโนมัติทุกปุ่มย่อยระบบ
+- **Inline form validation**: `lib/use-inline-validation.ts` (touched-on-blur + submit-attempted) + migrate repair/edit, spare_parts/edit, users/edit, users/create; repair/create เปิด RHF `mode: "onBlur"` (zod)
+- **AndonBadge** (components/AndonBadge.tsx) — badge สถานะ .cmms-status มาตรฐาน แทนการก๊อป local Pill ซ้ำ 7 ไฟล์ (documents/engineering-changes/knowledge)
+
+### Changed (a11y / docs)
+- Color contrast AA: oee "N/A" slate-400 → 500 (2.5:1 → 4.7:1), process-flows note white/80 → 90 (4.27 → 5.0) บน brand blue
+- `docs/IMPECCABLE_FULL_PROJECT_AUDIT.md: Sprint 1-4 ทุกข้อปิดพร้อม evidence + commit ref (ผ่าน verify จริง ทั้งเชิง http วัดค่า และ e2e)
+- qa: Playwright e2e **144 passed / 0 failed / 2 skipped** (เดิม 35 failed), typecheck 0 error, pre-push design-audit strict PASS 0 WARN
 
 ## [1.2.0] — 2026-09-20 — ADVANCED MAINTENANCE PLANNING & SCHEDULING (Phase 25)
 

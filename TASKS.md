@@ -4,6 +4,14 @@ This document outlines the current status of features and modules within the CMM
 
 ## [x] Completed Features & Modules
 
+- [x] **UX/UI Hardening + Production Deploy Fix (2026-10-18):**
+  - Deploy วิกฤต: `ensure-next.ps1` copy `.next/static` + `public` เข้า `.next/standalone` ก่อน start (เดิม production :3001 โหลด CSS/JS/logo/manifest 404)
+  - e2e suite เขียวเต็ม: 144 passed / 0 failed (เดิม 35) — login locator เป็น getByRole + 3 legacy PHP specs เขียนใหม่เป็น assert 302 stub mapping
+  - `public/index.php` strip port จาก HTTP_HOST (เดิม Location `8081:3001`)
+  - Touch targets: Button hit-area ≥48px ทุกขนาดย่อย (pseudo-element, ไม่เปลี่ยน layout) — สำหรับโรงงานสวมถุงมือ
+  - Inline validation: `lib/use-inline-validation.ts` + migrate repair/edit, spare_parts/edit, users/edit, users/create; repair/create เปิด `mode: "onBlur"`
+  - AndonBadge shared (แทน local Pill ก๊อปซ้ำ 7 ไฟล์) + contrast AA (oee slate-500, process-flows white/90)
+  - Impeccable audit backlog (docs/IMPECCABLE_FULL_PROJECT_AUDIT.md): Sprint 1-4 ปิดครบพร้อม evidence
 - [x] **PHP REST API - Core Infrastructure:**
   - Database connection and utility (`src/config/db.php`)
   - User authentication and session management (`src/auth.php`)

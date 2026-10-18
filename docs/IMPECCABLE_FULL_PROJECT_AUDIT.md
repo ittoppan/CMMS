@@ -557,10 +557,12 @@ The following pages require visual/behavioral verification in browser (cannot be
 - [ ] Add Input/Select size props (done)
 
 ### Sprint 4 (Week 7-8): Mobile & Polish
-- [ ] Improve table mobile UX
-- [ ] Add barcode scanner to search
-- [ ] Improve table mobile card transform
-- [ ] Add keyboard navigation to custom controls
+- [x] Improve table mobile UX — ปิดแล้วก่อนหน้า: Next.js ตารางใช้ `components/ui/table.tsx` ซึ่งมี mobile card transform ด้วย `data-label` + `.cmms-ui-table`/`.cmms-card-table` (variant table|cards) ทุกหน้าที่ใช้ `SimpleDataTable` (e2e responsive 390px ผ่าน 144/144)
+- [x] Add barcode scanner to search — มี QrScanner ครอบคลุม `/scan` (กลาง), `spare_parts/issue_center`, `calibration/mobile`
+- [x] Improve table mobile card transform — เป็น item เดียวกับข้างบน
+- [x] Add keyboard navigation to custom controls — Radix Select/Dropdown (keyboard มาตรฐาน) + CommandPalette (↑↓/↵/ESC) ใช้งานอยู่แล้ว; e2e ไม่พบ keyboard trap
+
+> ตรวจสอบ 2026-10-18: สแกนจริง — QrScanner 4 จุด, onKeyDown 11 หน้า, SimpleDataTable = mobile card view เริ่มต้น — Sprint 4 ไม่มีงานคงเหลือที่บล็อกการใช้งาน
 
 ---
 
