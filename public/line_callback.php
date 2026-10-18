@@ -30,7 +30,10 @@ $state = $_GET['state'] ?? '';
 // Validate state to prevent CSRF
 if (!$state || !isset($_SESSION['line_oauth_state']) || $state !== $_SESSION['line_oauth_state']) {
     unset($_SESSION['line_oauth_state']);
-    die('Invalid OAuth state. Please try logging in again.');
+    // ไม่ die() ทิ้ง — เด้งกลับหน้า login พร้อมข้อความให้เริ่ม flow ใหม่ (state ใช้ครั้งเดียวและผูก session)
+    $loginPage = $isReactUi ? '/login' : '/login.php';
+    header('Location: ' . $loginPage . '?error=' . urlencode('LINE session หมดอายุหรือลิงก์ถูกใช้ซ้ำ กรุณากดปุ่ม LINE Login ใหม่ครับ'));
+    exit;
 }
 unset($_SESSION['line_oauth_state']);
 
