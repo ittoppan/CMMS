@@ -73,3 +73,6 @@ docs/EN/*.doc
 
 # Playwright MCP audit scratch
 .playwright-mcp/
+
+# polish sweep screenshots (verification artifacts)
+polish-*.png

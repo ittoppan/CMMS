@@ -17,11 +17,6 @@ type Asset = {
   payload: string;
 };
 
-const getAppBase = () =>
-  typeof window !== "undefined"
-    ? window.location.origin
-    : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
-
 export default function QrSheetPage() {
   const [machines, setMachines] = useState<Asset[]>([]);
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
