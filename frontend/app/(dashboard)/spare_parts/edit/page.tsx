@@ -15,6 +15,7 @@ import {
   SquarePen,
 } from "lucide-react";
 import ImageUploadField from "@/components/ImageUploadField";
+import { useInlineValidation } from "@/lib/use-inline-validation";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
 
@@ -27,6 +28,7 @@ function EditSparePartContent() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [form, setForm] = useState({
     code: "",
@@ -44,9 +46,15 @@ function EditSparePartContent() {
 
   const update = (key: string, val: any) => setForm(prev => ({ ...prev, [key]: val }));
 
+  // inline validation — บอกทันทีที่ field ผิด (blur / หลัง submit ครั้งแรก)
+  const iv = useInlineValidation();
+  const codeError = iv.errorFor("code", !form.code.trim() ? t("msg.part_code_required") : "");
+  const nameError = iv.errorFor("name", !form.name.trim() ? t("msg.part_name_required") : "");
+
   useEffect(() => {
     if (!partId) {
       setErrorMessage(t("msg.part_id_missing"));
+      setLoadFailed(true);
       setLoading(false);
       return;
     }
@@ -69,14 +77,19 @@ function EditSparePartContent() {
           });
         } else {
           setErrorMessage(t("msg.part_not_found"));
+          setLoadFailed(true);
         }
       })
-      .catch(() => setErrorMessage(t("msg.part_load_error")))
+      .catch(() => {
+        setErrorMessage(t("msg.part_load_error"));
+        setLoadFailed(true);
+      })
       .finally(() => setLoading(false));
   }, [partId]);
 
   const handleSubmit = async () => {
-    if (!form.code || !form.name) {
+    iv.submit();
+    if (!form.code.trim() || !form.name.trim()) {
       setErrorMessage(t("msg.part_code_name_required"));
       return;
     }
@@ -166,13 +179,15 @@ function EditSparePartContent() {
                 <Alert variant="danger" title="Error" description={errorMessage} />
               )}
 
-              {!errorMessage || (form.code && form.name) ? (
+              {!loadFailed ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Input
                     label={t("form.part_code_req")}
                     required
                     value={form.code}
                     onChange={(e) => update("code", e.target.value)}
+                    onBlur={() => iv.touch("code")}
+                    error={codeError}
                   />
 
                   <Input
@@ -180,6 +195,8 @@ function EditSparePartContent() {
                     required
                     value={form.name}
                     onChange={(e) => update("name", e.target.value)}
+                    onBlur={() => iv.touch("name")}
+                    error={nameError}
                   />
 
                   <div className="space-y-1.5">

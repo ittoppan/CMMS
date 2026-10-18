@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { useInlineValidation } from "@/lib/use-inline-validation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,9 @@ export default function CreateUserPage() {
 
   const update = (key: string, val: any) => setForm(prev => ({ ...prev, [key]: val }));
 
+  // inline validation — ตรวจเมื่อ blur / หลัง submit ครั้งแรก
+  const iv = useInlineValidation();
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -69,7 +73,8 @@ export default function CreateUserPage() {
   };
 
   const handleSubmit = async () => {
-    if (!form.username || !form.employeeCode || !form.fullName || !form.password) {
+    iv.submit();
+    if (!form.username.trim() || !form.employeeCode.trim() || !form.fullName.trim() || !form.password) {
       setErrorMessage(t("msg.user_required_fields"));
       return;
     }
@@ -195,49 +200,61 @@ export default function CreateUserPage() {
               <Label htmlFor="create-username">
                 {t("field.username")} <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="create-username"
-                placeholder={t("placeholder.username")}
-                value={form.username}
-                onChange={(e) => update("username", e.target.value)}
-              />
+                <Input
+                  id="create-username"
+                  placeholder={t("placeholder.username")}
+                  value={form.username}
+                  onChange={(e) => update("username", e.target.value)}
+                  onBlur={() => iv.touch("username")}
+                  error={iv.errorFor("username", !form.username.trim() ? t("msg.username_required") : "")}
+                  aria-required="true"
+                />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="create-full-name">
                 {t("field.full_name")} <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="create-full-name"
-                placeholder={t("placeholder.full_name")}
-                value={form.fullName}
-                onChange={(e) => update("fullName", e.target.value)}
-              />
+                <Input
+                  id="create-full-name"
+                  placeholder={t("placeholder.full_name")}
+                  value={form.fullName}
+                  onChange={(e) => update("fullName", e.target.value)}
+                  onBlur={() => iv.touch("fullName")}
+                  error={iv.errorFor("fullName", !form.fullName.trim() ? t("msg.full_name_required") : "")}
+                  aria-required="true"
+                />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="create-employee-code">
                 {t("field.employee_code")} <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="create-employee-code"
-                placeholder={t("placeholder.employee_code_line")}
-                value={form.employeeCode}
-                onChange={(e) => update("employeeCode", e.target.value.toUpperCase())}
-              />
+                <Input
+                  id="create-employee-code"
+                  placeholder={t("placeholder.employee_code_line")}
+                  value={form.employeeCode}
+                  onChange={(e) => update("employeeCode", e.target.value.toUpperCase())}
+                  onBlur={() => iv.touch("employeeCode")}
+                  error={iv.errorFor("employeeCode", !form.employeeCode.trim() ? t("msg.employee_code_required") : "")}
+                  aria-required="true"
+                />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="create-password">
                 {t("field.password")} <span className="text-destructive">*</span>
               </Label>
-              <Input
-                id="create-password"
-                type="password"
-                placeholder={t("form.set_password")}
-                value={form.password}
-                onChange={(e) => update("password", e.target.value)}
-              />
+                <Input
+                  id="create-password"
+                  type="password"
+                  placeholder={t("form.set_password")}
+                  value={form.password}
+                  onChange={(e) => update("password", e.target.value)}
+                  onBlur={() => iv.touch("password")}
+                  error={iv.errorFor("password", !form.password ? t("msg.password_required") : "")}
+                  aria-required="true"
+                />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

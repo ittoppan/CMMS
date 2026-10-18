@@ -50,6 +50,7 @@ export default function CreateWorkOrderPage() {
     setValue,
   } = useForm<CreateRepairFormValues>({
     resolver: zodResolver(createRepairSchema),
+    mode: "onBlur",
     defaultValues: {
       asset_id: "",
       title: "",

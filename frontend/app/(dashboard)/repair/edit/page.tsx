@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
+import { useInlineValidation } from "@/lib/use-inline-validation";
 
 /* ============================================================
    หน้าแก้ไขงานซ่อม F-EN-03 — ช่างเป็นคนกรอกข้อมูล
@@ -79,6 +80,9 @@ function EditWorkOrderContent() {
   const [loadingData, setLoadingData] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // inline validation — ตรวจเมื่อ blur / หลัง attempt แรก ไม่รอ submit คลิกเดียว
+  const iv = useInlineValidation();
   const [submitted, setSubmitted] = useState(false);
   const [woData, setWoData] = useState<RepairData | null>(null);
 
@@ -99,6 +103,14 @@ function EditWorkOrderContent() {
   const [afterImages, setAfterImages] = useState<string[]>([]);
   const [actualStartAt, setActualStartAt] = useState("");
   const [completedAt, setCompletedAt] = useState("");
+
+  // computed inline errors — ต้องอยู่หลังประกาศ state ของฟิลด์ที่ใช้อ้างอิง
+  const rootCauseError = iv.errorFor("rootCause", !rootCause.trim() ? "กรุณาระบุสาเหตุของปัญหา (Root Cause)" : "");
+  const maintenanceDescError = iv.errorFor("maintenanceDesc", !maintenanceDesc.trim() ? "กรุณาระบุรายละเอียดการซ่อม" : "");
+  const contaminateError = iv.errorFor(
+    "contaminate",
+    status === "completed" && contaminateChecking === "not_checked" ? "ต้องระบุผลตรวจการปนเปื้อนก่อนปิดงาน" : ""
+  );
 
   useEffect(() => {
     if (!woId) {
@@ -174,16 +186,8 @@ function EditWorkOrderContent() {
   };
 
   const handleSubmit = async () => {
-    if (!rootCause.trim()) {
-      setError("กรุณาระบุสาเหตุของปัญหา (Root Cause)");
-      return;
-    }
-    if (!maintenanceDesc.trim()) {
-      setError("กรุณาระบุรายละเอียดการซ่อม");
-      return;
-    }
-    if (status === "completed" && contaminateChecking === "not_checked") {
-      setError("ต้องระบุผลตรวจการปนเปื้อนก่อนปิดงาน");
+    iv.submit();
+    if (!rootCause.trim() || !maintenanceDesc.trim() || (status === "completed" && contaminateChecking === "not_checked")) {
       return;
     }
     setSubmitting(true);
@@ -330,6 +334,8 @@ function EditWorkOrderContent() {
                 placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ..."
                 value={rootCause}
                 onChange={(e) => setRootCause(e.target.value)}
+                onBlur={() => iv.touch("rootCause")}
+                error={rootCauseError}
                 rows={3}
               />
 
@@ -339,6 +345,8 @@ function EditWorkOrderContent() {
                 placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด..."
                 value={maintenanceDesc}
                 onChange={(e) => setMaintenanceDesc(e.target.value)}
+                onBlur={() => iv.touch("maintenanceDesc")}
+                error={maintenanceDescError}
                 rows={3}
               />
 
@@ -364,7 +372,7 @@ function EditWorkOrderContent() {
               <div className="space-y-1.5">
                 <Label htmlFor="wo-edit-contam">Contaminate Checking (ตรวจสอบการปนเปื้อน)<span className="text-destructive"> *</span></Label>
                 <Select value={contaminateChecking} onValueChange={setContaminateChecking}>
-                  <SelectTrigger id="wo-edit-contam" className="w-full">
+                  <SelectTrigger id="wo-edit-contam" className="w-full" aria-invalid={contaminateError ? true : undefined}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -374,6 +382,11 @@ function EditWorkOrderContent() {
                     <SelectItem value="not_applicable">ไม่เกี่ยวข้องกับงานนี้</SelectItem>
                   </SelectContent>
                 </Select>
+                {contaminateError && (
+                  <p id="wo-edit-contam-error" role="alert" className="text-xs font-medium text-[var(--cmms-danger)]">
+                    {contaminateError}
+                  </p>
+                )}
               </div>
 
               {/* Outsource By */}
