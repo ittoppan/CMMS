@@ -25,7 +25,7 @@ if (!preg_match('/^[A-Z0-9]{3,10}$/', $code)) {
 
 try {
     $pdo = getDb();
-    $stmt = $pdo->prepare("SELECT u.employee_code, u.full_name, u.position, u.avatar_path, d.name AS department
+    $stmt = $pdo->prepare("SELECT u.id, u.employee_code, u.full_name, u.position, u.avatar_path, u.avatar, d.name AS department
                             FROM users u LEFT JOIN departments d ON d.id = u.department_id
                             WHERE u.employee_code = ? AND u.is_active = 1 LIMIT 1");
     $stmt->execute([$code]);
@@ -37,7 +37,30 @@ try {
     if (!empty($u['avatar_path']) && preg_match('#^/uploads/avatars/[A-Za-z0-9_.-]+$#', $u['avatar_path'])
         && is_file($uploadsBase . $u['avatar_path'])) {
         $photo = $u['avatar_path'];
-    } else {
+    } elseif (!empty($u['avatar']) && preg_match('#^data:image/(jpeg|png|webp);base64,#', (string)$u['avatar'], $m)) {
+        // รูปถูกเซฟเป็น base64 ใน users.avatar (หน้า profile) — materialize เป็นไฟล์ครั้งเดียว
+        // จากนั้น avatar_path ครอบครองทุก feature ที่อ่าน path และลดขนาด DB
+        $bin = base64_decode(substr((string)$u['avatar'], strpos((string)$u['avatar'], ',') + 1), true);
+        if ($bin !== false && strlen($bin) > 100) {
+            $rel = '/uploads/avatars/avatar_u' . (int)$u['id'] . '_' . bin2hex(random_bytes(4))
+                 . '.' . ($m[1] === 'jpeg' ? 'jpg' : $m[1]);
+            if (@file_put_contents($uploadsBase . $rel, $bin) !== false) {
+                $upd = $pdo->prepare("UPDATE users SET avatar_path = ?, avatar = NULL WHERE id = ? AND (avatar_path IS NULL OR avatar_path = '')");
+                $upd->execute([$rel, (int)$u['id']]);
+                if ($upd->rowCount() > 0) {
+                    $photo = $rel;
+                } else {
+                    // มี process อื่นแปลงไปแล้ว — อ่านค่าล่าสุด
+                    $fresh = $pdo->prepare("SELECT avatar_path FROM users WHERE id = ?");
+                    $fresh->execute([(int)$u['id']]);
+                    $p = (string)$fresh->fetchColumn();
+                    if ($p !== '' && is_file($uploadsBase . $p)) $photo = $p;
+                    else @unlink($uploadsBase . $rel);
+                }
+            }
+        }
+    }
+    if (!$photo) {
         foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
             $rel = '/uploads/avatars/' . $code . '.' . $ext;
             if (is_file($uploadsBase . $rel)) { $photo = $rel; break; }
