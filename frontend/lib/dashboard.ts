@@ -276,6 +276,7 @@ export const RANGE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "ตลอดเวลา" },
   { value: "today", label: "วันนี้" },
   { value: "yesterday", label: "เมื่อวาน" },
+  { value: "custom", label: "เลือกวันที่…" },
   { value: "this_week", label: "สัปดาห์นี้" },
   { value: "last_week", label: "สัปดาห์ที่แล้ว" },
   { value: "this_month", label: "เดือนนี้" },

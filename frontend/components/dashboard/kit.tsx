@@ -135,6 +135,9 @@ export function RangePicker({
   const [start, setStart] = React.useState("");
   const [end, setEnd] = React.useState("");
   const isCustom = value === "custom";
+  // เลือกวันเดียว: กรอกฟิลด์เดียว = ใช้วันนั้นทั้งช่วง
+  const effStart = start || end;
+  const effEnd = end || start;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
 <Select
@@ -175,10 +178,10 @@ export function RangePicker({
           <Button
             size="sm"
             variant="outline"
-            disabled={!start || !end}
-            onClick={() => onCustom(start, end)}
+            disabled={!effStart}
+            onClick={() => onCustom(effStart, effEnd)}
           >
-            ใช้ช่วงวันที่
+            {effStart === effEnd ? "ใช้วันที่นี้" : "ใช้ช่วงวันที่"}
           </Button>
         </>
       )}
