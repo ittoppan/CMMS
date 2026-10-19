@@ -104,6 +104,17 @@ function EditWorkOrderContent() {
   const [actualStartAt, setActualStartAt] = useState("");
   const [completedAt, setCompletedAt] = useState("");
 
+  // auto-fill นาที downtime จาก Start/Finish เมื่อกรอกครบและไม่ได้ใส่ค่าเอง (>0) — ตรงกับ fallback ของ backend
+  useEffect(() => {
+    if (!downtimeStart || !downtimeEnd) return;
+    if (downtimeMinutes > 0) return;
+    const t1 = new Date(downtimeStart.replace("T", " ")).getTime();
+    const t2 = new Date(downtimeEnd.replace("T", " ")).getTime();
+    if (Number.isNaN(t1) || Number.isNaN(t2) || t2 <= t1) return;
+    setDowntimeMinutes(Math.max(1, Math.round((t2 - t1) / 60000)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [downtimeStart, downtimeEnd]);
+
   // computed inline errors — ต้องอยู่หลังประกาศ state ของฟิลด์ที่ใช้อ้างอิง
   const rootCauseError = iv.errorFor("rootCause", !rootCause.trim() ? "กรุณาระบุสาเหตุของปัญหา (Root Cause)" : "");
   const maintenanceDescError = iv.errorFor("maintenanceDesc", !maintenanceDesc.trim() ? "กรุณาระบุรายละเอียดการซ่อม" : "");

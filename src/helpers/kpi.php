@@ -351,10 +351,18 @@ function kpi_core_metrics(PDO $pdo, array $opts): array {
     $completedInRange = (int)$st->fetchColumn();
 
     // ---------- MTTR (range หรือ 30 วันล่าสุด) ----------
+    // repair_time_minutes (ช่องกรอกตรง) มีเพียงไม่กี่แถว → fallback: ระยะจากเริ่มงาน (actual_start/acknowledged) ถึงปิดงาน
     $mttr = null;
-    $mttrSql = 'SELECT AVG(r.repair_time_minutes) AS v FROM repair r
-                WHERE r.repair_time_minutes IS NOT NULL AND r.repair_time_minutes > 0
-                  AND (r.status IN ("closed","verified") OR r.completed_at IS NOT NULL)';
+    $mttrValueExpr = 'CASE
+            WHEN r.repair_time_minutes IS NOT NULL AND r.repair_time_minutes > 0 THEN r.repair_time_minutes
+            ELSE TIMESTAMPDIFF(MINUTE, COALESCE(r.actual_start_at, r.acknowledged_at), r.completed_at)
+        END';
+    $mttrSql = "SELECT AVG({$mttrValueExpr}) AS v FROM repair r
+                WHERE r.completed_at IS NOT NULL
+                  AND (r.status IN (\"closed\",\"verified\") OR r.completed_at IS NOT NULL)
+                  AND (r.repair_time_minutes IS NOT NULL AND r.repair_time_minutes > 0
+                       OR (COALESCE(r.actual_start_at, r.acknowledged_at) IS NOT NULL
+                           AND r.completed_at > COALESCE(r.actual_start_at, r.acknowledged_at)))";
     if ($range) {
         $mttrSql .= $completedRange;
     } else {

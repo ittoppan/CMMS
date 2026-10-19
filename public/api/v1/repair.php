@@ -14,6 +14,22 @@ session_start();
 // สถานะเฉพาะของ Phase 14 (Supervisor workflow) — จัดการผ่าน /api/v1/supervisor.php เท่านั้น
 $P14_ONLY_STATUSES = ['draft', 'pending_approval', 'approved', 'assigned', 'accepted', 'paused', 'waiting_external', 'pending_verification', 'verified'];
 
+/**
+ * Fallback RM-1: ป้องกันกราฟ Downtime ว่าง — ถ้า payload มี downtime_start + downtime_end
+ * แต่ไม่กรอก/กรอก 0 นาที → คำนวณจากความต่างของเวลาให้อัตโนมัติ (ผู้ใช้ยัง override ได้โดยกรอกค่าเอง)
+ */
+function repair_autofill_downtime(array &$data): void {
+    $s = trim((string)($data['downtime_start'] ?? ''));
+    $e = trim((string)($data['downtime_end'] ?? ''));
+    $m = $data['downtime_minutes'] ?? null;
+    if ($s === '' || $e === '') return;
+    if ($m !== null && trim((string)$m) !== '' && (int)$m > 0) return;
+    $ts1 = strtotime($s); $ts2 = strtotime($e);
+    if ($ts1 === false || $ts2 === false || $ts2 < $ts1) return;
+    $data['downtime_minutes'] = max(1, (int)round(($ts2 - $ts1) / 60));
+}
+
+
 try {
     $pdo = getDb();
     $method = $_SERVER['REQUEST_METHOD'];
@@ -134,6 +150,7 @@ try {
                     exit;
                 }
             }
+            repair_autofill_downtime($data);
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
@@ -446,6 +463,7 @@ try {
                     }
                 }
             }
+            repair_autofill_downtime($data);
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];
             // Phase 14: ฟิลด์วางแผนเปิดเฉพาะหัวหน้างาน (Admin/Manager/ASST Manager/Foreman)
             if (canSupervisor()) {
