@@ -769,6 +769,61 @@ function kpi_downtime(PDO $pdo, array $opts): array {
     ];
 }
 
+/**
+ * Trend รายวัน (สำหรับกราฟเส้นบน dashboard): WO สร้าง / ปิด / Downtime ชั่วโมง
+ * - range ไม่จำกัด → 30 วันล่าสุด, จำกัดช่วง → เติมทุกวันในช่วง (cap 62 วัน)
+ * - hero วัน downtime ใช้ downtime_end (เกิดจริง) ถึงมี completed_at หรือ created_at เป็นขอบ
+ */
+function kpi_trend(PDO $pdo, array $opts): array {
+    $range = kpi_parse_range($opts);
+    $flt = kpi_filters($pdo, $opts);
+    $scope = kpi_scope($pdo, (int)($opts['role_id'] ?? 0), (int)($opts['user_id'] ?? 0));
+    $where = ' WHERE 1=1 ' . $flt['sql'] . $scope['sql'];
+    $baseParams = array_merge($flt['params'], $scope['params']);
+
+    $end   = $range['end']   ?? date('Y-m-d 23:59:59');
+    $start = $range['start'] ?? date('Y-m-d 00:00:00', strtotime('-29 days'));
+    $days = (int)floor((strtotime($end) - strtotime($start)) / 86400) + 1;
+    if ($days > 62) { // cap — ช่วงยาวมากใช้ดูกราฟไม่ได้เท่าไร
+        $start = date('Y-m-d 00:00:00', strtotime($end) - (61 * 86400));
+        $days = 62;
+    }
+
+    $createdRange = kpi_range_sql(['start' => $start, 'end' => $end], 'r.created_at');
+    $completedRange = kpi_range_sql(['start' => $start, 'end' => $end], 'r.completed_at');
+    $dTParams = array_merge($baseParams, [$start, $end]);
+
+    $map = [];
+    $st = $pdo->prepare('SELECT DATE(r.created_at) d, COUNT(*) c FROM repair r' . $where . $createdRange . ' GROUP BY DATE(r.created_at)');
+    $st->execute($dTParams);
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $map[$r['d']]['created'] = (int)$r['c'];
+
+    $st = $pdo->prepare('SELECT DATE(r.completed_at) d, COUNT(*) c FROM repair r' . $where .
+        " AND r.status IN ('closed','verified','done','completed','resolved')" . $completedRange . ' GROUP BY DATE(r.completed_at)');
+    $st->execute($dTParams);
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $map[$r['d']]['completed'] = (int)$r['c'];
+
+    $st = $pdo->prepare('SELECT DATE(COALESCE(r.downtime_end, r.completed_at, r.created_at)) d,
+            SUM(COALESCE(r.downtime_minutes,0)) dt
+        FROM repair r' . $where .
+        " AND r.downtime_minutes > 0 AND COALESCE(r.downtime_end, r.completed_at, r.created_at) BETWEEN ? AND ?
+        GROUP BY DATE(COALESCE(r.downtime_end, r.completed_at, r.created_at))");
+    $st->execute($dTParams);
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) $map[$r['d']]['dt'] = (float)$r['dt'];
+
+    $series = [];
+    for ($i = 0; $i < $days; $i++) {
+        $key = date('Y-m-d', strtotime($start) + $i * 86400);
+        $series[] = [
+            'day' => $key,
+            'created' => (int)($map[$key]['created'] ?? 0),
+            'completed' => (int)($map[$key]['completed'] ?? 0),
+            'downtime_hours' => round((float)($map[$key]['dt'] ?? 0) / 60, 1),
+        ];
+    }
+    return ['series' => $series, 'days' => $days];
+}
+
 function kpi_cost(PDO $pdo, array $opts): array {
     $range = kpi_parse_range($opts);
     $flt = kpi_filters($pdo, $opts);

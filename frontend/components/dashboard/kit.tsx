@@ -331,6 +331,7 @@ export function StatusPill({ status, overdue_days }: { status: string; overdue_d
 export function StatusLabel({ status, overdue_days }: { status: string; overdue_days?: number }) {
   const map: Record<string, string> = {
     open: "เปิด",
+    pending: "รอดำเนินการ",
     acknowledged: "รับทราบ",
     pending_approval: "รออนุมัติ",
     approved: "อนุมัติแล้ว",
@@ -375,6 +376,13 @@ export function LoadingGrid({ cards = 4 }: { cards?: number }) {
     </div>
   );
 }
+
+export const PRIO_LABELS: Record<string, string> = {
+  critical: "วิกฤต",
+  high: "สูง",
+  medium: "ปานกลาง",
+  low: "ต่ำ",
+};
 
 export function RefreshBlock({ onRefresh, lastUpdated }: { onRefresh: () => void; lastUpdated: string }) {
   return (

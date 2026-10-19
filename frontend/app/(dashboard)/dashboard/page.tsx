@@ -28,6 +28,8 @@ import { Grid } from "@/components/layout/primitives";
 import {
   BarChart,
   Bar,
+  ComposedChart,
+  Line,
   PieChart,
   Pie,
   Cell,
@@ -46,6 +48,7 @@ import {
   SectionHeading,
   LoadingGrid,
   RefreshBlock,
+  PRIO_LABELS,
 } from "@/components/dashboard/kit";
 import * as D from "@/lib/dashboard";
 import { getPlanningKpis, type PlanningKpis } from "@/lib/planning";
@@ -56,6 +59,11 @@ const fmtBaht = (n: number) => (n >= 10000 ? `${Math.round(n / 1000).toLocaleStr
 const hours = (mins: number) => `${(mins / 60).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ชม.`;
 const fmtMoney = (n: number, symbol = "฿") => (n >= 10000 ? `${symbol} ${Math.round(n / 1000)}k` : `${symbol} ${fmt(n)}`);
 const MONTH_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const fmtThaiDay = (s: string) => {
+  const t = new Date(String(s).replace(" ", "T"));
+  if (Number.isNaN(t.getTime())) return s;
+  return `${t.getDate()} ${MONTH_SHORT[t.getMonth()]} ${t.getFullYear() + 543}`;
+};
 
 const CHART_COLORS = [
   "var(--cmms-primary)",
@@ -105,6 +113,7 @@ export default function DashboardPage() {
   const [dt, setDt] = useState<D.DowntimeResponse | null>(null);
   const [cost, setCost] = useState<D.CostResponse | null>(null);
   const [budget, setBudget] = useState<BudgetVsActualResponse | null>(null);
+  const [trend, setTrend] = useState<D.TrendPoint[] | null>(null);
   const [failure, setFailure] = useState<D.FailureResponse | null>(null);
   const [prio, setPrio] = useState<{ name: string; value: number }[] | null>(null);
   const [openWo, setOpenWo] = useState<D.WoItem[] | null>(null);
@@ -147,12 +156,13 @@ export default function DashboardPage() {
   const analysis = useCallback(async () => {
     if (!data || !isMgr) return;
     didAnal.current = true;
-    const [d, f, wo, c, b] = await Promise.all([
+    const [d, f, wo, c, b, tr] = await Promise.all([
       D.fetchDowntime(q),
       D.fetchFailure(q),
       D.fetchWoList({ ...q, group: "open", limit: 300 }),
       D.isCostVisible(data.can) ? D.fetchCost(q) : Promise.resolve(null),
       D.isCostVisible(data.can) ? fetchBudgetVsActualApi(new Date().getFullYear()) : Promise.resolve(null),
+      D.fetchTrend(q),
     ]);
     const priorityRows = [
       { name: "วิกฤต", value: 0 },
@@ -169,6 +179,7 @@ export default function DashboardPage() {
     setFailure(f);
     setOpenWo(wo.items);
     setPrio(priorityRows.filter((r) => r.value > 0));
+    setTrend(tr.series);
     if (c) setCost(c);
     if (b) setBudget(b);
   }, [data, isMgr, q]);
@@ -202,6 +213,7 @@ export default function DashboardPage() {
     setCost(null);
     setBudget(null);
     setPrio(null);
+    setTrend(null);
     setTick((t) => t + 1);
   }, []);
 
@@ -238,19 +250,26 @@ export default function DashboardPage() {
         <CardContent className="space-y-3 p-4">
           <SectionHeading
             title="ภาพรวมและตัวกรอง"
-            sub={data?.range ? `ช่วง ${data.range.start} ถึง ${data.range.end}` : "ไม่ได้จำกัดช่วงเวลา"}
+            sub={data?.range ? `ช่วง ${fmtThaiDay(data.range.start)} ถึง ${fmtThaiDay(data.range.end)}` : "ไม่ได้จำกัดช่วงเวลา"}
           />
           <RangePicker value={q.range ?? ""} onRange={applyRange} onCustom={applyCustom} />
-          <FilterBar
-            options={data?.options ?? null}
-            value={q}
-            onChange={patch}
-            hidden={
-              isTech || isOp
-                ? { technician_id: true, department_id: isTech ? true : false }
-                : undefined
-            }
-          />
+          <details className="rounded-[var(--cmms-radius-sm)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2" open>
+            <summary className="cursor-pointer select-none text-sm font-medium text-[var(--cmms-text-secondary)]">
+              ตัวกรองเพิ่มเติม (แผนก / เครื่องจักร / ช่าง / ประเภทงาน)
+            </summary>
+            <div className="mt-3">
+              <FilterBar
+                options={data?.options ?? null}
+                value={q}
+                onChange={patch}
+                hidden={
+                  isTech || isOp
+                    ? { technician_id: true, department_id: isTech ? true : false }
+                    : undefined
+                }
+              />
+            </div>
+          </details>
         </CardContent>
       </Card>
 
@@ -451,6 +470,39 @@ export default function DashboardPage() {
           {isMgr && (
             <section aria-label="กราฟวิเคราะห์" className="space-y-3">
               <SectionHeading title="การวิเคราะห์" sub="ข้อมูลตามช่วงเวลาและตัวกรองที่เลือก" />
+              <Card>
+                <CardContent className="space-y-3 p-4">
+                  <p className="text-sm font-medium text-[var(--cmms-text-muted)]">แนวโน้มรายวัน — สร้าง/ปิดงาน (ใบ) และ Downtime (ชาวโมง)</p>
+                  {!trend || trend.length === 0 ? (
+                    <EmptyState title="ไม่มีข้อมูลอยู่ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <ComposedChart
+                        data={trend.map((p) => {
+                          const d = new Date(p.day.replace(" ", "T"));
+                          return {
+                            day: Number.isNaN(d.getTime()) ? p.day : `${d.getDate()}/${d.getMonth() + 1}`,
+                            สร้าง: p.created,
+                            ปิด: p.completed,
+                            downtime: p.downtime_hours,
+                          };
+                        })}
+                        margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" minTickGap={24} />
+                        <YAxis yAxisId="wo" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                        <YAxis yAxisId="dt" orientation="right" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                        <Tooltip content={<ChartTooltip unit="" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Bar yAxisId="wo" dataKey="สร้าง" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                        <Bar yAxisId="wo" dataKey="ปิด" fill="var(--cmms-success)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                        <Line yAxisId="dt" dataKey="downtime" name="Downtime (ชม.)" stroke="var(--cmms-danger)" strokeWidth={2} dot={false} connectNulls />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
               <Grid columns={{ minWidth: 320, max: 2 }} gap={3}>
                 <Card>
                   <CardContent className="space-y-3 p-4">
@@ -745,7 +797,9 @@ export default function DashboardPage() {
                               )}
                             </span>
                             <span className="flex items-center gap-2">
-                              <span className="text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">{r.priority}</span>
+                              <span className="text-sm text-[var(--cmms-text-secondary)]">
+                                {PRIO_LABELS[r.priority] ?? r.priority}
+                              </span>
                               <StatusPill status={r.status} />
                             </span>
                           </Link>
@@ -785,7 +839,7 @@ export default function DashboardPage() {
                             </span>
                           </span>
                           <span className="flex shrink-0 items-center gap-2">
-                            <span className="text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">{w.priority}</span>
+                            <span className="text-sm text-[var(--cmms-text-secondary)]">{PRIO_LABELS[w.priority] ?? w.priority}</span>
                             <StatusPill status={w.status} overdue_days={w.overdue_days} />
                           </span>
                         </Link>
