@@ -139,15 +139,15 @@ export default function WorkforcePage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ทักษะใน catalog ทั้งหมด</span>
-                  <span className="font-medium">{dash?.skills.total ?? "—"}</span>
+                  <span className="font-medium">{dash?.skills?.total ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ต้องมีใบรับรอง</span>
-                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills.cert_required ?? "—"}</span>
+                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills?.cert_required ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ต้องมีสิทธิ์ (authorization)</span>
-                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills.auth_required ?? "—"}</span>
+                  <span className="font-medium text-[var(--cmms-text-secondary)]">{dash?.skills?.auth_required ?? "—"}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   ใบรับรองที่ยังใช้ได้เป็นหลักฐานความสามารถด้วยตัวเอง
@@ -163,23 +163,23 @@ export default function WorkforcePage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">ใบรับรอง</span>
-                  <AndonLamp status={dash?.expiring.certificates ? "down" : "idle"} size="sm" />
-                  <span className="font-medium">{dash?.expiring.certificates ?? "—"}</span>
+                  <AndonLamp status={dash?.expiring?.certificates ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring?.certificates ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">สิทธิ์</span>
-                  <AndonLamp status={dash?.expiring.authorizations ? "down" : "idle"} size="sm" />
-                  <span className="font-medium">{dash?.expiring.authorizations ?? "—"}</span>
+                  <AndonLamp status={dash?.expiring?.authorizations ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring?.authorizations ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">บันทึกทักษะ</span>
-                  <AndonLamp status={dash?.expiring.skill_records ? "down" : "idle"} size="sm" />
-                  <span className="font-medium">{dash?.expiring.skill_records ?? "—"}</span>
+                  <AndonLamp status={dash?.expiring?.skill_records ? "down" : "idle"} size="sm" />
+                  <span className="font-medium">{dash?.expiring?.skill_records ?? "—"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">งานที่รออบรม / เกินกำหนด</span>
                   <span className="font-medium">
-                    {dash?.training.due ?? "—"} / {dash?.training.overdue ?? "—"}
+                    {dash?.training?.due ?? "—"} / {dash?.training?.overdue ?? "—"}
                   </span>
                 </div>
               </CardContent>

@@ -618,11 +618,20 @@ export default function PlanningCenterPage() {
             >
               ทั้งหมด {queue?.total ?? "…"}
             </Button>
-            {GROUP_ORDER.filter((g) => (center?.groups?.[g] ?? 0) > 0).map((g) => (
-              <Button key={g} size="sm" variant={group === g ? "primary" : "outline"} onClick={() => setGroup(g)}>
-                {PLAN_GROUP_LABEL[g]} {center?.groups?.[g] ?? 0}
-              </Button>
-            ))}
+            {GROUP_ORDER.map((g) => {
+              const cnt = center?.groups?.[g] ?? 0;
+              return (
+                <Button
+                  key={g}
+                  size="sm"
+                  variant={group === g ? "primary" : "outline"}
+                  onClick={() => setGroup(g)}
+                  className={cnt === 0 ? "opacity-50" : ""}
+                >
+                  {PLAN_GROUP_LABEL[g]} {cnt}
+                </Button>
+              );
+            })}
             <div className="ml-auto w-56">
               <Input placeholder="ค้นหางาน / หมายเลข / เครื่องจักร…" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>

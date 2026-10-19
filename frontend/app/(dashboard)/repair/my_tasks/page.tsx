@@ -257,24 +257,26 @@ export default function MyTasksPage() {
 
       if (mapped.length > 0) {
         setTasks(mapped);
-        setError(false);
       } else {
-        setError(true);
+        setTasks([]);
       }
+      // ไม่มีงานที่มอบหมาย = สถานะปรกติ (EmptyState) — ไม่ใช่ข้อผิดพลาดการโหลด
+      setError(false);
       return mapped;
     };
 
     const loadTasks = () =>
       fetch("/api/v1/repair.php")
         .then((r) => r.json())
-        .then((rows) =>
-          fetch("/api/v1/index.php?resource=pm-plans")
+        .then((rows) => {
+          if (!Array.isArray(rows) && rows?.error) throw new Error(String(rows.error));
+          return fetch("/api/v1/index.php?resource=pm-plans")
             .then((r) => r.json())
             .then((pmJson) => {
               applyRows(Array.isArray(rows) ? rows : [], pmJson);
               snapshotSave("my_tasks", { rows: Array.isArray(rows) ? rows : [], pm: pmJson, savedAt: Date.now() });
-            })
-        )
+            });
+        })
         .catch(async (e) => {
           console.error("Fetch tasks error", e);
           const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");

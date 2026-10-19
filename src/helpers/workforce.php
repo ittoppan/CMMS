@@ -2191,6 +2191,27 @@ function wf_dashboard(PDO $pdo, ?string $from = null, ?string $to = null): array
         'shift_pct' => (int)round($withShift / $people * 100),
     ] : [];
 
+    $skillsTotal = (int)$pdo->query('SELECT COUNT(*) FROM wf_skills WHERE is_active = 1')->fetchColumn();
+    $skillsCert = (int)$pdo->query('SELECT COUNT(*) FROM wf_skills WHERE is_active = 1 AND required_certification_code IS NOT NULL AND required_certification_code <> ""')->fetchColumn();
+    $skillsAuth = (int)$pdo->query('SELECT COUNT(*) FROM wf_skills WHERE is_active = 1 AND required_authorization_code IS NOT NULL AND required_authorization_code <> ""')->fetchColumn();
+    $trainingDue = (int)$pdo->query('SELECT COUNT(*) FROM wf_training_records WHERE status IN ("assigned","scheduled")')->fetchColumn();
+    $trainingOverdue = (int)$pdo->query('SELECT COUNT(*) FROM wf_training_records
+        WHERE status IN ("assigned","scheduled")
+          AND (expires_at IS NOT NULL AND expires_at < CURDATE() OR (expires_at IS NULL AND scheduled_date IS NOT NULL AND scheduled_date < CURDATE()))')->fetchColumn();
+    $expiringCerts = 0;
+    $stExp = $pdo->prepare('SELECT COUNT(*) FROM worker_certifications
+        WHERE subject_type = "internal" AND is_active = 1 AND expiry_date IS NOT NULL
+          AND expiry_date >= CURDATE() AND expiry_date <= DATE_ADD(CURDATE(), INTERVAL ? DAY)');
+    $stExp->execute([$warn]);
+    $expiringCerts = (int)$stExp->fetchColumn();
+    $stExpAuth = $pdo->prepare('SELECT COUNT(*) FROM wf_authorizations
+        WHERE status = "active" AND valid_until IS NOT NULL
+          AND valid_until >= CURDATE() AND valid_until <= DATE_ADD(CURDATE(), INTERVAL ? DAY)');
+    $stExpAuth->execute([$warn]);
+    $expiringAuths = (int)$stExpAuth->fetchColumn();
+    $expiringRecs = (int)$pdo->query('SELECT COUNT(*) FROM technician_skills
+        WHERE valid_until IS NOT NULL AND valid_until >= CURDATE() AND valid_until <= DATE_ADD(CURDATE(), INTERVAL ' . (int)$warn . ' DAY)')->fetchColumn();
+
     return [
         'range' => ['from' => $from, 'to' => $to],
         'people' => [
@@ -2209,10 +2230,24 @@ function wf_dashboard(PDO $pdo, ?string $from = null, ?string $to = null): array
             'near_list' => array_slice($near, 0, 10),
         ],
         'expiring_certifications' => $expiring->fetchAll(PDO::FETCH_ASSOC),
+        'skills' => [
+            'total' => $skillsTotal,
+            'cert_required' => $skillsCert,
+            'auth_required' => $skillsAuth,
+        ],
+        'expiring' => [
+            'certificates' => $expiringCerts,
+            'authorizations' => $expiringAuths,
+            'skill_records' => $expiringRecs,
+        ],
+        'training' => [
+            'due' => $trainingDue,
+            'overdue' => $trainingOverdue,
+        ],
         'crews' => count(wf_crews($pdo, true)),
         'courses' => count(wf_courses($pdo, true)),
         'contractor_workers' => (int)$pdo->query('SELECT COUNT(*) FROM contractor_workers WHERE is_active = 1')->fetchColumn(),
-        'honesty' => 'ไม่มีระบบบันทึกเวลาเข้า-ออก (attendance) ในฐานข้อมูลนี้ — ความพร้อมทั้งหมดเป็น "ตามแผน" ไม่ใช่การมาทำงานจริง',
+        'honesty' => ['ไม่มีระบบบันทึกเวลาเข้า-ออก (attendance) ในฐานข้อมูลนี้ — ความพร้อมทั้งหมดเป็น "ตามแผน" ไม่ใช่การมาทำงานจริง'],
     ];
 }
 
