@@ -124,13 +124,13 @@ function RegisterContent() {
     return () => { cancelled = true; };
   }, []);
 
-  // Preview user by employee code (debounced)
+  // Preview user by employee code (debounced) — public lookup รวมรูปเพื่อยืนยันว่าใช่คุณเอง
   useEffect(() => {
     const code = empCode.trim().toUpperCase();
-    if (code.length < 3) { setPreviewUser(null); return; }
+    if (!/^[A-Z0-9]{3,10}$/.test(code)) { setPreviewUser(null); return; }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/v1/users.php?employee_code=${encodeURIComponent(code)}`);
+        const res = await fetch(`/api/v1/user_lookup.php?employee_code=${encodeURIComponent(code)}`);
         if (res.ok) {
           const json = await res.json();
           setPreviewUser({
@@ -138,7 +138,7 @@ function RegisterContent() {
             employee_code: json.employee_code,
             avatar_path: json.avatar_path ?? null,
             position: json.position ?? null,
-            department: json.role ?? null,
+            department: json.department ?? null,
           });
         } else {
           setPreviewUser(null);
@@ -316,13 +316,18 @@ function RegisterContent() {
 
                   {previewUser && (
                     <div className="cmms-reg-tile ok mt-3">
-                      <LineAvatar src={previewUser.avatar_path} name={previewUser.full_name} className="cmms-reg-avatar-sm" />
+                      <LineAvatar src={previewUser.avatar_path} name={previewUser.full_name} className="cmms-reg-avatar-md" />
                       <div className="flex flex-col">
-                        <span className="cmms-reg-tile-title">พบผู้ใช้: {previewUser.full_name}</span>
+                        <span className="cmms-reg-tile-title">ใช่คุณหรือไม่ — {previewUser.full_name}</span>
                         <span className="cmms-reg-tile-sub">
                           เลขพนักงาน {previewUser.employee_code}
                           {previewUser.position && ` · ตำแหน่ง ${previewUser.position}`}
                           {previewUser.department && ` · ${previewUser.department}`}
+                        </span>
+                        <span className="cmms-reg-tile-sub">
+                          {previewUser.avatar_path
+                            ? "ตรวจรูปให้ตรงกับตัวเองก่อนกดผูกบัญชี — ถ้าไม่ใช่คุณ อย่าผูก และแจ้งผู้ดูแลระบบ"
+                            : "ยังไม่มีรูปในระบบ — ให้แอดมินอัปโหลดรูปพนักงาน (ชื่อไฟล์ = รหัสพนักงาน) เพื่อยืนยันตัวตน"}
                         </span>
                       </div>
                     </div>
