@@ -315,8 +315,8 @@ function RegisterContent() {
                   </div>
 
                   {previewUser && (
-                    <div className="cmms-reg-tile ok mt-3">
-                      <LineAvatar src={previewUser.avatar_path} name={previewUser.full_name} className="cmms-reg-avatar-md" />
+                    <div className="cmms-reg-tile ok mt-3" style={{ alignItems: "center" }}>
+                      <LineAvatar src={previewUser.avatar_path} name={previewUser.full_name} className="cmms-reg-avatar-xl" />
                       <div className="flex flex-col">
                         <span className="cmms-reg-tile-title">ใช่คุณหรือไม่ — {previewUser.full_name}</span>
                         <span className="cmms-reg-tile-sub">

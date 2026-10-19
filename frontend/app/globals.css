@@ -783,6 +783,7 @@ h1, h2, h3, h4 {
   color: #fff; font-weight: 700; font-size: 1.1rem;
 }
 .cmms-reg-avatar-lg { width: 80px; height: 80px; font-size: 1.9rem; border-width: 3px; box-shadow: var(--cmms-shadow-md); margin: 0 auto 8px; }
+.cmms-reg-avatar-xl { width: 128px; height: 128px; font-size: 2.6rem; border-width: 3px; box-shadow: var(--cmms-shadow-md); }
 .cmms-reg-avatar-md { width: 56px; height: 56px; font-size: 1.4rem; }
 .cmms-reg-avatar-sm { width: 48px; height: 48px; font-size: 1.2rem; }
 .cmms-reg-mark-soft {
