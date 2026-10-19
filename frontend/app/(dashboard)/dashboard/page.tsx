@@ -64,6 +64,7 @@ const fmtThaiDay = (s: string) => {
   if (Number.isNaN(t.getTime())) return s;
   return `${t.getDate()} ${MONTH_SHORT[t.getMonth()]} ${t.getFullYear() + 543}`;
 };
+const cntOf = (r: D.FailureRow): number => Number((r as unknown as { cnt?: number }).cnt ?? 0);
 
 const CHART_COLORS = [
   "var(--cmms-primary)",
@@ -223,11 +224,6 @@ export default function DashboardPage() {
     dt: r.dt,
     cnt: r.cnt,
   })), [dt]);
-
-  const failRows = useMemo(() => (failure?.by_type ?? []).slice(0, 6).map((r) => ({
-    name: (r.failure_name || r.failure_code || "ไม่ระบุ").slice(0, 20),
-    cnt: r.cnt,
-  })), [failure]);
 
   const costRows = useMemo(() => (cost?.by_asset ?? []).slice(0, 6).map((r) => ({
     name: r.code || r.name || "—",
@@ -524,22 +520,44 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                   <CardContent className="space-y-3 p-4">
-                    <p className="text-sm font-medium text-[var(--cmms-text-muted)]">ประเภทความเสียหาย (Breakdown)</p>
-                    {failRows.length === 0 ? (
-                      <EmptyState title="ไม่มีข้อมูลอยู่ในช่วงนี้" description="ยังไม่มีงาน Breakdown ในช่วงนี้" />
-                    ) : (
-                      <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                          <Pie data={failRows} dataKey="cnt" nameKey="name" innerRadius={46} outerRadius={78} paddingAngle={2} stroke="var(--cmms-bg-card)">
-                            {failRows.map((_, i) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<ChartTooltip unit="ครั้ง" />} />
-                          <Legend wrapperStyle={{ fontSize: 11 }} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
+                    <p className="text-sm font-medium text-[var(--cmms-text-muted)]">ประเภทความเสียหาย — Pareto (ครั้ง และ % สะสม)</p>
+                    {(() => {
+                      const meaningfulBuckets = (failure?.by_type ?? []).filter(
+                        (r) => cntOf(r) > 0 && (r.failure_name || "").trim() !== "" && (r.failure_name || "").trim() !== "ไม่ระบุ"
+                      );
+                      if (meaningfulBuckets.length === 0) {
+                        return (
+                          <EmptyState
+                            title="ยังไม่มีข้อมูลอยู่ในช่วงนี้"
+                            description="งาน Breakdown ยังไม่ได้บันทึก ประเภทการเสีย / สาเหตุ — เลือก Failure Type ตอนปิดงานเพื่อเห็น Pareto"
+                          />
+                        );
+                      }
+                      const total = meaningfulBuckets.reduce((s, r) => s + cntOf(r), 0);
+                      let run = 0;
+                      const pareto = meaningfulBuckets.map((r) => {
+                        const c = cntOf(r);
+                        run += c;
+                        return {
+                          name: (r.failure_name || r.failure_code || "ไม่ระบุ").slice(0, 16),
+                          ครั้ง: c,
+                          สะสม: total > 0 ? Math.round((run / total) * 100) : 100,
+                        };
+                      });
+                      return (
+                        <ResponsiveContainer width="100%" height={220}>
+                          <ComposedChart data={pareto} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
+                            <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" interval={0} angle={-12} textAnchor="end" height={44} />
+                            <YAxis yAxisId="cnt" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                            <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                            <Tooltip content={<ChartTooltip unit="ครั้ง" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
+                            <Bar yAxisId="cnt" dataKey="ครั้ง" fill="var(--cmms-warning)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                            <Line yAxisId="pct" type="monotone" dataKey="สะสม" name="สะสม (%)" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
                 {D.isCostVisible(data.can) && (
