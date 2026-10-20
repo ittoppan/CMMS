@@ -812,6 +812,11 @@ h1, h2, h3, h4 {
 }
 .cmms-home-tile-badge.warn { background: rgba(245,158,11,0.18); color: #fbbf24; }
 .cmms-home-tile-badge.crit { background: rgba(239,68,68,0.20); color: #f87171; }
+.cmms-home-tone-green { color: var(--cmms-success); }
+.cmms-home-tone-amber { color: var(--cmms-warning); }
+.cmms-home-tone-red { color: var(--cmms-danger); }
+.cmms-home-tone-blue { color: var(--cmms-primary); }
+
 .cmms-home-signature, .cmms-home-signature:active { padding-top: 20px !important; padding-bottom: 20px !important; }
 .cmms-home-signature .cmms-home-tile-name { font-size: 1.02rem; }
 .cmms-home-signature .cmms-home-tile-ico { width: 46px; height: 46px; background: var(--cmms-primary); border-color: transparent; }

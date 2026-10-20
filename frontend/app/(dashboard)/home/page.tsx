@@ -28,11 +28,11 @@ interface Lamp {
   tone: "green" | "amber" | "red" | "blue";
 }
 
-const LAMP_TONE_COLOR: Record<Lamp["tone"], string> = {
-  green: "#34d399",
-  amber: "#fbbf24",
-  red: "#f87171",
-  blue: "#60a5fa",
+const LAMP_TONE_CLASS: Record<Lamp["tone"], string> = {
+  green: "cmms-home-tone-green",
+  amber: "cmms-home-tone-amber",
+  red: "cmms-home-tone-red",
+  blue: "cmms-home-tone-blue",
 };
 
 const TILE_BADGE: Record<string, (k: Kpis["counts"]) => { n?: number; warn?: boolean; crit?: boolean } | undefined> = {
@@ -98,6 +98,7 @@ export default function HomePage() {
   return (
     <PageShell
       breadcrumbs={[{ label: "หน้าแรก", href: "/home" }]}
+      eyebrow="จุดเริ่มการทำงานทุกวัน"
       title="หน้าแรก"
       description={`สวัสดี${userFullName ? ` คุณ${userFullName}` : ""}${nowLabel ? ` · ${nowLabel}` : ""}`}
     >
@@ -112,10 +113,9 @@ export default function HomePage() {
                 onClick={() => goto(l.href)}
               >
                 <span
-                  className="cmms-home-lamp-dot"
+                  className={`cmms-home-lamp-dot ${LAMP_TONE_CLASS[l.tone]}`}
                   style={{
-                    background: LAMP_TONE_COLOR[l.tone],
-                    color: LAMP_TONE_COLOR[l.tone],
+                    background: "currentColor",
                     opacity: l.count > 0 ? undefined : 0.28,
                     animation: l.count > 0 ? undefined : "none",
                   }}

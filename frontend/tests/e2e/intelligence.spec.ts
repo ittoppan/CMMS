@@ -71,7 +71,8 @@ test.describe("intelligence center (authed)", () => {
     await page.goto("/analytics/intelligence");
     await page.getByRole("tab", { name: "เสียซ้ำ" }).click();
     const drill = page.getByRole("button", { name: /ดูใบงาน/i }).first();
-    if ((await drill.count({ timeout: 5_000 })) === 0) {
+    const drillMissing = await drill.waitFor({ timeout: 5_000 }).then(() => false).catch(() => true);
+    if (drillMissing) {
       test.skip(true, "no repeat failures (clean install - no work orders yet)");
       return;
     }
