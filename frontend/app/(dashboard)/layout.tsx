@@ -78,7 +78,7 @@ function getPageTitle(pathname: string): string {
 
 // ═══════════ เมนู bottom nav มือถือ: role-based ═══════════
 const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: React.ComponentType<{ className?: string; size?: number | string; strokeWidth?: number }> }> = {
-  dashboard:             { labelKey: "bottom.dashboard",       href: "/dashboard",            icon: Home },
+  dashboard:             { labelKey: "bottom.dashboard",       href: "/home",                 icon: Home },
   "repair/my_tasks":     { labelKey: "bottom.my_tasks",        href: "/repair/my_tasks",      icon: ClipboardCheck },
   field:                 { labelKey: "menu.field_work",        href: "/field",               icon: Scan },
   "repair/request":      { labelKey: "bottom.repair_request",  href: "/repair/request",       icon: Wrench },

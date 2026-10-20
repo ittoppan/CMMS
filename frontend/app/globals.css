@@ -751,6 +751,79 @@ h1, h2, h3, h4 {
 }
 .cmms-gate-note svg { flex-shrink: 0; color: var(--cmms-success); }
 
+/* ---- Home hub (/home) — ANDON control-room launcher ---- */
+.cmms-home {
+  min-height: 100%;
+  background:
+    radial-gradient(1100px 420px at 12% -8%, rgba(56,132,255,0.16), transparent 60%),
+    radial-gradient(900px 380px at 88% -4%, rgba(255,138,76,0.12), transparent 55%),
+    linear-gradient(180deg, #0b1220 0%, #0d1526 52%, #0b1220 100%);
+  color: rgba(255,255,255,0.92);
+  border-radius: var(--cmms-radius-lg);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.cmms-home-lamp {
+  display: flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+  padding: 10px 14px; min-width: 108px; flex: 1 1 0;
+  background: rgba(255,255,255,0.05);
+  color: inherit; cursor: pointer; text-align: left;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+.cmms-home-lamp:hover { background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+.cmms-home-lamp:disabled { opacity: 0.55; cursor: default; transform: none; }
+.cmms-home-lamp-dot {
+  width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.10), 0 0 14px 2px currentColor;
+  animation: cmms-home-pulse 2.6s ease-in-out infinite;
+}
+@keyframes cmms-home-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.62; } }
+.cmms-home-lamp-num { font-size: 1.35rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.cmms-home-lamp-label { font-size: 0.74rem; color: rgba(255,255,255,0.66); }
+.cmms-home-group-title {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.52); margin: 0 0 10px;
+}
+.cmms-home-tile {
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
+  padding: 16px 16px 14px; border-radius: 14px; height: 100%;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.03));
+  color: rgba(255,255,255,0.92); cursor: pointer; text-align: left; width: 100%;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+.cmms-home-tile:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.11), rgba(255,255,255,0.05));
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+}
+.cmms-home-tile-ico {
+  width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.14); color: #fff;
+}
+.cmms-home-tile-name { font-size: 0.9rem; font-weight: 700; color: #fff; line-height: 1.25; }
+.cmms-home-tile-desc { font-size: 0.74rem; color: rgba(255,255,255,0.62); line-height: 1.45; }
+.cmms-home-tile-badge {
+  margin-top: auto; display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 2px 9px; border-radius: 999px;
+  background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.85);
+}
+.cmms-home-tile-badge.warn { background: rgba(245,158,11,0.18); color: #fbbf24; }
+.cmms-home-tile-badge.crit { background: rgba(239,68,68,0.20); color: #f87171; }
+.cmms-home-signature, .cmms-home-signature:active { padding-top: 20px !important; padding-bottom: 20px !important; }
+.cmms-home-signature .cmms-home-tile-name { font-size: 1.02rem; }
+.cmms-home-signature .cmms-home-tile-ico { width: 46px; height: 46px; background: var(--cmms-primary); border-color: transparent; }
+.cmms-home-signature {
+  border-color: color-mix(in srgb, var(--cmms-primary) 55%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--cmms-primary) 30%, rgba(255,255,255,0.05)), rgba(255,255,255,0.04) 65%);
+}
+.cmms-home-signature:hover {
+  border-color: color-mix(in srgb, var(--cmms-primary) 80%, transparent);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--cmms-primary) 35%, rgba(0,0,0,0.4));
+}
+
 /* ---- Register (LIFF) — brand hero + status tiles ---- */
 .cmms-reg-wrap { max-width: 560px; }
 .cmms-reg-hero {
