@@ -164,6 +164,8 @@ try {
                     'corner_radius'     => in_array($tpl['corner_radius'] ?? 'lg', ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $tpl['corner_radius'] : 'lg',
                     'bubble_direction'  => in_array($tpl['bubble_direction'] ?? 'ltr', ['ltr', 'rtl'], true) ? $tpl['bubble_direction'] : 'ltr',
                     'bubble_size'       => in_array($tpl['bubble_size'] ?? '', ['', 'nano', 'micro', 'deci', 'hecto', 'kilo', 'mega', 'giga'], true) ? $tpl['bubble_size'] : '',
+                    // โหมด JSON ขั้นสูง (Flex Message) — ตรวจเป็น bubble/carousel เท่านั้น ไม่ผ่าน → ว่าง
+                    'flex_json'         => ($fj = lineFlexJsonValidate((string)($tpl['flex_json'] ?? ''))) !== [] ? json_encode($fj, JSON_UNESCAPED_UNICODE) : '',
                     'enabled'           => (($tpl['enabled'] ?? '1') === '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
                 ];
                 $upsert->execute([$k, json_encode($clean, JSON_UNESCAPED_UNICODE), 'Notification template: ' . str_replace('line_tpl_', '', $k)]);
@@ -243,6 +245,18 @@ try {
             $headerText  = $tpl['header_title'] ?? '🔔 CMMS-TPT NOTIFICATION';
             $btnLabel    = $tpl['btn_label'] ?? 'ดูรายละเอียดในระบบ';
 
+            // โหมด JSON ขั้นสูง: template มี flex_json → ใช้เขียนทับ (แทนค่าตัวแปรตัวอย่างให้ด้วย)
+            $opts = [];
+            if (!empty($data['custom']) === false) {
+                $fj = lineFlexJsonValidate((string)($tpl['flex_json'] ?? ''));
+                if ($fj !== []) {
+                    $sampleVars = [];
+                    foreach ($sample as $var => $val) { $sampleVars[trim($var, '{}')] = $val; }
+                    lineFlexVarsApply($fj, $sampleVars);
+                    $opts['flex_contents'] = $fj;
+                }
+            }
+
             // รูปก่อน/หลังซ่อมจาก template — ถ้าไม่ได้ตั้ง URL ไว้ ใช้รูปตัวอย่างให้เห็นเลย์เอาต์ตอนทดสอบ
             $imgBefore = trim($tpl['image_before'] ?? '');
             $imgAfter  = trim($tpl['image_after'] ?? '');
@@ -257,7 +271,7 @@ try {
                     'after'  => ['https://picsum.photos/seed/cmms-after/400/300'],
                 ];
             }
-            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl, $photos, $headerColor, $headerText, $btnLabel);
+            $ok = sendLinePushMessage($target['line_user_id'], $title, $body, $btnUrl, $photos, $headerColor, $headerText, $btnLabel, $opts);
             if ($ok) {
                 echo json_encode(['success' => true, 'message' => "ส่งข้อความทดสอบ LINE ไปยัง {$target['full_name']} สำเร็จ"]);
             } else {

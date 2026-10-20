@@ -404,13 +404,19 @@ function sendLinePushMessage($lineUserId, $title, $message, $targetUrl = '', $ph
     if (mb_strlen($altText, 'UTF-8') > 1400) {
         $altText = mb_substr($altText, 0, 1400, 'UTF-8');
     }
+    // Raw Flex JSON override (จาก editor โหมด JSON ของ /settings/notifications): เทมเพลตได้รองรับแล้ว
+    // $contents = bubble หรือ carousel ที่ตรวจแล้วจาก lineFlexJsonValidate()
+    $contents = $bubble;
+    if (isset($opts['flex_contents']) && is_array($opts['flex_contents']) && $opts['flex_contents'] !== []) {
+        $contents = $opts['flex_contents'];
+    }
     $flexPayload = [
         'to' => $lineUserId,
         'messages' => [
             [
                 'type' => 'flex',
                 'altText' => $altText,
-                'contents' => $bubble
+                'contents' => $contents
             ]
         ]
     ];
@@ -529,6 +535,44 @@ function lineTemplateDefaults() {
  * อ่านเทมเพลต LINE จาก settings (line_tpl_*) — fallback ค่าเริ่มต้นถ้ายังไม่ได้ตั้ง
  * @return array{header_color:string,header_title:string,body_text:string,btn_label:string,enabled:string,image_before:string,image_after:string}
  */
+/**
+ * ตรวจ+แปลง Raw Flex JSON (โหมด JSON ขั้นสูงของเทมเพลตแจ้งเตือน)
+ * คืน array contents ("bubble" หรือ "carousel") หรือ [] ถ้าไม่ใช้/ไม่ผ่าน
+ */
+function lineFlexJsonValidate(string $raw): array {
+    $raw = trim($raw);
+    if ($raw === '') return [];
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) return [];
+    // รับได้ทั้ง {type:bubble}, {type:carousel}, หรือ payload เต็ม {type:flex, contents:{...}}
+    $contents = null;
+    $top = strtolower((string)($decoded['type'] ?? ''));
+    if ($top === 'flex') {
+        $c = $decoded['contents'] ?? null;
+        if (is_array($c)) $contents = $c;
+    } elseif ($top === 'bubble' || $top === 'carousel') {
+        $contents = $decoded;
+    }
+    if (!is_array($contents)) return [];
+    $ct = strtolower((string)($contents['type'] ?? ''));
+    if ($ct !== 'bubble' && $ct !== 'carousel') return [];
+    return $contents;
+}
+
+/** แทนค่าตัวแปร {var} ทุก string ในโครงสร้าง array (recursive, สำหรับ raw flex JSON) */
+function lineFlexVarsApply(&$node, array $vars) {
+    if (is_array($node)) {
+        foreach ($node as $k => &$v) {
+            if (is_string($v)) {
+                $v = substituteVars($v, $vars);
+            } elseif (is_array($v)) {
+                lineFlexVarsApply($v, $vars);
+            }
+        }
+        unset($v);
+    }
+}
+
 function getLineTemplate($tplKey) {
     $d = lineTemplateDefaults()[$tplKey] ?? [
         'header_color' => '#1d4ed8', 'header_title' => '🔔 CMMS-TPT NOTIFICATION',
@@ -578,8 +622,8 @@ function getLineTemplate($tplKey) {
         'corner_radius'     => in_array($pick('corner_radius', 'lg'), ['none', 'xs', 'sm', 'md', 'lg', 'xl'], true) ? $pick('corner_radius', 'lg') : 'lg',
         'bubble_direction'  => in_array($pick('bubble_direction', 'ltr'), ['ltr', 'rtl'], true) ? $pick('bubble_direction', 'ltr') : 'ltr',
         'bubble_size'       => in_array($pick('bubble_size', ''), ['', 'nano', 'micro', 'deci', 'hecto', 'kilo', 'mega', 'giga'], true) ? $pick('bubble_size', '') : '',
-        'enabled'           => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',
-    ];
+        'flex_json'         => lineFlexJsonValidate((string)($tpl['flex_json'] ?? $d['flex_json'] ?? '')),
+        'enabled'           => (($tpl['enabled'] ?? $d['enabled'] ?? '1') == '1' || ($tpl['enabled'] ?? '1') === true) ? '1' : '0',    ];
 }
 
 /**
@@ -599,6 +643,15 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
     $title    = substituteVars($tpl['header_title'], $norm);
     $body     = substituteVars($tpl['body_text'], $norm);
     $btnLabel = substituteVars($tpl['btn_label'], $norm);
+
+    // โหมด JSON ขั้นสูง: flex_json มีค่า → ใช้เขียนทับ bubble ที่สร้างจากฟอร์มเสมอ
+    $flexContents = [];
+    if ($tpl['flex_json'] !== '') {
+        $flexContents = lineFlexJsonValidate($tpl['flex_json']);
+        if ($flexContents !== []) {
+            lineFlexVarsApply($flexContents, $norm);
+        }
+    }
 
     if (empty($photos)) {
         $photos = [];
@@ -640,6 +693,9 @@ function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl
         'bubble_size'       => $tpl['bubble_size'],
         'tpl_key'           => $tplKey,
     ];
+    if ($flexContents !== []) {
+        $opts['flex_contents'] = $flexContents;
+    }
     return sendLinePushMessage($lineUserId, $title, $body, $targetUrl, $photos, $tpl['header_color'], $title, $btnLabel, $opts);
 }
 

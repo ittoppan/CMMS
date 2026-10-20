@@ -72,6 +72,8 @@ interface TemplateDef {
   corner_radius?: "none" | "xs" | "sm" | "md" | "lg" | "xl";
   bubble_direction?: "ltr" | "rtl";
   bubble_size?: "" | "nano" | "micro" | "deci" | "hecto" | "kilo" | "mega" | "giga";
+  // โหมด JSON ขั้นสูง (Flex Message) — ไม่ว่าง = ใช้ทับฟอร์มเสมอ (ทั้งทดสอบและแจ้งจริง)
+  flex_json?: string;
 }
 
 const TEMPLATE_ORDER = [
@@ -242,6 +244,10 @@ export default function NotificationsSettingsPage() {
   }, [settings, templates]);
 
   const handleSave = async () => {
+    if (invalidFlexJson.length > 0) {
+      setError(`JSON ขั้นสูงไม่ผ่านในเทมเพลต: ${invalidFlexJson.join(", ")}`);
+      return;
+    }
     setSaving(true);
     setSaveMessage("");
     try {
@@ -412,6 +418,31 @@ export default function NotificationsSettingsPage() {
       setTimeout(() => setCopied(false), 1500);
     } catch { /* clipboard ไม่พร้อม — ข้าม */ }
   };
+
+  // ตรวจ JSON ขั้นสูงของทุกเทมเพลต (ใช้กันบันทึกเข้า DB ด้วย JSON ที่อ่านไม่ได้)
+  const invalidFlexJson = useMemo(() => {
+    const bad: string[] = [];
+    for (const [k, t] of Object.entries(templates) as [string, TemplateDef][]) {
+      const raw = (t?.flex_json ?? "").trim();
+      if (raw === "") continue;
+      let ok = false;
+      try {
+        const p = JSON.parse(raw) as Record<string, unknown>;
+        const top = String(p.type ?? "");
+        let c: Record<string, unknown> | null = null;
+        if (top === "flex") { const v = p.contents; if (v && typeof v === "object" && !Array.isArray(v)) c = v as Record<string, unknown>; }
+        else if (top === "bubble" || top === "carousel") c = p;
+        ok = !!c && ["bubble", "carousel"].includes(String(c.type ?? ""));
+      } catch { ok = false; }
+      if (!ok) bad.push(k);
+    }
+    return bad;
+  }, [templates]);
+  const flexJsonError = useMemo(() => {
+    const raw = (activeTpl.flex_json ?? "").trim();
+    if (raw === "") return "";
+    return invalidFlexJson.includes(activeTemplate) ? "ต้องเป็น {\"type\":\"bubble\"} / {\"type\":\"carousel\"} หรือ {\"type\":\"flex\",\"contents\":{...}} ที่ JSON.parse ผ่าน" : "";
+  }, [activeTpl.flex_json, activeTemplate, invalidFlexJson]);
 
   // ── แผนที่ค่า LINE keyword → px สำหรับพรีวิวมือถือ ──
   const sizePx = (k: string | undefined, def: number) =>
@@ -1506,6 +1537,55 @@ export default function NotificationsSettingsPage() {
                 <span className="block text-sm text-muted-foreground">
                   เป็น payload ตัวเดียวกับที่กด "ยิงทดสอบเข้า LINE" ส่งจริง — ตัวแปรในตัวอย่างถูกแทนค่าด้วยข้อมูลจำลอง
                 </span>
+                <details className="w-full rounded-lg border border-border bg-muted/40 p-3">
+                  <summary className="cursor-pointer text-sm font-medium">
+                    โหมด JSON ขั้นสูง (Flex Message) {activeTpl.flex_json ? "· ใช้งานอยู่ ✓" : ""}
+                  </summary>
+                  <VStack gap={2}>
+                    <span className="block text-sm text-muted-foreground">
+                      แก้ JSON ตรงนี้ได้ — เมื่อไม่ว่างระบบจะใช้ JSON นี้แทนฟอร์มเสมอ (ทั้งส่งจริงและทดสอบ)
+                      รองรับ type: bubble / carousel เฉพาะโครงที่ LINE รับได้ ดูไกด์ได้ที่{" "}
+                      <a
+                        href="https://developers.line.biz/flex-simulator/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                        onClick={async () => { try { await navigator.clipboard.writeText(flexJson); } catch {} }}
+                        title="คลิกเพื่อคัดลอก JSON ปัจจุบัน แล้วไปวางใน Flex Simulator"
+                      >
+                        Flex Simulator
+                      </a>{" "}
+                      (เปิดแล้ว JSON อยู่ในคลิปบอร์ด) ·{" "}
+                      <a href="https://developers.line.biz/en/reference/messaging-api/#flex-message" target="_blank" rel="noreferrer" className="underline">Messaging API: Flex Message</a>
+                    </span>
+                    <Textarea
+                      className="font-mono text-xs"
+                      rows={14}
+                      value={activeTpl.flex_json ?? ""}
+                      onChange={(e) => setTplField("flex_json", e.target.value)}
+                      placeholder={`{\n  "type": "bubble",\n  "header": { ... },\n  "body": { ... },\n  "footer": { ... }\n}`}
+                    />
+                    {flexJsonError && (
+                      <span className="block text-sm text-red-600">JSON ไม่ถูกต้อง: {flexJsonError}</span>
+                    )}
+                    <HStack gap={2} wrap>
+                      <Button variant="secondary" size="sm" onClick={() => { setTplField("flex_json", flexJson); }}>
+                        เอา JSON จากฟอร์มปัจจุบัน
+                      </Button>
+                      <Button variant="secondary" size="sm" onClick={async () => { try { const t = await navigator.clipboard.readText(); setTplField("flex_json", t); } catch {} }}>
+                        วางจากคลิปบอร์ด (จาก Simulator)
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        aria-label="ล้าง JSON"
+                        onClick={() => setTplField("flex_json", "")}
+                      >
+                        ล้าง (กลับไปใช้ฟอร์ม)
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </details>
               </VStack>
             )}
             </>
