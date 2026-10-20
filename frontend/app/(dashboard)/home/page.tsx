@@ -98,7 +98,7 @@ export default function HomePage() {
   return (
     <PageShell
       breadcrumbs={[{ label: "หน้าแรก", href: "/home" }]}
-      eyebrow="จุดเริ่มการทำงานทุกวัน"
+      eyebrow={<p className="cmms-eyebrow">จุดเริ่มการทำงานทุกวัน</p>}
       title="หน้าแรก"
       description={`สวัสดี${userFullName ? ` คุณ${userFullName}` : ""}${nowLabel ? ` · ${nowLabel}` : ""}`}
     >
