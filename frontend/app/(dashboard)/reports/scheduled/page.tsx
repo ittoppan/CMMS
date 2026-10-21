@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeading } from "@/components/dashboard/kit";
 import { useApiQuery, apiJson, type ApiError } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 
 interface SchedConfig {
   id: number;
@@ -168,7 +169,7 @@ export default function ScheduledReportsPage() {
   };
 
   const remove = async (cfg: SchedConfig) => {
-    if (!window.confirm(`ลบกำหนดการ "${cfg.name}"?`)) return;
+    if (!(await swalConfirm({ title: `ลบกำหนดการ "${cfg.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       await apiJson(`/api/v1/report_schedule.php?id=${cfg.id}`, { method: "DELETE" });
       await refetch();

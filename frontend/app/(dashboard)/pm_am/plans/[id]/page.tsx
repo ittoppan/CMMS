@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
+import { swalConfirm } from "@/lib/swal";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -61,7 +62,7 @@ export default function PMPlanViewPage() {
   };
 
   const handleGenerate = async () => {
-    if (!window.confirm(`สร้างรอบ PM ตามแผน "${plan.name}" สำหรับทุกเครื่องจักรในแผน?\n(ระบบกันรอบซ้ำอัตโนมัติ)`)) return;
+    if (!(await swalConfirm({ title: `สร้างรอบ PM ตามแผน "${plan.name}" สำหรับทุกเครื่องจักรในแผน?`, text: "ระบบกันรอบซ้ำอัตโนมัติ" }))) return;
     setBusy(true); setActionMsg(""); setActionErr("");
     try {
       const res = await fetch("/api/v1/pm_plans.php?action=generate", {
@@ -84,7 +85,7 @@ export default function PMPlanViewPage() {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`ลบแผน "${plan.name}"?`)) return;
+    if (!(await swalConfirm({ title: `ลบแผน "${plan.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setBusy(true); setActionErr("");
     try {
       const res = await fetch(`/api/v1/pm_plans.php?id=${planId}`, { method: "DELETE" });

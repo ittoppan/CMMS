@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "../../../../components/ToastProvider";
+import { swalConfirm } from "@/lib/swal";
 import {
   Plus,
   ClipboardCheck,
@@ -166,7 +167,7 @@ export default function StockTakePage() {
   };
 
   const cancelRound = async () => {
-    if (!window.confirm("ยกเลิกรอบนับนี้? (ข้อมูลที่กรอกจะหาย)")) return;
+    if (!(await swalConfirm({ title: "ยกเลิกรอบนับนี้?", text: "ข้อมูลที่กรอกจะหาย", destructive: true, confirmText: "ยกเลิก" }))) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/v1/stock_take.php?id=${activeId}`, {
@@ -187,7 +188,7 @@ export default function StockTakePage() {
   };
 
   const deleteRound = async (id: number) => {
-    if (!window.confirm("ลบรอบนับนี้? (ลบได้เฉพาะรอบที่ยังไม่ปิด)")) return;
+    if (!(await swalConfirm({ title: "ลบรอบนับนี้?", text: "ลบได้เฉพาะรอบที่ยังไม่ปิดเท่านั้น", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       const res = await fetch(`/api/v1/stock_take.php?id=${id}`, { method: "DELETE" });
       const json = await res.json();

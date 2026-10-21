@@ -31,6 +31,7 @@ import {
 import $ from "jquery";
 import { loadFormBuilder } from "@/lib/form-builder-loader";
 import { usePageHero, t } from "@/lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 
 interface TemplateSummary {
   id: number;
@@ -239,7 +240,7 @@ export default function FormDesignerPage() {
   }, [code, title, rev, description, selectedId, fetchTemplates]);
 
   const deleteForm = useCallback(async () => {
-    if (!selectedId || !window.confirm("ลบแบบฟอร์มนี้และผลการกรอกทั้งหมด?")) return;
+    if (!selectedId || !(await swalConfirm({ title: "ลบแบบฟอร์มนี้และผลการกรอกทั้งหมด?", destructive: true, confirmText: "ลบเลย" }))) return;
     setMsg(null);
     try {
       const res = await fetch(`/api/v1/form_templates.php?id=${selectedId}`, {

@@ -9,6 +9,7 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import AndonLamp from "@/components/AndonLamp";
 import { useMenuPermission } from "@/lib/useMenuPermission";
+import { swalConfirm } from "@/lib/swal";
 import {
   ArrowLeft,
   Wrench,
@@ -74,7 +75,7 @@ export default function PMDetailPage() {
   const failCount = checklist.filter((i) => i.status === "fail" || (typeof i.value === "number" && pm?.checklist_meta?.fails)).length;
 
   const generateWO = async () => {
-    if (!window.confirm(`สร้าง Work Order จากรอบ PM "${pm.title}"?\n(ระบบกัน WO ซ้ำสำหรับรอบนี้)`)) return;
+    if (!(await swalConfirm({ title: `สร้าง Work Order จากรอบ PM "${pm.title}"?`, text: "ระบบกัน WO ซ้ำสำหรับรอบนี้" }))) return;
     setBusy(true); setWoMsg(""); setWoErr("");
     try {
       const res = await fetch("/api/v1/pm_plans.php?action=generate_wo", {

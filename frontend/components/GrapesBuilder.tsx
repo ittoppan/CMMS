@@ -12,6 +12,7 @@
  *          จึงเก็บ hex palette ไว้ที่นี่ ไม่ใช่ในหน้า
  */
 import { useEffect, useRef, useState, useCallback } from "react";
+import { swalConfirm } from "@/lib/swal";
 import "grapesjs/dist/css/grapes.min.css";
 
 /* ── Design tokens (ค่าเดียวกับ globals.css) ─────────────────────────── */
@@ -670,7 +671,7 @@ export default function GrapesBuilder() {
   };
 
   const removePage = async (row: PageRow) => {
-    if (!window.confirm(`ลบหน้า "${row.title}" (/pages/${row.slug}) ?`)) return;
+    if (!(await swalConfirm({ title: `ลบหน้า "${row.title}" (/pages/${row.slug})?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/v1/custom_pages.php?slug=${encodeURIComponent(row.slug)}`, {

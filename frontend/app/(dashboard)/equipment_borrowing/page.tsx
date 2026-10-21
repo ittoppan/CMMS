@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { swalConfirm } from "@/lib/swal";
 import {
   SimpleDataTable,
   type SimpleColumn,
@@ -88,7 +89,7 @@ export default function EquipmentBorrowingPage() {
   useEffect(() => { fetchData(); }, []);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this borrowing record?")) return;
+    if (!(await swalConfirm({ title: "ลบรายการยืม-คืนนี้?", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       await fetch(`/api/v1/equipment_borrowing.php?id=${id}`, { method: "DELETE" });
       fetchData();

@@ -16,6 +16,7 @@ import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
 import { useToast } from "@/components/ToastProvider";
 import { Dialog } from "@/components/ui/dialog";
+import { swalConfirm } from "@/lib/swal";
 import {
   Select,
   SelectContent,
@@ -134,7 +135,7 @@ export default function SupervisorReviewPage() {
   };
 
   const cancel = async (m: MaintenanceRequest) => {
-    if (!window.confirm(`ยกเลิกคำขอ ${m.request_code}?`)) return;
+    if (!(await swalConfirm({ title: `ยกเลิกคำขอ ${m.request_code}?`, destructive: true, confirmText: "ยกเลิก" }))) return;
     try {
       await mutateSupervisor({ action: "cancel_request", id: m.id });
       showToast("success", "ยกเลิกคำขอแล้ว");

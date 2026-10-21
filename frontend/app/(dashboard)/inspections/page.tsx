@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { swalConfirm } from "@/lib/swal";
 import { Spinner } from "@/components/ui/spinner";
 import CountUp from "react-countup";
 import {
@@ -163,7 +164,7 @@ export default function InspectionsPage() {
   };
 
   const deleteSchedule = async (s: any) => {
-    if (!window.confirm(`ลบรอบตรวจของ "${s.template_title}" (${s.asset_name || "-"})?`)) return;
+    if (!(await swalConfirm({ title: `ลบรอบตรวจของ "${s.template_title}" (${s.asset_name || "-"})?`, destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       await fetch(`/api/v1/inspections.php?schedule=${s.id}`, { method: "DELETE" });
       flash("ลบรอบตรวจแล้ว");

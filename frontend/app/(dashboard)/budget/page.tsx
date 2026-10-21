@@ -20,6 +20,7 @@ import {
   BudgetItem, BudgetListResponse, BudgetVsActualRow, CostFiltersOptions,
   fetchBudget, fetchBudgetVsActual, fetchCostFilters, costPost, fmtMoney, ALERT_LABELS,
 } from "@/lib/cost";
+import { confirmThen } from "@/lib/swal";
 
 const STATUS_META: Record<string, { th: string; variant: "neutral" | "info" | "success" }> = {
   draft: { th: "ร่าง", variant: "neutral" },
@@ -286,19 +287,19 @@ export default function BudgetPage() {
                                   <ActionBtn title="แก้ไข" onClick={() => setModal({ kind: "edit", item: it })}><PencilLine size={14} aria-hidden="true" /></ActionBtn>
                                 )}
                                 {isDraft && (
-                                  <ActionBtn title="ยื่นขออนุมัติ" onClick={() => window.confirm(`ยื่นขออนุมัติงบ ${THAI_MONTHS[it.month]} ${it.year}?`) && act(() => costPost({ action: "budget/submit", id: it.id }), "ส่งขออนุมัติแล้ว")}><Send size={14} aria-hidden="true" /></ActionBtn>
+                                  <ActionBtn title="ยื่นขออนุมัติ" onClick={() => confirmThen(`ยื่นขออนุมัติงบ ${THAI_MONTHS[it.month]} ${it.year}?`, () => act(() => costPost({ action: "budget/submit", id: it.id }), "ส่งขออนุมัติแล้ว"))}><Send size={14} aria-hidden="true" /></ActionBtn>
                                 )}
                                 {isSubmitted && (
-                                  <ActionBtn title="อนุมัติ" variant="primary" onClick={() => window.confirm(`อนุมัติงบ ${THAI_MONTHS[it.month]} ${it.year}?`) && act(() => costPost({ action: "budget/approve", id: it.id }), "อนุมัติงบแล้ว")}><CheckCheck size={14} aria-hidden="true" /></ActionBtn>
+                                  <ActionBtn title="อนุมัติ" variant="primary" onClick={() => confirmThen(`อนุมัติงบ ${THAI_MONTHS[it.month]} ${it.year}?`, () => act(() => costPost({ action: "budget/approve", id: it.id }), "อนุมัติงบแล้ว"))}><CheckCheck size={14} aria-hidden="true" /></ActionBtn>
                                 )}
                                 {isActive && (
                                   <>
                                     <ActionBtn title="ปรับงบ +/−" onClick={() => setModal({ kind: "adjust", item: it })}><ArrowUpDown size={14} aria-hidden="true" /></ActionBtn>
-                                    <ActionBtn title="ปิดงบ" onClick={() => window.confirm(`ปิดงบ ${THAI_MONTHS[it.month]} ${it.year}?`) && act(() => costPost({ action: "budget/close", id: it.id }), "ปิดงบแล้ว")}><Lock size={14} aria-hidden="true" /></ActionBtn>
+                                    <ActionBtn title="ปิดงบ" onClick={() => confirmThen(`ปิดงบ ${THAI_MONTHS[it.month]} ${it.year}?`, () => act(() => costPost({ action: "budget/close", id: it.id }), "ปิดงบแล้ว"), { destructive: true })}><Lock size={14} aria-hidden="true" /></ActionBtn>
                                   </>
                                 )}
                                 {(isDraft || isSubmitted) && (
-                                  <ActionBtn title="ยกเลิก" onClick={() => window.confirm(`ยกเลิกงบ ${THAI_MONTHS[it.month]} ${it.year}?`) && act(() => costPost({ action: "budget/cancel", id: it.id }), "ยกเลิกงบแล้ว")}><Unlock size={14} aria-hidden="true" /></ActionBtn>
+                                  <ActionBtn title="ยกเลิก" onClick={() => confirmThen(`ยกเลิกงบ ${THAI_MONTHS[it.month]} ${it.year}?`, () => act(() => costPost({ action: "budget/cancel", id: it.id }), "ยกเลิกงบแล้ว"), { destructive: true })}><Unlock size={14} aria-hidden="true" /></ActionBtn>
                                 )}
                               </div>
                             </OsCell>

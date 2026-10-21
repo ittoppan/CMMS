@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import SuccessDialog from "@/components/SuccessDialog";
+import { swalConfirm } from "@/lib/swal";
 
 function EditPMContent() {
   const router = useRouter();
@@ -128,7 +129,7 @@ function EditPMContent() {
   };
 
   const deleteAttachment = async (attId: number) => {
-    if (!window.confirm("ลบเอกสารแนบนี้?")) return;
+    if (!(await swalConfirm({ title: "ลบเอกสารแนบนี้?", destructive: true, confirmText: "ลบเลย" }))) return;
     const res = await fetch(`/api/v1/pm_am.php?attachment_id=${attId}`, { method: "DELETE" });
     const json = await res.json();
     if (json.success) {

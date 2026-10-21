@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,7 @@ export default function PMChecklistsPage() {
   };
 
   const deleteTemplate = async (tpl: Template) => {
-    if (!window.confirm(`ลบ Template "${tpl.name}"? (หากถูกใช้ในแผนจะลบไม่ได้)`)) return;
+    if (!(await swalConfirm({ title: `ลบ Template "${tpl.name}"?`, text: "หากถูกใช้ในแผนจะลบไม่ได้", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       const res = await fetch(`/api/v1/checklist_templates.php?id=${tpl.id}`, { method: "DELETE" });
       const j = await res.json();
@@ -160,7 +161,7 @@ export default function PMChecklistsPage() {
   };
 
   const deleteItem = async (itemId: number) => {
-    if (!window.confirm("ลบรายการตรวจนี้?")) return;
+    if (!(await swalConfirm({ title: "ลบรายการตรวจนี้?", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       await fetch(`/api/v1/checklist_templates.php?action=item&item_id=${itemId}`, { method: "DELETE" });
       if (activeTpl) { await loadItems(activeTpl.id); await loadTemplates(); }

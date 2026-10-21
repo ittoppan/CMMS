@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { swalConfirm } from "@/lib/swal";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -189,7 +190,7 @@ export default function NotificationRulesPage() {
 
   const handleDelete = async (rule: RuleRow) => {
     if (!rule.id) return;
-    if (!window.confirm(`ลบกฎ "${rule.name}" ?`)) return;
+    if (!(await swalConfirm({ title: `ลบกฎ "${rule.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setError(null);
     try {
       await deleteRule(rule.id);

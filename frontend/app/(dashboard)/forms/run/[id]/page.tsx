@@ -24,6 +24,7 @@ import jsPDF from "jspdf";
 import { useParams } from "next/navigation";
 import { FORM_DATA_SOURCES, fetchDataSourceOptions, DataOption, dataSourceLabel } from "@/lib/form-data-sources";
 import { usePageHero, t } from "@/lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 
 interface SchemaField {
   type: string;
@@ -365,7 +366,7 @@ export default function FormRunPage() {
   }, [tpl]);
 
   const deleteSubmission = useCallback(async (sid: number) => {
-    if (!window.confirm("ลบผลการกรอกนี้?")) return;
+    if (!(await swalConfirm({ title: "ลบผลการกรอกนี้?", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       const res = await fetch("/api/v1/form_templates.php", {
         method: "POST",

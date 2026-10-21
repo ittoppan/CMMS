@@ -67,3 +67,14 @@ export async function swalInfo(message: string, title = "ข้อมูล"): P
   const SweetAlert = await getSwal();
   await SweetAlert.fire({ title, text: message, icon: "info" });
 }
+
+/** inline ยืนยันแล้วทำงาน — onClick={async () => confirmThen("ลบนี้?", () => del())} */
+export async function confirmThen(
+  title: string,
+  run: () => void | Promise<void>,
+  opts: { text?: string; destructive?: boolean; confirmText?: string; icon?: "warning" | "question" | "info" } = {},
+): Promise<void> {
+  if (await swalConfirm({ title, text: opts.text, destructive: opts.destructive, confirmText: opts.confirmText, icon: opts.icon })) {
+    await run();
+  }
+}
