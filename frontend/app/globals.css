@@ -2881,3 +2881,55 @@ html.cmms-no-anim *::after {
     animation: none !important;
   }
 }
+
+/* ── SweetAlert2 (pointer ที่ lib/swal.ts) — สไตล์ตาม design tokens ── */
+.cmms-swal-popup {
+  border-radius: var(--cmms-radius-lg);
+  border: 1px solid var(--cmms-border);
+  background: var(--cmms-bg-card);
+  color: var(--cmms-text-primary);
+  font-family: inherit;
+  box-shadow: var(--cmms-shadow-lg, 0 20px 40px rgba(0, 0, 0, 0.25));
+}
+.cmms-swal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cmms-text-primary);
+}
+.cmms-swal-text {
+  color: var(--cmms-text-secondary);
+  font-size: 0.9rem;
+}
+.cmms-swal-btn {
+  border-radius: var(--cmms-radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 8px 20px;
+  margin-inline: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+.cmms-swal-btn:hover { filter: brightness(1.08); }
+.cmms-swal-btn:focus-visible { outline: 2px solid var(--cmms-border-focus); outline-offset: 2px; }
+.cmms-swal-btn-confirm {
+  background: var(--cmms-primary);
+  color: var(--cmms-primary-contrast, #fff);
+}
+.cmms-swal-btn-danger {
+  background: var(--cmms-danger);
+  color: #fff;
+}
+.cmms-swal-btn-cancel {
+  background: var(--cmms-bg-muted, transparent);
+  color: var(--cmms-text-primary);
+  border-color: var(--cmms-border);
+}
+.cmms-swal-input {
+  border: 1px solid var(--cmms-border);
+  border-radius: var(--cmms-radius-sm);
+  color: var(--cmms-text-primary);
+  background: var(--cmms-bg-card);
+}
+.swal2-container .swal2-backdrop-show { background: rgba(15, 23, 42, 0.55); }
+.swal2-timer-progress-bar { background: var(--cmms-primary); }

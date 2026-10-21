@@ -11,6 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { swalConfirm } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -101,7 +102,13 @@ export default function FormsPage() {
   };
 
   const deleteDigital = async (id: number) => {
-    if (!window.confirm("ลบแบบฟอร์มดิจิทัลนี้และผลการกรอกทั้งหมด?")) return;
+    const ok = await swalConfirm({
+      title: "ลบแบบฟอร์มดิจิทัลนี้?",
+      text: "ผลการกรอกทั้งหมดของแบบฟอร์มนี้จะถูกลบด้วยและกู้คืนไม่ได้",
+      destructive: true,
+      confirmText: "ลบเลย",
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/v1/form_templates.php?id=${id}`, {
         method: "DELETE",
