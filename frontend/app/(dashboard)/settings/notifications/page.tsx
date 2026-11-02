@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PushTemplateEditor from "@/components/settings/PushTemplateEditor";
 import EmailNotifySettings from "@/components/EmailNotifySettings";
 import { PageShell } from "@/components/PageShell";
 import {
@@ -516,10 +517,13 @@ export default function NotificationsSettingsPage() {
       <Tabs value={activeChannel} onValueChange={setActiveChannel}>
         <TabsList aria-label="ช่องทางการแจ้งเตือน">
           <TabsTrigger value="line">LINE Messenger</TabsTrigger>
+          <TabsTrigger value="push">Web Push / PWA</TabsTrigger>
           <TabsTrigger value="email">อีเมล (Email)</TabsTrigger>
           <TabsTrigger value="telegram">Telegram (แอดมิน)</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {activeChannel === "push" && <PushTemplateEditor />}
 
       {activeChannel === "email" && <EmailNotifySettings />}
 

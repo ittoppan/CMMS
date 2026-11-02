@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
@@ -59,6 +60,17 @@ try {
                 case 'rules':
                     requireRole(canSupervisor(), 'เฉพาะผู้ดูแลระบบ/หัวหน้างานที่จัดการกฎการแจ้งเตือนได้');
                     echo json_encode(['items' => NotificationCenterService::rules($pdo)], JSON_UNESCAPED_UNICODE);
+                    break;
+
+                case 'templates':
+                    requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการรูปแบบข้อความแจ้งเตือนได้');
+                    echo json_encode([
+                        'items' => NotificationCenterService::templates($pdo),
+                        'push_enabled' => getSettingValue('push_alert_enabled', '1') === '1',
+                        'line_enabled' => getSettingValue('line_notify_enabled', '1') === '1',
+                        'email_enabled' => getSettingValue('email_notify_enabled', '0') === '1',
+                        'subscriptions' => (int)$pdo->query('SELECT COUNT(*) FROM push_subscriptions')->fetchColumn(),
+                    ], JSON_UNESCAPED_UNICODE);
                     break;
 
                 case 'meta':
@@ -136,6 +148,24 @@ try {
                     break;
                 }
 
+                case 'template': {
+                    requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขรูปแบบข้อความแจ้งเตือนได้');
+                    $d = json_decode(file_get_contents('php://input'), true);
+                    if (!is_array($d)) {
+                        http_response_code(400);
+                        echo json_encode(['error' => 'ต้องระบุ template fields'], JSON_UNESCAPED_UNICODE);
+                        break;
+                    }
+                    try {
+                        $n = NotificationCenterService::saveTemplate($pdo, $d);
+                        echo json_encode(['success' => true, 'updated' => $n], JSON_UNESCAPED_UNICODE);
+                    } catch (InvalidArgumentException $e) {
+                        http_response_code(400);
+                        echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+                    }
+                    break;
+                }
+
                 default:
                     http_response_code(400);
                     echo json_encode(['error' => 'Unknown action'], JSON_UNESCAPED_UNICODE);
@@ -153,6 +183,28 @@ try {
                 http_response_code(400);
                 echo json_encode(['error' => 'Unknown action'], JSON_UNESCAPED_UNICODE);
             }
+            break;
+
+        case 'POST':
+            if ($action === 'test_push') {
+                requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่ส่งข้อความทดสอบได้');
+                $d = json_decode(file_get_contents('php://input'), true);
+                if (!is_array($d)) $d = [];
+                try {
+                    $sent = NotificationCenterService::testPushTemplate($pdo, $uid, $d);
+                    if ($sent > 0) {
+                        echo json_encode(['success' => true, 'sent' => $sent, 'message' => "ส่งข้อความทดสอบเข้าอุปกรณ์ $sent เครื่อง"], JSON_UNESCAPED_UNICODE);
+                    } else {
+                        echo json_encode(['success' => false, 'sent' => 0, 'message' => 'ยังไม่มีอุปกรณ์ที่เปิดรับการแจ้งเตือน — เปิด CMMS บนมือถือ/เดสก์ท็อปแล้วกดอนุญาตการแจ้งเตือนก่อน'], JSON_UNESCAPED_UNICODE);
+                    }
+                } catch (Throwable $e) {
+                    http_response_code(400);
+                    echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+                }
+                break;
+            }
+            http_response_code(400);
+            echo json_encode(['error' => 'Unknown action'], JSON_UNESCAPED_UNICODE);
             break;
 
         default:
