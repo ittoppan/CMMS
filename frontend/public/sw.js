@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v39-20260920-0758";
+const SW_VERSION = "v40-20261104-ux1";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -39,14 +39,9 @@ const OFFLINE_ROUTES = [
 ];
 
 /* API ที่ precache ตอน install — ฟอร์มแจ้งซ่อมโหลดข้อมูล (เครื่องจักร/แผนก) */
-const PRECACHE_APIS = [
-  "/api/v1/asset_registry.php",
-  "/api/v1/departments.php",
-  "/api/v1/repair.php?reference=codes",
-  "/api/v1/menu_permissions.php",
-  "/api/v1/pm_am.php",
-  "/api/v1/index.php?resource=assets",
-];
+/* PRECACHE_APIS ถูกลบออก (v40): การ precache /api/v1/* ตอน install ทำให้บาง endpoint ค้าง
+ * ใน SW-fetch แล้ว SW ติด state "installing" ตลอดกาล (serviceWorker.ready ไม่ resolve)
+ * — API cache ยังเก็บแบบ network-first + fallback ที่ fetch handler เหมือนเดิม */
 
 /* ---------- Helpers ---------- */
 function cachePut(cacheName, request, response) {
@@ -76,11 +71,8 @@ self.addEventListener("install", (event) => {
       await Promise.allSettled(
         PRECACHE_URLS.map((url) => shell.add(url).catch(() => {}))
       );
-      // precache API สำหรับหน้า offline (ล้มไม่เป็นไร — ตอนออนไลน์จะ cache เองผ่าน fetch handler)
-      const api = await caches.open(API_CACHE);
-      await Promise.allSettled(
-        PRECACHE_APIS.map((url) => api.add(url).catch(() => {}))
-      );
+      // (v40) precache API ออกจาก install — บาง endpoint ค้างใน SW-fetch ทำให้ SW ติด installing ตลอดกาล
+      // API cache ยังเก็บแบบ network-first + fallback ที่ fetch handler เหมือนเดิม
       await self.skipWaiting();
     })()
   );

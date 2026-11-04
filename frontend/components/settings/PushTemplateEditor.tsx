@@ -16,6 +16,7 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Send, Smartphone, RefreshCw } from "lucide-react";
+import Link from "next/link";
 
 interface Tpl {
   id: number;
@@ -178,6 +179,9 @@ export default function PushTemplateEditor() {
                 <Smartphone className="h-3.5 w-3.5 mr-1" aria-hidden="true" />
                 อุปกรณ์รับแจ้งเตือน: {meta?.subscriptions ?? 0}
               </Badge>
+              <Link href="/settings/push" className="text-xs underline hover:opacity-80" style={{ color: "var(--cmms-primary)" }}>
+                เปิด/ปิดในอุปกรณ์ของฉัน →
+              </Link>
             </HStack>
             <Button variant="secondary" size="sm" onClick={load} aria-label="โหลดใหม่">
               <RefreshCw className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
