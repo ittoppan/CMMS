@@ -322,6 +322,56 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  // ── เลือกอะไหล่ที่ต้องการเบิก (requested_parts) ──
+  const [sparePicks, setSparePicks] = useState<{ code: string; name: string; qty: number }[]>([]);
+  const [spareQuery, setSpareQuery] = useState("");
+  const [spareResults, setSpareResults] = useState<{ item_no: string; description: string; unit?: string; available?: number | string }[]>([]);
+  const [spareSearching, setSpareSearching] = useState(false);
+  const [spareSearchLocked, setSpareSearchLocked] = useState(false);
+  const [spareManualName, setSpareManualName] = useState("");
+  const [spareManualQty, setSpareManualQty] = useState(1);
+  const spareDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const addSparePick = (p: { code: string; name: string; qty: number }) => {
+    if (!p.name.trim() || p.qty < 1) return;
+    const key = String(p.code || p.name).trim().toLowerCase();
+    setSparePicks((prev) => (prev.some((x) => String(x.code || x.name).trim().toLowerCase() === key) ? prev : [...prev, p]));
+    setSpareManualName("");
+    setSpareManualQty(1);
+  };
+
+  // ค้นหาอะไหล่จาก Sage — ต้องมี session; ถ้าไม่ล็อกอิน (LIFF/LINE) ให้ใช้ช่องพิมพ์เองแทน
+  useEffect(() => {
+    const q = spareQuery.trim();
+    if (!q) {
+      setSpareResults([]);
+      return;
+    }
+    if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
+    spareDebounceRef.current = setTimeout(async () => {
+      setSpareSearching(true);
+      try {
+        const res = await apiFetch(`/api/v1/sage_items.php?q=${encodeURIComponent(q)}`);
+        if (!res.ok) {
+          setSpareSearchLocked(true);
+          setSpareResults([]);
+        } else {
+          const json = await res.json();
+          setSpareResults(Array.isArray(json.items) ? json.items : []);
+          setSpareSearchLocked(false);
+        }
+      } catch {
+        setSpareResults([]);
+      }
+      setSpareSearching(false);
+    }, 400);
+    return () => {
+      if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spareQuery]);
+
+
   const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
 
   /* เติมชื่อ-นามสกุลจากฐานข้อมูล ถ้าผู้ใช้ยังไม่ได้กรอก/แก้เอง */
@@ -738,6 +788,7 @@ const flushQueue = async () => {
         is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
+        requested_parts: sparePicks.length > 0 ? JSON.stringify(sparePicks) : null,
       };
 
       let res: Response;
@@ -1214,6 +1265,100 @@ const flushQueue = async () => {
                 onChange={(e) => update("note", e.target.value)}
                 rows={2}
               />
+            </div>
+
+            {/* ── อะไหล่ที่ต้องการเบิก (requested_parts) — บันทึกไว้บนใบงานให้ช่าง/คลังเตรียม ── */}
+            <div>
+              <p className="text-sm font-bold mb-2">อะไหล่ที่ต้องการเบิก (ถ้ามี)</p>
+              {!spareSearchLocked && (
+                <Input
+                  label="ค้นหาอะไหล่จาก Sage 300"
+                  isLabelHidden
+                  placeholder="พิมพ์รหัส/ชื่ออะไหล่เพื่อค้นหาจาก Sage 300"
+                  value={spareQuery}
+                  onChange={(e) => setSpareQuery(e.target.value)}
+                  className="mb-2"
+                />
+              )}
+              {spareSearchLocked && (
+                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
+                  ค้นหาจาก Sage ได้เมื่อใช้งานผ่านระบบเว็บ — สำหรับใช้งานผ่าน LINE ให้พิมพ์ชื่ออะไหล่เองด้านล่าง
+                </p>
+              )}
+              {spareSearching && <p className="text-2xs text-[var(--cmms-text-secondary)] animate-pulse mb-2">กำลังค้นหา…</p>}
+              {!spareSearchLocked && spareQuery.trim() && !spareSearching && spareResults.length === 0 && (
+                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">ไม่พบใน Sage — พิมพ์เพิ่มเองได้ด้านล่าง</p>
+              )}
+              {!spareSearchLocked && spareResults.length > 0 && (
+                <ul className="divide-y divide-border rounded-xl border border-border bg-card mb-3 max-h-56 overflow-y-auto">
+                  {spareResults.slice(0, 8).map((it) => (
+                    <li key={it.item_no} className="flex items-center gap-3 p-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold truncate m-0">{it.item_no}</p>
+                        <p className="text-2xs text-[var(--cmms-text-secondary)] truncate m-0">{it.description}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => addSparePick({ code: it.item_no, name: it.description, qty: 1 })}
+                      >
+                        + เพิ่ม
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="flex items-end gap-2">
+                <Input
+                  label="อะไหล่ (พิมพ์เอง)"
+                  isLabelHidden
+                  placeholder="ชื่ออะไหล่ที่ต้องการ (พิมพ์เอง)"
+                  value={spareManualName}
+                  onChange={(e) => setSpareManualName(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  type="number"
+                  min={1}
+                  label="จำนวน"
+                  isLabelHidden
+                  value={String(spareManualQty)}
+                  onChange={(e) => setSpareManualQty(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-20"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => addSparePick({ code: "", name: spareManualName, qty: spareManualQty })}
+                >
+                  + เพิ่มเอง
+                </Button>
+              </div>
+
+              {sparePicks.length > 0 && (
+                <ul className="mt-2.5 flex flex-wrap gap-2">
+                  {sparePicks.map((p, i) => (
+                    <li key={`${p.code || p.name}-${i}`} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs">
+                      <span className="font-semibold">{p.code || "พิมพ์เอง"}</span>
+                      <span className="truncate max-w-40">{p.name}</span>
+                      <span className="tabular-nums text-[var(--cmms-text-secondary)]">×{p.qty}</span>
+                      <button
+                        type="button"
+                        aria-label={`ลบ ${p.name} ออกจากรายการ`}
+                        onClick={() => setSparePicks(sparePicks.filter((_, j) => j !== i))}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </Card>

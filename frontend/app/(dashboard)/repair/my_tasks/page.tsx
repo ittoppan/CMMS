@@ -21,7 +21,10 @@ import {
   Wrench,
   Clock,
   RotateCcw,
+  PackagePlus,
 } from "lucide-react";
+
+import SagePartAddModal from "@/components/spare/SagePartAddModal";
 
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
@@ -125,6 +128,9 @@ export default function MyTasksPage() {
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+
+  // Sage เบิกอะไหล่ Modal (repair kind)
+  const [spareModalTask, setSpareModalTask] = useState<TaskItem | null>(null);
 
   // Close Work Order Form State
   const [failureCode, setFailureCode] = useState("");
@@ -674,6 +680,18 @@ export default function MyTasksPage() {
               </>
             )}
 
+            {task.kind === "repair" && task.status !== "completed" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSpareModalTask(task)}
+                className="gap-1.5"
+              >
+                <PackagePlus className="w-3.5 h-3.5" />
+                <span>เบิกอะไหล่</span>
+              </Button>
+            )}
+
             <Button
               variant="outline"
               size="sm"
@@ -1028,6 +1046,14 @@ export default function MyTasksPage() {
           </Button>
         </div>
       </AnimatedDialog>
+
+      {/* Sage เบิกอะไหล่ modal */}
+      <SagePartAddModal
+        open={spareModalTask !== null}
+        onClose={() => setSpareModalTask(null)}
+        workOrderId={spareModalTask?.kind === "repair" ? spareModalTask.rawId : null}
+        woNumber={spareModalTask?.woNumber}
+      />
     </PageShell>
   );
 }

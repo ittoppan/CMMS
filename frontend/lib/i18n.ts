@@ -680,7 +680,7 @@ DICT["priority.low"] = { th: "ต่ำ", en: "Low" };
 // ── Phase 37: Reliability Engineering (nav + menu) ──
 DICT["nav.reliability"] = { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" };
 DICT["menu.reliability"] = { th: "ภาพรวมความเสียหาย", en: "Reliability Overview" };
-DICT["menu.reliability_assets"] = { th: "ความเสียหายรายเครื่อง", en: "Asset Reliability" };
+DICT["menu.reliability_assets"] = { th: "ความเสียหายรายเครื่อง", en: "Reliability by Asset" };
 DICT["menu.reliability_failure_modes"] = { th: "รูปแบบการเสีย & Pareto", en: "Failure Modes & Pareto" };
 DICT["menu.reliability_trend"] = { th: "แนวโน้มความเสียหาย", en: "Reliability Trend" };
 DICT["menu.reliability_weibull"] = { th: "การวิเคราะห์ Weibull", en: "Weibull Analysis" };

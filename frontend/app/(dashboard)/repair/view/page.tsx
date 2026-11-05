@@ -25,6 +25,7 @@ import {
   Info,
   Trash2,
   Plus,
+  PackagePlus,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -53,6 +54,24 @@ interface PartRow {
   sage_doc_no?: string;
 }
 
+/** อ่าน requested_parts JSON ที่ผู้แจ้งกรอกมาตอนแจ้งซ่อม [{code,name,qty}] */
+function parseRequestedParts(raw: unknown): { code: string; name: string; qty: number }[] {
+  if (!raw || typeof raw !== "string") return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((p: any) => p && (p.name || p.code))
+      .map((p: any) => ({
+        code: String(p.code || ""),
+        name: String(p.name || p.code || ""),
+        qty: Math.max(1, Number(p.qty) || 1),
+      }));
+  } catch {
+    return [];
+  }
+}
+
 interface WorkOrderDetail {
   id: number;
   workOrderNo: string;
@@ -68,6 +87,7 @@ interface WorkOrderDetail {
   receiverSignature: string;
   completedAt: string;
   createdDate: string;
+  requestedParts: { code: string; name: string; qty: number }[];
   rootCause: string;
   solution: string;
   costParts: number;
@@ -211,6 +231,7 @@ export default function RepairViewDetailsPage() {
     receiverSignature: "",
     completedAt: "-",
     createdDate: "-",
+    requestedParts: [],
     rootCause: "-",
     solution: "-",
     costParts: 0,
@@ -247,6 +268,7 @@ export default function RepairViewDetailsPage() {
             receiverSignature: row.receiver_signature_path || "",
             completedAt: row.completed_at || row.updated_at || "-",
             createdDate: row.created_at || "-",
+            requestedParts: parseRequestedParts(row.requested_parts),
             rootCause: row.root_cause || "-",
             solution: row.solution || row.resolution || "-",
             costParts: Number(row.cost_parts || 0),
@@ -417,8 +439,8 @@ export default function RepairViewDetailsPage() {
     }
   };
 
-  const addSagePart = async (item: any) => {
-    const qty = Math.max(1, Number(sageQtyRef.current || 1));
+  const addSagePart = async (item: any, qtyOverride?: number) => {
+    const qty = Math.max(1, Number(qtyOverride ?? sageQtyRef.current ?? 1));
     if (!item?.item_no) { setSageMsg("เลือกอะไหล่จากรายการค้นหาก่อน"); return; }
     setPartsSaving(true);
     setSageMsg(null);
@@ -861,6 +883,62 @@ export default function RepairViewDetailsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* ── อะไหล่ที่ผู้แจ้งร้องขอ (requested_parts จากฟอร์มแจ้งซ่อม) ── */}
+        {(wo.requestedParts || []).length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  REQUESTED BY REPORTER · F-EN-03
+                </span>
+                <CardTitle className="text-base">อะไหล่ที่ผู้แจ้งร้องขอตอนแจ้งซ่อม</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/60 text-left border-b border-border">
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวนที่ขอ</th>
+                      <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {wo.requestedParts.map((p, i) => (
+                      <tr key={`${p.code}-${p.name}-${i}`} className="transition-colors hover:bg-primary-light/60">
+                        <td className="p-3 font-semibold">{p.code || <span className="text-muted-foreground">พิมพ์เอง</span>}</td>
+                        <td className="p-3">{p.name}</td>
+                        <td className="p-3 tabular-nums">{p.qty.toLocaleString()}</td>
+                        <td className="p-3 text-right">
+                          {p.code ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              loading={partsSaving}
+                              onClick={() => addSagePart({ item_no: p.code, description: p.name }, p.qty)}
+                            >
+                              <PackagePlus className="w-3.5 h-3.5" />
+                              <span>เบิกเลย</span>
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">กรอกเอง — ค้นหาด้านล่างเพื่อเบิกจาก Sage</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-2xs text-muted-foreground mt-2">
+                ปุ่ม "เบิกเลย" เพิ่มรายการเข้าใบเบิก (Pending Issue) ตามสต็อก Sage 300 — ตรวจจำนวนอีกครั้งที่ตารางใบเบิกด้านล่าง
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* ── เบิกอะไหล่ที่ใช้ซ่อม (Phase 12: Pending Issue — สต็อกอ้างอิง Sage 300) ── */}
         <Card className="mb-6">
