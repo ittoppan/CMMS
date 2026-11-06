@@ -31,6 +31,7 @@ import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
 import { getMenuHrefs } from "../../lib/quick-links";
 import { routeIsBlocked } from "../../lib/route-perms";
+import { recordMenuUsage } from "../../lib/frequent-menus";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { useUnreadCount } from "../../lib/notifications";
@@ -104,6 +105,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener("cmms:profile-updated", onProfileUpdated);
     return () => window.removeEventListener("cmms:profile-updated", onProfileUpdated);
   }, [refresh]);
+
+  // UX P5: นับการใช้งานเมนูจริง (localStorage) → ไว้เรียงแถว "ใช้บ่อย" บน /home
+  useEffect(() => {
+    recordMenuUsage(pathname);
+  }, [pathname]);
 
   // badge งานแจ้งซ่อมค้างส่ง (offline queue)
   useEffect(() => {

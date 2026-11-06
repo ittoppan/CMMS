@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { NAV_GROUPS } from "@/components/dashboard/sidebar-nav";
+import { NAV_GROUPS, type NavItemDef } from "@/components/dashboard/sidebar-nav";
 import { useMenuPermission } from "@/lib/useMenuPermission";
+import { getFrequentMenuItems } from "@/lib/frequent-menus";
 import { t } from "@/lib/i18n";
+import type { LucideIcon } from "lucide-react";
 
 /** หน้าแรกแบบเมนูหลัก (app launcher) — ฉากเปิดหลังล็อกอิน โทน ANDON เข้ม */
 
@@ -50,10 +52,47 @@ function TileIcon({ ico }: { ico: ReactNode }) {
   return <span className="cmms-home-tile-ico" aria-hidden="true">{ico}</span>;
 }
 
+/** การ์ดเมนู (แถว "ใช้บ่อย" + กลุ่มเมนูปกติ ใช้หน้าตาเดียวกัน) */
+function MenuTileLink({ href, icon, label, counts }: { href: string; icon: LucideIcon; label: string; counts: Kpis["counts"] }) {
+  const badge = TILE_BADGE[href]?.(counts);
+  const Icon = icon;
+  return (
+    <Link href={href} className="block h-full">
+      <span
+        className={`cmms-home-tile${href === "/repair/request" ? " cmms-home-signature" : ""}`}
+      >
+        <TileIcon ico={<Icon className="w-5 h-5" strokeWidth={1.75} />} />
+        <span className="cmms-home-tile-name">{label}</span>
+        {badge ? (
+          <span
+            className={`cmms-home-tile-badge${badge.crit ? " crit" : badge.warn ? " warn" : ""}`}
+          >
+            {badge.n ?? 0}
+          </span>
+        ) : (
+          <span className="cmms-home-tile-desc">
+            {href === "/repair/request"
+              ? "แจ้งซ่อมเครื่องจักร ส่งเข้าคิวหัวหน้าทันที"
+              : null}
+          </span>
+        )}
+      </span>
+    </Link>
+  );
+}
+
 export default function HomePage() {
-  const { canShow, userFullName } = useMenuPermission();
+  const { canShow, permission, userFullName } = useMenuPermission();
   const [kpis, setKpis] = useState<Kpis | null>(null);
   const [nowLabel, setNowLabel] = useState("");
+  const canShowRef = useRef(canShow);
+  canShowRef.current = canShow;
+
+  // UX P5: เมนู "ใช้บ่อย" 8 รายการ — คำนวณฝั่ง client หลังสิทธิ์พร้อมเท่านั้น (กัน hydration mismatch)
+  const [freqItems, setFreqItems] = useState<NavItemDef[] | null>(null);
+  useEffect(() => {
+    setFreqItems(getFrequentMenuItems(8, (k) => canShowRef.current(k)));
+  }, [permission]);
 
   useEffect(() => {
     setNowLabel(new Intl.DateTimeFormat("th-TH", { dateStyle: "full", timeStyle: "short" }).format(new Date()));
@@ -129,37 +168,24 @@ export default function HomePage() {
           </div>
         </section>
 
+        {freqItems && freqItems.length > 0 && (
+          <section aria-label="เมนูที่ใช้บ่อย">
+            <h3 className="cmms-home-group-title">ใช้บ่อย</h3>
+            <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {freqItems.map((it) => (
+                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={t(it.labelKey)} counts={kpis?.counts ?? {}} />
+              ))}
+            </div>
+          </section>
+        )}
+
         {groups.map((g) => (
           <section key={g.title} aria-label={g.title}>
             <h3 className="cmms-home-group-title">{g.title}</h3>
             <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              {g.items.map((it) => {
-                const badge = TILE_BADGE[it.href]?.(kpis?.counts ?? {});
-                const Icon = it.icon;
-                return (
-                  <Link key={it.href} href={it.href} className="block h-full">
-                    <span
-                      className={`cmms-home-tile${it.href === "/repair/request" ? " cmms-home-signature" : ""}`}
-                    >
-                      <TileIcon ico={<Icon className="w-5 h-5" strokeWidth={1.75} />} />
-                      <span className="cmms-home-tile-name">{it.label}</span>
-                      {badge ? (
-                        <span
-                          className={`cmms-home-tile-badge${badge.crit ? " crit" : badge.warn ? " warn" : ""}`}
-                        >
-                          {badge.n ?? 0}
-                        </span>
-                      ) : (
-                        <span className="cmms-home-tile-desc">
-                          {it.href === "/repair/request"
-                            ? "แจ้งซ่อมเครื่องจักร ส่งเข้าคิวหัวหน้าทันที"
-                            : null}
-                        </span>
-                      )}
-                    </span>
-                  </Link>
-                );
-              })}
+              {g.items.map((it) => (
+                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label} counts={kpis?.counts ?? {}} />
+              ))}
             </div>
           </section>
         ))}
