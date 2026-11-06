@@ -31,6 +31,7 @@ import {
   type KnFeatureStatus,
 } from "@/lib/knowledge";
 import { cn } from "@/lib/cn";
+import { KNOWLEDGE_QUICK_LINKS } from "@/lib/quick-links";
 
 function Kpi({
   label,
@@ -367,11 +368,9 @@ export default function KnowledgePage() {
               <CardTitle>ทางลัด</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
-              <QuickLink href="/knowledge/search" icon={<Search size={15} />} label="ค้นหาความรู้" />
-              <QuickLink href="/knowledge/articles" icon={<BookMarked size={15} />} label="ทะเบียนบทความ" />
-              <QuickLink href="/knowledge/gaps" icon={<CircleAlert size={15} />} label="ช่องว่างความรู้" />
-              <QuickLink href="/knowledge/reviews" icon={<ClipboardList size={15} />} label="งานทบทวนความรู้" />
-              <QuickLink href="/knowledge/usage" icon={<FileWarning size={15} />} label="สถิติการใช้งาน" />
+              {KNOWLEDGE_QUICK_LINKS.map((q) => (
+                <QuickLink key={q.href} href={q.href} icon={<q.icon size={15} />} label={q.label} />
+              ))}
             </CardContent>
           </Card>
         </div>

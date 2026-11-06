@@ -1,20 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Activity,
-  BellRing,
-  Boxes,
-  CalendarCheck,
-  ClipboardList,
-  Cog,
-  Gauge,
-  ShieldCheck,
-  Timer,
-  UsersRound,
-  Wallet,
-  Wrench,
-} from "lucide-react";
+import { Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,29 +9,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeading } from "@/components/dashboard/kit";
 import { useApiQuery } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
+import { REPORT_CENTER_LINKS } from "@/lib/quick-links";
 import { ReportChartsGrid, ReportKpiGrid } from "@/components/reports/report-page";
 import { fmtDateTime, fmtNumber, reportUrl } from "@/components/reports/report-lib";
 
-const REPORT_LINKS: {
-  href: string;
-  title: string;
-  desc: string;
-  icon: typeof Wrench;
-  tone: string;
-}[] = [
-  { href: "/reports/work-orders", title: "ใบสั่งงานซ่อม", desc: "จำนวนงานตามสถานะ ประเภทงาน และอัตราปิดงาน", icon: Wrench, tone: "" },
-  { href: "/reports/requests", title: "ใบแจ้งซ่อม", desc: "คำขอแจ้งซ่อม อัตราแปลงเป็นงาน และสถานะรับงาน", icon: ClipboardList, tone: "blue" },
-  { href: "/reports/pm", title: "งาน PM/AM", desc: "งานตามแผน ระหว่างซ่อม งานล่าช้า และผลเช็คชีท", icon: CalendarCheck, tone: "green" },
-  { href: "/reports/inspections", title: "ตรวจเช็ครอบ", desc: "ผลตรวจ ผ่าน/ข้อสังเกต/ไม่ผ่าน ตามเครื่องจักร", icon: ShieldCheck, tone: "green" },
-  { href: "/reports/assets", title: "เครื่องจักร & ความพร้อม", desc: "MTBF MTTR ความพร้อมใช้งานรายเครื่องจักร", icon: Cog, tone: "warning" },
-  { href: "/reports/spare-parts", title: "คลังอะไหล่", desc: "ยอดคงคลัง รายการต่ำกว่า Safety Stock", icon: Boxes, tone: "blue" },
-  { href: "/reports/cost", title: "ค่าใช้จ่ายซ่อมบำรุง", desc: "อะไหล่ + ค่าแรง ยอดรายเดือน (ผู้บริหาร)", icon: Wallet, tone: "warning" },
-  { href: "/reports/downtime", title: "Downtime", desc: "เวลาหยุดเครื่อง จำแนกเครื่องจักร/แผนก", icon: Timer, tone: "warning" },
-  { href: "/reports/technicians", title: "ผลงานช่าง", desc: "จำนวนงาน งานใน SLA เวลาที่ใช้ต่อช่าง", icon: UsersRound, tone: "blue" },
-  { href: "/reports/sla", title: "SLA", desc: "อัตรางานปิดใน SLA ตามแผนก/ความเร่งด่วน", icon: Gauge, tone: "green" },
-  { href: "/reports/mttr-mtbf", title: "MTTR / MTBF", desc: "แนวโน้มระยะเวลาซ่อม/ก่อนชำรุดรายเดือน", icon: Activity, tone: "" },
-  { href: "/reports/scheduled", title: "รายงานอัตโนมัติ", desc: "ตั้งเวลาส่งรายงาน Telegram / LINE / Email", icon: BellRing, tone: "blue" },
-];
+// รายงานทั้งหมดอ่านจาก quick-links.ts (UX P3) — map ให้เข้า shape เดิมของหน้า
+const REPORT_LINKS: { href: string; title: string; desc: string; icon: typeof Wrench; tone: string }[] =
+  REPORT_CENTER_LINKS.map((r) => ({ href: r.href, title: r.label, desc: r.desc ?? "", icon: r.icon, tone: r.tone ?? "" }));
 
 function StatItem({ label, value }: { label: string; value: string }) {
   return (

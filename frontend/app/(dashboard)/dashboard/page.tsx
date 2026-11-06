@@ -53,6 +53,7 @@ import {
 import * as D from "@/lib/dashboard";
 import { getPlanningKpis, type PlanningKpis } from "@/lib/planning";
 import { fetchBudgetVsActual as fetchBudgetVsActualApi, type BudgetVsActualResponse } from "@/lib/cost";
+import { DASHBOARD_SHORTCUTS } from "@/lib/quick-links";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("th-TH");
 const fmtBaht = (n: number) => (n >= 10000 ? `${Math.round(n / 1000).toLocaleString("th-TH")}k` : fmt(n));
@@ -873,11 +874,11 @@ export default function DashboardPage() {
           <section aria-label="ทางลัด" className="space-y-3">
             <SectionHeading title="ทางลัด" />
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/repair/request")}>แจ้งซ่อมด่วน</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/supervisor/queue")}>คิวงานหัวหน้างาน</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/pm_am/calendar")}>ปฏิทิน PM</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/asset_registry")}>ทะเบียนเครื่องจักร</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/analytics/kpi")}>KPI ผู้บริหาร</Button>
+              {DASHBOARD_SHORTCUTS.map((s) => (
+                <Button key={s.href} variant="outline" size="sm" onClick={() => (window.location.href = s.href)}>
+                  {s.label}
+                </Button>
+              ))}
             </div>
           </section>
         </>

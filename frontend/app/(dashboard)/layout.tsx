@@ -27,6 +27,7 @@ import ThemeModeToggle from "../../components/ThemeModeToggle";
 import CommandPalette from "../../components/CommandPalette";
 import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
+import { getMenuHrefs } from "../../lib/quick-links";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { useUnreadCount } from "../../lib/notifications";
@@ -37,35 +38,7 @@ import { ConnectivityStatus } from "../../components/ConnectivityStatus";
 // Page title mapping for breadcrumb
 
 // รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
-const MENU_HREFS: string[] = [
-  "/dashboard",
-  "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
-  "/field", "/field/work", "/field/plan",
-  "/planning", "/planning/calendar", "/process-flows",
-  "/approval", "/forms", "/manuals",
-  "/pm_am", "/pm_am/dashboard", "/pm_am/plans", "/pm_am/plans/create", "/pm_am/view", "/pm_am/checklists", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
-  "/inspections", "/inspections/run", "/inspections/templates",
-  "/asset_registry", "/asset_registry/view", "/assets", "/qr-sheet", "/asset_registry/bom_tree", "/asset_registry/criticality",
-  "/equipment_borrowing", "/calibration", "/calibration/dashboard", "/calibration/instruments", "/calibration/plans", "/calibration/schedule", "/calibration/standards", "/calibration/procedures", "/calibration/certificates", "/calibration/oot", "/calibration/reports", "/calibration/data-quality", "/calibration/mobile", "/calibration/config", "/calibration/calendar", "/calibration/po", "/calibration/tracking", "/mtbf_mttr",
-  "/asset-reliability", "/asset-reliability/critical", "/asset-reliability/lifecycle", "/asset-reliability/aging", "/asset-reliability/replacement", "/asset-reliability/overhaul", "/asset-reliability/data-quality", "/asset-reliability/reports", "/asset-reliability/config", "/asset-reliability/profile",
-  "/spare_parts", "/spare_parts/issue_center", "/spare_parts/balances", "/spare_parts/returns", "/spare_parts/sage_po", "/spare_parts/sage_sync", "/spare_parts/optimization", "/spare_parts/stock_take", "/suppliers",
-  "/analytics/kpi", "/analytics", "/analytics/advanced", "/reports", "/reports/monthly_pdf", "/reports/export_excel", "/reports/import_excel",
-  "/cost", "/budget",
-  "/rca", "/rca/events", "/rca/taxonomy", "/rca/new",
-  "/safety/work_permit", "/iot/monitor",
-  "/contractors", "/contractors/work", "/contractors/create", "/contractors",
-  "/users", "/roles", "/register",
-  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",
-  "/editor/builder", "/pages",
-  "/knowledge", "/knowledge/search", "/knowledge/articles", "/knowledge/articles/create", "/knowledge/articles/[id]",
-  "/knowledge/gaps", "/knowledge/gaps/[id]", "/knowledge/reviews", "/knowledge/taxonomy", "/knowledge/usage",
-  // ── Phase 37: Reliability Engineering ──
-  "/reliability", "/reliability/assets", "/reliability/assets/[id]",
-  "/reliability/failure-modes", "/reliability/trend", "/reliability/weibull",
-  "/reliability/bad-actors", "/reliability/pm-effectiveness", "/reliability/growth",
-  "/reliability/studies", "/reliability/studies/[id]",
-  "/reliability/data-quality", "/reliability/config",
-];
+
 
 function getSection(pathname: string): string | null {
   const s = tSection(pathname);
@@ -167,7 +140,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (href === "/dashboard") return pathname === "/dashboard";
     if (pathname === href) return true;
     if (href === "/" || !pathname.startsWith(href + "/")) return false;
-    const deeper = MENU_HREFS.some(
+    const deeper = getMenuHrefs().some(
       (h) => h.length > href.length && (pathname === h || pathname.startsWith(h + "/"))
     );
     return !deeper;
