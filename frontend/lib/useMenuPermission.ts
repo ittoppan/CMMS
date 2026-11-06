@@ -107,5 +107,5 @@ export function useMenuPermission() {
     return permission[menuKey] !== 0; // default (ไม่มี key) = เห็น
   };
 
-  return { canShow, roleName, userFullName, avatar, simulated, loading, bottomNavKeys, refresh: load };
+  return { canShow, permission, roleName, userFullName, avatar, simulated, loading, bottomNavKeys, refresh: load };
 }

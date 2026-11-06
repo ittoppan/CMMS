@@ -17,6 +17,8 @@ import {
   FileDown,
   FileText,
   Settings,
+  ShieldAlert,
+  Undo2,
 } from "lucide-react";
 import LiffBridge from "../../components/LiffBridge";
 import { offlineQueueCount } from "../../lib/offline-store";
@@ -28,6 +30,7 @@ import CommandPalette from "../../components/CommandPalette";
 import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
 import { getMenuHrefs } from "../../lib/quick-links";
+import { routeIsBlocked } from "../../lib/route-perms";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { useUnreadCount } from "../../lib/notifications";
@@ -82,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const lang = useLang();
-  const { canShow, roleName, userFullName, avatar, simulated, bottomNavKeys, refresh } = useMenuPermission();
+  const { canShow, permission, roleName, userFullName, avatar, simulated, bottomNavKeys, refresh } = useMenuPermission();
   const unreadCount = useUnreadCount(60000);
 
   // Bottom nav มือถือ: API order → fallback preset ตามบทบาท → filter สิทธิ์
@@ -163,6 +166,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- อัปเดตตาม pathname/pageTitle
   }, [pathname, pageTitle]);
+
+  // UX P4: route-level guard — path ที่ perm ถูกปิด "ครบทุกตัว" (fail-open: ไม่รู้จัก/ยังโหลด = ผ่าน)
+  const routeBlocked = routeIsBlocked(pathname, permission);
 
   return (
     <ToastProvider>
@@ -277,7 +283,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Content */}
           <main id="cmms-main-scroll" className="min-h-0 flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-[calc(56px+env(safe-area-inset-top)+12px)] lg:px-6 lg:pb-10 lg:pt-6">
-              {children}
+              {routeBlocked ? (
+                /* UX P4: หน้า 403 inline — ไม่ redirect เพื่อให้ผู้ใช้ยังเห็นเมนู/topbar ปกติ */
+                <section
+                  aria-label="ไม่มีสิทธิ์เข้าถึงหน้านี้"
+                  className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center"
+                >
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40" aria-hidden="true">
+                    <ShieldAlert className="h-7 w-7" />
+                  </span>
+                  <h1 className="text-xl font-bold text-foreground">403 — ไม่มีสิทธิ์เข้าใช้หน้านี้</h1>
+                  <p className="text-sm text-muted-foreground">
+                    หน้า <span className="font-mono text-xs">{pathname}</span> ยังไม่เปิดสิทธิ์สำหรับบทบาท
+                    {roleName ? <span className="font-semibold text-foreground">“{roleName}”</span> : "ของคุณ"}
+                    {simulated ? " (โหมดจำลอง)" : ""}
+                    หากคิดว่าควรได้ใช้ กรุณาติดต่อผู้ดูแลระบบเพื่อขอเปิดสิทธิ์เมนูนี้
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white shadow-[var(--cmms-shadow-sm)] transition-[background-color] hover:bg-[var(--cmms-primary-hover)]"
+                      aria-label="กลับหน้าแรก"
+                    >
+                      <Home className="h-4 w-4" aria-hidden="true" />
+                      <span>กลับหน้าแรก</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => router.back()}
+                      className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                      aria-label="ย้อนกลับหน้าก่อนหน้า"
+                    >
+                      <Undo2 className="h-4 w-4" aria-hidden="true" />
+                      <span>ย้อนกลับ</span>
+                    </button>
+                  </div>
+                </section>
+              ) : (
+                children
+              )}
             </div>
           </main>
         </div>
