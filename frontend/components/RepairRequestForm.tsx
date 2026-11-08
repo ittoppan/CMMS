@@ -15,6 +15,7 @@ import {
   Mail,
   X,
   Paperclip,
+  Video,
   Link,
   Printer,
   Droplets,
@@ -296,6 +297,9 @@ export default function RepairRequestForm() {
   const [bindError, setBindError] = useState<string | null>(null);
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [videoErr, setVideoErr] = useState<string | null>(null);
   const offlineRef = useRef(false);
 
   const [form, setForm] = useState({
@@ -315,6 +319,7 @@ export default function RepairRequestForm() {
     contaminationRisk: false,
     safetyRelated: false,
     photos: [] as string[],
+    video: "",
     note: "",
     isUrgent: false,
   });
@@ -756,6 +761,44 @@ const flushQueue = async () => {
     update("photos", next);
   };
 
+  /* ── วิดีโอจุดชำรุด (staging อัปโหลดทันทีเมื่อเลือก — ต้องออนไลน์) ── */
+  const uploadVideo = async (file: File) => {
+    setVideoErr(null);
+    if (!navigator.onLine) {
+      setVideoErr("ต้องออนไลน์เพื่อแนบวิดีโอ — รูปถ่ายยังแนบได้แม้ไม่มีเน็ต");
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      setVideoErr("วิดีโอใหญ่เกิน 25 MB — โปรดลดความยาว/คุณภาพแล้วลองอีกครั้ง");
+      return;
+    }
+    if (!/^video\//.test(file.type)) {
+      setVideoErr("ต้องเป็นไฟล์วิดีโอ (mp4/mov/webm)");
+      return;
+    }
+    setVideoBusy(true);
+    try {
+      const csrf = await (await apiFetch("/api/v1/csrf.php")).json();
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiFetch("/api/v1/repair_video.php", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrf.csrf_token },
+        body: fd,
+      });
+      const j = await res.json().catch(() => ({}));
+      if (j?.success && j?.path) {
+        update("video", j.path);
+        setVideoErr(null);
+      } else {
+        setVideoErr(j?.error || "อัปโหลดวิดีโอไม่สำเร็จ — ลองอีกครั้ง");
+      }
+    } catch {
+      setVideoErr("อัปโหลดวิดีโอไม่สำเร็จ — ตรวจเน็ตแล้วลองอีกครั้ง");
+    }
+    setVideoBusy(false);
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
@@ -782,6 +825,7 @@ const flushQueue = async () => {
         safety_related: form.safetyRelated ? 1 : 0,
         product_lot_no: form.lotNo,
         before_image_path: form.photos.length > 0 ? form.photos.join("|") : null,
+        video_path: form.video || null,
         notes: form.note || null,
         receiver_name: form.reporterName,
         reporter_phone: form.phone,
@@ -850,7 +894,7 @@ const flushQueue = async () => {
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], note: "", isUrgent: false });
+              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], video: "", note: "", isUrgent: false });
             }}>
               แจ้งซ่อมอีก
             </Button>
@@ -1503,10 +1547,13 @@ const flushQueue = async () => {
               </div>
             </div>
 
-            {/* Photos */}
+            {/* Photos + Video */}
             <div>
               <p className="text-sm font-bold mb-2">
-                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่ายจุดชำรุด (สูงสุด 5 รูป)
+                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่าย / วิดีโอจุดชำรุด
+              </p>
+              <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
+                รูป (สูงสุด 5 รูป) · วิดีโอ 1 คลิป ≤ 25 MB (mp4/mov/webm) — วิดีโอต้องออนไลน์เท่านั้น
               </p>
               <input
                 ref={photoInputRef}
@@ -1516,6 +1563,17 @@ const flushQueue = async () => {
                 capture="environment"
                 className="hidden"
                 onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }}
+              />
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) uploadVideo(f);
+                }}
               />
               <div className="cmms-photo-grid">
                 {form.photos.map((p, i) => (
@@ -1533,7 +1591,37 @@ const flushQueue = async () => {
                     <p className="text-2xs font-bold m-0">ถ่าย / เลือกรูป</p>
                   </button>
                 )}
+                {form.video && (
+                  <div className="cmms-photo-thumb">
+                    <video src={form.video} controls preload="metadata" playsInline className="w-full h-full object-cover" />
+                    <button type="button" className="cmms-photo-remove"
+                      onClick={() => update("video", "")} aria-label="เอาวิดีโอออก">
+                      <X size={14} strokeWidth={1.75} />
+                    </button>
+                  </div>
+                )}
+                {!form.video && (
+                  <button
+                    type="button"
+                    className="cmms-photo-add"
+                    onClick={() => videoInputRef.current?.click()}
+                    disabled={videoBusy}
+                    aria-label="เลือกวิดีโอ"
+                  >
+                    {videoBusy ? (
+                      <Loader2 size={24} strokeWidth={1.75} className="animate-spin" />
+                    ) : (
+                      <Video size={24} strokeWidth={1.75} />
+                    )}
+                    <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "เลือกวิดีโอ"}</p>
+                  </button>
+                )}
               </div>
+              {videoErr && (
+                <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2 mt-2">
+                  <AlertCircle size={16} strokeWidth={1.75} /> {videoErr}
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -1554,6 +1642,7 @@ const flushQueue = async () => {
               <SummaryRow label="สำนักงาน" value={form.office} />
               <SummaryRow label="Lot No." value={form.lotNo || "—"} />
               <SummaryRow label="วันที่แจ้ง" value={new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })} icon={<Clock size={14} strokeWidth={1.75} />} />
+              <SummaryRow label="วิดีโอ" value={form.video ? "แนบแล้ว" : "—"} icon={<Video size={14} strokeWidth={1.75} />} />
             </div>
 
             <div>
@@ -1566,7 +1655,8 @@ const flushQueue = async () => {
                 {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่ปนเปื้อน"}
               </Badge>
               {form.safetyRelated && <Badge variant="danger">Safety</Badge>}
-              <Badge variant="info">{form.photos.length} รูป</Badge>
+              {form.photos.length > 0 && <Badge variant="info">{form.photos.length} รูป</Badge>}
+              {form.video && <Badge variant="info">แนบวิดีโอ</Badge>}
             </div>
 
             {submitError && (

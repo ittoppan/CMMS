@@ -83,6 +83,7 @@ interface WorkOrderDetail {
   assignedName: string;
   receiverName: string;
   beforeImg: string;
+  videoPath: string;
   afterImg: string;
   receiverSignature: string;
   completedAt: string;
@@ -227,6 +228,7 @@ export default function RepairViewDetailsPage() {
     assignedName: "-",
     receiverName: "-",
     beforeImg: "",
+    videoPath: "",
     afterImg: "",
     receiverSignature: "",
     completedAt: "-",
@@ -264,6 +266,7 @@ export default function RepairViewDetailsPage() {
             assignedName: row.assigned_name || "-",
             receiverName: row.receiver_name || "-",
             beforeImg: row.before_image_path || "",
+            videoPath: row.video_path || "",
             afterImg: row.after_image_path || "",
             receiverSignature: row.receiver_signature_path || "",
             completedAt: row.completed_at || row.updated_at || "-",
@@ -1182,6 +1185,19 @@ export default function RepairViewDetailsPage() {
             </div>
 
             {photoMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{photoMsg}</p>}
+
+            {wo.videoPath && (
+              <div className="rounded-lg border border-border p-2">
+                <p className="mb-1 text-[11px] font-medium text-muted-foreground">วิดีโอจุดชำรุด (จากใบแจ้งซ่อม)</p>
+                <video
+                  src={assetUrl(wo.videoPath)}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="max-h-72 w-full rounded bg-black"
+                />
+              </div>
+            )}
 
             {(localAtts.length > 0 || serverAtts.length > 0) ? (
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
