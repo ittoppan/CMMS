@@ -298,8 +298,11 @@ export default function RepairRequestForm() {
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const attachInputRef = useRef<HTMLInputElement>(null);
   const [videoBusy, setVideoBusy] = useState(false);
   const [videoErr, setVideoErr] = useState<string | null>(null);
+  const [attachBusy, setAttachBusy] = useState(false);
+  const [attachErr, setAttachErr] = useState<string | null>(null);
   const offlineRef = useRef(false);
 
   const [form, setForm] = useState({
@@ -320,6 +323,7 @@ export default function RepairRequestForm() {
     safetyRelated: false,
     photos: [] as string[],
     video: "",
+    attachment: "",
     note: "",
     isUrgent: false,
   });
@@ -799,6 +803,40 @@ const flushQueue = async () => {
     setVideoBusy(false);
   };
 
+  /* ── ไฟล์เอกสารแนบ (staging อัปโหลดทันทีเมื่อเลือก — ต้องออนไลน์) ── */
+  const uploadAttachment = async (file: File) => {
+    setAttachErr(null);
+    if (!navigator.onLine) {
+      setAttachErr("ต้องออนไลน์เพื่อแนบไฟล์เอกสาร");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setAttachErr("ไฟล์เอกสารใหญ่เกิน 10 MB — โปรดลดขนาดไฟล์แล้วลองอีกครั้ง");
+      return;
+    }
+    setAttachBusy(true);
+    try {
+      const csrf = await (await apiFetch("/api/v1/csrf.php")).json();
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiFetch("/api/v1/repair_form_attachment.php", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrf.csrf_token },
+        body: fd,
+      });
+      const j = await res.json().catch(() => ({}));
+      if (j?.success && j?.path) {
+        update("attachment", j.path);
+        setAttachErr(null);
+      } else {
+        setAttachErr(j?.error || "อัปโหลดไฟล์เอกสารไม่สำเร็จ — ลองอีกครั้ง");
+      }
+    } catch {
+      setAttachErr("อัปโหลดไฟล์เอกสารไม่สำเร็จ — ตรวจเน็ตแล้วลองอีกครั้ง");
+    }
+    setAttachBusy(false);
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
@@ -826,6 +864,7 @@ const flushQueue = async () => {
         product_lot_no: form.lotNo,
         before_image_path: form.photos.length > 0 ? form.photos.join("|") : null,
         video_path: form.video || null,
+        attachment_path: form.attachment || null,
         notes: form.note || null,
         receiver_name: form.reporterName,
         reporter_phone: form.phone,
@@ -894,7 +933,7 @@ const flushQueue = async () => {
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], video: "", note: "", isUrgent: false });
+              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], video: "", attachment: "", note: "", isUrgent: false });
             }}>
               แจ้งซ่อมอีก
             </Button>
@@ -1550,10 +1589,10 @@ const flushQueue = async () => {
             {/* Photos + Video */}
             <div>
               <p className="text-sm font-bold mb-2">
-                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่าย / วิดีโอจุดชำรุด
+                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่าย / วิดีโอ / ไฟล์เอกสาร
               </p>
               <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
-                รูป (สูงสุด 5 รูป) · วิดีโอ 1 คลิป ≤ 25 MB (mp4/mov/webm) — วิดีโอต้องออนไลน์เท่านั้น
+                รูป (สูงสุด 5 รูป) · วิดีโอ 1 คลิป ≤ 25 MB (mp4/mov/webm) · เอกสาร 1 ไฟล์ ≤ 10 MB (PDF/DOC/XLS/CSV/ZIP) — รูปวิดีโอและเอกสารต้องออนไลน์
               </p>
               <input
                 ref={photoInputRef}
@@ -1618,6 +1657,43 @@ const flushQueue = async () => {
                   </button>
                 )}
               </div>
+              <input
+                ref={attachInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) uploadAttachment(f);
+                }}
+              />
+              {attachErr && (
+                <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2 mt-2">
+                  <AlertCircle size={16} strokeWidth={1.75} /> {attachErr}
+                </div>
+              )}
+              <div className="mt-2 flex items-center gap-3 flex-wrap">
+                {form.attachment && (
+                  <div className="flex items-center gap-2 rounded-lg border border-[var(--cmms-border)] px-3 py-2 text-sm">
+                    <FileText size={16} strokeWidth={1.75} />
+                    <span>ไฟล์เอกสารแนบแล้ว</span>
+                    <button type="button" aria-label="เอาไฟล์เอกสารออก" className="inline-flex items-center justify-center rounded-full bg-[var(--cmms-warning-light)] text-[var(--cmms-warning)] p-1"
+                      onClick={() => update("attachment", "")}>
+                      <X size={14} strokeWidth={1.75} />
+                    </button>
+                  </div>
+                )}
+                {!form.attachment && (
+                  <button type="button" className="inline-flex items-center gap-2 rounded-lg border border-dashed border-[var(--cmms-border)] px-3 py-2 text-sm font-semibold"
+                    onClick={() => attachInputRef.current?.click()}
+                    disabled={attachBusy}
+                    aria-label="แนบไฟล์เอกสาร">
+                    {attachBusy ? <Loader2 size={16} strokeWidth={1.75} className="animate-spin" /> : <Paperclip size={16} strokeWidth={1.75} />}
+                    {attachBusy ? "กำลังส่งไฟล์เอกสาร…" : "แนบไฟล์เอกสาร (PDF/DOC/XLS/CSV/ZIP)"}
+                  </button>
+                )}
+              </div>
               {videoErr && (
                 <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2 mt-2">
                   <AlertCircle size={16} strokeWidth={1.75} /> {videoErr}
@@ -1644,6 +1720,7 @@ const flushQueue = async () => {
               <SummaryRow label="Lot No." value={form.lotNo || "—"} />
               <SummaryRow label="วันที่แจ้ง" value={new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })} icon={<Clock size={14} strokeWidth={1.75} />} />
               <SummaryRow label="วิดีโอ" value={form.video ? "แนบแล้ว" : "—"} icon={<Video size={14} strokeWidth={1.75} />} />
+              <SummaryRow label="ไฟล์เอกสาร" value={form.attachment ? "แนบแล้ว" : "—"} icon={<FileText size={14} strokeWidth={1.75} />} />
             </div>
 
             <div>
@@ -1658,6 +1735,7 @@ const flushQueue = async () => {
               {form.safetyRelated && <Badge variant="danger">Safety</Badge>}
               {form.photos.length > 0 && <Badge variant="info">{form.photos.length} รูป</Badge>}
               {form.video && <Badge variant="info">แนบวิดีโอ</Badge>}
+              {form.attachment && <Badge variant="info">แนบไฟล์เอกสาร</Badge>}
             </div>
 
             {submitError && (

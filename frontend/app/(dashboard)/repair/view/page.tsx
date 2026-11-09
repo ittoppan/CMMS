@@ -84,6 +84,7 @@ interface WorkOrderDetail {
   receiverName: string;
   beforeImg: string;
   videoPath: string;
+  attachmentPath: string;
   afterImg: string;
   receiverSignature: string;
   completedAt: string;
@@ -229,6 +230,7 @@ export default function RepairViewDetailsPage() {
     receiverName: "-",
     beforeImg: "",
     videoPath: "",
+    attachmentPath: "",
     afterImg: "",
     receiverSignature: "",
     completedAt: "-",
@@ -267,6 +269,7 @@ export default function RepairViewDetailsPage() {
             receiverName: row.receiver_name || "-",
             beforeImg: row.before_image_path || "",
             videoPath: row.video_path || "",
+            attachmentPath: row.attachment_path || "",
             afterImg: row.after_image_path || "",
             receiverSignature: row.receiver_signature_path || "",
             completedAt: row.completed_at || row.updated_at || "-",
@@ -1197,6 +1200,25 @@ export default function RepairViewDetailsPage() {
                   playsInline
                   className="max-h-72 w-full rounded bg-black"
                 />
+              </div>
+            )}
+
+            {wo.attachmentPath && (
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <FileDown className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-xs font-medium">ไฟล์เอกสารแนบ (จากใบแจ้งซ่อม)</span>
+                </div>
+                <a
+                  href={assetUrl(wo.attachmentPath)}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  ดาวน์โหลดไฟล์
+                </a>
               </div>
             )}
 
