@@ -55,7 +55,7 @@ export function ReportKpiGrid({ kpi, loading }: { kpi: ReportKpi[]; loading?: bo
             value={display}
             unit={k.fmt === "money" ? undefined : k.unit}
             tone={k.tone ?? ""}
-            count={animate}
+            onDrill={() => {}}
           />
         );
       })}
@@ -173,7 +173,7 @@ export function ReportPage({
       {/* Hero */}
       <div className="no-print cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div>
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
+          <p className="cmms-eyebrow" data-on-dark="true">
             {hero.eyebrow}
           </p>
           <div className="flex flex-wrap items-center gap-3">
@@ -181,16 +181,16 @@ export function ReportPage({
               {hero.title}
             </h1>
             {scope && (
-              <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+              <span className="cmms-andon-chip" data-on-dark="true">
                 ขอบเขต: {scope}
               </span>
             )}
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="no-print flex flex-col items-start gap-2 sm:items-end">
           {data && (
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               อัปเดตล่าสุด {fmtDateTime(data.generated_at)}
             </span>
           )}

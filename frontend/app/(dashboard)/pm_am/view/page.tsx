@@ -99,12 +99,12 @@ export default function PMDetailPage() {
     <div className="space-y-6">
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow} · PM Detail</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow} · PM Detail</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{pm?.title || "รอบ PM"}</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>#{pmId}</span>
+            <span className="cmms-andon-chip" data-on-dark="true">#{pmId}</span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{pm?.description || "รายละเอียดรอบการบำรุงรักษาเชิงป้องกัน"}</p>
+          <p className="cmms-hero-desc">{pm?.description || "รายละเอียดรอบการบำรุงรักษาเชิงป้องกัน"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" onClick={() => router.back()} className="border-white/20 bg-white/10 text-white hover:bg-white/20">

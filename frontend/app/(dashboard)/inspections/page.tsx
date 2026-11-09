@@ -198,14 +198,14 @@ export default function InspectionsPage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <a href="/inspections/history" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">

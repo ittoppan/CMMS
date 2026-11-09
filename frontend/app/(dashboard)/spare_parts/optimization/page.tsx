@@ -218,14 +218,14 @@ export default function InventoryOptimizationPage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>AI วิเคราะห์คลังอะไหล่</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" /> ขับเคลื่อนด้วย AI
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             คำนวณจุดสั่งซื้อ Reorder Point, กลุ่ม Class A/B/C และวิเคราะห์สินค้าค้างคลัง (Dead Stock)
           </p>
         </div>

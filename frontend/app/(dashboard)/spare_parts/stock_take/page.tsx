@@ -220,14 +220,14 @@ export default function StockTakePage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>STOCK TAKE · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">STOCK TAKE · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>นับสต็อกจริง</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> {rounds.length} รอบ
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             สร้างรอบนับ → กรอกจำนวนที่พบจริงบนมือถือ → ปิดรอบเพื่อปรับ stock_qty ตามจริง
           </p>
         </div>

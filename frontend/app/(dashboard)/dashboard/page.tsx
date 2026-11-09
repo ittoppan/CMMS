@@ -322,7 +322,6 @@ export default function DashboardPage() {
                   label="อัตราสำเร็จงาน"
                   value={core.wo_completion_rate ?? "—"}
                   unit="%"
-                  count={false}
                   icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />}
                   tone="green"
                   sub={core.wo_completed_in_range === 0 ? "ยังไม่มีงานปิดในรอบ" : `ปิดแล้ว ${core.wo_completed_in_range} ใบ จาก ${core.total_wo_created} ใบ`}
@@ -341,7 +340,6 @@ export default function DashboardPage() {
                       label="MTTR (เวลาซ่อมเฉลี่ย)"
                       value={core.mttr_hours ?? "—"}
                       unit="ชม."
-                      count={false}
                       icon={<Timer size={18} strokeWidth={1.9} aria-hidden="true" />}
                       tone="cyan"
                     />
@@ -349,7 +347,6 @@ export default function DashboardPage() {
                       label="MTBF (เวลาทำงานเฉลี่ย)"
                       value={core.mtbf_hours ?? "—"}
                       unit="ชม."
-                      count={false}
                       icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />}
                       tone="green"
                     />
@@ -357,7 +354,6 @@ export default function DashboardPage() {
                       label="เวลาเฉลี่ยก่อนเริ่มงาน"
                       value={core.avg_response_minutes ?? "—"}
                       unit="นาที"
-                      count={false}
                       icon={<Timer size={18} strokeWidth={1.9} aria-hidden="true" />}
                       tone="blue"
                     />
@@ -365,7 +361,6 @@ export default function DashboardPage() {
                       label="ปิดงานทันกำหนด (SLA)"
                       value={core.sla_compliance_pct ?? "—"}
                       unit="%"
-                      count={false}
                       icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />}
                       tone={core.sla_compliance_pct != null && core.sla_compliance_pct < 60 ? "red" : "green"}
                     />
@@ -547,8 +542,8 @@ export default function DashboardPage() {
               <Grid columns={{ minWidth: 210, max: 4 }} gap={3}>
                 <KpiCard label="รอบ PM ทั้งหมด" value={data.pm.due_total} unit="รอบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/pm_am/calendar" />
                 <KpiCard label="จบแล้วในรอบ" value={data.pm.completed} unit="รอบ" icon={<CheckCircle2 size={18} strokeWidth={1.9} aria-hidden="true" />} tone="green" href={listHref(q, "pm", "completed")} />
-                <KpiCard label="อัตราการทำครบ" value={data.pm.completion_rate ?? "—"} unit="%" count={false} icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.completion_rate != null && data.pm.completion_rate < 80 ? "amber" : "green"} />
-                <KpiCard label="เสร็จทันกำหนด" value={data.pm.on_time_pct ?? "—"} unit="%" count={false} icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" sub={`ตรงเวลา ${data.pm.on_time} · ช้า ${data.pm.late}`} />
+                <KpiCard label="อัตราการทำครบ" value={data.pm.completion_rate ?? "—"} unit="%" icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.completion_rate != null && data.pm.completion_rate < 80 ? "amber" : "green"} />
+                <KpiCard label="เสร็จทันกำหนด" value={data.pm.on_time_pct ?? "—"} unit="%" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" sub={`ตรงเวลา ${data.pm.on_time} · ช้า ${data.pm.late}`} />
               </Grid>
             </section>
           )}
@@ -558,10 +553,10 @@ export default function DashboardPage() {
             <section aria-label="ค่าใช้จ่าย" className="space-y-3">
               <SectionHeading title="ค่าใช้จ่ายบำรุงรักษา" sub="เห็นได้เฉพาะผู้มีสิทธิ์ดูต้นทุน" />
               <Grid columns={{ minWidth: 210, max: 4 }} gap={3}>
-                <KpiCard label="ค่าแรง" value={fmtBaht(cost.labor)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" count={false} />
-                <KpiCard label="ค่าวัสดุจริง (เบิกอะไหล่)" value={fmtBaht(cost.material_cost)} icon={<Package size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" count={false} />
-                <KpiCard label="ค่าจ้างภายนอก" value={fmtBaht(cost.outsource)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="amber" count={false} />
-                <KpiCard label="รวมทั้งสิ้น" value={fmtBaht(cost.total)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="red" count={false} />
+                <KpiCard label="ค่าแรง" value={fmtBaht(cost.labor)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" />
+                <KpiCard label="ค่าวัสดุจริง (เบิกอะไหล่)" value={fmtBaht(cost.material_cost)} icon={<Package size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" />
+                <KpiCard label="ค่าจ้างภายนอก" value={fmtBaht(cost.outsource)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="amber" />
+                <KpiCard label="รวมทั้งสิ้น" value={fmtBaht(cost.total)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="red" />
               </Grid>
               {cost.top_spare_parts.length > 0 && (
                 <Card>

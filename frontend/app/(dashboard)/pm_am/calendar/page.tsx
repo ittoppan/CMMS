@@ -260,14 +260,14 @@ export default function PMCalendarPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               PM / AM
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button

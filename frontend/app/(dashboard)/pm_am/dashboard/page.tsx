@@ -105,9 +105,9 @@ export default function PMDashboardPage() {
     <div className="space-y-6">
       <div className="cmms-page-hero">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => router.push("/pm_am/plans")}>

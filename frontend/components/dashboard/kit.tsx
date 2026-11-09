@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/cn";
-import CountUp from "@/components/CountUp";
 import {
   RANGE_OPTIONS,
   PRIORITY_LABELS,
@@ -38,8 +37,8 @@ export function SectionHeading({
   return (
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0 space-y-0.5">
-        <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">{title}</h2>
-        {sub && <p className="text-sm text-muted-foreground">{sub}</p>}
+        <h2 className="cmms-section-title text-lg font-semibold">{title}</h2>
+        {sub && <p className="cmms-caption">{sub}</p>}
       </div>
       {right && <div className="flex flex-wrap items-center gap-2">{right}</div>}
     </div>
@@ -50,6 +49,28 @@ export function SectionHeading({
 
 export type KpiTone = "" | "blue" | "green" | "amber" | "red" | "cyan";
 
+/* KPI value (tabular-nums, no animation) */
+export function KpiValue({
+  value,
+  unit,
+}: {
+  value: number | string | React.ReactNode;
+  unit?: string;
+}) {
+  if (typeof value === "number") {
+    return (
+      <>
+        <span className="tabular-nums">{value}</span>
+        {unit && <span className="cmms-kpi-unit ml-1">{unit}</span>}
+      </>
+    );
+  }
+  return (
+    <>
+      {value} {unit && <span className="cmms-kpi-unit ml-1">{unit}</span>}
+    </>
+  );
+}
 export function KpiCard({
   label,
   value,
@@ -58,8 +79,7 @@ export function KpiCard({
   tone = "",
   href,
   sub,
-  count = true,
-  onDrill,
+    onDrill,
 }: {
   label: string;
   value: number | string | React.ReactNode;
@@ -68,30 +88,21 @@ export function KpiCard({
   tone?: KpiTone;
   href?: string;
   sub?: React.ReactNode;
-  /** count=true → ใช้ CountUp (เฉพาะตัวเลข) */
-  count?: boolean;
   onDrill?: () => void;
 }) {
+
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium text-[var(--cmms-text-muted)]">{label}</p>
+        <p className="cmms-label">{label}</p>
         {icon && (
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] bg-[var(--cmms-bg-muted)] text-[var(--cmms-primary)]">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] bg-[var(--cmms-bg-muted)] text-[var(--cmms-primary)]">
             {icon}
           </span>
         )}
       </div>
       <div className="cmms-kpi-value">
-        {typeof value === "number" && count ? (
-          <>
-            <CountUp end={value} /> {unit && <span className="cmms-kpi-unit">{unit}</span>}
-          </>
-        ) : (
-          <>
-            {value} {unit && <span className="cmms-kpi-unit">{unit}</span>}
-          </>
-        )}
+        <KpiValue value={value} unit={unit} />
       </div>
       {sub && <div className="mt-1 text-xs text-[var(--cmms-text-secondary)]">{sub}</div>}
     </>
@@ -107,10 +118,10 @@ export function KpiCard({
   }
   if (onDrill) {
     return (
-      <button type="button" onClick={onDrill} className={cn(cls, "relative w-full text-left", "hover:-translate-y-0.5")}>
+      <button type="button" onClick={onDrill} className={cn(cls, "relative w-full text-left")}>
         {body}
         <ChevronRight
-          size={16}
+          size={15}
           strokeWidth={2}
           aria-hidden="true"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]"

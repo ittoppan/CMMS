@@ -151,14 +151,14 @@ export default function BatchSchedulePage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>PM SCHEDULER · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">PM SCHEDULER · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               กำหนดเช็คชีทเดียว ให้หลายเครื่องพร้อมกัน
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             กำหนดเช็คชีทเดียว ให้กับเครื่องจักรหลายๆ ตัวพร้อมกัน
           </p>
         </div>

@@ -414,7 +414,7 @@ export default function InspectionRunPage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTION RUN · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">INSPECTION RUN · CMMS-TOPPAN</p>
           {!online && (
             <div className="flex w-fit items-center gap-2 rounded-lg px-3.5 py-2.5 text-[0.85rem] font-semibold" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
               <span className="cmms-status-dot warn inline-block" /> ออฟไลน์ — กรอกข้อมูลได้ รอออนไลน์แล้วกดบันทึกผล
@@ -427,11 +427,11 @@ export default function InspectionRunPage() {
           )}
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ทำรายการตรวจเช็ค</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             ตรวจแบบมือถือ — ถ่ายรูปหลักฐาน วัดค่า และบันทึกร่างอัตโนมัติทุกครั้งที่แก้
             {savedAt && <> · บันทึกร่างเมื่อ {savedAt}</>}
           </p>

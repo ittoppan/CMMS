@@ -199,14 +199,14 @@ export default function MonthlyPdfReportPage() {
       {/* Header + Controls */}
       <div className="cmms-page-hero flex flex-col xl:flex-row xl:items-end justify-between gap-6 print:hidden">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>MONTHLY REPORT · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">MONTHLY REPORT · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>รายงานสรุปงานซ่อมบำรุงประจำเดือน</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <Printer size={14} strokeWidth={1.75} aria-hidden="true" /> พิมพ์เอกสาร A4 (ISO)
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             รายงานสรุปผลการดำเนินงานซ่อมบำรุงเสนอผู้บริหารประจำเดือน — ข้อมูลจริงจากระบบ
           </p>
         </div>

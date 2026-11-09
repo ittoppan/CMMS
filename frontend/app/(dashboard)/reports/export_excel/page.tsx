@@ -62,14 +62,14 @@ export default function ExportExcelReportPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS EXPORT EXCEL · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">REPORTS EXPORT EXCEL · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ศูนย์ส่งออกข้อมูล Excel &amp; CSV</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <Table size={14} strokeWidth={1.75} aria-hidden="true" /> รองรับ Excel &amp; Sage 300
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             ส่งออกรายงานสรุปงานซ่อม ค่าใช้จ่าย รายการสต็อก และทะเบียนเครื่องจักรเพื่อส่งต่อให้ฝ่ายบัญชีและการเงิน
           </p>
           <Button variant="ghost" size="sm" className="self-start" onClick={() => (window.location.href = "/reports/import_excel")}>

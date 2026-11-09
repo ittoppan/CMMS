@@ -257,14 +257,14 @@ export default function SageSyncConfigPage() {
       {/* Page Header */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>SAGE SYNC · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">SAGE SYNC · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ตั้งค่าการดึงสต็อก Sage 300 ERP</h2>
             <span className="cmms-andon-chip" style={{ background: sageConnected ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)" }}>
               <Database size={14} strokeWidth={1.75} aria-hidden="true" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             เลือกประเภทสต็อก กำหนดรูปแบบการดึง และซิงค์ข้อมูลกับฐานข้อมูล Sage 300 ERP (Inventory Control Module)
           </p>
         </div>

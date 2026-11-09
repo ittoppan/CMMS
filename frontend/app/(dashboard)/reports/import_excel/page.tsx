@@ -307,14 +307,14 @@ export default function ImportExcelPage() {
       {/* Header */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>REPORTS IMPORT EXCEL · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">REPORTS IMPORT EXCEL · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>นำเข้าข้อมูลจาก Excel (Import)</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <Upload size={14} strokeWidth={1.75} aria-hidden="true" /> แม่แบบ + ตรวจสอบ + ยืนยันก่อนบันทึก
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             ดาวน์โหลดแม่แบบ เติมข้อมูล แล้วอัปโหลดเพื่อตรวจสอบทีละแถว — นำเข้าเฉพาะที่ผ่านเท่านั้น ปลอดภัยไม่ทำข้อมูลพัง
           </p>
         </div>

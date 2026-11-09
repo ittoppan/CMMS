@@ -87,14 +87,14 @@ export default function InspectionHistoryPage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>ประวัติการตรวจเช็ค{assetName ? ` — ${assetName}` : ""}</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <History size={14} strokeWidth={1.75} aria-hidden="true" /> ดูรอบที่เสร็จสิ้น = MR/WO อัตโนมัติ
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>ตรวจสอบรอบที่ผ่านมา ผลการตรวจ และงานซ่อมที่ถูกสร้างจากผลตรวจไม่ผ่าน</p>
+          <p className="cmms-hero-desc">ตรวจสอบรอบที่ผ่านมา ผลการตรวจ และงานซ่อมที่ถูกสร้างจากผลตรวจไม่ผ่าน</p>
         </div>
         {assetId && (
           <a href={`/asset_registry/view?id=${assetId}`} className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">

@@ -189,14 +189,14 @@ export default function InspectionTemplatesPage() {
       {/* Hero */}
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>INSPECTIONS TEMPLATES · CMMS-TOPPAN</p>
+          <p className="cmms-eyebrow" data-on-dark="true">INSPECTIONS TEMPLATES · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>จัดการ Template ตรวจเช็ค</h2>
-            <span className="cmms-andon-chip" style={{ background: "rgba(255,255,255,0.12)" }}>
+            <span className="cmms-andon-chip" data-on-dark="true">
               <ClipboardList size={14} strokeWidth={1.75} aria-hidden="true" /> ครอบคลุม F-EN-07~63
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>
+          <p className="cmms-hero-desc">
             สร้างหัวข้อตรวจเช็ครอบ (รายวัน/สัปดาห์/เดือน/ปี) — กำหนดข้อตรวจ ค่าเกณฑ์ และความถี่
           </p>
         </div>
