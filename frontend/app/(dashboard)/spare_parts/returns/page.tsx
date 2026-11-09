@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
-import CountUp from "react-countup";
 import { Undo2, Clock3, History, Save } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
@@ -95,7 +94,7 @@ export default function SpareReturnsPage() {
             <div>
               <p className="text-sm text-muted-foreground">รายการรอคืนซาก</p>
               <div className="cmms-kpi-value">
-                <CountUp end={pending.length} />
+                {(pending.length)}
                 <span className="cmms-kpi-unit">รายการ</span>
               </div>
             </div>
@@ -109,7 +108,7 @@ export default function SpareReturnsPage() {
             <div>
               <p className="text-sm text-muted-foreground">คืนซากแล้ว</p>
               <div className="cmms-kpi-value">
-                <CountUp end={returned.length} />
+                {(returned.length)}
                 <span className="cmms-kpi-unit">รายการ</span>
               </div>
             </div>
@@ -123,7 +122,7 @@ export default function SpareReturnsPage() {
             <div>
               <p className="text-sm text-muted-foreground">จำนวนที่คืนแล้ว</p>
               <div className="cmms-kpi-value">
-                <CountUp end={returned.reduce((s, r) => s + r.qty_returned, 0)} decimals={1} />
+                {(returned.reduce((s, r) => s + r.qty_returned, 0)).toLocaleString("th-TH", { minimumFractionDigits: (1), maximumFractionDigits: (1) })}
                 <span className="cmms-kpi-unit">หน่วย</span>
               </div>
             </div>

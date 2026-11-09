@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
-import CountUp from "react-countup";
 import {
   Plus,
   Search,
@@ -180,7 +179,7 @@ export default function AssetsPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เครื่องจักรทั้งหมด</p>
-              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.total} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="text-xl font-semibold tabular-nums">{(kpiData.total)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -191,7 +190,7 @@ export default function AssetsPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">พร้อมใช้งาน</p>
-              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.operational} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="text-xl font-semibold tabular-nums">{(kpiData.operational)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -202,7 +201,7 @@ export default function AssetsPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">กำลังซ่อม</p>
-              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.underRepair} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="text-xl font-semibold tabular-nums">{(kpiData.underRepair)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -213,7 +212,7 @@ export default function AssetsPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">สแตนด์บาย</p>
-              <h2 className="text-xl font-semibold tabular-nums"><CountUp end={kpiData.standby} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="text-xl font-semibold tabular-nums">{(kpiData.standby)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>

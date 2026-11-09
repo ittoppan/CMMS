@@ -5,7 +5,6 @@ import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairOverdue } from "@/lib/repair-status";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
-import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { useRouter } from "next/navigation";
@@ -535,7 +534,7 @@ export default function WorkOrdersPage() {
               <AndonLamp status="idle" size="sm" />
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.total} />
+              {(stats.total)}
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
           </div>
@@ -547,7 +546,7 @@ export default function WorkOrdersPage() {
               <AndonLamp status="warn" size="sm" />
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.open} />
+              {(stats.open)}
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
           </div>
@@ -559,7 +558,7 @@ export default function WorkOrdersPage() {
               <AndonLamp status="warn" size="sm" />
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.inprog} />
+              {(stats.inprog)}
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
           </div>
@@ -571,7 +570,7 @@ export default function WorkOrdersPage() {
               <AndonLamp status="ok" size="sm" />
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.done} />
+              {(stats.done)}
               <span className="cmms-kpi-unit">รายการ</span>
             </div>
           </div>
@@ -591,7 +590,7 @@ export default function WorkOrdersPage() {
                 <AndonLamp status="warn" size="sm" />
               </div>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.outsourceCount} />
+                {(stats.outsourceCount)}
                 <span className="cmms-kpi-unit">ใบ</span>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -616,7 +615,7 @@ export default function WorkOrdersPage() {
                   <AndonLamp status="down" size="sm" />
                 </div>
                 <div className="cmms-kpi-value">
-                  <CountUp end={stats.overdue} />
+                  {(stats.overdue)}
                   <span className="cmms-kpi-unit">รายการ</span>
                 </div>
               </div>

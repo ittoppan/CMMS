@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
-import CountUp from "react-countup";
 import {
   Search,
   Calendar,
@@ -372,7 +371,7 @@ export default function PMSchedulePage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">แผนบำรุงรักษาทั้งหมด</p>
-              <h2 className="cmms-kpi-value"><CountUp end={stats.total} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="cmms-kpi-value">{(stats.total)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -383,7 +382,7 @@ export default function PMSchedulePage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">รอตรวจเช็ค</p>
-              <h2 className="cmms-kpi-value"><CountUp end={stats.dueThisWeek} /> <span className="text-sm font-normal">รายการ</span></h2>
+              <h2 className="cmms-kpi-value">{(stats.dueThisWeek)} <span className="text-sm font-normal">รายการ</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -394,7 +393,7 @@ export default function PMSchedulePage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-text-secondary)]">อัตราการปฏิบัติตามแผน</p>
-              <h2 className="cmms-kpi-value"><CountUp end={stats.complianceRate} /> <span className="text-sm font-normal">%</span></h2>
+              <h2 className="cmms-kpi-value">{(stats.complianceRate)} <span className="text-sm font-normal">%</span></h2>
             </div>
           </CardContent>
         </Card>
@@ -406,7 +405,7 @@ export default function PMSchedulePage() {
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">เลยกำหนด</p>
-                <h2 className="cmms-kpi-value"><CountUp end={stats.overdue} /> <span className="text-sm font-normal">รายการ</span></h2>
+                <h2 className="cmms-kpi-value">{(stats.overdue)} <span className="text-sm font-normal">รายการ</span></h2>
               </div>
             </CardContent>
           </Card>

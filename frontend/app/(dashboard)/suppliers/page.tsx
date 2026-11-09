@@ -20,7 +20,6 @@ import {
   SimpleDataTable,
   type SimpleColumn,
 } from "@/components/ui/data-table-adapter";
-import CountUp from "react-countup";
 import { Plus, Search, SquarePen, Trash2, Truck, Star } from "lucide-react";
 
 interface Supplier extends Record<string, unknown> {
@@ -201,7 +200,7 @@ export default function SuppliersPage() {
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">จำนวนผู้ผลิตทั้งหมด</p>
             <div className="cmms-kpi-value tabular-nums">
-              <CountUp end={filtered.length} /> <span className="text-sm font-normal">ราย</span>
+              {(filtered.length)} <span className="text-sm font-normal">ราย</span>
             </div>
           </div>
         </div>

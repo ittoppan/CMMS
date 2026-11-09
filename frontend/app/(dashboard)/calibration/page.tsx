@@ -5,7 +5,6 @@ import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
-import CountUp from "react-countup";
 import {
   Plus,
   Scale,
@@ -193,7 +192,7 @@ export default function CalibrationPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เครื่องมือวัดทั้งหมด</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.total} />
+                {(stats.total)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>
@@ -208,7 +207,7 @@ export default function CalibrationPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">รอดำเนินการ</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.dueSoon} />
+                {(stats.dueSoon)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>
@@ -223,7 +222,7 @@ export default function CalibrationPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เลยกำหนด</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.overdue} />
+                {(stats.overdue)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>

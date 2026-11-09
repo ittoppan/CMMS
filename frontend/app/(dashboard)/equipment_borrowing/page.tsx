@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
-import CountUp from "react-countup";
 import {
   Plus,
   Search,
@@ -189,7 +188,7 @@ export default function EquipmentBorrowingPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">กำลังถูกยืมใช้งาน</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.borrowed} />
+                {(stats.borrowed)}
                 <span className="cmms-kpi-unit">รายการ</span>
               </div>
             </div>
@@ -204,7 +203,7 @@ export default function EquipmentBorrowingPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เกินกำหนดคืน</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.overdue} />
+                {(stats.overdue)}
                 <span className="cmms-kpi-unit">รายการ</span>
               </div>
             </div>
@@ -219,7 +218,7 @@ export default function EquipmentBorrowingPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">คืนเรียบร้อยแล้ว</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.returned} />
+                {(stats.returned)}
                 <span className="cmms-kpi-unit">รายการ</span>
               </div>
             </div>

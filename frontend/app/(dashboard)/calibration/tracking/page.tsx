@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
-import CountUp from "react-countup";
 import { Search, FileCheck2, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -253,7 +252,7 @@ export default function CalibrationTrackingPage() {
           <Card key={c.key} className="p-4">
             <p className="text-xs text-muted-foreground">{c.label}</p>
             <div className={`cmms-kpi-value ${c.cls}`}>
-              <CountUp end={c.value} />
+              {(c.value)}
             </div>
           </Card>
         ))}

@@ -12,7 +12,6 @@ import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import { ClipboardCheck, Plus, Search, RefreshCw, GitPullRequest, AlertTriangle, Timer } from "lucide-react";
@@ -46,7 +45,7 @@ function Kpi({ label, value, sub, lamp }: { label: string; value: number; sub?: 
           {lamp && <AndonLamp status={lamp} size="sm" />}
         </div>
         <div className="cmms-kpi-value">
-          <CountUp end={value} duration={0.6} />
+          {(value)}
           <span className="cmms-kpi-unit">รายการ</span>
         </div>
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}

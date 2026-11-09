@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
-import CountUp from "react-countup";
 import { ChevronLeft, ChevronRight, CalendarDays, Clock, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -125,7 +124,7 @@ export default function CalibrationCalendar() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">กำหนดสอบเทียบในเดือนนี้</p>
               <div className="cmms-kpi-value">
-                <CountUp end={monthStats.count} />
+                {(monthStats.count)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>
@@ -139,7 +138,7 @@ export default function CalibrationCalendar() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เสร็จสิ้นในเดือนนี้</p>
               <div className="cmms-kpi-value">
-                <CountUp end={monthStats.done} />
+                {(monthStats.done)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>
@@ -153,7 +152,7 @@ export default function CalibrationCalendar() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">เกินกำหนดค้าง</p>
               <div className="cmms-kpi-value">
-                <CountUp end={monthStats.overdue} />
+                {(monthStats.overdue)}
                 <span className="cmms-kpi-unit">เครื่อง</span>
               </div>
             </div>

@@ -3,7 +3,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
-import CountUp from "react-countup";
 import { Search, Boxes, TriangleAlert, CircleDollarSign, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -156,7 +155,7 @@ export default function SpareBalancesPage() {
             <div>
               <p className="text-sm text-muted-foreground">รายการอะไหล่</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.count} />
+                {(stats.count)}
                 <span className="cmms-kpi-unit">ชิ้น</span>
               </div>
             </div>
@@ -184,7 +183,7 @@ export default function SpareBalancesPage() {
             <div>
               <p className="text-sm text-muted-foreground">ต่ำกว่า Min</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.low} />
+                {(stats.low)}
                 <span className="cmms-kpi-unit">ชิ้น</span>
               </div>
             </div>
@@ -198,7 +197,7 @@ export default function SpareBalancesPage() {
             <div>
               <p className="text-sm text-muted-foreground">หมดคลัง</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.out} />
+                {(stats.out)}
                 <span className="cmms-kpi-unit">ชิ้น</span>
               </div>
             </div>

@@ -20,7 +20,6 @@ import {
   SimpleDataTable,
   type SimpleColumn,
 } from "@/components/ui/data-table-adapter";
-import CountUp from "react-countup";
 import { Plus, Search, SquarePen, Trash2, Users } from "lucide-react";
 
 interface Role extends Record<string, unknown> {
@@ -140,7 +139,7 @@ export default function RolesPage() {
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">จำนวนบทบาททั้งหมด</p>
             <div className="cmms-kpi-value tabular-nums">
-              <CountUp end={filtered.length} /> <span className="text-sm font-normal">บทบาท</span>
+              {(filtered.length)} <span className="text-sm font-normal">บทบาท</span>
             </div>
           </div>
         </div>

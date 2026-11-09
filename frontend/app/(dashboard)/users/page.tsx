@@ -31,7 +31,6 @@ import {
   SimpleDataTable,
   type SimpleColumn,
 } from "@/components/ui/data-table-adapter";
-import CountUp from "react-countup";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
   Plus,
@@ -321,7 +320,7 @@ export default function UsersPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">ผู้ใช้ทั้งหมด (Total Users)</p>
               <div className="cmms-kpi-value tabular-nums">
-                <CountUp end={stats.total} /> <span className="text-sm font-normal">คน</span>
+                {(stats.total)} <span className="text-sm font-normal">คน</span>
               </div>
             </div>
           </Card>
@@ -330,7 +329,7 @@ export default function UsersPage() {
             <div className="space-y-1">
               <p className="text-sm text-[var(--cmms-success-dark)]">กำลังใช้งาน</p>
               <div className="cmms-kpi-value tabular-nums text-[var(--cmms-success-dark)]">
-                <CountUp end={stats.active} /> <span className="text-sm font-normal">คน</span>
+                {(stats.active)} <span className="text-sm font-normal">คน</span>
               </div>
             </div>
           </Card>
@@ -339,7 +338,7 @@ export default function UsersPage() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">ระงับการใช้งาน (Inactive)</p>
               <div className="cmms-kpi-value tabular-nums text-muted-foreground">
-                <CountUp end={stats.inactive} /> <span className="text-sm font-normal">คน</span>
+                {(stats.inactive)} <span className="text-sm font-normal">คน</span>
               </div>
             </div>
           </Card>

@@ -16,7 +16,6 @@ import {
   SimpleDataTable,
   type SimpleColumn,
 } from "@/components/ui/data-table-adapter";
-import CountUp from "react-countup";
 
 interface Row {
   rank: number;
@@ -147,7 +146,7 @@ export default function LeaderboardPage() {
               <div className="flex gap-4 mt-1 text-center">
                 <div>
                   <div className="text-lg font-bold text-emerald-600">
-                    <CountUp end={r.completedCount} duration={0.6} />
+                    {(r.completedCount)}
                   </div>
                   <div className="text-[11px] text-muted-foreground uppercase">งานเสร็จ</div>
                 </div>

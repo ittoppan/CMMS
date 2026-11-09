@@ -15,7 +15,6 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { swalConfirm } from "@/lib/swal";
 import { Spinner } from "@/components/ui/spinner";
-import CountUp from "react-countup";
 import {
   Plus,
   ClipboardCheck,
@@ -235,7 +234,7 @@ export default function InspectionsPage() {
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-[var(--cmms-text-secondary)]">{k.label}</p>
-                <h2 className="cmms-kpi-value text-xl"><CountUp end={k.value} decimals={k.suffix ? 1 : 0} />{k.suffix && <span className="text-sm font-normal">{k.suffix}</span>}</h2>
+                <h2 className="cmms-kpi-value text-xl">{(k.value).toLocaleString("th-TH", { minimumFractionDigits: (k.suffix ? 1 : 0), maximumFractionDigits: (k.suffix ? 1 : 0) })}{k.suffix && <span className="text-sm font-normal">{k.suffix}</span>}</h2>
               </div>
             </CardContent>
           </Card>

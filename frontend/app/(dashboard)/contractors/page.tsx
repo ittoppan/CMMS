@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CountUp from "react-countup";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
@@ -35,7 +34,7 @@ function KpiCard({ label, value, sub, lamp, tone }: {
           {lamp && <AndonLamp status={lamp} size="sm" />}
         </div>
         <div className="cmms-kpi-value">
-          <CountUp end={value} duration={0.6} />
+          {(value)}
           <span className="cmms-kpi-unit">รายการ</span>
         </div>
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}

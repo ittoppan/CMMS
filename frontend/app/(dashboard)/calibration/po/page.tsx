@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
-import CountUp from "react-countup";
 import {
   FilePlus2,
   Send,
@@ -161,7 +160,7 @@ export default function CalibrationPoPage() {
             <div>
               <p className="text-sm text-muted-foreground">รอออก PO</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.ready} />
+                {(stats.ready)}
               </div>
             </div>
           </div>
@@ -174,7 +173,7 @@ export default function CalibrationPoPage() {
             <div>
               <p className="text-sm text-muted-foreground">มี PO ยังไม่แจ้ง</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.po} />
+                {(stats.po)}
               </div>
             </div>
           </div>
@@ -187,7 +186,7 @@ export default function CalibrationPoPage() {
             <div>
               <p className="text-sm text-muted-foreground">แจ้งแล้ว / ระหว่างติดตาม</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.emailed + stats.sent_out} />
+                {(stats.emailed + stats.sent_out)}
               </div>
             </div>
           </div>
@@ -200,7 +199,7 @@ export default function CalibrationPoPage() {
             <div>
               <p className="text-sm text-muted-foreground">เกินกำหนด</p>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.overdue} />
+                {(stats.overdue)}
               </div>
             </div>
           </div>

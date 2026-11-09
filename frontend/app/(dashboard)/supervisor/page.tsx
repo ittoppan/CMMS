@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePageHero, t } from "@/lib/i18n";
 import { getKpis, type KpisResponse } from "@/lib/supervisor";
-import CountUp from "react-countup";
 import { RefreshCw, ArrowRight, Users2, ClipboardList, CalendarClock, BadgeCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -82,7 +81,7 @@ export default function SupervisorDeskPage() {
                 <div className="text-sm text-[var(--cmms-text-muted)]">{cd.label}</div>
                 <div className="mt-1 flex items-end justify-between">
                   <span className="text-3xl font-bold" style={{ color: cd.tone }}>
-                    {loading ? "…" : <CountUp end={Number(cd.value)} duration={0.6} />}
+                    {loading ? "…" : (Number(cd.value))}
                   </span>
                   <ArrowRight className="h-4 w-4 text-[var(--cmms-text-muted)]" />
                 </div>
@@ -120,7 +119,7 @@ export default function SupervisorDeskPage() {
             <CardContent className="p-4">
               <div className="text-sm text-[var(--cmms-text-muted)]">{k.label}</div>
               <div className="mt-1 text-2xl font-bold text-[var(--cmms-text-primary)]">
-                {loading || k.value === null ? "—" : <CountUp end={Number(k.value)} decimals={Number(k.value) % 1 !== 0 ? 1 : 0} duration={0.6} />}
+                {loading || k.value === null ? "—" : (Number(k.value)).toLocaleString("th-TH", { minimumFractionDigits: (Number(k.value) % 1 !== 0 ? 1 : 0), maximumFractionDigits: (Number(k.value) % 1 !== 0 ? 1 : 0) })}
                 {k.value !== null && !loading ? <span className="ml-1 text-xs font-normal text-[var(--cmms-text-muted)]">{k.suffix}</span> : null}
               </div>
               <div className="mt-1 text-[11px] text-[var(--cmms-text-muted)]">{k.hint}</div>

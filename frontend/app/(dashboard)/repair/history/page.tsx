@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { t, statusText } from "@/lib/i18n";
 import AndonLamp from "@/components/AndonLamp";
-import CountUp from "react-countup";
 import { useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Search, RefreshCw, ClipboardList } from "lucide-react";
@@ -224,7 +223,7 @@ export default function RepairHistoryPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">งานที่เสร็จสิ้น</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.total} />
+              {(stats.total)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
@@ -236,7 +235,7 @@ export default function RepairHistoryPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าอะไหล่</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costParts} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              {(stats.costParts).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </CardContent>
@@ -248,7 +247,7 @@ export default function RepairHistoryPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าแรง</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costLabor} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              {(stats.costLabor).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </CardContent>
@@ -260,7 +259,7 @@ export default function RepairHistoryPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ค่าจ้างภายนอก</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={stats.costOutsource} formattingFn={(n) => n.toLocaleString("th-TH", { minimumFractionDigits: 2 })} />
+              {(stats.costOutsource).toLocaleString("th-TH", { minimumFractionDigits: 2 })}
               <span className="cmms-kpi-unit">บาท</span>
             </div>
           </CardContent>
@@ -273,7 +272,7 @@ export default function RepairHistoryPage() {
                 <span className="text-sm text-[var(--cmms-text-secondary)]">เวลาหยุดเครื่องรวม</span>
               </div>
               <div className="cmms-kpi-value">
-                <CountUp end={stats.downtime} />
+                {(stats.downtime)}
                 <span className="cmms-kpi-unit">นาที</span>
               </div>
             </CardContent>

@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import AndonLamp from "@/components/AndonLamp";
-import CountUp from "react-countup";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Users, RefreshCw } from "lucide-react";
 
@@ -182,7 +181,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ช่างที่มีงาน</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.technicians} />
+              {(summary.technicians)}
               <span className="cmms-kpi-unit">คน</span>
             </div>
           </CardContent>
@@ -194,7 +193,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">งานค้างทั้งหมด</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.total_open} />
+              {(summary.total_open)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
@@ -206,7 +205,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ยังไม่มอบหมายช่าง</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.unassigned} />
+              {(summary.unassigned)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
@@ -218,7 +217,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.total_overdue} />
+              {(summary.total_overdue)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
@@ -230,7 +229,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ด่วน / วิกฤต</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.total_urgent} />
+              {(summary.total_urgent)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
@@ -242,7 +241,7 @@ export default function WorkloadPage() {
               <span className="text-sm text-[var(--cmms-text-secondary)]">ปิดงาน 7 วันล่าสุด</span>
             </div>
             <div className="cmms-kpi-value">
-              <CountUp end={summary.done_7d} />
+              {(summary.done_7d)}
               <span className="cmms-kpi-unit">งาน</span>
             </div>
           </CardContent>
