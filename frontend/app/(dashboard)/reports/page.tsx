@@ -28,7 +28,7 @@ export default function ReportsHubPage() {
         className="cmms-page-hero flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
       >
         <div className="flex items-start gap-4">
-          <div className="cmms-icon-tile h-12 w-12 shrink-0 rounded-xl" style={{ background: "rgba(255,255,255,0.16)" }}>
+          <div className="cmms-icon-tile on-dark h-12 w-12 shrink-0 rounded-xl">
             <BarChart3 size={24} strokeWidth={1.75} aria-hidden="true" />
           </div>
           <div>

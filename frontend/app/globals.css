@@ -2425,6 +2425,10 @@ next-route-announcer {
   background: var(--cmms-info);
   color: #fff;
 }
+.cmms-icon-tile.on-dark {
+  background: var(--cmms-hero-chip-bg, rgba(255,255,255,0.16));
+  color: #fff;
+}
 
 /* ================================================
    Page Designer (settings/design) — design tokens

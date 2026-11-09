@@ -1568,6 +1568,7 @@ const flushQueue = async () => {
                 ref={videoInputRef}
                 type="file"
                 accept="video/*"
+                capture="environment"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -1613,7 +1614,7 @@ const flushQueue = async () => {
                     ) : (
                       <Video size={24} strokeWidth={1.75} />
                     )}
-                    <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "เลือกวิดีโอ"}</p>
+                    <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "ถ่าย / เลือกวิดีโอ"}</p>
                   </button>
                 )}
               </div>
