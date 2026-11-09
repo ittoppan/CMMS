@@ -9,7 +9,7 @@ import { getFrequentMenuItems } from "@/lib/frequent-menus";
 import { t } from "@/lib/i18n";
 import type { LucideIcon } from "lucide-react";
 
-/** หน้าแรกแบบเมนูหลัก (app launcher) — ฉากเปิดหลังล็อกอิน โทน ANDON เข้ม */
+/** หน้าแรกแบบเมนูหลัก (app launcher) — ฉากเปิดหลังล็อกอิน โทนสว่าง (light launcher) */
 
 interface Kpis {
   counts?: {
