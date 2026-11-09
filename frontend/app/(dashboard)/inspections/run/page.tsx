@@ -514,7 +514,7 @@ export default function InspectionRunPage() {
                       backgroundColor: isNg ? "var(--cmms-danger-light)" : isWarn ? "var(--cmms-warning-light)" : item.status === "pass" ? "var(--cmms-success-light)" : "transparent",
                     }}
                   >
-                    <input ref={(el) => { fileRefs.current[item.id] = el; }} type="file" accept="image/png,image/jpeg,image/gif,image/webp" className="hidden"
+                    <input ref={(el) => { fileRefs.current[item.id] = el; }} type="file" accept="image/png,image/jpeg,image/gif,image/webp" capture="environment" className="hidden"
                       onChange={(e) => { onPickFile(index, e.target.files?.[0] ?? null); e.target.value = ""; }} />
                     <div className="space-y-3">
                       <div className="flex flex-wrap items-start justify-between gap-3">

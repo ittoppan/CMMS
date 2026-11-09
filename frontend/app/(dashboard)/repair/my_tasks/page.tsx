@@ -965,6 +965,7 @@ export default function MyTasksPage() {
               id="mytasks-after-photo"
               type="file"
               accept="image/*"
+              capture="environment"
               onChange={(e) => {
                 const file = e.target.files?.[0] ?? null;
                 setAfterFile(file);

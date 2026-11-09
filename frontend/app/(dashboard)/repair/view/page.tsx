@@ -1163,6 +1163,7 @@ export default function RepairViewDetailsPage() {
               ref={photoInputRef}
               type="file"
               accept="image/*"
+              capture="environment"
               className="hidden"
               onChange={handlePickPhoto}
               aria-label="เลือกไฟล์รูปหลักฐาน"
