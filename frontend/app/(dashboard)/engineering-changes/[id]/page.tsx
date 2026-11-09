@@ -210,7 +210,7 @@ export default function EngineeringChangeDetailPage() {
         <div className="min-w-0">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{d.title}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{d.title}</h1>
             <AndonBadge tone={lampOf(ECR_STATUS_TONE[d.status])}>{ecrStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.priority === "critical" ? "danger" : d.priority === "high" ? "warning" : "neutral"}>
               {ecrPriorityLabel(d.priority)}

@@ -121,7 +121,7 @@ export default function KpiDashboardPage() {
           <div>
             <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
+              <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
               <span className="cmms-andon-chip" data-on-dark="true">
                 <ChartBar size={14} strokeWidth={2} aria-hidden="true" /> ช่วง {months} เดือนล่าสุด
               </span>

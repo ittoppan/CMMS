@@ -87,7 +87,7 @@ export default function RcaEventsPage() {
         <div>
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
             {data && <AndonLamp status="idle" size="sm" showLabel />}
           </div>
           <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>

@@ -158,7 +158,7 @@ export default function ContractorDetailPage() {
         <div className="min-w-0">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{c.company_name}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{c.company_name}</h1>
             {c.code && <Badge variant="primary">{c.code}</Badge>}
             <Badge variant={tone} dot>{CTR_STATUS_LABELS[c.status] || c.status}</Badge>
           </div>

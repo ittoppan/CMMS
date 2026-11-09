@@ -264,7 +264,7 @@ export default function PMCalendarPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h2>
+            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h2>
             <span className="cmms-andon-chip" data-on-dark="true">
               PM / AM
             </span>

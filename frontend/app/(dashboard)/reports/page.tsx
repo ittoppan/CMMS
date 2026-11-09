@@ -14,7 +14,7 @@ export default function ReportsHubPage() {
         <div>
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               ISO 9001 / ISO 55000
             </span>
@@ -32,7 +32,7 @@ export default function ReportsHubPage() {
             <BarChart3 size={24} strokeWidth={1.75} aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-lg font-bold" style={{ color: "#fff" }}>ศูนย์ออกรายงานใหม่ (Report Center)</h2>
+            <h2 className="cmms-hero-title text-lg font-bold">ศูนย์ออกรายงานใหม่ (Report Center)</h2>
             <p className="cmms-hero-desc">
               12 หมวดรายงานจากข้อมูลจริง — กรองช่วงเวลา/เครื่องจักร/แผนก แล้วส่งออก CSV, Excel หรือพิมพ์ PDF ได้ทันที
             </p>

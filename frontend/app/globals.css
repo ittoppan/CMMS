@@ -2952,6 +2952,7 @@ html.cmms-no-anim *::after {
   --cmms-hero-desc: rgba(255,255,255,0.78);
   --cmms-hero-chip-bg: rgba(255,255,255,0.12);
 }
+.cmms-hero-title { color: #fff; }
 .cmms-hero-on-dark .cmms-eyebrow { color: var(--cmms-hero-eyebrow); }
 .cmms-hero-on-dark .cmms-hero-desc { color: var(--cmms-hero-desc); }
 .cmms-hero-on-dark .cmms-andon-chip { background: var(--cmms-hero-chip-bg); color: var(--cmms-text-on-primary); }

@@ -296,7 +296,7 @@ export default function DocumentDetailPage() {
         <div className="min-w-0">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{d.title}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{d.title}</h1>
             <AndonBadge tone={lampOf(DOC_STATUS_TONE[d.status])}>{docStatusLabel(d.status)}</AndonBadge>
             <Badge variant={d.confidentiality === "confidential" ? "danger" : d.confidentiality === "restricted" ? "warning" : "neutral"}>
               {CONFIDENTIALITY_LABELS[d.confidentiality] ?? d.confidentiality}

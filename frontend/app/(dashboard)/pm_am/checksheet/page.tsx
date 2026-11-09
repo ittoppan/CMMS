@@ -557,7 +557,7 @@ export default function PMChecksheetPage() {
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">PM CHECKSHEET · CMMS-TOPPAN</p>
-          <h2 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{tliff("liff.checksheet_title")}</h2>
+          <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">{tliff("liff.checksheet_title")}</h2>
 
           {pending > 0 && (
             <div

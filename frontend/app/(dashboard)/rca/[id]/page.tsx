@@ -238,7 +238,7 @@ export default function RcaDetailPage() {
             <a href="/rca" className="no-underline" style={{ color: "inherit" }}>{hero.eyebrow}</a>
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{rca.rca_code} {/* title */}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{rca.rca_code} {/* title */}</h1>
             {statusBadge(rca.status)}
             {rca.due_date && rca.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10) && !["closed", "cancelled"].includes(rca.status) ? <AndonLamp status="down" size="sm" showLabel /> : null}
           </div>

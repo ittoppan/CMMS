@@ -196,7 +196,7 @@ export default function ScheduledReportsPage() {
         <div>
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               ผู้จัดการ / ผู้ดูแลระบบ
             </span>

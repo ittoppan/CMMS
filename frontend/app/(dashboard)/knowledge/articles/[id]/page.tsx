@@ -265,7 +265,7 @@ export default function KnowledgeArticleDetailPage() {
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
         <div className="min-w-0">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
+          <h1 className="mt-1 cmms-hero-title text-2xl font-bold tracking-tight">
             {article.title}
           </h1>
           <p className="cmms-hero-desc mt-1 font-mono text-xs">
