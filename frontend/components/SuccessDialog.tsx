@@ -50,27 +50,27 @@ export default function SuccessDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="success-dialog-title"
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fade-in"
       onClick={onBackdrop}
     >
       <div
-        className="flex flex-col items-center gap-6 bg-white dark:bg-slate-900 rounded-2xl p-8 md:p-12 text-center max-w-[420px] w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-scale-in"
+        className="flex flex-col items-center gap-6 bg-white rounded-2xl p-8 md:p-12 text-center max-w-[420px] w-full shadow-2xl border border-slate-100 animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >{/* impeccable-disable-next-line bounce-easing: success checkmark flourish */}
-        <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center animate-bounce-short">
+        <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center animate-bounce-short">
           <CheckCircle2 className="w-9 h-9" />
         </div>
 
         <div className="space-y-2">
           <h3
             id="success-dialog-title"
-            className="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-50"
+            className="text-xl md:text-2xl font-bold text-slate-900"
           >
             {title}
           </h3>
 
           {message && (
-            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="text-sm md:text-base text-slate-500 leading-relaxed">
               {message}
             </p>
           )}

@@ -822,7 +822,7 @@ export default function RepairViewDetailsPage() {
                       {m.status === "accepted" ? (
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <span className="text-[11px] font-semibold text-emerald-600">
                             รับงานแล้ว{m.accepted_at ? ` · ${String(m.accepted_at).slice(11, 16)} น.` : ""}
                           </span>
                         </div>
@@ -1113,7 +1113,7 @@ export default function RepairViewDetailsPage() {
                             <span className="text-[10px] text-muted-foreground"> ({it.unit})</span>
                           </td>
                           <td className="p-2.5">
-                            <span className={`inline-flex items-center gap-1 font-semibold tabular-nums ${Number(it.available) > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>
+                            <span className={`inline-flex items-center gap-1 font-semibold tabular-nums ${Number(it.available) > 0 ? "text-emerald-600" : "text-destructive"}`}>
                               {Number(it.available).toLocaleString()}
                             </span>
                             {it.stock_status === "low" && <Badge variant="warning" className="ml-1.5">น้อย</Badge>}
@@ -1141,7 +1141,7 @@ export default function RepairViewDetailsPage() {
                   · การเพิ่มจะสร้าง <span className="font-semibold">Pending Issue</span> ให้คลังจัดของจริงใน Sage 300 · ค่าอะไหล่ใช้ต้นทุนล่าสุดบันทึกในใบสั่งซ่อม
                 </span>
               </p>
-              {sageMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{sageMsg}</p>}
+              {sageMsg && <p className="text-xs font-medium text-emerald-600">{sageMsg}</p>}
             </div>
           </CardContent>
         </Card>
@@ -1188,7 +1188,7 @@ export default function RepairViewDetailsPage() {
               </span>
             </div>
 
-            {photoMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{photoMsg}</p>}
+            {photoMsg && <p className="text-xs font-medium text-emerald-600">{photoMsg}</p>}
 
             {wo.videoPath && (
               <div className="rounded-lg border border-border p-2">
@@ -1228,7 +1228,7 @@ export default function RepairViewDetailsPage() {
                   <div key={a.id} className="relative rounded-lg border border-dashed border-amber-400/60 bg-amber-400/5 p-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={a.data} alt={a.file_name} className="h-20 w-full rounded object-cover" />
-                    <span className="mt-1 block text-center text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                    <span className="mt-1 block text-center text-[10px] font-medium text-amber-600">
                       รอซิงก์
                     </span>
                   </div>

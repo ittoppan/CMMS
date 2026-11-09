@@ -38,11 +38,11 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_TONE: Record<SyncStatusType, string> = {
-  PENDING: "border-blue-400/40 bg-blue-400/10 text-blue-600 dark:text-blue-300",
-  SYNCING: "border-blue-400/50 bg-blue-400/15 text-blue-600 dark:text-blue-300",
-  SUCCESS: "border-emerald-400/40 bg-emerald-400/10 text-emerald-600 dark:text-emerald-300",
+  PENDING: "border-blue-400/40 bg-blue-400/10 text-blue-600",
+  SYNCING: "border-blue-400/50 bg-blue-400/15 text-blue-600",
+  SUCCESS: "border-emerald-400/40 bg-emerald-400/10 text-emerald-600",
   FAILED: "border-destructive/40 bg-destructive/10 text-destructive",
-  CONFLICT: "border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-300",
+  CONFLICT: "border-amber-400/40 bg-amber-400/10 text-amber-600",
 };
 
 function fmtTime(iso: string | null | undefined): string {
@@ -270,7 +270,7 @@ export default function SyncCenterPage() {
                       </Badge>
                     </div>
                     {it.status === "CONFLICT" && (
-                      <div className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                      <div className="mt-1.5 text-xs text-amber-600">
                         <TriangleAlert size={12} className="mr-1 inline" aria-hidden="true" />
                         {t("sync.conflict_hint")}
                       </div>

@@ -279,7 +279,7 @@ function EditWorkOrderContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <FileText className="w-5 h-5 text-sky-600" />
                 <span>ข้อมูลจากผู้แจ้ง</span>
                 <span className="text-xs font-normal text-muted-foreground">(อ่านอย่างเดียว)</span>
               </CardTitle>
@@ -300,7 +300,7 @@ function EditWorkOrderContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <Wrench className="w-5 h-5 text-sky-600" />
                 <span>ข้อมูลซ่อม (ช่างกรอก)</span>
               </CardTitle>
             </CardHeader>
@@ -414,7 +414,7 @@ function EditWorkOrderContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Clock className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <Clock className="w-5 h-5 text-sky-600" />
                 <span>เวลาและค่าใช้จ่าย</span>
               </CardTitle>
             </CardHeader>
@@ -465,7 +465,7 @@ function EditWorkOrderContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Camera className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                <Camera className="w-5 h-5 text-sky-600" />
                 <span>รูปหลังซ่อม (After Image)</span>
               </CardTitle>
             </CardHeader>

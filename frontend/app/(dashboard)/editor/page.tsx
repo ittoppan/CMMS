@@ -260,7 +260,7 @@ export default function InteractiveStylePageEditor() {
                           className={`flex items-center gap-2 rounded-lg p-2 text-left transition-shadow ${
                             primaryColor === swatch.hex
                               ? "border-2 border-transparent ring-2 ring-ring"
-                              : "border border-zinc-300 dark:border-zinc-600"
+                              : "border border-zinc-300"
                           }`}
                           style={{ background: swatch.bg }}
                         >
@@ -286,7 +286,7 @@ export default function InteractiveStylePageEditor() {
                           className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-shadow ${
                             bgColor === bgStyle.color
                               ? "border-2 border-transparent ring-2 ring-ring"
-                              : "border border-zinc-300 dark:border-zinc-600"
+                              : "border border-zinc-300"
                           }`}
                           style={{
                             background: bgStyle.color,
@@ -316,7 +316,7 @@ export default function InteractiveStylePageEditor() {
                           className={`bg-card p-2.5 text-center transition-shadow ${
                             borderRadius === opt.id
                               ? "border-2 border-transparent ring-2 ring-ring"
-                              : "border border-zinc-300 dark:border-zinc-600"
+                              : "border border-zinc-300"
                           }`}
                           style={{ borderRadius: opt.id }}
                         >
@@ -339,7 +339,7 @@ export default function InteractiveStylePageEditor() {
                           className={`flex w-full items-center justify-between bg-card px-3 py-2.5 transition-shadow ${
                             fontFamily === font.id
                               ? "border-2 border-transparent ring-2 ring-ring"
-                              : "border border-zinc-300 dark:border-zinc-600"
+                              : "border border-zinc-300"
                           } rounded-lg`}
                         >
                           <span className="text-sm font-semibold">{font.label}</span>

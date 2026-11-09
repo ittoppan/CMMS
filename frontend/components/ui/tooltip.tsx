@@ -24,7 +24,7 @@ function TooltipContent({
       <TooltipPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "cmms-tip-content z-[70] overflow-hidden rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-50 shadow-md dark:bg-zinc-50 dark:text-zinc-900",
+          "cmms-tip-content z-[70] overflow-hidden rounded-lg bg-zinc-900 px-2.5 py-1.5 text-xs text-zinc-50 shadow-md",
           className
         )}
         {...props}

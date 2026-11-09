@@ -46,9 +46,9 @@ interface SchedPayload {
 const WEEKDAYS = ["จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์", "อาทิตย์"];
 
 const CHANNEL_TONE: Record<string, string> = {
-  telegram: "bg-sky-500/15 text-sky-600 dark:text-sky-400",
-  line: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-  email: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
+  telegram: "bg-sky-500/15 text-sky-600",
+  line: "bg-emerald-500/15 text-emerald-600",
+  email: "bg-violet-500/15 text-violet-600",
 };
 
 const CHANNEL_ICON: Record<string, string> = { telegram: "✈", line: "🔵", email: "✉" };

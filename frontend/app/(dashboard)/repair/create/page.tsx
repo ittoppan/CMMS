@@ -201,7 +201,7 @@ export default function CreateWorkOrderPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Wrench className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <Wrench className="w-5 h-5 text-sky-600" />
             <span>รายละเอียดใบแจ้งซ่อม</span>
           </CardTitle>
         </CardHeader>

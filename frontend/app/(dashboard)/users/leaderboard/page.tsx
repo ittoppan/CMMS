@@ -32,9 +32,9 @@ interface Row {
 }
 
 const podiums = [
-  { bg: "bg-amber-100 dark:bg-amber-950/40", ring: "ring-amber-400", label: "1", icon: "🥇" },
-  { bg: "bg-slate-100 dark:bg-slate-900/60", ring: "ring-slate-400", label: "2", icon: "🥈" },
-  { bg: "bg-orange-100 dark:bg-orange-950/40", ring: "ring-orange-500", label: "3", icon: "🥉" },
+  { bg: "bg-amber-100", ring: "ring-amber-400", label: "1", icon: "🥇" },
+  { bg: "bg-slate-100", ring: "ring-slate-400", label: "2", icon: "🥈" },
+  { bg: "bg-orange-100", ring: "ring-orange-500", label: "3", icon: "🥉" },
 ];
 
 export default function LeaderboardPage() {

@@ -294,7 +294,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   aria-label="ไม่มีสิทธิ์เข้าถึงหน้านี้"
                   className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center"
                 >
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40" aria-hidden="true">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600" aria-hidden="true">
                     <ShieldAlert className="h-7 w-7" />
                   </span>
                   <h1 className="text-xl font-bold text-foreground">403 — ไม่มีสิทธิ์เข้าใช้หน้านี้</h1>

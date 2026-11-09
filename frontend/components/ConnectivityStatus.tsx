@@ -33,9 +33,9 @@ export function ConnectivityStatus({ variant = "chip" }: { variant?: "chip" | "i
   const tone = offline
     ? "border-destructive/30 bg-destructive/10 text-destructive"
     : hasSyncError && pending > 0
-      ? "border-amber-400/40 bg-amber-400/10 text-amber-600 dark:text-amber-400"
+      ? "border-amber-400/40 bg-amber-400/10 text-amber-600"
       : syncing
-        ? "border-blue-400/40 bg-blue-400/10 text-blue-600 dark:text-blue-300"
+        ? "border-blue-400/40 bg-blue-400/10 text-blue-600"
         : "border-border bg-secondary/60 text-muted-foreground";
 
   if (variant === "icon") {
