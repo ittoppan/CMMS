@@ -196,10 +196,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
           <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="h-8 w-auto object-contain" />
-            <span className="leading-tight">
-              <span className="block text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
-              <span className="block text-[0.65rem] font-medium uppercase tracking-wider text-muted-foreground">Enterprise Maintenance</span>
+            <img src="/logo.png" alt="TOPPAN" className="h-8 w-auto shrink-0 object-contain" />
+            <span className="min-w-0 leading-tight">
+              <span className="block truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
+              <span className="block truncate text-[0.65rem] font-medium uppercase tracking-wider text-muted-foreground">Enterprise Maintenance</span>
             </span>
           </Link>
           <SidebarNav canShow={canShow} isSelected={isSelected} />
