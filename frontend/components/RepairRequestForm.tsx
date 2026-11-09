@@ -65,7 +65,8 @@ import { Card, CardContent } from "@/components/ui/card";
    ฟอร์มแจ้งซ่อม MAINTENANCE JOB REQUEST (F-EN-03)
    - ฟิลด์ผู้แจ้ง / เครื่องจักร / Job Type / Job Description
      อ้างอิงแบบฟอร์ม LIFF ที่ใช้งานจริง + ใบ F-EN-03
-   - เพิ่มจุดเด่น F-EN-03: ความเสี่ยงปนเปื้อน (GMP), Safety
+   - ฟิลด์งานของช่าง (อะไหล่/ผู้รับเหมา/ผลตรวจปนเปื้อน/หมายเหตุ)
+     ไม่แสดงในฟอร์มนี้ — ให้ช่างบันทึกตอนซ่อมทีหลัง
    ========================================================= */
 
 type Asset = {
@@ -148,6 +149,9 @@ const MACHINE_GROUPS = [
   { label: "เครื่องทำถุง", iconName: "shopping-bag", prefix: "A-BM" },
 ];
 
+// เครื่องจักรที่ไม่ได้ลงทะเบียนใน asset_registry — ผู้แจ้งพิมพ์ชื่อเอง
+export const OTHER_MACHINE_CODE = "__other__";
+
 // Default options (fallback if API fails)
 const DEFAULT_MACHINE_STATUS = [
   { value: "breakdown", label: "Break Down", th: "เครื่องหยุดทำงาน", iconName: "alert-circle", color: "var(--cmms-danger)" },
@@ -169,12 +173,6 @@ const DEFAULT_JOB_DESCRIPTIONS = [
   { value: "Build", label: "สร้าง / จัดทำใหม่", en: "Build", iconName: "hard-hat" },
 ];
 
-const DEFAULT_CONTAMINATE_CHECK = [
-  { value: "not_checked", label: "ยังไม่ตรวจ", iconName: "circle-help" },
-  { value: "clean", label: "ไม่พบการปนเปื้อน (ผ่าน)", iconName: "circle-check" },
-  { value: "contaminated", label: "พบการปนเปื้อน", iconName: "shield-alert" },
-  { value: "not_applicable", label: "ไม่เกี่ยวข้องกับงานนี้", iconName: "minus" },
-];
 
 const OFFICES = ["โรงงานอมตะซิตี้ (ระยอง)"];
 
@@ -288,7 +286,6 @@ export default function RepairRequestForm() {
   const [machineStatusOptions, setMachineStatusOptions] = useState(DEFAULT_MACHINE_STATUS);
   const [jobTypeOptions, setJobTypeOptions] = useState(DEFAULT_JOB_TYPES);
   const [jobDescriptionOptions, setJobDescriptionOptions] = useState(DEFAULT_JOB_DESCRIPTIONS);
-  const [contaminateCheckOptions, setContaminateCheckOptions] = useState(DEFAULT_CONTAMINATE_CHECK);
   const [rootCauseOptions, setRootCauseOptions] = useState<{ value: string; label: string; emoji?: string }[]>([]);
 
   const [lineBound, setLineBound] = useState<boolean | null>(null);
@@ -307,79 +304,26 @@ export default function RepairRequestForm() {
 
   const [form, setForm] = useState({
     machineCode: "",
+    machineOther: "",
     machineStatus: "",
     jobType: "",
     jobDescription: "",
     symptoms: "",
     lotNo: "",
-    contaminateChecking: "not_checked",
-    outsourceBy: "",
     reporterName: "",
     departmentCode: "",
     office: OFFICES[0],
     phone: "",
     email: "",
-    contaminationRisk: false,
     safetyRelated: false,
     photos: [] as string[],
     video: "",
     attachment: "",
-    note: "",
     isUrgent: false,
   });
 
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
-
-  // ── เลือกอะไหล่ที่ต้องการเบิก (requested_parts) ──
-  const [sparePicks, setSparePicks] = useState<{ code: string; name: string; qty: number }[]>([]);
-  const [spareQuery, setSpareQuery] = useState("");
-  const [spareResults, setSpareResults] = useState<{ item_no: string; description: string; unit?: string; available?: number | string }[]>([]);
-  const [spareSearching, setSpareSearching] = useState(false);
-  const [spareSearchLocked, setSpareSearchLocked] = useState(false);
-  const [spareManualName, setSpareManualName] = useState("");
-  const [spareManualQty, setSpareManualQty] = useState(1);
-  const spareDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const addSparePick = (p: { code: string; name: string; qty: number }) => {
-    if (!p.name.trim() || p.qty < 1) return;
-    const key = String(p.code || p.name).trim().toLowerCase();
-    setSparePicks((prev) => (prev.some((x) => String(x.code || x.name).trim().toLowerCase() === key) ? prev : [...prev, p]));
-    setSpareManualName("");
-    setSpareManualQty(1);
-  };
-
-  // ค้นหาอะไหล่จาก Sage — ต้องมี session; ถ้าไม่ล็อกอิน (LIFF/LINE) ให้ใช้ช่องพิมพ์เองแทน
-  useEffect(() => {
-    const q = spareQuery.trim();
-    if (!q) {
-      setSpareResults([]);
-      return;
-    }
-    if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
-    spareDebounceRef.current = setTimeout(async () => {
-      setSpareSearching(true);
-      try {
-        const res = await apiFetch(`/api/v1/sage_items.php?q=${encodeURIComponent(q)}`);
-        if (!res.ok) {
-          setSpareSearchLocked(true);
-          setSpareResults([]);
-        } else {
-          const json = await res.json();
-          setSpareResults(Array.isArray(json.items) ? json.items : []);
-          setSpareSearchLocked(false);
-        }
-      } catch {
-        setSpareResults([]);
-      }
-      setSpareSearching(false);
-    }, 400);
-    return () => {
-      if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spareQuery]);
-
 
   const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
 
@@ -434,6 +378,9 @@ export default function RepairRequestForm() {
           if (hit) {
             update("machineCode", hit.code);
             setStep((s) => (s === 0 ? 1 : s));
+          } else {
+            update("machineCode", OTHER_MACHINE_CODE);
+            update("machineOther", qrPrefillRef.current);
           }
         }
       })
@@ -482,15 +429,6 @@ export default function RepairRequestForm() {
             iconName: o.option_emoji || 'file'
           }));
         if (jobDescs.length > 0) setJobDescriptionOptions(jobDescs);
-
-        const contamChecks = rows
-          .filter(o => o.option_type === 'contaminate_check' && o.is_active)
-          .map(o => ({
-            value: o.option_value,
-            label: o.option_label,
-            iconName: o.option_emoji || 'circle-help'
-          }));
-        if (contamChecks.length > 0) setContaminateCheckOptions(contamChecks);
 
         const rootCauses = rows
           .filter(o => o.option_type === 'root_cause' && o.is_active)
@@ -674,6 +612,8 @@ export default function RepairRequestForm() {
   };
 
   const selectedAsset = assets.find((a) => a.code === form.machineCode) || null;
+  const isOtherMachine = form.machineCode === OTHER_MACHINE_CODE;
+  const machineDisplay = selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : form.machineOther.trim() || "เครื่องจักรอื่น";
 
   const refreshQueueItems = async () => {
     try {
@@ -744,7 +684,10 @@ const flushQueue = async () => {
   }, [selectedAsset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canNext = () => {
-    if (step === 0) return !!form.machineCode && !!form.machineStatus;
+    if (step === 0) {
+      const hasMachine = isOtherMachine ? form.machineOther.trim().length >= 2 : !!selectedAsset;
+      return hasMachine && !!form.machineStatus;
+    }
     if (step === 1) return !!form.jobType && !!form.jobDescription && form.symptoms.trim().length >= 5;
     if (step === 2) {
       const phoneOk = /^[0-9+\-()\s]{9,}$/.test(form.phone.trim());
@@ -849,15 +792,13 @@ const flushQueue = async () => {
       const dept = depts.find((d) => d.code === form.departmentCode);
 
       const payload = {
-        title: `[${selectedAsset?.code || form.machineCode}] ${jt?.en || ""} / ${jd?.en || ""}`,
+        title: `[${selectedAsset?.code || machineDisplay}] ${jt?.en || ""} / ${jd?.en || ""}`,
         description: form.symptoms,
-        failure_report: `JobType: ${jt?.en || "-"} | JobDescription: ${jd?.en || "-"} | Lot: ${form.lotNo || "-"}`,
+        failure_report: `Machine: ${machineDisplay} | JobType: ${jt?.en || "-"} | JobDescription: ${jd?.en || "-"} | Lot: ${form.lotNo || "-"}`,
         asset_id: selectedAsset?.id || null,
         department_id: dept?.id || selectedAsset?.department_id || null,
         source_type: sourceTypeMap[form.jobDescription] || "breakdown",
         machine_status: machineStatusOptions.find((s) => s.value === form.machineStatus)?.label,
-        contaminate_checking: form.contaminateChecking || "not_checked",
-        outsource_by: form.outsourceBy?.trim() || null,
         priority: priorityMap[form.machineStatus] || "medium",
         status: "pending",
         safety_related: form.safetyRelated ? 1 : 0,
@@ -865,13 +806,11 @@ const flushQueue = async () => {
         before_image_path: form.photos.length > 0 ? form.photos.join("|") : null,
         video_path: form.video || null,
         attachment_path: form.attachment || null,
-        notes: form.note || null,
         receiver_name: form.reporterName,
         reporter_phone: form.phone,
         is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
-        requested_parts: sparePicks.length > 0 ? JSON.stringify(sparePicks) : null,
       };
 
       let res: Response;
@@ -924,7 +863,7 @@ const flushQueue = async () => {
           </p>
           <div className="cmms-success-wo">{createdWoNo}</div>
           <p className="text-xs text-[var(--cmms-text-secondary)] text-center mb-5">
-            {selectedAsset?.code} · {machineStatusOptions.find((s) => s.value === form.machineStatus)?.label}
+            {selectedAsset?.code || machineDisplay} · {machineStatusOptions.find((s) => s.value === form.machineStatus)?.label}
             {"\n"}{offlineQueued > 0 ? "ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว"}
           </p>
           <div className="flex flex-col gap-2 w-full">
@@ -933,7 +872,7 @@ const flushQueue = async () => {
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], video: "", attachment: "", note: "", isUrgent: false });
+              setForm({ machineCode: "", machineOther: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", safetyRelated: false, photos: [], video: "", attachment: "", isUrgent: false });
             }}>
               แจ้งซ่อมอีก
             </Button>
@@ -1181,7 +1120,7 @@ const flushQueue = async () => {
           <div className="flex flex-col gap-5">
             <div>
               <p className="text-sm font-bold mb-0.5">1. เลือกเครื่องจักร / อุปกรณ์ <span className="cmms-req">*</span></p>
-              <p className="text-xs text-[var(--cmms-text-secondary)]">ทะเบียนเครื่องจักรโรงงาน (22 เครื่อง)</p>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">เลือกเครื่องที่ลงทะเบียน หรือกด “อื่นๆ” แล้วพิมพ์ชื่อเครื่องเอง</p>
             </div>
 
             {MACHINE_GROUPS.map((g) => {
@@ -1204,6 +1143,38 @@ const flushQueue = async () => {
                 </div>
               );
             })}
+
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-bold text-[var(--cmms-text-secondary)]">เครื่องจักรอื่นๆ (ไม่ได้ลงทะเบียน)</p>
+              <div className="cmms-chip-grid">
+                <button type="button"
+                  className={`cmms-chip ${form.machineCode === OTHER_MACHINE_CODE ? "selected" : ""}`}
+                  onClick={() => update("machineCode", OTHER_MACHINE_CODE)}>
+                  อื่นๆ — พิมพ์ชื่อเอง
+                </button>
+              </div>
+              {isOtherMachine && (
+                <Input
+                  label="เครื่องจักรอื่นๆ"
+                  isLabelHidden
+                  placeholder="พิมพ์ชื่อ/รหัสเครื่องจักร เช่น เครื่องบรรจุ XYZ-01"
+                  value={form.machineOther}
+                  onChange={(e) => update("machineOther", e.target.value)}
+                />
+              )}
+            </div>
+
+            {isOtherMachine && form.machineOther.trim() && (
+              <div className="cmms-machine-summary">
+                <div className="flex items-center gap-3">
+                  <div className="cmms-machine-icon"><Building2 size={22} strokeWidth={1.75} /></div>
+                  <div className="flex flex-col flex-1">
+                    <p className="text-sm font-bold m-0">{form.machineOther.trim()}</p>
+                    <p className="text-xs text-[var(--cmms-text-secondary)] m-0">เครื่องจักรอื่น — พิมพ์เอง (ไม่ได้ลงทะเบียน)</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {selectedAsset && (
               <div className="cmms-machine-summary">
@@ -1305,144 +1276,6 @@ const flushQueue = async () => {
               />
             </div>
 
-            <div>
-              <p className="text-sm font-bold mb-2">ตรวจสอบการปนเปื้อนหลังงานเสร็จ (Contaminate Checking)</p>
-              <div className="space-y-1.5">
-                <Label className="sr-only">ตรวจสอบการปนเปื้อน</Label>
-                <Select
-                  value={form.contaminateChecking}
-                  onValueChange={(v) => update("contaminateChecking", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {contaminateCheckOptions.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>
-                        <Icon name={o.iconName} size={14} className="mr-2" /> {o.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-bold mb-2">ผู้รับเหมาภายนอก (ถ้าจ้างภายนอกทำ)</p>
-              <Input
-                label="ผู้รับเหมาภายนอก"
-                isLabelHidden
-                placeholder="ระบุชื่อบริษัท/ผู้รับเหมาภายนอก (ถ้ามี)"
-                value={form.outsourceBy}
-                onChange={(e) => update("outsourceBy", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <p className="text-sm font-bold mb-2">หมายเหตุ (Note)</p>
-              <Textarea
-                label="หมายเหตุ"
-                isLabelHidden
-                placeholder="บันทึกข้อมูลเพิ่มเติม (ถ้ามี)"
-                value={form.note}
-                onChange={(e) => update("note", e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            {/* ── อะไหล่ที่ต้องการเบิก (requested_parts) — บันทึกไว้บนใบงานให้ช่าง/คลังเตรียม ── */}
-            <div>
-              <p className="text-sm font-bold mb-2">อะไหล่ที่ต้องการเบิก (ถ้ามี)</p>
-              {!spareSearchLocked && (
-                <Input
-                  label="ค้นหาอะไหล่จาก Sage 300"
-                  isLabelHidden
-                  placeholder="พิมพ์รหัส/ชื่ออะไหล่เพื่อค้นหาจาก Sage 300"
-                  value={spareQuery}
-                  onChange={(e) => setSpareQuery(e.target.value)}
-                  className="mb-2"
-                />
-              )}
-              {spareSearchLocked && (
-                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
-                  ค้นหาจาก Sage ได้เมื่อใช้งานผ่านระบบเว็บ — สำหรับใช้งานผ่าน LINE ให้พิมพ์ชื่ออะไหล่เองด้านล่าง
-                </p>
-              )}
-              {spareSearching && <p className="text-2xs text-[var(--cmms-text-secondary)] animate-pulse mb-2">กำลังค้นหา…</p>}
-              {!spareSearchLocked && spareQuery.trim() && !spareSearching && spareResults.length === 0 && (
-                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">ไม่พบใน Sage — พิมพ์เพิ่มเองได้ด้านล่าง</p>
-              )}
-              {!spareSearchLocked && spareResults.length > 0 && (
-                <ul className="divide-y divide-border rounded-xl border border-border bg-card mb-3 max-h-56 overflow-y-auto">
-                  {spareResults.slice(0, 8).map((it) => (
-                    <li key={it.item_no} className="flex items-center gap-3 p-2.5">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold truncate m-0">{it.item_no}</p>
-                        <p className="text-2xs text-[var(--cmms-text-secondary)] truncate m-0">{it.description}</p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        className="shrink-0"
-                        onClick={() => addSparePick({ code: it.item_no, name: it.description, qty: 1 })}
-                      >
-                        + เพิ่ม
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="flex items-end gap-2">
-                <Input
-                  label="อะไหล่ (พิมพ์เอง)"
-                  isLabelHidden
-                  placeholder="ชื่ออะไหล่ที่ต้องการ (พิมพ์เอง)"
-                  value={spareManualName}
-                  onChange={(e) => setSpareManualName(e.target.value)}
-                  className="flex-1"
-                />
-                <Input
-                  type="number"
-                  min={1}
-                  label="จำนวน"
-                  isLabelHidden
-                  value={String(spareManualQty)}
-                  onChange={(e) => setSpareManualQty(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-20"
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="shrink-0"
-                  onClick={() => addSparePick({ code: "", name: spareManualName, qty: spareManualQty })}
-                >
-                  + เพิ่มเอง
-                </Button>
-              </div>
-
-              {sparePicks.length > 0 && (
-                <ul className="mt-2.5 flex flex-wrap gap-2">
-                  {sparePicks.map((p, i) => (
-                    <li key={`${p.code || p.name}-${i}`} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs">
-                      <span className="font-semibold">{p.code || "พิมพ์เอง"}</span>
-                      <span className="truncate max-w-40">{p.name}</span>
-                      <span className="tabular-nums text-[var(--cmms-text-secondary)]">×{p.qty}</span>
-                      <button
-                        type="button"
-                        aria-label={`ลบ ${p.name} ออกจากรายการ`}
-                        onClick={() => setSparePicks(sparePicks.filter((_, j) => j !== i))}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        ×
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
         </Card>
       )}
@@ -1527,27 +1360,6 @@ const flushQueue = async () => {
                 onChange={(e) => update("email", e.target.value)}
               />
             </FieldRow>
-
-            {/* Contamination Risk */}
-            <div className={`cmms-contam-box ${form.contaminationRisk ? "risk" : "safe"}`}>
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} strokeWidth={1.75} />
-                  <p className="text-sm font-bold m-0">ความเสี่ยงปนเปื้อนจากการซ่อม (GMP)</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch
-                    label="Contamination"
-                    isLabelHidden
-                    checked={form.contaminationRisk}
-                    onChange={(c) => update("contaminationRisk", c)}
-                  />
-                  <p className="text-sm m-0" style={{ color: form.contaminationRisk ? "var(--cmms-danger)" : "var(--cmms-success)" }}>
-                    {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่มีความเสี่ยงปนเปื้อน"}
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Safety Related */}
             <div className="flex items-center gap-3 py-3 border-b border-[var(--cmms-border)]">
@@ -1711,7 +1523,7 @@ const flushQueue = async () => {
             <h4 className="text-base font-bold">ตรวจสอบก่อนส่ง</h4>
 
             <div className="cmms-summary-box">
-              <SummaryRow label="เครื่องจักร" value={selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : form.machineCode} />
+              <SummaryRow label="เครื่องจักร" value={machineDisplay} />
               <SummaryRow label="สถานะเครื่อง" value={machineStatusOptions.find((s) => s.value === form.machineStatus)?.label || "—"} />
               <SummaryRow label="ประเภทงาน" value={`${jobTypeOptions.find((j) => j.value === form.jobType)?.label || "—"} / ${jobDescriptionOptions.find((j) => j.value === form.jobDescription)?.label || "—"}`} />
               <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${depts.find((d) => d.code === form.departmentCode)?.name || "—"})`} icon={<User size={14} strokeWidth={1.75} />} />
@@ -1729,9 +1541,6 @@ const flushQueue = async () => {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={form.contaminationRisk ? "danger" : "success"}>
-                {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่ปนเปื้อน"}
-              </Badge>
               {form.safetyRelated && <Badge variant="danger">Safety</Badge>}
               {form.photos.length > 0 && <Badge variant="info">{form.photos.length} รูป</Badge>}
               {form.video && <Badge variant="info">แนบวิดีโอ</Badge>}
