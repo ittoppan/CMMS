@@ -124,12 +124,12 @@ export default function BudgetPage() {
 
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div>
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</p>
+          <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             <Badge variant="primary" dot><Wallet size={13} aria-hidden="true" /> ปีงบ {year || "ทั้งหมด"}</Badge>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.78)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="flex items-center gap-2">
           <button type="button" onClick={load} className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">

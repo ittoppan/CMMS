@@ -234,15 +234,15 @@ export default function RcaDetailPage() {
     <div className="space-y-6">
       <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
         <div>
-          <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.6)" }}>
-            <a href="/rca" className="no-underline" style={{ color: "rgba(255,255,255,0.6)" }}>{hero.eyebrow}</a>
+          <p className="cmms-eyebrow" data-on-dark="true">
+            <a href="/rca" className="no-underline" style={{ color: "inherit" }}>{hero.eyebrow}</a>
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{rca.rca_code} {/* title */}</h1>
             {statusBadge(rca.status)}
             {rca.due_date && rca.due_date.slice(0, 10) < new Date().toISOString().slice(0, 10) && !["closed", "cancelled"].includes(rca.status) ? <AndonLamp status="down" size="sm" showLabel /> : null}
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{rca.title}</p>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{rca.title}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a href="/rca" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={16} aria-hidden="true" /> ภาพรวม</a>
