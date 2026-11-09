@@ -34,9 +34,9 @@
   --tp-warning: #F59E0B;
   --tp-danger: #EF4444;
 
-  /* ── Typography ── */
-  --tp-font-body: "Roboto", "Inter", "Noto Sans Thai", -apple-system, sans-serif;
-  --tp-font-heading: "Roboto", "Inter", "Noto Sans Thai", sans-serif;
+  /* ── Typography (Sarabun ทั้งระบบตามคำสั่งผู้ใช้) ── */
+  --tp-font-body: "Sarabun", -apple-system, sans-serif;
+  --tp-font-heading: "Sarabun", -apple-system, sans-serif;
 
   /* ── Spacing scale ── */
   --tp-space-1: 2px;

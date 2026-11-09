@@ -53,22 +53,22 @@ export function PageShell({
   className,
 }: PageShellProps) {
   return (
-    <div className={cn("w-full space-y-5", className)}>
+    <div className={cn("w-full space-y-6", className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumb>
-          <BreadcrumbList>
+          <BreadcrumbList className="flex flex-wrap items-center gap-1 text-xs">
             {breadcrumbs.map((crumb, i) => {
               const last = i === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={`${crumb.label}-${i}`}>
                   <BreadcrumbItem>
                     {last || !crumb.href ? (
-                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                      <BreadcrumbPage className="font-semibold text-foreground">{crumb.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                      <BreadcrumbLink href={crumb.href} className="rounded-full px-2 py-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">{crumb.label}</BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
-                  {!last && <BreadcrumbSeparator />}
+                  {!last && <BreadcrumbSeparator className="text-border" />}
                 </React.Fragment>
               );
             })}
@@ -76,19 +76,19 @@ export function PageShell({
         </Breadcrumb>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-1">
+      {/* Header — Modern Enterprise: หัวเรื่องเด่น, เส้นใต้อ่อน, อธิบายสั้น */}
+      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0 space-y-2">
           {eyebrow}
-          <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="max-w-3xl text-[1.7rem] font-bold leading-tight tracking-tight text-foreground">
             {title}
           </h1>
           {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p>
           )}
         </div>
         {actions != null && (
-          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
             {actions}
           </div>
         )}

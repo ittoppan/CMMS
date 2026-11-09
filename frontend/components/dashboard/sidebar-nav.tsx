@@ -323,7 +323,7 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {showSearch && (
-        <div className="px-3 pb-2">
+        <div className="px-3 pb-3 pt-1">
           <div className="relative">
             <Search
               size={15}
@@ -336,12 +336,12 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("sidebar.search")}
               aria-label="ค้นหาเมนู"
-              className="h-9 w-full rounded-lg border border-border bg-card pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+              className="h-9 w-full rounded-[var(--cmms-radius)] border border-border bg-muted/60 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
             />
           </div>
         </div>
       )}
-      <nav aria-label="เมนูหลัก" className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+      <nav aria-label="เมนูหลัก" className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-4">
         {groups.map((group) => (
           <SidebarGroup
             key={group.titleKey}
@@ -399,18 +399,18 @@ function SidebarGroup({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-[0.68rem] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-full items-center justify-between rounded-[var(--cmms-radius-sm)] px-2 py-2 text-left text-[0.68rem] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
       >
         <span>{t(group.titleKey)}</span>
         <ChevronRight
-          size={14}
+          size={13}
           strokeWidth={2}
           aria-hidden="true"
           className={cn("transition-transform duration-150", isOpen && "rotate-90")}
         />
       </button>
       {isOpen && (
-        <ul className="mb-1 mt-0.5 space-y-0.5">
+        <ul className="mb-2 mt-0.5 space-y-px">
           {items.map((item) => {
             const active = isSelected(item.href);
             const Icon = item.icon;
@@ -421,10 +421,10 @@ function SidebarGroup({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-sm font-medium transition-colors",
+                    "flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] px-2.5 text-sm font-medium transition-colors",
                     active
-                      ? "bg-primary text-white shadow-sm"
-                      : "text-[var(--cmms-sidebar-text)] hover:bg-accent hover:text-accent-foreground"
+                      ? "bg-primary font-semibold text-white shadow-sm"
+                      : "text-[var(--cmms-sidebar-text)] hover:bg-[var(--cmms-bg-sidebar-hover)] hover:text-[var(--cmms-sidebar-text-strong)]"
                   )}
                 >
                   <Icon size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
@@ -439,7 +439,7 @@ function SidebarGroup({
                 type="button"
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={expanded}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ChevronRight
                   size={13}

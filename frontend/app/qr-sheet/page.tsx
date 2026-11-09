@@ -81,7 +81,7 @@ export default function QrSheetPage() {
   };
 
   return (
-    <div style={{ fontFamily: "'Roboto', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
+    <div style={{ fontFamily: "'Sarabun', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff", color: "#111" }}>
       <style>{`
         .qr-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .qr-sheet-card { text-align: center; break-inside: avoid; }

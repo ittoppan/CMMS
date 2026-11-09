@@ -25,7 +25,6 @@ import { offlineQueueCount } from "../../lib/offline-store";
 import { runQueueMigrationOnce } from "../../lib/queue-migration";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
-import ThemeModeToggle from "../../components/ThemeModeToggle";
 import CommandPalette from "../../components/CommandPalette";
 import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
@@ -195,19 +194,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
         {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
-          <Link href="/dashboard" className="flex items-center gap-2.5 px-4 pb-3 pt-4">
+          <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto object-contain" />
-            <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]">
-              CMMS-TOPPAN
+            <img src="/logo.png" alt="TOPPAN" className="h-8 w-auto object-contain" />
+            <span className="leading-tight">
+              <span className="block text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
+              <span className="block text-[0.65rem] font-medium uppercase tracking-wider text-muted-foreground">Enterprise Maintenance</span>
             </span>
           </Link>
           <SidebarNav canShow={canShow} isSelected={isSelected} />
-          <div className="border-t border-border px-3 py-2">
+          <div className="border-t border-border p-3">
             <button
               type="button"
               onClick={() => router.push("/profile")}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent"
+              className="flex w-full items-center gap-2.5 rounded-[var(--cmms-radius)] border border-border bg-card px-2.5 py-2 text-left shadow-sm transition-colors hover:border-[var(--cmms-border-hover)]"
             >
               {currentUser?.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -235,7 +235,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
-          <header className="hidden h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-card px-5 lg:flex">
+          <header className="hidden h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-card/90 px-6 backdrop-blur lg:flex">
             <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
               <Link href="/dashboard" className="transition-colors hover:text-foreground">CMMS</Link>
               {section && (
@@ -263,7 +263,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
               <NotificationBell variant="popover" unreadCount={unreadCount} />
               <ConnectivityStatus variant="chip" />
-              <ThemeModeToggle lang={lang} />
               <button
                 type="button"
                 onClick={() => setUserLang(lang === "th" ? "en" : "th")}
@@ -288,7 +287,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Content */}
           <main id="cmms-main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-[calc(56px+env(safe-area-inset-top)+12px)] lg:px-6 lg:pb-10 lg:pt-6">
+            <div className="mx-auto w-full max-w-6xl px-5 pb-24 pt-[calc(64px+env(safe-area-inset-top)+20px)] lg:px-8 lg:pb-12 lg:pt-8">
               {routeBlocked ? (
                 /* UX P4: หน้า 403 inline — ไม่ redirect เพื่อให้ผู้ใช้ยังเห็นเมนู/topbar ปกติ */
                 <section

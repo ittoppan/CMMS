@@ -7,7 +7,7 @@ import ToastProvider from "./ToastProvider";
 
 /**
  * Providers — ครอบทั้งแอป
- * - next-themes: light เป็นค่าเริ่มต้นเสมอ (attribute="class" → .dark บน <html> เมื่อเปิด dark ผ่าน toggle) — ไม่ตามระบบ เพื่อกันหน้า login/home เพี้ยนบนเครื่อง dark
+ * - next-themes: forced light เสมอ — ไม่เอา dark mode (ผู้ใช้ยืนยัน) เลี่ยงปุ่มสลับธีม
  * - react-query: cache/data fetching มาตรฐาน (lib/api.ts ใช้ร่วม)
  * - disableTransitionOnChange: กัน transition กระตุกตอนสลับธีม
  * - suppressHydrationWarning อยู่ที่ <html> ใน root layout แล้ว (กัน FOUC warning)
@@ -30,6 +30,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
+      forcedTheme="light"
       defaultTheme="light"
       enableSystem={false}
       disableTransitionOnChange

@@ -58,7 +58,7 @@ export default function PMChecksheetDocument({ data }: { data: PMChecksheetData 
   };
 
   return (
-    <div style={{ width: 794, background: "#fff", color: "#0F172A", fontFamily: "'Barlow', 'Sarabun', sans-serif", padding: "36px 44px", boxSizing: "border-box" }}>
+    <div style={{ width: 794, background: "#fff", color: "#0F172A", fontFamily: "'Sarabun', sans-serif", padding: "36px 44px", boxSizing: "border-box" }}>
       {/* หัวเอกสาร */}
       <div style={{ borderBottom: "3px solid #1E3A5F", paddingBottom: 12, marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>

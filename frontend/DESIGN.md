@@ -75,13 +75,13 @@ colors:
 
 typography:
   body:
-    fontFamily: "'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, sans-serif"
+    fontFamily: "'Sarabun', -apple-system, 'Segoe UI', sans-serif"
   body-thai:
-    fontFamily: "'Noto Sans Thai', 'Sarabun', 'Roboto', sans-serif"
+    fontFamily: "'Sarabun', -apple-system, sans-serif"
   heading:
-    fontFamily: "'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif"
+    fontFamily: "'Sarabun', -apple-system, sans-serif"
   display:
-    fontFamily: "'Barlow Condensed', 'Roboto', sans-serif"
+    fontFamily: "'Sarabun', -apple-system, sans-serif"
   code:
     fontFamily: "'SF Mono', Monaco, Consolas, monospace"
 
@@ -134,13 +134,12 @@ rounded:
 
 | Role | Font | ใช้ที่ |
 |---|---|---|
-| Body (Latin) | **Roboto** | ตัวอักษรทั่วไป (ตรงกับเว็บ TOPPAN) |
-| Body (Thai) | **Noto Sans Thai** | ภาษาไทย |
-| Heading / Display | **Barlow Condensed** | หัวข้อ, KPI, ตัวนับ, eyebrow |
+| Body | **Sarabun** | ตัวอักษรทั่วไปทั้งระบบ (ไทย + ละติน) |
+| Heading / Display | **Sarabun** | หัวข้อ, KPI, ตัวนับ, eyebrow |
 | Code | SF Mono | id, โค้ด, ค่าทางเทคนิค |
 
-- **Eyebrow:** `.cmms-eyebrow` — Barlow 600, uppercase, letter-spacing `0.16em`
-- **KPI value:** `.cmms-kpi-value` — Barlow, tabular-nums
+- **Eyebrow:** `.cmms-eyebrow` — Sarabun 700, uppercase, letter-spacing `0.12em`
+- **KPI value:** `.cmms-kpi-value` — Sarabun, tabular-nums
 - ห้ามใช้ Google Fonts อื่นเพิ่มโดยไม่จำเป็น
 
 ## 4. Radius / Spacing / Shadow
@@ -158,7 +157,7 @@ rounded:
 | `.cmms-status` + `.cmms-status-dot` | จุดหลอดไฟ + label — `ok / warn / down / idle` |
 | `.cmms-andon-board` | แผง navy + scanlines (บอร์ดสถานะโรงงาน) |
 | `.cmms-andon-chip` | chip บนพื้นเข้ม |
-| `.cmms-count-pill` | ตัวนับแบบ Barlow บนพื้นขาว |
+| `.cmms-count-pill` | ตัวนับแบบ Sarabun บนพื้นขาว |
 
 ## 6. Layout / Motion
 
@@ -200,6 +199,6 @@ rounded:
 | ใช้ token `var(--cmms-*)` | hard-code hex ในเพจ |
 | `AndonLamp` / `.cmms-status` สำหรับสถานะ | `Badge` error/warning/success แทนไฟ |
 | ใส่ eyebrow ทุกหัวหน้า | หัวหน้าเพจไม่มี eyebrow |
-| ตัวเลขสถิติใช้ Barlow + tabular-nums | ฟอนต์ตัวเลขไม่เท่ากัน |
-| ภาษาไทยใช้ Noto Sans Thai | ฟอนต์ Google อื่นที่ไม่จำเป็น |
+| ตัวเลขสถิติใช้ Sarabun + tabular-nums | ฟอนต์ตัวเลขไม่เท่ากัน |
+| ภาษาไทยใช้ Sarabun (ทั้งระบบ) | ฟอนต์ Google อื่นที่ไม่จำเป็น |
 | แดง = เรื่องวิกฤตจริง | ใช้แดงกับข้อมูลทั่วไป |

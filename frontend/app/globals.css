@@ -1,5 +1,5 @@
-/* impeccable-disable-next-line overused-font: Roboto/Noto Sans Thai are established brand body fonts; Barlow Condensed provides the distinctive display voice */
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Roboto:wght@400;500;700;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap');
+/* Sarabun — ฟอนต์หลักทั้งระบบ (ไทย + ละติน) ตามคำสั่งผู้ใช้ */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
 
 /* TOPPAN design tokens (single source — design-system/tokens.css) */
 @import "../src/design-system/tokens.css";
@@ -33,6 +33,10 @@
   --color-purple-700: #00508C;
   --color-purple-800: #193264;
   --color-purple-900: #12244A;
+
+  /* ฟอนต์หลักทั้งระบบ — Sarabun (คำสั่งผู้ใช้) */
+  --font-sans: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-serif: 'Sarabun', serif;
 
   /* === UI Kit semantic colors (อ้าง --cmms-* เพื่อ dark mode อัตโนมัติ) ===
      ใช้กับ components/ui/* — ห้าม hard-code สีใน component */
@@ -92,21 +96,21 @@ body {
   --color-border-blue: #0068B5;
   --color-icon-blue: #0068B5;
   --color-text-blue: #00508C;
-  --color-background-body: #F5F7FA;
+  --color-background-body: #F6F8FB;
   --color-background-surface: #FFFFFF;
   --color-background-card: #FFFFFF;
-  --color-background-muted: #EEF1F6;
+  --color-background-muted: #EFF3F8;
   --color-background-popover: #FFFFFF;
-  --color-text-primary: #22262E;
+  --color-text-primary: #1C2536;
   --color-text-secondary: #475569;
   --color-text-muted: #64748B;
   --color-text-disabled: #9AA4B8;
-  --color-border: #E4E8EE;
-  --color-border-emphasized: #C9D2DC;
+  --color-border: #E6EBF2;
+  --color-border-emphasized: #CBD5E1;
   --color-neutral: rgba(0, 104, 181, 0.08);
-  --color-shadow: rgba(25, 50, 100, 0.08);
-  --color-skeleton: #E4E8EE;
-  --color-track: #E4E8EE;
+  --color-shadow: rgba(15, 35, 75, 0.08);
+  --color-skeleton: #E6EBF2;
+  --color-track: #E6EBF2;
 
   --cmms-primary: var(--color-accent);
   --cmms-primary-hover: #00508C;
@@ -135,6 +139,9 @@ body {
   --cmms-bg-page: var(--color-background-body);
   --cmms-bg-card: var(--color-background-card);
   --cmms-bg-card-hover: var(--color-background-muted);
+  --cmms-text-primary: #17233A;
+  --cmms-text-secondary: #4B6076;
+  --cmms-text-muted: #7C8DA6;
   --cmms-bg-sidebar: #FFFFFF;
   --cmms-bg-sidebar-hover: #F1F5F9;
   --cmms-bg-sidebar-active: #0057A8;
@@ -155,17 +162,17 @@ body {
   --cmms-border: var(--color-border);
   --cmms-border-hover: var(--color-border-emphasized);
   --cmms-border-focus: var(--color-accent);
-  --cmms-radius-sm: 6px;
-  --cmms-radius: 10px;
-  --cmms-radius-lg: 14px;
-  --cmms-radius-xl: 18px;
+  --cmms-radius-sm: 8px;
+  --cmms-radius: 12px;
+  --cmms-radius-lg: 16px;
+  --cmms-radius-xl: 20px;
 
   /* === Shadows === */
-  --cmms-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --cmms-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --cmms-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
-  --cmms-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
-  --cmms-shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.03);
+  --cmms-shadow-sm: 0 1px 2px rgba(15,35,75,0.05);
+  --cmms-shadow: 0 1px 3px rgba(15,35,75,0.06), 0 1px 2px rgba(15,35,75,0.04);
+  --cmms-shadow-md: 0 4px 12px -2px rgba(15,35,75,0.08), 0 2px 4px -1px rgba(15,35,75,0.05);
+  --cmms-shadow-lg: 0 12px 20px -6px rgba(15,35,75,0.10), 0 4px 8px -4px rgba(15,35,75,0.05);
+  --cmms-shadow-xl: 0 24px 32px -12px rgba(15,35,75,0.14), 0 10px 12px -6px rgba(15,35,75,0.05);
   --cmms-shadow-focus: 0 0 0 3px var(--color-accent-muted);
 
   /* === Layout === */
@@ -193,15 +200,12 @@ body {
    Global Base
    ================================================ */
 
-/* === Font unification ========================
-   (ค่า default เป็น Segoe UI) — ต้อง override ให้เป็น
-   ฟอนต์เดียวกับ body: Roboto (ฟอนต์เว็บ TOPPAN Holdings)
-   สำหรับอักษรละติน + Noto Sans Thai สำหรับภาษาไทย
-   เพื่อให้ฟอนต์เหมือนกันทั้งระบบ ========================= */
+/* === Font unification — Sarabun ทั้งระบบ (คำสั่งผู้ใช้) === */
 :root {
-  --font-family-body: 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-heading: 'Barlow Condensed', 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-family-display: 'Barlow Condensed', 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-body: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-display: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --cmms-font-display: var(--font-family-display);
   --font-family-code: 'SF Mono', Monaco, Consolas, 'Cascadia Code', monospace;
 }
 
@@ -219,7 +223,7 @@ html {
 }
 
 html, body {
-  font-family: var(--cmms-font-family, 'Roboto', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif) !important;
+  font-family: var(--cmms-font-family, 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif) !important;
   font-size: var(--cmms-font-size-base, 16px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -612,12 +616,12 @@ h1, h2, h3, h4 {
 
 .cmms-login-hero-body { display: flex; flex-direction: column; gap: 26px; max-width: 540px; }
 .cmms-login-hero-eyebrow {
-  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
-  font-weight: 600; text-transform: uppercase; letter-spacing: 0.18em;
+  font-family: var(--font-family-heading);
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em;
   font-size: 0.72rem; color: rgba(255,255,255,0.6); margin: 0 0 12px;
 }
 .cmms-login-hero h1 {
-  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: clamp(2rem, 3.4vw, 3rem); font-weight: 700; line-height: 1.1;
   letter-spacing: 0.004em; color: #fff; margin: 0;
 }
@@ -680,7 +684,7 @@ h1, h2, h3, h4 {
 .cmms-login-logo-sub { font-size: 0.7rem; color: var(--cmms-text-muted); margin-top: 2px; }
 
 .cmms-login-title {
-  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.7rem; font-weight: 700; letter-spacing: 0.004em;
   color: var(--cmms-text-primary); margin: 0;
 }
@@ -744,7 +748,7 @@ h1, h2, h3, h4 {
   padding: 26px 24px; display: flex; flex-direction: column; gap: 18px;
 }
 .cmms-gate-title {
-  font-family: 'Barlow Condensed', 'Roboto', 'Noto Sans Thai', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.55rem; font-weight: 700; letter-spacing: 0.004em;
   color: var(--cmms-text-primary); margin: 0; line-height: 1.2;
 }
@@ -1897,10 +1901,10 @@ next-route-announcer {
    แดง = หยุดทำงาน — มาจากเสาไฟสัญญาณบนเครื่องจักรจริง
    ================================================ */
 
-/* ── ฟอนต์ตัวเลข/ป้ายแบบเครื่องจักร (Barlow Condensed) ── */
+/* ── ฟอนต์ตัวเลข/ป้ายแบบเครื่องจักร (Sarabun) ── */
 .cmms-display,
 .cmms-num {
-  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', -apple-system, sans-serif;
+  font-family: var(--font-family-display);
   font-weight: 700;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
@@ -1908,12 +1912,12 @@ next-route-announcer {
 }
 
 .cmms-eyebrow {
-  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-family-heading);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.12em;
   font-size: 0.72rem;
-  color: var(--cmms-text-muted);
+  color: var(--cmms-primary);
 }
 
 /* ── เสาไฟสัญญาณ Andon (โคมแดง/เหลือง/เขียว) ── */
@@ -2182,7 +2186,7 @@ next-route-announcer {
 }
 
 .cmms-andon-tile .cmms-andon-tile-count {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
@@ -2192,9 +2196,9 @@ next-route-announcer {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* นับงานแบบตัวเลข Barlow — ใช้บนพื้นขาว */
+/* นับงานแบบตัวเลข Sarabun — ใช้บนพื้นขาว */
 .cmms-count-pill {
-  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 0.9rem;
   letter-spacing: 0.03em;
@@ -2305,7 +2309,7 @@ next-route-announcer {
   min-width: 0;
   align-items: baseline;
   gap: 8px;
-  font-family: 'Barlow Condensed', 'Inter', 'Noto Sans Thai', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: 2.15rem;
   line-height: 1;
@@ -2315,7 +2319,7 @@ next-route-announcer {
 }
 
 .cmms-kpi-value .cmms-kpi-unit {
-  font-family: 'Barlow Condensed', 'Noto Sans Thai', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--color-text-secondary);
@@ -2436,7 +2440,7 @@ next-route-announcer {
    -> ThemeProvider อ่านมา apply เป็น CSS vars ทั่วระบบ
    ================================================ */
 :root {
-  --cmms-font-family: 'Noto Sans Thai', 'Sarabun', 'Roboto', 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  --cmms-font-family: 'Sarabun', -apple-system, 'Segoe UI', sans-serif;
   --cmms-font-size-base: 16px;
   --cmms-andon-ok: #10B981;
   --cmms-andon-warn: #F59E0B;
@@ -2679,36 +2683,36 @@ next-route-announcer {
   --popover-foreground: #18181b;
   --primary: #0068b5;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #52525b;
-  --accent: #eef4f9;
+  --secondary: #eff3f8;
+  --secondary-foreground: #1c2536;
+  --muted: #eff3f8;
+  --muted-foreground: #475569;
+  --accent: #e8f0f9;
   --accent-foreground: #00508c;
   --destructive: #dc2626;
   --success: #16a34a;
   --warning: #d97706;
   --info: #0284c7;
-  --border: #e4e4e7;
-  --input: #d4d4d8;
+  --border: #e6ebf2;
+  --input: #d0d9e4;
   --ring: #0068b5;
 
   /* --- refreshed --cmms-* values (names unchanged) --- */
-  --cmms-bg-page: #f4f5f7;
+  --cmms-bg-page: #f6f8fb;
   --cmms-bg-card: #ffffff;
   --cmms-bg-popover: #ffffff;
-  --cmms-bg-muted: #f4f4f5;
-  --cmms-bg-wash: #f4f4f5;
-  --cmms-text-primary: #18181b;
-  --cmms-text-secondary: #52525b;
+  --cmms-bg-muted: #eff3f8;
+  --cmms-bg-wash: #eff3f8;
+  --cmms-text-primary: #1c2536;
+  --cmms-text-secondary: #475569;
   --cmms-text-muted: #64748b;
   --cmms-text-on-primary: #ffffff;
-  --cmms-border: #e4e4e7;
-  --cmms-border-hover: #d4d4d8;
+  --cmms-border: #e6ebf2;
+  --cmms-border-hover: #cbd5e1;
   --cmms-border-focus: #0068b5;
   --cmms-primary: #0068b5;
   --cmms-primary-hover: #005fa3;
-  --cmms-primary-light: rgba(0, 104, 181, 0.10);
+  --cmms-primary-light: rgba(0, 104, 181, 0.08);
   --cmms-primary-glow: rgba(0, 104, 181, 0.22);
   --cmms-danger: #dc2626;
   --cmms-danger-light: #fee2e2;
@@ -2722,20 +2726,20 @@ next-route-announcer {
   --cmms-info: #0284c7;
   --cmms-info-light: #e0f2fe;
   --cmms-bg-sidebar: #ffffff;
-  --cmms-bg-sidebar-hover: #f4f5f7;
+  --cmms-bg-sidebar-hover: #f0f4fa;
   --cmms-bg-sidebar-active: #0068b5;
   --cmms-sidebar-indicator: #0068b5;
-  --cmms-sidebar-text: #52525b;
-  --cmms-sidebar-text-strong: #18181b;
-  --cmms-radius-sm: 6px;
-  --cmms-radius: 8px;
-  --cmms-radius-lg: 12px;
-  --cmms-radius-xl: 16px;
-  --cmms-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.05);
-  --cmms-shadow: 0 1px 3px rgba(24, 24, 27, 0.07), 0 1px 2px rgba(24, 24, 27, 0.04);
-  --cmms-shadow-md: 0 4px 8px -2px rgba(24, 24, 27, 0.08);
-  --cmms-shadow-lg: 0 10px 18px -6px rgba(24, 24, 27, 0.10);
-  --cmms-shadow-xl: 0 20px 30px -10px rgba(24, 24, 27, 0.14);
+  --cmms-sidebar-text: #475569;
+  --cmms-sidebar-text-strong: #1c2536;
+  --cmms-radius-sm: 8px;
+  --cmms-radius: 10px;
+  --cmms-radius-lg: 14px;
+  --cmms-radius-xl: 18px;
+  --cmms-shadow-sm: 0 1px 2px rgba(15, 35, 75, 0.05);
+  --cmms-shadow: 0 1px 3px rgba(15, 35, 75, 0.06), 0 1px 2px rgba(15, 35, 75, 0.04);
+  --cmms-shadow-md: 0 4px 12px -2px rgba(15, 35, 75, 0.08), 0 2px 4px -1px rgba(15, 35, 75, 0.05);
+  --cmms-shadow-lg: 0 12px 20px -6px rgba(15, 35, 75, 0.10), 0 4px 8px -4px rgba(15, 35, 75, 0.05);
+  --cmms-shadow-xl: 0 24px 32px -12px rgba(15, 35, 75, 0.14), 0 10px 12px -6px rgba(15, 35, 75, 0.05);
   --cmms-shadow-focus: 0 0 0 3px rgba(0, 104, 181, 0.18);
   --radius: 0.75rem;
 }

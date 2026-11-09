@@ -36,8 +36,8 @@ export function SectionHeading({
 }) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-2">
-      <div className="min-w-0 space-y-0.5">
-        <h2 className="cmms-section-title text-lg font-semibold">{title}</h2>
+      <div className="min-w-0 space-y-1">
+        <h2 className="cmms-section-title text-base font-bold tracking-tight">{title}</h2>
         {sub && <p className="cmms-caption">{sub}</p>}
       </div>
       {right && <div className="flex flex-wrap items-center gap-2">{right}</div>}
@@ -94,14 +94,14 @@ export function KpiCard({
   const body = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <p className="cmms-label">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-[var(--cmms-text-muted)]">{label}</p>
         {icon && (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] bg-[var(--cmms-bg-muted)] text-[var(--cmms-primary)]">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--cmms-radius)] bg-[var(--cmms-primary-light)] text-[var(--cmms-primary)]">
             {icon}
           </span>
         )}
       </div>
-      <div className="cmms-kpi-value">
+      <div className="cmms-kpi-value text-[1.9rem] font-bold tracking-tight">
         <KpiValue value={value} unit={unit} />
       </div>
       {sub && <div className="mt-1 text-xs text-[var(--cmms-text-secondary)]">{sub}</div>}

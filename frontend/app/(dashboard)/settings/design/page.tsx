@@ -87,7 +87,7 @@ const DESIGN_DEFAULTS: Record<string, string> = {
   design_andon_ok: "#10B981",
   design_andon_warn: "#F59E0B",
   design_andon_down: "#EF4444",
-  design_font_family: "'Noto Sans Thai', 'Sarabun', 'Roboto', 'Inter', sans-serif",
+  design_font_family: "'Sarabun', -apple-system, 'Segoe UI', sans-serif",
   design_font_size: "16px",
 };
 
@@ -120,10 +120,7 @@ const SHADOW_OPTIONS = [
 ];
 
 const FONT_OPTIONS = [
-  { label: "Noto Sans Thai (มาตรฐาน)", value: "'Noto Sans Thai', 'Sarabun', 'Roboto', 'Inter', sans-serif" },
-  { label: "Sarabun (ทางการ ISO)", value: "'Sarabun', 'Noto Sans Thai', 'Roboto', sans-serif" },
-  { label: "Kanit (โมเดิร์น)", value: "'Kanit', 'Noto Sans Thai', 'Roboto', sans-serif" },
-  { label: "Prompt (ทันสมัย)", value: "'Prompt', 'Noto Sans Thai', 'Roboto', sans-serif" },
+  { label: "Sarabun (มาตรฐานทั้งระบบ)", value: "'Sarabun', -apple-system, 'Segoe UI', sans-serif" },
 ];
 
 const FONT_SIZE_OPTIONS = [

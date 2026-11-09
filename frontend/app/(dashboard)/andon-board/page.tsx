@@ -230,7 +230,7 @@ export default function AndonBoardPage() {
         <HStack gap={2} vAlign="center" wrap="wrap">
           <div
             style={{
-              fontFamily: "var(--cmms-font-display, 'Barlow Condensed', sans-serif)",
+              fontFamily: "var(--cmms-font-display, 'Sarabun', sans-serif)",
               fontSize: "1.5rem", fontWeight: 700, color: "var(--cmms-text-primary)",
               padding: "4px 14px", borderRadius: 8, background: "var(--cmms-bg-wash)",
               letterSpacing: "0.04em",
