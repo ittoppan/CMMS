@@ -7,11 +7,22 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
 import { Wrench, ChartBar, Clock, Box, Eye, EyeOff, AlertCircle, ShieldCheck } from 'lucide-react';
 
-const LINE_SVG = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .348-.281.63-.63.63h-2.425v1.145h2.425c.349 0 .63.282.63.63 0 .348-.281.63-.63.63h-3.055c-.349 0-.63-.282-.63-.63V8.583c0-.349.281-.63.63-.63h3.055c.349 0 .63.281.63.63 0 .348-.281.63-.63.63h-2.425v1.145h2.425zm-6.046 3.666c0 .348-.281.63-.63.63-.349 0-.63-.282-.63-.63V8.583c0-.349.281-.63.63-.63.349 0 .63.281.63.63v4.946zm-2.52 0c0 .248-.146.47-.37.568-.084.036-.173.054-.26.054-.153 0-.305-.056-.425-.164l-2.404-2.857v2.4c0 .348-.281.63-.63.63-.349 0-.63-.282-.63-.63V8.583c0-.248.146-.47.37-.568.084-.035.173-.053.26-.053.153 0 .305.056.425.164l2.404 2.857v-2.4c0-.349.281-.63.63-.63.349 0 .63.281.63.63v4.946zm-7.618 0c0 .348-.281.63-.63.63H.63C.282 14.159 0 13.877 0 13.529V8.583c0-.349.282-.63.63-.63.348 0 .63.281.63.63v4.316h1.259c.348 0 .63.282.63.63z" />
-  </svg>
-);
+// LINE Login button — ไอคอนทางการจาก LINE Login button template
+// (line-login-64.png = 32dp 2x, line-login-88.png = 44dp 2x) ห้ามใช้ SVG วาดเอง
+// ข้อความไทยที่แนะนำตาม guideline: "ล็อกอินด้วย LINE"
+function LineLoginIcon() {
+  return (
+    <img
+      src="/icons/line-login-88.png"
+      srcSet="/icons/line-login-64.png 1x, /icons/line-login-88.png 1.375x"
+      alt=""
+      aria-hidden="true"
+      width={22}
+      height={22}
+      style={{ width: 22, height: 22, flexShrink: 0 }}
+    />
+  );
+}
 
 const FEATURES = [
   { icon: Clock, text: 'ติดตามงานซ่อมแบบ Real-time' },
@@ -259,9 +270,12 @@ function LoginContent() {
               type="button"
               variant="secondary"
               className="w-full h-11 cmms-login-line"
+              style={{ paddingLeft: 22, paddingRight: 22 }}
               onClick={() => { window.location.href = '/line_login.php'; }}
             >
-              {LINE_SVG} เข้าสู่ระบบด้วย LINE
+              <LineLoginIcon />
+              <span className="cmms-login-line-divider" aria-hidden="true" />
+              <span>ล็อกอินด้วย LINE</span>
             </Button>
             {bindLine && (
               <p className="cmms-login-note">ล็อกอินสำเร็จแล้วระบบจะพาไปผูกบัญชี LINE เพื่อรับการแจ้งเตือนงาน</p>

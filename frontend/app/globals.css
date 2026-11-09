@@ -750,8 +750,17 @@ h1, h2, h3, h4 {
 
 .cmms-login-rule { flex: 1; height: 1px; background: var(--cmms-border); }
 
-.cmms-login-line { background-color: var(--cmms-line-green) !important; color: #fff !important; border: none !important; }
-.cmms-login-line:hover { filter: brightness(0.95); }
+/* LINE Login button — ทำตาม LINE Login button design guidelines:
+   base #06C755 (ตัวแปร --cmms-line-green) / hover overlay ดำ 10% / press overlay ดำ 30% /
+   disabled พื้นขาว โลโก้เทาดำ 20% เส้นแบ่ง #E5E5E5 60% เส้นขอบ #E5E5E5 60%
+   ข้อความไทยที่แนะนำ: "ล็อกอินด้วย LINE" — ใช้ไอคอนทางการ line-login-*.png ห้ามวาดเอง */
+.cmms-login-line { background-color: var(--cmms-line-green) !important; background-image: none !important; color: #fff !important; border: none !important; }
+.cmms-login-line:hover:not(:disabled) { background-color: #06C755 !important; background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.10)) !important; }
+.cmms-login-line:active:not(:disabled) { background-color: #06C755 !important; background-image: linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)) !important; }
+.cmms-login-line:focus-visible { outline: none !important; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #06C755 !important; }
+.cmms-login-line:disabled { background-color: #fff !important; background-image: none !important; color: rgba(30,30,30,0.20) !important; border: 1px solid rgba(229,229,229,0.60) !important; opacity: 1 !important; }
+.cmms-login-line-divider { width: 1px; align-self: stretch; margin: 6px 0; background: rgba(0,0,0,0.08); flex-shrink: 0; }
+.cmms-login-line:disabled .cmms-login-line-divider { background: rgba(229,229,229,0.60); }
 
 .cmms-login-note { font-size: 0.72rem; line-height: 1.6; color: var(--cmms-text-secondary); text-align: center; margin: 0; }
 
