@@ -77,13 +77,13 @@
 | ระดับ | วิธีใช้ |
 |---|---|
 | **Eyebrow** (ป้ายเล็กบนหัว) | `.cmms-eyebrow` — Sarabun 600, uppercase, letter-spacing `0.16em`, 0.72rem — ขึ้นต้นหัวทุกหน้า เช่น `WORK ORDER BOARD · CMMS-TOPPAN` |
-| **Heading** | Sarabun/Noto 700 ตามลำดับของ Sarabun (`Heading level={1..5}`) |
+| **Heading** | Sarabun 700 ตามลำดับของ Sarabun (`Heading level={1..5}`) |
 | **ตัวเลข KPI** | `.cmms-kpi-value` — Sarabun 700, 2.15rem, tabular-nums |
-| **Body** | Sarabun/Noto 400-500 ขนาดปกติ |
+| **Body** | Sarabun 400-500 ขนาดปกติ |
 
 ### 3.2 ข้อห้ามฟอนต์
 
-- **ห้าม** ใช้ฟอนต์อื่นนอกจาก 3 ตัวข้างบน (ไม่ใช้ Google Fonts เพิ่มโดยไม่จำเป็น)
+- **ห้าม** ใช้ฟอนต์อื่นนอกจาก **Sarabun** (ไม่ใช้ Google Fonts เพิ่มโดยไม่จำเป็น)
 - ตัวเลขที่ต้องเทียบกัน (ตาราง/สถิติ) ควรใช้ Sarabun + `tabular-nums` เสมอ
 
 ---

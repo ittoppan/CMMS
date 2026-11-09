@@ -142,7 +142,7 @@ The shell is an app, not a website: the PWA App Shell (56px top bar / bottom nav
 
 A blue-and-navy industrial palette over warm-zinc neutrals. Hue carries function before mood: blue means action, deep navy means the board, and the Andon triad means machine health.
 
-The light theme is the canonical token set; dark mode remaps the same roles to a near-black field (`#101012` background, `#1B1B1F` card) with lifted blue and signal luminances for reduced-glare night use.
+Light-only: the light theme above is the sole shipped theme. There is no dark mode shipped; any dark tokens elsewhere in this file are legacy reference only.
 
 ### Primary
 - **Toppan Blue** (#0068B5): The single actionable accent — primary buttons, active navigation, links, focus rings, selected chips, KPI accent bars, the sidebar active state (as active-fill `#005FA3`, and the desktop indicator dot). On white surfaces it stays flat; gradients are reserved for the navy hero consoles only.
@@ -213,7 +213,7 @@ A fixed app shell frames a separable content area. Desktop: 260px sidebar (68px 
 Flat by default; the 1px hairline is the primary separating device. A short, cool-zinc shadow ladder adds lift only where a layer must float above the board — dialogs, popovers, toasts, the command palette, and the mobile bottom bar.
 
 - **Resting surfaces** (cards in a grid, rows, panels) carry at most an ambient shadow and a hairline; borders, not shadows, do the resting separation.
-- **Lift ladder** (light theme): `--shadow-sm` `0 1px 2px rgba(24,24,27,.05)`; `--shadow` `0 1px 3px/.07 + 0 1px 2px/.04` for cards; `--shadow-md` for hover lift on KPI cards; `--shadow-lg` toasts and dialogs; `--shadow-xl` the command palette and success overlay. Dark mode deepens the same roles with `rgba(0,0,0,.45–.55)`.
+- **Lift ladder** (light theme): `--shadow-sm` `0 1px 2px rgba(24,24,27,.05)`; `--shadow` `0 1px 3px/.07 + 0 1px 2px/.04` for cards; `--shadow-md` for hover lift on KPI cards; `--shadow-lg` toasts and dialogs; `--shadow-xl` the command palette and success overlay.
 - **Focus is a glow ring, not a border fatten.** `0 0 0 3px rgba(0,104,181,.18)` on primary-outline focus-visible; selection uses the same glow. This keeps 1px hairlines honest — resting separation never thickens into a state.
 - **Signal glow** on Andon lamps and status dots (`0 0 6–10px` in the lamp's own color) is the one sanctioned glow: it is the machine's light, not decoration. Respect `prefers-reduced-motion` by killing the red blink.
 - **Interaction lift:** KPI cards rise 2–3px to `--shadow-lg` on hover; buttons deepen their fill one step and release their tinted shadow.

@@ -57,21 +57,7 @@ colors:
   sidebar-hover: "#F1F5F9"
   sidebar-active: "#0057A8"
 
-  # Dark mode
-  page-dark: "#101012"
-  surface-dark: "#1B1B1F"
-  muted-dark: "#27272A"
-  border-dark: "#2E2E33"
-  input-dark: "#3F3F46"
-  primary-dark: "#3B93CF"
-  primary-hover-dark: "#5AA8DE"
-  success-darkmode: "#22C55E"
-  warning-darkmode: "#F59E0B"
-  danger-darkmode: "#EF4444"
-  info-darkmode: "#38BDF8"
-  text-primary-dark: "#F4F4F5"
-  text-secondary-dark: "#A1A1AA"
-  text-muted-dark: "#8AA0B8"  # AA ≈5.1:1 บน surface-dark — muted text (theme มืด)
+  # Light-only: dark tokens removed (system ships light-only per PRODUCT.md)
 
 typography:
   body:
