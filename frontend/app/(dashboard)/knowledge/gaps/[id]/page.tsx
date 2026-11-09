@@ -146,7 +146,7 @@ export default function KnowledgeGapDetailPage() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
             {gap.search_term}
           </h1>
-          <p className="mt-1 font-mono text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <p className="cmms-hero-desc mt-1 font-mono text-xs">
             พบ {gap.occurrences} ครั้ง · ล่าสุด {fmtKnDateTime(gap.last_seen_at)}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">

@@ -90,7 +90,7 @@ export default function RcaEventsPage() {
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             {data && <AndonLamp status="idle" size="sm" showLabel />}
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a href="/rca" className={buttonVariants({ variant: "secondary" })}><Activity size={16} aria-hidden="true" /> ภาพรวม</a>

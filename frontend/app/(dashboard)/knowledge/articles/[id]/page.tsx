@@ -268,7 +268,7 @@ export default function KnowledgeArticleDetailPage() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>
             {article.title}
           </h1>
-          <p className="mt-1 font-mono text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>
+          <p className="cmms-hero-desc mt-1 font-mono text-xs">
             {article.article_key} · v{article.version_no}
             {article.category_name_th ? ` · ${article.category_name_th}` : ""}
           </p>

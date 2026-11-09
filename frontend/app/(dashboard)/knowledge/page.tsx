@@ -133,7 +133,7 @@ export default function KnowledgePage() {
               <GraduationCap size={13} aria-hidden="true" /> Phase 38
             </Badge>
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">
             {hero.desc}
           </p>
         </div>

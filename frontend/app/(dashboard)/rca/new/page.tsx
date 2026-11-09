@@ -151,7 +151,7 @@ export default function RcaNewPage() {
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             {existing && <Badge variant="primary">{existing.event_code}</Badge>}
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
         </div>
         <a href="/rca/events" className={buttonVariants({ variant: "secondary" })}><ArrowLeft size={16} aria-hidden="true" /> ย้อนกลับ</a>
       </div>

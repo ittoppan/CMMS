@@ -116,7 +116,7 @@ export default function ContractorsPage() {
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             <Badge variant="primary" dot><HardHat size={13} aria-hidden="true" /> Phase 31</Badge>
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ClipboardList size={16} aria-hidden="true" /> งานภายนอก</a>

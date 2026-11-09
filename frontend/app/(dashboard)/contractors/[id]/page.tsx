@@ -162,7 +162,7 @@ export default function ContractorDetailPage() {
             {c.code && <Badge variant="primary">{c.code}</Badge>}
             <Badge variant={tone} dot>{CTR_STATUS_LABELS[c.status] || c.status}</Badge>
           </div>
-          <p className="mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-1 text-sm" style={{ color: "rgba(255,255,255,0.75)" }}>
+          <p className="cmms-hero-desc mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span>{catsStr.map((k) => categoryLabel(k, cats)).join(" · ") || "ยังไม่ระบุหมวดงาน"}</span>
             {c.tax_id && <span>TAX {c.tax_id}</span>}
           </p>

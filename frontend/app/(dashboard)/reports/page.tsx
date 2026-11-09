@@ -33,7 +33,7 @@ export default function ReportsHubPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold" style={{ color: "#fff" }}>ศูนย์ออกรายงานใหม่ (Report Center)</h2>
-            <p style={{ color: "rgba(255,255,255,0.85)" }}>
+            <p className="cmms-hero-desc">
               12 หมวดรายงานจากข้อมูลจริง — กรองช่วงเวลา/เครื่องจักร/แผนก แล้วส่งออก CSV, Excel หรือพิมพ์ PDF ได้ทันที
             </p>
           </div>

@@ -216,7 +216,7 @@ export default function EngineeringChangeDetailPage() {
               {ecrPriorityLabel(d.priority)}
             </Badge>
           </div>
-          <p className="mt-1.5 font-mono text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>{d.ecr_no}</p>
+          <p className="cmms-hero-desc mt-1.5 font-mono text-sm">{d.ecr_no}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/engineering-changes" className={buttonVariants({ variant: "secondary" })}>

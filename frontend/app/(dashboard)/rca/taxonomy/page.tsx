@@ -112,7 +112,7 @@ export default function RcaTaxonomyPage() {
             <h1 className="text-2xl font-bold tracking-tight" style={{ color: "#fff" }}>{hero.title}</h1>
             {canTax && <Badge variant="primary" dot>แก้ไขได้</Badge>}
           </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{hero.desc}</p>
+          <p className="cmms-hero-desc mt-1.5 max-w-3xl text-sm leading-relaxed">{hero.desc}</p>
         </div>
       </div>
 
