@@ -97,6 +97,28 @@ export interface NavItemDef {
   secondary?: boolean;
 }
 
+/**
+ * section accent — palette ใหม่ 9 หมวด แยกสีเห็นชัดบน light (ทองแดง/ส้ม/น้ำเงิน/ม่วง/ฟ้า/เขียว/แดง/เทา/คราม)
+ * ใช้กับ chip จำนวนรายการ + icon tile ช่วยแยกโซนเมนู
+ */
+export const SECTION_ACCENTS = {
+  work_orders:        '#0068B5', // งานซ่อม — น้ำเงิน brand
+  pm_machines:        '#7C3AED', // บำรุงรักษา+เครื่องจักร — ม่วง
+  calibration:        '#0E7490', // สอบเทียบ — คราม
+  parts_external:     '#B45309', // อะไหล่/ผู้รับจ้าง — ทองแดง
+  planning:           '#15803D', // วางแผน — เขียว
+  analytics_reports:  '#0E7490', // วิเคราะห์/รายงาน — ฟ้าเข้ม
+  reliability:        '#DC2626', // ความเชื่อถือได้ — แดง
+  knowledge_ops:      '#6D28D9', // องค์ความรู้/ปฏิบัติการ — ม่วงโท้ก
+  system:             '#475569', // ระบบ — สลาเต้
+} as const;
+
+export type SectionKey = keyof typeof SECTION_ACCENTS;
+
+export function sectionAccent(titleKey: string): string {
+  return SECTION_ACCENTS[titleKey.replace('nav.', '') as SectionKey] ?? SECTION_ACCENTS.system;
+}
+
 export interface NavGroupDef {
   titleKey: string;
   pathPrefixes: string[];
@@ -427,10 +449,11 @@ function SidebarGroup({
         <span
           className={cn(
             "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] text-[0.62rem] font-extrabold tabular-nums transition-colors",
-            anyActive
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground group-hover:bg-primary-light group-hover:text-primary"
+            anyActive ? "text-white" : ""
           )}
+          style={{
+            backgroundColor: anyActive ? sectionAccent(group.titleKey) : undefined,
+          }}
         >
           {group.visibleItems.length}
         </span>
@@ -471,10 +494,13 @@ function SidebarGroup({
                   <span
                     className={cn(
                       "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] transition-colors",
-                      active
-                        ? "bg-white/15 text-white"
-                        : "bg-muted/70 text-muted-foreground group-hover/item:bg-primary-light group-hover/item:text-primary"
+                      active ? "bg-white/15 text-white"      : "bg-muted/70"
                     )}
+                    style={
+                      active
+                        ? undefined
+                        : { color: sectionAccent(group.titleKey), backgroundColor: `${sectionAccent(group.titleKey)}1A` }
+                    }
                   >
                     <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
                   </span>
