@@ -320,28 +320,43 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
+  const totalVisible = groups.reduce((n, g) => n + g.visibleItems.length, 0);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {showSearch && (
-        <div className="px-3 pb-3 pt-1">
+        <div className="shrink-0 px-3 pb-3 pt-3">
           <div className="relative">
             <Search
               size={15}
               strokeWidth={1.75}
               aria-hidden="true"
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("sidebar.search")}
+              placeholder={`${t("sidebar.search")} · ${totalVisible}`}
               aria-label="ค้นหาเมนู"
-              className="h-9 w-full rounded-[var(--cmms-radius)] border border-border bg-muted/60 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
+              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-3 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-all placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
             />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="clear"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
       )}
-      <nav aria-label="เมนูหลัก" className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-4">
+      <nav
+        aria-label="เมนูหลัก"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+      >
         {groups.map((group) => (
           <SidebarGroup
             key={group.titleKey}
@@ -352,7 +367,10 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
           />
         ))}
         {groups.length === 0 && (
-          <p className="px-2 py-6 text-center text-xs text-muted-foreground">—</p>
+          <div className="mx-2 rounded-[var(--cmms-radius)] border border-dashed border-border bg-muted/40 px-4 py-10 text-center">
+            <Search size={20} aria-hidden="true" className="mx-auto mb-2 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">{t("sidebar.no_results") ?? "ไม่พบเมนูที่ค้นหา"}</p>
+          </div>
         )}
       </nav>
     </div>
@@ -394,23 +412,43 @@ function SidebarGroup({
   const isOpen = open || searching;
 
   return (
-    <div className="mb-1">
+    <div
+      className={cn(
+        "rounded-[var(--cmms-radius-lg)] border bg-card/70 p-1.5 transition-colors",
+        isOpen ? "border-border shadow-[var(--cmms-shadow-sm)]" : "border-transparent"
+      )}
+    >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between rounded-[var(--cmms-radius-sm)] px-2 py-2 text-left text-[0.68rem] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+        className="group flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
       >
-        <span>{t(group.titleKey)}</span>
+        <span
+          className={cn(
+            "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] text-[0.62rem] font-extrabold tabular-nums transition-colors",
+            anyActive
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground group-hover:bg-primary-light group-hover:text-primary"
+          )}
+        >
+          {group.visibleItems.length}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-[0.66rem] font-extrabold uppercase tracking-[0.09em] text-muted-foreground">
+          {t(group.titleKey)}
+        </span>
         <ChevronRight
-          size={13}
+          size={14}
           strokeWidth={2}
           aria-hidden="true"
-          className={cn("transition-transform duration-150", isOpen && "rotate-90")}
+          className={cn(
+            "shrink-0 text-muted-foreground transition-transform duration-200",
+            isOpen && "rotate-90 text-primary"
+          )}
         />
       </button>
       {isOpen && (
-        <ul className="mb-2 mt-0.5 space-y-px">
+        <ul className="mb-0.5 mt-1 space-y-0.5">
           {items.map((item) => {
             const active = isSelected(item.href);
             const Icon = item.icon;
@@ -421,14 +459,27 @@ function SidebarGroup({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] px-2.5 text-sm font-medium transition-colors",
+                    "group/item relative flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all",
                     active
-                      ? "bg-primary font-semibold text-white shadow-sm"
-                      : "text-[var(--cmms-sidebar-text)] hover:bg-[var(--cmms-bg-sidebar-hover)] hover:text-[var(--cmms-sidebar-text-strong)]"
+                      ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
+                      : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"
                   )}
                 >
-                  <Icon size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
-                  <span className="truncate">{t(item.labelKey)}</span>
+                  {active && (
+                    <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-white/70" aria-hidden="true" />
+                  )}
+                  <span
+                    className={cn(
+                      "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] transition-colors",
+                      active
+                        ? "bg-white/15 text-white"
+                        : "bg-muted/70 text-muted-foreground group-hover/item:bg-primary-light group-hover/item:text-primary"
+                    )}
+                  >
+                    <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{t(item.labelKey)}</span>
+                  {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/80" aria-hidden="true" />}
                 </Link>
               </li>
             );
@@ -439,13 +490,13 @@ function SidebarGroup({
                 type="button"
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={expanded}
-                className="flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="flex w-full items-center gap-2 rounded-[var(--cmms-radius)] py-1.5 pl-3 pr-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/50 hover:text-primary"
               >
                 <ChevronRight
                   size={13}
                   strokeWidth={2}
                   aria-hidden="true"
-                  className={cn("shrink-0 transition-transform duration-150", expanded && "rotate-90")}
+                  className={cn("shrink-0 transition-transform duration-200", expanded && "rotate-90")}
                 />
                 <span className="truncate">
                   {showAll ? t("nav.show_less") : `${t("nav.show_more")} (${hiddenCount})`}
