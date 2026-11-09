@@ -19,7 +19,8 @@ try {
 }
 
 // Static URL อ่านจาก env (NGROK_STATIC_URL) — กัน URL ฝังตายตัว
-$STATIC_URL = getenv('NGROK_STATIC_URL') ?: 'https://ommatophorous-robert-fortifyingly.ngrok-free.app';
+// อ่านจาก env เท่านั้น — ห้ามฝัง URL ตายตัวในโค้ด (ถ้าไม่ตั้ง ให้สถานะแสดง URL ปัจจุบันจาก ngrok API)
+$STATIC_URL = getenv('NGROK_STATIC_URL') ?: '';
 
 const NGROK_EXE   = 'C:\ngrok\ngrok.exe';
 const TUNNEL_NAME = 'cmms-tpt';

@@ -68,23 +68,23 @@
 
 | บทบาท | ฟอนต์ | ใช้ที่ |
 |---|---|---|
-| **Body (ละติน)** | **Roboto** | ตัวอักษรทั่วไป (ตรงกับเว็บ TOPPAN) |
-| **Body (ไทย)** | **Noto Sans Thai** | ตัวอักษรภาษาไทย — กันอ่านยาก |
-| **ตัวเลข/ป้าย** | **Barlow Condensed** (500-700) | KPI ตัวเลขใหญ่, ตัวนับ, eyebrow, ป้ายสถานะ |
+| **Body (ละติน)** | **Sarabun** (self-hosted) | ตัวอักษรทั่วไป (ตรงกับเว็บ TOPPAN) |
+| **Body (ไทย)** | **Sarabun** (self-hosted, 12 ไฟล์ woff2) | ตัวอักษรภาษาไทย — กันอ่านยาก |
+| **ตัวเลข/ป้าย** | **Sarabun** (500-700) | KPI ตัวเลขใหญ่, ตัวนับ, eyebrow, ป้ายสถานะ |
 
 ### 3.1 ระดับตัวอักษรมาตรฐาน
 
 | ระดับ | วิธีใช้ |
 |---|---|
-| **Eyebrow** (ป้ายเล็กบนหัว) | `.cmms-eyebrow` — Barlow 600, uppercase, letter-spacing `0.16em`, 0.72rem — ขึ้นต้นหัวทุกหน้า เช่น `WORK ORDER BOARD · CMMS-TOPPAN` |
-| **Heading** | Roboto/Noto 700 ตามลำดับของ astryx (`Heading level={1..5}`) |
-| **ตัวเลข KPI** | `.cmms-kpi-value` — Barlow 700, 2.15rem, tabular-nums |
-| **Body** | Roboto/Noto 400-500 ขนาดปกติ |
+| **Eyebrow** (ป้ายเล็กบนหัว) | `.cmms-eyebrow` — Sarabun 600, uppercase, letter-spacing `0.16em`, 0.72rem — ขึ้นต้นหัวทุกหน้า เช่น `WORK ORDER BOARD · CMMS-TOPPAN` |
+| **Heading** | Sarabun/Noto 700 ตามลำดับของ Sarabun (`Heading level={1..5}`) |
+| **ตัวเลข KPI** | `.cmms-kpi-value` — Sarabun 700, 2.15rem, tabular-nums |
+| **Body** | Sarabun/Noto 400-500 ขนาดปกติ |
 
 ### 3.2 ข้อห้ามฟอนต์
 
 - **ห้าม** ใช้ฟอนต์อื่นนอกจาก 3 ตัวข้างบน (ไม่ใช้ Google Fonts เพิ่มโดยไม่จำเป็น)
-- ตัวเลขที่ต้องเทียบกัน (ตาราง/สถิติ) ควรใช้ Barlow + `tabular-nums` เสมอ
+- ตัวเลขที่ต้องเทียบกัน (ตาราง/สถิติ) ควรใช้ Sarabun + `tabular-nums` เสมอ
 
 ---
 
@@ -98,7 +98,7 @@
 | `.cmms-status` + `.cmms-status-dot` | จุดหลอดไฟ + label (ใช้ในตาราง/รายการ) — class: `ok / warn / down / idle` |
 | `.cmms-andon-board` | แผง navy เข้มพร้อม scanlines (บอร์ดสถานะโรงงาน) |
 | `.cmms-andon-chip` | chip บนพื้นเข้ม (พร้อมใช้งาน/ต้องดูแล/หยุด) |
-| `.cmms-count-pill` | ตัวนับแบบ Barlow บนพื้นขาว |
+| `.cmms-count-pill` | ตัวนับแบบ Sarabun บนพื้นขาว |
 
 ### 4.2 การแมปสถานะ → ไฟ (ตามหน้าที่ใช้จริง)
 
@@ -148,7 +148,7 @@
 
 ### 6.2 การ์ด KPI (`.cmms-kpi-card`)
 
-- การ์ดขาว + แถบ accent 3px ด้านซ้าย + `AndonLamp` ข้าง label + ตัวเลข Barlow ใหญ่
+- การ์ดขาว + แถบ accent 3px ด้านซ้าย + `AndonLamp` ข้าง label + ตัวเลข Sarabun ใหญ่
 - ห้ามใช้การ์ด gradient พาสเทลหลายสี (blue-50/rose-50...) — ใช้สีขาว + ไฟเดียว
 
 ### 6.3 ปุ่ม (Buttons)
@@ -171,8 +171,8 @@
 | ใช้ token จาก `design-system/tokens.css` เสมอ | เขียนสี hex hardcode ในหน้า |
 | ใช้ `AndonLamp`/`.cmms-status` สำหรับสถานะ | ใช้ emoji แทนสถานะหรือตกแต่งหัวข้อ/ปุ่ม/placeholder |
 | ใส่ eyebrow ทุกหัวหน้า | หัวหน้าเพจแบบไม่มี eyebrow |
-| ตัวเลขสถิติใช้ Barlow | ตัวเลขตารางฟอนต์ไม่เท่ากัน |
-| ภาษาไทยใช้ Noto Sans Thai เสมอ | ฟอนต์ Google อื่นๆ ที่ไม่จำเป็น |
+| ตัวเลขสถิติใช้ Sarabun | ตัวเลขตารางฟอนต์ไม่เท่ากัน |
+| ภาษาไทยใช้ Sarabun เสมอ | ฟอนต์ Google อื่นๆ ที่ไม่จำเป็น |
 | ไฟแดงต้องเป็นเรื่องวิกฤตจริง | ใช้แดงกับข้อมูลทั่วไป |
 
 ---

@@ -5,11 +5,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Dark-mode visual pass — localStorage.theme=dark via addInitScript
- * works for BOTH stacks (PHP engine + next-themes share the key).
+ * Light-only visual pass — the app is light-only by design (Sarabun everywhere,
+ * no dark theme). Captures canonical Next.js routes with colorScheme=light and theme=light.
  */
 
-const SHOT_DIR = path.join("test-results", "screenshots-dark");
+const SHOT_DIR = path.join("test-results", "screenshots-light");
 
 const DASH: Array<[string, string]> = [
   ["dashboard", "/dashboard"],
@@ -20,7 +20,7 @@ const DASH: Array<[string, string]> = [
   ["users", "/users"],
 ];
 
-// PHP legacy pages are retired 302 stubs — dark shots target the canonical Next.js routes instead
+// PHP legacy pages are retired 302 stubs — light shots target the canonical Next.js routes instead
 const PHP_PAGES: Array<[string, string]> = [
   ["repair-index", "/repair"],
   ["departments", "/settings/master/departments"],
@@ -30,7 +30,7 @@ const PHP_PAGES: Array<[string, string]> = [
 test.describe.configure({ mode: "serial" });
 
 test.use({
-  colorScheme: "dark",
+  colorScheme: "light",
 });
 
 let savedStorage: string | undefined;
@@ -38,7 +38,7 @@ let savedStorage: string | undefined;
 test.beforeAll(async ({ browser }) => {
   test.skip(!hasCreds(), "needs creds");
   const ctx = await browser.newContext();
-  await ctx.addInitScript(() => localStorage.setItem("theme", "dark"));
+  await ctx.addInitScript(() => localStorage.setItem("theme", "light"));
   const page = await ctx.newPage();
   await page.goto("/login");
   await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
@@ -50,18 +50,18 @@ test.beforeAll(async ({ browser }) => {
 });
 
 function shoot(page: import("@playwright/test").Page, name: string): void {
-  const dir = path.join(SHOT_DIR, "dark");
+  const dir = path.join(SHOT_DIR, "light");
   fs.mkdirSync(dir, { recursive: true });
   return void page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true });
 }
 
 for (const [name, route] of DASH) {
-  test(`dark ${name}`, async ({ browser }) => {
+  test(`light ${name}`, async ({ browser }) => {
     const ctx = await browser.newContext({
-      colorScheme: "dark",
+      colorScheme: "light",
       storageState: savedStorage ? JSON.parse(savedStorage) : undefined,
     });
-    await ctx.addInitScript(() => localStorage.setItem("theme", "dark"));
+    await ctx.addInitScript(() => localStorage.setItem("theme", "light"));
     const page = await ctx.newPage();
     await page.goto(route, { waitUntil: "domcontentloaded" });
     // splash fades after window load (+250ms, 5s safety) — wait for it to detach
@@ -73,17 +73,17 @@ for (const [name, route] of DASH) {
 }
 
 for (const [name, url] of PHP_PAGES) {
-  test(`dark php ${name}`, async ({ browser }) => {
+  test(`light php ${name}`, async ({ browser }) => {
     const ctx = await browser.newContext({
-      colorScheme: "dark",
+      colorScheme: "light",
       storageState: savedStorage ? JSON.parse(savedStorage) : undefined,
     });
-    await ctx.addInitScript(() => localStorage.setItem("theme", "dark"));
+    await ctx.addInitScript(() => localStorage.setItem("theme", "light"));
     const page = await ctx.newPage();
     await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1_500);
     await page.waitForSelector("#cmms-splash", { state: "detached", timeout: 8_000 }).catch(() => undefined);
-    await expect(page.locator("main"), `Next.js canonical dark UI for ${name}`).toBeVisible();
+    await expect(page.locator("main"), `Next.js canonical light UI for ${name}`).toBeVisible();
     await shoot(page, `php-${name}`);
     await ctx.close();
   });

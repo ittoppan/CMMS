@@ -13,10 +13,20 @@
  */
 
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/helpers/iot_ingest.php';
 
 $id = (int)($_GET['id'] ?? 0);
 $code = trim((string)($_GET['code'] ?? ''));
 $name = trim((string)($_GET['name'] ?? ''));
+
+/* ---------- 0) จำกัดขนาด input + rate limit (กัน abuse สร้างรูปไม่จำกัด) ---------- */
+$code = mb_substr($code, 0, 32);
+$name = mb_substr($name, 0, 80);
+if ($id <= 0 && $code === '') { http_response_code(400); exit; }
+try {
+    $rl = iot_rate_check(getDb(), 'spare_image_ip:' . (string)($_SERVER['REMOTE_ADDR'] ?? ''), 120);
+    if (empty($rl['ok']) && ($rl['error'] ?? '') === 'RATE_LIMITED') { http_response_code(429); exit; }
+} catch (Throwable $e) { /* DB ไม่พร้อม — ยัง serve placeholder ได้ */ }
 
 /* ---------- 1) มี id → ตรวจ DB: รูปจริง / code / name ---------- */
 if ($id > 0) {

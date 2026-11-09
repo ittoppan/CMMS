@@ -5,7 +5,7 @@
  * Endpoints:
  *   GET  /api/v1/pm_plans.php                    → รายการแผน PM พร้อมสถิติ (asset_count, template_count, next_due, last_done)
  *   GET  /api/v1/pm_plans.php?id=N               → รายละเอียดแผน + assets + templates(+items) + ประวัติรอบ
- *   GET  /api/v1/pm_plans.php?action=overdue     → sync สถานะ overdue (ตาม due_date) แล้วคืนสรุป
+ *   POST /api/v1/pm_plans.php?action=overdue     → sync สถานะ overdue (ตาม due_date) แล้วคืนสรุป (GET ห้าม mutate — คืน 405)
  *   POST /api/v1/pm_plans.php                    → สร้างแผน + ลิงก์ assets/templates
  *   PUT  /api/v1/pm_plans.php?id=N               → แก้แผน + แทนที่ลิงก์ assets/templates
  *   DELETE /api/v1/pm_plans.php?id=N             → soft-delete (status=cancelled) ถ้ามีประวัติ, ลบลิงก์ถ้ายังไม่มี
@@ -74,12 +74,9 @@ requireLogin($pdo);
         case 'GET':
             // ---- SYNC สถานะ overdue (ตาม due_date จริง ไม่ใช่ค่าซ้อน) ----
             if (isset($_GET['action']) && $_GET['action'] === 'overdue') {
-                $today = date('Y-m-d');
-                $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([$today]);
-                $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([$today]);
-                $sum = [];
-                foreach ($pdo->query("SELECT status, COUNT(*) c FROM pm_am GROUP BY status")->fetchAll(PDO::FETCH_ASSOC) as $r) $sum[$r['status']] = (int)$r['c'];
-                echo json_encode(['success' => true, 'status' => $sum]);
+                // GET ห้าม mutate — ให้ใช้ POST ?action=overdue แทน (ต้อง login + CSRF ผ่าน requireLogin)
+                http_response_code(405);
+                echo json_encode(['error' => 'ใช้ POST สำหรับ sync overdue']);
                 exit;
             }
 
@@ -133,6 +130,17 @@ requireLogin($pdo);
 
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+            // ---- ACTION: sync สถานะ overdue (ย้ายจาก GET มาที่นี่) ----
+            if (isset($_GET['action']) && $_GET['action'] === 'overdue') {
+                $today = date('Y-m-d');
+                $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([$today]);
+                $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([$today]);
+                $sum = [];
+                foreach ($pdo->query("SELECT status, COUNT(*) c FROM pm_am GROUP BY status")->fetchAll(PDO::FETCH_ASSOC) as $r) $sum[$r['status']] = (int)$r['c'];
+                echo json_encode(['success' => true, 'status' => $sum]);
+                exit;
+            }
 
             // ---- ACTION: generate รอบ PM จากแผน (ทุก asset ที่ลิงก์) ----
             if (isset($_GET['action']) && $_GET['action'] === 'generate') {

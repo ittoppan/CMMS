@@ -33,16 +33,16 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [{ key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" }],
       },
-      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย (production only)
+      // 2) icons / fonts — แคชยาวได้ ปลอดภัย (production only; _next/static ใช้ default ของ Next ห้าม custom — จะเตือน)
       ...(isDev
         ? []
         : [
             {
-              source: "/_next/static/:path*",
+              source: "/icons/:path*",
               headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
             },
             {
-              source: "/icons/:path*",
+              source: "/fonts/:path*",
               headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
             },
           ]),
@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
             value:
               "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net" +
               (isDev ? " 'unsafe-eval'" : "") +
-              "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+              "; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
           },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
         ],

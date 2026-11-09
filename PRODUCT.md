@@ -10,7 +10,7 @@ web
 
 - **Frontend:** Next.js 16 (React 19, TypeScript) app in `frontend/` — the primary user-facing product (dev on port 3001; `npm run verify` = typecheck + build)
 - **Backend:** PHP 8.x REST API (PDO, JSON), versioned under `public/api/v1/*.php`, auth at `public/api/auth/login.php`; CSRF enforced on every mutating endpoint (`src/csrf.php`)
-- **Design system:** Astryx Design System (`astryx-main/`) + `design-system/` tokens, Tailwind CSS v4, documented in root `DESIGN.md` and `frontend/DESIGN.md`
+- **Design system:** TOPPAN design tokens (`design-system/` + `frontend/DESIGN.md` canonical) + Tailwind CSS v4 — Sarabun-only self-hosted, light-only (no dark mode). Root `DESIGN.md` is legacy reference.
 - **Frontend libraries:** Radix UI primitives, TanStack Query/Table, React Hook Form + Zod, Recharts, ZXing QR scanning, cmdk, next-themes, sonner, vaul, Sentry, Playwright e2e (Tailwind v4, lucide-react)
 - **PWA:** standalone app shell with manifest (`public/manifest.json`), offline caching, local work-order queue for field sync-later
 
@@ -42,7 +42,7 @@ An enterprise maintenance platform whose center of gravity is still the technici
 
 ## Capabilities and Constraints
 
-- **Must preserve**: Astryx Design System components + Tailwind CSS utility classes; PHP 8 JSON API under `public/api/v1/`; the Next.js app in `frontend/` as the primary surface; PWA manifest and offline behavior; CSRF on all mutating endpoints; Thai-first UI with English fallback
+- **Must preserve**: TOPPAN design tokens + Tailwind CSS utility classes (Sarabun-only, light-only); PHP 8 JSON API under `public/api/v1/`; the Next.js app in `frontend/` as the primary surface; PWA manifest and offline behavior; CSRF on all mutating endpoints; Thai-first UI with English fallback
 - **Technical constraints**: PHP 8.x + MySQL/MariaDB backend only (no Node backend; the Next.js app is frontend/SSR); service worker for offline; IndexedDB local work-order queue; Sentry instrumentation in the frontend
 - **Built capabilities** (evidence in code): work orders (corrective/PM/inspection), asset registry, hierarchy, components, criticality, lifecycle, reliability, measurements, overhauls; inspections and checklist templates; calibration management/tracking; spare parts inventory and spare optimization; cost/budget and thresholds; approval workflows; dispatch; contractor management; safety and shutdown/planning; RCA and failure analysis; engineering change; document control; knowledge base; custom forms builder and custom pages; IoT ingest, alarms, and condition monitoring; predictive maintenance (PredictiveService); AI Copilot; analytics, dashboards, KPIs, reports; notifications (email + web push); audit logs and data governance; roles and permissions; multi-plant / multi-department planning; equipment borrowing; Excel import/export; Sage 300 PO sync
 - **Terminology**: "Work Order" (WO), "Preventive Maintenance" (PM), "Asset", "Spare Part", "Technician", "Plant/Line/Machine", "RCA", "Calibration", "IoT condition monitoring", OEE/MTTR/MTBF
@@ -57,11 +57,11 @@ An enterprise maintenance platform whose center of gravity is still the technici
 
 ## Evidence on Hand
 
-- `DESIGN.md` (repo root) documents the incumbent Astryx + Tailwind design system; `frontend/DESIGN.md` also exists
+- `frontend/DESIGN.md` is the canonical design spec (Sarabun-only, light-only); root `DESIGN.md` retained as legacy reference
 - Working PWA manifest at `public/manifest.json`
 - PHP REST API under `public/api/v1/` covering work orders, assets/registry, inspections, calibration, spares, approvals, IoT, analytics, document control, engineering change, contractor, safety, shutdown, forms, and more
 - Backend services in `src/services/` (Predictive, RCA, Dispatch, SagePO, AI Copilot, Data Governance, Audit Trail, Web Push, Notification Center, Inventory Optimization, Approval)
-- Component library and tokens in `astryx-main/`, `design-system/`, `css/astryx-theme-*.css`
+- Component library and tokens in `design-system/` + `frontend/public/fonts/` (Sarabun self-hosted); legacy `astryx-main/` + `css/astryx-theme-*.css` retained for reference
 - Database schema in `database/` (migrations, seeders)
 - Playwright e2e suite in `frontend/tests/`; visual regression goldens in `visual-baseline/`
 - Real media under `public/uploads/` (assets, avatars, inspections, repair, spares placeholders)

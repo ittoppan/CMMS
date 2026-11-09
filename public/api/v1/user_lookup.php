@@ -7,6 +7,7 @@
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/iot_ingest.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -25,6 +26,17 @@ if (!preg_match('/^[A-Z0-9]{3,10}$/', $code)) {
 
 try {
     $pdo = getDb();
+    // Rate limit (endpoint นี้ public — กัน enumeration ชื่อพนักงาน): 30 ครั้ง/IP/นาที, 10 ครั้ง/รหัส/นาที
+    $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+    foreach ([['user_lookup_ip:' . $ip, 30], ['user_lookup_code:' . $code, 10]] as [$scope, $limit]) {
+        $rl = iot_rate_check($pdo, $scope, $limit);
+        if (empty($rl['ok']) && ($rl['error'] ?? '') === 'RATE_LIMITED') {
+            http_response_code(429);
+            echo json_encode(['error' => 'rate_limited']);
+            exit;
+        }
+    }
+    header('Cache-Control: no-store, max-age=0'); // ข้อมูลส่วนบุคคล — ห้าม cache ที่ shared proxy
     $stmt = $pdo->prepare("SELECT u.id, u.employee_code, u.full_name, u.position, u.avatar_path, u.avatar, d.name AS department
                             FROM users u LEFT JOIN departments d ON d.id = u.department_id
                             WHERE u.employee_code = ? AND u.is_active = 1 LIMIT 1");

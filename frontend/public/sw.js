@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v40-20261104-ux1";
+const SW_VERSION = "v41-20261109-fonts";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -22,6 +22,18 @@ const PRECACHE_URLS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/fonts/sarabun-300-thai.woff2",
+  "/fonts/sarabun-300-latin.woff2",
+  "/fonts/sarabun-400-thai.woff2",
+  "/fonts/sarabun-400-latin.woff2",
+  "/fonts/sarabun-500-thai.woff2",
+  "/fonts/sarabun-500-latin.woff2",
+  "/fonts/sarabun-600-thai.woff2",
+  "/fonts/sarabun-600-latin.woff2",
+  "/fonts/sarabun-700-thai.woff2",
+  "/fonts/sarabun-700-latin.woff2",
+  "/fonts/sarabun-800-thai.woff2",
+  "/fonts/sarabun-800-latin.woff2",
 ];
 
 /* ---------- Offline Routes (PWA) ----------

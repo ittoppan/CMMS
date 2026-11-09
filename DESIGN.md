@@ -1,6 +1,6 @@
 ---
 name: CMMS App
-description: Offline-first maintenance console for the factory floor — operate by signal, not by slog. TOPPAN blue, Andon lamp language, Barlow numerical readouts.
+description: Offline-first maintenance console for the factory floor — operate by signal, not by slog. TOPPAN blue, Andon lamp language, Sarabun type throughout.
 colors:
   toppan-blue: "#0068B5"
   toppan-blue-hover: "#005FA3"
@@ -26,31 +26,31 @@ colors:
   andon-red: "#EF4444"
 typography:
   display:
-    fontFamily: "Barlow Condensed, 'Noto Sans Thai', Inter, sans-serif"
+    fontFamily: "Sarabun, sans-serif"
     fontSize: "2.15rem"
     fontWeight: 700
     lineHeight: 1
     letterSpacing: "0.01em"
     fontFeature: "'tnum' 1"
   headline:
-    fontFamily: "Barlow Condensed, 'Noto Sans Thai', Inter, sans-serif"
+    fontFamily: "Sarabun, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 700
     lineHeight: 1.3
     letterSpacing: "-0.02em"
   title:
-    fontFamily: "Barlow Condensed, 'Noto Sans Thai', Inter, sans-serif"
+    fontFamily: "Sarabun, sans-serif"
     fontSize: "1.0625rem"
     fontWeight: 600
     lineHeight: 1.4
     letterSpacing: "-0.02em"
   body:
-    fontFamily: "Roboto, 'Noto Sans Thai', Inter, -apple-system, sans-serif"
+    fontFamily: "Sarabun, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.6
   label:
-    fontFamily: "Barlow Condensed, 'Noto Sans Thai', Inter, sans-serif"
+    fontFamily: "Sarabun, sans-serif"
     fontSize: "0.72rem"
     fontWeight: 600
     lineHeight: 1.4
@@ -125,7 +125,7 @@ components:
 
 The interface behaves like the machine room of plant maintenance: a calm surface that speaks in signals, not slogans. It inherits the motifs a technician already reads on the physical floor — the Andon signal stack on the machine, part numbers printed in condensed block type, the blue laminating standards tag on calibrated equipment — and renders them as a software control panel rather than a dashboard prettied up for management reviews.
 
-TOPPAN blue (`#0068B5`) is the single calibrated interactive accent, used the way it is in the source world: a subdued, precise indicator of "you can act here," never a decorative wash. Numbers are the loudest typographic voice. They are set in Barlow Condensed with tabular numerals, so a column of OEE figures aligns like a row of readouts, and any figure can glance-diff at arm's length in bad light.
+TOPPAN blue (`#0068B5`) is the single calibrated interactive accent, used the way it is in the source world: a subdued, precise indicator of "you can act here," never a decorative wash. Numbers are the loudest typographic voice. They are set in Sarabun with tabular numerals, so a column of OEE figures aligns like a row of readouts, and any figure can glance-diff at arm's length in bad light.
 
 Everything else is quiet enough to disappear. Zinc neutrals, flat surfaces, thin one-pixel hairlines, and a deliberately dry depth vocabulary put the factory's own syntax — lamp colors, status text, machine names, work order numbers — on top of the interface where it belongs. Dialogs, toasts, and the command palette are the only surfaces that float, and even those stay within one restrained shadow ladder.
 
@@ -133,10 +133,10 @@ The shell is an app, not a website: the PWA App Shell (56px top bar / bottom nav
 
 **Key Characteristics:**
 - Machine-health color grammar: green / amber / red mean what they mean on the Andon pole, everywhere in the app
-- Barlow Condensed numerals for every measurement; Thai and body copy in Roboto / Noto Sans Thai at 16px-equivalent clarity
+- Sarabun numerals for every measurement; Thai and body copy in Sarabun at 16px-equivalent clarity
 - Flat surfaces separated by 1px hairlines; shadows reserved for floating layers and KPI lifts
 - TOPPAN blue appears at most a few times per screen, always meaning "act"
-- Touch targets ≥48px, dark-mode aware, `prefers-reduced-motion` respected end-to-end
+- Touch targets ≥48px, light-only, `prefers-reduced-motion` respected end-to-end
 
 ## Colors
 
@@ -176,11 +176,11 @@ The light theme is the canonical token set; dark mode remaps the same roles to a
 
 ## Typography
 
-**Display Font:** Barlow Condensed (with Noto Sans Thai / Inter fallback) — the machine type. Condensed block lettering for numbers, page titles, and section eyebrows.
-**Body Font:** Roboto with Noto Sans Thai (primary for the Thai-first UI), Inter/Sarabun fallback — technical, neutral, never decorative.
+**Display Font:** Sarabun — the machine type. Condensed block lettering for numbers, page titles, and section eyebrows.
+**Body Font:** Sarabun (self-hosted, 12 woff2 files, Thai + Latin) — technical, neutral, never decorative.
 **Label/Mono Font:** System monospace stacks for codes, part numbers, and work order IDs; never a costume.
 
-**Character:** A compressed industrial voice for readouts and section labels against a calm, human body face. Barlow gives numbers the visual weight of stamped part numbers; Roboto/Noto Sans Thai keeps the technician's actual reading comfortable, including the tall ascenders and descenders of Thai glyphs.
+**Character:** A compressed industrial voice for readouts and section labels against a calm, human body face. Sarabun gives numbers the visual weight of stamped part numbers; Sarabun keeps the technician's actual reading comfortable, including the tall ascenders and descenders of Thai glyphs.
 
 Protect the display voice at every size — no UI kit's generic sans is a substitute for the condensed block pair. `font-feature-settings: "tnum"` is on for every numeral surface so tabular data aligns column-to-column.
 
@@ -192,11 +192,11 @@ Protect the display voice at every size — no UI kit's generic sans is a substi
 - **Label (Semibold 600 · 0.72rem · tracking 0.16em, uppercase):** Section eyebrows, table column headers, stat labels, mobile card `data-label` tags. The only uppercase in the system, and only for micro-heads — never headings.
 
 ### Named Rules
-**The Readout Rule.** Every numeric measure — counts, ratios, times, units — is set in Barlow Condensed with tabular numerals. Figures align like instrument readouts; they never inherit body type.
+**The Readout Rule.** Every numeric measure — counts, ratios, times, units — is set in Sarabun with tabular numerals. Figures align like instrument readouts; they never inherit body type.
 
-**The Two-Voice Rule.** Display type and body type never trade roles. Headings get Barlow; paragraphs, controls, and instructions get Roboto/Noto Sans Thai. A Thai sentence in the display face is always a mistake.
+**The Two-Voice Rule.** Display type and body type never trade roles. Headings get Sarabun; paragraphs, controls, and instructions get Sarabun. A Thai sentence in the display face is always a mistake.
 
-**The Eyebrow Rule.** Uppercase micro-labels are the only label layer, they are always Barlow 600, and they never sit above a heading alone — a heading carries its own weight.
+**The Eyebrow Rule.** Uppercase micro-labels are the only label layer, they are always Sarabun 600, and they never sit above a heading alone — a heading carries its own weight.
 
 ## Layout
 
@@ -242,7 +242,7 @@ Gently rounded and machined: radius reads as component edges you can snap togeth
 ### Chips & Stat Pills
 - **Style:** Pill, 12×5px padding, 0.8rem weight 600. Unselected = muted fill + hairline + ink text.
 - **Selected:** Flat Toppan blue fill, white text, soft primary glow. Machine/job selectors use the heavier 1.5px hairline and `scale(.96)` press so they read as tactile keys.
-- **Filters & status:** The pill vocabulary carries tags and stat counts; counts set their numerals in Barlow tabular.
+- **Filters & status:** The pill vocabulary carries tags and stat counts; counts set their numerals in Sarabun tabular.
 
 ### Cards / Containers
 - **Corner Style:** 12–16px radius; flat white fill.
@@ -269,7 +269,7 @@ Gently rounded and machined: radius reads as component edges you can snap togeth
 
 ### Do:
 - **Do** reserve Toppan blue for exactly one interactive thing per view; the active button deserves to be the only blue that pops.
-- **Do** set every number in Barlow Condensed tabular numerals — KPIs, counters, pills, board figures.
+- **Do** set every number in Sarabun tabular numerals — KPIs, counters, pills, board figures.
 - **Do** let green/amber/red mean machine health via the Andon vocabulary, and keep their fills and dots consistent with the lamp set.
 - **Do** keep resting surfaces flat with a 1px hairline; reach for shadow only to lift a floating layer or answer a hover.
 - **Do** keep touch targets ≥48px and form inputs 48px/16px on phones.
