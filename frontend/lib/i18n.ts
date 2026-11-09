@@ -24,15 +24,28 @@ export type Lang = "th" | "en";
 const DICT: Record<string, { th: string; en: string }> = {
   // ── หมวดเมนู (SideNav sections) ──
   "nav.work_orders": { th: "งานซ่อมบำรุง", en: "Maintenance" },
+  "nav.planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
+  "nav.shutdown": { th: "หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
   "nav.supervisor": { th: "ควบคุมงาน & วางแผน", en: "Supervisor & Planner" },
   "nav.approval_docs": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
+  "nav.phase32_docs": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "nav.knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
   "nav.pm_machines": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "nav.spare_parts": { th: "คลังอะไหล่", en: "Spare Parts" },
   "nav.analytics_reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "nav.cost_budget": { th: "ค่าใช้จ่าย & งบประมาณ", en: "Cost & Budget" },
+  "nav.failure_rca": { th: "วิเคราะห์ความเสียหาย & Root Cause", en: "Failure Analysis & RCA" },
+  "nav.contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
   "nav.safety_iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "nav.people": { th: "บุคลากร", en: "People" },
   "nav.system": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "nav.account": { th: "บัญชี", en: "Account" },
+  "nav.calibration": { th: "สอบเทียบเครื่องมือวัด", en: "Calibration" },
+  "nav.parts_external": { th: "อะไหล่ & ผู้รับเหมา", en: "Spare Parts & Contractors" },
+  "nav.knowledge_ops": { th: "ความรู้ เอกสาร & ความปลอดภัย", en: "Knowledge, Docs & Safety" },
+  "nav.show_more": { th: "แสดงเพิ่มเติม", en: "Show more" },
+  "nav.show_less": { th: "ย่อรายการ", en: "Show less" },
+  "sidebar.search": { th: "ค้นหาเมนู...", en: "Search menu..." },
 
   // ── เมนูหลัก (SideNav items) ──
   "menu.dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
@@ -40,6 +53,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.repair_request": { th: "แจ้งซ่อมด่วน", en: "Quick Repair Request" },
   "menu.repair_assign": { th: "แจกงานซ่อม", en: "Assign Jobs" },
   "menu.my_tasks": { th: "งานของฉัน (ซ่อม + PM)", en: "My Tasks (Repair + PM)" },
+  "menu.field_work": { th: "โหมดภาคสนาม", en: "Field Work" },
   "menu.tracking": { th: "ติดตามงานซ่อม", en: "Repair Tracking" },
   "menu.workload": { th: "ภาระงานช่าง", en: "Technician Workload" },
   "menu.kanban": { th: "กระดานคัมบัง", en: "Kanban Board" },
@@ -49,6 +63,20 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.supervisor_queue": { th: "คิวงานทั้งหมด", en: "Work Queue" },
   "menu.supervisor_review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
   "menu.supervisor_plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
+  "menu.planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
+  "menu.planning_calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
+  "menu.field_my_plan": { th: "แผนงานของฉัน", en: "My Plan" },
+  "menu.shutdown": { th: "ศูนย์หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
+  "menu.workforce": { th: "กำลังคนและคุณสมบัติ", en: "Workforce & Competency" },
+  "menu.workforce_people": { th: "ข้อมูลช่าง", en: "People Records" },
+  "menu.workforce_skills": { th: "ทะเบียนทักษะ", en: "Skill Catalog" },
+  "menu.workforce_certs": { th: "ใบรับรองและสิทธิ์", en: "Certifications" },
+  "menu.workforce_training": { th: "หลักสูตรและอบรม", en: "Courses & Training" },
+  "menu.workforce_capacity": { th: "ความจุและภาระงาน", en: "Capacity Board" },
+  "menu.workforce_shifts": { th: "กะและการลา", en: "Shifts & Leave" },
+  "menu.workforce_crews": { th: "ทีมงาน", en: "Crews" },
+  "menu.workforce_mine": { th: "ข้อมูลของฉัน", en: "My Competency" },
+  "menu.workforce_conflicts": { th: "ความพร้อมและการจัดช่าง", en: "Readiness & Crewing" },
   "menu.supervisor_verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
   "menu.forms": { th: "ศูนย์แบบฟอร์ม", en: "Forms Center (F-EN)" },
   "menu.forms_designer": { th: "ออกแบบแบบฟอร์มดิจิทัล", en: "Form Designer" },
@@ -62,16 +90,37 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.inspections_run": { th: "ทำเช็คลิสต์ทันที", en: "Run Checklist Now" },
   "menu.inspections_templates": { th: "จัดการ Template ตรวจ", en: "Inspection Templates" },
   "menu.asset_registry": { th: "ทะเบียนเครื่องจักร", en: "Machine Registry" },
-  "menu.assets": { th: "ทรัพย์สิน & เครื่องจักร", en: "Assets & Machines" },
   "menu.qr_sheet": { th: "แผ่น QR เครื่องจักร", en: "Machine QR Sheets" },
   "menu.bom_tree": { th: "ผังชิ้นส่วน (BOM)", en: "Parts Tree (BOM)" },
   "menu.criticality": { th: "ลำดับความสำคัญ A/B/C", en: "Criticality A/B/C" },
+  "menu.asset_reliability": { th: "ความน่าเชื่อถือ & วงจรชีวิต (Reliability)", en: "Asset Reliability & Lifecycle" },
+  "menu.asset_reliability_dashboard": { th: "แดชบอร์ด Reliability", en: "Reliability Dashboard" },
+  "menu.asset_reliability_critical": { th: "เครื่องสำคัญ (A/B/C/D)", en: "Critical Assets" },
+  "menu.asset_reliability_lifecycle": { th: "สถานะวงจรชีวิต", en: "Lifecycle Status" },
+  "menu.asset_reliability_aging": { th: "เครื่องถึงกำหนดศึกษา", en: "Aging Review" },
+  "menu.asset_reliability_replacement": { th: "เปลี่ยนชิ้นส่วน Components", en: "Component Replacements" },
+  "menu.asset_reliability_overhaul": { th: "งานยกเครื่อง (Overhaul)", en: "Overhauls" },
+  "menu.asset_reliability_data_quality": { th: "คุณภาพข้อมูล Asset", en: "Data Quality" },
+  "menu.asset_reliability_reports": { th: "รายงาน Reliability", en: "Reliability Reports" },
+  "menu.asset_reliability_config": { th: "ตั้งค่า Reliability", en: "Reliability Settings" },
   "menu.equipment_borrowing": { th: "ยืม-คืนอุปกรณ์", en: "Tool Borrowing" },
   "menu.calibration": { th: "สอบเทียบเครื่องมือวัด", en: "Calibration" },
-  "menu.calibration_calendar": { th: "ปฏิทินสอบเทียบ", en: "Calibration Calendar" },
+  "menu.calibration_dashboard": { th: "แดชบอร์ดสอบเทียบ", en: "Calibration Dashboard" },
+  "menu.calibration_instruments": { th: "เครื่องมือวัด (Instrument Master)", en: "Instruments" },
+  "menu.calibration_plans": { th: "แผนสอบเทียบ", en: "Calibration Plans" },
+  "menu.calibration_schedule": { th: "ตารางสอบเทียบ", en: "Calibration Schedule" },
+  "menu.calibration_standards": { th: "มาตรฐานอ้างอิง", en: "Reference Standards" },
+  "menu.calibration_procedures": { th: "ขั้นตอนสอบเทียบ", en: "Calibration Procedures" },
+  "menu.calibration_certificates": { th: "ใบรับรองสอบเทียบ", en: "Certificates" },
+  "menu.calibration_oot": { th: "OOT / นอกเกณฑ์", en: "OOT Events" },
+  "menu.calibration_reports": { th: "รายงานสอบเทียบ", en: "Calibration Reports" },
+  "menu.calibration_data_quality": { th: "คุณภาพข้อมูลสอบเทียบ", en: "Calibration Data Quality" },
+  "menu.calibration_mobile": { th: "สอบเทียบบนมือถือ", en: "Mobile Calibration" },
+  "menu.calibration_config": { th: "ตั้งค่าสอบเทียบ", en: "Calibration Config" },
   "menu.calibration_po": { th: "PO งานสอบเทียบ", en: "Calibration PO" },
   "menu.calibration_tracking": { th: "ติดตามงานสอบเทียบ", en: "Calibration Tracking" },
   "menu.mtbf_mttr": { th: "วิเคราะห์ MTBF/MTTR", en: "MTBF/MTTR Analysis" },
+  "menu.production_hours": { th: "ชั่วโมงการผลิต", en: "Production Hours" },
   "menu.spare_parts": { th: "คลังสต็อกอะไหล่", en: "Spare Parts Stock" },
   "menu.spare_overview": { th: "ภาพรวมสต็อก & การเบิก", en: "Stock & Usage Overview" },
   "menu.spare_balances": { th: "ยอดคงเหลืออะไหล่", en: "Stock Balances" },
@@ -86,12 +135,31 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.analytics_kpi": { th: "KPI ผู้บริหาร", en: "Executive KPI" },
   "menu.analytics_bi": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
   "menu.analytics_advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
+  "menu.analytics_intelligence": { th: "ศูนย์วิเคราะห์อัจฉริยะ", en: "Intelligence Center" },
   "menu.reports": { th: "ศูนย์รวมรายงาน", en: "Reports Center" },
   "menu.reports_pdf": { th: "รายงาน PDF ผู้บริหาร", en: "Executive PDF Report" },
   "menu.reports_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel / CSV" },
   "menu.reports_import": { th: "นำเข้า Excel", en: "Import Excel" },
   "menu.andon_board": { th: "จอ Andon TV (โรงงาน)", en: "Andon TV Board" },
-  "menu.loto": { th: "ใบอนุญาต LOTO", en: "LOTO Permits" },
+  "menu.cost": { th: "ศูนย์วิเคราะห์ต้นทุน", en: "Cost Analysis Center" },
+  "menu.budget": { th: "จัดการงบประมาณ", en: "Budget Management" },
+  "menu.rca": { th: "วิเคราะห์ความเสียหาย", en: "Failure Analysis" },
+  "menu.rca_events": { th: "เหตุการณ์ความเสียหาย", en: "Failure Events" },
+  "menu.rca_taxonomy": { th: "จัดการหมวดความเสียหาย", en: "Failure Taxonomy" },
+  "menu.contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "menu.contractors_registry": { th: "ทะเบียนผู้รับเหมา", en: "Contractor Registry" },
+  "menu.contractors_work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
+  "menu.documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
+  "menu.engineering_changes": { th: "Engineering Change (ECR)", en: "Engineering Change (ECR)" },
+  "menu.knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
+  "menu.knowledge_search": { th: "ค้นหาความรู้", en: "Knowledge Search" },
+  "menu.knowledge_articles": { th: "บทความความรู้", en: "Knowledge Articles" },
+  "menu.knowledge_articles_create": { th: "เขียนบทความใหม่", en: "New Article" },
+  "menu.knowledge_gaps": { th: "ช่องว่างความรู้", en: "Knowledge Gaps" },
+  "menu.knowledge_reviews": { th: "งานทบทวนความรู้", en: "Knowledge Reviews" },
+  "menu.knowledge_categories": { th: "หมวดหมู่ความรู้", en: "Knowledge Categories" },
+  "menu.knowledge_usage": { th: "สถิติการใช้งาน", en: "Usage Analytics" },
+  "menu.loto": { th: "ใบอนุญาตทำงานเสี่ยง (PTW)", en: "Work Permit (PTW)" },
   "menu.iot_monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
   "menu.users": { th: "ผู้ใช้งานระบบ", en: "Users" },
   "menu.roles": { th: "บทบาท & สิทธิ์", en: "Roles & Permissions" },
@@ -101,6 +169,9 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.settings_notifications": { th: "รูปแบบการแจ้งเตือน LINE", en: "LINE Notification Templates" },
   "menu.settings": { th: "ตั้งค่าระบบทั้งหมด", en: "System Settings" },
   "menu.settings_menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
+  "menu.audit_log": { th: "บันทึกการตรวจสอบ", en: "Audit Log" },
+  "menu.feedback": { th: "ส่งความคิดเห็น / แจ้งปัญหา", en: "Feedback & Issues" },
+  "menu.system_health": { th: "สุขภาพระบบ (มอนิเตอร์)", en: "System Health" },
   "menu.settings_services": { th: "บริการและสถานะการรัน", en: "Services & Status" },
   "menu.settings_pwa": { th: "ไอคอนแอปมือถือ", en: "PWA Icons (Mobile App)" },
   "menu.settings_design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
@@ -111,6 +182,10 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.pages": { th: "หน้าเว็บที่สร้างเอง", en: "Custom Pages" },
   "menu.profile": { th: "โปรไฟล์", en: "Profile" },
   "menu.logout": { th: "ออกจากระบบ", en: "Log out" },
+  "access_denied.title": { th: "ไม่มีสิทธิ์เข้าถึงหน้านี้", en: "Access Denied" },
+  "access_denied.desc": { th: "บทบาทของคุณไม่มีสิทธิ์ดูเนื้อหานี้ หากจำเป็นต้องใช้ กรุณาติดต่อผู้ดูแลระบบ", en: "Your role does not have permission to view this content. Contact an administrator if you need access." },
+  "access_denied.back": { th: "กลับหน้าแรก", en: "Back to dashboard" },
+  "access_denied.retry": { th: "ลองใหม่", en: "Retry" },
 
   // ── Bottom nav มือถือ ──
   "bottom.dashboard": { th: "หน้าแรก", en: "Home" },
@@ -126,6 +201,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "bottom.reports_excel": { th: "ส่งออก Excel", en: "Export Excel" },
   "bottom.reports_pdf": { th: "รายงาน PDF", en: "PDF Report" },
   "bottom.settings": { th: "ตั้งค่า", en: "Settings" },
+  "bottom.planning_calendar": { th: "ตารางวางแผน", en: "Plan" },
 
   // ── สถานะ ──
   "status.open": { th: "รอดำเนินการ", en: "Open" },
@@ -150,6 +226,39 @@ const DICT: Record<string, { th: string; en: string }> = {
   "status.verified": { th: "ตรวจรับแล้ว", en: "Verified" },
   "status.pending_review": { th: "รอทบทวน", en: "Pending Review" },
   "status.pending_plan": { th: "รอวางแผน", en: "Pending Plan" },
+
+  // ── Offline Sync (Phase 19) ──
+  "sync.menu": { th: "ศูนย์ซิงก์ Offline", en: "Sync Center" },
+  "sync.status.online": { th: "ออนไลน์", en: "Online" },
+  "sync.status.offline": { th: "ออฟไลน์ — ข้อมูลบันทึกในเครื่อง จะซิงก์เมื่อกลับมามีเน็ต", en: "Offline — saved on device, syncs when back online" },
+  "sync.status.reconnecting": { th: "กำลังเชื่อมต่อใหม่…", en: "Reconnecting…" },
+  "sync.status.syncing": { th: "กำลังซิงก์…", en: "Syncing…" },
+  "sync.status.sync_error": { th: "ซิงก์มีรายการที่ค้างอยู่", en: "Sync pending items" },
+  "sync.now": { th: "ซิงก์เดี๋ยวนี้", en: "Sync Now" },
+  "sync.last_run": { th: "ซิงก์ล่าสุด", en: "Last sync" },
+  "sync.never": { th: "—", en: "Never" },
+  "sync.queue.empty": { th: "ไม่มีรายการค้างซิงก์ — ข้อมูลอัปเดตครบแล้ว", en: "All caught up — nothing waiting to sync" },
+  "sync.queue.title": { th: "คิวซิงก์ ({n})", en: "Sync queue ({n})" },
+  "sync.stat.pending": { th: "รอส่ง", en: "Pending" },
+  "sync.stat.failed": { th: "ส่งไม่สำเร็จ", en: "Failed" },
+  "sync.stat.conflict": { th: "ข้อมูลขัดแย้ง", en: "Conflicts" },
+  "sync.stat.sent_today": { th: "ส่งสำเร็จวันนี้", en: "Sent today" },
+  "sync.st.in_pending": { th: "รอส่ง", en: "Pending" },
+  "sync.st.syncing": { th: "กำลังส่ง", en: "Syncing" },
+  "sync.st.success": { th: "ส่งแล้ว", en: "Done" },
+  "sync.st.failed": { th: "ส่งไม่สำเร็จ", en: "Failed" },
+  "sync.st.conflict": { th: "ขัดแย้ง", en: "Conflict" },
+  "sync.retry_item": { th: "ส่งอีกครั้ง", en: "Retry" },
+  "sync.remove_item": { th: "ลบรายการ", en: "Remove" },
+  "sync.conflict_hint": { th: "ข้อมูลถูกแก้ไขจากหน้าอื่น — เปิดหน้างาน ตรวจสอบและลองใหม่ หรือลบรายการนี้", en: "Data changed elsewhere — open the record, review, then retry or remove" },
+  "sync.failed_hint": { th: "ระบบปฏิเสธรายการนี้ (สิทธิ์/ข้อมูล) — ตรวจสอบแล้วลองใหม่ หรือลบรายการ", en: "Server rejected this item (permission/data) — review then retry or remove" },
+  "sync.retrying_in": { th: "จะลองใหม่อัตโนมัติใน {s} วิ", en: "Auto retry in {s}s" },
+  "sync.attachments_stored": { th: "รูปที่เก็บในเครื่อง: {n} รายการ (~{mb} MB)", en: "Local photos: {n} (~{mb} MB)" },
+  "sync.badge.tooltip": { th: "มีงานค้างซิงก์ {n} รายการ", en: "{n} item(s) waiting to sync" },
+  "sync.chip.pending": { th: "รอซิงก์", en: "Pending sync" },
+  "sync.saved_offline_note": { th: "บันทึกลงเครื่องแล้ว — จะส่งเข้าสู่ระบบเมื่อกลับมาออนไลน์", en: "Saved on this device — will sync when online" },
+  "sync.browser_cache": { th: "พื้นที่เบราว์เซอร์ที่ใช้: {mb} MB", en: "Browser storage used: {mb} MB" },
+  "sync.more_items": { th: "… อีก {n} รายการ", en: "… {n} more" },
 
   // ── ปุ่ม / แอคชันกลาง ──
   "action.save": { th: "บันทึก", en: "Save" },
@@ -403,7 +512,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "hero.roles_edit_desc": { th: "ปรับปรุงข้อมูลบทบาทในระบบเพื่อใช้ในการกำหนดสิทธิ์การเข้าถึงข้อมูล", en: "Update role data in the system for access permissions" },
   "hero.users_create_desc": { th: "เพิ่มข้อมูลพนักงาน กำหนดบทบาท สิทธิ์ และอัปโหลดรูปโปรไฟล์", en: "Add employee data, set role, permissions, and upload profile image" },
   "msg.added_successfully": { th: "ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว", en: "Added to the system successfully" },
-  "msg.cal_create_error": { th: "เกิดข้อผิดพลาดในการสร้างแผนสอบเทียบ", en: "Error creating calibration plan" },
+  "msg.cal_create_error": { th: "เกิดข้อผิดพลาดในการสร้างแผนสอบเทียบ กรุณาลองใหม่อีกครั้ง", en: "Error creating calibration plan. Please try again." },
   "msg.cal_plan_added": { th: "แผนสอบเทียบสำหรับเครื่องมือนี้ ถูกเพิ่มเข้าสู่ระบบเรียบร้อยแล้ว", en: "Calibration plan for this tool added successfully" },
   "msg.cal_plan_updated": { th: "แผนสอบเทียบ ถูกอัปเดตเรียบร้อยแล้ว", en: "Calibration plan updated successfully" },
   "msg.cal_required_fields": { th: "กรุณาเลือกเครื่องมือ, ระบุวันที่สอบเทียบ และวันครบกำหนด", en: "Please select a tool, calibration date, and due date" },
@@ -411,40 +520,47 @@ const DICT: Record<string, { th: string; en: string }> = {
   "msg.calibration_not_found": { th: "ไม่พบข้อมูล Calibration", en: "Calibration not found" },
   "msg.conn_fail_retry": { th: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองอีกครั้ง", en: "Cannot connect to the system. Please try again." },
   "msg.image_process_error": { th: "ไม่สามารถประมวลผลรูปภาพได้ กรุณาเลือกรูปอื่น", en: "Cannot process the image. Please choose another one." },
-  "msg.load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูล", en: "Error loading data" },
+  "msg.load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง", en: "Error loading data. Please try again." },
   "msg.manufacturer_code_name_required": { th: "กรุณาระบุรหัสผู้ผลิต และชื่อผู้ผลิต", en: "Please specify manufacturer code and name" },
   "msg.part_added": { th: "เพิ่มรายการอะไหล่สำเร็จ!", en: "Part added successfully!" },
   "msg.part_code_name_required": { th: "กรุณากรอกรหัสอะไหล่ และชื่ออะไหล่", en: "Please fill in the part code and part name" },
+  "msg.part_code_required": { th: "กรุณากรอกรหัสอะไหล่", en: "Please fill in the part code" },
+  "msg.part_name_required": { th: "กรุณากรอกชื่ออะไหล่", en: "Please fill in the part name" },
+  "msg.field_required": { th: "จำเป็นต้องกรอกข้อมูลนี้", en: "This field is required" },
   "msg.part_id_missing": { th: "ไม่ระบุรหัสอะไหล่", en: "Part ID not specified" },
-  "msg.part_load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูลอะไหล่", en: "Error loading part data" },
+  "msg.part_load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูลอะไหล่ กรุณาลองใหม่อีกครั้ง", en: "Error loading part data. Please try again." },
   "msg.part_not_found": { th: "ไม่พบข้อมูลอะไหล่", en: "Part not found" },
-  "msg.part_save_error": { th: "เกิดข้อผิดพลาดในการบันทึกข้อมูลอะไหล่", en: "Error saving part data" },
+  "msg.part_save_error": { th: "เกิดข้อผิดพลาดในการบันทึกข้อมูลอะไหล่ กรุณาลองใหม่อีกครั้ง", en: "Error saving part data. Please try again." },
   "msg.part_saved": { th: "บันทึกข้อมูลอะไหล่สำเร็จ!", en: "Part saved successfully!" },
   "msg.part_saved_to_stock": { th: "บันทึกเข้าสู่ระบบคลังเรียบร้อยแล้ว", en: "Saved to the inventory system" },
-  "msg.role_create_error": { th: "เกิดข้อผิดพลาดในการสร้าง Role", en: "Error creating role" },
+  "msg.role_create_error": { th: "เกิดข้อผิดพลาดในการสร้าง Role กรุณาลองใหม่อีกครั้ง", en: "Error creating role. Please try again." },
   "msg.role_created": { th: "สร้างบทบาทสำเร็จ!", en: "Role created successfully!" },
   "msg.role_id_missing": { th: "ไม่ระบุหมายเลข Role", en: "Role number not specified" },
   "msg.role_name_required": { th: "กรุณาระบุชื่อบทบาท", en: "Please specify the role name" },
   "msg.role_not_found": { th: "ไม่พบข้อมูล Role", en: "Role not found" },
-  "msg.role_update_error": { th: "เกิดข้อผิดพลาดในการอัปเดต Role", en: "Error updating role" },
+  "msg.role_update_error": { th: "เกิดข้อผิดพลาดในการอัปเดต Role กรุณาลองใหม่อีกครั้ง", en: "Error updating role. Please try again." },
   "msg.role_updated": { th: "อัปเดตบทบาทสำเร็จ!", en: "Role updated successfully!" },
-  "msg.save_error": { th: "เกิดข้อผิดพลาดในการบันทึก", en: "Error saving data" },
-  "msg.supplier_create_error": { th: "เกิดข้อผิดพลาดในการสร้าง Supplier", en: "Error creating supplier" },
+  "msg.save_error": { th: "เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่อีกครั้ง", en: "Error saving data. Please try again." },
+  "msg.supplier_create_error": { th: "เกิดข้อผิดพลาดในการสร้าง Supplier กรุณาลองใหม่อีกครั้ง", en: "Error creating supplier. Please try again." },
   "msg.supplier_created": { th: "สร้าง Supplier สำเร็จ!", en: "Supplier created successfully!" },
   "msg.supplier_id_missing": { th: "ไม่ระบุหมายเลข Supplier", en: "Supplier number not specified" },
   "msg.supplier_not_found": { th: "ไม่พบข้อมูล Supplier", en: "Supplier not found" },
   "msg.tool_registered": { th: "ลงทะเบียนเครื่องมือสำเร็จ!", en: "Tool registered successfully!" },
-  "msg.update_error": { th: "เกิดข้อผิดพลาดในการอัปเดตข้อมูล", en: "Error updating data" },
+  "msg.update_error": { th: "เกิดข้อผิดพลาดในการอัปเดตข้อมูล กรุณาลองใหม่อีกครั้ง", en: "Error updating data. Please try again." },
   "msg.update_success": { th: "อัปเดตข้อมูลสำเร็จ!", en: "Data updated successfully!" },
   "msg.updated_successfully": { th: "ถูกอัปเดตเรียบร้อยแล้ว", en: "Updated successfully" },
-  "msg.user_create_error": { th: "เกิดข้อผิดพลาดในการสร้างผู้ใช้", en: "Error creating user" },
+  "msg.user_create_error": { th: "เกิดข้อผิดพลาดในการสร้างผู้ใช้ กรุณาลองใหม่อีกครั้ง", en: "Error creating user. Please try again." },
   "msg.user_created": { th: "สร้างผู้ใช้ใหม่สำเร็จ!", en: "User created successfully!" },
   "msg.user_id_missing": { th: "ไม่ระบุรหัสผู้ใช้", en: "User ID not specified" },
-  "msg.user_load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้", en: "Error loading user data" },
+  "msg.user_load_error": { th: "เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้ง", en: "Error loading user data. Please try again." },
   "msg.user_not_found": { th: "ไม่พบข้อมูลผู้ใช้", en: "User not found" },
   "msg.user_required_fields": { th: "กรุณากรอกชื่อผู้ใช้ รหัสพนักงาน ชื่อ-นามสกุล และรหัสผ่าน (รหัสพนักงานใช้สำหรับผูกบัญชี LINE)", en: "Please fill in username, employee code, full name, and password (employee code links LINE)" },
+  "msg.employee_code_required": { th: "กรุณากรอกรหัสพนักงาน", en: "Please fill in the employee code" },
   "msg.user_saved": { th: "บันทึกข้อมูลผู้ใช้สำเร็จ!", en: "User saved successfully!" },
   "msg.username_fullname_required": { th: "กรุณากรอกชื่อผู้ใช้ และชื่อ-นามสกุล", en: "Please fill in username and full name" },
+  "msg.username_required": { th: "กรุณากรอกชื่อผู้ใช้", en: "Please fill in a username" },
+  "msg.full_name_required": { th: "กรุณากรอกชื่อ-นามสกุล", en: "Please fill in full name" },
+  "msg.password_required": { th: "กรุณาตั้งรหัสผ่านเริ่มต้น", en: "Please set an initial password" },
   "placeholder.address": { th: "เช่น อาคาร A ชั้น 2", en: "e.g. Building A, Floor 2" },
   "placeholder.asset_code": { th: "เช่น AST-016", en: "e.g. AST-016" },
   "placeholder.asset_name": { th: "เช่น Centrifugal Pump P-102", en: "e.g. Centrifugal Pump P-102" },
@@ -561,6 +677,24 @@ DICT["priority.high"] = { th: "สูง", en: "High" };
 DICT["priority.medium"] = { th: "ปานกลาง", en: "Medium" };
 DICT["priority.low"] = { th: "ต่ำ", en: "Low" };
 
+// ── Phase 37: Reliability Engineering (nav + menu) ──
+DICT["nav.reliability"] = { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" };
+DICT["menu.reliability"] = { th: "ภาพรวมความเสียหาย", en: "Reliability Overview" };
+DICT["menu.reliability_assets"] = { th: "ความเสียหายรายเครื่อง", en: "Reliability by Asset" };
+DICT["menu.reliability_failure_modes"] = { th: "รูปแบบการเสีย & Pareto", en: "Failure Modes & Pareto" };
+DICT["menu.reliability_trend"] = { th: "แนวโน้มความเสียหาย", en: "Reliability Trend" };
+DICT["menu.reliability_weibull"] = { th: "การวิเคราะห์ Weibull", en: "Weibull Analysis" };
+DICT["menu.reliability_bad_actors"] = { th: "เครื่องที่มีปัญหาเป็นระบบ", en: "Bad Actors" };
+DICT["menu.reliability_pm_effectiveness"] = { th: "ประสิทธิผลของแผน PM", en: "PM Effectiveness" };
+DICT["menu.reliability_growth"] = { th: "การเติบโตของความเสียหาย", en: "Reliability Growth" };
+DICT["menu.reliability_studies"] = { th: "งานวิเคราะห์เชิงวิศวกรรม", en: "Engineering Studies" };
+DICT["menu.reliability_data_quality"] = { th: "คุณภาพข้อมูล", en: "Data Quality" };
+DICT["menu.reliability_config"] = { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions" };
+
+// ── Visual Process Flows (nav + menu) ──
+DICT["nav.process_flows"] = { th: "ผังกระบวนการ", en: "Process Flows" };
+DICT["menu.process_flows"] = { th: "ผังกระบวนการซ่อมบำรุง", en: "Visual Process Flows" };
+
 // ════════════════
 // ════════════════ ชื่อหน้า (breadcrumb) ════════════════
 const PAGE_TITLES: Record<string, { th: string; en: string }> = {
@@ -579,6 +713,11 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/supervisor/review": { th: "ทบทวนคำขอแจ้งซ่อม", en: "Review Requests" },
   "/supervisor/plan": { th: "วางแผน & จัดตาราง", en: "Plan & Schedule" },
   "/supervisor/verify": { th: "ตรวจรับงาน (Verify)", en: "Verify Work" },
+  "/planning": { th: "ศูนย์วางแผนซ่อมบำรุง", en: "Planning Center" },
+  "/planning/calendar": { th: "ตารางวางแผนงาน (เดือน)", en: "Monthly Timeline Planner" },
+  "/field/plan": { th: "แผนงานของฉัน", en: "My Plan" },
+  "/shutdown": { th: "ศูนย์หยุดเครื่อง & Turnaround", en: "Shutdown & Turnaround" },
+  "/shutdown/[id]": { th: "รายละเอียดงานหยุดเครื่อง", en: "Shutdown Detail" },
   "/pm_am/calendar": { th: "ปฏิทิน PM/AM", en: "PM/AM Calendar" },
   "/pm_am/create": { th: "สร้างแผน PM", en: "Create PM Plan" },
   "/pm_am/batch_schedule": { th: "สร้างแผนแบบกลุ่ม", en: "Batch Schedule" },
@@ -602,13 +741,19 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/spare_parts/sage_po": { th: "รับอะไหล่จาก PO", en: "Receive from PO" },
   "/spare_parts/optimization": { th: "AI คำนวณ EOQ และสต็อกค้าง", en: "AI EOQ & Dead Stock" },
   "/analytics": { th: "คลังข้อมูลและ BI", en: "Data Warehouse & BI" },
+  "/cost": { th: "ศูนย์วิเคราะห์ต้นทุน", en: "Cost Analysis Center" },
+  "/budget": { th: "จัดการงบประมาณ", en: "Budget Management" },
   "/analytics/kpi": { th: "แดชบอร์ด KPI ผู้บริหาร", en: "Executive KPI" },
   "/analytics/advanced": { th: "วิเคราะห์เจาะลึก", en: "Drill-down Analytics" },
+  "/analytics/intelligence": { th: "ศูนย์วิเคราะห์อัจฉริยะ", en: "Intelligence Center" },
   "/reports/monthly_pdf": { th: "รายงาน PDF", en: "PDF Report" },
   "/reports/export_excel": { th: "ส่งออก Excel / CSV", en: "Export Excel" },
   "/reports/import_excel": { th: "นำเข้า Excel", en: "Import Excel" },
-  "/safety/work_permit": { th: "ใบอนุญาต LOTO", en: "LOTO Permits" },
+  "/safety/work_permit": { th: "ใบอนุญาตทำงานเสี่ยง (PTW)", en: "Work Permit (PTW)" },
+  "/safety/work_permit/create": { th: "ออกใบอนุญาตทำงานเสี่ยงใหม่", en: "New Work Permit" },
+  "/safety/work_permit/[id]": { th: "รายละเอียดใบอนุญาตทำงานเสี่ยง", en: "Work Permit Detail" },
   "/iot/monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
+  "/sync-center": { th: "ศูนย์ซิงก์ Offline", en: "Sync Center" },
   "/notifications": { th: "ศูนย์แจ้งเตือน", en: "Notifications" },
   "/notifications/history": { th: "ประวัติการส่ง LINE", en: "LINE Send History" },
   "/users": { th: "ผู้ใช้งานระบบ", en: "Users" },
@@ -619,6 +764,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/settings/notification-prefs": { th: "การแจ้งเตือนของฉัน", en: "My Notification Preferences" },
   "/settings/notification-rules": { th: "กฎการแจ้งเตือนอัตโนมัติ", en: "Notification Rules" },
   "/settings/menus": { th: "สิทธิ์เมนูตามบทบาท", en: "Menu Permissions" },
+  "/audit-log": { th: "บันทึกการตรวจสอบ", en: "Audit Log" },
   "/settings/repair-options": { th: "ตัวเลือกงานซ่อม", en: "Repair Options" },
   "/settings/pwa": { th: "ตั้งค่าไอคอน PWA", en: "PWA Settings" },
   "/settings/design": { th: "ปรับแต่งหน้าตาของระบบ", en: "Page Designer" },
@@ -648,6 +794,9 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/manuals/edit": { th: "แก้ไขคู่มือ", en: "Edit Manual" },
   "/mtbf_mttr/create": { th: "บันทึกข้อมูล MTBF/MTTR", en: "Add MTBF/MTTR" },
   "/mtbf_mttr/edit": { th: "แก้ไข MTBF/MTTR", en: "Edit MTBF/MTTR" },
+  "/mtbf_mttr/production_hours": { th: "ชั่วโมงการผลิต", en: "Production Hours" },
+  "/mtbf_mttr/production_hours/create": { th: "บันทึกชั่วโมงการผลิต", en: "Add Production Hours" },
+  "/mtbf_mttr/production_hours/edit": { th: "แก้ไขชั่วโมงการผลิต", en: "Edit Production Hours" },
   "/pages/[slug]": { th: "หน้าเว็บ", en: "Custom Page" },
   "/pm_am": { th: "แผน PM/AM", en: "PM/AM Plans" },
   "/pm_am/edit": { th: "แก้ไขแผน PM", en: "Edit PM Plan" },
@@ -694,14 +843,65 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/pm_am/plans/[id]": { th: "รายละเอียดแผนแม่แบบ PM", en: "PM Master Plan Detail" },
   "/pm_am/checklists": { th: "จัดการ Checklist Templates", en: "Checklist Templates" },
   "/pm_am/view": { th: "รายละเอียดรอบ PM", en: "PM Cycle Detail" },
+  // ── PHASE 28: Asset Reliability & Lifecycle ──
+  "/asset-reliability": { th: "Reliability & Lifecycle", en: "Asset Reliability & Lifecycle" },
+  "/asset-reliability/critical": { th: "เครื่องสำคัญ (A/B/C/D)", en: "Critical Assets" },
+  "/asset-reliability/lifecycle": { th: "สถานะวงจรชีวิต", en: "Lifecycle Status" },
+  "/asset-reliability/aging": { th: "เครื่องถึงกำหนดศึกษา", en: "Aging Review" },
+  "/asset-reliability/replacement": { th: "เปลี่ยนชิ้นส่วน Components", en: "Component Replacements" },
+  "/asset-reliability/overhaul": { th: "งานยกเครื่อง (Overhaul)", en: "Overhauls" },
+  "/asset-reliability/data-quality": { th: "คุณภาพข้อมูล Asset", en: "Asset Data Quality" },
+  "/asset-reliability/reports": { th: "รายงาน Reliability", en: "Reliability Reports" },
+  "/asset-reliability/config": { th: "ตั้งค่า Reliability", en: "Reliability Settings" },
+  "/asset-reliability/[id]": { th: "โปรไฟล์ Reliability", en: "Reliability Profile" },
+  // ── PHASE 31: Contractor Management ──
+  "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "/contractors/create": { th: "สร้างผู้รับเหมาใหม่", en: "Register Contractor" },
+  "/contractors/[id]": { th: "โปรไฟล์ผู้รับเหมา", en: "Contractor Profile" },
+  "/contractors/work": { th: "งานภายนอก (External Work)", en: "External Work Board" },
+  // ── PHASE 32: Engineering Change & Controlled Documents ──
+  "/engineering-changes": { th: "Engineering Change Request", en: "Engineering Change Request" },
+  "/engineering-changes/create": { th: "เปิด ECR ใหม่", en: "Open Engineering Change" },
+  "/engineering-changes/[id]": { th: "รายละเอียด ECR", en: "ECR Detail" },
+  "/documents": { th: "เอกสารควบคุม", en: "Controlled Documents" },
+  "/documents/create": { th: "สร้างเอกสารควบคุม", en: "Register Controlled Document" },
+  "/documents/[id]": { th: "รายละเอียดเอกสาร", en: "Controlled Document Detail" },
+  // ── PHASE 38: Knowledge Center ──
+  "/knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
+  "/knowledge/search": { th: "ค้นหาความรู้", en: "Knowledge Search" },
+  "/knowledge/articles": { th: "บทความความรู้", en: "Knowledge Articles" },
+  "/knowledge/articles/create": { th: "เขียนบทความใหม่", en: "New Knowledge Article" },
+  "/knowledge/articles/[id]": { th: "รายละเอียดบทความความรู้", en: "Knowledge Article Detail" },
+  "/knowledge/gaps": { th: "ช่องว่างความรู้", en: "Knowledge Gaps" },
+  "/knowledge/gaps/[id]": { th: "รายละเอียดช่องว่างความรู้", en: "Knowledge Gap Detail" },
+  "/knowledge/reviews": { th: "งานทบทวนความรู้", en: "Knowledge Reviews" },
+  "/knowledge/taxonomy": { th: "หมวดหมู่ & แท็กความรู้", en: "Knowledge Taxonomy" },
+  "/knowledge/usage": { th: "สถิติการใช้งานความรู้", en: "Knowledge Usage Analytics" },
+  // ── Phase 37: Reliability Engineering ──
+  "/reliability": { th: "วิศวกรรมความเสียหายเชิงวิเคราะห์", en: "Reliability Engineering" },
+  "/reliability/assets": { th: "ความเสียหายรายเครื่อง", en: "Asset Reliability" },
+  "/reliability/assets/[id]": { th: "รายละเอียดความเสียหายของเครื่อง", en: "Asset Reliability Detail" },
+  "/reliability/failure-modes": { th: "รูปแบบการเสีย & Pareto", en: "Failure Modes & Pareto" },
+  "/reliability/trend": { th: "แนวโน้มความเสียหาย", en: "Reliability Trend" },
+  "/reliability/weibull": { th: "การวิเคราะห์ Weibull", en: "Weibull Analysis" },
+  "/reliability/bad-actors": { th: "เครื่องที่มีปัญหาเป็นระบบ", en: "Bad Actors" },
+  "/reliability/pm-effectiveness": { th: "ประสิทธิผลของแผน PM", en: "PM Effectiveness" },
+  "/reliability/growth": { th: "การเติบโตของความเสียหาย", en: "Reliability Growth" },
+  "/reliability/studies": { th: "งานวิเคราะห์เชิงวิศวกรรม", en: "Engineering Studies" },
+  "/reliability/studies/[id]": { th: "รายละเอียดงานวิเคราะห์", en: "Study Detail" },
+  "/reliability/data-quality": { th: "คุณภาพข้อมูลความเสียหาย", en: "Reliability Data Quality" },
+  "/reliability/config": { th: "นิยาม & การตั้งค่า KPI", en: "KPI Definitions & Settings" },
+  "/process-flows": { th: "ผังกระบวนการซ่อมบำรุง", en: "Visual Process Flows" },
 };
 
 // หมวด breadcrumb
 const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/repair": { th: "งานซ่อมบำรุง", en: "Maintenance" },
+  "/planning": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
   "/approval": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "/forms": { th: "การอนุมัติ & เอกสาร", en: "Approval & Documents" },
   "/pm_am": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
+  "/asset-reliability": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/asset_registry": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/assets": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/equipment_borrowing": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
@@ -713,17 +913,26 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/analytics": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/analytics/kpi": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/analytics/advanced": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
+  "/analytics/intelligence": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/reports": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/andon-board": { th: "วิเคราะห์ & รายงาน", en: "Analytics & Reports" },
   "/safety": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
   "/iot": { th: "ความปลอดภัย & IoT", en: "Safety & IoT" },
+  "/contractors": { th: "ผู้รับเหมา & งานภายนอก", en: "Contractors & External Work" },
+  "/engineering-changes": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "/documents": { th: "วิศวกรรม & เอกสารควบคุม", en: "Engineering & Controlled Documents" },
+  "/knowledge": { th: "ศูนย์ความรู้", en: "Knowledge Center" },
   "/users": { th: "บุคลากร", en: "People" },
   "/roles": { th: "บุคลากร", en: "People" },
   "/manuals": { th: "เอกสารคู่มือ", en: "Manuals" },
   "/notifications": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
+  "/sync-center": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/settings": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/pages": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
+  "/audit-log": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
   "/editor": { th: "ระบบ & ตั้งค่า", en: "System & Settings" },
+  "/reliability": { th: "วิศวกรรมความเสียหาย", en: "Reliability Engineering" },
+  "/process-flows": { th: "การวางแผนซ่อมบำรุง", en: "Maintenance Planning" },
 };
 
 // ════════════════ Hero หน้า (หัวข้อหลัก) ════════════════
@@ -737,6 +946,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "dashboard/list": {
     th: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "วิเคราะห์ลงลึก", desc: "ลงลึกจาก KPI บนแดชบอร์ด — รายการงานซ่อม งานค้างเกินกำหนด PM และวิเคราะห์แนวโน้ม" },
     en: { eyebrow: "DASHBOARD DRILL-DOWN · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "Dig deeper from dashboard KPIs — work order lists, overdue items, PM and trend analysis" },
+  },
+  "process_flows": {
+    th: { eyebrow: "PROCESS FLOWS · CMMS-TOPPAN", title: "ผังกระบวนการซ่อมบำรุง", desc: "ภาพรวมขั้นตอนการทำงานของแต่ละกระบวนการหลัก ตั้งแต่เริ่มจนปิดงาน พร้อมสถานะแยกจากสายหลัก" },
+    en: { eyebrow: "PROCESS FLOWS · CMMS-TOPPAN", title: "Visual Process Flows", desc: "End-to-end visual overview of the core maintenance processes, main steps and their branch statuses" },
   },
   repair: {
     th: { eyebrow: "Work Order Board · CMMS-TOPPAN", title: "ใบสั่งงานซ่อม", desc: "สถานะงานจากใบแจ้งซ่อม — ไฟเหลืองคือค้างอยู่ ไฟแดงกระพริบคือเกินกำหนด" },
@@ -761,6 +974,62 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "supervisor/verify": {
     th: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "ตรวจรับงาน (Verify)", desc: "ตรวจสอบงานที่ทำเสร็จแล้ว ตรวจรับ ปิดใบงาน หรือส่งกลับแก้ไข (Reopen)" },
     en: { eyebrow: "WORK VERIFICATION · CMMS-TOPPAN", title: "Work Verification", desc: "Verify completed work, close work orders, or reopen for rework" },
+  },
+  "planning": {
+    th: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "ศูนย์วางแผนซ่อมบำรุง", desc: "ภาพรวมคิววางแผน ภาระงานช่าง ความพร้อมงาน และความขัดแย้งของตาราง — จัดลำดับ มอบหมาย และวางแผนเป็นกลุ่ม" },
+    en: { eyebrow: "PLANNING CENTER · CMMS-TOPPAN", title: "Maintenance Planning Center", desc: "Planning queue, technician workload, work readiness and schedule conflicts — prioritize, assign and bulk-plan" },
+  },
+  "shutdown": {
+    th: { eyebrow: "SHUTDOWN & TURNAROUND · CMMS-TOPPAN", title: "ศูนย์หยุดเครื่อง & Turnaround", desc: "วางแผนขอบเขตงาน ความสัมพันธ์ และ Critical Path ตรวจความพร้อมเป็นรายการพร้อมเหตุผล และควบคุมการกลับเข้าสู่ระบบ — ไม่มีคะแนนรวม และไม่ปลด LOTO อัตโนมัติ" },
+    en: { eyebrow: "SHUTDOWN & TURNAROUND · CMMS-TOPPAN", title: "Shutdown & Turnaround", desc: "Plan scope, dependencies and the critical path, check readiness item-by-item with reasons, and control startup — no aggregate score and no automatic LOTO release" },
+  },
+  "workforce": {
+    th: { eyebrow: "WORKFORCE · CMMS-TOPPAN", title: "กำลังคนและคุณสมบัติ", desc: "ทักษะ ใบรับรอง สิทธิ์ ความพร้อมตามกะ และปริมาณงานเทียบความจุ — ทุกการมอบหมายตรวจสอบคุณสมบัติจริงก่อนเสมอ" },
+    en: { eyebrow: "WORKFORCE · CMMS-TOPPAN", title: "Workforce & Competency", desc: "Skills, certifications, authorizations, shift availability and workload versus capacity — every assignment is checked against real evidence" },
+  },
+  "workforce/capacity": {
+    th: { eyebrow: "CAPACITY BOARD · CMMS-TOPPAN", title: "ความจุและภาระงาน", desc: "เทียบเวลาที่วางแผนกับเวลาที่บันทึกจริงต่อช่าง — หักวันลาอนุมัติแล้วและเวลาที่งานถูกหยุด" },
+    en: { eyebrow: "CAPACITY BOARD · CMMS-TOPPAN", title: "Capacity & Workload", desc: "Planned versus recorded hours per technician — approved leave and paused time are deducted" },
+  },
+  "workforce/skills": {
+    th: { eyebrow: "SKILL CATALOG · CMMS-TOPPAN", title: "ทะเบียนทักษะ", desc: "กำหนดทักษะ ระดับขั้นต่ำ และเงื่อนไขใบรับรอง/สิทธิ์ที่ต้องมีครบก่อนรับงาน" },
+    en: { eyebrow: "SKILL CATALOG · CMMS-TOPPAN", title: "Skill Catalog", desc: "Define skills, minimum levels and the certificate or authorization each one requires" },
+  },
+  "workforce/certifications": {
+    th: { eyebrow: "CERTIFICATIONS · CMMS-TOPPAN", title: "ใบรับรองและสิทธิ์", desc: "บันทึกใบรับรองของพนักงานและผู้รับเหมา พร้อมแจ้งเตือนก่อนหมดอายุ" },
+    en: { eyebrow: "CERTIFICATIONS · CMMS-TOPPAN", title: "Certifications & Authorizations", desc: "Record employee and contractor credentials with expiry warnings" },
+  },
+  "workforce/training": {
+    th: { eyebrow: "TRAINING · CMMS-TOPPAN", title: "หลักสูตรและการอบรม", desc: "หลักสูตร ตารางอบรม และผลการอบรม — ผ่านการอบรมแล้วจะออกหลักฐานทักษะให้อัตโนมัติ" },
+    en: { eyebrow: "TRAINING · CMMS-TOPPAN", title: "Courses & Training", desc: "Course catalog, scheduled training and results — passing grants skill evidence automatically" },
+  },
+  "workforce/crews": {
+    th: { eyebrow: "CREWS · CMMS-TOPPAN", title: "ทีมงาน", desc: "จัดกลุ่มช่างเป็นทีม กำหนดหัวหน้าทีม และใช้ทีมเป็นเงื่อนไขระดับทีมในการมอบหมายงาน" },
+    en: { eyebrow: "CREWS · CMMS-TOPPAN", title: "Crews", desc: "Group technicians into crews, set crew leads, and use crews as team-level assignment clauses" },
+  },
+  "workforce/shifts": {
+    th: { eyebrow: "SHIFTS & LEAVE · CMMS-TOPPAN", title: "กะทำงานและการลา", desc: "กะรายบุคคลและวันลาที่อนุมัติแล้ว — วันลาอนุมัติจะถูกหักออกจากความจุโดยอัตโนมัติ" },
+    en: { eyebrow: "SHIFTS & LEAVE · CMMS-TOPPAN", title: "Shifts & Leave", desc: "Per-technician shifts and leave — approved leave is deducted from capacity automatically" },
+  },
+  "workforce/technicians": {
+    th: { eyebrow: "PEOPLE · CMMS-TOPPAN", title: "ข้อมูลช่าง", desc: "ทักษะ ใบรับรอง สิทธิ์ และหลักฐานที่มีอยู่ของแต่ละคน แบบละรายคน" },
+    en: { eyebrow: "PEOPLE · CMMS-TOPPAN", title: "People Records", desc: "Skills, certificates, authorizations and evidence held by each person" },
+  },
+  "workforce/conflicts": {
+    th: { eyebrow: "ความพร้อมและการจัดช่าง � CMMS-TOPPAN", title: "ความพร้อมและการจัดช่าง", desc: "ตรวจคุณสมบัติก่อนรับงาน — ระบบจัดอันดับผู้สมัครพร้อมเหตุผลประกอบ แต่ไม่มอบหมายงานให้อัตโนมัติ" },
+    en: { eyebrow: "READINESS & CREWING � CMMS-TOPPAN", title: "Readiness & Crewing", desc: "Qualification before work starts - candidates are ranked with reasons, but nothing is ever auto-assigned" },
+  },
+  "workforce/mine": {
+    th: { eyebrow: "MY RECORD · CMMS-TOPPAN", title: "คุณสมบัติของฉัน", desc: "ทักษะ ใบรับรอง สิทธิ์ และประวัติการอบรมของคุณเอง — ใช้ได้บนมือถือแบบออฟไลน์" },
+    en: { eyebrow: "MY RECORD · CMMS-TOPPAN", title: "My Competency", desc: "Your own skills, certificates, authorizations and training history — works offline on mobile" },
+  },
+  "planning/calendar": {
+    th: { eyebrow: "TIMELINE PLANNER · CMMS-TOPPAN", title: "ตารางวางแผนงาน (Monthly)", desc: "ดูรอบเวลาวางแผนบนไทม์ไลน์รายวัน/สัปดาห์/เดือน กันความซ้ำซ้อนของช่างและเครื่องจักร แล้ววางแผนแบบกลุ่มจากช่องว่างในตาราง" },
+    en: { eyebrow: "TIMELINE PLANNER · CMMS-TOPPAN", title: "Timeline Planner (Monthly)", desc: "View planned slots on a day/week/month timeline, avoid technician & asset conflicts, and bulk-plan into free slots" },
+  },
+  "field/plan": {
+    th: { eyebrow: "MY PLAN · CMMS-TOPPAN", title: "แผนงานของฉัน", desc: "งานที่ถูกวางแผน/มอบหมายให้คุณในสัปดาห์นี้ พร้อมเวลาวางแผนและความพร้อมของงาน" },
+    en: { eyebrow: "MY PLAN · CMMS-TOPPAN", title: "My Plan", desc: "Work scheduled/assigned to you this week, with planned slots and readiness" },
   },
   "repair/my_tasks": {
     th: { eyebrow: "My Tasks · CMMS-TOPPAN", title: "งานของฉัน (ซ่อม + PM)", desc: 'งานซ่อมและแผน PM ที่มอบหมายให้คุณ — กด "ไปทำ PM" แล้วสแกน QR ที่เครื่องเพื่อตรวจเช็คได้เลย' },
@@ -830,6 +1099,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     th: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "วิเคราะห์เจาะลึก (Drill-down)", desc: "8 มุมวิเคราะห์จากข้อมูลจริง — Downtime & ความพร้อม · ค่าใช้จ่าย · SLA · PM vs Breakdown · สต็อก · ช่าง · Inspection · สอบเทียบ" },
     en: { eyebrow: "DRILL-DOWN ANALYTICS · CMMS-TOPPAN", title: "Drill-down Analytics", desc: "8 analysis views from real data — Downtime & Availability · Cost · SLA · PM vs Breakdown · Stock · Technicians · Inspection · Calibration" },
   },
+  "analytics/intelligence": {
+    th: { eyebrow: "INTELLIGENCE CENTER · CMMS-TOPPAN", title: "ศูนย์วิเคราะห์อัจฉริยะ (Intelligence)", desc: "Executive dashboard — MTBF/MTTR จาก operating time จริง · สถานะเครื่องอธิบายได้ · การเสียซ้ำ · Pareto Downtime · PM · ภาระงานช่าง · สต็อก Sage vs การใช้งาน · ต้นทุน (ตามสิทธิ์) พร้อมตรวจสอบคุณภาพข้อมูลทุกตัวเลข" },
+    en: { eyebrow: "INTELLIGENCE CENTER · CMMS-TOPPAN", title: "Intelligence Center", desc: "Executive dashboard — MTBF/MTTR from real operating time · explainable asset health · repeat failures · Downtime Pareto · PM · technician load · Sage stock vs usage · cost (role-gated) with data-quality checks on every figure" },
+  },
   users: {
     th: { eyebrow: "USER MANAGEMENT · CMMS-TOPPAN", title: "ผู้ใช้งานระบบ (User Management)", desc: "จัดการผู้ใช้ เพิ่ม แก้ไข ลบ และจัดการสิทธิ์เข้าใช้งานระบบ CMMS" },
     en: { eyebrow: "USER MANAGEMENT · CMMS-TOPPAN", title: "Users", desc: "Manage users — add, edit, delete and control CMMS access" },
@@ -849,6 +1122,26 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   mtbf_mttr: {
     th: { eyebrow: "MTBF MTTR · CMMS-TOPPAN", title: "รายงานดัชนีชี้วัด MTBF & MTTR (Reliability KPI)", desc: "ติดตามค่าระยะเวลาเฉลี่ยก่อนการชำรุด (MTBF) และระยะเวลาเฉลี่ยในการซ่อม (MTTR)" },
     en: { eyebrow: "MTBF MTTR · CMMS-TOPPAN", title: "MTBF & MTTR Report (Reliability KPI)", desc: "Track mean time between failures (MTBF) and mean time to repair (MTTR)" },
+  },
+  production_hours: {
+    th: { eyebrow: "PRODUCTION HOURS · CMMS-TOPPAN", title: "ชั่วโมงการผลิต (Production Hours)", desc: "บันทึกเวลาทำงานจริงของเครื่องจักร — ใช้เป็นฐานคำนวณ MTBF / MTTR / OEE / Availability" },
+    en: { eyebrow: "PRODUCTION HOURS · CMMS-TOPPAN", title: "Production Hours", desc: "Record real machine run hours — the basis for MTBF / MTTR / OEE / Availability" },
+  },
+  "asset-reliability": {
+    th: { eyebrow: "ASSET RELIABILITY & LIFECYCLE · CMMS-TOPPAN", title: "ความน่าเชื่อถือและวงจรชีวิตเครื่องจักร", desc: "Reliability, Health, Criticality (A-D), Lifecycle, Failure history, Cost และ Decision Support จากข้อมูลจริงในระบบ — ไม่ใช้ค่าคาดเดา" },
+    en: { eyebrow: "ASSET RELIABILITY & LIFECYCLE · CMMS-TOPPAN", title: "Asset Reliability & Lifecycle", desc: "Reliability, Health, Criticality (A-D), Lifecycle, failure history, cost and decision support from real system data — never fabricated" },
+  },
+  "asset-reliability/profile": {
+    th: { eyebrow: "RELIABILITY PROFILE · CMMS-TOPPAN", title: "โปรไฟล์ความน่าเชื่อถือเครื่องจักร", desc: "ข้อมูลรวมเครื่องเดียว: criticality, lifecycle, reliability, health, failures, cost, parts, overhaul และการใช้แทน — แสดงค่าจริงจากระบบ" },
+    en: { eyebrow: "RELIABILITY PROFILE · CMMS-TOPPAN", title: "Asset Reliability Profile", desc: "Single-asset view: criticality, lifecycle, reliability, health, failures, cost, parts, overhaul — all real system data" },
+  },
+  "asset-reliability/reports": {
+    th: { eyebrow: "RELIABILITY REPORTS · CMMS-TOPPAN", title: "รายงาน Reliability & Lifecycle", desc: "รายงานจากข้อมูลจริง: criticality ranking, aging, lifecycle distribution, replacements, overhauls, data quality และ reliability ranking" },
+    en: { eyebrow: "RELIABILITY REPORTS · CMMS-TOPPAN", title: "Reliability & Lifecycle Reports", desc: "Real-data reports: criticality ranking, aging, lifecycle distribution, replacements, overhauls, data quality and reliability ranking" },
+  },
+  "asset-reliability/config": {
+    th: { eyebrow: "RELIABILITY SETTINGS · CMMS-TOPPAN", title: "ตั้งค่า Reliability & Criticality", desc: "ค่าน้ำหนัก ค่าขีดแบ่ง และรอบทบทวนสำหรับการประเมินความสำคัญ (A-D) และการคำนวณ reliability" },
+    en: { eyebrow: "RELIABILITY SETTINGS · CMMS-TOPPAN", title: "Reliability & Criticality Settings", desc: "Weights, thresholds and review cycles for criticality (A-D) scoring and reliability calculations" },
   },
   calibration: {
     th: { eyebrow: "CALIBRATION · CMMS-TOPPAN", title: "ทะเบียนสอบเทียบเครื่องมือวัด", desc: "ติดตามรอบการสอบเทียบของเครื่องมือวัดในโรงงานทั้งหมด" },
@@ -890,6 +1183,26 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     th: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "รายงานค่าใช้จ่ายซ่อมบำรุง", desc: "ค่าใช้จ่ายอะไหล่และค่าแรง รวมเป็นยอดรายเดือน และรายการค่าใช้จ่ายละเอียด (เฉพาะผู้บริหาร)" },
     en: { eyebrow: "REPORT · COST · CMMS-TOPPAN", title: "Maintenance Cost Report", desc: "Parts & labour cost, monthly totals and cost line items (managers only)" },
   },
+  cost: {
+    th: { eyebrow: "COST · CMMS-TOPPAN", title: "ศูนย์วิเคราะห์ต้นทุน", desc: "ค่าแรง + อะไหล่ + จ้างภายนอก คำนวณจากใบสั่งซ่อมจริง — ระบุจุดที่ค่าใช้จ่ายสูง และความครบถ้วนของข้อมูล (ไม่แสดงหน้าจอให้ช่าง)" },
+    en: { eyebrow: "COST · CMMS-TOPPAN", title: "Cost Analysis Center", desc: "Labour + parts + outsourced cost from real work orders — pinpoint what costs the most and data completeness (management only)" },
+  },
+  budget: {
+    th: { eyebrow: "BUDGET · CMMS-TOPPAN", title: "จัดการงบประมาณ", desc: "ตั้งงบประมาณรายเดือนรายแผนก อนุมัติ ปรับ และติดตามการใช้จ่ายจริงเทียบกับงบ (ผู้จัดการ/ผู้ดูแลระบบ)" },
+    en: { eyebrow: "BUDGET · CMMS-TOPPAN", title: "Budget Management", desc: "Set monthly budgets per department, approve, adjust and track actual spend vs budget (manager/admin only)" },
+  },
+  rca: {
+    th: { eyebrow: "FAILURE ANALYSIS · RCA · CMMS-TOPPAN", title: "วิเคราะห์ความเสียหาย & Root Cause", desc: "บันทึกเหตุการณ์ความเสียหาย พิสูจน์หาสาเหตุรากด้วย 5-Why กำหนด action แก้ไข/ป้องกัน ว่าติดตามผลและเฝ้าระวังการเสียซ้ำ (ผู้จัดการ/หัวหน้าช่าง/แอดมิน)" },
+    en: { eyebrow: "FAILURE ANALYSIS · RCA · CMMS-TOPPAN", title: "Failure Analysis & Root Cause", desc: "Log failure events, investigate root causes with 5-Why, define corrective/preventive actions, track effectiveness and watch for repeat failures (management/foreman/admin)" },
+  },
+  "rca/events": {
+    th: { eyebrow: "FAILURE EVENTS · CMMS-TOPPAN", title: "เหตุการณ์ความเสียหาย", desc: "รายการเหตุการณ์ทั้งหมด พร้อมตัวกรองและบัญชี RCA ที่ยังต้องทำ (Repeat Failure Suspected เกิดจากข้อมูล ไม่ใช่ข้อสรุปสาเหตุ)" },
+    en: { eyebrow: "FAILURE EVENTS · CMMS-TOPPAN", title: "Failure Events", desc: "All failure events with filters and pending RCA tracking (Repeat Failure Suspected is data-driven, not a causal conclusion)" },
+  },
+  "rca/taxonomy": {
+    th: { eyebrow: "TAXONOMY · CMMS-TOPPAN", title: "จัดการ Taxonomies ความเสียหาย", desc: "บริหารรายการประเภทรหัสของความเสียหาย: failure type / failure mode / failure cause / root cause category" },
+    en: { eyebrow: "TAXONOMY · CMMS-TOPPAN", title: "Failure Taxonomy Admin", desc: "Manage failure taxonomy codes: failure type / failure mode / failure cause / root cause category" },
+  },
   "reports/downtime": {
     th: { eyebrow: "REPORT · DOWNTIME · CMMS-TOPPAN", title: "รายงาน Downtime", desc: "เวลาหยุดเครื่อง จำนวนเหตุการณ์ และDowntime รวมรายเครื่องจักร/แผนก เพื่อจัดลำดับการลงทุน" },
     en: { eyebrow: "REPORT · DOWNTIME · CMMS-TOPPAN", title: "Downtime Report", desc: "Machine stop hours, event counts and total downtime by machine/department to prioritize investments" },
@@ -901,6 +1214,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "reports/sla": {
     th: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "รายงานการปฏิบัติตาม SLA", desc: "อัตรางานที่ปิดภายใน SLA จำแนกตามแผนก/ระดับความเร่งด่วน ย้อนหลังหลายเดือน" },
     en: { eyebrow: "REPORT · SLA · CMMS-TOPPAN", title: "SLA Compliance Report", desc: "SLA closure rate by department/priority over recent months" },
+  },
+  "audit-log": {
+    th: { eyebrow: "SECURITY · AUDIT LOG · CMMS-TOPPAN", title: "บันทึกการตรวจสอบ", desc: "ประวัติการใช้งานระบบทั้งหมด ตามเวลา ผู้ใช้งาน การกระทำ และค่าก่อน/หลังการแก้ไข" },
+    en: { eyebrow: "SECURITY · AUDIT LOG · CMMS-TOPPAN", title: "Audit Log", desc: "Full system activity trail by time, user, action, and before/after values" },
   },
   "reports/mttr-mtbf": {
     th: { eyebrow: "REPORT · MTTR/MTBF · CMMS-TOPPAN", title: "รายงาน MTTR & MTBF", desc: "แนวโน้มระยะเวลาซ่อมเฉลี่ยและระยะเวลาเฉลี่ยก่อนชำรุด รายเดือน ตามเครื่องจักร และการพยากรณ์" },
@@ -929,6 +1246,132 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "forms/run": {
     th: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "กรอกแบบฟอร์ม", desc: "กรอกข้อมูลแบบฟอร์มดิจิทัล — ฟิลด์ที่ผูกฐานข้อมูลเลือกค่าจริง แล้วพิมพ์เป็น PDF" },
     en: { eyebrow: "FORM FILL · CMMS-TOPPAN", title: "Fill Form", desc: "Complete the digital form — database-bound fields load live options, then print to PDF" },
+  },
+  contractors: {
+    th: { eyebrow: "CONTRACTOR MANAGEMENT · CMMS-TOPPAN", title: "ผู้รับเหมา & งานภายนอก", desc: "ทะเบียนผู้รับเหมา คุณสมบัติ เอกสาร ความปลอดภัย งานภายนอก และผลการปฏิบัติงาน — ข้อมูลจริง ระบบเดียว ตรวจย้อนได้" },
+    en: { eyebrow: "CONTRACTOR MANAGEMENT · CMMS-TOPPAN", title: "Contractors & External Work", desc: "Contractor registry, qualification, documents, safety, external work and performance — one source of truth, auditable" },
+  },
+  "contractors/create": {
+    th: { eyebrow: "NEW CONTRACTOR · CMMS-TOPPAN", title: "สร้างผู้รับเหมาใหม่", desc: "ลงทะเบียนบริษัทผู้รับเหมาใหม่ พร้อมข้อมูลทะเบียน ผู้ติดต่อ และหมวดงานบริการ" },
+    en: { eyebrow: "NEW CONTRACTOR · CMMS-TOPPAN", title: "Register Contractor", desc: "Register a new contractor company with registration details, contacts and service categories" },
+  },
+  "contractors/[id]": {
+    th: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "โปรไฟล์ผู้รับเหมา", desc: "คุณสมบัติ เอกสาร พนักงาน สัญญา ประวัติการทำงาน ใบอนุญาต และผลการปฏิบัติงาน" },
+    en: { eyebrow: "CONTRACTOR PROFILE · CMMS-TOPPAN", title: "Contractor Profile", desc: "Qualification, documents, workers, contracts, work history, permits and performance" },
+  },
+  "documents": {
+    th: { eyebrow: "CONTROLLED DOCUMENTS · CMMS-TOPPAN", title: "เอกสารควบคุม", desc: "ทะเบียนเอกสารมาตรฐาน ประวัติการแก้ไข ฉบับที่มีผลบังคับใช้ การรับทราบ และการอบรม — ค้นหาฉบับที่ใช้งานได้เสมอในหน้างาน" },
+    en: { eyebrow: "CONTROLLED DOCUMENTS · CMMS-TOPPAN", title: "Controlled Documents", desc: "Standard document registry, revision history, effective release, acknowledgement and training — always find the version that is valid on the floor" },
+  },
+  "documents/create": {
+    th: { eyebrow: "NEW CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "สร้างเอกสารควบคุม", desc: "ลงทะเบียนเอกสารใหม่ กำหนดเจ้าของ ระดับการเข้าถึง รอบการทบทวน และการรับทราบ" },
+    en: { eyebrow: "NEW CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "Register Controlled Document", desc: "Register a new standard document with owner, confidentiality, review cycle and acknowledgement policy" },
+  },
+  "documents/[id]": {
+    th: { eyebrow: "CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "รายละเอียดเอกสาร", desc: "ประวัติ revision แบบ immutable ขั้นตอนอนุมัติ ผลกระทบ การรับทราบ และจุดระบุ QR สำหรับงานกระดาษ" },
+    en: { eyebrow: "CONTROLLED DOCUMENT · CMMS-TOPPAN", title: "Document Detail", desc: "Immutable revision history, approval steps, impacts, acknowledgements and the CMMS-D QR tag for paper copies" },
+  },
+  "engineering-changes": {
+    th: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "Engineering Change Request", desc: "ติดตามการเปลี่ยนแปลงทางวิศวกรรม ตั้งแต่คำขอ ผลกระทบ การอนุมัติ การดำเนินงาน การตรวจสอบผล และการปิดงาน" },
+    en: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "Engineering Change Request", desc: "Track engineering changes from request through impact assessment, approval, implementation, verification and closure" },
+  },
+  "engineering-changes/create": {
+    th: { eyebrow: "NEW ECR · CMMS-TOPPAN", title: "เปิด Engineering Change ใหม่", desc: "บันทึกคำขอการเปลี่ยนแปลง ประเภท ระดับความสำคัญ เหตุผล และกำหนดเสร็จ เพื่อเข้าสู่กระบวนการอนุมัติ" },
+    en: { eyebrow: "NEW ECR · CMMS-TOPPAN", title: "Open Engineering Change", desc: "Record the change request, type, priority, reason and required-by date to enter the approval workflow" },
+  },
+  "engineering-changes/[id]": {
+    th: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "รายละเอียด ECR", desc: "สถานะแบบทางเดียว ผลกระทบ ความเชื่อมโยงไปยังเอกสาร/อะไหล่ ขั้นตอนอนุมัติ และผลตรวจสอบก่อนปิดงาน" },
+    en: { eyebrow: "ENGINEERING CHANGE · CMMS-TOPPAN", title: "ECR Detail", desc: "One-way status, impact items, traceability links to documents and parts, approval steps and verification before closure" },
+  },
+  "contractors/work": {
+    th: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "งานภายนอก (External Work)", desc: "การมอบหมายงานภายนอก การขอใบอนุญาต (PTW) ตรวจรับงาน และความเสี่ยงด้านความปลอดภัย" },
+    en: { eyebrow: "EXTERNAL WORK BOARD · CMMS-TOPPAN", title: "External Work Board", desc: "External work assignments, permit-to-work (PTW), acceptance inspection and safety risks" },
+  },
+  // ── PHASE 38: Knowledge Center ──
+  "knowledge": {
+    th: { eyebrow: "KNOWLEDGE CENTER · CMMS-TOPPAN", title: "ศูนย์ความรู้", desc: "บทความอาการ–วิธีแก้ปัญหาจากเครื่องจริงในระบบ เชื่อมกับเครื่อง อะไหล่ ใบงาน และเอกสารควบคุม — ค้นแล้วได้ฉบับที่เผยแพร่แล้วเสมอ" },
+    en: { eyebrow: "KNOWLEDGE CENTER · CMMS-TOPPAN", title: "Knowledge Center", desc: "Symptom-to-remedy articles captured from real machines, linked to assets, parts, work orders and controlled documents — search always returns the published version" },
+  },
+  "knowledge/search": {
+    th: { eyebrow: "KNOWLEDGE SEARCH · CMMS-TOPPAN", title: "ค้นหาความรู้", desc: "พิมพ์อาการเบื้องต้นหรือข้อมูลเครื่อง ระบบจะค้นบทความความรู้และเอกสารควบคุมที่เกี่ยวข้อง และบันทึกคำค้นที่ยังไม่มีคำตอบเป็นช่องว่างความรู้" },
+    en: { eyebrow: "KNOWLEDGE SEARCH · CMMS-TOPPAN", title: "Knowledge Search", desc: "Type a symptom or asset hint — search knowledge articles together with controlled documents and record unanswered queries as knowledge gaps" },
+  },
+  "knowledge/articles": {
+    th: { eyebrow: "KNOWLEDGE ARTICLES · CMMS-TOPPAN", title: "บทความความรู้", desc: "ทะเบียนบทความทั้งหมด ตั้งแต่ร่าง รอทบทวน อนุมัติ ไปจนถึงเผยแพร่และถูกแทนที่ — ฉบับที่เผยแพร่แล้วแก้ไขไม่ได้" },
+    en: { eyebrow: "KNOWLEDGE ARTICLES · CMMS-TOPPAN", title: "Knowledge Articles", desc: "Full article registry from draft through review, approval, publication and supersession — published versions are immutable" },
+  },
+  "knowledge/articles/create": {
+    th: { eyebrow: "NEW KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "เขียนบทความใหม่", desc: "บันทึกอาการ การวินิจฉัย สาเหตุ วิธีแก้ ข้อควรระวัง และเชื่อมโยงกับเครื่องจักรหรือเอกสารควบคุม" },
+    en: { eyebrow: "NEW KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "Write a Knowledge Article", desc: "Capture symptoms, diagnosis, root cause, remedy, safety notes and traceability links to assets or controlled documents" },
+  },
+  "knowledge/articles/[id]": {
+    th: { eyebrow: "KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "รายละเอียดบทความความรู้", desc: "เนื้อหาตามหัวข้อ ความเชื่อมโยงไปยังเครื่อง/อะไหล่/เอกสาร ประวัติฉบับ ผลตอบรับการใช้งาน และวงจรอนุมัติแบบทางเดียว" },
+    en: { eyebrow: "KNOWLEDGE ARTICLE · CMMS-TOPPAN", title: "Knowledge Article Detail", desc: "Sectioned content, traceability links to assets/parts/documents, version history, real usage feedback and the one-way approval workflow" },
+  },
+  "knowledge/gaps": {
+    th: { eyebrow: "KNOWLEDGE GAPS · CMMS-TOPPAN", title: "ช่องว่างความรู้", desc: "รายการคำค้นที่ยังไม่มีคำตอบ พร้อมจำนวนครั้งที่พบและหลักฐานจริง — ตัดสินใจว่าจะเขียนความรู้หรือปิดเป็นไม่ต้องทำ" },
+    en: { eyebrow: "KNOWLEDGE GAPS · CMMS-TOPPAN", title: "Knowledge Gaps", desc: "Queries with no answer yet, their real occurrence counts and evidence — decide whether to write knowledge or close as not needed" },
+  },
+  "knowledge/gaps/[id]": {
+    th: { eyebrow: "KNOWLEDGE GAP · CMMS-TOPPAN", title: "รายละเอียดช่องว่างความรู้", desc: "หลักฐานจากบรรทัดค้นหาจริง ประวัติการดำเนินการ และการเชื่อมไปยังบทความที่ปิดช่องว่างนี้" },
+    en: { eyebrow: "KNOWLEDGE GAP · CMMS-TOPPAN", title: "Knowledge Gap Detail", desc: "Evidence from real search log rows, action history and the article that closed the gap" },
+  },
+  "knowledge/reviews": {
+    th: { eyebrow: "KNOWLEDGE REVIEWS · CMMS-TOPPAN", title: "งานทบทวนความรู้", desc: "รอบการทบทวนตามเวลาและตามเหตุการณ์ ผลการทบทวนกำหนดวันทบทวนถัดไปและอาจส่งบทความกลับไปแก้ไข" },
+    en: { eyebrow: "KNOWLEDGE REVIEWS · CMMS-TOPPAN", title: "Knowledge Reviews", desc: "Scheduled and event-driven review rounds — outcomes set the next review date and may send an article back for revision" },
+  },
+  "knowledge/taxonomy": {
+    th: { eyebrow: "KNOWLEDGE TAXONOMY · CMMS-TOPPAN", title: "หมวดหมู่ & แท็กความรู้", desc: "โครงสร้างหมวดหมู่และคำแท็กที่ใช้จัดกลุ่มบทความ เพื่อให้ค้นหาและทบทวนเป็นระบบ" },
+    en: { eyebrow: "KNOWLEDGE TAXONOMY · CMMS-TOPPAN", title: "Categories & Tags", desc: "Category structure and tags used to group articles so search and review stay systematic" },
+  },
+  "knowledge/usage": {
+    th: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "สถิติการใช้งานความรู้", desc: "เหตุการณ์การใช้งานและผลตอบรับจากผู้ใช้จริง พร้อมการค้นหาที่ไม่เจอคำตอบ เพื่อหาบทความที่ไม่มีคนใช้หรือยังไม่ช่วยเหลือใคร" },
+    en: { eyebrow: "KNOWLEDGE USAGE · CMMS-TOPPAN", title: "Knowledge Usage Analytics", desc: "Real usage events and user feedback plus unanswered searches — find articles nobody uses or that still do not help" },
+  },
+  // ── Phase 37: Reliability Engineering ──
+  reliability: {
+    th: { eyebrow: "RELIABILITY ENGINEERING · CMMS-TOPPAN", title: "วิศวกรรมความเสียหายเชิงวิเคราะห์", desc: "MTBF · MTTR · ความพร้อม · รูปแบบการเสีย คำนวณทั้งหมดโดย Reliability Engine ฝั่งเซิร์ฟเวอร์ ค่าที่ไม่ผ่านเกณฑ์ข้อมูลจะแสดงเป็นช่องว่าง ไม่ใช่ 0" },
+    en: { eyebrow: "RELIABILITY ENGINEERING · CMMS-TOPPAN", title: "Reliability Engineering", desc: "MTBF, MTTR, availability and failure modes — every number computed by the server-side Reliability Engine; values that fail the minimum-data threshold stay blank, never zero" },
+  },
+  "reliability/assets": {
+    th: { eyebrow: "ASSET RELIABILITY · CMMS-TOPPAN", title: "ความเสียหายรายเครื่อง", desc: "จัดอันดับเครื่องจักรจาก downtime · จำนวนเหตุ · MTBF · MTTR · ความพร้อม ตามขอบเขตและช่วงเวลาที่เลือก" },
+    en: { eyebrow: "ASSET RELIABILITY · CMMS-TOPPAN", title: "Asset Reliability", desc: "Rank assets by downtime, failures, MTBF, MTTR and availability within the selected scope and period" },
+  },
+  "reliability/failure-modes": {
+    th: { eyebrow: "FAILURE MODES · CMMS-TOPPAN", title: "รูปแบบการเสีย & Pareto", desc: "สัดส่วนของแต่ละ failure mode พร้อมการจัดกลุ่ม ABC จาก downtime และจำนวนเหตุ — สะสมเป็นร้อยละโดยเอนจิน" },
+    en: { eyebrow: "FAILURE MODES · CMMS-TOPPAN", title: "Failure Modes & Pareto", desc: "Share per failure mode with ABC classification by downtime and count — cumulative percentages come from the engine" },
+  },
+  "reliability/trend": {
+    th: { eyebrow: "RELIABILITY TREND · CMMS-TOPPAN", title: "แนวโน้มความเสียหาย", desc: "MTBF · MTTR · ความพร้อม · จำนวนเหตุ แยกตามช่วงเวลา เห็นช่องว่างได้ตรงที่เอนจินคำนวณไม่ได้" },
+    en: { eyebrow: "RELIABILITY TREND · CMMS-TOPPAN", title: "Reliability Trend", desc: "MTBF, MTTR, availability and failures per bucket — gaps appear exactly where the engine could not compute a value" },
+  },
+  "reliability/weibull": {
+    th: { eyebrow: "WEIBULL ANALYSIS · CMMS-TOPPAN", title: "การวิเคราะห์ Weibull", desc: "พารามิเตอร์รูป Weibull (β · η) เมื่อมีเหตุเสียเพียงพอเท่านั้น พร้อมเส้นโค้งความน่าเชื่อถือและข้อจำกัดของแบบจำลอง" },
+    en: { eyebrow: "WEIBULL ANALYSIS · CMMS-TOPPAN", title: "Weibull Analysis", desc: "Weibull shape and scale parameters only when the failure count is sufficient, with reliability curves and model limitations" },
+  },
+  "reliability/bad-actors": {
+    th: { eyebrow: "BAD ACTORS · CMMS-TOPPAN", title: "เครื่องที่มีปัญหาเป็นระบบ", desc: "คะแนนจากเกณฑ์ที่ผู้ดูแลกำหนด พร้อมหลักฐานและเงื่อนไขขั้นต่ำที่แต่ละเกณฑ์ต้องผ่าน" },
+    en: { eyebrow: "BAD ACTORS · CMMS-TOPPAN", title: "Bad Actors", desc: "Scores from administrator-defined criteria, with the evidence and minimum sample each criterion had to satisfy" },
+  },
+  "reliability/pm-effectiveness": {
+    th: { eyebrow: "PM EFFECTIVENESS · CMMS-TOPPAN", title: "ประสิทธิผลของแผน PM", desc: "เปรียบเทียบอัตราการเสียในหน้าต่างก่อน–หลังการซ่อมบำรุง เป็นการสังเกตเชิงสถิติ ไม่ใช่ข้อสรุปเชิงเหตุผล" },
+    en: { eyebrow: "PM EFFECTIVENESS · CMMS-TOPPAN", title: "PM Effectiveness", desc: "Compare failure rates in the pre- and post-maintenance windows — an observed comparison, not a causal claim" },
+  },
+  "reliability/growth": {
+    th: { eyebrow: "RELIABILITY GROWTH · CMMS-TOPPAN", title: "การเติบโตของความเสียหาย", desc: "ผลสังเกตก่อน–หลัง Engineering Change โดยไม่สรุปว่าเป็นเพราะของการเปลี่ยนแปลง" },
+    en: { eyebrow: "RELIABILITY GROWTH · CMMS-TOPPAN", title: "Reliability Growth", desc: "Observed results before and after an engineering change, without claiming the change caused them" },
+  },
+  "reliability/studies": {
+    th: { eyebrow: "ENGINEERING STUDIES · CMMS-TOPPAN", title: "งานวิเคราะห์เชิงวิศวกรรม", desc: "บันทึกวิธีการ · สมมติฐาน · หลักฐาน และผลสรุป พร้อมส่งต่อเป็นการดำเนินการได้" },
+    en: { eyebrow: "ENGINEERING STUDIES · CMMS-TOPPAN", title: "Engineering Studies", desc: "Record method, assumptions, evidence and conclusions, then carry them forward as actions" },
+  },
+  "reliability/data-quality": {
+    th: { eyebrow: "DATA QUALITY · CMMS-TOPPAN", title: "คุณภาพข้อมูลความเสียหาย", desc: "ตรวจสอบข้อมูลต้นทางที่ทำให้ KPI คำนวณไม่ได้ พร้อมระดับความรุนแรงและผลกระทบต่อตัวชี้วัด" },
+    en: { eyebrow: "DATA QUALITY · CMMS-TOPPAN", title: "Reliability Data Quality", desc: "Source-data checks that block KPI computation, with severity and the affected indicators" },
+  },
+  "reliability/config": {
+    th: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "นิยาม & การตั้งค่า KPI", desc: "สูตร · หน่วย · แหล่งข้อมูล และข้อจำกัดของแต่ละ KPI พร้อมนโยบายเกณฑ์ขั้นต่ำของเอนจิน" },
+    en: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "KPI Definitions & Settings", desc: "Formula, unit, data sources and limitations of each KPI, plus the engine's minimum-data thresholds" },
   },
 };
 

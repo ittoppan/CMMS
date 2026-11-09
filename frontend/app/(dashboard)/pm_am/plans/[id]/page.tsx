@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
+import { swalConfirm } from "@/lib/swal";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -47,7 +48,7 @@ export default function PMPlanViewPage() {
       if (j?.status === "success" && j.data) setPlan(j.data);
       else setError(j?.error || "โหลดแผนไม่สำเร็จ");
     } catch {
-      setError("ไม่สามารถเชื่อมต่อระบบได้");
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
@@ -61,7 +62,7 @@ export default function PMPlanViewPage() {
   };
 
   const handleGenerate = async () => {
-    if (!window.confirm(`สร้างรอบ PM ตามแผน "${plan.name}" สำหรับทุกเครื่องจักรในแผน?\n(ระบบกันรอบซ้ำอัตโนมัติ)`)) return;
+    if (!(await swalConfirm({ title: `สร้างรอบ PM ตามแผน "${plan.name}" สำหรับทุกเครื่องจักรในแผน?`, text: "ระบบกันรอบซ้ำอัตโนมัติ" }))) return;
     setBusy(true); setActionMsg(""); setActionErr("");
     try {
       const res = await fetch("/api/v1/pm_plans.php?action=generate", {
@@ -77,22 +78,22 @@ export default function PMPlanViewPage() {
         setActionErr(j.error || "สร้างรอบไม่สำเร็จ");
       }
     } catch {
-      setActionErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setActionErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`ลบแผน "${plan.name}"?`)) return;
+    if (!(await swalConfirm({ title: `ลบแผน "${plan.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setBusy(true); setActionErr("");
     try {
       const res = await fetch(`/api/v1/pm_plans.php?id=${planId}`, { method: "DELETE" });
       const j = await res.json();
       if (j.success) { router.push("/pm_am/plans"); return; }
-      setActionErr(j.error || "ลบไม่สำเร็จ");
+      setActionErr(j.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } catch {
-      setActionErr("ไม่สามารถเชื่อมต่อระบบได้");
+      setActionErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setBusy(false);
     }
@@ -253,7 +254,7 @@ export default function PMPlanViewPage() {
                   description='กดปุ่ม "สร้างรอบ PM" เพื่อสร้างรอบแรกให้เครื่องจักรในแผน' />
               ) : (
                 <div className="space-y-2">
-                  {plan.history.map((h: any) => {
+                  {(plan.history ?? []).map((h: any) => {
                     const woCount = h.wo_count || 0;
                     return (
                       <div key={h.id} className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"

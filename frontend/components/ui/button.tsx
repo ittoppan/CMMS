@@ -9,9 +9,14 @@ import { Loader2 } from "lucide-react";
  * Button — ปุ่มมาตรฐานของระบบ (tokens + cva)
  * variants: primary / secondary / outline / ghost / danger
  * sizes: sm (32px) / md (40px) / lg (48px) / icon (40px) / icon-xs (32px)
+ *   — ขนาดภาพ < 48px จะขยายพื้นที่กดจริง (hit area) เป็น ≥48px ด้วย pseudo-element
+ *     (ไม่เปลี่ยน layout — จำเป็นสำหรับการใช้งานสวมถุงมือบนโรงงาน, WCAG 2.5.8)
  * loading state: แสดง spinner + disable ปุ่ม
  * ใช้ Lucide icon เป็น children (strokeWidth 1.75 ตาม guideline)
  */
+const HIT_AREA = "relative after:absolute after:content-[''] after:rounded-[inherit]";
+const HIT_32 = `${HIT_AREA} after:-inset-2`; // 32px visual → hit ≥48px
+const HIT_40 = `${HIT_AREA} after:-inset-1`; // 40px visual → hit 48px
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--cmms-radius)] font-semibold transition-[background-color,box-shadow,transform] duration-[var(--cmms-transition)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cmms-bg-page)] disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:shrink-0 [&_svg]:aria-hidden",
   {
@@ -29,11 +34,11 @@ const buttonVariants = cva(
           "bg-[var(--cmms-danger)] text-white shadow-[var(--cmms-shadow-sm)] hover:opacity-90",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-4 text-sm",
+        sm: `${HIT_32} h-8 px-3 text-xs`,
+        md: `${HIT_40} h-10 px-4 text-sm`,
         lg: "h-12 px-6 text-base",
-        icon: "h-10 w-10",
-        "icon-xs": "h-8 w-8",
+        icon: `${HIT_40} h-10 w-10`,
+        "icon-xs": `${HIT_32} h-8 w-8`,
       },
     },
     defaultVariants: {

@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { t, statusText, priorityText } from "@/lib/i18n";
+import { assetUrl } from "@/lib/utils";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
+import { sendOrEnqueue } from "@/lib/offlineQueue";
+import { makeId, syncEngine } from "@/lib/offline/engine";
+import { idbGetAll } from "@/lib/offline/idb";
+import { preparePhoto, saveOfflineAttachment, makeClientActionId } from "@/lib/offline/photo";
+import type { OfflineAttachmentRecord } from "@/lib/offline/types";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
 import {
@@ -19,6 +25,7 @@ import {
   Info,
   Trash2,
   Plus,
+  PackagePlus,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -47,6 +54,24 @@ interface PartRow {
   sage_doc_no?: string;
 }
 
+/** อ่าน requested_parts JSON ที่ผู้แจ้งกรอกมาตอนแจ้งซ่อม [{code,name,qty}] */
+function parseRequestedParts(raw: unknown): { code: string; name: string; qty: number }[] {
+  if (!raw || typeof raw !== "string") return [];
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((p: any) => p && (p.name || p.code))
+      .map((p: any) => ({
+        code: String(p.code || ""),
+        name: String(p.name || p.code || ""),
+        qty: Math.max(1, Number(p.qty) || 1),
+      }));
+  } catch {
+    return [];
+  }
+}
+
 interface WorkOrderDetail {
   id: number;
   workOrderNo: string;
@@ -58,10 +83,12 @@ interface WorkOrderDetail {
   assignedName: string;
   receiverName: string;
   beforeImg: string;
+  videoPath: string;
   afterImg: string;
   receiverSignature: string;
   completedAt: string;
   createdDate: string;
+  requestedParts: { code: string; name: string; qty: number }[];
   rootCause: string;
   solution: string;
   costParts: number;
@@ -171,6 +198,12 @@ export default function RepairViewDetailsPage() {
   const [sageSource, setSageSource] = useState<"sage" | "cache">("sage");
   const [lastStockInfo, setLastStockInfo] = useState<{ last_synced_at?: string; request_count: number; request_status?: string }>({ request_count: 0 });
   const [sageMsg, setSageMsg] = useState<string | null>(null);
+  // ── หลักฐานภาพถ่าย offline (Phase 19) ──
+  const [serverAtts, setServerAtts] = useState<any[]>([]);
+  const [localAtts, setLocalAtts] = useState<OfflineAttachmentRecord[]>([]);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoMsg, setPhotoMsg] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   // โหมด offline — แสดง banner + เวลา "ข้อมูล ณ" จาก snapshot (IndexedDB)
   const [offline, setOffline] = useState(false);
   const [snapshotTime, setSnapshotTime] = useState<number | null>(null);
@@ -195,10 +228,12 @@ export default function RepairViewDetailsPage() {
     assignedName: "-",
     receiverName: "-",
     beforeImg: "",
+    videoPath: "",
     afterImg: "",
     receiverSignature: "",
     completedAt: "-",
     createdDate: "-",
+    requestedParts: [],
     rootCause: "-",
     solution: "-",
     costParts: 0,
@@ -231,10 +266,12 @@ export default function RepairViewDetailsPage() {
             assignedName: row.assigned_name || "-",
             receiverName: row.receiver_name || "-",
             beforeImg: row.before_image_path || "",
+            videoPath: row.video_path || "",
             afterImg: row.after_image_path || "",
             receiverSignature: row.receiver_signature_path || "",
             completedAt: row.completed_at || row.updated_at || "-",
             createdDate: row.created_at || "-",
+            requestedParts: parseRequestedParts(row.requested_parts),
             rootCause: row.root_cause || "-",
             solution: row.solution || row.resolution || "-",
             costParts: Number(row.cost_parts || 0),
@@ -405,19 +442,21 @@ export default function RepairViewDetailsPage() {
     }
   };
 
-  const addSagePart = async (item: any) => {
-    const qty = Math.max(1, Number(sageQtyRef.current || 1));
+  const addSagePart = async (item: any, qtyOverride?: number) => {
+    const qty = Math.max(1, Number(qtyOverride ?? sageQtyRef.current ?? 1));
     if (!item?.item_no) { setSageMsg("เลือกอะไหล่จากรายการค้นหาก่อน"); return; }
     setPartsSaving(true);
     setSageMsg(null);
     setPartsMsg(null);
+    const clientActionId = makeId("sa");
+    const payload = { action: "add", work_order_id: Number(woId), items: [{ item_code: item.item_no, qty }], client_action_id: clientActionId };
     try {
       const csrf = await (await fetch("/api/v1/csrf.php", { credentials: "include" })).json();
       const res = await fetch("/api/v1/spare_usage.php", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf.csrf_token },
-        body: JSON.stringify({ action: "add", work_order_id: Number(woId), items: [{ item_code: item.item_no, qty }] }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (json.success) {
@@ -430,7 +469,19 @@ export default function RepairViewDetailsPage() {
       }
     } catch (e) {
       console.error(e);
-      setPartsMsg({ kind: "err", text: "ไม่สามารถเพิ่มอะไหล่ได้ (เน็ตหลุด?) — ลองอีกครั้ง" });
+      // offline / เน็ตหลุด → คิว offline (idempotent) — จะเบิกจริงเมื่อกลับมาออนไลน์เท่านั้น
+      const out = await sendOrEnqueue({
+        url: "/api/v1/spare_usage.php",
+        method: "POST",
+        body: payload,
+        kind: "spare_usage",
+        label: `เบิกอะไหล่ ${item.item_no} ×${qty}`,
+      });
+      if (out === "queued") {
+        setPartsMsg({ kind: "ok", text: `บันทึกลงเครื่อง (${item.item_no} ×${qty}) แล้ว — จะสร้างใบเบิก Pending Issue เมื่อกลับมาออนไลน์` });
+      } else {
+        setPartsMsg({ kind: "err", text: out === "failed" ? "ระบบปฏิเสธรายการเบิก — ตรวจสอบอีกครั้ง" : "ไม่สามารถเพิ่มอะไหล่ได้ (เน็ตหลุด?) — ลองอีกครั้ง" });
+      }
     }
     setPartsSaving(false);
   };
@@ -471,6 +522,87 @@ export default function RepairViewDetailsPage() {
       loadParts(String(woId));
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  // ── หลักฐานภาพถ่าย offline (Phase 19) ──
+  const loadServerAtts = async () => {
+    if (!woId) return;
+    try {
+      const res = await fetch(`/api/v1/repair_attachment.php?work_order_id=${woId}`, { credentials: "include" });
+      const json = await res.json();
+      if (Array.isArray(json?.attachments)) setServerAtts(json.attachments);
+    } catch {
+      /* offline — ข้าม (สงวนดี อย่าแสดงตัวตน) */
+    }
+  };
+  const refreshLocalAtts = async () => {
+    try {
+      const rows = await idbGetAll<OfflineAttachmentRecord>("attachments");
+      setLocalAtts(rows.filter((a) => String(a.work_order_id) === String(woId)));
+    } catch {
+      setLocalAtts([]);
+    }
+  };
+  useEffect(() => {
+    void loadServerAtts();
+    void refreshLocalAtts();
+    const h = () => void refreshLocalAtts();
+    window.addEventListener("cmms:sync-changed", h);
+    window.addEventListener("cmms:offline-queued", h);
+    return () => {
+      window.removeEventListener("cmms:sync-changed", h);
+      window.removeEventListener("cmms:offline-queued", h);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [woId]);
+
+  const handlePickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !woId) return;
+    setPhotoBusy(true);
+    setPhotoMsg(null);
+    try {
+      const p = await preparePhoto(file);
+      const cid = makeClientActionId("a");
+      const rec: OfflineAttachmentRecord = {
+        id: cid,
+        work_order_id: Number(woId),
+        category: "other",
+        file_name: file.name,
+        mime: p.mime,
+        data: p.dataUrl,
+        estBytes: p.bytes,
+        client_action_id: cid,
+        status: "pending",
+        created_at: new Date().toISOString(),
+      };
+      await saveOfflineAttachment(rec);
+      await syncEngine.enqueue({
+        local_action_id: cid,
+        entity_type: "attachment",
+        entity_id: String(woId),
+        action: "upload",
+        endpoint: "/api/v1/repair_attachment.php",
+        method: "POST",
+        body: { work_order_id: Number(woId), category: "other", data: p.dataUrl, file_name: file.name, client_action_id: cid },
+        deps: [],
+        label: `แนบรูปหลักฐาน (#${woId} · ${(p.bytes / 1024).toFixed(0)} KB)`,
+      });
+      await refreshLocalAtts();
+      if (navigator.onLine) {
+        await syncEngine.sync();
+        await refreshLocalAtts();
+        await loadServerAtts();
+        setPhotoMsg("อัปโหลดรูปหลักฐานเรียบร้อย");
+      } else {
+        setPhotoMsg("บันทึกลงเครื่องแล้ว — จะอัปโหลดอัตโนมัติเมื่อกลับมาออนไลน์");
+      }
+    } catch (err) {
+      setPhotoMsg(err instanceof Error ? err.message : "ไม่สามารถจัดเก็บรูปได้ — ลองใหม่");
+    } finally {
+      setPhotoBusy(false);
     }
   };
 
@@ -648,18 +780,18 @@ export default function RepairViewDetailsPage() {
                 ผู้รับผิดชอบหลัก (หัวหน้าชุด) + สมาชิกในทีม — ใครในทีมก็ปิดงานได้
               </p>
             </div>
-            {wo.team.length > 0 && (
-              <Badge variant="info">{wo.team.length} คน</Badge>
+            {(wo.team ?? []).length > 0 && (
+              <Badge variant="info">{(wo.team ?? []).length} คน</Badge>
             )}
           </CardHeader>
           <CardContent>
-            {wo.team.length === 0 ? (
+            {(wo.team ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 ยังไม่มีการมอบหมายทีมซ่อม — ไปที่หน้า "แจกงานซ่อม" เพื่อเลือกทีม
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {wo.team.map((m) => (
+                {(wo.team ?? []).map((m) => (
                   <div
                     key={m.user_id}
                     className={`flex items-center gap-3 p-3 rounded-xl border ${
@@ -754,6 +886,62 @@ export default function RepairViewDetailsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* ── อะไหล่ที่ผู้แจ้งร้องขอ (requested_parts จากฟอร์มแจ้งซ่อม) ── */}
+        {(wo.requestedParts || []).length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  REQUESTED BY REPORTER · F-EN-03
+                </span>
+                <CardTitle className="text-base">อะไหล่ที่ผู้แจ้งร้องขอตอนแจ้งซ่อม</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/60 text-left border-b border-border">
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">รหัส</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">ชื่ออะไหล่</th>
+                      <th className="p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">จำนวนที่ขอ</th>
+                      <th className="p-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {wo.requestedParts.map((p, i) => (
+                      <tr key={`${p.code}-${p.name}-${i}`} className="transition-colors hover:bg-primary-light/60">
+                        <td className="p-3 font-semibold">{p.code || <span className="text-muted-foreground">พิมพ์เอง</span>}</td>
+                        <td className="p-3">{p.name}</td>
+                        <td className="p-3 tabular-nums">{p.qty.toLocaleString()}</td>
+                        <td className="p-3 text-right">
+                          {p.code ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5"
+                              loading={partsSaving}
+                              onClick={() => addSagePart({ item_no: p.code, description: p.name }, p.qty)}
+                            >
+                              <PackagePlus className="w-3.5 h-3.5" />
+                              <span>เบิกเลย</span>
+                            </Button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">กรอกเอง — ค้นหาด้านล่างเพื่อเบิกจาก Sage</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-2xs text-muted-foreground mt-2">
+                ปุ่ม "เบิกเลย" เพิ่มรายการเข้าใบเบิก (Pending Issue) ตามสต็อก Sage 300 — ตรวจจำนวนอีกครั้งที่ตารางใบเบิกด้านล่าง
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* ── เบิกอะไหล่ที่ใช้ซ่อม (Phase 12: Pending Issue — สต็อกอ้างอิง Sage 300) ── */}
         <Card className="mb-6">
@@ -952,6 +1140,93 @@ export default function RepairViewDetailsPage() {
               </p>
               {sageMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{sageMsg}</p>}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* ══ หลักฐานภาพถ่าย — ทำงานได้แม้ออฟไลน์ (Phase 19) ══ */}
+        <Card>
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                PHOTO EVIDENCE · OFFLINE READY
+              </span>
+              <CardTitle className="text-base">หลักฐานภาพถ่าย</CardTitle>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap text-xs">
+              {localAtts.length > 0 && (
+                <Badge variant="warning">{localAtts.length} รายการค้างอัปโหลดในเครื่อง</Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePickPhoto}
+              aria-label="เลือกไฟล์รูปหลักฐาน"
+            />
+
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={photoBusy}
+                className="gap-1.5"
+              >
+                {photoBusy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                {photoBusy ? "กำลังจัดการรูป…" : "แนบรูปหลักฐาน (ออฟไลน์ได้)"}
+              </Button>
+              <span className="text-[11px] text-muted-foreground">
+                รูปถูกบีบอัดอัตโนมัติ ~1280px · ออฟไลน์บันทึกลงเครื่องแล้วอัปโหลดเองเมื่อมีเน็ต
+              </span>
+            </div>
+
+            {photoMsg && <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{photoMsg}</p>}
+
+            {wo.videoPath && (
+              <div className="rounded-lg border border-border p-2">
+                <p className="mb-1 text-[11px] font-medium text-muted-foreground">วิดีโอจุดชำรุด (จากใบแจ้งซ่อม)</p>
+                <video
+                  src={assetUrl(wo.videoPath)}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="max-h-72 w-full rounded bg-black"
+                />
+              </div>
+            )}
+
+            {(localAtts.length > 0 || serverAtts.length > 0) ? (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+                {localAtts.filter((a) => a.status === "pending").map((a) => (
+                  <div key={a.id} className="relative rounded-lg border border-dashed border-amber-400/60 bg-amber-400/5 p-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.data} alt={a.file_name} className="h-20 w-full rounded object-cover" />
+                    <span className="mt-1 block text-center text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      รอซิงก์
+                    </span>
+                  </div>
+                ))}
+                {serverAtts.map((a) => (
+                  <div key={a.id} className="rounded-lg border border-border p-1">
+                    {(a.file_type || "").startsWith("image") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={assetUrl(a.file_path)} alt={a.file_name} className="h-20 w-full rounded object-cover" />
+                    ) : (
+                      <div className="flex h-20 w-full items-center justify-center rounded bg-secondary/40 text-[10px] font-medium text-muted-foreground">
+                        {a.file_name}
+                      </div>
+                    )}
+                    <span className="mt-1 block truncate text-center text-[10px] text-muted-foreground">{a.category}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">ยังไม่มีหลักฐานภาพถ่าย — กด “แนบรูปหลักฐาน” เพื่อถ่าย/เลือกภาพของงานครั้งนี้</p>
+            )}
           </CardContent>
         </Card>
       </div>

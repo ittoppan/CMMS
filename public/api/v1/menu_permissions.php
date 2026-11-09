@@ -16,6 +16,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/menu_catalog.php';
 require_once __DIR__ . '/../../../src/bottom_nav.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -214,6 +215,7 @@ try {
             if (array_key_exists('bottom_nav', $data)) {
                 $msg .= " และปุ่มล่าง $bnSaved ปุ่ม";
             }
+            audit_log($pdo, 'PERMISSION_CHANGE', 'role', (string)$roleId, 'แก้ไขสิทธิ์เมนูบทบาท: ' . $msg, null, ['role_id' => $roleId, 'saved' => $saved], 'info');
             echo json_encode(['success' => true, 'message' => $msg]);
             break;
 
@@ -223,6 +225,5 @@ try {
     }
 } catch (Exception $e) {
     if (isset($pdo)) { try { $pdo->rollBack(); } catch (Exception $e2) {} }
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { swalConfirm } from "@/lib/swal";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -123,7 +124,7 @@ export default function NotificationRulesPage() {
       setRules(r as RuleRow[]);
       setMeta(m);
     } catch {
-      setError("ไม่สามารถโหลดกฎการแจ้งเตือนได้");
+      setError("ไม่สามารถโหลดกฎการแจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   }, []);
@@ -182,14 +183,14 @@ export default function NotificationRulesPage() {
       setSavedMsg(editingId ? "อัปเดตกฎแล้ว" : "สร้างกฎใหม่แล้ว");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch {
-      setError("บันทึกกฎไม่สำเร็จ");
+      setError("บันทึกกฎไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
     setSaving(false);
   };
 
   const handleDelete = async (rule: RuleRow) => {
     if (!rule.id) return;
-    if (!window.confirm(`ลบกฎ "${rule.name}" ?`)) return;
+    if (!(await swalConfirm({ title: `ลบกฎ "${rule.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setError(null);
     try {
       await deleteRule(rule.id);
@@ -197,7 +198,7 @@ export default function NotificationRulesPage() {
       setSavedMsg("ลบกฎแล้ว");
       setTimeout(() => setSavedMsg(""), 4000);
     } catch {
-      setError("ลบกฎไม่สำเร็จ");
+      setError("ลบกฎไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   };
 

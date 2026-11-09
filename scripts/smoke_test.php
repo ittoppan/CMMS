@@ -15,17 +15,31 @@ $SAVE_PATH = 'C:\Windows\Temp';   // ตรงกับ session.save_path ขอ
 // ---------- 1. สร้าง session จำลอง ----------
 // ต้องใช้ ID ความยาวตาม session.sid_length (ค่าเริ่มต้น 26) ไม่งั้น PHP 8.x จะ reject session_id()
 $sid = bin2hex(random_bytes(13)); // 26 hex chars
+// ต้องปิด strict mode ก่อน session_start(): php.ini ตั้ง session.use_strict_mode=1
+// ซึ่งจะทำให้ PHP สร้าง session id ใหม่แทน id ที่กำหนด -> cookie ชี้ไฟล์ที่ไม่มี -> 401 ทุก endpoint
+// (ห้าม echo อะไรก่อนบรรทัดเหล่านี้ ไม่งั้น PHP จะถือว่า headers ถูกส่งแล้วและ ini_set/session_start ไม่ผ่าน)
 ini_set('session.save_path', $SAVE_PATH);
+ini_set('session.use_strict_mode', '0');
+ini_set('session.use_cookies', '0');
 session_id($sid);
-session_start();
+if (!session_start()) {
+    fwrite(STDERR, "สร้าง session จำลองไม่สำเร็จ\n");
+    exit(2);
+}
 $_SESSION['user_id'] = 1;
 $_SESSION['user_name'] = 'admin';
 $_SESSION['role_id'] = 1;
 $_SESSION['full_name'] = 'Smoke Test';
+$_SESSION['last_activity'] = time();
+$_SESSION['last_regenerated'] = time();
 session_write_close();
 
 $sessFile = rtrim($SAVE_PATH, '\\/') . DIRECTORY_SEPARATOR . 'sess_' . $sid;
-// Apache (FastCGI) รันเป็น NT AUTHORITY\IUSR — ต้องให้สิทธิ์อ่าน session ที่ CLI สร้าง
+if (!is_file($sessFile)) {
+    fwrite(STDERR, "ไม่พบไฟล์ session {$sessFile} — ตรวจ session.save_path ของ FastCGI\n");
+    exit(2);
+}
+// FastCGI (IIS) รันในสิทธิ์ IUSR — ต้องให้สิทธิ์อ่าน session ที่ CLI สร้าง
 // ใช้ SID S-1-5-17 (IUSR) ป้องกันปัญหา account name ต่างเครื่อง/ภาษาของ Windows
 @shell_exec('icacls "' . $sessFile . '" /grant "*S-1-5-17:(F)" 2>nul');
 
@@ -88,6 +102,9 @@ $apis = [
     '/api/v1/workload.php',
     '/api/v1/suppliers.php',
     '/api/v1/pm_ical.php',
+    '/api/v1/contractor.php?action=config',
+    '/api/v1/document.php?action=config',
+    '/api/v1/engineering_change.php?action=options',
 ];
 foreach ($apis as $a) {
     runCheck($BASE . $a, 'API' . $a, $cookie);

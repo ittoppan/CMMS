@@ -66,6 +66,21 @@ function settingsDefaultValues(): array {
         'timezone'              => 'Asia/Bangkok',
         'topbar_style'          => 'clean_white',
         'work_hours_per_day'    => '8',
+
+        // ── cost & budget (Phase 26) ──
+        'cost_labor_enabled'     => '1',    // คำนวณค่าแรงจากเวลา × อัตรา (0 = ใช้ที่บันทึกใบงานเท่านั้น)
+        'cost_labor_rate_source' => 'configured', // configured=standard_labor_rate / recorded=จากใบงาน
+        'cost_external_source'   => 'wo_response', // แหล่งค่าแรงภายนอก: wo_response
+        'budget_warning_pct'     => '80',   // ใช้จริงถึง 80% = WARNING
+        'budget_exceed_pct'      => '100',  // ใช้จริงถึง 100% = EXCEEDED
+        'budget_dept_filter_enabled' => '1', // งบผูกแผนก (0 = คิดทั้งบริษัท)
+
+        'planning_shift_start'  => '08:00',  // Phase 25: จุดเริ่มกะทำงาน (คำนวณความพร้อม/capacity)
+        'planning_shift_hours'  => '8',      // Phase 25: ชั่วโมงทำงานต่อวัน (fallback: work_hours_per_day)
+        'planning_working_days' => '1,2,3,4,5', // Phase 25: วันทำงาน (1=จันทร์ ... 7=อาทิตย์)
+        'planning_skip_holidays' => '1',    // Phase 25: เลื่อนกำหนด PM ไปวันทำงานถัดไปถ้าตรงวันหยุด/วันหยุดประจำปี (0 = ปิด)
+        'planning_sla_risk_hours' => '24',   // Phase 25: เหลือ SLA ภายในกี่ชม. = At Risk
+        'planner_break_hour'    => '12.5',   // Phase 25: ช่วงพักกลางวันที่ buffer (0 = ไม่นับ)
         'lang_default'          => 'th',  // ภาษาหลักของระบบ: th (ไทย) / en (English) — ฐาน i18n
         'demo_login_enabled'    => '1',  // แสดงปุ่มบัญชีทดสอบ (admin/manager/tech01) บนหน้า login — ตั้ง 0 เมื่อใช้งานจริง (กันคนนอกล็อกอินด้วยรหัส default)
         'animations_enabled'     => '1',  // เปิด animation UI ทั่วระบบ (0 = ปิดทุกหน้า — ผู้ดูแลเลือกเอง ไม่เกี่ยวกับค่า OS)

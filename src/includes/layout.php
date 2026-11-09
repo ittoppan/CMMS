@@ -33,6 +33,26 @@ $pageTitle = $pageTitle ?? 'CMMS-TPT';
 $pageName  = $pageName  ?? '';
 $pageDesc  = $pageDesc  ?? '';
 
+if (!function_exists('sel')) {
+    /** attribute selected ของ <option> — ใช้ร่วมกันทุกหน้าฟอร์ม */
+    function sel($a, $b) { return $a === $b ? 'selected' : ''; }
+}
+
+if (!function_exists('chk')) {
+    /** attribute checked ของ <input type=checkbox> — ใช้ร่วมกันทุกหน้าฟอร์ม (สลับลำดับ argument ได้) */
+    function chk($a, $b) { return in_array($a, (array)$b) || in_array($b, (array)$a) ? 'checked' : ''; }
+}
+
+if (!function_exists('form_null')) {
+    /** ค่า POST ที่ส่งมาว่าง → NULL (แทน closure $toNull ที่เคยก๊อปซ้ำทุกหน้า) */
+    function form_null($v) { return ($v ?? '') === '' ? null : $v; }
+}
+
+if (!function_exists('form_zero')) {
+    /** ค่า POST ตัวเลข ว่าง → 0.0 (แทน closure $toZero เดิม) */
+    function form_zero($v) { return (float)($v ?? 0); }
+}
+
 function renderHeader(): void {
     include __DIR__ . '/header.php';
 }

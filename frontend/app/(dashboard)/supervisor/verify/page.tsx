@@ -33,7 +33,7 @@ export default function SupervisorVerifyPage() {
       setPending(p.items.filter((i) => i.kind === "workorder"));
       setDone(d.items.filter((i) => i.kind === "workorder"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "ไม่สามารถโหลดข้อมูลได้");
+      setError(e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

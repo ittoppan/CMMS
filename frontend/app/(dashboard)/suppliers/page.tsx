@@ -230,7 +230,7 @@ export default function SuppliersPage() {
             <p className="text-sm text-muted-foreground">คะแนนเฉลี่ย</p>
             <div className="cmms-kpi-value tabular-nums">
               {suppliers.length > 0
-                ? Math.round(suppliers.reduce((sum, s) => sum + s.rating, 0) / suppliers.length)
+                ? Math.round(suppliers.reduce((sum, s) => sum + (Number(s.rating) || 0), 0) / suppliers.length)
                 : 0}<span className="text-sm font-normal">/100</span>
             </div>
           </div>

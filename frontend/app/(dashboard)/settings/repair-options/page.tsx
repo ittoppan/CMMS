@@ -145,11 +145,11 @@ export default function RepairOptionsPage() {
       if (Array.isArray(json)) {
         setOptions(json);
       } else {
-        setError("ไม่สามารถโหลดข้อมูลได้");
+        setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
       }
     } catch (e) {
       console.error(e);
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   };
@@ -236,7 +236,7 @@ export default function RepairOptionsPage() {
         setError(json.error || "เพิ่มไม่สำเร็จ");
       }
     } catch (e) {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -258,7 +258,7 @@ export default function RepairOptionsPage() {
         setError(json.error || "แก้ไขไม่สำเร็จ");
       }
     } catch (e) {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -275,10 +275,10 @@ export default function RepairOptionsPage() {
         fetchOptions();
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setError(json.error || "ลบไม่สำเร็จ");
+        setError(json.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       }
     } catch (e) {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 

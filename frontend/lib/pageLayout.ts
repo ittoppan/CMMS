@@ -112,8 +112,55 @@ export const PAGE_CATEGORIES: PageCategory[] = [
   {
     name: "ความปลอดภัย & IoT",
     pages: [
-      { value: "/safety/work_permit", label: "ใบอนุญาต LOTO" },
+      { value: "/safety/work_permit", label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
       { value: "/iot/monitor", label: "มอนิเตอร์เซนเซอร์ IoT" },
+    ],
+  },
+  {
+    name: "ผู้รับเหมา & งานภายนอก",
+    pages: [
+      { value: "/contractors", label: "ผู้รับเหมา & งานภายนอก" },
+      { value: "/contractors/create", label: "สร้างผู้รับเหมาใหม่" },
+      { value: "/contractors/work", label: "งานภายนอก (External Work)" },
+    ],
+  },
+  {
+    name: "วิศวกรรม & เอกสารควบคุม",
+    pages: [
+      { value: "/engineering-changes", label: "Engineering Change Request (ECR)" },
+      { value: "/engineering-changes/create", label: "เปิด ECR ใหม่" },
+      { value: "/documents", label: "เอกสารควบคุม" },
+      { value: "/documents/create", label: "สร้างเอกสารควบคุม" },
+    ],
+  },
+  {
+    name: "ศูนย์ความรู้",
+    pages: [
+      { value: "/knowledge", label: "ศูนย์ความรู้ (Knowledge Center)" },
+      { value: "/knowledge/search", label: "ค้นหาความรู้" },
+      { value: "/knowledge/articles", label: "บทความความรู้" },
+      { value: "/knowledge/articles/create", label: "เขียนบทความใหม่" },
+      { value: "/knowledge/gaps", label: "ช่องว่างความรู้" },
+      { value: "/knowledge/reviews", label: "งานทบทวนความรู้" },
+      { value: "/knowledge/taxonomy", label: "หมวดหมู่ & แท็กความรู้" },
+      { value: "/knowledge/usage", label: "สถิติการใช้งานความรู้" },
+    ],
+  },
+  {
+    // ── Phase 37: Reliability Engineering ──
+    name: "วิศวกรรมความเสียหาย",
+    pages: [
+      { value: "/reliability", label: "ภาพรวมความเสียหาย" },
+      { value: "/reliability/assets", label: "ความเสียหายรายเครื่อง" },
+      { value: "/reliability/failure-modes", label: "รูปแบบการเสีย & Pareto" },
+      { value: "/reliability/trend", label: "แนวโน้มความเสียหาย" },
+      { value: "/reliability/weibull", label: "การวิเคราะห์ Weibull" },
+      { value: "/reliability/bad-actors", label: "เครื่องที่มีปัญหาเป็นระบบ" },
+      { value: "/reliability/pm-effectiveness", label: "ประสิทธิผลของแผน PM" },
+      { value: "/reliability/growth", label: "การเติบโตของความเสียหาย" },
+      { value: "/reliability/studies", label: "งานวิเคราะห์เชิงวิศวกรรม" },
+      { value: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+      { value: "/reliability/config", label: "นิยาม & การตั้งค่า KPI" },
     ],
   },
   {
@@ -199,6 +246,93 @@ export const SETTINGS_SECTIONS: PageLayoutSection[] = [
   { id: "grid", label: "กลุ่มการตั้งค่า + ฟอร์ม", desc: "เมนูกลุ่มซ้าย + ฟอร์มแก้ไขค่า" },
 ];
 
+export const CONTRACTORS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างผู้รับเหมา / งานภายนอก" },
+  { id: "kpi", label: "การ์ดสรุปผู้รับเหมา (KPI)", desc: "เจ้าของ/ผ่าน/รอประเมิน/งานภายนอก/เตือน" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + หมวดงาน + ผู้ดูแล" },
+  { id: "content", label: "ตารางทะเบียนผู้รับเหมา", desc: "รายการผู้รับเหมา + สถานะ + คุณสมบัติ" },
+];
+
+export const CONTRACTOR_WORK_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างงานภายนอก" },
+  { id: "kpi", label: "การ์ดสรุปงานภายนอก (KPI)", desc: "งานที่ค้าง/เกิน SLA/รอใบอนุญาต/รอบทำซ้ำ" },
+  { id: "filters", label: "ตัวกรองงานภายนอก", desc: "ค้นหา + สถานะ + ผู้รับเหมา" },
+  { id: "content", label: "รายการงานภายนอก", desc: "ตารางงาน + ขั้นตอน workflow + PTW" },
+];
+
+export const DOCUMENTS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มรีเฟรช / สร้างเอกสาร" },
+  { id: "kpi", label: "การ์ดสรุปเอกสาร (KPI)", desc: "ทั้งหมด/ไม่มีฉบับที่มีผล/รอรับทราบ/ครบกำหนดทบทวน" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + ประเภทเอกสาร + เจ้าของ" },
+  { id: "content", label: "ตารางทะเบียนเอกสาร + ฉลาก QR", desc: "รายการเอกสาร + ฉบับที่มีผล + ตาราง payload ฉลาก CMMS-D" },
+];
+
+export const ENGINEERING_CHANGES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มรีเฟรช / เปิด ECR ใหม่" },
+  { id: "kpi", label: "การ์ดสรุป ECR (KPI)", desc: "ทั้งหมด/รออนุมัติ/ผลกระทบค้าง/เกินกำหนด" },
+  { id: "filters", label: "ตัวกรอง ECR", desc: "ค้นหา + สถานะ + ประเภทการเปลี่ยนแปลง + ความสำคัญ + เฉพาะของฉัน" },
+  { id: "content", label: "ตารางรายการ ECR", desc: "เลขที่ + ประเภท + ความสำคัญ + สถานะ + SLA" },
+];
+
+export const KNOWLEDGE_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ช่องค้นหา", desc: "ชื่อหน้า + ช่องค้นหาความรู้ + ปุ่มเขียนบทความใหม่" },
+  { id: "kpi", label: "การ์ดสรุปความรู้ (KPI)", desc: "บทความที่เผยแพร่/ช่องว่างความรู้/งานทบทวน/เอกสารที่ล้าสมัย" },
+  { id: "content", label: "เนื้อหาหลัก", desc: "หมวดหมู่ + บทความที่ใช้งานจริง + ช่องว่างที่พบจากการค้นหา" },
+];
+
+export const KNOWLEDGE_SEARCH_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ช่องค้นหา", desc: "ช่องค้นหาอาการ/ข้อมูลเครื่อง + ตัวกรองหมวด/แท็ก" },
+  { id: "content", label: "ผลลัพธ์ความรู้", desc: "บทความที่ตรงคำค้น + เอกสารควบคุมที่เกี่ยวข้อง" },
+  { id: "charts", label: "ผลการค้นหาที่ยังไม่มีคำตอบ", desc: "ค้นที่ไม่เจอ → สร้างช่องว่างความรู้" },
+];
+
+export const KNOWLEDGE_ARTICLES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มเขียนบทความใหม่ + รีเฟรช" },
+  { id: "filters", label: "ตัวกรองทะเบียน", desc: "ค้นหา + สถานะ + หมวดหมู่ + ระดับความลับ" },
+  { id: "content", label: "ตารางบทความความรู้", desc: "รายการ + สถานะ + เจ้าของ + วันทบททวนถัดไป" },
+];
+
+export const KNOWLEDGE_USAGE_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มส่งออก", desc: "ชื่อหน้า + ปุ่มส่งออก CSV" },
+  { id: "kpi", label: "การ์ดสรุปการใช้งาน", desc: "การใช้งาน/คำตอบความช่วยเหลือ/ผลค้นหา" },
+  { id: "content", label: "ตารางเหตุการณ์การใช้งาน", desc: "ตัวกรอง action/ผู้ใช้/อุปกรณ์ + ตาราง log จริง" },
+];
+
+/**
+ * ── Phase 37: Reliability Engineering ──
+ * Section ids mirror the DOM structure of the /reliability pages so the Layout
+ * Studio in /editor can toggle them.
+ */
+export const RELIABILITY_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ตัวกรองร่วม", desc: "ชื่อหน้า + ตัวกรองขอบเขต/ช่วงเวลา/ฐานเวลา ใช้ร่วมทั้งโมดูล" },
+  { id: "kpi", label: "การ์ด KPI หลัก (8 ตัว)", desc: "MTBF · MTTR · อัตราการเสีย · ความพร้อม · downtime · การเสียซ้ำ · แจ้งเหตุ · ต้นทุน" },
+  { id: "blocked", label: "แผง KPI ที่คำนวณไม่ได้", desc: "รายการที่ไม่ผ่านเกณฑ์ขั้นต่ำ พร้อมเหตุผลจากเอนจิน" },
+  { id: "lineage", label: "ที่มาของตัวเลข (Lineage)", desc: "ช่วงเวลา · ขอบเขต · ฐานเวลา · แหล่งข้อมูล · เวอร์ชันเอนจิน" },
+  { id: "charts", label: "แนวโน้ม & รูปแบบการเสีย", desc: "กราฟแนวโน้ม + ตาราง failure mode ชั้นนำ" },
+  { id: "content", label: "เนื้อหาหลักของหน้า", desc: "ตาราง/รายละเอียดเฉพาะของแต่ละหน้าในโมดูล" },
+  { id: "quality", label: "คุณภาพข้อมูล", desc: "ผลตรวจ DQ ที่อธิบายว่าทำไมบางค่าจึงคำนวณไม่ได้" },
+];
+
+export const RELIABILITY_ASSETS_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ตัวกรองร่วม", desc: "ชื่อหน้า + ตัวกรองขอบเขต/ช่วงเวลา" },
+  { id: "summary", label: "สรุปผลการจัดอันดับ", desc: "จำนวนเครื่องในขอบเขต + หมายเหตุการมองเห็นต้นทุน" },
+  { id: "content", label: "ตารางจัดอันดับเครื่อง", desc: "MTBF · MTTR · downtime · ความพร้อม · ต้นทุน + ลิงก์ไปหน้าเครื่อง" },
+  { id: "lineage", label: "ที่มาของตัวเลข (Lineage)", desc: "ช่วงเวลา · ขอบเขต · ฐานเวลา" },
+];
+
+export const RELIABILITY_STUDIES_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + ปุ่มหลัก", desc: "ชื่อหน้า + ปุ่มสร้างงานวิเคราะห์ (ตามสิทธิ์)" },
+  { id: "filters", label: "ตัวกรองงานวิเคราะห์", desc: "สถานะ + คำค้น + ช่วงเวลา" },
+  { id: "content", label: "ตารางงานวิเคราะห์", desc: "รหัส · ชื่อเรื่อง · วิธีการ · ผู้วิเคราะห์ · สถานะ" },
+  { id: "actions", label: "การดำเนินการที่ตั้งไว้", desc: "งานที่ถูกสร้างต่อจากงานวิเคราะห์ + สถานะ" },
+];
+
+export const RELIABILITY_CONFIG_SECTIONS: PageLayoutSection[] = [
+  { id: "hero", label: "หัวข้อหน้า + สิทธิ์", desc: "ชื่อหน้า + สถานะสิทธิ์ (อ่าน/เขียน/ผู้ดูแล)" },
+  { id: "config", label: "นโยบายเอนจิน", desc: "เกณฑ์ขั้นต่ำ · ฐานเวลา · ขอบเขตสูงสุด (อ่านอย่างเดียว)" },
+  { id: "definitions", label: "นิยาม KPI", desc: "สูตร · หน่วย · แหล่งข้อมูล · ข้อจำกัด · เวอร์ชัน" },
+];
+
 export const PAGE_MODEL_OVERRIDES: Record<
   string,
   { sections: PageLayoutSection[]; wired: boolean }
@@ -209,6 +343,19 @@ export const PAGE_MODEL_OVERRIDES: Record<
   "/analytics/kpi": { sections: KPI_SECTIONS, wired: true },
   "/users": { sections: USERS_SECTIONS, wired: true },
   "/settings": { sections: SETTINGS_SECTIONS, wired: true },
+  "/contractors": { sections: CONTRACTORS_SECTIONS, wired: true },
+  "/contractors/work": { sections: CONTRACTOR_WORK_SECTIONS, wired: true },
+  "/documents": { sections: DOCUMENTS_SECTIONS, wired: true },
+  "/engineering-changes": { sections: ENGINEERING_CHANGES_SECTIONS, wired: true },
+  "/knowledge": { sections: KNOWLEDGE_SECTIONS, wired: true },
+  "/knowledge/search": { sections: KNOWLEDGE_SEARCH_SECTIONS, wired: true },
+  "/knowledge/articles": { sections: KNOWLEDGE_ARTICLES_SECTIONS, wired: true },
+  "/knowledge/usage": { sections: KNOWLEDGE_USAGE_SECTIONS, wired: true },
+  // ── Phase 37: Reliability Engineering ──
+  "/reliability": { sections: RELIABILITY_SECTIONS, wired: true },
+  "/reliability/assets": { sections: RELIABILITY_ASSETS_SECTIONS, wired: true },
+  "/reliability/studies": { sections: RELIABILITY_STUDIES_SECTIONS, wired: true },
+  "/reliability/config": { sections: RELIABILITY_CONFIG_SECTIONS, wired: true },
 };
 
 export const sectionsFor = (route: string): PageLayoutSection[] =>

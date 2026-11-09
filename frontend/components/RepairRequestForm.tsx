@@ -15,6 +15,7 @@ import {
   Mail,
   X,
   Paperclip,
+  Video,
   Link,
   Printer,
   Droplets,
@@ -296,6 +297,9 @@ export default function RepairRequestForm() {
   const [bindError, setBindError] = useState<string | null>(null);
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const [videoBusy, setVideoBusy] = useState(false);
+  const [videoErr, setVideoErr] = useState<string | null>(null);
   const offlineRef = useRef(false);
 
   const [form, setForm] = useState({
@@ -315,6 +319,7 @@ export default function RepairRequestForm() {
     contaminationRisk: false,
     safetyRelated: false,
     photos: [] as string[],
+    video: "",
     note: "",
     isUrgent: false,
   });
@@ -322,7 +327,64 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  // ── เลือกอะไหล่ที่ต้องการเบิก (requested_parts) ──
+  const [sparePicks, setSparePicks] = useState<{ code: string; name: string; qty: number }[]>([]);
+  const [spareQuery, setSpareQuery] = useState("");
+  const [spareResults, setSpareResults] = useState<{ item_no: string; description: string; unit?: string; available?: number | string }[]>([]);
+  const [spareSearching, setSpareSearching] = useState(false);
+  const [spareSearchLocked, setSpareSearchLocked] = useState(false);
+  const [spareManualName, setSpareManualName] = useState("");
+  const [spareManualQty, setSpareManualQty] = useState(1);
+  const spareDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const addSparePick = (p: { code: string; name: string; qty: number }) => {
+    if (!p.name.trim() || p.qty < 1) return;
+    const key = String(p.code || p.name).trim().toLowerCase();
+    setSparePicks((prev) => (prev.some((x) => String(x.code || x.name).trim().toLowerCase() === key) ? prev : [...prev, p]));
+    setSpareManualName("");
+    setSpareManualQty(1);
+  };
+
+  // ค้นหาอะไหล่จาก Sage — ต้องมี session; ถ้าไม่ล็อกอิน (LIFF/LINE) ให้ใช้ช่องพิมพ์เองแทน
+  useEffect(() => {
+    const q = spareQuery.trim();
+    if (!q) {
+      setSpareResults([]);
+      return;
+    }
+    if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
+    spareDebounceRef.current = setTimeout(async () => {
+      setSpareSearching(true);
+      try {
+        const res = await apiFetch(`/api/v1/sage_items.php?q=${encodeURIComponent(q)}`);
+        if (!res.ok) {
+          setSpareSearchLocked(true);
+          setSpareResults([]);
+        } else {
+          const json = await res.json();
+          setSpareResults(Array.isArray(json.items) ? json.items : []);
+          setSpareSearchLocked(false);
+        }
+      } catch {
+        setSpareResults([]);
+      }
+      setSpareSearching(false);
+    }, 400);
+    return () => {
+      if (spareDebounceRef.current) clearTimeout(spareDebounceRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spareQuery]);
+
+
   const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
+
+  /* เติมชื่อ-นามสกุลจากฐานข้อมูล ถ้าผู้ใช้ยังไม่ได้กรอก/แก้เอง */
+  const seedReporter = (name?: string | null) => {
+    const n = (name || "").trim();
+    if (!n) return;
+    setForm((prev) => (prev.reporterName.trim() ? prev : { ...prev, reporterName: n }));
+  };
 
   const qrPrefillRef = useRef<string | null>(null);
   useEffect(() => {
@@ -441,6 +503,7 @@ export default function RepairRequestForm() {
       .then((r) => r.json())
       .then((j) => {
         setSessionName(j?.me?.full_name || "");
+        seedReporter(j?.me?.full_name);
         if (j?.me?.id) setBindGate("bound");
       })
       .catch(() => {});
@@ -494,6 +557,7 @@ export default function RepairRequestForm() {
               .then((j) => {
                 if (j?.me?.id) {
                   setSessionName(j.me.full_name || "");
+                  seedReporter(j.me.full_name);
                   setBindGate("bound");
                 } else if ((window as any).liff?.isInClient?.()) {
                   setBindGate("unbound");
@@ -697,6 +761,44 @@ const flushQueue = async () => {
     update("photos", next);
   };
 
+  /* ── วิดีโอจุดชำรุด (staging อัปโหลดทันทีเมื่อเลือก — ต้องออนไลน์) ── */
+  const uploadVideo = async (file: File) => {
+    setVideoErr(null);
+    if (!navigator.onLine) {
+      setVideoErr("ต้องออนไลน์เพื่อแนบวิดีโอ — รูปถ่ายยังแนบได้แม้ไม่มีเน็ต");
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      setVideoErr("วิดีโอใหญ่เกิน 25 MB — โปรดลดความยาว/คุณภาพแล้วลองอีกครั้ง");
+      return;
+    }
+    if (!/^video\//.test(file.type)) {
+      setVideoErr("ต้องเป็นไฟล์วิดีโอ (mp4/mov/webm)");
+      return;
+    }
+    setVideoBusy(true);
+    try {
+      const csrf = await (await apiFetch("/api/v1/csrf.php")).json();
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await apiFetch("/api/v1/repair_video.php", {
+        method: "POST",
+        headers: { "X-CSRF-Token": csrf.csrf_token },
+        body: fd,
+      });
+      const j = await res.json().catch(() => ({}));
+      if (j?.success && j?.path) {
+        update("video", j.path);
+        setVideoErr(null);
+      } else {
+        setVideoErr(j?.error || "อัปโหลดวิดีโอไม่สำเร็จ — ลองอีกครั้ง");
+      }
+    } catch {
+      setVideoErr("อัปโหลดวิดีโอไม่สำเร็จ — ตรวจเน็ตแล้วลองอีกครั้ง");
+    }
+    setVideoBusy(false);
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
@@ -723,12 +825,14 @@ const flushQueue = async () => {
         safety_related: form.safetyRelated ? 1 : 0,
         product_lot_no: form.lotNo,
         before_image_path: form.photos.length > 0 ? form.photos.join("|") : null,
+        video_path: form.video || null,
         notes: form.note || null,
         receiver_name: form.reporterName,
         reporter_phone: form.phone,
         is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
+        requested_parts: sparePicks.length > 0 ? JSON.stringify(sparePicks) : null,
       };
 
       let res: Response;
@@ -762,7 +866,7 @@ const flushQueue = async () => {
       }
     } catch (e) {
       console.error("Submit failed", e);
-      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
     setSubmitting(false);
   };
@@ -790,7 +894,7 @@ const flushQueue = async () => {
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
-              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], note: "", isUrgent: false });
+              setForm({ machineCode: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", contaminateChecking: "not_checked", outsourceBy: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", contaminationRisk: false, safetyRelated: false, photos: [], video: "", note: "", isUrgent: false });
             }}>
               แจ้งซ่อมอีก
             </Button>
@@ -804,15 +908,15 @@ const flushQueue = async () => {
   if (bindGate !== "bound") {
     return (
       <div className="cmms-mobile-page">
-<div className="cmms-page-header">
+<div className="cmms-liff-hero">
         <div className="flex items-center gap-3">
-          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
-            <div className="flex flex-col flex-1">
-              <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
-              <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
-            </div>
+          <div className="cmms-liff-logo"><Wrench size={20} strokeWidth={1.75} /></div>
+          <div className="flex-1 min-w-0">
+            <p className="cmms-liff-eyebrow">MAINTENANCE JOB REQUEST · F-EN-03</p>
+            <h1 className="cmms-liff-title">{tliff("liff.repair_header")}</h1>
           </div>
         </div>
+      </div>
 
         <Card className="cmms-card-flat mx-4 my-4 p-5">
           {bindGate === "checking" && (
@@ -881,7 +985,7 @@ const flushQueue = async () => {
                 onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}
               />
               {bindError && (
-                <div className="bg-[#FEE2E2] text-[#B91C1C] rounded-lg px-3 py-2 text-sm flex items-center gap-2">
+                <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2">
                   <AlertCircle size={16} strokeWidth={1.75} /> {bindError}
                 </div>
               )}
@@ -911,13 +1015,12 @@ const flushQueue = async () => {
   return (
     <div className="cmms-mobile-page">
       {/* Header */}
-<div className="cmms-page-header">
+<div className="cmms-liff-hero">
         <div className="flex items-center gap-3">
-          <LiffLangToggle />
-          <div className="cmms-header-emoji"><AlertTriangle size={24} strokeWidth={1.75} /></div>
-          <div className="flex flex-col flex-1">
-            <h3 className="text-lg font-bold m-0">{tliff("liff.repair_header")}</h3>
-            <p className="text-sm text-[var(--cmms-text-secondary)] m-0">MAINTENANCE JOB REQUEST · F-EN-03</p>
+          <div className="cmms-liff-logo"><Wrench size={20} strokeWidth={1.75} /></div>
+          <div className="flex-1 min-w-0">
+            <p className="cmms-liff-eyebrow">MAINTENANCE JOB REQUEST · F-EN-03</p>
+            <h1 className="cmms-liff-title">{tliff("liff.repair_header")}</h1>
           </div>
           <LiffLangToggle />
           {lineProfile?.pic ? (
@@ -926,10 +1029,14 @@ const flushQueue = async () => {
             <div className="cmms-avatar cmms-avatar-fallback"><User size={18} strokeWidth={1.75} /></div>
           )}
         </div>
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <span className="cmms-liff-chip"><FileText size={13} strokeWidth={1.75} /> ใบแจ้งซ่อม F-EN-03</span>
+          <span className="cmms-liff-chip"><HardHat size={13} strokeWidth={1.75} /> แผนกซ่อมบำรุง</span>
+        </div>
       </div>
 
       {/* Step Indicator */}
-      <div className="cmms-steps">
+      <div className="cmms-stepper">
 {STEPS.map((s, i) => (
             <div key={i} className={`cmms-step ${i === step ? "active" : ""} ${i < step ? "done" : ""}`}
               onClick={() => { if (i < step) setStep(i); }}>
@@ -1203,6 +1310,100 @@ const flushQueue = async () => {
                 rows={2}
               />
             </div>
+
+            {/* ── อะไหล่ที่ต้องการเบิก (requested_parts) — บันทึกไว้บนใบงานให้ช่าง/คลังเตรียม ── */}
+            <div>
+              <p className="text-sm font-bold mb-2">อะไหล่ที่ต้องการเบิก (ถ้ามี)</p>
+              {!spareSearchLocked && (
+                <Input
+                  label="ค้นหาอะไหล่จาก Sage 300"
+                  isLabelHidden
+                  placeholder="พิมพ์รหัส/ชื่ออะไหล่เพื่อค้นหาจาก Sage 300"
+                  value={spareQuery}
+                  onChange={(e) => setSpareQuery(e.target.value)}
+                  className="mb-2"
+                />
+              )}
+              {spareSearchLocked && (
+                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
+                  ค้นหาจาก Sage ได้เมื่อใช้งานผ่านระบบเว็บ — สำหรับใช้งานผ่าน LINE ให้พิมพ์ชื่ออะไหล่เองด้านล่าง
+                </p>
+              )}
+              {spareSearching && <p className="text-2xs text-[var(--cmms-text-secondary)] animate-pulse mb-2">กำลังค้นหา…</p>}
+              {!spareSearchLocked && spareQuery.trim() && !spareSearching && spareResults.length === 0 && (
+                <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">ไม่พบใน Sage — พิมพ์เพิ่มเองได้ด้านล่าง</p>
+              )}
+              {!spareSearchLocked && spareResults.length > 0 && (
+                <ul className="divide-y divide-border rounded-xl border border-border bg-card mb-3 max-h-56 overflow-y-auto">
+                  {spareResults.slice(0, 8).map((it) => (
+                    <li key={it.item_no} className="flex items-center gap-3 p-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold truncate m-0">{it.item_no}</p>
+                        <p className="text-2xs text-[var(--cmms-text-secondary)] truncate m-0">{it.description}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => addSparePick({ code: it.item_no, name: it.description, qty: 1 })}
+                      >
+                        + เพิ่ม
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="flex items-end gap-2">
+                <Input
+                  label="อะไหล่ (พิมพ์เอง)"
+                  isLabelHidden
+                  placeholder="ชื่ออะไหล่ที่ต้องการ (พิมพ์เอง)"
+                  value={spareManualName}
+                  onChange={(e) => setSpareManualName(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  type="number"
+                  min={1}
+                  label="จำนวน"
+                  isLabelHidden
+                  value={String(spareManualQty)}
+                  onChange={(e) => setSpareManualQty(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-20"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => addSparePick({ code: "", name: spareManualName, qty: spareManualQty })}
+                >
+                  + เพิ่มเอง
+                </Button>
+              </div>
+
+              {sparePicks.length > 0 && (
+                <ul className="mt-2.5 flex flex-wrap gap-2">
+                  {sparePicks.map((p, i) => (
+                    <li key={`${p.code || p.name}-${i}`} className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs">
+                      <span className="font-semibold">{p.code || "พิมพ์เอง"}</span>
+                      <span className="truncate max-w-40">{p.name}</span>
+                      <span className="tabular-nums text-[var(--cmms-text-secondary)]">×{p.qty}</span>
+                      <button
+                        type="button"
+                        aria-label={`ลบ ${p.name} ออกจากรายการ`}
+                        onClick={() => setSparePicks(sparePicks.filter((_, j) => j !== i))}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </Card>
       )}
@@ -1346,10 +1547,13 @@ const flushQueue = async () => {
               </div>
             </div>
 
-            {/* Photos */}
+            {/* Photos + Video */}
             <div>
               <p className="text-sm font-bold mb-2">
-                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่ายจุดชำรุด (สูงสุด 5 รูป)
+                <Paperclip size={14} strokeWidth={1.75} className="inline align-[-2px]" /> แนบรูปถ่าย / วิดีโอจุดชำรุด
+              </p>
+              <p className="text-2xs text-[var(--cmms-text-secondary)] mb-2">
+                รูป (สูงสุด 5 รูป) · วิดีโอ 1 คลิป ≤ 25 MB (mp4/mov/webm) — วิดีโอต้องออนไลน์เท่านั้น
               </p>
               <input
                 ref={photoInputRef}
@@ -1359,6 +1563,17 @@ const flushQueue = async () => {
                 capture="environment"
                 className="hidden"
                 onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }}
+              />
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) uploadVideo(f);
+                }}
               />
               <div className="cmms-photo-grid">
                 {form.photos.map((p, i) => (
@@ -1376,7 +1591,37 @@ const flushQueue = async () => {
                     <p className="text-2xs font-bold m-0">ถ่าย / เลือกรูป</p>
                   </button>
                 )}
+                {form.video && (
+                  <div className="cmms-photo-thumb">
+                    <video src={form.video} controls preload="metadata" playsInline className="w-full h-full object-cover" />
+                    <button type="button" className="cmms-photo-remove"
+                      onClick={() => update("video", "")} aria-label="เอาวิดีโอออก">
+                      <X size={14} strokeWidth={1.75} />
+                    </button>
+                  </div>
+                )}
+                {!form.video && (
+                  <button
+                    type="button"
+                    className="cmms-photo-add"
+                    onClick={() => videoInputRef.current?.click()}
+                    disabled={videoBusy}
+                    aria-label="เลือกวิดีโอ"
+                  >
+                    {videoBusy ? (
+                      <Loader2 size={24} strokeWidth={1.75} className="animate-spin" />
+                    ) : (
+                      <Video size={24} strokeWidth={1.75} />
+                    )}
+                    <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "เลือกวิดีโอ"}</p>
+                  </button>
+                )}
               </div>
+              {videoErr && (
+                <div className="bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)] rounded-lg px-3 py-2 text-sm flex items-center gap-2 mt-2">
+                  <AlertCircle size={16} strokeWidth={1.75} /> {videoErr}
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -1397,6 +1642,7 @@ const flushQueue = async () => {
               <SummaryRow label="สำนักงาน" value={form.office} />
               <SummaryRow label="Lot No." value={form.lotNo || "—"} />
               <SummaryRow label="วันที่แจ้ง" value={new Date().toLocaleString("th-TH", { dateStyle: "short", timeStyle: "short" })} icon={<Clock size={14} strokeWidth={1.75} />} />
+              <SummaryRow label="วิดีโอ" value={form.video ? "แนบแล้ว" : "—"} icon={<Video size={14} strokeWidth={1.75} />} />
             </div>
 
             <div>
@@ -1409,7 +1655,8 @@ const flushQueue = async () => {
                 {form.contaminationRisk ? "มีความเสี่ยงปนเปื้อน" : "ไม่ปนเปื้อน"}
               </Badge>
               {form.safetyRelated && <Badge variant="danger">Safety</Badge>}
-              <Badge variant="info">{form.photos.length} รูป</Badge>
+              {form.photos.length > 0 && <Badge variant="info">{form.photos.length} รูป</Badge>}
+              {form.video && <Badge variant="info">แนบวิดีโอ</Badge>}
             </div>
 
             {submitError && (
@@ -1424,6 +1671,14 @@ const flushQueue = async () => {
 
       {/* Sticky bottom bar */}
       <div className="cmms-mobile-bottom-bar">
+        <div className="cmms-bottom-meta">
+          <span>{step + 1}/4 · {tliff(`liff.step_${STEPS[step].key}`)}</span>
+          <div className="cmms-bottom-progress" aria-hidden="true">
+            {STEPS.map((_, i) => (
+              <span key={i} className={i <= step ? "on" : ""} />
+            ))}
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           {step > 0 ? (
             <Button variant="secondary" onClick={() => setStep(step - 1)}>

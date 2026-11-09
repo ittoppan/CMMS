@@ -9,18 +9,15 @@
  * ต้อง login (session) — PWA เรียกผ่าน Next.js proxy (/api/* -> :8081) ซึ่ง Origin ผ่าน CSRF check
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/services/WebPushService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $userId = (int)$_SESSION['user_id'];
     $method = $_SERVER['REQUEST_METHOD'];
 
@@ -69,6 +66,5 @@ try {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
 } catch (Throwable $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
+    api_safe_catch($e);
 }

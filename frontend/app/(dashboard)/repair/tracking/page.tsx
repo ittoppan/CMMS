@@ -108,6 +108,7 @@ export default function RepairTrackingPage() {
     {
       accessorKey: "woNumber",
       header: t("tbl.work_order_no"),
+      meta: { cardTitle: true },
       cell: ({ row }: { row: { original: TrackWO } }) => (
         <strong>{row.original.woNumber}</strong>
       ),
@@ -174,6 +175,7 @@ export default function RepairTrackingPage() {
           </CardHeader>
           <CardContent>
             <DataTable
+              variant="cards"
               columns={columns}
               data={data}
               getRowId={(row) => row.id}

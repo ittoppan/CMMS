@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t, statusText } from "@/lib/i18n";
+import { assetUrl } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -107,7 +108,7 @@ export default function PMSchedulePage() {
       }
     } catch (e) {
       console.error("Failed to fetch PMs", e);
-      setError("Failed to fetch PM tasks");
+      setError("โหลดงาน PM ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
@@ -256,7 +257,7 @@ export default function PMSchedulePage() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm">{row.original.assignee}</span>
           {row.original.teamNames.length > 1 && (
-            <span className="cmms-andon-chip" style={{ background: "rgba(30,136,229,0.12)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>
+            <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)", fontSize: "0.65rem", padding: "2px 7px" }}>
               +{row.original.teamNames.length - 1} ทีม
             </span>
           )}
@@ -647,7 +648,7 @@ export default function PMSchedulePage() {
                   {detailAtts.map(a => (
                     <div key={a.id} className="flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2" style={{ background: "var(--cmms-bg-wash)", borderColor: "var(--cmms-border)" }}>
                       <a
-                        href={a.file_path}
+                        href={assetUrl(a.file_path)}
                         target="_blank"
                         rel="noreferrer"
                         className="break-all text-[13px] font-semibold no-underline"

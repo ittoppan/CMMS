@@ -337,13 +337,13 @@ export default function RepairKanbanPage() {
                       draggable={!savingId}
                       onDragStart={(e) => { setDragId(item.id); e.dataTransfer.effectAllowed = "move"; }}
                       onDragEnd={() => { setDragId(null); setDragOverKey(null); }}
-                      className="rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-4"
+                      className="rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-4 cmms-side-accent"
                       style={{
-                        borderLeft: `3px solid ${priorityTone[item.priority] || "var(--cmms-text-secondary)"}`,
+                        borderLeftColor: priorityTone[item.priority] || "var(--cmms-text-secondary)",
                         boxShadow: dragId === item.id ? '0 6px 16px rgba(0,0,0,0.12)' : '0 2px 4px rgba(0,0,0,0.04)',
                         opacity: dragId === item.id ? 0.55 : 1,
                         cursor: savingId ? 'wait' : 'grab',
-                        transition: 'all 0.2s',
+                        transition: 'box-shadow 0.2s, opacity 0.2s',
                       }}
                     >
                       <div className="flex flex-col gap-2">

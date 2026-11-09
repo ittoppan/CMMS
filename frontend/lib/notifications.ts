@@ -180,11 +180,13 @@ export function dispatchNotificationsChanged(): void {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(NOTIFICATIONS_CHANGED));
 }
 
-/** hook ตัวเลข unread — poll + focus/visibility + event การอ่านเอง */
-export function useUnreadCount(pollMs = 60000): number {
+/** hook ตัวเลข unread — poll + focus/visibility + event การอ่านเอง
+ *  (enabled=false: ใช้เลขจากภายนอก เช่น layout แชร์ poller เดียวให้หลาย instance) */
+export function useUnreadCount(pollMs = 60000, enabled = true): number {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
+    if (!enabled) return;
     let alive = true;
     const refresh = () => {
       fetchUnreadCount().then((n) => {

@@ -130,6 +130,10 @@ try {
             echo json_encode(array_merge($base, kpi_downtime($pdo, $opts)), JSON_UNESCAPED_UNICODE);
             exit;
         }
+        case 'trend': {
+            echo json_encode(array_merge($base, kpi_trend($pdo, $opts)), JSON_UNESCAPED_UNICODE);
+            exit;
+        }
         case 'cost': {
             requireRole(kpi_can_see_cost($roleId), 'ไม่มีสิทธิ์ดูข้อมูลต้นทุน');
             echo json_encode(array_merge($base, kpi_cost($pdo, $opts)), JSON_UNESCAPED_UNICODE);
@@ -158,8 +162,7 @@ try {
             exit;
     }
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    api_safe_catch($e);
 }
 exit;
 

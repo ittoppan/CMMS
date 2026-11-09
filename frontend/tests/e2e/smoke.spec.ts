@@ -13,8 +13,8 @@ test.describe("public pages render", () => {
     await expect(page).toHaveURL(/\/login/);
 
     // Kit <Input label> renders a linked <label><input> pair
-    const user = page.getByLabel(/ชื่อผู้ใช้|Username/i);
-    const pass = page.getByLabel(/รหัสผ่าน|Password/i);
+    const user = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
+    const pass = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
     await expect(user).toBeVisible();
     await expect(pass).toBeVisible();
 
@@ -60,8 +60,8 @@ test.describe("authenticated flow", () => {
 
   test("login → dashboard shell visible", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
+    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
+    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
 
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
@@ -72,8 +72,8 @@ test.describe("authenticated flow", () => {
 
   test("repair module list loads after login", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(creds.username!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(creds.password!);
+    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
+    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 

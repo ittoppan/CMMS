@@ -47,7 +47,7 @@ const SPLASH_CSS = `
 }
 #cmms-splash.cmms-splash-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 .cmms-splash-logo {
-  width: 84px; height: 84px; border-radius: 22px;
+  width: 84px; height: 84px; border-radius: 20px;
   background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
   display: flex; align-items: center; justify-content: center;
   font-size: 40px; font-weight: 800; letter-spacing: -0.02em;

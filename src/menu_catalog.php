@@ -26,10 +26,32 @@ return [
     ['key' => 'pm_am/checksheet',          'href' => '/pm_am/checksheet',          'label' => 'ทำเช็คชีท PM',           'section' => 'PM & เครื่องจักร'],
     ['key' => 'asset_registry',            'href' => '/asset_registry',            'label' => 'ทะเบียนเครื่องจักร',     'section' => 'PM & เครื่องจักร'],
     ['key' => 'qr-sheet',                  'href' => '/qr-sheet',                  'label' => 'QR Sheet เครื่องจักร',   'section' => 'PM & เครื่องจักร'],
+    ['key' => 'asset_reliability',                           'href' => '/asset-reliability',                           'label' => 'ความน่าเชื่อถือเครื่องจักร',  'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/dashboard',                 'href' => '/asset-reliability',                           'label' => 'แดชบอร์ด Reliability',       'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/critical',                  'href' => '/asset-reliability/critical',                  'label' => 'เครื่องวิกฤต (A–D)',          'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/lifecycle',                 'href' => '/asset-reliability/lifecycle',                 'label' => 'วงจรชีวิตเครื่องจักร',        'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/aging',                     'href' => '/asset-reliability/aging',                     'label' => 'เครื่องเก่า / อายุการใช้งาน',  'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/replacement',               'href' => '/asset-reliability/replacement',               'label' => 'แผนเปลี่ยนชิ้นส่วน',          'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/overhaul',                  'href' => '/asset-reliability/overhaul',                  'label' => 'แผนยกเครื่อง (Overhaul)',      'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/data-quality',              'href' => '/asset-reliability/data-quality',              'label' => 'คุณภาพข้อมูลเครื่องจักร',     'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/reports',                   'href' => '/asset-reliability/reports',                   'label' => 'รายงาน Reliability',          'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
+    ['key' => 'asset_reliability/config',                    'href' => '/asset-reliability/config',                    'label' => 'ตั้งค่า Reliability',         'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
     ['key' => 'asset_registry/bom_tree',   'href' => '/asset_registry/bom_tree',   'label' => 'BOM Tree ชิ้นส่วน',      'section' => 'PM & เครื่องจักร'],
     ['key' => 'asset_registry/criticality','href' => '/asset_registry/criticality','label' => 'ลำดับความสำคัญ A/B/C',  'section' => 'PM & เครื่องจักร'],
     ['key' => 'equipment_borrowing',       'href' => '/equipment_borrowing',       'label' => 'ยืม-คืนอุปกรณ์',         'section' => 'PM & เครื่องจักร'],
     ['key' => 'calibration',               'href' => '/calibration',               'label' => 'สอบเทียบเครื่องมือวัด',  'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/instruments',    'href' => '/calibration/instruments',   'label' => 'เครื่องมือวัด (Instrument Master)', 'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/plans',          'href' => '/calibration/plans',         'label' => 'แผนสอบเทียบ',          'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/schedule',       'href' => '/calibration/schedule',      'label' => 'ตารางสอบเทียบ',         'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/dashboard',      'href' => '/calibration/dashboard',     'label' => 'แดชบอร์ดสอบเทียบ',      'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/standards',      'href' => '/calibration/standards',     'label' => 'มาตรฐานอ้างอิง',        'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/procedures',     'href' => '/calibration/procedures',    'label' => 'ขั้นตอนสอบเทียบ',       'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/certificates',   'href' => '/calibration/certificates',  'label' => 'ใบรับรองสอบเทียบ',      'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/oot',            'href' => '/calibration/oot',           'label' => 'OOT / นอกเกณฑ์',       'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/reports',        'href' => '/calibration/reports',       'label' => 'รายงานสอบเทียบ',        'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/data-quality',   'href' => '/calibration/data-quality',  'label' => 'คุณภาพข้อมูลสอบเทียบ',  'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/mobile',         'href' => '/calibration/mobile',        'label' => 'สอบเทียบบนมือถือ',      'section' => 'PM & เครื่องจักร'],
+    ['key' => 'calibration/config',         'href' => '/calibration/config',        'label' => 'ตั้งค่าสอบเทียบ',       'section' => 'PM & เครื่องจักร'],
     ['key' => 'calibration/calendar',      'href' => '/calibration/calendar',      'label' => 'ปฏิทินสอบเทียบ',         'section' => 'PM & เครื่องจักร'],
     ['key' => 'calibration/po',            'href' => '/calibration/po',            'label' => 'PO งานสอบเทียบ',         'section' => 'PM & เครื่องจักร'],
     ['key' => 'calibration/tracking',      'href' => '/calibration/tracking',      'label' => 'ติดตามงานสอบเทียบ',      'section' => 'PM & เครื่องจักร'],
@@ -50,8 +72,34 @@ return [
     ['key' => 'andon-board',               'href' => '/andon-board',               'label' => 'จอ Andon TV (โรงงาน)',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/monthly_pdf',       'href' => '/reports/monthly_pdf',       'label' => 'รายงาน PDF ผู้บริหาร',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/export_excel',      'href' => '/reports/export_excel',      'label' => 'Export Excel / CSV',     'section' => 'วิเคราะห์ & รายงาน'],
-    ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาต LOTO',          'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
+
+    // ---- 4.47 ความปลอดภัย & ใบอนุญาตทำงานเสี่ยง (Phase 30) ----
+    ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาตทำงานเสี่ยง (PTW)','section' => 'ความปลอดภัย & งานที่เสี่ยง'],
+
+    // ---- 4.4 ค่าใช้จ่าย & งบประมาณ (Phase 26) ----
+    ['key' => 'cost',                      'href' => '/cost',                      'label' => 'ศูนย์วิเคราะห์ต้นทุน',   'section' => 'ค่าใช้จ่าย & งบประมาณ'],
+    ['key' => 'budget',                    'href' => '/budget',                    'label' => 'จัดการงบประมาณ',        'section' => 'ค่าใช้จ่าย & งบประมาณ'],
+
+    // ---- 4.45 วิเคราะห์ความเสียหาย & RCA (Phase 27) ----
+    ['key' => 'rca',                       'href' => '/rca',                       'label' => 'วิเคราะห์ความเสียหาย',   'section' => 'วิเคราะห์ความเสียหาย & Root Cause'],
+    ['key' => 'rca/events',                'href' => '/rca/events',                'label' => 'เหตุการณ์ความเสียหาย',  'section' => 'วิเคราะห์ความเสียหาย & Root Cause'],
+    ['key' => 'rca/taxonomy',              'href' => '/rca/taxonomy',              'label' => 'จัดการหมวดความเสียหาย', 'section' => 'วิเคราะห์ความเสียหาย & Root Cause'],
+
+    // ---- 4.46 วิศวกรรมความเสียหาย (Phase 37) ----
+    // ค่าทุกตัวคำนวณมาจาก Reliability Engine ฝั่ง PHP เท่านั้น หน้าเว็บเป็นตัวแสดงผลอย่างเดียว
+    // (ดู RELIABILITY_ENGINEERING.md — NULL = คำนวณไม่ได้ ห้ามแทนด้วย 0)
+    ['key' => 'reliability',                  'href' => '/reliability',                       'label' => 'ภาพรวมความเสียหาย',            'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/assets',           'href' => '/reliability/assets',                'label' => 'ตารางความเสียหายรายเครื่อง',      'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/failure-modes',    'href' => '/reliability/failure-modes',         'label' => 'การวิเคราะห์โหมดการเสีย',        'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/trend',            'href' => '/reliability/trend',                 'label' => 'แนวโน้มตามเวลา',                  'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/weibull',          'href' => '/reliability/weibull',               'label' => 'การวิเคราะห์ Weibull',           'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/bad-actors',       'href' => '/reliability/bad-actors',            'label' => 'Bad Actors',                     'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/pm-effectiveness', 'href' => '/reliability/pm-effectiveness',      'label' => 'ประสิทธิผลแผน PM',               'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/growth',           'href' => '/reliability/growth',                'label' => 'การเติบโต & ต้นทุน',              'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/studies',          'href' => '/reliability/studies',               'label' => 'งานวิจัยเชิงวิศวกรรม',            'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/data-quality',     'href' => '/reliability/data-quality',          'label' => 'คุณภาพข้อมูล',                  'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'reliability/config',           'href' => '/reliability/config',                'label' => 'ตั้งค่าความเสียหาย',             'section' => 'วิศวกรรมความเสียหาย'],
 
     // ---- 4.5 การอนุมัติ & เอกสาร ----
     ['key' => 'supervisor',                 'href' => '/supervisor',                 'label' => 'คิวงานหัวหน้างาน',      'section' => 'ควบคุมงาน & วางแผน'],
@@ -59,6 +107,11 @@ return [
     ['key' => 'supervisor/review',          'href' => '/supervisor/review',          'label' => 'ทบทวนคำขอแจ้งซ่อม',       'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/plan',            'href' => '/supervisor/plan',            'label' => 'วางแผน & จัดตาราง',      'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/verify',          'href' => '/supervisor/verify',          'label' => 'ตรวจรับงาน (Verify)',     'section' => 'ควบคุมงาน & วางแผน'],
+
+    // ---- 4.55 การวางแผนซ่อมบำรุง (Phase 25) ----
+    ['key' => 'planning',                   'href' => '/planning',                   'label' => 'ศูนย์วางแผนซ่อมบำรุง',   'section' => 'การวางแผนซ่อมบำรุง'],
+    ['key' => 'planning/calendar',          'href' => '/planning/calendar',          'label' => 'ตารางวางแผนงาน (เดือน)',  'section' => 'การวางแผนซ่อมบำรุง'],
+    ['key' => 'field/plan',                 'href' => '/field/plan',                 'label' => 'แผนงานของฉัน',          'section' => 'การวางแผนซ่อมบำรุง'],
 
     // ---- 4.6 การอนุมัติ & เอกสาร ----
     ['key' => 'approval',                  'href' => '/approval',                  'label' => 'ศูนย์อนุมัติเอกสาร',     'section' => 'การอนุมัติ & เอกสาร'],
@@ -71,7 +124,30 @@ return [
     ['key' => 'settings/notifications',    'href' => '/settings/notifications',    'label' => 'รูปแบบการแจ้งเตือน LINE','section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'register',                  'href' => '/register',                  'label' => 'ลงทะเบียนผูกบัญชี LINE', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'users',                     'href' => '/users',                     'label' => 'ผู้ใช้งานระบบ',          'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'audit_log',                 'href' => '/audit-log',                 'label' => 'บันทึกการตรวจสอบ',      'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'settings',                  'href' => '/settings',                  'label' => 'ตั้งค่าทั้งหมด',          'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'editor/builder',            'href' => '/editor/builder',            'label' => 'สร้างหน้าเว็บ (Visual Builder)', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'pages',                     'href' => '/pages',                     'label' => 'หน้าเว็บที่สร้างเอง',    'section' => 'ระบบ & ตั้งค่า'],
+
+    // ---- 4.95 ผู้รับเหมา & งานภายนอก (Phase 31) ----
+    ['key' => 'contractor/overview',       'href' => '/contractors',               'label' => 'ผู้รับเหมา & งานภายนอก', 'section' => 'ผู้รับเหมา & งานภายนอก'],
+    ['key' => 'contractor/work',           'href' => '/contractors/work',          'label' => 'งานภายนอก (External Work)','section' => 'ผู้รับเหมา & งานภายนอก'],
+
+    // ---- 4.96 Engineering Change & เอกสารควบคุม (Phase 32) ----
+    ['key' => 'engineering_change/overview', 'href' => '/engineering-changes',      'label' => 'Engineering Change (ECR)', 'section' => 'ECR & เอกสารควบคุม'],
+    ['key' => 'document_control/overview',  'href' => '/documents',                 'label' => 'เอกสารควบคุม (Document Control)', 'section' => 'ECR & เอกสารควบคุม'],
+
+    // ---- 4.97 ศูนย์ความรู้ (Phase 38) ----
+    // โหลดความรู้ต้องง่ายเหมือนเปิดเอกสาร: roles 3/4/5 อ่านและค้นได้
+    // ส่วนการเขียน/อนุมัติ/เผยแพร่ แยกสิทธิ์เหมือนเอกสารควบคุม
+    ['key' => 'knowledge',                  'href' => '/knowledge',                 'label' => 'ศูนย์ความรู้ (Knowledge Center)', 'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/search',           'href' => '/knowledge/search',          'label' => 'ค้นหาความรู้',           'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/articles',         'href' => '/knowledge/articles',        'label' => 'บทความความรู้',          'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/articles/create',  'href' => '/knowledge/articles/create', 'label' => 'เขียนบทความใหม่',       'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/gaps',             'href' => '/knowledge/gaps',            'label' => 'ช่องว่างความรู้',        'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/reviews',          'href' => '/knowledge/reviews',         'label' => 'งานทบทวนความรู้',        'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/categories',       'href' => '/knowledge/taxonomy',        'label' => 'หมวดหมู่ความรู้',         'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/tags',             'href' => '/knowledge/taxonomy',        'label' => 'แท็กความรู้',            'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/usage',            'href' => '/knowledge/usage',           'label' => 'สถิติการใช้งาน',         'section' => 'ศูนย์ความรู้'],
+    ['key' => 'knowledge/config',           'href' => '/knowledge/taxonomy',        'label' => 'ตั้งค่าศูนย์ความรู้',     'section' => 'ศูนย์ความรู้'],
 ];

@@ -13,9 +13,12 @@ import {
   Search,
   BarChart3,
   Bell,
+  Scan,
   FileDown,
   FileText,
   Settings,
+  ShieldAlert,
+  Undo2,
 } from "lucide-react";
 import LiffBridge from "../../components/LiffBridge";
 import { offlineQueueCount } from "../../lib/offline-store";
@@ -26,28 +29,20 @@ import ThemeModeToggle from "../../components/ThemeModeToggle";
 import CommandPalette from "../../components/CommandPalette";
 import { NotificationBell } from "../../components/NotificationBell";
 import { SidebarNav } from "../../components/dashboard/sidebar-nav";
+import { getMenuHrefs } from "../../lib/quick-links";
+import { routeIsBlocked } from "../../lib/route-perms";
+import { recordMenuUsage } from "../../lib/frequent-menus";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
+import { useUnreadCount } from "../../lib/notifications";
 import { t, useLang, setUserLang, tPage, tSection, applyUserLang } from "../../lib/i18n";
+import { ConnectivityProvider } from "../../lib/offline/connectivity";
+import { ConnectivityStatus } from "../../components/ConnectivityStatus";
 
 // Page title mapping for breadcrumb
 
 // รายการ href ทั้งหมดที่อยู่ใน SideNav — สำหรับกฎ "เมนูที่ตรงสุด" (deepest match)
-const MENU_HREFS: string[] = [
-  "/dashboard",
-  "/repair", "/repair/request", "/repair/assign", "/repair/my_tasks", "/repair/tracking", "/repair/workload", "/repair/kanban", "/repair/history",
-  "/approval", "/forms", "/manuals",
-  "/pm_am", "/pm_am/dashboard", "/pm_am/plans", "/pm_am/plans/create", "/pm_am/view", "/pm_am/checklists", "/pm_am/calendar", "/pm_am/checksheet", "/pm_am/create", "/pm_am/batch_schedule",
-  "/inspections", "/inspections/run", "/inspections/templates",
-  "/asset_registry", "/asset_registry/view", "/assets", "/qr-sheet", "/asset_registry/bom_tree", "/asset_registry/criticality",
-  "/equipment_borrowing", "/calibration", "/calibration/calendar", "/calibration/po", "/calibration/tracking", "/mtbf_mttr",
-  "/spare_parts", "/spare_parts/issue_center", "/spare_parts/balances", "/spare_parts/returns", "/spare_parts/sage_po", "/spare_parts/sage_sync", "/spare_parts/optimization", "/spare_parts/stock_take", "/suppliers",
-  "/analytics/kpi", "/analytics", "/analytics/advanced", "/reports", "/reports/monthly_pdf", "/reports/export_excel", "/reports/import_excel",
-  "/safety/work_permit", "/iot/monitor",
-  "/users", "/roles", "/register",
-  "/notifications", "/notifications/history", "/settings/notifications", "/settings", "/settings/menus", "/settings/services", "/settings/pwa", "/settings/design", "/settings/repair-options", "/settings/notification-prefs", "/settings/notification-rules",
-  "/editor/builder", "/pages",
-];
+
 
 function getSection(pathname: string): string | null {
   const s = tSection(pathname);
@@ -60,12 +55,14 @@ function getPageTitle(pathname: string): string {
 
 // ═══════════ เมนู bottom nav มือถือ: role-based ═══════════
 const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: React.ComponentType<{ className?: string; size?: number | string; strokeWidth?: number }> }> = {
-  dashboard:             { labelKey: "bottom.dashboard",       href: "/dashboard",            icon: Home },
+  dashboard:             { labelKey: "bottom.dashboard",       href: "/home",                 icon: Home },
   "repair/my_tasks":     { labelKey: "bottom.my_tasks",        href: "/repair/my_tasks",      icon: ClipboardCheck },
+  field:                 { labelKey: "menu.field_work",        href: "/field",               icon: Scan },
   "repair/request":      { labelKey: "bottom.repair_request",  href: "/repair/request",       icon: Wrench },
   "repair/tracking":     { labelKey: "bottom.tracking",        href: "/repair/tracking",      icon: Map },
   "pm_am/checksheet":    { labelKey: "bottom.checksheet",      href: "/pm_am/checksheet",     icon: ClipboardCheck },
   "pm_am/calendar":      { labelKey: "bottom.pm_calendar",     href: "/pm_am/calendar",       icon: CalendarDays },
+  "planning/calendar":   { labelKey: "bottom.planning_calendar", href: "/planning/calendar",   icon: CalendarDays },
   asset_registry:        { labelKey: "bottom.asset_registry",  href: "/asset_registry",       icon: Building2 },
   "qr-sheet":            { labelKey: "bottom.qr_sheet",        href: "/qr-sheet",             icon: Search },
   analytics:             { labelKey: "bottom.analytics",       href: "/analytics",            icon: BarChart3 },
@@ -79,7 +76,7 @@ const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: R
 const BOTTOM_NAV_ROLE_ORDER: Record<string, string[]> = {
   Admin:      ["dashboard", "repair/request", "pm_am/calendar", "asset_registry", "settings"],
   Manager:    ["dashboard", "pm_am/checksheet", "pm_am/calendar", "repair/my_tasks", "asset_registry"],
-  Technician: ["dashboard", "repair/my_tasks", "pm_am/checksheet", "repair/request", "asset_registry"],
+  Technician: ["dashboard", "field", "repair/my_tasks", "pm_am/checksheet", "repair/request"],
   Operator:   ["dashboard", "repair/request", "repair/tracking", "qr-sheet", "notifications"],
   Viewer:     ["dashboard", "analytics", "notifications", "reports/export_excel", "reports/monthly_pdf"],
 };
@@ -89,7 +86,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const lang = useLang();
-  const { canShow, roleName, userFullName, simulated, bottomNavKeys } = useMenuPermission();
+  const { canShow, permission, roleName, userFullName, avatar, simulated, bottomNavKeys, refresh } = useMenuPermission();
+  const unreadCount = useUnreadCount(60000);
 
   // Bottom nav มือถือ: API order → fallback preset ตามบทบาท → filter สิทธิ์
   const bottomNav = (bottomNavKeys.length > 0 ? bottomNavKeys : (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER))
@@ -99,67 +97,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [pendingCount, setPendingCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Auth guard: session invalid (401) → /login (online only)
-  const loadProfile = () => {
-    fetch("/api/v1/menu_permissions.php?user=1")
-      .then((res) => {
-        if (res.status === 401) {
-          router.replace("/login");
-          return null;
-        }
-        return res.json();
-      })
-      .then((json) => {
-        if (json?.user?.must_change_password) {
-          router.replace("/change-password");
-          return null;
-        }
-        if (json?.user?.full_name) {
-          const full = String(json.user.full_name).split("(")[0].trim();
-          const rawAvatar = json.user.avatar || json.user.avatar_path || "";
-          let avatar: string | null = null;
-          if (rawAvatar) {
-            const cleaned = String(rawAvatar).replace(/\\/g, "/");
-            avatar = cleaned.startsWith("data:") || cleaned.startsWith("/")
-              ? cleaned
-              : "/" + cleaned;
-          }
-          setCurrentUser({
-            name: full,
-            initial: full.trim().charAt(0).toUpperCase() || "U",
-            avatar,
-          });
-        }
-      })
-      .catch(() => {
-        /* offline — ไม่ redirect */
-      });
-  };
-
+  // Auth guard: 401 → /login และ must_change_password → /change-password
+  // โดยตรงใน useMenuPermission (รวม fetch โปรไฟล์เป็น request เดียว กับสิทธิ์เมนู)
   useEffect(() => {
-    loadProfile();
     applyUserLang();
-    const onProfileUpdated = () => loadProfile();
+    const onProfileUpdated = () => refresh();
     window.addEventListener("cmms:profile-updated", onProfileUpdated);
     return () => window.removeEventListener("cmms:profile-updated", onProfileUpdated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- รันครั้งเดียวตอน mount
-  }, []);
+  }, [refresh]);
+
+  // UX P5: นับการใช้งานเมนูจริง (localStorage) → ไว้เรียงแถว "ใช้บ่อย" บน /home
+  useEffect(() => {
+    recordMenuUsage(pathname);
+  }, [pathname]);
 
   // badge งานแจ้งซ่อมค้างส่ง (offline queue)
   useEffect(() => {
-    const refresh = () => {
+    const refreshPending = () => {
       offlineQueueCount().then(setPendingCount).catch(() => setPendingCount(0));
     };
-    runQueueMigrationOnce().finally(refresh);
-    window.addEventListener("online", refresh);
-    window.addEventListener("cmms:offline-queued", refresh);
+    runQueueMigrationOnce().finally(refreshPending);
+    window.addEventListener("online", refreshPending);
+    window.addEventListener("cmms:offline-queued", refreshPending);
     return () => {
-      window.removeEventListener("online", refresh);
-      window.removeEventListener("cmms:offline-queued", refresh);
+      window.removeEventListener("online", refreshPending);
+      window.removeEventListener("cmms:offline-queued", refreshPending);
     };
   }, []);
 
-  // ชื่อผู้ใช้จาก hook (merge ไม่ทับ avatar ที่ fetch ตั้งไว้)
+  // ชื่อ + รูปโปรไฟล์จาก hook (fetch ครั้งเดียวเดียวกับ permission)
   useEffect(() => {
     if (userFullName && !simulated) {
       const full = userFullName.split("(")[0].trim();
@@ -167,6 +133,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ...(prev || {}),
         name: full,
         initial: full.trim().charAt(0).toUpperCase() || "U",
+        avatar: avatar ?? prev?.avatar ?? null,
       }));
     } else if (simulated) {
       setCurrentUser((prev) => ({
@@ -175,14 +142,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         initial: (roleName || "R").charAt(0).toUpperCase(),
       }));
     }
-  }, [userFullName, simulated, roleName]);
+  }, [userFullName, simulated, roleName, avatar]);
 
   // "เมนูที่ตรงสุด" highlight rule
   const isSelected = (href: string) => {
     if (href === "/dashboard") return pathname === "/dashboard";
     if (pathname === href) return true;
     if (href === "/" || !pathname.startsWith(href + "/")) return false;
-    const deeper = MENU_HREFS.some(
+    const deeper = getMenuHrefs().some(
       (h) => h.length > href.length && (pathname === h || pathname.startsWith(h + "/"))
     );
     return !deeper;
@@ -206,11 +173,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     // eslint-disable-next-line react-hooks/exhaustive-deps -- อัปเดตตาม pathname/pageTitle
   }, [pathname, pageTitle]);
 
+  // UX P4: route-level guard — path ที่ perm ถูกปิด "ครบทุกตัว" (fail-open: ไม่รู้จัก/ยังโหลด = ผ่าน)
+  const routeBlocked = routeIsBlocked(pathname, permission);
+
   return (
     <ToastProvider>
       <ThemeProvider />
+      <ConnectivityProvider>
       <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
       <LiffBridge />
+
+      {/* Skip link — ให้คีย์บอร์ด/Screen reader ข้าม sidebar+topbar ไปเนื้อหา */}
+      <a
+        href="#cmms-main-scroll"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[100] focus:rounded-lg focus:border focus:border-border focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg"
+      >
+        ข้ามไปยังเนื้อหา
+      </a>
 
       {/* ═══════════ DESKTOP SHELL (≥1024px): sidebar + topbar ═══════════ */}
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
@@ -282,7 +261,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               >
                 <FileText size={17} strokeWidth={1.75} aria-hidden="true" />
               </button>
-              <NotificationBell variant="popover" />
+              <NotificationBell variant="popover" unreadCount={unreadCount} />
+              <ConnectivityStatus variant="chip" />
               <ThemeModeToggle lang={lang} />
               <button
                 type="button"
@@ -308,8 +288,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Content */}
           <main id="cmms-main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-4 lg:px-6 lg:pb-10 lg:pt-6">
-              {children}
+            <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-[calc(56px+env(safe-area-inset-top)+12px)] lg:px-6 lg:pb-10 lg:pt-6">
+              {routeBlocked ? (
+                /* UX P4: หน้า 403 inline — ไม่ redirect เพื่อให้ผู้ใช้ยังเห็นเมนู/topbar ปกติ */
+                <section
+                  aria-label="ไม่มีสิทธิ์เข้าถึงหน้านี้"
+                  className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center"
+                >
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40" aria-hidden="true">
+                    <ShieldAlert className="h-7 w-7" />
+                  </span>
+                  <h1 className="text-xl font-bold text-foreground">403 — ไม่มีสิทธิ์เข้าใช้หน้านี้</h1>
+                  <p className="text-sm text-muted-foreground">
+                    หน้า <span className="font-mono text-xs">{pathname}</span> ยังไม่เปิดสิทธิ์สำหรับบทบาท
+                    {roleName ? <span className="font-semibold text-foreground">“{roleName}”</span> : "ของคุณ"}
+                    {simulated ? " (โหมดจำลอง)" : ""}
+                    หากคิดว่าควรได้ใช้ กรุณาติดต่อผู้ดูแลระบบเพื่อขอเปิดสิทธิ์เมนูนี้
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    <Link
+                      href="/dashboard"
+                      className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--cmms-primary)] px-4 text-sm font-semibold text-white shadow-[var(--cmms-shadow-sm)] transition-[background-color] hover:bg-[var(--cmms-primary-hover)]"
+                      aria-label="กลับหน้าแรก"
+                    >
+                      <Home className="h-4 w-4" aria-hidden="true" />
+                      <span>กลับหน้าแรก</span>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => router.back()}
+                      className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                      aria-label="ย้อนกลับหน้าก่อนหน้า"
+                    >
+                      <Undo2 className="h-4 w-4" aria-hidden="true" />
+                      <span>ย้อนกลับ</span>
+                    </button>
+                  </div>
+                </section>
+              ) : (
+                children
+              )}
             </div>
           </main>
         </div>
@@ -335,7 +353,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
-        <h1 className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</h1>
+        <div className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</div>
         <a
           href="/repair/request"
           className="cmms-mobile-app-bar-btn"
@@ -352,7 +370,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </span>
         </a>
-        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" />
+        <ConnectivityStatus variant="icon" />
+        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
       </header>
 
       {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
@@ -393,6 +412,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
         })}
       </nav>
+      </ConnectivityProvider>
     </ToastProvider>
   );
 }

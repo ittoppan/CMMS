@@ -45,11 +45,24 @@ function Get-NextPid {
     return $null
 }
 
+function Sync-StandaloneAssets {
+    # output:standalone ไม่ copy สองอย่างนี้อัตโนมัติ — ถ้าไม่ copy บั๊กคือ CSS/JS/logo/manifest/sw.js 404 (HTML เปล่าๆ)
+    $sstatic = Join-Path $standalone ".next\static"
+    Copy-Item -LiteralPath (Join-Path $root "frontend\.next\static")     -Destination $sstatic  -Recurse -Force -ErrorAction SilentlyContinue
+    Copy-Item -LiteralPath (Join-Path $root "frontend\public")           -Destination (Join-Path $standalone "public") -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath (Join-Path $sstatic "chunks")) {
+        Write-Log "Synced .next/static -> standalone/.next/static + public/"
+    } else {
+        Write-Log "WARN static copy failed — chunks missing"
+    }
+}
+
 function Start-Next {
     if (-not (Test-Path -LiteralPath (Join-Path $standalone "server.js"))) {
         Write-Log "ERROR server.js not found at $standalone — deploy ยังไม่เสร็จ"
         return $false
     }
+    Sync-StandaloneAssets
     $env:PORT = "$Port"
     $p = Start-Process -FilePath $nodeExe -ArgumentList "server.js" `
         -WorkingDirectory $standalone -WindowStyle Hidden -PassThru

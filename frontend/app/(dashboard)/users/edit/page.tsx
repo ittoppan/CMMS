@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { useInlineValidation } from "@/lib/use-inline-validation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +59,9 @@ function EditUserContent() {
     mustChange: false,
   });
 
+  // inline validation — ตรวจเมื่อ blur / หลัง submit ครั้งแรก
+  const iv = useInlineValidation();
+
   const update = (key: string, val: any) => setForm(prev => ({ ...prev, [key]: val }));
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,7 +110,8 @@ function EditUserContent() {
   }, [userId]);
 
   const handleSubmit = async () => {
-    if (!form.username || !form.fullName) {
+    iv.submit();
+    if (!form.username.trim() || !form.fullName.trim()) {
       setErrorMessage(t("msg.username_fullname_required"));
       return;
     }
@@ -240,6 +245,9 @@ function EditUserContent() {
                     id="edit-username"
                     value={form.username}
                     onChange={(e) => update("username", e.target.value)}
+                    onBlur={() => iv.touch("username")}
+                    error={iv.errorFor("username", !form.username.trim() ? t("msg.username_required") : "")}
+                    aria-required="true"
                   />
                 </div>
 
@@ -251,6 +259,9 @@ function EditUserContent() {
                     id="edit-full-name"
                     value={form.fullName}
                     onChange={(e) => update("fullName", e.target.value)}
+                    onBlur={() => iv.touch("fullName")}
+                    error={iv.errorFor("fullName", !form.fullName.trim() ? t("msg.full_name_required") : "")}
+                    aria-required="true"
                   />
                 </div>
 

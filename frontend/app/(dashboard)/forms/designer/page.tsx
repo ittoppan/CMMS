@@ -31,6 +31,7 @@ import {
 import $ from "jquery";
 import { loadFormBuilder } from "@/lib/form-builder-loader";
 import { usePageHero, t } from "@/lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 
 interface TemplateSummary {
   id: number;
@@ -92,7 +93,7 @@ export default function FormDesignerPage() {
       }
     } catch (e) {
       console.error("Fetch templates error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     } finally {
       setTemplatesLoading(false);
     }
@@ -232,14 +233,14 @@ export default function FormDesignerPage() {
       }
     } catch (e) {
       console.error("Save template error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     } finally {
       setSaving(false);
     }
   }, [code, title, rev, description, selectedId, fetchTemplates]);
 
   const deleteForm = useCallback(async () => {
-    if (!selectedId || !window.confirm("ลบแบบฟอร์มนี้และผลการกรอกทั้งหมด?")) return;
+    if (!selectedId || !(await swalConfirm({ title: "ลบแบบฟอร์มนี้และผลการกรอกทั้งหมด?", destructive: true, confirmText: "ลบเลย" }))) return;
     setMsg(null);
     try {
       const res = await fetch(`/api/v1/form_templates.php?id=${selectedId}`, {
@@ -252,11 +253,11 @@ export default function FormDesignerPage() {
         handleSelect(0);
         fetchTemplates();
       } else {
-        setMsg({ text: json.message || "ลบไม่สำเร็จ", isError: true });
+        setMsg({ text: json.message || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", isError: true });
       }
     } catch (e) {
       console.error("Delete template error", e);
-      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้", isError: true });
+      setMsg({ text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง", isError: true });
     }
   }, [selectedId, handleSelect, fetchTemplates]);
 

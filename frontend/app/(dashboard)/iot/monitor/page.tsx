@@ -53,7 +53,7 @@ export default function IotMonitorPage() {
       }
     } catch (e) {
       console.error("Fetch iot-devices error:", e);
-      setError("ไม่สามารถเชื่อมต่อระบบได้");
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }

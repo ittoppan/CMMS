@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/api.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -20,12 +22,37 @@ try {
 
     switch ($method) {
         case 'GET':
+            if (($_GET['action'] ?? '') === 'leaderboard') {
+                $stmt = $pdo->query("
+                    SELECT u.id, u.full_name, u.employee_code, u.position, u.avatar_path, d.name AS dept_name,
+                           COUNT(r.id) AS total_assigned,
+                           SUM(CASE WHEN r.status IN ('resolved','closed') THEN 1 ELSE 0 END) AS completed_count,
+                           SUM(CASE WHEN r.status = 'in_progress' THEN 1 ELSE 0 END) AS in_progress_count,
+                           COALESCE(AVG(rr.rating_score), 0) AS avg_rating
+                    FROM users u
+                    LEFT JOIN departments d ON u.department_id = d.id
+                    LEFT JOIN repair r ON r.assigned_to = u.id
+                    LEFT JOIN repair_ratings rr ON r.id = rr.repair_id
+                    WHERE u.is_active = 1
+                    GROUP BY u.id, u.full_name, u.employee_code, u.position, u.avatar_path, d.name
+                    ORDER BY completed_count DESC, avg_rating DESC
+                ");
+                echo json_encode($stmt->fetchAll());
+                break;
+            }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
             if ($id) {
                 $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+                echo json_encode($row);
+            } elseif ($empCode !== '') {
+                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE employee_code = ? AND is_active = 1');
+                $stmt->execute([$empCode]);
+                $row = $stmt->fetch();
+                if (!$row) { http_response_code(404); echo json_encode(['error' => 'ไม่พบผู้ใช้งาน']); exit; }
                 echo json_encode($row);
             } else {
                 $stmt = $pdo->query('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users ORDER BY created_at DESC');
@@ -60,7 +87,9 @@ try {
             $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
             $stmt = $pdo->prepare("INSERT INTO users (" . implode(',', $cols) . ") VALUES ($placeholders)");
             $stmt->execute($vals);
-            echo json_encode(['success' => true, 'id' => (int)$pdo->lastInsertId()]);
+            $newId = (int)$pdo->lastInsertId();
+            audit_log($pdo, 'USER_CREATE', 'user', (string)$newId, 'สร้างผู้ใช้ใหม่: ' . ($data['username'] ?? $newId), null, ['id' => $newId, 'username' => $data['username'] ?? '', 'role_id' => $data['role_id'] ?? null]);
+            echo json_encode(['success' => true, 'id' => $newId]);
             break;
         case 'PUT':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -101,6 +130,14 @@ try {
             $values[] = $id;
             $stmt = $pdo->prepare("UPDATE users SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // audit: บันทึกเฉพาะชื่อฟิลด์ที่แก้ (password เก็บแค่ flag ว่าเปลี่ยน — ไม่เก็บ hash / ค่า)
+            $changedFields = [];
+            foreach ($allowed as $col) {
+                if ($col === 'password') { if (!empty($data[$col] ?? null)) $changedFields['password'] = true; continue; }
+                if (array_key_exists($col, $data)) $changedFields[$col] = $data[$col];
+            }
+            audit_log($pdo, 'USER_UPDATE', 'user', (string)$id, 'แก้ไขผู้ใช้ #' . $id, null, ['id' => $id, 'changed' => $changedFields], 'info');
             echo json_encode(['success' => true, 'message' => 'Updated']);
             break;
         case 'DELETE':
@@ -114,11 +151,12 @@ try {
             $stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');
             $stmt->execute([$id]);
             if ($stmt->rowCount() === 0) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
+            audit_log($pdo, 'USER_DELETE', 'user', (string)$id, 'ลบผู้ใช้ #' . $id, null, ['id' => $id], 'info');
             echo json_encode(['success' => true, 'message' => 'Deleted']);
             break;
         default:
             http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

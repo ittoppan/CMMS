@@ -6,16 +6,14 @@ import { e2eCreds, hasCreds } from "./creds";
  * 
  * Preconditions:
  * - Server running on :3001 (deploy.ps1)
- * - Use known working user E01117 / password (set via E2E_USERNAME/E2E_PASSWORD env or fixture)
+ * - Credentials come from the e2e fixture (e2e_bot, Manager) or E2E_USERNAME/E2E_PASSWORD
  * - spare_issue_requests has at least one row with status='Approved' for testing
  *   (if empty, modal tests will skip gracefully)
  */
 
 test.describe("sage shipments", () => {
-  const creds = {
-    username: process.env.E2E_USERNAME ?? "E01117",
-    password: process.env.E2E_PASSWORD ?? "password",
-  };
+  test.skip(() => !hasCreds(), "set E2E_USERNAME/E2E_PASSWORD to run");
+  const creds = e2eCreds() as { username: string; password: string };
 
   async function login(page: any) {
     // Login via API and extract session cookie
@@ -54,9 +52,17 @@ test.describe("sage shipments", () => {
     await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("main h1")).toBeVisible();
 
-    // Table should exist (even if empty)
-    await expect(page.locator("table")).toBeVisible();
-    await expect(page.locator("thead")).toBeVisible();
+    // Table should exist (even if empty). ถ้าไม่มีใบเบิกที่อนุมัติ ระบบแสดง empty-state
+    // ("ไม่พบรายการที่ต้องตัดใน Sage 300") แทน <table> — ยอมรับทั้งสองสถานะ
+    const table = page.locator("table");
+    const emptyState = page.locator('text="ไม่พบรายการที่ต้องตัดใน Sage 300"');
+    const hasTable = await table.count();
+    if (hasTable > 0) {
+      await expect(table).toBeVisible();
+      await expect(page.locator("thead")).toBeVisible();
+    } else {
+      await expect(emptyState).toBeVisible();
+    }
   });
 
   test("request status update modal opens and submits", async ({ page }) => {

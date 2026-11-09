@@ -1,4 +1,13 @@
 <?php
+// Ensure session cookie works across Next.js rewrite proxy
+$frontendDomain = parse_url(getenv('LINE_CALLBACK_URL') ?: '', PHP_URL_HOST);
+if ($frontendDomain) {
+    ini_set('session.cookie_domain', '.' . $frontendDomain);
+}
+ini_set('session.cookie_path', '/');
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? '1' : '0');
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_samesite', 'Lax');
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
 require_once __DIR__ . '/../src/helpers/notification.php';
@@ -21,7 +30,10 @@ $state = $_GET['state'] ?? '';
 // Validate state to prevent CSRF
 if (!$state || !isset($_SESSION['line_oauth_state']) || $state !== $_SESSION['line_oauth_state']) {
     unset($_SESSION['line_oauth_state']);
-    die('Invalid OAuth state. Please try logging in again.');
+    // ไม่ die() ทิ้ง — เด้งกลับหน้า login พร้อมข้อความให้เริ่ม flow ใหม่ (state ใช้ครั้งเดียวและผูก session)
+    $loginPage = $isReactUi ? '/login' : '/login.php';
+    header('Location: ' . $loginPage . '?error=' . urlencode('LINE session หมดอายุหรือลิงก์ถูกใช้ซ้ำ กรุณากดปุ่ม LINE Login ใหม่ครับ'));
+    exit;
 }
 unset($_SESSION['line_oauth_state']);
 

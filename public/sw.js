@@ -1,26 +1,47 @@
-/* ============================================================
-   CMMS-TOPPAN Service Worker (PHP app) — PWA shell v3
-   ------------------------------------------------------------
-   - Navigation: network-first → cache → offline.html → synthesized offline page
-   - API (GET /api/*): network-first + cache fallback
-   - Static (/css, /js, /icons, /assets): cache-first
-   - Install: per-URL precache (URL หนึ่งพัง ไม่ล้มทั้งชุด)
-   - ทุก respondWith คืน Response เสมอ (กัน "Failed to convert value to 'Response'")
-   ============================================================ */
-const SHELL_CACHE = "cmms-tpt-php-shell-v3";
-const ASSET_CACHE = "cmms-tpt-php-assets-v3";
-const API_CACHE   = "cmms-tpt-php-api-v3";
+﻿/* CMMS-TPT Service Worker — PWA full-app shell v9
+ * ยทบาย:
+ *  - Navigation (HTML): network-only → offline.html → synthesized offline page
+ *    (ไม่คืนหน้า HTML เก่าจาก cache เด็ดขาด — กันเห็นหน้าเก่าหลัง deploy)
+ *  - API (GET /api/v1/*): network-first + cache fallback
+ *  - Static assets (/_next/static, /icons): stale-while-revalidate
+ *  - Install: precache แบบ per-URL (URL หนึ่งพัง ไม่ล้มทั้งชุด)
+ *  ทุก respondWith คืน Response เสมอ — กัน "Failed to convert value to 'Response'"
+ *
+ *  เมื่อ deploy UI ใหม่ ให้ bump SW_VERSION (v38 → v39 ...) หนึ่งบรรทัดเดียว:
+ *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
+ *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
+ */
+const SW_VERSION = "v40-20261104-ux1";
+const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
+const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
+const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
+const PAGE_CACHE = `cmms-tpt-pages-${SW_VERSION}`;
 
 const PRECACHE_URLS = [
-  "/",
-  "/login.php",
   "/offline.html",
-  "/manifest.json",
+  "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
-  "/css/app.css",
-  "/css/daisy-compat.css"
 ];
+
+/* ---------- Offline Routes (PWA) ----------
+ * หน้าเหล่านี้เปิดดู/กรอกได้แม้ไม่มีเน็ต:
+ *  - /repair/request (แจ้งซ่อมด่วน — LIFF) — ฟอร์ม + queue submit ออฟไลน์
+ *  - /repair/my_tasks (งานของฉัน) — ดูรายการงานจาก cache
+ * หน้าแรกที่ออนไลน์ จะถูกเก็บ HTML ลง PAGE_CACHE แล้วตอน offline เสิร์ฟจาก cache
+ * (ไม่ได้อยู่ในลิสต์ = network-only เดิม — กันเห็นหน้าเก่าหลัง deploy) */
+const OFFLINE_ROUTES = [
+  "/repair/request",
+  "/repair/my_tasks",
+  "/repair/view",
+  "/pm_am/checksheet",
+  "/sync-center",
+];
+
+/* API ที่ precache ตอน install — ฟอร์มแจ้งซ่อมโหลดข้อมูล (เครื่องจักร/แผนก) */
+/* PRECACHE_APIS ถูกลบออก (v40): การ precache /api/v1/* ตอน install ทำให้บาง endpoint ค้าง
+ * ใน SW-fetch แล้ว SW ติด state "installing" ตลอดกาล (serviceWorker.ready ไม่ resolve)
+ * — API cache ยังเก็บแบบ network-first + fallback ที่ fetch handler เหมือนเดิม */
 
 /* ---------- Helpers ---------- */
 function cachePut(cacheName, request, response) {
@@ -33,7 +54,7 @@ function cachePut(cacheName, request, response) {
 
 function offlineFallback() {
   return new Response(
-    "<!DOCTYPE html><html lang='th'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CMMS-TPT — Offline</title><style>body{font-family:system-ui,'Sarabun',sans-serif;background:#f1f1f1;color:#262626;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center}.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:40px 32px;max-width:360px;box-shadow:0 2px 4px rgba(0,0,0,.05)}.logo{width:64px;height:64px;border-radius:18px;background:#0D4785;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin-bottom:16px}h1{font-size:18px;margin:0 0 8px}p{font-size:13px;color:#737373;line-height:1.6;margin:0}</style></head><body><div class='card'><div class='logo'>C</div><h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1><p>ระบบ CMMS-TOPPAN ต้องการเครือข่ายเพื่อโหลดข้อมูล<br>กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง</p></div></body></html>",
+    "<!DOCTYPE html><html lang='th'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>CMMS-TPT — Offline</title><style>body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f1f1;color:#262626;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center}.card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:40px 32px;max-width:360px;box-shadow:0 2px 4px rgba(0,0,0,.05)}.logo{width:64px;height:64px;border-radius:18px;background:#0068B5;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;margin-bottom:16px}h1{font-size:18px;margin:0 0 8px}p{font-size:13px;color:#737373;line-height:1.6;margin:0}</style></head><body><div class='card'><div class='logo'>C</div><h1>ไม่มีการเชื่อมต่ออินเทอร์เน็ต</h1><p>ระบบ CMMS-TOPPAN ต้องการเครือข่ายเพื่อโหลดข้อมูล<br>กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง</p></div></body></html>",
     {
       status: 503,
       statusText: "Offline",
@@ -42,19 +63,22 @@ function offlineFallback() {
   );
 }
 
-/* ---------- Install: precache shell (per-URL) ---------- */
+/* ---------- Install: precache shell + data APIs (per-URL — ไม่ล้มทั้งชุด) ---------- */
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(SHELL_CACHE);
+      const shell = await caches.open(SHELL_CACHE);
       await Promise.allSettled(
-        PRECACHE_URLS.map((url) => cache.add(url).catch(() => {}))
+        PRECACHE_URLS.map((url) => shell.add(url).catch(() => {}))
       );
+      // (v40) precache API ออกจาก install — บาง endpoint ค้างใน SW-fetch ทำให้ SW ติด installing ตลอดกาล
+      // API cache ยังเก็บแบบ network-first + fallback ที่ fetch handler เหมือนเดิม
       await self.skipWaiting();
     })()
   );
 });
 
+/* ---------- Message: SKIP_WAITING จากหน้าเว็บ (PwaRegister) ---------- */
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
@@ -69,7 +93,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE)
+            .filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE && key !== API_CACHE && key !== PAGE_CACHE)
             .map((key) => caches.delete(key))
         )
       )
@@ -83,9 +107,9 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return; // CDN/LINE cross-origin
+  if (url.origin !== self.location.origin) return; // cross-origin (CDN, LINE) ปล่อยผ่าน
 
-  // 1) API — network-first + cache fallback
+  // 1) API — network-first + cache fallback (คืน Response.error() แทน undefined)
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(request)
@@ -100,42 +124,61 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2) Static — cache-first
-  if (/^\/(css|js|icons|assets|uploads)\//.test(url.pathname)) {
+  // 2) Static assets — stale-while-revalidate (โหลดเร็ว + อัปเดต cache ในพื้นหลัง)
+  if (url.pathname.startsWith("/_next/") || url.pathname.startsWith("/icons/")) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
+      caches.match(request).then((cached) => {
+        if (cached) {
+          // มี cache → เสิร์ฟทันที + ดึง version ใหม่จาก network อัปเดต cache (พื้นหลัง)
           fetch(request)
             .then((response) => {
-              cachePut(ASSET_CACHE, request, response.clone());
-              return response;
+              if (response && response.ok) cachePut(ASSET_CACHE, request, response.clone());
             })
-            .catch(() => Response.error())
-      )
+            .catch(() => {});
+          return cached;
+        }
+        // ไม่มี cache → โหลดจาก network ตามปกติ + เก็บ cache
+        return fetch(request)
+          .then((response) => {
+            cachePut(ASSET_CACHE, request, response.clone());
+            return response;
+          })
+          .catch(() => Response.error());
+      })
     );
     return;
   }
 
-  // 3) Navigation — network-first (session/login safe)
+  // 3) Navigation / pages
+  //    - หน้าใน OFFLINE_ROUTES: network-first + cache fallback (เปิดดูได้ตอน offline)
+  //    - หน้าอื่น: network-only (ไม่คืน HTML เก่า — กันเห็นหน้าเก่าหลัง deploy)
   if (request.mode === "navigate") {
+    const isOfflineRoute = OFFLINE_ROUTES.some((r) => url.pathname === r || url.pathname.startsWith(r + "/"));
+    if (!isOfflineRoute) {
+      event.respondWith(
+        fetch(request).catch(() =>
+          caches.match("/offline.html").then((res) => res || offlineFallback())
+        )
+      );
+      return;
+    }
+    // offline route — network-first, เก็บ HTML ลง PAGE_CACHE, offline เสิร์ฟจาก cache
     event.respondWith(
       fetch(request)
         .then((response) => {
-          cachePut(SHELL_CACHE, request, response.clone());
+          cachePut(PAGE_CACHE, request, response.clone());
           return response;
         })
         .catch(() =>
           caches
-            .match(request)
-            .then((cached) => cached || caches.match("/offline.html"))
-            .then((res) => res || offlineFallback())
+            .match(request, { cacheName: PAGE_CACHE })
+            .then((cached) => cached || caches.match("/offline.html").then((res) => res || offlineFallback()))
         )
     );
     return;
   }
 
-  // 4) Other same-origin — network-first + cache fallback
+  // 4) อื่น ๆ (ไฟล์ static ทั่วไป) — network-first + cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -143,5 +186,39 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(() => caches.match(request).then((cached) => cached || Response.error()))
+  );
+});
+
+/* ---------- Web Push (PWA push notifications) ---------- */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) { /* ignore */ }
+  const title = data.title || "CMMS-TPT";
+  const options = {
+    body: data.body || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    data: { url: data.url || "/" },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        for (const client of list) {
+          if ("focus" in client) {
+            client.navigate(url).catch(() => {});
+            return client.focus();
+          }
+        }
+        return clients.openWindow(url);
+      })
   );
 });

@@ -11,6 +11,7 @@
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
+require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -161,13 +162,22 @@ try {
 
         if (empty($fields)) { http_response_code(400); echo json_encode(['error' => 'ไม่มีข้อมูลที่จะแก้ไข']); exit; }
 
+        $changedPw = false;
+        foreach ($fields as $f) { if (str_starts_with($f, 'password')) { $changedPw = true; break; } }
+
         $values[] = $userId;
         $pdo->prepare('UPDATE users SET ' . implode(', ', $fields) . ', updated_at = NOW() WHERE id = ?')->execute($values);
+
+        if ($changedPw) {
+            audit_log($pdo, 'PASSWORD_CHANGE', 'user', (string)$userId, 'ผู้ใช้เปลี่ยนรหัสผ่านของตัวเอง', null, ['id' => $userId, 'method' => 'self'], 'warning');
+        } else {
+            audit_log($pdo, 'PROFILE_UPDATE', 'user', (string)$userId, 'แก้ไขโปรไฟล์ส่วนตัว', null, ['id' => $userId], 'info');
+        }
         echo json_encode(['success' => true, 'message' => 'บันทึกโปรไฟล์สำเร็จ']);
         exit;
     }
 
     http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => 'Server Error: ' . $e->getMessage()]);
+    api_safe_catch($e);
 }

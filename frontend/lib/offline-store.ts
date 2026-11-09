@@ -38,19 +38,29 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-/** จำนวนงานแจ้งซ่อมที่ค้างส่ง (offline queue) */
+/** จำนวนงานแจ้งซ่อมที่ค้างส่ง (offline queue) — รวมคิวใหม่ cmms-sync (Phase 19) */
 export async function offlineQueueCount(): Promise<number> {
+  let existing = 0;
   try {
     const db = await openDb();
-    return await new Promise<number>((resolve) => {
+    existing = await new Promise<number>((resolve) => {
       const tx = db.transaction(QUEUE_STORE, "readonly");
       const req = tx.objectStore(QUEUE_STORE).count();
       req.onsuccess = () => resolve(req.result || 0);
       req.onerror = () => resolve(0);
     });
   } catch {
-    return 0;
+    existing = 0;
   }
+  let syncQueue = 0;
+  try {
+    const { syncEngine } = await import("./offline/engine");
+    await syncEngine.ensureLoaded();
+    syncQueue = syncEngine.pendingCount();
+  } catch {
+    syncQueue = 0;
+  }
+  return existing + syncQueue;
 }
 
 /** เก็บ snapshot ข้อมูล (เช่น รายการงานของฉัน) ลง IndexedDB */

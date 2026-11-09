@@ -6,12 +6,29 @@ require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
+require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
 // สถานะเฉพาะของ Phase 14 (Supervisor workflow) — จัดการผ่าน /api/v1/supervisor.php เท่านั้น
 $P14_ONLY_STATUSES = ['draft', 'pending_approval', 'approved', 'assigned', 'accepted', 'paused', 'waiting_external', 'pending_verification', 'verified'];
+
+/**
+ * Fallback RM-1: ป้องกันกราฟ Downtime ว่าง — ถ้า payload มี downtime_start + downtime_end
+ * แต่ไม่กรอก/กรอก 0 นาที → คำนวณจากความต่างของเวลาให้อัตโนมัติ (ผู้ใช้ยัง override ได้โดยกรอกค่าเอง)
+ */
+function repair_autofill_downtime(array &$data): void {
+    $s = trim((string)($data['downtime_start'] ?? ''));
+    $e = trim((string)($data['downtime_end'] ?? ''));
+    $m = $data['downtime_minutes'] ?? null;
+    if ($s === '' || $e === '') return;
+    if ($m !== null && trim((string)$m) !== '' && (int)$m > 0) return;
+    $ts1 = strtotime($s); $ts2 = strtotime($e);
+    if ($ts1 === false || $ts2 === false || $ts2 < $ts1) return;
+    $data['downtime_minutes'] = max(1, (int)round(($ts2 - $ts1) / 60));
+}
+
 
 try {
     $pdo = getDb();
@@ -102,26 +119,45 @@ try {
             if (empty($data['work_order_no'])) {
                 $data['work_order_no'] = generateWorkOrderNo($pdo);
             }
+            // Phase 19: idempotency — form แจ้งซ่อม (offline queue) ส่งซ้ำไม่สร้างใบงานซ้ำ
+            $idemKey = clientActionKeyFromRequest($data);
+            if ($idemKey !== '') {
+                $idem = clientActionBegin($pdo, $idemKey, 'POST', '/api/v1/repair.php');
+                if ($idem['status'] === 'replay') {
+                    echo json_encode(['success' => true, 'dedup' => true, 'ref_id' => $idem['ref_id']]);
+                    exit;
+                }
+                if ($idem['status'] !== 'new') {
+                    clientActionFinish($pdo, $idemKey, 'conflict', null, null, 409);
+                    http_response_code(409);
+                    echo json_encode(['error' => 'รายการนี้ถูกส่งแล้วจากอุปกรณ์ของท่าน — ไม่ประมวลผลซ้ำ', 'code' => 'CLIENT_ACTION_UNCERTAIN'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
             // ไม่ได้ login (ฟอร์มสาธารณะจาก LINE) → ต้องมีชื่อผู้แจ้ง + เบอร์โทร
             // (ฟอร์ม /repair/request บังคับทั้งคู่ในขั้นตอน "ผู้แจ้ง & รูป")
             if (!currentUser($pdo)) {
                 if (empty($data['receiver_name'])) {
+                    clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
                     http_response_code(400);
                     echo json_encode(['error' => 'Missing receiver_name — ฟอร์มสาธารณะต้องระบุชื่อผู้แจ้ง']);
                     exit;
                 }
                 if (empty($data['reporter_phone'])) {
+                    clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
                     http_response_code(400);
                     echo json_encode(['error' => 'Missing reporter_phone — ฟอร์มสาธารณะต้องระบุเบอร์โทรผู้แจ้ง']);
                     exit;
                 }
             }
-            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            repair_autofill_downtime($data);
+            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
             if ($closingNow) {
                 $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
                 if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
+                    clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
                     http_response_code(400);
                     echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
                     exit;
@@ -131,11 +167,12 @@ try {
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $cols[] = $col; $vals[] = $data[$col]; }
             }
-            if (empty($cols)) { http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
+            if (empty($cols)) { clientActionFinish($pdo, $idemKey, 'failed', null, null, 400); http_response_code(400); echo json_encode(['error' => 'No data']); exit; }
             $placeholders = rtrim(str_repeat('?,', count($cols)), ',');
             $stmt = $pdo->prepare("INSERT INTO repair (" . implode(',', $cols) . ") VALUES ($placeholders)");
             $stmt->execute($vals);
             $newId = (int)$pdo->lastInsertId();
+            clientActionFinish($pdo, $idemKey, 'success', 'repair', $newId, 200);
             echo json_encode(['success' => true, 'id' => $newId, 'work_order_no' => $data['work_order_no']]);
 
             // ---- อะไหล่ที่ใช้ซ่อม (ใบเบิกจากใบซ่อม) — ตัดสต็อก + ผูก repair_spare_parts ----
@@ -335,12 +372,47 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // Phase 19: idempotency — ป้องกัน offline sync queue ส่งซ้ำ (network timeout / retry)
+            $idemKey = clientActionKeyFromRequest($data);
+            if ($idemKey !== '') {
+                $idem = clientActionBegin($pdo, $idemKey, 'PUT', '/api/v1/repair.php');
+                if ($idem['status'] === 'replay') {
+                    echo json_encode(['success' => true, 'dedup' => true, 'ref_id' => $idem['ref_id']]);
+                    exit;
+                }
+                if ($idem['status'] !== 'new') {
+                    clientActionFinish($pdo, $idemKey, 'conflict', null, null, 409);
+                    http_response_code(409);
+                    echo json_encode(['error' => 'รายการนี้ถูกส่งแล้วจากอุปกรณ์ของท่าน — ไม่ประมวลผลซ้ำ', 'code' => 'CLIENT_ACTION_UNCERTAIN'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
             // Phase 14: สถานะใน Supervisor workflow ต้องจัดการผ่าน supervisor.php เท่านั้น
             if (isset($data['status'])) {
                 $wantedStatus = trim((string)$data['status']);
                 if (in_array($wantedStatus, $P14_ONLY_STATUSES, true) && !canSupervisor()) {
+                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 403);
                     http_response_code(403);
                     echo json_encode(['error' => 'สถานะนี้จัดการผ่าน Supervisor Workflow หน้า /supervisor เท่านั้น (ห้ามข้ามขั้นตอน)'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
+            // Phase 19: conflict detection — ถ้าใบงานถูกแก้จากระบบระหว่างที่ช่างออฟไลน์ → กันเขียนทับ
+            if (!empty($data['base_updated_at']) && (isset($data['status']) || isset($data['completed_at']))) {
+                $qc = $pdo->prepare('SELECT updated_at, status FROM repair WHERE id = ?');
+                $qc->execute([$id]);
+                $curRow = $qc->fetch(PDO::FETCH_ASSOC);
+                $curUpd = $curRow ? $curRow['updated_at'] : null;
+                $wantedStatus = strtolower((string)($data['status'] ?? ($curRow['status'] ?? '')));
+                $isTerminalOrFlow = in_array($wantedStatus, ['completed', 'in_progress', 'paused', 'waiting_parts', 'closed', 'verified'], true);
+                if ($curUpd && strtotime((string)$data['base_updated_at']) !== strtotime((string)$curUpd) && $isTerminalOrFlow) {
+                    clientActionFinish($pdo, $idemKey, 'conflict', 'repair', $id, 409);
+                    http_response_code(409);
+                    echo json_encode([
+                        'error' => 'ข้อมูลรายการนี้ถูกแก้ไขจากระบบแล้ว — กรุณาโหลดข้อมูลล่าสุดก่อนบันทึก',
+                        'code' => 'CONFLICT',
+                        'current' => ['status' => $curRow['status'] ?? null, 'updated_at' => $curUpd],
+                    ], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
             }
@@ -391,7 +463,8 @@ try {
                     }
                 }
             }
-            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by'];
+            repair_autofill_downtime($data);
+            $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path'];
             // Phase 14: ฟิลด์วางแผนเปิดเฉพาะหัวหน้างาน (Admin/Manager/ASST Manager/Foreman)
             if (canSupervisor()) {
                 $allowed = array_merge($allowed, ['work_order_type', 'planned_start_at', 'planned_end_at', 'estimated_duration_minutes', 'required_skill', 'required_tools', 'safety_requirement', 'instructions', 'sla_due_at']);
@@ -401,7 +474,11 @@ try {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
             }
             if (empty($fields)) {
-                if ($accepted) { echo json_encode(['success' => true, 'accepted' => true]); exit; }
+                if ($accepted) {
+                    clientActionFinish($pdo, $idemKey, 'success', 'repair', $id, 200);
+                    echo json_encode(['success' => true, 'accepted' => true]); exit;
+                }
+                clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                 http_response_code(400); echo json_encode(['error' => 'No data']); exit;
             }
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
@@ -409,12 +486,14 @@ try {
             if ($closingNow) {
                 $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
                 if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
+                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                     http_response_code(400);
                     echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
                     exit;
                 }
             }
             $values[] = $id;
+            $qOld = $pdo->prepare('SELECT assigned_to FROM repair WHERE id = ?');
             $qOld = $pdo->prepare('SELECT assigned_to FROM repair WHERE id = ?');
             $qOld->execute([$id]);
             $oldAssignedTo = (int)($qOld->fetchColumn() ?: 0);
@@ -530,6 +609,7 @@ try {
             } catch (Exception $e) {
                 error_log("[repair.php] assign/spare notify failed: " . $e->getMessage());
             }
+            clientActionFinish($pdo, $idemKey, 'success', 'repair', $id, 200);
             echo json_encode(['success' => true]);
 
             // ---- แจ้งเตือนเมื่อปิดงานซ่อม (completed) — LINE เทมเพลต line_tpl_completed + Telegram เหมือน LINE ----
@@ -613,5 +693,5 @@ try {
             http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

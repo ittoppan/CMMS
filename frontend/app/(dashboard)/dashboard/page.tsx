@@ -6,6 +6,7 @@ import {
   Activity,
   Archive,
   CalendarCheck,
+  CalendarClock,
   CheckCircle2,
   ClipboardCheck,
   Cpu,
@@ -27,6 +28,8 @@ import { Grid } from "@/components/layout/primitives";
 import {
   BarChart,
   Bar,
+  ComposedChart,
+  Line,
   PieChart,
   Pie,
   Cell,
@@ -45,12 +48,24 @@ import {
   SectionHeading,
   LoadingGrid,
   RefreshBlock,
+  PRIO_LABELS,
 } from "@/components/dashboard/kit";
 import * as D from "@/lib/dashboard";
+import { getPlanningKpis, type PlanningKpis } from "@/lib/planning";
+import { fetchBudgetVsActual as fetchBudgetVsActualApi, type BudgetVsActualResponse } from "@/lib/cost";
+import { DASHBOARD_SHORTCUTS } from "@/lib/quick-links";
 
 const fmt = (n: number) => Math.round(n).toLocaleString("th-TH");
 const fmtBaht = (n: number) => (n >= 10000 ? `${Math.round(n / 1000).toLocaleString("th-TH")}k` : fmt(n));
 const hours = (mins: number) => `${(mins / 60).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ชม.`;
+const fmtMoney = (n: number, symbol = "฿") => (n >= 10000 ? `${symbol} ${Math.round(n / 1000)}k` : `${symbol} ${fmt(n)}`);
+const MONTH_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const fmtThaiDay = (s: string) => {
+  const t = new Date(String(s).replace(" ", "T"));
+  if (Number.isNaN(t.getTime())) return s;
+  return `${t.getDate()} ${MONTH_SHORT[t.getMonth()]} ${t.getFullYear() + 543}`;
+};
+const cntOf = (r: D.FailureRow): number => Number((r as unknown as { cnt?: number }).cnt ?? 0);
 
 const CHART_COLORS = [
   "var(--cmms-primary)",
@@ -99,9 +114,12 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [dt, setDt] = useState<D.DowntimeResponse | null>(null);
   const [cost, setCost] = useState<D.CostResponse | null>(null);
+  const [budget, setBudget] = useState<BudgetVsActualResponse | null>(null);
+  const [trend, setTrend] = useState<D.TrendPoint[] | null>(null);
   const [failure, setFailure] = useState<D.FailureResponse | null>(null);
   const [prio, setPrio] = useState<{ name: string; value: number }[] | null>(null);
   const [openWo, setOpenWo] = useState<D.WoItem[] | null>(null);
+  const [planKpis, setPlanKpis] = useState<PlanningKpis | null>(null);
   const didAnal = useRef(false);
 
   const role = data?.dashboard_role ?? "manager";
@@ -129,14 +147,24 @@ export default function DashboardPage() {
     load();
   }, [load]);
 
+  // Phase 25: KPI การวางแผน — โหลดแยก ไม่รบกวนโหลดหลัก
+  useEffect(() => {
+    if (!data || planKpis) return;
+    getPlanningKpis()
+      .then(setPlanKpis)
+      .catch(() => { /* ไม่บังคับ — ถ้า endpoint ล่มไม่ทำให้หน้าเด้ง */ });
+  }, [data, planKpis]);
+
   const analysis = useCallback(async () => {
     if (!data || !isMgr) return;
     didAnal.current = true;
-    const [d, f, wo, c] = await Promise.all([
+    const [d, f, wo, c, b, tr] = await Promise.all([
       D.fetchDowntime(q),
       D.fetchFailure(q),
       D.fetchWoList({ ...q, group: "open", limit: 300 }),
       D.isCostVisible(data.can) ? D.fetchCost(q) : Promise.resolve(null),
+      D.isCostVisible(data.can) ? fetchBudgetVsActualApi(new Date().getFullYear()) : Promise.resolve(null),
+      D.fetchTrend(q),
     ]);
     const priorityRows = [
       { name: "วิกฤต", value: 0 },
@@ -153,7 +181,9 @@ export default function DashboardPage() {
     setFailure(f);
     setOpenWo(wo.items);
     setPrio(priorityRows.filter((r) => r.value > 0));
+    setTrend(tr.series);
     if (c) setCost(c);
+    if (b) setBudget(b);
   }, [data, isMgr, q]);
 
   useEffect(() => {
@@ -183,7 +213,9 @@ export default function DashboardPage() {
     setDt(null);
     setFailure(null);
     setCost(null);
+    setBudget(null);
     setPrio(null);
+    setTrend(null);
     setTick((t) => t + 1);
   }, []);
 
@@ -193,11 +225,6 @@ export default function DashboardPage() {
     dt: r.dt,
     cnt: r.cnt,
   })), [dt]);
-
-  const failRows = useMemo(() => (failure?.by_type ?? []).slice(0, 6).map((r) => ({
-    name: (r.failure_name || r.failure_code || "ไม่ระบุ").slice(0, 20),
-    cnt: r.cnt,
-  })), [failure]);
 
   const costRows = useMemo(() => (cost?.by_asset ?? []).slice(0, 6).map((r) => ({
     name: r.code || r.name || "—",
@@ -220,19 +247,26 @@ export default function DashboardPage() {
         <CardContent className="space-y-3 p-4">
           <SectionHeading
             title="ภาพรวมและตัวกรอง"
-            sub={data?.range ? `ช่วง ${data.range.start} ถึง ${data.range.end}` : "ไม่ได้จำกัดช่วงเวลา"}
+            sub={data?.range ? `ช่วง ${fmtThaiDay(data.range.start)} ถึง ${fmtThaiDay(data.range.end)}` : "ไม่ได้จำกัดช่วงเวลา"}
           />
           <RangePicker value={q.range ?? ""} onRange={applyRange} onCustom={applyCustom} />
-          <FilterBar
-            options={data?.options ?? null}
-            value={q}
-            onChange={patch}
-            hidden={
-              isTech || isOp
-                ? { technician_id: true, department_id: isTech ? true : false }
-                : undefined
-            }
-          />
+          <details className="rounded-[var(--cmms-radius-sm)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2" open>
+            <summary className="cursor-pointer select-none text-sm font-medium text-[var(--cmms-text-secondary)]">
+              ตัวกรองเพิ่มเติม (แผนก / เครื่องจักร / ช่าง / ประเภทงาน)
+            </summary>
+            <div className="mt-3">
+              <FilterBar
+                options={data?.options ?? null}
+                value={q}
+                onChange={patch}
+                hidden={
+                  isTech || isOp
+                    ? { technician_id: true, department_id: isTech ? true : false }
+                    : undefined
+                }
+              />
+            </div>
+          </details>
         </CardContent>
       </Card>
 
@@ -383,6 +417,30 @@ export default function DashboardPage() {
             </section>
           )}
 
+          {/* ── การวางแผนซ่อมบำรุง (Phase 25) ── */}
+          {planKpis && (
+            <section aria-label="การวางแผนซ่อมบำรุง" className="space-y-3">
+              <SectionHeading title="การวางแผนซ่อมบำรุง" sub="คิวงานที่ต้องวางแผน/จัดตาราง (ตามขอบเขตบทบาท)" />
+              <Grid columns={{ minWidth: 200, max: isTech ? 3 : 5 }} gap={3}>
+                {isMgr ? (
+                  <>
+                    <KpiCard label="ยังไม่วางแผน" value={planKpis.groups.unplanned ?? 0} unit="ใบ" icon={<CalendarClock size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unplanned > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="ยังไม่มีรอบเวลา" value={planKpis.groups.unscheduled ?? 0} unit="ใบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unscheduled > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="วางแผนแล้ว" value={planKpis.groups.scheduled ?? 0} unit="ใบ" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/planning/calendar" />
+                    <KpiCard label="SLA เสี่ยง" value={planKpis.sla.at_risk ?? 0} unit="ใบ" icon={<TriangleAlert size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.sla.at_risk > 0 ? "amber" : "green"} href="/planning" />
+                    <KpiCard label="เกินกำหนด (SLA)" value={planKpis.sla.breached ?? 0} unit="ใบ" icon={<TriangleAlert size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.sla.breached > 0 ? "red" : "green"} href="/planning" />
+                  </>
+                ) : (
+                  <>
+                    <KpiCard label="งานของฉัน (เปิด)" value={planKpis.total_open} unit="ใบ" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/field/plan" />
+                    <KpiCard label="งานสัปดาห์ฉัน" value={planKpis.groups.scheduled ?? 0} unit="ใบ" icon={<CalendarClock size={18} strokeWidth={1.9} aria-hidden="true" />} tone="green" href="/field/plan" />
+                    <KpiCard label="ยังไม่มีรอบเวลา" value={planKpis.groups.unscheduled ?? 0} unit="ใบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone={planKpis.groups.unscheduled > 0 ? "amber" : "green"} href="/field/plan" />
+                  </>
+                )}
+              </Grid>
+            </section>
+          )}
+
           {/* ── เครื่องจักร & Downtown ── */}
           {isMgr && (
             <section aria-label="เครื่องจักรและ Downtime" className="space-y-3">
@@ -404,6 +462,39 @@ export default function DashboardPage() {
           {isMgr && (
             <section aria-label="กราฟวิเคราะห์" className="space-y-3">
               <SectionHeading title="การวิเคราะห์" sub="ข้อมูลตามช่วงเวลาและตัวกรองที่เลือก" />
+              <Card>
+                <CardContent className="space-y-3 p-4">
+                  <p className="text-sm font-medium text-[var(--cmms-text-muted)]">แนวโน้มรายวัน — สร้าง/ปิดงาน (ใบ) และ Downtime (ชาวโมง)</p>
+                  {!trend || trend.length === 0 ? (
+                    <EmptyState title="ไม่มีข้อมูลอยู่ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={240}>
+                      <ComposedChart
+                        data={trend.map((p) => {
+                          const d = new Date(p.day.replace(" ", "T"));
+                          return {
+                            day: Number.isNaN(d.getTime()) ? p.day : `${d.getDate()}/${d.getMonth() + 1}`,
+                            สร้าง: p.created,
+                            ปิด: p.completed,
+                            downtime: p.downtime_hours,
+                          };
+                        })}
+                        margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
+                        <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" minTickGap={24} />
+                        <YAxis yAxisId="wo" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                        <YAxis yAxisId="dt" orientation="right" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                        <Tooltip content={<ChartTooltip unit="" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
+                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Bar yAxisId="wo" dataKey="สร้าง" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                        <Bar yAxisId="wo" dataKey="ปิด" fill="var(--cmms-success)" radius={[4, 4, 0, 0]} maxBarSize={18} />
+                        <Line yAxisId="dt" dataKey="downtime" name="Downtime (ชม.)" stroke="var(--cmms-danger)" strokeWidth={2} dot={false} connectNulls />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
               <Grid columns={{ minWidth: 320, max: 2 }} gap={3}>
                 <Card>
                   <CardContent className="space-y-3 p-4">
@@ -425,22 +516,44 @@ export default function DashboardPage() {
                 </Card>
                 <Card>
                   <CardContent className="space-y-3 p-4">
-                    <p className="text-sm font-medium text-[var(--cmms-text-muted)]">ประเภทความเสียหาย (Breakdown)</p>
-                    {failRows.length === 0 ? (
-                      <EmptyState title="ไม่มีข้อมูลอยู่ในช่วงนี้" description="ยังไม่มีงาน Breakdown ในช่วงนี้" />
-                    ) : (
-                      <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                          <Pie data={failRows} dataKey="cnt" nameKey="name" innerRadius={46} outerRadius={78} paddingAngle={2} stroke="var(--cmms-bg-card)">
-                            {failRows.map((_, i) => (
-                              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<ChartTooltip unit="ครั้ง" />} />
-                          <Legend wrapperStyle={{ fontSize: 11 }} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    )}
+                    <p className="text-sm font-medium text-[var(--cmms-text-muted)]">ประเภทความเสียหาย — Pareto (ครั้ง และ % สะสม)</p>
+                    {(() => {
+                      const meaningfulBuckets = (failure?.by_type ?? []).filter(
+                        (r) => cntOf(r) > 0 && (r.failure_name || "").trim() !== "" && (r.failure_name || "").trim() !== "ไม่ระบุ"
+                      );
+                      if (meaningfulBuckets.length === 0) {
+                        return (
+                          <EmptyState
+                            title="ยังไม่มีข้อมูลอยู่ในช่วงนี้"
+                            description="งาน Breakdown ยังไม่ได้บันทึก ประเภทการเสีย / สาเหตุ — เลือก Failure Type ตอนปิดงานเพื่อเห็น Pareto"
+                          />
+                        );
+                      }
+                      const total = meaningfulBuckets.reduce((s, r) => s + cntOf(r), 0);
+                      let run = 0;
+                      const pareto = meaningfulBuckets.map((r) => {
+                        const c = cntOf(r);
+                        run += c;
+                        return {
+                          name: (r.failure_name || r.failure_code || "ไม่ระบุ").slice(0, 16),
+                          ครั้ง: c,
+                          สะสม: total > 0 ? Math.round((run / total) * 100) : 100,
+                        };
+                      });
+                      return (
+                        <ResponsiveContainer width="100%" height={220}>
+                          <ComposedChart data={pareto} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
+                            <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" interval={0} angle={-12} textAnchor="end" height={44} />
+                            <YAxis yAxisId="cnt" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                            <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                            <Tooltip content={<ChartTooltip unit="ครั้ง" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
+                            <Bar yAxisId="cnt" dataKey="ครั้ง" fill="var(--cmms-warning)" radius={[6, 6, 0, 0]} maxBarSize={36} />
+                            <Line yAxisId="pct" type="monotone" dataKey="สะสม" name="สะสม (%)" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
                 {D.isCostVisible(data.can) && (
@@ -489,11 +602,11 @@ export default function DashboardPage() {
                   <Card>
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายแผนก" />
-                      {dt.by_department.length === 0 ? (
-                        <EmptyState title="ไม่มีข้อมูล" />
+                      {(dt.by_department ?? []).length === 0 ? (
+                        <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
-                          {dt.by_department.map((r) => (
+                          {(dt.by_department ?? []).map((r) => (
                             <li key={r.department} className="flex items-center justify-between gap-2 text-sm">
                               <span className="truncate text-[var(--cmms-text-secondary)]">{r.department}</span>
                               <span className="shrink-0 font-semibold tabular-nums">{hours(r.dt)}</span>
@@ -506,11 +619,11 @@ export default function DashboardPage() {
                   <Card>
                     <CardContent className="space-y-3 p-4">
                       <SectionHeading title="Downtime รายประเภทย่อย" />
-                      {dt.by_failure_type.length === 0 ? (
-                        <EmptyState title="ไม่มีข้อมูล" />
+                      {(dt.by_failure_type ?? []).length === 0 ? (
+                        <EmptyState title="ไม่มีข้อมูล downtime ในช่วงนี้" description="ลองขยายช่วงเวลาหรือล้างตัวกรอง" />
                       ) : (
                         <ul className="space-y-2">
-                          {dt.by_failure_type.map((r) => (
+                          {(dt.by_failure_type ?? []).map((r) => (
                             <li key={`${r.failure_code}-${r.failure_name}`} className="flex items-center justify-between gap-2 text-sm">
                               <span className="truncate text-[var(--cmms-text-secondary)]">
                                 {r.failure_code ? `${r.failure_code} · ` : ""}{r.failure_name}{" "}
@@ -558,12 +671,12 @@ export default function DashboardPage() {
                 <KpiCard label="ค่าจ้างภายนอก" value={fmtBaht(cost.outsource)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="amber" />
                 <KpiCard label="รวมทั้งสิ้น" value={fmtBaht(cost.total)} icon={<DollarSign size={18} strokeWidth={1.9} aria-hidden="true" />} tone="red" />
               </Grid>
-              {cost.top_spare_parts.length > 0 && (
+              {(cost.top_spare_parts ?? []).length > 0 && (
                 <Card>
                   <CardContent className="space-y-3 p-4">
                     <SectionHeading title="อะไหล่ที่มีค่าใช้จ่ายสูงสุด" />
                     <ul className="space-y-2">
-                      {cost.top_spare_parts.slice(0, 5).map((p) => (
+                      {(cost.top_spare_parts ?? []).slice(0, 5).map((p) => (
                         <li key={p.code ?? p.part_name} className="flex items-center justify-between gap-2 text-sm">
                           <span className="truncate text-[var(--cmms-text-secondary)]">
                             {p.part_name} <span className="text-xs text-[var(--cmms-text-muted)]">({p.qty} ชิ้น)</span>
@@ -575,6 +688,64 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               )}
+            </section>
+          )}
+
+          {/* ── งบประมาณปีนี้ (มีสิทธิ์) ── */}
+          {isMgr && D.isCostVisible(data.can) && budget && (
+            <section aria-label="งบประมาณบำรุงรักษา" className="space-y-3">
+              <SectionHeading
+                title={`งบประมาณบำรุงรักษา ${budget.year}`}
+                sub="งบ (effective) vs ใช้จริงรายเดือน — จากศูนย์วิเคราะห์ต้นทุน"
+                right={
+                  <div className="flex items-center gap-3">
+                    <Link href="/budget" className="text-sm font-medium text-[var(--cmms-primary)]">
+                      จัดการงบ →
+                    </Link>
+                    <Link href="/cost" className="text-sm font-medium text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-primary)]">
+                      วิเคราะห์ต้นทุน →
+                    </Link>
+                  </div>
+                }
+              />
+              <Card>
+                <CardContent className="p-4">
+                  {budget.series.length === 0 ? (
+                    <EmptyState title="ยังไม่มีงบประมาณ" description={`ยังไม่ตั้งงบประมาณปี ${budget.year} — ไปที่หน้า จัดการงบประมาณ`} />
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {budget.series.map((m) => {
+                        const pct = m.utilization_pct;
+                        const warn = budget.config.warning_pct ?? 80;
+                        const exceed = budget.config.exceed_pct ?? 100;
+                        const hasBudget = m.budget > 0;
+                        const barColor = pct === null ? "var(--cmms-text-muted)" : pct >= exceed ? "var(--cmms-danger)" : pct >= warn ? "var(--cmms-warning)" : "var(--cmms-success)";
+                        return (
+                          <div key={m.month} className="rounded-xl border border-[var(--cmms-border)] p-3" style={{ background: "var(--cmms-bg-card)" }}>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-semibold">{m.month_name}</span>
+                              {pct === null ? (
+                                <span className="text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>{hasBudget ? "ยังไม่มีใช้จ่าย" : "ไม่มีงบ"}</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                  style={{ background: "var(--cmms-bg-muted)", color: barColor }}>
+                                  {pct >= exceed ? `${pct.toFixed(0)}% เกิน` : `${pct.toFixed(0)}%`}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                              งบ <strong>{fmtMoney(m.budget)}</strong> · ใช้ <strong>{fmtMoney(m.actual)}</strong>
+                            </p>
+                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-[var(--cmms-bg-muted)]">
+                              <div className="h-full rounded-full" style={{ width: `${pct === null ? 0 : Math.min(100, Math.max(pct, 3))}%`, background: barColor }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </section>
           )}
 
@@ -640,7 +811,9 @@ export default function DashboardPage() {
                               )}
                             </span>
                             <span className="flex items-center gap-2">
-                              <span className="text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">{r.priority}</span>
+                              <span className="text-sm text-[var(--cmms-text-secondary)]">
+                                {PRIO_LABELS[r.priority] ?? r.priority}
+                              </span>
                               <StatusPill status={r.status} />
                             </span>
                           </Link>
@@ -680,7 +853,7 @@ export default function DashboardPage() {
                             </span>
                           </span>
                           <span className="flex shrink-0 items-center gap-2">
-                            <span className="text-xs uppercase tracking-wide text-[var(--cmms-text-muted)]">{w.priority}</span>
+                            <span className="text-sm text-[var(--cmms-text-secondary)]">{PRIO_LABELS[w.priority] ?? w.priority}</span>
                             <StatusPill status={w.status} overdue_days={w.overdue_days} />
                           </span>
                         </Link>
@@ -696,11 +869,11 @@ export default function DashboardPage() {
           <section aria-label="ทางลัด" className="space-y-3">
             <SectionHeading title="ทางลัด" />
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/repair/request")}>แจ้งซ่อมด่วน</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/supervisor/queue")}>คิวงานหัวหน้างาน</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/pm_am/calendar")}>ปฏิทิน PM</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/asset_registry")}>ทะเบียนเครื่องจักร</Button>
-              <Button variant="outline" size="sm" onClick={() => (window.location.href = "/analytics/kpi")}>KPI ผู้บริหาร</Button>
+              {DASHBOARD_SHORTCUTS.map((s) => (
+                <Button key={s.href} variant="outline" size="sm" onClick={() => (window.location.href = s.href)}>
+                  {s.label}
+                </Button>
+              ))}
             </div>
           </section>
         </>

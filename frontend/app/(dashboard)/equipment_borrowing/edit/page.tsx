@@ -87,7 +87,7 @@ function EditBorrowingContent() {
           setError("ไม่พบข้อมูลรายการยืม");
         }
       })
-      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล"))
+      .catch(e => setError("เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาลองใหม่อีกครั้ง"))
       .finally(() => setLoadingData(false));
   }, [recordId]);
 

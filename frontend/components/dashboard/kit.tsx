@@ -146,6 +146,9 @@ export function RangePicker({
   const [start, setStart] = React.useState("");
   const [end, setEnd] = React.useState("");
   const isCustom = value === "custom";
+  // เลือกวันเดียว: กรอกฟิลด์เดียว = ใช้วันนั้นทั้งช่วง
+  const effStart = start || end;
+  const effEnd = end || start;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
 <Select
@@ -186,10 +189,10 @@ export function RangePicker({
           <Button
             size="sm"
             variant="outline"
-            disabled={!start || !end}
-            onClick={() => onCustom(start, end)}
+            disabled={!effStart}
+            onClick={() => onCustom(effStart, effEnd)}
           >
-            ใช้ช่วงวันที่
+            {effStart === effEnd ? "ใช้วันที่นี้" : "ใช้ช่วงวันที่"}
           </Button>
         </>
       )}
@@ -342,6 +345,7 @@ export function StatusPill({ status, overdue_days }: { status: string; overdue_d
 export function StatusLabel({ status, overdue_days }: { status: string; overdue_days?: number }) {
   const map: Record<string, string> = {
     open: "เปิด",
+    pending: "รอดำเนินการ",
     acknowledged: "รับทราบ",
     pending_approval: "รออนุมัติ",
     approved: "อนุมัติแล้ว",
@@ -386,6 +390,13 @@ export function LoadingGrid({ cards = 4 }: { cards?: number }) {
     </div>
   );
 }
+
+export const PRIO_LABELS: Record<string, string> = {
+  critical: "วิกฤต",
+  high: "สูง",
+  medium: "ปานกลาง",
+  low: "ต่ำ",
+};
 
 export function RefreshBlock({ onRefresh, lastUpdated }: { onRefresh: () => void; lastUpdated: string }) {
   return (

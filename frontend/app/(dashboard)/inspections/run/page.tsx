@@ -6,6 +6,7 @@
 // + offline submit (enqueue) + blocking ป้องกันซ้ำ (server FOR UPDATE + 409) + สร้าง WO/MR อัตโนมัติเมื่อไม่ผ่าน
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { assetUrl } from "@/lib/utils";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -641,7 +642,7 @@ export default function InspectionRunPage() {
                         {item.photos.map((ph, pi) => (
                           <div key={pi} className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={ph.dataUrl || ph.path} alt={`หลักฐานข้อ ${index + 1} รูปที่ ${pi + 1}`} className="h-16 w-20 rounded-lg border object-cover" style={{ borderColor: ph.pending ? "var(--cmms-warning)" : "var(--cmms-border)", opacity: ph.pending ? 0.6 : 1 }} />
+                            <img src={ph.dataUrl || assetUrl(ph.path)} alt={`หลักฐานข้อ ${index + 1} รูปที่ ${pi + 1}`} className="h-16 w-20 rounded-lg border object-cover" style={{ borderColor: ph.pending ? "var(--cmms-warning)" : "var(--cmms-border)", opacity: ph.pending ? 0.6 : 1 }} />
                             {ph.pending && <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" style={{ background: "rgba(0,0,0,0.35)" }}>รอส่ง</span>}
                             <button type="button" aria-label={`ลบรูปข้อ ${index + 1}`} onClick={() => removePhoto(index, pi)}
                               className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white"

@@ -87,7 +87,7 @@ export default function LineDeliveryHistoryPage() {
         setStats(json.stats || {});
         setTemplates((json.filters?.templates || []).filter((t: string) => t !== " "));
       } else {
-        setError(json.message || "โหลดประวัติไม่สำเร็จ");
+        setError(json.message || "โหลดประวัติไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       }
     } catch (e) {
       console.error(e);

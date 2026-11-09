@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
+import { qrDarkColor } from "@/lib/qr-color";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
@@ -10,28 +11,26 @@ type Asset = {
   id: number;
   code: string;
   name: string;
-  department: string;
-  criticality: string;
-  status: string;
+  department: string | null;
+  criticality: string | null;
+  status: string | null;
+  payload: string;
 };
-
-const APP_BASE =
-  (typeof window !== "undefined" && window.location.origin) ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3001";
 
 export default function QrSheetPage() {
   const [machines, setMachines] = useState<Asset[]>([]);
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [printed, setPrinted] = useState(false);
 
   useEffect(() => {
-    fetch("/api/v1/asset_registry.php")
+    fetch("/api/v1/scan.php?action=labels", { credentials: "include" })
       .then((r) => r.json())
-      .then((rows: Asset[]) => {
+      .then((json) => {
+        const rows = json?.items ?? [];
         const list = (Array.isArray(rows) ? rows : [])
-          .filter((a) => /^A-[A-Z]{2}-\\d{2}$/.test(a.code))
+          .filter((a) => /^A-[A-Z]{2}-\d{2}$/.test(a.code))
           .sort((a, b) => a.code.localeCompare(b.code));
         setMachines(list);
       })
@@ -44,13 +43,15 @@ export default function QrSheetPage() {
     let cancelled = false;
     (async () => {
       const map: Record<string, string> = {};
+      const dark = qrDarkColor();
       for (const m of machines) {
         try {
-          const url = `${APP_BASE}/scan?asset_code=${encodeURIComponent(m.code)}`;
-          map[m.code] = await QRCode.toDataURL(url, {
+          // ใช้ payload มาตรฐาน CMMS-A-<token> — resolver รองรับทั้งในแอปและ LINE
+          const payload = m.payload && m.payload.startsWith("CMMS-") ? m.payload : m.code;
+          map[m.code] = await QRCode.toDataURL(payload, {
             width: 300,
             margin: 1,
-            color: { dark: "var(--cmms-primary)", light: "#FFFFFF" },
+            color: { dark, light: "#FFFFFF" },
           });
         } catch {
           /* ข้ามเครื่องที่ generate ไม่ได้ */
@@ -62,13 +63,31 @@ export default function QrSheetPage() {
     return () => { cancelled = true; };
   }, [machines]);
 
+  const handlePrint = async () => {
+    const firstLog = !printed;
+    setPrinted(true);
+    window.print();
+    if (!firstLog || machines.length === 0) return;
+    try {
+      await fetch("/api/v1/scan.php?action=print_log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ asset_ids: machines.map((m) => m.id), template: "a4-sheet" }),
+      });
+    } catch {
+      /* การบันทึกประวัติพิมพ์ไม่บล็อกการพิมพ์ */
+    }
+  };
+
   return (
-    <div style={{ fontFamily: "'Inter', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
+    <div style={{ fontFamily: "'Roboto', 'Noto Sans Thai', -apple-system, 'Segoe UI', sans-serif", padding: 24, background: "#fff" }}>
       <style>{`
         .qr-sheet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
         .qr-sheet-card { text-align: center; break-inside: avoid; }
         .qr-sheet-card img { width: 100%; max-width: 170px; }
-        .qr-sheet-note { border-left: 4px solid #0068B5; border-radius: 0 6px 6px 0; }
+        /* impeccable-disable-next-line side-tab: print-only note accent */
+        .qr-sheet-note { border-left: 2px solid var(--color-primary); border-radius: 0 6px 6px 0; opacity: 0.4; }
         @media print {
           body { margin: 0; }
           .no-print { display: none !important; }
@@ -91,7 +110,7 @@ export default function QrSheetPage() {
           <Button
             className="w-full"
             disabled={generating}
-            onClick={() => window.print()}
+            onClick={() => void handlePrint()}
           >
             ปริ้นติกเกอร์
           </Button>

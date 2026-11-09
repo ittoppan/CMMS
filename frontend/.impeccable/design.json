@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "source": "frontend/app/globals.css + design-system/tokens.css + frontend/components/*",
+  "note": "Companion metadata for DESIGN.md — tonal ramps and radii the detector should treat as part of the system. Generated manually from the implementation (impeccable CLI document skill unavailable in this environment).",
+  "extensions": {
+    "colorMeta": {
+      "toppan-blue": {
+        "canonical": "#0068B5",
+        "role": "brand-primary",
+        "tonalRamp": ["#00469B", "#00508C", "#0057A8", "#005FA3", "#007AC8", "#0093FF", "#0268B6", "#3E8FCF", "#6CB2E8", "#8FC0E8", "#C2DDF2", "#E6F0FA"]
+      },
+      "deep-navy": {
+        "canonical": "#193264",
+        "role": "brand-navy",
+        "tonalRamp": ["#0B1F4B", "#12244A"]
+      },
+      "success": {
+        "canonical": "#16A34A",
+        "role": "semantic",
+        "tonalRamp": ["#059669", "#10B981", "#15803D", "#22C55E", "#DCFCE7", "#D1FAE5", "#BBF7D0", "#F0FDF4"]
+      },
+      "warning": {
+        "canonical": "#D97706",
+        "role": "semantic",
+        "tonalRamp": ["#F59E0B", "#B45309", "#FEF3C7", "#FDBA74", "#FFF7ED"]
+      },
+      "danger": {
+        "canonical": "#DC2626",
+        "role": "semantic",
+        "tonalRamp": ["#EF4444", "#B91C1C", "#7F1D1D", "#FEE2E2", "#FECACA", "#FEF2F2", "#9A3412"]
+      },
+      "info": {
+        "canonical": "#0284C7",
+        "role": "semantic",
+        "tonalRamp": ["#0891B2", "#06B6D4", "#0284C7", "#38BDF8", "#E0F2FE"]
+      },
+      "neutral": {
+        "canonical": "#F4F5F7",
+        "role": "surface",
+        "tonalRamp": ["#FFFFFF", "#F8FAFC", "#F8F8F8", "#F5F7FA", "#F4F5F7", "#F4F4F5", "#F2F2F2", "#F1F5F9", "#EEF4F9", "#EEF2F7", "#EEF1F6", "#E5E5E5", "#E4E8EE", "#E4E4E7", "#E2E8F0", "#D6D6D6", "#D4D4D8", "#C9D2DC", "#CBD5E1", "#BABABA"]
+      },
+      "ink": {
+        "canonical": "#18181B",
+        "role": "text",
+        "tonalRamp": ["#222222", "#22262E", "#323232", "#475569", "#52525B", "#64748B", "#71717A", "#737373", "#94A3B8", "#9AA4B8", "#A1A1AA"]
+      },
+      "dark-surface": {
+        "canonical": "#101012",
+        "role": "surface-dark",
+        "tonalRamp": ["#0F172A", "#101012", "#1B1B1F", "#1E293B", "#1F2937", "#27272A", "#243247", "#2E2E33", "#2E3D52", "#3F3F46", "#0F1E3D", "#16213E", "#17213F", "#1A2450", "#1B2440", "#1E3A5F", "#2B2E37", "#2E5E8C", "#3D5678", "#454A58", "#093"]
+      },
+      "overlay": {
+        "canonical": "#000000",
+        "role": "overlay-scrim",
+        "note": "Shadow / scrim / overlay black. Alpha varies per usage; the detector matches RGB and ignores alpha, so one entry covers every rgba(0,0,0,*) shade.",
+        "tonalRamp": []
+      },
+      "hero": {
+        "canonical": "#0F1E3D",
+        "role": "module-hero-gradient",
+        "note": "Per-module hero gradients driven by ThemeProvider data-hero, plus page-hero / LIFF / login stops. Intentional page-identity palette (docs/DESIGN-GUIDELINE.md §6).",
+        "tonalRamp": ["#16213E", "#27436B", "#3A5F8F", "#1B2440", "#2C3E5E", "#3D5678", "#0C2E2A", "#115E54", "#178B7A", "#221A4D", "#3A2E7E", "#5B4BB0", "#1E1B3A", "#37306B", "#5246A8", "#0F2036", "#1D3E5F", "#2E5E8C", "#1A2450", "#2D3F7E", "#4460B0", "#17181D", "#2B2E37", "#454A58", "#17213F", "#283B6E", "#3E559A", "#0E2B33", "#17515F", "#207E91", "#241F18", "#4A3D28", "#7A6436", "#1E40AF"]
+      },
+      "hero-accent": {
+        "canonical": "#7DD3FC",
+        "role": "decorative-tint",
+        "note": "Per-module hero watermark radial-gradient tints (base hue; alpha varies) and login/standalone glow accents.",
+        "tonalRamp": ["#FBBF24", "#34D399", "#A78BFA", "#C4B5FD", "#67E8F9", "#93C5FD", "#818CF8", "#5EEAD4", "#FCD34D", "#94A3B8", "#E11D48", "#2563EB", "#7C3AED"]
+      },
+      "andon-housing": {
+        "canonical": "#7F8DAA",
+        "role": "andong-housing",
+        "note": "Neutral gray housing of the Andon lamp tower (rgba alpha varies).",
+        "tonalRamp": []
+      },
+      "line-green": {
+        "canonical": "#06C755",
+        "role": "brand-line",
+        "note": "Official LINE brand green + gradient shade used on the LIFF bind banner.",
+        "tonalRamp": ["#059E44"]
+      },
+      "telegram-mock": {
+        "canonical": "#0B141A",
+        "role": "external-mock",
+        "note": "Faithful Telegram app color reproduction inside the notifications preview mock — intentionally NOT our UI palette.",
+        "tonalRamp": ["#2B3945", "#17212B", "#7D8B99", "#182533", "#D2DBE3", "#4DA3FF", "#8CABD9"]
+      },
+      "line-flex-mock": {
+        "canonical": "#1D4ED8",
+        "role": "external-payload",
+        "note": "LINE Flex Message text/header_color default — sent to the LINE API as data, not rendered app UI (see scripts/design-audit.py HEX_ALLOW_FILE).",
+        "tonalRamp": []
+      },
+      "theme-preset": {
+        "canonical": "#4F46E5",
+        "role": "user-selectable-preset",
+        "note": "Alternate accent presets in components/ThemeProvider.tsx (settings/design) — indigo/violet, emerald/teal, amber/slate. User-chosen data, not fixed UI.",
+        "tonalRamp": ["#8B5CF6", "#0D9488", "#EA580C"]
+      }
+    },
+    "roundedMeta": {
+      "none": { "canonical": "0", "role": "none" },
+      "xs": { "canonical": "2px", "role": "radius" },
+      "sm": { "canonical": "4px", "role": "radius", "values": ["5px"] },
+      "sm-alt": { "canonical": "6px", "role": "radius", "values": ["7px"] },
+      "md": { "canonical": "8px", "role": "radius" },
+      "lg": { "canonical": "10px", "role": "radius" },
+      "lg-alt": { "canonical": "12px", "role": "radius" },
+      "xl": { "canonical": "14px", "role": "radius" },
+      "xl-alt": { "canonical": "16px", "role": "radius" },
+      "xxl": { "canonical": "18px", "role": "radius" },
+      "round": { "canonical": "20px", "role": "radius" },
+      "full": { "canonical": "9999px", "role": "pill", "values": ["99px", "100px", "999px"] }
+    }
+  }
+}

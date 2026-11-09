@@ -430,7 +430,7 @@ export default function EmailNotifySettings() {
               {testResult && (
                 <Card style={{
                   background: testResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
-                  border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "#f87171"}`,
+                  border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                 }}>
                   <CardContent className="p-3">
                     <span className="text-sm font-bold" style={{ color: testResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
@@ -490,7 +490,7 @@ export default function EmailNotifySettings() {
                     style={{
                       margin: "14px 0",
                       padding: "14px 16px",
-                      background: "#f8fafc",
+                      background: "#f8fafc", // impeccable-disable-next-line side-tab: email preview mock border
                       borderLeft: `4px solid ${headerColor}`,
                       borderRadius: 6,
                       fontSize: 13.5,

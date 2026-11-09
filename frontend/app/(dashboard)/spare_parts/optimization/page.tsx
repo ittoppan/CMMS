@@ -109,7 +109,7 @@ export default function InventoryOptimizationPage() {
       }
     } catch (e) {
       console.error(e);
-      setError("ไม่สามารถโหลดข้อมูลอะไหล่ได้");
+      setError("ไม่สามารถโหลดข้อมูลอะไหล่ได้ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   };

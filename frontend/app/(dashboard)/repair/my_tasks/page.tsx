@@ -7,6 +7,7 @@ import { repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/rep
 import AndonLamp from "@/components/AndonLamp";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
 import { sendOrEnqueue, subscribeOnline, type SendOutcome } from "@/lib/offlineQueue";
+import { syncEngine } from "@/lib/offline/engine";
 import { formatClockTime, formatRelativeTime } from "@/lib/time-utils";
 import { serverResponds } from "@/lib/server-check";
 import AnimatedDialog from "@/components/AnimatedDialog";
@@ -20,7 +21,10 @@ import {
   Wrench,
   Clock,
   RotateCcw,
+  PackagePlus,
 } from "lucide-react";
+
+import SagePartAddModal from "@/components/spare/SagePartAddModal";
 
 import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
@@ -88,6 +92,34 @@ export default function MyTasksPage() {
   const offlineRef = useRef(false);
   const [now, setNow] = useState(() => Date.now());
 
+  // ── จำนวนคิว offline ต่อใบงาน (รอซิงก์ badge) ──
+  const [pendingQueueMap, setPendingQueueMap] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const refresh = () => {
+      try {
+        const map: Record<string, number> = {};
+        for (const it of syncEngine.unstable_items()) {
+          if (it.status === "SUCCESS") continue;
+          if (it.entity_id != null && it.entity_id !== "") {
+            const k = String(it.entity_id);
+            map[k] = (map[k] || 0) + 1;
+          }
+        }
+        setPendingQueueMap(map);
+      } catch {
+        /* engine ไม่พร้อม */
+      }
+    };
+    void syncEngine.ensureLoaded().then(refresh);
+    window.addEventListener("cmms:sync-changed", refresh);
+    window.addEventListener("cmms:offline-queued", refresh);
+    return () => {
+      window.removeEventListener("cmms:sync-changed", refresh);
+      window.removeEventListener("cmms:offline-queued", refresh);
+    };
+  }, []);
+  const pendingForTask = (rawId: number) => pendingQueueMap[String(rawId)] || 0;
+
   useEffect(() => {
     const iv = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(iv);
@@ -96,6 +128,9 @@ export default function MyTasksPage() {
   const [closeModalOpen, setCloseModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+
+  // Sage เบิกอะไหล่ Modal (repair kind)
+  const [spareModalTask, setSpareModalTask] = useState<TaskItem | null>(null);
 
   // Close Work Order Form State
   const [failureCode, setFailureCode] = useState("");
@@ -228,24 +263,26 @@ export default function MyTasksPage() {
 
       if (mapped.length > 0) {
         setTasks(mapped);
-        setError(false);
       } else {
-        setError(true);
+        setTasks([]);
       }
+      // ไม่มีงานที่มอบหมาย = สถานะปรกติ (EmptyState) — ไม่ใช่ข้อผิดพลาดการโหลด
+      setError(false);
       return mapped;
     };
 
     const loadTasks = () =>
       fetch("/api/v1/repair.php")
         .then((r) => r.json())
-        .then((rows) =>
-          fetch("/api/v1/index.php?resource=pm-plans")
+        .then((rows) => {
+          if (!Array.isArray(rows) && rows?.error) throw new Error(String(rows.error));
+          return fetch("/api/v1/index.php?resource=pm-plans")
             .then((r) => r.json())
             .then((pmJson) => {
               applyRows(Array.isArray(rows) ? rows : [], pmJson);
               snapshotSave("my_tasks", { rows: Array.isArray(rows) ? rows : [], pm: pmJson, savedAt: Date.now() });
-            })
-        )
+            });
+        })
         .catch(async (e) => {
           console.error("Fetch tasks error", e);
           const snap = await snapshotLoad<{ rows: any[]; pm: any; savedAt?: number }>("my_tasks");
@@ -485,6 +522,14 @@ export default function MyTasksPage() {
           <div className="flex items-center gap-2">
             <Badge variant="info">{task.kind === "pm" ? "PM" : "ซ่อม"}</Badge>
             <span className="font-semibold">{task.woNumber}</span>
+            {pendingForTask(task.rawId) > 0 && (
+              <Badge
+                variant="warning"
+                title={t("sync.badge.tooltip").replace("{n}", String(pendingForTask(task.rawId)))}
+              >
+                {t("sync.chip.pending")} · {pendingForTask(task.rawId)}
+              </Badge>
+            )}
           </div>
         );
       },
@@ -633,6 +678,18 @@ export default function MyTasksPage() {
                   <span>ปิดใบงานซ่อม</span>
                 </Button>
               </>
+            )}
+
+            {task.kind === "repair" && task.status !== "completed" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSpareModalTask(task)}
+                className="gap-1.5"
+              >
+                <PackagePlus className="w-3.5 h-3.5" />
+                <span>เบิกอะไหล่</span>
+              </Button>
             )}
 
             <Button
@@ -989,6 +1046,14 @@ export default function MyTasksPage() {
           </Button>
         </div>
       </AnimatedDialog>
+
+      {/* Sage เบิกอะไหล่ modal */}
+      <SagePartAddModal
+        open={spareModalTask !== null}
+        onClose={() => setSpareModalTask(null)}
+        workOrderId={spareModalTask?.kind === "repair" ? spareModalTask.rawId : null}
+        woNumber={spareModalTask?.woNumber}
+      />
     </PageShell>
   );
 }

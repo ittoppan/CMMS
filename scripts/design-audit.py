@@ -63,6 +63,19 @@ EYEBROW_EXEMPT = {
     "frontend/app/(dashboard)/approval/center/page.tsx",
     # LINE Flex editor — หน้าเครื่องมือเต็มจอ (ไม่มีหัวหน้าเพจ)
     "frontend/app/(dashboard)/editor/page.tsx",
+    # Report Center — หน้าแยก 12 หมวดแบบผอม: hero/eyebrow ถูก render ภายใน
+    # components/reports/report-page.tsx (ReportPage) เหมือนกันทุกหน้า
+    "frontend/app/(dashboard)/reports/assets/page.tsx",
+    "frontend/app/(dashboard)/reports/cost/page.tsx",
+    "frontend/app/(dashboard)/reports/downtime/page.tsx",
+    "frontend/app/(dashboard)/reports/inspections/page.tsx",
+    "frontend/app/(dashboard)/reports/mttr-mtbf/page.tsx",
+    "frontend/app/(dashboard)/reports/pm/page.tsx",
+    "frontend/app/(dashboard)/reports/requests/page.tsx",
+    "frontend/app/(dashboard)/reports/sla/page.tsx",
+    "frontend/app/(dashboard)/reports/spare-parts/page.tsx",
+    "frontend/app/(dashboard)/reports/technicians/page.tsx",
+    "frontend/app/(dashboard)/reports/work-orders/page.tsx",
 }
 
 # hex จากยุค Phase gradient (ห้ามใช้เด็ดขาด — FAIL)
@@ -75,6 +88,9 @@ EMOJI_ALLOW = {
     0x2713,  # ✓ คัดลอก/บันทึกแล้ว
     0x2715,  # ✕ ปุ่มปิด
     0x1F947, 0x1F948, 0x1F949,  # 🥇🥈🥉 อันดับช่าง
+    0x2708,  # ✈ ช่องทางส่ง Telegram
+    0x1F535,  # 🔵 ช่องทางส่ง LINE
+    0x2709,  # ✉ ช่องทางส่ง Email
 }
 
 # บริบทที่อนุญาตให้มี emoji ได้ (ข้อมูลที่ส่งจริงไป LINE / comment)

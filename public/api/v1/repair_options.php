@@ -11,10 +11,19 @@
 
 require_once __DIR__ . '/../../../src/includes/layout.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
+session_start();
 
-$pdo = getDb();
+try {
+    $pdo = getDb();
+    requireLogin($pdo);
+} catch (Throwable $e) {
+    api_safe_catch($e);
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 // ดึงตัวเลือกทั้งหมด
@@ -38,8 +47,7 @@ if ($method === 'GET') {
         
         echo json_encode($options);
     } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        api_safe_catch($e);
     }
     exit;
 }
@@ -83,12 +91,10 @@ if ($method === 'POST') {
             http_response_code(409);
             echo json_encode(['error' => 'ตัวเลือกนี้มีอยู่แล้วในระบบ']);
         } else {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            api_safe_catch($e);
         }
     } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        api_safe_catch($e);
     }
     exit;
 }
@@ -145,12 +151,10 @@ if ($method === 'PUT') {
             http_response_code(409);
             echo json_encode(['error' => 'ตัวเลือกนี้มีอยู่แล้วในระบบ']);
         } else {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            api_safe_catch($e);
         }
     } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        api_safe_catch($e);
     }
     exit;
 }
@@ -179,8 +183,7 @@ if ($method === 'DELETE') {
             'message' => 'ลบตัวเลือกสำเร็จ',
         ]);
     } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        api_safe_catch($e);
     }
     exit;
 }

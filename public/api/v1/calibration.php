@@ -1,18 +1,20 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/permissions.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
+require_once __DIR__ . '/../../../src/csrf.php';
+if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) enforceCsrf();
 
 // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
+    // RBAC module 'calibration' (Phase 29): view/create/edit/delete
+    requirePerm($pdo, 'calibration', $method === 'GET' ? 'view' : ($method === 'POST' ? 'create' : ($method === 'PUT' ? 'edit' : 'delete')));
 
     switch ($method) {
         case 'GET':
@@ -69,5 +71,5 @@ try {
             http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

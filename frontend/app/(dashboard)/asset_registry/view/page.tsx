@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
+import { qrDarkColor } from "@/lib/qr-color";
 import { usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { Grid, VStack, HStack } from "@/components/layout";
@@ -216,10 +217,10 @@ interface ScheduleRow {
   [k: string]: unknown;
 }
 
-const APP_BASE =
-  (typeof window !== "undefined" && window.location.origin) ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3001";
+const getAppBase = () =>
+  typeof window !== "undefined"
+    ? window.location.origin
+    : process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
 
 export default function AssetRegistryViewPage() {
   const router = useRouter();
@@ -424,12 +425,12 @@ export default function AssetRegistryViewPage() {
     if (!asset?.code || qrGenerating) return;
     setQrGenerating(true);
     try {
-      const url = `${APP_BASE}/scan?asset_code=${encodeURIComponent(asset.code)}`;
+      const url = `${getAppBase()}/scan?asset_code=${encodeURIComponent(asset.code)}`;
       const dataUrl = await QRCode.toDataURL(url, {
         width: 280,
         margin: 1,
         errorCorrectionLevel: "M",
-        color: { dark: "var(--cmms-primary, #0068B5)", light: "#FFFFFF" },
+        color: { dark: qrDarkColor(), light: "#FFFFFF" },
       });
       setQrUrl(dataUrl);
       setQrOpen(true);

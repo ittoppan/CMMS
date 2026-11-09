@@ -64,7 +64,7 @@ export default function InspectionHistoryPage() {
       if (json.history?.[0]) setAssetName(json.history[0].asset_name);
     } catch (e) {
       console.error(e);
-      setError("โหลดประวัติไม่สำเร็จ");
+      setError("โหลดประวัติไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
     setLoading(false);
   }, [assetId, resultFilter, dateFrom, dateTo]);

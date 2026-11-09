@@ -11,7 +11,8 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCheck, Info, Settings2 } from "lucide-react";
+import { CheckCheck, Info, Settings2, BellRing } from "lucide-react";
+import Link from "next/link";
 import { fetchMeta, fetchPreferences, savePreferences, dispatchNotificationsChanged, type NotifMeta } from "@/lib/notifications";
 
 const CHANNEL_LABEL: Record<string, { th: string; en: string; note: string }> = {
@@ -112,9 +113,17 @@ export default function NotificationPrefsPage() {
       title="การแจ้งเตือนของฉัน"
       description="เลือกว่าต้องการรับการแจ้งเตือนแต่ละประเภทผ่านช่องทางใด — ติ๊ก = รับการแจ้งเตือน (ค่าเริ่มต้นเปิดทั้งหมด)"
       actions={
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
-        </Button>
+        <>
+          <Link href="/settings/push">
+            <Button variant="secondary">
+              <BellRing className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
+              เปิดการแจ้งเตือนบนอุปกรณ์
+            </Button>
+          </Link>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
+          </Button>
+        </>
       }
     >
       <div className="space-y-4 pb-24 lg:pb-8">

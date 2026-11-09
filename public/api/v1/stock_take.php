@@ -78,7 +78,10 @@ try {
 
         // รหัสรอบ: ST-YYYYMMDD-NNN
         $prefix = 'ST-' . date('Ymd') . '-';
-        $seq = (int)$pdo->query("SELECT COUNT(*) FROM stock_take WHERE code LIKE '$prefix%'")->fetchColumn() + 1;
+        // ใช้ค่าสูงสุดเชิงตัวเลขของ suffix (ไม่ใช่ COUNT ซึ่งจะ reuse เลขเดิมเมื่อมีการลบรอบ)
+        $stSeq = $pdo->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(code, '-', -1) AS UNSIGNED)) FROM stock_take WHERE code LIKE ?");
+        $stSeq->execute([$prefix . '%']);
+        $seq = (int)$stSeq->fetchColumn() + 1;
         $code = $prefix . str_pad((string)$seq, 3, '0', STR_PAD_LEFT);
 
         $pdo->prepare('INSERT INTO stock_take (code, note, status, created_by) VALUES (?, ?, \'draft\', ?)')
@@ -136,7 +139,7 @@ try {
                 $pdo->commit();
             } catch (Exception $e) {
                 $pdo->rollBack();
-                http_response_code(500); echo json_encode(['error' => 'ปรับสต็อกไม่สำเร็จ: ' . $e->getMessage()]);
+                http_response_code(500); error_log('[stock_take.php] ' . get_class($e) . ': ' . $e->getMessage()); echo json_encode(['error' => 'ปรับสต็อกไม่สำเร็จ']);
                 exit;
             }
             echo json_encode(['success' => true, 'message' => 'ปิดรอบนับสต็อก + ปรับ stock_qty ตามจำนวนจริงเรียบร้อย']);
@@ -169,5 +172,5 @@ try {
 
     http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => 'Server Error: ' . $e->getMessage()]);
+    api_safe_catch($e);
 }

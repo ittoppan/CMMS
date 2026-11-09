@@ -131,7 +131,7 @@ export default function PMPlanFormPage() {
           note: x.note || "",
         })));
       } catch {
-        setLoadErr("ไม่สามารถเชื่อมต่อระบบได้");
+        setLoadErr("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
       }
     })();
   }, [editId]);

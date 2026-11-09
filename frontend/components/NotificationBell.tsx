@@ -33,11 +33,15 @@ function timeAgo(dateStr: string): string {
 export function NotificationBell({
   variant = "popover",
   className,
+  unreadCount,
 }: {
   variant?: "popover" | "link";
   className?: string;
+  /** เลข unread จาก layout (shared poller) — ว่าง = poll เองใน component นี้ */
+  unreadCount?: number;
 }) {
-  const unread = useUnreadCount(60000);
+  const polledUnread = useUnreadCount(60000, unreadCount === undefined);
+  const unread = unreadCount ?? polledUnread;
   const [items, setItems] = useState<NotifItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);

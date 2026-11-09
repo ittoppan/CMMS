@@ -24,6 +24,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useLang, setUserLang } from "../../../lib/i18n";
+import { swalConfirm } from "@/lib/swal";
 
 interface Profile {
   id: number;
@@ -111,7 +112,7 @@ export default function ProfilePage() {
 
   const handleDeleteAvatar = async () => {
     if (!avatarSrc || deletingAvatar) return;
-    if (!window.confirm("ลบรูปโปรไฟล์? ระบบจะแสดงตัวอักษรย่อแทน")) return;
+    if (!(await swalConfirm({ title: "ลบรูปโปรไฟล์?", text: "ระบบจะแสดงตัวอักษรย่อแทน", destructive: true, confirmText: "ลบเลย" }))) return;
     setDeletingAvatar(true);
     try {
       const res = await fetch("/api/v1/profile.php", {

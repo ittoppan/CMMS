@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T00:00:00.000Z",
+  "title": "Design System: CMMS App",
+  "extensions": {
+    "colorMeta": {
+      "toppan-blue": {
+        "role": "primary",
+        "displayName": "Toppan Blue",
+        "canonical": "#0068B5",
+        "tonalRamp": ["#001F3A", "#003463", "#00457F", "#005A9E", "#0068B5", "#2E85C8", "#6FAFDC", "#C3E0F5"]
+      },
+      "deep-navy": {
+        "role": "secondary",
+        "displayName": "Deep Navy",
+        "canonical": "#193264",
+        "tonalRamp": ["#040B1E", "#0B1F4B", "#112A5C", "#193264", "#27457E", "#3D5C9A", "#6E84B8", "#C3D0E8"]
+      },
+      "navy-dark": {
+        "role": "secondary",
+        "displayName": "Navy Dark",
+        "canonical": "#0B1F4B",
+        "tonalRamp": ["#030814", "#0B1F4B", "#12295B", "#193466", "#24447C", "#3A5C97", "#6881B4", "#BFC9E0"]
+      },
+      "page-bg": {
+        "role": "neutral",
+        "displayName": "Page Field",
+        "canonical": "#F4F5F7",
+        "tonalRamp": ["#17181B", "#2A2C30", "#3D3F45", "#5B5E65", "#80858E", "#AEB3BC", "#D6D9DE", "#F4F5F7"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#18181B",
+        "tonalRamp": ["#18181B", "#26262A", "#34343A", "#44454C", "#52525B", "#71717A", "#A1A1AA", "#D4D4D8"]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#17181B", "#26262A", "#3D3F45", "#6E7178", "#9AA0A8", "#C6C9CE", "#E4E4E7", "#FFFFFF"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#52525B",
+        "tonalRamp": ["#1C1C20", "#27272B", "#313136", "#3E3F45", "#52525B", "#6E6F78", "#A0A1A8", "#D8D8DC"]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Success",
+        "canonical": "#16A34A",
+        "tonalRamp": ["#052E16", "#094E24", "#0C6B31", "#128B42", "#16A34A", "#53C173", "#93DFAC", "#DCF5E6"]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning",
+        "canonical": "#D97706",
+        "tonalRamp": ["#3A1F00", "#703D00", "#995400", "#C26A03", "#D97706", "#E8A444", "#F3D194", "#FBF0D5"]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "#DC2626",
+        "tonalRamp": ["#3D0909", "#701414", "#961B1B", "#BB2121", "#DC2626", "#E96A6A", "#F5B1B1", "#FDE3E3"]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Info",
+        "canonical": "#0284C7",
+        "tonalRamp": ["#013142", "#024866", "#035C80", "#02709C", "#0284C7", "#50AADD", "#9BD0EC", "#E2F3FB"]
+      },
+      "andon-green": {
+        "role": "signal",
+        "displayName": "Andon Green",
+        "canonical": "#10B981",
+        "tonalRamp": ["#022C22", "#065F46", "#067647", "#0A8A52", "#10B981", "#4ED9A3", "#96E8C6", "#E2F9F0"]
+      },
+      "andon-amber": {
+        "role": "signal",
+        "displayName": "Andon Amber",
+        "canonical": "#F59E0B",
+        "tonalRamp": ["#3A2401", "#6B4200", "#965E00", "#C47F03", "#F59E0B", "#F7BC56", "#FBDBA0", "#FEF4E0"]
+      },
+      "andon-red": {
+        "role": "signal",
+        "displayName": "Andon Red",
+        "canonical": "#EF4444",
+        "tonalRamp": ["#3D0808", "#6E1212", "#962020", "#C03030", "#EF4444", "#F3777A", "#F8B1B3", "#FDE7E7"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display / Readout",
+        "purpose": "KPI values, board counters, single headline numbers. Barlow Condensed, tabular numerals."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles inside hero bands and section headers."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and dialog titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "UI copy, instructions, descriptions. Thai keeps line-height >= 1.6."
+      },
+      "label": {
+        "displayName": "Label / Eyebrow",
+        "purpose": "Uppercase micro-heads: table headers, stat labels, mobile data-labels."
+      }
+    },
+    "shadows": [
+      { "name": "ambient-sm", "value": "0 1px 2px rgba(24,24,27,0.05)", "purpose": "Resting hairlines and KPI cards." },
+      { "name": "ambient", "value": "0 1px 3px rgba(24,24,27,0.07), 0 1px 2px rgba(24,24,27,0.04)", "purpose": "Standard card separation." },
+      { "name": "lifted-md", "value": "0 4px 8px -2px rgba(24,24,27,0.08)", "purpose": "KPI hover lift." },
+      { "name": "float-lg", "value": "0 10px 18px -6px rgba(24,24,27,0.10)", "purpose": "Toasts, dialogs, popovers." },
+      { "name": "float-xl", "value": "0 20px 30px -10px rgba(24,24,27,0.14)", "purpose": "Command palette, success overlay." },
+      { "name": "focus-ring", "value": "0 0 0 3px rgba(0,104,181,0.18)", "purpose": "Keyboard focus glow on interactive elements." },
+      { "name": "signal-ok", "value": "0 0 8px rgba(16,185,129,0.55)", "purpose": "Andon green lamp glow." },
+      { "name": "signal-warn", "value": "0 0 8px rgba(245,158,11,0.55)", "purpose": "Andon amber lamp glow." },
+      { "name": "signal-down", "value": "0 0 10px rgba(239,68,68,0.6)", "purpose": "Andon red lamp glow / alarm." }
+    ],
+    "motion": [
+      { "name": "ease-fast", "value": "120ms ease", "purpose": "Press feedback, chip state swaps." },
+      { "name": "ease-standard", "value": "200ms ease", "purpose": "Color, shadow, and layout-safe transitions." },
+      { "name": "ease-slow", "value": "300ms ease", "purpose": "Andon lamp color changes, broader fades." },
+      { "name": "page-enter", "value": "240ms cmmsPageEnter ease", "purpose": "Route transition — subtle rise + fade." },
+      { "name": "signal-blink", "value": "1.2s ease-in-out infinite", "purpose": "Red Andon alarm blink only; disabled by prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Tables collapse to stacked cards; dialogs become bottom sheets." },
+      { "name": "md", "value": "768px", "purpose": "Login stacks, mobile card redesign, full-bleed 48px inputs." },
+      { "name": "lg", "value": "1024px", "purpose": "Top app bar + bottom nav swap to desktop sidebar + topbar." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single flat Toppan blue action — the only blue pop on a screen.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">บันทึกใบแจ้งซ่อม</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:12px; font-family:'Roboto','Noto Sans Thai',Inter,sans-serif; font-size:0.875rem; font-weight:600; color:#FFFFFF; cursor:pointer; transition:background .2s ease, box-shadow .2s ease; } .ds-btn-primary { background:#0068B5; border:1px solid transparent; box-shadow:0 4px 14px -8px rgba(0,104,181,.45); } .ds-btn-primary:hover { background:#005FA3; box-shadow:none; } .ds-btn-primary:focus-visible { outline:2px solid #0068B5; outline-offset:2px; } .ds-btn-primary:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Success Button",
+      "kind": "button",
+      "refersTo": "button-success",
+      "description": "Green fill for actions that complete work — sync, close work order, finish checklists.",
+      "html": "<button class=\"ds-btn ds-btn-success\">บันทึกผลตรวจ</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:12px; font-family:'Roboto','Noto Sans Thai',Inter,sans-serif; font-size:0.875rem; font-weight:600; color:#FFFFFF; cursor:pointer; transition:background .2s ease, box-shadow .2s ease; } .ds-btn-success { background:#16A34A; border:1px solid transparent; box-shadow:0 4px 14px -8px rgba(22,163,74,.45); } .ds-btn-success:hover { background:#15803D; box-shadow:none; } .ds-btn-success:focus-visible { outline:2px solid #16A34A; outline-offset:2px; } .ds-btn-success:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Red fill for destructive or stop-state actions; never decorative.",
+      "html": "<button class=\"ds-btn ds-btn-danger\">หยุดงาน</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px; border-radius:12px; font-family:'Roboto','Noto Sans Thai',Inter,sans-serif; font-size:0.875rem; font-weight:600; color:#FFFFFF; cursor:pointer; transition:background .2s ease, box-shadow .2s ease; } .ds-btn-danger { background:#DC2626; border:1px solid transparent; box-shadow:0 4px 14px -8px rgba(220,38,38,.45); } .ds-btn-danger:hover { background:#B91C1C; box-shadow:none; } .ds-btn-danger:focus-visible { outline:2px solid #DC2626; outline-offset:2px; } .ds-btn-danger:disabled { opacity:.5; cursor:not-allowed; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "White field, 8px radius, focus glow ring. 48px and 16px font on phones to kill iOS zoom.",
+      "html": "<label class=\"ds-input-label\" for=\"n1\">เลขครุภัณฑ์</label><input class=\"ds-input\" id=\"n1\" type=\"text\" placeholder=\"SAC-1042\">",
+      "css": ".ds-input { box-sizing:border-box; width:100%; height:48px; min-height:48px; padding:0 12px; border:1px solid #D4D4D8; border-radius:8px; background:#FFFFFF; color:#18181B; font-family:'Roboto','Noto Sans Thai',Inter,sans-serif; font-size:16px; transition:border-color .2s ease, box-shadow .2s ease; } .ds-input::placeholder { color:#A1A1AA; } .ds-input:focus { outline:none; border-color:#0068B5; box-shadow:0 0 0 3px rgba(0,104,181,.18); } .ds-input:disabled { background:#F4F4F5; color:#A1A1AA; cursor:not-allowed; } .ds-input-label { display:block; margin-bottom:6px; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:0.8rem; font-weight:600; color:#52525B; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "Flat white surface with a hairline and ambient shadow; KPI cards add a 2px semantic rail.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">ระดับน้ำมันเครื่อง</div><div class=\"ds-card-text\">ตรวจเช็คทุกกะก่อนเริ่มงาน</div></div>",
+      "css": ".ds-card { background:#FFFFFF; border:1px solid #E4E4E7; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(24,24,27,.07), 0 1px 2px rgba(24,24,27,.04); transition:box-shadow .2s ease, transform .2s ease; } .ds-card-title { margin:0 0 6px; font-family:'Barlow Condensed','Noto Sans Thai',sans-serif; font-size:1.0625rem; font-weight:600; letter-spacing:-0.02em; color:#18181B; } .ds-card-text { margin:0; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:0.875rem; line-height:1.6; color:#52525B; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Pill status with the Andon lamp vocabulary — green/amber/red mean machine health.",
+      "html": "<span class=\"ds-chip ds-chip-ok\"><span class=\"ds-chip-dot\"></span>พร้อมใช้งาน</span>",
+      "css": ".ds-chip { display:inline-flex; align-items:center; gap:7px; padding:4px 12px; border-radius:9999px; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:0.8rem; font-weight:600; white-space:nowrap; } .ds-chip-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; } .ds-chip-ok { color:#16A34A; } .ds-chip-ok .ds-chip-dot { background:#10B981; box-shadow:0 0 6px rgba(16,185,129,.5); } .ds-chip-warn { color:#D97706; } .ds-chip-warn .ds-chip-dot { background:#F59E0B; box-shadow:0 0 6px rgba(245,158,11,.5); } .ds-chip-down { color:#DC2626; } .ds-chip-down .ds-chip-dot { background:#EF4444; box-shadow:0 0 6px rgba(239,68,68,.6); } .ds-chip-idle { color:#52525B; } .ds-chip-idle .ds-chip-dot { background:#94A3B8; }"
+    },
+    {
+      "name": "Andon Lamp Stack",
+      "kind": "custom",
+      "refersTo": "andon-lamp-ok",
+      "description": "The signature 3-lamp machine-health signal — red/amber/green, lit lamp glows, red blinks.",
+      "html": "<div class=\"ds-andon ds-andon-warn\" role=\"img\" aria-label=\"สถานะ: ต้องดูแล\"><span class=\"ds-andon-lamp\"></span><span class=\"ds-andon-lamp\"></span><span class=\"ds-andon-lamp\"></span></div>",
+      "css": ".ds-andon { display:inline-flex; flex-direction:column; align-items:center; gap:3px; padding:5px 4px; background:rgba(127,141,170,.14); border:1px solid rgba(127,141,170,.14); border-radius:7px; } .ds-andon-lamp { width:8px; height:8px; border-radius:50%; background:rgba(127,141,170,.28); transition:background .3s ease, box-shadow .3s ease; } .ds-andon-ok .ds-andon-lamp:nth-child(3) { background:#10B981; box-shadow:0 0 8px rgba(16,185,129,.55); } .ds-andon-warn .ds-andon-lamp:nth-child(2) { background:#F59E0B; box-shadow:0 0 8px rgba(245,158,11,.55); } .ds-andon-down .ds-andon-lamp:nth-child(1) { background:#EF4444; box-shadow:0 0 10px rgba(239,68,68,.6); animation:dsAndonBlink 1.2s ease-in-out infinite; } @keyframes dsAndonBlink { 0%,100%{opacity:1} 50%{opacity:.45} } @media (prefers-reduced-motion:reduce){ .ds-andon-down .ds-andon-lamp:nth-child(1){ animation:none; } }"
+    },
+    {
+      "name": "KPI Value",
+      "kind": "custom",
+      "refersTo": "kpi-value",
+      "description": "The loudest voice — Barlow Condensed tabular numeral over a stat label.",
+      "html": "<div class=\"ds-kpi\"><div class=\"ds-kpi-value\">98.4<span class=\"ds-kpi-unit\">%</span></div><div class=\"ds-kpi-label\">OEE</div></div>",
+      "css": ".ds-kpi-value { display:flex; align-items:baseline; gap:8px; font-family:'Barlow Condensed','Noto Sans Thai',Inter,sans-serif; font-weight:700; font-size:2.15rem; line-height:1; letter-spacing:.01em; font-variant-numeric:tabular-nums; color:#18181B; } .ds-kpi-unit { font-family:'Barlow Condensed','Noto Sans Thai',Inter,sans-serif; font-size:.8rem; font-weight:500; color:#52525B; } .ds-kpi-label { margin-top:6px; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:.8rem; font-weight:500; color:#52525B; }"
+    },
+    {
+      "name": "Sidebar Nav Item (active)",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Active rail item — flat Toppan blue fill, white text, with the 5px indicator dot.",
+      "html": "<a class=\"ds-nav ds-nav-active\" href=\"#\"><svg class=\"ds-nav-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877\"/><path d=\"M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z\"/></svg><span>งานซ่อม</span></a>",
+      "css": ".ds-nav { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:0.875rem; font-weight:600; color:#52525B; text-decoration:none; transition:background .2s ease, color .2s ease; } .ds-nav:hover { background:#F4F5F7; } .ds-nav-icon { width:18px; height:18px; flex-shrink:0; } .ds-nav-active { background:#0068B5; color:#FFFFFF; box-shadow:0 4px 14px rgba(0,87,168,.35); } .ds-nav-active:hover { background:#0068B5; } .ds-nav-active:focus-visible { outline:2px solid #0068B5; outline-offset:2px; }"
+    },
+    {
+      "name": "Machine Select Chip",
+      "kind": "chip",
+      "refersTo": "chip-selected",
+      "description": "Tactile floor selector — heavy hairline, flat blue when chosen, presses like a key.",
+      "html": "<button class=\"ds-mchip ds-mchip-selected\">CNC-03</button>",
+      "css": ".ds-mchip { border:1.5px solid #E4E4E7; background:#FFFFFF; color:#18181B; border-radius:12px; padding:12px 8px; font-family:'Roboto','Noto Sans Thai',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; touch-action:manipulation; transition:all 120ms ease; } .ds-mchip:active { transform:scale(.96); } .ds-mchip-selected { background:#0068B5; border-color:#0068B5; color:#FFFFFF; box-shadow:0 4px 12px rgba(0,104,181,.22); } .ds-mchip:focus-visible { outline:2px solid #0068B5; outline-offset:2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Factory Floor Console",
+    "overview": "The interface behaves like the machine room of plant maintenance: a calm surface that speaks in signals, not slogans. It inherits the motifs a technician already reads on the physical floor — the Andon signal stack on the machine, part numbers printed in condensed block type, the blue laminated standard tag on calibrated equipment — and renders them as a software control panel. TOPPAN blue (#0068B5) is the single calibrated interactive accent, used the way it is in the source world: a subdued, precise indicator of where a technician can act. Numbers are the loudest voice, set in Barlow Condensed with tabular numerals so columns of figures align like readouts that glance-diff at arm's length. Everything else is quiet: zinc neutrals, flat surfaces, one-pixel hairlines, a dry depth vocabulary. Dialogs, toasts, and the command palette float; the rest rests. The PWA App Shell is the frame — 56px top bar and bottom nav on phones, 260px sidebar on desktop — sized for gloved thumbs and full-brightness field light, and offline-first by operating truth.",
+    "keyCharacteristics": [
+      "Machine-health color grammar: green / amber / red mean what they mean on the Andon pole, everywhere in the app",
+      "Barlow Condensed numerals for every measurement; Thai and body copy in Roboto / Noto Sans Thai with ≥1.6 line-height",
+      "Flat surfaces separated by 1px hairlines; shadows reserved for floating layers and KPI lifts",
+      "TOPPAN blue appears at most a few times per screen, always meaning \"act\"",
+      "Touch targets ≥48px, dark-mode aware, prefers-reduced-motion respected end-to-end"
+    ],
+    "rules": [
+      { "name": "The Andon Rule", "body": "Green, amber, and red mean machine and process health — nothing else. If a color is not signaling a state change, it does not earn a signal color.", "section": "colors" },
+      { "name": "The Calibrated Blue Rule", "body": "Toppan blue is the only interactive accent. On any given screen it covers no more than ~10% of visible surface.", "section": "colors" },
+      { "name": "The Flat-Alloy Rule", "body": "Blue on white is always a flat fill. Gradients belong to the navy console (hero headers, Andon board, login band) and nowhere else.", "section": "colors" },
+      { "name": "The Readout Rule", "body": "Every numeric measure is set in Barlow Condensed with tabular numerals so figures align like instrument readouts.", "section": "typography" },
+      { "name": "The Two-Voice Rule", "body": "Display type and body type never trade roles. Headings get Barlow; paragraphs, controls, and instructions get Roboto/Noto Sans Thai.", "section": "typography" },
+      { "name": "The Eyebrow Rule", "body": "Uppercase micro-labels are the only label layer, always Barlow 600, and never sit above a heading alone.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Resting separation is always a hairline or a tonal step — never a shadow. Shadow appears as a response to hover, float, or importance.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reserve Toppan blue for exactly one interactive thing per view.",
+      "Do set every number in Barlow Condensed tabular numerals.",
+      "Do let green/amber/red mean machine health via the Andon vocabulary.",
+      "Do keep resting surfaces flat with a 1px hairline; reach for shadow only to lift a floating layer or answer a hover.",
+      "Do keep touch targets ≥48px and form inputs 48px/16px on phones.",
+      "Do give every interactive element a 3px primary glow ring on focus-visible.",
+      "Do round dialogs 16–20px and seat mobile bottom sheets at the screen edge."
+    ],
+    "donts": [
+      "Don't run gradients on white surfaces — buttons, icon tiles, list rails, or callout strips.",
+      "Don't decorate with a signal color; amber and red are earned by state.",
+      "Don't give a card a border and a wide shadow at once — the ghost-card double separation.",
+      "Don't set Thai or paragraph text in the display face, and don't clip Thai descenders with tight line-heights.",
+      "Don't use monospace as a mood for \"technical\"; codes and WO IDs may be monospace, body copy may not.",
+      "Don't animate the red Andon lamp when prefers-reduced-motion is on.",
+      "Don't let an eyebrow label float above a heading."
+    ]
+  }
+}

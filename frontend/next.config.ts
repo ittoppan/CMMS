@@ -22,24 +22,30 @@ const nextConfig: NextConfig = {
     .map((s) => s.trim())
     .filter(Boolean),
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
     // ตรงข้ามกับที่ Next ส่ง (SSG prerender => Cache-Control: s-maxage=31536000 = 1 ปี)
     // LINE in-app browser (ผ่าน shared cache/relay) เชื่อ s-maxage แล้วแคชหน้า HTML เก่า
     // ทั้งปี => สาเหตุหลัก "เปิดใน LINE เห็นระบบตัวเก่า" ขณะที่นอก LINE เห็นของใหม่
-    return [
+    // ใน dev mode: ไม่ใส่ Cache-Control header สำหรับ _next/static เพื่อไม่ให้ชนกับ Turbopack dev server
+    const headers = [
       // 1) HTML / navigation / API — ห้ามแคชทุก shared cache (สั่ง no-store ก่อน -> ข้อ 2-4 ยกเว้นให้)
       {
         source: "/:path*",
         headers: [{ key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" }],
       },
-      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย
-      {
-        source: "/_next/static/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
-      {
-        source: "/icons/:path*",
-        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
-      },
+      // 2) hashed static (Next ใส่ hash ในชื่อไฟล์) — แคชยาวได้ ปลอดภัย (production only)
+      ...(isDev
+        ? []
+        : [
+            {
+              source: "/_next/static/:path*",
+              headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+            },
+            {
+              source: "/icons/:path*",
+              headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+            },
+          ]),
       // 3) SW / manifest / offline page — ให้ revalidate ทุกครั้งที่เปิด (กัน SW เก่าจุก)
       {
         source: "/sw.js",
@@ -53,39 +59,66 @@ const nextConfig: NextConfig = {
         source: "/offline.html",
         headers: [{ key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" }],
       },
+      // 5) security headers (ทุก path) — Phase 18 hardening
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Phase 24: เปิดกล้องให้ same-origin (สแกน QR ในฟิลด์) — ยังปิด microphone/geolocation
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=()" },
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline' https://static.line-scdn.net" +
+              (isDev ? " 'unsafe-eval'" : "") +
+              "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          },
+          { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+        ],
+      },
     ];
+    return headers;
   },
   async rewrites() {
+    // ปลายทาง PHP Backend (IIS) — อ่านจาก env CMMS_BACKEND_URL (ค่าเริ่มต้น localhost:8081)
+    const apiUrl = process.env.CMMS_BACKEND_URL || "http://localhost:8081";
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8081/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
+      },
+      // Health check (public, ไม่มี auth) → PHP endpoint ที่ IIS
+      {
+        source: "/health",
+        destination: `${apiUrl}/api/health.php`,
       },
       // LINE Login / bind flow ยังใช้ PHP ฝั่ง IIS (8081)
       {
         source: "/line_callback.php",
-        destination: "http://localhost:8081/line_callback.php",
+        destination: `${apiUrl}/line_callback.php`,
       },
       {
         source: "/line_login.php",
-        destination: "http://localhost:8081/line_login.php",
+        destination: `${apiUrl}/line_login.php`,
       },
       {
         source: "/bind_line.php",
-        destination: "http://localhost:8081/bind_line.php",
+        destination: `${apiUrl}/bind_line.php`,
       },
       {
         source: "/login.php",
-        destination: "http://localhost:8081/login.php",
+        destination: `${apiUrl}/login.php`,
       },
       {
         source: "/logout.php",
-        destination: "http://localhost:8081/logout.php",
+        destination: `${apiUrl}/logout.php`,
       },
       // รูปอัปโหลด (avatar, รูปซ่อม) — เสิร์ฟจาก IIS (8081) ให้แสดงใน PWA ได้ทันที
       {
         source: "/uploads/:path*",
-        destination: "http://localhost:8081/uploads/:path*",
+        destination: `${apiUrl}/uploads/:path*`,
       },
     ];
   },

@@ -1,0 +1,57 @@
+/* ============================================================
+   TOPPAN Design Tokens — สกัดจาก https://www.holdings.toppan.com/en/
+   (palette: static CSS analysis + typography/spacing: dembrandt)
+   นำเข้าไฟล์นี้ใน app entrypoint เมื่อพร้อมใช้งาน
+   หมายเหตุ: โทนเหล่านี้ถูกนำไปใช้ใน frontend/app/globals.css แล้ว
+   ============================================================ */
+
+:root {
+  /* ── Brand (TOPPAN) ── */
+  --tp-toppan-blue: #0068B5;
+  --tp-deep-navy: #193264;
+  --tp-navy-dark: #0B1F4B;
+  --tp-blue-hover: #00469B;
+  --tp-blue-deep: #0268B6;
+  --tp-blue-light: #007AC8;
+  --tp-blue-bright: #0093FF;
+  --tp-red-accent: #FF2A00;
+
+  /* ── Text ── */
+  --tp-text-primary: #323232;
+  --tp-text-dark: #222222;
+  --tp-text-on-brand: #FFFFFF;
+
+  /* ── Surface ── */
+  --tp-surface-white: #FFFFFF;
+  --tp-surface-gray-lightest: #F8F8F8;
+  --tp-surface-gray-light: #F2F2F2;
+  --tp-surface-gray: #E5E5E5;
+  --tp-surface-gray-mid: #D6D6D6;
+  --tp-surface-gray-dark: #BABABA;
+
+  /* ── Semantic (Andon) ── */
+  --tp-success: #10B981;
+  --tp-warning: #F59E0B;
+  --tp-danger: #EF4444;
+
+  /* ── Typography ── */
+  --tp-font-body: "Roboto", "Inter", "Noto Sans Thai", -apple-system, sans-serif;
+  --tp-font-heading: "Roboto", "Inter", "Noto Sans Thai", sans-serif;
+
+  /* ── Spacing scale ── */
+  --tp-space-1: 2px;
+  --tp-space-2: 4px;
+  --tp-space-3: 8px;
+  --tp-space-4: 12px;
+  --tp-space-5: 16px;
+  --tp-space-6: 24px;
+  --tp-space-7: 32px;
+  --tp-space-8: 40px;
+  --tp-space-9: 60px;
+  --tp-space-10: 80px;
+  --tp-space-11: 120px;
+
+  /* ── Radius ── */
+  --tp-radius-sm: 2px;
+  --tp-radius-md: 4px;
+}

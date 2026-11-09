@@ -51,10 +51,11 @@ export default function PwaRegister() {
         });
     };
 
-    // Web Push: ขอสิทธิ์แจ้งเตือน + subscribe + ลงทะเบียนกับ PHP backend
+    // Web Push: subscribe เฉพาะเมื่อผู้ใช้เคยอนุญาตแล้ว — ไม่ขอสิทธิ์เอง (ผู้ใช้เปิดเองที่ /settings/push)
     const registerPush = async (reg: ServiceWorkerRegistration) => {
       try {
         const vapidResp = await fetch("/api/v1/push_subscribe.php", { credentials: "include" });
+        if (vapidResp.status === 401 || vapidResp.status === 403) return; // ยังไม่ login → ข้ามเงียบ ๆ
         const vapidJson = (await vapidResp.json()) as { publicKey?: string; enabled?: string };
         // ถ้า admin ปิด PWA Web Push (push_alert_enabled=0) → ยกเลิก subscription ที่มีอยู่ ไม่ subscribe ใหม่
         if (vapidJson.enabled === "0") {
@@ -99,12 +100,14 @@ export default function PwaRegister() {
       window.addEventListener("load", register, { once: true });
     }
 
-    // PWA Web Push: register สำเร็จแล้วค่อย subscribe push
+    // PWA Web Push: subscribe เฉพาะเมื่อผู้ใช้อนุญาตแล้วก่อนหน้า (ไม่ขอสิทธิ์โดยไม่มีคลิก — 
+    // ผิดหลัก UX และเบราว์เซอร์บางตัวบล็อก prompt ที่ไม่ได้มาจาก user gesture)
     const initPush = async () => {
       if (!("Notification" in window) || !("PushManager" in window)) return;
+      // ยังไม่ login (login.php อยู่ root layout) → ไม่ควร subscribe push
+      if (!document.cookie.split(";").some((c) => c.trim().startsWith("PHPSESSID="))) return;
       try {
-        const perm = await Notification.requestPermission();
-        if (perm !== "granted") return;
+        if (Notification.permission !== "granted") return; // จะเปิดที่ /settings/push
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) await registerPush(reg);
       } catch (err) {

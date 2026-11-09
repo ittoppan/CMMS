@@ -195,7 +195,9 @@ export default function AssetCriticalityPage() {
                       <SelectValue placeholder="เลือกเครื่องจักร..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {assets.map((a) => (
+                      {assets.length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">ยังไม่มีเครื่องจักรในระบบ</div>
+                      ) : assets.map((a) => (
                         <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
                       ))}
                     </SelectContent>

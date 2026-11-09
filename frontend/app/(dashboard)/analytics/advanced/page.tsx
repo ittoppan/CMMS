@@ -215,7 +215,7 @@ function DowntimeTab({ d }: { d: AdvData["downtime"] | undefined }) {
         <Stat label="ใบสั่งงานทั้งหมด" value={d.summary.total_wo} suffix="ใบ" />
         <Stat label="เวลาหยุดรวม (ชม.)" value={dtHours} suffix="ชม." tone={dtHours > 24 ? "danger" : undefined} />
         <Stat label="งานที่หยุดจริง" value={d.summary.with_downtime_wo} suffix="ใบ" />
-        <Stat label="เครื่องที่วิเคราะห์ได้" value={d.per_asset_availability.length} suffix="เครื่อง" />
+        <Stat label="เครื่องที่วิเคราะห์ได้" value={(d.per_asset_availability ?? []).length} suffix="เครื่อง" />
       </div>
 
       <ChartCard title="แนวโน้ม Downtime รายเดือน" desc="นาทีหยุดรวม + จำนวนใบสั่งงานของแต่ละเดือน">
@@ -240,9 +240,9 @@ function DowntimeTab({ d }: { d: AdvData["downtime"] | undefined }) {
             <CardDescription className="text-xs">10 ลำดับแรกจากเวลาหยุดรวม</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {d.by_asset.length === 0 && <EmptyBlock />}
-            {d.by_asset.map((r) => {
-              const max = Math.max(1, ...d.by_asset.map((x) => x.total_min));
+            {(d.by_asset ?? []).length === 0 && <EmptyBlock />}
+            {(d.by_asset ?? []).map((r) => {
+              const max = Math.max(1, ...(d.by_asset ?? []).map((x) => x.total_min));
               return (
                 <div key={r.code} className="flex items-center gap-3">
                   <div className="min-w-0 flex-1">
@@ -269,13 +269,13 @@ function DowntimeTab({ d }: { d: AdvData["downtime"] | undefined }) {
             <CardDescription className="text-xs">จาก operating hours จริงในตาราง MTBF/MTTR</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {d.per_asset_availability.length === 0 && <EmptyBlock msg="ยังไม่มีข้อมูล availability (mtbf_mttr)" />}
-            {d.per_asset_availability.slice(0, 10).map((r) => (
+            {(d.per_asset_availability ?? []).length === 0 && <EmptyBlock msg="ยังไม่มีข้อมูล availability (mtbf_mttr)" />}
+            {(d.per_asset_availability ?? []).slice(0, 10).map((r) => (
               <div key={r.code}>
                 <div className="flex items-center justify-between gap-2 text-sm">
                   <p className="truncate font-medium"><span className="mr-1 rounded px-1 py-0.5 text-xs" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>{r.code}</span>{r.name}</p>
                   <span className="shrink-0 font-bold" style={{ color: r.availability_pct >= 95 ? "var(--cmms-success)" : r.availability_pct >= 90 ? "var(--cmms-warning)" : "var(--cmms-danger)" }}>
-                    {r.availability_pct}%
+                    {r.availability_pct ?? 0}%
                   </span>
                 </div>
                 <MiniBar pct={r.availability_pct} tone={r.availability_pct >= 95 ? "success" : r.availability_pct >= 90 ? "warning" : "danger"} />
@@ -290,7 +290,7 @@ function DowntimeTab({ d }: { d: AdvData["downtime"] | undefined }) {
 
 function CostTab({ d }: { d: AdvData["cost"] | undefined }) {
   if (!d) return <EmptyBlock />;
-  const monthlyStack = d.monthly.map((m) => ({ month: m.month, ชิ้นส่วน: m.parts, ค่าแรง: m.labor, จ้างภายนอก: m.outsource }));
+  const monthlyStack = (d.monthly ?? []).map((m) => ({ month: m.month, ชิ้นส่วน: m.parts, ค่าแรง: m.labor, จ้างภายนอก: m.outsource }));
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -301,7 +301,7 @@ function CostTab({ d }: { d: AdvData["cost"] | undefined }) {
       </div>
 
       <ChartCard title="ค่าใช้จ่ายรายเดือน จำแนกหมวด" desc="ชิ้นส่วน / ค่าแรง / จ้างภายนอก (บาท)">
-        {d.monthly.every((m) => m.parts + m.labor + m.outsource === 0) ? (
+        {(d.monthly ?? []).every((m) => m.parts + m.labor + m.outsource === 0) ? (
           <EmptyBlock msg="ยังไม่มีข้อมูลค่าใช้จ่ายในปีนี้" />
         ) : (
           <ResponsiveContainer width="100%" height={260}>
@@ -327,8 +327,8 @@ function CostTab({ d }: { d: AdvData["cost"] | undefined }) {
           </CardHeader>
           <CardContent className="space-y-3">
             {(d.by_asset ?? []).length === 0 && <EmptyBlock msg="ยังไม่มีข้อมูลค่าใช้จ่าย" />}
-            {d.by_asset.map((r) => {
-              const max = Math.max(1, ...d.by_asset.map((x) => x.total));
+            {(d.by_asset ?? []).map((r) => {
+              const max = Math.max(1, ...(d.by_asset ?? []).map((x) => x.total));
               return (
                 <div key={r.code}>
                   <div className="flex items-center justify-between gap-2 text-sm">
@@ -681,7 +681,7 @@ function InspectionTab({ d }: { d: AdvData["inspection"] | undefined }) {
           <EmptyBlock msg="ยังไม่มีข้อมูลผลการตรวจในปีนี้" />
         ) : (
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={d.monthly}>
+          <BarChart data={d.monthly ?? []}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" />
               <XAxis dataKey="month" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />

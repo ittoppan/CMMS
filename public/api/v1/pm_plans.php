@@ -13,20 +13,18 @@
  *   POST /api/v1/pm_plans.php?action=generate_wo → สร้าง Work Order (repair, source_type='pm') จากรอบ PM (กันซ้ำ)
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
+require_once __DIR__ . '/../../../src/helpers/calendar.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
 
     /** ความถี่ → ตัวช่วยคำนวณรอบถัดไป */
@@ -172,6 +170,10 @@ try {
                     while ($dueDate < $now && $guard < 60) {
                         $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], (int)$plan['frequency_interval']);
                         $guard++;
+                    }
+                    // เว้นวันหยุด/วันไม่ทำงาน: เลื่อนกำหนด PM ไปวันทำงานถัดไป
+                    if (workday_skip_holidays_enabled($pdo)) {
+                        $dueDate = workday_next_working_day($pdo, $dueDate);
                     }
 
                     $title = $plan['name'] . ($plan['plan_type'] === 'single' ? " — {$asset['name']}" : '');
@@ -478,5 +480,5 @@ try {
             http_response_code(405); echo json_encode(['error' => 'Method not allowed']);
     }
 } catch (Exception $e) {
-    http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

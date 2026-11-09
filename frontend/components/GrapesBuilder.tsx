@@ -12,6 +12,7 @@
  *          จึงเก็บ hex palette ไว้ที่นี่ ไม่ใช่ในหน้า
  */
 import { useEffect, useRef, useState, useCallback } from "react";
+import { swalConfirm } from "@/lib/swal";
 import "grapesjs/dist/css/grapes.min.css";
 
 /* ── Design tokens (ค่าเดียวกับ globals.css) ─────────────────────────── */
@@ -670,18 +671,18 @@ export default function GrapesBuilder() {
   };
 
   const removePage = async (row: PageRow) => {
-    if (!window.confirm(`ลบหน้า "${row.title}" (/pages/${row.slug}) ?`)) return;
+    if (!(await swalConfirm({ title: `ลบหน้า "${row.title}" (/pages/${row.slug})?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/v1/custom_pages.php?slug=${encodeURIComponent(row.slug)}`, {
         method: "DELETE",
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ");
+      if (!res.ok) throw new Error(json?.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       setMsg({ kind: "ok", text: json?.message || "ลบแล้ว" });
       refreshList();
     } catch (e) {
-      setMsg({ kind: "err", text: e instanceof Error ? e.message : "ลบไม่สำเร็จ" });
+      setMsg({ kind: "err", text: e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
     } finally {
       setBusy(false);
     }

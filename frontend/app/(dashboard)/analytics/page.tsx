@@ -320,17 +320,20 @@ export default function AnalyticsDashboardPage() {
               monthlyData.rows.map((m) => {
                 const val = m.completed + m.breakdown;
                 const h = Math.max(6, (val / maxValue) * 150);
+                const scaleY = h / 150;
                 return (
                   <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
                     <span className="text-xs font-bold">{val}</span>
                     <div
+                      className="bar-animate"
                       style={{
                         width: "60%",
                         maxWidth: 34,
-                        height: h,
+                        height: 150,
+                        transform: `scaleY(${scaleY})`,
+                        transformOrigin: "bottom",
                         borderRadius: "6px 6px 0 0",
                         backgroundColor: MONTH_COLORS[(m.monthNum - 1) % 12],
-                        transition: "height 0.3s ease",
                       }}
                       title={`${m.month}: ${val} ใบงาน`}
                     />
@@ -382,17 +385,20 @@ export default function AnalyticsDashboardPage() {
             {monthlyData.rows.length > 0 ? (
               monthlyData.rows.map((m) => {
                 const h = Math.max(6, (m.cost / maxCost) * 120);
+                const scaleY = h / 120;
                 return (
                   <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
                     <span className="text-xs font-bold">{m.cost}</span>
                     <div
+                      className="bar-animate"
                       style={{
                         width: "60%",
                         maxWidth: 34,
-                        height: h,
+                        height: 120,
+                        transform: `scaleY(${scaleY})`,
+                        transformOrigin: "bottom",
                         borderRadius: "6px 6px 0 0",
                         backgroundColor: "var(--cmms-accent)",
-                        transition: "height 0.3s ease",
                       }}
                       title={`${m.month}: ${m.cost} หมื่นบาท`}
                     />

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
+import { assetUrl } from "@/lib/utils";
 import { Grid } from "@/components/layout";
 import {
   Card,
@@ -132,7 +133,7 @@ export default function ManualsPage() {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(item.filePath, '_blank');
+                window.open(assetUrl(item.filePath), '_blank');
               }}
               className="gap-1.5"
             >

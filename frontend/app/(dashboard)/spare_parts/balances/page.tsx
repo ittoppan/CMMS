@@ -352,7 +352,7 @@ export default function SpareBalancesPage() {
                             <tr key={tx.item_id} className="border-b border-border/60">
                               <td className="py-1.5 pr-2 font-mono text-xs">{tx.work_order_no || "-"}</td>
                               <td className="py-1.5 pr-2">{tx.wo_title || "-"}</td>
-                              <td className="py-1.5 pr-2 text-right">{tx.qty_issued.toLocaleString("th-TH")}</td>
+                              <td className="py-1.5 pr-2 text-right">{(tx.qty_issued ?? 0).toLocaleString("th-TH")}</td>
                               <td className="py-1.5 pr-2 text-right">
                                 {tx.qty_returned > 0 ? (
                                   <span className="font-semibold text-[var(--cmms-warning-dark)]">

@@ -11,18 +11,12 @@ if (!function_exists('generateWorkOrderNo')) {
         $yymm = date('ym'); // e.g. 2608
         $prefix = "EN-" . $yymm . "-";
 
-        $stmt = $pdo->prepare("SELECT work_order_no FROM repair WHERE work_order_no LIKE ? ORDER BY work_order_no DESC LIMIT 1");
+        // ใช้ค่าสูงสุดเชิงตัวเลขของ suffix (ไม่ใช่ sort แบบ string ซึ่งจะพังเมื่อ seq เกิน 999)
+        $stmt = $pdo->prepare("SELECT MAX(CAST(SUBSTRING_INDEX(work_order_no, '-', -1) AS UNSIGNED)) FROM repair WHERE work_order_no LIKE ?");
         $stmt->execute([$prefix . '%']);
-        $last = $stmt->fetchColumn();
+        $nextSeq = (int)$stmt->fetchColumn() + 1;
 
-        if ($last) {
-            $lastSeq = (int)substr($last, -3);
-            $nextSeq = $lastSeq + 1;
-        } else {
-            $nextSeq = 1;
-        }
-
-        return $prefix . str_pad($nextSeq, 3, '0', STR_PAD_LEFT);
+        return $prefix . str_pad((string)$nextSeq, 3, '0', STR_PAD_LEFT);
     }
 }
 

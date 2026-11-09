@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { swalConfirm } from "@/lib/swal";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Plus,
@@ -152,13 +153,13 @@ export default function InspectionTemplatesPage() {
   };
 
   const deleteTemplate = async (t: any) => {
-    if (!window.confirm(`ลบ Template "${t.title}"? (รอบตรวจที่ผูกอยู่จะถูกลบด้วย)`)) return;
+    if (!(await swalConfirm({ title: `ลบ Template "${t.title}"?`, text: "รอบตรวจที่ผูกอยู่จะถูกลบด้วย", destructive: true, confirmText: "ลบเลย" }))) return;
     try {
       await fetch(`/api/v1/inspections.php?template=${t.id}`, { method: "DELETE" });
       if (editingId === t.id) resetForm();
       flash("ลบ Template แล้ว");
       fetchTemplates();
-    } catch { setError("ลบไม่สำเร็จ"); }
+    } catch { setError("ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"); }
   };
 
   const updateItem = (idx: number, patch: Partial<Item>) => {

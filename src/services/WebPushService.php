@@ -92,8 +92,8 @@ class WebPushService
     {
         $p  = self::hex2dec(self::P256_P);
         $a  = self::hex2dec(self::P256_A);
-        $bx = self::hex2dec(substr($peerPoint, 1, 32));
-        $by = self::hex2dec(substr($peerPoint, 33, 32));
+        $bx = self::hex2dec(bin2hex(substr($peerPoint, 1, 32)));
+        $by = self::hex2dec(bin2hex(substr($peerPoint, 33, 32)));
         [$sx, $sy] = self::ecMul($dHex, $bx, $by, $p, $a);
         return hex2bin(self::dec2hex($sx, 64));
     }

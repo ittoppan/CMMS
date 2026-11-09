@@ -221,6 +221,18 @@ export interface DowntimeResponse extends DashboardBase {
   by_failure_type: DowntimeRow[];
 }
 
+export interface TrendPoint {
+  day: string;
+  created: number;
+  completed: number;
+  downtime_hours: number;
+}
+
+export interface TrendResponse extends DashboardBase {
+  series: TrendPoint[];
+  days: number;
+}
+
 export interface CostRow {
   id?: number;
   code?: string;
@@ -264,6 +276,7 @@ export const RANGE_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "ตลอดเวลา" },
   { value: "today", label: "วันนี้" },
   { value: "yesterday", label: "เมื่อวาน" },
+  { value: "custom", label: "เลือกวันที่…" },
   { value: "this_week", label: "สัปดาห์นี้" },
   { value: "last_week", label: "สัปดาห์ที่แล้ว" },
   { value: "this_month", label: "เดือนนี้" },
@@ -338,6 +351,9 @@ export async function fetchPmList(q: DashboardQuery = {}): Promise<PmItem[]> {
   return r.items;
 }
 
+export async function fetchTrend(q: DashboardQuery = {}): Promise<TrendResponse> {
+  return apiJson<TrendResponse>(dashboardUrl("trend", q));
+}
 export async function fetchDowntime(q: DashboardQuery = {}): Promise<DowntimeResponse> {
   return apiJson<DowntimeResponse>(dashboardUrl("downtime", q));
 }

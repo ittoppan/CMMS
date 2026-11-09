@@ -282,7 +282,9 @@ export default function AndonBoardPage() {
                 </h3>
                 <span className="text-sm text-muted-foreground">{urgentRepairs.length} รายการ</span>
               </HStack>
-              {urgentRepairs.length === 0 ? (
+              {loading ? (
+                <div className="py-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</div>
+              ) : urgentRepairs.length === 0 ? (
                 <div className="py-8 text-center text-[var(--cmms-text-muted)]">
                   <AndonLamp status="ok" size="lg" />
                   <span className="mt-2.5 block text-sm">ไม่มีงานด่วน — ทุกเครื่องทำงานปกติ</span>
@@ -329,7 +331,9 @@ export default function AndonBoardPage() {
               </h3>
               <span className="text-sm text-muted-foreground">{todayPms.length} รายการ</span>
             </HStack>
-            {todayPms.length === 0 ? (
+            {loading ? (
+              <span className="py-5 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</span>
+            ) : todayPms.length === 0 ? (
               <span className="py-5 text-center text-sm text-muted-foreground">
                 ไม่มีแผน PM ค้างวันนี้
               </span>
@@ -364,7 +368,9 @@ export default function AndonBoardPage() {
                 </h3>
                 <span className="text-sm text-muted-foreground">{lowStock.length} รายการ</span>
               </HStack>
-              {lowStock.length === 0 ? (
+              {loading ? (
+                <span className="py-5 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</span>
+              ) : lowStock.length === 0 ? (
                 <span className="py-5 text-center text-sm text-muted-foreground">
                   สต็อกอะไหล่ปกติทั้งหมด
                 </span>
@@ -396,7 +402,9 @@ export default function AndonBoardPage() {
               <span className="cmms-status-dot ok" style={{ display: "inline-block" }} />
               สถานะงานทั้งหมด
             </h3>
-            {!kpi?.status_dist?.length ? (
+            {loading ? (
+              <span className="text-sm text-[var(--cmms-text-muted)]">กำลังโหลด…</span>
+            ) : !kpi?.status_dist?.length ? (
               <span className="text-sm text-muted-foreground">ยังไม่มีข้อมูลงานซ่อม</span>
             ) : (
               <VStack gap={2}>

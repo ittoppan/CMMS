@@ -119,7 +119,7 @@ export default function SageShipmentsPage() {
       if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
       setRequests(Array.isArray(json) ? json : []);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "ไม่สามารถโหลดข้อมูลได้";
+      const msg = e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
       setError(msg);
     } finally {
       setLoading(false);

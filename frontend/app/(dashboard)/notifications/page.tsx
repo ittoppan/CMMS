@@ -103,7 +103,7 @@ const deliveryColumns: SimpleColumn<any>[] = [
     header: "ข้อความ",
     renderCell: (log) => (
       <div className="line-clamp-2 max-w-[420px] whitespace-pre-line text-sm text-muted-foreground">
-        {String(log.content || "")}
+        {String(log.content || "").replace(/<[^>]*>/g, "").trim()}
       </div>
     ),
   },

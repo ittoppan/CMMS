@@ -1,12 +1,13 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
+// CORS: เฉพาะ origin ที่เชื่อถือได้ — ห้าม wildcard 'Access-Control-Allow-Origin: *'
+cmms_cors_headers();
 // CSRF: ทุก request ที่เปลี่ยนข้อมูล (POST/PUT/DELETE) ต้องผ่านการตรวจ (token หรือ Origin/Referer เดียวกัน)
 if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
     enforceCsrf();
@@ -137,5 +138,6 @@ try {
         echo json_encode(['status' => 'error', 'code' => 404, 'message' => 'Resource not found'], JSON_UNESCAPED_UNICODE);
     }
 } catch (Exception $e) {
-    echo json_encode(['status' => 'error', 'code' => 500, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    error_log(sprintf('[CMMS API index] %s: %s @ %s:%d', get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()));
+    echo json_encode(['status' => 'error', 'code' => 500, 'message' => 'Internal server error'], JSON_UNESCAPED_UNICODE);
 }

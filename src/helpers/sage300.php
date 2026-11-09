@@ -10,14 +10,17 @@ class Sage300Service {
 
     /**
      * Connect to Sage 300 via ODBC DSN (TFPT2C or TFPT1C)
+     *
+     * Phase 18: ไม่มี default user/pass ฮาร์ดโค้ดอีกต่อไป (เดิมมี 'sa'/'sql2u'
+     * ฝังอยู่) — ต้องมาจาก .env หรือ environment จริงเท่านั้น
      */
     public static function connectOdbc() {
-        $dsn = getenv('SAGE300_ODBC_DSN') ?: 'TFPT2C';
-        $user = getenv('SAGE300_DB_USER') ?: 'sa';
-        $pass = getenv('SAGE300_DB_PASS') ?: 'sql2u';
+        $dsn = getenv('SAGE300_ODBC_DSN') ?: '';
+        $user = getenv('SAGE300_DB_USER') ?: '';
+        $pass = getenv('SAGE300_DB_PASS') ?: '';
 
         $envPath = __DIR__ . '/../../.env';
-        if (file_exists($envPath)) {
+        if (file_exists($envPath) && ($dsn === '' || $user === '' || $pass === '')) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
                 if (str_starts_with(trim($line), '#')) continue;
@@ -30,6 +33,10 @@ class Sage300Service {
                     if ($k === 'SAGE300_DB_PASS' && $v) $pass = $v;
                 }
             }
+        }
+
+        if ($dsn === '' || $user === '' || $pass === '') {
+            return ['success' => false, 'error' => 'Sage 300 credentials ไม่ถูกตั้งค่า — ระบุ SAGE300_ODBC_DSN / SAGE300_DB_USER / SAGE300_DB_PASS ใน .env'];
         }
 
         try {
@@ -54,6 +61,32 @@ class Sage300Service {
                 }
                 return ['success' => false, 'error' => $e1->getMessage()];
             }
+        }
+    }
+
+    /**
+     * พิสูจน์เส้นเชื่อมต่อจริง (ไม่ใช่ flag ฮาร์ดโค้ด) — ใช้หน้า Settings > ERP status
+     * พยายามต่อ ODBC + query SELECT 1 ภายใน timeout 5 วิ (ตั้งไว้ใน connectOdbc)
+     */
+    public static function probeConnection(): array {
+        $connObj = self::connectOdbc();
+        if (empty($connObj['success'])) {
+            return ['connected' => false, 'driver' => $connObj['driver'] ?? 'none', 'detail' => 'connection_unavailable'];
+        }
+        try {
+            $conn = $connObj['connection'];
+            if ($connObj['driver'] === 'PDO_ODBC') {
+                $conn->query('SELECT 1');
+            } else {
+                $r = @odbc_exec($conn, 'SELECT 1');
+                if (!$r) {
+                    throw new Exception(odbc_error() ?: 'ODBC exec failed');
+                }
+            }
+            return ['connected' => true, 'driver' => $connObj['driver']];
+        } catch (Exception $e) {
+            error_log('Sage300 probeConnection: ' . $e->getMessage());
+            return ['connected' => false, 'driver' => $connObj['driver'] ?? 'none', 'detail' => 'query_failed'];
         }
     }
 

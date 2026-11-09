@@ -7,8 +7,8 @@ test("screenshot " + TARGET, async ({ page }) => {
   // auth via PWA first (same host => session cookie covers :8081 too)
   if (process.env.E2E_USERNAME && process.env.E2E_PASSWORD) {
     await page.goto("/login");
-    await page.getByLabel(/ชื่อผู้ใช้|Username/i).fill(process.env.E2E_USERNAME!);
-    await page.getByLabel(/รหัสผ่าน|Password/i).fill(process.env.E2E_PASSWORD!);
+    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(process.env.E2E_USERNAME!);
+    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(process.env.E2E_PASSWORD!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
   }

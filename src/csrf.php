@@ -22,8 +22,11 @@
 /** สร้าง/คืน CSRF token ของ session นี้ (สร้างครั้งแรกเมื่อ render ฟอร์ม) */
 function csrfToken(): string {
     if (session_status() === PHP_SESSION_NONE) {
-        @session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+        @session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => $https]);
         session_start();
+        @ini_set('session.use_strict_mode', '1');
     }
     if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -60,7 +63,8 @@ function csrfSubmittedToken(): string {
 function csrfCurrentHost(): string {
     $h = $_SERVER['HTTP_HOST'] ?? '';
     $h = (string)preg_replace('/:\d+$/', '', $h);
-    return strtolower(trim($h));
+    // IPv6 host ถูกห่อด้วย [] (เช่น [::1]) — ตัดออกให้เทียบกับ ::1 ได้
+    return strtolower(trim($h, '[]'));
 }
 
 /**
@@ -74,7 +78,7 @@ function csrfTrustedOrigin(string $url): bool {
     $parts = parse_url($url);
     $scheme = strtolower((string)($parts['scheme'] ?? ''));
     if (!in_array($scheme, ['http', 'https'], true)) return false;
-    $host = strtolower((string)($parts['host'] ?? ''));
+    $host = strtolower(trim((string)($parts['host'] ?? ''), '[]'));
     if ($host === '') return false;
 
     if ($host === csrfCurrentHost()) return true;
@@ -102,6 +106,24 @@ function csrfTrustedOrigin(string $url): bool {
         }
     }
     return false;
+}
+
+/**
+ * CORS headers — ห้ามใช้ wildcard `*` (เคยฝังที่ index.php)
+ * ส่งค่า Origin จริงเฉพาะเมื่อมาจาก origin ที่เชื่อถือได้เท่านั้น
+ * (sessions ผ่าน Next proxy เป็น same-origin → ไม่มีผลต่อการใช้งานปกติ)
+ */
+function cmms_cors_headers(): void {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    if ($origin !== '' && csrfTrustedOrigin($origin)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Vary: Origin');
+    }
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+        header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token, X-Request-ID, Origin');
+        header('Access-Control-Max-Age: 600');
+    }
 }
 
 /** ตรวจ CSRF ผ่านไหม: token ถูกต้อง OR Origin ถูกต้อง OR Referer ถูกต้อง */

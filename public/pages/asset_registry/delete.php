@@ -1,11 +1,3 @@
 <?php
-require_once __DIR__ . '/../../../src/includes/layout.php';
-$id = (int)($_GET['id'] ?? 0);
-if ($id) {
-    try {
-        $pdo = getDb();
-        $pdo->prepare('DELETE FROM asset_registry WHERE id = ?')->execute([$id]);
-    } catch (Exception $e) {}
-}
-header('Location: index.php');
-exit;
+require_once __DIR__ . '/../../../src/includes/gone_next.php';
+redirect_to_next('/asset_registry');

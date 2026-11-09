@@ -12,19 +12,17 @@
  *   POST (CSRF) { action:'set_qty', id, qty } → แก้จำนวน
  */
 require_once __DIR__ . '/../../../src/config/db.php';
+require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
+require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
-if (empty($_SESSION['user_id'])) { http_response_code(401); echo json_encode(['error' => 'Unauthorized']); exit; }
 
-require_once __DIR__ . '/../../../src/csrf.php';
-if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'], true)) {
-    enforceCsrf();
-}
 
 try {
     $pdo = getDb();
+requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
 
     $resolvePart = function (PDO $pdo, array $item): array {
@@ -190,12 +188,24 @@ try {
         $uName = (string)($_SESSION['user']['full_name'] ?? $_SESSION['full_name'] ?? '');
 
         if ($action === 'add') {
+            // Phase 19: idempotency — offline sync ส่งซ้ำไม่เบิกรายการซ้ำ (upsert เป็นแบบ accumulate)
+            $idemKey = clientActionKeyFromRequest($data);
+            if ($idemKey !== '') {
+                $idem = clientActionBegin($pdo, $idemKey, 'POST', '/api/v1/spare_usage.php');
+                if ($idem['status'] === 'replay') { echo json_encode(['success' => true, 'dedup' => true, 'ref_id' => $idem['ref_id']]); exit; }
+                if ($idem['status'] !== 'new') {
+                    clientActionFinish($pdo, $idemKey, 'conflict', null, null, 409);
+                    http_response_code(409);
+                    echo json_encode(['error' => 'รายการนี้ถูกส่งแล้วจากอุปกรณ์ของท่าน — ไม่ประมวลผลซ้ำ', 'code' => 'CLIENT_ACTION_UNCERTAIN'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
             $woId = (int)($data['work_order_id'] ?? 0);
             $items = $data['items'] ?? [];
-            if (!$woId || empty($items)) { http_response_code(400); echo json_encode(['error' => 'Missing work_order_id or items']); exit; }
+            if (!$woId || empty($items)) { clientActionFinish($pdo, $idemKey, 'failed', null, null, 400); http_response_code(400); echo json_encode(['error' => 'Missing work_order_id or items']); exit; }
             $chk = $pdo->prepare("SELECT COUNT(*) FROM repair WHERE id = ?");
             $chk->execute([$woId]);
-            if ((int)$chk->fetchColumn() === 0) { http_response_code(404); echo json_encode(['error' => 'Work order not found']); exit; }
+            if ((int)$chk->fetchColumn() === 0) { clientActionFinish($pdo, $idemKey, 'failed', null, null, 404); http_response_code(404); echo json_encode(['error' => 'Work order not found']); exit; }
 
             $woNo = $getWoNo($pdo, $woId);
             $pdo->beginTransaction();
@@ -241,12 +251,18 @@ try {
                 $total->execute([$reqId]);
                 $tt = $total->fetch(PDO::FETCH_NUM);
                 $pdo->prepare("UPDATE spare_issue_requests SET total_qty = ?, total_value = ? WHERE id = ?")->execute([(float)$tt[0], (float)$tt[1], $reqId]);
+                // Roll-up: sync repair.cost_parts snapshot from WO part usage (Phase 26 cost model)
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$woId, $woId]);
                 $pdo->commit();
+                clientActionFinish($pdo, $idemKey, 'success', 'spare_issue_request', $reqId, 200);
                 echo json_encode(['success' => true, 'request_id' => $reqId, 'message' => 'เพิ่มอะไหล่ในใบสั่งซ่อมและคำขอเบิก (Pending Issue) เรียบร้อย', 'added' => $added]);
             } catch (Exception $e) {
                 $pdo->rollBack();
+                clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
                 http_response_code(400);
-                echo json_encode(['error' => $e->getMessage()]);
+                error_log('[spare_usage.php add] ' . get_class($e) . ': ' . $e->getMessage());
+                echo json_encode(['error' => 'เพิ่มอะไหล่ไม่สำเร็จ กรุณาลองใหม่']);
             }
             exit;
         }
@@ -267,6 +283,7 @@ try {
             try {
                 $pdo->prepare("DELETE FROM repair_spare_parts WHERE id = ?")->execute([$id]);
                 // เอารายการในใบเบิก Pending ออกด้วย + คำนวณยอดใหม่ (ลบใบเบิกถ้าไม่มีรายการเหลือ)
+                $repairId = (int)$rs['repair_id'];
                 $reqIds = $pdo->prepare("SELECT id FROM spare_issue_requests WHERE work_order_id = ? AND status IN ('pending','Requested')");
                 $reqIds->execute([(int)$rs['repair_id']]);
                 foreach ($reqIds->fetchAll(PDO::FETCH_COLUMN) as $rid) {
@@ -281,12 +298,13 @@ try {
                         $pdo->prepare("UPDATE spare_issue_requests SET total_qty = ?, total_value = ? WHERE id = ?")->execute([(float)$tt[0], (float)$tt[1], (int)$rid]);
                     }
                 }
+                // Roll-up: sync repair.cost_parts snapshot after removal (Phase 26 cost model)
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$repairId, $repairId]);
                 $pdo->commit();
             } catch (Exception $e) {
                 $pdo->rollBack();
-                http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
-                exit;
+                api_safe_catch($e);
             }
             echo json_encode(['success' => true, 'message' => 'ลบรายการอะไหล่ออกจากใบสั่งซ่อมแล้ว']);
             exit;
@@ -297,6 +315,13 @@ try {
             $qty = (float)($data['qty'] ?? 0);
             if (!$id || $qty <= 0) { http_response_code(400); echo json_encode(['error' => 'Missing id or qty']); exit; }
             $pdo->prepare("UPDATE repair_spare_parts SET quantity_used = ? WHERE id = ?")->execute([$qty, $id]);
+            $row = $pdo->prepare("SELECT repair_id FROM repair_spare_parts WHERE id = ?");
+            $row->execute([$id]);
+            $rid2 = (int)($row->fetchColumn() ?: 0);
+            if ($rid2) {
+                $pdo->prepare("UPDATE repair SET cost_parts = (SELECT COALESCE(SUM(quantity_used * unit_price), 0) FROM repair_spare_parts WHERE repair_id = ?) WHERE id = ?")
+                    ->execute([$rid2, $rid2]);
+            }
             echo json_encode(['success' => true, 'message' => 'อัปเดตจำนวนเรียบร้อย']);
             exit;
         }
@@ -310,5 +335,5 @@ try {
     echo json_encode(['error' => 'Method not allowed']);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    api_safe_catch($e);
 }

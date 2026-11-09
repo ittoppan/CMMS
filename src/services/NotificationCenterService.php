@@ -158,6 +158,9 @@ class NotificationCenterService
             ['module' => 'repair', 'event' => 'sla_at_risk', 'priority' => 'high', 'title_template' => 'ใกล้หมดเวลา SLA: {work_order_no}', 'message_template' => "งาน: {title}\nเครื่อง: {asset_code}\nกำหนดเสร็จ: {sla_due_at}", 'url_template' => '/repair/view?id={id}'],
             ['module' => 'repair', 'event' => 'sla_breached', 'priority' => 'critical', 'title_template' => 'เกินเวลา SLA: {work_order_no}', 'message_template' => "งาน: {title}\nเครื่อง: {asset_code}\nเกินกำหนด: {overdue_days} วัน", 'url_template' => '/repair/view?id={id}'],
             ['module' => 'repair', 'event' => 'escalated', 'priority' => 'critical', 'title_template' => 'งานด่วนค้างเกิน {escalation_hours} ชม.', 'message_template' => "ใบงาน: {work_order_no}\nงาน: {title}\nเครื่อง: {asset_code}\nค้างมา: {age_hours} ชม.", 'url_template' => '/repair/view?id={id}'],
+            ['module' => 'repair', 'event' => 'planned', 'priority' => 'medium', 'title_template' => 'งาน {work_order_no} ถูกวางแผนแล้ว', 'message_template' => "เครื่อง: {asset_code} - {asset_name}\nเวลาเริ่ม: {planned_start_at}\nทักษะที่ต้องการ: {required_skill}", 'url_template' => '/repair/view?id={id}'],
+            ['module' => 'repair', 'event' => 'rescheduled', 'priority' => 'high', 'title_template' => 'เลื่อนกำหนดงาน {work_order_no}', 'message_template' => "งาน: {title}\nเครื่อง: {asset_code}\nเวลาใหม่: {planned_start_at} → {planned_end_at}\nเหตุผล: {reason}", 'url_template' => '/repair/view?id={id}'],
+            ['module' => 'repair', 'event' => 'emergency', 'priority' => 'critical', 'title_template' => 'งานฉุกเฉิน {work_order_no}', 'message_template' => "เครื่อง: {asset_code} - {asset_name}\nงาน: {title}\nเหตุผล: {reason}", 'url_template' => '/repair/view?id={id}'],
             ['module' => 'pm_am', 'event' => 'due', 'priority' => 'medium', 'title_template' => 'แผน PM ใกล้กำหนด: {asset_code}', 'message_template' => "รายการ: {title}\nครบกำหนด: {due_date} (อีก {days} วัน)", 'url_template' => '/pm_am/checksheet'],
             ['module' => 'pm_am', 'event' => 'overdue', 'priority' => 'high', 'title_template' => 'แผน PM เกินกำหนด: {asset_code}', 'message_template' => "รายการ: {title}\nครบกำหนด: {due_date} (เกิน {days_overdue} วัน)", 'url_template' => '/pm_am/checksheet'],
             ['module' => 'pm_am', 'event' => 'completed', 'priority' => 'low', 'title_template' => 'ทำ PM เสร็จ: {asset_code}', 'message_template' => "รายการ: {title}\nผู้ทำ: {assigned_name}", 'url_template' => '/pm_am/checksheet'],
@@ -171,6 +174,9 @@ class NotificationCenterService
             ['module' => 'calibration', 'event' => 'due', 'priority' => 'medium', 'title_template' => 'เครื่องมือวัดใกล้ครบสอบเทียบ', 'message_template' => "เครื่องมือ: {asset_name}\nรอบถัดไป: {next_date}", 'url_template' => '/calibration'],
             ['module' => 'system', 'event' => 'sync_failed', 'priority' => 'high', 'title_template' => 'ซิงค์ Sage 300 ล้มเหลว', 'message_template' => "รายละเอียด: {detail}", 'url_template' => '/spare_parts/sage_sync'],
             ['module' => 'system', 'event' => 'error', 'priority' => 'critical', 'title_template' => 'ข้อผิดพลาดระบบ', 'message_template' => "{detail}", 'url_template' => ''],
+            ['module' => 'budget', 'event' => 'alert', 'priority' => 'high', 'title_template' => 'งบประมาณใกล้ถึงเกณฑ์: {period_label}', 'message_template' => "งบปี {year}: ใช้ไป {actual} จาก {budget} ({pct}%)\nแผนก: {department_name}\nเหลือ: {remaining}", 'url_template' => '/budget'],
+            ['module' => 'budget', 'event' => 'over', 'priority' => 'critical', 'title_template' => 'งบประมาณเกินกำหนด: {period_label}', 'message_template' => "งบปี {year}: ใช้ไป {actual} จาก {budget} ({pct}%)\nแผนก: {department_name}\nเกินไป: {remaining}", 'url_template' => '/budget'],
+            ['module' => 'budget', 'event' => 'approved', 'priority' => 'medium', 'title_template' => 'งบประมาณได้รับอนุมัติ: {period_label}', 'message_template' => "งบปี {year} แผนก: {department_name}", 'url_template' => '/budget'],
         ];
     }
 
@@ -567,7 +573,8 @@ class NotificationCenterService
         $reference = $jsonOr($d['reference'] ?? null, '[]');
         $roles     = is_array($d['recipients_role'] ?? null) ? json_encode(array_values(array_map('intval', $d['recipients_role'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['recipients_role'] ?? null, '[]');
         $uids      = is_array($d['recipients_user'] ?? null) ? json_encode(array_values(array_map('intval', $d['recipients_user'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['recipients_user'] ?? null, '[]');
-        $chs       = is_array($d['channels'] ?? ['app']) ? json_encode(array_values(array_intersect(self::CHANNELS, $d['channels'])), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($d['channels'] ?? null, '["app"]');
+        $chsIn     = $d['channels'] ?? null;
+        $chs       = is_array($chsIn) ? json_encode(array_values(array_intersect(self::CHANNELS, $chsIn)), JSON_UNESCAPED_UNICODE) : (string)$jsonOr($chsIn, '["app"]');
         $fields = [
             'name = ?', 'module = ?', 'event = ?', 'priority = ?', '`reference` = ?',
             'recipients_role = ?', 'recipients_user = ?', 'channels = ?',
@@ -634,5 +641,90 @@ class NotificationCenterService
             if ($ok) $retried++;
         }
         return $retried;
+    }
+
+    /* ============================================================
+     * TEMPLATES (แจ้งเตือนทุกช่องทาง: app/push/email/line) — ตั้งค่ารูปแบบข้อความ
+     * ============================================================ */
+
+    /** map ตัวแปรตัวอย่างสำหรับพรีวิว/ทดสอบ — merge ทุก module (substituteVars แทนเฉพาะที่พบ) */
+    public static function sampleVars(): array
+    {
+        return [
+            'work_order_no' => 'WO-2026-0142', 'title' => 'เสียงดังผิดปกติที่มอเตอร์',
+            'asset_code' => 'MCH-01', 'asset_name' => 'Press Machine 01',
+            'priority' => 'HIGH', 'status' => 'IN_PROGRESS',
+            'reporter_name' => 'อนันต์ พนักงานคุมเครื่อง', 'assigner_name' => 'สมศักดิ์ หัวหน้าช่าง',
+            'assignee_name' => 'สมศักดิ์ ช่างซ่อมบำรุง', 'verified_by_name' => 'วิชัย ผู้ตรวจรับงาน',
+            'reason' => 'รออะไหล่ Bearing 6204', 'downtime_hours' => '2.5',
+            'overdue_days' => '2', 'escalation_hours' => '4', 'age_hours' => '6',
+            'planned_start_at' => '2026-11-03 08:30', 'planned_end_at' => '2026-11-03 11:00',
+            'required_skill' => 'ช่างกล', 'sla_due_at' => '2026-11-05 17:00',
+            'due_date' => '2026-11-06', 'days' => '3', 'days_overdue' => '2', 'assigned_name' => 'สมศักดิ์ ช่างซ่อมบำรุง',
+            'schedule_title' => 'ตรวจรายเดือนเครื่องกด', 'failed_summary' => '2 รายการไม่ผ่าน',
+            'item_code' => 'SUP0010917', 'item_name' => 'Bearing 6204', 'qty' => '3', 'unit' => 'ชิ้น', 'min_stock' => '5',
+            'request_no' => 'REQ-2026-0088', 'items_summary' => 'Bearing 6204 x 2', 'total_amount' => '1,250',
+            'request_code' => 'MR-2026-0031', 'repair_id' => '0',
+            'next_date' => '2026-11-10',
+            'detail' => 'ตัวอย่างรายละเอียดจากระบบ',
+            'period_label' => 'พฤศจิกายน 2026', 'year' => '2026', 'actual' => '185,000',
+            'budget' => '150,000', 'pct' => '123', 'department_name' => 'ฝ่ายผลิต', 'remaining' => '-35,000',
+        ];
+    }
+
+    /** รายการเทมเพลตทั้งหมด + ตัวแปรตัวอย่าง (สำหรับหน้าตั้งค่ารูปแบบข้อความแจ้งเตือน) */
+    public static function templates(PDO $pdo): array
+    {
+        self::install($pdo);
+        $rows = $pdo->query('SELECT id, module, event, title_template, message_template, priority, url_template, enabled FROM notification_templates ORDER BY module, event')->fetchAll(PDO::FETCH_ASSOC);
+        $sample = self::sampleVars();
+        // ตัวแปรที่ใช้จริงในแต่ละเทมเพลต (ดึง {var} ออกมา)
+        foreach ($rows as &$r) {
+            $used = [];
+            foreach ([$r['title_template'], $r['message_template'], $r['url_template']] as $f) {
+                if (preg_match_all('/\{([a-z_0-9]+)\}/i', (string)$f, $m)) {
+                    foreach ($m[1] as $v) { $used[$v] = $sample[$v] ?? '{' . $v . '}'; }
+                }
+            }
+            $r['sample_vars'] = $used;
+        }
+        unset($r);
+        return $rows;
+    }
+
+    /** บันทึกแก้ไขเทมเพลต (id บังคับ) — คืนจำนวน row ที่ได้รับผล */
+    public static function saveTemplate(PDO $pdo, array $d): int
+    {
+        self::install($pdo);
+        $id = (int)($d['id'] ?? 0);
+        if (!$id) throw new InvalidArgumentException('missing id');
+        $title = mb_substr(trim((string)($d['title_template'] ?? '')), 0, 255);
+        $message = mb_substr(trim((string)($d['message_template'] ?? '')), 0, 2000);
+        $priority = self::validPriority((string)($d['priority'] ?? 'info'));
+        $url = mb_substr(trim((string)($d['url_template'] ?? '')), 0, 255);
+        $enabled = !isset($d['enabled']) || (int)$d['enabled'] === 1 ? 1 : 0;
+        $st = $pdo->prepare('UPDATE notification_templates SET title_template = ?, message_template = ?, priority = ?, url_template = ?, enabled = ? WHERE id = ?');
+        $st->execute([$title, $message, $priority, $url, $enabled, $id]);
+        return $st->rowCount();
+    }
+
+    /** ส่ง push ทดสอบด้วยเทมเพลต (แทนค่าตัวแปรตัวอย่าง) ถึงผู้ใช้ที่ระบุ — คืนจำนวนอุปกรณ์ที่ส่งถึงจริง */
+    public static function testPushTemplate(PDO $pdo, int $userId, array $d): int
+    {
+        self::install($pdo);
+        $tplId = (int)($d['id'] ?? 0);
+        if (!$tplId) throw new InvalidArgumentException('missing id');
+        $st = $pdo->prepare('SELECT title_template, message_template, url_template FROM notification_templates WHERE id = ?');
+        $st->execute([$tplId]);
+        $tpl = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$tpl) throw new RuntimeException('template not found');
+        $title = substituteVars((string)$tpl['title_template'], self::sampleVars());
+        $body = substituteVars((string)$tpl['message_template'], self::sampleVars());
+        $url = substituteVars((string)$tpl['url_template'], self::sampleVars());
+        if ($url !== '' && strpos($url, 'http') !== 0) {
+            $url = rtrim(publicBaseUrl(), '/') . '/' . ltrim($url, '/');
+        }
+        require_once __DIR__ . '/WebPushService.php';
+        return WebPushService::sendToUsers($pdo, $userId, "[ทดสอบ] $title", $body, $url);
     }
 }
