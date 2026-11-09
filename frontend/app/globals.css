@@ -232,74 +232,6 @@ html, body {
   background: var(--cmms-bg-page);
 }
 
-/* ================================================
-   Dark Mode Tokens (next-themes เพิ่ม .dark บน <html>)
-   - override --color-* และ --cmms-* ที่กำหนดตายตัวใน :root
-   ================================================ */
-.dark {
-  color-scheme: dark;
-
-  --cmms-hero-eyebrow: rgba(255,255,255,0.6);
-  --cmms-hero-desc: rgba(255,255,255,0.78);
-  --cmms-hero-chip-bg: rgba(255,255,255,0.12);
-
-  --color-accent-muted: rgba(96, 165, 250, 0.18);
-  --color-text-accent: #6CB2E8;
-  --color-icon-accent: #3E8FCF;
-  --color-background-blue: rgba(0, 104, 181, 0.20);
-  --color-border-blue: #3E8FCF;
-  --color-icon-blue: #3E8FCF;
-  --color-text-blue: #6CB2E8;
-  --color-background-body: #0F172A;
-  --color-background-surface: #1E293B;
-  --color-background-card: #1E293B;
-  --color-background-muted: #243247;
-  --color-background-popover: #1E293B;
-  --color-text-primary: #E6EDF5;
-  --color-text-secondary: #9FB0C3;
-  --color-text-muted: #8AA0B8;
-  --color-text-disabled: #64748B;
-  --color-border: #2E3D52;
-  --color-border-emphasized: #3D4E66;
-  --color-neutral: rgba(96, 165, 250, 0.12);
-  --color-shadow: rgba(0, 0, 0, 0.45);
-  --color-skeleton: #2E3D52;
-  --color-track: #2E3D52;
-
-  /* === CMMS tokens (dark) === */
-  --cmms-primary-hover: #5aa8de;
-  --cmms-primary-light: var(--color-background-blue);
-  --cmms-primary-glow: rgba(0, 104, 181, 0.28);
-
-  --cmms-bg-page: var(--color-background-body);
-  --cmms-bg-card: var(--color-background-card);
-  --cmms-bg-card-hover: #2A3A52;
-  --cmms-bg-sidebar: #0F172A;
-  --cmms-bg-sidebar-hover: #1E293B;
-  --cmms-bg-sidebar-active: #0057A8;
-  --cmms-sidebar-indicator: #3E8FCF;
-  --cmms-sidebar-text: #9FB0C3;
-  --cmms-sidebar-text-strong: #E6EDF5;
-  --cmms-bg-topnav: var(--color-background-surface);
-  --cmms-bg-muted: var(--color-background-muted);
-  --cmms-bg-wash: var(--color-background-muted);
-
-  --cmms-text-primary: var(--color-text-primary);
-  --cmms-text-secondary: var(--color-text-secondary);
-  --cmms-text-muted: var(--color-text-muted);
-  --cmms-text-on-primary: #FFFFFF;
-
-  --cmms-border: var(--color-border);
-  --cmms-border-hover: var(--color-border-emphasized);
-  --cmms-border-focus: #3E8FCF;
-
-  --cmms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --cmms-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --cmms-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  --cmms-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --cmms-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  --cmms-shadow-focus: 0 0 0 3px rgba(0, 104, 181, 0.4);
-}
 
 /* ================================================
    Scrollbar
@@ -577,26 +509,23 @@ h1, h2, h3, h4 {
   .cmms-login-container { grid-template-columns: 1.15fr 1fr; }
 }
 
-/* ---- Brand hero (desktop) ---- */
+/* ---- Brand hero (desktop) — Modern Enterprise clean light ---- */
 .cmms-login-hero {
   position: relative; display: none; flex-direction: column; justify-content: space-between;
-  padding: 46px 52px; overflow: hidden; color: #fff;
-  /* ข้อยกเว้นที่ตั้งใจ: login hero palette (DESIGN.md §7) */
-  background: linear-gradient(150deg, var(--tp-navy-dark) 0%, #0E2A5C 46%, var(--cmms-primary) 100%);
+  padding: 46px 52px; overflow: hidden; color: var(--cmms-text-primary);
+  background: var(--cmms-bg-card);
+  border-right: 1px solid var(--cmms-border);
 }
 @media (min-width: 1024px) { .cmms-login-hero { display: flex; } }
 .cmms-login-hero::before {
-  content: ''; position: absolute; inset: 0; opacity: 0.55; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: radial-gradient(125% 95% at 82% 8%, #000, transparent 76%);
-  mask-image: radial-gradient(125% 95% at 82% 8%, #000, transparent 76%);
+  content: ''; position: absolute; inset: auto -40px -70px auto;
+  width: 220px; height: 220px; border-radius: 50%;
+  border: 28px solid var(--cmms-primary-light);
+  pointer-events: none;
 }
 .cmms-login-hero::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(58% 48% at 12% 100%, rgba(0,147,255,0.34), transparent 70%);
+  background: none;
 }
 .cmms-login-hero > * { position: relative; z-index: 1; }
 .cmms-login-hero-mark { position: absolute; top: 42px; right: 46px; width: 92px; height: 92px; z-index: 1; opacity: 0.5; }
@@ -2011,43 +1940,43 @@ next-route-announcer {
 .cmms-page-hero[data-hero="dashboard"],
 .cmms-page-hero[data-hero="andon-board"],
 .cmms-page-hero[data-hero="iot"] {
-  background: linear-gradient(135deg, #16213E 0%, #27436B 60%, #3A5F8F 100%);
+  background: #16213E;
 }
 .cmms-page-hero[data-hero="repair"] {
-  background: linear-gradient(135deg, #1B2440 0%, #2C3E5E 55%, #3D5678 100%);
+  background: #1B2440;
 }
 .cmms-page-hero[data-hero="spare_parts"] {
-  background: linear-gradient(135deg, #0C2E2A 0%, #115E54 60%, #178B7A 100%);
+  background: #0C2E2A;
 }
 .cmms-page-hero[data-hero="pm_am"] {
-  background: linear-gradient(135deg, #221A4D 0%, #3A2E7E 60%, #5B4BB0 100%);
+  background: #221A4D;
 }
 .cmms-page-hero[data-hero="analytics"],
 .cmms-page-hero[data-hero="reports"],
 .cmms-page-hero[data-hero="bi"],
 .cmms-page-hero[data-hero="leaderboard"] {
-  background: linear-gradient(135deg, #1E1B3A 0%, #37306B 60%, #5246A8 100%);
+  background: #1E1B3A;
 }
 .cmms-page-hero[data-hero="asset_registry"],
 .cmms-page-hero[data-hero="assets"] {
-  background: linear-gradient(135deg, #0F2036 0%, #1D3E5F 60%, #2E5E8C 100%);
+  background: #0F2036;
 }
 .cmms-page-hero[data-hero="users"],
 .cmms-page-hero[data-hero="profile"] {
-  background: linear-gradient(135deg, #1A2450 0%, #2D3F7E 60%, #4460B0 100%);
+  background: #1A2450;
 }
 .cmms-page-hero[data-hero="settings"] {
-  background: linear-gradient(135deg, #17181D 0%, #2B2E37 60%, #454A58 100%);
+  background: #17181D;
 }
 .cmms-page-hero[data-hero="approval"],
 .cmms-page-hero[data-hero="loto"] {
-  background: linear-gradient(135deg, #17213F 0%, #283B6E 60%, #3E559A 100%);
+  background: #17213F;
 }
 .cmms-page-hero[data-hero="inspections"] {
-  background: linear-gradient(135deg, #0E2B33 0%, #17515F 60%, #207E91 100%);
+  background: #0E2B33;
 }
 .cmms-page-hero[data-hero="calibration"] {
-  background: linear-gradient(135deg, #241F18 0%, #4A3D28 60%, #7A6436 100%);
+  background: #241F18;
 }
 
 /* ไอคอนลายน้ำเฉพาะหน้า (แทนวงกลมเรืองแสงสีน้ำเงิน) — อยู่มุมขวา */
@@ -2744,66 +2673,6 @@ next-route-announcer {
   --radius: 0.75rem;
 }
 
-.dark {
-  --background: #101012;
-  --foreground: #f4f4f5;
-  --card: #1b1b1f;
-  --card-foreground: #f4f4f5;
-  --popover: #1b1b1f;
-  --popover-foreground: #f4f4f5;
-  --primary: #3b93cf;
-  --primary-foreground: #0b1220;
-  --secondary: #27272a;
-  --secondary-foreground: #f4f4f5;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #1f2937;
-  --accent-foreground: #dbeafe;
-  --destructive: #ef4444;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --info: #38bdf8;
-  --border: #2e2e33;
-  --input: #3f3f46;
-  --ring: #3b93cf;
-
-  --cmms-bg-page: #101012;
-  --cmms-bg-card: #1b1b1f;
-  --cmms-bg-popover: #1b1b1f;
-  --cmms-bg-muted: #27272a;
-  --cmms-bg-wash: #27272a;
-  --cmms-text-primary: #f4f4f5;
-  --cmms-text-secondary: #a1a1aa;
-  --cmms-text-muted: #8aa0b8;
-  --cmms-text-on-primary: #0b1220;
-  --cmms-border: #2e2e33;
-  --cmms-border-hover: #3f3f46;
-  --cmms-border-focus: #3b93cf;
-  --cmms-primary: #3b93cf;
-  --cmms-primary-hover: #5aa8de;
-  --cmms-primary-light: rgba(59, 147, 207, 0.15);
-  --cmms-primary-glow: rgba(59, 147, 207, 0.28);
-  --cmms-danger: #ef4444;
-  --cmms-danger-light: rgba(239, 68, 68, 0.15);
-  --cmms-success: #22c55e;
-  --cmms-success-light: rgba(34, 197, 94, 0.15);
-  --cmms-warning: #f59e0b;
-  --cmms-warning-light: rgba(245, 158, 11, 0.15);
-  --cmms-info: #38bdf8;
-  --cmms-info-light: rgba(56, 189, 248, 0.15);
-  --cmms-bg-sidebar: #1b1b1f;
-  --cmms-bg-sidebar-hover: #27272a;
-  --cmms-bg-sidebar-active: #0068b5;
-  --cmms-sidebar-indicator: #3b93cf;
-  --cmms-sidebar-text: #a1a1aa;
-  --cmms-sidebar-text-strong: #f4f4f5;
-  --cmms-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --cmms-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --cmms-shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.5);
-  --cmms-shadow-lg: 0 10px 18px -6px rgba(0, 0, 0, 0.5);
-  --cmms-shadow-xl: 0 20px 30px -10px rgba(0, 0, 0, 0.55);
-  --cmms-shadow-focus: 0 0 0 3px rgba(59, 147, 207, 0.35);
-}
 
 /* ================================================================
    v3 MOTION — Radix state animations (no plugin dependency)

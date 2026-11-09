@@ -27,10 +27,10 @@ colors:
 
   # Surfaces (light)
   surface-white: "#FFFFFF"
-  page: "#F4F5F7"
-  page-alt: "#F5F7FA"
-  muted: "#F4F4F5"
-  muted-alt: "#EEF1F6"
+  page: "#F6F9FC"
+  page-alt: "#F6F9FC"
+  muted: "#EFF3F8"
+  muted-alt: "#EFF3F8"
   surface-gray: "#F2F2F2"
   skeleton: "#E4E8EE"
 
@@ -38,18 +38,18 @@ colors:
   overlay: "#000000"
 
   # Lines (light)
-  border: "#E4E4E7"
-  border-emphasized: "#D4D4D8"
-  line-soft: "#E4E8EE"
+  border: "#E6EBF2"
+  border-emphasized: "#CBD5E1"
+  line-soft: "#E6EBF2"
   line-mid: "#C9D2DC"
-  input: "#D4D4D8"
+  input: "#D0D9E4"
 
   # Text (light)
-  text-primary: "#18181B"
-  text-secondary: "#52525B"
+  text-primary: "#1C2536"
+  text-secondary: "#475569"
   text-muted: "#64748B"  # AA 4.76:1 — ใช้กับ muted text (เดิม #A1A1AA 2.56:1 ตก AA)
   text-disabled: "#9AA4B8"
-  text-soft: "#22262E"
+  text-soft: "#1C2536"
   text-soft-alt: "#475569"
 
   # Sidebar (light)
