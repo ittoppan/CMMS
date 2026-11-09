@@ -12,14 +12,18 @@
 return [
     // ---- 1. งานซ่อมบำรุง ----
     ['key' => 'dashboard',                 'href' => '/dashboard',                 'label' => 'แดชบอร์ดภาพรวม',       'section' => 'งานซ่อมบำรุง'],
+    ['key' => 'repair',                    'href' => '/repair',                    'label' => 'ใบสั่งงานซ่อมทั้งหมด',      'section' => 'งานซ่อมบำรุง'],
+    ['key' => 'field',                     'href' => '/field',                     'label' => 'โหมดภาคสนาม',             'section' => 'งานซ่อมบำรุง'],
+    ['key' => 'repair/workload',           'href' => '/repair/workload',           'label' => 'ภาระงานช่าง',             'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/request',            'href' => '/repair/request',            'label' => 'ฟอร์มแจ้งซ่อมด่วน',      'section' => 'งานซ่อมบำรุง'],
-    ['key' => 'repair/assign',             'href' => '/repair/assign',             'label' => 'แจกงานซ่อม',             'section' => 'งานซ่อมบำรุง'],
+    ['key' => 'repair/assign',             'href' => '/repair/assign',             'label' => 'มอบหมายงาน',              'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/my_tasks',           'href' => '/repair/my_tasks',           'label' => 'งานซ่อมของฉัน',          'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/tracking',           'href' => '/repair/tracking',           'label' => 'ติดตามงานซ่อม',          'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/kanban',             'href' => '/repair/kanban',             'label' => 'Kanban Board',           'section' => 'งานซ่อมบำรุง'],
     ['key' => 'repair/history',            'href' => '/repair/history',            'label' => 'ประวัติงานซ่อม',         'section' => 'งานซ่อมบำรุง'],
 
     // ---- 2. PM & เครื่องจักร ----
+    ['key' => 'pm_am',                     'href' => '/pm_am',                     'label' => 'ตารางแผน PM',            'section' => 'PM & เครื่องจักร'],
     ['key' => 'pm_am/calendar',            'href' => '/pm_am/calendar',            'label' => 'ปฏิทิน PM/AM',           'section' => 'PM & เครื่องจักร'],
     ['key' => 'pm_am/create',              'href' => '/pm_am/create',              'label' => 'สร้างแผน PM',            'section' => 'PM & เครื่องจักร'],
     ['key' => 'pm_am/batch_schedule',      'href' => '/pm_am/batch_schedule',      'label' => 'สร้างแผนแบบกลุ่ม',       'section' => 'PM & เครื่องจักร'],
@@ -57,20 +61,26 @@ return [
     ['key' => 'calibration/tracking',      'href' => '/calibration/tracking',      'label' => 'ติดตามงานสอบเทียบ',      'section' => 'PM & เครื่องจักร'],
     ['key' => 'inspections',               'href' => '/inspections',               'label' => 'ตรวจเช็ครอบ (Checklist)','section' => 'PM & เครื่องจักร'],
     ['key' => 'inspections/templates',     'href' => '/inspections/templates',     'label' => 'จัดการ Template ตรวจ',  'section' => 'PM & เครื่องจักร'],
+    ['key' => 'inspections/run',     'href' => '/inspections/run',     'label' => 'ทำเช็คลิสต์ทันที',  'section' => 'PM & เครื่องจักร'],
 
     // ---- 3. คลังอะไหล่ ----
     ['key' => 'spare_parts',               'href' => '/spare_parts',               'label' => 'คลังสต็อกอะไหล่',        'section' => 'คลังอะไหล่'],
+    ['key' => 'spare_parts/overview',      'href' => '/spare_parts/overview',      'label' => 'ภาพรวมสต็อก & การเบิก',    'section' => 'คลังอะไหล่'],
+    ['key' => 'suppliers',                   'href' => '/suppliers',                   'label' => 'ผู้ผลิต & คะแนนผู้ขาย',    'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/balances',      'href' => '/spare_parts/balances',      'label' => 'ยอดคงเหลืออะไหล่',       'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/returns',       'href' => '/spare_parts/returns',       'label' => 'สต็อกอะไหล่คืนซาก',       'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/issue_center',  'href' => '/spare_parts/issue_center',  'label' => 'ศูนย์เบิก-จ่าย',         'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/sage_shipments','href' => '/spare_parts/sage_shipments', 'label' => 'Sage 300 I/C Shipments',   'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/sage_po',       'href' => '/spare_parts/sage_po',       'label' => 'รับอะไหล่จาก PO',        'section' => 'คลังอะไหล่'],
     ['key' => 'spare_parts/optimization',  'href' => '/spare_parts/optimization',  'label' => 'AI EOQ & Dead Stock',    'section' => 'คลังอะไหล่'],
+    ['key' => 'spare_parts/sage_sync',       'href' => '/spare_parts/sage_sync',       'label' => 'ซิงค์สต็อก Sage 300',      'section' => 'คลังอะไหล่'],
 
     // ---- 4. วิเคราะห์ & รายงาน ----
     ['key' => 'analytics',                 'href' => '/analytics',                 'label' => 'Data Warehouse & BI',    'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'andon-board',               'href' => '/andon-board',               'label' => 'จอ Andon TV (โรงงาน)',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/monthly_pdf',       'href' => '/reports/monthly_pdf',       'label' => 'รายงาน PDF ผู้บริหาร',   'section' => 'วิเคราะห์ & รายงาน'],
+    ['key' => 'reports',                     'href' => '/reports',                     'label' => 'ศูนย์รวมรายงาน',          'section' => 'วิเคราะห์ & รายงาน'],
+    ['key' => 'reports/import_excel',        'href' => '/reports/import_excel',        'label' => 'นำเข้า Excel',            'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/export_excel',      'href' => '/reports/export_excel',      'label' => 'Export Excel / CSV',     'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
 
@@ -100,6 +110,7 @@ return [
     ['key' => 'reliability/studies',          'href' => '/reliability/studies',               'label' => 'งานวิจัยเชิงวิศวกรรม',            'section' => 'วิศวกรรมความเสียหาย'],
     ['key' => 'reliability/data-quality',     'href' => '/reliability/data-quality',          'label' => 'คุณภาพข้อมูล',                  'section' => 'วิศวกรรมความเสียหาย'],
     ['key' => 'reliability/config',           'href' => '/reliability/config',                'label' => 'ตั้งค่าความเสียหาย',             'section' => 'วิศวกรรมความเสียหาย'],
+    ['key' => 'mtbf_mttr',                    'href' => '/mtbf_mttr',                       'label' => 'วิเคราะห์ MTBF/MTTR',              'section' => 'วิศวกรรมความเสียหาย'],
 
     // ---- 4.5 การอนุมัติ & เอกสาร ----
     ['key' => 'supervisor',                 'href' => '/supervisor',                 'label' => 'คิวงานหัวหน้างาน',      'section' => 'ควบคุมงาน & วางแผน'],
@@ -107,11 +118,23 @@ return [
     ['key' => 'supervisor/review',          'href' => '/supervisor/review',          'label' => 'ทบทวนคำขอแจ้งซ่อม',       'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/plan',            'href' => '/supervisor/plan',            'label' => 'วางแผน & จัดตาราง',      'section' => 'ควบคุมงาน & วางแผน'],
     ['key' => 'supervisor/verify',          'href' => '/supervisor/verify',          'label' => 'ตรวจรับงาน (Verify)',     'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce',                  'href' => '/workforce',                  'label' => 'กำลังคนและคุณสมบัติ',     'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/technicians',        'href' => '/workforce/technicians',        'label' => 'ข้อมูลช่าง',               'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/skills',             'href' => '/workforce/skills',             'label' => 'ทะเบียนทักษะ',             'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/certifications',     'href' => '/workforce/certifications',     'label' => 'ใบรับรองและสิทธิ์',        'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/training',           'href' => '/workforce/training',           'label' => 'หลักสูตรและอบรม',         'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/capacity',           'href' => '/workforce/capacity',           'label' => 'ความจุและภาระงาน',        'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/shifts',             'href' => '/workforce/shifts',             'label' => 'กะและการลา',              'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/crews',              'href' => '/workforce/crews',              'label' => 'ทีมงาน',                   'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/conflicts',          'href' => '/workforce/conflicts',          'label' => 'มอบหมายงาน (ความพร้อมและการจัดช่าง)', 'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'workforce/mine',               'href' => '/workforce/mine',               'label' => 'ข้อมูลของฉัน',             'section' => 'ควบคุมงาน & วางแผน'],
+    ['key' => 'process_flows',                'href' => '/process-flows',                'label' => 'ผังกระบวนการซ่อมบำรุง',     'section' => 'ควบคุมงาน & วางแผน'],
 
     // ---- 4.55 การวางแผนซ่อมบำรุง (Phase 25) ----
     ['key' => 'planning',                   'href' => '/planning',                   'label' => 'ศูนย์วางแผนซ่อมบำรุง',   'section' => 'การวางแผนซ่อมบำรุง'],
     ['key' => 'planning/calendar',          'href' => '/planning/calendar',          'label' => 'ตารางวางแผนงาน (เดือน)',  'section' => 'การวางแผนซ่อมบำรุง'],
     ['key' => 'field/plan',                 'href' => '/field/plan',                 'label' => 'แผนงานของฉัน',          'section' => 'การวางแผนซ่อมบำรุง'],
+    ['key' => 'shutdown',                   'href' => '/shutdown',                   'label' => 'ศูนย์หยุดเครื่อง & Turnaround', 'section' => 'การวางแผนซ่อมบำรุง'],
 
     // ---- 4.6 การอนุมัติ & เอกสาร ----
     ['key' => 'approval',                  'href' => '/approval',                  'label' => 'ศูนย์อนุมัติเอกสาร',     'section' => 'การอนุมัติ & เอกสาร'],
@@ -121,6 +144,10 @@ return [
 
     // ---- 5. ระบบ & ตั้งค่า ----
     ['key' => 'notifications',             'href' => '/notifications',             'label' => 'ศูนย์แจ้งเตือน',         'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'notifications/history',     'href' => '/notifications/history',     'label' => 'ประวัติการส่ง LINE',      'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'feedback',                    'href' => '/feedback',                    'label' => 'ส่งความคิดเห็น / แจ้งปัญหา', 'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'roles',                       'href' => '/roles',                       'label' => 'บทบาท & สิทธิ์',            'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'system_health',               'href' => '/settings/health',             'label' => 'สุขภาพระบบ (มอนิเตอร์)',    'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'settings/notifications',    'href' => '/settings/notifications',    'label' => 'รูปแบบการแจ้งเตือน LINE','section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'register',                  'href' => '/register',                  'label' => 'ลงทะเบียนผูกบัญชี LINE', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'users',                     'href' => '/users',                     'label' => 'ผู้ใช้งานระบบ',          'section' => 'ระบบ & ตั้งค่า'],
@@ -131,6 +158,7 @@ return [
 
     // ---- 4.95 ผู้รับเหมา & งานภายนอก (Phase 31) ----
     ['key' => 'contractor/overview',       'href' => '/contractors',               'label' => 'ผู้รับเหมา & งานภายนอก', 'section' => 'ผู้รับเหมา & งานภายนอก'],
+    ['key' => 'contractor',                   'href' => '/contractors',                   'label' => 'ผู้รับเหมา & งานภายนอก',            'section' => 'ผู้รับเหมา & งานภายนอก'],
     ['key' => 'contractor/work',           'href' => '/contractors/work',          'label' => 'งานภายนอก (External Work)','section' => 'ผู้รับเหมา & งานภายนอก'],
 
     // ---- 4.96 Engineering Change & เอกสารควบคุม (Phase 32) ----

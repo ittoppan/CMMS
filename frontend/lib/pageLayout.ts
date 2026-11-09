@@ -34,7 +34,7 @@ export const PAGE_CATEGORIES: PageCategory[] = [
       { value: "/dashboard", label: "แดชบอร์ดภาพรวม" },
       { value: "/repair", label: "ใบสั่งงานซ่อมทั้งหมด" },
       { value: "/repair/request", label: "แจ้งซ่อมด่วน" },
-      { value: "/repair/assign", label: "แจกงานซ่อม" },
+      { value: "/repair/assign", label: "มอบหมายงาน" },
       { value: "/repair/my_tasks", label: "งานของฉัน (ซ่อม + PM)" },
       { value: "/repair/tracking", label: "ติดตามงานซ่อม" },
       { value: "/repair/workload", label: "ภาระงานช่าง" },

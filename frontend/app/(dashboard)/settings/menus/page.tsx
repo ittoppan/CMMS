@@ -105,9 +105,28 @@ export default function MenuPermissionsPage() {
   useEffect(() => { fetchData(); }, []);
 
   const sections = useMemo(() => {
-    const order = ["งานซ่อมบำรุง", "PM & เครื่องจักร", "คลังอะไหล่", "วิเคราะห์ & รายงาน", "ระบบ & ตั้งค่า"];
+    const order = [
+      "งานซ่อมบำรุง",
+      "PM & เครื่องจักร",
+      "คลังอะไหล่",
+      "วิเคราะห์ & รายงาน",
+      "ควบคุมงาน & วางแผน",
+      "การวางแผนซ่อมบำรุง",
+      "การอนุมัติ & เอกสาร",
+      "ค่าใช้จ่าย & งบประมาณ",
+      "วิศวกรรมความเสียหาย",
+      "ความน่าเชื่อถือ & วงจรชีวิต",
+      "วิเคราะห์ความเสียหาย & Root Cause",
+      "ผู้รับเหมา & งานภายนอก",
+      "ECR & เอกสารควบคุม",
+      "ศูนย์ความรู้",
+      "ความปลอดภัย & งานที่เสี่ยง",
+      "ระบบ & ตั้งค่า",
+    ];
     const present = Array.from(new Set(menus.map((m) => m.section)));
-    return order.filter((s) => present.includes(s));
+    const ordered = order.filter((s) => present.includes(s));
+    const extra = present.filter((s) => !ordered.includes(s));
+    return [...ordered, ...extra];
   }, [menus]);
 
   const toggle = (roleId: number, menuKey: string) => {

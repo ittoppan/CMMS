@@ -51,7 +51,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.dashboard": { th: "แดชบอร์ดภาพรวม", en: "Dashboard" },
   "menu.repairs": { th: "ใบสั่งงานซ่อมทั้งหมด", en: "All Work Orders" },
   "menu.repair_request": { th: "แจ้งซ่อมด่วน", en: "Quick Repair Request" },
-  "menu.repair_assign": { th: "แจกงานซ่อม", en: "Assign Jobs" },
+  "menu.repair_assign": { th: "มอบหมายงาน", en: "Assign Jobs" },
   "menu.my_tasks": { th: "งานของฉัน (ซ่อม + PM)", en: "My Tasks (Repair + PM)" },
   "menu.field_work": { th: "โหมดภาคสนาม", en: "Field Work" },
   "menu.tracking": { th: "ติดตามงานซ่อม", en: "Repair Tracking" },
