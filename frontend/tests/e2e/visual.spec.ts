@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { e2eCreds, hasCreds } from "./creds";
-const creds = e2eCreds();
+// lazy: read creds after fixture creates .e2e-auth.json (not at import time)
+const creds = { get username() { return e2eCreds().username; }, get password() { return e2eCreds().password; } };
 import fs from "node:fs";
 import path from "node:path";
 
@@ -91,8 +92,18 @@ test.describe("dashboard route screenshots", () => {
     const ctx = await browser.newContext();
     const page = await ctx.newPage();
     await page.goto("/login");
-    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
-    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
+    const userBox = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
+    const passBox = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
+    let filled = false;
+    for (let i = 0; i < 20 && !filled; i++) {
+      await userBox.fill(creds.username!);
+      await passBox.fill(creds.password!);
+      await page.waitForTimeout(400);
+      filled = (await userBox.inputValue()) === creds.username && (await passBox.inputValue()) === creds.password;
+    }
+    await expect(userBox).toHaveValue(creds.username!);
+    await expect(passBox).toHaveValue(creds.password!);
+    
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
     savedStorage = JSON.stringify(await ctx.storageState());

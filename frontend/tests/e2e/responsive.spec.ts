@@ -68,8 +68,12 @@ test.describe("responsive layouts", () => {
     const creds = e2eCreds();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/login");
-    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
-    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
+    const userBox = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
+    const passBox = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
+    await userBox.fill(creds.username!);
+    await passBox.fill(creds.password!);
+    if ((await userBox.inputValue()) !== creds.username) await userBox.fill(creds.username!);
+    await expect(userBox).toHaveValue(creds.username!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 
@@ -89,8 +93,19 @@ test.describe("responsive layouts", () => {
     const errors = watchErrors(page);
 
     await page.goto("/login");
-    await page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i }).fill(creds.username!);
-    await page.getByRole("textbox", { name: /รหัสผ่าน|Password/i }).fill(creds.password!);
+    const userBox2 = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
+    const passBox2 = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
+    // Hydration race: fill() before React hydration attaches onChange can be wiped.
+    // Loop fill until the value sticks (hydration completes within ~10s).
+    let filled = false;
+    for (let i = 0; i < 20 && !filled; i++) {
+      await userBox2.fill(creds.username!);
+      await passBox2.fill(creds.password!);
+      await page.waitForTimeout(400);
+      filled = (await userBox2.inputValue()) === creds.username && (await passBox2.inputValue()) === creds.password;
+    }
+    await expect(userBox2).toHaveValue(creds.username!);
+    await expect(passBox2).toHaveValue(creds.password!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 

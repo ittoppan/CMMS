@@ -3,7 +3,8 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { e2eCreds, hasCreds } from "./creds";
 
-const creds = e2eCreds();
+// lazy: read creds after fixture creates .e2e-auth.json (not at import time)
+const creds = { get username() { return e2eCreds().username; }, get password() { return e2eCreds().password; } };
 const root = path.resolve(__dirname, "..", "..");
 
 /**
@@ -19,16 +20,30 @@ const root = path.resolve(__dirname, "..", "..");
 
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login");
-  await page.getByRole("textbox", { name: /Username|ชื่อผู้ใช้/i }).fill(creds.username!);
-  await page.getByRole("textbox", { name: /Password|รหัสผ่าน/i }).fill(creds.password!);
+  await fillLogin(page, creds.username!, creds.password!);
   await page.getByRole("button", { name: /Login|เข้าสู่ระบบ/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 }
 
+// Hydration race: fill() before React hydration attaches onChange can be wiped.
+// Loop fill until the value sticks.
+async function fillLogin(page: import("@playwright/test").Page, username: string, password: string) {
+  const userBox = page.getByRole("textbox", { name: /Username|ชื่อผู้ใช้/i });
+  const passBox = page.getByRole("textbox", { name: /Password|รหัสผ่าน/i });
+  let filled = false;
+  for (let i = 0; i < 20 && !filled; i++) {
+    await userBox.fill(username);
+    await passBox.fill(password);
+    await page.waitForTimeout(400);
+    filled = (await userBox.inputValue()) === username && (await passBox.inputValue()) === password;
+  }
+  await expect(userBox).toHaveValue(username);
+  await expect(passBox).toHaveValue(password);
+}
+
 async function loginAs(page: import("@playwright/test").Page, username: string, password: string) {
   await page.goto("/login");
-  await page.getByRole("textbox", { name: /Username|ชื่อผู้ใช้/i }).fill(username);
-  await page.getByRole("textbox", { name: /Password|รหัสผ่าน/i }).fill(password);
+  await fillLogin(page, username, password);
   await page.getByRole("button", { name: /Login|เข้าสู่ระบบ/i }).first().click();
   await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });
 }
