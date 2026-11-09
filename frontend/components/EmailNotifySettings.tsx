@@ -375,7 +375,7 @@ export default function EmailNotifySettings() {
                       onClick={() => insertVar(v)}
                       className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] text-[var(--cmms-primary-hover)]"
                       style={{
-                        fontFamily: "monospace",
+                        fontFamily: "'Sarabun', sans-serif",
                         background: "var(--cmms-primary-light)",
                         border: "1px solid var(--cmms-border)",
                       }}

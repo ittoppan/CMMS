@@ -947,7 +947,7 @@ export default function NotificationsSettingsPage() {
                       onClick={() => insertVar(v)}
                       className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] text-[var(--cmms-primary-hover)]"
                       style={{
-                        fontFamily: "monospace",
+                        fontFamily: "'Sarabun', sans-serif",
                         background: "var(--cmms-primary-light)",
                         border: "1px solid var(--cmms-border)",
                       }}
@@ -1532,7 +1532,7 @@ export default function NotificationsSettingsPage() {
               <VStack gap={2}>
                 <div style={{
                   background: "#0f172a", color: "#e2e8f0", borderRadius: 10,
-                  padding: "12px 14px", fontFamily: "'JetBrains Mono', Consolas, monospace",
+                  padding: "12px 14px", fontFamily: "'Sarabun', sans-serif",
                   fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-all",
                   maxHeight: 320, overflow: "auto", border: "1px solid #334155",
                 }}>

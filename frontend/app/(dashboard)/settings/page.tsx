@@ -1160,7 +1160,7 @@ export default function SettingsPage() {
                           <div style={{
                             fontSize: 12, color: "var(--cmms-text-secondary)", background: "var(--cmms-bg-muted)",
                             padding: "10px 12px", borderRadius: 8, border: "1px solid var(--cmms-border)",
-                            fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-all",
+                            fontFamily: "'Sarabun', sans-serif", whiteSpace: "pre-wrap", wordBreak: "break-all",
                             maxHeight: 90, overflow: "auto",
                           }}>
                             {String(form[row.setting_key] || "")}

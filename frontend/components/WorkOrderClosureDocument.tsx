@@ -252,7 +252,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
                 const price = Number(p.unit_price) || 0;
                 return (
                   <tr key={i} style={{ background: i % 2 ? "#F8FAFC" : "#FFFFFF" }}>
-                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", fontFamily: "monospace", fontSize: 12 }}>{p.code || "-"}</td>
+                    <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", fontFamily: "'Sarabun', sans-serif", fontSize: 12 }}>{p.code || "-"}</td>
                     <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1" }}>{p.name || "-"}</td>
                     <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>{qty}</td>
                     <td style={{ padding: "8px 10px", border: "1px solid #CBD5E1", textAlign: "right" }}>฿{price.toLocaleString()}</td>

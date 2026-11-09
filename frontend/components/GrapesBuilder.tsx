@@ -33,8 +33,8 @@ const C = {
   downDark: "#7F1D1D",
   radius: "10px",
 };
-const FONT = "'Sarabun', 'Inter', sans-serif";
-const FONT_DISPLAY = "'Sarabun', 'Inter', sans-serif";
+const FONT = "'Sarabun', sans-serif";
+const FONT_DISPLAY = "'Sarabun', sans-serif";
 
 /* ── บล็อกที่ลากลง canvas ได้ ────────────────────────────────────────── */
 const BLOCKS: Array<{

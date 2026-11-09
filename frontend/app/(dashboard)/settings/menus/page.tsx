@@ -319,7 +319,7 @@ export default function MenuPermissionsPage() {
                               fontSize: "0.82rem", fontWeight: 600, color: "var(--cmms-text-primary)",
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{m.label}</span>
-                            <span style={{ fontSize: "0.68rem", color: "var(--cmms-text-muted)", fontFamily: "monospace" }}>{m.href}</span>
+                            <span style={{ fontSize: "0.68rem", color: "var(--cmms-text-muted)", fontFamily: "'Sarabun', sans-serif" }}>{m.href}</span>
                           </div>
                           {roles.map((r) => (
                             <div key={r.id} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 4 }}>

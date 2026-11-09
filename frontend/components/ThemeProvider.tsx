@@ -129,7 +129,6 @@ const DESIGN_VAR_MAP: Record<string, string[]> = {
   design_andon_ok: ["--cmms-andon-ok"],
   design_andon_warn: ["--cmms-andon-warn"],
   design_andon_down: ["--cmms-andon-down"],
-  design_font_family: ["--cmms-font-family"],
   design_font_size: ["--cmms-font-size-base"],
 };
 
@@ -145,6 +144,8 @@ const applyDesign = (get: (k: string) => string) => {
     if (!v) continue;
     for (const vn of vars) root.style.setProperty(vn, v);
   }
+  // ฟอนต์ทั้งระบบล็อกเป็น Sarabun — ไม่ให้ค่าที่เก็บไว้ในฐานข้อมูลมา override
+  root.style.setProperty("--cmms-font-family", "'Sarabun', sans-serif");
 };
 
 /**

@@ -227,7 +227,7 @@ export default function PMPlansPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-primary-hover)", fontFamily: "monospace" }}>
+                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-primary-hover)", fontFamily: "'Sarabun', sans-serif" }}>
                           {p.code}
                         </span>
                         <span className="cmms-andon-chip" style={freqChipStyle[p.frequency_type] || freqChipStyle.monthly}>
