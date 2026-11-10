@@ -371,7 +371,7 @@ export default function InspectionsPage() {
             <div className="flex flex-wrap gap-2">
               {SCOPES.map((s) => (
                 <button key={s.value} type="button" onClick={() => setScope(s.value)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                  className="min-h-10 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
                   style={{ background: scope === s.value ? "var(--cmms-primary)" : "var(--cmms-bg-muted)", color: scope === s.value ? "#fff" : "var(--cmms-text-secondary)" }}>
                   {s.label}
                 </button>

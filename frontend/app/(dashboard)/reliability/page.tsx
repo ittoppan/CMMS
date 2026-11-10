@@ -125,7 +125,7 @@ function OverviewInner() {
             <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
           </Button>
-          <Link href={relNavHref("/reliability/studies", query)} className={buttonVariants({ size: "sm" })}>
+          <Link href={relNavHref("/reliability/studies", query)} className={buttonVariants({ size: "sm", className: "min-h-10" })}>
             งานวิเคราะห์
           </Link>
         </>
@@ -171,7 +171,7 @@ function OverviewInner() {
             actions={
               <Link
                 href={relNavHref("/reliability/failure-modes", query)}
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
+                className={buttonVariants({ variant: "ghost", size: "sm", className: "min-h-10" })}
               >
                 ดูทั้งหมด
                 <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
