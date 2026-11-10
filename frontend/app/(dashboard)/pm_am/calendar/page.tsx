@@ -103,7 +103,7 @@ function MiniCalendar({ value, onChange }: { value: string; onChange: (d: string
           type="button"
           onClick={() => shift(-1)}
           aria-label="เดือนก่อนหน้า"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
           style={{ color: "var(--cmms-text-secondary)" }}
         >
           <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -113,13 +113,13 @@ function MiniCalendar({ value, onChange }: { value: string; onChange: (d: string
           type="button"
           onClick={() => shift(1)}
           aria-label="เดือนถัดไป"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
           style={{ color: "var(--cmms-text-secondary)" }}
         >
           <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold" style={{ color: "var(--cmms-text-muted)" }}>
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold" style={{ color: "var(--cmms-text-muted)" }}>
         {DOW_SHORT.map((d) => (
           <span key={d} className="py-1">{d}</span>
         ))}
@@ -137,7 +137,7 @@ function MiniCalendar({ value, onChange }: { value: string; onChange: (d: string
               onClick={() => onChange(iso)}
               aria-pressed={selected}
               aria-current={isToday ? "date" : undefined}
-              className="inline-flex h-8 items-center justify-center rounded-lg text-xs font-semibold transition-colors"
+              className="inline-flex h-10 items-center justify-center rounded-lg text-xs font-semibold transition-colors"
               style={{
                 background: selected ? "var(--cmms-primary)" : "transparent",
                 color: selected ? "#fff" : isToday ? "var(--cmms-primary-hover)" : "var(--cmms-text-primary)",

@@ -292,7 +292,7 @@ export default function CalibrationTrackingPage() {
             <button
               key={k}
               onClick={() => setFilter(k)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${chipClass(k)}`}
+              className={`min-h-10 rounded-full px-3 py-2 text-xs font-semibold transition-colors ${chipClass(k)}`}
             >
               {k === "all"
                 ? "ทั้งหมด"

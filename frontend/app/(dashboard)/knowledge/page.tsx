@@ -237,7 +237,7 @@ export default function KnowledgePage() {
             </div>
             <Link
               href="/knowledge/articles"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
+              className={buttonVariants({ variant: "ghost", size: "sm", className: "min-h-10" })}
               aria-label="ดูบทความทั้งหมด"
             >
               ดูทั้งหมด <ArrowRight size={14} aria-hidden="true" />
@@ -268,7 +268,7 @@ export default function KnowledgePage() {
                     <div className="min-w-0">
                       <Link
                         href={`/knowledge/articles?category_id=${c.id}`}
-                        className="font-medium text-foreground hover:underline"
+                        className="inline-flex min-h-10 items-center font-medium text-foreground hover:underline"
                       >
                         {c.name_th}
                       </Link>
@@ -348,8 +348,8 @@ export default function KnowledgePage() {
                     <ul className="space-y-1.5 pt-1">
                       {usage.top_used.slice(0, 5).map((t) => (
                         <li key={t.article_id} className="flex items-center justify-between gap-2 text-xs">
-                          <Link href={`/knowledge/articles/${t.article_id}`} className="truncate hover:underline">
-                            {t.title}
+                          <Link href={`/knowledge/articles/${t.article_id}`} className="flex min-h-10 min-w-0 flex-1 items-center hover:underline">
+                            <span className="truncate">{t.title}</span>
                           </Link>
                           <span className="shrink-0 tabular-nums text-muted-foreground">{t.c}</span>
                         </li>
