@@ -830,7 +830,7 @@ export default function SparePartsPage() {
 
           {/* KPI row */}
           <div style={layoutStyle("kpi")}>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <Card className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
@@ -864,15 +864,15 @@ export default function SparePartsPage() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-4">
+              <Card className="col-span-2 p-4 sm:col-span-1">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)] sm:h-12 sm:w-12">
                     <Banknote size={20} strokeWidth={1.75} aria-hidden="true" />
                   </div>
-                  <div className="min-w-0 space-y-1">
+                  <div className="min-w-0 flex-1 space-y-1">
                     <p className="truncate text-sm text-muted-foreground">มูลค่าคลังรวม</p>
                     <p
-                      className="cmms-kpi-value tabular-nums"
+                      className="cmms-kpi-value break-all tabular-nums leading-tight sm:break-normal"
                       style={{ fontSize: kpis.totalValue >= 9_000_000 ? "1.15rem" : kpis.totalValue >= 1_000_000 ? "1.35rem" : undefined }}
                     >
                       ฿{kpis.totalValue.toLocaleString()}

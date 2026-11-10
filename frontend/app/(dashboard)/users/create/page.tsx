@@ -191,7 +191,7 @@ export default function CreateUserPage() {
                         type="button"
                         onClick={() => update("avatar", av.url)}
                         style={{
-                          padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
+                          padding: '10px 14px', minHeight: 40, borderRadius: 20, cursor: 'pointer',
                           border: `2px solid ${form.avatar === av.url ? 'var(--cmms-primary)' : 'var(--cmms-border)'}`,
                           background: form.avatar === av.url ? 'var(--cmms-primary-light)' : 'var(--cmms-bg-card)',
                           fontSize: '0.8rem', fontWeight: 600
