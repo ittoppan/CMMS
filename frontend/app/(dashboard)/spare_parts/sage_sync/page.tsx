@@ -259,7 +259,7 @@ export default function SageSyncConfigPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">SAGE SYNC · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">ตั้งค่าการดึงสต็อก Sage 300 ERP</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ตั้งค่าการดึงสต็อก Sage 300 ERP</h1>
             <span className="cmms-andon-chip" style={sageConnected ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" } : { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
               <Database size={14} strokeWidth={1.75} aria-hidden="true" /> {sageConnected ? "Sage 300 Connected" : "Sage 300 ไม่พร้อม"}
             </span>

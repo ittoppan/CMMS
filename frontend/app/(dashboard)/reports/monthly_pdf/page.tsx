@@ -201,7 +201,7 @@ export default function MonthlyPdfReportPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">MONTHLY REPORT · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">รายงานสรุปงานซ่อมบำรุงประจำเดือน</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">รายงานสรุปงานซ่อมบำรุงประจำเดือน</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               <Printer size={14} strokeWidth={1.75} aria-hidden="true" /> พิมพ์เอกสาร A4 (ISO)
             </span>

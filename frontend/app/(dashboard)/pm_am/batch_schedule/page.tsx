@@ -153,7 +153,7 @@ export default function BatchSchedulePage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">PM SCHEDULER · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">สร้างแผน PM แบบกลุ่ม (Batch Scheduling)</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               กำหนดเช็คชีทเดียว ให้หลายเครื่องพร้อมกัน
             </span>

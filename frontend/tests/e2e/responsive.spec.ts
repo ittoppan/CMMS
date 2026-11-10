@@ -70,9 +70,15 @@ test.describe("responsive layouts", () => {
     await page.goto("/login");
     const userBox = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });
     const passBox = page.getByRole("textbox", { name: /รหัสผ่าน|Password/i });
-    await userBox.fill(creds.username!);
-    await passBox.fill(creds.password!);
-    if ((await userBox.inputValue()) !== creds.username) await userBox.fill(creds.username!);
+    // Hydration race: fill() before React hydration attaches onChange can be wiped.
+    for (let i = 0, filled = false; i < 20 && !filled; i++) {
+      await userBox.fill(creds.username!);
+      await passBox.fill(creds.password!);
+      await page.waitForTimeout(400);
+      filled =
+        (await userBox.inputValue()) === creds.username &&
+        (await passBox.inputValue()) === creds.password;
+    }
     await expect(userBox).toHaveValue(creds.username!);
     await page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first().click();
     await page.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 15_000 });

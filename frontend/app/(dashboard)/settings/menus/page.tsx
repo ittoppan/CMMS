@@ -241,7 +241,14 @@ export default function MenuPermissionsPage() {
           .bn-config-grid { grid-template-columns: 1fr; }
           .bn-preview-sticky { position: static; }
         }
-        .bn-chip-btn { border: none; background: transparent; cursor: pointer; padding: 0 2px; font-size: 0.72rem; line-height: 1; color: var(--cmms-text-muted); border-radius: 4px; }
+        /* ปุ่ม ▲▼✕ ใช้ได้จริงบนจอสัมผัส: พื้นที่กดอย่างน้อย 28×28 (เดิม 15×12) */
+        .bn-chip-btn {
+          border: none; background: transparent; cursor: pointer;
+          min-width: 28px; min-height: 28px; padding: 0 4px;
+          display: inline-flex; align-items: center; justify-content: center;
+          font-size: 0.78rem; line-height: 1; color: var(--cmms-text-muted); border-radius: 6px;
+        }
+        .bn-chip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .bn-chip-btn:hover { color: var(--cmms-primary); background: var(--cmms-primary-light); }
         .bn-chip-btn.danger:hover { color: #dc2626; background: #fee2e2; }
       `}</style>
@@ -261,7 +268,7 @@ export default function MenuPermissionsPage() {
               <div style={{ overflowX: "auto" }}>
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: `minmax(220px, 2fr) repeat(${roles.length}, minmax(90px, 1fr))`,
+                  gridTemplateColumns: `minmax(200px, 2fr) repeat(${roles.length}, minmax(64px, 1fr))`,
                   gap: 4,
                   alignItems: "center",
                   padding: "4px 0",
@@ -291,7 +298,8 @@ export default function MenuPermissionsPage() {
                         title="เปิดทุกเมนู"
                         style={{
                           border: "none", background: "transparent", cursor: "pointer",
-                          fontSize: "0.68rem", color: "var(--cmms-primary)", textDecoration: "underline", padding: 0,
+                          fontSize: "0.74rem", color: "var(--cmms-primary)", textDecoration: "underline",
+                          padding: "6px 4px", minHeight: 28, lineHeight: 1.2,
                         }}
                       >
                         เลือกทั้งหมด
@@ -302,7 +310,8 @@ export default function MenuPermissionsPage() {
                         title="ปิดทุกเมนู"
                         style={{
                           border: "none", background: "transparent", cursor: "pointer",
-                          fontSize: "0.68rem", color: "var(--cmms-text-muted)", textDecoration: "underline", padding: 0,
+                          fontSize: "0.74rem", color: "var(--cmms-text-muted)", textDecoration: "underline",
+                          padding: "6px 4px", minHeight: 28, lineHeight: 1.2,
                         }}
                       >
                         ปิดทั้งหมด
@@ -327,29 +336,40 @@ export default function MenuPermissionsPage() {
                       .map((m) => (
                         <div key={m.key} style={{
                           display: "grid",
-                          gridTemplateColumns: `minmax(220px, 2fr) repeat(${roles.length}, minmax(90px, 1fr))`,
+                          gridTemplateColumns: `minmax(200px, 2fr) repeat(${roles.length}, minmax(64px, 1fr))`,
                           gap: 4,
                           alignItems: "center",
-                          padding: "4px 0",
+                          padding: "2px 0",
                           borderBottom: "1px solid var(--cmms-border)",
                         }}>
-                          <div title={m.href} style={{ display: "flex", flexDirection: "column", gap: 1, padding: "2px 4px", minWidth: 0 }}>
+                          {/* ชื่อเมนูติดซ้าย (sticky) — เลื่อนแนวนอนดูบทบาทอื่นแล้วยังรู้ว่ากำลังตั้งสิทธิ์เมนูไหน */}
+                          <div title={m.href} style={{
+                            display: "flex", flexDirection: "column", gap: 1, padding: "2px 4px", minWidth: 0,
+                            position: "sticky", left: 0, zIndex: 1, background: "var(--cmms-bg-card, #fff)",
+                          }}>
                             <span style={{
-                              fontSize: "0.82rem", fontWeight: 600, color: "var(--cmms-text-primary)",
+                              fontSize: "0.84rem", fontWeight: 600, color: "var(--cmms-text-primary)",
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{m.label}</span>
-                            <span style={{ fontSize: "0.68rem", color: "var(--cmms-text-muted)", fontFamily: "'Sarabun', sans-serif" }}>{m.href}</span>
+                            <span style={{ fontSize: "0.72rem", color: "var(--cmms-text-muted)", fontFamily: "'Sarabun', sans-serif" }}>{m.href}</span>
                           </div>
                           {roles.map((r) => (
-                            <div key={r.id} style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 4 }}>
+                            <label
+                              key={r.id}
+                              style={{
+                                display: "flex", justifyContent: "center", alignItems: "center",
+                                minHeight: 44, minWidth: 44, padding: 4, margin: 0, cursor: "pointer",
+                              }}
+                              title={`${r.name} · ${m.label}`}
+                            >
                               <input
                                 type="checkbox"
-                                style={{ width: 18, height: 18, cursor: "pointer", accentColor: "var(--cmms-primary, #4F46E5)", borderRadius: 4 }}
+                                style={{ width: 20, height: 20, cursor: "pointer", accentColor: "var(--cmms-primary, #4F46E5)", borderRadius: 4 }}
                                 checked={(perms[r.id]?.[m.key] ?? 1) === 1}
                                 onChange={() => toggle(r.id, m.key)}
                                 aria-label={`${r.name}: ${m.label}`}
                               />
-                            </div>
+                            </label>
                           ))}
                         </div>
                       ))}

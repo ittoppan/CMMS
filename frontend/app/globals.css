@@ -1475,12 +1475,22 @@ html, body {
     gap: 3px;
     font-size: 10px;
     font-weight: 600;
-    line-height: 1;
+    line-height: 1.15;
     color: var(--cmms-text-secondary);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
+    /* ป้ายชื่อห้ามล้น/ตัดขาดกลางคำบนจอ 360px — ย่อด้วย ellipsis และมี padding ข้าง */
+    padding: 0 2px;
+    text-align: center;
   }
-  .cmms-mobile-nav-item svg { width: 21px; height: 21px; }
+  .cmms-mobile-nav-item > span:last-child {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cmms-mobile-nav-item svg { width: 21px; height: 21px; flex-shrink: 0; }
   .cmms-mobile-nav-item.active,
   .cmms-mobile-nav-item:active { color: var(--cmms-primary); }
   .cmms-mobile-nav-item.active svg,
@@ -1673,6 +1683,16 @@ html, body {
     height: 48px !important;
     min-height: 48px !important;
     font-size: 16px !important;
+  }
+  /* Radix Select ฝัง <select> ซ่อน (1×1px, aria-hidden) ไว้ในตัว trigger เพื่อ a11y —
+     ถ้าถูกกฎ "เต็มความกว้าง" ข้างบนยืด จะดันหน้าล้นแนวนอน จึงตรึงกลับเป็น 1px */
+  select[aria-hidden="true"][tabindex="-1"] {
+    width: 1px !important;
+    height: 1px !important;
+    min-height: 1px !important;
+    font-size: 0 !important;
+    opacity: 0;
+    pointer-events: none;
   }
   textarea {
     height: auto !important;
@@ -1893,6 +1913,24 @@ textarea:focus-visible,
   background: var(--cmms-bg-muted, #f1f5f9);
   color: var(--cmms-text-muted, #64748b);
   flex-shrink: 0;
+}
+
+/* ---- Shell: กันหน้าล้นแนวนอนแบบ phantom (การ์ด/grid ที่มี min-content กว้างกว่าจอ
+   ทำให้ <html> เลื่อนซ้าย-ขวาได้ทั้งหน้า) — พื้นที่เลื่อนของแต่ละตารางยังทำงาน
+   ปกติเพราะมี overflow-x ของตัวเอง ---- */
+html,
+body {
+  overflow-x: clip;
+}
+#cmms-main-scroll {
+  overflow-x: clip;
+}
+/* ตารางที่อยู่ในกล่องเลื่อนของตัวเอง: Chrome ยังนับ overflow ของ <table>
+   เข้า scrollWidth ของหน้า (ทำให้หน้าขยับซ้าย-ขวาได้ทั้งหน้า) — contain: paint
+   ตรึงการเลื่อนไว้ในกล่องของมัน (137 หน้าใช้ตารางแบบนี้) */
+#cmms-main-scroll div:has(> table),
+#cmms-main-scroll div:has(> div > table) {
+  contain: paint;
 }
 
 /* ---- Page fade-in (loading skeleton ฯลฯ) ---- */

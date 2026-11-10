@@ -187,6 +187,20 @@ Every page renders exactly this skeleton:
 A shared helper `components/PageShell.tsx` (breadcrumb items, title,
 description, actions) implements steps 1–2 so pages stay DRY.
 
+### 5.1 One `<h1>` per page (a11y contract)
+
+Every page renders **exactly one `<h1>`** — the page title. Pages that draw the
+navy `cmms-page-hero` banner directly (ไม่ผ่าน `PageShell`) put the title in
+`<h1 className="cmms-hero-title">`, **not** `<h2>`; section/card titles continue
+from `<h2>`. The mobile app-bar title (`.cmms-mobile-app-bar-title`) must stay a
+non-heading element, otherwise the page gets a second `<h1>`.
+
+```bash
+# ตรวจทุกหน้าจริงด้วยเบราว์เซอร์: 1 h1, ไม่มีล้นแนวนอน, tap target, ตัวอักษรเล็ก
+cd frontend && node scripts/ux-sweep.mjs            # ทุกหน้า (206 routes)
+cd frontend && node scripts/ux-sweep.mjs /repair /pm_am   # เจาะจงบางหน้า
+```
+
 ---
 
 ## 6. Navigation Structure (new sidebar)

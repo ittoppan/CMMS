@@ -166,13 +166,14 @@ export default function NotificationPrefsPage() {
                     <span className="text-center text-sm font-bold text-foreground">
                       {CHANNEL_LABEL[c]?.th ?? c}
                     </span>
-                    <span className="text-center text-[0.68rem] text-muted-foreground">
+                    <span className="text-center text-[0.72rem] text-muted-foreground">
                       {CHANNEL_LABEL[c]?.note ?? ""}
                     </span>
                     <button
                       type="button"
                       onClick={() => setChannelAll(c, !allTypesOn(c))}
-                      className="text-[0.7rem] font-semibold text-[var(--cmms-primary)] underline-offset-2 hover:underline"
+                      className="text-[0.75rem] font-semibold text-[var(--cmms-primary)] underline-offset-2 hover:underline"
+                      style={{ padding: "6px 10px", minHeight: 36, lineHeight: 1.2 }}
                     >
                       {allTypesOn(c) ? "ปิดทั้งหมด" : "เปิดทั้งหมด"}
                     </button>
@@ -193,11 +194,11 @@ export default function NotificationPrefsPage() {
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-foreground">{meta.type_labels[t]?.th ?? t}</p>
-                        <p className="truncate text-[0.68rem] text-muted-foreground">{t}</p>
+                        <p className="truncate text-[0.72rem] text-muted-foreground">{t}</p>
                       </div>
                     </div>
                     {meta.channels.map((c) => (
-                      <div key={c} className="flex justify-center" style={{ borderTop: "1px solid var(--cmms-border)", padding: "10px 0" }}>
+                      <div key={c} className="flex justify-center" style={{ borderTop: "1px solid var(--cmms-border)", padding: "10px 0", minHeight: 44, alignItems: "center" }}>
                         <Switch
                           checked={matrix[t]?.[c] ?? true}
                           onCheckedChange={(on) => toggle(t, c, on)}

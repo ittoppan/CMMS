@@ -309,7 +309,7 @@ export default function ImportExcelPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">REPORTS IMPORT EXCEL · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">นำเข้าข้อมูลจาก Excel (Import)</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">นำเข้าข้อมูลจาก Excel (Import)</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               <Upload size={14} strokeWidth={1.75} aria-hidden="true" /> แม่แบบ + ตรวจสอบ + ยืนยันก่อนบันทึก
             </span>

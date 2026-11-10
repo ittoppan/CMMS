@@ -102,7 +102,7 @@ export default function PMDetailPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow} · PM Detail</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">{pm?.title || "รอบ PM"}</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{pm?.title || "รอบ PM"}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">#{pmId}</span>
           </div>
           <p className="cmms-hero-desc">{pm?.description || "รายละเอียดรอบการบำรุงรักษาเชิงป้องกัน"}</p>

@@ -204,7 +204,7 @@ function EditPMContent() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">PM PLAN · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">อัปเดตสถานะงานซ่อมบำรุง</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">อัปเดตสถานะงานซ่อมบำรุง</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               {pmNumber || "PM Plan"}
             </span>

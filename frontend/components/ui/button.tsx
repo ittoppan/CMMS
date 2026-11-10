@@ -62,6 +62,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type={type}
+        data-slot="button"
         className={cn(buttonVariants({ variant, size }), className)}
         disabled={isLoading}
         aria-busy={loading}

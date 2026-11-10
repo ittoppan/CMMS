@@ -106,7 +106,7 @@ export default function PMDashboardPage() {
       <div className="cmms-page-hero">
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
-          <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h2>
+          <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
           <p className="cmms-hero-desc">{hero.desc}</p>
         </div>
         <div className="flex flex-wrap gap-3">

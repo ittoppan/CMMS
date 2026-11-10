@@ -427,7 +427,7 @@ export default function InspectionRunPage() {
             </div>
           )}
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">ทำรายการตรวจเช็ค</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">ทำรายการตรวจเช็ค</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               <ClipboardCheck size={14} strokeWidth={1.75} aria-hidden="true" /> รายการไม่ผ่าน → สร้างใบแจ้งซ่อมอัตโนมัติ
             </span>

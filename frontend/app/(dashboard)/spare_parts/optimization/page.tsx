@@ -220,7 +220,7 @@ export default function InventoryOptimizationPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">SPARE PARTS OPTIMIZATION · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">AI วิเคราะห์คลังอะไหล่</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">AI วิเคราะห์คลังอะไหล่</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               <Sparkles size={14} strokeWidth={1.75} aria-hidden="true" /> ขับเคลื่อนด้วย AI
             </span>

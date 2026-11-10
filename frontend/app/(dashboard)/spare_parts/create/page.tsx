@@ -104,7 +104,7 @@ export default function CreateSparePartPage() {
         <div className="space-y-1">
           <p className="cmms-eyebrow" data-on-dark="true">SPARE PART REGISTER · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="cmms-hero-title text-2xl font-bold tracking-tight">{t("form.parts_create_title")}</h2>
+            <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{t("form.parts_create_title")}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">
               <Box size={14} strokeWidth={1.75} aria-hidden="true" /> Spare Part
             </span>
