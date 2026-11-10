@@ -337,7 +337,7 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${val} ใบงาน`}
                     />
-                    <span className="text-[11px] text-[var(--cmms-text-secondary)]">{m.month}</span>
+                    <span className="text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
                   </div>
                 );
               })
@@ -358,13 +358,13 @@ export default function AnalyticsDashboardPage() {
                 <span className="text-sm text-[var(--cmms-text-secondary)]">{m.month}</span>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="min-w-[38px] text-[11px]" style={{ color: "var(--cmms-info)" }}>MTBF</span>
+                    <span className="min-w-[38px] text-xs" style={{ color: "var(--cmms-info)" }}>MTBF</span>
                     <div className="h-2 flex-1 rounded" style={{ backgroundColor: "var(--cmms-bg-muted)" }}>
                       <div className="h-2 rounded" style={{ width: `${Math.min(100, (m.mtbf / 400) * 100)}%`, backgroundColor: "var(--cmms-info)" }} />
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="min-w-[38px] text-[11px]" style={{ color: "var(--cmms-warning)" }}>MTTR</span>
+                    <span className="min-w-[38px] text-xs" style={{ color: "var(--cmms-warning)" }}>MTTR</span>
                     <div className="h-2 flex-1 rounded" style={{ backgroundColor: "var(--cmms-bg-muted)" }}>
                       <div className="h-2 rounded" style={{ width: `${Math.min(100, (m.mttr / 8) * 100)}%`, backgroundColor: "var(--cmms-warning)" }} />
                     </div>
@@ -402,7 +402,7 @@ export default function AnalyticsDashboardPage() {
                       }}
                       title={`${m.month}: ${m.cost} หมื่นบาท`}
                     />
-                    <span className="text-[11px] text-[var(--cmms-text-secondary)]">{m.month}</span>
+                    <span className="text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
                   </div>
                 );
               })

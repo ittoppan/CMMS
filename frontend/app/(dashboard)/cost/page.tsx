@@ -205,7 +205,7 @@ export default function CostPage() {
               ] as { key: keyof Filters; label: string; options: { value: string; label: string }[] }[]
             ).map((f) => (
               <div key={f.key} className="min-w-[150px]">
-                <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{f.label}</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{f.label}</label>
                 <Select value={filters[f.key]} onValueChange={(v) => setF(f.key, v)}>
                   <SelectTrigger aria-label={f.label} className="h-9 w-full sm:w-[180px]">
                     <SelectValue />
@@ -244,11 +244,11 @@ export default function CostPage() {
               ).map((k) => (
                 <Card key={k.label}>
                   <CardContent className="p-4">
-                    <p className="mb-1 flex items-center gap-1.5 text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>
+                    <p className="mb-1 flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>
                       <span className="text-[var(--cmms-primary)]">{k.icon}</span>{k.label}
                     </p>
                     <p className="text-xl font-bold tabular-nums tracking-tight">{k.value}</p>
-                    <p className="mt-0.5 text-[11px] leading-snug" style={{ color: "var(--cmms-text-muted)" }}>{k.detail}</p>
+                    <p className="mt-0.5 text-xs leading-snug" style={{ color: "var(--cmms-text-muted)" }}>{k.detail}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -334,7 +334,7 @@ export default function CostPage() {
                               <div className="h-full rounded-full" style={{ width: `${summary.total > 0 ? Math.min(100, (t.total / summary.total) * 100) : 0}%`, background: PERCENT_COLORS[byType.indexOf(t) % PERCENT_COLORS.length] }} />
                             </div>
                             <span className="w-24 shrink-0 text-right font-semibold tabular-nums">{fmtMoney(t.total, symbol)}</span>
-                            <span className="w-10 shrink-0 text-right text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>{t.wo_count} ใบ</span>
+                            <span className="w-10 shrink-0 text-right text-xs" style={{ color: "var(--cmms-text-muted)" }}>{t.wo_count} ใบ</span>
                           </div>
                         ))}
                       </div>
@@ -453,10 +453,10 @@ export default function CostPage() {
             {activeTab === "breakdown" && (
               <div className="space-y-4">
                 <div className="grid gap-4 lg:grid-cols-4">
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>งานเสียทั้งหมด</p><p className="text-2xl font-bold tabular-nums">{breakdown?.wo_count ?? 0} ครั้ง</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ค่าเสียจ่าย</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(breakdown?.total ?? 0, symbol)}</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>Downtime</p><p className="text-2xl font-bold tabular-nums">{(breakdown?.downtime_minutes ?? 0) / 60 < 1 ? `${breakdown?.downtime_minutes ?? 0} นาที` : `${(((breakdown?.downtime_minutes ?? 0) / 60).toFixed(1))} ชม.`}</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>งานฉุกเฉิน (critical+high)</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(emergency?.total ?? 0, symbol)}</p><p className="text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>{emergency?.wo_count ?? 0} ใบ</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>งานเสียทั้งหมด</p><p className="text-2xl font-bold tabular-nums">{breakdown?.wo_count ?? 0} ครั้ง</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ค่าเสียจ่าย</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(breakdown?.total ?? 0, symbol)}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>Downtime</p><p className="text-2xl font-bold tabular-nums">{(breakdown?.downtime_minutes ?? 0) / 60 < 1 ? `${breakdown?.downtime_minutes ?? 0} นาที` : `${(((breakdown?.downtime_minutes ?? 0) / 60).toFixed(1))} ชม.`}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>งานฉุกเฉิน (critical+high)</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(emergency?.total ?? 0, symbol)}</p><p className="text-xs" style={{ color: "var(--cmms-text-muted)" }}>{emergency?.wo_count ?? 0} ใบ</p></CardContent></Card>
                 </div>
                 <Card>
                   <CardHeader><CardTitle>เครื่องจักรที่เกิดงานเสียบ่อย / ต้นทุนสูง</CardTitle></CardHeader>
@@ -561,10 +561,10 @@ export default function CostPage() {
             {activeTab === "forecast" && forecast && (
               <div className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ใช้จริงสะสม YTD {forecast.year}</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.ytd_total, symbol)}</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>เฉลี่ย / เดือน</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.monthly_avg, symbol)}</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>คาดการณ์สิ้นปี</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.full_year_projection, symbol)}</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>คาดการณ์ที่เหลือ ({forecast.months_remaining} เดือน)</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.projection_remaining, symbol)}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ใช้จริงสะสม YTD {forecast.year}</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.ytd_total, symbol)}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>เฉลี่ย / เดือน</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.monthly_avg, symbol)}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>คาดการณ์สิ้นปี</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.full_year_projection, symbol)}</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>คาดการณ์ที่เหลือ ({forecast.months_remaining} เดือน)</p><p className="text-2xl font-bold tabular-nums">{fmtMoney(forecast.projection_remaining, symbol)}</p></CardContent></Card>
                 </div>
                 <Alert variant="info" title="วิธีคำนวณ" description="พยากรณ์อิงข้อมูลจริงรายเดือนเฉลี่ยเท่านั้น (ไม่ใช่เส้นแนวโน้ม) — ตัวเลขเหมาะต่อการเตรียมงบประมาณ ไม่ใช่การคาดเดาแม่นยำ" />
               </div>
@@ -577,7 +577,7 @@ export default function CostPage() {
                 <CardContent className="space-y-4">
                   <div className="flex flex-wrap items-end gap-2">
                     <div className="min-w-[200px]">
-                      <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ID ใบสั่งซ่อม</label>
+                      <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ID ใบสั่งซ่อม</label>
                       <input value={woQuery} onChange={(e) => setWoQuery(e.target.value.replace(/\D/g, ""))} onKeyDown={(e) => e.key === "Enter" && openWo()}
                         placeholder="เช่น 5"
                         className="h-9 w-full rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg)] px-3 text-sm outline-none focus:border-[var(--cmms-primary)]" />

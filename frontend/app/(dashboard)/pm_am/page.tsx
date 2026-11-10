@@ -288,7 +288,7 @@ export default function PMSchedulePage() {
               <button
                 type="button"
                 onClick={() => openDetail(item)}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
                 style={{ background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }}
               >
                 <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -304,7 +304,7 @@ export default function PMSchedulePage() {
                   setDeferReason("");
                   setDeferDate("");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
                 style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
               >
                 <CalendarDays size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -441,7 +441,7 @@ export default function PMSchedulePage() {
                   key={opt.v}
                   type="button"
                   onClick={() => setOutsourceFilter(opt.v)}
-                  className="rounded-[7px] border-none px-3 py-[5px] text-[12.5px] font-semibold cursor-pointer"
+                  className="min-h-10 rounded-[7px] border-none px-3 py-2 text-[12.5px] font-semibold cursor-pointer"
                   style={{
                     background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
                     color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",

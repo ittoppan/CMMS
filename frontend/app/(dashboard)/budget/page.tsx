@@ -148,7 +148,7 @@ export default function BudgetPage() {
         <CardContent className="pt-5">
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-[130px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ปี</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ปี</label>
               <Select value={year === "" ? "all" : String(year)} onValueChange={(v) => setYear(v === "all" ? "" : Number(v))}>
                 <SelectTrigger aria-label="ปี" className="h-9 w-[150px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -158,7 +158,7 @@ export default function BudgetPage() {
               </Select>
             </div>
             <div className="min-w-[180px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>แผนก</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>แผนก</label>
               <Select value={deptId} onValueChange={setDeptId}>
                 <SelectTrigger aria-label="แผนก" className="h-9 w-full sm:w-[210px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -335,7 +335,7 @@ export default function BudgetPage() {
 function ActionBtn({ title, onClick, variant, children }: { title: string; onClick?: () => unknown; variant?: "primary"; children: React.ReactNode }) {
   return (
     <button type="button" title={title} onClick={onClick}
-      className={`inline-flex h-7 w-7 items-center justify-center rounded-lg border ${variant === "primary"
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border ${variant === "primary"
         ? "border-transparent bg-[var(--cmms-primary)] text-white hover:opacity-90"
         : "border-[var(--cmms-border)] text-[var(--cmms-text-secondary)] hover:border-[var(--cmms-primary)] hover:text-[var(--cmms-primary)]"}`}>
       {children}
@@ -450,7 +450,7 @@ function BudgetModal({ modal, symbol, departments, busy, onClose, onSave }: {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{label}</span>
+      <span className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{label}</span>
       {children}
     </label>
   );
