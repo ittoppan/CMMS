@@ -796,13 +796,13 @@ export default function SparePartsPage() {
             </TabsList>
           </Tabs>
           <div className="flex flex-wrap items-center gap-1.5">
-            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/sage_sync")}>
+            <Button variant="outline" size="sm" className="h-auto min-h-8 whitespace-normal py-1.5 text-left sm:whitespace-nowrap" onClick={() => router.push("/spare_parts/sage_sync")}>
               ตั้งค่าการดึง Sage 300
             </Button>
-            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/issue_center")}>
+            <Button variant="outline" size="sm" className="h-auto min-h-8 whitespace-normal py-1.5 text-left sm:whitespace-nowrap" onClick={() => router.push("/spare_parts/issue_center")}>
               ศูนย์เบิก-จ่าย
             </Button>
-            <Button variant="outline" size="sm" onClick={() => router.push("/spare_parts/optimization")}>
+            <Button variant="outline" size="sm" className="h-auto min-h-8 whitespace-normal py-1.5 text-left sm:whitespace-nowrap" onClick={() => router.push("/spare_parts/optimization")}>
               AI คำนวณ EOQ และสต็อกค้าง
             </Button>
           </div>
