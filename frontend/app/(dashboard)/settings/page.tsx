@@ -799,7 +799,7 @@ export default function SettingsPage() {
 
       {/* ═══ ลิงก์หน้าย่อยตั้งค่า ═══ */}
       <div style={layoutStyle("subpages")}>
-      <Grid columns={{ minWidth: 220, repeat: "fit" }} gap={3}>
+      <Grid columns={{ minWidth: 180, repeat: "fit" }} gap={3}>
         {SUB_PAGES.map((p) => (
           <Card
             key={p.href}
