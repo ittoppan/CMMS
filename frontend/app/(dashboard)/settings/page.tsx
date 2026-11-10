@@ -844,16 +844,17 @@ export default function SettingsPage() {
                     onClick={() => { setActiveTopic(topicId || null); setActiveGroup(s.setting_group); setSearchQuery(""); }}
                     title={`${s.setting_key} · แก้ไข ${relativeTime(s.updated_at)}`}
                     style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "5px 11px", border: "1px solid var(--cmms-border)",
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      padding: "6px 12px", minHeight: 40, maxWidth: "100%",
+                      border: "1px solid var(--cmms-border)",
                       borderRadius: 999,
                       background: isActive ? "var(--cmms-primary-light)" : "var(--cmms-bg-wash)",
                       color: isActive ? "var(--cmms-primary)" : "var(--cmms-text-primary)",
                       cursor: "pointer", font: "inherit", fontSize: 12,
                     }}
                   >
-                    {meta.label}
-                    <span style={{ fontSize: 10, color: "var(--cmms-text-muted)" }}>{relativeTime(s.updated_at)}</span>
+                    <span className="truncate max-w-[140px] sm:max-w-none">{meta.label}</span>
+                    <span className="shrink-0 text-xs text-[var(--cmms-text-muted)]">{relativeTime(s.updated_at)}</span>
                   </button>
                 );
               })}
