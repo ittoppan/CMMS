@@ -725,9 +725,9 @@ export default function DashboardPage() {
                             <div className="flex items-center justify-between">
                               <span className="text-sm font-semibold">{m.month_name}</span>
                               {pct === null ? (
-                                <span className="text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>{hasBudget ? "ยังไม่มีใช้จ่าย" : "ไม่มีงบ"}</span>
+                                <span className="text-xs" style={{ color: "var(--cmms-text-muted)" }}>{hasBudget ? "ยังไม่มีใช้จ่าย" : "ไม่มีงบ"}</span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                                <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
                                   style={{ background: "var(--cmms-bg-muted)", color: barColor }}>
                                   {pct >= exceed ? `${pct.toFixed(0)}% เกิน` : `${pct.toFixed(0)}%`}
                                 </span>
@@ -832,7 +832,7 @@ export default function DashboardPage() {
               <SectionHeading
                 title="งานที่ยังไม่จบ ล่าสุด"
                 right={
-                  <Link href={listHref(q, "wo", "open")} className="text-sm font-medium text-[var(--cmms-primary)]">
+                  <Link href={listHref(q, "wo", "open")} className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--cmms-primary)]">
                     เปิดคิวทั้งหมด
                   </Link>
                 }
