@@ -140,7 +140,7 @@ export default function FieldHomePage() {
       <section className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h2 className="m-0 text-base font-bold">งานที่มอบหมายให้ฉัน</h2>
-          <Link href="/repair/my_tasks" className="text-sm">ดูทั้งหมด</Link>
+          <Link href="/repair/my_tasks" className="inline-flex min-h-10 items-center text-sm">ดูทั้งหมด</Link>
         </div>
         {loading && myWos.length === 0 ? (
           <div className="flex items-center gap-2 py-6 text-[var(--cmms-text-secondary)]">

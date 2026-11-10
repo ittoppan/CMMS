@@ -314,7 +314,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => router.push(`/pm_am/view?id=${item.rawId}`)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
               style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}
             >
               <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -323,7 +323,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
               style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
             >
               <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.update")}
@@ -331,7 +331,7 @@ export default function PMSchedulePage() {
             <button
               type="button"
               onClick={() => handleDelete(item.rawId)}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300"
               style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
             >
               <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.delete")}

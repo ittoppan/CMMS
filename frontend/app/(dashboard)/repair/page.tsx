@@ -397,7 +397,7 @@ export default function WorkOrdersPage() {
           aria-label={`เลือกงาน ${row.original.woNumber}`}
           checked={selected.has(Number(row.original.rawId))}
           onChange={() => toggleSelect(Number(row.original.rawId))}
-          className="h-4 w-4 cursor-pointer"
+          className="h-5 w-5 cursor-pointer"
         />
       ),
     },
@@ -638,7 +638,7 @@ export default function WorkOrdersPage() {
                 aria-label={t("action.select_all_page")}
                 checked={filtered.length > 0 && selected.size === filtered.length}
                 onChange={toggleAll}
-                className="h-4 w-4 cursor-pointer"
+                className="h-5 w-5 cursor-pointer"
               />{t("action.select_all")}</label>
             {selected.size > 0 && (
               <Badge variant="primary">เลือก {selected.size} รายการ</Badge>
@@ -693,7 +693,7 @@ export default function WorkOrdersPage() {
                 type="button"
                 onClick={() => setOutsourceFilter(opt.v)}
                 className={cn(
-                  "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
+                  "min-h-10 rounded-[var(--cmms-radius-sm)] px-3 py-2 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
                   outsourceFilter === opt.v
                     ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
                     : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"

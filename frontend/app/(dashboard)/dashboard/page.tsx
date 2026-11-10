@@ -482,11 +482,11 @@ export default function DashboardPage() {
                         margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
-                        <XAxis dataKey="day" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" minTickGap={24} />
-                        <YAxis yAxisId="wo" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
-                        <YAxis yAxisId="dt" orientation="right" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                        <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" minTickGap={24} />
+                        <YAxis yAxisId="wo" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                        <YAxis yAxisId="dt" orientation="right" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
                         <Tooltip content={<ChartTooltip unit="" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
-                        <Legend wrapperStyle={{ fontSize: 11 }} />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
                         <Bar yAxisId="wo" dataKey="สร้าง" fill="var(--cmms-primary)" radius={[4, 4, 0, 0]} maxBarSize={18} />
                         <Bar yAxisId="wo" dataKey="ปิด" fill="var(--cmms-success)" radius={[4, 4, 0, 0]} maxBarSize={18} />
                         <Line yAxisId="dt" dataKey="downtime" name="Downtime (ชม.)" stroke="var(--cmms-danger)" strokeWidth={2} dot={false} connectNulls />
@@ -505,8 +505,8 @@ export default function DashboardPage() {
                       <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={dtRows} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
-                          <YAxis tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                          <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
+                          <YAxis tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
                           <Tooltip content={<ChartTooltip unit="ชม." />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
                           <Bar dataKey="ชั่วโมง" fill="var(--cmms-primary)" radius={[6, 6, 0, 0]} maxBarSize={42} />
                         </BarChart>
@@ -544,9 +544,9 @@ export default function DashboardPage() {
                         <ResponsiveContainer width="100%" height={220}>
                           <ComposedChart data={pareto} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
-                            <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" interval={0} angle={-12} textAnchor="end" height={44} />
-                            <YAxis yAxisId="cnt" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
-                            <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" interval={0} angle={-12} textAnchor="end" height={44} />
+                            <YAxis yAxisId="cnt" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" allowDecimals={false} />
+                            <YAxis yAxisId="pct" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
                             <Tooltip content={<ChartTooltip unit="ครั้ง" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
                             <Bar yAxisId="cnt" dataKey="ครั้ง" fill="var(--cmms-warning)" radius={[6, 6, 0, 0]} maxBarSize={36} />
                             <Line yAxisId="pct" type="monotone" dataKey="สะสม" name="สะสม (%)" stroke="var(--cmms-danger)" strokeWidth={2} dot={{ r: 3 }} />
@@ -566,8 +566,8 @@ export default function DashboardPage() {
                         <ResponsiveContainer width="100%" height={220}>
                           <BarChart data={costRows} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="var(--cmms-border)" vertical={false} />
-                            <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
-                            <YAxis tick={{ fontSize: 11 }} stroke="var(--cmms-text-muted)" />
+                            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
+                            <YAxis tick={{ fontSize: 12 }} stroke="var(--cmms-text-muted)" />
                             <Tooltip content={<ChartTooltip unit="บาท" />} cursor={{ fill: "var(--cmms-bg-muted)" }} />
                             <Bar dataKey="ค่าซ่อม" fill="var(--cmms-info)" radius={[6, 6, 0, 0]} maxBarSize={42} />
                           </BarChart>
@@ -590,7 +590,7 @@ export default function DashboardPage() {
                             ))}
                           </Pie>
                           <Tooltip content={<ChartTooltip unit="ใบ" />} />
-                          <Legend wrapperStyle={{ fontSize: 11 }} />
+                          <Legend wrapperStyle={{ fontSize: 12 }} />
                         </PieChart>
                       </ResponsiveContainer>
                     )}
@@ -647,7 +647,7 @@ export default function DashboardPage() {
               <SectionHeading
                 title="ซ่อมบำรุงเชิงป้องกัน (PM)"
                 right={
-                  <Link href={listHref(q, "pm", "overdue")} className="text-sm font-medium text-[var(--cmms-primary)]">
+                  <Link href={listHref(q, "pm", "overdue")} className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--cmms-primary)]">
                     PM ค้างเกินกำหนด
                   </Link>
                 }
@@ -699,10 +699,10 @@ export default function DashboardPage() {
                 sub="งบ (effective) vs ใช้จริงรายเดือน — จากศูนย์วิเคราะห์ต้นทุน"
                 right={
                   <div className="flex items-center gap-3">
-                    <Link href="/budget" className="text-sm font-medium text-[var(--cmms-primary)]">
+                    <Link href="/budget" className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--cmms-primary)]">
                       จัดการงบ →
                     </Link>
-                    <Link href="/cost" className="text-sm font-medium text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-primary)]">
+                    <Link href="/cost" className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-primary)]">
                       วิเคราะห์ต้นทุน →
                     </Link>
                   </div>
@@ -755,7 +755,7 @@ export default function DashboardPage() {
               <SectionHeading
                 title="ภาระงานช่าง"
                 right={
-                  <Link href="/dashboard/list?action=tech" className="text-sm font-medium text-[var(--cmms-primary)]">
+                  <Link href="/dashboard/list?action=tech" className="inline-flex min-h-10 items-center text-sm font-medium text-[var(--cmms-primary)]">
                     ดูทั้งหมด
                   </Link>
                 }

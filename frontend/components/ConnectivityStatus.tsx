@@ -29,7 +29,7 @@ export function ConnectivityStatus({ variant = "chip" }: { variant?: "chip" | "i
   const badge = pending > 0 ? t("sync.badge.tooltip").replace("{n}", String(pending)) : "";
 
   const base =
-    "inline-flex select-none items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.7rem] font-medium transition-colors";
+    "inline-flex min-h-9 select-none items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-xs font-medium transition-colors";
   const tone = offline
     ? "border-destructive/30 bg-destructive/10 text-destructive"
     : hasSyncError && pending > 0
