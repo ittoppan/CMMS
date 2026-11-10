@@ -56,8 +56,10 @@ test.describe("responsive layouts", () => {
       await expect(page.getByRole("button", { name: /เข้าสู่ระบบ|Login/i }).first()).toBeVisible();
 
       // protected pages redirect when unauthenticated
-      await page.goto("/dashboard");
-      await page.waitForURL(/\/(login|$)/, { timeout: 10_000 });
+      // (หน้า /dashboard ตอบ shell ก่อนแล้ว redirect ฝั่ง client — goto อาจถูก abort
+      //  ด้วย net::ERR_ABORTED กลางทาง จึงรอที่ URL แทนการถือว่า goto ต้องสำเร็จ)
+      await page.goto("/dashboard", { waitUntil: "commit" }).catch(() => {});
+      await page.waitForURL(/\/(login|$)/, { timeout: 15_000 });
 
       expect(errors, `console errors on ${vp.name} for public pages`).toEqual([]);
     });
