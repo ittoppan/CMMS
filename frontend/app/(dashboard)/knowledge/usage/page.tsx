@@ -238,7 +238,7 @@ export default function KnowledgeUsagePage() {
                   description="สถิติจะเริ่มมีเมื่อมีผู้ค้นหาหรือเปิดอ่านบทความจริง — ไม่มีการสร้างข้อมูลตัวอย่าง"
                   icon={<Activity size={40} />}
                   action={
-                    <Link href="/knowledge/search" className="text-sm underline">
+                    <Link href="/knowledge/search" className="inline-flex min-h-10 items-center text-sm underline">
                       ลองค้นหาความรู้
                     </Link>
                   }
