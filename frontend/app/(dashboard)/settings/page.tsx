@@ -888,7 +888,7 @@ export default function SettingsPage() {
               )}
             </HStack>
 
-            <Grid columns={{ minWidth: 320, repeat: "fit" }} gap={4}>
+            <Grid columns={{ minWidth: 260, repeat: "fit" }} gap={4}>
               {Object.entries(TOPICS).map(([topicId, topic]) => {
                 const topicSettings = settings.filter((s) => topic.groups.includes(s.setting_group));
                 const dirtyCount = topicDirtyCount[topicId] || 0;
@@ -969,7 +969,7 @@ export default function SettingsPage() {
           // ═══════════════════════════════════════════════════════════════════════════
           // DETAIL VIEW — แสดงการตั้งค่าใน topic ที่เลือก
           // ═══════════════════════════════════════════════════════════════════════════
-          <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
+          <Grid columns={{ minWidth: 240, repeat: "fit" }} gap={6} style={{ alignItems: "start" }}>
             {/* Sidebar: กลุ่มย่อยใน topic */}
             <Card>
               <CardContent className="space-y-2 p-2">
@@ -1041,7 +1041,7 @@ export default function SettingsPage() {
             </Card>
 
             {/* Form panel */}
-            <Card style={{ gridColumn: "span 2" }}>
+            <Card>
               <CardContent className="space-y-5 p-5">
                 <VStack gap={1}>
                   <h2 className="text-base font-semibold">
