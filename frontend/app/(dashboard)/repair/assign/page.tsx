@@ -372,6 +372,7 @@ export default function RepairAssignPage() {
 
       {/* Table */}
       <DataTable
+        exportFileName="repair-assign"
         columns={columns}
         data={filtered}
         loading={loading}

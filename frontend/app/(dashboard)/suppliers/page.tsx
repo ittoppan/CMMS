@@ -283,6 +283,7 @@ export default function SuppliersPage() {
         </CardHeader>
         <CardContent>
           <SimpleDataTable<Supplier>
+            exportFileName="suppliers"
             columns={columns}
             data={filtered}
             idKey="rawId"

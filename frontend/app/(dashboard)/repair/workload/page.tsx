@@ -261,6 +261,7 @@ export default function WorkloadPage() {
         </CardHeader>
         <CardContent>
           <DataTable
+            exportFileName="repair-workload"
             columns={columns}
             data={rows}
             loading={loading}

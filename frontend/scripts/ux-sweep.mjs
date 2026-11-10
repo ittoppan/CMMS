@@ -94,7 +94,11 @@ const MEASURE = () => {
   window.scrollTo(9999, window.scrollY);
   const canScrollX = window.scrollX > 0;
   window.scrollTo(before, window.scrollY);
-  const docOverflow = canScrollX ? document.documentElement.scrollWidth - vw : 0;
+  // overflow-x: clip ที่ shell ทำให้ document ไม่ scroll — ต้องวัด scrollWidth ของ
+  // container จริงด้วย ไม่งั้นเนื้อหาที่ถูกตัดขาด (ผู้ใช้เห็นไม่ครบ) จะถูกนับเป็น 0
+  const scroller = document.getElementById("cmms-main-scroll");
+  const mainOverflow = scroller ? Math.max(0, scroller.scrollWidth - scroller.clientWidth) : 0;
+  const docOverflow = Math.max(canScrollX ? document.documentElement.scrollWidth - vw : 0, mainOverflow);
   const main = document.querySelector("main") || document.body;
   const h1s = [...main.querySelectorAll("h1")].filter((h) => h.offsetParent !== null);
   const visible = (el) => {
@@ -129,7 +133,8 @@ const MEASURE = () => {
 
   // tap targets under 40px tall (mobile guideline) — real interactive elements only
   // [data-slot=button] = ปุ่มจาก components/ui/button — มี pseudo-element ขยายพื้นที่กดเป็น ≥48px แล้ว
-  const smallEls = [...main.querySelectorAll("button:not([data-slot=button]), a[href], [role=button], input[type=checkbox]")]
+  // [data-hit-area] = element ที่มี pseudo-element ขยายพื้นที่กดแล้ว (เช่น checkbox ในตาราง)
+  const smallEls = [...main.querySelectorAll("button:not([data-slot=button]):not([data-hit-area]), a[href]:not([data-hit-area]), [role=button]:not([data-hit-area]), input[type=checkbox]:not([data-hit-area])")]
     .filter(visible)
     .filter((el) => {
       const r = el.getBoundingClientRect();

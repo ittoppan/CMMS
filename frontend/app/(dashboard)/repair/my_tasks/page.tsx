@@ -815,6 +815,7 @@ export default function MyTasksPage() {
           </CardHeader>
           <CardContent className="p-0">
             <DataTable columns={columns} data={filteredTasks} />
+              exportFileName="my-tasks"
           </CardContent>
         </Card>
       )}

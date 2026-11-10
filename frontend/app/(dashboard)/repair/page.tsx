@@ -726,6 +726,7 @@ export default function WorkOrdersPage() {
         </CardHeader>
         <CardContent>
           <DataTable<WorkOrder>
+            exportFileName="work-orders"
             key={tableKey}
             columns={columns}
             data={filtered}

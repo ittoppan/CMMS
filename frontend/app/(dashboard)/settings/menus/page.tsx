@@ -235,10 +235,12 @@ export default function MenuPermissionsPage() {
     >
       <VStack gap={6}>
       <style>{`
-        .bn-config-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+        /* minmax(0, …) สำคัญ: 1fr เปล่าใช้ min-content เป็นพื้น ทำให้ตารางสิทธิ์
+           (กว้างขั้นต่ำ 200px + 64px × จำนวนบทบาท) ดันคอลัมน์ให้กว้างเกินจอ */
+        .bn-config-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
         .bn-preview-sticky { position: sticky; top: 16px; }
         @media (max-width: 1200px) {
-          .bn-config-grid { grid-template-columns: 1fr; }
+          .bn-config-grid { grid-template-columns: minmax(0, 1fr); }
           .bn-preview-sticky { position: static; }
         }
         /* ปุ่ม ▲▼✕ ใช้ได้จริงบนจอสัมผัส: พื้นที่กดอย่างน้อย 28×28 (เดิม 15×12) */

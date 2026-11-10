@@ -38,6 +38,8 @@ export function toColumnDefs<T extends RowData>(
   return cols.map((col) => ({
     id: col.key,
     header: col.header,
+    // accessorFn → getValue() คืนค่าจริง ทำให้เรียงลำดับถูก และ "ส่งออก CSV" ได้ค่าที่อ่านได้
+    accessorFn: (row: T) => (row as Record<string, unknown>)[col.key],
     enableSorting: col.enableSorting ?? true,
     meta: { align: col.align },
     cell: (ctx: { row: { original: T } }) => {

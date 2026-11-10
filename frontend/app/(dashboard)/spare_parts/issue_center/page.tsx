@@ -471,6 +471,7 @@ export default function SageIssueCenterPage() {
             ) : (
               <>
                 <DataTable
+                  exportFileName="spare-parts-issue"
                   columns={columns}
                   data={cart}
                   showPagination={false}

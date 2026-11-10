@@ -344,6 +344,10 @@ html, body {
 /* ================================================
    Scrollbar
    ================================================ */
+/* ซ่อนแถบเลื่อนแต่ยังเลื่อนได้ (ใช้กับแท็บ/ชิปที่ล้นแนวนอนบนมือถือ) */
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--cmms-border); border-radius: 100px; }
@@ -443,6 +447,54 @@ html, body {
     color: var(--cmms-text-muted);
     text-align: left;
     flex-shrink: 0;
+  }
+}
+
+/* ================================================
+   DataTable: checkbox เลือกแถว (hit area 36px)
+   ================================================ */
+.cmms-select-cell [data-hit-area] {
+  position: relative;
+}
+.cmms-select-cell [data-hit-area]::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 10px;
+}
+@media (max-width: 767.98px) {
+  /* การ์ด (variant=cards): ย้าย checkbox ไปมุมขวาบนของการ์ด */
+  table.cmms-card-table tbody td.cmms-select-cell {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: auto !important;
+    padding: 0 !important;
+  }
+  table.cmms-card-table tbody td.cmms-select-cell::before {
+    display: none;
+  }
+  table.cmms-card-table tbody tr:has(td.cmms-select-cell) {
+    padding-right: 56px;
+  }
+}
+@media (max-width: 640px) {
+  /* ตารางปกติบนมือถือ: ย้าย checkbox ไปมุมขวาบนของ "การ์ด" แต่ละแถว */
+  .cmms-ui-table tbody tr:has(td.cmms-select-cell) {
+    position: relative;
+    padding-right: 52px;
+  }
+  .cmms-ui-table tbody td.cmms-select-cell {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    display: block;
+    width: auto !important;
+    padding: 0 !important;
+    border-bottom: none !important;
+  }
+  .cmms-ui-table tbody td.cmms-select-cell::before {
+    display: none;
   }
 }
 

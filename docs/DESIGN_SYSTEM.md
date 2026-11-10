@@ -201,6 +201,27 @@ cd frontend && node scripts/ux-sweep.mjs            # ทุกหน้า (206
 cd frontend && node scripts/ux-sweep.mjs /repair /pm_am   # เจาะจงบางหน้า
 ```
 
+### 5.2 ตารางรายการ: เลือกแถว + bulk action + ส่งออก CSV
+
+`DataTable` (และ `SimpleDataTable` ที่ห่ออยู่) มีของกลางให้แล้ว — ไม่ต้องเขียน checkbox
+หรือตัวดาวน์โหลดเองในหน้า:
+
+```tsx
+<DataTable
+  columns={columns}
+  data={filtered}                 // ส่งข้อมูลหลังกรองเข้าไป → CSV ได้ทุกแถว ไม่ใช่แค่หน้าปัจจุบัน
+  exportFileName="work-orders"    // ได้ไฟล์ work-orders-YYYY-MM-DD.csv (UTF-8 + BOM สำหรับ Excel)
+  bulkActions={[{ label: "คัดลอกเลข PM", onRun: (rows) => navigator.clipboard.writeText(rows.map(r => r.id).join(", ")) }]}
+/>
+```
+
+- `bulkActions` มีผลเท่ากับเปิด `selectable` — คอลัมน์ checkbox จะขึ้นเอง และ toolbar
+  (จำนวนที่เลือก / ปุ่ม action / ล้างที่เลือก) จะโผล่เมื่อมีการเลือก; รันเสร็จจะล้างที่เลือกให้
+- CSV เรียงตามการเรียงบนจอ และใช้ค่าจริง (`accessorFn`) — คอลัมน์ที่ไม่ต้องการให้ออก
+  ใส่ `meta: { exportable: false }`
+- ฝั่งมือถือ checkbox ย้ายไปมุมขวาบนของการ์ด และมี hit area 36px (`data-hit-area`
+  ทำให้ ux-sweep ไม่นับว่าปุ่มเล็ก)
+
 ---
 
 ## 6. Navigation Structure (new sidebar)

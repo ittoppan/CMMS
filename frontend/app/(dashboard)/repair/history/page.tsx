@@ -355,6 +355,7 @@ export default function RepairHistoryPage() {
 
       {/* Table */}
       <DataTable
+        exportFileName="repair-history"
         columns={columns}
         data={filtered}
         loading={loading}

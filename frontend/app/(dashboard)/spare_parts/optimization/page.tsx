@@ -300,6 +300,7 @@ export default function InventoryOptimizationPage() {
       </Tabs>
 
       <DataTable
+        exportFileName="spare-parts-optimization"
         columns={columns}
         data={filteredData.slice(0, 100)}
         showPagination={false}

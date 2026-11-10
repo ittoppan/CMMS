@@ -310,6 +310,7 @@ export default function SagePOReceiptPage() {
         ) : (
           <>
             <DataTable
+              exportFileName="sage-po"
               columns={columns}
               data={items}
               showPagination={false}

@@ -528,6 +528,7 @@ export default function SageSyncConfigPage() {
             </div>
           ) : (
             <DataTable
+              exportFileName="sage-sync"
               columns={columns}
               data={logs}
               showPagination={false}

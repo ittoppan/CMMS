@@ -24,7 +24,9 @@ function TabsList({
   return (
     <TabsPrimitive.List
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg border border-border bg-secondary p-1 text-muted-foreground",
+        // max-w-full + overflow-x-auto: แท็บเยอะ (เช่น 7 แท็บ) ต้องเลื่อนในแถบตัวเอง
+        // ไม่ดันหน้าให้ล้นแนวนอนบนมือถือ · scrollbar-none เพื่อไม่ให้มีแถบหนา
+        "inline-flex max-w-full items-center gap-1 overflow-x-auto scrollbar-none rounded-lg border border-border bg-secondary p-1 text-muted-foreground",
         className
       )}
       {...props}
@@ -39,7 +41,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm",
+        "inline-flex h-9 shrink-0 items-center justify-center whitespace-nowrap rounded-md px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm",
         className
       )}
       {...props}

@@ -24,6 +24,7 @@ import {
   ClipboardCheck,
   CalendarDays,
   Eye,
+  Copy,
 } from "lucide-react";
 
 interface PMTask extends Record<string, unknown> {
@@ -117,6 +118,7 @@ export default function PMSchedulePage() {
 
   // ── เลื่อนกำหนด PM (ต้องอนุมัติโดยหัวหน้า — แจ้งผ่าน LINE) ──
   const [deferTarget, setDeferTarget] = useState<PMTask | null>(null);
+  const [copyNote, setCopyNote] = useState<string | null>(null);
   const [deferReason, setDeferReason] = useState("");
   const [deferDate, setDeferDate] = useState("");
   const [deferSaving, setDeferSaving] = useState(false);
@@ -463,8 +465,30 @@ export default function PMSchedulePage() {
           </div>
 
           {error && <Alert variant="danger" description={error} />}
+          {copyNote && (
+            <p role="status" className="mb-2 text-xs font-semibold text-[var(--cmms-text-secondary)]">
+              {copyNote}
+            </p>
+          )}
 
           <DataTable
+            exportFileName="pm-am-plans"
+            bulkActions={[
+              {
+                label: "คัดลอกเลข PM",
+                icon: <Copy size={14} strokeWidth={2} aria-hidden="true" />,
+                onRun: async (rows) => {
+                  const text = rows.map((row) => row.id).join(", ");
+                  try {
+                    await navigator.clipboard.writeText(text);
+                    setCopyNote(`คัดลอกแล้ว ${rows.length} รายการ`);
+                  } catch {
+                    setCopyNote("เบราว์เซอร์ไม่อนุญาตให้คัดลอก — เลือกข้อความจากตารางแทน");
+                  }
+                  window.setTimeout(() => setCopyNote(null), 4000);
+                },
+              },
+            ]}
             columns={columns}
             data={filtered}
             loading={loading}

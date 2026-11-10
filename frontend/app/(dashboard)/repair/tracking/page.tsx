@@ -175,6 +175,7 @@ export default function RepairTrackingPage() {
           </CardHeader>
           <CardContent>
             <DataTable
+              exportFileName="repair-tracking"
               variant="cards"
               columns={columns}
               data={data}

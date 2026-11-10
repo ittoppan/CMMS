@@ -171,6 +171,7 @@ export default function CalibrationInstrumentsPage() {
         </CardHeader>
         <CardContent>
           <SimpleDataTable<Instrument>
+            exportFileName="calibration-instruments"
             columns={columns}
             data={filtered}
             idKey="id"
