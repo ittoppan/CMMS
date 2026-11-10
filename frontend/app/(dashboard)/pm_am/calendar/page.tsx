@@ -520,7 +520,7 @@ export default function PMCalendarPage() {
                             <button
                               type="button"
                               onClick={() => (window.location.href = `/pm_am/view?id=${t.rawId}`)}
-                              className="inline-flex w-full items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-300 sm:w-auto"
+                              className="inline-flex min-h-10 w-full items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-300 sm:w-auto"
                               style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}
                             >
                               <ExternalLink size={14} strokeWidth={1.75} aria-hidden="true" />

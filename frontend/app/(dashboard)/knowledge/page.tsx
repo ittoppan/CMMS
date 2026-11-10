@@ -390,7 +390,7 @@ export default function KnowledgePage() {
                 <Link
                   key={k}
                   href={`/knowledge/articles?status=${k}`}
-                  className="inline-flex items-center gap-2"
+                  className="inline-flex min-h-10 items-center gap-2"
                 >
                   <span className={cn("cmms-status", lampTone(KN_STATUS_TONE[k]), isPublished && "bg-[var(--cmms-success-light)] text-[var(--cmms-success)] ring-2 ring-[var(--cmms-success)]/30")}>
                     <span className="cmms-status-dot" />
