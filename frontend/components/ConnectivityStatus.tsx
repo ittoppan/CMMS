@@ -39,6 +39,10 @@ export function ConnectivityStatus({ variant = "chip" }: { variant?: "chip" | "i
         : "border-border bg-secondary/60 text-muted-foreground";
 
   if (variant === "icon") {
+    // บนมือถือ พื้นที่ app bar จำกัดมาก — แสดงเฉพาะเมื่อ "มีเรื่องต้องรู้"
+    // (ออฟไลน์/กำลังต่อ/กำลังซิงก์/ซิงก์ผิดพลาด/มีงานค้าง) ไม่ใช่โชว์ไอคอน WiFi ตลอดเวลา
+    const quiet = !offline && !reconnecting && !syncing && !hasSyncError && pending === 0;
+    if (quiet) return null;
     return (
       <Link
         href="/sync-center"

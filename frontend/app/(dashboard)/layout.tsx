@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Home,
@@ -95,6 +95,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // ปุ่ม "ย้อนกลับ" บน app bar มือถือ: แสดงเฉพาะเมื่อผู้ใช้เดินทางภายในแอปมาแล้ว
+  // (หน้าแรกที่เปิด = ไม่มีอะไรให้ย้อนกลับ — กดไปจะหลุดออกจากแอป/PWA)
+  const entryPathRef = useRef<string | null>(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+  useEffect(() => {
+    if (entryPathRef.current === null) entryPathRef.current = pathname;
+    setCanGoBack(pathname !== entryPathRef.current);
+  }, [pathname]);
 
   // Auth guard: 401 → /login และ must_change_password → /change-password
   // โดยตรงใน useMenuPermission (รวม fetch โปรไฟล์เป็น request เดียว กับสิทธิ์เมนู)
@@ -194,13 +203,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
         {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
+          {/* แบรนด์: โลโก้ TOPPAN กว้างตามสัดส่วนจริง (6.09:1) — ต้องจำกัดความกว้าง
+              ไม่งั้นโลโก้กินพื้นที่จนชื่อระบบถูกตัดเหลือ "C..." */}
           <Link href="/dashboard" className="flex items-center gap-2.5 border-b border-border px-4 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="h-8 w-auto shrink-0 object-contain" />
-            <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
-              <span className="block truncate text-[0.65rem] font-medium uppercase tracking-wider text-muted-foreground">Enterprise Maintenance</span>
-            </span>
+            <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
+            <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
           </Link>
           <SidebarNav canShow={canShow} isSelected={isSelected} />
           <div className="border-t border-border p-3">
@@ -342,14 +350,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
         </button>
-        <button
-          type="button"
-          className="cmms-mobile-app-bar-btn"
-          aria-label="ย้อนกลับ"
-          onClick={() => router.back()}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-        </button>
+        {canGoBack && (
+          <button
+            type="button"
+            className="cmms-mobile-app-bar-btn"
+            aria-label="ย้อนกลับ"
+            onClick={() => router.back()}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+          </button>
+        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
         <div className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</div>

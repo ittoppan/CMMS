@@ -526,7 +526,9 @@ export default function WorkOrdersPage() {
       <div className="flex flex-col gap-6">
       {/* KPI — มินิบอร์ด Andon: กวาดตาเดียวรู้สถานะงาน */}
       <div style={layoutStyle("kpi")}>
-      <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
+      {/* minWidth 150: ให้ KPI 5 ใบเรียงครบแถวเดียวบนเดสก์ท็อป และ 2 คอลัมน์บนมือถือ
+          (เดิม 200 ทำให้ใบที่ 5 ตกไปอยู่คนเดียวแถวสอง) */}
+      <Grid columns={{ minWidth: 150, repeat: "fit" }} gap={4}>
         <Card className="p-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">

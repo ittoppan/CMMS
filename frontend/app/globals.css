@@ -1428,6 +1428,11 @@ html, body {
     flex-shrink: 0;
     filter: none; /* โฉมใหม่: โลโก้สีจริงบนพื้นขาว (เดิม invert เป็นขาว) */
   }
+  /* จอเล็กมาก (≤479px): โลโก้กินพื้นที่จนชื่อหน้าถูกตัดเหลือ 2-3 ตัวอักษร
+     — ซ่อนโลโก้ใน app bar เฉพาะจอแคบนี้ (แบรนด์ยังอยู่ที่ drawer + splash) */
+  @media (max-width: 479.98px) {
+    .cmms-mobile-app-bar-logo { display: none; }
+  }
   .cmms-mobile-app-bar-title {
     flex: 1 1 auto;
     min-width: 0;
@@ -2949,6 +2954,11 @@ html.cmms-no-anim *::after {
 }
 .cmms-hero-desc {
   color: var(--cmms-text-secondary);
+}
+/* .cmms-page-hero เป็นพื้น navy เข้ม (#0F1E3D) — คำอธิบายใต้หัวเรื่องต้องเป็นขาวนวล
+   ไม่ใช่ text-secondary (เทาเข้ม) ไม่งั้นอ่านไม่ออกบน 61 หน้าที่ใช้ hero นี้ */
+.cmms-page-hero .cmms-hero-desc {
+  color: rgba(255, 255, 255, 0.78);
 }
 .cmms-eyebrow[data-on-dark="true"] {
   color: rgba(255,255,255,0.6);

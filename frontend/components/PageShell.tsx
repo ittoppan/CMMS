@@ -54,8 +54,10 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <div className={cn("w-full space-y-6", className)}>
+      {/* Desktop มี breadcrumb อยู่ใน topbar แล้ว — ไม่ต้องแสดงซ้ำในเนื้อหา
+          (มือถือ topbar ซ่อน จึงยังคงใช้ breadcrumb ตัวนี้เป็นตัวบอกตำแหน่ง) */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumb>
+        <Breadcrumb className="lg:hidden">
           <BreadcrumbList className="flex flex-wrap items-center gap-1 text-xs">
             {breadcrumbs.map((crumb, i) => {
               const last = i === breadcrumbs.length - 1;

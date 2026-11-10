@@ -119,6 +119,26 @@ export function sectionAccent(titleKey: string): string {
   return SECTION_ACCENTS[titleKey.replace('nav.', '') as SectionKey] ?? SECTION_ACCENTS.system;
 }
 
+/**
+ * ไอคอนประจำหมวดเมนู — ใช้แทน "จำนวนเมนู" ที่เดิมแสดงเป็นตัวเลขในชิป
+ * (ตัวเลขในชิปอ่านเหมือน badge แจ้งเตือน/งานค้าง ทำให้เข้าใจผิด)
+ */
+export const SECTION_ICONS: Record<string, LucideIcon> = {
+  work_orders: Wrench,
+  pm_machines: CalendarDays,
+  calibration: Gauge,
+  parts_external: Boxes,
+  planning: CalendarClock,
+  analytics_reports: BarChart3,
+  reliability: ShieldCheck,
+  knowledge_ops: BookOpen,
+  system: Settings,
+};
+
+export function sectionIcon(titleKey: string): LucideIcon {
+  return SECTION_ICONS[titleKey.replace('nav.', '')] ?? LayoutGrid;
+}
+
 export interface NavGroupDef {
   titleKey: string;
   pathPrefixes: string[];
@@ -447,15 +467,19 @@ function SidebarGroup({
         className="group flex w-full items-center gap-2 rounded-[var(--cmms-radius)] px-2.5 py-2 text-left transition-colors hover:bg-muted/60"
       >
         <span
+          aria-hidden="true"
           className={cn(
-            "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] text-[0.62rem] font-extrabold tabular-nums transition-colors",
-            anyActive ? "text-white" : ""
+            "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)] transition-colors",
+            anyActive ? "text-white" : "bg-muted text-muted-foreground"
           )}
           style={{
             backgroundColor: anyActive ? sectionAccent(group.titleKey) : undefined,
           }}
         >
-          {group.visibleItems.length}
+          {(() => {
+            const Icon = sectionIcon(group.titleKey);
+            return <Icon size={14} strokeWidth={2} aria-hidden="true" />;
+          })()}
         </span>
         <span className="min-w-0 flex-1 truncate text-[0.66rem] font-extrabold uppercase tracking-[0.09em] text-muted-foreground">
           {t(group.titleKey)}
