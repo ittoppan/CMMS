@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/api.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
+require_once __DIR__ . '/../../../src/helpers/roles.php'; // users_normalize_role / users_role_id_from_value
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -43,25 +44,26 @@ try {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
             if ($id) {
-                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE id = ?');
+                $stmt = $pdo->prepare('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 echo json_encode($row);
             } elseif ($empCode !== '') {
-                $stmt = $pdo->prepare('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users WHERE employee_code = ? AND is_active = 1');
+                $stmt = $pdo->prepare('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.employee_code = ? AND u.is_active = 1');
                 $stmt->execute([$empCode]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'ไม่พบผู้ใช้งาน']); exit; }
                 echo json_encode($row);
             } else {
-                $stmt = $pdo->query('SELECT id, role_id, username, email, full_name, phone, role, position, employee_code, avatar, avatar_path, line_user_id, lang, is_active, must_change_password, created_at, updated_at FROM users ORDER BY created_at DESC');
+                $stmt = $pdo->query('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id ORDER BY u.created_at DESC');
                 echo json_encode($stmt->fetchAll());
             }
             break;
         case 'POST':
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
+            users_normalize_role($pdo, $data);
+            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
             $cols = [];
             $vals = [];
             foreach ($allowed as $col) {
@@ -96,7 +98,8 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
-            $allowed = ['role_id', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
+            users_normalize_role($pdo, $data);
+            $allowed = ['role_id', 'role', 'username', 'email', 'password', 'full_name', 'phone', 'avatar', 'is_active', 'department_id', 'employee_code', 'position', 'signature_path', 'line_user_id', 'lang', 'must_change_password'];
             $fields = [];
             $values = [];
             foreach ($allowed as $col) {

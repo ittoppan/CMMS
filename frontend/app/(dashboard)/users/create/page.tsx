@@ -3,7 +3,7 @@
 // users/create — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, ui/Switch, ui/Avatar)
 // business logic ครบเดิม: POST users.php, avatar preset/upload + compressImage, validation
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -40,6 +40,9 @@ export default function CreateUserPage() {
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // บทบาทจากตาราง roles (หน้าจัดการสิทธิ์) — ไม่ hardcode รายชื่อเดิมอีก
+  const [roles, setRoles] = useState<{ id: number; name: string; description?: string }[]>([]);
+
   const [form, setForm] = useState({
     username: "",
     employeeCode: "",
@@ -47,12 +50,26 @@ export default function CreateUserPage() {
     email: "",
     phone: "",
     password: "",
-    role: "technician",
+    roleId: "",
     position: "",
     avatar: PRESET_AVATARS[0].url,
     isActive: true,
     lineUserId: "",
   });
+
+  useEffect(() => {
+    fetch("/api/v1/roles.php")
+      .then((res) => res.json())
+      .then((json) => {
+        if (!Array.isArray(json)) return;
+        const list = json.map((r: any) => ({ id: Number(r.id), name: String(r.name ?? ""), description: r.description ?? "" }));
+        setRoles(list);
+        // ค่าเริ่มต้น: บทบาท Operate (ช่างซ่อมบำรุง) ถ้ามี ไม่งั้นตัวแรก
+        const fallback = list.find((r) => r.name.toLowerCase() === "operate") ?? list[0];
+        if (fallback) setForm((prev) => (prev.roleId ? prev : { ...prev, roleId: String(fallback.id) }));
+      })
+      .catch(() => {});
+  }, []);
 
   const update = (key: string, val: any) => setForm(prev => ({ ...prev, [key]: val }));
 
@@ -74,6 +91,10 @@ export default function CreateUserPage() {
 
   const handleSubmit = async () => {
     iv.submit();
+    if (!form.roleId) {
+      setErrorMessage("กรุณาเลือกบทบาทการใช้งาน (ต้องมีอยู่ในหน้าจัดการสิทธิ์)");
+      return;
+    }
     if (!form.username.trim() || !form.employeeCode.trim() || !form.fullName.trim() || !form.password) {
       setErrorMessage(t("msg.user_required_fields"));
       return;
@@ -92,7 +113,7 @@ export default function CreateUserPage() {
           email: form.email || `${form.username}@cmms.local`,
           phone: form.phone,
           password: form.password,
-          role: form.role,
+          role_id: form.roleId ? Number(form.roleId) : null,
           position: form.position,
           avatar: form.avatar,
           is_active: form.isActive ? 1 : 0,
@@ -122,7 +143,7 @@ export default function CreateUserPage() {
         onPrimary={() => router.push("/users")}
         onSecondary={() => {
           setSubmitted(false);
-          setForm({ username: "", employeeCode: "", fullName: "", email: "", phone: "", password: "", role: "technician", position: "", avatar: PRESET_AVATARS[0].url, isActive: true, lineUserId: "" });
+          setForm({ username: "", employeeCode: "", fullName: "", email: "", phone: "", password: "", roleId: form.roleId, position: "", avatar: PRESET_AVATARS[0].url, isActive: true, lineUserId: "" });
         }}
         onBackdrop={() => router.push("/users")}
       />
@@ -305,18 +326,22 @@ export default function CreateUserPage() {
               <Label id="create-role-label" htmlFor="create-role">
                 {t("form.usage_role")}
               </Label>
-              <Select value={form.role} onValueChange={(v) => update("role", v)}>
+              <Select value={form.roleId} onValueChange={(v) => update("roleId", v)}>
                 <SelectTrigger id="create-role" aria-labelledby="create-role-label">
-                  <SelectValue placeholder={t("form.usage_role")} />
+                  <SelectValue placeholder="— เลือกบทบาท —" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="technician">{t("form.technician")}</SelectItem>
-                  <SelectItem value="engineer">{t("field.engineer")}</SelectItem>
-                  <SelectItem value="manager">{t("form.manager")}</SelectItem>
-                  <SelectItem value="operator">{t("form.machine_operator")}</SelectItem>
-                  <SelectItem value="admin">{t("form.administrator")}</SelectItem>
+                  {roles.map((r) => (
+                    <SelectItem key={r.id} value={String(r.id)}>
+                      {r.name}
+                      {r.description ? <span className="text-muted-foreground"> — {r.description}</span> : null}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                รายการนี้มาจากหน้า “จัดการสิทธิ์ (Roles &amp; Permissions)” — สิทธิ์การใช้งานจะเปลี่ยนตามบทบาทที่เลือก
+              </p>
             </div>
 
             <div className="space-y-1.5">

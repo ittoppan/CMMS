@@ -95,3 +95,88 @@ function isRepairAssignee(PDO $pdo, int $repairId): bool {
     $q->execute([$repairId]);
     return (int)$q->fetchColumn() === $uid;
 }
+/* =====================================================================
+ * แปลงบทบาทที่รับจากฟอร์ม → role_id (สำหรับ users.php)
+ * ปัญหาเดิม: หน้า users/edit + users/create ส่ง role เป็น slug
+ * (technician/engineer/manager/operator/admin) ซึ่ง (1) ไม่ตรงกับชื่อบทบาท
+ * ในตาราง roles และ (2) API ไม่รับคีย์ role → role_id ไม่เคยถูกบันทึก
+ * ผู้ใช้จึงตกไปอยู่ที่บทบาทเริ่มต้น (ช่างเทคนิค) เสมอ
+ * ===================================================================== */
+
+/**
+ * แปลงค่าที่รับมาเป็น role_id
+ * รับได้: role_id (ตัวเลข), ชื่อบทบาทใน roles.name (ไม่สนตัวพิมพ์), slug เดิมของระบบ
+ *
+ * @return int|null null = ไม่พบบทบาท
+ */
+function users_role_id_from_value(PDO $pdo, $value): ?int
+{
+    if ($value === null || $value === '') return null;
+    if (is_numeric($value)) {
+        $stmt = $pdo->prepare('SELECT id FROM roles WHERE id = ?');
+        $stmt->execute([(int)$value]);
+        $id = $stmt->fetchColumn();
+        return $id === false ? null : (int)$id;
+    }
+
+    $raw = trim((string)$value);
+
+    // 1) ชื่อบทบาทตรงกับ roles.name (ไม่สนตัวพิมพ์)
+    $stmt = $pdo->prepare('SELECT id FROM roles WHERE LOWER(name) = LOWER(?) LIMIT 1');
+    $stmt->execute([$raw]);
+    $id = $stmt->fetchColumn();
+    if ($id !== false) return (int)$id;
+
+    // 2) slug เดิมที่ยังค้างใน users.role → ชื่อบทบาทปัจจุบัน
+    $legacy = [
+        'admin' => 'Admin', 'administrator' => 'Admin',
+        'manager' => 'Manager',
+        'technician' => 'Operate', 'tech' => 'Operate', 'operate' => 'Operate', 'operator' => 'Operate',
+        'viewer' => 'Viewer',
+        'asst.manager' => 'Asst.Manager', 'asstmanager' => 'Asst.Manager', 'assistantmanager' => 'Asst.Manager',
+        'foreman' => 'Foreman', 'supervisor' => 'Foreman',
+        'officer' => 'Officer', 'engineer' => 'Officer',
+    ];
+    $key = strtolower(preg_replace('/\s+/', ' ', $raw));
+    $name = $legacy[$key] ?? $legacy[str_replace(' ', '', $key)] ?? null;
+    if ($name === null) return null;
+
+    $stmt = $pdo->prepare('SELECT id FROM roles WHERE LOWER(name) = LOWER(?) LIMIT 1');
+    $stmt->execute([$name]);
+    $id = $stmt->fetchColumn();
+    return $id === false ? null : (int)$id;
+}
+
+/**
+ * ข้อความบทบาทแบบเดิม (users.role) ที่สอดคล้องกับชื่อบทบาท — รายงาน/KPI บางตัว
+ * ยังอ่านคอลัมน์นี้ เช่น "Asst.Manager" → "asst.manager"
+ */
+function users_legacy_role_text(string $roleName): string
+{
+    return strtolower(str_replace([' ', '.'], ['', '.'], trim($roleName)));
+}
+
+/**
+ * แปลง role/role_id ใน payload ให้เป็น role_id + เติม users.role ให้ตรงกัน
+ * หยุดพร้อม HTTP 400 เมื่อไม่พบบทบาท (ไม่ปล่อยให้บันทึกแบบเงียบ ๆ)
+ */
+function users_normalize_role(PDO $pdo, array &$data): void
+{
+    if (!array_key_exists('role', $data) && !array_key_exists('role_id', $data)) return;
+
+    $source = array_key_exists('role_id', $data) ? $data['role_id'] : $data['role'];
+    $resolved = users_role_id_from_value($pdo, $source);
+    if ($resolved === null) {
+        http_response_code(400);
+        echo json_encode(
+            ['error' => 'ไม่พบบทบาทที่ระบุ — กรุณาเลือกจากรายการบทบาทในหน้าจัดการสิทธิ์'],
+            JSON_UNESCAPED_UNICODE
+        );
+        exit;
+    }
+
+    $stmt = $pdo->prepare('SELECT name FROM roles WHERE id = ?');
+    $stmt->execute([$resolved]);
+    $data['role_id'] = $resolved;
+    $data['role'] = users_legacy_role_text((string)$stmt->fetchColumn());
+}

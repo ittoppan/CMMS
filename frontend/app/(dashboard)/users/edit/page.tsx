@@ -44,6 +44,11 @@ function EditUserContent() {
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // บทบาทจริงจากตาราง roles (หน้าจัดการสิทธิ์) — เดิมหน้านี้ hardcode 5 ค่า
+  // แบบเดิม (technician/engineer/...) ซึ่งไม่ตรงกับบทบาทในระบบและส่ง role เป็น
+  // ข้อความที่ API ไม่รับ ทำให้ role_id ไม่เคยถูกบันทึก
+  const [roles, setRoles] = useState<{ id: number; name: string; description?: string }[]>([]);
+
   const [form, setForm] = useState({
     username: "",
     employeeCode: "",
@@ -51,7 +56,7 @@ function EditUserContent() {
     email: "",
     phone: "",
     password: "",
-    role: "technician",
+    roleId: "",
     position: "",
     avatar: PRESET_AVATARS[0].url,
     isActive: true,
@@ -78,6 +83,15 @@ function EditUserContent() {
   };
 
   useEffect(() => {
+    fetch("/api/v1/roles.php")
+      .then((res) => res.json())
+      .then((json) => {
+        if (Array.isArray(json)) setRoles(json.map((r: any) => ({ id: Number(r.id), name: String(r.name ?? ""), description: r.description ?? "" })));
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (!userId) {
       setErrorMessage(t("msg.user_id_missing"));
       setLoading(false);
@@ -94,7 +108,7 @@ function EditUserContent() {
             email: user.email || "",
             phone: user.phone || "",
             password: "",
-            role: user.role || "technician",
+            roleId: user.role_id ? String(user.role_id) : "",
             position: user.position || "",
             avatar: user.avatar || user.avatar_path || PRESET_AVATARS[0].url,
             isActive: user.is_active === 1 || user.is_active === "1" || user.is_active === true,
@@ -115,6 +129,10 @@ function EditUserContent() {
       setErrorMessage(t("msg.username_fullname_required"));
       return;
     }
+    if (!form.roleId) {
+      setErrorMessage("กรุณาเลือกบทบาทการใช้งาน (ต้องมีอยู่ในหน้าจัดการสิทธิ์)");
+      return;
+    }
     setSubmitting(true);
     setErrorMessage("");
 
@@ -129,7 +147,7 @@ function EditUserContent() {
           email: form.email,
           phone: form.phone,
           password: form.password || undefined,
-          role: form.role,
+          role_id: Number(form.roleId),
           position: form.position,
           avatar: form.avatar,
           is_active: form.isActive ? 1 : 0,
@@ -332,18 +350,22 @@ function EditUserContent() {
                   <Label id="edit-role-label" htmlFor="edit-role">
                     {t("form.usage_role")}
                   </Label>
-                  <Select value={form.role} onValueChange={(v) => update("role", v)}>
+                  <Select value={form.roleId} onValueChange={(v) => update("roleId", v)}>
                     <SelectTrigger id="edit-role" aria-labelledby="edit-role-label">
-                      <SelectValue placeholder={t("form.usage_role")} />
+                      <SelectValue placeholder="— เลือกบทบาท —" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="technician">{t("form.technician")}</SelectItem>
-                      <SelectItem value="engineer">{t("field.engineer")}</SelectItem>
-                      <SelectItem value="manager">{t("form.manager")}</SelectItem>
-                      <SelectItem value="operator">{t("form.machine_operator")}</SelectItem>
-                      <SelectItem value="admin">{t("form.administrator")}</SelectItem>
+                      {roles.map((r) => (
+                        <SelectItem key={r.id} value={String(r.id)}>
+                          {r.name}
+                          {r.description ? <span className="text-muted-foreground"> — {r.description}</span> : null}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">
+                    รายการนี้มาจากหน้า “จัดการสิทธิ์ (Roles &amp; Permissions)” — สิทธิ์การใช้งานจะเปลี่ยนตามบทบาทที่เลือก
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">

@@ -50,6 +50,7 @@ interface User extends Record<string, unknown> {
   email: string;
   phone: string;
   role: string;
+  roleName: string;
   position: string;
   employeeCode: string;
   isActive: boolean;
@@ -59,6 +60,15 @@ interface User extends Record<string, unknown> {
 }
 
 const roleBadgeVariant: Record<string, "danger" | "warning" | "primary" | "success" | "neutral"> = {
+  // ชื่อบทบาทจากตาราง roles
+  Admin: "danger",
+  Manager: "warning",
+  "Asst.Manager": "warning",
+  Foreman: "primary",
+  Operate: "success",
+  Officer: "primary",
+  Viewer: "neutral",
+  // slug เดิม (ข้อมูลเก่า)
   admin: "danger",
   manager: "warning",
   supervisor: "primary",
@@ -117,7 +127,9 @@ export default function UsersPage() {
           email: row.email || "-",
           phone: row.phone || "-",
           avatar: row.avatar || row.avatar_path || "",
-          role: row.role || "viewer",
+          // ชื่อบทบาทจริงจากตาราง roles (role_name) — fallback เป็น slug เดิม
+          role: String(row.role_name || row.role || "viewer"),
+          roleName: String(row.role_name || roleLabels[row.role] || row.role || "—"),
           position: row.position || "-",
           employeeCode: row.employee_code || "-",
           isActive: row.is_active === 1 || row.is_active === "1" || row.is_active === true,
@@ -236,8 +248,8 @@ export default function UsersPage() {
       key: "role",
       header: t("tbl.role"),
       renderCell: (item: User) => (
-        <Badge variant={roleBadgeVariant[item.role] || "neutral"}>
-          {roleLabels[item.role] || item.role}
+        <Badge variant={roleBadgeVariant[item.role] || roleBadgeVariant[item.role.toLowerCase()] || "neutral"}>
+          {item.roleName}
         </Badge>
       ),
     },
