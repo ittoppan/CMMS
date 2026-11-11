@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
 import { isRepairOverdue } from "@/lib/repair-status";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowPathIcon,
+  BookmarkIcon,
+  BookmarkSquareIcon,
   ClipboardDocumentListIcon,
   DocumentArrowDownIcon,
   MagnifyingGlassIcon,
@@ -29,6 +31,22 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { DataTable, type DataTableProps } from "@/components/ui/table";
 import { useToast } from "@/components/ToastProvider";
 import { cn } from "@/lib/cn";
+import { Dialog } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  listSavedViews,
+  saveSavedView,
+  deleteSavedView,
+  setDefaultSavedView,
+  clearDefaultSavedView,
+  type SavedView,
+} from "@/lib/saved-views";
 
 interface WorkOrder extends Record<string, unknown> {
   id: string;
@@ -88,17 +106,47 @@ const priorityVariant = (p: string): "danger" | "warning" | "primary" | "neutral
 const ALL_STATUS = "__all__";
 const ALL_PRIORITY = "__all__";
 
+const REPAIR_VIEW_ENTITY = "work_orders";
+const REPAIR_VIEW_VERSION = 1 as const;
+
+type RepairOutsource = "all" | "in" | "out";
+
+function readRepairFilters(sp: URLSearchParams) {
+  const qParam = sp.get("q");
+  const woParam = sp.get("wo");
+  const search = (qParam ?? woParam ?? "").trim();
+  const status = (sp.get("status") || "").trim();
+  const priority = (sp.get("priority") || "").trim();
+  const outRaw = (sp.get("outsource") || "all").trim();
+  const outsource: RepairOutsource = outRaw === "in" || outRaw === "out" ? outRaw : "all";
+  return { search, statusFilter: status, priorityFilter: priority, outsourceFilter: outsource };
+}
+
+function buildRepairParams(state: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, base?: URLSearchParams) {
+  const sp = new URLSearchParams(base ? base.toString() : "");
+  sp.delete("wo");
+  const q = state.search.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  if (state.statusFilter) sp.set("status", state.statusFilter); else sp.delete("status");
+  if (state.priorityFilter) sp.set("priority", state.priorityFilter); else sp.delete("priority");
+  if (state.outsourceFilter && state.outsourceFilter !== "all") sp.set("outsource", state.outsourceFilter); else sp.delete("outsource");
+  return sp;
+}
+
 export default function WorkOrdersPage() {
   const hero = usePageHero("repair");
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
-  const [outsourceFilter, setOutsourceFilter] = useState<"all" | "in" | "out">("all");
+  const initialFilters = useMemo(() => readRepairFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
+  const [search, setSearch] = useState(initialFilters.search);
+  const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
+  const [priorityFilter, setPriorityFilter] = useState(initialFilters.priorityFilter);
+  const [outsourceFilter, setOutsourceFilter] = useState<RepairOutsource>(initialFilters.outsourceFilter);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [rawMap, setRawMap] = useState<Record<number, any>>({});
   const [pdfBuilding, setPdfBuilding] = useState(false);
@@ -106,6 +154,52 @@ export default function WorkOrdersPage() {
   const [partsForBatch, setPartsForBatch] = useState<Record<number, WorkOrderPart[]>>({});
   const [excelBuilding, setExcelBuilding] = useState(false);
   const deptMapRef = useRef<Record<number, string>>({});
+
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string>("");
+  const [saveViewOpen, setSaveViewOpen] = useState(false);
+  const [saveViewName, setSaveViewName] = useState("");
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
+  const appliedSnapshotRef = useRef<string>("");
+
+  const currentFilterState = useMemo(
+    () => ({ search, statusFilter, priorityFilter, outsourceFilter }),
+    [search, statusFilter, priorityFilter, outsourceFilter]
+  );
+
+  const snapshotOf = useCallback((s: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }) => {
+    return JSON.stringify({ q: s.search.trim(), status: s.statusFilter || "", priority: s.priorityFilter || "", outsource: s.outsourceFilter || "all" });
+  }, []);
+
+  const syncUrl = useCallback((next: { search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }, mode: "replace" | "push" = "replace") => {
+    const sp = buildRepairParams(next, new URLSearchParams(searchParams.toString()));
+    const qs = sp.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    if (mode === "push") router.push(url); else router.replace(url);
+  }, [pathname, router, searchParams]);
+
+  const setFilters = useCallback((patch: Partial<{ search: string; statusFilter: string; priorityFilter: string; outsourceFilter: RepairOutsource }>) => {
+    const next = { search, statusFilter, priorityFilter, outsourceFilter, ...patch };
+    setSearch(next.search);
+    setStatusFilter(next.statusFilter);
+    setPriorityFilter(next.priorityFilter);
+    setOutsourceFilter(next.outsourceFilter);
+    syncUrl(next, "replace");
+  }, [outsourceFilter, priorityFilter, search, statusFilter, syncUrl]);
+
+  useEffect(() => {
+    setSavedViews(listSavedViews(REPAIR_VIEW_ENTITY));
+  }, []);
+
+  useEffect(() => {
+    const fromUrl = readRepairFilters(new URLSearchParams(searchParams.toString()));
+    setSearch(fromUrl.search);
+    setStatusFilter(fromUrl.statusFilter);
+    setPriorityFilter(fromUrl.priorityFilter);
+    setOutsourceFilter(fromUrl.outsourceFilter);
+  }, [searchParams]);
+
+  const dirty = snapshotOf(currentFilterState) !== (appliedSnapshotRef.current || snapshotOf({ search: "", statusFilter: "", priorityFilter: "", outsourceFilter: "all" }));
 
   const fetchWO = async () => {
     setLoading(true);
@@ -138,15 +232,77 @@ export default function WorkOrdersPage() {
     setLoading(false);
   };
 
-  useEffect(() => { 
-    fetchWO(); 
+  const applyViewState = useCallback((view: SavedView | null) => {
+    if (!view) {
+      const next = { search: "", statusFilter: "", priorityFilter: "", outsourceFilter: "all" as RepairOutsource };
+      setSearch(next.search); setStatusFilter(next.statusFilter); setPriorityFilter(next.priorityFilter); setOutsourceFilter(next.outsourceFilter);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId("");
+      syncUrl(next, "replace");
+      return;
+    }
+    const f = view.filters || {};
+    const next = {
+      search: (view.search ?? (typeof f.search === "string" ? f.search : typeof f.q === "string" ? f.q : "")) || "",
+      statusFilter: typeof f.status === "string" ? f.status : "",
+      priorityFilter: typeof f.priority === "string" ? f.priority : "",
+      outsourceFilter: (f.outsource === "in" || f.outsource === "out") ? f.outsource : "all" as RepairOutsource,
+    };
+    setSearch(next.search); setStatusFilter(next.statusFilter); setPriorityFilter(next.priorityFilter); setOutsourceFilter(next.outsourceFilter);
+    appliedSnapshotRef.current = snapshotOf(next);
+    setActiveViewId(view.id);
+    syncUrl(next, "replace");
+  }, [snapshotOf, syncUrl]);
+
+  useEffect(() => {
+    fetchWO();
     setError(null);
   }, []);
 
   useEffect(() => {
-    const wo = new URLSearchParams(window.location.search).get("wo")?.trim();
-    if (wo) setSearch(wo);
+    // Initialize applied snapshot from URL on first load (preserves shared/bookmarked URLs)
+    appliedSnapshotRef.current = snapshotOf(readRepairFilters(new URLSearchParams(searchParams.toString())));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const openSaveView = () => {
+    setSaveViewName(activeViewId ? (savedViews.find(v => v.id === activeViewId)?.name || "") : "");
+    setSaveAsDefault(false);
+    setSaveViewOpen(true);
+  };
+
+  const handleSaveView = () => {
+    const input = {
+      name: saveViewName,
+      filters: { status: statusFilter, priority: priorityFilter, outsource: outsourceFilter } as Record<string, string>,
+      search,
+      isDefault: saveAsDefault,
+    };
+    const res = saveSavedView(REPAIR_VIEW_ENTITY, input as any, undefined, activeViewId || undefined);
+    if (!res.ok) { showToast("error", res.error); return; }
+    setSavedViews(res.views);
+    setActiveViewId(res.view.id);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+    setSaveViewOpen(false);
+    showToast("success", activeViewId ? "อัปเดตมุมมองแล้ว" : "บันทึกมุมมองแล้ว");
+  };
+
+  const handleDeleteView = (id: string) => {
+    const views = deleteSavedView(REPAIR_VIEW_ENTITY, id);
+    setSavedViews(views);
+    if (activeViewId === id) setActiveViewId("");
+    showToast("success", "ลบมุมมองแล้ว");
+  };
+
+  const handleSetDefaultView = (id: string) => {
+    const views = setDefaultSavedView(REPAIR_VIEW_ENTITY, id);
+    setSavedViews(views);
+    showToast("success", "ตั้งเป็นมุมมองเริ่มต้นแล้ว");
+  };
+
+  const handleResetFilters = () => {
+    applyViewState(null);
+  };
 
   const filtered = useMemo(() => {
     const statusGroup = (s: string) => {
@@ -581,7 +737,7 @@ export default function WorkOrdersPage() {
           <div
             role="button"
             tabIndex={0}
-            onClick={() => setOutsourceFilter(prev => prev === "out" ? "all" : "out")}
+            onClick={() => setFilters({ outsourceFilter: outsourceFilter === "out" ? "all" : "out" })}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOutsourceFilter(prev => prev === "out" ? "all" : "out"); } }}
             title={outsourceFilter === "out" ? "ยกเลิกกรองงานภายนอก" : "กรองเฉพาะงานจ้างภายนอก"}
             style={{ cursor: "pointer" }}
@@ -606,8 +762,8 @@ export default function WorkOrdersPage() {
             <div
               role="button"
               tabIndex={0}
-              onClick={() => setStatusFilter(prev => prev === "overdue" ? "" : "overdue")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setStatusFilter(prev => prev === "overdue" ? "" : "overdue"); } }}
+              onClick={() => setFilters({ statusFilter: statusFilter === "overdue" ? "" : "overdue" })}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFilters({ statusFilter: statusFilter === "overdue" ? "" : "overdue" }); } }}
               title={statusFilter === "overdue" ? "ยกเลิกกรองงานเกินกำหนด" : "กรองเฉพาะงานเกินกำหนด"}
               style={{ cursor: "pointer" }}
             >
@@ -648,12 +804,12 @@ export default function WorkOrdersPage() {
             isLabelHidden
             placeholder="ค้นหาเลขงาน, เครื่องจักร..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setFilters({ search: e.target.value })}
             className="w-full sm:w-56"
           />
           <Select
             value={statusFilter || ALL_STATUS}
-            onValueChange={(v) => setStatusFilter(v === ALL_STATUS ? "" : v)}
+            onValueChange={(v) => setFilters({ statusFilter: v === ALL_STATUS ? "" : v })}
           >
             <SelectTrigger aria-label="สถานะ" className="w-full sm:w-44">
               <SelectValue placeholder={t("action.filter_all_status")} />
@@ -668,7 +824,7 @@ export default function WorkOrdersPage() {
           </Select>
           <Select
             value={priorityFilter || ALL_PRIORITY}
-            onValueChange={(v) => setPriorityFilter(v === ALL_PRIORITY ? "" : v)}
+            onValueChange={(v) => setFilters({ priorityFilter: v === ALL_PRIORITY ? "" : v })}
           >
             <SelectTrigger aria-label="ความสำคัญ" className="w-full sm:w-44">
               <SelectValue placeholder={t("action.filter_all_priority")} />
@@ -690,7 +846,7 @@ export default function WorkOrdersPage() {
               <button
                 key={opt.v}
                 type="button"
-                onClick={() => setOutsourceFilter(opt.v)}
+                onClick={() => setFilters({ outsourceFilter: opt.v })}
                 className={cn(
                   "min-h-10 rounded-[var(--cmms-radius-sm)] px-3 py-2 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
                   outsourceFilter === opt.v
@@ -702,8 +858,85 @@ export default function WorkOrdersPage() {
               </button>
             ))}
           </div>
+
+          {/* Saved views (v1: localStorage per entity, URL เป็น source of truth) */}
+          <div className="flex w-full flex-wrap items-center gap-2 border-t border-[var(--cmms-border)] pt-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-[var(--cmms-text-secondary)]">
+              <BookmarkSquareIcon className="h-4 w-4" aria-hidden="true" />
+              <span>มุมมองที่บันทึก</span>
+              {dirty && <Badge variant="warning">แก้ไขแล้ว</Badge>}
+            </div>
+            <Select
+              value={activeViewId || "__none__"}
+              onValueChange={(v) => {
+                if (v === "__none__") return;
+                const view = savedViews.find((sv) => sv.id === v);
+                if (view) applyViewState(view);
+              }}
+            >
+              <SelectTrigger aria-label="มุมมองที่บันทึก" className="w-full sm:w-56">
+                <SelectValue placeholder="เลือกมุมมอง..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— เลือกมุมมอง —</SelectItem>
+                {savedViews.map((sv) => (
+                  <SelectItem key={sv.id} value={sv.id}>
+                    {sv.name}{sv.isDefault ? " (ค่าเริ่มต้น)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="secondary" size="sm" onClick={openSaveView} className="gap-1.5">
+              <BookmarkIcon className="h-4 w-4" aria-hidden="true" />
+              {activeViewId ? "บันทึกทับมุมมอง" : "บันทึกมุมมอง"}
+            </Button>
+            {activeViewId && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm">จัดการมุมมอง</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => handleSetDefaultView(activeViewId)}>ตั้งเป็นค่าเริ่มต้น</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { const v = clearDefaultSavedView(REPAIR_VIEW_ENTITY); setSavedViews(v); showToast("success", "ยกเลิกค่าเริ่มต้นแล้ว"); }}>ยกเลิกค่าเริ่มต้นทั้งหมด</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteView(activeViewId)}>ลบมุมมองนี้</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {dirty && (
+              <Button type="button" variant="ghost" size="sm" onClick={handleResetFilters}>
+                รีเซ็ตตัวกรอง
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={saveViewOpen}
+        onClose={() => setSaveViewOpen(false)}
+        title={activeViewId ? "บันทึกทับมุมมอง" : "บันทึกมุมมองใหม่"}
+        description="บันทึกตัวกรองและคำค้นหาปัจจุบันของหน้างานซ่อม (เก็บในเครื่องนี้)"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setSaveViewOpen(false)}>ยกเลิก</Button>
+            <Button type="button" onClick={handleSaveView}>บันทึก</Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <Input
+            label="ชื่อมุมมอง"
+            placeholder="เช่น งานค้าง/เกินกำหนด, งานจ้างภายนอก"
+            value={saveViewName}
+            onChange={(e) => setSaveViewName(e.target.value)}
+          />
+          <label className="flex items-center gap-2 text-sm text-[var(--cmms-text-secondary)]">
+            <Checkbox checked={saveAsDefault} onCheckedChange={(v) => setSaveAsDefault(!!v)} />
+            ตั้งเป็นมุมมองเริ่มต้นของหน้านี้
+          </label>
+        </div>
+      </Dialog>
 
       {/* Table */}
       <Card>
