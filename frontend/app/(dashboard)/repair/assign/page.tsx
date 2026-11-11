@@ -78,7 +78,7 @@ function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | nul
   return (
     <span
       aria-hidden="true"
-      className="flex shrink-0 items-center justify-center rounded-full bg-[var(--cmms-primary-light)] text-[0.65rem] font-bold text-[var(--cmms-primary-hover)]"
+      className="flex shrink-0 items-center justify-center rounded-full bg-[var(--cmms-primary-light)] text-xs font-bold text-[var(--cmms-primary-hover)]"
       style={{ width: size, height: size }}
     >
       {initial}
@@ -273,7 +273,7 @@ export default function RepairAssignPage() {
             <TechAvatar name={item.assignee} src={item.assigneeAvatar} />
             <span className="text-sm">{item.assignee}</span>
             {(item.teamIds || []).length > 1 && (
-              <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)", fontSize: "0.7rem", padding: "2px 8px" }}>
+              <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)", fontSize: "0.75rem", padding: "2px 8px" }}>
                 +{(item.teamIds || []).length - 1} ทีม
               </span>
             )}

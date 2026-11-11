@@ -50,11 +50,17 @@ export default function RepairPrintPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="p-10 text-center text-sm text-muted-foreground">กำลังโหลดเอกสาร...</div>;
+    return (
+      <div className="p-10 text-center text-sm text-muted-foreground">
+        <h1 className="sr-only">พิมพ์ใบบันทึกงานซ่อม</h1>
+        กำลังโหลดเอกสาร...
+      </div>
+    );
   }
   if (error || !row) {
     return (
       <div className="mx-auto max-w-3xl p-6">
+        <h1 className="mb-3 text-xl font-bold">พิมพ์ใบบันทึกงานซ่อม</h1>
         <Alert variant="danger">{error || "ไม่พบรายการงานซ่อม"}</Alert>
         <Button variant="secondary" className="mt-3" onClick={() => window.history.back()}>
           <ArrowLeft className="w-4 h-4" /> ย้อนกลับ

@@ -743,7 +743,7 @@ export default function MyTasksPage() {
                 type="button"
                 onClick={() => setOutsourceFilter(opt.v)}
                 className={cn(
-                  "rounded-[var(--cmms-radius-sm)] px-3 py-1.5 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
+                  "inline-flex min-h-10 items-center rounded-[var(--cmms-radius-sm)] px-3 py-2 text-xs font-semibold transition-colors duration-[var(--cmms-transition-fast)]",
                   outsourceFilter === opt.v
                     ? "bg-[var(--cmms-bg-card)] text-[var(--cmms-primary-hover)] shadow-[var(--cmms-shadow-sm)]"
                     : "text-[var(--cmms-text-secondary)] hover:text-[var(--cmms-text-primary)]"

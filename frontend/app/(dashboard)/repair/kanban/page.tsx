@@ -273,7 +273,7 @@ export default function RepairKanbanPage() {
               type="button"
               onClick={() => setOverdueOnly(v => !v)}
               title="แสดงเฉพาะงานที่เลยกำหนดเสร็จ"
-              className={overdueOnly ? "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold cmms-andon-chip" : "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"}
+              className={overdueOnly ? "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold cmms-andon-chip" : "inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold"}
               style={overdueOnly
                 ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)", border: "1px solid var(--cmms-danger)" }
                 : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)", border: "1px solid var(--cmms-border)", cursor: "pointer" }}
