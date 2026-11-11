@@ -822,14 +822,14 @@ export default function RepairViewDetailsPage() {
                       {m.status === "accepted" ? (
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          <span className="text-[11px] font-semibold text-emerald-600">
+                          <span className="text-xs font-semibold text-emerald-600">
                             รับงานแล้ว{m.accepted_at ? ` · ${String(m.accepted_at).slice(11, 16)} น.` : ""}
                           </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
-                          <span className="text-[11px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             ยังไม่รับงาน
                           </span>
                         </div>
@@ -874,7 +874,7 @@ export default function RepairViewDetailsPage() {
                           <p className="text-xs md:text-sm font-semibold text-foreground truncate">
                             {a.description || a.action}
                           </p>
-                          <span className="text-[11px] text-muted-foreground whitespace-nowrap tabular-nums">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap tabular-nums">
                             {a.created_at}
                           </span>
                         </div>
@@ -1045,7 +1045,7 @@ export default function RepairViewDetailsPage() {
                           ) : (
                             <span className="text-muted-foreground">ยังไม่จ่าย (Pending)</span>
                           )}
-                          {r.sage_doc_no && <span className="block mt-0.5 text-[11px] text-muted-foreground tabular-nums">อ้างอิง {r.sage_doc_no}</span>}
+                          {r.sage_doc_no && <span className="block mt-0.5 text-xs text-muted-foreground tabular-nums">อ้างอิง {r.sage_doc_no}</span>}
                         </td>
                         <td className="p-3 text-right">
                           <Button
@@ -1135,7 +1135,7 @@ export default function RepairViewDetailsPage() {
                 <p className="text-xs text-muted-foreground">ไม่พบรายการ "{sageQuery.trim()}" — ลองเปลี่ยนคำค้น หรือ Sage 300 ไม่พร้อม (แสดงผลจาก cache เท่านั้น)</p>
               ) : null}
 
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 แหล่งข้อมูล: {sageSource === "cache" ? "แคชล่าสุด (Last known stock — Sage 300 ไม่พร้อมใช้งาน)" : "อัปเดตสดจาก Sage 300"}
                 <span className="ml-1">
                   · การเพิ่มจะสร้าง <span className="font-semibold">Pending Issue</span> ให้คลังจัดของจริงใน Sage 300 · ค่าอะไหล่ใช้ต้นทุนล่าสุดบันทึกในใบสั่งซ่อม
@@ -1183,7 +1183,7 @@ export default function RepairViewDetailsPage() {
                 {photoBusy ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                 {photoBusy ? "กำลังจัดการรูป…" : "แนบรูปหลักฐาน (ออฟไลน์ได้)"}
               </Button>
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 รูปถูกบีบอัดอัตโนมัติ ~1280px · ออฟไลน์บันทึกลงเครื่องแล้วอัปโหลดเองเมื่อมีเน็ต
               </span>
             </div>
@@ -1192,7 +1192,7 @@ export default function RepairViewDetailsPage() {
 
             {wo.videoPath && (
               <div className="rounded-lg border border-border p-2">
-                <p className="mb-1 text-[11px] font-medium text-muted-foreground">วิดีโอจุดชำรุด (จากใบแจ้งซ่อม)</p>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">วิดีโอจุดชำรุด (จากใบแจ้งซ่อม)</p>
                 <video
                   src={assetUrl(wo.videoPath)}
                   controls
