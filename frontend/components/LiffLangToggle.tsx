@@ -49,8 +49,9 @@ export default function LiffLangToggle({
             style={{
               border: "none",
               borderRadius: 999,
-              padding: "4px 12px",
-              fontSize: 12,
+              padding: "10px 14px",
+              minHeight: 40,
+              fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
               background: active ? "var(--cmms-primary, #0057A8)" : "transparent",

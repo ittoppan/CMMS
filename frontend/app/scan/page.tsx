@@ -139,12 +139,15 @@ export default function ScanLandingPage() {
         <Card style={{ width: "100%", maxWidth: 480, boxShadow: "0 24px 60px rgba(0,0,0,0.4)" }}>
           <CardContent className="p-6">
             <p className="cmms-eyebrow mb-3 text-center">FIELD SCAN · CMMS-TOPPAN</p>
+            <h1 className="mb-3 text-center text-xl font-bold" style={{ color: "var(--cmms-text-primary)" }}>
+              สแกน QR เครื่องจักร
+            </h1>
 
             {status === "idle" && (
               <div className="flex flex-col items-center gap-4 py-2">
                 <Badge variant="info">QR / BARCODE</Badge>
                 <p className="m-0 text-center font-bold" style={{ color: "var(--cmms-text-primary)" }}>
-                  สแกนเครื่องจักรเพื่อดูสถานะและแจ้งซ่อม
+                  สแกนเพื่อดูสถานะและแจ้งซ่อม
                 </p>
                 <Button
                   onClick={() => setScannerOpen(true)}
@@ -173,7 +176,10 @@ export default function ScanLandingPage() {
                 </div>
 
                 <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  ต้องการแจ้งซ่อมโดยไม่รู้รหัส? <Link href="/repair/request">เปิดฟอร์มแจ้งซ่อม</Link>
+                  ต้องการแจ้งซ่อมโดยไม่รู้รหัส?{" "}
+                  <Link href="/repair/request" className="inline-flex min-h-10 items-center font-semibold underline">
+                    เปิดฟอร์มแจ้งซ่อม
+                  </Link>
                 </p>
               </div>
             )}
@@ -192,7 +198,7 @@ export default function ScanLandingPage() {
                 <Button variant="outline" className="w-full" onClick={() => setScannerOpen(true)}>
                   <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" /> สแกนใหม่
                 </Button>
-                <Link href="/repair/request" className="text-sm">แจ้งซ่อมโดยไม่ใช้รหัส</Link>
+                <Link href="/repair/request" className="inline-flex min-h-10 items-center text-sm font-semibold underline">แจ้งซ่อมโดยไม่ใช้รหัส</Link>
               </div>
             )}
 
@@ -218,7 +224,7 @@ export default function ScanLandingPage() {
                 <Button className="w-full" disabled={reporting} onClick={() => void reportUnknown()}>
                   {reporting ? "กำลังส่ง…" : "แจ้งผู้ดูแลระบบ"}
                 </Button>
-                <Link href="/repair/request" className="text-sm">แจ้งซ่อมโดยไม่ใช้รหัส</Link>
+                <Link href="/repair/request" className="inline-flex min-h-10 items-center text-sm font-semibold underline">แจ้งซ่อมโดยไม่ใช้รหัส</Link>
               </div>
             )}
 

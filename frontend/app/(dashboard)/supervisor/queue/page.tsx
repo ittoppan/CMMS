@@ -143,12 +143,12 @@ export default function SupervisorQueuePage() {
             <button
               key={g.key || "__all__"}
               onClick={() => { setGroup(g.key); setSelected(new Set()); }}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
+              className={`flex min-h-10 items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
                 active ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)] text-white" : "bg-transparent hover:bg-[var(--cmms-bg-muted)]"
               }`}
             >
               {g.label}
-              <span className={`rounded-full px-1.5 text-[11px] ${active ? "bg-white/20 text-white" : "bg-[var(--cmms-bg-muted)]"}`}>{count}</span>
+              <span className={`rounded-full px-1.5 py-0.5 text-xs ${active ? "bg-white/20 text-white" : "bg-[var(--cmms-bg-muted)]"}`}>{count}</span>
             </button>
           );
         })}
@@ -235,7 +235,7 @@ export default function SupervisorQueuePage() {
                             onClick={() => go(it.kind === "workorder" ? `/repair/view?id=${it.ref_id}` : `/supervisor/review?id=${it.ref_id}`)}
                           >
                             {it.code}
-                            {it.kind === "request" && <span className="ml-1 text-[11px] font-normal text-[var(--cmms-text-muted)]">(คำขอ)</span>}
+                            {it.kind === "request" && <span className="ml-1 text-xs font-normal text-[var(--cmms-text-muted)]">(คำขอ)</span>}
                           </button>
                           <div className="max-w-[280px] truncate text-xs text-[var(--cmms-text-muted)]">{it.title}</div>
                         </div>

@@ -122,7 +122,7 @@ export default function SupervisorDeskPage() {
                 {loading || k.value === null ? "—" : (Number(k.value)).toLocaleString("th-TH", { minimumFractionDigits: (Number(k.value) % 1 !== 0 ? 1 : 0), maximumFractionDigits: (Number(k.value) % 1 !== 0 ? 1 : 0) })}
                 {k.value !== null && !loading ? <span className="ml-1 text-xs font-normal text-[var(--cmms-text-muted)]">{k.suffix}</span> : null}
               </div>
-              <div className="mt-1 text-[11px] text-[var(--cmms-text-muted)]">{k.hint}</div>
+              <div className="mt-1 text-xs text-[var(--cmms-text-muted)]">{k.hint}</div>
             </CardContent>
           </Card>
         ))}
