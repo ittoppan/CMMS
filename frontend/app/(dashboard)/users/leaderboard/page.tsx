@@ -148,13 +148,13 @@ export default function LeaderboardPage() {
                   <div className="text-lg font-bold text-emerald-600">
                     {(r.completedCount)}
                   </div>
-                  <div className="text-[11px] text-muted-foreground uppercase">งานเสร็จ</div>
+                  <div className="text-xs text-muted-foreground uppercase">งานเสร็จ</div>
                 </div>
                 <div>
                   <div className="text-lg font-bold text-primary">
                     {r.avgRating > 0 ? r.avgRating.toFixed(1) : "-"}
                   </div>
-                  <div className="text-[11px] text-muted-foreground uppercase">คะแนน</div>
+                  <div className="text-xs text-muted-foreground uppercase">คะแนน</div>
                 </div>
               </div>
             </CardContent>

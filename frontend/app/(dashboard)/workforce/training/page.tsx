@@ -343,7 +343,7 @@ export default function WorkforceTrainingPage() {
                   type="button"
                   onClick={() => setStatusFilter(v)}
                   aria-pressed={statusFilter === v}
-                  className={`rounded-md border px-2.5 py-1.5 text-sm transition-colors ${
+                  className={`inline-flex min-h-10 items-center rounded-md border px-3 py-2 text-sm transition-colors ${
                     statusFilter === v
                       ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)] text-white"
                       : "border-border bg-background hover:bg-muted"

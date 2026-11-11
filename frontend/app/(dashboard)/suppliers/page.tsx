@@ -104,7 +104,7 @@ export default function SuppliersPage() {
       key: "email",
       header: "Email",
       renderCell: (item: Supplier) => (
-        <a href={`mailto:${item.email}`} className="text-[var(--cmms-primary)] hover:underline">
+        <a href={`mailto:${item.email}`} className="inline-flex min-h-10 items-center py-1 text-[var(--cmms-primary)] hover:underline">
           {item.email}
         </a>
       ),

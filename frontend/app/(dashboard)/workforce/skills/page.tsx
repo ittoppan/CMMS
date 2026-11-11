@@ -228,7 +228,7 @@ export default function WorkforceSkillsPage() {
               type="button"
               onClick={() => setView(v)}
               aria-pressed={view === v}
-              className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
+              className={`inline-flex min-h-10 items-center rounded-md border px-3 py-2 text-sm transition-colors ${
                 view === v
                   ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)] text-white"
                   : "border-border bg-background hover:bg-muted"
