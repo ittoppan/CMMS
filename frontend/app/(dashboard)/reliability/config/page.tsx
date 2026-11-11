@@ -161,20 +161,20 @@ function ConfigInner() {
               <Card key={d.kpi_code}>
                 <CardHeader className="pb-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <CardTitle className="text-sm">
+                    <CardTitle className="min-w-0 break-words text-sm">
                       {d.name_th ?? d.kpi_code}
-                      <span className="ml-2 font-mono text-xs text-muted-foreground">
+                      <span className="ml-2 break-all font-mono text-xs text-muted-foreground">
                         {d.kpi_code} · v{d.version}
                       </span>
                     </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-1 text-xs">
-                  <p>{d.definition_th}</p>
-                  <p className="text-muted-foreground">สูตร: {d.formula_display}</p>
-                  <p className="text-muted-foreground">แหล่งข้อมูล: {d.data_sources}</p>
+                <CardContent className="min-w-0 space-y-1 break-words text-xs">
+                  <p className="break-words">{d.definition_th}</p>
+                  <p className="break-words text-muted-foreground">สูตร: {d.formula_display}</p>
+                  <p className="break-words text-muted-foreground">แหล่งข้อมูล: {d.data_sources}</p>
                   {d.limitations ? (
-                    <p className="text-muted-foreground">ข้อจำกัด: {d.limitations}</p>
+                    <p className="break-words text-muted-foreground">ข้อจำกัด: {d.limitations}</p>
                   ) : null}
                 </CardContent>
               </Card>

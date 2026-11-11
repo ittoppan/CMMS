@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import SuccessDialog from "@/components/SuccessDialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, Plus, Search, X } from "lucide-react";
 
 const FREQ_OPTIONS: { value: string; label: string }[] = [
@@ -370,7 +371,7 @@ export default function PMPlanFormPage() {
                 return (
                   <label key={a.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5"
                     style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                    <input type="checkbox" checked={checked} onChange={() => toggleAsset(a.id)} />
+                    <Checkbox checked={checked} onCheckedChange={() => toggleAsset(a.id)} />
                     <span className={`truncate text-sm ${checked ? "font-semibold" : ""}`}>{a.code} - {a.name}</span>
                   </label>
                 );
@@ -392,7 +393,7 @@ export default function PMPlanFormPage() {
                 return (
                   <label key={tpl.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5"
                     style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                    <input type="checkbox" checked={checked} onChange={() => toggleTemplate(tpl.id)} />
+                    <Checkbox checked={checked} onCheckedChange={() => toggleTemplate(tpl.id)} />
                     <span className={`truncate text-sm ${checked ? "font-semibold" : ""}`}>{tpl.code} - {tpl.name}</span>
                   </label>
                 );
