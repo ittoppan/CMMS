@@ -373,7 +373,7 @@ export default function FormDesignerPage() {
               <button
                 type="button"
                 onClick={() => { fbCall("formData", ""); }}
-                className="text-sm text-muted-foreground underline hover:text-foreground"
+                className="inline-flex min-h-10 items-center text-sm text-muted-foreground underline hover:text-foreground"
               >
                 ล้างฟอร์ม
               </button>

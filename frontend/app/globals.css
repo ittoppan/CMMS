@@ -771,7 +771,7 @@ h1, h2, h3, h4 {
   background: var(--cmms-gradient-primary); box-shadow: var(--cmms-shadow-md);
 }
 .cmms-login-logo-text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; color: var(--cmms-text-primary); line-height: 1.1; }
-.cmms-login-logo-sub { font-size: 0.7rem; color: var(--cmms-text-muted); margin-top: 2px; }
+.cmms-login-logo-sub { font-size: 0.75rem; color: var(--cmms-text-muted); margin-top: 2px; }
 
 .cmms-login-title {
   font-family: var(--font-family-heading);
@@ -3054,4 +3054,11 @@ html.cmms-no-anim *::after {
 }
 .cmms-eyebrow[data-on-dark="true"] {
   color: rgba(255,255,255,0.6);
+}
+
+/* formBuilder action buttons — ensure tap targets on mobile */
+.cmms-formbuilder-stage .btn,
+.cmms-formbuilder-stage button {
+  min-height: 2.5rem;
+  padding-block: 0.375rem;
 }
