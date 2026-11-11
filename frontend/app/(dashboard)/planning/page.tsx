@@ -43,6 +43,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -642,7 +643,7 @@ export default function PlanningCenterPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b text-xs uppercase text-[var(--cmms-text-muted)]">
-                  {canPlan && <th className="w-10 px-3 py-2"><input type="checkbox" aria-label="เลือกทั้งหมด" checked={selectableItems.length > 0 && selectableItems.every((w) => selected.has(w.id))} onChange={() => {
+                  {canPlan && <th className="w-10 px-3 py-2"><Checkbox aria-label="เลือกทั้งหมด" checked={selectableItems.length > 0 && selectableItems.every((w) => selected.has(w.id))} onCheckedChange={() => {
                     const all = new Set(selected);
                     if (selectableItems.every((w) => selected.has(w.id))) selectableItems.forEach((w) => all.delete(w.id));
                     else selectableItems.forEach((w) => all.add(w.id));
@@ -670,7 +671,7 @@ export default function PlanningCenterPage() {
                           {w.kind === "request" ? (
                             <span className="text-[var(--cmms-text-muted)]">—</span>
                           ) : (
-                            <input type="checkbox" aria-label={`เลือก ${w.work_order_no}`} checked={selected.has(w.id)} onChange={() => toggleSelect(w.id)} />
+                            <Checkbox aria-label={`เลือก ${w.work_order_no}`} checked={selected.has(w.id)} onCheckedChange={() => toggleSelect(w.id)} />
                           )}
                         </td>
                       )}

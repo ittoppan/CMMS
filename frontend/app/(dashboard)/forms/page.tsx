@@ -247,7 +247,7 @@ export default function FormsPage() {
             </CardDescription>
           </div>
           {canDesign && (
-            <a href="/forms/designer" className={buttonVariants({ size: "sm" })}>
+            <a href="/forms/designer" className={buttonVariants({ size: "sm", className: "min-h-10" })}>
               <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
               ออกแบบแบบฟอร์มใหม่
             </a>
