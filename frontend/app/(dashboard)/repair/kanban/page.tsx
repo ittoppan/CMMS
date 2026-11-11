@@ -385,8 +385,8 @@ export default function RepairKanbanPage() {
                                   style={{
                                     background: declined ? "var(--cmms-danger-light)" : accepted ? "var(--cmms-success-light)" : "var(--cmms-warning-light)",
                                     color: declined ? "var(--cmms-danger-dark)" : accepted ? "var(--cmms-success-dark)" : "var(--cmms-warning-dark)",
-                                    fontSize: "0.68rem",
-                                    padding: "2px 7px",
+                                    fontSize: "0.75rem",
+                                    padding: "3px 8px",
                                     display: "inline-flex",
                                     alignItems: "center",
                                     gap: 5,
