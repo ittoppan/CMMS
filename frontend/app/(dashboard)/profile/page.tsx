@@ -215,9 +215,9 @@ export default function ProfilePage() {
                 title="เปลี่ยนรูปโปรไฟล์"
                 aria-label="เปลี่ยนรูปโปรไฟล์"
                 onClick={() => fileRef.current?.click()}
-                className="absolute bottom-0 right-0 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-[var(--cmms-primary)] text-white transition-opacity hover:opacity-90"
+                className="absolute -bottom-1 -right-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-[var(--cmms-primary)] text-white transition-opacity hover:opacity-90"
               >
-                {uploading ? <Spinner size={14} label="" /> : <Camera className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
+                {uploading ? <Spinner size={16} label="" /> : <Camera className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
               </button>
               {avatarSrc && !uploading && (
                 <button
@@ -225,9 +225,9 @@ export default function ProfilePage() {
                   title="ลบรูปโปรไฟล์"
                   aria-label="ลบรูปโปรไฟล์"
                   onClick={handleDeleteAvatar}
-                  className="absolute bottom-0 left-0 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-destructive text-white transition-opacity hover:opacity-90"
+                  className="absolute -bottom-1 -left-1 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-destructive text-white transition-opacity hover:opacity-90"
                 >
-                  {deletingAvatar ? <Spinner size={14} label="" /> : <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
+                  {deletingAvatar ? <Spinner size={16} label="" /> : <Trash2 className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
                 </button>
               )}
               <input
