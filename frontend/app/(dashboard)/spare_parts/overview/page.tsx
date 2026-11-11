@@ -218,7 +218,7 @@ export default function SparePartsOverviewPage() {
                   </div>
                   <div className="text-center">
                     <div className="text-xs font-semibold tabular-nums">{fmt(b.qty)}</div>
-                    <div className="text-[11px] text-muted-foreground">{b.label}</div>
+                    <div className="text-xs text-muted-foreground">{b.label}</div>
                   </div>
                 </div>
               ))}
@@ -253,7 +253,7 @@ export default function SparePartsOverviewPage() {
                           <td className="py-2 pr-2 font-mono text-xs">{m.item_code}</td>
                           <td className="py-2 pr-2">
                             {m.description}
-                            {m.unit && <span className="text-[11px] text-muted-foreground"> ({m.unit})</span>}
+                            {m.unit && <span className="text-xs text-muted-foreground"> ({m.unit})</span>}
                           </td>
                           <td className="py-2 pr-2 text-right font-semibold tabular-nums">{fmt(m.total_used)}</td>
                           <td className="py-2 pr-2 text-right tabular-nums">{fmt(m.total_cost)}</td>

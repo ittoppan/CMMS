@@ -147,7 +147,7 @@ export default function SpareBalancesPage() {
       }
     >
       <Grid columns={{ minWidth: 200, max: 4 }} gap={4}>
-        <Card className="p-4">
+        <Card className="min-w-0 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
               <Boxes className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
@@ -161,7 +161,7 @@ export default function SpareBalancesPage() {
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="min-w-0 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
               <CircleDollarSign className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
@@ -175,7 +175,7 @@ export default function SpareBalancesPage() {
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="min-w-0 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
               <TriangleAlert className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
@@ -189,7 +189,7 @@ export default function SpareBalancesPage() {
             </div>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="min-w-0 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
               <TriangleAlert className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
@@ -205,8 +205,8 @@ export default function SpareBalancesPage() {
         </Card>
       </Grid>
 
-      <Card className="p-4">
-        <div className="relative mb-3 w-full max-w-[360px]">
+      <Card className="min-w-0 p-4">
+        <div className="relative mb-3 w-full min-w-0 max-w-full sm:max-w-[360px]">
           <Search
             size={16}
             strokeWidth={1.75}
@@ -229,7 +229,7 @@ export default function SpareBalancesPage() {
             <Skeleton className="h-12 w-full" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="w-full max-w-full overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
@@ -334,7 +334,7 @@ export default function SpareBalancesPage() {
                       ยังไม่มีรายการเบิก-จ่ายของอะไหล่ชิ้นนี้
                     </p>
                   ) : (
-                    <div className="overflow-x-auto">
+                    <div className="w-full max-w-full overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">

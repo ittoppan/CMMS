@@ -687,7 +687,7 @@ export default function NotificationsSettingsPage() {
                         เครื่องจักร MCH-01 Press Machine 01 — เสียงดังผิดปกติที่มอเตอร์
                         ความเร่งด่วน: CRITICAL
                       </div>
-                      <div style={{ fontSize: 11, color: "#4da3ff", marginTop: 6 }}>เปิดในระบบ →</div>
+                      <div style={{ fontSize: 12, color: "#4da3ff", marginTop: 6 }}>เปิดในระบบ →</div>
                       <div style={{ fontSize: 9, color: "#7d8b99", marginTop: 4, textAlign: "right" }}>✓✓ อ่านแล้ว</div>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -1420,13 +1420,13 @@ export default function NotificationsSettingsPage() {
                     color: activeTpl.header_text_color || "#ffffff",
                     padding: `${padPx(activeTpl.header_padding, 8)}px 12px`,
                     fontWeight: (activeTpl.header_weight ?? "bold") === "bold" ? 800 : 500,
-                    fontSize: sizePx(activeTpl.header_size, 10),
+                    fontSize: Math.max(12, sizePx(activeTpl.header_size, 12)),
                     textAlign: activeTpl.header_align || "start",
                     direction: (activeTpl.bubble_direction ?? "ltr") === "rtl" ? "rtl" : "ltr",
                   }}>
                     {previewTitle || "แจ้งเตือน CMMS-TPT"}
                     {(activeTpl.header_subtitle || "").trim() !== "" && (
-                      <div style={{ fontWeight: 600, fontSize: sizePx(activeTpl.header_size, 10) - 2, opacity: 0.75, marginTop: 3 }}>{activeTpl.header_subtitle}</div>
+                      <div style={{ fontWeight: 600, fontSize: Math.max(12, sizePx(activeTpl.header_size, 12) - 2), opacity: 0.75, marginTop: 3 }}>{activeTpl.header_subtitle}</div>
                     )}
                   </div>
                   {/* Hero image */}
@@ -1474,7 +1474,7 @@ export default function NotificationsSettingsPage() {
                         color: (activeTpl.btn_style || "primary") === "primary" ? (activeTpl.btn_text_color || "#ffffff") : (activeTpl.btn_color || "#06C755"),
                         textAlign: "center",
                         fontWeight: 800,
-                        fontSize: 11,
+                        fontSize: 12,
                         padding: `${activeTpl.btn_height === "sm" ? 5 : activeTpl.btn_height === "lg" ? 12 : 8}px 0`,
                         borderRadius: 8,
                         border: (activeTpl.btn_style || "primary") === "secondary" ? "1px solid " + (activeTpl.btn_color || "#06C755") : "none",
@@ -1489,7 +1489,7 @@ export default function NotificationsSettingsPage() {
                           marginTop: 6,
                           textAlign: "center",
                           fontWeight: 700,
-                          fontSize: 11,
+                          fontSize: 12,
                           color: activeTpl.btn_color || "#06C755",
                           border: "1px solid " + (activeTpl.btn_color || "#06C755"),
                           padding: `${activeTpl.btn_height === "sm" ? 4 : activeTpl.btn_height === "lg" ? 11 : 7}px 0`,
@@ -1533,7 +1533,7 @@ export default function NotificationsSettingsPage() {
                 <div style={{
                   background: "#0f172a", color: "#e2e8f0", borderRadius: 10,
                   padding: "12px 14px", fontFamily: "'Sarabun', sans-serif",
-                  fontSize: 11, lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-all",
+                  fontSize: 12, lineHeight: 1.6, whiteSpace: "pre-wrap", wordBreak: "break-all",
                   maxHeight: 320, overflow: "auto", border: "1px solid #334155",
                 }}>
                   {flexJson}
