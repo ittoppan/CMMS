@@ -226,7 +226,7 @@ export default function PushDevicePage() {
             <Bell className="h-7 w-7" style={{ color: "var(--cmms-primary)" }} strokeWidth={1.75} />
           </div>
           <VStack gap={1}>
-            <span className="text-base font-semibold">{phase === "no-sub" ? "อนุญาตแล้ว — เหลือลงทะเบียนอุปกรณ์นี้ 1 ขั้น" : "ยังปิดการแจ้งเตือนบนอุปกรณ์นี้อยู่"}</span>
+            <span className="min-w-0 break-words text-base font-semibold">{phase === "no-sub" ? "อนุญาตแล้ว — เหลือลงทะเบียนอุปกรณ์นี้ 1 ขั้น" : "ยังปิดการแจ้งเตือนบนอุปกรณ์นี้อยู่"}</span>
             <span className="mx-auto max-w-md text-sm text-muted-foreground">
               เปิดเพื่อรับแจ้งเตือนงานด่วนได้ทันทีแม้ไม่ได้เปิดหน้าจอ CMMS — เช่น งานซ่อมความเร่งด่วนสูง, สต็อกอะไหล่ต่ำกว่าเกณฑ์, SLA ใกล้เกิน
             </span>
@@ -236,7 +236,7 @@ export default function PushDevicePage() {
           {busy ? <Spinner size={16} /> : <BellRing className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />}
           เปิดการแจ้งเตือน
         </Button>
-        <p className="text-xs text-muted-foreground">
+        <p className="break-words text-xs text-muted-foreground">
           กดแล้วเบราว์เซอร์จะถาม “อนุญาตการแจ้งเตือนจาก {typeof window !== "undefined" ? window.location.host : "CMMS"} หรือไม่” — เลือกอนุญาต
         </p>
       </CardContent>
@@ -252,7 +252,7 @@ export default function PushDevicePage() {
       title="การแจ้งเตือนบนอุปกรณ์ (Web Push)"
       description="เปิดรับแจ้งเตือนแบบ Pop-up บนมือถือและเดสก์ท็อป — ทำ 1 ครั้งต่ออุปกรณ์"
       actions={
-        <HStack gap={3}>
+        <HStack gap={3} wrap="wrap">
           <Badge variant={phase === "active" ? "success" : "neutral"}>
             {phase === "active" ? "เปิดอยู่" : "ยังปิด"}
           </Badge>
@@ -266,8 +266,8 @@ export default function PushDevicePage() {
       <VStack gap={6}>
         {flash && <Alert variant={flash.ok ? "success" : "danger"} title={flash.ok ? "สำเร็จ" : "ยังไม่สำเร็จ"} description={flash.text} />}
 
-        <Grid columns={{ minWidth: 320 }} gap={6} style={{ alignItems: "start" }}>
-          <Card style={{ gridColumn: "span 2" }}>
+        <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
+          <Card>
             <CardContent className="space-y-4 p-5">
               <HStack gap={3} vAlign="center">
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: "var(--cmms-primary-light)" }} aria-hidden="true">
@@ -302,7 +302,7 @@ export default function PushDevicePage() {
                 ))}
               </VStack>
               <p className="text-xs text-muted-foreground" style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 10 }}>
-                ต้องการปรับรูปแบบข้อความแจ้งเตือน? ผู้ดูแลระบบจัดการได้ที่ <a href="/settings/notifications" className="underline" style={{ color: "var(--cmms-primary)" }}>ตั้งค่ารูปแบบการแจ้งเตือน</a>
+                ต้องการปรับรูปแบบข้อความแจ้งเตือน? ผู้ดูแลระบบจัดการได้ที่ <a href="/settings/notifications" className="inline-flex min-h-10 items-center py-1 underline" style={{ color: "var(--cmms-primary)" }}>ตั้งค่ารูปแบบการแจ้งเตือน</a>
               </p>
             </CardContent>
           </Card>
@@ -322,7 +322,7 @@ export default function PushDevicePage() {
                     <div key={d.id} className={`flex items-center gap-3 py-2.5 ${i > 0 ? "border-t" : ""}`} style={{ borderColor: "var(--cmms-border)" }}>
                       <Smartphone className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                       <VStack gap={0}>
-                        <span className="flex items-center gap-2 text-sm font-medium">
+                        <span className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium">
                           {hostOf(d.endpoint)}
                           {currentEndpoint && d.endpoint === currentEndpoint && <Badge variant="info">อุปกรณ์นี้</Badge>}
                         </span>
@@ -350,7 +350,7 @@ function StatusHeader({ icon: Icon, tone, title }: { icon: LucideIcon; tone: "su
       <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: tone === "success" ? "var(--cmms-primary-light)" : "var(--cmms-bg-muted)" }} aria-hidden="true">
         <Icon className="h-5 w-5" style={{ color: tone === "success" ? "var(--cmms-primary)" : "var(--cmms-text-secondary)" }} strokeWidth={1.75} />
       </div>
-      <span className="text-base font-semibold">{title}</span>
+      <span className="min-w-0 break-words text-base font-semibold">{title}</span>
     </HStack>
   );
 }

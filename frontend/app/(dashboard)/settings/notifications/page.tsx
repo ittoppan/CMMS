@@ -945,7 +945,7 @@ export default function NotificationsSettingsPage() {
                       key={v}
                       type="button"
                       onClick={() => insertVar(v)}
-                      className="cursor-pointer rounded-full px-2 py-0.5 text-[11px] text-[var(--cmms-primary-hover)]"
+                      className="inline-flex min-h-10 cursor-pointer items-center rounded-full px-3 py-1 text-xs text-[var(--cmms-primary-hover)]"
                       style={{
                         fontFamily: "'Sarabun', sans-serif",
                         background: "var(--cmms-primary-light)",
@@ -1399,7 +1399,7 @@ export default function NotificationsSettingsPage() {
                   flexDirection: "column",
                 }}
               >
-                <div style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.85)", fontWeight: 700, marginBottom: 10 }}>
+                <div style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 700, marginBottom: 10 }}>
                   CMMS-TOPPAN · ระบบแจ้งเตือน · {new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                 </div>
 
@@ -1620,13 +1620,13 @@ export default function NotificationsSettingsPage() {
                   <div style={{ width: 70, height: 6, background: "#475569", borderRadius: 999, margin: "0 auto 10px" }} />
                 </div>
                 <div style={{ background: "#8cabd9", borderRadius: 14, padding: 14, minHeight: 380, display: "flex", flexDirection: "column" }}>
-                  <div style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.85)", fontWeight: 700, marginBottom: 10 }}>
+                  <div style={{ textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 700, marginBottom: 10 }}>
                     CMMS-TOPPAN · ข้อความธรรมดา · {new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                   </div>
                   <div style={{ background: "#ffffff", borderRadius: 12, padding: "12px 14px", maxWidth: 280, boxShadow: "0 2px 8px rgba(0,0,0,0.18)", fontSize: 12, color: "#334155", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                     {tplMeta.sample || "ข้อความตัวอย่างจากระบบ"}
                   </div>
-                  <span className="mt-3.5 block text-center text-[11px] text-muted-foreground">
+                  <span className="mt-3.5 block text-center text-xs text-muted-foreground">
                     ข้อความจริงสร้างอัตโนมัติจากข้อมูลของระบบ — ตัวอย่างด้านบนเท่านั้น
                   </span>
                 </div>

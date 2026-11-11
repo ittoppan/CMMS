@@ -246,9 +246,9 @@ export default function MenuPermissionsPage() {
         /* ปุ่ม ▲▼✕ ใช้ได้จริงบนจอสัมผัส: พื้นที่กดอย่างน้อย 28×28 (เดิม 15×12) */
         .bn-chip-btn {
           border: none; background: transparent; cursor: pointer;
-          min-width: 28px; min-height: 28px; padding: 0 4px;
+          min-width: 40px; min-height: 40px; padding: 0 6px;
           display: inline-flex; align-items: center; justify-content: center;
-          font-size: 0.78rem; line-height: 1; color: var(--cmms-text-muted); border-radius: 6px;
+          font-size: 0.875rem; line-height: 1; color: var(--cmms-text-muted); border-radius: 6px;
         }
         .bn-chip-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .bn-chip-btn:hover { color: var(--cmms-primary); background: var(--cmms-primary-light); }
@@ -300,7 +300,7 @@ export default function MenuPermissionsPage() {
                         title="เปิดทุกเมนู"
                         style={{
                           border: "none", background: "transparent", cursor: "pointer",
-                          fontSize: "0.74rem", color: "var(--cmms-primary)", textDecoration: "underline",
+                          fontSize: "0.75rem", color: "var(--cmms-primary)", textDecoration: "underline",
                           padding: "6px 4px", minHeight: 28, lineHeight: 1.2,
                         }}
                       >
@@ -312,7 +312,7 @@ export default function MenuPermissionsPage() {
                         title="ปิดทุกเมนู"
                         style={{
                           border: "none", background: "transparent", cursor: "pointer",
-                          fontSize: "0.74rem", color: "var(--cmms-text-muted)", textDecoration: "underline",
+                          fontSize: "0.75rem", color: "var(--cmms-text-muted)", textDecoration: "underline",
                           padding: "6px 4px", minHeight: 28, lineHeight: 1.2,
                         }}
                       >
@@ -353,7 +353,7 @@ export default function MenuPermissionsPage() {
                               fontSize: "0.84rem", fontWeight: 600, color: "var(--cmms-text-primary)",
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{m.label}</span>
-                            <span style={{ fontSize: "0.72rem", color: "var(--cmms-text-muted)", fontFamily: "'Sarabun', sans-serif" }}>{m.href}</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--cmms-text-muted)", fontFamily: "'Sarabun', sans-serif" }}>{m.href}</span>
                           </div>
                           {roles.map((r) => (
                             <label
@@ -463,13 +463,13 @@ export default function MenuPermissionsPage() {
                               opacity: hidden ? 0.75 : 1,
                             }}
                           >
-                            <span style={{ fontSize: "0.68rem", fontWeight: 700, color: rc.fg, minWidth: 14 }}>
+                            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: rc.fg, minWidth: 14 }}>
                               {i + 1}
                             </span>
                             <span style={{ fontSize: "0.78rem", fontWeight: 600, whiteSpace: "nowrap", color: "var(--cmms-text-primary)" }}>
                               {bnLabelOf(k)}
                             </span>
-                            {hidden && <span style={{ fontSize: "0.62rem", color: "var(--cmms-warning-dark)", fontWeight: 700 }}>ปิดสิทธิ์</span>}
+                            {hidden && <span style={{ fontSize: "0.75rem", color: "var(--cmms-warning-dark)", fontWeight: 700 }}>ปิดสิทธิ์</span>}
                             <div style={{ display: "flex", gap: 1, marginLeft: 2 }} onClick={(e) => e.stopPropagation()}>
                               <button type="button" className="bn-chip-btn" disabled={i === 0} onClick={() => bnMove(r.id, i, -1)} title="เลื่อนซ้าย (ก่อนหน้า)">▲</button>
                               <button type="button" className="bn-chip-btn" disabled={i === list.length - 1} onClick={() => bnMove(r.id, i, 1)} title="เลื่อนขวา (ถัดไป)">▼</button>
@@ -552,17 +552,17 @@ export default function MenuPermissionsPage() {
                   display: "flex", flexDirection: "column", minHeight: 480,
                 }}>
                   {/* status bar */}
-                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 10, fontWeight: 700, color: "var(--cmms-text-secondary)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 16px 4px", fontSize: 12, fontWeight: 700, color: "var(--cmms-text-secondary)" }}>
                     <span>9:41</span>
                   </div>
                   {/* app header */}
                   <div style={{ background: previewColor.fg, padding: "9px 12px", display: "flex", alignItems: "center", gap: 8 }}>
                     <span style={{
                       width: 16, height: 16, borderRadius: 6, background: "#fff", display: "inline-flex",
-                      alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 900, color: previewColor.fg,
+                      alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 900, color: previewColor.fg,
                     }}>C</span>
                     <span style={{ color: "#fff", fontWeight: 800, fontSize: 12 }}>CMMS-TOPPAN</span>
-                    <span style={{ marginLeft: "auto", background: "rgba(255,255,255,.25)", borderRadius: 999, padding: "2px 8px", fontSize: 9, fontWeight: 700, color: "#fff" }}>
+                    <span style={{ marginLeft: "auto", background: "rgba(255,255,255,.25)", borderRadius: 999, padding: "2px 8px", fontSize: 12, fontWeight: 700, color: "#fff" }}>
                       {previewRole?.name || "-"}
                     </span>
                   </div>
@@ -578,7 +578,7 @@ export default function MenuPermissionsPage() {
                   {/* ปุ่มล่างจำลอง (เดียวกับ cmms-mobile-bottom-nav) */}
                   <div style={{ display: "flex", borderTop: "1px solid var(--cmms-border)", background: "#fff", padding: "7px 2px 9px" }}>
                     {previewItems.length === 0 && (
-                      <div style={{ flex: 1, textAlign: "center", fontSize: 10, color: "var(--cmms-text-secondary)", padding: "8px 0" }}>
+                      <div style={{ flex: 1, textAlign: "center", fontSize: 12, color: "var(--cmms-text-secondary)", padding: "8px 0" }}>
                         ยังไม่มีปุ่ม — จะใช้ค่าเริ่มต้นของบทบาท
                       </div>
                     )}
@@ -597,7 +597,7 @@ export default function MenuPermissionsPage() {
                         >
                           {ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />}
                           <span style={{
-                            fontSize: 8, fontWeight: 700, whiteSpace: "nowrap",
+                            fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
                             overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
                           }}>
                             {it.label}

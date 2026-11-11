@@ -205,7 +205,7 @@ export default function SystemServicesPage() {
                       <p className="text-sm">
                         {s.detail}
                         {s.url && s.status === "running" && (
-                          <> • <a href={s.url} target="_blank" rel="noreferrer" style={{ color: "var(--cmms-primary)", fontWeight: 600 }}>เปิด URL</a></>
+                          <> • <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center py-1" style={{ color: "var(--cmms-primary)", fontWeight: 600 }}>เปิด URL</a></>
                         )}
                       </p>
                     </VStack>

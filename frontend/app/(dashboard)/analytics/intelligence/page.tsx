@@ -94,7 +94,7 @@ function StatCard({ label, value, sub, tone }: { label: string; value: string; s
     <div className="rounded-xl p-4" style={{ background: "var(--cmms-bg-card)", border: "1px solid var(--cmms-border)" }}>
       <p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{label}</p>
       <p className="mt-1 text-xl font-bold tracking-tight" style={{ color: tone ?? "inherit" }}>{value}</p>
-      {sub && <p className="mt-0.5 text-[11px]" style={{ color: "var(--cmms-text-secondary)" }}>{sub}</p>}
+      {sub && <p className="mt-0.5 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{sub}</p>}
     </div>
   );
 }
@@ -147,7 +147,7 @@ function Tbl({ headers, children }: { headers: string[]; children: React.ReactNo
         <thead>
           <tr style={{ background: "var(--cmms-bg-muted)" }}>
             {headers.map((h) => (
-              <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide"
+              <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide"
                 style={{ color: "var(--cmms-text-secondary)" }}>{h}</th>
             ))}
           </tr>
@@ -324,7 +324,7 @@ export default function IntelligencePage() {
           <div className="flex flex-wrap items-end gap-3">
             {FILTER_LAYOUT.map((f) => (
               <div key={f.key} className="min-w-[150px]">
-                <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{f.label}</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>{f.label}</label>
                 <Select value={filters[f.key as keyof Filters]} onValueChange={(v) => setF(f.key as keyof Filters, v)}>
                   <SelectTrigger aria-label={f.label} className="h-9 w-full sm:w-[170px]">
                     <SelectValue />
@@ -336,7 +336,7 @@ export default function IntelligencePage() {
               </div>
             ))}
             <div className="min-w-[150px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>หมวดเครื่อง</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>หมวดเครื่อง</label>
               <Select value={filters.asset_category} onValueChange={(v) => setF("asset_category", v)}>
                 <SelectTrigger aria-label="หมวดเครื่อง" className="h-9 w-full sm:w-[170px]">
                   <SelectValue />
@@ -348,7 +348,7 @@ export default function IntelligencePage() {
               </Select>
             </div>
             <div className="min-w-[170px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>กรม/ฝ่าย</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>กรม/ฝ่าย</label>
               <Select value={filters.department_id} onValueChange={(v) => setF("department_id", v)}>
                 <SelectTrigger aria-label="ฝ่าย" className="h-9 w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -358,7 +358,7 @@ export default function IntelligencePage() {
               </Select>
             </div>
             <div className="min-w-[190px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>เครื่องจักร</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>เครื่องจักร</label>
               <Select value={filters.asset_id} onValueChange={(v) => setF("asset_id", v)}>
                 <SelectTrigger aria-label="เครื่อง" className="h-9 w-full sm:w-[200px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -368,7 +368,7 @@ export default function IntelligencePage() {
               </Select>
             </div>
             <div className="min-w-[170px]">
-              <label className="mb-1 block text-[11px] font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ช่าง</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: "var(--cmms-text-secondary)" }}>ช่าง</label>
               <Select value={filters.technician_id} onValueChange={(v) => setF("technician_id", v)}>
                 <SelectTrigger aria-label="ช่าง" className="h-9 w-full sm:w-[180px]"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -726,11 +726,11 @@ export default function IntelligencePage() {
                       {t.overlap_active_high && <Badge variant="danger">งานทับซ้อน</Badge>}
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center text-sm">
-                      <div><p className="text-lg font-bold">{t.active_cnt}</p><p className="text-[11px]" style={{ color: "var(--cmms-text-secondary)" }}>active</p></div>
-                      <div><p className="text-lg font-bold">{t.open_cnt}</p><p className="text-[11px]" style={{ color: "var(--cmms-text-secondary)" }}>เปิด/รอรับ</p></div>
-                      <div><p className="text-lg font-bold">{t.done_cnt}</p><p className="text-[11px]" style={{ color: "var(--cmms-text-secondary)" }}>เสร็จ</p></div>
+                      <div><p className="text-lg font-bold">{t.active_cnt}</p><p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>active</p></div>
+                      <div><p className="text-lg font-bold">{t.open_cnt}</p><p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>เปิด/รอรับ</p></div>
+                      <div><p className="text-lg font-bold">{t.done_cnt}</p><p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>เสร็จ</p></div>
                     </div>
-                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px]" style={{ color: "var(--cmms-text-secondary)" }}>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
                       <span>ซ่อมเฉลี่ย {t.avg_repair_min == null ? "—" : `${fmtNum(t.avg_repair_min, 0)} นาที`}</span>
                       <span>Downtime {fmtNum(t.downtime_minutes, 0)} นาที</span>
                       <span style={{ color: (t.overdue_sla_cnt ?? 0) > 0 ? "var(--cmms-danger)" : undefined }}>เกิน SLA {t.overdue_sla_cnt ?? 0} ใบ</span>
