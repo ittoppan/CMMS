@@ -52,7 +52,12 @@ export default function PMDetailPage() {
   }, [pmId]);
 
   if (!pmId) {
-    return <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่พบข้อมูล" description="ต้องระบุ id ของรอบ PM" />;
+    return (
+      <div className="space-y-6">
+        <h1 className="sr-only">รายละเอียดรอบ PM</h1>
+        <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่พบข้อมูล" description="ต้องระบุ id ของรอบ PM" />
+      </div>
+    );
   }
 
   const freqLabels: Record<string, string> = {

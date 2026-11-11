@@ -100,7 +100,7 @@ export default function QrSheetPage() {
       <div className="flex items-center justify-between gap-4 wrap">
         <div className="flex flex-col gap-1">
           <p className="text-sm text-[var(--cmms-text-secondary)] cmms-eyebrow">QR SHEET · CMMS-TOPPAN</p>
-          <h2 style={{ margin: 0 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</h2>
+          <h1 style={{ margin: 0, fontSize: "inherit", fontWeight: 700 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</h1>
           <p className="text-sm text-[var(--cmms-text-secondary)] supporting">
             สแกน QR แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
             {" · "}{machines.length} เครื่อง{machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}

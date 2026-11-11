@@ -304,7 +304,7 @@ export default function PlanningCalendarPage() {
                         <td key={c.key} className={cn("min-w-[140px] align-top border-b border-l first:border-l-0 px-1 py-1", !c.inMonth && "bg-[var(--cmms-bg-wash)] opacity-70")}>
                           <div className="min-h-[120px] space-y-1" style={{ borderColor: isToday ? "var(--cmms-primary)" : undefined }}>
                             {dayItems.length === 0 ? (
-                              <p className="px-1 pt-2 text-center text-[10px] text-[var(--cmms-text-muted)]">—</p>
+                              <p className="px-1 pt-2 text-center text-xs text-[var(--cmms-text-muted)]">—</p>
                             ) : (
                               dayItems.slice(0, 6).map((w) => (
                                 <div
@@ -312,11 +312,11 @@ export default function PlanningCalendarPage() {
                                   className="rounded-md border border-border bg-card px-1.5 py-1"
                                   style={{ boxShadow: isToday ? "inset 0 0 0 1px var(--cmms-primary)" : undefined }}
                                 >
-                                  <p className="text-[10px] font-bold text-[var(--cmms-text-primary)]">
+                                  <p className="text-xs font-bold text-[var(--cmms-text-primary)]">
                                     {fmtSlot(w.planned_start_at)}
                                   </p>
                                   <p className="truncate text-[11px] text-[var(--cmms-text-secondary)]">{w.work_order_no}</p>
-                                  <p className="truncate text-[10px] text-[var(--cmms-text-muted)]">{w.title}</p>
+                                  <p className="truncate text-xs text-[var(--cmms-text-muted)]">{w.title}</p>
                                   <div className="mt-0.5 flex flex-wrap gap-1">
                                     <Badge variant={readinessVariant(w.readiness?.state)}>{w.readiness ? READINESS_LABEL[w.readiness.state] : w.group}</Badge>
                                     {(w.team_ids ?? []).length > 0 && <Badge variant="neutral">{(w.team_ids ?? []).length} คน</Badge>}
@@ -325,7 +325,7 @@ export default function PlanningCalendarPage() {
                               ))
                             )}
                             {dayItems.length > 6 && (
-                              <p className="px-1 text-center text-[10px] text-[var(--cmms-text-muted)]">+{dayItems.length - 6} งาน</p>
+                              <p className="px-1 text-center text-xs text-[var(--cmms-text-muted)]">+{dayItems.length - 6} งาน</p>
                             )}
                           </div>
                         </td>
@@ -544,7 +544,7 @@ function DayTimeline({ items }: { items: PlanningWo[] }) {
     <div className="relative" style={{ height }}>
       {hours.map((h) => (
         <div key={h} className="absolute left-0 right-0 flex items-start border-t border-dashed border-border" style={{ top: (h - TIME_START) * HOUR_PX, height: HOUR_PX }}>
-          <span className="w-12 px-2 pt-0.5 text-right text-[10px] uppercase text-[var(--cmms-text-muted)]">
+          <span className="w-12 px-2 pt-0.5 text-right text-xs uppercase text-[var(--cmms-text-muted)]">
             {String(h).padStart(2, "0")}:00
           </span>
         </div>
