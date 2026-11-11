@@ -65,7 +65,7 @@ export default function WorkforceTechniciansPage() {
         <div>
           <Link
             href={`/workforce/technicians/${r.id}`}
-            className="font-medium text-[var(--cmms-primary-hover)] underline-offset-2 hover:underline"
+            className="inline-flex min-h-10 items-center font-medium text-[var(--cmms-primary-hover)] underline-offset-2 hover:underline"
           >
             {r.full_name}
           </Link>
@@ -246,7 +246,7 @@ export default function WorkforceTechniciansPage() {
                     type="button"
                     onClick={() => setFlag(v as typeof flag)}
                     aria-pressed={flag === v}
-                    className={`rounded-md border px-2.5 py-1.5 text-sm transition-colors ${
+                    className={`inline-flex min-h-10 items-center rounded-md border px-2.5 py-1.5 text-sm transition-colors ${
                       flag === v
                         ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)] text-white"
                         : "border-border bg-background hover:bg-muted"
