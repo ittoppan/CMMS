@@ -150,7 +150,7 @@ export default function WorkOrderClosureDocument({ wo }: { wo: WorkOrderDocData 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
             {cells.map((c) => (
               <div key={c.label} style={{ background: "#F8FAFC", padding: "10px 12px", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                <div style={{ fontSize: 11, color: "#64748B" }}>{c.label}</div>
+                <div style={{ fontSize: 12, color: "#64748B" }}>{c.label}</div>
                 <div style={{ fontWeight: 700, marginTop: 2, color: c.accent ? "#D97706" : "#334155" }}>{c.value}</div>
               </div>
             ))}
