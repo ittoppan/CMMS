@@ -445,7 +445,7 @@ export default function InteractiveStylePageEditor() {
                 <button
                   type="button"
                   onClick={() => setViewport("desktop")}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
+                  className="flex min-h-10 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition-colors"
                   style={{
                     background: viewport === "desktop" ? primaryColor : "transparent",
                     color: viewport === "desktop" ? "#fff" : undefined,
@@ -456,7 +456,7 @@ export default function InteractiveStylePageEditor() {
                 <button
                   type="button"
                   onClick={() => setViewport("tablet")}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
+                  className="flex min-h-10 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition-colors"
                   style={{
                     background: viewport === "tablet" ? primaryColor : "transparent",
                     color: viewport === "tablet" ? "#fff" : undefined,
@@ -467,7 +467,7 @@ export default function InteractiveStylePageEditor() {
                 <button
                   type="button"
                   onClick={() => setViewport("phone")}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-bold transition-colors"
+                  className="flex min-h-10 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-bold transition-colors"
                   style={{
                     background: viewport === "phone" ? primaryColor : "transparent",
                     color: viewport === "phone" ? "#fff" : undefined,

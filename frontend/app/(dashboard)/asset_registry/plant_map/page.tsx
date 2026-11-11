@@ -111,11 +111,11 @@ export default function PlantMapPage() {
                         >
                           <div className="font-mono text-xs font-bold">{r.code}</div>
                           <div className="text-sm font-semibold leading-snug line-clamp-2">{r.name}</div>
-                          <div className="mt-1 text-[11px] opacity-70">{r.location_name || "ไม่ระบุตำแหน่ง"}</div>
+                          <div className="mt-1 text-xs opacity-70">{r.location_name || "ไม่ระบุตำแหน่ง"}</div>
                           {Number(r.active_repairs) > 0 ? (
-                            <div className="mt-1 text-[11px] font-bold text-rose-600 flex items-center gap-1"><Wrench className="w-3.5 h-3.5" aria-hidden="true" />{r.active_repairs} งานเปิด</div>
+                            <div className="mt-1 text-xs font-bold text-rose-600 flex items-center gap-1"><Wrench className="w-3.5 h-3.5" aria-hidden="true" />{r.active_repairs} งานเปิด</div>
                           ) : (
-                            <div className="mt-1 text-[11px] opacity-60">ไม่มีงานค้าง</div>
+                            <div className="mt-1 text-xs opacity-60">ไม่มีงานค้าง</div>
                           )}
                         </button>
                       );

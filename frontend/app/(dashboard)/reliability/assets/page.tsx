@@ -98,7 +98,7 @@ function AssetsInner() {
       renderCell: (r) => (
         <Link
           href={relNavHref(`/reliability/assets/${r.asset_id}`, query)}
-          className="font-medium underline-offset-2 hover:underline"
+          className="inline-flex min-h-10 items-center font-medium underline-offset-2 hover:underline"
         >
           {r.asset_code}
         </Link>
@@ -171,7 +171,7 @@ function AssetsInner() {
       renderCell: (r) => (
         <Link
           href={relNavHref(`/reliability/assets/${r.asset_id}`, query)}
-          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          className="inline-flex min-h-10 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
           <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
           ดู
@@ -256,7 +256,7 @@ function AssetsInner() {
                 </Select>
                 <Link
                   href={relNavHref("/reliability/failure-modes", query)}
-                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                  className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "min-h-10")}
                 >
                   Pareto
                 </Link>

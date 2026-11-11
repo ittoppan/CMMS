@@ -344,9 +344,9 @@ export default function BOMTreePage() {
             </CardContent>
           </Card>
 
-          <Grid columns={3} gap={6}>
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             {/* แพนซ้าย: BOM tree */}
-            <div style={{ gridColumn: "span 2" }}>
+            <div className="min-w-0 xl:col-span-2">
               <Card className="h-full">
                 <CardHeader className="flex-row items-center justify-between">
                   <CardTitle>ชิ้นส่วนประกอบของ {machine?.code || "เครื่องจักร"}</CardTitle>
@@ -454,7 +454,7 @@ export default function BOMTreePage() {
             </div>
 
             {/* แพนขวา: รายละเอียดชิ้นส่วน */}
-            <div>
+            <div className="min-w-0">
               <Card className="h-full">
                 <CardContent className="space-y-4 p-5">
                   {selectedPart ? (
@@ -525,7 +525,7 @@ export default function BOMTreePage() {
                 </CardContent>
               </Card>
             </div>
-          </Grid>
+          </div>
         </>
       )}
 

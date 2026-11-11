@@ -177,9 +177,9 @@ export default function AssetCriticalityPage() {
           </CardContent>
         </Card>
       ) : (
-        <Grid columns={3} gap={6}>
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {/* คอลัมน์ซ้าย: ฟอร์มประเมิน */}
-          <div style={{ gridColumn: "span 2" }}>
+          <div className="min-w-0 xl:col-span-2">
             <Card className="h-full">
               <CardHeader>
                 <CardTitle>1. เลือกเครื่องจักรและระบุปัจจัยความเสี่ยง</CardTitle>
@@ -229,7 +229,7 @@ export default function AssetCriticalityPage() {
           </div>
 
           {/* คอลัมน์ขวา: ผลการประเมิน */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Card
               className="text-center"
               style={{
@@ -311,7 +311,7 @@ export default function AssetCriticalityPage() {
               </CardContent>
             </Card>
           </div>
-        </Grid>
+        </div>
       )}
 
     </PageShell>

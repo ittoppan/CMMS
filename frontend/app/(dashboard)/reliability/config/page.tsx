@@ -197,9 +197,9 @@ function Permission({ label, allowed }: { label: string; allowed: boolean }) {
 
 function SettingRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-border/50 py-1.5 last:border-0">
-      <span className="text-sm">{label}</span>
-      <span className="font-mono text-sm tabular-nums">{value === "" || value === null || value === undefined ? "—" : String(value)}</span>
+    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 border-b border-border/50 py-2 last:border-0">
+      <span className="min-w-0 text-sm">{label}</span>
+      <span className="min-w-0 break-words font-mono text-sm tabular-nums">{value === "" || value === null || value === undefined ? "—" : String(value)}</span>
     </div>
   );
 }

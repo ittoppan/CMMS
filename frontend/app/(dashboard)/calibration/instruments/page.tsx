@@ -74,7 +74,7 @@ export default function CalibrationInstrumentsPage() {
       key: "code",
       header: "รหัสเครื่อง",
       renderCell: (r) => (
-        <button type="button" className="font-medium text-[var(--cmms-primary-hover)] hover:underline" onClick={() => router.push(`/calibration/instruments/${r.id}`)}>
+        <button type="button" className="inline-flex min-h-10 items-center font-medium text-[var(--cmms-primary-hover)] hover:underline" onClick={() => router.push(`/calibration/instruments/${r.id}`)}>
           {r.code}
         </button>
       ),

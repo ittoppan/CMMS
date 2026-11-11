@@ -896,6 +896,7 @@ export default function GrapesBuilder() {
                   disabled={busy}
                   style={{
                     width: "100%",
+                    minHeight: 40,
                     fontFamily: "inherit",
                     fontSize: 13,
                     fontWeight: 700,
@@ -903,7 +904,7 @@ export default function GrapesBuilder() {
                     background: "var(--cmms-primary, #0068B5)",
                     border: "none",
                     borderRadius: 8,
-                    padding: "8px 0",
+                    padding: "10px 0",
                     cursor: "pointer",
                   }}
                 >

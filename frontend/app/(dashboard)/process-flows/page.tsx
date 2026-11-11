@@ -278,7 +278,7 @@ function StepNode({ index, step }: { index: number; step: PfStep }) {
     >
       <span
         className={cn(
-          "flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full text-[0.7rem] font-bold",
+          "flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
           wait ? "bg-[var(--cmms-warning)] text-white" : "bg-secondary text-muted-foreground"
         )}
         aria-hidden="true"
@@ -299,7 +299,7 @@ function DoneNode({ index, label, note }: { index: number; label: string; note?:
   return (
     <div className="flex w-auto max-w-full items-center gap-2.5 rounded-xl border border-primary bg-primary px-3.5 py-2.5 text-white">
       <span
-        className="flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-white/20 text-[0.7rem] font-bold"
+        className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold"
         aria-hidden="true"
       >
         {index + 1}
@@ -439,7 +439,7 @@ export default function ProcessFlowsPage() {
             <a
               key={f.id}
               href={`#pf-${f.id}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               style={{ textDecoration: "none" }}
             >
               <f.icon size={13} strokeWidth={1.75} aria-hidden="true" />
