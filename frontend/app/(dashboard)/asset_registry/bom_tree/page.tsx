@@ -385,11 +385,11 @@ export default function BOMTreePage() {
                           <div
                             key={`p-db-${p.id}`}
                             onClick={() => setSelectedPart(p)}
-                            className={`ml-6 cursor-pointer rounded-lg border px-4 py-2.5 transition-colors duration-150 ${
+                            className={`cursor-pointer rounded-lg border px-4 py-2.5 transition-colors duration-150 sm:ml-6 ${
                               selectedPart?.id === p.id ? "border-ring bg-accent" : "bg-card hover:bg-secondary/60"
                             }`}
                           >
-                            <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div className="flex min-w-0 flex-1 items-center gap-3">
                                 {img ? (
                                   // eslint-disable-next-line @next/next/no-img-element
@@ -418,11 +418,11 @@ export default function BOMTreePage() {
                                 </div>
                               </div>
 
-                              <div className="flex shrink-0 items-center gap-3">
-                                <div className="text-right">
+                              <div className="flex flex-wrap items-center gap-2 sm:shrink-0 sm:justify-end sm:gap-3">
+                                <div className="text-left sm:text-right">
                                   <p className="text-sm">ใช้ {qty} {p.unit || "ชิ้น"}</p>
                                   <p className={`text-sm font-semibold ${low ? "text-destructive" : "text-[var(--cmms-success)]"}`}>
-                                    คงเหลือ {stock} {p.unit || "ชิ้น"}{low ? " " : ""}
+                                    คงเหลือ {stock} {p.unit || "ชิ้น"}
                                   </p>
                                 </div>
                                 <Button

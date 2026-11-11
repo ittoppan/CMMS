@@ -98,7 +98,7 @@ function AssetsInner() {
       renderCell: (r) => (
         <Link
           href={relNavHref(`/reliability/assets/${r.asset_id}`, query)}
-          className="inline-flex min-h-10 items-center font-medium underline-offset-2 hover:underline"
+          className="inline-flex min-h-10 min-w-10 items-center px-1 font-medium underline-offset-2 hover:underline"
         >
           {r.asset_code}
         </Link>

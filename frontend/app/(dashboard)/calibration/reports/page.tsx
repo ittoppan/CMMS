@@ -98,10 +98,10 @@ export default function CalibrationReportsPage() {
         </div>
       }
     >
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         {(Object.keys(REPORT_META) as ReportType[]).map((t) => (
           <a key={t} href={`/calibration/reports?type=${t}`} aria-current={type === t ? "page" : undefined}>
-            <Button variant={type === t ? "primary" : "secondary"} size="sm">{REPORT_META[t].label}</Button>
+            <Button variant={type === t ? "primary" : "secondary"} size="sm" className="min-h-10">{REPORT_META[t].label}</Button>
           </a>
         ))}
       </div>
