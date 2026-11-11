@@ -191,6 +191,7 @@ function LoginContent() {
       {/* Login form */}
       <main className="cmms-login-panel">
         <form className="cmms-login-form" onSubmit={onSubmit} noValidate>
+          <h1 className="sr-only">เข้าสู่ระบบ CMMS-TOPPAN</h1>
           <div className="cmms-login-logo">
             <div className="cmms-login-logo-icon"><Wrench size={20} strokeWidth={1.75} /></div>
             <div>
