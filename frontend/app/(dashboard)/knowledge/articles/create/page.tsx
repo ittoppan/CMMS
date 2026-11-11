@@ -288,8 +288,8 @@ export default function KnowledgeArticleCreatePage() {
                         aria-pressed={on}
                         className={
                           on
-                            ? "rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors"
-                            : "rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent"
+                            ? "inline-flex min-h-10 items-center rounded-full bg-primary px-3 py-2 text-xs font-semibold text-white transition-colors"
+                            : "inline-flex min-h-10 items-center rounded-full border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-accent"
                         }
                       >
                         {t.label_th || t.tag}
