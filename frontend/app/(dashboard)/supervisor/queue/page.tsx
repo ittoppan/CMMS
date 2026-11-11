@@ -199,7 +199,7 @@ export default function SupervisorQueuePage() {
               <tr className="border-b bg-[var(--cmms-bg-muted)] text-xs uppercase text-[var(--cmms-text-muted)]">
                 {can.plan && (
                   <th className="px-3 py-2.5">
-                    <Checkbox checked={items.filter((i) => i.kind === "workorder").length > 0 && items.filter((i) => i.kind === "workorder").every((i) => selected.has(`wo-${i.ref_id}`))} onCheckedChange={toggleAll} aria-label="เลือกทั้งหมด" />
+                    <span className="inline-flex min-h-10 min-w-10 items-center justify-center"><Checkbox checked={items.filter((i) => i.kind === "workorder").length > 0 && items.filter((i) => i.kind === "workorder").every((i) => selected.has(`wo-${i.ref_id}`))} onCheckedChange={toggleAll} aria-label="เลือกทั้งหมด" /></span>
                   </th>
                 )}
                 <th className="px-3 py-2.5">งาน</th>
@@ -222,7 +222,7 @@ export default function SupervisorQueuePage() {
                     {can.plan && (
                       <td className="px-3 py-2.5">
                         {it.kind === "workorder" ? (
-                          <Checkbox checked={selected.has(`wo-${it.ref_id}`)} onCheckedChange={() => toggleOne(`wo-${it.ref_id}`)} aria-label={`เลือก ${it.code}`} />
+                          <span className="inline-flex min-h-10 min-w-10 items-center justify-center"><Checkbox checked={selected.has(`wo-${it.ref_id}`)} onCheckedChange={() => toggleOne(`wo-${it.ref_id}`)} aria-label={`เลือก ${it.code}`} /></span>
                         ) : null}
                       </td>
                     )}
@@ -231,7 +231,7 @@ export default function SupervisorQueuePage() {
                         <AndonLamp status={it.kind === "workorder" ? andonOf(it.status, Boolean(it.overdue)) : it.overdue ? "down" : "idle"} />
                         <div className="min-w-0">
                           <button
-                            className="block max-w-[260px] truncate font-bold text-left hover:underline"
+                            className="inline-flex min-h-10 max-w-[260px] items-center truncate py-1 font-bold text-left hover:underline"
                             onClick={() => go(it.kind === "workorder" ? `/repair/view?id=${it.ref_id}` : `/supervisor/review?id=${it.ref_id}`)}
                           >
                             {it.code}
