@@ -339,7 +339,8 @@ export default function RepairHistoryPage() {
                   onClick={() => setOutsourceFilter(opt.v)}
                   aria-pressed={outsourceFilter === opt.v}
                   style={{
-                    padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
+                    minHeight: 40, display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    padding: "8px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 12.5, fontWeight: 600,
                     background: outsourceFilter === opt.v ? "var(--cmms-bg-card)" : "transparent",
                     color: outsourceFilter === opt.v ? "var(--cmms-primary-hover)" : "var(--cmms-text-secondary)",
                     boxShadow: outsourceFilter === opt.v ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
