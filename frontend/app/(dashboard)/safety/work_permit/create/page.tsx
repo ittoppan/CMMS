@@ -314,7 +314,7 @@ export default function WorkPermitCreatePage() {
                     const label = typeof f === "string" ? f : (f as any)?.label || (f as any)?.role_key;
                     return (
                       <li key={i} className="flex items-center gap-2 text-sm text-[var(--cmms-text-primary)]">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--cmms-bg-muted)] text-[10px] font-semibold">{i + 1}</span>
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--cmms-bg-muted)] text-xs font-semibold">{i + 1}</span>
                         {label}
                       </li>
                     );

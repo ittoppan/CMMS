@@ -211,9 +211,9 @@ export default function KnowledgeTaxonomyPage() {
         />
       )}
 
-      <div style={layoutStyle("content")}>
-        <Tabs defaultValue="categories">
-          <TabsList>
+      <div style={layoutStyle("content")} className="min-w-0">
+        <Tabs defaultValue="categories" className="min-w-0">
+          <TabsList className="max-w-full">
             <TabsTrigger value="categories">
               <ListChecks size={14} aria-hidden="true" /> หมวดหมู่ ({cats.length})
             </TabsTrigger>
@@ -223,15 +223,15 @@ export default function KnowledgeTaxonomyPage() {
           </TabsList>
 
           {/* หมวดหมู่ */}
-          <TabsContent value="categories" className="mt-4 grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader>
+          <TabsContent value="categories" className="mt-4 grid min-w-0 gap-4 lg:grid-cols-3">
+            <Card className="min-w-0 lg:col-span-2">
+              <CardHeader className="min-w-0">
                 <CardTitle>หมวดหมู่ทั้งหมด</CardTitle>
                 <CardDescription>
                   รหัสหมวดหมู่ถูกใช้สร้างรหัสบทความ — เปลี่ยนรหัสเดิมแล้วบทความเก่าจะอ้างรหัสผิด
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="min-w-0 p-0">
                 {cats.length === 0 ? (
                   <div className="p-6">
                     <EmptyState
@@ -241,8 +241,8 @@ export default function KnowledgeTaxonomyPage() {
                     />
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <div className="w-full max-w-full overflow-x-auto">
+                    <table className="w-full min-w-[560px] text-sm">
                       <thead>
                         <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           <th className="px-4 py-2.5">รหัส</th>
@@ -293,7 +293,7 @@ export default function KnowledgeTaxonomyPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>{catId ? "แก้ไขหมวดหมู่" : "เพิ่มหมวดหมู่"}</CardTitle>
               </CardHeader>
@@ -388,8 +388,8 @@ export default function KnowledgeTaxonomyPage() {
           </TabsContent>
 
           {/* แท็ก */}
-          <TabsContent value="tags" className="mt-4 grid gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
+          <TabsContent value="tags" className="mt-4 grid min-w-0 gap-4 lg:grid-cols-3">
+            <Card className="min-w-0 lg:col-span-2">
               <CardHeader>
                 <CardTitle>แท็กทั้งหมด</CardTitle>
                 <CardDescription>แท็กถูกใช้ค้นหาแบบ “ตรงกับแท็กใดแท็กหนึ่ง” เพื่อให้คำค้นภาษาช่างเจอผล</CardDescription>
@@ -436,7 +436,7 @@ export default function KnowledgeTaxonomyPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>{tagId ? "แก้ไขแท็ก" : "เพิ่มแท็ก"}</CardTitle>
               </CardHeader>
