@@ -294,7 +294,7 @@ export default function InspectionTemplatesPage() {
                       title="ลบข้อ"
                       aria-label={`ลบข้อที่ ${idx + 1}`}
                       onClick={() => removeItem(idx)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300"
                       style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                     >
                       <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
@@ -401,7 +401,7 @@ export default function InspectionTemplatesPage() {
                 <button
                   type="button"
                   onClick={() => openTemplate(tpl)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
                   style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}
                 >
                   <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -410,7 +410,7 @@ export default function InspectionTemplatesPage() {
                 <button
                   type="button"
                   onClick={() => deleteTemplate(tpl)}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300"
                   style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}
                 >
                   <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
