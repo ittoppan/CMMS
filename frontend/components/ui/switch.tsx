@@ -47,15 +47,23 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
             onCheckedChange?.(next);
           }}
           className={cn(
-            "peer relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors duration-200 after:absolute after:-inset-y-3 after:-inset-x-3 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+            "peer relative inline-flex h-10 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
           )}
           {...props}
         >
-          <SwitchPrimitive.Thumb
+          <span
+            aria-hidden="true"
             className={cn(
-              "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+              "relative inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors duration-200",
+              isOn ? "bg-primary" : "bg-input"
             )}
-          />
+          >
+            <SwitchPrimitive.Thumb
+              className={cn(
+                "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+              )}
+            />
+          </span>
         </SwitchPrimitive.Root>
         {(label || description) && (
           <div className="flex flex-col">
