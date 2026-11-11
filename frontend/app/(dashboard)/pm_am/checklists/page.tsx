@@ -223,15 +223,15 @@ export default function PMChecklistsPage() {
                     type="button"
                     aria-label="แก้ไข template"
                     onClick={() => { setFormOpen(true); setFormEditId(tpl.id); setForm({ code: tpl.code, name: tpl.name, category: tpl.category, description: tpl.description || "", is_active: tpl.is_active }); }}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-text-secondary)" }}>
-                    <SquarePen size={13} strokeWidth={1.75} aria-hidden="true" />
+                    className="inline-flex h-10 w-10 min-h-10 min-w-10 items-center justify-center rounded-md hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-text-secondary)" }}>
+                    <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
                     aria-label="ลบ template"
                     onClick={() => deleteTemplate(tpl)}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-danger)" }}>
-                    <Trash2 size={13} strokeWidth={1.75} aria-hidden="true" />
+                    className="inline-flex h-10 w-10 min-h-10 min-w-10 items-center justify-center rounded-md hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-danger)" }}>
+                    <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                   </button>
                 </div>
               </div>

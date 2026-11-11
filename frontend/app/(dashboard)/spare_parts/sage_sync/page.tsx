@@ -14,6 +14,7 @@ import {
   FileCheck2,
   Wrench,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SyncLog {
   id: number | string;
@@ -348,7 +349,7 @@ export default function SageSyncConfigPage() {
                     value={key}
                     checked={syncConfig.mode === key}
                     onChange={() => setSyncConfig(prev => prev ? { ...prev, mode: key as SyncConfig["mode"] } : prev)}
-                    className="mt-1 h-4 w-4 shrink-0 accent-[var(--cmms-primary)]"
+                    className="mt-0 h-10 w-10 shrink-0 accent-[var(--cmms-primary)]"
                   />
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold">{m.label}</span>
@@ -368,18 +369,16 @@ export default function SageSyncConfigPage() {
                 {Object.entries(FIELD_LABELS).map(([key, label]) => (
                   <label
                     key={key}
-                    className={`flex items-center gap-2.5 rounded-[var(--cmms-radius-sm)] border border-[var(--cmms-border)] px-3 py-2 text-sm transition-opacity ${syncConfig.mode === "new_only" ? "pointer-events-none opacity-50" : ""}`}
+                    className={`flex min-h-10 items-center gap-2.5 rounded-[var(--cmms-radius-sm)] border border-[var(--cmms-border)] px-3 py-2 text-sm transition-opacity ${syncConfig.mode === "new_only" ? "pointer-events-none opacity-50" : ""}`}
                   >
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={syncConfig.fields.includes(key)}
-                      onChange={(e) => setSyncConfig(prev => prev ? {
+                      onCheckedChange={(checked) => setSyncConfig(prev => prev ? {
                         ...prev,
-                        fields: e.target.checked
+                        fields: checked === true
                           ? [...prev.fields, key]
                           : prev.fields.filter(f => f !== key),
                       } : prev)}
-                      className="h-4 w-4 shrink-0 accent-[var(--cmms-primary)]"
                     />
                     {label}
                   </label>

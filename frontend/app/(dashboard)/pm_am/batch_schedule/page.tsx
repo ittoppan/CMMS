@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Layers, Search } from "lucide-react";
 
@@ -251,14 +252,12 @@ export default function BatchSchedulePage() {
               </div>
 
               <div className="mb-2 mt-4 flex items-center justify-between border-b pb-2" style={{ borderColor: "var(--cmms-border)" }}>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input
+                <label className="flex min-h-10 cursor-pointer items-center gap-2">
+                  <Checkbox
                     id="select-all"
-                    type="checkbox"
                     aria-label="เลือกทั้งหมด"
                     checked={selectedAssets.length === filteredAssets.length && filteredAssets.length > 0}
-                    onChange={handleSelectAll}
-                    className="h-4 w-4 accent-[var(--cmms-primary)]"
+                    onCheckedChange={() => handleSelectAll()}
                   />
                   <span className="text-sm font-semibold">เลือกทั้งหมด</span>
                 </label>
@@ -270,18 +269,16 @@ export default function BatchSchedulePage() {
                   {filteredAssets.map((asset) => (
                     <label
                       key={asset.rawId}
-                      className="flex cursor-pointer items-center gap-3 rounded-md border p-3"
+                      className="flex min-h-10 cursor-pointer items-center gap-3 rounded-md border p-3"
                       style={{
                         backgroundColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary-wash)" : "var(--cmms-bg-card)",
                         borderColor: selectedAssets.includes(asset.rawId) ? "var(--cmms-primary)" : "var(--cmms-border)",
                       }}
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         aria-label={asset.code}
                         checked={selectedAssets.includes(asset.rawId)}
-                        onChange={() => handleToggleAsset(asset.rawId)}
-                        className="h-4 w-4 accent-[var(--cmms-primary)]"
+                        onCheckedChange={() => handleToggleAsset(asset.rawId)}
                       />
                       <div>
                         <p className="font-semibold">{asset.code}</p>

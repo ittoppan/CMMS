@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import SuccessDialog from "@/components/SuccessDialog";
 import { swalConfirm } from "@/lib/swal";
 
@@ -252,12 +253,10 @@ function EditPMContent() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex cursor-pointer items-center gap-2">
-                  <input
-                    type="checkbox"
+                <label className="inline-flex min-h-10 cursor-pointer items-center gap-2">
+                  <Checkbox
                     checked={isOutsource}
-                    onChange={(e) => setIsOutsource(e.target.checked)}
-                    className="h-4 w-4 accent-[var(--cmms-primary)]"
+                    onCheckedChange={(v) => setIsOutsource(v === true)}
                   />
                   <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
                 </label>

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
@@ -296,12 +297,10 @@ export default function SageShipmentsPage() {
             </SelectContent>
           </Select>
 
-          <label className="inline-flex items-center gap-2 text-sm cursor-pointer select-none">
-            <input
-              type="checkbox"
+          <label className="inline-flex min-h-10 items-center gap-2 text-sm cursor-pointer select-none">
+            <Checkbox
               checked={showOnlyPending}
-              onChange={(e) => setShowOnlyPending(e.target.checked)}
-              className="h-4 w-4 shrink-0 rounded border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] text-[var(--cmms-primary)] focus-visible:ring-2 focus-visible:ring-[var(--cmms-primary)]"
+              onCheckedChange={(v) => setShowOnlyPending(v === true)}
             />
             แสดงเฉพาะที่ยังไม่ตัดครบ
           </label>
