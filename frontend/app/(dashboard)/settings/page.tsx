@@ -775,7 +775,7 @@ export default function SettingsPage() {
       {/* ═══ HEADER ═══ */}
       <div style={layoutStyle("header")}>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[220px] flex-1">
+          <div className="relative min-w-0 flex-1 sm:min-w-[220px]">
             <MagnifyingGlassIcon
               className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--cmms-text-muted)]"
               strokeWidth={1.75}
@@ -932,18 +932,33 @@ export default function SettingsPage() {
                         )}
                       </div>
 
-                      <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 12 }}>
+                      <div style={{ borderTop: "1px solid var(--cmms-border)", paddingTop: 12, minWidth: 0 }}>
                         <p className="text-sm text-muted-foreground">ตัวอย่างการตั้งค่า:</p>
                         <VStack gap={1} style={{ marginTop: 8 }}>
                           {topicSettings.slice(0, 3).map((s) => {
                             const meta = KEY_META[s.setting_key] ?? { label: s.setting_key };
                             const isBool = BOOLEAN_KEYS.has(s.setting_key);
                             const value = form[s.setting_key] ?? "";
+                            const display = isBool ? (value === "1" ? "เปิด" : "ปิด") : (value || "(ว่าง)");
+                            const displayShort = String(display).length > 40 ? `${String(display).slice(0, 40)}…` : String(display);
                             return (
-                              <HStack key={s.id} gap={2} vAlign="center" wrap="wrap">
+                              <HStack key={s.id} gap={2} vAlign="center" wrap="wrap" style={{ minWidth: 0 }}>
                                 <span className="text-sm font-semibold">{meta.label}</span>
-                                <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-                                  {isBool ? (value === "1" ? "เปิด" : "ปิด") : value || "(ว่าง)"}
+                                <span
+                                  className="cmms-andon-chip"
+                                  title={String(display)}
+                                  style={{
+                                    background: "var(--cmms-bg-muted)",
+                                    color: "var(--cmms-text-secondary)",
+                                    maxWidth: "100%",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    display: "inline-block",
+                                    verticalAlign: "middle",
+                                  }}
+                                >
+                                  {displayShort}
                                 </span>
                               </HStack>
                             );
