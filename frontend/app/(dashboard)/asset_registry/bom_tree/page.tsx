@@ -286,7 +286,7 @@ export default function BOMTreePage() {
           {/* เลือกเครื่องจักร + ข้อมูลเครื่อง */}
           <Card>
             <CardContent className="flex flex-wrap items-center gap-6 p-5">
-              <div className="flex min-w-[320px] flex-1 items-center gap-3">
+              <div className="flex min-w-0 flex-1 flex-col items-stretch gap-2 sm:min-w-[320px] sm:flex-row sm:items-center sm:gap-3">
                 <p className="whitespace-nowrap text-sm font-medium">เลือกเครื่องจักร:</p>
                 <div className="flex-1">
                   <Select
