@@ -190,6 +190,7 @@ export default function EngineeringChangeDetailPage() {
   if (error || !d) {
     return (
       <div className="space-y-4">
+        <h1 className="text-2xl font-bold tracking-tight">ไม่พบรายการ ECR</h1>
         <Alert variant="danger" title="โหลด ECR ไม่สำเร็จ" description={error || "ไม่พบข้อมูล"} />
         <Link href="/engineering-changes" className={buttonVariants({ variant: "outline" })}>
           <ArrowLeft size={15} aria-hidden="true" /> กลับไปรายการ ECR
