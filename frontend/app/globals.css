@@ -2445,11 +2445,13 @@ next-route-announcer {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
+  max-width: 100%;
   align-items: baseline;
   gap: 8px;
   font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: 2.15rem;
+  overflow-wrap: anywhere;
   line-height: 1;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;

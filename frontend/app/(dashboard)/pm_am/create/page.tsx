@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import SuccessDialog from "@/components/SuccessDialog";
 
 export default function PMCreatePage() {
@@ -180,8 +181,8 @@ export default function PMCreatePage() {
                   const tid = Number(u.id);
                   const checked = teamMembers.includes(tid);
                   return (
-                    <label key={u.id} className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                      <input type="checkbox" checked={checked} onChange={() => setTeamMembers(prev => checked ? prev.filter(x => x !== tid) : [...prev, tid])} />
+                    <label key={u.id} className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
+                      <Checkbox checked={checked} onCheckedChange={() => setTeamMembers(prev => checked ? prev.filter(x => x !== tid) : [...prev, tid])} />
                       <span className={`text-sm ${checked ? "font-semibold" : ""}`}>{u.full_name || u.username || `#${u.id}`}</span>
                     </label>
                   );
@@ -209,12 +210,10 @@ export default function PMCreatePage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
+            <label className="inline-flex min-h-10 cursor-pointer items-center gap-2">
+              <Checkbox
                 checked={isOutsource}
-                onChange={(e) => setIsOutsource(e.target.checked)}
-                className="h-4 w-4 accent-[var(--cmms-primary)]"
+                onCheckedChange={(v) => setIsOutsource(v === true)}
               />
               <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
             </label>

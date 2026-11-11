@@ -152,7 +152,7 @@ export default function SpareBalancesPage() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-primary-light)] text-[var(--cmms-primary-hover)]">
               <Boxes className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">รายการอะไหล่</p>
               <div className="cmms-kpi-value">
                 {(stats.count)}
@@ -166,9 +166,9 @@ export default function SpareBalancesPage() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-success-light)] text-[var(--cmms-success-dark)]">
               <CircleDollarSign className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">มูลค่าคลังรวม</p>
-              <div className="cmms-kpi-value">
+              <div className="cmms-kpi-value break-words">
                 {fmt(stats.totalValue)}
                 <span className="cmms-kpi-unit">บาท</span>
               </div>
@@ -180,7 +180,7 @@ export default function SpareBalancesPage() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-warning-light)] text-[var(--cmms-warning-dark)]">
               <TriangleAlert className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">ต่ำกว่า Min</p>
               <div className="cmms-kpi-value">
                 {(stats.low)}
@@ -194,7 +194,7 @@ export default function SpareBalancesPage() {
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-danger-light)] text-[var(--cmms-danger-dark)]">
               <TriangleAlert className="w-5 h-5" strokeWidth={1.75} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">หมดคลัง</p>
               <div className="cmms-kpi-value">
                 {(stats.out)}
