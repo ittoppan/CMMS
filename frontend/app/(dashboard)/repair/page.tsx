@@ -22,6 +22,7 @@ import html2canvas from "html2canvas";
 import WorkOrderClosureDocument, { WorkOrderDocData, WorkOrderPart } from "../../../components/WorkOrderClosureDocument";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -392,12 +393,11 @@ export default function WorkOrdersPage() {
       header: t("tbl.select"),
       enableSorting: false,
       cell: ({ row }) => (
-        <input
-          type="checkbox"
+        <Checkbox
           aria-label={`เลือกงาน ${row.original.woNumber}`}
           checked={selected.has(Number(row.original.rawId))}
-          onChange={() => toggleSelect(Number(row.original.rawId))}
-          className="h-5 w-5 cursor-pointer"
+          onCheckedChange={() => toggleSelect(Number(row.original.rawId))}
+          className="cursor-pointer"
         />
       ),
     },
@@ -633,12 +633,11 @@ export default function WorkOrdersPage() {
         <CardContent className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <label className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[13px] text-[var(--cmms-text-secondary)]">
-              <input
-                type="checkbox"
+              <Checkbox
                 aria-label={t("action.select_all_page")}
                 checked={filtered.length > 0 && selected.size === filtered.length}
-                onChange={toggleAll}
-                className="h-5 w-5 cursor-pointer"
+                onCheckedChange={toggleAll}
+                className="cursor-pointer"
               />{t("action.select_all")}</label>
             {selected.size > 0 && (
               <Badge variant="primary">เลือก {selected.size} รายการ</Badge>

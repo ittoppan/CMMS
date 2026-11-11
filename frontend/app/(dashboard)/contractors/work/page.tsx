@@ -9,6 +9,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
@@ -347,7 +348,7 @@ export default function ContractorWorkPage() {
               <input className={inputCls} value={aEndCond} onChange={(e) => setAEndCond(e.target.value)} />
             </label>
             <label className="flex items-end gap-2 pb-2">
-              <input type="checkbox" checked={aPermit} onChange={(e) => setAPermit(e.target.checked)} className="h-5 w-5" />
+              <Checkbox checked={aPermit} onCheckedChange={(v) => setAPermit(v === true)} />
               <span className="text-sm">ต้องใช้ใบอนุญาตทำงาน (PTW)</span>
             </label>
             <label className="block sm:col-span-2 lg:col-span-3">
@@ -385,7 +386,7 @@ export default function ContractorWorkPage() {
           </SelectContent>
         </Select>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={onlyActive} onChange={(e) => setOnlyActive(e.target.checked)} className="h-5 w-5" />
+          <Checkbox checked={onlyActive} onCheckedChange={(v) => setOnlyActive(v === true)} />
           เฉพาะงานที่ยังไม่ปิด
         </label>
         <Button variant="secondary" onClick={applyFilters}><Search size={15} aria-hidden="true" /> ค้นหา</Button>
