@@ -652,7 +652,7 @@ h1, h2, h3, h4 {
   background: var(--cmms-success); border-color: var(--cmms-success); color: white;
 }
 .cmms-step-label {
-  font-size: 0.68rem; font-weight: 600; color: var(--cmms-text-muted);
+  font-size: 0.75rem; font-weight: 600; color: var(--cmms-text-muted);
   max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
 }
 .cmms-step.active .cmms-step-label { color: var(--cmms-primary); font-weight: 700; }
@@ -1175,7 +1175,7 @@ html.cmms-no-anim *::after {
   display: flex; align-items: center; justify-content: center; color: #fff;
 }
 .cmms-liff-eyebrow {
-  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
   color: rgba(255,255,255,0.78); margin: 0; line-height: 1.4;
 }
 .cmms-liff-title {
@@ -1184,7 +1184,7 @@ html.cmms-no-anim *::after {
 }
 .cmms-liff-chip {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.7rem; font-weight: 700; color: #fff;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
   background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.3);
   border-radius: 100px; padding: 4px 10px; line-height: 1.2;
 }
@@ -1359,7 +1359,7 @@ html.cmms-no-anim *::after {
 /* Mobile tweaks (F-EN-03) */
 @media (max-width: 768px) {
   .cmms-stepper { padding: 11px 10px; }
-  .cmms-step-label { font-size: 0.66rem; }
+  .cmms-step-label { font-size: 0.75rem; }
   .cmms-liff-title { font-size: 1.3rem; }
   .cmms-success-card { padding: 32px 20px; margin: 0 16px; }
   .cmms-success-card [class*="HStack"] { flex-direction: column; align-items: stretch; }
