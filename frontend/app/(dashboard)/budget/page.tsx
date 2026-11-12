@@ -21,6 +21,7 @@ import {
   fetchBudget, fetchBudgetVsActual, fetchCostFilters, costPost, fmtMoney, ALERT_LABELS,
 } from "@/lib/cost";
 import { confirmThen } from "@/lib/swal";
+import AnimatedDialog from "@/components/AnimatedDialog";
 
 const STATUS_META: Record<string, { th: string; variant: "neutral" | "info" | "success" }> = {
   draft: { th: "ร่าง", variant: "neutral" },
@@ -381,15 +382,16 @@ function BudgetModal({ modal, symbol, departments, busy, onClose, onSave }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/50" onClick={busy ? undefined : onClose} />
-      <div className="relative w-full max-w-md rounded-2xl border border-[var(--cmms-border)] bg-[var(--cmms-card)] p-5 shadow-2xl">
-        <h2 className="mb-1 text-lg font-bold">
-          {modal.kind === "create" && "สร้างงบประมาณรายเดือน"}
-          {modal.kind === "edit" && `แก้ไขงบ ${THAI_MONTHS[base!.month]} ${base!.year}`}
-          {modal.kind === "adjust" && `ปรับงบ ${THAI_MONTHS[base!.month]} ${base!.year}`}
-        </h2>
-        <p className="mb-4 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{modal.kind === "adjust" ? `งบสุทธิปัจจุบัน ${fmtMoney(base!.effective_budget, symbol)} · ใช้จริง ${fmtMoney(base!.actual, symbol)}` : "งบที่ตั้งไว้สำหรับการซ่อมบำรุงประจำเดือน"}</p>
+    <AnimatedDialog open onClose={busy ? () => {} : onClose} className="max-w-md">
+      <div className="space-y-4 p-5">
+        <div>
+          <h2 className="text-lg font-bold">
+            {modal.kind === "create" && "สร้างงบประมาณรายเดือน"}
+            {modal.kind === "edit" && `แก้ไขงบ ${THAI_MONTHS[base!.month]} ${base!.year}`}
+            {modal.kind === "adjust" && `ปรับงบ ${THAI_MONTHS[base!.month]} ${base!.year}`}
+          </h2>
+          <p className="mt-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>{modal.kind === "adjust" ? `งบสุทธิปัจจุบัน ${fmtMoney(base!.effective_budget, symbol)} · ใช้จริง ${fmtMoney(base!.actual, symbol)}` : "งบที่ตั้งไว้สำหรับการซ่อมบำรุงประจำเดือน"}</p>
+        </div>
         {err && <Alert variant="danger" title="ระบุข้อมูลไม่ครบ" description={err} />}
 
         {(modal.kind === "create") && (
@@ -436,14 +438,14 @@ function BudgetModal({ modal, symbol, departments, busy, onClose, onSave }: {
           </div>
         )}
 
-        <div className="mt-5 flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-1">
           <button type="button" onClick={onClose} disabled={busy} className="rounded-xl border border-[var(--cmms-border)] px-4 py-2 text-sm font-medium disabled:opacity-50">ยกเลิก</button>
           <button type="button" onClick={submit} disabled={busy} className="inline-flex items-center gap-2 rounded-xl bg-[var(--cmms-primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">
             {busy ? "กำลังบันทึก..." : "บันทึก"}
           </button>
         </div>
       </div>
-    </div>
+    </AnimatedDialog>
   );
 }
 
