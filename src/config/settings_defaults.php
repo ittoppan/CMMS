@@ -50,6 +50,7 @@ function settingsDefaultValues(): array {
         'enable_mtbf_analytics' => '1',
         'escalation_alert'      => '1',
         'escalation_hours'      => '24',
+        'sla_overdue_alert'     => '1',
         'max_login_attempts'    => '5',
         'notification_sound'    => 'chime',
         'org_chart_enabled'     => '1',
