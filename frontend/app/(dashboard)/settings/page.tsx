@@ -180,6 +180,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   enable_mtbf_analytics: { label: "เปิดใช้งานวิเคราะห์ MTBF/MTTR" },
   escalation_alert: { label: "เปิดการแจ้งเตือนงานด่วนค้าง (Escalation)" },
   escalation_hours: { label: "งานค้างเกินกี่ชั่วโมงถึงแจ้งเตือน", hint: "ค่าเริ่มต้น 24 ชม." },
+  sla_overdue_alert: { label: "เปิดการแจ้งเตือนงานเกินกำหนด SLA", hint: "แจ้งเตือนเมื่อเลย sla_due_at หรือ planned_end_at" },
   // data retention
   lang_default: { label: "ภาษาหลักของระบบ", hint: "ไทย / English — ใช้เป็นค่าเริ่มต้นของหน้า UI (ฐานภาษา)" },
   log_retention_enabled: { label: "ลบ notification_logs อัตโนมัติ", hint: "เปิดแล้วระบบจะลบประวัติการแจ้งเตือนที่เก่ากว่าที่กำหนดทุกวัน (ผ่าน watchdog)" },
@@ -288,7 +289,7 @@ const BOOLEAN_KEYS = new Set([
   "enable_leaderboard", "enable_machine_bom", "enable_mtbf_analytics", "iso_watermark_enabled",
   "line_notify_enabled", "low_stock_alert", "org_chart_enabled", "qr_code_enabled",
   "require_root_cause", "auto_assign_pm", "auto_assign_repair", "require_approval_repair",
-  "spare_require_approval", "escalation_alert", "push_alert_enabled", "smtp_enabled",
+  "spare_require_approval", "escalation_alert", "sla_overdue_alert", "push_alert_enabled", "smtp_enabled",
   "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
   "daily_summary_enabled", "auto_req_low_stock", "pm_deferral_enabled",
   "animations_enabled",
