@@ -184,6 +184,9 @@ export const PAGE_CATEGORIES: PageCategory[] = [
       { value: "/settings/services", label: "บริการและสถานะการรัน" },
       { value: "/settings/pwa", label: "ไอคอน PWA (Mobile App)" },
       { value: "/settings/design", label: "ปรับแต่งหน้าตาระบบ (Page Designer)" },
+      { value: "/settings/repair-options", label: "ตัวเลือกใบแจ้งซ่อม" },
+      { value: "/settings/master/departments", label: "ตั้งค่าแผนก (ข้อมูลหลัก)" },
+      { value: "/settings/master/locations", label: "ตั้งค่าที่ตั้ง/สถานที่ (ลำดับชั้น)" },
     ],
   },
 ];

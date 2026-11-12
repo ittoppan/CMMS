@@ -113,7 +113,7 @@ export default function HomePage() {
         title: t(g.titleKey),
         items: g.items
           .filter((it) => !it.secondary && canShow(it.perm))
-          .map((it) => ({ href: it.href, icon: it.icon, label: t(it.labelKey) })),
+          .map((it) => ({ href: it.href, icon: it.icon, label: it.label ?? (it.labelKey ? t(it.labelKey) : "") })),
       }))
         .filter((g) => g.items.length > 0)
         .map((g) => ({ ...g, items: g.items.slice(0, 4) })),
@@ -173,7 +173,7 @@ export default function HomePage() {
             <h3 className="cmms-home-group-title">ใช้บ่อย</h3>
             <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
               {freqItems.map((it) => (
-                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={t(it.labelKey)} counts={kpis?.counts ?? {}} />
+                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label ?? (it.labelKey ? t(it.labelKey) : "")} counts={kpis?.counts ?? {}} />
               ))}
             </div>
           </section>

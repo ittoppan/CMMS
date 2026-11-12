@@ -22,6 +22,7 @@ import {
   ListChecks,
   PlayCircle,
   Building2,
+  MapPinned,
   Box,
   Scale,
   ArrowLeftRight,
@@ -90,7 +91,8 @@ import { t } from "@/lib/i18n";
 
 export interface NavItemDef {
   perm: string;
-  labelKey: string;
+  labelKey?: string;
+  label?: string;
   href: string;
   icon: LucideIcon;
   /** เมนูระดับสูง/ใช้ไม่บ่อย — ซ่อนไว้หลังปุ่ม "แสดงเพิ่มเติม" ในหมวดนั้น */
@@ -334,6 +336,8 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "settings", labelKey: "menu.settings_pwa", href: "/settings/pwa", icon: Smartphone, secondary: true },
       { perm: "settings", labelKey: "menu.settings_design", href: "/settings/design", icon: Paintbrush, secondary: true },
       { perm: "settings", labelKey: "menu.settings_repair_options", href: "/settings/repair-options", icon: Wrench, secondary: true },
+      { perm: "settings", label: "ตั้งค่าแผนก (ข้อมูลหลัก)", href: "/settings/master/departments", icon: Building2, secondary: true },
+      { perm: "settings", label: "ตั้งค่าที่ตั้ง/สถานที่ (ลำดับชั้น)", href: "/settings/master/locations", icon: MapPinned, secondary: true },
       { perm: "system_health", labelKey: "menu.system_health", href: "/settings/health", icon: Activity, secondary: true },
       { perm: "editor/builder", labelKey: "menu.builder", href: "/editor/builder", icon: LayoutGrid, secondary: true },
       { perm: "pages", labelKey: "menu.pages", href: "/pages", icon: FileText, secondary: true },
@@ -358,7 +362,7 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
     visibleItems: group.items.filter(
       (item) =>
         canShow(item.perm) &&
-        (!q || t(item.labelKey).toLowerCase().includes(q))
+        (!q || (item.label ?? (item.labelKey ? t(item.labelKey) : "")).toLowerCase().includes(q))
     ),
   })).filter((g) => g.visibleItems.length > 0);
 
@@ -528,7 +532,7 @@ function SidebarGroup({
                   >
                     <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
                   </span>
-                  <span className="min-w-0 flex-1 truncate">{t(item.labelKey)}</span>
+                  <span className="min-w-0 flex-1 truncate">{item.label ?? (item.labelKey ? t(item.labelKey) : "")}</span>
                   {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white/80" aria-hidden="true" />}
                 </Link>
               </li>
