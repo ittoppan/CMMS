@@ -213,8 +213,6 @@ if ($escOn === '1') {
     echo "escalation alert: disabled (escalation_alert != 1)\n";
 }
 
-echo "== done: {$sent} alert(s) — ตรวจสอบ notification_logs เพื่อยืนยัน ==\n";
-
 // ---------------- 4) งานเกิน SLA/กำหนด (sla_due_at หรือ planned_end_at) ----------------
 $slaOn = settingValue($pdo, 'sla_overdue_alert', '1');
 if ($slaOn === '1') {
@@ -262,6 +260,57 @@ if ($slaOn === '1') {
     }
 } else {
     echo "sla overdue alert: disabled (sla_overdue_alert != 1)\n";
+}
+
+
+// ---------------- 5) RCA actions เกินกำหนด (CAPA/action ค้าง) ----------------
+$rcaActionOn = settingValue($pdo, 'rca_action_alert', '1');
+if ($rcaActionOn === '1') {
+    $rcaRows = $pdo->query("
+        SELECT ra.id, ra.rca_id, ra.title AS action_title, ra.due_date, ra.status, ra.action_type,
+               r.rca_code, r.title AS rca_title, r.repair_id,
+               u.full_name AS owner_name
+        FROM rca_actions ra
+        JOIN rca r ON r.id = ra.rca_id
+        LEFT JOIN users u ON u.id = ra.owner_id
+        WHERE ra.status NOT IN ('completed','verified','closed','cancelled','done')
+          AND ra.due_date IS NOT NULL
+          AND ra.due_date < CURDATE()
+          AND (r.status IS NULL OR r.status NOT IN ('closed','cancelled'))
+        ORDER BY ra.due_date ASC
+        LIMIT 20
+    ")->fetchAll();
+    echo "RCA actions overdue: " . count($rcaRows) . "\n";
+    foreach ($rcaRows as $ra) {
+        $needle = 'RCA-ACTION-' . $ra['id'];
+        if (!$force && alreadyAlerted($pdo, $needle)) {
+            echo "  skip (alerted <24h): RCA action {$ra['id']}\n";
+            continue;
+        }
+        $days = (int)((strtotime(date('Y-m-d')) - strtotime($ra['due_date'])) / 86400);
+        $rcaLabel = $ra['rca_code'] ?: ('RCA#' . $ra['rca_id']);
+        $msg = "\n🛠️ [RCA Action เกินกำหนด]\n"
+             . "----------------------------------\n"
+             . "RCA: {$rcaLabel} - {$ra['rca_title']}\n"
+             . "Action: {$ra['action_title']}\n"
+             . "ประเภท: " . ($ra['action_type'] ?: '-') . "\n"
+             . "ผู้รับผิดชอบ: " . ($ra['owner_name'] ?: 'ยังไม่ระบุ') . "\n"
+             . "ครบกำหนด: {$ra['due_date']} (เกิน {$days} วัน)\n"
+             . "----------------------------------\n"
+             . "📋 ดู RCA: " . rtrim((string)publicBaseUrl(), '/') . "/rca/{$ra['rca_id']}";
+        if (NotificationService::isLineTemplateEnabled('line_tpl_breakdown')) {
+            NotificationService::sendLineMessage($msg);
+            $sent++;
+        }
+        if (settingValue($pdo, 'push_alert_enabled', '1') === '1') {
+            try {
+                WebPushService::sendToUsers($pdo, null, '🛠️ RCA Action เกินกำหนด', $rcaLabel . ' — ' . ($ra['action_title'] ?: ''), '/rca/' . $ra['rca_id']);
+            } catch (Throwable $ex) {}
+        }
+        echo "  alert RCA ACTION OVERDUE: #{$ra['id']} ({$rcaLabel}, due {$ra['due_date']}, {$days}d)\n";
+    }
+} else {
+    echo "rca action alert: disabled (rca_action_alert != 1)\n";
 }
 
 echo "== done: {$sent} alert(s) — ตรวจสอบ notification_logs เพื่อยืนยัน ==
