@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +13,19 @@ import AndonBadge from "@/components/AndonBadge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ToastProvider";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
-import { FileText, Plus, Search, BookMarked, QrCode, RefreshCw, AlertTriangle, CheckCheck } from "lucide-react";
+import { FileText, Plus, Search, BookMarked, QrCode, RefreshCw, AlertTriangle, CheckCheck, Bookmark, BookmarkCheck } from "lucide-react";
 import {
   fetchDocConfig,
   fetchDocDashboard,
@@ -32,6 +43,40 @@ import {
   type DocumentRow,
 } from "@/lib/document";
 import { cn } from "@/lib/cn";
+import {
+  listSavedViews,
+  saveSavedView,
+  deleteSavedView,
+  setDefaultSavedView,
+  clearDefaultSavedView,
+  type SavedView,
+} from "@/lib/saved-views";
+
+const DOC_VIEW_ENTITY = "documents";
+
+function readDocFilters(sp: URLSearchParams) {
+  return {
+    search: (sp.get("q") || "").trim(),
+    status: (sp.get("status") || "").trim(),
+    docType: (sp.get("doc_type") || sp.get("type") || "").trim(),
+    owner: (sp.get("owner") || "").trim(),
+  };
+}
+
+function hasExplicitDocParams(sp: URLSearchParams) {
+  return sp.has("q") || sp.has("status") || sp.has("doc_type") || sp.has("type") || sp.has("owner");
+}
+
+function buildDocParams(state: { search: string; status: string; docType: string; owner: string }, base?: URLSearchParams) {
+  const sp = new URLSearchParams(base ? base.toString() : "");
+  sp.delete("type");
+  const q = state.search.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  if (state.status) sp.set("status", state.status); else sp.delete("status");
+  if (state.docType) sp.set("doc_type", state.docType); else sp.delete("doc_type");
+  if (state.owner) sp.set("owner", state.owner); else sp.delete("owner");
+  return sp;
+}
 
 function Kpi({ label, value, sub, lamp }: { label: string; value: number; sub?: string; lamp?: "ok" | "warn" | "down" | "idle" }) {
   return (
@@ -69,6 +114,11 @@ function lampTone(tone: string | undefined): "ok" | "warn" | "down" | "idle" {
 
 export default function DocumentsPage() {
   const hero = usePageHero("documents");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { showToast } = useToast();
+
   const layout = usePageLayout("/documents", ["hero", "kpi", "filters", "content"]);
   const layoutStyle = (id: string) => ({
     order: layout.orderOf(id),
@@ -83,15 +133,111 @@ export default function DocumentsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [docType, setDocType] = useState("");
-  const [owner, setOwner] = useState("");
+  const initialFilters = useMemo(() => readDocFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
+  const [search, setSearch] = useState(initialFilters.search);
+  const [status, setStatus] = useState(initialFilters.status);
+  const [docType, setDocType] = useState(initialFilters.docType);
+  const [owner, setOwner] = useState(initialFilters.owner);
+
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string>("");
+  const [saveViewOpen, setSaveViewOpen] = useState(false);
+  const [saveViewName, setSaveViewName] = useState("");
+  const [saveAsDefault, setSaveAsDefault] = useState(false);
+  const appliedSnapshotRef = useRef<string>("");
+  const initializedRef = useRef(false);
+
+  const currentFilterState = useMemo(
+    () => ({ search, status, docType, owner }),
+    [search, status, docType, owner]
+  );
+
+  const snapshotOf = useCallback((s: { search: string; status: string; docType: string; owner: string }) => {
+    return JSON.stringify({ q: s.search.trim(), status: s.status || "", doc_type: s.docType || "", owner: s.owner || "" });
+  }, []);
+
+  const syncUrl = useCallback((next: { search: string; status: string; docType: string; owner: string }, mode: "replace" | "push" = "replace") => {
+    const sp = buildDocParams(next, new URLSearchParams(searchParams.toString()));
+    const qs = sp.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    if (mode === "push") router.push(url); else router.replace(url);
+  }, [pathname, router, searchParams]);
+
+  const setFilters = useCallback((patch: Partial<{ search: string; status: string; docType: string; owner: string }>) => {
+    const next = { search, status, docType, owner, ...patch };
+    setSearch(next.search);
+    setStatus(next.status);
+    setDocType(next.docType);
+    setOwner(next.owner);
+    syncUrl(next, "replace");
+  }, [docType, owner, search, status, syncUrl]);
+
+  const applyViewState = useCallback((view: SavedView | null) => {
+    if (!view) {
+      const next = { search: "", status: "", docType: "", owner: "" };
+      setSearch(next.search); setStatus(next.status); setDocType(next.docType); setOwner(next.owner);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId("");
+      syncUrl(next, "replace");
+      return;
+    }
+    const f = view.filters || {};
+    const next = {
+      search: (view.search ?? (typeof f.search === "string" ? f.search : typeof f.q === "string" ? f.q : "")) || "",
+      status: typeof f.status === "string" ? f.status : "",
+      docType: typeof f.doc_type === "string" ? f.doc_type : (typeof f.docType === "string" ? f.docType : ""),
+      owner: typeof f.owner === "string" ? f.owner : (typeof f.owner_id === "string" ? f.owner_id : ""),
+    };
+    setSearch(next.search); setStatus(next.status); setDocType(next.docType); setOwner(next.owner);
+    appliedSnapshotRef.current = snapshotOf(next);
+    setActiveViewId(view.id);
+    syncUrl(next, "replace");
+  }, [snapshotOf, syncUrl]);
 
   useEffect(() => {
     fetchDocConfig().then(setCfg).catch(() => {});
     fetchDocOptions().then(setOptions).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setSavedViews(listSavedViews(DOC_VIEW_ENTITY));
+  }, []);
+
+  useEffect(() => {
+    const sp = new URLSearchParams(searchParams.toString());
+    const fromUrl = readDocFilters(sp);
+    setSearch(fromUrl.search);
+    setStatus(fromUrl.status);
+    setDocType(fromUrl.docType);
+    setOwner(fromUrl.owner);
+
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      if (!hasExplicitDocParams(sp)) {
+        const views = listSavedViews(DOC_VIEW_ENTITY);
+        const def = views.find((v) => v.isDefault);
+        if (def) {
+          const f = def.filters || {};
+          const next = {
+            search: (def.search ?? (typeof f.search === "string" ? f.search : typeof f.q === "string" ? f.q : "")) || "",
+            status: typeof f.status === "string" ? f.status : "",
+            docType: typeof f.doc_type === "string" ? f.doc_type : (typeof f.docType === "string" ? f.docType : ""),
+            owner: typeof f.owner === "string" ? f.owner : (typeof f.owner_id === "string" ? f.owner_id : ""),
+          };
+          setSearch(next.search); setStatus(next.status); setDocType(next.docType); setOwner(next.owner);
+          appliedSnapshotRef.current = snapshotOf(next);
+          setActiveViewId(def.id);
+          const qs = buildDocParams(next).toString();
+          router.replace(qs ? `${pathname}?${qs}` : pathname);
+          return;
+        }
+      }
+      appliedSnapshotRef.current = snapshotOf(fromUrl);
+      return;
+    }
+  }, [pathname, router, searchParams, snapshotOf]);
+
+  const dirty = snapshotOf(currentFilterState) !== (appliedSnapshotRef.current || snapshotOf({ search: "", status: "", docType: "", owner: "" }));
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,6 +264,45 @@ export default function DocumentsPage() {
   const users = options?.users ?? [];
   const t = dash?.totals;
   const can = cfg?.can;
+
+  const openSaveView = () => {
+    setSaveViewName(activeViewId ? (savedViews.find((v) => v.id === activeViewId)?.name || "") : "");
+    setSaveAsDefault(false);
+    setSaveViewOpen(true);
+  };
+
+  const handleSaveView = () => {
+    const input = {
+      name: saveViewName,
+      filters: { status, doc_type: docType, owner } as Record<string, string>,
+      search,
+      isDefault: saveAsDefault,
+    };
+    const res = saveSavedView(DOC_VIEW_ENTITY, input as any, undefined, activeViewId || undefined);
+    if (!res.ok) { showToast("error", res.error); return; }
+    setSavedViews(res.views);
+    setActiveViewId(res.view.id);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+    setSaveViewOpen(false);
+    showToast("success", activeViewId ? "อัปเดตมุมมองแล้ว" : "บันทึกมุมมองแล้ว");
+  };
+
+  const handleDeleteView = (id: string) => {
+    const views = deleteSavedView(DOC_VIEW_ENTITY, id);
+    setSavedViews(views);
+    if (activeViewId === id) setActiveViewId("");
+    showToast("success", "ลบมุมมองแล้ว");
+  };
+
+  const handleSetDefaultView = (id: string) => {
+    const views = setDefaultSavedView(DOC_VIEW_ENTITY, id);
+    setSavedViews(views);
+    showToast("success", "ตั้งเป็นมุมมองเริ่มต้นแล้ว");
+  };
+
+  const handleResetFilters = () => {
+    applyViewState(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -158,42 +343,95 @@ export default function DocumentsPage() {
       </div>
 
       {/* Filters */}
-      <div style={layoutStyle("filters")} className="flex flex-wrap items-center gap-2">
-        <div className="relative">
-          <Search size={15} aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") load(); }}
-            placeholder="ค้นหาชื่อ / เลขเอกสาร"
-            className="w-[280px] pl-8"
-            aria-label="ค้นหาเอกสารควบคุม"
-          />
+      <div style={layoutStyle("filters")} className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search size={15} aria-hidden="true" className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setFilters({ search: e.target.value })}
+              onKeyDown={(e) => { if (e.key === "Enter") load(); }}
+              placeholder="ค้นหาชื่อ / เลขเอกสาร"
+              className="w-[280px] pl-8"
+              aria-label="ค้นหาเอกสารควบคุม"
+            />
+          </div>
+          <Select value={status || "all"} onValueChange={(v) => setFilters({ status: v === "all" ? "" : v })}>
+            <SelectTrigger className="w-44" aria-label="กรองตามสถานะเอกสาร"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">สถานะทั้งหมด</SelectItem>
+              {Object.entries(DOC_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={docType || "all"} onValueChange={(v) => setFilters({ docType: v === "all" ? "" : v })}>
+            <SelectTrigger className="w-52" aria-label="กรองตามประเภทเอกสาร"><SelectValue placeholder="ประเภททั้งหมด" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">ประเภททั้งหมด</SelectItem>
+              {types.map((x) => <SelectItem key={x.key} value={x.key}>{x.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={owner || "all"} onValueChange={(v) => setFilters({ owner: v === "all" ? "" : v })}>
+            <SelectTrigger className="w-48" aria-label="กรองตามเจ้าของเอกสาร"><SelectValue placeholder="เจ้าของทั้งหมด" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">เจ้าของทั้งหมด</SelectItem>
+              {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {(search || status || docType || owner) && (
+            <Button variant="ghost" onClick={() => applyViewState(null)}>ล้างตัวกรอง</Button>
+          )}
         </div>
-        <Select value={status} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-44" aria-label="กรองตามสถานะเอกสาร"><SelectValue placeholder="สถานะทั้งหมด" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">สถานะทั้งหมด</SelectItem>
-            {Object.entries(DOC_STATUS_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={docType} onValueChange={(v) => setDocType(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-52" aria-label="กรองตามประเภทเอกสาร"><SelectValue placeholder="ประเภททั้งหมด" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ประเภททั้งหมด</SelectItem>
-            {types.map((x) => <SelectItem key={x.key} value={x.key}>{x.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={owner} onValueChange={(v) => setOwner(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-48" aria-label="กรองตามเจ้าของเอกสาร"><SelectValue placeholder="เจ้าของทั้งหมด" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">เจ้าของทั้งหมด</SelectItem>
-            {users.map((u) => <SelectItem key={u.id} value={String(u.id)}>{u.full_name}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        {(search || status || docType || owner) && (
-          <Button variant="ghost" onClick={() => { setSearch(""); setStatus(""); setDocType(""); setOwner(""); }}>ล้างตัวกรอง</Button>
-        )}
+
+        {/* Saved views (v1: localStorage per entity, URL เป็น source of truth) */}
+        <div className="flex w-full flex-wrap items-center gap-2 rounded-[var(--cmms-radius)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] p-2">
+          <div className="flex items-center gap-2 text-sm font-medium text-[var(--cmms-text-secondary)]">
+            <BookmarkCheck className="h-4 w-4" aria-hidden="true" />
+            <span>มุมมองที่บันทึก</span>
+            {dirty && <Badge variant="neutral">แก้ไขแล้ว</Badge>}
+          </div>
+          <Select
+            value={activeViewId || "__none__"}
+            onValueChange={(v) => {
+              if (v === "__none__") return;
+              const view = savedViews.find((sv) => sv.id === v);
+              if (view) applyViewState(view);
+            }}
+          >
+            <SelectTrigger aria-label="มุมมองที่บันทึก" className="w-full sm:w-56">
+              <SelectValue placeholder="เลือกมุมมอง..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">— เลือกมุมมอง —</SelectItem>
+              {savedViews.map((sv) => (
+                <SelectItem key={sv.id} value={sv.id}>
+                  {sv.name}{sv.isDefault ? " (ค่าเริ่มต้น)" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button type="button" variant="secondary" size="sm" onClick={openSaveView} className="gap-1.5">
+            <Bookmark className="h-4 w-4" aria-hidden="true" />
+            {activeViewId ? "บันทึกทับมุมมอง" : "บันทึกมุมมอง"}
+          </Button>
+          {activeViewId && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="outline" size="sm">จัดการมุมมอง</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => handleSetDefaultView(activeViewId)}>ตั้งเป็นค่าเริ่มต้น</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { const v = clearDefaultSavedView(DOC_VIEW_ENTITY); setSavedViews(v); showToast("success", "ยกเลิกค่าเริ่มต้นแล้ว"); }}>ยกเลิกค่าเริ่มต้นทั้งหมด</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteView(activeViewId)}>ลบมุมมองนี้</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {dirty && (
+            <Button type="button" variant="ghost" size="sm" onClick={handleResetFilters}>
+              รีเซ็ตตัวกรอง
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Registry table */}
@@ -301,8 +539,8 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
 
-      {/* ฉลาก QR ของเอกสาร — พิมพ์ผ่าน scan.php (CMMS-D) */}
-      {can?.publish && (
+        {/* ฉลาก QR ของเอกสาร — พิมพ์ผ่าน scan.php (CMMS-D) */}
+        {can?.publish && (
           <Card className="mt-4">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -318,6 +556,32 @@ export default function DocumentsPage() {
           </Card>
         )}
       </div>
+
+      <Dialog
+        open={saveViewOpen}
+        onClose={() => setSaveViewOpen(false)}
+        title={activeViewId ? "บันทึกทับมุมมอง" : "บันทึกมุมมองใหม่"}
+        description="บันทึกตัวกรองและคำค้นหาปัจจุบันของเอกสารควบคุม (เก็บในเครื่องนี้)"
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setSaveViewOpen(false)}>ยกเลิก</Button>
+            <Button type="button" onClick={handleSaveView}>บันทึก</Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <Input
+            label="ชื่อมุมมอง"
+            placeholder="เช่น รออนุมัติ, เอกสาร SOP ที่ใช้งานอยู่"
+            value={saveViewName}
+            onChange={(e) => setSaveViewName(e.target.value)}
+          />
+          <label className="flex items-center gap-2 text-sm text-[var(--cmms-text-secondary)]">
+            <Checkbox checked={saveAsDefault} onCheckedChange={(v) => setSaveAsDefault(!!v)} />
+            ตั้งเป็นมุมมองเริ่มต้นของหน้านี้
+          </label>
+        </div>
+      </Dialog>
     </div>
   );
 }
