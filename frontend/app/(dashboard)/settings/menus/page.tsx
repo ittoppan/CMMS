@@ -579,16 +579,22 @@ export default function MenuPermissionsPage() {
                   </div>
                   {/* ปุ่มล่างจำลอง (เดียวกับ cmms-mobile-bottom-nav) — สแกนอยู่กลางเสมอ */}
                   <div style={{ display: "flex", alignItems: "flex-end", borderTop: "1px solid var(--cmms-border)", background: "#fff", padding: "7px 2px 9px" }}>
-                    {previewItems.length === 0 && (
-                      <div style={{ flex: 1, textAlign: "center", fontSize: 12, color: "var(--cmms-text-secondary)", padding: "8px 0" }}>
-                        ยังไม่มีปุ่ม — จะใช้ค่าเริ่มต้นของบทบาท
-                      </div>
-                    )}
                     {(() => {
                       const items = previewItems.slice();
                       const sIdx = items.findIndex((x) => x.key === "scan");
                       let scanIt = null as typeof items[0] | null;
-                      if (sIdx >= 0) scanIt = items.splice(sIdx, 1)[0];
+                      if (sIdx >= 0) {
+                        scanIt = items.splice(sIdx, 1)[0];
+                      } else {
+                        const scanDef = bnKeys.find((b) => b.key === "scan");
+                        scanIt = {
+                          key: "scan",
+                          label: scanDef?.label || "สแกน",
+                          icon: BN_ICONS["scan"],
+                          hidden: (previewRole ? (perms[previewRole.id]?.["scan"] ?? 1) : 1) === 0,
+                          active: false,
+                        } as typeof items[0];
+                      }
                       const left = items.slice(0, Math.ceil(items.length / 2));
                       const right = items.slice(Math.ceil(items.length / 2));
                       const render = (it: (typeof previewItems)[0], forcedScan = false) => {
