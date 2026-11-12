@@ -613,7 +613,7 @@ export default function RepairRequestForm() {
 
   const selectedAsset = assets.find((a) => a.code === form.machineCode) || null;
   const isOtherMachine = form.machineCode === OTHER_MACHINE_CODE;
-  const machineDisplay = selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : form.machineOther.trim() || "เครื่องจักรอื่น";
+  const machineDisplay = selectedAsset ? `${selectedAsset.code} — ${selectedAsset.name}` : (form.machineOther.trim() || "ไม่ระบุเครื่องจักร");
 
   const refreshQueueItems = async () => {
     try {
@@ -685,7 +685,7 @@ const flushQueue = async () => {
 
   const canNext = () => {
     if (step === 0) {
-      const hasMachine = isOtherMachine ? form.machineOther.trim().length >= 2 : !!selectedAsset;
+      const hasMachine = isOtherMachine ? true : !!selectedAsset;
       return hasMachine && !!form.machineStatus;
     }
     if (step === 1) return !!form.jobType && !!form.jobDescription && form.symptoms.trim().length >= 5;
@@ -1120,7 +1120,7 @@ const flushQueue = async () => {
           <div className="flex flex-col gap-5">
             <div>
               <p className="text-sm font-bold mb-0.5">1. เลือกเครื่องจักร / อุปกรณ์ <span className="cmms-req">*</span></p>
-              <p className="text-xs text-[var(--cmms-text-secondary)]">เลือกเครื่องที่ลงทะเบียน หรือกด “อื่นๆ” แล้วพิมพ์ชื่อเครื่องเอง</p>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">เลือกเครื่องที่ลงทะเบียน หรือกด “อื่นๆ” หากไม่มีเครื่องจักร/ต้องการพิมพ์ชื่อเอง</p>
             </div>
 
             {MACHINE_GROUPS.map((g) => {
@@ -1164,13 +1164,13 @@ const flushQueue = async () => {
               )}
             </div>
 
-            {isOtherMachine && form.machineOther.trim() && (
+            {isOtherMachine && (
               <div className="cmms-machine-summary">
                 <div className="flex items-center gap-3">
                   <div className="cmms-machine-icon"><Building2 size={22} strokeWidth={1.75} /></div>
                   <div className="flex flex-col flex-1">
-                    <p className="text-sm font-bold m-0">{form.machineOther.trim()}</p>
-                    <p className="text-xs text-[var(--cmms-text-secondary)] m-0">เครื่องจักรอื่น — พิมพ์เอง (ไม่ได้ลงทะเบียน)</p>
+                    <p className="text-sm font-bold m-0">{form.machineOther.trim() || "ไม่ระบุเครื่องจักร"}</p>
+                    <p className="text-xs text-[var(--cmms-text-secondary)] m-0">เครื่องจักรอื่น — พิมพ์เอง (ไม่ได้ลงทะเบียน) / ไม่มีเครื่องจักร</p>
                   </div>
                 </div>
               </div>

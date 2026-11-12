@@ -151,6 +151,13 @@ try {
                 }
             }
             repair_autofill_downtime($data);
+            // อนุญาตแจ้งซ่อมโดยไม่ระบุเครื่องจักร: asset_id ว่าง/0 ให้เป็น NULL (กัน FK constraint)
+            if (array_key_exists('asset_id', $data)) {
+                $aid = $data['asset_id'];
+                if ($aid === '' || $aid === '0' || $aid === 0 || $aid === null || $aid === 'null') {
+                    $data['asset_id'] = null;
+                }
+            }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path', 'attachment_path'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
@@ -372,6 +379,13 @@ try {
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
+            // อนุญาตกรณีไม่ระบุเครื่องจักร: asset_id ว่าง/0 ให้เป็น NULL
+            if (array_key_exists('asset_id', $data)) {
+                $aid = $data['asset_id'];
+                if ($aid === '' || $aid === '0' || $aid === 0 || $aid === null || $aid === 'null') {
+                    $data['asset_id'] = null;
+                }
+            }
             // Phase 19: idempotency — ป้องกัน offline sync queue ส่งซ้ำ (network timeout / retry)
             $idemKey = clientActionKeyFromRequest($data);
             if ($idemKey !== '') {
