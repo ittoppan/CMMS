@@ -193,7 +193,7 @@ if ($escOn === '1') {
              . "ค้างมา: {$e['age_hours']} ชม. (เริ่ม " . date('d/m H:i', strtotime($e['created_at'])) . ")\n"
              . "ผู้รับผิดชอบ: " . ($e['assigned_name'] ?: 'ยังไม่ assign') . "\n"
              . "----------------------------------\n"
-             . "🔧 ดูงาน: " . rtrim((string)publicBaseUrl(), '/') . "/pages/repair/view.php?id={$e['id']}";
+             . "🔧 ดูงาน: " . rtrim((string)publicBaseUrl(), '/') . "/repair/view?id={$e['id']}";
         if (NotificationService::isLineTemplateEnabled('line_tpl_breakdown')) {
             NotificationService::sendLineMessage($msg);
             $sent++;
@@ -204,7 +204,7 @@ if ($escOn === '1') {
         // Web Push ควบคู่ LINE (เฉพาะคนที่ subscribe — ถ้าไม่มีก็ข้าม)
         if (settingValue($pdo, 'push_alert_enabled', '1') === '1') {
             try {
-                WebPushService::sendToUsers($pdo, null, '🚨 งานด่วนค้างเกิน ' . $escHours . ' ชม.', $e['title'] . ' — ' . $code, '/pages/repair/view.php?id=' . $e['id']);
+                WebPushService::sendToUsers($pdo, null, '🚨 งานด่วนค้างเกิน ' . $escHours . ' ชม.', $e['work_order_no'] . ' — ' . $code, '/repair/view?id=' . $e['id']);
             } catch (Throwable $ex) {}
         }
         echo "  alert ESCALATE: {$e['work_order_no']} (ค้าง {$e['age_hours']}h)\n";
@@ -214,3 +214,55 @@ if ($escOn === '1') {
 }
 
 echo "== done: {$sent} alert(s) — ตรวจสอบ notification_logs เพื่อยืนยัน ==\n";
+
+// ---------------- 4) งานเกิน SLA/กำหนด (sla_due_at หรือ planned_end_at) ----------------
+$slaOn = settingValue($pdo, 'sla_overdue_alert', '1');
+if ($slaOn === '1') {
+    $slaRows = $pdo->query("
+        SELECT r.id, r.work_order_no, r.title, r.priority, r.sla_due_at, r.planned_end_at,
+               a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
+        FROM repair r
+        LEFT JOIN asset_registry a ON r.asset_id = a.id
+        LEFT JOIN users u ON r.assigned_to = u.id
+        WHERE r.status NOT IN ('resolved','closed','cancelled','rejected','completed','verified')
+          AND r.work_order_no NOT LIKE '%DEMO%'
+          AND COALESCE(r.sla_due_at, r.planned_end_at) IS NOT NULL
+          AND COALESCE(r.sla_due_at, r.planned_end_at) < NOW()
+        ORDER BY COALESCE(r.sla_due_at, r.planned_end_at) ASC
+        LIMIT 15
+    ")->fetchAll();
+    echo "SLA overdue: " . count($slaRows) . "\n";
+    foreach ($slaRows as $s) {
+        $needle = 'SLA-OVERDUE-WO' . $s['id'];
+        if (!$force && alreadyAlerted($pdo, $needle)) {
+            echo "  skip (alerted <24h): {$s['work_order_no']}\n";
+            continue;
+        }
+        $due = $s['sla_due_at'] ?: $s['planned_end_at'];
+        $code = $s['asset_code'] ?: ($s['asset_name'] ?: '-');
+        $msg = "\n⏱️ [SLA เกินกำหนด]\n"
+             . "----------------------------------\n"
+             . "ใบงาน: {$s['work_order_no']}\n"
+             . "หัวข้อ: {$s['title']}\n"
+             . "เครื่องจักร: $code\n"
+             . "กำหนดเสร็จ: {$due}\n"
+             . "ผู้รับผิดชอบ: " . ($s['assigned_name'] ?: 'ยังไม่ assign') . "\n"
+             . "----------------------------------\n"
+             . "🔧 ดูงาน: " . rtrim((string)publicBaseUrl(), '/') . "/repair/view?id={$s['id']}";
+        if (NotificationService::isLineTemplateEnabled('line_tpl_breakdown')) {
+            NotificationService::sendLineMessage($msg);
+            $sent++;
+        }
+        if (settingValue($pdo, 'push_alert_enabled', '1') === '1') {
+            try {
+                WebPushService::sendToUsers($pdo, null, '⏱️ งานเกินกำหนด SLA', ($s['work_order_no'] ?? '') . ' — ' . $code, '/repair/view?id=' . $s['id']);
+            } catch (Throwable $ex) {}
+        }
+        echo "  alert SLA OVERDUE: {$s['work_order_no']} (due {$due})\n";
+    }
+} else {
+    echo "sla overdue alert: disabled (sla_overdue_alert != 1)\n";
+}
+
+echo "== done: {$sent} alert(s) — ตรวจสอบ notification_logs เพื่อยืนยัน ==
+";
