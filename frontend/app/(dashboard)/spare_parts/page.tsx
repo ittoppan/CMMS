@@ -210,6 +210,8 @@ function ItemsCard({
   onEdit,
   onDelete,
   onRefresh,
+  totalItems,
+  serverPaged,
 }: {
   parts: SparePart[];
   filtered: SparePart[];
@@ -222,8 +224,10 @@ function ItemsCard({
   onEdit: (item: SparePart) => void;
   onDelete: (item: SparePart) => void;
   onRefresh: () => void;
+  totalItems?: number;
+  serverPaged?: boolean;
 }) {
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paged = serverPaged ? filtered : filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // ── Batch image upload state ──
   const [selectMode, setSelectMode] = useState(false);
@@ -308,7 +312,8 @@ function ItemsCard({
     }
   };
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const countForPagination = serverPaged ? (totalItems ?? filtered.length) : filtered.length;
+  const pageCount = Math.max(1, Math.ceil(countForPagination / PAGE_SIZE));
 
   return (
     <Card>
@@ -320,7 +325,7 @@ function ItemsCard({
               <Box size={16} strokeWidth={1.75} aria-hidden="true" />
             </div>
             <h3 className="m-0 text-base font-semibold text-foreground">รายการอะไหล่</h3>
-            <Badge variant="neutral">{filtered.length} รายการ</Badge>
+            <Badge variant="neutral">{serverPaged ? (totalItems ?? filtered.length) : filtered.length} รายการ</Badge>
             {selectMode && (
               <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-muted-foreground">
                 <input
@@ -366,14 +371,14 @@ function ItemsCard({
               isLabelHidden
               placeholder="ค้นหารหัส CMMS, Sage 300 Item No, ชื่อ..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9"
             />
           </div>
           <div className="w-full sm:w-[240px]">
             <Select
               value={sageTypeFilter || "__all__"}
-              onValueChange={(v) => setSageTypeFilter(v === "__all__" ? "" : v)}
+              onValueChange={(v) => { setSageTypeFilter(v === "__all__" ? "" : v); setPage(1); }}
             >
               <SelectTrigger aria-label="ประเภทสต็อก Sage" className="w-full">
                 <SelectValue placeholder="ทุกประเภทสต็อก Sage 300" />
@@ -504,7 +509,7 @@ function ItemsCard({
         <Pagination
           page={page}
           pageCount={pageCount}
-          totalItems={filtered.length}
+          totalItems={serverPaged ? (totalItems ?? filtered.length) : filtered.length}
           pageSize={PAGE_SIZE}
           onPageChange={setPage}
           className="border-t-0 px-0 pt-2"
@@ -614,13 +619,47 @@ export default function SparePartsPage() {
     display: layout.isHidden(id) ? ("none" as const) : undefined,
   });
 
-  const fetchParts = async () => {
+  const [totalItems, setTotalItems] = useState(0);
+  const [serverPaged, setServerPaged] = useState(false);
+
+  const fetchParts = async (opts?: { p?: number; q?: string; sage?: string }) => {
     setLoading(true);
     setError("");
+    const p = opts?.p ?? page;
+    const q = opts?.q ?? search;
+    const sage = opts?.sage ?? sageTypeFilter;
     try {
-      const res = await fetch("/api/v1/spare_parts.php");
+      const params = new URLSearchParams();
+      params.set("limit", String(PAGE_SIZE));
+      params.set("page", String(p));
+      if (q) params.set("q", q);
+      if (sage) params.set("sage_category", sage);
+      const res = await fetch(`/api/v1/spare_parts.php?${params.toString()}`);
       const json = await res.json();
-      if (Array.isArray(json)) {
+      if (json && Array.isArray(json.items)) {
+        setServerPaged(true);
+        setTotalItems(Number(json.total || json.items.length));
+        const fetched = json.items.map((row: any, i: number) => ({
+          rawId: row.id,
+          id: `sp-${row.id || i}`,
+          code: row.code || row.part_code || `SP-${row.id || i}`,
+          name: row.name || row.part_name || "ไม่ระบุ",
+          category: row.category || "ทั่วไป",
+          sageCategory: row.sage_category || "Spare Parts",
+          stock: Number(row.stock_qty || row.quantity || row.stock || 0),
+          minStock: Number(row.min_stock || row.reorder_point || 10),
+          maxStock: Number(row.max_stock || 100),
+          unit: row.unit || "pcs",
+          location: row.location || "-",
+          price: Number(row.unit_price || row.price || 0),
+          sageItemNo: row.sage_item_no || row.sage_code || `IC-SP-${row.id || i}`,
+          syncStatus: row.sage_sync_status || "synced",
+          imageUrl: row.image_url || null,
+        }));
+        setParts(fetched);
+      } else if (Array.isArray(json)) {
+        setServerPaged(false);
+        setTotalItems(json.length);
         const fetched = json.map((row: any, i: number) => ({
           rawId: row.id,
           id: `sp-${row.id || i}`,
@@ -648,9 +687,9 @@ export default function SparePartsPage() {
   };
 
   useEffect(() => {
-    fetchParts();
+    fetchParts({ p: page, q: search, sage: sageTypeFilter });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [page, search, sageTypeFilter]);
 
   // Sync from Sage 300 ERP
   const handleSageSync = async () => {
@@ -904,7 +943,9 @@ export default function SparePartsPage() {
                 setPage={setPage}
                 onEdit={handleEdit}
                 onDelete={setDeleteTarget}
-                onRefresh={fetchParts}
+                onRefresh={() => fetchParts({ p: page, q: search, sage: sageTypeFilter })}
+                totalItems={totalItems}
+                serverPaged={serverPaged}
               />
             )}
           </div>
