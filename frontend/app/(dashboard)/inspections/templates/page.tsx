@@ -39,7 +39,7 @@ const ITEM_TYPES: { value: string; label: string }[] = [
 const NUMERIC_TYPES = ["numeric", "measurement", "value"];
 
 interface Item {
-  id?: number; task: string; type: string;
+  id?: number; task: string; topic: string; check_detail: string; check_method: string; type: string;
   standard: string; min_value: string; max_value: string; unit: string;
   options: string; is_required: boolean; photo_required: boolean; remark_required: boolean;
   failure_action: string; pass_criteria: string;
@@ -87,7 +87,7 @@ export default function InspectionTemplatesPage() {
       const res = await fetch(`/api/v1/inspections.php?template=${t.id}`);
       const json = await res.json();
       setItems((json.items || []).map((i: any) => ({
-        id: i.id, task: i.task, type: i.type, standard: i.standard || "",
+        id: i.id, task: i.task || "", topic: i.topic || "", check_detail: i.check_detail || "", check_method: i.check_method || "", type: i.type, standard: i.standard || "",
         min_value: i.min_value != null ? String(i.min_value) : "", max_value: i.max_value != null ? String(i.max_value) : "",
         unit: i.unit || "",
         options: i.options ? (Array.isArray(i.options) ? i.options.join("\n") : String(i.options)) : "",
@@ -123,7 +123,8 @@ export default function InspectionTemplatesPage() {
       for (const idx of items.keys()) {
         const it = items[idx];
         const body = JSON.stringify({
-          task: it.task, type: it.type, standard: it.standard,
+          task: it.task || it.topic || "", topic: it.topic || "", check_detail: it.check_detail || "", check_method: it.check_method || "",
+          type: it.type, standard: it.standard,
           min_value: it.min_value || null, max_value: it.max_value || null, unit: it.unit, seq: idx,
           options: it.type === "dropdown" ? it.options.split(/\r?\n/).map((s) => s.trim()).filter(Boolean) : null,
           is_required: it.is_required ? 1 : 0,
@@ -167,7 +168,7 @@ export default function InspectionTemplatesPage() {
   };
 
   const addItem = () => {
-    setItems((prev) => [...prev, { task: "", type: "check", standard: "", min_value: "", max_value: "", unit: "", options: "", is_required: true, photo_required: false, remark_required: false, failure_action: "", pass_criteria: "" }]);
+    setItems((prev) => [...prev, { task: "", topic: "", check_detail: "", check_method: "", type: "check", standard: "", min_value: "", max_value: "", unit: "", options: "", is_required: true, photo_required: false, remark_required: false, failure_action: "", pass_criteria: "" }]);
   };
 
   const removeItem = (idx: number) => {
@@ -265,13 +266,12 @@ export default function InspectionTemplatesPage() {
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-start gap-2">
                     <div className="mt-1 flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[13px] font-bold" style={{ backgroundColor: "var(--cmms-primary)", color: "white" }}>{idx + 1}</div>
-                    <div className="min-w-[200px] flex-1">
+                    <div className="min-w-[220px] flex-1">
                       <Input
-                        label="ข้อความตรวจ"
-                        isLabelHidden
-                        placeholder="เช่น ตรวจสอบกล้องบันทึกภาพปกติทุกจุด"
-                        value={it.task}
-                        onChange={(e) => updateItem(idx, { task: e.target.value })}
+                        label="หัวข้อการตรวจสอบ"
+                        placeholder="เช่น อุณหภูมิห้องอบ / สภาพทั่วไป"
+                        value={it.topic}
+                        onChange={(e) => updateItem(idx, { topic: e.target.value, task: e.target.value || it.task })}
                       />
                     </div>
                     <div className="w-[190px]">
@@ -299,6 +299,28 @@ export default function InspectionTemplatesPage() {
                     >
                       <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
                     </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 pl-[34px] sm:grid-cols-2">
+                    <Textarea
+                      label="รายละเอียดการตรวจสอบ"
+                      placeholder="เช่น ตรวจสอบอุณหภูมิแสดงผลและสภาพการทำงานของห้องอบ"
+                      value={it.check_detail}
+                      onChange={(e) => updateItem(idx, { check_detail: e.target.value })}
+                    />
+                    <Textarea
+                      label="รายละเอียดวิธีการตรวจสอบ"
+                      placeholder="เช่น อ่านค่าจากเทอร์โมมิเตอร์/จอแสดงผล เปรียบเทียบเกณฑ์มาตรฐาน และบันทึกผล"
+                      value={it.check_method}
+                      onChange={(e) => updateItem(idx, { check_method: e.target.value })}
+                    />
+                  </div>
+                  <div className="pl-[34px]">
+                    <Input
+                      label="ข้อความตรวจ (สรุป/คำสั่งตรวจ)"
+                      placeholder="เช่น ตรวจสอบอุณหภูมิห้องอบให้อยู่ในเกณฑ์"
+                      value={it.task}
+                      onChange={(e) => updateItem(idx, { task: e.target.value })}
+                    />
                   </div>
                   {NUMERIC_TYPES.includes(it.type) && (
                     <div className="flex flex-wrap gap-2 pl-[34px]">

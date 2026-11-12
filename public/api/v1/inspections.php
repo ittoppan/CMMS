@@ -8,7 +8,7 @@
  *   POST /api/v1/inspections.php                      -> create template { code,title,category,frequency,description }
  *   PUT  /api/v1/inspections.php?template=1           -> update template meta
  *   DELETE /api/v1/inspections.php?template=1         -> delete template
- *   POST /api/v1/inspections.php?action=item&template=1 -> add item { task,type,standard,min_value,max_value,unit,is_required }
+ *   POST /api/v1/inspections.php?action=item&template=1 -> add item { task,topic,check_detail,check_method,type,standard,min_value,max_value,unit,is_required }
  *   PUT  /api/v1/inspections.php?item=1               -> update item
  *   DELETE /api/v1/inspections.php?item=1             -> delete item
  *
@@ -108,11 +108,14 @@ try {
         $seq = (int)($data['seq'] ?? 0);
         $itemType = normalizeItemType($data['type'] ?? 'check');
         $stmt = $pdo->prepare('INSERT INTO inspection_template_items
-            (template_id, seq, task, type, standard, min_value, max_value, unit, options, photo_required, remark_required, pass_criteria, failure_action, is_required)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+            (template_id, seq, task, topic, check_detail, check_method, type, standard, min_value, max_value, unit, options, photo_required, remark_required, pass_criteria, failure_action, is_required)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
         $stmt->execute([
             $tplId, $seq,
             trim((string)($data['task'] ?? '')),
+            trim((string)($data['topic'] ?? '')) !== '' ? trim((string)$data['topic']) : null,
+            trim((string)($data['check_detail'] ?? '')) !== '' ? trim((string)$data['check_detail']) : null,
+            trim((string)($data['check_method'] ?? '')) !== '' ? trim((string)$data['check_method']) : null,
             $itemType,
             $data['standard'] ?? null,
             isset($data['min_value']) && $data['min_value'] !== '' ? (float)$data['min_value'] : null,
@@ -150,8 +153,14 @@ try {
     if ($method === 'PUT' && isset($_GET['item'])) {
         $data = json_decode(file_get_contents('php://input'), true) ?? [];
         $fields = []; $vals = [];
-        foreach (['task', 'standard', 'unit', 'pass_criteria', 'failure_action', 'is_required', 'photo_required', 'remark_required'] as $f) {
-            if (array_key_exists($f, $data)) { $fields[] = "$f = ?"; $vals[] = $data[$f]; }
+        foreach (['task', 'topic', 'check_detail', 'check_method', 'standard', 'unit', 'pass_criteria', 'failure_action', 'is_required', 'photo_required', 'remark_required'] as $f) {
+            if (array_key_exists($f, $data)) {
+                $val = $data[$f];
+                if (in_array($f, ['topic', 'check_detail', 'check_method'], true)) {
+                    $val = (is_string($val) && trim($val) !== '') ? trim($val) : null;
+                }
+                $fields[] = "$f = ?"; $vals[] = $val;
+            }
         }
         if (array_key_exists('type', $data)) { $fields[] = 'type = ?'; $vals[] = normalizeItemType($data['type']); }
         if (array_key_exists('options', $data)) {
