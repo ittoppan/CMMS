@@ -26,6 +26,7 @@ require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
+require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/kpi.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
 header('Content-Type: application/json; charset=utf-8');
@@ -878,10 +879,35 @@ function apiAssignWork(PDO $pdo, bool $bulk): void {
 
     $assigner = p14_uid();
     $results = [];
+    $wfCfg = wf_config($pdo);
+    $wfBlock = !empty($wfCfg['block_unqualified']);
     foreach ($ids as $rid) {
         try {
             $wo = p14_fetch_wo($pdo, $rid);
             $from = $wo['status'];
+            // Competency/certification gate (per work order)
+            $woRequired = function_exists('wf_required_skills_for_work_order') ? wf_required_skills_for_work_order($pdo, $rid) : [];
+            if ($woRequired) {
+                $woCandidates = wf_candidates($pdo, $woRequired, $wo['planned_start_at'] ?? null, $wo['planned_end_at'] ?? null, $wfCfg);
+                $woCandidateMap = [];
+                foreach ($woCandidates as $c) $woCandidateMap[(int)$c['user_id']] = $c;
+                $gateErrors = [];
+                foreach ($teamIds as $uid) {
+                    $cand = $woCandidateMap[(int)$uid] ?? null;
+                    if (!$cand) {
+                        $gateErrors[] = 'user_id ' . $uid . ' ไม่อยู่ในกลุ่มช่างที่ตรวจสอบได้';
+                        continue;
+                    }
+                    if ($wfBlock && empty($cand['eligible'])) {
+                        $reasons = array_filter((array)($cand['reasons'] ?? []));
+                        $gateErrors[] = ($cand['full_name'] ?? ('user_id ' . $uid)) . ': ' . implode('; ', $reasons ?: ['ไม่ผ่านคุณสมบัติ/ทักษะที่กำหนด']);
+                    }
+                }
+                if ($gateErrors) {
+                    $results[] = ['id' => $rid, 'success' => false, 'code' => $wo['work_order_no'], 'error' => 'ไม่ผ่านเกณฑ์ทักษะ/ใบรับรอง: ' . implode(' | ', $gateErrors), 'qualification_errors' => $gateErrors];
+                    continue;
+                }
+            }
             if (in_array($from, p14_done_statuses(), true)) {
                 $results[] = ['id' => $rid, 'success' => false, 'code' => $wo['work_order_no'], 'error' => 'งานจบแล้ว ไม่สามารถมอบหมายได้'];
                 continue;
