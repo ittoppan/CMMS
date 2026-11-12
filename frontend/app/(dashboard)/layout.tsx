@@ -55,6 +55,7 @@ function getPageTitle(pathname: string): string {
 // ═══════════ เมนู bottom nav มือถือ: role-based ═══════════
 const BOTTOM_NAV_ITEMS: Record<string, { labelKey: string; href: string; icon: React.ComponentType<{ className?: string; size?: number | string; strokeWidth?: number }> }> = {
   dashboard:             { labelKey: "bottom.dashboard",       href: "/home",                 icon: Home },
+  scan:                  { labelKey: "bottom.scan",            href: "/scan",                 icon: Scan },
   "repair/my_tasks":     { labelKey: "bottom.my_tasks",        href: "/repair/my_tasks",      icon: ClipboardCheck },
   field:                 { labelKey: "menu.field_work",        href: "/field",               icon: Scan },
   "repair/request":      { labelKey: "bottom.repair_request",  href: "/repair/request",       icon: Wrench },
@@ -91,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Bottom nav มือถือ: API order → fallback preset ตามบทบาท → filter สิทธิ์
   const bottomNav = (bottomNavKeys.length > 0 ? bottomNavKeys : (BOTTOM_NAV_ROLE_ORDER[roleName] || DEFAULT_BOTTOM_NAV_ORDER))
     .filter((key) => BOTTOM_NAV_ITEMS[key] && canShow(key))
-    .map((key) => ({ ...BOTTOM_NAV_ITEMS[key], label: t(BOTTOM_NAV_ITEMS[key].labelKey) }));
+    .map((key) => ({ key, ...BOTTOM_NAV_ITEMS[key], label: t(BOTTOM_NAV_ITEMS[key].labelKey) }));
   const [currentUser, setCurrentUser] = useState<{ name: string; initial: string; avatar?: string | null } | null>(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -402,14 +403,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SheetContent>
       </Sheet>
 
+      {/* Global scan shortcut (ทุกหน้าใน dashboard) — สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม */}
+      <Link
+        href="/scan"
+        className="cmms-global-scan-fab"
+        aria-label="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+        title="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+      >
+        <Scan size={22} strokeWidth={2} aria-hidden="true" />
+        <span className="cmms-global-scan-fab-label">สแกน</span>
+      </Link>
+
       {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
       <nav className="cmms-mobile-bottom-nav lg:!hidden" aria-label="เมนูหลัก">
         {bottomNav.map((item) => {
           const ItemIcon = item.icon;
+          const isScan = item.key === "scan" || item.href === "/scan";
           return (
-            <a key={item.href} href={item.href} className={`cmms-mobile-nav-item ${isSelected(item.href) ? "active" : ""}`}>
-              <span className="cmms-mobile-nav-icon-wrap">
-                <ItemIcon size={22} strokeWidth={1.75} aria-hidden="true" />
+            <a
+              key={`${item.key}-${item.href}`}
+              href={item.href}
+              className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
+              aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+              title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+            >
+              <span className={`cmms-mobile-nav-icon-wrap ${isScan ? "cmms-mobile-nav-icon-wrap-scan" : ""}`}>
+                <ItemIcon size={isScan ? 24 : 22} strokeWidth={1.75} aria-hidden="true" />
                 {item.href === "/repair/request" && pendingCount > 0 && (
                   <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
                     {pendingCount > 99 ? "99+" : pendingCount}

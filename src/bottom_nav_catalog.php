@@ -21,6 +21,7 @@ return [
         'pm_am/checksheet'      => ['เช็คชีตตามแผน','/pages/pm_am/checksheet.php','checksheet',        'check'],
         'pm_am/calendar'        => ['แผน PM',      '/pages/pm_am/',              'calendar',          'calendar'],
         'asset_registry'        => ['เครื่องจักร',  '/pages/asset_registry/',     'asset_registry',    'factory'],
+        'scan'                  => ['สแกน',        '/scan',                      'scan',              'scan'],
         'qr-sheet'              => ['สแกน QR',     '/pages/qr/scanner.php',      'qr',                'qr'],
         'notifications'         => ['แจ้งเตือน',    '/pages/notifications/center.php', 'notification', 'bell'],
         'analytics'             => ['คลังข้อมูล',   '/pages/analytics/bi_warehouse.php', 'bi_warehouse', 'chart'],

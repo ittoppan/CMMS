@@ -1555,6 +1555,39 @@ html, body {
     top: -1px;
   }
 
+  /* ปุ่มสแกนแบบเด่น/กึ่งกลางในแถบล่าง — ใช้เป็นปุ่มลัดสแกนบาร์โค้ดเพื่อทำ PM/แจ้งซ่อม */
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan {
+    overflow: visible;
+  }
+  .cmms-mobile-nav-icon-wrap-scan {
+    width: 46px;
+    height: 46px;
+    margin-top: -18px;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    background: var(--cmms-primary);
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    border: 3px solid var(--cmms-bg-topnav);
+  }
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan svg {
+    width: 24px;
+    height: 24px;
+  }
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan.active svg,
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan:active svg,
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan svg {
+    background: transparent;
+    padding: 0;
+    top: 0;
+    box-sizing: border-box;
+    stroke: currentColor;
+  }
+  .cmms-mobile-nav-item.cmms-mobile-nav-item-scan span:last-child {
+    margin-top: -1px;
+  }
+
   /* ไอคอน nav + badge งานค้างส่ง (offline queue) */
   .cmms-mobile-nav-icon-wrap {
     position: relative;
@@ -3061,4 +3094,44 @@ html.cmms-no-anim *::after {
 .cmms-formbuilder-stage button {
   min-height: 2.5rem;
   padding-block: 0.375rem;
+}
+
+
+/* Global scan shortcut FAB (ทุกหน้า dashboard) — สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม */
+.cmms-global-scan-fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--cmms-primary);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.cmms-global-scan-fab:hover { filter: brightness(1.03); }
+.cmms-global-scan-fab:active { transform: translateY(1px); }
+.cmms-global-scan-fab-label { white-space: nowrap; }
+@media (min-width: 1024px) {
+  .cmms-global-scan-fab {
+    bottom: 24px;
+  }
+}
+@media (max-width: 479.98px) {
+  .cmms-global-scan-fab {
+    padding: 0;
+    width: 52px;
+    height: 52px;
+    min-height: 52px;
+  }
+  .cmms-global-scan-fab-label { display: none; }
 }

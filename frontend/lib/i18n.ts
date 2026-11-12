@@ -190,6 +190,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   // ── Bottom nav มือถือ ──
   "bottom.dashboard": { th: "หน้าแรก", en: "Home" },
   "bottom.my_tasks": { th: "งานของฉัน", en: "My Tasks" },
+  "bottom.scan": { th: "สแกน", en: "Scan" },
   "bottom.repair_request": { th: "แจ้งซ่อม", en: "Report" },
   "bottom.tracking": { th: "ติดตามงาน", en: "Track" },
   "bottom.checksheet": { th: "เช็คชีตตามแผน", en: "Checksheet" },

@@ -23,6 +23,7 @@ import {
   Table as TableCellsIcon,
   FileDown as DocumentArrowDownIcon,
   Settings as Cog6ToothIcon,
+  Scan,
 } from "lucide-react";
 
 interface MenuItem {
@@ -55,6 +56,7 @@ const ROLE_COLOR: Record<string, { bg: string; fg: string }> = {
 // ไอคอนพรีวิวปุ่มล่าง (ตัวเดียวกับ layout.tsx — สำหรับวาดภาพบนหน้าจอมือถือจำลอง)
 const BN_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   dashboard: HomeIcon,
+  scan: Scan,
   "repair/my_tasks": ClipboardDocumentCheckIcon,
   "repair/request": WrenchScrewdriverIcon,
   "repair/tracking": MapIcon,
@@ -396,7 +398,7 @@ export default function MenuPermissionsPage() {
               <VStack gap={1}>
                 <h3 className="text-base font-semibold">ปุ่มล่างมือถือ (Bottom Nav)</h3>
                 <p className="text-sm text-muted-foreground">
-                  เลือกปุ่มที่ผู้ใช้ของบทบาทนั้นเห็นที่แถบด้านล่างสุดของแอปมือถือ — กดการ์ดบทบาทเพื่อดูพรีวิวฝั่งขวา
+                  เลือกปุ่มที่ผู้ใช้ของบทบาทนั้นเห็นที่แถบด้านล่างสุดของแอปมือถือ — กดการ์ดบทบาทเพื่อดูพรีวิวฝั่งขวา (สามารถเพิ่มปุ่ม “สแกน” เป็นปุ่มลัดตรงกลางสำหรับสแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม)
                   {" "}ปุ่มที่เมนูถูกปิดสิทธิ์ (ติ๊กออกด้านบน) จะขึ้นเป็นปุ่มจางในพรีวิว และไม่แสดงบนมือถือจริง
                 </p>
               </VStack>
@@ -584,10 +586,11 @@ export default function MenuPermissionsPage() {
                     )}
                     {previewItems.map((it) => {
                       const ItemIcon = it.icon;
+                      const isScan = it.key === "scan";
                       return (
                         <div
                           key={it.key}
-                          title={`${it.label}${it.hidden ? " (เมนูถูกปิดสิทธิ์ → ไม่แสดงจริง)" : ""}`}
+                          title={`${it.label}${it.hidden ? " (เมนูถูกปิดสิทธิ์ → ไม่แสดงจริง)" : ""}${isScan ? " · ปุ่มลัดสแกนบาร์โค้ด (PM/แจ้งซ่อม)" : ""}`}
                           style={{
                             flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
                             color: it.hidden ? "var(--cmms-border)" : it.active ? previewColor.fg : "var(--cmms-text-secondary)",
@@ -595,7 +598,13 @@ export default function MenuPermissionsPage() {
                             minWidth: 0, padding: "0 2px",
                           }}
                         >
-                          {ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />}
+                          {isScan ? (
+                            <span style={{ width: 30, height: 30, borderRadius: 999, background: it.hidden ? "var(--cmms-border)" : previewColor.fg, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -10, boxShadow: "0 4px 10px rgba(0,0,0,0.15)" }}>
+                              {ItemIcon ? <ItemIcon className="w-4 h-4" /> : null}
+                            </span>
+                          ) : (
+                            ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />
+                          )}
                           <span style={{
                             fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
                             overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
