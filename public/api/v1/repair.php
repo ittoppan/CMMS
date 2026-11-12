@@ -496,14 +496,33 @@ try {
                 clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                 http_response_code(400); echo json_encode(['error' => 'No data']); exit;
             }
-            // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
+            // ---- บังคับผลตรวจการปนเปื้อนและข้อมูลปิดงานก่อนปิดงานซ่อม ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
             if ($closingNow) {
                 $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
                 if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
                     clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                     http_response_code(400);
-                    echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED']);
+                    echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อน (ไม่พบการปนเปื้อน / พบการปนเปื้อน / ไม่เกี่ยวข้องกับงานนี้) ก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                // บังคับข้อมูลสำหรับวิเคราะห์สาเหตุ/ปิดงาน
+                $cur = $pdo->prepare('SELECT root_cause, solution, resolution, failure_code_id FROM repair WHERE id = ?');
+                $cur->execute([$id]);
+                $cr = $cur->fetch(PDO::FETCH_ASSOC) ?: [];
+                $needRoot = getSettingValue('require_root_cause', '1') === '1';
+                $needFail = getSettingValue('require_failure_code', '0') === '1';
+                $rc = trim((string)($data['root_cause'] ?? $cr['root_cause'] ?? ''));
+                $sol = trim((string)($data['solution'] ?? $data['resolution'] ?? $cr['solution'] ?? $cr['resolution'] ?? ''));
+                $fc = isset($data['failure_code_id']) ? (int)$data['failure_code_id'] : (int)($cr['failure_code_id'] ?? 0);
+                $errs = [];
+                if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
+                if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
+                if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
+                if ($errs) {
+                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
+                    http_response_code(400);
+                    echo json_encode(['error' => implode(' ', $errs), 'code' => 'CLOSURE_INCOMPLETE', 'errors' => $errs], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
             }

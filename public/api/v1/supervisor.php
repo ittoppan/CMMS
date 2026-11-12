@@ -1085,6 +1085,21 @@ function apiCompleteWork(PDO $pdo): void {
         echo json_encode(['error' => 'ต้องระบุผลตรวจการปนเปื้อนก่อนปิดใบงานซ่อม', 'code' => 'CONTAM_REQUIRED'], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    // บังคับข้อมูลสำหรับวิเคราะห์สาเหตุ/ปิดงาน
+    $needRoot = function_exists('getSettingValue') && getSettingValue('require_root_cause', '1') === '1';
+    $needFail = function_exists('getSettingValue') && getSettingValue('require_failure_code', '0') === '1';
+    $rc = trim((string)($d['root_cause'] ?? $wo['root_cause'] ?? ''));
+    $sol = trim((string)($d['solution'] ?? $d['resolution'] ?? $wo['solution'] ?? $wo['resolution'] ?? ''));
+    $fc = isset($d['failure_code_id']) ? (int)$d['failure_code_id'] : (int)($wo['failure_code_id'] ?? 0);
+    $errs = [];
+    if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
+    if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
+    if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
+    if ($errs) {
+        http_response_code(400);
+        echo json_encode(['error' => implode(' ', $errs), 'code' => 'CLOSURE_INCOMPLETE', 'errors' => $errs], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 
     $updates = ['status = "completed"', 'completed_at = NOW()', 'contaminate_checking = ?', 'status_changed_at = NOW()'];
     $vals = [$cc];
