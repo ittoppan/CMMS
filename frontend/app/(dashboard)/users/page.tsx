@@ -2,10 +2,11 @@
 
 // users — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, SimpleDataTable, ui/Dialog, ui/Badge, ui/Avatar)
 // business logic ครบเดิม: fetch/delete users.php, client filter (search + role), KPI counters
+// + Saved views v1 (localStorage per entity, URL เป็น source of truth)
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { usePageHero, t } from "@/lib/i18n";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import {
@@ -41,6 +42,14 @@ import {
   Trash2,
   TriangleAlert,
 } from "lucide-react";
+import {
+  listSavedViews,
+  saveSavedView,
+  deleteSavedView,
+  setDefaultSavedView,
+  clearDefaultSavedView,
+  type SavedView,
+} from "@/lib/saved-views";
 
 interface User extends Record<string, unknown> {
   rawId: number;
@@ -49,6 +58,7 @@ interface User extends Record<string, unknown> {
   fullName: string;
   email: string;
   phone: string;
+  avatar?: string;
   role: string;
   roleName: string;
   position: string;
@@ -87,6 +97,24 @@ const roleLabels: Record<string, string> = {
 };
 
 const PAGE_SIZE = 10;
+const USERS_VIEW_ENTITY = "users";
+
+function readUserFilters(sp: URLSearchParams) {
+  return {
+    search: (sp.get("q") || "").trim(),
+    roleFilter: (sp.get("role") || "").trim(),
+  };
+}
+function hasExplicitUserParams(sp: URLSearchParams) {
+  return sp.has("q") || sp.has("role");
+}
+function buildUserParams(state: { search: string; roleFilter: string }, base?: URLSearchParams) {
+  const sp = new URLSearchParams(base ? base.toString() : "");
+  const q = state.search.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  if (state.roleFilter) sp.set("role", state.roleFilter); else sp.delete("role");
+  return sp;
+}
 
 function initialsOf(name: string): string {
   return name
@@ -101,16 +129,68 @@ function initialsOf(name: string): string {
 export default function UsersPage() {
   const hero = usePageHero("users");
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
+
+  const initialFilters = useMemo(() => readUserFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
+  const [search, setSearch] = useState(initialFilters.search);
+  const [roleFilter, setRoleFilter] = useState(initialFilters.roleFilter);
+
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string>("");
+  const initializedRef = useRef(false);
+  const appliedSnapshotRef = useRef<string>("");
 
   // Delete modal state
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  const currentFilterState = useMemo(() => ({ search, roleFilter }), [search, roleFilter]);
+  const snapshotOf = useCallback(
+    (s: { search: string; roleFilter: string }) => JSON.stringify({ q: s.search.trim(), role: s.roleFilter || "" }),
+    []
+  );
+
+  const syncUrl = useCallback((next: { search: string; roleFilter: string }, mode: "replace" | "push" = "replace") => {
+    const sp = buildUserParams(next, new URLSearchParams(searchParams.toString()));
+    const qs = sp.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    if (mode === "push") router.push(url); else router.replace(url);
+  }, [pathname, router, searchParams]);
+
+  const setFilters = useCallback((patch: Partial<{ search: string; roleFilter: string }>) => {
+    const next = { search, roleFilter, ...patch };
+    setSearch(next.search);
+    setRoleFilter(next.roleFilter);
+    syncUrl(next, "replace");
+  }, [search, roleFilter, syncUrl]);
+
+  const applyViewState = useCallback((view: SavedView | null) => {
+    if (!view) {
+      const next = { search: "", roleFilter: "" };
+      setSearch(next.search);
+      setRoleFilter(next.roleFilter);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId("");
+      syncUrl(next, "replace");
+      return;
+    }
+    const f = (view.filters || {}) as Record<string, unknown>;
+    const next = {
+      search: typeof view.search === "string" ? view.search : (typeof f.q === "string" ? f.q : ""),
+      roleFilter: typeof f.role === "string" ? f.role : "",
+    };
+    setSearch(next.search);
+    setRoleFilter(next.roleFilter);
+    appliedSnapshotRef.current = snapshotOf(next);
+    setActiveViewId(view.id);
+    syncUrl(next, "replace");
+  }, [snapshotOf, syncUrl]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -148,6 +228,39 @@ export default function UsersPage() {
 
   useEffect(() => { fetchUsers(); }, []);
 
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    const views = listSavedViews(USERS_VIEW_ENTITY);
+    setSavedViews(views);
+    const sp = new URLSearchParams(searchParams.toString());
+    const fromUrl = readUserFilters(sp);
+    if (hasExplicitUserParams(sp)) {
+      setSearch(fromUrl.search);
+      setRoleFilter(fromUrl.roleFilter);
+      appliedSnapshotRef.current = snapshotOf(fromUrl);
+      return;
+    }
+    const def = views.find((v) => v.isDefault);
+    if (def) {
+      const f = (def.filters || {}) as Record<string, unknown>;
+      const next = {
+        search: typeof def.search === "string" ? def.search : (typeof f.q === "string" ? f.q : ""),
+        roleFilter: typeof f.role === "string" ? f.role : "",
+      };
+      setSearch(next.search);
+      setRoleFilter(next.roleFilter);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId(def.id);
+      const qs = buildUserParams(next).toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      return;
+    }
+    appliedSnapshotRef.current = snapshotOf(fromUrl);
+  }, [pathname, router, searchParams, snapshotOf]);
+
+  const dirty = snapshotOf(currentFilterState) !== (appliedSnapshotRef.current || snapshotOf({ search: "", roleFilter: "" }));
+
   // Handle User Deletion
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -172,6 +285,61 @@ export default function UsersPage() {
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleSaveNewView = () => {
+    const name = window.prompt("ชื่อมุมมอง (Saved view):", `มุมมอง ${savedViews.length + 1}`);
+    if (!name) return;
+    const res = saveSavedView(USERS_VIEW_ENTITY, {
+      name,
+      filters: { role: roleFilter } as Record<string, string>,
+      search,
+      isDefault: false,
+    } as any);
+    if (!res.ok) { window.alert(res.error); return; }
+    setSavedViews(res.views);
+    setActiveViewId(res.view.id);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+  };
+
+  const handleUpdateView = () => {
+    if (!activeViewId) return;
+    const current = savedViews.find((v) => v.id === activeViewId);
+    if (!current) return;
+    const res = saveSavedView(USERS_VIEW_ENTITY, {
+      name: current.name,
+      filters: { role: roleFilter } as Record<string, string>,
+      search,
+      isDefault: !!current.isDefault,
+    } as any, undefined, activeViewId);
+    if (!res.ok) { window.alert(res.error); return; }
+    setSavedViews(res.views);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+  };
+
+  const handleDeleteView = () => {
+    if (!activeViewId) return;
+    const current = savedViews.find((v) => v.id === activeViewId);
+    if (!current) return;
+    if (!window.confirm(`ลบมุมมอง "${current.name}" ?`)) return;
+    const views = deleteSavedView(USERS_VIEW_ENTITY, activeViewId);
+    setSavedViews(views);
+    setActiveViewId("");
+  };
+
+  const handleSetDefaultView = () => {
+    if (!activeViewId) return;
+    const views = setDefaultSavedView(USERS_VIEW_ENTITY, activeViewId);
+    setSavedViews(views);
+  };
+
+  const handleClearDefault = () => {
+    const views = clearDefaultSavedView(USERS_VIEW_ENTITY);
+    setSavedViews(views);
+  };
+
+  const handleResetFilters = () => {
+    applyViewState(null);
   };
 
   // Stats
@@ -360,39 +528,75 @@ export default function UsersPage() {
       <div style={layoutStyle("content")} className="space-y-4">
         {/* Filter Toolbar */}
         <Card>
-          <CardContent className="flex flex-wrap items-center gap-2 py-4">
-            <div className="relative min-w-[220px] flex-1 sm:max-w-[350px]">
-              <Search
-                size={16}
-                strokeWidth={1.75}
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                label="ค้นหา"
-                isLabelHidden
-                placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-base">ตัวกรอง</CardTitle>
+              {dirty && <Badge variant="neutral">แก้ไขแล้ว</Badge>}
             </div>
-            <Select
-              value={roleFilter || "__all__"}
-              onValueChange={(v) => setRoleFilter(v === "__all__" ? "" : v)}
-            >
-              <SelectTrigger className="w-full sm:w-[200px]" aria-label="บทบาท">
-                <SelectValue placeholder="ทุกบทบาท" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">ทุกบทบาท</SelectItem>
-                {roles.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>
-                    {r.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Select
+                value={activeViewId || "__none__"}
+                onValueChange={(v) => {
+                  if (v === "__none__") { setActiveViewId(""); return; }
+                  const view = savedViews.find((sv) => sv.id === v) || null;
+                  applyViewState(view);
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[260px]" aria-label="เลือกมุมมองที่บันทึกไว้">
+                  <SelectValue placeholder="มุมมองที่บันทึกไว้" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— ไม่ใช้มุมมอง —</SelectItem>
+                  {savedViews.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name}{v.isDefault ? " (ค่าเริ่มต้น)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button type="button" variant="secondary" size="sm" onClick={handleSaveNewView}>บันทึกเป็นมุมมองใหม่</Button>
+              <Button type="button" variant="secondary" size="sm" onClick={handleUpdateView} disabled={!activeViewId || !dirty}>บันทึกทับ</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={handleSetDefaultView} disabled={!activeViewId}>ตั้งเป็นค่าเริ่มต้น</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={handleClearDefault}>ยกเลิกค่าเริ่มต้น</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={handleDeleteView} disabled={!activeViewId}>ลบมุมมอง</Button>
+              <Button type="button" variant="ghost" size="sm" onClick={handleResetFilters}>รีเซ็ตตัวกรอง</Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative min-w-[220px] flex-1 sm:max-w-[350px]">
+                <Search
+                  size={16}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  label="ค้นหา"
+                  isLabelHidden
+                  placeholder="ค้นหาชื่อ, รหัสพนักงาน, อีเมล, เบอร์โทร..."
+                  value={search}
+                  onChange={(e) => setFilters({ search: e.target.value })}
+                  className="pl-9"
+                />
+              </div>
+              <Select
+                value={roleFilter || "__all__"}
+                onValueChange={(v) => setFilters({ roleFilter: v === "__all__" ? "" : v })}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]" aria-label="บทบาท">
+                  <SelectValue placeholder="ทุกบทบาท" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">ทุกบทบาท</SelectItem>
+                  {roles.map((r) => (
+                    <SelectItem key={r.value} value={r.value}>
+                      {r.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
 
