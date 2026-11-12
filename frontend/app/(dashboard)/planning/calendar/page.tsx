@@ -315,7 +315,7 @@ export default function PlanningCalendarPage() {
                                   <p className="text-xs font-bold text-[var(--cmms-text-primary)]">
                                     {fmtSlot(w.planned_start_at)}
                                   </p>
-                                  <p className="truncate text-[11px] text-[var(--cmms-text-secondary)]">{w.work_order_no}</p>
+                                  <p className="truncate text-xs text-[var(--cmms-text-secondary)]">{w.work_order_no}</p>
                                   <p className="truncate text-xs text-[var(--cmms-text-muted)]">{w.title}</p>
                                   <div className="mt-0.5 flex flex-wrap gap-1">
                                     <Badge variant={readinessVariant(w.readiness?.state)}>{w.readiness ? READINESS_LABEL[w.readiness.state] : w.group}</Badge>
@@ -560,10 +560,10 @@ function DayTimeline({ items }: { items: PlanningWo[] }) {
             boxShadow: "var(--cmms-shadow-sm)",
           }}
         >
-          <p className="truncate text-[11px] font-bold text-[var(--cmms-text-primary)]">
+          <p className="truncate text-xs font-bold text-[var(--cmms-text-primary)]">
             {fmtSlot(w.planned_start_at)} – {fmtSlot(w.planned_end_at)}
           </p>
-          <p className="truncate text-[11px] text-[var(--cmms-text-secondary)]">{w.work_order_no} · {w.title}</p>
+          <p className="truncate text-xs text-[var(--cmms-text-secondary)]">{w.work_order_no} · {w.title}</p>
           <div className="mt-0.5 flex gap-1">
             <Badge variant={readinessVariant(w.readiness?.state)}>{w.readiness ? READINESS_LABEL[w.readiness.state] : w.group}</Badge>
             {(w.team_ids ?? []).length > 0 && <Badge variant="neutral">{(w.team_ids ?? []).length} คน</Badge>}

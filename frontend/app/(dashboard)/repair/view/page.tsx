@@ -1110,7 +1110,7 @@ export default function RepairViewDetailsPage() {
                           <td className="p-2.5 font-semibold">{it.item_no}</td>
                           <td className="p-2.5">
                             {it.description}
-                            <span className="text-[10px] text-muted-foreground"> ({it.unit})</span>
+                            <span className="text-xs text-muted-foreground"> ({it.unit})</span>
                           </td>
                           <td className="p-2.5">
                             <span className={`inline-flex items-center gap-1 font-semibold tabular-nums ${Number(it.available) > 0 ? "text-emerald-600" : "text-destructive"}`}>
@@ -1228,7 +1228,7 @@ export default function RepairViewDetailsPage() {
                   <div key={a.id} className="relative rounded-lg border border-dashed border-amber-400/60 bg-amber-400/5 p-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={a.data} alt={a.file_name} className="h-20 w-full rounded object-cover" />
-                    <span className="mt-1 block text-center text-[10px] font-medium text-amber-600">
+                    <span className="mt-1 block text-center text-xs font-medium text-amber-600">
                       รอซิงก์
                     </span>
                   </div>
@@ -1239,11 +1239,11 @@ export default function RepairViewDetailsPage() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={assetUrl(a.file_path)} alt={a.file_name} className="h-20 w-full rounded object-cover" />
                     ) : (
-                      <div className="flex h-20 w-full items-center justify-center rounded bg-secondary/40 text-[10px] font-medium text-muted-foreground">
+                      <div className="flex h-20 w-full items-center justify-center rounded bg-secondary/40 text-xs font-medium text-muted-foreground">
                         {a.file_name}
                       </div>
                     )}
-                    <span className="mt-1 block truncate text-center text-[10px] text-muted-foreground">{a.category}</span>
+                    <span className="mt-1 block truncate text-center text-xs text-muted-foreground">{a.category}</span>
                   </div>
                 ))}
               </div>
