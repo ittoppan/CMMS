@@ -577,43 +577,58 @@ export default function MenuPermissionsPage() {
                     <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid var(--cmms-border)" }} />
                     <div style={{ height: 56, background: "#fff", borderRadius: 10, border: "1px solid var(--cmms-border)" }} />
                   </div>
-                  {/* ปุ่มล่างจำลอง (เดียวกับ cmms-mobile-bottom-nav) */}
-                  <div style={{ display: "flex", borderTop: "1px solid var(--cmms-border)", background: "#fff", padding: "7px 2px 9px" }}>
+                  {/* ปุ่มล่างจำลอง (เดียวกับ cmms-mobile-bottom-nav) — สแกนอยู่กลางเสมอ */}
+                  <div style={{ display: "flex", alignItems: "flex-end", borderTop: "1px solid var(--cmms-border)", background: "#fff", padding: "7px 2px 9px" }}>
                     {previewItems.length === 0 && (
                       <div style={{ flex: 1, textAlign: "center", fontSize: 12, color: "var(--cmms-text-secondary)", padding: "8px 0" }}>
                         ยังไม่มีปุ่ม — จะใช้ค่าเริ่มต้นของบทบาท
                       </div>
                     )}
-                    {previewItems.map((it) => {
-                      const ItemIcon = it.icon;
-                      const isScan = it.key === "scan";
-                      return (
-                        <div
-                          key={it.key}
-                          title={`${it.label}${it.hidden ? " (เมนูถูกปิดสิทธิ์ → ไม่แสดงจริง)" : ""}${isScan ? " · ปุ่มลัดสแกนบาร์โค้ด (PM/แจ้งซ่อม)" : ""}`}
-                          style={{
-                            flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                            color: it.hidden ? "var(--cmms-border)" : it.active ? previewColor.fg : "var(--cmms-text-secondary)",
-                            opacity: it.hidden ? 0.4 : 1,
-                            minWidth: 0, padding: "0 2px",
-                          }}
-                        >
-                          {isScan ? (
-                            <span style={{ width: 30, height: 30, borderRadius: 999, background: it.hidden ? "var(--cmms-border)" : previewColor.fg, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -10, boxShadow: "0 4px 10px rgba(0,0,0,0.15)" }}>
-                              {ItemIcon ? <ItemIcon className="w-4 h-4" /> : null}
+                    {(() => {
+                      const items = previewItems.slice();
+                      const sIdx = items.findIndex((x) => x.key === "scan");
+                      let scanIt = null as typeof items[0] | null;
+                      if (sIdx >= 0) scanIt = items.splice(sIdx, 1)[0];
+                      const left = items.slice(0, Math.ceil(items.length / 2));
+                      const right = items.slice(Math.ceil(items.length / 2));
+                      const render = (it: (typeof previewItems)[0], forcedScan = false) => {
+                        const ItemIcon = it.icon;
+                        const isScan = forcedScan || it.key === "scan";
+                        return (
+                          <div
+                            key={it.key}
+                            title={`${it.label}${it.hidden ? " (เมนูถูกปิดสิทธิ์ → ไม่แสดงจริง)" : ""}${isScan ? " · ปุ่มลัดสแกนบาร์โค้ด (PM/แจ้งซ่อม) อยู่ตรงกลางเสมอ" : ""}`}
+                            style={{
+                              flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                              color: it.hidden ? "var(--cmms-border)" : it.active ? previewColor.fg : "var(--cmms-text-secondary)",
+                              opacity: it.hidden ? 0.4 : 1,
+                              minWidth: 0, padding: "0 2px",
+                            }}
+                          >
+                            {isScan ? (
+                              <span style={{ width: 30, height: 30, borderRadius: 999, background: it.hidden ? "var(--cmms-border)" : previewColor.fg, color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", marginTop: -10, boxShadow: "0 4px 10px rgba(0,0,0,0.15)" }}>
+                                {ItemIcon ? <ItemIcon className="w-4 h-4" /> : null}
+                              </span>
+                            ) : (
+                              ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />
+                            )}
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
+                              overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
+                            }}>
+                              {it.label}
                             </span>
-                          ) : (
-                            ItemIcon ? <ItemIcon className="w-5 h-5" /> : <span style={{ width: 20, height: 20, borderRadius: 4, background: "var(--cmms-border)" }} />
-                          )}
-                          <span style={{
-                            fontSize: 12, fontWeight: 700, whiteSpace: "nowrap",
-                            overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%",
-                          }}>
-                            {it.label}
-                          </span>
-                        </div>
+                          </div>
+                        );
+                      };
+                      return (
+                        <>
+                          {left.map((it) => render(it))}
+                          {scanIt ? render(scanIt, true) : null}
+                          {right.map((it) => render(it))}
+                        </>
                       );
-                    })}
+                    })()}
                   </div>
                 </div>
               </div>
@@ -630,7 +645,7 @@ export default function MenuPermissionsPage() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  แถบนี้ตรงกับแถบล่างสุดของแอปบนมือถือ — เรียงจากซ้ายไปขวาตามลำดับปุ่ม
+                  แถบนี้ตรงกับแถบล่างสุดของแอปบนมือถือ — ปุ่ม "สแกน" จะแสดงตรงกลางเสมอโดยไม่ขึ้นกับลำดับที่เลือก
                 </p>
               </VStack>
             </CardContent>

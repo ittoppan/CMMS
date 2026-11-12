@@ -415,30 +415,52 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </Link>
 
       {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
-      <nav className="cmms-mobile-bottom-nav lg:!hidden" aria-label="เมนูหลัก">
-        {bottomNav.map((item) => {
-          const ItemIcon = item.icon;
-          const isScan = item.key === "scan" || item.href === "/scan";
+      <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูหลัก">
+        {(() => {
+          const items = bottomNav.slice();
+          const scanIndex = items.findIndex((item) => item.key === "scan" || item.href === "/scan");
+          let scanItem = null as typeof items[0] | null;
+          if (scanIndex >= 0) {
+            scanItem = items.splice(scanIndex, 1)[0];
+          } else {
+            const scanDef = (BOTTOM_NAV_ITEMS as any)["scan"];
+            if (scanDef) {
+              scanItem = { key: "scan", href: scanDef.href, icon: scanDef.icon, label: t(scanDef.labelKey) } as typeof items[0];
+            }
+          }
+          const left = items.slice(0, Math.ceil(items.length / 2));
+          const right = items.slice(Math.ceil(items.length / 2));
+          const renderItem = (item: (typeof bottomNav)[0], forcedScan = false) => {
+            const ItemIcon = item.icon;
+            const isScan = forcedScan || item.key === "scan" || item.href === "/scan";
+            return (
+              <a
+                key={`${item.key}-${item.href}`}
+                href={item.href}
+                className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
+                aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+                title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+              >
+                <span className={`cmms-mobile-nav-icon-wrap ${isScan ? "cmms-mobile-nav-icon-wrap-scan" : ""}`}>
+                  <ItemIcon size={isScan ? 24 : 22} strokeWidth={1.75} aria-hidden="true" />
+                  {item.href === "/repair/request" && pendingCount > 0 && (
+                    <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
+                      {pendingCount > 99 ? "99+" : pendingCount}
+                    </span>
+                  )}
+                </span>
+                <span>{item.label}</span>
+              </a>
+            );
+          };
           return (
-            <a
-              key={`${item.key}-${item.href}`}
-              href={item.href}
-              className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
-              aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
-              title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
-            >
-              <span className={`cmms-mobile-nav-icon-wrap ${isScan ? "cmms-mobile-nav-icon-wrap-scan" : ""}`}>
-                <ItemIcon size={isScan ? 24 : 22} strokeWidth={1.75} aria-hidden="true" />
-                {item.href === "/repair/request" && pendingCount > 0 && (
-                  <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
-                    {pendingCount > 99 ? "99+" : pendingCount}
-                  </span>
-                )}
-              </span>
-              <span>{item.label}</span>
-            </a>
+            <>
+              {left.map((item) => renderItem(item))}
+              {scanItem ? renderItem(scanItem, true) : null}
+              {right.map((item) => renderItem(item))}
+            </>
           );
-        })}
+        })()}
       </nav>
       </ConnectivityProvider>
     </ToastProvider>
