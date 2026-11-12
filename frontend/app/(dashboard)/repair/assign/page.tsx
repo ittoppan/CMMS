@@ -200,6 +200,7 @@ export default function RepairAssignPage() {
   const submitAssign = async () => {
     if (!selectedWo || !selectedTech) return;
     setSaving(true);
+    setError(null);
     try {
       const res = await fetch(`/api/v1/repair.php?id=${selectedWo.rawId}`, {
         method: "PUT",
@@ -212,17 +213,22 @@ export default function RepairAssignPage() {
           actual_start_at: new Date().toISOString().slice(0, 19).replace("T", " "),
         }),
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (json.success) {
         setAssignOpen(false);
         showToast("success", `จ่ายงาน ${selectedWo.woNumber} เรียบร้อยแล้ว`);
         fetchData();
       } else {
-        setError(json.error || "ไม่สามารถบันทึกการจ่ายงานได้");
+        const q = Array.isArray(json.qualification_errors) ? ` (${json.qualification_errors.join("; ")})` : "";
+        const msg = (json.error || "ไม่สามารถบันทึกการจ่ายงานได้") + q;
+        setError(msg);
+        showToast("error", msg);
       }
     } catch (e) {
       console.error(e);
-      setError("เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่");
+      const msg = "เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่";
+      setError(msg);
+      showToast("error", msg);
     }
     setSaving(false);
   };
