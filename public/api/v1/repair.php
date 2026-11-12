@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
+require_once __DIR__ . '/../../../src/helpers/workforce.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -540,9 +541,60 @@ try {
                     // 1) งานถูกมอบหมาย → บันทึกทีม (lead + ทีม) + แจ้งถึงผู้ถูกเพิ่มทุกคน
                     $teamChanged = (isset($data['team_ids']) && is_array($data['team_ids'])) || (isset($data['assigned_to']) && (int)$data['assigned_to'] !== $oldAssignedTo);
                     if ($teamChanged) {
-                        $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? $data['team_ids'] : array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'repair', $id));
+                        $teamIds = isset($data['team_ids']) && is_array($data['team_ids']) ? array_map('intval', $data['team_ids']) : array_map(fn($m) => (int)$m['user_id'], getWorkAssignees($pdo, 'repair', $id));
+                        $leadIdAssign = (int)($data['assigned_to'] ?? $oldAssignedTo);
+                        if ($leadIdAssign > 0 && !in_array($leadIdAssign, $teamIds, true)) {
+                            $teamIds[] = $leadIdAssign;
+                        }
+                        // Competency/certification gate
+                        try {
+                            $cfgWf = wf_config($pdo);
+                            $woRow = $row;
+                            $req = wf_required_skills_for_work_order($pdo, $woRow);
+                            if ($cfgWf['block_unqualified'] && !empty($req['unmapped'])) {
+                                clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 409);
+                                http_response_code(409);
+                                echo json_encode(['error' => 'ใบงานระบุทักษะที่ยังไม่ผูกกับ catalog: ' . implode(', ', $req['unmapped']) . ' — ปิดกั้นการมอบหมาย', 'code' => 'WF_UNMAPPED_REQUIREMENT'], JSON_UNESCAPED_UNICODE);
+                                exit;
+                            }
+                            $perPerson = array_values(array_filter($req['required'], fn($r) => empty($r['require_any_of'])));
+                            $teamLevel = array_values(array_filter($req['required'], fn($r) => !empty($r['require_any_of'])));
+                            $dateAssign = substr((string)($woRow['planned_start_at'] ?? ''), 0, 10) ?: date('Y-m-d');
+                            foreach ($teamIds as $uidCheck) {
+                                $qual = wf_qualification($pdo, (int)$uidCheck, $perPerson, $dateAssign);
+                                $av = wf_availability($pdo, (int)$uidCheck, $dateAssign, $cfgWf);
+                                $codes = array_merge($qual['reason_codes'] ?? [], $av['reasons'] ?? []);
+                                if (empty($qual['has_skill_data']) && $perPerson) $codes[] = 'NO_SKILL_DATA';
+                                $codes = array_values(array_unique(array_filter($codes)));
+                                if ($codes && $cfgWf['block_unqualified']) {
+                                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 409);
+                                    http_response_code(409);
+                                    echo json_encode(['error' => 'มอบหมายไม่ได้: ' . wf_user_label($pdo, (int)$uidCheck) . ' — ' . implode(', ', array_map(fn($c) => (WF_CONFLICT_REASONS[$c] ?? $c), $codes)), 'code' => 'WF_UNQUALIFIED'], JSON_UNESCAPED_UNICODE);
+                                    exit;
+                                }
+                            }
+                            foreach ($teamLevel as $rReq) {
+                                $holders = [];
+                                foreach ($teamIds as $u) {
+                                    $q = wf_qualification($pdo, (int)$u, [$rReq], $dateAssign);
+                                    if (!empty($q['qualified'])) $holders[] = (int)$u;
+                                }
+                                if (!$holders && $cfgWf['block_unqualified']) {
+                                    $sname = (string)($rReq['name'] ?? ('skill#' . ($rReq['skill_id'] ?? '')));
+                                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 409);
+                                    http_response_code(409);
+                                    echo json_encode(['error' => 'มอบหมายไม่ได้: ' . $sname . ' — ' . (WF_CONFLICT_REASONS['TEAM_SKILL_GAP'] ?? 'TEAM_SKILL_GAP'), 'code' => 'WF_TEAM_SKILL_GAP'], JSON_UNESCAPED_UNICODE);
+                                    exit;
+                                }
+                            }
+                        } catch (Exception $e) {
+                            if ($e->getCode() >= 400 && $e->getCode() < 600) {
+                                throw $e;
+                            }
+                            error_log('[repair.php] wf gate failed: ' . $e->getMessage());
+                        }
                         $cu = currentUser($pdo);
-                        $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
+                        $res = setWorkAssignees($pdo, 'repair', $id, $teamIds, $leadIdAssign > 0 ? $leadIdAssign : (int)($data['assigned_to'] ?? $oldAssignedTo), $cu['id'] ?? null);
 
                         if (!empty($res['added'])) {
                             $names = [];
