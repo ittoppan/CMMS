@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { SimpleDataTable, type SimpleColumn } from "@/components/ui/data-table-adapter";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { PageShell } from "@/components/PageShell";
-import { apiJson } from "@/lib/api";
+import { apiJson, apiFetch } from "@/lib/api";
 import { t } from "@/lib/i18n";
 import {
   CheckCircle2 as CheckCircleIcon,
@@ -135,8 +135,7 @@ function RepairOptionsSection() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/v1/repair_options.php");
-      const json = await res.json();
+      const json = await apiJson<any>("/api/v1/repair_options.php");
       if (Array.isArray(json)) {
         setOptions(json);
       } else {
@@ -204,19 +203,18 @@ function RepairOptionsSection() {
 
   const handleSubmitAdd = async () => {
     try {
-      const res = await fetch("/api/v1/repair_options.php", {
+      const res = await apiFetch("/api/v1/repair_options.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ option_type: activeType, ...form }),
       });
-      const json = await res.json();
-      if (json.success) {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json?.success) {
         setSaveMessage("เพิ่มตัวเลือกสำเร็จ");
         setShowAddDialog(false);
         fetchOptions();
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setError(json.error || "เพิ่มไม่สำเร็จ");
+        setError(json?.error || "เพิ่มไม่สำเร็จ");
       }
     } catch {
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
@@ -226,19 +224,18 @@ function RepairOptionsSection() {
   const handleSubmitEdit = async () => {
     if (!selectedOption) return;
     try {
-      const res = await fetch(`/api/v1/repair_options.php?id=${selectedOption.id}`, {
+      const res = await apiFetch(`/api/v1/repair_options.php?id=${selectedOption.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const json = await res.json();
-      if (json.success) {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json?.success) {
         setSaveMessage("แก้ไขตัวเลือกสำเร็จ");
         setShowEditDialog(false);
         fetchOptions();
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setError(json.error || "แก้ไขไม่สำเร็จ");
+        setError(json?.error || "แก้ไขไม่สำเร็จ");
       }
     } catch {
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
@@ -248,15 +245,15 @@ function RepairOptionsSection() {
   const handleConfirmDelete = async () => {
     if (!selectedOption) return;
     try {
-      const res = await fetch(`/api/v1/repair_options.php?id=${selectedOption.id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
+      const res = await apiFetch(`/api/v1/repair_options.php?id=${selectedOption.id}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json?.success) {
         setSaveMessage("ลบตัวเลือกสำเร็จ");
         setShowDeleteDialog(false);
         fetchOptions();
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
-        setError(json.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        setError(json?.error || "ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       }
     } catch {
       setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
@@ -265,13 +262,12 @@ function RepairOptionsSection() {
 
   const handleToggleActive = async (option: RepairOption) => {
     try {
-      const res = await fetch(`/api/v1/repair_options.php?id=${option.id}`, {
+      const res = await apiFetch(`/api/v1/repair_options.php?id=${option.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_active: !option.is_active }),
       });
-      const json = await res.json();
-      if (json.success) {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && json?.success) {
         fetchOptions();
       }
     } catch (e) {

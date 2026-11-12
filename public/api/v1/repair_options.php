@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../../src/includes/layout.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/csrf.php';
 
 header('Content-Type: application/json; charset=utf-8');
 session_start();
@@ -20,11 +21,14 @@ session_start();
 try {
     $pdo = getDb();
     requireLogin($pdo);
+    $method = $_SERVER['REQUEST_METHOD'];
+    if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
+        enforceCsrf();
+    }
 } catch (Throwable $e) {
     api_safe_catch($e);
 }
 
-$method = $_SERVER['REQUEST_METHOD'];
 
 // ดึงตัวเลือกทั้งหมด
 if ($method === 'GET') {
