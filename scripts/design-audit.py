@@ -76,6 +76,8 @@ EYEBROW_EXEMPT = {
     "frontend/app/(dashboard)/reports/spare-parts/page.tsx",
     "frontend/app/(dashboard)/reports/technicians/page.tsx",
     "frontend/app/(dashboard)/reports/work-orders/page.tsx",
+    # Andon TV board — จอแสดงผลเต็มจอสำหรับ Smart TV (ธีมมืด/กราฟิก/3D เฉพาะหน้า)
+    "frontend/app/(dashboard)/andon-board/page.tsx",
 }
 
 # hex จากยุค Phase gradient (ห้ามใช้เด็ดขาด — FAIL)
@@ -108,6 +110,13 @@ HEX_ALLOW_FILE = {
     "frontend/app/(dashboard)/settings/design/page.tsx",
     # LINE Flex JSON + header_color config — hex ต้องเป็นค่าจริงที่ส่งให้ LINE API
     "frontend/app/(dashboard)/settings/notifications/page.tsx",
+    # Andon TV board — จอแสดงผล Smart TV ใช้ธีมมืด/กราฟิก/3D เฉพาะหน้า
+    "frontend/app/(dashboard)/andon-board/page.tsx",
+}
+
+# หน้าที่อนุญาต gradient เฉพาะกิจ (จอแสดงผลพิเศษ/ธีมเฉพาะ)
+GRADIENT_ALLOW_FILE = {
+    "frontend/app/(dashboard)/andon-board/page.tsx",
 }
 
 # ---------------------------------------------------------------------------
@@ -162,9 +171,10 @@ def audit_file(rel):
     text = "\n".join(lines)
 
     # 1) Gradient (FAIL)
-    for i, ln in enumerate(lines, 1):
-        if GRADIENT_RE.search(ln) and not GRADIENT_ALLOW.search(ln):
-            issues.append(("gradient", "FAIL", i, ln.strip()[:110]))
+    if rel not in GRADIENT_ALLOW_FILE:
+        for i, ln in enumerate(lines, 1):
+            if GRADIENT_RE.search(ln) and not GRADIENT_ALLOW.search(ln):
+                issues.append(("gradient", "FAIL", i, ln.strip()[:110]))
 
     # 2) Banned hex (FAIL)
     for i, ln in enumerate(lines, 1):
