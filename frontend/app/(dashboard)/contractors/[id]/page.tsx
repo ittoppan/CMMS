@@ -146,7 +146,7 @@ export default function ContractorDetailPage() {
     <div className="rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/40 p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="cmms-kpi-value text-lg">{val === null || val === undefined ? "—" : `${val.toFixed(0)}${suf}`}</p>
-      {ok !== null && ok !== undefined && <p className="text-[11px] text-muted-foreground">อ้างอิงจาก {ok} งาน</p>}
+      {ok !== null && ok !== undefined && <p className="text-xs text-muted-foreground">อ้างอิงจาก {ok} งาน</p>}
     </div>
   );
 
@@ -213,7 +213,7 @@ export default function ContractorDetailPage() {
             >
               <Icon size={15} aria-hidden="true" /> {t.label}
               {t.key === "activity" && (d.activity?.length ?? 0) > 0 && (
-                <span className="rounded-full bg-[var(--cmms-bg-muted)] px-1.5 text-[10px]">{d.activity.length}</span>
+                <span className="rounded-full bg-[var(--cmms-bg-muted)] px-1.5 text-xs">{d.activity.length}</span>
               )}
             </button>
           );
@@ -241,19 +241,19 @@ export default function ContractorDetailPage() {
                 ["สร้างเมื่อ", fmtDate(c.created_at)],
               ].map(([k, v]) => (
                 <div key={k as string} className="rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{k}</p>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{k}</p>
                   <p className="mt-0.5 text-sm font-medium break-words">{v}</p>
                 </div>
               ))}
               {c.notes && (
                 <div className="sm:col-span-2 rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">หมายเหตุ</p>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">หมายเหตุ</p>
                   <p className="mt-0.5 whitespace-pre-wrap text-sm">{c.notes}</p>
                 </div>
               )}
               {c.status_reason && (
                 <div className="sm:col-span-2 rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">เหตุผลสถานะล่าสุด</p>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">เหตุผลสถานะล่าสุด</p>
                   <p className="mt-0.5 text-sm">{c.status_reason}</p>
                 </div>
               )}
@@ -305,15 +305,15 @@ export default function ContractorDetailPage() {
                 <>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                      <p className="text-[11px] uppercase text-muted-foreground">คะแนน</p>
+                      <p className="text-xs uppercase text-muted-foreground">คะแนน</p>
                       <p className="text-lg font-semibold">{q.result_score ?? "—"} / 100</p>
                     </div>
                     <div className="rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                      <p className="text-[11px] uppercase text-muted-foreground">ประเมินเมื่อ</p>
+                      <p className="text-xs uppercase text-muted-foreground">ประเมินเมื่อ</p>
                       <p className="text-sm font-medium">{fmtDateTime(q.assessed_at)}</p>
                     </div>
                     <div className="rounded-lg bg-[var(--cmms-bg-muted)]/40 px-3 py-2">
-                      <p className="text-[11px] uppercase text-muted-foreground">หมดอายุ</p>
+                      <p className="text-xs uppercase text-muted-foreground">หมดอายุ</p>
                       <p className="text-sm font-medium">{fmtDate(q.valid_until)}</p>
                     </div>
                   </div>
@@ -392,7 +392,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       <th className="px-4 py-2.5">ประเภท</th>
                       <th className="px-4 py-2.5">เลขที่เอกสาร</th>
                       <th className="px-4 py-2.5">ออกเมื่อ</th>
@@ -481,7 +481,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       <th className="px-4 py-2.5">สัญญา</th>
                       <th className="px-4 py-2.5">ประเภท</th>
                       <th className="px-4 py-2.5">วงเงิน</th>
@@ -532,7 +532,7 @@ export default function ContractorDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       <th className="px-4 py-2.5">เลขที่งาน</th>
                       <th className="px-4 py-2.5">หัวข้อ</th>
                       <th className="px-4 py-2.5">หมวด</th>
@@ -579,7 +579,7 @@ export default function ContractorDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         <th className="px-4 py-2.5">เลขที่</th>
                         <th className="px-4 py-2.5">ประเภท</th>
                         <th className="px-4 py-2.5">ระดับเสี่ยง</th>

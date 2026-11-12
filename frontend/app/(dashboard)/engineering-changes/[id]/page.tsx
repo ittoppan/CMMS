@@ -61,7 +61,7 @@ function lampOf(tone: Tone | "ok" | "warn" | "down" | "idle" | undefined): "ok" 
 function InfoCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
       <div className="text-sm">{children}</div>
     </div>
   );
@@ -376,7 +376,7 @@ export default function EngineeringChangeDetailPage() {
                 <Icon size={15} aria-hidden="true" />
                 {t.label}
                 {t.key === "impacts" && openImpacts.length > 0 && (
-                  <span className="ml-0.5 rounded-full bg-[var(--cmms-warning-light)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--cmms-warning)]">
+                  <span className="ml-0.5 rounded-full bg-[var(--cmms-warning-light)] px-1.5 py-0.5 text-xs font-semibold text-[var(--cmms-warning)]">
                     {openImpacts.length}
                   </span>
                 )}
@@ -535,7 +535,7 @@ export default function EngineeringChangeDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         <th className="px-4 py-2.5">ขั้นที่</th>
                         <th className="px-4 py-2.5">ผู้อนุมัติ</th>
                         <th className="px-4 py-2.5">ผล</th>
@@ -581,7 +581,7 @@ export default function EngineeringChangeDetailPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         <th className="px-4 py-2.5">รอบ</th>
                         <th className="px-4 py-2.5">ผล</th>
                         <th className="px-4 py-2.5">วิธีตรวจสอบ</th>
