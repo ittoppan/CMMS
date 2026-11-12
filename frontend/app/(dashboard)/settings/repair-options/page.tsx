@@ -23,7 +23,10 @@ import {
   FileText as DocumentTextIcon,
   User,
   Wrench as WrenchScrewdriverIcon,
+  MapPin,
+  ArrowRight,
 } from "lucide-react";
+import Link from "next/link";
 
 interface RepairOption {
   id: number;
@@ -52,13 +55,6 @@ interface OptionTypeMeta {
 }
 
 const OPTION_TYPES: Record<string, OptionTypeMeta> = {
-  department: {
-    label: "แผนก (Department)",
-    icon: BuildingOffice2Icon,
-    hint: "แผนกในโรงงานที่ใช้แจ้งซ่อม",
-    color: "var(--cmms-primary)",
-    bgColor: "var(--cmms-primary-bg)",
-  },
   job_type: {
     label: "ประเภทงาน (Job Type)",
     icon: Briefcase,
@@ -115,7 +111,7 @@ export default function RepairOptionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState("");
-  const [activeType, setActiveType] = useState<string>("department");
+  const [activeType, setActiveType] = useState<string>("job_type");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -311,14 +307,14 @@ export default function RepairOptionsPage() {
     );
   }
 
-  const currentMeta = OPTION_TYPES[activeType];
+  const currentMeta = OPTION_TYPES[activeType] || Object.values(OPTION_TYPES)[0];
 
   return (
     <PageShell
       eyebrow={<p className="cmms-eyebrow">REPAIR OPTIONS · CMMS-TOPPAN</p>}
       breadcrumbs={[{ label: "หน้าแรก", href: "/dashboard" }, { label: "ตั้งค่า", href: "/settings" }, { label: "ตัวเลือกฟอร์มแจ้งซ่อม" }]}
       title="ตัวเลือกฟอร์มแจ้งซ่อม"
-      description="จัดการตัวเลือก dropdown ที่ใช้ในฟอร์มแจ้งซ่อม (F-EN-03)"
+      description="จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (F-EN-03) — แผนกและที่ตั้ง/สถานที่จัดการกลางที่ข้อมูลหลัก"
     >
       <VStack gap={6}>
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
@@ -326,6 +322,24 @@ export default function RepairOptionsPage() {
       {saveMessage && (
         <Alert variant="success" title="สำเร็จ" description={saveMessage} />
       )}
+
+      <Alert
+        variant="info"
+        title="แผนกและที่ตั้ง/สถานที่ ใช้ข้อมูลหลักร่วมทุกฟังก์ชัน"
+        description={
+          <div className="space-y-2">
+            <p>แผนกและที่ตั้ง/สถานที่ถูกย้ายไปจัดการที่ข้อมูลหลัก (Master Data) เพื่อให้ใช้รายการเดียวกันทั่วทั้งระบบ ลดความซ้ำซ้อนของตัวเลือก</p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/settings/master/departments" className="inline-flex items-center gap-1 font-semibold underline-offset-2 hover:underline" style={{ color: "var(--cmms-primary)" }}>
+                <BuildingOffice2Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" /> ตั้งค่าแผนก <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link href="/settings/master/locations" className="inline-flex items-center gap-1 font-semibold underline-offset-2 hover:underline" style={{ color: "var(--cmms-primary)" }}>
+                <MapPin className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" /> ตั้งค่าที่ตั้ง/สถานที่ <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        }
+      />
 
       <Grid columns={{ minWidth: 280 }} gap={6} style={{ alignItems: "start" }}>
         {/* Sidebar: ประเภทตัวเลือก */}

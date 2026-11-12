@@ -89,7 +89,7 @@ const TOPICS: Record<string, TopicMeta> = {
   repair_options: {
     label: "ตัวเลือกฟอร์มแจ้งซ่อม",
     icon: WrenchScrewdriverIcon,
-    hint: "จัดการตัวเลือก dropdown ในฟอร์มแจ้งซ่อม (Department, Job Type, Machine Status, Root Cause)",
+    hint: "จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (ประเภทงาน สถานะ สาเหตุ ฯลฯ) — แผนก/สถานที่จัดการที่ข้อมูลหลัก",
     color: "var(--cmms-danger)",
     bgColor: "var(--cmms-danger-bg)",
     groups: ["repair_options"],
@@ -433,7 +433,9 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
 const SUB_PAGES = [
   { href: "/settings/menus", label: "สิทธิ์เมนูตามบทบาท", desc: "กำหนดเมนูที่แต่ละบทบาทเห็นได้", icon: ShieldCheckIcon },
   { href: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE", desc: "เทมเพลตข้อความ LINE + Web Push", icon: ChatBubbleLeftRightIcon },
-  { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown ในฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
+  { href: "/settings/master/departments", label: "แผนก (ข้อมูลหลัก)", desc: "จัดการรายชื่อแผนกกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
+  { href: "/settings/master/locations", label: "ที่ตั้ง/สถานที่ (ข้อมูลหลัก)", desc: "จัดการสถานที่/ตำแหน่งกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
+  { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
   { href: "/settings/design", label: "ปรับแต่งหน้าตาของระบบ", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
