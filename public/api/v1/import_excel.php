@@ -255,12 +255,27 @@ function imp_validate_row(array $cells, array $cfg, array $lk): array {
     return [$data, $errs];
 }
 
-/** ตรวจซ้ำในไฟล์/กับฐานข้อมูล สำหรับคอลัมน์ unique */
-function imp_unique_checks(array $okRows, array $cfg, PDO $pdo): array {
-    // $okRows: [ [rowNo, cells, data] ]
-    if (empty($cfg['unique']) || empty($okRows)) return $okRows;
+/**
+ * วิเคราะห์การซ้ำ/ผลกระทบตามโหมด สำหรับคอลัมน์ unique
+ * mode: insert | skip | upsert
+ * เติม $row['action'] = insert|update|skip|error และอาจเติม/ลบ $row['errors']
+ */
+function imp_apply_mode_actions(array $okRows, array $cfg, PDO $pdo, string $mode): array {
+    if (empty($okRows)) return $okRows;
+    $mode = in_array($mode, ['insert', 'skip', 'upsert'], true) ? $mode : 'insert';
+
+    if (empty($cfg['unique'])) {
+        foreach ($okRows as &$row) { $row['action'] = 'insert'; }
+        unset($row);
+        return $okRows;
+    }
+
     $field = $cfg['unique'][0];
-    if (!imp_valid_identifier((string)$field)) return $okRows;
+    if (!imp_valid_identifier((string)$field)) {
+        foreach ($okRows as &$row) { $row['action'] = 'insert'; }
+        unset($row);
+        return $okRows;
+    }
 
     $used = [];
     $st = $pdo->query("SELECT `$field` FROM `{$cfg['table']}`");
@@ -271,17 +286,41 @@ function imp_unique_checks(array $okRows, array $cfg, PDO $pdo): array {
     foreach ($okRows as $row) {
         $code = trim((string)($row['data'][$field] ?? ''));
         $k = mb_strtolower($code);
-        if ($k === '') continue;
-        if (isset($used[$k])) {
-            $row['errors'][] = 'รหัส "' . $code . '" มีอยู่แล้วในระบบ (ต้องไม่ซ้ำ)';
-        } elseif (isset($seen[$k])) {
+        $row['action'] = 'insert';
+        if ($k === '') {
+            $out[] = $row;
+            continue;
+        }
+        if (isset($seen[$k])) {
             $row['errors'][] = 'รหัส "' . $code . '" ซ้ำกับบรรทัดอื่นในไฟล์ (ต้องไม่ซ้ำ)';
+            $row['action'] = 'error';
+        } elseif (isset($used[$k])) {
+            if ($mode === 'skip') {
+                $row['action'] = 'skip';
+            } elseif ($mode === 'upsert') {
+                $row['action'] = 'update';
+            } else {
+                $row['errors'][] = 'รหัส "' . $code . '" มีอยู่แล้วในระบบ (ต้องไม่ซ้ำ) — เลือกโหมดข้ามถ้าซ้ำหรืออัปเดตถ้ามีเพื่อจัดการ';
+                $row['action'] = 'error';
+            }
+            $seen[$k] = true;
         } else {
             $seen[$k] = true;
+            $row['action'] = 'insert';
         }
         $out[] = $row;
     }
     return $out;
+}
+
+function imp_impact_summary(array $rows): array {
+    $s = ['insert' => 0, 'update' => 0, 'skip' => 0, 'error' => 0, 'total' => count($rows)];
+    foreach ($rows as $r) {
+        $a = $r['action'] ?? (empty($r['errors']) ? 'insert' : 'error');
+        if (!isset($s[$a])) $a = empty($r['errors']) ? 'insert' : 'error';
+        $s[$a]++;
+    }
+    return $s;
 }
 
 /** สร้างแถวตัวอย่างสำหรับแม่แบบ */
@@ -460,12 +499,68 @@ function imp_insert_calibration(PDO $pdo, array $d): void {
     ]);
 }
 
+function imp_update_asset(PDO $pdo, array $d): void {
+    $sql = "UPDATE asset_registry SET
+            name = :name, category = :category, description = :description, location = :location,
+            criticality = :criticality, department = :department, manufacturer = :manufacturer, model = :model,
+            serial_number = :serial_number, purchase_date = :purchase_date, warranty_expiry = :warranty_expiry,
+            status = :status, floor_x = :floor_x, floor_y = :floor_y, running_hours_month = :running_hours_month
+            WHERE code = :code";
+    $st = $pdo->prepare($sql);
+    $st->execute([
+        'code' => trim($d['code']),
+        'name' => $d['name'],
+        'category' => $d['category'] ?? null,
+        'description' => $d['description'] ?? null,
+        'location' => $d['location'] ?? null,
+        'criticality' => ($d['criticality'] ?? 'B') === 'C' ? 'C' : ($d['criticality'] ?? 'B'),
+        'department' => $d['department'] ?? null,
+        'manufacturer' => $d['manufacturer'] ?? null,
+        'model' => $d['model'] ?? null,
+        'serial_number' => $d['serial_number'] ?? null,
+        'purchase_date' => $d['purchase_date'] ?? null,
+        'warranty_expiry' => $d['warranty_expiry'] ?? null,
+        'status' => $d['status'] ?? 'active',
+        'floor_x' => $d['floor_x'] ?? 10,
+        'floor_y' => $d['floor_y'] ?? 10,
+        'running_hours_month' => $d['running_hours_month'] ?? 720,
+    ]);
+}
+
+function imp_update_spare(PDO $pdo, array $d): void {
+    $sql = "UPDATE spare_parts SET
+            supplier_id = :supplier_id, name = :name, description = :description, category = :category,
+            unit = :unit, stock_qty = :stock_qty, reserved_qty = :reserved_qty,
+            min_stock = :min_stock, max_stock = :max_stock, location = :location, unit_price = :unit_price
+            WHERE code = :code";
+    $st = $pdo->prepare($sql);
+    $st->execute([
+        'supplier_id' => $d['supplier_id'] ?? null,
+        'code' => trim($d['code']),
+        'name' => $d['name'],
+        'description' => $d['description'] ?? null,
+        'category' => $d['category'] ?? null,
+        'unit' => $d['unit'] ?? 'ชิ้น',
+        'stock_qty' => $d['stock_qty'] ?? 0,
+        'reserved_qty' => $d['reserved_qty'] ?? 0,
+        'min_stock' => $d['min_stock'] ?? 0,
+        'max_stock' => $d['max_stock'] ?? 0,
+        'location' => $d['location'] ?? null,
+        'unit_price' => $d['unit_price'] ?? 0,
+    ]);
+}
+
 $IMP_INSERT = [
     'repair' => 'imp_insert_repair',
     'asset' => 'imp_insert_asset',
     'pm_am' => 'imp_insert_pm',
     'spare_parts' => 'imp_insert_spare',
     'calibration' => 'imp_insert_calibration',
+];
+
+$IMP_UPDATE = [
+    'asset' => 'imp_update_asset',
+    'spare_parts' => 'imp_update_spare',
 ];
 
 /* ====================== รัน ====================== */
@@ -475,12 +570,15 @@ try {
 
     $action = $_GET['action'] ?? ($_SERVER['REQUEST_METHOD'] === 'POST' ? 'validate' : '');
     $dataset = $_POST['dataset'] ?? $_GET['dataset'] ?? '';
+    $mode = $_POST['mode'] ?? $_GET['mode'] ?? 'insert';
     $body = null;
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['import', 'errors_xlsx'], true)) {
         $body = json_decode((string)file_get_contents('php://input'), true);
         if (!is_array($body)) $body = [];
         if (empty($dataset)) $dataset = $body['dataset'] ?? '';
+        if (!empty($body['mode'])) $mode = (string)$body['mode'];
     }
+    if (!in_array($mode, ['insert', 'skip', 'upsert'], true)) $mode = 'insert';
 
     /* ---------- ประวัติการนำเข้า (audit trail) ---------- */
     if ($action === 'history') {
@@ -571,18 +669,26 @@ try {
         $allRows = $book['rows'];
         if (empty($allRows)) imp_json(400, ['error' => 'ไฟล์ไม่มีข้อมูล (ต้องมีแถวหัวข้อ + ข้อมูล)']);
 
-        // ตรวจหัวคอลัมน์บรรทัดแรก
+        // ตรวจหัวคอลัมน์บรรทัดแรก (ยืดหยุ่น: trim/case-insensitive/เว้นวรรค/ * ท้ายชื่อ)
         $headerRow = array_shift($allRows);
         $labels = array_map(fn($c) => $c['label'], $cfg['columns']);
+        $norm = function($s) {
+            $s = trim((string)$s);
+            $s = rtrim($s, "* \t");
+            $s = preg_replace('/\s+/u', ' ', $s);
+            return mb_strtolower($s);
+        };
+        $labelNorm = [];
+        foreach ($labels as $i => $l) $labelNorm[$norm($l)] = $i;
         $colIndex = []; // label => column index
         $headerInfo = [];
         $sheetErrors = [];
         foreach ($headerRow as $idx => $h) {
             $h = trim((string)$h);
-            $hClean = rtrim($h, "* \t");
-            $found = array_search($hClean, $labels, true);
-            if ($found !== false) {
-                $colIndex[$labels[$found]] = $idx;
+            $hKey = $norm($h);
+            if ($hKey !== '' && isset($labelNorm[$hKey])) {
+                $found = $labelNorm[$hKey];
+                if (!isset($colIndex[$labels[$found]])) $colIndex[$labels[$found]] = $idx;
                 $headerInfo[] = ['label' => $labels[$found], 'recognized' => true, 'required' => !empty($cfg['columns'][$found]['required'])];
             } else {
                 $headerInfo[] = ['label' => $h, 'recognized' => false, 'required' => false];
@@ -603,14 +709,11 @@ try {
         foreach ($allRows as $rowNo => $vals) {
             $cells = [];
             foreach ($labels as $label) {
-                if (isset($colIndex[$label])) {
-                    $cells[$label] = $vals[$colIndex[$label]] ?? '';
-                }
+                $cells[$label] = isset($colIndex[$label]) ? ($vals[$colIndex[$label]] ?? '') : '';
             }
             $rawList[] = ['row' => $rowNo + 2, 'cells' => $cells];
         }
 
-        $outRows = [];
         $grid = [];
         foreach ($rawList as $item) {
             $cellLine = $item['cells'];
@@ -620,21 +723,25 @@ try {
             }
             [$data, $vErrs] = imp_validate_row($cellLine, $cfg, $lk);
             $errors = array_merge($errors, $vErrs);
-            $grid[] = ['row' => $item['row'], 'cells' => $cellLine, 'data' => $data, 'errors' => $errors];
+            $grid[] = ['row' => $item['row'], 'cells' => $cellLine, 'data' => $data, 'errors' => $errors, 'action' => empty($errors) ? 'insert' : 'error'];
         }
-        // ตรวจ unique ภายในไฟล์/กับ DB (เฉพาะผ่าน format)
+        // วิเคราะห์ผลกระทบ/การซ้ำตามโหมด (เฉพาะแถวที่ผ่าน format)
         $okRows = []; foreach ($grid as $g) if (empty($g['errors'])) $okRows[] = $g;
-        $checked = imp_unique_checks($okRows, $cfg, $pdo);
-        $ucMap = []; foreach ($checked as $g) $ucMap[$g['row']] = $g['errors'];
+        $checked = imp_apply_mode_actions($okRows, $cfg, $pdo, $mode);
+        $actMap = []; foreach ($checked as $g) $actMap[$g['row']] = $g;
 
         $outRows = [];
         $okCnt = 0;
         foreach ($grid as $g) {
             $errs = $g['errors'];
-            if (isset($ucMap[$g['row']])) $errs = array_merge($errs, $ucMap[$g['row']]);
+            $actionRow = $g['action'] ?? (empty($errs) ? 'insert' : 'error');
+            if (isset($actMap[$g['row']])) {
+                $errs = $actMap[$g['row']]['errors'];
+                $actionRow = $actMap[$g['row']]['action'] ?? $actionRow;
+            }
             $isOk = empty($errs);
             if ($isOk) $okCnt++;
-            $outRows[] = ['row' => $g['row'], 'ok' => $isOk, 'errors' => $errs, 'cells' => strip_emoji_for_json($g['cells'])];
+            $outRows[] = ['row' => $g['row'], 'ok' => $isOk, 'action' => $actionRow, 'errors' => $errs, 'cells' => strip_emoji_for_json($g['cells'])];
         }
 
         imp_json(200, [
@@ -646,6 +753,9 @@ try {
             'sheet_errors' => $sheetErrors,
             'rows' => $outRows,
             'summary' => ['total' => count($outRows), 'ok' => $okCnt, 'error' => count($outRows) - $okCnt],
+            'impact' => imp_impact_summary($outRows),
+            'mode' => $mode,
+            'supports_upsert' => !empty($cfg['unique']) && isset($IMP_UPDATE[$dataset]),
         ]);
     }
 
@@ -668,7 +778,9 @@ try {
             }
             [$data, $vErrs] = imp_validate_row($cells, $cfg, $lk);
             $errors = array_merge($errors, $vErrs);
-            $grid[] = ['row' => (int)($it['row'] ?? ($i + 2)), 'cells' => $cells, 'data' => $data, 'errors' => $errors];
+            $desiredAction = isset($it['action']) ? (string)$it['action'] : (empty($errors) ? 'insert' : 'error');
+            if (!in_array($desiredAction, ['insert','update','skip','error'], true)) $desiredAction = empty($errors) ? 'insert' : 'error';
+            $grid[] = ['row' => (int)($it['row'] ?? ($i + 2)), 'cells' => $cells, 'data' => $data, 'errors' => $errors, 'action' => $desiredAction];
         }
 
         // lock เฉพาะการนำเข้า (กันคน 2 คนอัปโหลดพร้อมกัน) — GET_LOCK ระดับ connection เดียวกับ transaction
@@ -678,33 +790,47 @@ try {
         }
 
         try {
-            // unique + insert แบบ transaction
+            // unique + insert/update/skip แบบ transaction
             $pdo->beginTransaction();
             try {
                 $okRows = []; foreach ($grid as $g) if (empty($g['errors'])) $okRows[] = $g;
-                $checked = imp_unique_checks($okRows, $cfg, $pdo);
-                $ucMap = []; foreach ($checked as $g) $ucMap[$g['row']] = $g['errors'];
+                $checked = imp_apply_mode_actions($okRows, $cfg, $pdo, $mode);
+                $actMap = []; foreach ($checked as $g) $actMap[$g['row']] = $g;
                 unset($checked);
 
-                $inserted = 0; $failedXml = [];
-                $fn = $IMP_INSERT[$dataset];
+                $inserted = 0; $updated = 0; $skipped = 0; $failedXml = [];
+                $fnInsert = $IMP_INSERT[$dataset];
+                $fnUpdate = $IMP_UPDATE[$dataset] ?? null;
                 foreach ($grid as $g) {
                     $errs = $g['errors'];
-                    if (isset($ucMap[$g['row']])) $errs = array_merge($errs, $ucMap[$g['row']]);
+                    $act = $g['action'];
+                    if (isset($actMap[$g['row']])) {
+                        $errs = $actMap[$g['row']]['errors'];
+                        $act = $actMap[$g['row']]['action'] ?? $act;
+                    }
                     if (!empty($errs)) {
-                        $failedXml[] = ['row' => $g['row'], 'errors' => $errs];
+                        $failedXml[] = ['row' => $g['row'], 'errors' => $errs, 'action' => 'error'];
                         continue;
                     }
-                    $fn($pdo, $g['data'], (int)$user['id']);
+                    if ($act === 'skip') { $skipped++; continue; }
+                    if ($act === 'update') {
+                        if ($fnUpdate) { $fnUpdate($pdo, $g['data']); $updated++; }
+                        else { $fnInsert($pdo, $g['data'], (int)$user['id']); $inserted++; }
+                        continue;
+                    }
+                    $fnInsert($pdo, $g['data'], (int)$user['id']);
                     $inserted++;
                 }
 
+                $failedCount = count($failedXml);
+                $note = 'mode=' . $mode . '; inserted=' . $inserted . '; updated=' . $updated . '; skipped=' . $skipped . '; failed=' . $failedCount;
                 // audit trail ใน same transaction
                 imp_history_log($pdo, $dataset, (int)$user['id'], [
                     'file_name' => $body['file_name'] ?? '',
                     'total' => count($grid),
                     'inserted' => $inserted,
-                    'failed' => count($failedXml),
+                    'failed' => $failedCount + $skipped,
+                    'note' => $note,
                 ]);
                 $pdo->commit();
             } catch (Throwable $e) {
@@ -719,8 +845,11 @@ try {
         imp_json(200, [
             'status' => 'success',
             'inserted' => $inserted,
+            'updated' => $updated,
+            'skipped' => $skipped,
             'failed' => count($failedXml),
             'total' => count($grid),
+            'mode' => $mode,
             'errors' => $failedXml,
         ]);
     }
