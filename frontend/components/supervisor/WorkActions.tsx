@@ -111,12 +111,18 @@ export function AssignDialog({
       });
       const failed = (res.results || []).filter((r) => !r.success);
       if (!res.success && failed.length && !force) {
-        setErr(failed.map((f) => `${f.code || f.id}: ${f.error || ""}`).join("\n"));
+        const lines = failed.map((f) => {
+          const base = `${f.code || f.id}: ${f.error || "ไม่สำเร็จ"}`;
+          const q = Array.isArray((f as any).qualification_errors) ? (f as any).qualification_errors as string[] : [];
+          return q.length ? `${base}\n- ${q.join("\n- ")}` : base;
+        });
+        setErr(lines.join("\n\n"));
         const cList = failed.filter((f) => Array.isArray(f.conflicts) && f.conflicts.length);
         if (cList.length)
           setConflicts(`มีงานขัดกับช่วงเวลาที่วางแผนของทีม ${cList.length} รายการ — ต้องเลือก "บังคับมอบหมาย" หรือเลื่อนเวลา`);
       } else if (!res.success && failed.length) {
-        showToast("error", `มอบหมายบางรายการไม่สำเร็จ (${failed.length})`);
+        const msg = failed.map((f) => `${f.code || f.id}: ${f.error || "ไม่สำเร็จ"}`).join("; ");
+        showToast("error", `มอบหมายบางรายการไม่สำเร็จ (${failed.length})${msg ? ` — ${msg}` : ""}`);
         onDone?.();
         onOpenChange(false);
       } else {
@@ -124,8 +130,10 @@ export function AssignDialog({
         onDone?.();
         onOpenChange(false);
       }
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "เกิดข้อผิดพลาด");
+    } catch (e: any) {
+      const q = Array.isArray(e?.qualification_errors) ? e.qualification_errors as string[] : [];
+      const base = e instanceof Error ? e.message : "เกิดข้อผิดพลาด";
+      setErr(q.length ? `${base}\n- ${q.join("\n- ")}` : base);
     } finally {
       setBusy(false);
     }
