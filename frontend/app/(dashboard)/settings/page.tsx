@@ -87,9 +87,9 @@ const TOPICS: Record<string, TopicMeta> = {
     groups: ["repair_config"],
   },
   repair_options: {
-    label: "ตัวเลือกฟอร์มแจ้งซ่อม",
+    label: "ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง",
     icon: WrenchScrewdriverIcon,
-    hint: "จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (ประเภทงาน สถานะ สาเหตุ ฯลฯ) — แผนก/สถานที่จัดการที่ข้อมูลหลัก",
+    hint: "จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน",
     color: "var(--cmms-danger)",
     bgColor: "var(--cmms-danger-bg)",
     groups: ["repair_options"],

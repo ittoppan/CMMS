@@ -216,6 +216,12 @@ export default function MasterDataPage() {
   const entityKey = (params?.entity || "").toLowerCase();
   const def = E[entityKey];
 
+  useEffect(() => {
+    if (entityKey === "departments" || entityKey === "locations") {
+      router.replace(`/settings/repair-options?tab=${entityKey}`);
+    }
+  }, [entityKey, router]);
+
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
