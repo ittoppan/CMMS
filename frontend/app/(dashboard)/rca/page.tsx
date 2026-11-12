@@ -14,7 +14,7 @@ import {
   Activity, AlertTriangle, ClipboardList, FlaskConical, Plus, TrendingUp, History, ListChecks, ArrowRight, Clock, Wallet, Wrench,
 } from "lucide-react";
 import {
-  DashboardResponse, TrendRow, fetchDashboard, fetchTrend, fetchAssetsWos,
+  DashboardResponse, TrendRow, Rca, fetchDashboard, fetchTrend, fetchAssetsWos, fetchRcas,
   RCA_STATUS_LABELS, RCA_STATUS_FLOW, fmtDuration, FAILURE_SEVERITIES, severityTone,
 } from "@/lib/rca";
 import type { AssetOption } from "@/lib/rca";
@@ -56,6 +56,7 @@ export default function RcaDashboardPage() {
   const [severity, setSeverity] = useState("");
   const [dashboard, setDashboard] = useState<DashboardResponse | null>(null);
   const [trend, setTrend] = useState<TrendRow[]>([]);
+  const [trackRcas, setTrackRcas] = useState<Rca[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -68,9 +69,15 @@ export default function RcaDashboardPage() {
     setError("");
     try {
       const p = { asset_id: assetId, severity };
-      const [d, t] = await Promise.all([fetchDashboard(p), fetchTrend(p)]);
+      const [d, t, r] = await Promise.all([
+        fetchDashboard(p),
+        fetchTrend(p),
+        fetchRcas({ asset_id: assetId, sort: "due", page: "1", per: "10" } as any).catch(() => ({ rcas: { items: [], total: 0, page: 1, per: 10, pages: 0, can_manage: false } })),
+      ]);
       setDashboard(d);
       setTrend(t.trend || []);
+      const items = (r as any)?.rcas?.items ?? [];
+      setTrackRcas(items.filter((x: Rca) => Number(x.open_actions || 0) > 0 || !["closed", "cancelled"].includes(String(x.status))).slice(0, 8));
     } catch (e: any) {
       setError(e?.message || "โหลดข้อมูลวิเคราะห์ความเสียหายไม่สำเร็จ");
     } finally {
@@ -279,6 +286,70 @@ export default function RcaDashboardPage() {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex-row items-center justify-between">
+              <div>
+                <CardTitle>RCA ที่ต้องติดตาม (CAPA/Actions)</CardTitle>
+                <CardDescription>รายการ RCA ที่ยังไม่ปิดหรือมี action ค้าง เพื่อปิดวงจรการแก้ไขและป้องกันซ้ำ</CardDescription>
+              </div>
+              <ClipboardList size={18} className="text-[var(--cmms-text-secondary)]" aria-hidden="true" />
+            </CardHeader>
+            <CardContent>
+              {trackRcas.length === 0 ? (
+                <EmptyState title="ไม่มี RCA ที่ต้องติดตาม" description="ไม่มี RCA ที่เปิดอยู่หรือมี action ค้างในขณะนี้" icon={<ClipboardList size={40} />} />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[760px] text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-[var(--cmms-border)] text-xs uppercase tracking-wide text-[var(--cmms-text-secondary)]">
+                        <th className="px-3 py-2">RCA</th>
+                        <th className="px-3 py-2">หัวข้อ/เครื่องจักร</th>
+                        <th className="px-3 py-2">สถานะ</th>
+                        <th className="px-3 py-2">Actions ค้าง</th>
+                        <th className="px-3 py-2">กำหนดเสร็จ</th>
+                        <th className="px-3 py-2">ผู้รับผิดชอบ</th>
+                        <th className="px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {trackRcas.map((r) => {
+                        const overdue = r.due_date ? new Date(r.due_date).getTime() < Date.now() && !["closed", "cancelled"].includes(String(r.status)) : false;
+                        return (
+                          <tr key={r.id} className="border-b border-[var(--cmms-border)] last:border-0 hover:bg-[var(--cmms-bg-muted)]">
+                            <td className="px-3 py-2 font-mono text-xs">{r.rca_code}</td>
+                            <td className="px-3 py-2">
+                              <div className="font-medium text-[var(--cmms-text-primary)]">{r.title || "—"}</div>
+                              <div className="text-xs text-[var(--cmms-text-secondary)]">{[r.asset_code, r.asset_name].filter(Boolean).join(" — ") || "—"}</div>
+                            </td>
+                            <td className="px-3 py-2">{statusBadge(String(r.status))}</td>
+                            <td className="px-3 py-2">
+                              <Badge variant={Number(r.open_actions || 0) > 0 ? "warning" : "neutral"} dot>
+                                {Number(r.open_actions || 0)} / {Number(r.total_actions || 0)}
+                              </Badge>
+                            </td>
+                            <td className="px-3 py-2">
+                              {r.due_date ? (
+                                <span className={overdue ? "font-medium text-[var(--cmms-danger)]" : ""}>
+                                  {String(r.due_date).slice(0, 10)}{overdue ? " (เกินกำหนด)" : ""}
+                                </span>
+                              ) : "—"}
+                            </td>
+                            <td className="px-3 py-2">{r.assignee_name || "—"}</td>
+                            <td className="px-3 py-2">
+                              <a href={`/rca/${r.id}`} className={buttonVariants({ variant: "ghost", size: "icon-xs" })} aria-label={`เปิด ${r.rca_code}`}>
+                                <ArrowRight size={14} aria-hidden="true" />
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
