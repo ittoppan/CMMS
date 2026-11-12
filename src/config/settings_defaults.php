@@ -130,6 +130,12 @@ function settingsDefaultValues(): array {
         'default_repair_priority' => 'medium',
         'require_approval_repair' => '0',
 
+        // ── kpi targets ──
+        'kpi_sla_target_minutes' => '120',
+        'kpi_pm_ontime_target'   => '80',
+        'kpi_mtbf_target_hours'  => '',
+        'kpi_mttr_target_minutes'=> '',
+
         // ── andon_board ──
         'andon_refresh_sec'     => '30',  // ความถี่รีเฟรชจอ Andon TV (วินาที) - default 30
 

@@ -7,12 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
 import {
   Banknote, CalendarDays,
-  Zap, Clock, ChartBar, RefreshCw, TriangleAlert,
+  Zap, Clock, ChartBar, RefreshCw, TriangleAlert, Settings,
 } from "lucide-react";
+import { Dialog } from "@/components/ui/dialog";
 import {
   BarChart, Bar, ComposedChart, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell,
@@ -34,6 +36,14 @@ const fmtMonth = (ym: string) => {
 };
 const fmtBaht = (n: number | string | null | undefined) =>
   n == null ? "—" : `${Number(n).toLocaleString("th-TH")} บาท`;
+
+const getCsrfToken = (): string | null => {
+  if (typeof document === "undefined") return null;
+  const m = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
+  if (m?.content) return m.content;
+  const v = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/)?.[1] ?? null;
+  return v ? decodeURIComponent(v) : null;
+};
 
 const STATUS_LABEL: Record<string, string> = {
   completed: "เสร็จแล้ว", resolved: "เสร็จแล้ว", closed: "ปิดงาน",
@@ -65,6 +75,14 @@ export default function KpiDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<KpiData | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [kpiSettings, setKpiSettings] = useState({
+    kpi_sla_target_minutes: "120",
+    kpi_pm_ontime_target: "80",
+    kpi_mtbf_target_hours: "",
+    kpi_mttr_target_minutes: "",
+  });
 
   const fetchData = useCallback(async (m: number) => {
     setLoading(true);
@@ -80,7 +98,55 @@ export default function KpiDashboardPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchData(months); }, [months, fetchData]);
+  const loadKpiSettings = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/settings.php?keys=kpi_sla_target_minutes,kpi_pm_ontime_target,kpi_mtbf_target_hours,kpi_mttr_target_minutes", { credentials: "include" });
+      if (res.ok) {
+        const json = await res.json();
+        const data = Array.isArray(json) ? json : json?.data || json?.settings || [];
+        const map: Record<string, string> = {};
+        if (Array.isArray(data)) {
+          data.forEach((s: any) => { if (s?.setting_key) map[s.setting_key] = String(s.setting_value ?? ""); });
+        } else if (typeof data === 'object') {
+          Object.entries(data).forEach(([k,v]) => { map[k] = String(v ?? ""); });
+        }
+        setKpiSettings((prev) => ({
+          kpi_sla_target_minutes: map.kpi_sla_target_minutes || prev.kpi_sla_target_minutes,
+          kpi_pm_ontime_target: map.kpi_pm_ontime_target || prev.kpi_pm_ontime_target,
+          kpi_mtbf_target_hours: map.kpi_mtbf_target_hours ?? prev.kpi_mtbf_target_hours,
+          kpi_mttr_target_minutes: map.kpi_mttr_target_minutes ?? prev.kpi_mttr_target_minutes,
+        }));
+      }
+    } catch {}
+  }, []);
+
+  const saveKpiSettings = async () => {
+    setSaving(true);
+    try {
+      const csrf = getCsrfToken();
+      const entries = [
+        { setting_key: "kpi_sla_target_minutes", setting_value: kpiSettings.kpi_sla_target_minutes },
+        { setting_key: "kpi_pm_ontime_target", setting_value: kpiSettings.kpi_pm_ontime_target },
+        { setting_key: "kpi_mtbf_target_hours", setting_value: kpiSettings.kpi_mtbf_target_hours },
+        { setting_key: "kpi_mttr_target_minutes", setting_value: kpiSettings.kpi_mttr_target_minutes },
+      ];
+      for (const e of entries) {
+        await fetch("/api/v1/settings.php", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
+          body: JSON.stringify(e),
+        });
+      }
+      setSettingsOpen(false);
+    } catch {
+      // ignore
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  useEffect(() => { fetchData(months); loadKpiSettings(); }, [months, fetchData, loadKpiSettings]);
 
   const h = data?.headline;
   const pmOnTime = data && data.pm.total_completed > 0
@@ -128,19 +194,25 @@ export default function KpiDashboardPage() {
             </div>
             <p className="cmms-hero-desc">{hero.desc}</p>
           </div>
-          <Select value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
-            <SelectTrigger
-              aria-label="ช่วงเวลา"
-              className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="3">3 เดือน</SelectItem>
-              <SelectItem value="6">6 เดือน</SelectItem>
-              <SelectItem value="12">12 เดือน</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" className="gap-2 border-white/20 bg-white/10 text-white hover:bg-white/20" onClick={() => setSettingsOpen(true)}>
+              <Settings size={16} strokeWidth={1.75} aria-hidden="true" />
+              ตั้งค่า KPI
+            </Button>
+            <Select value={String(months)} onValueChange={(v) => setMonths(Number(v))}>
+              <SelectTrigger
+                aria-label="ช่วงเวลา"
+                className="h-10 w-[150px] border-white/20 bg-white/10 text-sm text-white"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">3 เดือน</SelectItem>
+                <SelectItem value="6">6 เดือน</SelectItem>
+                <SelectItem value="12">12 เดือน</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -331,7 +403,7 @@ export default function KpiDashboardPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <Clock size={20} strokeWidth={1.75} aria-hidden="true" style={{ color: "var(--cmms-primary)" }} />
                 <h3 className="font-bold">% งานปิดใน SLA รายเดือน</h3>
-                <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤120 นาที</span>
+                <span className="cmms-andon-chip" style={{ background: "rgba(100,116,139,0.12)", color: "var(--cmms-text-muted)", fontSize: "0.75rem", padding: "4px 10px" }}>เป้า ≤{kpiSettings.kpi_sla_target_minutes || '—'} นาที</span>
               </div>
               <div className="h-[200px] w-full">
                 <ResponsiveContainer>
@@ -368,8 +440,8 @@ export default function KpiDashboardPage() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-4">
-                <span className={Number(pmOnTime ?? 0) >= 80 ? "cmms-status ok" : "cmms-status warn"}>
-                  <span className="cmms-status-dot" />ทันกำหนด {pmOnTime ?? 0}%
+                <span className={Number(pmOnTime ?? 0) >= Number(kpiSettings.kpi_pm_ontime_target || 0) ? "cmms-status ok" : "cmms-status warn"}>
+                  <span className="cmms-status-dot" />ทันกำหนด {pmOnTime ?? 0}% (เป้า {kpiSettings.kpi_pm_ontime_target || '-'}%)
                 </span>
                 {Number(data?.pm.overdue_pending) > 0 && (
                   <span className="cmms-status down">
@@ -394,6 +466,38 @@ export default function KpiDashboardPage() {
           รีเฟรชข้อมูล
         </Button>
       </div>
+
+      <Dialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        title="ตั้งค่าเป้าหมาย KPI"
+        description="กำหนดค่าเป้าหมายที่ใช้แสดงบนแดชบอร์ด KPI"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setSettingsOpen(false)}>ยกเลิก</Button>
+            <Button onClick={saveKpiSettings} disabled={saving}>{saving ? "กำลังบันทึก..." : "บันทึก"}</Button>
+          </>
+        }
+      >
+        <div className="grid gap-4 py-2">
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">เป้าหมาย SLA ปิดงาน (นาที)</label>
+            <Input type="number" value={kpiSettings.kpi_sla_target_minutes} onChange={(e) => setKpiSettings((s) => ({ ...s, kpi_sla_target_minutes: e.target.value }))} />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">เป้าหมาย PM ทันกำหนด (%)</label>
+            <Input type="number" value={kpiSettings.kpi_pm_ontime_target} onChange={(e) => setKpiSettings((s) => ({ ...s, kpi_pm_ontime_target: e.target.value }))} />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">เป้าหมาย MTBF (ชั่วโมง)</label>
+            <Input type="number" value={kpiSettings.kpi_mtbf_target_hours} onChange={(e) => setKpiSettings((s) => ({ ...s, kpi_mtbf_target_hours: e.target.value }))} placeholder="เว้นว่างหากไม่กำหนด" />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">เป้าหมาย MTTR (นาที)</label>
+            <Input type="number" value={kpiSettings.kpi_mttr_target_minutes} onChange={(e) => setKpiSettings((s) => ({ ...s, kpi_mttr_target_minutes: e.target.value }))} placeholder="เว้นว่างหากไม่กำหนด" />
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }
