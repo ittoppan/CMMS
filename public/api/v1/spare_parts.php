@@ -18,7 +18,12 @@ try {
     switch ($method) {
         case 'GET':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-            $sageCategory = isset($_GET['sage_category']) ? $_GET['sage_category'] : '';
+            $sageCategory = isset($_GET['sage_category']) ? trim((string)$_GET['sage_category']) : '';
+            $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+            $limitParam = $_GET['limit'] ?? null;
+            $pageParam = $_GET['page'] ?? null;
+            $offsetParam = $_GET['offset'] ?? null;
+            $paginate = ($limitParam !== null || $pageParam !== null || $offsetParam !== null);
 
             if ($id) {
                 $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id WHERE s.id = ?');
@@ -26,12 +31,42 @@ try {
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 echo json_encode($row);
-            } elseif (!empty($sageCategory)) {
-                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id WHERE s.sage_category = ? ORDER BY s.created_at DESC');
-                $stmt->execute([$sageCategory]);
-                echo json_encode($stmt->fetchAll());
+                break;
+            }
+
+            $where = [];
+            $params = [];
+            if ($sageCategory !== '' && strtolower($sageCategory) !== 'all') {
+                $where[] = 's.sage_category = ?';
+                $params[] = $sageCategory;
+            }
+            if ($q !== '') {
+                $where[] = '(s.code LIKE ? OR s.name LIKE ? OR s.sage_item_no LIKE ? OR s.category LIKE ? OR s.location LIKE ?)';
+                $like = '%' . $q . '%';
+                array_push($params, $like, $like, $like, $like, $like);
+            }
+            $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+            $baseSql = 'FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id ' . $whereSql;
+
+            if ($paginate) {
+                $limit = max(1, min(200, (int)($limitParam ?? 50)));
+                if ($pageParam !== null) {
+                    $page = max(1, (int)$pageParam);
+                    $offset = ($page - 1) * $limit;
+                } else {
+                    $offset = max(0, (int)($offsetParam ?? 0));
+                    $page = (int)floor($offset / $limit) + 1;
+                }
+                $countStmt = $pdo->prepare('SELECT COUNT(*) ' . $baseSql);
+                $countStmt->execute($params);
+                $total = (int)$countStmt->fetchColumn();
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $baseSql . ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?');
+                $stmt->execute(array_merge($params, [$limit, $offset]));
+                $items = $stmt->fetchAll();
+                echo json_encode(['items' => $items, 'total' => $total, 'limit' => $limit, 'offset' => $offset, 'page' => $page]);
             } else {
-                $stmt = $pdo->query('SELECT s.*, sup.name AS supplier_name FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id ORDER BY s.created_at DESC');
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $baseSql . ' ORDER BY s.created_at DESC');
+                $stmt->execute($params);
                 echo json_encode($stmt->fetchAll());
             }
             break;
