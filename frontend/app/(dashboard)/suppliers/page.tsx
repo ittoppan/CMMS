@@ -2,9 +2,10 @@
 
 // suppliers — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Badge)
 // business logic ครบเดิม: fetch/delete suppliers.php, client search filter, KPI calculations
+// URL-synced filters + Saved Views (localStorage, entity: suppliers)
 
-import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import {
@@ -17,10 +18,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   SimpleDataTable,
   type SimpleColumn,
 } from "@/components/ui/data-table-adapter";
 import { Plus, Search, SquarePen, Trash2, Truck, Star } from "lucide-react";
+import {
+  listSavedViews,
+  saveSavedView,
+  deleteSavedView,
+  setDefaultSavedView,
+  clearDefaultSavedView,
+  type SavedView,
+} from "@/lib/saved-views";
+
+const SAVED_VIEWS_ENTITY = "suppliers";
 
 interface Supplier extends Record<string, unknown> {
   rawId: number;
@@ -36,12 +54,67 @@ interface Supplier extends Record<string, unknown> {
   rating: number;
 }
 
+function readFilters(sp: URLSearchParams) {
+  return { search: (sp.get("q") || "").trim() };
+}
+function hasExplicitParams(sp: URLSearchParams) {
+  return sp.has("q");
+}
+function buildParams(state: { search: string }, base?: URLSearchParams) {
+  const sp = new URLSearchParams(base ? base.toString() : "");
+  const q = state.search.trim();
+  if (q) sp.set("q", q); else sp.delete("q");
+  return sp;
+}
+
 export default function SuppliersPage() {
   const router = useRouter();
-  const [search, setSearch] = useState("");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const initialFilters = useMemo(() => readFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
+  const [search, setSearch] = useState(initialFilters.search);
+
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string>("");
+  const initializedRef = useRef(false);
+  const appliedSnapshotRef = useRef<string>("");
+
+  const currentFilterState = useMemo(() => ({ search }), [search]);
+  const snapshotOf = useCallback((s: { search: string }) => JSON.stringify({ q: s.search.trim() }), []);
+
+  const syncUrl = useCallback((next: { search: string }, mode: "replace" | "push" = "replace") => {
+    const sp = buildParams(next, new URLSearchParams(searchParams.toString()));
+    const qs = sp.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    if (mode === "push") router.push(url); else router.replace(url);
+  }, [pathname, router, searchParams]);
+
+  const setFilters = useCallback((patch: Partial<{ search: string }>) => {
+    const next = { search, ...patch };
+    setSearch(next.search);
+    syncUrl(next, "replace");
+  }, [search, syncUrl]);
+
+  const applyViewState = useCallback((view: SavedView | null) => {
+    if (!view) {
+      const next = { search: "" };
+      setSearch(next.search);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId("");
+      syncUrl(next, "replace");
+      return;
+    }
+    const f = (view.filters || {}) as Record<string, unknown>;
+    const next = { search: typeof view.search === "string" ? view.search : (typeof f.q === "string" ? f.q : "") };
+    setSearch(next.search);
+    appliedSnapshotRef.current = snapshotOf(next);
+    setActiveViewId(view.id);
+    syncUrl(next, "replace");
+  }, [snapshotOf, syncUrl]);
 
   const fetchSuppliers = async () => {
     setLoading(true);
@@ -72,6 +145,89 @@ export default function SuppliersPage() {
   };
 
   useEffect(() => { fetchSuppliers(); }, []);
+
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    const views = listSavedViews(SAVED_VIEWS_ENTITY);
+    setSavedViews(views);
+    const sp = new URLSearchParams(searchParams.toString());
+    const fromUrl = readFilters(sp);
+    if (hasExplicitParams(sp)) {
+      setSearch(fromUrl.search);
+      appliedSnapshotRef.current = snapshotOf(fromUrl);
+      return;
+    }
+    const def = views.find((v) => v.isDefault);
+    if (def) {
+      const f = (def.filters || {}) as Record<string, unknown>;
+      const next = { search: typeof def.search === "string" ? def.search : (typeof f.q === "string" ? f.q : "") };
+      setSearch(next.search);
+      appliedSnapshotRef.current = snapshotOf(next);
+      setActiveViewId(def.id);
+      const qs = buildParams(next).toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname);
+      return;
+    }
+    appliedSnapshotRef.current = snapshotOf(fromUrl);
+  }, [pathname, router, searchParams, snapshotOf]);
+
+  const dirty = snapshotOf(currentFilterState) !== (appliedSnapshotRef.current || snapshotOf({ search: "" }));
+
+  const handleSaveNewView = () => {
+    const name = window.prompt("ชื่อมุมมอง (Saved view):", `มุมมอง ${savedViews.length + 1}`);
+    if (!name) return;
+    const res = saveSavedView(SAVED_VIEWS_ENTITY, {
+      name,
+      filters: {} as Record<string, string>,
+      search,
+      isDefault: false,
+    } as any);
+    if (!res.ok) { window.alert(res.error); return; }
+    setSavedViews(res.views);
+    setActiveViewId(res.view.id);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+  };
+
+  const handleUpdateView = () => {
+    if (!activeViewId) return;
+    const current = savedViews.find((v) => v.id === activeViewId);
+    if (!current) return;
+    const res = saveSavedView(SAVED_VIEWS_ENTITY, {
+      name: current.name,
+      filters: {} as Record<string, string>,
+      search,
+      isDefault: !!current.isDefault,
+    } as any, undefined, activeViewId);
+    if (!res.ok) { window.alert(res.error); return; }
+    setSavedViews(res.views);
+    appliedSnapshotRef.current = snapshotOf(currentFilterState);
+  };
+
+  const handleDeleteView = () => {
+    if (!activeViewId) return;
+    const current = savedViews.find((v) => v.id === activeViewId);
+    if (!current) return;
+    if (!window.confirm(`ลบมุมมอง "${current.name}" ?`)) return;
+    const views = deleteSavedView(SAVED_VIEWS_ENTITY, activeViewId);
+    setSavedViews(views);
+    setActiveViewId("");
+  };
+
+  const handleSetDefaultView = () => {
+    if (!activeViewId) return;
+    const views = setDefaultSavedView(SAVED_VIEWS_ENTITY, activeViewId);
+    setSavedViews(views);
+  };
+
+  const handleClearDefault = () => {
+    const views = clearDefaultSavedView(SAVED_VIEWS_ENTITY);
+    setSavedViews(views);
+  };
+
+  const handleResetFilters = () => {
+    applyViewState(null);
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this supplier?")) return;
@@ -252,22 +408,58 @@ export default function SuppliersPage() {
 
       {/* Filter card */}
       <Card>
-        <CardContent className="flex flex-wrap items-center gap-2 py-4">
-          <div className="relative min-w-[220px] flex-1 sm:max-w-[400px]">
-            <Search
-              size={16}
-              strokeWidth={1.75}
-              aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              label="ค้นหา"
-              isLabelHidden
-              placeholder="ค้นหาตามรหัส, ชื่อ หรืออีเมล..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+        <CardHeader>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle className="text-base">ตัวกรอง</CardTitle>
+            {dirty && <Badge variant="neutral">แก้ไขแล้ว</Badge>}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select
+              value={activeViewId || "__none__"}
+              onValueChange={(v) => {
+                if (v === "__none__") { setActiveViewId(""); return; }
+                const view = savedViews.find((sv) => sv.id === v) || null;
+                applyViewState(view);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[260px]" aria-label="เลือกมุมมองที่บันทึกไว้">
+                <SelectValue placeholder="มุมมองที่บันทึกไว้" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— ไม่ใช้มุมมอง —</SelectItem>
+                {savedViews.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name}{v.isDefault ? " (ค่าเริ่มต้น)" : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button type="button" variant="secondary" size="sm" onClick={handleSaveNewView}>บันทึกเป็นมุมมองใหม่</Button>
+            <Button type="button" variant="secondary" size="sm" onClick={handleUpdateView} disabled={!activeViewId || !dirty}>บันทึกทับ</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={handleSetDefaultView} disabled={!activeViewId}>ตั้งเป็นค่าเริ่มต้น</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={handleClearDefault}>ยกเลิกค่าเริ่มต้น</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={handleDeleteView} disabled={!activeViewId}>ลบมุมมอง</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={handleResetFilters}>รีเซ็ตตัวกรอง</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[220px] flex-1 sm:max-w-[400px]">
+              <Search
+                size={16}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                label="ค้นหา"
+                isLabelHidden
+                placeholder="ค้นหาตามรหัส, ชื่อ หรืออีเมล..."
+                value={search}
+                onChange={(e) => setFilters({ search: e.target.value })}
+                className="pl-9"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
