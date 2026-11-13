@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import AndonLamp from "@/components/AndonLamp";
+import { apiFetch } from "@/lib/api";
 import {
   Plus,
   Search,
@@ -131,6 +132,8 @@ export default function PMPlansPage() {
   const [error, setError] = useState("");
   const [cbm, setCbm] = useState<CbmPlantResponse | null>(null);
   const [cbmOnlyActionable, setCbmOnlyActionable] = useState(true);
+  const [cbmBusy, setCbmBusy] = useState<Record<string, boolean>>({});
+  const [cbmNotice, setCbmNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
   const load = async () => {
     try {
@@ -146,6 +149,14 @@ export default function PMPlansPage() {
     }
   };
 
+  const loadCbm = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/pm_plans.php?meters=1", { credentials: "include" });
+      const j = await res.json();
+      if (Array.isArray(j?.items)) setCbm(j as CbmPlantResponse);
+    } catch {}
+  }, []);
+
   // CBM รวมทั้งโรงงาน — แยก fetch เพื่อไม่ให้กระทบรายการแผนถ้า endpoint นี้ผิดพลาด
   useEffect(() => {
     let alive = true;
@@ -159,6 +170,36 @@ export default function PMPlansPage() {
       alive = false;
     };
   }, []);
+
+  const generateFromCbm = async (r: CbmPlantRow) => {
+    const key = `${r.asset_id}-${r.plan_id}`;
+    if (cbmBusy[key]) return;
+    setCbmBusy((s) => ({ ...s, [key]: true }));
+    setCbmNotice(null);
+    try {
+      const res = await apiFetch("/api/v1/pm_plans.php?action=generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan_id: r.plan_id }),
+      });
+      const j = await res.json();
+      if (j?.success) {
+        const created = Number(j.created || 0);
+        const skipped = Number(j.skipped || 0);
+        setCbmNotice({
+          kind: "success",
+          text: `สร้างรอบ PM แผน ${r.plan_code || r.plan_name || r.plan_id} สำเร็จ ${created} รอบ (ข้าม ${skipped})`,
+        });
+        await loadCbm();
+      } else {
+        setCbmNotice({ kind: "error", text: j?.error || "สร้างรอบไม่สำเร็จ" });
+      }
+    } catch {
+      setCbmNotice({ kind: "error", text: "ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง" });
+    } finally {
+      setCbmBusy((s) => ({ ...s, [key]: false }));
+    }
+  };
 
   useEffect(() => { load(); }, []);
 
@@ -278,6 +319,19 @@ export default function PMPlansPage() {
               </div>
             </div>
 
+            {cbmNotice && (
+              <div
+                className="rounded-[10px] border p-3 text-sm font-medium"
+                style={
+                  cbmNotice.kind === "success"
+                    ? { borderColor: "var(--cmms-success)", background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                    : { borderColor: "var(--cmms-danger)", background: "var(--cmms-danger-light)" }
+                }
+              >
+                {cbmNotice.text}
+              </div>
+            )}
+
             {cbmShown.length === 0 ? (
               <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">
                 ไม่มีแผนตามมิเตอร์ที่ถึงหรือใกล้ถึงเป้าหมาย
@@ -304,10 +358,24 @@ export default function PMPlansPage() {
                           {r.used_pct != null ? ` · ใช้ไป ${r.used_pct}%` : ""}
                         </p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
+                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                         <Badge variant={ui.variant} dot>{ui.label}</Badge>
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>
-                          เปิดแผน <ArrowRight size={13} strokeWidth={2} aria-hidden="true" />
+                        {r.open_pm_id ? (
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/view?id=${r.open_pm_id}`)}>
+                            เปิดรอบ PM <ArrowRight size={13} strokeWidth={2} aria-hidden="true" />
+                          </Button>
+                        ) : (r.status === "due" || r.status === "near") ? (
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            disabled={!!cbmBusy[`${r.asset_id}-${r.plan_id}`]}
+                            onClick={() => generateFromCbm(r)}
+                          >
+                            {cbmBusy[`${r.asset_id}-${r.plan_id}`] ? "กำลังสร้าง..." : "สร้างรอบ PM"}
+                          </Button>
+                        ) : null}
+                        <Button variant="ghost" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>
+                          แผน
                         </Button>
                       </div>
                     </div>
