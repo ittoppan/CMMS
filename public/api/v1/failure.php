@@ -84,6 +84,7 @@ try {
             'role_id' => $roleId,
             'user_id' => $uid,
             'asset_id' => (string)($_GET['asset_id'] ?? ''),
+            'repair_id' => (string)($_GET['repair_id'] ?? ''),
             'severity' => (string)($_GET['severity'] ?? ''),
             'repeat_suspected' => (string)($_GET['repeat_suspected'] ?? ''),
             'rca_required' => (string)($_GET['rca_required'] ?? ''),

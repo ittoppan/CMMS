@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/roles.php';
+require_once __DIR__ . '/../../../src/helpers/failure.php';
 require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
@@ -1095,6 +1096,9 @@ function apiCompleteWork(PDO $pdo): void {
     if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
     if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
     if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
+    if (function_exists('failure_repair_close_blockers')) {
+        $errs = array_merge($errs, failure_repair_close_blockers($pdo, $id));
+    }
     if ($errs) {
         http_response_code(400);
         echo json_encode(['error' => implode(' ', $errs), 'code' => 'CLOSURE_INCOMPLETE', 'errors' => $errs], JSON_UNESCAPED_UNICODE);
@@ -1185,6 +1189,14 @@ function apiVerifyWork(PDO $pdo): void {
 
     $autoClose = !empty($d['auto_close']);
     $finalStatus = $autoClose ? 'closed' : 'verified';
+    if ($autoClose && function_exists('failure_repair_close_blockers')) {
+        $rcaBlockers = failure_repair_close_blockers($pdo, $id);
+        if ($rcaBlockers) {
+            http_response_code(400);
+            echo json_encode(['error' => implode(' ', $rcaBlockers), 'code' => 'CLOSURE_INCOMPLETE', 'errors' => $rcaBlockers], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
     p14_set_status($pdo, $id, $finalStatus, [
         'verified_by' => p14_uid(),
         'verified_at' => date('Y-m-d H:i:s'),
@@ -1211,6 +1223,14 @@ function apiCloseWork(PDO $pdo): void {
         http_response_code(409);
         echo json_encode(['error' => 'ต้องตรวจรับงาน (Verify) ก่อนปิดใบงาน — ไม่ข้ามขั้นตอน'], JSON_UNESCAPED_UNICODE);
         exit;
+    }
+    if (function_exists('failure_repair_close_blockers')) {
+        $rcaBlockers = failure_repair_close_blockers($pdo, $id);
+        if ($rcaBlockers) {
+            http_response_code(400);
+            echo json_encode(['error' => implode(' ', $rcaBlockers), 'code' => 'CLOSURE_INCOMPLETE', 'errors' => $rcaBlockers], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
     }
     p14_set_status($pdo, $id, 'closed', ['closed_by' => p14_uid(), 'closed_at' => date('Y-m-d H:i:s')]);
     p14_sync_mr_status($pdo, $id, 'closed');

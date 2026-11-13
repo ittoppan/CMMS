@@ -422,6 +422,7 @@ function failure_event_filters(PDO $pdo, array $opts): array {
     $sql = ' WHERE 1=1';
     $params = [];
     if (!empty($opts['asset_id']) && (int)$opts['asset_id'] > 0) { $sql .= ' AND fe.asset_id = ?'; $params[] = (int)$opts['asset_id']; }
+    if (!empty($opts['repair_id']) && (int)$opts['repair_id'] > 0) { $sql .= ' AND fe.repair_id = ?'; $params[] = (int)$opts['repair_id']; }
     if (!empty($opts['severity'])) { $sql .= ' AND fe.severity = ?'; $params[] = (string)$opts['severity']; }
     if (!empty($opts['repeat_suspected'])) { $sql .= ' AND fe.repeat_suspected = 1'; }
     if (!empty($opts['rca_required']) && (string)$opts['rca_required'] === '1') { $sql .= ' AND fe.rca_required = 1'; }
@@ -646,6 +647,7 @@ function failure_rca_list(PDO $pdo, array $opts, int $page = 1, int $per = 25): 
     if (!empty($opts['status'])) { $sql .= ' AND r.status = ?'; $params[] = (string)$opts['status']; }
     if (!empty($opts['assignee_id']) && (int)$opts['assignee_id'] > 0) { $sql .= ' AND r.assignee_id = ?'; $params[] = (int)$opts['assignee_id']; }
     if (!empty($opts['asset_id']) && (int)$opts['asset_id'] > 0) { $sql .= ' AND fe.asset_id = ?'; $params[] = (int)$opts['asset_id']; }
+    if (!empty($opts['repair_id']) && (int)$opts['repair_id'] > 0) { $sql .= ' AND fe.repair_id = ?'; $params[] = (int)$opts['repair_id']; }
     if (!empty($opts['q'])) {
         $sql .= ' AND (r.rca_code LIKE ? OR r.title LIKE ? OR a.code LIKE ? OR a.name LIKE ?)';
         $like = '%' . (string)$opts['q'] . '%';
@@ -1223,6 +1225,45 @@ function failure_data_quality(PDO $pdo): array {
     // 6) total
     try { $out['total_events'] = (int)$pdo->query('SELECT COUNT(*) FROM failure_events')->fetchColumn(); } catch (Throwable $e) { $out['total_events'] = -1; }
     return $out;
+}
+
+/**
+ * ตรวจเงื่อนไข RCA ก่อนปิด/จบใบงานซ่อม (ปิดวงจร Failure → RCA/CAPA → WO)
+ * คืนรายการข้อความบล็อก (ว่าง = ผ่าน). ไม่บล็อกเมื่อไม่มี failure event ที่ต้องทำ RCA
+ * หรือ RCA ที่เชื่อมโยงถูกปิดแล้ว (closed/cancelled) — การบังคับ action ก่อนปิด RCA
+ * อยู่ใน failure_rca_transition().
+ */
+function failure_repair_close_blockers(PDO $pdo, int $repairId): array {
+    if ($repairId <= 0) return [];
+    try {
+        $st = $pdo->prepare(
+            "SELECT fe.id, fe.event_code, fe.rca_id, fe.rca_required,
+                    r.status AS rca_status, r.rca_code
+             FROM failure_events fe
+             LEFT JOIN rca r ON r.id = fe.rca_id
+             WHERE fe.repair_id = ? AND fe.rca_required = 1
+             ORDER BY fe.id DESC"
+        );
+        $st->execute([$repairId]);
+        $rows = $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        return [];
+    }
+    $blockers = [];
+    foreach ($rows as $ev) {
+        $label = (string)($ev['event_code'] ?? ('FE#' . $ev['id']));
+        $rcaId = (int)($ev['rca_id'] ?? 0);
+        $rcaStatus = strtolower((string)($ev['rca_status'] ?? ''));
+        if ($rcaId <= 0) {
+            $blockers[] = "เหตุการณ์ {$label} ต้องทำ RCA ก่อนปิดใบงาน (ยังไม่มี RCA ที่เชื่อมโยง)";
+            continue;
+        }
+        if (!in_array($rcaStatus, ['closed', 'cancelled'], true)) {
+            $rcaLabel = (string)($ev['rca_code'] ?? ('RCA#' . $rcaId));
+            $blockers[] = "RCA {$rcaLabel} (เหตุการณ์ {$label}) ยังไม่ปิด — ต้องปิด RCA/CAPA ก่อนปิดใบงาน";
+        }
+    }
+    return array_values(array_unique($blockers));
 }
 
 /* ═══════════════════════ 13. COST / WO REFERENCE ═══════════════════════ */

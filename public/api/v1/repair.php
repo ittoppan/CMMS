@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../../src/helpers/roles.php';
 require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/workforce.php';
+require_once __DIR__ . '/../../../src/helpers/failure.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -519,6 +520,9 @@ try {
                 if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
                 if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
                 if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
+                if (function_exists('failure_repair_close_blockers')) {
+                    $errs = array_merge($errs, failure_repair_close_blockers($pdo, $id));
+                }
                 if ($errs) {
                     clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                     http_response_code(400);
