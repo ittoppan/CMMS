@@ -24,7 +24,7 @@ requireLogin($pdo);
                 exit;
             }
             if ($id) {
-                $stmt = $pdo->prepare('SELECT p.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id WHERE p.id = ?');
+                $stmt = $pdo->prepare('SELECT p.*, pl.meter_interval AS meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id WHERE p.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
@@ -32,7 +32,7 @@ requireLogin($pdo);
                 attachWorkTeams($single, 'pm_am');
                 echo json_encode($single[0]);
             } else {
-                $stmt = $pdo->query('SELECT p.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id ORDER BY p.created_at DESC');
+                $stmt = $pdo->query('SELECT p.*, pl.meter_interval AS meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id ORDER BY p.created_at DESC');
                 $rows = $stmt->fetchAll();
                 attachWorkTeams($rows, 'pm_am');
                 echo json_encode($rows);
