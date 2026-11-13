@@ -705,18 +705,24 @@ function kpi_pm_list(PDO $pdo, array $opts): array {
     elseif ($group === 'on_time') $cond = " AND p.status = 'completed' AND p.completed_at IS NOT NULL AND p.completed_at <= p.due_date";
     elseif ($group === 'meter_based') $cond = " AND (p.frequency_type = 'meter_based' OR pl.frequency_type = 'meter_based')";
     $limit = min(300, max(1, (int)($opts['limit'] ?? 50)));
+    $offset = max(0, (int)($opts['offset'] ?? 0));
+
+    $from = ' FROM pm_am p
+              LEFT JOIN asset_registry a ON a.id = p.asset_id
+              LEFT JOIN users u ON u.id = p.assigned_to
+              LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id';
+
+    $ct = $pdo->prepare('SELECT COUNT(*)' . $from . $where . $cond . $dueSql);
+    $ct->execute($params);
+    $total = (int)$ct->fetchColumn();
 
     $sql = 'SELECT p.id, p.title, p.status, p.priority, p.due_date, p.completed_at,
                    p.frequency_type, p.meter_unit, p.meter_reading, pl.meter_interval,
-                   a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
-            FROM pm_am p
-            LEFT JOIN asset_registry a ON a.id = p.asset_id
-            LEFT JOIN users u ON u.id = p.assigned_to
-            LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id' . $where . $cond . $dueSql . '
-            ORDER BY p.due_date ASC LIMIT ' . $limit;
+                   a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name' . $from . $where . $cond . $dueSql .
+            ' ORDER BY p.due_date ASC, p.id ASC LIMIT ' . $limit . ' OFFSET ' . $offset;
     $st = $pdo->prepare($sql);
     $st->execute($params);
-    return $st->fetchAll(PDO::FETCH_ASSOC);
+    return ['items' => $st->fetchAll(PDO::FETCH_ASSOC), 'total' => $total];
 }
 
 /* ───────────────────────── 8. Downtime / Cost / Failure / Asset ───────────────────────── */

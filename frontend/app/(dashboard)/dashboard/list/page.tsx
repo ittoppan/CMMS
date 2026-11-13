@@ -93,6 +93,7 @@ export default function DashboardListPage() {
   const [items, setItems] = useState<D.WoItem[] | null>(null);
   const [total, setTotal] = useState(0);
   const [pmItems, setPmItems] = useState<D.PmItem[] | null>(null);
+  const [pmTotal, setPmTotal] = useState(0);
   const [dt, setDt] = useState<D.DowntimeResponse | null>(null);
   const [cost, setCost] = useState<D.CostResponse | null>(null);
   const [failure, setFailure] = useState<D.FailureResponse | null>(null);
@@ -130,7 +131,8 @@ export default function DashboardListPage() {
         } else if (action === "pm") {
           const r = await D.fetchPmList({ ...q, group });
           if (!alive) return;
-          setPmItems(r);
+          setPmItems(r.items);
+          setPmTotal(r.total);
         } else if (action === "downtime") {
           const r = await D.fetchDowntime(q);
           if (!alive) return;
@@ -164,7 +166,7 @@ export default function DashboardListPage() {
   const pageSize = q.limit ?? 50;
   const offset = q.offset ?? 0;
   const page = Math.floor(offset / pageSize) + 1;
-  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const pages = Math.max(1, Math.ceil((action === "pm" ? pmTotal : total) / pageSize));
   const goPage = useCallback(
     (n: number) => {
       const next = new URLSearchParams(sp.toString());
@@ -186,8 +188,8 @@ export default function DashboardListPage() {
   const subtitle =
     action === "wo" || action === "alerts"
       ? `พบ ${total} รายการ`
-      : action === "pm" && pmItems
-      ? `พบ ${pmItems.length} รายการ`
+      : action === "pm"
+      ? `พบ ${pmTotal} รายการ`
       : undefined;
 
   return (
@@ -285,6 +287,19 @@ export default function DashboardListPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {pages > 1 && (
+              <div className="flex items-center justify-between gap-2 border-t border-[var(--cmms-border)] p-4">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => goPage(page - 1)}>
+                  <ChevronLeft size={14} strokeWidth={2} aria-hidden="true" /> ก่อนหน้า
+                </Button>
+                <span className="text-sm text-[var(--cmms-text-muted)]">
+                  หน้า {page} / {pages} · เริ่มที่รายการที่ {offset + 1}
+                </span>
+                <Button variant="outline" size="sm" disabled={page >= pages} onClick={() => goPage(page + 1)}>
+                  ถัดไป <ChevronRight size={14} strokeWidth={2} aria-hidden="true" />
+                </Button>
               </div>
             )}
           </CardContent>

@@ -123,7 +123,8 @@ try {
         case 'pm': {
             $opts['group'] = (string)($_GET['group'] ?? 'all');
             $opts['limit'] = (int)($_GET['limit'] ?? 50);
-            echo json_encode(array_merge($base, ['items' => kpi_pm_list($pdo, $opts)]), JSON_UNESCAPED_UNICODE);
+            $opts['offset'] = (int)($_GET['offset'] ?? 0);
+            echo json_encode(array_merge($base, kpi_pm_list($pdo, $opts)), JSON_UNESCAPED_UNICODE);
             exit;
         }
         case 'downtime': {

@@ -350,9 +350,14 @@ export async function fetchWoList(q: DashboardQuery = {}): Promise<WoListRespons
   return apiJson<WoListResponse>(dashboardUrl("wo", { ...q, limit: q.limit ?? 50 }));
 }
 
-export async function fetchPmList(q: DashboardQuery = {}): Promise<PmItem[]> {
-  const r = await apiJson<{ items: PmItem[] }>(dashboardUrl("pm", q));
-  return r.items;
+export interface PmListResponse {
+  items: PmItem[];
+  total: number;
+}
+
+export async function fetchPmList(q: DashboardQuery = {}): Promise<PmListResponse> {
+  const r = await apiJson<{ items: PmItem[]; total?: number }>(dashboardUrl("pm", { ...q, limit: q.limit ?? 50 }));
+  return { items: r.items ?? [], total: r.total ?? (r.items?.length ?? 0) };
 }
 
 export async function fetchTrend(q: DashboardQuery = {}): Promise<TrendResponse> {
