@@ -413,12 +413,18 @@ try {
                     exit;
                 }
             }
+            // โหลดสถานะปัจจุบันของใบงาน (ใช้ตรวจ conflict, auto-stamp เวลา, และตรวจเงื่อนไขปิดงาน)
+            $curStmt = $pdo->prepare('SELECT * FROM repair WHERE id = ?');
+            $curStmt->execute([$id]);
+            $curRow = $curStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$curRow) {
+                clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 404);
+                http_response_code(404); echo json_encode(['error' => 'Not found']); exit;
+            }
+
             // Phase 19: conflict detection — ถ้าใบงานถูกแก้จากระบบระหว่างที่ช่างออฟไลน์ → กันเขียนทับ
             if (!empty($data['base_updated_at']) && (isset($data['status']) || isset($data['completed_at']))) {
-                $qc = $pdo->prepare('SELECT updated_at, status FROM repair WHERE id = ?');
-                $qc->execute([$id]);
-                $curRow = $qc->fetch(PDO::FETCH_ASSOC);
-                $curUpd = $curRow ? $curRow['updated_at'] : null;
+                $curUpd = $curRow['updated_at'] ?? null;
                 $wantedStatus = strtolower((string)($data['status'] ?? ($curRow['status'] ?? '')));
                 $isTerminalOrFlow = in_array($wantedStatus, ['completed', 'in_progress', 'paused', 'waiting_parts', 'closed', 'verified'], true);
                 if ($curUpd && strtotime((string)$data['base_updated_at']) !== strtotime((string)$curUpd) && $isTerminalOrFlow) {
@@ -440,11 +446,10 @@ try {
                     acceptWorkAssignment($pdo, 'repair', $id, (int)$cu['id']);
                     // Phase 14: รับงานแล้ว → ยกระดับใบงาน assigned/approved → accepted
                     try {
-                        $qc = $pdo->prepare('SELECT status FROM repair WHERE id = ?');
-                        $qc->execute([$id]);
-                        $curStatus = $qc->fetchColumn();
+                        $curStatus = $curRow['status'] ?? null;
                         if (in_array($curStatus, ['pending_approval', 'approved', 'assigned'], true)) {
                             $pdo->prepare('UPDATE repair SET status = "accepted", status_changed_at = NOW() WHERE id = ?')->execute([$id]);
+                            $curRow['status'] = 'accepted';
                         }
                     } catch (Exception $e) {
                         error_log('[repair.php] accept status upgrade failed: ' . $e->getMessage());
@@ -479,6 +484,29 @@ try {
                     }
                 }
             }
+
+            // ---- เวลาเริ่ม/เสร็จซ่อม: ห้ามแก้ไขเอง — ประทับอัตโนมัติตามการเปลี่ยนสถานะ ----
+            $oldStatus = strtolower((string)($curRow['status'] ?? ''));
+            $newStatus = strtolower((string)($data['status'] ?? $oldStatus));
+            // ไม่รับค่าจากผู้ใช้ (ห้ามแก้ไขเวลาเริ่ม/เสร็จ)
+            unset($data['actual_start_at'], $data['completed_at'], $data['downtime_start'], $data['downtime_end']);
+
+            $inProgressStatuses = ['in_progress', 'waiting_parts', 'paused', 'waiting_external', 'waiting_approval', 'pending_verification'];
+            $startedNow = in_array($newStatus, $inProgressStatuses, true) && !in_array($oldStatus, $inProgressStatuses, true) && $oldStatus !== 'completed' && $oldStatus !== 'closed' && $oldStatus !== 'verified';
+            $startMissing = in_array($newStatus, $inProgressStatuses, true) && empty($curRow['actual_start_at']) && empty($curRow['downtime_start']);
+            if ($startedNow || $startMissing) {
+                $stampStart = date('Y-m-d H:i:s');
+                if (empty($curRow['actual_start_at'])) $data['actual_start_at'] = $stampStart;
+                if (empty($curRow['downtime_start'])) $data['downtime_start'] = $stampStart;
+            }
+
+            $completedNow = ($newStatus === 'completed' && $oldStatus !== 'completed');
+            if ($completedNow) {
+                $stampEnd = date('Y-m-d H:i:s');
+                if (empty($curRow['completed_at'])) $data['completed_at'] = $stampEnd;
+                if (empty($curRow['downtime_end'])) $data['downtime_end'] = $stampEnd;
+            }
+
             repair_autofill_downtime($data);
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path', 'attachment_path'];
             // Phase 14: ฟิลด์วางแผนเปิดเฉพาะหัวหน้างาน (Admin/Manager/ASST Manager/Foreman)
@@ -498,9 +526,9 @@ try {
                 http_response_code(400); echo json_encode(['error' => 'No data']); exit;
             }
             // ---- บังคับผลตรวจการปนเปื้อนและข้อมูลปิดงานก่อนปิดงานซ่อม ----
-            $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);
+            $closingNow = ($newStatus === 'completed');
             if ($closingNow) {
-                $cc = strtolower((string)($data['contaminate_checking'] ?? 'not_checked'));
+                $cc = strtolower((string)($data['contaminate_checking'] ?? $curRow['contaminate_checking'] ?? 'not_checked'));
                 if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
                     clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 400);
                     http_response_code(400);
@@ -508,9 +536,7 @@ try {
                     exit;
                 }
                 // บังคับข้อมูลสำหรับวิเคราะห์สาเหตุ/ปิดงาน
-                $cur = $pdo->prepare('SELECT root_cause, solution, resolution, failure_code_id FROM repair WHERE id = ?');
-                $cur->execute([$id]);
-                $cr = $cur->fetch(PDO::FETCH_ASSOC) ?: [];
+                $cr = $curRow;
                 $needRoot = getSettingValue('require_root_cause', '1') === '1';
                 $needFail = getSettingValue('require_failure_code', '0') === '1';
                 $rc = trim((string)($data['root_cause'] ?? $cr['root_cause'] ?? ''));
@@ -520,6 +546,9 @@ try {
                 if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
                 if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
                 if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
+                // ผู้แจ้งต้องเซ็นรับจากช่างตอนปิดงาน
+                $recvSig = trim((string)($data['receiver_signature_path'] ?? $cr['receiver_signature_path'] ?? ''));
+                if ($recvSig === '') $errs[] = 'ต้องมีลายเซ็นรับงานจากผู้แจ้งก่อนปิดงาน';
                 if (function_exists('failure_repair_close_blockers')) {
                     $errs = array_merge($errs, failure_repair_close_blockers($pdo, $id));
                 }

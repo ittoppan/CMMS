@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, type MouseEvent, type TouchEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Wrench,
@@ -9,6 +9,7 @@ import {
   Camera,
   X,
   Save,
+  Check,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ interface RepairData {
   priority: string;
   assigned_name: string;
   receiver_name: string;
+  receiver_signature_path: string;
   root_cause: string;
   solution: string;
   resolution: string;
@@ -103,6 +105,11 @@ function EditWorkOrderContent() {
   const [afterImages, setAfterImages] = useState<string[]>([]);
   const [actualStartAt, setActualStartAt] = useState("");
   const [completedAt, setCompletedAt] = useState("");
+  const [receiverName, setReceiverName] = useState("");
+  const [receiverSignature, setReceiverSignature] = useState("");
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasDrawnSignature, setHasDrawnSignature] = useState(false);
+  const signatureCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // auto-fill นาที downtime จาก Start/Finish เมื่อกรอกครบและไม่ได้ใส่ค่าเอง (>0) — ตรงกับ fallback ของ backend
   useEffect(() => {
@@ -149,6 +156,9 @@ function EditWorkOrderContent() {
           setCostLabor(json.cost_labor || 0);
           setActualStartAt(json.actual_start_at || "");
           setCompletedAt(json.completed_at || "");
+          setReceiverName(json.receiver_name || "");
+          setReceiverSignature(json.receiver_signature_path || "");
+          if (json.receiver_signature_path) setHasDrawnSignature(true);
           if (json.after_image_path) {
             setAfterImages(json.after_image_path.split("|").filter(Boolean));
           }
@@ -196,9 +206,75 @@ function EditWorkOrderContent() {
     setAfterImages(next);
   };
 
+  const getCanvasPos = (e: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if ("touches" in e) {
+      const t = e.touches[0];
+      return { x: (t.clientX - rect.left) * scaleX, y: (t.clientY - rect.top) * scaleY };
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  };
+  const startSignature = (e: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const ctx = signatureCanvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    const { x, y } = getCanvasPos(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+  const drawSignature = (e: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const ctx = signatureCanvasRef.current?.getContext("2d");
+    if (!ctx) return;
+    const { x, y } = getCanvasPos(e);
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgb(17, 24, 39)";
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+  const stopSignature = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    if (signatureCanvasRef.current) {
+      setReceiverSignature(signatureCanvasRef.current.toDataURL("image/png"));
+      setHasDrawnSignature(true);
+    }
+  };
+  const clearSignature = () => {
+    const canvas = signatureCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setReceiverSignature("");
+    setHasDrawnSignature(false);
+  };
+
+  const formatStamp = (v: string) => {
+    if (!v) return "— ยังไม่ประทับ (ประทับอัตโนมัติตามสถานะ)";
+    return v.replace("T", " ").replace(/\.\d+.*/, "").replace(/Z$/, "");
+  };
+
   const handleSubmit = async () => {
     iv.submit();
-    if (!rootCause.trim() || !maintenanceDesc.trim() || (status === "completed" && contaminateChecking === "not_checked")) {
+    const closing = status === "completed";
+    if (
+      !rootCause.trim() ||
+      !maintenanceDesc.trim() ||
+      (closing && contaminateChecking === "not_checked") ||
+      (closing && !receiverSignature)
+    ) {
+      if (closing && !receiverSignature) {
+        setError("กรุณาให้ผู้แจ้งเซ็นรับงานก่อนปิดงาน");
+      }
       return;
     }
     setSubmitting(true);
@@ -214,15 +290,13 @@ function EditWorkOrderContent() {
         priority,
         contaminate_checking: contaminateChecking,
         outsource_by: outsourceBy || null,
-        downtime_start: downtimeStart || null,
-        downtime_end: downtimeEnd || null,
         downtime_minutes: downtimeMinutes || null,
         cost_parts: costParts || 0,
         cost_labor: costLabor || 0,
-        actual_start_at: actualStartAt || null,
-        completed_at: status === "completed" ? (completedAt || new Date().toISOString().slice(0, 19).replace("T", " ")) : completedAt || null,
         after_image_path: afterImages.length > 0 ? afterImages.join("|") : null,
       };
+      if (receiverName) payload.receiver_name = receiverName;
+      if (receiverSignature) payload.receiver_signature_path = receiverSignature;
 
       const res = await fetch(`/api/v1/repair.php?id=${woId}`, {
         method: "PUT",
@@ -420,22 +494,20 @@ function EditWorkOrderContent() {
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
-                  type="datetime-local"
-                  label="Start Date/Time (วันที่เริ่มซ่อม)"
-                  value={downtimeStart ? downtimeStart.slice(0, 16) : ""}
-                  onChange={(e) =>
-                    setDowntimeStart(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")
-                  }
-                />
-                <Input
-                  type="datetime-local"
-                  label="Finish Date/Time (วันที่เสร็จซ่อม)"
-                  value={downtimeEnd ? downtimeEnd.slice(0, 16) : ""}
-                  onChange={(e) =>
-                    setDowntimeEnd(e.target.value ? e.target.value.replace("T", " ") + ":00" : "")
-                  }
-                />
+                <div className="space-y-1.5">
+                  <Label>Start Date/Time (วันที่เริ่มซ่อม)</Label>
+                  <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
+                    {formatStamp(downtimeStart || actualStartAt)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">ประทับอัตโนมัติตามสถานะงาน แก้ไขไม่ได้</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Finish Date/Time (วันที่เสร็จซ่อม)</Label>
+                  <div className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-foreground">
+                    {formatStamp(downtimeEnd || completedAt)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">ประทับอัตโนมัติตามสถานะงาน แก้ไขไม่ได้</p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -506,6 +578,60 @@ function EditWorkOrderContent() {
                     <Camera className="w-6 h-6" />
                     <span className="text-xs font-semibold">ถ่าย / เลือกรูป</span>
                   </button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ── ลายเซ็นรับงานจากผู้แจ้ง (บังคับเมื่อปิดงาน) ── */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Check className="w-5 h-5 text-sky-600" />
+                <span>ลายเซ็นรับงานจากผู้แจ้ง</span>
+                {status === "completed" && <span className="text-destructive text-sm">*</span>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {status === "completed"
+                  ? "กรุณาให้ผู้แจ้งเซ็นรับงานจากช่างก่อนปิดงาน"
+                  : "เมื่อต้องการปิดงาน ให้เปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" แล้วให้ผู้แจ้งเซ็นรับงานที่นี่"}
+              </p>
+              <Input
+                label="ชื่อผู้รับงาน/ผู้แจ้ง"
+                placeholder="ชื่อผู้เซ็นรับ"
+                value={receiverName}
+                onChange={(e) => setReceiverName(e.target.value)}
+              />
+              <div className="space-y-2">
+                <Label>ลายเซ็นผู้แจ้ง{status === "completed" ? <span className="text-destructive"> *</span> : null}</Label>
+                <div className="rounded-md border border-input bg-white p-2">
+                  <canvas
+                    ref={signatureCanvasRef}
+                    width={600}
+                    height={180}
+                    className="h-[180px] w-full touch-none rounded bg-white"
+                    style={{ touchAction: "none" }}
+                    onMouseDown={startSignature}
+                    onMouseMove={drawSignature}
+                    onMouseUp={stopSignature}
+                    onMouseLeave={stopSignature}
+                    onTouchStart={startSignature}
+                    onTouchMove={drawSignature}
+                    onTouchEnd={stopSignature}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={clearSignature}>
+                    ล้างลายเซ็น
+                  </Button>
+                  {receiverSignature && (
+                    <span className="text-xs text-emerald-700">มีลายเซ็นแล้ว</span>
+                  )}
+                </div>
+                {receiverSignature && !hasDrawnSignature && (
+                  <p className="text-xs text-muted-foreground">มีลายเซ็นเดิมอยู่ในระบบ (เซ็นใหม่เพื่อแทนที่)</p>
                 )}
               </div>
             </CardContent>
