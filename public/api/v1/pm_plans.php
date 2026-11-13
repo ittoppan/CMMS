@@ -164,27 +164,67 @@ requireLogin($pdo);
                     $dup->execute([$planId, $asset['id'], $now]);
                     if ($dup->fetchColumn()) { $skipped++; $details[] = $asset['code'] . ': มีรอบค้างอยู่แล้ว'; continue; }
 
-                    // คำนวณ due_date: ใช้รอบที่ผ่านมา (ถ้าครบกำหนดแล้ว) หรือวันเริ่มแผน
-                    $last = $pdo->prepare("SELECT due_date, last_done_date, id FROM pm_am WHERE plan_id = ? AND asset_id = ? ORDER BY id DESC LIMIT 1");
+                    $last = $pdo->prepare("SELECT id, due_date, last_done_date, meter_reading, status FROM pm_am WHERE plan_id = ? AND asset_id = ? ORDER BY id DESC LIMIT 1");
                     $last->execute([$planId, $asset['id']]);
                     $lastRow = $last->fetch(PDO::FETCH_ASSOC);
-                    $dueDate = $plan['start_date'] ?: date('Y-m-d');
-                    if ($lastRow) {
-                        $base = $lastRow['last_done_date'] ?: $lastRow['due_date'];
-                        $dueDate = $calcNextDue($base, $plan['frequency_type'], (int)$plan['frequency_interval']);
-                    }
-                    // ถ้าเลยกำหนดมาหลายรอบ ให้ขยับทีละรอบจนถึงวันนี้ (ไม่สร้างย้อนหลัง)
-                    $guard = 0;
-                    while ($dueDate < $now && $guard < 60) {
-                        $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], (int)$plan['frequency_interval']);
-                        $guard++;
-                    }
-                    // เว้นวันหยุด/วันไม่ทำงาน: เลื่อนกำหนด PM ไปวันทำงานถัดไป
-                    if (workday_skip_holidays_enabled($pdo)) {
-                        $dueDate = workday_next_working_day($pdo, $dueDate);
+
+                    $dueDate = $plan['start_date'] ?: $now;
+                    $meterNote = null;
+
+                    if (($plan['frequency_type'] ?? '') === 'meter_based') {
+                        $meterUnit = trim((string)($plan['meter_unit'] ?? ''));
+                        $meterInterval = (float)($plan['meter_interval'] ?? 0);
+                        if ($meterUnit === '' || $meterInterval <= 0) {
+                            $skipped++; $details[] = $asset['code'] . ': แผนตามมิเตอร์ยังไม่กำหนดหน่วย/ช่วงมิเตอร์'; continue;
+                        }
+                        // ค่ามิเตอร์ล่าสุดของเครื่อง (จับคู่ parameter หรือ unit กับ meter_unit ของแผน)
+                        $mr = $pdo->prepare("SELECT value_numeric FROM asset_measurements WHERE asset_id = ? AND (parameter = ? OR unit = ?) ORDER BY measured_at DESC, id DESC LIMIT 1");
+                        $mr->execute([$asset['id'], $meterUnit, $meterUnit]);
+                        $latestM = $mr->fetch(PDO::FETCH_ASSOC);
+                        if (!$latestM || $latestM['value_numeric'] === null) {
+                            $skipped++; $details[] = $asset['code'] . ': รอข้อมูลมิเตอร์ล่าสุด (' . $meterUnit . ')'; continue;
+                        }
+                        $currentReading = (float)$latestM['value_numeric'];
+
+                        $baselineReading = null;
+                        if ($lastRow) {
+                            if (array_key_exists('meter_reading', $lastRow) && $lastRow['meter_reading'] !== null && $lastRow['meter_reading'] !== '') {
+                                $baselineReading = (float)$lastRow['meter_reading'];
+                            } elseif (($lastRow['status'] ?? '') === 'completed' && !empty($lastRow['last_done_date'])) {
+                                $br = $pdo->prepare("SELECT value_numeric FROM asset_measurements WHERE asset_id = ? AND (parameter = ? OR unit = ?) AND DATE(measured_at) <= DATE(?) ORDER BY measured_at DESC, id DESC LIMIT 1");
+                                $br->execute([$asset['id'], $meterUnit, $meterUnit, $lastRow['last_done_date']]);
+                                $brv = $br->fetchColumn();
+                                if ($brv !== false && $brv !== null) $baselineReading = (float)$brv;
+                            }
+                        }
+                        if ($baselineReading === null) {
+                            $baselineReading = 0.0;
+                        }
+
+                        $targetReading = $baselineReading + $meterInterval;
+                        if ($currentReading + 1e-9 < $targetReading) {
+                            $skipped++; $details[] = $asset['code'] . ': ยังไม่ถึงรอบมิเตอร์ (' . rtrim(rtrim(number_format($currentReading, 2, '.', ''), '0'), '.') . '/' . rtrim(rtrim(number_format($targetReading, 2, '.', ''), '0'), '.') . ' ' . $meterUnit . ')'; continue;
+                        }
+                        $dueDate = $now;
+                        $meterNote = 'ครบกำหนดตามมิเตอร์ ' . $meterUnit . ' (ปัจจุบัน ' . rtrim(rtrim(number_format($currentReading, 2, '.', ''), '0'), '.') . ', เป้าหมาย ' . rtrim(rtrim(number_format($targetReading, 2, '.', ''), '0'), '.') . ')';
+                    } else {
+                        if ($lastRow) {
+                            $base = $lastRow['last_done_date'] ?: $lastRow['due_date'];
+                            $dueDate = $calcNextDue($base, $plan['frequency_type'], (int)$plan['frequency_interval']);
+                        }
+                        $guard = 0;
+                        while ($dueDate < $now && $guard < 60) {
+                            $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], (int)$plan['frequency_interval']);
+                            $guard++;
+                        }
+                        if (workday_skip_holidays_enabled($pdo)) {
+                            $dueDate = workday_next_working_day($pdo, $dueDate);
+                        }
                     }
 
                     $title = $plan['name'] . ($plan['plan_type'] === 'single' ? " — {$asset['name']}" : '');
+                    $desc = $plan['description'] ?: ($plan['instructions'] ?: '');
+                    if ($meterNote) { $desc = trim($desc . "\n\n" . $meterNote); }
                     $ins = $pdo->prepare(
                         "INSERT INTO pm_am (asset_id, assigned_to, plan_id, department_id, location_id, work_zone_id, title, description, frequency_type, frequency_interval, priority, estimated_duration_minutes, due_date, status, created_at, updated_at)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())"
@@ -197,7 +237,7 @@ requireLogin($pdo);
                         $plan['location_id'] ?: null,
                         $plan['work_zone_id'] ?: null,
                         $title,
-                        $plan['description'] ?: ($plan['instructions'] ?: ''),
+                        $desc,
                         $plan['frequency_type'],
                         (int)$plan['frequency_interval'],
                         $plan['priority'],
@@ -205,12 +245,11 @@ requireLogin($pdo);
                         $dueDate,
                     ]);
                     $newPmId = (int)$pdo->lastInsertId();
-                    // คัดลอกทีมผู้รับผิดชอบ (ถ้าผูก work_assignees กับแผน — ใช้ responsable เป็น lead)
                     if ($plan['responsible_user_id']) {
                         setWorkAssignees($pdo, 'pm_am', $newPmId, [], $plan['responsible_user_id'], (int)($_SESSION['user_id'] ?? 0) ?: null);
                     }
                     $created++;
-                    $details[] = $asset['code'] . ": กำหนด {$dueDate}";
+                    $details[] = $asset['code'] . ': กำหนด ' . $dueDate . ($meterNote ? ' (ตามมิเตอร์)' : '');
                 }
                 echo json_encode(['success' => true, 'created' => $created, 'skipped' => $skipped, 'details' => $details]);
                 exit;
