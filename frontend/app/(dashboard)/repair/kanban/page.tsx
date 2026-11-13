@@ -99,10 +99,11 @@ export default function RepairKanbanPage() {
   const fetchKanban = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/v1/index.php?resource=work-orders");
+      const res = await fetch("/api/v1/repair.php");
       const json = await res.json();
-      if (json.status === "success" && Array.isArray(json.data) && json.data.length > 0) {
-        const fetched: KanbanItem[] = json.data.map((row: any) => {
+      const rows = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      if (res.ok && Array.isArray(rows)) {
+        const fetched: KanbanItem[] = rows.map((row: any) => {
           let normalizedStatus: KanbanItem["status"] = "open";
           // ใช้สถานะกลางเดียวกับหน้ารายการ (lib/repair-status.ts) — alias/สี/คำแปลตรงกัน
           const k = normalizeRepairStatus(row.status);
@@ -137,9 +138,12 @@ export default function RepairKanbanPage() {
           };
         });
         setItems(fetched);
+      } else {
+        setItems([]);
       }
     } catch (e) {
       console.error("Failed to fetch kanban items", e);
+      setItems([]);
     }
     setLoading(false);
   };
