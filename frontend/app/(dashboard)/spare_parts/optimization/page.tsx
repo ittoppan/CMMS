@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Lightbulb,
   Scale,
+  Copy,
 } from "lucide-react";
 
 interface EOQItem {
@@ -25,6 +26,7 @@ interface EOQItem {
   unitPrice: number;
   totalValue: number;
   reorderPoint: number;
+  suggestedQty: number;
   abcClass: "A" | "B" | "C";
   deadStockDays: number;
   aiRecommendation: string;
@@ -46,6 +48,7 @@ function computeEOQ(item: any): EOQItem {
   const eoq = unitPrice > 0 ? Math.round(Math.sqrt((2 * annualDemand * ORDER_COST) / (HOLDING_RATE * unitPrice))) : 0;
   const reorderPoint = Math.round(minStock * 1.2);
   const totalValue = stock * unitPrice;
+  const targetLevel = maxStock > 0 ? maxStock : Math.max(reorderPoint, minStock * 2, 1);
 
   // ABC Class ตามสัดส่วนมูลค่าคงคลัง (ชั้นบนสุด 70% = A, 20% = B, 10% = C)
   let abcClass: "A" | "B" | "C" = "C";
@@ -62,6 +65,7 @@ function computeEOQ(item: any): EOQItem {
 
   const needsReorder = minStock > 0 && stock <= minStock;
   const isDeadStock = deadStockDays >= 180 && stock > 0 && stock >= maxStock;
+  const suggestedQty = needsReorder ? Math.max(eoq || 0, targetLevel - Math.floor(stock), 1) : 0;
 
   let aiRecommendation: string;
   if (isDeadStock) {
@@ -84,6 +88,7 @@ function computeEOQ(item: any): EOQItem {
     unitPrice,
     totalValue,
     reorderPoint,
+    suggestedQty,
     abcClass,
     deadStockDays,
     aiRecommendation,
@@ -176,10 +181,20 @@ export default function InventoryOptimizationPage() {
     },
     {
       id: "reorder",
-      header: "Reorder Point",
+      header: "จุดสั่งซื้อ (ROP)",
       cell: ({ row }: { row: { original: EOQItem } }) => (
         <span className="text-sm text-[var(--cmms-text-secondary)]">~{row.original.reorderPoint} หน่วย</span>
       ),
+    },
+    {
+      id: "suggestedQty",
+      header: "แนะนำสั่งซื้อ (EOQ)",
+      cell: ({ row }: { row: { original: EOQItem } }) =>
+        row.original.needsReorder ? (
+          <span className="text-sm font-semibold text-[var(--cmms-warning)]">{row.original.suggestedQty.toLocaleString("th-TH")} หน่วย</span>
+        ) : (
+          <span className="text-sm text-[var(--cmms-text-secondary)]">-</span>
+        ),
     },
     {
       id: "deadStockDays",
@@ -202,6 +217,26 @@ export default function InventoryOptimizationPage() {
       ),
     },
   ];
+
+  const copyReorderList = async () => {
+    const rows = items.filter((i) => i.needsReorder);
+    if (rows.length === 0) return;
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const lines = [
+      "รายการแนะนำสั่งซื้ออะไหล่ (Spare Parts Reorder)",
+      `วันที่: ${new Date().toLocaleString("th-TH")}`,
+      "",
+      "รหัส,ชื่อ,คงเหลือ,Min,จุดสั่งซื้อ(ROP),แนะนำสั่งซื้อ(EOQ)",
+      ...rows.map((r) => `${r.code},${esc(String(r.name || ""))},${r.currentStock},${r.minStock},${r.reorderPoint},${r.suggestedQty}`),
+    ];
+    const textOut = lines.join("\n");
+    try {
+      await navigator.clipboard.writeText(textOut);
+      alert("คัดลอกรายการแนะนำสั่งซื้อแล้ว");
+    } catch {
+      window.prompt("คัดลอกรายการด้านล่าง", textOut);
+    }
+  };
 
   if (loading) {
     return (
@@ -290,14 +325,26 @@ export default function InventoryOptimizationPage() {
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v)}>
-        <TabsList>
-          <TabsTrigger value="all">อะไหล่ทั้งหมด ({items.length})</TabsTrigger>
-          <TabsTrigger value="deadstock">อะไหล่ค้างคลัง ({stats.deadCount})</TabsTrigger>
-          <TabsTrigger value="classA">กลุ่มสำคัญสูง ({stats.classA})</TabsTrigger>
-          <TabsTrigger value="reorder">ต้องสั่งซื้อ ({stats.reorder})</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v)}>
+          <TabsList>
+            <TabsTrigger value="all">อะไหล่ทั้งหมด ({items.length})</TabsTrigger>
+            <TabsTrigger value="deadstock">อะไหล่ค้างคลัง ({stats.deadCount})</TabsTrigger>
+            <TabsTrigger value="classA">กลุ่มสำคัญสูง ({stats.classA})</TabsTrigger>
+            <TabsTrigger value="reorder">ต้องสั่งซื้อ ({stats.reorder})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {stats.reorder > 0 && (
+          <button
+            type="button"
+            onClick={copyReorderList}
+            className="inline-flex items-center gap-2 rounded-xl border border-input bg-background px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent hover:text-accent-foreground"
+          >
+            <Copy size={16} strokeWidth={1.75} aria-hidden="true" />
+            คัดลอกรายการสั่งซื้อ ({stats.reorder})
+          </button>
+        )}
+      </div>
 
       <DataTable
         exportFileName="spare-parts-optimization"
