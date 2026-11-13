@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./tower.css";
 import PwaRegister from "../components/PwaRegister";
 import SplashScreen from "../components/SplashScreen";
 import Providers from "../components/Providers";

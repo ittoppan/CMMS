@@ -185,6 +185,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const section = getSection(pathname);
   const pageTitle = getPageTitle(pathname);
+  // Dashboard = Maintenance Control Tower (TV wallboard) — ต้องเต็มจอ ไม่มี scroll บนจอ TV
+  const isTower = pathname === "/dashboard";
 
   // tab title ต่อหน้า
   useEffect(() => {
@@ -314,8 +316,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </header>
 
           {/* Content */}
-          <main id="cmms-main-scroll" className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-6xl px-5 pb-24 pt-[calc(64px+env(safe-area-inset-top)+20px)] lg:px-8 lg:pb-12 lg:pt-8">
+          <main
+            id="cmms-main-scroll"
+            className={`min-h-0 flex-1 ${isTower ? "overflow-y-auto lg:overflow-hidden" : "overflow-y-auto"}`}
+          >
+            <div
+              className={
+                isTower
+                  ? "w-full px-4 pb-24 pt-[calc(64px+env(safe-area-inset-top)+16px)] lg:h-full lg:px-4 lg:pb-4 lg:pt-[calc(64px+env(safe-area-inset-top)+12px)]"
+                  : "mx-auto w-full max-w-6xl px-5 pb-24 pt-[calc(64px+env(safe-area-inset-top)+20px)] lg:px-8 lg:pb-12 lg:pt-8"
+              }
+            >
               {routeBlocked ? (
                 /* UX P4: หน้า 403 inline — ไม่ redirect เพื่อให้ผู้ใช้ยังเห็นเมนู/topbar ปกติ */
                 <section
