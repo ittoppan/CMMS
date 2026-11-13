@@ -18,6 +18,7 @@ require_once __DIR__ . '/../../../src/helpers/work_order.php';
 require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
 require_once __DIR__ . '/../../../src/helpers/calendar.php';
+require_once __DIR__ . '/../../../src/helpers/pm_meter.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -84,6 +85,12 @@ requireLogin($pdo);
             $today = date('Y-m-d');
             $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([$today]);
             $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([$today]);
+
+            // ---- สถานะ CBM ตามมิเตอร์ของเครื่อง (?asset_id=N&meters=1) ----
+            if (!empty($_GET['asset_id']) && isset($_GET['meters'])) {
+                echo json_encode(pm_meter_asset_status($pdo, (int)$_GET['asset_id']), JSON_UNESCAPED_UNICODE);
+                exit;
+            }
 
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 

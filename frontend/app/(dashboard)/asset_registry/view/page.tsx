@@ -39,6 +39,7 @@ import {
   PackageOpen,
   ArrowRight,
   ShieldAlert,
+  Gauge,
 } from "lucide-react";
 
 // ── mobile detection (pattern เดียวกับ spare_parts page) ──
@@ -217,6 +218,41 @@ interface ScheduleRow {
   [k: string]: unknown;
 }
 
+// สถานะ CBM ต่อแผน PM ตามมิเตอร์ (จาก /api/v1/pm_plans.php?asset_id=&meters=1)
+interface CbmItem {
+  plan_id: number;
+  plan_code: string;
+  plan_name: string;
+  meter_unit: string;
+  meter_interval: number;
+  status: "due" | "near" | "ok" | "no_reading" | "no_baseline";
+  current: number | null;
+  baseline: number | null;
+  baseline_source: string;
+  baseline_since: string | null;
+  target: number | null;
+  used: number | null;
+  remaining: number | null;
+  used_pct: number | null;
+  open_pm_id: number | null;
+  open_pm_status: string | null;
+  open_pm_due_date: string | null;
+}
+
+interface CbmResponse {
+  asset_id: number;
+  items: CbmItem[];
+  summary: Record<string, number>;
+}
+
+const cbmStatusUi: Record<string, { label: string; variant: "neutral" | "primary" | "success" | "warning" | "danger" | "info" }> = {
+  due: { label: "ถึงกำหนด/เกิน", variant: "danger" },
+  near: { label: "ใกล้ถึง (≥90%)", variant: "warning" },
+  ok: { label: "ยังไม่ถึง", variant: "success" },
+  no_reading: { label: "ยังไม่มีค่าวัด", variant: "neutral" },
+  no_baseline: { label: "ยังไม่มี baseline", variant: "info" },
+};
+
 const getAppBase = () =>
   typeof window !== "undefined"
     ? window.location.origin
@@ -236,6 +272,7 @@ export default function AssetRegistryViewPage() {
   const [pmTasks, setPmTasks] = useState<PickingRow[]>([]);
   const [calibrations, setCalibrations] = useState<CalibrationRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
+  const [cbm, setCbm] = useState<CbmResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | TimelineKind>("all");
@@ -379,12 +416,13 @@ export default function AssetRegistryViewPage() {
         const code = String(assetJson.code);
         const urlId = Number(assetId) || 0;
 
-        const [p1, p2, p3, p4, p5] = await Promise.allSettled([
+        const [p1, p2, p3, p4, p5, p6] = await Promise.allSettled([
           fetch(`/api/v1/repair.php?asset_code=${encodeURIComponent(code)}`),
           fetch("/api/v1/index.php?resource=pm-plans"),
           fetch("/api/v1/calibration.php"),
           fetch(`/api/v1/machine_bom.php?asset_id=${encodeURIComponent(assetId)}`),
           fetch(`/api/v1/inspections.php?schedules=1&asset_id=${encodeURIComponent(assetId)}`),
+          fetch(`/api/v1/pm_plans.php?asset_id=${encodeURIComponent(assetId)}&meters=1`),
         ]);
 
         if (p1.status === "fulfilled") {
@@ -408,6 +446,10 @@ export default function AssetRegistryViewPage() {
         if (p5.status === "fulfilled") {
           const j = await p5.value.json();
           if (Array.isArray(j)) setSchedules(j as ScheduleRow[]);
+        }
+        if (p6.status === "fulfilled") {
+          const j = await p6.value.json();
+          if (Array.isArray(j?.items)) setCbm(j as CbmResponse);
         }
       } catch (e) {
         console.error("Fetch asset detail error:", e);
@@ -695,6 +737,68 @@ export default function AssetRegistryViewPage() {
               </Grid>
             </CardContent>
           </Card>
+
+          {/* สถานะ PM ตามมิเตอร์ (CBM) */}
+          {cbm && cbm.items.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Gauge size={16} strokeWidth={1.75} aria-hidden="true" />
+                  PM ตามมิเตอร์ (CBM)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  เป้าหมายรอบถัดไป = ค่ามิเตอร์ตอนปิดรอบล่าสุด + รอบของแผน · ค่าปัจจุบันอ่านจากค่าวัดล่าสุดของเครื่อง
+                </p>
+                <div className="space-y-2">
+                  {cbm.items.map((m) => {
+                    const ui = cbmStatusUi[m.status] || cbmStatusUi.ok;
+                    const unit = m.meter_unit || "";
+                    const fmt = (v: number | null) => (v != null ? `${v.toLocaleString("th-TH")} ${unit}`.trim() : "—");
+                    return (
+                      <div key={m.plan_id} className="rounded-lg border border-[var(--cmms-border)] p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold">{m.plan_name}</p>
+                            <p className="text-xs text-muted-foreground font-mono">{m.plan_code}</p>
+                          </div>
+                          <Badge variant={ui.variant} dot>{ui.label}</Badge>
+                        </div>
+                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                          <div>
+                            <p className="text-muted-foreground">ค่าปัจจุบัน</p>
+                            <p className="font-semibold">{fmt(m.current)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Baseline</p>
+                            <p className="font-semibold">{fmt(m.baseline)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">เป้าหมาย</p>
+                            <p className="font-semibold">{fmt(m.target)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">คงเหลือ</p>
+                            <p className="font-semibold">{fmt(m.remaining)}</p>
+                          </div>
+                        </div>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                          <span>ใช้ไป {m.used_pct != null ? `${m.used_pct}%` : "—"} ของรอบ {m.meter_interval.toLocaleString("th-TH")} {unit}</span>
+                          {m.baseline_since && <span>baseline จากรอบ {m.baseline_since}</span>}
+                          {m.open_pm_id && (
+                            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => router.push(`/pm_am/view?id=${m.open_pm_id}`)}>
+                              เปิดรอบ PM <ArrowRight size={12} strokeWidth={2} aria-hidden="true" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* ═══ ประวัติ ═══ */}
