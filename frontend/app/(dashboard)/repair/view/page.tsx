@@ -26,6 +26,8 @@ import {
   Trash2,
   Plus,
   PackagePlus,
+  ShieldAlert,
+  ExternalLink,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -70,6 +72,18 @@ function parseRequestedParts(raw: unknown): { code: string; name: string; qty: n
   } catch {
     return [];
   }
+}
+
+interface WoFailureEvent {
+  id: number;
+  event_code?: string;
+  description?: string;
+  severity?: string;
+  rca_required?: number;
+  rca_id?: number | null;
+  rca_code?: string | null;
+  rca_status?: string | null;
+  repeat_suspected?: number;
 }
 
 interface WorkOrderDetail {
@@ -193,6 +207,7 @@ export default function RepairViewDetailsPage() {
   const [partRows, setPartRows] = useState<PartRow[]>([]);
   const [partsSaving, setPartsSaving] = useState(false);
   const [partsMsg, setPartsMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [woFailures, setWoFailures] = useState<WoFailureEvent[]>([]);
   const [sageQuery, setSageQuery] = useState("");
   const [sageResults, setSageResults] = useState<any[]>([]);
   const [sageSearching, setSageSearching] = useState(false);
@@ -316,6 +331,15 @@ export default function RepairViewDetailsPage() {
       .then(res => res.json())
       .then((list: any[]) => { if (Array.isArray(list)) setActivity(list); })
       .catch(e => console.error("Fetch WO activity error", e));
+
+    // Failure events / RCA ที่ผูกกับใบงานนี้ (ปิดวงจร RCA/CAPA)
+    fetch(`/api/v1/failure.php?action=events&repair_id=${idParam}`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((j: any) => {
+        const items = Array.isArray(j?.items) ? j.items : (Array.isArray(j) ? j : []);
+        setWoFailures(items);
+      })
+      .catch(() => setWoFailures([]));
   }, []);
 
   // ติดตาม online/offline — แสดง banner + อ่านเวลาสุดท้ายจาก snapshot (เหมือนหน้างานของฉัน)
@@ -1249,6 +1273,81 @@ export default function RepairViewDetailsPage() {
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">ยังไม่มีหลักฐานภาพถ่าย — กด “แนบรูปหลักฐาน” เพื่อถ่าย/เลือกภาพของงานครั้งนี้</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ══ Failure / RCA linkage (ปิดวงจร CAPA) ══ */}
+        <Card>
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  FAILURE ANALYSIS & RCA
+                </span>
+                <CardTitle className="text-base">ความเสียหายและการวิเคราะห์สาเหตุ (RCA/CAPA)</CardTitle>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  เหตุการณ์ที่ต้องทำ RCA ต้องปิด RCA ให้ครบก่อนจบ/ปิดใบงานซ่อมนี้
+                </p>
+              </div>
+            </div>
+            <a
+              href={`/rca`}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              เปิดโมดูล RCA
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {woFailures.length === 0 ? (
+              <p className="text-sm text-muted-foreground">ไม่มี Failure Event ที่ผูกกับใบงานนี้</p>
+            ) : (
+              <div className="space-y-2">
+                {woFailures.map((ev) => {
+                  const needsRca = Number(ev.rca_required || 0) === 1;
+                  const rcaClosed = ev.rca_status === "closed" || ev.rca_status === "cancelled";
+                  const blocked = needsRca && (!ev.rca_id || !rcaClosed);
+                  return (
+                    <div key={ev.id} className="flex flex-col gap-2 rounded-xl border border-border p-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-sm">{ev.event_code || `FE-${ev.id}`}</span>
+                          {ev.severity ? <Badge variant={ev.severity === "critical" || ev.severity === "high" ? "danger" : ev.severity === "medium" ? "warning" : "neutral"}>{String(ev.severity)}</Badge> : null}
+                          {needsRca ? <Badge variant="warning">ต้องทำ RCA</Badge> : <Badge variant="neutral">ไม่บังคับ RCA</Badge>}
+                          {blocked ? <Badge variant="danger">RCA ยังไม่ปิด/ยังไม่เชื่อม</Badge> : needsRca ? <Badge variant="success">RCA ครบถ้วน</Badge> : null}
+                          {ev.repeat_suspected ? <Badge variant="info">สงสัยซ้ำ</Badge> : null}
+                        </div>
+                        <p className="mt-1 text-sm text-foreground line-clamp-2">{ev.description || "-"}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          RCA: {ev.rca_code ? `${ev.rca_code} (${ev.rca_status || "-"})` : "ยังไม่มี RCA"}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {ev.rca_id ? (
+                          <a
+                            href={`/rca/${ev.rca_id}`}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                          >
+                            เปิด RCA
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        ) : needsRca ? (
+                          <a
+                            href={`/rca/new?failure_event_id=${ev.id}`}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                          >
+                            สร้าง RCA
+                          </a>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </CardContent>
         </Card>
