@@ -655,8 +655,10 @@ export default function DashboardPage() {
               <Grid columns={{ minWidth: 210, max: 4 }} gap={3}>
                 <KpiCard label="รอบ PM ทั้งหมด" value={data.pm.due_total} unit="รอบ" icon={<CalendarCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="blue" href="/pm_am/calendar" />
                 <KpiCard label="จบแล้วในรอบ" value={data.pm.completed} unit="รอบ" icon={<CheckCircle2 size={18} strokeWidth={1.9} aria-hidden="true" />} tone="green" href={listHref(q, "pm", "completed")} />
-                <KpiCard label="อัตราการทำครบ" value={data.pm.completion_rate ?? "—"} unit="%" icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.completion_rate != null && data.pm.completion_rate < 80 ? "amber" : "green"} />
-                <KpiCard label="เสร็จทันกำหนด" value={data.pm.on_time_pct ?? "—"} unit="%" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" sub={`ตรงเวลา ${data.pm.on_time} · ช้า ${data.pm.late}`} />
+                <KpiCard label="อัตราการทำครบ" value={data.pm.completion_rate ?? "—"} unit="%" icon={<Gauge size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.completion_rate != null && data.pm.completion_rate < 80 ? "amber" : "green"} href={listHref(q, "pm")} />
+                <KpiCard label="เสร็จทันกำหนด" value={data.pm.on_time_pct ?? "—"} unit="%" icon={<ClipboardCheck size={18} strokeWidth={1.9} aria-hidden="true" />} tone="cyan" sub={`ตรงเวลา ${data.pm.on_time} · ช้า ${data.pm.late}`} href={listHref(q, "pm", "on_time")} />
+                <KpiCard label="PM ช้ากว่ากำหนด" value={data.pm.late} unit="รอบ" icon={<TriangleAlert size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.late > 0 ? "amber" : "green"} href={listHref(q, "pm", "late")} />
+                <KpiCard label="PM ค้างเกินกำหนด" value={data.pm.overdue_pending} unit="รอบ" icon={<CalendarClock size={18} strokeWidth={1.9} aria-hidden="true" />} tone={data.pm.overdue_pending > 0 ? "red" : "green"} href={listHref(q, "pm", "overdue")} />
               </Grid>
             </section>
           )}

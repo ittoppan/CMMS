@@ -198,6 +198,10 @@ export interface PmItem {
   asset_code: string;
   asset_name: string;
   assigned_name: string | null;
+  frequency_type?: string | null;
+  meter_unit?: string | null;
+  meter_reading?: number | string | null;
+  meter_interval?: number | string | null;
 }
 
 export interface DowntimeRow {

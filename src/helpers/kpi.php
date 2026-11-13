@@ -701,13 +701,18 @@ function kpi_pm_list(PDO $pdo, array $opts): array {
     if ($group === 'overdue') $cond = " AND p.status IN ('pending','in_progress') AND p.due_date < CURDATE()";
     elseif ($group === 'completed') $cond = " AND p.status = 'completed'";
     elseif ($group === 'due_today') $cond = " AND p.status IN ('pending','in_progress') AND DATE(p.due_date) = CURDATE()";
+    elseif ($group === 'late') $cond = " AND p.status = 'completed' AND p.completed_at IS NOT NULL AND p.completed_at > p.due_date";
+    elseif ($group === 'on_time') $cond = " AND p.status = 'completed' AND p.completed_at IS NOT NULL AND p.completed_at <= p.due_date";
+    elseif ($group === 'meter_based') $cond = " AND (p.frequency_type = 'meter_based' OR pl.frequency_type = 'meter_based')";
     $limit = min(300, max(1, (int)($opts['limit'] ?? 50)));
 
     $sql = 'SELECT p.id, p.title, p.status, p.priority, p.due_date, p.completed_at,
+                   p.frequency_type, p.meter_unit, p.meter_reading, pl.meter_interval,
                    a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
             FROM pm_am p
             LEFT JOIN asset_registry a ON a.id = p.asset_id
-            LEFT JOIN users u ON u.id = p.assigned_to' . $where . $cond . $dueSql . '
+            LEFT JOIN users u ON u.id = p.assigned_to
+            LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id' . $where . $cond . $dueSql . '
             ORDER BY p.due_date ASC LIMIT ' . $limit;
     $st = $pdo->prepare($sql);
     $st->execute($params);

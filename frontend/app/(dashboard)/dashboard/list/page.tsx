@@ -174,6 +174,15 @@ export default function DashboardListPage() {
     [router, sp, pageSize]
   );
 
+  const pmGroupLabels: Record<string, string> = {
+    overdue: "ค้างเกินกำหนด",
+    completed: "ปิดแล้ว",
+    due_today: "ครบกำหนดวันนี้",
+    late: "เสร็จช้ากว่ากำหนด",
+    on_time: "เสร็จทันกำหนด",
+    meter_based: "ตามมิเตอร์",
+  };
+
   const subtitle =
     action === "wo" || action === "alerts"
       ? `พบ ${total} รายการ`
@@ -233,7 +242,7 @@ export default function DashboardListPage() {
           <CardContent className="p-0">
             <div className="flex flex-wrap items-center justify-between gap-2 p-4 pb-0">
               <p className="text-sm font-semibold">{subtitle}</p>
-              {group && <span className="text-xs text-[var(--cmms-text-muted)]">กลุ่ม: {group}</span>}
+              {group && <span className="text-xs text-[var(--cmms-text-muted)]">กลุ่ม: {pmGroupLabels[group] || group}</span>}
             </div>
             {pmItems && pmItems.length === 0 ? (
               <div className="p-4">
@@ -255,8 +264,16 @@ export default function DashboardListPage() {
                     {(pmItems ?? []).map((p) => (
                       <tr key={p.id} className="hover:bg-[var(--cmms-bg-muted)]">
                         <td className="px-4 py-3">
-                          <span className="font-medium">{p.title}</span>
-                          <span className="ml-2 text-xs text-[var(--cmms-text-muted)]">{p.priority}</span>
+                          <Link href={`/pm_am/view?id=${p.id}`} className="block">
+                            <span className="font-medium text-[var(--cmms-primary)]">{p.title}</span>
+                            <span className="ml-2 text-xs text-[var(--cmms-text-muted)]">{p.priority}</span>
+                          </Link>
+                          {(p.frequency_type === "meter_based" || p.meter_unit) && (
+                            <span className="mt-1 block text-xs text-[var(--cmms-text-secondary)]">
+                              ตามมิเตอร์{p.meter_interval ? ` · รอบ ${Number(p.meter_interval).toLocaleString("th-TH")} ${p.meter_unit || ""}` : p.meter_unit ? ` · ${p.meter_unit}` : ""}
+                              {p.meter_reading !== null && p.meter_reading !== undefined && p.meter_reading !== "" ? ` · บันทึก ${Number(p.meter_reading).toLocaleString("th-TH")} ${p.meter_unit || ""}` : ""}
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-[var(--cmms-text-secondary)]">{p.asset_code || p.asset_name || "—"}</td>
                         <td className="px-4 py-3 tabular-nums">{fmtTime(p.due_date)}</td>
