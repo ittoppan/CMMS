@@ -67,6 +67,7 @@ export default function PMChecksheetPage() {
   const [selectedPlanId, setSelectedPlanId] = useState("");
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [assetName, setAssetName] = useState("");
+  const [meterReading, setMeterReading] = useState<string>("");
   const [checklist, setChecklist] = useState<CheckItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -242,6 +243,7 @@ export default function PMChecksheetPage() {
 
   const applyPlan = async (plan: any) => {
     setSelectedPlan(plan);
+    setMeterReading(plan?.meter_reading != null && plan?.meter_reading !== "" ? String(plan.meter_reading) : "");
     try {
       // หาชื่อเครื่องจักรจาก assets
       const assetRes = await fetch("/api/v1/index.php?resource=assets");
@@ -412,6 +414,7 @@ export default function PMChecksheetPage() {
         operator_signature: operatorSig,
         operator_name: operatorName.trim(),
         signed_at: now,
+        ...(selectedPlan && (selectedPlan.frequency_type === "meter_based" || selectedPlan.meter_unit) && meterReading.trim() !== "" ? { meter_reading: Number(meterReading), meter_unit: selectedPlan.meter_unit || undefined } : {}),
         checklist: JSON.stringify(
           checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
         ),
@@ -427,6 +430,7 @@ export default function PMChecksheetPage() {
         setSelectedPlan(null);
         setChecklist([]);
         setAssetName("");
+        setMeterReading("");
         return;
       }
       const res = await fetch(`/api/v1/pm_am.php?id=${selectedPlan.id}`, {
@@ -443,6 +447,7 @@ export default function PMChecksheetPage() {
         setSelectedPlan(null);
         setChecklist([]);
         setAssetName("");
+        setMeterReading("");
         fetchPlans();
       } else {
         setError(json.error || "ไม่สามารถบันทึกผลได้");
@@ -464,6 +469,7 @@ export default function PMChecksheetPage() {
           operator_signature: operatorSig,
           operator_name: operatorName.trim(),
           signed_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+          ...(selectedPlan && (selectedPlan.frequency_type === "meter_based" || selectedPlan.meter_unit) && meterReading.trim() !== "" ? { meter_reading: Number(meterReading), meter_unit: selectedPlan.meter_unit || undefined } : {}),
           checklist: JSON.stringify(
             checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
           ),
@@ -477,6 +483,7 @@ export default function PMChecksheetPage() {
       setSelectedPlan(null);
       setChecklist([]);
       setAssetName("");
+      setMeterReading("");
     }
     setSubmitting(false);
   };
@@ -649,6 +656,18 @@ export default function PMChecksheetPage() {
                       งานภายนอก · {selectedPlan.outsource_by || "ไม่ระบุบริษัท"}
                       {Number(selectedPlan.cost_outsource) > 0 ? ` · ${Number(selectedPlan.cost_outsource).toLocaleString("th-TH")} บาท` : ""}
                     </span>
+                  )}
+                  {(selectedPlan.frequency_type === "meter_based" || selectedPlan.meter_unit) && (
+                    <div className="mt-2 w-full max-w-xs">
+                      <Input
+                        label={`ค่ามิเตอร์ปัจจุบัน${selectedPlan.meter_unit ? ` (${selectedPlan.meter_unit})` : ""}`}
+                        type="number"
+                        placeholder="ระบุค่ามิเตอร์ ณ ตอนปิดงาน"
+                        value={meterReading}
+                        onChange={(e) => setMeterReading(e.target.value)}
+                      />
+                      <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">บันทึกเป็น baseline สำหรับรอบถัดไป (ถ้าเว้นว่างระบบจะพยายามใช้ค่ามิเตอร์ล่าสุด)</p>
+                    </div>
                   )}
                 </div>
                 <div className="text-right">
