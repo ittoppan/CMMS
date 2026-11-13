@@ -18,6 +18,7 @@ import { Dialog } from "@/components/ui/dialog";
 
 type TrackWO = Record<string, unknown> & {
   id: string;
+  rawId: number;
   woNumber: string;
   machine: string;
   symptoms: string;
@@ -41,6 +42,7 @@ export default function RepairTrackingPage() {
         if (json.status === "success" && Array.isArray(json.data)) {
           const mapped: TrackWO[] = json.data.map((row: any, index: number) => ({
             id: `db-wo-${row.id || index}`,
+            rawId: Number(row.id || index),
             woNumber: row.work_order_no || row.wo_number || `EN-${String(row.id || index).padStart(3, '0')}`,
             machine: row.asset_name || "-",
             symptoms: row.title || row.description || "-",
@@ -144,7 +146,7 @@ export default function RepairTrackingPage() {
             ประเมินผล
           </Button>
         ) : (
-          <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${item.id}`)}>
+          <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${item.rawId}`)}>
             ดูรายละเอียด
           </Button>
         );

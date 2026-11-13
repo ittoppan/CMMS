@@ -85,9 +85,11 @@ export default function RepairKanbanPage() {
       console.error(e);
       // ย้อนกลับถ้าบันทึกไม่สำเร็จ
       setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: prevStatus } : i));
-      const serverMsg = typeof e?.message === "string" && e.message.includes("ปนเปื้อน")
-        ? e.message
-        : `บันทึกสถานะ ${item.woNumber} ไม่สำเร็จ — ลองอีกครั้ง`;
+      const rawMsg = typeof e?.message === "string" ? e.message : "";
+      const serverMsg =
+        rawMsg && (rawMsg.includes("ปนเปื้อน") || rawMsg.includes("ลายเซ็น") || rawMsg.includes("สาเหตุ") || rawMsg.includes("วิธีแก้ไข") || rawMsg.includes("Failure"))
+          ? `${item.woNumber}: ${rawMsg}${rawMsg.includes("ลายเซ็น") ? " — กรุณาปิดงานจากหน้าบันทึก/แก้ไขงานเพื่อให้ผู้แจ้งเซ็นรับ" : ""}`
+          : `บันทึกสถานะ ${item.woNumber} ไม่สำเร็จ — ลองอีกครั้ง`;
       setMoveMsg({ kind: "err", text: serverMsg });
     } finally {
       setSavingId(null);

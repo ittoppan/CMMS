@@ -186,7 +186,7 @@ export default function RepairHistoryPage() {
       header: t("tbl.actions"),
       enableSorting: false,
       cell: ({ row }: { row: { original: HistoryWO } }) => (
-        <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/edit?id=${row.original.rawId}`)}>
+        <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${row.original.rawId}`)}>
           ดูรายละเอียด
         </Button>
       ),
