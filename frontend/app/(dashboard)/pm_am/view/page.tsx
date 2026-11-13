@@ -38,6 +38,8 @@ export default function PMDetailPage() {
   const [woMsg, setWoMsg] = useState("");
   const [woErr, setWoErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [meterCurrent, setMeterCurrent] = useState<{ value: number | null; measuredAt?: string }>({ value: null });
+  const [meterInterval, setMeterInterval] = useState<number | null>(null);
 
   useEffect(() => {
     if (!pmId) { setLoading(false); return; }
@@ -78,6 +80,42 @@ export default function PMDetailPage() {
   };
   const checklist = parseChecklist();
   const failCount = checklist.filter((i) => i.status === "fail" || (typeof i.value === "number" && pm?.checklist_meta?.fails)).length;
+
+
+  useEffect(() => {
+    if (!pm) return;
+    const unit = String(pm.meter_unit || "").trim();
+    const isMeter = pm.frequency_type === "meter_based" || unit !== "";
+    if (!isMeter) return;
+    let cancelled = false;
+
+    // meter interval from cycle or plan
+    const directInterval = pm.meter_interval != null && pm.meter_interval !== "" ? Number(pm.meter_interval) : (pm.frequency_interval != null && pm.frequency_interval !== "" ? Number(pm.frequency_interval) : null);
+    if (Number.isFinite(directInterval as number) && (directInterval as number) > 0) setMeterInterval(directInterval as number);
+    if ((!Number.isFinite(directInterval as number) || (directInterval as number) <= 0) && pm.plan_id) {
+      fetch(`/api/v1/pm_plans.php?id=${pm.plan_id}`, { credentials: "include" })
+        .then((r) => r.json())
+        .then((j) => {
+          const p = j?.data || j?.plan || j;
+          const mi = p?.meter_interval != null ? Number(p.meter_interval) : null;
+          if (!cancelled && Number.isFinite(mi as number)) setMeterInterval(mi as number);
+        })
+        .catch(() => {});
+    }
+
+    if (pm.asset_id && unit) {
+      fetch(`/api/v1/asset_measurements.php?asset_id=${pm.asset_id}`, { credentials: "include" })
+        .then((r) => r.json())
+        .then((j) => {
+          const rows = Array.isArray(j?.measurements) ? j.measurements : Array.isArray(j) ? j : [];
+          const m = rows.find((r: any) => String(r.parameter || "") === unit || String(r.unit || "") === unit) || rows[0];
+          const val = m && m.value_numeric !== undefined && m.value_numeric !== null && m.value_numeric !== "" ? Number(m.value_numeric) : null;
+          if (!cancelled) setMeterCurrent({ value: Number.isFinite(val as number) ? (val as number) : null, measuredAt: m?.measured_at });
+        })
+        .catch(() => { if (!cancelled) setMeterCurrent({ value: null }); });
+    }
+    return () => { cancelled = true; };
+  }, [pm?.id, pm?.asset_id, pm?.plan_id, pm?.meter_unit, pm?.frequency_type, pm?.meter_interval, pm?.frequency_interval]);
 
   const generateWO = async () => {
     if (!(await swalConfirm({ title: `สร้าง Work Order จากรอบ PM "${pm.title}"?`, text: "ระบบกัน WO ซ้ำสำหรับรอบนี้" }))) return;
@@ -159,10 +197,33 @@ export default function PMDetailPage() {
                     </>)}
                     <span className="text-[var(--cmms-text-secondary)]">ความเร่งด่วน</span>
                     <span className="font-semibold capitalize">{pm.priority || "medium"}</span>
-                    {pm.meter_reading !== null && pm.meter_reading !== undefined && (<>
-                      <span className="flex items-center gap-1 text-[var(--cmms-text-secondary)]"><Gauge size={14} aria-hidden="true" />ค่ามิเตอร์</span>
+                    {(pm.meter_reading !== null && pm.meter_reading !== undefined && pm.meter_reading !== "") && (<>
+                      <span className="flex items-center gap-1 text-[var(--cmms-text-secondary)]"><Gauge size={14} aria-hidden="true" />ค่ามิเตอร์ (บันทึก)</span>
                       <span className="font-semibold">{pm.meter_reading} {pm.meter_unit || ""}</span>
                     </>)}
+                    {(pm.frequency_type === "meter_based" || pm.meter_unit) && meterInterval != null && meterInterval > 0 && (<>
+                      <span className="text-[var(--cmms-text-secondary)]">รอบตามมิเตอร์</span>
+                      <span className="font-semibold">{Number(meterInterval).toLocaleString("th-TH")} {pm.meter_unit || ""}</span>
+                    </>)}
+                    {(pm.frequency_type === "meter_based" || pm.meter_unit) && (<>
+                      <span className="text-[var(--cmms-text-secondary)]">ค่ามิเตอร์ปัจจุบัน</span>
+                      <span className="font-semibold">
+                        {meterCurrent.value != null ? `${Number(meterCurrent.value).toLocaleString("th-TH")} ${pm.meter_unit || ""}` : "ไม่มีข้อมูล"}
+                        {meterCurrent.measuredAt ? <span className="block text-[11px] font-normal" style={{ color: "var(--cmms-text-muted)" }}>วัดล่าสุด {String(meterCurrent.measuredAt).replace("T", " ").slice(0, 16)}</span> : null}
+                      </span>
+                    </>)}
+                    {(pm.frequency_type === "meter_based" || pm.meter_unit) && meterCurrent.value != null && pm.meter_reading !== null && pm.meter_reading !== undefined && pm.meter_reading !== "" && meterInterval != null && meterInterval > 0 && (() => {
+                      const baseline = Number(pm.meter_reading);
+                      const target = baseline + Number(meterInterval);
+                      const remaining = target - Number(meterCurrent.value);
+                      const due = remaining <= 0;
+                      return (<>
+                        <span className="text-[var(--cmms-text-secondary)]">เป้าหมาย / คงเหลือ</span>
+                        <span className="font-semibold" style={{ color: due ? "var(--cmms-danger)" : undefined }}>
+                          {target.toLocaleString("th-TH")} {pm.meter_unit || ""} · {due ? "ถึงกำหนด/เกิน" : `เหลือ ${remaining.toLocaleString("th-TH")} ${pm.meter_unit || ""}`}
+                        </span>
+                      </>);
+                    })()}
                   </div>
                 </CardContent>
               </Card>
