@@ -30,7 +30,9 @@ import {
   RefreshCw,
   Timer,
   TrendingDown,
+  UserCheck,
   Wrench,
+  X,
 } from "lucide-react";
 import {
   Bar,
@@ -101,6 +103,7 @@ interface Loaded {
   trend: D.TrendPoint[] | null;
   downtime: D.DowntimeResponse | null;
   recent: D.WoItem[] | null;
+  openWos: { items: D.WoItem[]; total: number } | null;
   pm: D.PmItem[] | null;
   plant: PlantMapAsset[] | null;
   spare: SpareReorderRow[] | null;
@@ -114,6 +117,7 @@ const EMPTY: Loaded = {
   trend: null,
   downtime: null,
   recent: null,
+  openWos: null,
   pm: null,
   plant: null,
   spare: null,
@@ -274,6 +278,7 @@ export default function DashboardPage() {
   const [now, setNow] = useState<Date | null>(null);
   const [online, setOnline] = useState(true);
   const [isFull, setIsFull] = useState(false);
+  const [pendingOpen, setPendingOpen] = useState(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const chartFont = useChartFont();
 
@@ -319,10 +324,11 @@ export default function DashboardPage() {
       setError(e instanceof Error ? e.message : "โหลดข้อมูลภาพรวมไม่สำเร็จ");
     }
 
-    const [trend, downtime, recent, pm, plant, spare, mtbf] = await Promise.allSettled([
+    const [trend, downtime, recent, openList, pm, plant, spare, mtbf] = await Promise.allSettled([
       D.fetchTrend(q),
       D.fetchDowntime(q),
       D.fetchWoList({ ...q, group: "all", limit: 8 }),
+      D.fetchWoList({ ...q, group: "open", limit: 200 }),
       D.fetchPmList({ limit: 100 }),
       fetchPlantMap(),
       fetchReorderParts(8),
@@ -336,6 +342,10 @@ export default function DashboardPage() {
       trend: trend.status === "fulfilled" ? trend.value.series ?? [] : null,
       downtime: downtime.status === "fulfilled" ? downtime.value : null,
       recent: recent.status === "fulfilled" ? recent.value.items ?? [] : null,
+      openWos:
+        openList.status === "fulfilled"
+          ? { items: openList.value.items ?? [], total: openList.value.total ?? 0 }
+          : null,
       pm: pm.status === "fulfilled" ? pm.value.items : null,
       plant: plant.status === "fulfilled" ? plant.value : null,
       spare: spare.status === "fulfilled" ? spare.value.rows : null,
@@ -442,6 +452,24 @@ export default function DashboardPage() {
   const deptOptions = ov?.options?.departments ?? [];
   const firstLoad = loading && !ov;
   const loadingNote = <Na value="…" note="กำลังโหลดข้อมูล" />;
+
+  /* งานค้าง + ผู้รับผิดชอบ — ใช้รายการงานค้างชุดเดียวกับที่โหลดในรอบรีเฟรช (dashboard.php?action=wo&group=open) */
+  const techWorkload = ov?.tech_workload ?? [];
+  const pending = data.openWos;
+  const pendingOwned = pending ? pending.items.filter((w) => Boolean(w.assigned_name)).length : 0;
+  const pendingUnassigned = pending ? pending.items.length - pendingOwned : 0;
+  const availableTechs = ov?.options?.technicians?.length ?? 0;
+
+  const openPending = useCallback(() => setPendingOpen(true), []);
+
+  useEffect(() => {
+    if (!pendingOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPendingOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [pendingOpen]);
 
   return (
     <div
@@ -870,7 +898,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── OPERATIONAL ────────────────────────────────────────────── */}
-      <div className="tower-band grid grid-cols-1 gap-2 md:grid-cols-2 lg:min-h-0 lg:flex-[0.62] lg:grid-cols-3 lg:grid-rows-1 lg:gap-3 lg:overflow-hidden">
+      <div className="tower-band grid grid-cols-1 gap-2 md:grid-cols-2 lg:min-h-0 lg:flex-[0.62] lg:grid-cols-4 lg:grid-rows-1 lg:gap-3 lg:overflow-hidden">
         <Panel
           title="Asset Status by Area"
           icon={Factory}
@@ -902,6 +930,57 @@ export default function DashboardPage() {
                 );
               })}
             </ul>
+          )}
+        </Panel>
+
+        <Panel
+          title="งานค้าง · ผู้รับผิดชอบ"
+          icon={UserCheck}
+          className="min-h-[190px] lg:min-h-0"
+          action={
+            <button type="button" className="tower-panel-link" onClick={() => void openPending()}>
+              รายละเอียด
+              <ArrowRight size="0.85em" aria-hidden />
+            </button>
+          }
+          bodyClassName="flex min-h-0 flex-col"
+        >
+          {!counts ? (
+            firstLoad ? loadingNote : <Na note={`โหลด ${SRC.overview} ไม่สำเร็จ`} />
+          ) : (
+            <>
+              <div className="tower-owner-head">
+                <span className="tower-owner-num" data-tone={pendingUnassigned > 0 ? "amber" : "green"}>
+                  {pending ? fmtNumber(pendingUnassigned) : fmtNumber(counts.unassigned)}
+                </span>
+                <span className="tower-owner-label">
+                  ยังไม่มีผู้รับผิดชอบ
+                  <span className="tower-row-sub">
+                    จากงานค้าง {fmtNumber(pending ? pending.items.length : core?.open_wo ?? 0)} ใบ · มีผู้รับผิดชอบ{" "}
+                    {fmtNumber(pendingOwned)}
+                  </span>
+                </span>
+              </div>
+              {techWorkload.length === 0 ? (
+                <p className="tower-owner-note" title="ยังไม่มีใบงานค้างที่ระบุผู้รับผิดชอบ (repair.assigned_to)">
+                  ยังไม่มีช่างถูกมอบหมาย · ช่างพร้อมรับงาน {fmtNumber(availableTechs)} คน
+                </p>
+              ) : (
+                <ul className="tower-list min-h-0 flex-1">
+                  {techWorkload.slice(0, 2).map((t) => (
+                    <li className="tower-row min-h-0 flex-1 !py-0" key={t.user_id}>
+                      <div className="tower-row-main">
+                        <span className="tower-row-title">{t.full_name}</span>
+                        <span className="tower-row-sub">
+                          กำลังซ่อม {fmtNumber(t.in_progress_cnt)} · รอรับ {fmtNumber(t.assigned_cnt)}
+                        </span>
+                      </div>
+                      <span className="tower-row-value">{fmtNumber(t.total)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
         </Panel>
 
@@ -938,7 +1017,7 @@ export default function DashboardPage() {
         </Panel>
 
         <Panel
-          title="Recent Maintenance Activities"
+          title="Recent Work Orders"
           icon={Wrench}
           className="min-h-[190px] md:col-span-2 lg:col-span-1 lg:min-h-0"
           action={<PanelLink href="/repair" label="งานซ่อมทั้งหมด" />}
@@ -972,6 +1051,102 @@ export default function DashboardPage() {
           )}
         </Panel>
       </div>
+
+      {/* ── DRILL-DOWN: รายละเอียดงานค้าง + ผู้รับผิดชอบ ─────────────── */}
+      {pendingOpen ? (
+        <div className="tower-modal" role="dialog" aria-modal="true" aria-label="รายละเอียดงานค้างและผู้รับผิดชอบ">
+          <button
+            type="button"
+            className="tower-modal-backdrop"
+            aria-label="ปิดรายละเอียด"
+            onClick={() => setPendingOpen(false)}
+          />
+          <div className="tower-modal-card">
+            <header className="tower-modal-head">
+              <div className="min-w-0">
+                <div className="tower-modal-title">งานค้าง · ผู้รับผิดชอบ</div>
+                <div className="tower-modal-sub">
+                  {pending
+                    ? `งานค้าง ${fmtNumber(pending.total)} ใบ · มีผู้รับผิดชอบ ${fmtNumber(pendingOwned)} · ยังไม่มอบหมาย ${fmtNumber(
+                        pendingUnassigned,
+                      )} — ข้อมูลจาก repair.assigned_to`
+                    : "โหลดรายการงานค้างไม่สำเร็จ"}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <Link href="/repair/assign" className="tower-btn">
+                  <UserCheck size="1em" aria-hidden />
+                  จ่ายงาน
+                </Link>
+                <button type="button" className="tower-btn" onClick={() => setPendingOpen(false)} aria-label="ปิด">
+                  <X size="1em" aria-hidden />
+                </button>
+              </div>
+            </header>
+            <div className="tower-modal-body">
+              {!pending || pending.items.length === 0 ? (
+                <p className="tower-modal-empty">ไม่พบงานค้างตามช่วงที่เลือก</p>
+              ) : (
+                <table className="tower-table">
+                  <thead>
+                    <tr>
+                      <th>ใบงาน</th>
+                      <th>งาน / อุปกรณ์</th>
+                      <th>สถานะ</th>
+                      <th>ผู้รับผิดชอบ</th>
+                      <th className="text-right">ค้างมา</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...pending.items]
+                      .sort((a, b) => b.overdue_days - a.overdue_days || (a.created_at < b.created_at ? -1 : 1))
+                      .slice(0, 60)
+                      .map((w) => {
+                        const st = WO_STATUS[w.status] ?? { label: w.status, tone: "muted" };
+                        return (
+                          <tr key={w.id}>
+                            <td className="tower-num tower-strong">{w.work_order_no}</td>
+                            <td>
+                              <span className="tower-table-main">{w.title}</span>
+                              <span className="tower-table-sub">
+                                {w.asset_code || "-"}
+                                {w.asset_name ? ` · ${w.asset_name}` : ""}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="tower-pill" data-tone={st.tone}>
+                                {st.label}
+                              </span>
+                            </td>
+                            <td>
+                              {w.assigned_name ? (
+                                <span className="tower-strong">{w.assigned_name}</span>
+                              ) : (
+                                <span className="tower-table-unassigned">ยังไม่มอบหมาย</span>
+                              )}
+                            </td>
+                            <td className="tower-num text-right">
+                              {fmtAgo(w.created_at)}
+                              {w.overdue_days > 0 ? (
+                                <span className="tower-table-over"> · เกิน {w.overdue_days} วัน</span>
+                              ) : null}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              )}
+              {pending && pending.items.length > 0 ? (
+                <p className="tower-modal-foot">
+                  แสดง {fmtNumber(Math.min(60, pending.items.length))} จาก {fmtNumber(pending.total)} ใบ ·
+                  เรียงตามจำนวนวันที่ค้างมากที่สุด — มอบหมายผู้รับผิดชอบได้ที่หน้า “มอบหมายงาน”
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
