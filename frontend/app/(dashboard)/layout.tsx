@@ -222,7 +222,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </a>
 
       {/* ═══════════ DESKTOP SHELL (≥1024px): sidebar + topbar ═══════════ */}
-      <div className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden">
+      <div
+        className="min-h-dvh bg-background lg:flex lg:h-dvh lg:overflow-hidden"
+        {...(isTower ? { "data-tower-shell": "" } : {})}
+      >
         {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
           {/* แบรนด์: โลโก้ TOPPAN กว้างตามสัดส่วนจริง (6.09:1) — ต้องจำกัดความกว้าง

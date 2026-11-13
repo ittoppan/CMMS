@@ -16,9 +16,10 @@ export const TOWER_PALETTE = {
   blueSoft: "#58A6F0",
   teal: "#2ED3C1",
   cyan: "#38BDF8",
-  green: "#35C27A",
+  green: "#2FCB7E",
   amber: "#EFAB4B",
   red: "#F0605F",
+  purple: "#8B6FE8",
   text: "#E9F2FC",
   text2: "#A8BDD6",
   text3: "#7A9AB8",
@@ -208,3 +209,80 @@ export function fmtAgo(iso: string | null | undefined): string {
 }
 
 export const TH_MONTHS = TH_MONTHS_SHORT;
+
+/* ── 12 เดือนล่าสุด (Maintenance Overview) ───────────────────────────────
+   API trend จำกัดช่วงละ 62 วัน จึงเรียกทีละเดือน (ไม่เกิน 31 วัน) แล้วรวมยอด
+   ไม่ได้แต่งค่าขึ้นมา: เดือนที่ไม่มีใบงานจะเป็น 0 ตามจริง
+   ---------------------------------------------------------------------- */
+export interface MonthlyPoint {
+  key: string;
+  label: string;
+  created: number;
+  completed: number;
+  rate: number | null;
+}
+
+interface MonthWindow {
+  key: string;
+  label: string;
+  start: string;
+  end: string;
+}
+
+function monthWindows(months: number): MonthWindow[] {
+  const now = new Date();
+  const out: MonthWindow[] = [];
+  for (let i = months - 1; i >= 0; i -= 1) {
+    const first = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+    const y = first.getFullYear();
+    const m = first.getMonth() + 1;
+    const mm = String(m).padStart(2, "0");
+    out.push({
+      key: `${y}-${mm}`,
+      label: `${TH_MONTHS_SHORT[m - 1]} ${String(y + 543).slice(-2)}`,
+      start: `${y}-${mm}-01 00:00:00`,
+      end: `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, "0")}-${String(last.getDate()).padStart(2, "0")} 23:59:59`,
+    });
+  }
+  return out;
+}
+
+export async function fetchMonthlyTrend(
+  q: { department_id?: string; location_id?: string; asset_id?: string; asset_category?: string; source_type?: string; priority?: string } = {},
+  months = 12,
+): Promise<MonthlyPoint[]> {
+  const { fetchTrend } = await import("./dashboard");
+  const windows = monthWindows(months);
+  const settled = await Promise.allSettled(
+    windows.map((w) => fetchTrend({ ...q, range: "custom", range_start: w.start, range_end: w.end })),
+  );
+  return windows.map((w, i) => {
+    const r = settled[i];
+    if (r.status !== "fulfilled") {
+      return { key: w.key, label: w.label, created: 0, completed: 0, rate: null };
+    }
+    const series = r.value.series ?? [];
+    const created = series.reduce((s, p) => s + (Number(p.created) || 0), 0);
+    const completed = series.reduce((s, p) => s + (Number(p.completed) || 0), 0);
+    return {
+      key: w.key,
+      label: w.label,
+      created,
+      completed,
+      rate: created > 0 ? Math.round((completed / created) * 1000) / 10 : null,
+    };
+  });
+}
+
+/** เส้น sparkline (polyline points) สำหรับการ์ด KPI — ใช้ข้อมูลจริงเท่านั้น */
+export function sparkPoints(values: number[], width = 100, height = 26): string {
+  if (values.length === 0) return "";
+  const max = Math.max(...values);
+  const min = Math.min(...values);
+  const span = max - min || 1;
+  const step = values.length > 1 ? width / (values.length - 1) : width;
+  return values
+    .map((v, i) => `${(i * step).toFixed(2)},${(height - ((v - min) / span) * (height - 2) - 1).toFixed(2)}`)
+    .join(" ");
+}
