@@ -16,17 +16,19 @@ import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import { Dialog } from "@/components/ui/dialog";
 
-type TrackWO = Record<string, unknown> & {
-  id: string;
-  rawId: number;
-  woNumber: string;
-  machine: string;
-  symptoms: string;
-  status: "pending_assign" | "pending_accept" | "in_progress" | "pending_parts" | "pending_eval" | "completed";
-  overdue: boolean;
-  requestDate: string;
-  technician?: string;
-  etaDate?: string;
+type TrackWO = Record<string, unknown> & {
+  id: string;
+  rawId: number;
+  woNumber: string;
+  machine: string;
+  symptoms: string;
+  status: "pending_assign" | "pending_accept" | "in_progress" | "pending_parts" | "pending_eval" | "completed";
+  overdue: boolean;
+  requestDate: string;
+  technician?: string;
+  etaDate?: string;
+  ratingScore?: number | null;
+  ratingComment?: string | null;
 };
 
 export default function RepairTrackingPage() {
@@ -57,7 +59,9 @@ export default function RepairTrackingPage() {
             })(),
             overdue: isRepairOverdue(row.estimated_completion_date, row.status),
             requestDate: row.created_at || "-",
-            technician: row.assigned_name || "-"
+            technician: row.assigned_name || "-",
+            ratingScore: row.rating_score != null && row.rating_score !== "" ? Number(row.rating_score) : null,
+            ratingComment: row.rating_comment != null ? String(row.rating_comment) : null,
           }));
           setData(mapped);
           setError(false);
@@ -78,18 +82,38 @@ export default function RepairTrackingPage() {
   const [comment, setComment] = useState("");
   const { showToast } = useToast();
 
-  const handleEvaluate = (wo: TrackWO) => {
-    setSelectedWo(wo);
-    setRating(5);
-    setComment("");
-    setEvalModalOpen(true);
-  };
-
-  const submitEvaluation = () => {
-    if (!selectedWo) return;
-    setData(prev => prev.map(w => w.id === selectedWo.id ? { ...w, status: "completed" } : w));
-    setEvalModalOpen(false);
-    showToast("success", "บันทึกการประเมินงานเรียบร้อยแล้ว");
+    const handleEvaluate = (wo: TrackWO) => {
+    setSelectedWo(wo);
+    setRating(wo.ratingScore && wo.ratingScore >= 1 && wo.ratingScore <= 5 ? wo.ratingScore : 5);
+    setComment(wo.ratingComment || "");
+    setEvalModalOpen(true);
+  };
+
+  const submitEvaluation = async () => {
+    if (!selectedWo) return;
+    try {
+      const res = await fetch("/api/v1/repair.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          action: "rate",
+          repair_id: selectedWo.rawId,
+          rating_score: rating,
+          rating_comment: comment,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json?.success === false) {
+        throw new Error(json?.error || "บันทึกการประเมินไม่สำเร็จ");
+      }
+      setData(prev => prev.map(w => w.id === selectedWo.id ? { ...w, status: "completed", ratingScore: rating, ratingComment: comment } : w));
+      setEvalModalOpen(false);
+      showToast("success", "บันทึกการประเมินงานเรียบร้อยแล้ว");
+    } catch (e: any) {
+      console.error("Submit evaluation error:", e);
+      showToast("error", e?.message || "บันทึกการประเมินไม่สำเร็จ");
+    }
   };
 
   const getStatusDisplay = (wo: TrackWO) => {
@@ -140,18 +164,29 @@ export default function RepairTrackingPage() {
       id: "actions",
       header: t("tbl.actions"),
       enableSorting: false,
-      cell: ({ row }: { row: { original: TrackWO } }) => {
-        const item = row.original;
-        return item.status === 'pending_eval' ? (
-          <Button size="sm" onClick={() => handleEvaluate(item)} className="gap-1.5">
-            <Star size={14} strokeWidth={2} aria-hidden="true" />
-            ประเมินผล
-          </Button>
-        ) : (
-          <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${item.rawId}`)}>
-            ดูรายละเอียด
-          </Button>
-        );
+            cell: ({ row }: { row: { original: TrackWO } }) => {
+        const item = row.original;
+        if (item.status === 'pending_eval' && !item.ratingScore) {
+          return (
+            <Button size="sm" onClick={() => handleEvaluate(item)} className="gap-1.5">
+              <Star size={14} strokeWidth={2} aria-hidden="true" />
+              ประเมินผล
+            </Button>
+          );
+        }
+        return (
+          <div className="flex items-center gap-2">
+            {item.ratingScore ? (
+              <span className="inline-flex items-center gap-1 text-sm text-[var(--cmms-warning)]" title="ประเมินแล้ว">
+                <Star size={14} strokeWidth={1.75} fill="currentColor" aria-hidden="true" />
+                {item.ratingScore}
+              </span>
+            ) : null}
+            <Button size="sm" variant="secondary" onClick={() => router.push(`/repair/view?id=${item.rawId}`)}>
+              ดูรายละเอียด
+            </Button>
+          </div>
+        );
       },
     },
   ];

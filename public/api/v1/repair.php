@@ -92,7 +92,7 @@ try {
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
-                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id WHERE r.id = ?');
+                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id) WHERE r.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
@@ -101,12 +101,13 @@ try {
                 echo json_encode($single[0]);
             } else {
                 // กรองตามเครื่อง: ?asset_code=A-PT-01 (ใช้หน้า scan — ประวัติซ่อมต่อเครื่อง)
+                $ratingJoin = ' LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id)';
                 if (!empty($_GET['asset_code'])) {
-                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id WHERE a.code = ? ORDER BY r.created_at DESC');
+                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin . ' WHERE a.code = ? ORDER BY r.created_at DESC');
                     $stmt->execute([(string)$_GET['asset_code']]);
                     $rows = $stmt->fetchAll();
                 } else {
-                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id ORDER BY r.created_at DESC');
+                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin . ' ORDER BY r.created_at DESC');
                     $rows = $stmt->fetchAll();
                 }
                 attachWorkTeams($rows, 'repair');
@@ -118,6 +119,49 @@ try {
             enforceCsrf();
 
             $data = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+            // ประเมินงานซ่อม (tracking) — บันทึกคะแนน/ความคิดเห็นลง repair_ratings
+            if (($data['action'] ?? '') === 'rate') {
+                requireLogin($pdo);
+                $rid = (int)($data['repair_id'] ?? 0);
+                $score = (int)($data['rating_score'] ?? 0);
+                $comment = trim((string)($data['rating_comment'] ?? ''));
+                if ($rid <= 0 || $score < 1 || $score > 5) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Invalid rating data', 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                $st = $pdo->prepare('SELECT id, status FROM repair WHERE id = ?');
+                $st->execute([$rid]);
+                $repairRow = $st->fetch();
+                if (!$repairRow) {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Repair not found', 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                $cu = currentUser($pdo);
+                $ratedBy = $cu['id'] ?? null;
+                $ex = $pdo->prepare('SELECT id FROM repair_ratings WHERE repair_id = ? ORDER BY id DESC LIMIT 1');
+                $ex->execute([$rid]);
+                $existingId = $ex->fetchColumn();
+                if ($existingId) {
+                    $u = $pdo->prepare('UPDATE repair_ratings SET rating_score = ?, rating_comment = ?, rated_by = ?, created_at = NOW() WHERE id = ?');
+                    $u->execute([$score, ($comment !== '' ? $comment : null), $ratedBy, $existingId]);
+                    $ratingId = (int)$existingId;
+                } else {
+                    $i = $pdo->prepare('INSERT INTO repair_ratings (repair_id, rating_score, rating_comment, rated_by) VALUES (?, ?, ?, ?)');
+                    $i->execute([$rid, $score, ($comment !== '' ? $comment : null), $ratedBy]);
+                    $ratingId = (int)$pdo->lastInsertId();
+                }
+                echo json_encode([
+                    'success' => true,
+                    'rating_id' => $ratingId,
+                    'repair_id' => $rid,
+                    'rating_score' => $score,
+                    'rating_comment' => $comment,
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
             if (empty($data['work_order_no'])) {
                 $data['work_order_no'] = generateWorkOrderNo($pdo);
             }
