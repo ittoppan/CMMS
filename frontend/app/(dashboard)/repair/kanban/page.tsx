@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { usePageHero, t } from "@/lib/i18n";
 import { normalizeRepairStatus, repairStatusLabel, repairStatusAndon, isRepairOverdue } from "@/lib/repair-status";
 import { Plus, RefreshCw, Search, ChevronRight, ChevronLeft, User, Inbox } from "lucide-react";
@@ -44,6 +45,7 @@ const priorityTone: Record<KanbanItem["priority"], string> = {
 
 export default function RepairKanbanPage() {
   const hero = usePageHero("repair/kanban");
+  const router = useRouter();
   const [items, setItems] = useState<KanbanItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -66,6 +68,12 @@ export default function RepairKanbanPage() {
 
   const persistStatus = async (item: KanbanItem, newStatus: KanbanItem["status"]) => {
     if (item.status === newStatus || savingId) return;
+    // การปิดงานต้องกรอกข้อมูล/ลายเซ็นผู้รับครบถ้วน — พาไปหน้าบันทึกงานเพื่อปิดอย่างถูกต้อง
+    if (newStatus === "completed") {
+      setMoveMsg({ kind: "ok", text: `เปิดหน้าบันทึกงานเพื่อปิด ${item.woNumber} (ต้องระบุสาเหตุ/วิธีแก้ไข ผลตรวจปนเปื้อน และลายเซ็นผู้แจ้งรับงาน)` });
+      router.push(`/repair/edit?id=${item.dbId}`);
+      return;
+    }
     const prevStatus = item.status;
     // optimistic update ก่อน — ย้ายการ์ดทันที
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
@@ -80,7 +88,7 @@ export default function RepairKanbanPage() {
       const json = await res.json();
       if (!res.ok || (!json.success && !json.message)) throw new Error(json.error || "บันทึกไม่สำเร็จ");
       setMoveMsg({ kind: "ok", text: `ย้าย ${item.woNumber} ไป "${columnsDef.find(c => c.key === newStatus)?.title ?? newStatus}" สำเร็จ` });
-      fetchKanban(); // ดึงใหม่ — ดึง completed_at/เวลาจริงจาก DB
+      fetchKanban(); // ดึงใหม่ — ดึงสถานะ/เวลาจริงจาก DB
     } catch (e: any) {
       console.error(e);
       // ย้อนกลับถ้าบันทึกไม่สำเร็จ

@@ -100,18 +100,94 @@ try {
                 attachWorkTeams($single, 'repair');
                 echo json_encode($single[0]);
             } else {
-                // กรองตามเครื่อง: ?asset_code=A-PT-01 (ใช้หน้า scan — ประวัติซ่อมต่อเครื่อง)
+                // รายการงานซ่อม (รองรับกรอง/แบ่งหน้าแบบ opt-in เพื่อความเข้ากันได้ย้อนหลัง)
                 $ratingJoin = ' LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id)';
+                $baseSelect = 'SELECT r.*, a.name AS asset_name, a.code AS asset_code, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin;
+                $baseCount = 'SELECT COUNT(*) FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id';
+
+                $where = [];
+                $params = [];
                 if (!empty($_GET['asset_code'])) {
-                    $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin . ' WHERE a.code = ? ORDER BY r.created_at DESC');
-                    $stmt->execute([(string)$_GET['asset_code']]);
-                    $rows = $stmt->fetchAll();
-                } else {
-                    $stmt = $pdo->query('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin . ' ORDER BY r.created_at DESC');
-                    $rows = $stmt->fetchAll();
+                    $where[] = 'a.code = ?';
+                    $params[] = (string)$_GET['asset_code'];
                 }
+                if (isset($_GET['status']) && $_GET['status'] !== '' && $_GET['status'] !== 'all') {
+                    $stFilter = strtolower(trim((string)$_GET['status']));
+                    // รองรับกลุ่มสถานะที่ UI ใช้บ่อย
+                    if ($stFilter === 'overdue') {
+                        $where[] = "r.estimated_completion_date IS NOT NULL AND r.estimated_completion_date < CURDATE() AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
+                    } elseif ($stFilter === 'open_active') {
+                        $where[] = "LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
+                    } elseif ($stFilter === 'completed_all') {
+                        $where[] = "LOWER(COALESCE(r.status,'')) IN ('completed','closed','resolved')";
+                    } else {
+                        $where[] = 'LOWER(COALESCE(r.status,"")) = ?';
+                        $params[] = $stFilter;
+                    }
+                }
+                if (!empty($_GET['assigned_to'])) {
+                    $where[] = 'r.assigned_to = ?';
+                    $params[] = (int)$_GET['assigned_to'];
+                }
+                if (!empty($_GET['created_from'])) {
+                    $where[] = 'DATE(r.created_at) >= ?';
+                    $params[] = (string)$_GET['created_from'];
+                }
+                if (!empty($_GET['created_to'])) {
+                    $where[] = 'DATE(r.created_at) <= ?';
+                    $params[] = (string)$_GET['created_to'];
+                }
+                if (!empty($_GET['q'])) {
+                    $q = trim((string)$_GET['q']);
+                    if ($q !== '') {
+                        $where[] = '(r.work_order_no LIKE ? OR r.title LIKE ? OR r.description LIKE ? OR a.name LIKE ? OR a.code LIKE ? OR u.full_name LIKE ?)';
+                        $like = '%' . $q . '%';
+                        array_push($params, $like, $like, $like, $like, $like, $like);
+                    }
+                }
+                $whereSql = $where ? (' WHERE ' . implode(' AND ', $where)) : '';
+                $orderSql = ' ORDER BY r.created_at DESC';
+
+                $hasLimit = isset($_GET['limit']) || isset($_GET['offset']) || isset($_GET['page']);
+                $wantTotal = isset($_GET['with_total']) || isset($_GET['paginate']);
+                $limit = isset($_GET['limit']) ? max(1, min(500, (int)$_GET['limit'])) : 0;
+                $offset = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
+                if (isset($_GET['page']) && $limit > 0) {
+                    $page = max(1, (int)$_GET['page']);
+                    $offset = ($page - 1) * $limit;
+                } elseif (isset($_GET['page']) && $limit === 0) {
+                    $limit = 50;
+                    $page = max(1, (int)$_GET['page']);
+                    $offset = ($page - 1) * $limit;
+                }
+
+                $total = null;
+                if ($wantTotal) {
+                    $cStmt = $pdo->prepare($baseCount . $whereSql);
+                    $cStmt->execute($params);
+                    $total = (int)$cStmt->fetchColumn();
+                }
+
+                $sql = $baseSelect . $whereSql . $orderSql;
+                if ($limit > 0) {
+                    $sql .= ' LIMIT ' . (int)$limit . ' OFFSET ' . (int)$offset;
+                }
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $rows = $stmt->fetchAll();
                 attachWorkTeams($rows, 'repair');
-                echo json_encode($rows);
+
+                // คงรูปแบบผลลัพธ์เดิม (array) เพื่อความเข้ากันได้; คืนรูปแบบ object เมื่อขอ with_total/paginate อย่างชัดเจน
+                if ($wantTotal) {
+                    echo json_encode([
+                        'items' => $rows,
+                        'total' => $total,
+                        'limit' => $limit > 0 ? $limit : null,
+                        'offset' => $limit > 0 ? $offset : 0,
+                    ], JSON_UNESCAPED_UNICODE);
+                } else {
+                    echo json_encode($rows);
+                }
             }
             break;
         case 'POST':
@@ -137,6 +213,12 @@ try {
                 if (!$repairRow) {
                     http_response_code(404);
                     echo json_encode(['error' => 'Repair not found', 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                $rStatus = strtolower(trim((string)($repairRow['status'] ?? '')));
+                if (!in_array($rStatus, ['completed', 'closed', 'resolved'], true)) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'สามารถประเมินได้เฉพาะงานที่ปิดงาน/เสร็จสิ้นแล้ว', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
                 $cu = currentUser($pdo);
@@ -571,6 +653,7 @@ try {
             }
             // ---- บังคับผลตรวจการปนเปื้อนและข้อมูลปิดงานก่อนปิดงานซ่อม ----
             $closingNow = ($newStatus === 'completed');
+            $newlyClosing = ($newStatus === 'completed' && $oldStatus !== 'completed' && $oldStatus !== 'closed');
             if ($closingNow) {
                 $cc = strtolower((string)($data['contaminate_checking'] ?? $curRow['contaminate_checking'] ?? 'not_checked'));
                 if (!in_array($cc, ['clean', 'contaminated', 'not_applicable'], true)) {
@@ -590,9 +673,9 @@ try {
                 if ($needRoot && $rc === '') $errs[] = 'ต้องระบุสาเหตุรากก่อนปิดงาน';
                 if ($sol === '') $errs[] = 'ต้องระบุวิธีแก้ไขก่อนปิดงาน';
                 if ($needFail && $fc <= 0) $errs[] = 'ต้องเลือกรหัสการเสีย (Failure Code) ก่อนปิดงาน';
-                // ผู้แจ้งต้องเซ็นรับจากช่างตอนปิดงาน
+                // ผู้แจ้งต้องเซ็นรับจากช่างตอนปิดงาน (บังคับเมื่อปิดงานครั้งแรก; ใบงานที่ปิดแล้วแบบเดิมที่ยังไม่มีลายเซ็นไม่บังคับย้อนหลังเมื่อแก้ไข)
                 $recvSig = trim((string)($data['receiver_signature_path'] ?? $cr['receiver_signature_path'] ?? ''));
-                if ($recvSig === '') $errs[] = 'ต้องมีลายเซ็นรับงานจากผู้แจ้งก่อนปิดงาน';
+                if ($newlyClosing && $recvSig === '') $errs[] = 'ต้องมีลายเซ็นรับงานจากผู้แจ้งก่อนปิดงาน';
                 if (function_exists('failure_repair_close_blockers')) {
                     $errs = array_merge($errs, failure_repair_close_blockers($pdo, $id));
                 }
