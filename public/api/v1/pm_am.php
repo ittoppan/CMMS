@@ -151,47 +151,64 @@ requireLogin($pdo);
                 $parentStmt = $pdo->prepare('SELECT * FROM pm_am WHERE id = ?');
                 $parentStmt->execute([$id]);
                 $parent = $parentStmt->fetch(PDO::FETCH_ASSOC);
-                if ($parent && !empty($parent['frequency_type'])) {
-                    $base = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
-                    $freq = $parent['frequency_type'];
-                    $interval = max(1, (int)($parent['frequency_interval'] ?: 1));
-                    $nextDue = match ($freq) {
-                        'daily'     => date('Y-m-d', strtotime("$base + $interval days")),
-                        'weekly'    => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
-                        'monthly'   => date('Y-m-d', strtotime("$base + $interval months")),
-                        'quarterly' => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
-                        'yearly'    => date('Y-m-d', strtotime("$base + $interval years")),
-                        default     => date('Y-m-d', strtotime("$base + $interval days")), // custom
-                    };
 
-                    // Dedup: มีรอบเดียวกัน (เครื่อง+ชื่อ) ที่ยังค้างอยู่แล้วไหม — กันสร้างซ้ำ
-                    $dup = $pdo->prepare("SELECT COUNT(*) FROM pm_am WHERE asset_id = ? AND title = ? AND status IN ('pending','in_progress')");
-                    $dup->execute([$parent['asset_id'], $parent['title']]);
-                    if ((int)$dup->fetchColumn() === 0) {
-                        $ins = $pdo->prepare(
-                            "INSERT INTO pm_am (asset_id, assigned_to, plan_id, title, description, frequency_type, frequency_interval, due_date, status, department_id, location_id, work_zone_id, created_at)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())"
-                        );
-                        $ins->execute([
-                            $parent['asset_id'],
-                            $parent['assigned_to'],
-                            $parent['plan_id'], // ลิงก์แม่ (ใช้ dedup/ติดตามรอบ)
-                            $parent['title'],
-                            $parent['description'],
-                            $freq,
-                            $interval,
-                            $nextDue,
-                            $parent['department_id'],
-                            $parent['location_id'],
-                            $parent['work_zone_id'],
-                        ]);
-                        // คัดลอกทีมผู้รับผิดชอบไปรอบถัดไปด้วย
-                        $newPmId = (int)$pdo->lastInsertId();
-                        $cpTeam = $pdo->prepare(
-                            "INSERT IGNORE INTO work_assignees (ref_type, ref_id, user_id, role, assigned_by, created_at)
-                             SELECT 'pm_am', ?, user_id, role, assigned_by, NOW() FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?"
-                        );
-                        $cpTeam->execute([$newPmId, $id]);
+                if ($parent) {
+                    $freq = (string)($parent['frequency_type'] ?? '');
+                    // PM ตามมิเตอร์: บันทึกค่ามิเตอร์ ณ ตอนปิดงานเป็น baseline (ถ้ามีข้อมูล) และไม่สร้างรอบถัดไปตามเวลา
+                    if ($freq === 'meter_based') {
+                        $meterReadingProvided = array_key_exists('meter_reading', $data) && $data['meter_reading'] !== '' && $data['meter_reading'] !== null;
+                        $pmMeterUnit = trim((string)($parent['meter_unit'] ?? ''));
+                        if (!$meterReadingProvided && $pmMeterUnit !== '' && !empty($parent['asset_id'])) {
+                            try {
+                                $mr = $pdo->prepare("SELECT value_numeric FROM asset_measurements WHERE asset_id = ? AND (parameter = ? OR unit = ?) ORDER BY measured_at DESC, id DESC LIMIT 1");
+                                $mr->execute([(int)$parent['asset_id'], $pmMeterUnit, $pmMeterUnit]);
+                                $latestM = $mr->fetchColumn();
+                                if ($latestM !== false && $latestM !== null) {
+                                    $pdo->prepare("UPDATE pm_am SET meter_reading = ? WHERE id = ?")->execute([(float)$latestM, $id]);
+                                }
+                            } catch (Exception $e) { /* ตาราง/คอลัมน์อาจไม่พร้อม */ }
+                        }
+                    } elseif ($freq !== '') {
+                        $base = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
+                        $interval = max(1, (int)($parent['frequency_interval'] ?: 1));
+                        $nextDue = match ($freq) {
+                            'daily'     => date('Y-m-d', strtotime("$base + $interval days")),
+                            'weekly'    => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
+                            'monthly'   => date('Y-m-d', strtotime("$base + $interval months")),
+                            'quarterly' => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
+                            'yearly'    => date('Y-m-d', strtotime("$base + $interval years")),
+                            default     => date('Y-m-d', strtotime("$base + $interval days")), // custom
+                        };
+
+                        // Dedup: มีรอบเดียวกัน (เครื่อง+ชื่อ) ที่ยังค้างอยู่แล้วไหม — กันสร้างซ้ำ
+                        $dup = $pdo->prepare("SELECT COUNT(*) FROM pm_am WHERE asset_id = ? AND title = ? AND status IN ('pending','in_progress')");
+                        $dup->execute([$parent['asset_id'], $parent['title']]);
+                        if ((int)$dup->fetchColumn() === 0) {
+                            $ins = $pdo->prepare(
+                                "INSERT INTO pm_am (asset_id, assigned_to, plan_id, title, description, frequency_type, frequency_interval, due_date, status, department_id, location_id, work_zone_id, created_at)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())"
+                            );
+                            $ins->execute([
+                                $parent['asset_id'],
+                                $parent['assigned_to'],
+                                $parent['plan_id'], // ลิงก์แม่ (ใช้ dedup/ติดตามรอบ)
+                                $parent['title'],
+                                $parent['description'],
+                                $freq,
+                                $interval,
+                                $nextDue,
+                                $parent['department_id'],
+                                $parent['location_id'],
+                                $parent['work_zone_id'],
+                            ]);
+                            // คัดลอกทีมผู้รับผิดชอบไปรอบถัดไปด้วย
+                            $newPmId = (int)$pdo->lastInsertId();
+                            $cpTeam = $pdo->prepare(
+                                "INSERT IGNORE INTO work_assignees (ref_type, ref_id, user_id, role, assigned_by, created_at)
+                                 SELECT 'pm_am', ?, user_id, role, assigned_by, NOW() FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?"
+                            );
+                            $cpTeam->execute([$newPmId, $id]);
+                        }
                     }
                 }
             }
