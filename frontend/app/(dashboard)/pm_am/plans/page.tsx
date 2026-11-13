@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Badge } from "@/components/ui/badge";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import AndonLamp from "@/components/AndonLamp";
 import {
@@ -21,6 +22,8 @@ import {
   CheckCircle2,
   PauseCircle,
   Layers,
+  Gauge,
+  ArrowRight,
 } from "lucide-react";
 
 interface PMPlan {
@@ -67,6 +70,39 @@ const planTypeLabels: Record<string, string> = {
   usage_based: "ตามการใช้งาน",
 };
 
+// สถานะ CBM รวมทั้งโรงงาน (จาก /api/v1/pm_plans.php?meters=1)
+interface CbmPlantRow {
+  plan_id: number;
+  plan_code: string | null;
+  plan_name: string | null;
+  asset_id: number;
+  asset_code: string | null;
+  asset_name: string | null;
+  meter_unit: string;
+  meter_interval: number;
+  status: "due" | "near" | "ok" | "no_reading" | "no_baseline";
+  current: number | null;
+  baseline: number | null;
+  target: number | null;
+  remaining: number | null;
+  used_pct: number | null;
+  open_pm_id: number | null;
+}
+
+interface CbmPlantResponse {
+  items: CbmPlantRow[];
+  summary: { pairs: number; due: number; near: number; ok: number; no_reading: number; no_baseline: number };
+  counts: number;
+}
+
+const cbmStatusUi: Record<string, { label: string; variant: "neutral" | "primary" | "success" | "warning" | "danger" | "info" }> = {
+  due: { label: "ถึงกำหนด/เกิน", variant: "danger" },
+  near: { label: "ใกล้ถึง (≥90%)", variant: "warning" },
+  ok: { label: "ยังไม่ถึง", variant: "success" },
+  no_reading: { label: "ยังไม่มีค่าวัด", variant: "neutral" },
+  no_baseline: { label: "ยังไม่มี baseline", variant: "info" },
+};
+
 const priorityStyle: Record<string, React.CSSProperties> = {
   low: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
   medium: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
@@ -93,6 +129,8 @@ export default function PMPlansPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cbm, setCbm] = useState<CbmPlantResponse | null>(null);
+  const [cbmOnlyActionable, setCbmOnlyActionable] = useState(true);
 
   const load = async () => {
     try {
@@ -108,6 +146,20 @@ export default function PMPlansPage() {
     }
   };
 
+  // CBM รวมทั้งโรงงาน — แยก fetch เพื่อไม่ให้กระทบรายการแผนถ้า endpoint นี้ผิดพลาด
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/pm_plans.php?meters=1", { credentials: "include" })
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive && Array.isArray(j?.items)) setCbm(j as CbmPlantResponse);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   useEffect(() => { load(); }, []);
 
   const filtered = plans.filter((p) =>
@@ -116,6 +168,10 @@ export default function PMPlansPage() {
 
   const activeCount = plans.filter((p) => p.status === "active" && p.is_active === 1).length;
   const dueSoonCount = plans.filter((p) => p.next_due && p.next_due <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)).length;
+
+  const cbmActionable = (cbm?.items || []).filter((r) => r.status === "due" || r.status === "near");
+  const cbmRows = cbmOnlyActionable ? cbmActionable : cbm?.items || [];
+  const cbmShown = cbmRows.slice(0, 8);
 
   if (!canShow("pm_am/plans")) {
     return <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่มีสิทธิ์เข้าถึง" description="โปรดติดต่อผู้ดูแลระบบ" />;
@@ -185,6 +241,87 @@ export default function PMPlansPage() {
         <div className="rounded-[10px] border p-4 text-sm font-medium" style={{ borderColor: "var(--cmms-danger)", background: "var(--cmms-danger-light)" }}>
           {error}
         </div>
+      )}
+
+      {/* CBM รวมทั้งโรงงาน — แผนตามมิเตอร์ที่ถึง/ใกล้ถึงเป้าหมาย */}
+      {cbm && cbm.summary.pairs > 0 && (
+        <Card>
+          <CardContent className="space-y-4 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="cmms-icon-tile"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" /></div>
+                <h4 className="font-bold">PM ตามมิเตอร์ (CBM)</h4>
+                <span className="cmms-count-pill">{cbm.summary.pairs} คู่เครื่อง×แผน</span>
+              </div>
+              <div className="flex gap-2">
+                <Button variant={cbmOnlyActionable ? "primary" : "outline"} size="sm" onClick={() => setCbmOnlyActionable(true)}>
+                  ต้องดำเนินการ {cbmActionable.length}
+                </Button>
+                <Button variant={cbmOnlyActionable ? "outline" : "primary"} size="sm" onClick={() => setCbmOnlyActionable(false)}>
+                  ทั้งหมด {cbm.summary.pairs}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                <p className="text-xs text-[var(--cmms-text-secondary)]">ถึงกำหนดแล้ว</p>
+                <p className="text-lg font-bold" style={{ color: cbm.summary.due > 0 ? "var(--cmms-danger)" : "var(--cmms-text-primary)" }}>{cbm.summary.due}</p>
+              </div>
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                <p className="text-xs text-[var(--cmms-text-secondary)]">ใกล้ถึง (≥90%)</p>
+                <p className="text-lg font-bold" style={{ color: cbm.summary.near > 0 ? "var(--cmms-warning-dark)" : "var(--cmms-text-primary)" }}>{cbm.summary.near}</p>
+              </div>
+              <div className="rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)" }}>
+                <p className="text-xs text-[var(--cmms-text-secondary)]">ยังไม่มีค่าวัด</p>
+                <p className="text-lg font-bold">{cbm.summary.no_reading + cbm.summary.no_baseline}</p>
+              </div>
+            </div>
+
+            {cbmShown.length === 0 ? (
+              <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">
+                ไม่มีแผนตามมิเตอร์ที่ถึงหรือใกล้ถึงเป้าหมาย
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {cbmShown.map((r) => {
+                  const ui = cbmStatusUi[r.status] || cbmStatusUi.ok;
+                  const unit = r.meter_unit || "";
+                  const fmt = (v: number | null) => (v != null ? `${v.toLocaleString("th-TH")} ${unit}`.trim() : "—");
+                  return (
+                    <div
+                      key={`${r.asset_id}-${r.plan_id}`}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
+                      style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold">{r.asset_code}{r.asset_name ? ` · ${r.asset_name}` : ""}</p>
+                        <p className="text-xs text-[var(--cmms-text-secondary)]">
+                          {r.plan_code ? `${r.plan_code} · ` : ""}{r.plan_name}
+                        </p>
+                        <p className="mt-1 text-xs text-[var(--cmms-text-muted)]">
+                          ปัจจุบัน {fmt(r.current)} · เป้าหมาย {fmt(r.target)} · คงเหลือ {fmt(r.remaining)}
+                          {r.used_pct != null ? ` · ใช้ไป ${r.used_pct}%` : ""}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <Badge variant={ui.variant} dot>{ui.label}</Badge>
+                        <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>
+                          เปิดแผน <ArrowRight size={13} strokeWidth={2} aria-hidden="true" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                {cbmRows.length > cbmShown.length && (
+                  <p className="text-center text-xs text-[var(--cmms-text-muted)]">
+                    แสดง {cbmShown.length} จาก {cbmRows.length} รายการ — ดูที่เหลือได้จากรายละเอียดแผน
+                  </p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       <Card>

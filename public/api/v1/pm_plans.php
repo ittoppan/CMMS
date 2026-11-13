@@ -86,9 +86,16 @@ requireLogin($pdo);
             $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([$today]);
             $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([$today]);
 
-            // ---- สถานะ CBM ตามมิเตอร์ของเครื่อง (?asset_id=N&meters=1) ----
-            if (!empty($_GET['asset_id']) && isset($_GET['meters'])) {
-                echo json_encode(pm_meter_asset_status($pdo, (int)$_GET['asset_id']), JSON_UNESCAPED_UNICODE);
+            // ---- สถานะ CBM ตามมิเตอร์: ?meters=1 (ทั้งโรงงาน) หรือ ?asset_id=N&meters=1 (รายเครื่อง) ----
+            if (isset($_GET['meters'])) {
+                if (!empty($_GET['asset_id'])) {
+                    echo json_encode(pm_meter_asset_status($pdo, (int)$_GET['asset_id']), JSON_UNESCAPED_UNICODE);
+                } else {
+                    echo json_encode(pm_meter_plant_status($pdo, [
+                        'only' => (string)($_GET['only'] ?? 'all'),
+                        'limit' => (int)($_GET['limit'] ?? 500),
+                    ]), JSON_UNESCAPED_UNICODE);
+                }
                 exit;
             }
 
