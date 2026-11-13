@@ -104,7 +104,7 @@ requireLogin($pdo);
                 $plan['planned_parts'] = $loadPlanParts($id);
 
                 // ประวัติรอบ PM ของแผนนี้ (พร้อมสถานะ + ชื่อช่าง)
-                $hist = $pdo->prepare("SELECT pm.id, pm.title, pm.due_date, pm.last_done_date, pm.status, pm.priority, pm.completed_at, u.full_name AS assigned_name, a.code AS asset_code, a.name AS asset_name,
+                $hist = $pdo->prepare("SELECT pm.id, pm.title, pm.due_date, pm.last_done_date, pm.status, pm.priority, pm.completed_at, pm.meter_reading, pm.meter_unit, u.full_name AS assigned_name, a.code AS asset_code, a.name AS asset_name,
                         (SELECT COUNT(*) FROM repair WHERE repair.pm_am_id = pm.id) AS wo_count
                      FROM pm_am pm LEFT JOIN users u ON u.id = pm.assigned_to LEFT JOIN asset_registry a ON a.id = pm.asset_id
                      WHERE pm.plan_id = ? ORDER BY pm.due_date DESC, pm.id DESC LIMIT 200");

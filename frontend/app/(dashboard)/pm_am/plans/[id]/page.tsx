@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +39,7 @@ export default function PMPlanViewPage() {
   const [actionMsg, setActionMsg] = useState("");
   const [actionErr, setActionErr] = useState("");
   const [busy, setBusy] = useState(false);
+  const [meterProgress, setMeterProgress] = useState<Record<number, { current: number | null; measuredAt?: string }>>({});
 
   const load = async () => {
     try {
@@ -99,6 +100,37 @@ export default function PMPlanViewPage() {
     }
   };
 
+
+  useEffect(() => {
+    if (!plan || plan.frequency_type !== "meter_based") return;
+    const unit = String(plan.meter_unit || "").trim();
+    const assets = Array.isArray(plan.assets) ? plan.assets : [];
+    if (!unit || assets.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        assets.map(async (a: any) => {
+          try {
+            const res = await fetch(`/api/v1/asset_measurements.php?asset_id=${a.id}`, { credentials: "include" });
+            const j = await res.json();
+            const rows = Array.isArray(j?.measurements) ? j.measurements : Array.isArray(j) ? j : [];
+            const m = rows.find((r: any) => String(r.parameter || "") === unit || String(r.unit || "") === unit) || rows[0];
+            const val = m && m.value_numeric !== undefined && m.value_numeric !== null && m.value_numeric !== "" ? Number(m.value_numeric) : null;
+            return [Number(a.id), { current: Number.isFinite(val as number) ? (val as number) : null, measuredAt: m?.measured_at }] as const;
+          } catch {
+            return [Number(a.id), { current: null }] as const;
+          }
+        })
+      );
+      if (!cancelled) {
+        const map: Record<number, { current: number | null; measuredAt?: string }> = {};
+        for (const [id, v] of entries) map[id] = v;
+        setMeterProgress(map);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [plan?.id, plan?.frequency_type, plan?.meter_unit, plan?.meter_interval, JSON.stringify((plan?.assets || []).map((a: any) => a.id))]);
+
   if (loading) return <p className="p-8 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>;
   if (error) return <div className="space-y-4 p-6"><Alert variant="danger" description={error} /><Button variant="secondary" onClick={() => router.push("/pm_am/plans")}><ArrowLeft size={16} aria-hidden="true" />กลับ</Button></div>;
   if (!plan) return null;
@@ -152,6 +184,12 @@ export default function PMPlanViewPage() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-[var(--cmms-text-secondary)]">ประเภท</p><p className="font-semibold">{plan.plan_type === "single" ? "เครื่องเดียว" : plan.plan_type === "group" ? "กลุ่มเครื่อง" : "ตามการใช้งาน"}</p></div>
                 <div><p className="text-[var(--cmms-text-secondary)]">ความถี่</p><p className="font-semibold">{freqLabels[plan.frequency_type] || plan.frequency_type}</p></div>
+                {plan.frequency_type === "meter_based" && (
+                  <>
+                    <div><p className="text-[var(--cmms-text-secondary)]">หน่วยมิเตอร์</p><p className="font-semibold">{plan.meter_unit || "-"}</p></div>
+                    <div><p className="text-[var(--cmms-text-secondary)]">รอบตามมิเตอร์</p><p className="font-semibold flex items-center gap-1"><Gauge size={13} aria-hidden="true" />{plan.meter_interval != null ? `${Number(plan.meter_interval).toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                  </>
+                )}
                 <div><p className="text-[var(--cmms-text-secondary)]">ความเร่งด่วน</p><p className="font-semibold capitalize">{plan.priority}</p></div>
                 <div><p className="text-[var(--cmms-text-secondary)]">ระยะเวลา</p><p className="flex items-center gap-1 font-semibold"><Timer size={13} aria-hidden="true" />{plan.estimated_duration_minutes ? `${plan.estimated_duration_minutes} นาที` : "-"}</p></div>
                 <div><p className="text-[var(--cmms-text-secondary)]">วันเริ่ม/สิ้นสุด</p><p className="font-semibold">{plan.start_date || "-"} {plan.end_date ? `→ ${plan.end_date}` : ""}</p></div>
@@ -194,6 +232,50 @@ export default function PMPlanViewPage() {
               ) : <p className="text-sm text-[var(--cmms-text-muted)]">ยังไม่มีเครื่องจักรในแผน</p>}
             </CardContent>
           </Card>
+
+          {plan.frequency_type === "meter_based" && (
+            <Card>
+              <CardContent className="space-y-3 p-5">
+                <h4 className="flex items-center gap-2 font-bold"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" />ความคืบหน้าตามมิเตอร์</h4>
+                <p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                  เป้าหมายรอบถัดไป = baseline (ค่ามิเตอร์ที่บันทึกตอนปิดรอบล่าสุดของเครื่อง/แผน) + {plan.meter_interval != null ? Number(plan.meter_interval).toLocaleString("th-TH") : "-"} {plan.meter_unit || ""}
+                </p>
+                {plan.assets?.length ? (
+                  <div className="space-y-2">
+                    {plan.assets.map((a: any) => {
+                      const cur = meterProgress[a.id]?.current;
+                      const completed = (plan.history || []).filter((h: any) => h.status === "completed" && (h.asset_code === a.code || String(h.asset_name || "").includes(a.name)));
+                      const lastWithMeter = [...completed].reverse().find((h: any) => h.meter_reading !== null && h.meter_reading !== undefined && h.meter_reading !== "") || completed[completed.length - 1];
+                      const baseline = lastWithMeter && lastWithMeter.meter_reading !== null && lastWithMeter.meter_reading !== undefined && lastWithMeter.meter_reading !== "" ? Number(lastWithMeter.meter_reading) : null;
+                      const interval = plan.meter_interval != null ? Number(plan.meter_interval) : null;
+                      const target = baseline != null && interval != null ? baseline + interval : null;
+                      const remaining = cur != null && target != null ? target - cur : null;
+                      const due = remaining != null ? remaining <= 0 : false;
+                      return (
+                        <div key={a.id} className="rounded-lg border p-3 text-sm" style={{ borderColor: "var(--cmms-border)" }}>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-semibold"><span className="font-bold">{a.code}</span> {a.name}</span>
+                            {target != null && cur != null && (
+                              <span className="cmms-andon-chip" style={due ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger)" } : { background: "var(--cmms-success-light)", color: "var(--cmms-success, #059669)" }}>
+                                {due ? "ถึงกำหนด/เกิน" : "ยังไม่ถึง"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>ค่าปัจจุบัน</p><p className="font-semibold">{cur != null ? `${cur.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "ไม่มีข้อมูล"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>Baseline ล่าสุด</p><p className="font-semibold">{baseline != null ? `${baseline.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>เป้าหมาย</p><p className="font-semibold">{target != null ? `${target.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>คงเหลือ</p><p className="font-semibold" style={{ color: remaining != null && remaining <= 0 ? "var(--cmms-danger)" : undefined }}>{remaining != null ? `${remaining.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                          </div>
+                          {meterProgress[a.id]?.measuredAt && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>วัดล่าสุด: {String(meterProgress[a.id]?.measuredAt).replace("T", " ").slice(0, 16)}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : <p className="text-sm text-[var(--cmms-text-muted)]">ยังไม่มีเครื่องจักรในแผน</p>}
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardContent className="space-y-2 p-5">
@@ -274,8 +356,11 @@ export default function PMPlanViewPage() {
                               <FilePlus2 size={12} aria-hidden="true" /> {woCount} WO
                             </span>
                           )}
-                          <span className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                          <span className="text-xs text-right" style={{ color: "var(--cmms-text-secondary)" }}>
                             ครบ: {h.due_date || "-"}{h.status === "completed" ? ` · เสร็จ: ${(h.completed_at || "").slice(0, 10)}` : ""}
+                            {(h.meter_reading !== null && h.meter_reading !== undefined && h.meter_reading !== "") && (
+                              <> · มิเตอร์: {Number(h.meter_reading).toLocaleString("th-TH")} {h.meter_unit || plan.meter_unit || ""}</>
+                            )}
                           </span>
                           <button
                             type="button"
