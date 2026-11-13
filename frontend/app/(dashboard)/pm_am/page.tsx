@@ -42,6 +42,9 @@ interface PMTask extends Record<string, unknown> {
   isOutsource?: boolean;
   outsourceBy?: string;
   costOutsource?: number;
+  meterUnit?: string;
+  meterReading?: number | string | null;
+  meterInterval?: number | string | null;
 }
 
 const statusChipStyle: Record<string, React.CSSProperties> = {
@@ -103,6 +106,9 @@ export default function PMSchedulePage() {
           isOutsource: !!Number(row.is_outsource),
           outsourceBy: row.outsource_by || "",
           costOutsource: Number(row.cost_outsource) || 0,
+          meterUnit: row.meter_unit || "",
+          meterReading: row.meter_reading ?? null,
+          meterInterval: row.meter_interval ?? null,
         }));
         setTasks(fetched);
       }
@@ -244,11 +250,25 @@ export default function PMSchedulePage() {
     {
       accessorKey: "frequency",
       header: t("tbl.frequency"),
-      cell: ({ row }: { row: { original: PMTask } }) => (
-        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-          {t("freq." + (row.original.frequency || ""))}
-        </span>
-      ),
+      cell: ({ row }: { row: { original: PMTask } }) => {
+        const isMeter = row.original.frequency === "meter_based" || !!row.original.meterUnit;
+        const meterLabel = row.original.meterInterval != null && row.original.meterInterval !== ""
+          ? `${Number(row.original.meterInterval).toLocaleString("th-TH")} ${row.original.meterUnit || ""}`
+          : (row.original.meterUnit || "");
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="cmms-andon-chip w-fit" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
+              {t("freq." + (row.original.frequency || ""))}
+            </span>
+            {isMeter && (
+              <span className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                {meterLabel ? `รอบ ${meterLabel}` : "ตามมิเตอร์"}
+                {(row.original.meterReading !== null && row.original.meterReading !== undefined && row.original.meterReading !== "") ? ` · บันทึก ${Number(row.original.meterReading).toLocaleString("th-TH")} ${row.original.meterUnit || ""}` : ""}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     { accessorKey: "nextDue", header: t("tbl.due_date") },
     {
