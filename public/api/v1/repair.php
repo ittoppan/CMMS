@@ -207,7 +207,7 @@ try {
                     echo json_encode(['error' => 'Invalid rating data', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
-                $st = $pdo->prepare('SELECT id, status FROM repair WHERE id = ?');
+                $st = $pdo->prepare('SELECT id, status, created_by, work_order_no FROM repair WHERE id = ?');
                 $st->execute([$rid]);
                 $repairRow = $st->fetch();
                 if (!$repairRow) {
@@ -223,17 +223,37 @@ try {
                 }
                 $cu = currentUser($pdo);
                 $ratedBy = $cu['id'] ?? null;
-                $ex = $pdo->prepare('SELECT id FROM repair_ratings WHERE repair_id = ? ORDER BY id DESC LIMIT 1');
+                $createdBy = isset($repairRow['created_by']) ? (int)$repairRow['created_by'] : 0;
+                $canRate = false;
+                if (function_exists('canSupervisor') && canSupervisor()) $canRate = true;
+                if ($ratedBy && $createdBy > 0 && (int)$ratedBy === $createdBy) $canRate = true;
+                if ($createdBy <= 0 && $ratedBy) $canRate = true; // ผู้แจ้งสาธารณะ/ไม่ระบุตัวตนผู้สร้าง — อนุญาตผู้ใช้ที่ล็อกอิน
+                if (!$canRate) {
+                    http_response_code(403);
+                    echo json_encode(['error' => 'ไม่มีสิทธิ์ประเมินงานนี้', 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+                $ex = $pdo->prepare('SELECT id, rating_score, rating_comment FROM repair_ratings WHERE repair_id = ? ORDER BY id DESC LIMIT 1');
                 $ex->execute([$rid]);
-                $existingId = $ex->fetchColumn();
+                $existing = $ex->fetch(PDO::FETCH_ASSOC);
+                $existingId = $existing ? (int)$existing['id'] : 0;
                 if ($existingId) {
                     $u = $pdo->prepare('UPDATE repair_ratings SET rating_score = ?, rating_comment = ?, rated_by = ?, created_at = NOW() WHERE id = ?');
                     $u->execute([$score, ($comment !== '' ? $comment : null), $ratedBy, $existingId]);
-                    $ratingId = (int)$existingId;
+                    $ratingId = $existingId;
                 } else {
                     $i = $pdo->prepare('INSERT INTO repair_ratings (repair_id, rating_score, rating_comment, rated_by) VALUES (?, ?, ?, ?)');
                     $i->execute([$rid, $score, ($comment !== '' ? $comment : null), $ratedBy]);
                     $ratingId = (int)$pdo->lastInsertId();
+                }
+                // บันทึกกิจกรรมการประเมิน (ถ้ามีตาราง)
+                try {
+                    $oldVal = $existing ? (($existing['rating_score'] ?? '') . '|' . ($existing['rating_comment'] ?? '')) : '';
+                    $newVal = $score . '|' . $comment;
+                    $pdo->prepare('INSERT INTO repair_activity_log (repair_id, user_id, action, description, old_value, new_value, created_at) VALUES (?,?,?,?,?,?,NOW())')
+                        ->execute([$rid, $ratedBy, $existingId ? 'rating_updated' : 'rating_created', 'บันทึกการประเมินงานซ่อม', $oldVal, $newVal]);
+                } catch (Exception $e) {
+                    // ไม่บล็อกการบันทึกคะแนนหากบันทึก log ไม่สำเร็จ
                 }
                 echo json_encode([
                     'success' => true,

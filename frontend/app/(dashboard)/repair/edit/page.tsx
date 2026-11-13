@@ -71,6 +71,7 @@ interface RepairData {
   completed_at: string;
   machine_status: string;
   product_lot_no: string;
+  updated_at?: string;
 }
 
 function EditWorkOrderContent() {
@@ -87,6 +88,7 @@ function EditWorkOrderContent() {
   const iv = useInlineValidation();
   const [submitted, setSubmitted] = useState(false);
   const [woData, setWoData] = useState<RepairData | null>(null);
+  const [woUpdatedAt, setWoUpdatedAt] = useState<string | null>(null);
 
   // Technician fields
   const [rootCause, setRootCause] = useState("");
@@ -141,6 +143,7 @@ function EditWorkOrderContent() {
       .then((json: RepairData) => {
         if (json && !(json as any).error) {
           setWoData(json);
+          setWoUpdatedAt(json.updated_at || null);
           setRootCause(json.root_cause || "");
           setMaintenanceDesc(json.solution || json.resolution || "");
           setMaintenanceNote(json.notes || "");
@@ -297,6 +300,7 @@ function EditWorkOrderContent() {
       };
       if (receiverName) payload.receiver_name = receiverName;
       if (receiverSignature) payload.receiver_signature_path = receiverSignature;
+      if (woUpdatedAt) payload.base_updated_at = woUpdatedAt;
 
       const res = await fetch(`/api/v1/repair.php?id=${woId}`, {
         method: "PUT",

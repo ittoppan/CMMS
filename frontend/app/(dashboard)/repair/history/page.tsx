@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { t, statusText } from "@/lib/i18n";
+import { normalizeRepairStatus } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -57,11 +58,16 @@ export default function RepairHistoryPage() {
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/v1/repair.php");
+      // ดึงเฉพาะงานที่ปิดแล้วเมื่อ API รองรับ เพื่อลดปริมาณข้อมูล (fallback: กรองฝั่ง client)
+      const res = await fetch("/api/v1/repair.php?status=completed_all");
       const json = await res.json();
-      if (Array.isArray(json)) {
-        const fetched = json
-          .filter((row: any) => !row.status || CLOSED_STATUSES.includes(row.status))
+      const rows = Array.isArray(json) ? json : (Array.isArray(json?.items) ? json.items : []);
+      if (Array.isArray(rows)) {
+        const fetched = rows
+          .filter((row: any) => {
+            const k = normalizeRepairStatus(row.status);
+            return !row.status || CLOSED_STATUSES.includes(k) || CLOSED_STATUSES.includes(String(row.status || "").toLowerCase());
+          })
           .map((row: any) => ({
             rawId: row.id,
             id: `wo-${row.id}`,
