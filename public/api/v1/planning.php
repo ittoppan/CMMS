@@ -453,7 +453,17 @@ function apiAssignCheck(PDO $pdo): void {
     $duration = max(15, min(1440, $duration));
 
     $end = date('Y-m-d H:i:s', $dueTs);
-    $start = date('Y-m-d H:i:s', $dueTs - $duration * 60);
+    // ถ้าผู้จ่ายงานระบุเวลาเริ่มจริง ใช้ช่วงนั้นตรวจ (แม่นกว่า) — ไม่เช่นนั้นประมาณจากระยะงานก่อนถึงกำหนด
+    $startRaw = trim((string)($_GET['start_at'] ?? ''));
+    $startTs = $startRaw !== '' ? strtotime(str_replace('T', ' ', $startRaw)) : false;
+    $windowSource = 'estimated';
+    if ($startTs !== false && $startTs < $dueTs) {
+        $start = date('Y-m-d H:i:s', $startTs);
+        $duration = max(15, (int)round(($dueTs - $startTs) / 60));
+        $windowSource = 'planned';
+    } else {
+        $start = date('Y-m-d H:i:s', $dueTs - $duration * 60);
+    }
 
     $teamIds = array_values(array_unique(array_filter(
         array_map('intval', explode(',', (string)($_GET['team_ids'] ?? ''))),
@@ -502,7 +512,7 @@ function apiAssignCheck(PDO $pdo): void {
     ] : null;
 
     echo json_encode([
-        'window'        => ['start' => $start, 'end' => $end, 'duration_minutes' => $duration],
+        'window'        => ['start' => $start, 'end' => $end, 'duration_minutes' => $duration, 'source' => $windowSource],
         'date'          => $day->format('Y-m-d'),
         'user'          => ['id' => $techId, 'name' => pln_name($pdo, $techId)],
         'conflicts'     => $conflicts,
