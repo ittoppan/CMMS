@@ -422,6 +422,95 @@ function plnGetTechnicians(PDO $pdo): void {
 }
 
 /** ความขัดแย้งของแผนในหน้าต่าง (default: สัปดาห์นี้) */
+/**
+ * GET assign_check — พรีวิวก่อนจ่ายงาน ให้หน้า /repair/assign เตือน
+ * (งานชนเวลา + ภาระงานที่มีอยู่ + กำลังคนของวันครบกำหนด) — เตือนเทานั้น ไม่บล็อกการบันทึก
+ *
+ * params: technician_id (บังคับ), due_at (บังคับ), work_order_id?, team_ids?, duration_minutes?, asset_id?
+ * ใช้สูตรเดิมทั้งหมด: pln_detect_conflicts() + pln_technician_workload() (ไม่สร้างกฏช้ำ)
+ */
+function apiAssignCheck(PDO $pdo): void {
+    requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
+    $techId = (int)($_GET['technician_id'] ?? 0);
+    if ($techId <= 0) { http_response_code(400); echo json_encode(['error' => 'ต้องระบุ technician_id'], JSON_UNESCAPED_UNICODE); exit; }
+
+    $dueRaw = trim((string)($_GET['due_at'] ?? ''));
+    $dueTs = $dueRaw !== '' ? strtotime(str_replace('T', ' ', $dueRaw)) : false;
+    if ($dueTs === false) { http_response_code(400); echo json_encode(['error' => 'ต้องระบุ due_at (Y-m-d H:i:s)'], JSON_UNESCAPED_UNICODE); exit; }
+
+    $woId = (int)($_GET['work_order_id'] ?? 0);
+    $wo = null;
+    if ($woId > 0) {
+        $st = $pdo->prepare('SELECT id, work_order_no, asset_id, priority, estimated_duration_minutes FROM repair WHERE id = ? LIMIT 1');
+        $st->execute([$woId]);
+        $wo = $st->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    // หน้าต่างพรีวิว: ระยะงานที่ส่งมา → ค่าประมาณของใบงาน → 60 นาที (ใช้ตรวจชนเวลาเท่านั้น ไม่ได้บันทึกลง DB)
+    $duration = (int)($_GET['duration_minutes'] ?? 0);
+    if ($duration <= 0 && $wo) $duration = (int)($wo['estimated_duration_minutes'] ?? 0);
+    if ($duration <= 0) $duration = 60;
+    $duration = max(15, min(1440, $duration));
+
+    $end = date('Y-m-d H:i:s', $dueTs);
+    $start = date('Y-m-d H:i:s', $dueTs - $duration * 60);
+
+    $teamIds = array_values(array_unique(array_filter(
+        array_map('intval', explode(',', (string)($_GET['team_ids'] ?? ''))),
+        fn($v) => $v > 0
+    )));
+    $userIds = array_values(array_unique(array_merge([$techId], $teamIds)));
+    $assetId = (int)($_GET['asset_id'] ?? 0) ?: (int)($wo['asset_id'] ?? 0);
+
+    $conflicts = pln_detect_conflicts($pdo, $start, $end, $userIds, $woId, $assetId ?: null);
+
+    // งานที่ช่างมีอยู่แล้วและครบกำหนดไม่เกินเวลานี้ — ให้ผู้จ่ายงานเห็นภาระจริง (แม้งานยังไม่มีรอบเวลา)
+    $active = pln_active_statuses();
+    $in = implode(',', array_fill(0, count($active), '?'));
+    $st = $pdo->prepare("SELECT r.id, r.work_order_no, r.title, r.status, r.priority,
+                                r.planned_start_at, r.planned_end_at,
+                                COALESCE(r.sla_due_at, r.estimated_completion_date) AS due_at
+                         FROM repair r
+                         WHERE r.id != ? AND r.status IN ($in)
+                           AND (r.assigned_to = ? OR EXISTS (
+                                 SELECT 1 FROM work_assignees wa WHERE wa.ref_type = 'repair' AND wa.ref_id = r.id AND wa.user_id = ?))
+                           AND COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL
+                           AND COALESCE(r.sla_due_at, r.estimated_completion_date) <= ?
+                         ORDER BY COALESCE(r.sla_due_at, r.estimated_completion_date) ASC
+                         LIMIT 8");
+    $st->execute(array_merge([$woId], $active, [$techId, $techId, $end]));
+    $jobs = [];
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $ps = (string)($row['planned_start_at'] ?? '');
+        $pe = (string)($row['planned_end_at'] ?? '');
+        $row['id'] = (int)$row['id'];
+        $row['overlaps_window'] = $ps !== '' && $ps < $end && ($pe !== '' ? $pe : $ps) > $start;
+        $jobs[] = $row;
+    }
+
+    // กำลังคนของวันครบกำหนด — สูตรเดียวกับหน้า Planning Center / Workforce
+    $day = new DateTime(date('Y-m-d 00:00:00', $dueTs));
+    $next = (clone $day)->modify('+1 day');
+    $wl = pln_technician_workload($pdo, $day, $next);
+    $cap = $wl[$techId] ?? null;
+    $capacity = $cap ? [
+        'assigned_minutes' => (int)$cap['assigned_minutes'],
+        'total_minutes'    => (int)$cap['total_minutes'],
+        'utilization'      => (int)$cap['utilization'],
+        'active_jobs'      => (int)$cap['active_jobs'],
+        'overloaded'       => (int)$cap['utilization'] >= 100,
+    ] : null;
+
+    echo json_encode([
+        'window'        => ['start' => $start, 'end' => $end, 'duration_minutes' => $duration],
+        'date'          => $day->format('Y-m-d'),
+        'user'          => ['id' => $techId, 'name' => pln_name($pdo, $techId)],
+        'conflicts'     => $conflicts,
+        'existing_jobs' => $jobs,
+        'capacity'      => $capacity,
+    ], JSON_UNESCAPED_UNICODE);
+}
+
 function apiGetConflicts(PDO $pdo): void {
     requireRole(canPlanWork(), 'เฉพาะผู้วางแผน/หัวหน้างาน');
     $cfg = pln_config($pdo);
@@ -875,6 +964,7 @@ try {
                 case 'calendar':        apiGetCalendar($pdo); break;
                 case 'technicians':     plnGetTechnicians($pdo); break;
                 case 'conflicts':       apiGetConflicts($pdo); break;
+                case 'assign_check':    apiAssignCheck($pdo); break;
                 case 'readiness':       apiGetReadiness($pdo); break;
                 case 'duration_history': apiGetDurationHistory($pdo); break;
                 case 'schedule_log':    apiGetScheduleLog($pdo); break;

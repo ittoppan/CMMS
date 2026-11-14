@@ -312,6 +312,63 @@ export function getReadiness(id: number): Promise<ReadinessResponse> {
   return apiJson<ReadinessResponse>(`${PLANNING_API}?action=readiness&id=${id}`);
 }
 
+export interface AssignCheckConflict {
+  type: "technician" | "asset" | "pm" | string;
+  user_id: number;
+  user_name: string;
+  wo: { id: number; work_order_no: string; title: string };
+  overlap_from: string;
+  overlap_to: string;
+  severity: string;
+}
+
+export interface AssignCheckJob {
+  id: number;
+  work_order_no: string;
+  title: string;
+  status: string;
+  priority: string;
+  planned_start_at: string | null;
+  planned_end_at: string | null;
+  due_at: string | null;
+  overlaps_window: boolean;
+}
+
+export interface AssignCheckResponse {
+  window: { start: string; end: string; duration_minutes: number };
+  date: string;
+  user: { id: number; name: string };
+  conflicts: AssignCheckConflict[];
+  existing_jobs: AssignCheckJob[];
+  capacity: {
+    assigned_minutes: number;
+    total_minutes: number;
+    utilization: number;
+    active_jobs: number;
+    overloaded: boolean;
+  } | null;
+}
+
+/**
+ * พรีวิวก่อนจ่ายงาน: งานชนเวลา (ช่าง/ทีม/เครื่องเดียวกัน) + ภาระงานที่มีอยู่ + กำลังคนของวันครบกำหนด
+ * ใช้ในหน้า /repair/assign เพื่อเตือน — ไม่บล็อกการบันทึก
+ */
+export function getAssignCheck(params: {
+  technician_id: number;
+  due_at: string;
+  work_order_id?: number;
+  team_ids?: number[];
+  duration_minutes?: number;
+  asset_id?: number;
+}): Promise<AssignCheckResponse> {
+  const qs = new URLSearchParams({ action: "assign_check", technician_id: String(params.technician_id), due_at: params.due_at });
+  if (params.work_order_id) qs.set("work_order_id", String(params.work_order_id));
+  if (params.team_ids && params.team_ids.length) qs.set("team_ids", params.team_ids.join(","));
+  if (params.duration_minutes) qs.set("duration_minutes", String(params.duration_minutes));
+  if (params.asset_id) qs.set("asset_id", String(params.asset_id));
+  return apiJson<AssignCheckResponse>(`${PLANNING_API}?${qs.toString()}`);
+}
+
 export function getDurationHistory(id: number): Promise<DurationHistoryResponse> {
   return apiJson<DurationHistoryResponse>(`${PLANNING_API}?action=duration_history&id=${id}`);
 }
