@@ -168,6 +168,8 @@ export interface CenterResponse {
   scheduled_today: number;
   conflicts: ConflictItem[];
   workload: WorkloadItem[];
+  /** ภาระงาน PM/AM ที่ยังไม่เป็นใบงาน (อ่านจาก pm_am.due_date) */
+  pm_due?: { overdue: number; next7: number; next30: number };
   can: { plan: boolean; role_id: number };
 }
 
@@ -186,7 +188,18 @@ export interface CalendarResponse {
   to: string;
   items: PlanningWo[];
   workload: WorkloadItem[];
+  /** รอบ PM/AM ที่ครบกำหนดในช่วงนี้แต่ยังไม่มีใบงาน (อ่านอย่างเดียว) */
+  pm_due?: PmDueItem[];
   can: { plan: boolean; role_id: number };
+}
+
+export interface PmDueItem {
+  id: number;
+  title: string;
+  due_date: string;
+  priority: string;
+  asset_code: string | null;
+  asset_name: string | null;
 }
 
 export interface TechniciansResponse {

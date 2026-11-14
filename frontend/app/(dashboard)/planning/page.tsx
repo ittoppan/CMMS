@@ -62,6 +62,9 @@ import {
   CheckSquare,
   ClipboardCheck,
   Wrench,
+  CalendarClock,
+  Layers,
+  GitCompareArrows,
 } from "lucide-react";
 
 const GROUP_ORDER: PlanGroup[] = ["new_request", "unplanned", "unscheduled", "scheduled", "at_risk", "overdue"];
@@ -568,6 +571,15 @@ export default function PlanningCenterPage() {
         </Alert>
       )}
 
+      {center && (center.pm_due?.overdue ?? 0) > 0 && (
+        <Alert variant="warning">
+          <AlertTriangle className="h-4 w-4" />
+          รอบ PM/AM เกินกำหนด {center.pm_due?.overdue} รอบที่ยังไม่เปิดใบงาน — เปิดงานจาก{" "}
+          <Link href="/pm_am/plans" className="font-semibold underline">แผน PM/AM</Link>{" "}
+          เพื่อให้เข้าระบบวางแผน (มีกำหนดส่งตามรอบแล้ว)
+        </Alert>
+      )}
+
       <Alert variant="info">
         <div className="space-y-1 text-sm">
           <p>
@@ -578,6 +590,36 @@ export default function PlanningCenterPage() {
           </p>
         </div>
       </Alert>
+
+      {/* เส้นทางวางแผนทั้งวงจร — หน้าอื่นที่ต้องใช้คู่กัน */}
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="flex items-center gap-2 text-base"><Layers className="h-5 w-5" /> เส้นทางวางแผนซ่อมบำรุง</CardTitle>
+          <p className="text-xs text-[var(--cmms-text-muted)]">
+            คำขอ → อนุมัติเป็นใบงาน → วางรอบเวลา/มอบหมาย (หน้านี้) → กำลังคนและความขัดแย้ง → ลงมือทำ → PM รอบถัดไป
+          </p>
+        </CardHeader>
+        <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <Link href="/planning/calendar" className="rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-[var(--cmms-bg-wash)]">
+            <p className="flex items-center gap-2 text-sm font-semibold"><CalendarClock className="h-4 w-4" /> ปฏิทินวางแผน</p>
+            <p className="mt-0.5 text-xs text-[var(--cmms-text-secondary)]">ดูรอบเวลารายวัน/สัปดาห์/เดือน และจุดชนกัน</p>
+          </Link>
+          <Link href="/pm_am/plans" className="rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-[var(--cmms-bg-wash)]">
+            <p className="flex items-center gap-2 text-sm font-semibold"><CalendarDays className="h-4 w-4" /> แผน PM/AM</p>
+            <p className="mt-0.5 text-xs text-[var(--cmms-text-secondary)]">
+              รอบป้องกันที่ยังไม่เป็นใบงาน: ครบกำหนด 7 วัน {center?.pm_due?.next7 ?? "—"} · เกินกำหนด {center?.pm_due?.overdue ?? "—"}
+            </p>
+          </Link>
+          <Link href="/workforce/capacity" className="rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-[var(--cmms-bg-wash)]">
+            <p className="flex items-center gap-2 text-sm font-semibold"><Users2 className="h-4 w-4" /> กำลังคน (capacity)</p>
+            <p className="mt-0.5 text-xs text-[var(--cmms-text-secondary)]">ชั่วโมงว่างจริงตามกะ/ลา/ใบรับรอง ก่อนมอบหมาย</p>
+          </Link>
+          <Link href="/workforce/conflicts" className="rounded-lg border border-border px-3 py-2.5 transition-colors hover:bg-[var(--cmms-bg-wash)]">
+            <p className="flex items-center gap-2 text-sm font-semibold"><GitCompareArrows className="h-4 w-4" /> ความขัดแย้งกำลังคน</p>
+            <p className="mt-0.5 text-xs text-[var(--cmms-text-secondary)]">งานชนกัน/คนเดียวกันถูกจองซ้อน ในมุมกำลังคน</p>
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Workload strip */}
       <Card>
