@@ -83,6 +83,16 @@ const stockBadge: Record<string, { label: string; variant: "success" | "warning"
 
 const PAGE_SIZE = 15;
 
+const SORT_OPTIONS = [
+  { value: "newest", label: "ใหม่ล่าสุด" },
+  { value: "stock_asc", label: "คงเหลือน้อย → มาก" },
+  { value: "stock_desc", label: "คงเหลือมาก → น้อย" },
+  { value: "value_desc", label: "มูลค่าคงคลังสูงสุด" },
+  { value: "price_desc", label: "ราคาต่อหน่วยสูงสุด" },
+  { value: "name_asc", label: "ชื่อ ก → ฮ" },
+  { value: "updated", label: "อัปเดตล่าสุด" },
+];
+
 function getCsrfToken(): string | null {
   if (typeof document === "undefined") return null;
   const v = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/)?.[1] ?? null;
@@ -236,6 +246,8 @@ function ItemsCard({
   setSageTypeFilter,
   page,
   setPage,
+  sort,
+  setSort,
   onEdit,
   onDelete,
   onRefresh,
@@ -250,6 +262,8 @@ function ItemsCard({
   setSageTypeFilter: (v: string) => void;
   page: number;
   setPage: (v: number) => void;
+  sort: string;
+  setSort: (v: string) => void;
   onEdit: (item: SparePart) => void;
   onDelete: (item: SparePart) => void;
   onRefresh: () => void;
@@ -423,6 +437,21 @@ function ItemsCard({
                 <SelectItem value="Raw Materials">วัตถุดิบการผลิต</SelectItem>
                 <SelectItem value="Consumables">วัสดุสิ้นเปลือง</SelectItem>
                 <SelectItem value="Tools">เครื่องมือช่าง</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-full sm:w-[210px]">
+            <Select
+              value={sort}
+              onValueChange={(v) => { setSort(v); setPage(1); }}
+            >
+              <SelectTrigger aria-label="เรียงลำดับรายการอะไหล่" className="w-full">
+                <SelectValue placeholder="เรียงลำดับ" />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -633,7 +662,10 @@ export default function SparePartsPage() {
   const [search, setSearch] = useState("");
   const [sageTypeFilter, setSageTypeFilter] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
+  // อ่าน state จาก URL ครั้งแรก (แชร์ลิงก์/กดย้อนกลับ/รีเฟรชไม่หลุดบริบท) — ต้องรอให้อ่านก่อนค่อยยิง API
+  const [urlReady, setUrlReady] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<SparePart | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -663,13 +695,14 @@ export default function SparePartsPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const fetchParts = async (opts?: { p?: number; q?: string; sage?: string; tab?: string }) => {
+  const fetchParts = async (opts?: { p?: number; q?: string; sage?: string; tab?: string; sortBy?: string }) => {
     setLoading(true);
     setError("");
     const p = opts?.p ?? page;
     const q = opts?.q ?? search;
     const sage = opts?.sage ?? sageTypeFilter;
     const tab = opts?.tab ?? activeTab;
+    const orderBy = opts?.sortBy ?? sort;
     try {
       const params = new URLSearchParams();
       params.set("limit", String(PAGE_SIZE));
@@ -677,6 +710,7 @@ export default function SparePartsPage() {
       if (q) params.set("q", q);
       if (sage) params.set("sage_category", sage);
       if (tab === "low" || tab === "out") params.set("stock_status", tab);
+      if (orderBy && orderBy !== "newest") params.set("sort", orderBy);
       const res = await fetch(`/api/v1/spare_parts.php?${params.toString()}`);
       const json = await res.json();
       if (json && Array.isArray(json.items)) {
@@ -731,10 +765,41 @@ export default function SparePartsPage() {
     setLoading(false);
   };
 
+  // อ่านค่าเริ่มต้นจาก query string
   useEffect(() => {
-    fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    const q = params.get("q") ?? "";
+    const sage = params.get("sage") ?? "";
+    const sortParam = params.get("sort") ?? "";
+    const pageParam = Number(params.get("page") ?? "1");
+    if (tab === "low" || tab === "out" || tab === "all") setActiveTab(tab);
+    if (sage) setSageTypeFilter(sage);
+    if (SORT_OPTIONS.some((o) => o.value === sortParam)) setSort(sortParam);
+    if (Number.isFinite(pageParam) && pageParam > 1) setPage(Math.floor(pageParam));
+    setSearchInput(q);
+    setSearch(q.trim());
+    setUrlReady(true);
+  }, []);
+
+  // เขียน state กลับลง URL (replaceState — ไม่ทำ navigation ซ้ำ)
+  useEffect(() => {
+    if (!urlReady) return;
+    const params = new URLSearchParams();
+    if (activeTab !== "all") params.set("tab", activeTab);
+    if (search) params.set("q", search);
+    if (sageTypeFilter) params.set("sage", sageTypeFilter);
+    if (sort !== "newest") params.set("sort", sort);
+    if (page > 1) params.set("page", String(page));
+    const qs = params.toString();
+    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+  }, [urlReady, activeTab, search, sageTypeFilter, sort, page]);
+
+  useEffect(() => {
+    if (!urlReady) return;
+    fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab, sortBy: sort });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, sageTypeFilter, activeTab]);
+  }, [urlReady, page, search, sageTypeFilter, activeTab, sort]);
 
   // หลังลบ/เปลี่ยนตัวกรองแล้วหน้าปัจจุบันว่างแต่ยังมีข้อมูล → ถอยกลับหนึ่งหน้า
   useEffect(() => {
@@ -758,7 +823,7 @@ export default function SparePartsPage() {
       const json = await res.json();
       if (json.status === "success") {
         setSyncNotice(json.message || "ซิงค์ข้อมูลจาก Sage เรียบร้อย");
-        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
+        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab, sortBy: sort });
         setTimeout(() => setSyncNotice(""), 4000);
       } else {
         setError(json?.message || json?.error || "ซิงค์ข้อมูลจาก Sage ไม่สำเร็จ");
@@ -784,7 +849,7 @@ export default function SparePartsPage() {
       const json = await res.json();
       if (json.success || json.message === "Deleted") {
         setDeleteSuccess(true);
-        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
+        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab, sortBy: sort });
         setTimeout(() => {
           setDeleteSuccess(false);
           setDeleteTarget(null);
@@ -1008,9 +1073,11 @@ export default function SparePartsPage() {
                 setSageTypeFilter={setSageTypeFilter}
                 page={page}
                 setPage={setPage}
+                sort={sort}
+                setSort={setSort}
                 onEdit={handleEdit}
                 onDelete={setDeleteTarget}
-                onRefresh={() => fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab })}
+                onRefresh={() => fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab, sortBy: sort })}
                 totalItems={totalItems}
                 serverPaged={serverPaged}
               />

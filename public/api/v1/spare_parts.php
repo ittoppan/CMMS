@@ -21,6 +21,18 @@ try {
             $sageCategory = isset($_GET['sage_category']) ? trim((string)$_GET['sage_category']) : '';
             $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
             $stockStatus = isset($_GET['stock_status']) ? trim((string)$_GET['stock_status']) : '';
+            // sort: whitelist เท่านั้น (กัน SQL injection) — default ใหม่ล่าสุด
+            $sortMap = [
+                'newest'     => 's.created_at DESC, s.id DESC',
+                'name_asc'   => 's.name ASC, s.id ASC',
+                'stock_asc'  => "COALESCE(s.stock_qty, 0) ASC, s.id ASC",
+                'stock_desc' => "COALESCE(s.stock_qty, 0) DESC, s.id ASC",
+                'value_desc' => "(COALESCE(s.stock_qty, 0) * COALESCE(s.unit_price, 0)) DESC, s.id ASC",
+                'price_desc' => 'COALESCE(s.unit_price, 0) DESC, s.id ASC',
+                'updated'    => 's.updated_at DESC, s.id DESC',
+            ];
+            $sortParam = isset($_GET['sort']) ? trim((string)$_GET['sort']) : '';
+            $orderBy = $sortMap[$sortParam] ?? $sortMap['newest'];
             $limitParam = $_GET['limit'] ?? null;
             $pageParam = $_GET['page'] ?? null;
             $offsetParam = $_GET['offset'] ?? null;
@@ -93,12 +105,12 @@ try {
                 $countStmt = $pdo->prepare('SELECT COUNT(*) ' . $listSql);
                 $countStmt->execute($params);
                 $total = (int)$countStmt->fetchColumn();
-                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?');
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY ' . $orderBy . ' LIMIT ? OFFSET ?');
                 $stmt->execute(array_merge($params, [$limit, $offset]));
                 $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode(['items' => $items, 'total' => $total, 'limit' => $limit, 'offset' => $offset, 'page' => $page, 'summary' => $summary], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['items' => $items, 'total' => $total, 'limit' => $limit, 'offset' => $offset, 'page' => $page, 'summary' => $summary, 'sort' => $sortParam !== '' && isset($sortMap[$sortParam]) ? $sortParam : 'newest'], JSON_UNESCAPED_UNICODE);
             } else {
-                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY s.created_at DESC');
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY ' . $orderBy);
                 $stmt->execute($params);
                 // คืน array เดิมเพื่อความเข้ากันได้ย้อนหลังกับ consumer ที่คาดหวังรูปแบบเดิม
                 echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
