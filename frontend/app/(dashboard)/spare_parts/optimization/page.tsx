@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -273,6 +275,23 @@ export default function InventoryOptimizationPage() {
           ประมวลผล AI ใหม่
         </button>
       </div>
+
+      <ModuleGuide
+        name="วิเคราะห์คลังอะไหล่"
+        summary="วิเคราะห์จากข้อมูลจริงในทะเบียนอะไหล่: จุดสั่งซื้อ (ROP), ปริมาณแนะนำต่อครั้ง (EOQ) และอะไหล่ที่ไม่เคลื่อนไหว — พร้อมรายการให้คัดลอกไปสั่งซื้อ"
+        steps={[
+          "เลือกหมวด/แท็บที่ต้องการดู (เช่น ต้องสั่งซื้อทันที · ไม่เคลื่อนไหว)",
+          "อ่านเหตุผลของแต่ละรายการเทียบกับค่าที่ตั้งในทะเบียนอะไหล่",
+          "คัดลอกรายการที่ต้องการส่งต่อฝ่ายจัดซื้อ",
+        ]}
+        source="คำนวณจากข้อมูล /api/v1/spare_parts.php (คงเหลือ Min/ROP ราคา และวันที่เคลื่อนไหวล่าสุด) — ไม่ได้ส่งข้อมูลออกไปยังโมเดลภายนอก"
+        note="ถ้ารายการใดยังไม่ได้ตั้ง Min/ROP หรือไม่เคยมีประวัติเบิก ระบบจะแนะนำได้จำกัด — อัปเดตค่าทะเบียนก่อนเชื่อตัวเลข"
+        related={[
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+          { href: "/spare_parts/balances", label: "ยอดคงเหลืออะไหล่" },
+          { href: "/spare_parts/overview", label: "ภาพรวมสต็อก & การเบิก" },
+        ]}
+      />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">

@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
@@ -242,6 +244,23 @@ export default function SagePOReceiptPage() {
           รีเฟรช
         </button>
       </div>
+
+      <ModuleGuide
+        name="รับอะไหล่จาก PO"
+        summary="บันทึกรับอะไหล่เข้าคลังตามใบสั่งซื้อ — เลือกอะไหล่ ระบุจำนวน/ราคาต่อหน่วย แล้วยืนยันรับเข้า"
+        steps={[
+          "กรอกเลขที่ PO และเลือกอะไหล่ที่จะรับเข้า",
+          "ระบุจำนวนรับเข้าและราคาต่อหน่วยให้ตรงกับเอกสาร",
+          "ตรวจรายการทั้งหมดแล้วกด “ยืนยันการรับเข้าคลัง”",
+        ]}
+        source="อ่านรายการอะไหล่และบันทึกรับเข้าผ่าน /api/v1/spare_parts.php"
+        note="การยืนยันจะเพิ่มยอดคงเหลือทันที — ตรวจเลข PO และจำนวนให้ถูกก่อนบันทึก และไม่ควรรับเข้าซ้ำเพื่อป้องกันยอดเกิน"
+        related={[
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+          { href: "/suppliers", label: "ผู้จำหน่าย" },
+          { href: "/spare_parts/sage_sync", label: "ตั้งค่าดึงสต็อกจาก Sage" },
+        ]}
+      />
 
       <Card>
         <CardContent className="space-y-4 p-5">

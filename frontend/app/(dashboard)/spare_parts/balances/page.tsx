@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useMemo, useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -146,6 +148,21 @@ export default function SpareBalancesPage() {
         </Button>
       }
     >
+      <ModuleGuide
+        name="ยอดคงเหลืออะไหล่"
+        summary="สรุปยอดคงเหลือและมูลค่าคลังของทุกอะไหล่ พร้อมทางเข้าดูประวัติเบิก-จ่ายรายชิ้น"
+        steps={[
+          "อ่านภาพรวมจากบัตร KPI ด้านบน (จำนวนรายการ · มูลค่าคลังรวม · ต่ำกว่า Min · หมดคลัง)",
+          "ค้นหาด้วยรหัส/ชื่ออะไหล่เพื่อหาตัวที่ต้องการ",
+          "กดแถวรายการเพื่อดูประวัติเบิก-จ่ายย้อนหลังของอะไหล่นั้น",
+        ]}
+        source="ยอดคงเหลือ/มูลค่าคลังจาก /api/v1/spare_parts.php · ประวัติเบิก-จ่ายจาก /api/v1/spare_issue.php"
+        note="มูลค่าคลังคำนวณจากคงเหลือ × ราคาต่อหน่วยของรายการ — ตัวเลขจะตรงก็ต่อเมื่อราคาในทะเบียนอะไหล่เป็นปัจุบัน"
+        related={[
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+          { href: "/spare_parts/overview", label: "ภาพรวมสต็อก & การเบิก" },
+        ]}
+      />
       <Grid columns={{ minWidth: 200, max: 4 }} gap={4}>
         <Card className="min-w-0 p-4">
           <div className="flex items-center gap-3">

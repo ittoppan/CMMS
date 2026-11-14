@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
@@ -123,6 +125,22 @@ export default function ContractorsPage() {
           <a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> สร้างผู้รับเหมาใหม่</a>
         </div>
       </div>
+
+      <ModuleGuide
+        name="ผู้รับเหมา"
+        summary="ทะเบียนผู้รับเหมา — ข้อมูลติดต่อ หมวดงานที่รับผิดชอบ ใบรับรอง/เอกสารที่ต้องมี และสถานะคุณสมบัติ"
+        steps={[
+          "ค้นหาหรือกรองตามสถานะ/หมวดงาน และผู้ดูแล",
+          "กด “สร้างผู้รับเหมาใหม่” หรือเปิดรายการเดิมเพื่อดูรายละเอียดและเอกสาร",
+          "เมื่อต้องมอบหมายงานหรือติดตามงานภายนอก ให้ไปที่เมนู “งานภายนอก”",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/contractor.php (dashboard, list, options, config)"
+        note="ผู้รับเหมาที่ใบรับรองหมดอายุหรือใกล้หมดจะถูกเตือนใน KPI ด้านบน — ตรวจก่อนมอบหมายงานทุกครั้ง"
+        related={[
+          { href: "/contractors/work", label: "งานภายนอก" },
+          { href: "/contractors/create", label: "สร้างผู้รับเหมาใหม่" },
+        ]}
+      />
 
       {/* KPI */}
       <div style={layoutStyle("kpi")} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

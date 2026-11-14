@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // suppliers — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Badge)
 // business logic ครบเดิม: fetch/delete suppliers.php, client search filter, KPI calculations
 // URL-synced filters + Saved Views (localStorage, entity: suppliers)
@@ -346,6 +348,21 @@ export default function SuppliersPage() {
         </Button>
       }
     >
+      <ModuleGuide
+        name="ผู้จำหน่าย (Suppliers)"
+        summary="ทะเบียนผู้ผลิต/ผู้จำหน่ายอะไหล่ — เก็บข้อมูลติดต่อ คะแนนผู้ขาย และมูลค่าสต็อกที่ซื้อจากแต่ละราย"
+        steps={[
+          "ค้นหาหรือกรองรายชื่อผู้จำหน่าย และบันทึกตัวกรองเป็น “มุมมอง” เมื่อใช้บ่อย",
+          "เพิ่มผู้จำหน่ายใหม่หรือเปิดรายการเดิมเพื่อแก้ไข",
+          "ดูจำนวนรายการสินค้า/คะแนนของผู้จำหน่ายแต่ละรายเพื่อประกอบการเลือกซื้อ",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/suppliers.php — ตัวกรองและมุมมองที่บันทึกจะจำไว้ในเบราว์เซอร์ (localStorage)"
+        note="ก่อนลบผู้จำหน่าย ตรวจรายการอะไหล่ที่อ้างถึงก่อน — เมื่อลบแล้วรายการที่เคยผูกจะไม่มีข้อมูลผู้ขายอ้างอิง"
+        related={[
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+          { href: "/spare_parts/sage_po", label: "รับอะไหล่จาก PO" },
+        ]}
+      />
       {/* KPI */}
       <Grid columns={{ minWidth: 200, repeat: "fit" }} gap={4}>
         <Card className="p-4">

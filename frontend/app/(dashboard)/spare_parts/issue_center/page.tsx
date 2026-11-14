@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
@@ -352,6 +354,23 @@ export default function SageIssueCenterPage() {
           <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />{t("action.refresh")}
         </button>
       </div>
+
+      <ModuleGuide
+        name="ศูนย์จ่ายอะไหล่"
+        summary="จุดเบิกจ่ายอะไหล่ให้ช่าง — เลือก/สแกนอะไหล่ ผูกกับใบสั่งงานหรือใบแจ้งซ่อม แล้วบันทึกการเบิกออกจากคลัง"
+        steps={[
+          "เลือกอะไหล่ด้วยการสแกนบาร์โค้ด/QR หรือค้นหาด้วยรหัส/ชื่อ",
+          "ระบุจำนวน ผู้เบิก และผูกกับใบสั่งงาน/ใบแจ้งซ่อมที่เกี่ยวข้อง",
+          "ตรวจรายการแล้วกดเบิกจ่าย — ระบบบันทึกการตัดยอดและประวัติให้อัตโนมัติ",
+        ]}
+        source="อะไหล่และยอดจาก /api/v1/spare_parts.php · คำขอเบิก/อนุมัติจาก /api/v1/spare_issue_request.php + /api/v1/approval.php · บันทึกจ่ายผ่าน /api/v1/spare_issue.php"
+        note="การจ่ายต้องผ่านรายการใบเบิก (ไม่แก้ยอดคงเหลือโดยตรง) — คำขอที่ต้องอนุมัติจะค้างอยู่ในคิวอนุมัติก่อนจ่ายได้"
+        related={[
+          { href: "/spare_parts/balances", label: "ยอดคงเหลืออะไหล่" },
+          { href: "/spare_parts/returns", label: "รับคืนซากอะไหล่" },
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* คอลัมน์ซ้าย: ฟอร์ม */}

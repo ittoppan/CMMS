@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
@@ -270,6 +272,21 @@ export default function SageShipmentsPage() {
         </Button>
       }
     >
+      <ModuleGuide
+        name="Sage 300 I/C Shipments"
+        summary="ตรวจใบตัดสต็อก (I/C Shipments) จาก Sage 300 เทียบกับงานที่เบิกจริง — ดูว่าตัดครบ ตัดบางส่วน หรือยังไม่ตัด"
+        steps={[
+          "ค้นหาด้วยเลขที่ Sage Shipment หรือใบสั่งงาน/ช่างที่เกี่ยวข้อง",
+          "เปิดรายการเพื่อเทียบจำนวนที่ตัดใน Sage กับจำนวนที่เบิกใน CMMS",
+          "บันทึกผลการตรวจเมื่อจำนวนตรงกัน — กรณีไม่ตรงให้แจ้งผู้ดูแลคลัง/Sage",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/sage_shipments.php (ข้อมูลที่ตัดใน Sage 300)"
+        note="หน้านี้ใช้ตรวจความต่างเท่านั้น — ไม่แก้ยอดใน Sage 300; การแก้ยอดจริงต้องทำใน Sage"
+        related={[
+          { href: "/spare_parts/sage_sync", label: "ตั้งค่าดึงสต็อกจาก Sage" },
+          { href: "/spare_parts/issue_center", label: "ศูนย์จ่ายอะไหล่" },
+        ]}
+      />
       <Card className="p-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative min-w-[280px] flex-1">

@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -132,6 +134,13 @@ export default function SageSyncConfigPage() {
   useEffect(() => { fetchData(); }, []);
 
   const handleSyncCategory = async (catId: string) => {
+    const cat = categories.find((c) => c.id === catId);
+    const overwrite = syncConfig?.overwrite !== false;
+    const modeLabel = MODE_LABELS[syncConfig?.mode ?? "full"]?.label ?? "ทับข้อมูลเดิม";
+    const confirmMsg = overwrite
+      ? `ดึงข้อมูล “${cat?.name ?? catId}” จาก Sage 300 และเขียนทับข้อมูลในคลัง CMMS?\n\nโหมด: ${modeLabel}`
+      : `ดึงข้อมูล “${cat?.name ?? catId}” จาก Sage 300?\n\nโหมด: ${modeLabel} (ไม่ทับรายการเดิม)`;
+    if (!window.confirm(confirmMsg)) return;
     setSyncingCat(catId);
     setSyncMessage("");
     setError(null);
@@ -277,6 +286,22 @@ export default function SageSyncConfigPage() {
           กลับไปยังคลังอะไหล่
         </button>
       </div>
+
+      <ModuleGuide
+        name="ตั้งค่าดึงสต็อกจาก Sage 300"
+        summary="กำหนดว่าจะดึงข้อมูลอะไรจาก Sage 300 (รหัส/ชื่อ/ที่เก็บ/ยอดคงเหลือ) ใช้ทับข้อมูลเดิมหรือไม่ และสั่งดึงได้ทันที"
+        steps={[
+          "เลือกฟิลด์ที่ต้องการ map กับคอลัมน์ใน Sage 300",
+          "กำหนดตัวเลือก เช่น การทับข้อมูลรายการเดิม และรายการที่ปิดใช้งาน",
+          "กด “บันทึกรูปแบบการดึง” แล้วใช้ “ดึงข้อมูลทันที” เมื่อต้องการซิงค์",
+        ]}
+        source="อ่าน/บันทึกการตั้งค่าและสั่งซิงค์ผ่าน /api/v1/sage_sync.php"
+        note="โหมด “ทับข้อมูลรายการเดิม” จะเขียนทับชื่อ/ที่เก็บ/ยอดของรายการที่มีอยู่ — ตรวจการ map ให้ถูกก่อนกดดึงทุกครั้ง"
+        related={[
+          { href: "/spare_parts", label: "คลังสต็อกอะไหล่" },
+          { href: "/spare_parts/sage_shipments", label: "Sage I/C Shipments" },
+        ]}
+      />
 
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 

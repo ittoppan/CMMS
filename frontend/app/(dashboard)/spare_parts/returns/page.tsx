@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -85,6 +87,21 @@ export default function SpareReturnsPage() {
       title="สต็อกอะไหล่คืนซาก"
       description="บันทึกการคืนซากอะไหล่ที่เบิกใช้แล้ว (ทิ้งซาก ไม่เข้าคลังใหม่) ตามใบแจ้งซ่อม"
     >
+      <ModuleGuide
+        name="รับคืนซากอะไหล่"
+        summary="บันทึกการคืนซากอะไหล่ที่เบิกไปใช้แล้ว (ทิ้งซาก ไม่กลับเข้าคลัง) พร้อมประวัติย้อนหลังตามใบแจ้งซ่อม"
+        steps={[
+          "เปิดแท็บ “เตรียมคืนซาก” เพื่อดูรายการที่ยังค้างคืน",
+          "เลือกรายการ ระบุจำนวนที่คืนและหมายเหตุ แล้วบันทึก",
+          "ตรวจย้อนหลังได้ที่แท็บ “ประวัติคืนซาก”",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/spare_issue.php (รายการรอคืนซากและประวัติ)"
+        note="การคืนซากไม่เพิ่มยอดคงเหลือในคลัง — ถ้าต้องการนับเข้าคลังจริงต้องทำผ่านการรับเข้า (PO/Sage)"
+        related={[
+          { href: "/spare_parts/issue_center", label: "ศูนย์จ่ายอะไหล่" },
+          { href: "/spare_parts/balances", label: "ยอดคงเหลืออะไหล่" },
+        ]}
+      />
       <Grid columns={{ minWidth: 200, max: 3 }} gap={4}>
         <Card className="p-4">
           <div className="flex items-center gap-3">

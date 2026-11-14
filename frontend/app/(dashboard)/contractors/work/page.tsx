@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -245,6 +247,21 @@ export default function ContractorWorkPage() {
           </Button>
         </div>
       </div>
+
+      <ModuleGuide
+        name="งานภายนอก (ผู้รับเหมา)"
+        summary="มอบหมายงานให้ผู้รับเหมาและติดตามสถานะตลอดวงจร: ขออนุมัติ → เลือกผู้รับเหมา → ความปลอดภัย/ใบอนุญาต (PTW) → ทำงาน → ตรวจรับ → แก้ไข (rework)"
+        steps={[
+          "กด “มอบหมายงานภายนอก” เลือกงาน/หมวดงาน ผู้รับเหมา และกำหนดส่งงาน",
+          "ติดตามสถานะในรายการ และอัปเดตเมื่อผ่านขั้นความปลอดภัย/ขอใบอนุญาต",
+          "เมื่อผู้รับเหมาส่งงาน ให้บันทึกผลตรวจรับ — งานที่ไม่ผ่านจะเข้ารอบแก้ไข",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/contractor.php (assignments, dashboard, options)"
+        note="งานจะปิดได้หลังบันทึกผลตรวจรับเท่านั้น — ผู้รับเหมาที่ไม่ได้อยู่ในทะเบียน/ใบรับรองหมดอายุจะไม่ผ่านขั้นคุณสมบัติ"
+        related={[
+          { href: "/contractors", label: "ทะเบียนผู้รับเหมา" },
+        ]}
+      />
 
       {/* KPI */}
       <div style={layoutStyle("kpi")} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

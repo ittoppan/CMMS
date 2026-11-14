@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -123,6 +125,22 @@ export default function SparePartsOverviewPage() {
         </div>
       }
     >
+      <ModuleGuide
+        name="ภาพรวมสต็อก & การเบิก"
+        summary="มุมมองรวมของคงเหลือและต้นทุนอะไหล่ เทียบกับการใช้จริงจากใบสั่งซ่อม/ใบเบิกที่ยังค้าง"
+        steps={[
+          "อ่านตัวเลขสรุปด้านบน (จำนวนอะไหล่ · ต่ำกว่า Min · มูลค่าคลัง · การใช้/การเบิก)",
+          "ดูรายการที่มีการใช้สูงหรือค้างเบิก เพื่อวางแผนสั่งซื้อ",
+          "ไปต่อที่คลังอะไหล่หรือศูนย์จ่ายเมื่อต้องลงมือแก้รายการ",
+        ]}
+        source="สรุปจาก /api/v1/spare_usage.php — สต็อกอ้างอิง Sage 300 (Last known stock) และการใช้จริงจากใบสั่งซ่อม/ใบเบิก Pending"
+        note="เมื่อออฟไลน์ หน้าจะแสดงยอดล่าสุดที่เคยดึงไว้ — ตัวเลขอาจไม่ตรงกับ Sage จนกว่าจะกลับมาออนไลน์และดึงใหม่"
+        related={[
+          { href: "/spare_parts/balances", label: "ยอดคงเหลืออะไหล่" },
+          { href: "/spare_parts/issue_center", label: "ศูนย์จ่ายอะไหล่" },
+          { href: "/spare_parts/optimization", label: "วิเคราะห์คลังอะไหล่" },
+        ]}
+      />
       {loading ? (
         <div className="space-y-2">
           <Skeleton className="h-14 w-full" />

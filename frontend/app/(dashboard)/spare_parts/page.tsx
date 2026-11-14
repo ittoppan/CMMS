@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // spare_parts — migrate ui kit (PageShell, ui/Card, ui/Input, ui/Select, ui/Tabs, ui/Dialog,
 // ui/Pagination, ui/Badge, Lucide, MiniBar progressbar)
 // business logic ครบเดิม: batch image upload, Sage 300 sync, tab filter, side panel สรุปคลัง
@@ -1134,6 +1136,23 @@ export default function SparePartsPage() {
         </>
       }
     >
+      <ModuleGuide
+        name="คลังสต็อกอะไหล่"
+        summary="ทะเบียนอะไหล่หลัก — ดู/เพิ่ม/แก้ไขรายการ รูปอะไหล่ จุดสั่งซื้อ และดึงยอดคงเหลือจาก Sage 300"
+        steps={[
+          "เลือกแท็บ (ทั้งหมด · ใกล้หมด · หมด) หรือค้นหาด้วยรหัส/ชื่อ แล้วเปิดรายการที่ต้องดู",
+          "เพิ่ม/แก้ไขรายการผ่านฟอร์ม หรือกด “ดึงสต็อกจาก Sage” เพื่ออัปเดตยอดล่าสุด",
+          "ดูการเคลื่อนไหวของอะไหล่แต่ละตัวจากแผง “ประวัติเคลื่อนไหว” ด้านข้าง",
+        ]}
+        source="รายการและยอดคงเหลือจาก /api/v1/spare_parts.php · ดึงยอดจาก Sage 300 ผ่าน /api/v1/sage_sync.php · รูปอะไหล่ผ่าน /api/v1/upload.php"
+        note="ยอดคงเหลือจริงเป็นของ Sage 300 — การตัดยอดควรเกิดจากการเบิกจ่าย/รับเข้า ไม่แก้ตัวเลขคงเหลือตรง ๆ"
+        related={[
+          { href: "/spare_parts/balances", label: "ยอดคงเหลืออะไหล่" },
+          { href: "/spare_parts/issue_center", label: "ศูนย์จ่ายอะไหล่" },
+          { href: "/spare_parts/sage_sync", label: "ตั้งค่าดึงสต็อกจาก Sage" },
+          { href: "/suppliers", label: "ผู้จำหน่าย" },
+        ]}
+      />
       {isNarrow && (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {sageSyncButton}
