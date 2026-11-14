@@ -381,6 +381,7 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
     { value: "ssl", label: "SSL" },
   ],
   session_timeout_mins: [
+    { value: "0", label: "ไม่หมดอายุ (อยู่ในระบบตลอด)" },
     { value: "30", label: "30 นาที" },
     { value: "60", label: "60 นาที (แนะนำ)" },
     { value: "120", label: "120 นาที" },

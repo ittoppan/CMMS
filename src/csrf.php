@@ -24,7 +24,8 @@ function csrfToken(): string {
     if (session_status() === PHP_SESSION_NONE) {
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-        @session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax', 'secure' => $https]);
+        @ini_set('session.gc_maxlifetime', '31536000');
+        @session_set_cookie_params(['lifetime' => 31536000, 'httponly' => true, 'samesite' => 'Lax', 'secure' => $https]);
         session_start();
         @ini_set('session.use_strict_mode', '1');
     }
