@@ -270,6 +270,7 @@ function Kpi({
   meta,
   tone,
   wave,
+  href,
 }: {
   label: string;
   icon: React.ComponentType<{ size?: string | number; strokeWidth?: number; "aria-hidden"?: boolean }>;
@@ -280,9 +281,11 @@ function Kpi({
   meta: React.ReactNode;
   tone: "blue" | "green" | "amber" | "red" | "purple";
   wave?: number[];
+  /** ถ้ากำหนด จะทำให้การ์ดทั้งใบเป็นลิงก์ไปยังรายการงานที่กรองแล้ว */
+  href?: string;
 }) {
   return (
-    <div className="tower-kpi" data-tone={tone}>
+    <div className={href ? "tower-kpi tower-kpi-link" : "tower-kpi"} data-tone={tone}>
       <div className="tower-kpi-head">
         <span className="tower-kpi-icon">
           <Icon size="1.05em" strokeWidth={2.2} aria-hidden />
@@ -303,6 +306,9 @@ function Kpi({
         <span className="tower-kpi-wave">
           <Wave values={wave} />
         </span>
+      ) : null}
+      {href ? (
+        <Link href={href} className="tower-kpi-hit" aria-label={`${label} — เปิดรายการงานที่กรองแล้ว`} />
       ) : null}
     </div>
   );
@@ -658,6 +664,7 @@ export default function DashboardPage() {
           meta={core ? `เปิดใหม่ในช่วงที่เลือก · งานค้างทั้งหมด` : "กำลังโหลดข้อมูล"}
           tone="blue"
           wave={sparkCreated.length > 1 ? sparkCreated : undefined}
+          href="/repair"
         />
         <Kpi
           label="Completed"
@@ -667,6 +674,7 @@ export default function DashboardPage() {
           meta={core ? `อัตราปิดงานในช่วง · Downtime ${fmtHours(downtimeHours)} ชม.` : "กำลังโหลดข้อมูล"}
           tone="green"
           wave={sparkCompleted.length > 1 ? sparkCompleted : undefined}
+          href="/repair?status=completed"
         />
         <Kpi
           label="In Progress"
@@ -679,6 +687,7 @@ export default function DashboardPage() {
               : "กำลังโหลดข้อมูล"
           }
           tone="amber"
+          href="/repair?status=in_progress"
         />
         <Kpi
           label="Overdue"
@@ -691,6 +700,7 @@ export default function DashboardPage() {
               : "กำลังโหลดข้อมูล"
           }
           tone="red"
+          href="/repair?status=overdue"
         />
         <Kpi
           label="MTTR"

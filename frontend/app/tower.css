@@ -171,6 +171,12 @@
 .tower-dot[data-tone="green"] { animation: tower-pulse 2s ease-in-out infinite; }
 .tower-dot[data-tone="amber"] { background: var(--tower-amber); box-shadow: 0 0 0.3em var(--tower-amber); }
 
+/* KPI ที่กดได้ → เปิดรายการงานที่กรองแล้ว (overlay link ไม่รบกวน layout) */
+.tower-kpi-link { cursor: pointer; transition: border-color 0.15s ease, transform 0.15s ease; }
+.tower-kpi-link:hover { border-color: var(--tower-border-strong); }
+.tower-kpi-link:focus-within { outline: 2px solid var(--tower-blue-soft); outline-offset: 2px; }
+.tower-kpi-hit { position: absolute; inset: 0; border-radius: inherit; }
+
 /* ── KPI cards (gradient tile ตามสี KPI) ────────────────────────────────── */
 .tower-kpi {
   position: relative;
