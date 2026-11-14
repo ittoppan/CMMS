@@ -278,8 +278,13 @@ export function getPlanningQueue(params: Record<string, string | number | null |
   return apiJson<QueueResponse>(`${PLANNING_API}?action=queue${qs(params)}`);
 }
 
-export function getPlanningCalendar(view: "day" | "week" | "month"): Promise<CalendarResponse> {
-  return apiJson<CalendarResponse>(`${PLANNING_API}?action=calendar&view=${view}`);
+/** ปฏิทินวางแผน — ส่ง from/to (Y-m-d, to = exclusive) เพื่อให้เลื่อนช่วงดูย้อนหลัง/ล่วงหน้าได้จริง */
+export function getPlanningCalendar(
+  view: "day" | "week" | "month",
+  from?: string,
+  to?: string
+): Promise<CalendarResponse> {
+  return apiJson<CalendarResponse>(`${PLANNING_API}?action=calendar&view=${view}${qs({ from, to })}`);
 }
 
 export function getTechnicians(from?: string, to?: string): Promise<TechniciansResponse> {

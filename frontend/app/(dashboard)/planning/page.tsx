@@ -152,6 +152,7 @@ export default function PlanningCenterPage() {
   const [center, setCenter] = useState<CenterResponse | null>(null);
   const [queue, setQueue] = useState<QueueResponse | null>(null);
   const [techs, setTechs] = useState<TechnicianItem[]>([]);
+  const [queueLoading, setQueueLoading] = useState(true);
 
   const [group, setGroup] = useState<PlanGroup | null>(null);
   const [search, setSearch] = useState("");
@@ -221,6 +222,7 @@ export default function PlanningCenterPage() {
   );
 
   const reloadQueue = useCallback(async () => {
+    setQueueLoading(true);
     try {
       const q = await getPlanningQueue(queryKey);
       setQueue(q);
@@ -228,6 +230,8 @@ export default function PlanningCenterPage() {
       const status = (e as { status?: number })?.status;
       if (status === 403 || status === 401) setDenied(true);
       else setError(e instanceof Error ? e.message : "ไม่สามารถโหลดคิวงานได้");
+    } finally {
+      setQueueLoading(false);
     }
   }, [queryKey]);
 
@@ -554,6 +558,17 @@ export default function PlanningCenterPage() {
         </Alert>
       )}
 
+      <Alert variant="info">
+        <div className="space-y-1 text-sm">
+          <p>
+            <strong>ศูนย์วางแผน (Planning)</strong> ใช้จัดคิว วางรอบเวลา มอบหมายงาน ดูภาระงาน ความขัดแย้ง ความพร้อม และ SLA ของงานซ่อม/คำขอแจ้งซ่อม — เน้น <em>วางแผนเมื่อไร ใครทำ</em>
+          </p>
+          <p className="text-[var(--cmms-text-secondary)]">
+            <strong>PM/AM</strong> (<Link href="/pm_am" className="font-medium text-[var(--cmms-primary)] underline-offset-2 hover:underline">/pm_am</Link>) ใช้จัดการโปรแกรมบำรุงรักษาเชิงป้องกัน: แผน/รอบงานตามกำหนด เช็กลิสต์ ผลการทำ และการเลื่อนรอบ — เน้น <em>ทำอะไรตามรอบป้องกัน</em> ทั้งสองโมดูลเสริมกัน ไม่ซ้ำหน้าที่กัน
+          </p>
+        </div>
+      </Alert>
+
       {/* Workload strip */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -661,7 +676,9 @@ export default function PlanningCenterPage() {
                 </tr>
               </thead>
               <tbody>
-                {items.length === 0 ? (
+                {queueLoading && items.length === 0 ? (
+                  <tr><td colSpan={canPlan ? 10 : 9} className="px-3 py-10 text-center text-[var(--cmms-text-muted)]">กำลังโหลดคิวงาน…</td></tr>
+                ) : items.length === 0 ? (
                   <tr><td colSpan={canPlan ? 10 : 9} className="px-3 py-10 text-center text-[var(--cmms-text-muted)]">ไม่พบงานในกลุ่มนี้</td></tr>
                 ) : (
                   items.map((w) => (

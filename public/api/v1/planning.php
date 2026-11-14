@@ -282,14 +282,25 @@ function apiGetCalendar(PDO $pdo): void {
     $view = (string)($_GET['view'] ?? 'week');
     if (!in_array($view, ['day', 'week', 'month'], true)) $view = 'week';
     $today = new DateTime('today');
-    if ($view === 'day') {
+    // UI ที่เลื่อนปฏิทินส่งช่วงที่ต้องการมา (from/to = Y-m-d, to เป็นแบบ exclusive)
+    // ไม่ส่งมา หรือรูปแบบไม่ถูกต้อง/ช่วงกว้างเกิน 92 วัน → คำนวณจาก "วันนี้" ตาม view
+    $qFrom = substr(trim((string)($_GET['from'] ?? '')), 0, 10);
+    $qTo = substr(trim((string)($_GET['to'] ?? '')), 0, 10);
+    $valid = static fn(string $d): bool => (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)
+        && DateTime::createFromFormat('!Y-m-d', $d) !== false;
+    $useRange = $valid($qFrom) && $valid($qTo) && strcmp($qFrom, $qTo) < 0
+        && (new DateTime($qFrom))->diff(new DateTime($qTo))->days <= 92;
+    if ($useRange) {
+        $from = new DateTime($qFrom . ' 00:00:00');
+        $to = new DateTime($qTo . ' 00:00:00');
+    } elseif ($view === 'day') {
         $from = clone $today;
         $to = (clone $today)->modify('+1 day');
     } elseif ($view === 'month') {
-        $from = (clone $today)->setDate($today->format('Y'), $today->format('m'), 1);
+        $from = (clone $today)->setDate((int)$today->format('Y'), (int)$today->format('m'), 1);
         $to = (clone $from)->modify('+1 month');
     } else {
-        $from = (clone $today)->modify('-' . max(0, $today->format('N') - 1) . ' days');
+        $from = (clone $today)->modify('-' . max(0, (int)$today->format('N') - 1) . ' days');
         $to = (clone $from)->modify('+7 days');
     }
     $fromStr = $from->format('Y-m-d 00:00:00');
