@@ -34,9 +34,9 @@
 | 18 | Responsive optimization | PASS | wallboard ไม่ scroll ที่ 1920×1080 / 2560×1440 / 3840×2160 (ตรวจรอบก่อน) |
 | 19 | Security audit | PASS (ตรวจโค้ด) | `SECURITY_REPORT.md` — ไม่ได้ pen-test |
 | 20 | Testing | PARTIAL | `TEST_REPORT.md` — tsc/build/audit ผ่าน; UI ไม่ได้คลิกทดสอบด้วยตา |
-| 21 | Production readiness | BLOCKED (deploy ยังไม่ทำในรอบนี้) | `PRODUCTION_READINESS.md` |
+| 21 | Production readiness | PASS (deploy 2026-11-14 09:47) | `PRODUCTION_READINESS.md` — backend `8751c99` + frontend `BUILD_ID=nOrw5KXGZv66eJAtnXLWB` บน 3001 |
 | 22 | SLA ตาม priority + บังคับเวลาคาดเสร็จตอนจ่ายงาน | PASS (ตรวจเฉพาะ syntax/type/build — UI ยังไม่คลิกทดสอบ) | `src/helpers/sla.php` (ใหม่), `repair.php`, `supervisor.php`, `/repair/assign`, `/settings` |
-| 23 | มุมมอง SLA บนแดชบอร์ด (แยก priority + drill-down) + แจ้งเตือน SLA จากกำหนดส่งจริง | PASS (backend มี test จริง; UI ยังไม่คลิกดู) | `src/helpers/kpi.php`, `dashboard/page.tsx`, `repair.php`, `notification_engine.php`, `alert_check.php` |
+| 23 | มุมมอง SLA บนแดชบอร์ด (แยก priority + drill-down) + แจ้งเตือน SLA จากกำหนดส่งจริง | PASS (backend test จริง + เห็นแถบ SLA บน production 1/99) | `src/helpers/kpi.php`, `dashboard/page.tsx`, `repair.php`, `notification_engine.php`, `alert_check.php` |
 
 ## ไฟล์ที่แก้/เพิ่มในรอบนี้
 

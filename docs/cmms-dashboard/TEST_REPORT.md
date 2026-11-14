@@ -161,3 +161,21 @@ otification_engine.php`, State Ready |
 
 - task รันสคริปต์จากโฟลเดอร์ deploy (`C:\inetpub\wwwroot\cmms-tpt`) ซึ่งยังไม่ได้ deploy โค้ดรอบล่าสุด — การแจ้งเตือนจึงยังไม่ใช้ `estimated_completion_date` เป็นกำหนดส่งสำรองจนกว่าจะ deploy
 - ยังไม่ได้ทดสอบช่อง LINE/Telegram (env ไม่ได้ตั้งบนเครื่องนี้ และ `alert_check.php` ไม่มี dry-run)
+
+## รอบ 6: Deploy ขึ้น IIS + ตรวจแถบ SLA บน production (2026-11-14 09:47)
+
+| # | ขั้นตอน | ผล |
+|---|---|---|
+| 1 | Backup ก่อน deploy (`scripts/backup-task.ps1`) | **PASS** — `cmms-tpt_db_20261114_094408.sql.gz` + uploads 15 MB |
+| 2 | ตรวจ working tree ของ checkout production | **PASS** — ไฟล์ที่แก้ค้าง 16 ไฟล์มีเนื้อหาอยู่ใน `origin/main` แล้ว (ตรวจ hash/`diff -w`) และ untracked 15 ไฟล์มี hash ตรงกับของใหม่ → ย้ายไป `backups/untracked_prepull_20261114/` ก่อน pull (ไม่ลบ) |
+| 3 | `git pull --ff-only origin main` | **PASS** — 4c6b4ee → **8751c99** |
+| 4 | `Restart-WebAppPool cmms-tpt` | **PASS** — Started |
+| 5 | ตรวจ helper บนโค้ดที่ deploy | **PASS** — `kpi_alerts()` คืน `sla_by_priority=[…medium total 99 due_set 1 no_due 98…]`, `sla_risk_hours=24` |
+| 6 | `scripts/deploy-next.ps1` | **PASS** — 30/30 checks, `BUILD_ID=nOrw5KXGZv66eJAtnXLWB`, PID 17448, `/login` 200, `/dashboard` 200 |
+| 7 | เปิด `http://localhost:3001/dashboard` | **PASS** — แถบ “สถานะ SLA ตามระดับความสำคัญ”: วิกฤต 0/0, ด่วน 0/0, **ปกติ มีกำหนดส่ง 1 / 99** (เลยกำหนด 0, ใกล้ครบ 0, ไม่มีกำหนดส่ง 98), ไม่เร่งด่วน 0/0 — ตรงกับข้อมูลจริง |
+
+### ข้อจำกัด (รอบ 6)
+
+- ไม่ได้คลิก drill-down จากแถบ SLA บน production (ตรวจเฉพาะตัวเลขที่แสดง)
+- Migration `database/migration_20261114_sla_priority.sql` **ยังไม่รันบน DB จริง** — ระบบใช้ค่า default จาก `settings_defaults.php` (SLA ยังแก้ผ่านหน้า settings ไม่ได้จนกว่าจะรัน)
+- ไฟล์สำรอง untracked 15 ไฟล์ยังอยู่ใน `backups/untracked_prepull_20261114/` (ลบได้เมื่อแน่ใจ)

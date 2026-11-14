@@ -9,7 +9,8 @@
 | Design audit | PASS | strict 242 หน้า FAIL 0 WARN 0 |
 | Git | PASS | commit + push `origin freebuff/ux-ui` และ `origin main` |
 | Data integrity | ATTENTION | ฐานข้อมูลยังไม่มีใบงานปิด/PM/ต้นทุน → KPI หลายตัวแสดง N/A ตามจริง |
-| Deploy production | NOT DONE | ยังไม่ได้ deploy รอบนี้ (ต้องขออนุมัติ) |
+| Deploy production | DONE (2026-11-14 09:47) | backup 09:44 → `git pull --ff-only` ถึง `8751c99` → `deploy-next.ps1` 30/30 checks, `BUILD_ID=nOrw5KXGZv66eJAtnXLWB` |
+| ตรวจหลัง deploy | PASS | `/api/health.php` 200, `/dashboard` 200 · แถบ SLA แสดง “ปกติ 1/99” ตรงกับ `kpi_alerts()` |
 
 ## สิ่งที่ต้องทำก่อน deploy
 
