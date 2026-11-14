@@ -4,7 +4,7 @@
 // ui/Pagination, ui/Badge, Lucide, MiniBar progressbar)
 // business logic ครบเดิม: batch image upload, Sage 300 sync, tab filter, side panel สรุปคลัง
 
-import { useState, useEffect, useMemo, type CSSProperties } from "react";
+import { useState, useEffect, useMemo, useCallback, type CSSProperties } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
@@ -765,24 +765,36 @@ export default function SparePartsPage() {
     setLoading(false);
   };
 
-  // อ่านค่าเริ่มต้นจาก query string
-  useEffect(() => {
+  // อ่าน state จาก query string (ใช้ทั้งตอนโหลดครั้งแรกและเมื่อกด Back/Forward)
+  const applyUrlState = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
     const q = params.get("q") ?? "";
     const sage = params.get("sage") ?? "";
     const sortParam = params.get("sort") ?? "";
     const pageParam = Number(params.get("page") ?? "1");
-    if (tab === "low" || tab === "out" || tab === "all") setActiveTab(tab);
-    if (sage) setSageTypeFilter(sage);
-    if (SORT_OPTIONS.some((o) => o.value === sortParam)) setSort(sortParam);
-    if (Number.isFinite(pageParam) && pageParam > 1) setPage(Math.floor(pageParam));
+    setActiveTab(tab === "low" || tab === "out" || tab === "all" ? tab : "all");
+    setSageTypeFilter(sage || "");
+    setSort(SORT_OPTIONS.some((o) => o.value === sortParam) ? sortParam : "newest");
+    setPage(Number.isFinite(pageParam) && pageParam > 1 ? Math.floor(pageParam) : 1);
     setSearchInput(q);
     setSearch(q.trim());
-    setUrlReady(true);
   }, []);
 
-  // เขียน state กลับลง URL (replaceState — ไม่ทำ navigation ซ้ำ)
+  // อ่านค่าเริ่มต้นจาก query string
+  useEffect(() => {
+    applyUrlState();
+    setUrlReady(true);
+  }, [applyUrlState]);
+
+  // กด Back/Forward → ย้อน state ทีละขั้นตาม URL
+  useEffect(() => {
+    const onPopState = () => { applyUrlState(); };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [applyUrlState]);
+
+  // เขียน state กลับลง URL ด้วย router.push (สร้าง history entry → Back ย้อนได้ทีละขั้น)
   useEffect(() => {
     if (!urlReady) return;
     const params = new URLSearchParams();
@@ -792,8 +804,12 @@ export default function SparePartsPage() {
     if (sort !== "newest") params.set("sort", sort);
     if (page > 1) params.set("page", String(page));
     const qs = params.toString();
-    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
-  }, [urlReady, activeTab, search, sageTypeFilter, sort, page]);
+    const target = window.location.pathname + (qs ? `?${qs}` : "");
+    const current = window.location.pathname + window.location.search;
+    if (target !== current) {
+      router.push(target, { scroll: false });
+    }
+  }, [urlReady, activeTab, search, sageTypeFilter, sort, page, router]);
 
   useEffect(() => {
     if (!urlReady) return;
