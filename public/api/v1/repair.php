@@ -942,31 +942,21 @@ try {
                         $totalCost = (float)($row['cost_parts'] ?? 0) + (float)($row['cost_labor'] ?? 0);
                         $detailUrl = publicBaseUrl() . '/repair/view?id=' . $id;
 
+                        // LINE ตอนปิดงาน: ส่งเฉพาะผู้แจ้ง (requester/created_by) ตามนโยบาย
                         if (getSettingValue('line_notify_enabled', '0') === '1') {
-                            $cv = [
-                                '{work_order_id}' => (string)($row['work_order_no'] ?? 'EN-????-???'),
-                                '{asset_code}' => (string)($row['asset_code'] ?? '-'),
-                                '{asset_name}' => (string)($row['asset_name'] ?? ''),
-                                '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
-                                '{downtime_hours}' => number_format($dt, 1),
-                                '{total_cost}' => number_format($totalCost),
-                                '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
-                            ];
-                            $targets = [];
-                            if (!empty($row['assigned_to'])) {
-                                $st = $pdo->prepare("SELECT line_user_id FROM users WHERE id = ? AND is_active = 1");
-                                $st->execute([(int)$row['assigned_to']]);
-                                $lid = $st->fetchColumn();
-                                if ($lid) $targets[] = (string)$lid;
-                            }
-                            // ผู้แจ้ง (requester/created_by) รับ LINE ด้วย
                             $creatorLineId = trim((string)($row['creator_line_id'] ?? ''));
-                            if ($creatorLineId !== '') $targets[] = $creatorLineId;
-                            $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
-                            if ($grp && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$grp;
-                            $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
-                            foreach (array_unique($targets) as $tid) {
-                                sendLineTemplatePush($tid, 'line_tpl_completed', $cv, $detailUrl, $photos);
+                            if ($creatorLineId !== '') {
+                                $cv = [
+                                    '{work_order_id}' => (string)($row['work_order_no'] ?? 'EN-????-???'),
+                                    '{asset_code}' => (string)($row['asset_code'] ?? '-'),
+                                    '{asset_name}' => (string)($row['asset_name'] ?? ''),
+                                    '{title}' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                                    '{downtime_hours}' => number_format($dt, 1),
+                                    '{total_cost}' => number_format($totalCost),
+                                    '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
+                                ];
+                                $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
+                                sendLineTemplatePush($creatorLineId, 'line_tpl_completed', $cv, $detailUrl, $photos);
                             }
                         }
 
