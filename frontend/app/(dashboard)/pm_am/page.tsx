@@ -365,13 +365,13 @@ export default function PMSchedulePage() {
     });
   }, [tasks, search, frequency, statusFilter, outsourceFilter, today]);
 
-  const columns: ColumnDef<PMTask>[] = [
+  const columns: ColumnDef<any, PMTask, any>[] = [
     { accessorKey: "id", header: t("tbl.pm_no") },
     { accessorKey: "asset", header: t("tbl.asset_full") },
     {
       accessorKey: "task",
       header: t("tbl.title"),
-      cell: ({ row }) => (
+      cell: ({ row }: any) => (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm">{row.original.task}</span>
           {row.original.isOutsource && (
@@ -385,7 +385,7 @@ export default function PMSchedulePage() {
     {
       accessorKey: "frequency",
       header: t("tbl.frequency"),
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const item = row.original;
         const isMeter = item.frequency === "meter_based" || !!item.meterUnit;
         const meterLabel = item.meterInterval != null && item.meterInterval !== ""
@@ -409,7 +409,7 @@ export default function PMSchedulePage() {
     {
       accessorKey: "nextDue",
       header: t("tbl.due_date"),
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const due = row.original.nextDueRaw;
         const ds = row.original.displayStatus;
         const isOver = isActionableDisplay(ds) && !!due && due < today;
@@ -428,7 +428,7 @@ export default function PMSchedulePage() {
     {
       accessorKey: "assignee",
       header: t("tbl.assignee"),
-      cell: ({ row }) => (
+      cell: ({ row }: any) => (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm">{row.original.assignee}</span>
           {row.original.teamNames.length > 1 && (
@@ -442,7 +442,7 @@ export default function PMSchedulePage() {
     {
       accessorKey: "displayStatus",
       header: t("tbl.status"),
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const ds = row.original.displayStatus;
         const label = statusLabels[ds] || statusText(ds, ds);
         return (
@@ -458,7 +458,7 @@ export default function PMSchedulePage() {
     {
       id: "actions",
       header: t("tbl.actions"),
-      cell: ({ row }) => {
+      cell: ({ row }: any) => {
         const item = row.original;
         const canDoNow = item.displayStatus !== "completed" && item.displayStatus !== "cancelled" && item.displayStatus !== "skipped";
         return (
