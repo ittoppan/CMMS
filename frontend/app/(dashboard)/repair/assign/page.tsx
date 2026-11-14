@@ -14,6 +14,7 @@ import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import { Dialog } from "@/components/ui/dialog";
+import { getAssignCheck, type AssignCheckResponse } from "@/lib/planning";
 
 interface AssignWO extends Record<string, unknown> {
   id: string;
@@ -79,6 +80,13 @@ function toSqlDateTime(v: string): string | null {
   return s.replace("T", " ");
 }
 
+/** เวลาแบบ HH:mm จาก datetime ของ API (Y-m-d H:i:s) */
+function hhmm(v?: string | null): string {
+  if (!v) return "—";
+  const s = String(v).replace("T", " ");
+  return s.length >= 16 ? s.slice(11, 16) : s;
+}
+
 // Avatar เล็ก (รูปจริง / initial) — ui kit ยังไม่มี Avatar component
 function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | null; size?: number }) {
   const initial = (name || "?").trim().charAt(0).toUpperCase();
@@ -140,6 +148,53 @@ export default function RepairAssignPage() {
   const [canAssignOnly, setCanAssignOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+
+  // พรีวิวจากเอนจินวางแผน (planning.php?action=assign_check) — เตือนงานชนเวลา/กำลังคน ไม่บล็อกการจ่ายงาน
+  const [assignCheck, setAssignCheck] = useState<AssignCheckResponse | null>(null);
+  const [assignCheckLoading, setAssignCheckLoading] = useState(false);
+  const [assignCheckError, setAssignCheckError] = useState<string | null>(null);
+
+  const teamKey = selectedTeam.join(",");
+  useEffect(() => {
+    if (!assignOpen || !selectedWo || !selectedTech || !dueAt) {
+      setAssignCheck(null);
+      setAssignCheckError(null);
+      setAssignCheckLoading(false);
+      return;
+    }
+    const dueAtSql = toSqlDateTime(dueAt);
+    if (!dueAtSql) {
+      setAssignCheck(null);
+      return;
+    }
+    let alive = true;
+    setAssignCheckLoading(true);
+    setAssignCheckError(null);
+    // debounce 400ms — กันเรียก API ถี่ตอนผู้ใช้แก้เวลา/เลือกทีม
+    const timer = setTimeout(() => {
+      getAssignCheck({
+        technician_id: Number(selectedTech),
+        due_at: dueAtSql,
+        work_order_id: selectedWo.rawId,
+        team_ids: selectedTeam,
+      })
+        .then((res) => { if (alive) setAssignCheck(res); })
+        .catch((e: unknown) => {
+          if (!alive) return;
+          setAssignCheck(null);
+          // 401/403 = ไม่มีสิทธิ์วางแผน → ไม่ต้องรบกวน (ปุ่มจ่ายงานปกติยังใช้ได้)
+          const status = Number((e as { status?: number })?.status ?? 0);
+          setAssignCheckError(
+            status === 401 || status === 403
+              ? null
+              : "ตรวจงานชนเวลาไม่สำเร็จ — ยังจ่ายงานได้ แต่ควรตรวจตารางช่างเอง"
+          );
+        })
+        .finally(() => { if (alive) setAssignCheckLoading(false); });
+    }, 400);
+    return () => { alive = false; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignOpen, selectedWo, selectedTech, teamKey, dueAt]);
 
   useEffect(() => {
     let alive = true;
@@ -576,6 +631,71 @@ export default function RepairAssignPage() {
               ใบงานจะถูกนับ &quot;เกินกำหนด&quot; เมื่อเลยเวลานี้
             </p>
           </div>
+
+          {/* ตรวจตารางก่อนจ่ายงาน (เอนจิน planning) — เตือนเท่านั้น ไม่บล็อกการจ่ายงาน */}
+          {selectedTech && dueAt && (
+            <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
+              <p className="text-sm font-bold">ตรวจตารางก่อนจ่ายงาน</p>
+              {assignCheckLoading && (
+                <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังตรวจงานชนเวลาและกำลังคน...</p>
+              )}
+              {!assignCheckLoading && assignCheckError && (
+                <p className="text-sm" style={{ color: "var(--cmms-warning-dark)" }}>{assignCheckError}</p>
+              )}
+              {!assignCheckLoading && assignCheck && (
+                <div className="space-y-1.5 text-sm">
+                  {assignCheck.conflicts.length > 0 ? (
+                    <Alert variant="warning">
+                      <div className="space-y-1">
+                        <p className="font-semibold">
+                          พบงานชนกัน {assignCheck.conflicts.length} รายการ ในช่วง{" "}
+                          {hhmm(assignCheck.window.start)}–{hhmm(assignCheck.window.end)} น.
+                        </p>
+                        <ul className="list-disc pl-4 text-sm">
+                          {assignCheck.conflicts.slice(0, 3).map((c, i) => (
+                            <li key={`${c.wo.id}-${i}`}>
+                              {c.wo.work_order_no} — {c.wo.title}
+                              {c.type === "pm" ? " (รอบ PM บนเครื่องเดียวกัน)" : c.type === "asset" ? " (เครื่องจักรเดียวกัน)" : ""}
+                            </li>
+                          ))}
+                        </ul>
+                        {assignCheck.conflicts.length > 3 && (
+                          <p>และอีก {assignCheck.conflicts.length - 3} รายการ — ดูได้ที่หน้าวางแผน</p>
+                        )}
+                      </div>
+                    </Alert>
+                  ) : (
+                    <p className="text-[var(--cmms-text-secondary)]">
+                      ไม่มีงานที่ชนกับช่วง {assignCheck.window.duration_minutes} นาทีก่อนถึงกำหนด
+                    </p>
+                  )}
+
+                  {assignCheck.capacity && (
+                    <p
+                      style={{
+                        color: assignCheck.capacity.overloaded
+                          ? "var(--cmms-danger-dark)"
+                          : "var(--cmms-text-secondary)",
+                      }}
+                    >
+                      ภาระงานวันที่ {assignCheck.date}: ใช้ {assignCheck.capacity.utilization}% ของ{" "}
+                      {Math.round(assignCheck.capacity.total_minutes / 60)} ชม. ({assignCheck.capacity.active_jobs} งาน)
+                      {assignCheck.capacity.overloaded ? " — เต็ม/เกินกำลังแล้ว ควรเลื่อนงานหรือแบ่งให้ช่างอื่น" : ""}
+                    </p>
+                  )}
+
+                  {assignCheck.existing_jobs.length > 0 && (
+                    <p className="text-[var(--cmms-text-secondary)]">
+                      ช่างคนนี้มีงานค้างครบกำหนดไม่เกินเวลานี้ {assignCheck.existing_jobs.length}
+                      {assignCheck.existing_jobs.length >= 8 ? "+" : ""} งาน
+                      {assignCheck.existing_jobs.some((j) => j.overlaps_window) ? " (มีงานที่ชนช่วงเวลาด้วย)" : ""}:{" "}
+                      {assignCheck.existing_jobs.slice(0, 3).map((j) => j.work_order_no).join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {canAssignOnly && (
           <div className="rounded-[10px] border border-[var(--cmms-border)] p-3">
