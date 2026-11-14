@@ -12,6 +12,7 @@ import { usePageHero } from "@/lib/i18n";
 import { REPORT_CENTER_LINKS } from "@/lib/quick-links";
 import { ReportChartsGrid, ReportKpiGrid } from "@/components/reports/report-page";
 import { fmtDateTime, fmtNumber, reportUrl } from "@/components/reports/report-lib";
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 
 // รายงานทั้งหมดอ่านจาก quick-links.ts (UX P3) — map ให้เข้า shape เดิมของหน้า
 const REPORT_LINKS: { href: string; title: string; desc: string; icon: typeof Wrench; tone: string }[] =
@@ -60,6 +61,23 @@ export default function ReportCenterPage() {
           </span>
         )}
       </div>
+
+      <ModuleGuide
+        name="ศูนย์ออกรายงาน (Report Center)"
+        summary="ศูนย์รวมรายงานตามหมวดจากข้อมูลจริง — เลือกรายงาน กำหนดช่วงเวลา/ตัวกรอง และส่งออกผลลัพธ์ได้จากหน้ารายงานปลายทาง"
+        steps={[
+          "เลือกหมวดรายงานจากการ์ดด้านล่าง",
+          "ในหน้ารายงานปลายทาง กำหนดช่วงเวลา/เครื่องจักร/เงื่อนไขที่ต้องการ แล้วดูผลลัพธ์",
+          "ส่งออก CSV/Excel หรือพิมพ์ PDF ตามตัวเลือกที่รายงานนั้นรองรับ",
+        ]}
+        source="อ่านภาพรวมจาก API report center ที่หน้านี้เรียก และแต่ละรายงานย่อยดึงข้อมูลจาก endpoint ของหมวดนั้น — ข้อมูลจริง ณ เวลาที่สร้างรายงาน"
+        note="ผลลัพธ์ขึ้นกับช่วงเวลา ตัวกรอง และความครบถ้วนของข้อมูลต้นทาง — ควรระบุขอบเขต/ช่วงเวลาที่ใช้เมื่อส่งต่อรายงาน"
+        related={[
+          { href: "/reports", label: "ศูนย์รายงาน (Reports Hub)" },
+          { href: "/reports/monthly_pdf", label: "รายงาน PDF ประจำเดือน" },
+          { href: "/reports/export_excel", label: "ส่งออก Excel/CSV" },
+        ]}
+      />
 
       {error && (
         <div className="rounded-xl border border-[var(--cmms-danger)]/30 bg-[var(--cmms-danger-light)] p-4 text-sm">
