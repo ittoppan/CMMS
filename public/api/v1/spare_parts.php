@@ -38,6 +38,23 @@ try {
             $offsetParam = $_GET['offset'] ?? null;
             $paginate = ($limitParam !== null || $pageParam !== null || $offsetParam !== null);
 
+            // ประวัติเคลื่อนไหวสต็อกของรายการ (อ่านอย่างเดียว จาก ledger ที่มีอยู่)
+            if ($id && (isset($_GET['history']) || (($_GET['action'] ?? '') === 'history'))) {
+                $limit = max(1, min(200, (int)($limitParam ?? 100)));
+                try {
+                    $h = $pdo->prepare('SELECT * FROM spare_part_transactions WHERE spare_part_id = ? ORDER BY COALESCE(created_at, "1970-01-01") DESC, id DESC LIMIT ?');
+                    $h->bindValue(1, $id, PDO::PARAM_INT);
+                    $h->bindValue(2, $limit, PDO::PARAM_INT);
+                    $h->execute();
+                    $rows = $h->fetchAll(PDO::FETCH_ASSOC);
+                    echo json_encode(['items' => $rows, 'total' => count($rows), 'spare_part_id' => $id, 'source' => 'spare_part_transactions'], JSON_UNESCAPED_UNICODE);
+                } catch (Exception $e) {
+                    // ตารางอาจยังไม่มีในบางสภาพแวดล้อม — รายงานตามจริง ไม่แต่งข้อมูล
+                    echo json_encode(['items' => [], 'total' => 0, 'spare_part_id' => $id, 'source' => 'spare_part_transactions', 'unavailable' => true, 'reason' => 'ledger_unavailable'], JSON_UNESCAPED_UNICODE);
+                }
+                break;
+            }
+
             if ($id) {
                 $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id WHERE s.id = ?');
                 $stmt->execute([$id]);
