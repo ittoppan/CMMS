@@ -24,18 +24,121 @@ requireLogin($pdo);
                 exit;
             }
             if ($id) {
-                $stmt = $pdo->prepare('SELECT p.*, pl.meter_interval AS meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id WHERE p.id = ?');
+                $stmt = $pdo->prepare('SELECT p.*, pl.meter_interval AS plan_meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id WHERE p.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 $single = [$row];
                 attachWorkTeams($single, 'pm_am');
-                echo json_encode($single[0]);
+                $r = $single[0];
+                if ((!isset($r['meter_interval']) || $r['meter_interval'] === null || $r['meter_interval'] === '') && !empty($r['plan_meter_interval'])) {
+                    $r['meter_interval'] = $r['plan_meter_interval'];
+                }
+                echo json_encode($r);
             } else {
-                $stmt = $pdo->query('SELECT p.*, pl.meter_interval AS meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id ORDER BY p.created_at DESC');
+                // sync overdue ตาม due_date จริง (อ่านให้สถานะสอดคล้อง)
+                $today = date('Y-m-d');
+                try {
+                    $pdo->prepare("UPDATE pm_am SET status='overdue' WHERE status='pending' AND due_date IS NOT NULL AND due_date < ?")->execute([$today]);
+                    $pdo->prepare("UPDATE pm_am SET status='pending' WHERE status='overdue' AND due_date IS NOT NULL AND due_date >= ?")->execute([$today]);
+                } catch (Exception $e) { /* ignore */ }
+
+                $where = [];
+                $params = [];
+                $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+                $frequency = isset($_GET['frequency']) ? trim((string)$_GET['frequency']) : '';
+                $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+                $outsource = isset($_GET['outsource']) ? trim((string)$_GET['outsource']) : '';
+                $assignee = isset($_GET['assignee']) ? (int)$_GET['assignee'] : 0;
+                $dueFrom = isset($_GET['due_from']) ? trim((string)$_GET['due_from']) : '';
+                $dueTo = isset($_GET['due_to']) ? trim((string)$_GET['due_to']) : '';
+                $dueState = isset($_GET['due_state']) ? trim((string)$_GET['due_state']) : '';
+
+                if ($status !== '' && $status !== 'all') { $where[] = 'p.status = ?'; $params[] = $status; }
+                if ($frequency !== '' && $frequency !== 'all') { $where[] = 'p.frequency_type = ?'; $params[] = $frequency; }
+                if ($assignee > 0) { $where[] = 'p.assigned_to = ?'; $params[] = $assignee; }
+                if ($outsource === '1' || $outsource === 'out') { $where[] = 'COALESCE(p.is_outsource,0) = 1'; }
+                elseif ($outsource === '0' || $outsource === 'in') { $where[] = 'COALESCE(p.is_outsource,0) = 0'; }
+                if ($dueFrom !== '') { $where[] = 'p.due_date >= ?'; $params[] = $dueFrom; }
+                if ($dueTo !== '') { $where[] = 'p.due_date <= ?'; $params[] = $dueTo; }
+                if ($q !== '') {
+                    $where[] = '(p.title LIKE ? OR a.name LIKE ? OR a.code LIKE ? OR CAST(p.id AS CHAR) LIKE ? OR u.full_name LIKE ?)';
+                    $like = '%' . $q . '%';
+                    array_push($params, $like, $like, $like, $like, $like);
+                }
+                if ($dueState === 'overdue') {
+                    $where[] = "p.status NOT IN ('completed','skipped','cancelled') AND p.due_date IS NOT NULL AND p.due_date < ?";
+                    $params[] = $today;
+                } elseif ($dueState === 'due_today') {
+                    $where[] = "p.status NOT IN ('completed','skipped','cancelled') AND p.due_date = ?";
+                    $params[] = $today;
+                } elseif ($dueState === 'upcoming_7') {
+                    $where[] = "p.status NOT IN ('completed','skipped','cancelled') AND p.due_date IS NOT NULL AND p.due_date >= ? AND p.due_date <= DATE_ADD(?, INTERVAL 7 DAY)";
+                    $params[] = $today; $params[] = $today;
+                } elseif ($dueState === 'no_due') {
+                    $where[] = "(p.due_date IS NULL OR p.due_date = '')";
+                }
+
+                $whereSql = $where ? (' WHERE ' . implode(' AND ', $where)) : '';
+                $baseSql = "FROM pm_am p LEFT JOIN asset_registry a ON p.asset_id = a.id LEFT JOIN users u ON p.assigned_to = u.id LEFT JOIN pm_am_plans pl ON pl.id = p.plan_id" . $whereSql;
+
+                if (isset($_GET['summary'])) {
+                    $sum = [
+                        'total' => 0, 'completed' => 0, 'in_progress' => 0, 'pending' => 0,
+                        'overdue' => 0, 'skipped' => 0, 'cancelled' => 0,
+                        'due_today' => 0, 'upcoming_7' => 0, 'no_due' => 0,
+                        'actionable' => 0, 'compliance_eligible' => 0,
+                    ];
+                    $cnt = $pdo->prepare("SELECT COUNT(*) " . $baseSql);
+                    $cnt->execute($params);
+                    $sum['total'] = (int)$cnt->fetchColumn();
+                    $stSum = $pdo->prepare("SELECT p.status, COUNT(*) c " . $baseSql . " GROUP BY p.status");
+                    $stSum->execute($params);
+                    foreach ($stSum->fetchAll() as $r) { $k = (string)$r['status']; if (array_key_exists($k, $sum)) $sum[$k] = (int)$r['c']; }
+                    $dueSql = "SELECT
+                        SUM(CASE WHEN p.status NOT IN ('completed','skipped','cancelled') AND p.due_date IS NOT NULL AND p.due_date < ? THEN 1 ELSE 0 END) AS overdue_due,
+                        SUM(CASE WHEN p.status NOT IN ('completed','skipped','cancelled') AND p.due_date = ? THEN 1 ELSE 0 END) AS due_today,
+                        SUM(CASE WHEN p.status NOT IN ('completed','skipped','cancelled') AND p.due_date IS NOT NULL AND p.due_date >= ? AND p.due_date <= DATE_ADD(?, INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS upcoming_7,
+                        SUM(CASE WHEN p.due_date IS NULL OR p.due_date = '' THEN 1 ELSE 0 END) AS no_due,
+                        SUM(CASE WHEN p.status NOT IN ('completed','skipped','cancelled') AND (p.due_date IS NULL OR p.due_date <= DATE_ADD(?, INTERVAL 7 DAY)) THEN 1 ELSE 0 END) AS actionable,
+                        SUM(CASE WHEN p.status NOT IN ('skipped','cancelled') AND p.due_date IS NOT NULL AND p.due_date <= ? THEN 1 ELSE 0 END) AS compliance_eligible
+                        " . $baseSql;
+                    $dueParams = array_merge([$today,$today,$today,$today,$today,$today], $params);
+                    $d = $pdo->prepare($dueSql);
+                    $d->execute($dueParams);
+                    $dr = $d->fetch() ?: [];
+                    $sum['overdue'] = max($sum['overdue'], (int)($dr['overdue_due'] ?? 0));
+                    $sum['due_today'] = (int)($dr['due_today'] ?? 0);
+                    $sum['upcoming_7'] = (int)($dr['upcoming_7'] ?? 0);
+                    $sum['no_due'] = (int)($dr['no_due'] ?? 0);
+                    $sum['actionable'] = (int)($dr['actionable'] ?? 0);
+                    $sum['compliance_eligible'] = (int)($dr['compliance_eligible'] ?? 0);
+                    echo json_encode(['status' => 'success', 'summary' => $sum, 'today' => $today]);
+                    exit;
+                }
+
+                $limit = isset($_GET['limit']) ? max(1, min(2000, (int)$_GET['limit'])) : 0; // 0 = all (backward compat)
+                $offset = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
+                $order = " ORDER BY (p.status='overdue') DESC, p.due_date IS NULL, p.due_date ASC, p.id DESC";
+                $sql = "SELECT p.*, pl.meter_interval AS plan_meter_interval, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy " . $baseSql . $order;
+                if ($limit > 0) { $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset; }
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
                 $rows = $stmt->fetchAll();
+                foreach ($rows as &$rr) {
+                    if ((!isset($rr['meter_interval']) || $rr['meter_interval'] === null || $rr['meter_interval'] === '') && !empty($rr['plan_meter_interval'])) {
+                        $rr['meter_interval'] = $rr['plan_meter_interval'];
+                    }
+                }
+                unset($rr);
                 attachWorkTeams($rows, 'pm_am');
-                echo json_encode($rows);
+                if ($limit > 0) {
+                    $cnt = $pdo->prepare("SELECT COUNT(*) " . $baseSql);
+                    $cnt->execute($params);
+                    echo json_encode(['status' => 'success', 'data' => $rows, 'total' => (int)$cnt->fetchColumn(), 'limit' => $limit, 'offset' => $offset]);
+                } else {
+                    echo json_encode($rows);
+                }
             }
             break;
         case 'POST':
@@ -63,18 +166,26 @@ requireLogin($pdo);
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
             $data = json_decode(file_get_contents('php://input'), true);
             if (!$data) { http_response_code(400); echo json_encode(['error' => 'Invalid JSON']); exit; }
-            // ⛔ ทำ PM ได้เฉพาะวันครบกำหนด (due_date) พอดี — บังคับฝั่ง server (กัน bypass / offline queue)
+            // ปิดงาน PM ได้ตั้งแต่วันครบกำหนดเป็นต้นไป (อนุญาตทำล่าช้า) แต่ไม่อนุญาตปิดก่อนถึงกำหนด
             if (($data['status'] ?? null) === 'completed') {
                 $qDue = $pdo->prepare('SELECT due_date FROM pm_am WHERE id = ?');
                 $qDue->execute([$id]);
-                $dueRaw = $qDue->fetchColumn();
-                if ($dueRaw === false) { http_response_code(404); echo json_encode(['error' => 'PM not found']); exit; }
-                $dueDay = date('Y-m-d', strtotime((string)$dueRaw));
-                if ($dueDay !== date('Y-m-d')) {
-                    http_response_code(403);
-                    echo json_encode(['error' => "PM นี้กำหนดตรวจวันที่ {$dueDay} — ทำเช็คชีตได้เฉพาะวันครบกำหนดเท่านั้น"]);
-                    exit;
+                $dueRow = $qDue->fetch(PDO::FETCH_ASSOC);
+                if (!$dueRow) { http_response_code(404); echo json_encode(['error' => 'PM not found']); exit; }
+                $dueRaw = $dueRow['due_date'] ?? null;
+                $todayDay = date('Y-m-d');
+                if ($dueRaw) {
+                    $dueDay = date('Y-m-d', strtotime((string)$dueRaw));
+                    if ($todayDay < $dueDay) {
+                        http_response_code(403);
+                        echo json_encode(['error' => "PM นี้กำหนดตรวจวันที่ {$dueDay} — ยังไม่ถึงวันครบกำหนด ไม่สามารถปิดงานล่วงหน้าได้"]);
+                        exit;
+                    }
                 }
+                // บันทึกเวลาจริงหากไม่ส่งมา
+                if (empty($data['completed_at'])) { $data['completed_at'] = date('Y-m-d H:i:s'); }
+                if (empty($data['last_done_date'])) { $data['last_done_date'] = $todayDay; }
+                if (empty($data['completed_by']) && !empty($_SESSION['user_id'])) { $data['completed_by'] = (int)$_SESSION['user_id']; }
             }
             // เพิ่มเอกสารแนบ (ใบแจ้งหนี้/ใบเสนอราคา) — { attach_file: {file_url, file_name, file_type, file_size} }
             if (isset($data['attach_file']) && is_array($data['attach_file'])) {

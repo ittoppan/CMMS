@@ -21,6 +21,9 @@ export default function PMCreatePage() {
   const [teamMembers, setTeamMembers] = useState<number[]>([]);
   const [title, setTitle] = useState("");
   const [frequency, setFrequency] = useState("monthly");
+  const [frequencyInterval, setFrequencyInterval] = useState("1");
+  const [meterUnit, setMeterUnit] = useState("");
+  const [meterReading, setMeterReading] = useState("");
   const [isOutsource, setIsOutsource] = useState(false);
   const [outsourceBy, setOutsourceBy] = useState("");
   const [costOutsource, setCostOutsource] = useState("");
@@ -33,57 +36,81 @@ export default function PMCreatePage() {
 
   useEffect(() => {
     fetch("/api/v1/asset_registry.php")
-      .then(res => res.json())
-      .then(json => {
-        if (Array.isArray(json)) {
-          setAssets(json);
-        }
+      .then((res) => res.json())
+      .then((json) => {
+        if (Array.isArray(json)) setAssets(json);
       })
-      .catch(e => console.error("Failed to load assets", e));
+      .catch((e) => console.error("Failed to load assets", e));
 
     // ผู้รับผิดชอบ = ผู้ใช้งานที่ active (ช่าง/ผู้ดูแล) — ข้อมูลจริงจาก users
     fetch("/api/v1/index.php?resource=users")
-      .then(res => res.json())
-      .then(json => {
-        const list = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : []);
+      .then((res) => res.json())
+      .then((json) => {
+        const list = Array.isArray(json) ? json : Array.isArray(json?.data) ? json.data : [];
         setUsers(list.filter((u: any) => u.is_active !== 0 && u.is_active !== "0"));
       })
-      .catch(e => console.error("Failed to load users", e));
+      .catch((e) => console.error("Failed to load users", e));
   }, []);
 
   const handleSubmit = async () => {
-    if (!title || !assetId) {
-      setError("กรุณาระบุชื่อแผนงาน และเลือกเครื่องจักร");
+    if (!title.trim()) {
+      setError("กรุณาระบุชื่องาน PM");
+      return;
+    }
+    if (!assetId) {
+      setError("กรุณาเลือกเครื่องจักร");
       return;
     }
     if (!assignedTo) {
       setError("กรุณาเลือกผู้รับผิดชอบ (ช่างที่จะไปทำ PM หน้างาน)");
       return;
     }
+    const intervalNum = Number(frequencyInterval || 1);
+    if (!Number.isFinite(intervalNum) || intervalNum < 1) {
+      setError("จำนวนรอบความถี่ต้องเป็นตัวเลขตั้งแต่ 1 ขึ้นไป");
+      return;
+    }
+    if (frequency === "meter_based" && !meterUnit.trim()) {
+      setError("กรุณาระบุหน่วยมิเตอร์สำหรับงาน PM แบบตามมิเตอร์ (เช่น ชั่วโมง, กม., รอบ)");
+      return;
+    }
+    if (isOutsource && !outsourceBy.trim()) {
+      setError("กรุณาระบุชื่อบริษัท/ผู้รับเหมาภายนอก");
+      return;
+    }
+
     setLoading(true);
     setError("");
+
+    const payload: Record<string, any> = {
+      title: title.trim(),
+      description: description.trim(),
+      asset_id: Number(assetId),
+      assigned_to: Number(assignedTo),
+      team_ids: teamMembers,
+      frequency_type: frequency,
+      frequency_interval: Math.floor(intervalNum),
+      due_date: dueDate || null,
+      status: "pending",
+      is_outsource: isOutsource ? 1 : 0,
+      outsource_by: isOutsource && outsourceBy.trim() ? outsourceBy.trim() : null,
+      cost_outsource: isOutsource ? Number(costOutsource) || 0 : 0,
+    };
+
+    if (meterUnit.trim()) payload.meter_unit = meterUnit.trim();
+    if (meterReading.trim() !== "") {
+      const mr = Number(meterReading);
+      if (Number.isFinite(mr)) payload.meter_reading = mr;
+    }
 
     try {
       const res = await fetch("/api/v1/pm_am.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          asset_id: assetId,
-          assigned_to: assignedTo ? Number(assignedTo) : null,
-          team_ids: teamMembers,
-          frequency_type: frequency,
-          frequency_interval: 1,
-          due_date: dueDate || null,
-          status: "pending",
-          is_outsource: isOutsource ? 1 : 0,
-          outsource_by: isOutsource && outsourceBy.trim() ? outsourceBy.trim() : null,
-          cost_outsource: isOutsource ? (Number(costOutsource) || 0) : 0
-        }),
+        body: JSON.stringify(payload),
       });
-      const json = await res.json();
-      if (json.success || json.id) {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok && (json.success || json.id)) {
         setSubmitted(true);
       } else {
         setError(json.error || "เกิดข้อผิดพลาดในการบันทึกแผน PM");
@@ -114,9 +141,7 @@ export default function PMCreatePage() {
           <p className="cmms-eyebrow" data-on-dark="true">PM PLAN · CMMS-TOPPAN</p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">สร้างแผนบำรุงรักษาเครื่องจักร</h1>
-            <span className="cmms-andon-chip" data-on-dark="true">
-              PM Plan
-            </span>
+            <span className="cmms-andon-chip" data-on-dark="true">PM Plan</span>
           </div>
           <p className="cmms-hero-desc">
             กำหนดแผนบำรุงรักษาเชิงป้องกัน (Preventive Maintenance) สำหรับเครื่องจักร
@@ -125,7 +150,7 @@ export default function PMCreatePage() {
       </div>
 
       <Card>
-        <CardContent className="max-w-[640px] space-y-5 p-6">
+        <CardContent className="max-w-[760px] space-y-5 p-6">
           {error && <Alert variant="danger" description={error} />}
 
           <Input
@@ -137,16 +162,13 @@ export default function PMCreatePage() {
 
           <div className="space-y-1.5">
             <label htmlFor="pm-create-asset" className="text-sm font-medium text-[var(--cmms-text-primary)]">เครื่องจักรเป้าหมาย *</label>
-            <Select
-              value={assetId || "__none__"}
-              onValueChange={(v) => setAssetId(v === "__none__" ? "" : v)}
-            >
+            <Select value={assetId || "__none__"} onValueChange={(v) => setAssetId(v === "__none__" ? "" : v)}>
               <SelectTrigger id="pm-create-asset" aria-label="เครื่องจักรเป้าหมาย">
                 <SelectValue placeholder="เลือกเครื่องจักร..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">เลือกเครื่องจักร...</SelectItem>
-                {assets.map(a => (
+                {assets.map((a) => (
                   <SelectItem key={a.id} value={String(a.id)}>{`${a.code} - ${a.name}`}</SelectItem>
                 ))}
               </SelectContent>
@@ -155,16 +177,13 @@ export default function PMCreatePage() {
 
           <div className="space-y-1.5">
             <label htmlFor="pm-create-assignee" className="text-sm font-medium text-[var(--cmms-text-primary)]">ผู้รับผิดชอบ (ช่าง) *</label>
-            <Select
-              value={assignedTo || "__none__"}
-              onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}
-            >
+            <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
               <SelectTrigger id="pm-create-assignee" aria-label="ผู้รับผิดชอบ">
                 <SelectValue placeholder="เลือกช่างที่รับผิดชอบงาน PM นี้..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">เลือกช่างที่รับผิดชอบงาน PM นี้...</SelectItem>
-                {users.map(u => (
+                {users.map((u) => (
                   <SelectItem key={u.id} value={String(u.id)}>{`${u.full_name || u.username || `#${u.id}`}${u.employee_code ? ` (${u.employee_code})` : ""}`}</SelectItem>
                 ))}
               </SelectContent>
@@ -176,13 +195,13 @@ export default function PMCreatePage() {
             <p className="text-sm text-[var(--cmms-text-secondary)]">ช่างที่เลือกจะเห็นงาน PM นี้ใน &quot;งานของฉัน&quot; — ไม่บังคับ</p>
             <div className="grid max-h-[180px] gap-1.5 overflow-y-auto rounded-[10px] border p-2" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", borderColor: "var(--cmms-border)" }}>
               {users
-                .filter(u => String(u.id) !== assignedTo)
-                .map(u => {
+                .filter((u) => String(u.id) !== assignedTo)
+                .map((u) => {
                   const tid = Number(u.id);
                   const checked = teamMembers.includes(tid);
                   return (
                     <label key={u.id} className="flex min-h-10 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5" style={{ background: checked ? "var(--cmms-primary-wash)" : "transparent" }}>
-                      <Checkbox checked={checked} onCheckedChange={() => setTeamMembers(prev => checked ? prev.filter(x => x !== tid) : [...prev, tid])} />
+                      <Checkbox checked={checked} onCheckedChange={() => setTeamMembers((prev) => checked ? prev.filter((x) => x !== tid) : [...prev, tid])} />
                       <span className={`text-sm ${checked ? "font-semibold" : ""}`}>{u.full_name || u.username || `#${u.id}`}</span>
                     </label>
                   );
@@ -190,31 +209,65 @@ export default function PMCreatePage() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="pm-create-frequency" className="text-sm font-medium text-[var(--cmms-text-primary)]">รอบความถี่ *</label>
-            <Select
-              value={frequency}
-              onValueChange={(v) => setFrequency(v)}
-            >
-              <SelectTrigger id="pm-create-frequency" aria-label="รอบความถี่">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="daily">รายวัน</SelectItem>
-                <SelectItem value="weekly">รายสัปดาห์</SelectItem>
-                <SelectItem value="monthly">รายเดือน</SelectItem>
-                <SelectItem value="quarterly">ทุก 3 เดือน</SelectItem>
-                <SelectItem value="yearly">รายปี</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="pm-create-frequency" className="text-sm font-medium text-[var(--cmms-text-primary)]">รอบความถี่ *</label>
+              <Select value={frequency} onValueChange={(v) => setFrequency(v)}>
+                <SelectTrigger id="pm-create-frequency" aria-label="รอบความถี่">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">รายวัน</SelectItem>
+                  <SelectItem value="weekly">รายสัปดาห์</SelectItem>
+                  <SelectItem value="monthly">รายเดือน</SelectItem>
+                  <SelectItem value="quarterly">รายไตรมาส (3 เดือน)</SelectItem>
+                  <SelectItem value="semi_annual">ทุก 6 เดือน</SelectItem>
+                  <SelectItem value="yearly">รายปี</SelectItem>
+                  <SelectItem value="custom">กำหนดเอง (ตามวัน)</SelectItem>
+                  <SelectItem value="meter_based">ตามมิเตอร์ (ชั่วโมง/รอบ/ระยะทาง)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Input
+              label={frequency === "meter_based" ? "จำนวนรอบอ้างอิง (วัน) สำหรับกำหนดเบื้องต้น" : "ทุกกี่หน่วย (interval)"}
+              type="number"
+              min={1}
+              value={frequencyInterval}
+              onChange={(e) => setFrequencyInterval(e.target.value)}
+              description={frequency === "meter_based" ? "ระบบจะติดตามถึงกำหนดหลักจากค่ามิเตอร์/แผนแม่แบบ กำหนดค่านี้เป็นรอบอ้างอิงตามวันได้หากต้องการ" : "เช่น 1 = ทุก 1 เดือน, 3 = ทุก 3 เดือน (ขึ้นกับความถี่ที่เลือก)"}
+            />
           </div>
+
+          {(frequency === "meter_based" || meterUnit || meterReading) && (
+            <div className="space-y-3 rounded-[10px] border p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+              <p className="text-sm font-semibold">ข้อมูลตามมิเตอร์ {frequency === "meter_based" ? "*" : "(ถ้ามี)"}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input
+                  label="หน่วยมิเตอร์"
+                  placeholder="เช่น ชั่วโมง, กม., รอบ, ชิ้น"
+                  value={meterUnit}
+                  onChange={(e) => setMeterUnit(e.target.value)}
+                  description={frequency === "meter_based" ? "จำเป็นสำหรับงานตามมิเตอร์" : "ระบุถ้าต้องการบันทึกค่ามิเตอร์กับรอบนี้"}
+                />
+                <Input
+                  label="ค่ามิเตอร์ baseline/ล่าสุด (ถ้าทราบ)"
+                  type="number"
+                  step="any"
+                  placeholder="เช่น 1250"
+                  value={meterReading}
+                  onChange={(e) => setMeterReading(e.target.value)}
+                  description="ใช้เป็นค่าตั้งต้นอ้างอิงรอบปัจจุบัน (ถ้ามี)"
+                />
+              </div>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">
+                สำหรับ PM ตามมิเตอร์ การถึงกำหนดควรยึดค่ามิเตอร์ปัจจุบันเทียบ baseline/รอบตามแผน (CBM) — ตรวจสอบให้มีการบันทึกค่ามิเตอร์ของเครื่องจักรอย่างสม่ำเสมอ
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-3">
             <label className="inline-flex min-h-10 cursor-pointer items-center gap-2">
-              <Checkbox
-                checked={isOutsource}
-                onCheckedChange={(v) => setIsOutsource(v === true)}
-              />
+              <Checkbox checked={isOutsource} onCheckedChange={(v) => setIsOutsource(v === true)} />
               <span className="text-sm font-semibold">งานภายนอก (Outsource)</span>
             </label>
             <span className="text-sm text-[var(--cmms-text-secondary)]">เปิดเมื่อจ้างบริษัท/ผู้รับเหมาภายนอกมาทำ PM (เช่น ผู้ผลิตเครื่องจักร)</span>
@@ -240,23 +293,22 @@ export default function PMCreatePage() {
           )}
 
           <Textarea
-            label="รายละเอียดวิธีตรวจเช็ค"
+            label="รายละเอียดวิธีตรวจเช็ค / ขอบเขตงาน"
             placeholder="อธิบายขั้นตอนการตรวจเช็คที่ต้องทำ..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
 
           <Input
-            label="กำหนดการทำครั้งแรก"
+            label={frequency === "meter_based" ? "กำหนดตรวจครั้งแรก (วันที่อ้างอิง)" : "กำหนดการทำครั้งแรก *"}
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
+            description={frequency === "meter_based" ? "ใช้เป็นวันอ้างอิง/แผนเบื้องต้นร่วมกับการติดตามตามมิเตอร์" : "วันครบกำหนดของรอบนี้"}
           />
 
           <div className="flex justify-end gap-3">
-            <Button variant="secondary" onClick={() => router.push("/pm_am")}>
-              ยกเลิก
-            </Button>
+            <Button variant="secondary" onClick={() => router.push("/pm_am")}>ยกเลิก</Button>
             <Button disabled={loading} onClick={handleSubmit}>
               {loading ? "กำลังบันทึก..." : "บันทึกแผนงาน"}
             </Button>
