@@ -386,7 +386,13 @@ export function assignWork(payload: AssignPayload): Promise<RawResult<MutationRe
 }
 
 export function emergencyWork(id: number, reason: string): Promise<RawResult<MutationResponse>> {
-  return mutatePlanningRaw<MutationResponse>("PUT", { action: "emergency", id, reason });
+  // ต้องมี client_action_id เพื่อให้ backend กัน double-submit (การประกาศฉุกเฉินเลื่อนงานอื่นทั้งกระดาน)
+  return mutatePlanningRaw<MutationResponse>("PUT", {
+    action: "emergency",
+    id,
+    reason,
+    client_action_id: `em-${id}-${Date.now()}`,
+  });
 }
 
 export interface SkillPayload {
