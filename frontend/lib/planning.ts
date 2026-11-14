@@ -335,7 +335,8 @@ export interface AssignCheckJob {
 }
 
 export interface AssignCheckResponse {
-  window: { start: string; end: string; duration_minutes: number };
+  /** source = planned (ใช้เวลาเริ่มที่ผู้จ่ายงานระบุ) | estimated (ประมาณจากระยะงานก่อนถึงกำหนด) */
+  window: { start: string; end: string; duration_minutes: number; source: "planned" | "estimated" };
   date: string;
   user: { id: number; name: string };
   conflicts: AssignCheckConflict[];
@@ -360,12 +361,15 @@ export function getAssignCheck(params: {
   team_ids?: number[];
   duration_minutes?: number;
   asset_id?: number;
+  /** เวลาเริ่มงานตามแผน — ถ้าส่งมา backend ใช้ช่วงนี้ตรวจงานชนแทนการประมาณ */
+  start_at?: string;
 }): Promise<AssignCheckResponse> {
   const qs = new URLSearchParams({ action: "assign_check", technician_id: String(params.technician_id), due_at: params.due_at });
   if (params.work_order_id) qs.set("work_order_id", String(params.work_order_id));
   if (params.team_ids && params.team_ids.length) qs.set("team_ids", params.team_ids.join(","));
   if (params.duration_minutes) qs.set("duration_minutes", String(params.duration_minutes));
   if (params.asset_id) qs.set("asset_id", String(params.asset_id));
+  if (params.start_at) qs.set("start_at", params.start_at);
   return apiJson<AssignCheckResponse>(`${PLANNING_API}?${qs.toString()}`);
 }
 

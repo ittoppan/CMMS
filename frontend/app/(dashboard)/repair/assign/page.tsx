@@ -32,6 +32,8 @@ interface AssignWO extends Record<string, unknown> {
   description: string;
   /** เวลาคาดเสร็จที่บันทึกไว้ (ใช้ prefilled ตอนเปลี่ยนช่าง) */
   estimatedCompletion?: string | null;
+  /** เวลาเริ่มงานตามแผนที่บันทึกไว้ (planned window) */
+  plannedStart?: string | null;
 }
 
 interface Technician {
@@ -140,6 +142,7 @@ export default function RepairAssignPage() {
   const [selectedTeam, setSelectedTeam] = useState<number[]>([]);
   // เวลาคาดเสร็จ (SLA) — บังคับกรอกตอนจ่ายงาน เพื่อให้ KPI overdue มีความหมาย
   const [dueAt, setDueAt] = useState("");
+  const [startAt, setStartAt] = useState("");
   const [slaHours, setSlaHours] = useState<Record<string, number>>(SLA_FALLBACK_HOURS);
   // มอบหมายอย่างเดียว (ไม่เริ่มงาน) → actual_start_at จะประทับตอนช่างกดเริ่มงานจริง
   // ทำให้ "เวลาซ่อมจริง" (repair_time_minutes) ไม่นับเวลารอช่าง
@@ -167,6 +170,7 @@ export default function RepairAssignPage() {
       setAssignCheck(null);
       return;
     }
+    const startAtSql = startAt ? toSqlDateTime(startAt) : null;
     let alive = true;
     setAssignCheckLoading(true);
     setAssignCheckError(null);
@@ -175,6 +179,7 @@ export default function RepairAssignPage() {
       getAssignCheck({
         technician_id: Number(selectedTech),
         due_at: dueAtSql,
+        start_at: startAtSql ?? undefined,
         work_order_id: selectedWo.rawId,
         team_ids: selectedTeam,
       })
@@ -194,7 +199,7 @@ export default function RepairAssignPage() {
     }, 400);
     return () => { alive = false; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignOpen, selectedWo, selectedTech, teamKey, dueAt]);
+  }, [assignOpen, selectedWo, selectedTech, teamKey, dueAt, startAt]);
 
   useEffect(() => {
     let alive = true;
@@ -245,6 +250,7 @@ export default function RepairAssignPage() {
             requestDate: row.created_at ? row.created_at.split(" ")[0] : "-",
             description: row.description || row.failure_report || row.symptoms || "",
             estimatedCompletion: row.estimated_completion_date || null,
+            plannedStart: row.planned_start_at || null,
           }));
         setWorkOrders(fetched);
       }
@@ -301,6 +307,7 @@ export default function RepairAssignPage() {
     setSelectedTech(wo.assigneeId ? String(wo.assigneeId) : "");
     setSelectedTeam((wo.teamIds || []).filter((id) => id !== wo.assigneeId));
     setStartNow(!canAssignOnly || wo.status === "in_progress");
+    setStartAt(wo.plannedStart ? wo.plannedStart.replace(" ", "T").slice(0, 16) : "");
     if (wo.estimatedCompletion) {
       // API ส่งมาเป็น "YYYY-MM-DD HH:MM:SS" — แปลงเป็นค่า datetime-local
       setDueAt(wo.estimatedCompletion.replace(" ", "T").slice(0, 16));
@@ -322,6 +329,15 @@ export default function RepairAssignPage() {
       showToast("error", "เวลาคาดเสร็จต้องเป็นเวลาในอนาคต");
       return;
     }
+    const startAtSql = startAt ? toSqlDateTime(startAt) : null;
+    if (startAt && !startAtSql) {
+      showToast("error", "รูปแบบเวลาเริ่มงานไม่ถูกต้อง");
+      return;
+    }
+    if (startAtSql && startAtSql >= dueAtSql) {
+      showToast("error", "เวลาเริ่มงานตามแผนต้องมาก่อนเวลาคาดเสร็จ");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -335,6 +351,8 @@ export default function RepairAssignPage() {
           team_ids: [Number(selectedTech), ...selectedTeam],
           estimated_completion_date: dueAtSql,
           sla_due_at: dueAtSql,
+          // รอบเวลาตามแผน (planned window) — ใช้ตรวจงานชนและให้ Planning Center เห็นกรอบเวลาจริง
+          ...(startAtSql ? { planned_start_at: startAtSql, planned_end_at: dueAtSql } : {}),
           status: startNow || !canAssignOnly ? "in_progress" : "assigned",
           ...(startNow || !canAssignOnly
             ? {
@@ -614,6 +632,24 @@ export default function RepairAssignPage() {
           </div>
 
           <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
+            <label htmlFor="assign-start-at" className="block text-sm font-bold">
+              เวลาเริ่มงานตามแผน{" "}
+              <span className="font-normal text-[var(--cmms-text-secondary)]">(ไม่บังคับ)</span>
+            </label>
+            <input
+              id="assign-start-at"
+              type="datetime-local"
+              value={startAt}
+              onChange={(e) => setStartAt(e.target.value)}
+              className="w-full rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-3 py-2 text-sm"
+            />
+            <p className="text-sm text-[var(--cmms-text-secondary)]">
+              ใช้เป็นรอบเวลาของใบงาน (planned) และให้ระบบตรวจงานชนตรงช่วงจริง — ถ้าเว้นว่าง ระบบจะประมาณจาก
+              ระยะเวลางานก่อนถึงเวลาคาดเสร็จ
+            </p>
+          </div>
+
+          <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
             <label htmlFor="assign-due-at" className="block text-sm font-bold">
               เวลาคาดเสร็จ (SLA) <span style={{ color: "var(--cmms-danger)" }}>*</span>
             </label>
@@ -666,7 +702,10 @@ export default function RepairAssignPage() {
                     </Alert>
                   ) : (
                     <p className="text-[var(--cmms-text-secondary)]">
-                      ไม่มีงานที่ชนกับช่วง {assignCheck.window.duration_minutes} นาทีก่อนถึงกำหนด
+                      ไม่มีงานที่ชนกับช่วง {hhmm(assignCheck.window.start)}–{hhmm(assignCheck.window.end)} น.
+                      {assignCheck.window.source === "estimated"
+                        ? ` (ประมาณ ${assignCheck.window.duration_minutes} นาทีก่อนถึงกำหนด — ระบุเวลาเริ่มงานเพื่อตรวจตรงช่วงจริง)`
+                        : ""}
                     </p>
                   )}
 

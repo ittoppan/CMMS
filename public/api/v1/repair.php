@@ -684,6 +684,17 @@ try {
             if (canSupervisor()) {
                 $allowed = array_merge($allowed, ['work_order_type', 'planned_start_at', 'planned_end_at', 'estimated_duration_minutes', 'required_skill', 'required_tools', 'safety_requirement', 'instructions', 'sla_due_at']);
             }
+            // รอบเวลาตามแผนต้องเรียงถูก: เริ่มก่อนสิ้นสุด (planned_end_at)
+            if (!empty($data['planned_start_at']) && !empty($data['planned_end_at'])) {
+                $psTs = strtotime((string)$data['planned_start_at']);
+                $peTs = strtotime((string)$data['planned_end_at']);
+                if ($psTs !== false && $peTs !== false && $psTs >= $peTs) {
+                    clientActionFinish($pdo, $idemKey, 'failed', 'repair', $id, 422);
+                    http_response_code(422);
+                    echo json_encode(['error' => 'เวลาเริ่มงานตามแผนต้องมาก่อนเวลาสิ้นสุด', 'code' => 'PLAN_WINDOW_INVALID'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (isset($data[$col])) { $fields[] = "$col = ?"; $values[] = $data[$col]; }
