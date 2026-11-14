@@ -21,6 +21,7 @@ import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Spinner } from "@/components/ui/spinner";
 import { Dialog } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Building2,
   Wrench,
@@ -40,6 +41,9 @@ import {
   ArrowRight,
   ShieldAlert,
   Gauge,
+  Droplets,
+  Zap,
+  Plus,
 } from "lucide-react";
 
 // ── mobile detection (pattern เดียวกับ spare_parts page) ──
@@ -245,6 +249,23 @@ interface CbmResponse {
   summary: Record<string, number>;
 }
 
+interface MeasurementRow {
+  id: number;
+  parameter: string;
+  value_numeric: number | string | null;
+  unit: string | null;
+  method: string | null;
+  measured_at: string | null;
+  notes: string | null;
+  created_at?: string | null;
+}
+
+const getCsrfToken = (): string | null => {
+  if (typeof document === "undefined") return null;
+  const v = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/)?.[1] ?? null;
+  try { return v ? decodeURIComponent(v) : null; } catch { return v; }
+};
+
 const cbmStatusUi: Record<string, { label: string; variant: "neutral" | "primary" | "success" | "warning" | "danger" | "info" }> = {
   due: { label: "ถึงกำหนด/เกิน", variant: "danger" },
   near: { label: "ใกล้ถึง (≥90%)", variant: "warning" },
@@ -273,6 +294,13 @@ export default function AssetRegistryViewPage() {
   const [calibrations, setCalibrations] = useState<CalibrationRow[]>([]);
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [cbm, setCbm] = useState<CbmResponse | null>(null);
+  const [measurements, setMeasurements] = useState<MeasurementRow[]>([]);
+  const [measLoading, setMeasLoading] = useState(false);
+  const [measSaving, setMeasSaving] = useState(false);
+  const [measError, setMeasError] = useState("");
+  const [measOk, setMeasOk] = useState("");
+  const [measPreset, setMeasPreset] = useState<"electric" | "water" | "hours" | "custom">("electric");
+  const [measForm, setMeasForm] = useState({ parameter: "มิเตอร์ไฟฟ้า", value: "", unit: "kWh", measured_at: new Date().toISOString().slice(0, 16), notes: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | TimelineKind>("all");
@@ -386,6 +414,67 @@ export default function AssetRegistryViewPage() {
 
   
 
+  const fetchMeasurements = useCallback(async (id: string) => {
+    if (!id) return;
+    setMeasLoading(true);
+    try {
+      const res = await fetch(`/api/v1/asset_measurements.php?asset_id=${encodeURIComponent(id)}`);
+      const j = await res.json().catch(() => ({}));
+      const list = Array.isArray(j?.measurements) ? j.measurements : Array.isArray(j) ? j : [];
+      setMeasurements(list as MeasurementRow[]);
+    } catch {
+      // ignore
+    } finally {
+      setMeasLoading(false);
+    }
+  }, []);
+
+  const applyMeasPreset = (p: "electric" | "water" | "hours" | "custom") => {
+    setMeasPreset(p);
+    if (p === "electric") setMeasForm((f) => ({ ...f, parameter: "มิเตอร์ไฟฟ้า", unit: "kWh" }));
+    else if (p === "water") setMeasForm((f) => ({ ...f, parameter: "มิเตอร์น้ำ", unit: "m³" }));
+    else if (p === "hours") setMeasForm((f) => ({ ...f, parameter: "ชั่วโมงเดินเครื่อง", unit: "ชั่วโมง" }));
+  };
+
+  const saveMeasurement = async () => {
+    if (!assetId) return;
+    const val = Number(measForm.value);
+    if (!Number.isFinite(val)) { setMeasError("กรุณาระบุค่ามิเตอร์เป็นตัวเลข"); return; }
+    if (!String(measForm.parameter || "").trim()) { setMeasError("กรุณาระบุชื่อพารามิเตอร์/ประเภทมิเตอร์"); return; }
+    setMeasSaving(true); setMeasError(""); setMeasOk("");
+    try {
+      const csrf = getCsrfToken();
+      const body = {
+        action: "add",
+        asset_id: Number(assetId),
+        parameter: String(measForm.parameter || "").trim(),
+        value_numeric: val,
+        unit: String(measForm.unit || "").trim() || null,
+        measured_at: measForm.measured_at ? new Date(measForm.measured_at).toISOString().slice(0, 19).replace("T", " ") : null,
+        notes: String(measForm.notes || "").trim() || null,
+      };
+      const res = await fetch("/api/v1/asset_measurements.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || j?.error) throw new Error(j?.error || j?.message || "บันทึกไม่สำเร็จ");
+      setMeasOk("บันทึกค่ามิเตอร์เรียบร้อย");
+      setMeasForm((f) => ({ ...f, value: "", notes: "" }));
+      await fetchMeasurements(assetId);
+      try {
+        const r = await fetch(`/api/v1/pm_plans.php?asset_id=${encodeURIComponent(assetId)}&meters=1`);
+        const jj = await r.json();
+        if (Array.isArray(jj?.items)) setCbm(jj as CbmResponse);
+      } catch {}
+    } catch (e: any) {
+      setMeasError(e?.message || "บันทึกค่ามิเตอร์ไม่สำเร็จ (ตรวจสอบสิทธิ์/การเชื่อมต่อ)");
+    } finally {
+      setMeasSaving(false);
+    }
+  };
+
   // ── load asset + related ──
   useEffect(() => {
     if (!assetId || filtersApplied.current) return;
@@ -451,6 +540,12 @@ export default function AssetRegistryViewPage() {
           const j = await p6.value.json();
           if (Array.isArray(j?.items)) setCbm(j as CbmResponse);
         }
+        try {
+          const mr = await fetch(`/api/v1/asset_measurements.php?asset_id=${encodeURIComponent(assetId)}`);
+          const mj = await mr.json().catch(() => ({}));
+          const mlist = Array.isArray(mj?.measurements) ? mj.measurements : Array.isArray(mj) ? mj : [];
+          setMeasurements(mlist as MeasurementRow[]);
+        } catch {}
       } catch (e) {
         console.error("Fetch asset detail error:", e);
         setError("ไม่พบข้อมูลเครื่องจักร หรือโหลดข้อมูลไม่สำเร็จ");
@@ -735,6 +830,81 @@ export default function AssetRegistryViewPage() {
                   </VStack>
                 ))}
               </Grid>
+            </CardContent>
+          </Card>
+
+          {/* บันทึกและประวัติค่ามิเตอร์ (น้ำ/ไฟ/ชั่วโมง) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Gauge size={16} strokeWidth={1.75} aria-hidden="true" />
+                บันทึกค่ามิเตอร์ (น้ำ / ไฟฟ้า / ชั่วโมง)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {measError && <Alert variant="danger" description={measError} />}
+              {measOk && <Alert variant="success" description={measOk} />}
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant={measPreset === "electric" ? "primary" : "secondary"} onClick={() => applyMeasPreset("electric")}><Zap size={14} aria-hidden="true" /> มิเตอร์ไฟฟ้า (kWh)</Button>
+                <Button type="button" size="sm" variant={measPreset === "water" ? "primary" : "secondary"} onClick={() => applyMeasPreset("water")}><Droplets size={14} aria-hidden="true" /> มิเตอร์น้ำ (m³)</Button>
+                <Button type="button" size="sm" variant={measPreset === "hours" ? "primary" : "secondary"} onClick={() => applyMeasPreset("hours")}><Timer size={14} aria-hidden="true" /> ชั่วโมงเดินเครื่อง</Button>
+                <Button type="button" size="sm" variant={measPreset === "custom" ? "primary" : "secondary"} onClick={() => applyMeasPreset("custom")}><Plus size={14} aria-hidden="true" /> กำหนดเอง</Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Input label="พารามิเตอร์/ประเภท" value={measForm.parameter} onChange={(e) => setMeasForm({ ...measForm, parameter: e.target.value })} hint="ใช้จับคู่กับแผน PM ตามมิเตอร์ (แนะนำตรงกับหน่วย เช่น มิเตอร์ไฟฟ้า/kWh)" />
+                <Input label="ค่าที่อ่านได้ *" type="number" step="any" value={measForm.value} onChange={(e) => setMeasForm({ ...measForm, value: e.target.value })} placeholder="เช่น 1250.5" />
+                <Input label="หน่วย" value={measForm.unit} onChange={(e) => setMeasForm({ ...measForm, unit: e.target.value })} placeholder="เช่น kWh, m³, ชั่วโมง" hint="ควรตรงกับ meter_unit ของแผน" />
+                <Input label="วัน-เวลาที่วัด" type="datetime-local" value={measForm.measured_at} onChange={(e) => setMeasForm({ ...measForm, measured_at: e.target.value })} />
+              </div>
+              <Input label="หมายเหตุ (ถ้ามี)" value={measForm.notes} onChange={(e) => setMeasForm({ ...measForm, notes: e.target.value })} placeholder="เช่น อ่านจากหน้าปัดรอบบ่าย" />
+              <div className="flex flex-wrap items-center gap-3">
+                <Button onClick={saveMeasurement} disabled={measSaving || !canShow("asset_registry")}>{measSaving ? "กำลังบันทึก..." : "บันทึกค่ามิเตอร์"}</Button>
+                <span className="text-xs text-muted-foreground">บันทึกค่าจริงสม่ำเสมอเพื่อให้ PM ตามมิเตอร์ (CBM) และรอบถัดไปประเมินได้ถูกต้อง</span>
+              </div>
+
+              {cbm && cbm.items.some((m) => m.status === "no_reading" && measurements.length > 0) && (
+                <Alert variant="warning" description="มีแผน PM ตามมิเตอร์ที่ยังไม่พบค่ามิเตอร์ที่ตรงกัน — ตรวจสอบให้หน่วย/พารามิเตอร์ที่บันทึกตรงกับ meter_unit ของแผน (เช่น ไฟฟ้า kWh, น้ำ m³)" />
+              )}
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold">ประวัติค่ามิเตอร์ล่าสุด</p>
+                  {measLoading && <Spinner />}
+                </div>
+                {measurements.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">ยังไม่มีค่ามิเตอร์ที่บันทึก (แสดง N/A ในการประเมิน CBM จนกว่าจะมีข้อมูล) — แนะนำบันทึกค่ามิเตอร์น้ำ/ไฟเป็นประจำ</p>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-[var(--cmms-border)]">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-[var(--cmms-bg-muted)] text-left">
+                        <tr>
+                          <th className="px-3 py-2 font-medium">เวลา</th>
+                          <th className="px-3 py-2 font-medium">พารามิเตอร์</th>
+                          <th className="px-3 py-2 font-medium">ค่า</th>
+                          <th className="px-3 py-2 font-medium">หน่วย</th>
+                          <th className="px-3 py-2 font-medium">หมายเหตุ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {measurements.slice(0, 20).map((r) => {
+                          const matched = cbm?.items.some((m) => String(m.meter_unit || "") === String(r.unit || "") || String(m.meter_unit || "") === String(r.parameter || ""));
+                          return (
+                            <tr key={r.id} className="border-t border-[var(--cmms-border)]">
+                              <td className="px-3 py-2 whitespace-nowrap">{String(r.measured_at || r.created_at || "-").replace("T", " ").slice(0, 16)}</td>
+                              <td className="px-3 py-2">{r.parameter || "-"}</td>
+                              <td className="px-3 py-2 font-semibold tabular-nums">{r.value_numeric != null ? Number(r.value_numeric).toLocaleString("th-TH") : "-"}</td>
+                              <td className="px-3 py-2">
+                                <span className="inline-flex items-center gap-1">{r.unit || "-"}{matched && <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--cmms-success-dark)]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--cmms-success-dark)]" aria-hidden="true" />ตรงแผน</span>}</span>
+                              </td>
+                              <td className="px-3 py-2 text-muted-foreground">{r.notes || "-"}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
