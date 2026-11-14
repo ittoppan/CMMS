@@ -125,3 +125,21 @@ assets: total 82 / running 82 / down(=มีใบงานค้าง) 82
 - ใบงานที่ว่างทั้ง 99 ใบเป็น `medium` หมด จึงทดสอบ prefill ต่างระดับผ่าน UI ไม่ได้ (helper ยังคุมด้วย `critical 4 / high 24 / medium 72 / low 168`)
 - ค่า SLA ยังไม่ถูก insert ลง `settings` (migration ยังไม่รัน) — ระบบใช้ค่า default จาก `settings_defaults.php` และหน้า dialog แสดง 72 ชม. ถูกต้อง
 - หลังทดสอบมีใบงานจริง 1 ใบถูกมอบหมาย (EN-26-081 → นายเกียรติศักดิ์ สีจันฮด, กำหนดส่ง 2026-11-17 09:19) — เป็นผลจากคำสั่งทดสอบ ไม่ได้ย้อนกลับ
+
+## รอบ 4: ทดสอบการแจ้งเตือน SLA ด้วยกำหนดส่งจริง (2026-11-14 09:31)
+
+วิธี: สร้างใบงานชั่วคราว 1 ใบ (`TEST-SLA-NOTIFY`, id 109, assigned_to 234, due = now + 2 ชม.) แล้วรัน engine ตรง ๆ ไม่ได้แก้กำหนดส่งของใบงานจริง และล้างข้อมูลทดสอบทิ้งหลังจบ
+
+| # | สถานการณ์ | คำสั่ง | ผล |
+|---|---|---|---|
+| 1 | near due (due = now + 2 ชม.) | `php scripts/notification_engine.php --module=sla` | **PASS** — `fire repair:sla_at_risk:repair:109 (inbox ×5)` → 5 แถวใน `notifications` (ผู้รับผิดชอบ 234 + หัวหน้า role 1,2,6), priority `high`, ข้อความ “กำหนดเสร็จ: 2026-11-14 11:31” ตรงกับ `sla_due_at` |
+| 2 | overdue (due = now − 3 ชม.) | รัน engine ซ้ำ | **PASS** — `fire repair:sla_breached:repair:109 (inbox ×5)`, priority `critical`, event `sla_breached` |
+| 3 | กันแจ้งซ้ำ | รัน engine ซ้ำทันที | **PASS** — `repeat-limit (1 ≥ 1)` และ `0 notification(s) fired` |
+| 4 | ล้างข้อมูลทดสอบ | DELETE notifications/events/repair ของ id 109 | **PASS** — `repair` กลับมา 99 แถว, `notifications` กลับมา 13 แถว, `sla_due_at` ของ EN-26-081 ยังเป็น 2026-11-17 09:19 |
+| 5 | ตรวจว่ารันอัตโนมัติหรือยัง | `schtasks /query` | **FAIL (ops)** — ไม่มี task ใดเรียก `notification_engine.php`; `CMMS-Watchdog` (ทุก 1 นาที) รันแค่ watchdog/weekly report |
+
+### ข้อจำกัด (รอบ 4)
+
+- ยังไม่ทดสอบช่อง LINE (`alert_check.php`) เพราะสคริปต์ไม่มี dry-run และการรันจริงจะยิงข้อความหาผู้ใช้จริง
+- ข้อความ breached แสดง “เกินกำหนด: 1 วัน” แม้เกินจริง 3 ชม. (engine ใช้ `max(1, days)` ตาม template `{overdue_days}` ที่เก็บในตาราง `notification_templates`)
+- ใบงานที่ไม่มี `work_order_no` จะได้หัวข้อเป็น “ใกล้หมดเวลา SLA: ” (ว่างหลัง colon) — ข้อมูลจริงมีเลขครบทั้ง 99 ใบ

@@ -78,4 +78,6 @@ kpi_done_statuses()   = closed, cancelled, rejected, verified, done, skipped
 | SLA เกินกำหนดเข่า LINE (legacy check) | `scripts/alert_check.php` | `COALESCE(sla_due_at, estimated_completion_date, planned_end_at)` | due < now (กันแจ้งซ้ำ 24 ชม. ด้วย needle `SLA-OVERDUE-WO<id>`) |
 
 - ทั้งสองที่ถูกแก้ให้อ่าน `estimated_completion_date` ด้วย — ใบงานที่ได้กำหนดส่งจาก SLA ตอนจ่ายงานจะไม่ถูกข้ามการแจ้งเตือน
-- ต้องมี cron/task เรียก `scripts/notification_engine.php` (และ/หรือ `alert_check.php`) ตามรอบ — **ยังไม่ได้ตั้ง scheduler ในรอบนี้**
+- ผู้รับของ at-risk/breached: ผู้รับผิดชอบหลัก (`assigned_to`) + หัวหน้าชุด (role 1,2,6) ผ่าน `notification_rules` (ถ้าไม่มี rule ใช้ dedupe 24 ชม. / ส่ง 1 ครั้งต่อ event ต่อใบงาน)
+- ต้องมี cron/task เรียก `scripts/notification_engine.php` ตามรอบ — บนเครื่องนี้ตรวจแล้วยังไม่มี task ใดเรียก engine (มีแต่ `CMMS-Watchdog` ทุก 1 นาที ที่ไม่เรียก engine) จึงยังไม่มีการแจ้งเตือนอัตโนมัติ
+- คำสั่งที่ต้องตั้ง (ตัวอย่าง ทุก 15 นาที): `C:\PHP\php.exe C:\inetpub\wwwroot\cmms-tpt\scripts\notification_engine.php`
