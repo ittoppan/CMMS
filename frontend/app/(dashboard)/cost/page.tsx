@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -181,6 +182,23 @@ export default function CostPage() {
         </button>
       </div>
 
+
+      <ModuleGuide
+        name="วิเคราะห์ต้นทุนการซ่อมบำรุง"
+        summary="วิเคราะห์ต้นทุนงานซ่อม (ค่าแรง อะไหล่ จ้างภายนอก) แยกตามช่วงเวลา แผนก สินทรัพย์ ประเภท และใบงาน"
+        steps={[
+          "ตั้งค่าตัวกรอง (ช่วงเวลา แผนก สินทรัพย์ แหล่งที่มา ความสำคัญ สถานะ ประเภทงาน) แล้วรีเฟรช",
+          "ดูสรุป แนวโน้ม การกระจาย และคำเตือนคุณภาพข้อมูล/พยากรณ์ (ถ้ามี)",
+          "เจาะรายละเอียดใบงาน (WO breakdown) เมื่อต้องตรวจองค์ประกอบต้นทุนรายใบ",
+        ]}
+        source="อ่านผ่าน lib/cost.ts และ /api/v1/cost.php (summary/trend/by-type/department/asset/parts/forecast/data-quality/work-order)"
+        note="ต้นทุนรวมขึ้นกับการบันทึกค่าแรง/อะไหล่/จ้างภายนอกในใบงาน — ข้อมูลไม่ครบจะแสดงในคำเตือนคุณภาพข้อมูล"
+        related={[
+          { href: "/budget", label: "งบประมาณซ่อมบำรุง" },
+          { href: "/analytics", label: "แดชบอร์ดวิเคราะห์" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
       {/* ── Filter bar ── */}
       <Card>
         <CardContent className="pt-5">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -350,6 +351,25 @@ export default function AndonBoardPage() {
         @media (max-width: 1200px){ .andon-main{ grid-template-columns: 1fr; } .andon-kpis{ grid-template-columns: repeat(2,minmax(0,1fr)); } }
         @media (max-width: 700px){ .andon-kpis{ grid-template-columns: 1fr; } .andon-stock-grid{ grid-template-columns: 1fr; } .andon-owner{ display:none; } }
       `}</style>
+      <div style={{ padding: "8px 16px" }}>
+        <ModuleGuide
+          name="จอ Andon (โรงงาน)"
+          summary="หน้าจอแสดงสถานะการผลิต/ซ่อมบำรุงแบบเรียลไทม์สำหรับพื้นที่หน้างาน — เน้นการมองเห็นงานค้าง สถานะเครื่อง และความเร่งด่วน"
+          steps={[
+            "เปิดจอบนหน้าจอที่กำหนดและปล่อยให้รีเฟรชข้อมูลอัตโนมัติ",
+            "ติดตามสัญญาณสถานะ (หยุด/เตือน/พร้อม) และรายการงาน/PM/อะไหล่ที่เกี่ยวข้อง",
+            "เข้าสู่โมดูลปฏิบัติงาน (งานซ่อม/PM/สต็อก) เพื่อดำเนินการแก้ไขเมื่อพบปัญหา",
+          ]}
+          source="ดึงข้อมูลงานซ่อม แผน PM และอะไหล่จาก API ที่หน้านี้เรียก (index/work-orders/pm/spare-parts ตามการตั้งค่า) — แสดงสถานะตามข้อมูลปัจจุบัน"
+          note="หน้านี้ออกแบบสำหรับจอแสดงผลหน้างาน สิทธิ์การดูถูกควบคุมตามเมนู; ข้อมูลขึ้นกับการอัปเดตสถานะจากผู้ปฏิบัติงาน"
+          related={[
+            { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+            { href: "/pm_am/calendar", label: "ปฏิทิน PM/AM" },
+            { href: "/spare_parts/issue_center", label: "ศูนย์เบิก-จ่ายอะไหล่" },
+          ]}
+        />
+      </div>
+
 
       <div className="andon-grid" aria-hidden="true" />
       <div className="andon-orb a" aria-hidden="true" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import {
@@ -252,6 +253,23 @@ export default function PlanningCalendarPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="ปฏิทินวางแผนซ่อมบำรุง"
+        summary="มองงานที่วางแผนไว้ในมุมมองวัน/สัปดาห์/เดือน พร้อมรอบ PM ที่ถึงกำหนดและความขัดแย้งของช่วงเวลา"
+        steps={[
+          "สลับมุมมอง (วัน/สัปดาห์/เดือน) และเลื่อนช่วงวันที่ต้องการดู",
+          "กดงานในปฏิทินเพื่อดูรายละเอียดหรือปรับรอบเวลา",
+          "ใช้ “จองรอบเวลากลุ่ม” กับงานที่ยังไม่มีรอบเวลา (unscheduled) เมื่อต้องจัดตารางทีละหลายงาน",
+        ]}
+        source="อ่านผ่าน lib/planning.ts — ปฏิทินวางแผน คิวงาน ความขัดแย้ง ช่าง และรอบ PM ที่ครบกำหนด (calendar/conflicts/queue/pm-due)"
+        note="รอบ PM ที่แสดงเป็นรอบตามแผนป้องกัน — การยืนยัน/เลื่อนรอบ PM ทำในโมดูล PM/AM ไม่ใช่หน้านี้"
+        related={[
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+          { href: "/pm_am/calendar", label: "ปฏิทิน PM/AM" },
+          { href: "/workforce/conflicts", label: "ความขัดแย้งกำลังคน" },
+        ]}
+      />
       {denied && <AccessDenied />}
       {error && <Alert variant="danger">{error}</Alert>}
 

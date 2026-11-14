@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -132,6 +133,23 @@ export default function SupervisorQueuePage() {
         }
       />
 
+
+      <ModuleGuide
+        name="คิวงานหัวหน้างาน"
+        summary="รายการงานที่อยู่ในความรับผิดชอบของหัวหน้างาน — มอบหมาย หยุดพัก/ต่อ ตรวจรับ ปิด หรือเปิดงานใหม่"
+        steps={[
+          "กรอง/ค้นหางานตามสถานะหรือคำสำคัญ แล้วเลือกงานที่ต้องจัดการ",
+          "มอบหมายงานทีละใบหรือหลายใบ (เลือกหลายรายการแล้วกดมอบหมาย)",
+          "ดำเนินการตามสถานะงาน: หยุดพัก ต่อ ตรวจรับ ปิดงาน หรือเปิดใหม่ เมื่อจำเป็น",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/supervisor.ts (getQueue และการกระทำงาน) — สถานะใบงานและผู้รับผิดชอบจากระบบ"
+        note="การกระทำเปลี่ยนสถานะงานจะมีผลทันทีและถูกบันทึกประวัติ — ตรวจใบงานให้ถูกก่อนยืนยัน"
+        related={[
+          { href: "/supervisor/review", label: "ทบทวนคำขอ" },
+          { href: "/supervisor/plan", label: "วางแผน/มอบหมาย" },
+          { href: "/supervisor/verify", label: "ตรวจรับงาน" },
+        ]}
+      />
       {error && <Alert variant="danger">{error}</Alert>}
 
       {/* Bucket tabs */}

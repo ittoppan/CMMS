@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useState } from "react";
 import { AlertTriangle, ShieldAlert } from "lucide-react";
 
@@ -90,6 +91,23 @@ export default function WorkforcePage() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="ภาพรวมกำลังคน"
+        summary="แดชบอร์ดสรุปความพร้อมกำลังคน — ภาระงานชั่วโมง กะ/การลา ใบรับรองที่ใกล้หมดอายุ และสัญญาณความเสี่ยง"
+        steps={[
+          "อ่าน KPI ด้านบน (ช่างที่พร้อม/ไม่พร้อม ชั่วโมงว่าง ความเสี่ยงใบรับรอง)",
+          "ดูการ์ดรายละเอียดเพื่อระบุจุดคอขวด ก่อนมอบหมายงานเพิ่ม",
+          "ไปยังหน้าจัดการย่อย (กำลังคน/กะ/ทักษะ/ใบรับรอง/ความขัดแย้ง) เพื่อแก้ไขข้อมูลต้นทาง",
+        ]}
+        source="อ่านผ่าน lib/workforce.ts (getConfig, getDashboard) — ข้อมูลช่าง กะ การลา ใบรับรอง และชั่วโมงว่างคำนวณจากระบบ"
+        note="ตัวเลข capacity คำนวณจากกะและการลาที่บันทึกไว้ — ถ้ากะ/วันลาไม่ครบ ผลสรุปจะคลาดเคลื่อน"
+        related={[
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+          { href: "/workforce/shifts", label: "กะทำงาน" },
+          { href: "/workforce/conflicts", label: "ความขัดแย้งกำลังคน" },
+        ]}
+      />
       {error && (
         <Alert variant="danger">
           <AlertTriangle className="h-4 w-4" />

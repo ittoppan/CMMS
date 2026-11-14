@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import { Activity, TriangleAlert } from "lucide-react";
 
@@ -202,6 +203,23 @@ export default function WorkforceCapacityPage() {
         title={hero.title}
         description={hero.desc}
       >
+
+      <ModuleGuide
+        name="กำลังคน (Capacity)"
+        summary="ดูชั่วโมงว่างและอัตราการใช้กำลังคนรายช่าง/ช่วงเวลา เพื่อวางแผนมอบหมายงานได้ไม่เกินกำลัง"
+        steps={[
+          "เลือกช่วงเวลาหรือมุมมองที่ต้องการวิเคราะห์",
+          "ตรวจชั่วโมงว่าง/ภาระงานและสัญญาณเกินกำลัง (over capacity)",
+          "นำผลไปใช้ตัดสินใจในศูนย์วางแผน/หัวหน้างานก่อนมอบหมาย",
+        ]}
+        source="อ่านผ่าน /api/v1/workforce.php (config/capacity) และ lib/workforce.ts — คำนวณจากกะ การลา และงานที่มอบหมาย"
+        note="ชั่วโมงว่างขึ้นกับกะและวันลาที่บันทึกไว้ — หากข้อมูลกะ/ลาไม่ครบ ตัวเลขจะไม่สะท้อนความจริง"
+        related={[
+          { href: "/workforce/shifts", label: "กะทำงาน" },
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+          { href: "/workforce/conflicts", label: "ความขัดแย้งกำลังคน" },
+        ]}
+      />
         <Alert variant="danger">
           <TriangleAlert className="h-4 w-4" aria-hidden="true" />
           <div>

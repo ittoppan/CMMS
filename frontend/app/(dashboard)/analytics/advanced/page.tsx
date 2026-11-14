@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -176,6 +177,23 @@ export default function AnalyticsAdvancedPage() {
           </button>
         </div>
       </div>
+
+      <ModuleGuide
+        name="วิเคราะห์เจาะลึก 8 มุม (Advanced)"
+        summary="รายงานวิเคราะห์เชิงลึก 8 หัวข้อ — Downtime/ความพร้อม, ต้นทุน, SLA, PM vs Breakdown, สต็อก, ภาระงานช่าง, Inspection, สอบเทียบ"
+        steps={[
+          "เลือกปี/ช่วงที่ต้องการ และสลับแท็บหัวข้อวิเคราะห์",
+          "อ่านกราฟ/ตารางสรุปของแต่ละมุมเพื่อระบุแนวโน้มและจุดผิดปกติ",
+          "เจาะลงโมดูลที่เกี่ยวข้องเพื่อดำเนินการแก้ไข",
+        ]}
+        source="อ่านจาก API analytics/advanced ที่หน้านี้เรียก — รวมข้อมูลงานซ่อม ต้นทุน PM สต็อก ช่าง inspection และ calibration"
+        note="ตัวชี้วัดขึ้นกับความครบถ้วนของข้อมูลต้นทาง — ช่องที่ไม่มีข้อมูลจะแสดงตามที่ระบบคำนวณได้"
+        related={[
+          { href: "/analytics/intelligence", label: "วิเคราะห์เชิงลึก (Intelligence)" },
+          { href: "/cost", label: "วิเคราะห์ต้นทุน" },
+          { href: "/calibration", label: "สอบเทียบเครื่องมือวัด" },
+        ]}
+      />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="w-full flex-wrap justify-start gap-1">

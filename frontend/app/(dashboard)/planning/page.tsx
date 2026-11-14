@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import {
@@ -549,6 +550,23 @@ export default function PlanningCenterPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="ศูนย์วางแผนซ่อมบำรุง"
+        summary="ศูนย์รวมคิวงานซ่อมและคำขอแจ้งซ่อม — ใช้ดูความพร้อม จัดรอบเวลา มอบหมายช่าง ปรับลำดับความสำคัญ และวางแผนแบบกลุ่ม"
+        steps={[
+          "เลือกกลุ่มงานจากแท็บ (คำขอใหม่ · ยังไม่วางแผน · ยังไม่กำหนดรอบ · กำหนดรอบแล้ว · พร้อมทำงาน) หรือค้นหาด้วยเลขที่/เครื่องจักร",
+          "เปิดการ์ดงานเพื่อวางแผนรอบเวลา มอบหมายทีม/หัวหน้างาน ปรับความสำคัญ หรือประกาศงานฉุกเฉิน",
+          "ตรวจภาระงานช่าง/ความขัดแย้งที่ระบบเตือนก่อนยืนยัน และใช้วางแผนกลุ่มเมื่อมีหลายงานพร้อมกัน",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/planning.ts (ศูนย์วางแผน คิวงาน ช่าง ความขัดแย้ง การวางแผน/มอบหมาย/ความสำคัญ/งานฉุกเฉิน)"
+        note="คำขอแจ้งซ่อมยังไม่ใช่ใบงาน — ต้องอนุมัติเป็น WO ก่อนจึงจะเลือกวางแผนกลุ่มหรือมอบหมายได้"
+        related={[
+          { href: "/planning/calendar", label: "ปฏิทินวางแผน" },
+          { href: "/supervisor/review", label: "ทบทวนคำขอ" },
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+        ]}
+      />
       {denied && <AccessDenied />}
       {error && <Alert variant="danger">{error}</Alert>}
 

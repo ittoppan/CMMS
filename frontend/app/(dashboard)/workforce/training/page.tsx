@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -321,6 +322,22 @@ export default function WorkforceTrainingPage() {
         )
       }
     >
+
+      <ModuleGuide
+        name="การฝึกอบรม"
+        summary="จัดการหลักสูตรและบันทึกผลการฝึกอบรมของช่าง เพื่อยกระดับทักษะและรักษาความพร้อม"
+        steps={[
+          "เพิ่ม/จัดการหลักสูตรอบรมและทักษะที่เกี่ยวข้อง",
+          "บันทึกผลการอบรมให้ช่าง (ผ่าน/ไม่ผ่าน วันที่ หมายเหตุ)",
+          "เชื่อมผลการอบรมกับทักษะ/ใบรับรองเมื่อมีการรับรองหลังอบรม",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/workforce.ts (WORKFORCE_API — courses/training records)"
+        note="การบันทึกผลอบรมไม่อัปเดตใบรับรองอัตโนมัติในทุกกรณี — ตรวจและบันทึกใบรับรองแยกเมื่อมีเอกสารรับรอง"
+        related={[
+          { href: "/workforce/skills", label: "ทักษะช่าง" },
+          { href: "/workforce/certifications", label: "ใบรับรอง/วุฒิบัตร" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 

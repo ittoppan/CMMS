@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
@@ -174,6 +175,23 @@ export default function AnalyticsDashboardPage() {
         </div>
       </div>
 
+
+      <ModuleGuide
+        name="แดชบอร์ดวิเคราะห์ (Analytics)"
+        summary="ภาพรวมตัวชี้วัดการซ่อมบำรุงรายเดือน/รายปี — จำนวนงาน ต้นทุน และแนวโน้มจากข้อมูลจริงในระบบ"
+        steps={[
+          "เลือกปีที่ต้องการดู แล้วรีเฟรชเพื่อดึงข้อมูลล่าสุด",
+          "อ่านการ์ดสรุปและกราฟแนวโน้มรายเดือน",
+          "ไปหน้าวิเคราะห์เชิงลึก/KPI เมื่อต้องการเจาะรายละเอียด",
+        ]}
+        source="อ่านจาก /api/v1/analytics_monthly.php และ /api/v1/index.php (งานซ่อม/สินทรัพย์/แผน PM) — ตัวเลขคำนวณจากข้อมูลที่มีในระบบ"
+        note="หากช่วงเวลาหรือข้อมูลต้นทางไม่ครบ บางตัวชี้วัดอาจแสดงเป็นค่าว่าง/N/A ตามที่ระบบคำนวณได้"
+        related={[
+          { href: "/analytics/kpi", label: "KPI ซ่อมบำรุง" },
+          { href: "/analytics/advanced", label: "วิเคราะห์เจาะลึก" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
       {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="cmms-kpi-card">

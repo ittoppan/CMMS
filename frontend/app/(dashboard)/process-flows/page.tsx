@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // /process-flows — Visual Process Flows: แผนผังขั้นตอนหลักของกระบวนการซ่อมบำรุง
 // (แบบ static/documentation — happy path + สถานะแยกจากสายหลัก ตรงตาม workflow ของระบบ)
 
@@ -415,6 +416,22 @@ export default function ProcessFlowsPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="ผังขั้นตอนกระบวนการ (Process Flows)"
+        summary="เอกสารอ้างอิงแบบภาพ — แสดงขั้นตอนหลักของกระบวนการซ่อมบำรุง (happy path) และทางแยกสถานะตามที่ระบบรองรับ"
+        steps={[
+          "เลือกดูผังขั้นตอนที่ต้องการทำความเข้าใจ",
+          "ใช้เป็นคู่มืออ้างอิงเมื่อฝึกงานหรือทบทวนขั้นตอนระหว่างทีม",
+          "เปรียบเทียบกับสถานะงานจริงในศูนย์วางแผน/คิวหัวหน้างานเมื่อต้องติดตามเคสจริง",
+        ]}
+        source="เนื้อหาแบบ static ในหน้านี้ (อ้างอิง workflow ของระบบ) — ไม่ดึงข้อมูลธุรกรรมสด"
+        note="ผังเป็นภาพรวมขั้นตอนมาตรฐาน — สถานะจริงของแต่ละใบงานดูจากโมดูลปฏิบัติงาน (repair/supervisor/planning)"
+        related={[
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+          { href: "/supervisor", label: "ศูนย์หัวหน้างาน" },
+        ]}
+      />
       <div className="space-y-5">
         <p className="max-w-3xl text-sm text-muted-foreground">{legendLabel.how}</p>
 

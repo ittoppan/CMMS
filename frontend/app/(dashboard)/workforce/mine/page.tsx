@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CloudOff, Wifi, RefreshCw, UserCog } from "lucide-react";
@@ -93,6 +94,22 @@ export default function MyWorkforcePage() {
         />
       }
     >
+
+      <ModuleGuide
+        name="ข้อมูลงานของฉัน (กำลังคน)"
+        summary="มุมมองส่วนตัวของช่าง/ผู้ใช้ — ดูตารางงาน กะ และงานที่เกี่ยวข้องกับตัวเอง รวมถึงสถานะออฟไลน์"
+        steps={[
+          "ตรวจงานและช่วงเวลาที่ได้รับมอบหมาย",
+          "ดูสถานะการซิงค์/ออฟไลน์หากใช้งานในพื้นที่สัญญาณไม่เสถียร",
+          "ไปที่หน้ารายละเอียดงานหรือแผนงานภาคสนามเพื่อลงมือปฏิบัติ",
+        ]}
+        source="อ่านผ่าน lib/workforce.ts (WORKFORCE_API) และสถานะออฟไลน์จาก lib/offlineQueue"
+        note="ข้อมูลอาจล่าช้าเมื่อออฟไลน์ — ซิงค์เมื่อกลับมาออนไลน์เพื่อให้สถานะตรงกับระบบ"
+        related={[
+          { href: "/field/plan", label: "แผนงานของฉัน (ภาคสนาม)" },
+          { href: "/workforce/shifts", label: "กะทำงาน" },
+        ]}
+      />
       <div className="space-y-6">
         {!online && (
           <Alert variant="warning">

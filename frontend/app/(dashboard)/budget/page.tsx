@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -144,6 +145,22 @@ export default function BudgetPage() {
         </div>
       </div>
 
+
+      <ModuleGuide
+        name="งบประมาณซ่อมบำรุง"
+        summary="จัดการและติดตามงบประมาณซ่อมบำรุงเทียบกับค่าใช้จ่ายจริง (Budget vs Actual) พร้อมสถานะและการปรับงบ"
+        steps={[
+          "เลือกปีงบ/มุมมอง และตรวจสรุปการใช้จบเทียบงบ",
+          "สร้าง แก้ไข ส่งอนุมัติ หรือปรับงบตามสิทธิ์",
+          "ติดตามการแจ้งเตือนเกินงบ/ใกล้เพดาน และเปรียบเทียบกับต้นทุนจริง",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/cost.ts และ /api/v1/cost.php (budget, budget-vs-actual และคำสั่งจัดการงบ) — สิทธิ์จัดการควบคุมที่ฝั่งเซิร์ฟเวอร์"
+        note="ตัวเลขเทียบจริงอิงข้อมูลต้นทุนที่บันทึกในระบบ — งบที่ยังไม่อนุมัติ/ปิดแล้วอาจมีข้อจำกัดการแก้ไขตามสถานะ"
+        related={[
+          { href: "/cost", label: "วิเคราะห์ต้นทุนการซ่อมบำรุง" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
       {/* ── Filter ── */}
       <Card>
         <CardContent className="pt-5">

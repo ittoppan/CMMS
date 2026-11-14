@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
@@ -240,6 +241,23 @@ export default function WorkforceConflictsPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="ความขัดแย้งกำลังคน"
+        summary="ตรวจจับงานที่ชนช่วงเวลา ช่างถูกจองซ้อน หรือมอบหมายเกินกำลัง — เพื่อแก้แผนก่อนเกิดปัญหาหน้างาน"
+        steps={[
+          "ดูรายการความขัดแย้งและสาเหตุ (ชนเวลา/ซ้อนคน/เกินกำลัง)",
+          "เปิดงานที่เกี่ยวข้องเพื่อเลื่อนรอบเวลาหรือเปลี่ยนผู้รับผิดชอบ",
+          "ยืนยันว่าความขัดแย้งหายไปหลังปรับแผน",
+        ]}
+        source="อ่านผ่าน lib/workforce.ts (WORKFORCE_API — conflicts) และเชื่อมการมอบหมายงานผ่าน supervisor/planning"
+        note="การแก้ไขต้องทำที่หน้าวางแผน/มอบหมาย — หน้านี้เน้นแสดงและชี้จุดที่ต้องแก้"
+        related={[
+          { href: "/planning/calendar", label: "ปฏิทินวางแผน" },
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+          { href: "/supervisor/plan", label: "วางแผน/มอบหมาย (หัวหน้างาน)" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 

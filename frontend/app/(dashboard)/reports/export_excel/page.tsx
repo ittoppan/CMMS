@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -78,6 +79,22 @@ export default function ExportExcelReportPage() {
         </div>
       </div>
 
+
+      <ModuleGuide
+        name="ส่งออกข้อมูล Excel/CSV"
+        summary="ส่งออกข้อมูลจากระบบเป็นไฟล์ Excel/CSV ตามประเภทรายงานและช่วงเวลา เพื่อใช้งานต่อหรือส่งต่อหน่วยงานที่เกี่ยวข้อง"
+        steps={[
+          "เลือกประเภทรายงาน ปี และเดือน (หรือทั้งหมด) ที่ต้องการส่งออก",
+          "กดส่งออกเพื่อดาวน์โหลดไฟล์ — ระบบดึงข้อมูลชุดที่เลือก ณ เวลานั้น",
+          "ตรวจสอบไฟล์ก่อนนำไปใช้ โดยเฉพาะเมื่อนำเข้าระบบบัญชีหรือ Sage",
+        ]}
+        source="ดึงข้อมูลจาก /api/v1/index.php (resource ตามประเภท เช่น work-orders/spare-parts/assets) แล้วแปลงเป็น CSV ฝั่งเบราว์เซอร์"
+        note="ไฟล์สะท้อนข้อมูล ณ เวลาที่ส่งออกและตามสิทธิ์ผู้ใช้ — หากไม่มีข้อมูลในช่วงที่เลือก ระบบจะแจ้งให้ทราบ"
+        related={[
+          { href: "/reports/import_excel", label: "นำเข้า Excel" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
       {/* Success Notice */}
       {successMsg && (
         <Alert variant="success" title={successMsg} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState } from "react";
 import { CalendarClock, TriangleAlert } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -358,6 +359,22 @@ export default function WorkforceShiftsPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="กะทำงาน"
+        summary="กำหนดกะให้ช่างและบันทึกวันลา — เป็นข้อมูลตั้งต้นสำหรับคำนวณชั่วโมงว่างและความขัดแย้ง"
+        steps={[
+          "เลือกช่าง/ช่วงเวลา แล้วกำหนดกะทำงาน",
+          "บันทึกวันลาเมื่อมี เพื่อหักชั่วโมงว่างออกจากกำลังคน",
+          "ตรวจผลสะท้อนในหน้า Capacity และการมอบหมายงาน",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/workforce.ts (WORKFORCE_API — shifts/leaves)"
+        note="การเปลี่ยนกะ/ลาย้อนหลังอาจกระทบการคำนวณ capacity ของช่วงเวลานั้น — แก้ไขเมื่อข้อมูลผิดจริงเท่านั้น"
+        related={[
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+          { href: "/workforce/technicians", label: "ช่างและทีมงาน" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && (
           <Alert variant={banner.tone}>

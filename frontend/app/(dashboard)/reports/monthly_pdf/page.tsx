@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -246,6 +247,22 @@ export default function MonthlyPdfReportPage() {
         </div>
       </div>
 
+
+      <ModuleGuide
+        name="รายงาน PDF สรุปประจำเดือน"
+        summary="สร้างรายงานสรุปงานซ่อมบำรุงประจำเดือนสำหรับผู้บริหารในรูปแบบพร้อมพิมพ์/ส่งออก PDF"
+        steps={[
+          "เลือกเดือนและปีที่ต้องการออกรายงาน",
+          "ตรวจสอบข้อมูลสรุปและตารางที่แสดง แล้วพิมพ์หรือส่งออก PDF",
+          "บันทึก/ส่งต่อไฟล์ตามรอบรายงานขององค์กร",
+        ]}
+        source="อ่านข้อมูลสรุปงานซ่อม/PM/ต้นทุนจาก API รายงานและ analytics ที่หน้านี้เรียก — ข้อมูลจริงตามช่วงเดือนที่เลือก"
+        note="ผลลัพธ์ขึ้นกับความครบถ้วนของใบงานและต้นทุนในช่วงนั้น — ช่องที่คำนวณไม่ได้จะแสดงตามค่าที่ระบบมี"
+        related={[
+          { href: "/reports", label: "ศูนย์รายงาน" },
+          { href: "/analytics", label: "แดชบอร์ดวิเคราะห์" },
+        ]}
+      />
       {/* A4 Printable Document Sheet */}
       <div style={{ maxWidth: 900, margin: "0 auto", width: "100%" }}>
         <div ref={reportRef}>

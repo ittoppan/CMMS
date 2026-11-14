@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -165,6 +166,22 @@ export default function WorkforceCertificationsPage() {
         )
       }
     >
+
+      <ModuleGuide
+        name="ใบรับรอง/วุฒิบัตร"
+        summary="ติดตามใบรับรองของช่าง — วันที่ออก วันหมดอายุ และการเตือนใบรับรองที่ใกล้หมดหรือหมดอายุ"
+        steps={[
+          "ดูรายการใบรับรองที่ใกล้หมดอายุ/หมดอายุจากสรุปด้านบน",
+          "บันทึกหรือแก้ไขใบรับรองให้ช่าง (ประเภท เลขที่ วันที่ออก/หมดอายุ)",
+          "ตรวจสถานะก่อนมอบหมายงานที่ต้องใช้ใบรับรองเฉพาะ",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/workforce.ts (WORKFORCE_API, ExpiringCertification)"
+        note="ใบรับรองหมดอายุถือว่าไม่พร้อมสำหรับงานที่กำหนดเงื่อนไข — อัปเดตวันที่ต่ออายุเมื่อมีการต่อจริง"
+        related={[
+          { href: "/workforce/skills", label: "ทักษะช่าง" },
+          { href: "/workforce/training", label: "การฝึกอบรม" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 

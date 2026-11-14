@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import AndonLampDefault from "@/components/AndonLamp";
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts";
@@ -317,6 +318,23 @@ export default function IntelligencePage() {
           <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" /> รีเฟรช
         </button>
       </div>
+
+      <ModuleGuide
+        name="วิเคราะห์เชิงลึก (Intelligence)"
+        summary="มุมมองวิเคราะห์หลายมิติ — ความน่าเชื่อถือ สุขภาพสินทรัพย์ งานซ้ำ Downtime/Pareto PM คิวงาน สต็อก และคุณภาพข้อมูล"
+        steps={[
+          "เลือกช่วงเวลา/ตัวกรองที่รองรับ แล้วรีเฟรชข้อมูล",
+          "สำรวจส่วนวิเคราะห์เพื่อหาสาเหตุและลำดับความสำคัญ",
+          "ใช้บริบทที่แสดงเพื่อไปแก้ไขที่โมดูลต้นทาง (งานซ่อม, PM, สินทรัพย์, สต็อก)",
+        ]}
+        source="อ่านจาก API วิเคราะห์/ภาพรวมที่หน้านี้เรียก — รวมข้อมูลจากใบงาน สินทรัพย์ PM และสต็อก"
+        note="บางส่วนอาจแสดงคำเตือนคุณภาพข้อมูลหรือ ‘ข้อมูลไม่เพียงพอ’ เมื่อการบันทึกไม่ครบ — อ่านหมายเหตุประกอบก่อนตัดสินใจ"
+        related={[
+          { href: "/analytics", label: "แดชบอร์ดวิเคราะห์" },
+          { href: "/analytics/advanced", label: "วิเคราะห์เจาะลึก (Advanced)" },
+          { href: "/reliability", label: "ความน่าเชื่อถือ (Reliability)" },
+        ]}
+      />
 
       {/* Filter bar */}
       <Card>

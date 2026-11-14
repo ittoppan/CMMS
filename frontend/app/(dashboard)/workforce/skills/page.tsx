@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GraduationCap, TriangleAlert } from "lucide-react";
@@ -213,6 +214,23 @@ export default function WorkforceSkillsPage() {
         )
       }
     >
+
+      <ModuleGuide
+        name="ทักษะช่าง (Skill Matrix)"
+        summary="กำหนดและบันทึกทักษะ/ระดับความชำนาญของช่าง เพื่อใช้ประเมินความพร้อมก่อนมอบหมายงาน"
+        steps={[
+          "เลือกช่างหรือทักษะที่ต้องการดู/แก้ไข",
+          "บันทึกชื่อทักษะ ระดับ (1–5) ใบรับรอง พื้นที่รับผิดชอบ และวันหมดอายุ (ถ้ามี)",
+          "ใช้ข้อมูลนี้ประกอบการมอบหมายงานในศูนย์วางแผน/หัวหน้างาน",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/workforce.ts (WORKFORCE_API) — เมทริกซ์ทักษะของบุคลากร"
+        note="ทักษะควรสะท้อนความสามารถจริงและใบรับรองที่ยังไม่หมดอายุ — ข้อมูลเก่าอาจทำให้ประเมินความพร้อมผิด"
+        related={[
+          { href: "/workforce/technicians", label: "ช่างและทีมงาน" },
+          { href: "/workforce/training", label: "การฝึกอบรม" },
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 

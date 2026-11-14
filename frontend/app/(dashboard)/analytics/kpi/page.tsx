@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import AndonLamp from "@/components/AndonLamp";
 import { usePageLayout } from "@/lib/pageLayout";
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import {
   Banknote, CalendarDays,
   Zap, Clock, ChartBar, RefreshCw, TriangleAlert, Settings,
@@ -215,6 +216,23 @@ export default function KpiDashboardPage() {
           </div>
         </div>
       </div>
+
+      <ModuleGuide
+        name="KPI ซ่อมบำรุง"
+        summary="ติดตาม KPI หลักของงานซ่อมบำรุง — SLA, MTBF/MTTR, สถานะงาน, ต้นทุน และผล PM ตามช่วงเวลาที่เลือก"
+        steps={[
+          "เลือกช่วงเดือน (และตั้งค่า KPI หากมี) เพื่อกำหนดขอบเขตการแสดงผล",
+          "อ่านการ์ดสรุป กราฟแนวโน้ม และสัดส่วนสถานะงาน/PM",
+          "ใช้ผลลัพธ์ระบุคอขวด (งานค้าง, SLA ต่ำ, ต้นทุนสูง) แล้วไปจัดการที่โมดูลที่เกี่ยวข้อง",
+        ]}
+        source="อ่านผ่าน API analytics/KPI ที่หน้านี้เรียก และการตั้งค่า KPI — คำนวณจากใบงาน ต้นทุน และข้อมูล PM จริง"
+        note="KPI บางตัวต้องมีข้อมูลความพร้อม/เวลาหยุดเครื่องครบถ้วน มิฉะนั้นอาจแสดงไม่ครบหรือ N/A"
+        related={[
+          { href: "/analytics", label: "แดชบอร์ดวิเคราะห์" },
+          { href: "/mtbf_mttr", label: "MTBF / MTTR" },
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+        ]}
+      />
 
       {/* ═══ การ์ด KPI หลัก ═══ */}
       <div style={layoutStyle("kpi")}>

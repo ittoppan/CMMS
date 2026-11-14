@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
@@ -389,6 +390,22 @@ export default function ImportExcelPage() {
           </p>
         </div>
       </div>
+
+      <ModuleGuide
+        name="นำเข้าข้อมูลจาก Excel (Import)"
+        summary="นำเข้าข้อมูลจากไฟล์ Excel ตามแม่แบบ — ตรวจสอบทีละแถว ดูผลกระทบ (เพิ่ม/อัปเดต/ข้าม) และยืนยันก่อนนำเข้า"
+        steps={[
+          "ดาวน์โหลดแม่แบบของชุดข้อมูลที่ต้องการ กรอกข้อมูลให้ถูกคอลัมน์/รูปแบบ",
+          "อัปโหลดไฟล์เพื่อตรวจสอบ — ดูข้อผิดพลาดรายแถวและผลกระทบตามโหมด",
+          "เลือกโหมดจัดการข้อมูลซ้ำ (ถ้ารองรับ) แล้วยืนยันนำเข้าเฉพาะแถวที่ผ่าน",
+        ]}
+        source="ตรวจสอบ/นำเข้าผ่าน API import ของระบบ (ตาม dataset) — รองรับผลกระทบ insert/update/skip ตามที่แสดง"
+        note="ควรตรวจไฟล์ต้นทางก่อนนำเข้า — การนำเข้าอาจสร้างหรือแก้ไขข้อมูลจริงตามโหมดที่เลือก และขึ้นกับสิทธิ์ผู้ใช้"
+        related={[
+          { href: "/reports/export_excel", label: "ส่งออก Excel/CSV" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
 
       {errorMsg && <Alert variant="danger" title={errorMsg} />}
 

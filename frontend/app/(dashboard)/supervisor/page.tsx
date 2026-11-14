@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePageHero, t } from "@/lib/i18n";
@@ -71,6 +72,23 @@ export default function SupervisorDeskPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="ศูนย์หัวหน้างาน"
+        summary="ภาพรวมงานสำหรับหัวหน้างาน — ตัวชี้วัดคิวงาน คำขอรอทบทวน งานรอตรวจรับ และทางลัดไปยังหน้าปฏิบัติงานย่อย"
+        steps={[
+          "ตรวจ KPI (รอดำเนินการ รอทบทวน รอตรวจรับ งานค้าง) เพื่อเห็นภาพรวม",
+          "เลือกหน้าปฏิบัติการย่อย: คิวงาน, ทบทวนคำขอ, วางแผน/มอบหมาย, ตรวจรับงาน",
+          "กดรีเฟรชเมื่อมีการเปลี่ยนแปลงจากช่างหรือผู้วางแผน",
+        ]}
+        source="อ่านผ่าน lib/supervisor.ts (getKpis) — สรุปสถานะงานและคำขอที่เกี่ยวข้องกับหัวหน้างาน"
+        note="สิทธิ์การอนุมัติ/ตรวจรับ/วางแผนถูกบังคับที่ฝั่งเซิร์ฟเวอร์ตามบทบาท — ปุ่มที่เห็นอาจต่างกันตามผู้ใช้"
+        related={[
+          { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+          { href: "/supervisor/review", label: "ทบทวนคำขอ" },
+          { href: "/supervisor/verify", label: "ตรวจรับงาน" },
+        ]}
+      />
       {error && <Alert variant="danger">{error}</Alert>}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

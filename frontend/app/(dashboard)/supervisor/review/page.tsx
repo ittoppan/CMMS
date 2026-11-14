@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
@@ -160,6 +161,22 @@ export default function SupervisorReviewPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="ทบทวนคำขอแจ้งซ่อม"
+        summary="พิจารณาคำขอแจ้งซ่อมที่รออนุมัติ — อนุมัติให้สร้างเป็นใบสั่งงาน หรือไม่อนุมัติพร้อมเหตุผล"
+        steps={[
+          "เปิดคำขอที่รอทบทวนและตรวจรายละเอียด (เครื่องจักร อาการ ความเร่งด่วน)",
+          "กดอนุมัติเพื่อสร้าง/ส่งต่อเป็นใบสั่งงาน (ปรับข้อมูลที่จำเป็นก่อนยืนยันได้) หรือกดไม่อนุมัติพร้อมระบุเหตุผล",
+          "ติดตามผลในคิวงาน/ศูนย์วางแผนหลังอนุมัติ",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/supervisor.ts (คิวคำขอ ทบทวน อนุมัติ/ไม่อนุมัติ)"
+        note="การอนุมัติจะสร้างหรือเปลี่ยนสถานะเป็นใบงานจริง — การไม่อนุมัติควรระบุเหตุผลเพื่อให้ผู้แจ้งทราบ"
+        related={[
+          { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+        ]}
+      />
       {error && <Alert variant="danger">{error}</Alert>}
 
       <div className="flex flex-wrap items-center gap-2">

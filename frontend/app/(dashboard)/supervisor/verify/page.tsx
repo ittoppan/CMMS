@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
@@ -92,6 +93,22 @@ export default function SupervisorVerifyPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="ตรวจรับงานซ่อม"
+        summary="ตรวจรับงานที่ช่างแจ้งเสร็จ — ยืนยันปิดงาน หรือเปิดกลับเพื่อแก้ไขเมื่อผลยังไม่ผ่าน"
+        steps={[
+          "เปิดรายการงานที่รอตรวจรับและตรวจรายละเอียด/ผลการซ่อม",
+          "กดตรวจรับเพื่อปิดงาน หรือเปิดงานใหม่/ส่งกลับเมื่อยังไม่ผ่านเกณฑ์",
+          "งานที่ปิดแล้วจะสะท้อนในประวัติและตัวชี้วัด",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/supervisor.ts (คิวรอตรวจรับ การตรวจรับ/ปิด/เปิดงาน)"
+        note="การปิดงานเป็นการยืนยันผลสุดท้าย — ควรตรวจหลักฐานและอะไหล่ที่ใช้ให้ครบก่อนยืนยัน"
+        related={[
+          { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+          { href: "/repair/history", label: "ประวัติงานซ่อม" },
+        ]}
+      />
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Card>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useState } from "react";
 import { usePageHero } from "@/lib/i18n";
 import {
@@ -127,6 +128,22 @@ export default function FieldMyPlanPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="แผนงานของฉัน (ภาคสนาม)"
+        summary="มุมมองสำหรับช่าง — แสดงงานที่ถูกมอบหมายและรอบเวลาที่วางไว้สำหรับผู้ใช้คนปัจจุบัน"
+        steps={[
+          "ตรวจรายการงานวันนี้/ที่จะถึง และดูรอบเวลา เครื่องจักร และสถานะของแต่ละงาน",
+          "เปิดงานเพื่อดูรายละเอียดและลงมือปฏิบัติ (เริ่ม/พัก/ทำเสร็จ ทำจากหน้ารายละเอียดงานหรือคิวหัวหน้างานตามสิทธิ์)",
+          "กดรีเฟรชเมื่อต้องการดึงการเปลี่ยนแปลงล่าสุดจากผู้วางแผน",
+        ]}
+        source="อ่านผ่าน lib/planning.ts (getMyPlan) — แผนงานและรอบเวลาที่มอบหมายให้ผู้ใช้ที่ล็อกอินอยู่"
+        note="หน้านี้เป็นมุมมองอ่าน/ติดตามของช่าง — การวางแผน/มอบหมายใหม่ทำที่ศูนย์วางแผนหรือเมนูหัวหน้างาน"
+        related={[
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+          { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+        ]}
+      />
       {denied && <AccessDenied />}
       {error && <Alert variant="danger">{error}</Alert>}
 

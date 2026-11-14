@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
@@ -231,6 +232,22 @@ export default function WorkforceCrewsPage() {
         )
       }
     >
+
+      <ModuleGuide
+        name="ทีมงาน (Crews)"
+        summary="จัดกลุ่มช่างเป็นทีม เพื่อมอบหมายงานเป็นกลุ่มและบริหารกำลังคนตามชุดงาน"
+        steps={[
+          "สร้างหรือแก้ไขทีมงาน (รหัส/ชื่อ)",
+          "เพิ่ม/ลบสมาชิกในทีม",
+          "ใช้ทีมเป็นหน่วยอ้างอิงเมื่อวางแผน/มอบหมายงานที่ต้องทำหลายคน",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/workforce.ts (WORKFORCE_API — crews/members)"
+        note="สมาชิกทีมควรตรงกับกะและทักษะจริง — ทีมที่ไม่มีสมาชิกพร้อมงานจะมอบหมายไม่ได้ผล"
+        related={[
+          { href: "/workforce/technicians", label: "ช่างและทีมงาน" },
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+        ]}
+      />
       <div className="space-y-6">
         {banner && <Alert variant={banner.tone}>{banner.text}</Alert>}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
@@ -165,6 +166,23 @@ export default function SupervisorPlanPage() {
         }
       />
 
+
+      <ModuleGuide
+        name="วางแผน/มอบหมายงาน (หัวหน้างาน)"
+        summary="กำหนดรอบเวลาและมอบหมายผู้รับผิดชอบให้ใบงานที่พร้อมวางแผน จากมุมมองหัวหน้างาน"
+        steps={[
+          "เลือกใบงานที่ยังไม่มีรอบเวลาหรือยังไม่มอบหมาย",
+          "กำหนดวันเวลาและผู้รับผิดชอบ (lead/ทีม) ตามความพร้อม",
+          "บันทึกแผนแล้วติดตามในคิวงานหรือปฏิทินวางแผน",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/supervisor.ts และ lib/planning.ts (ข้อมูลงาน ช่าง และการวางแผน/มอบหมาย)"
+        note="ควรตรวจความขัดแย้งช่วงเวลาและภาระงานช่างก่อนยืนยัน — งานชนกันอาจทำให้แผนคลาดเคลื่อน"
+        related={[
+          { href: "/planning/calendar", label: "ปฏิทินวางแผน" },
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+          { href: "/supervisor/queue", label: "คิวงานหัวหน้างาน" },
+        ]}
+      />
       {error && <Alert variant="danger">{error}</Alert>}
 
       {/* Workload */}

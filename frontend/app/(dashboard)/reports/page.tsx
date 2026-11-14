@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,23 @@ export default function ReportsHubPage() {
           เปิด Report Center
         </Button>
       </div>
+
+      <ModuleGuide
+        name="ศูนย์รายงาน (Reports Hub)"
+        summary="จุดรวมทางเข้าไปยังรายงานและการส่งออกข้อมูล — Report Center, รายงาน PDF ประจำเดือน, ส่งออก/นำเข้า Excel"
+        steps={[
+          "เลือกประเภทรายงานจากการ์ด/ปุ่มทางลัด (Report Center, PDF ประจำเดือน, Export/Import)",
+          "กำหนดช่วงเวลา/ตัวกรองในหน้าปลายทาง แล้วสร้างหรือส่งออกผลลัพธ์",
+          "ตรวจสอบไฟล์/ผลลัพธ์ก่อนส่งต่อ — ข้อมูลมาจากระบบจริง ณ เวลาที่ออกรายงาน",
+        ]}
+        source="หน้านี้เป็นศูนย์นำทาง — ข้อมูลดึงจากโมดูลรายงานปลายทางตามแต่ละหน้า"
+        note="รายงานที่พิมพ์/ส่งออกสะท้อนข้อมูล ณ เวลาที่สร้าง ควรระบุช่วงเวลาและแหล่งที่มาเมื่อส่งต่อ"
+        related={[
+          { href: "/reports/monthly_pdf", label: "รายงาน PDF ประจำเดือน" },
+          { href: "/reports/export_excel", label: "ส่งออก Excel/CSV" },
+          { href: "/reports/import_excel", label: "นำเข้า Excel" },
+        ]}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

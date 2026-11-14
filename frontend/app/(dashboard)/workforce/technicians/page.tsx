@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { TriangleAlert, UserCog } from "lucide-react";
@@ -159,6 +160,23 @@ export default function WorkforceTechniciansPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="ช่างและทีมงาน (กำลังคน)"
+        summary="รายชื่อช่าง/บุคลากรในระบบ — ดูข้อมูลพื้นฐาน ตำแหน่ง และเข้าหน้ารายละเอียดเพื่อจัดการทักษะ/ภาระงาน"
+        steps={[
+          "ค้นหาหรือกรองรายชื่อช่าง",
+          "เปิดรายละเอียดช่างเพื่อดูทักษะ ใบรับรอง กะ และงานที่รับผิดชอบ",
+          "อัปเดตข้อมูลที่เกี่ยวข้องผ่านหน้าจัดการย่อย (ทักษะ/ใบรับรอง/กะ) ตามสิทธิ์",
+        ]}
+        source="อ่านผ่าน lib/workforce.ts (WORKFORCE_API, TechnicianRow) — ข้อมูลผู้ใช้/ช่างจากระบบ"
+        note="ข้อมูลทักษะและใบรับรองมีผลต่อการประเมินความพร้อมในการมอบหมายงาน"
+        related={[
+          { href: "/workforce/skills", label: "ทักษะช่าง" },
+          { href: "/workforce/certifications", label: "ใบรับรอง/วุฒิบัตร" },
+          { href: "/workforce/shifts", label: "กะทำงาน" },
+        ]}
+      />
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard label="ช่างทั้งหมด" value={totals.headcount} unit="คน" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -194,6 +195,22 @@ export default function ShutdownBoardPage() {
         title={hero.title}
         description={hero.desc}
       >
+
+      <ModuleGuide
+        name="งานปิดโรง (Shutdown)"
+        summary="วางแผนและติดตามงานที่ต้องทำช่วงปิดโรง/หยุดเครื่อง — รวมรายการงาน งบประมาณ และความคืบหน้าตามช่วง shutdown"
+        steps={[
+          "เลือกช่วง shutdown/แผนกที่ต้องการดูแดชบอร์ดและรายการงาน",
+          "สร้างหรือปรับรายการงานในช่วง shutdown ตามสิทธิ์ (วางแผน)",
+          "ติดตามสถานะและผลเมื่อถึงช่วงปฏิบัติงานจริง",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/shutdown.php (config, options, dashboard, list และการจัดการรายการ)"
+        note="งาน shutdown มักกระทบหลายระบบพร้อมกัน — ตรวจช่วงเวลา ทรัพยากร และใบอนุญาตความปลอดภัยก่อนยืนยันแผน"
+        related={[
+          { href: "/planning", label: "ศูนย์วางแผนซ่อมบำรุง" },
+          { href: "/workforce/capacity", label: "กำลังคน (Capacity)" },
+        ]}
+      />
         <Alert
           variant="danger"
           title={st === 403 || st === 401 ? "ไม่มีสิทธิ์เข้าถึง" : "โหลดรายการไม่สำเร็จ"}
