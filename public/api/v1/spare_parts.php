@@ -20,6 +20,7 @@ try {
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $sageCategory = isset($_GET['sage_category']) ? trim((string)$_GET['sage_category']) : '';
             $q = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+            $stockStatus = isset($_GET['stock_status']) ? trim((string)$_GET['stock_status']) : '';
             $limitParam = $_GET['limit'] ?? null;
             $pageParam = $_GET['page'] ?? null;
             $offsetParam = $_GET['offset'] ?? null;
@@ -34,19 +35,51 @@ try {
                 break;
             }
 
-            $where = [];
-            $params = [];
+            $baseWhere = [];
+            $baseParams = [];
             if ($sageCategory !== '' && strtolower($sageCategory) !== 'all') {
-                $where[] = 's.sage_category = ?';
-                $params[] = $sageCategory;
+                $baseWhere[] = 's.sage_category = ?';
+                $baseParams[] = $sageCategory;
             }
             if ($q !== '') {
-                $where[] = '(s.code LIKE ? OR s.name LIKE ? OR s.sage_item_no LIKE ? OR s.category LIKE ? OR s.location LIKE ?)';
+                $baseWhere[] = '(s.code LIKE ? OR s.name LIKE ? OR s.sage_item_no LIKE ? OR s.category LIKE ? OR s.location LIKE ?)';
                 $like = '%' . $q . '%';
-                array_push($params, $like, $like, $like, $like, $like);
+                array_push($baseParams, $like, $like, $like, $like, $like);
+            }
+            $baseWhereSql = $baseWhere ? ('WHERE ' . implode(' AND ', $baseWhere)) : '';
+            $baseSql = 'FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id ' . $baseWhereSql;
+
+            $stockExpr = 'COALESCE(s.stock_qty, 0)';
+            $minExpr = 'COALESCE(s.min_stock, 0)';
+            $where = $baseWhere;
+            $params = $baseParams;
+            if ($stockStatus === 'out') {
+                $where[] = $stockExpr . ' <= 0';
+            } elseif ($stockStatus === 'low') {
+                $where[] = $stockExpr . ' > 0 AND ' . $stockExpr . ' <= ' . $minExpr;
+            } elseif ($stockStatus === 'ok') {
+                $where[] = $stockExpr . ' > ' . $minExpr;
             }
             $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
-            $baseSql = 'FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id ' . $whereSql;
+            $listSql = 'FROM spare_parts s LEFT JOIN suppliers sup ON s.supplier_id = sup.id ' . $whereSql;
+
+            $summarySql = "SELECT
+                COUNT(*) AS total_items,
+                SUM(CASE WHEN $stockExpr <= 0 THEN 1 ELSE 0 END) AS out_count,
+                SUM(CASE WHEN $stockExpr > 0 AND $stockExpr <= $minExpr THEN 1 ELSE 0 END) AS low_count,
+                SUM(CASE WHEN $stockExpr > $minExpr THEN 1 ELSE 0 END) AS ok_count,
+                COALESCE(SUM($stockExpr * COALESCE(s.unit_price, 0)), 0) AS total_value
+                " . $baseSql;
+            $sumStmt = $pdo->prepare($summarySql);
+            $sumStmt->execute($baseParams);
+            $summaryRow = $sumStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            $summary = [
+                'total_items' => (int)($summaryRow['total_items'] ?? 0),
+                'low_count' => (int)($summaryRow['low_count'] ?? 0),
+                'out_count' => (int)($summaryRow['out_count'] ?? 0),
+                'ok_count' => (int)($summaryRow['ok_count'] ?? 0),
+                'total_value' => (float)($summaryRow['total_value'] ?? 0),
+            ];
 
             if ($paginate) {
                 $limit = max(1, min(200, (int)($limitParam ?? 50)));
@@ -57,17 +90,18 @@ try {
                     $offset = max(0, (int)($offsetParam ?? 0));
                     $page = (int)floor($offset / $limit) + 1;
                 }
-                $countStmt = $pdo->prepare('SELECT COUNT(*) ' . $baseSql);
+                $countStmt = $pdo->prepare('SELECT COUNT(*) ' . $listSql);
                 $countStmt->execute($params);
                 $total = (int)$countStmt->fetchColumn();
-                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $baseSql . ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?');
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY s.created_at DESC LIMIT ? OFFSET ?');
                 $stmt->execute(array_merge($params, [$limit, $offset]));
-                $items = $stmt->fetchAll();
-                echo json_encode(['items' => $items, 'total' => $total, 'limit' => $limit, 'offset' => $offset, 'page' => $page]);
+                $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode(['items' => $items, 'total' => $total, 'limit' => $limit, 'offset' => $offset, 'page' => $page, 'summary' => $summary], JSON_UNESCAPED_UNICODE);
             } else {
-                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $baseSql . ' ORDER BY s.created_at DESC');
+                $stmt = $pdo->prepare('SELECT s.*, sup.name AS supplier_name ' . $listSql . ' ORDER BY s.created_at DESC');
                 $stmt->execute($params);
-                echo json_encode($stmt->fetchAll());
+                // คืน array เดิมเพื่อความเข้ากันได้ย้อนหลังกับ consumer ที่คาดหวังรูปแบบเดิม
+                echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE);
             }
             break;
         case 'POST':

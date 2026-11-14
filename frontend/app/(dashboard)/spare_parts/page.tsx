@@ -74,6 +74,12 @@ const stockBadge: Record<string, { label: string; variant: "success" | "warning"
 
 const PAGE_SIZE = 15;
 
+function getCsrfToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const v = document.cookie.match(/(?:^|; )csrf_token=([^;]+)/)?.[1] ?? null;
+  try { return v ? decodeURIComponent(v) : null; } catch { return v; }
+}
+
 function partThumbSrc(item: SparePart): string | undefined {
   const raw = item.imageUrl;
   if (!raw) return undefined;
@@ -285,9 +291,10 @@ function ItemsCard({
         const upRes = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
         const upJson = await upRes.json();
         if (!upJson.url) throw new Error(upJson.error || "อัปโหลดไม่สำเร็จ");
+                const csrf = getCsrfToken();
         const putRes = await fetch(`/api/v1/spare_parts.php?id=${p.rawId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
           body: JSON.stringify({ image_url: upJson.url }),
         });
         const putJson = await putRes.json();
@@ -593,8 +600,9 @@ function ItemsCard({
 export default function SparePartsPage() {
   const hero = usePageHero("spare_parts");
   const router = useRouter();
-  const [parts, setParts] = useState<SparePart[]>([]);
+    const [parts, setParts] = useState<SparePart[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [sageTypeFilter, setSageTypeFilter] = useState("");
   const [activeTab, setActiveTab] = useState("all");
@@ -621,24 +629,33 @@ export default function SparePartsPage() {
 
   const [totalItems, setTotalItems] = useState(0);
   const [serverPaged, setServerPaged] = useState(false);
+  const [summary, setSummary] = useState<{ total_items: number; low_count: number; out_count: number; ok_count: number; total_value: number } | null>(null);
 
-  const fetchParts = async (opts?: { p?: number; q?: string; sage?: string }) => {
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 350);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const fetchParts = async (opts?: { p?: number; q?: string; sage?: string; tab?: string }) => {
     setLoading(true);
     setError("");
     const p = opts?.p ?? page;
     const q = opts?.q ?? search;
     const sage = opts?.sage ?? sageTypeFilter;
+    const tab = opts?.tab ?? activeTab;
     try {
       const params = new URLSearchParams();
       params.set("limit", String(PAGE_SIZE));
       params.set("page", String(p));
       if (q) params.set("q", q);
       if (sage) params.set("sage_category", sage);
+      if (tab === "low" || tab === "out") params.set("stock_status", tab);
       const res = await fetch(`/api/v1/spare_parts.php?${params.toString()}`);
       const json = await res.json();
       if (json && Array.isArray(json.items)) {
         setServerPaged(true);
         setTotalItems(Number(json.total || json.items.length));
+        if (json.summary && typeof json.summary === "object") setSummary(json.summary);
         const fetched = json.items.map((row: any, i: number) => ({
           rawId: row.id,
           id: `sp-${row.id || i}`,
@@ -659,6 +676,7 @@ export default function SparePartsPage() {
         setParts(fetched);
       } else if (Array.isArray(json)) {
         setServerPaged(false);
+        setSummary(null);
         setTotalItems(json.length);
         const fetched = json.map((row: any, i: number) => ({
           rawId: row.id,
@@ -681,15 +699,15 @@ export default function SparePartsPage() {
       }
     } catch (e) {
       console.error("Failed to fetch spare parts", e);
-      setError("Failed to fetch spare parts. Please try again.");
+      setError("โหลดรายการอะไหล่ไม่สำเร็จ กรุณาลองใหม่");
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchParts({ p: page, q: search, sage: sageTypeFilter });
+    fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, sageTypeFilter]);
+  }, [page, search, sageTypeFilter, activeTab]);
 
   // Sync from Sage 300 ERP
   const handleSageSync = async () => {
@@ -697,16 +715,19 @@ export default function SparePartsPage() {
     setSyncNotice("");
     setError("");
     try {
+      const csrf = getCsrfToken();
       const res = await fetch("/api/v1/sage_sync.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
         body: JSON.stringify({ category: sageTypeFilter || "all" }),
       });
       const json = await res.json();
       if (json.status === "success") {
-        setSyncNotice(json.message);
-        await fetchParts();
+        setSyncNotice(json.message || "ซิงค์ข้อมูลจาก Sage เรียบร้อย");
+        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
         setTimeout(() => setSyncNotice(""), 4000);
+      } else {
+        setError(json?.message || json?.error || "ซิงค์ข้อมูลจาก Sage ไม่สำเร็จ");
       }
     } catch (e) {
       console.error("Sage 300 Sync error", e);
@@ -721,17 +742,21 @@ export default function SparePartsPage() {
     setDeleting(true);
     setError("");
     try {
+      const csrf = getCsrfToken();
       const res = await fetch(`/api/v1/spare_parts.php?id=${deleteTarget.rawId}`, {
         method: "DELETE",
+        headers: { ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
       });
       const json = await res.json();
       if (json.success || json.message === "Deleted") {
-        setParts((prev) => prev.filter((p) => p.rawId !== deleteTarget.rawId));
         setDeleteSuccess(true);
+        await fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
         setTimeout(() => {
           setDeleteSuccess(false);
           setDeleteTarget(null);
-        }, 1500);
+        }, 1200);
+      } else {
+        setError(json?.error || json?.message || "ลบรายการไม่สำเร็จ");
       }
     } catch (e) {
       console.error("Delete spare part error", e);
@@ -749,8 +774,9 @@ export default function SparePartsPage() {
     }
   };
 
-  // Filter
+  // Filter / KPIs (server-paged: API ส่ง summary และกรอง stock_status แล้ว)
   const filtered = useMemo(() => {
+    if (serverPaged) return parts;
     return parts.filter((p) => {
       const q = search.toLowerCase();
       const matchSearch =
@@ -759,19 +785,26 @@ export default function SparePartsPage() {
         p.name.toLowerCase().includes(q) ||
         p.sageItemNo.toLowerCase().includes(q);
       const matchSageType = !sageTypeFilter || p.sageCategory === sageTypeFilter;
-      const matchStock =
-        activeTab === "all" || getStockStatus(p) === activeTab;
+      const matchStock = activeTab === "all" || getStockStatus(p) === activeTab;
       return matchSearch && matchSageType && matchStock;
     });
-  }, [search, sageTypeFilter, activeTab, parts]);
+  }, [search, sageTypeFilter, activeTab, parts, serverPaged]);
 
   const kpis = useMemo(() => {
+    if (summary) {
+      return {
+        total: Number(summary.total_items || 0),
+        lowCount: Number(summary.low_count || 0),
+        outCount: Number(summary.out_count || 0),
+        totalValue: Number(summary.total_value || 0),
+      };
+    }
     const total = parts.length;
     const lowCount = parts.filter((p) => getStockStatus(p) === "low").length;
     const outCount = parts.filter((p) => getStockStatus(p) === "out").length;
     const totalValue = parts.reduce((sum, p) => sum + p.stock * p.price, 0);
     return { total, lowCount, outCount, totalValue };
-  }, [parts]);
+  }, [parts, summary]);
 
   const isPanelShown = isNarrow ? isPanelDialogOpen : showSidePanel;
   const togglePanel = () =>
@@ -935,15 +968,15 @@ export default function SparePartsPage() {
               <ItemsCard
                 parts={parts}
                 filtered={filtered}
-                search={search}
-                setSearch={setSearch}
+                search={searchInput}
+                setSearch={setSearchInput}
                 sageTypeFilter={sageTypeFilter}
                 setSageTypeFilter={setSageTypeFilter}
                 page={page}
                 setPage={setPage}
                 onEdit={handleEdit}
                 onDelete={setDeleteTarget}
-                onRefresh={() => fetchParts({ p: page, q: search, sage: sageTypeFilter })}
+                onRefresh={() => fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab })}
                 totalItems={totalItems}
                 serverPaged={serverPaged}
               />
