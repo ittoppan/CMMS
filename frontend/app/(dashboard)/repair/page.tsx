@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { usePageHero, t, statusText, priorityText } from "@/lib/i18n";
-import { isRepairOverdue } from "@/lib/repair-status";
+import { isRepairDueSoon, isRepairOverdue } from "@/lib/repair-status";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
 import AndonLamp from "@/components/AndonLamp";
@@ -58,6 +58,8 @@ interface WorkOrder extends Record<string, unknown> {
   assignee: string;
   date: string;
   overdue: boolean;
+  /** ใกล้ครบกำหนดส่ง (ยังไม่เกิน) ตาม SLA */
+  dueSoon: boolean;
   outsourceBy: string;
   costOutsource: number;
 }
@@ -216,7 +218,9 @@ export default function WorkOrdersPage() {
           priority: row.priority || "Medium",
           assignee: row.assigned_name || row.assigned_to || "ยังไม่มอบหมาย",
           date: row.created_at ? row.created_at.split(" ")[0] : "-",
-          overdue: isRepairOverdue(row.estimated_completion_date, row.status),
+          // กำหนดส่งจริง: sla_due_at ก่อน → estimated_completion_date (ตรงกับ kpi_is_overdue)
+          overdue: isRepairOverdue(row.sla_due_at || row.estimated_completion_date, row.status),
+          dueSoon: isRepairDueSoon(row.sla_due_at || row.estimated_completion_date, row.status),
           outsourceBy: row.outsource_by || "",
           costOutsource: Number(row.cost_outsource || 0)
         }));
@@ -315,7 +319,13 @@ export default function WorkOrdersPage() {
     return workOrders.filter((wo) => {
       const q = search.toLowerCase();
       const matchSearch = !q || wo.woNumber.toLowerCase().includes(q) || wo.asset.toLowerCase().includes(q) || wo.assignee.toLowerCase().includes(q);
-      const matchStatus = !statusFilter || (statusFilter === "overdue" ? wo.overdue : statusGroup(wo.status) === statusFilter);
+      const matchStatus =
+        !statusFilter ||
+        (statusFilter === "overdue"
+          ? wo.overdue
+          : statusFilter === "sla_risk"
+            ? wo.dueSoon
+            : statusGroup(wo.status) === statusFilter);
       const matchPriority = !priorityFilter || wo.priority === priorityFilter;
       const matchOutsource = outsourceFilter === "all" || (outsourceFilter === "out" ? !!wo.outsourceBy : !wo.outsourceBy);
       return matchSearch && matchStatus && matchPriority && matchOutsource;
@@ -819,6 +829,7 @@ export default function WorkOrdersPage() {
               <SelectItem value="open">งานใหม่ (Open)</SelectItem>
               <SelectItem value="in_progress">กำลังซ่อม</SelectItem>
               <SelectItem value="overdue">เกินกำหนด (ไฟแดง)</SelectItem>
+              <SelectItem value="sla_risk">ใกล้ครบกำหนด SLA (24 ชม.)</SelectItem>
               <SelectItem value="completed">เสร็จสิ้น</SelectItem>
             </SelectContent>
           </Select>
@@ -951,7 +962,7 @@ export default function WorkOrdersPage() {
             </div>
             {statusFilter && (
               <p className="text-sm text-muted-foreground">
-                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : statusFilter === "overdue" ? "เกินกำหนด" : "เสร็จสิ้น"}
+                ตัวกรองสถานะ: {statusFilter === "open" ? "งานใหม่ (Open)" : statusFilter === "in_progress" ? "กำลังซ่อม" : statusFilter === "overdue" ? "เกินกำหนด" : statusFilter === "sla_risk" ? "ใกล้ครบกำหนด SLA" : "เสร็จสิ้น"}
               </p>
             )}
           </div>

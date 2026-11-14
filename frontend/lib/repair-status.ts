@@ -73,6 +73,25 @@ export function isRepairOverdue(
   return due.getTime() < Date.now();
 }
 
+/**
+ * ใกล้ครบกำหนดส่งแต่ยังไม่เกิน (ค่าเริ่มต้น 24 ชม.) — เกณฑ์เดียวกับ KPI alerts
+ * (planning_sla_risk_hours) เพื่อให้แดชบอร์ดกับหน้ารายการตรงกัน
+ */
+export function isRepairDueSoon(
+  estimatedCompletion: string | null | undefined,
+  status: string | null | undefined,
+  withinHours = 24
+): boolean {
+  if (isRepairDone(status)) return false;
+  if (!estimatedCompletion) return false;
+  const raw = String(estimatedCompletion).trim();
+  if (!raw || raw === "-" || raw === "—") return false;
+  const due = new Date(raw.includes("T") ? raw : raw.replace(" ", "T"));
+  if (isNaN(due.getTime())) return false;
+  const diff = due.getTime() - Date.now();
+  return diff >= 0 && diff <= Math.max(1, withinHours) * 3600 * 1000;
+}
+
 /** สถานะ → ไฟ Andon (สีเดียวกับหน้า /repair เดิม): เขียว=เสร็จ, เหลือง=กำลัง/รออะไหล่, แดง=เกินกำหนด, เทา=รอดำเนินการ */
 export function repairStatusAndon(
   status: string | null | undefined,

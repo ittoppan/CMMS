@@ -140,7 +140,7 @@ export default function RepairKanbanPage() {
             priority: normalizedPriority,
             assignee: row.assigned_name || "ยังไม่จ่ายงาน",
             status: normalizedStatus,
-            overdue: isRepairOverdue(row.estimated_completion_date, row.status),
+            overdue: isRepairOverdue(row.sla_due_at || row.estimated_completion_date, row.status),
             createdAt: row.created_at || "-",
             team: Array.isArray(row.team) ? row.team : []
           };

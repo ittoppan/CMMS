@@ -23,6 +23,7 @@
  */
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/roles.php';
+require_once __DIR__ . '/settings.php';
 
 /* ───────────────────────── 1. ช่วงเวลา (time range) ───────────────────────── */
 
@@ -508,19 +509,38 @@ function kpi_alerts(PDO $pdo, array $opts): array {
     $pmOverdue = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE status IN ('pending','in_progress') AND due_date < CURDATE()")->fetchColumn();
     $pmDueToday = (int)$pdo->query("SELECT COUNT(*) FROM pm_am WHERE status IN ('pending','in_progress') AND DATE(due_date) = CURDATE()")->fetchColumn();
 
-    // SLA at risk: ค้าง > 80% ของเวลาก่อน due ที่มี due ใน 24 ชม. แต่ยังไม่เกินกำหนด
-    $riskParams = $params;
-    $st = $pdo->prepare('SELECT r.sla_due_at, r.estimated_completion_date, r.planned_end_at FROM repair r' . $where .
-        " AND r.status IN (" . $active . ") AND (r.sla_due_at IS NOT NULL OR r.estimated_completion_date IS NOT NULL OR r.planned_end_at IS NOT NULL)");
-    $st->execute($riskParams);
+    // SLA at risk: due ภายใน N ชม. (settings planning_sla_risk_hours, default 24) แต่ยังไม่เกินกำหนด
+    // พร้อมแจกแจงตาม priority เพื่อให้แดชบอร์ด drill-down ได้
+    $riskHours = max(1, (int)setting_value('planning_sla_risk_hours', '24'));
+    $st = $pdo->prepare('SELECT r.id, r.status, r.priority, r.sla_due_at, r.estimated_completion_date, r.planned_end_at FROM repair r' . $where .
+        " AND r.status IN (" . $active . ")");
+    $st->execute($params);
     $atRisk = 0;
     $now = time();
+    $byPriority = [];
+    foreach (['critical', 'high', 'medium', 'low'] as $p) {
+        $byPriority[$p] = ['priority' => $p, 'total' => 0, 'due_set' => 0, 'at_risk' => 0, 'overdue' => 0, 'no_due' => 0];
+    }
     foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $p = strtolower((string)($row['priority'] ?? 'medium'));
+        if (!isset($byPriority[$p])) {
+            $byPriority[$p] = ['priority' => $p, 'total' => 0, 'due_set' => 0, 'at_risk' => 0, 'overdue' => 0, 'no_due' => 0];
+        }
+        $byPriority[$p]['total']++;
         $due = $row['sla_due_at'] ?: ($row['estimated_completion_date'] ?: $row['planned_end_at']);
-        if (!$due) continue;
+        if (!$due) {
+            $byPriority[$p]['no_due']++;
+            continue;
+        }
+        $byPriority[$p]['due_set']++;
         $dueT = strtotime((string)$due);
         if ($dueT === false) continue;
-        if ($dueT >= $now && ($dueT - $now) <= 24 * 3600) $atRisk++;
+        if ($dueT < $now) {
+            $byPriority[$p]['overdue']++;
+        } elseif (($dueT - $now) <= $riskHours * 3600) {
+            $byPriority[$p]['at_risk']++;
+            $atRisk++;
+        }
     }
 
     return [
@@ -532,6 +552,8 @@ function kpi_alerts(PDO $pdo, array $opts): array {
         'waiting_parts' => $waiting_parts,
         'waiting_external' => $waiting_external,
         'sla_at_risk' => $atRisk,
+        'sla_risk_hours' => $riskHours,
+        'sla_by_priority' => array_values($byPriority),
     ];
 }
 

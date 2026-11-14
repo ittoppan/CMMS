@@ -217,16 +217,16 @@ if ($escOn === '1') {
 $slaOn = settingValue($pdo, 'sla_overdue_alert', '1');
 if ($slaOn === '1') {
     $slaRows = $pdo->query("
-        SELECT r.id, r.work_order_no, r.title, r.priority, r.sla_due_at, r.planned_end_at,
+        SELECT r.id, r.work_order_no, r.title, r.priority, r.sla_due_at, r.estimated_completion_date, r.planned_end_at,
                a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
         FROM repair r
         LEFT JOIN asset_registry a ON r.asset_id = a.id
         LEFT JOIN users u ON r.assigned_to = u.id
         WHERE r.status NOT IN ('resolved','closed','cancelled','rejected','completed','verified')
           AND r.work_order_no NOT LIKE '%DEMO%'
-          AND COALESCE(r.sla_due_at, r.planned_end_at) IS NOT NULL
-          AND COALESCE(r.sla_due_at, r.planned_end_at) < NOW()
-        ORDER BY COALESCE(r.sla_due_at, r.planned_end_at) ASC
+          AND COALESCE(r.sla_due_at, r.estimated_completion_date, r.planned_end_at) IS NOT NULL
+          AND COALESCE(r.sla_due_at, r.estimated_completion_date, r.planned_end_at) < NOW()
+        ORDER BY COALESCE(r.sla_due_at, r.estimated_completion_date, r.planned_end_at) ASC
         LIMIT 15
     ")->fetchAll();
     echo "SLA overdue: " . count($slaRows) . "\n";
@@ -236,12 +236,13 @@ if ($slaOn === '1') {
             echo "  skip (alerted <24h): {$s['work_order_no']}\n";
             continue;
         }
-        $due = $s['sla_due_at'] ?: $s['planned_end_at'];
+        $due = $s['sla_due_at'] ?: ($s['estimated_completion_date'] ?: $s['planned_end_at']);
         $code = $s['asset_code'] ?: ($s['asset_name'] ?: '-');
         $msg = "\n⏱️ [SLA เกินกำหนด]\n"
              . "----------------------------------\n"
              . "ใบงาน: {$s['work_order_no']}\n"
              . "หัวข้อ: {$s['title']}\n"
+             . "ความสำคัญ: " . ($s['priority'] ?: '-') . "\n"
              . "เครื่องจักร: $code\n"
              . "กำหนดเสร็จ: {$due}\n"
              . "ผู้รับผิดชอบ: " . ($s['assigned_name'] ?: 'ยังไม่ assign') . "\n"

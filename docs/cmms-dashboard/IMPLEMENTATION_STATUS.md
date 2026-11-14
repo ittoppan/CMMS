@@ -36,6 +36,7 @@
 | 20 | Testing | PARTIAL | `TEST_REPORT.md` — tsc/build/audit ผ่าน; UI ไม่ได้คลิกทดสอบด้วยตา |
 | 21 | Production readiness | BLOCKED (deploy ยังไม่ทำในรอบนี้) | `PRODUCTION_READINESS.md` |
 | 22 | SLA ตาม priority + บังคับเวลาคาดเสร็จตอนจ่ายงาน | PASS (ตรวจเฉพาะ syntax/type/build — UI ยังไม่คลิกทดสอบ) | `src/helpers/sla.php` (ใหม่), `repair.php`, `supervisor.php`, `/repair/assign`, `/settings` |
+| 23 | มุมมอง SLA บนแดชบอร์ด (แยก priority + drill-down) + แจ้งเตือน SLA จากกำหนดส่งจริง | PASS (backend มี test จริง; UI ยังไม่คลิกดู) | `src/helpers/kpi.php`, `dashboard/page.tsx`, `repair.php`, `notification_engine.php`, `alert_check.php` |
 
 ## ไฟล์ที่แก้/เพิ่มในรอบนี้
 
@@ -69,6 +70,9 @@
 | DE-5 | SLA ตาม priority: `sla_hours_<priority>` ใน settings + ประทับ `sla_due_at`/`estimated_completion_date` เมื่อจ่ายงาน (เฉพาะช่องว่าง) | PASS | `src/helpers/sla.php` (ใหม่), `src/config/settings_defaults.php`, `public/api/v1/repair.php`, `public/api/v1/supervisor.php` |
 | DE-6 | บังคับกรอกเวลาคาดเสร็จในหน้าจ่ายงาน (prefill จาก SLA ของ priority) + server บังคับซ้ำด้วย 422 `SLA_DUE_REQUIRED` เมื่อปิด auto-apply | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx`, `public/api/v1/repair.php` |
 | DE-7 | เปิดช่องแก้ค่า SLA ในหน้า `/settings` (กลุ่ม `repair_config`) + migration `INSERT IGNORE` | PASS (โค้ดพร้อม; ต้องรัน migration บนเครื่องนั้นก่อนช่องจะโผล่) | `frontend/app/(dashboard)/settings/page.tsx`, `database/migration_20261114_sla_priority.sql` |
+| DE-8 | แถบ "SLA ตามระดับความสำคัญ" บนแดชบอร์ด: มีกำหนดส่ง/ไม่ถึงกำหนด/เกินกำหนด แยก 4 priority + กดไปรายการที่กรองแล้ว | PASS (type/build) | `frontend/app/(dashboard)/dashboard/page.tsx`, `frontend/lib/dashboard.ts` |
+| DE-9 | filter `status=sla_risk` + แก้ filter `overdue` ใน API ให้ใช้ `COALESCE(sla_due_at, estimated_completion_date)` | PASS | `public/api/v1/repair.php`, `frontend/app/(dashboard)/repair/page.tsx`, `frontend/lib/repair-status.ts` |
+| DE-10 | แจ้งเตือน SLA ใช้กำหนดส่งจริง (รวม `estimated_completion_date`) ทั้ง Notification Center และ alert_check | PASS (php -l; ไม่ได้ส่งข้อความจริงเพราะยังไม่มี due date ในข้อมูลและ Telegram/LINE ไม่ได้ตั้งค่า) | `scripts/notification_engine.php`, `scripts/alert_check.php` |
 
 ### ผลต่อ KPI
 
@@ -86,6 +90,16 @@
 | Self-test helper ใน transaction + rollback (สร้างใบงานจำลอง 120 นาที, pause 20 นาที) | PASS — preview/stamp/stored = 100, เรียกซ้ำไม่เขียนทับ, rollback แล้วไม่มีแถวทดสอบเหลือ (0) |
 | `npx tsc --noEmit` | PASS |
 | UI: กดมอบหมาย/ปิดงานผ่านเบราว์เซอร์ | NOT TESTED |
+
+### SLA view + alerts (2026-11-14 รอบ 2)
+
+| รายการ | ผล |
+|---|---|
+| `php -l` 4 ไฟล์ PHP + helper | PASS |
+| `kpi_alerts()` บนฐานจริง | PASS — risk_hours 24, medium 99 ใบ no_due 99, at_risk 0 |
+| ใบงานจำลองใน transaction (due −2 ชม. และ +3 ชม.) | PASS — critical bucket total 2, due_set 2, overdue 1, at_risk 1; filter `overdue`/`sla_risk` คืน 1 แถวทั้งคู่; rollback เหลือ 0 |
+| `npx tsc --noEmit` / `npm run build` / `design-audit --strict` | PASS |
+| คลิกแถบ SLA → drill-down / เปิด dialog จ่ายงานด้วยตา | NOT TESTED — ต้องมีบัญชีผู้ใช้ระบบ (รหัสไม่ใช่ค่าเริ่มต้น) |
 
 ## งานถัดไป (ลำดับที่แนะนำ)
 

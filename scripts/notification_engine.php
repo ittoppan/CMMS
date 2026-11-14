@@ -258,17 +258,20 @@ if (engHas('low_stock') || engHas('all')) {
 /* ---------------- SLA at-risk / breached ---------------- */
 if (engHas('sla') || engHas('all')) {
     $active = "('open','acknowledged','draft','pending_approval','approved','assigned','accepted','in_progress','paused','waiting_parts','pending_parts','waiting_external','waiting_approval','completed','pending_verification','resolved')";
+    // ใช้กำหนดส่งจริง: sla_due_at ก่อน แล้วค่อย estimated_completion_date (ฟิลด์ที่ระบบประทับตอนจ่ายงาน)
+    $riskHours = max(1, (int)engSetting($pdo, 'planning_sla_risk_hours', '24'));
     $slaRows = $pdo->query("
-        SELECT r.id, r.work_order_no, r.title, r.sla_due_at, r.created_at, r.priority, r.assigned_to,
+        SELECT r.id, r.work_order_no, r.title, r.sla_due_at, r.estimated_completion_date, r.created_at, r.priority, r.assigned_to,
+               COALESCE(r.sla_due_at, r.estimated_completion_date) AS due_at,
                a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
         FROM repair r
         LEFT JOIN asset_registry a ON r.asset_id = a.id
         LEFT JOIN users u ON r.assigned_to = u.id
-        WHERE r.status IN $active AND r.sla_due_at IS NOT NULL
-          AND r.sla_due_at < DATE_ADD(NOW(), INTERVAL 24 HOUR)")->fetchAll();
+        WHERE r.status IN $active AND COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL
+          AND COALESCE(r.sla_due_at, r.estimated_completion_date) < DATE_ADD(NOW(), INTERVAL {$riskHours} HOUR)")->fetchAll();
     foreach ($slaRows as $r) {
-        $breached = strtotime((string)$r['sla_due_at']) < strtotime('now');
-        $days = (int)((strtotime('now') - strtotime((string)$r['sla_due_at'])) / 86400);
+        $breached = strtotime((string)$r['due_at']) < strtotime('now');
+        $days = (int)((strtotime('now') - strtotime((string)$r['due_at'])) / 86400);
         $done += engFire($pdo, [
             'module' => 'repair', 'event' => $breached ? 'sla_breached' : 'sla_at_risk',
             'type' => 'sla', 'priority' => $breached ? 'critical' : 'high',
@@ -279,7 +282,8 @@ if (engHas('sla') || engHas('all')) {
             'template' => 'repair:' . ($breached ? 'sla_breached' : 'sla_at_risk'),
             'vars' => [
                 'work_order_no' => (string)$r['work_order_no'], 'title' => (string)$r['title'],
-                'asset_code' => (string)$r['asset_code'], 'sla_due_at' => (string)$r['sla_due_at'],
+                'asset_code' => (string)$r['asset_code'], 'sla_due_at' => (string)$r['due_at'],
+                'priority' => (string)$r['priority'],
                 'overdue_days' => max(1, $days),
             ],
             'url' => '/repair/view?id=' . (int)$r['id'],

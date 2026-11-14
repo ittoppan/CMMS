@@ -214,13 +214,14 @@ export default function MyTasksPage() {
               if (s === "waiting_parts" || s === "pending_parts") return "pending_parts";
               return "new";
             })(),
-            overdue: isRepairOverdue(r.estimated_completion_date, r.status),
+            // ใช้กำหนดส่งจริง: sla_due_at ก่อน → estimated_completion_date (ตรงกับ kpi_is_overdue)
+            overdue: isRepairOverdue(r.sla_due_at || r.estimated_completion_date, r.status),
             assignedTo: r.assigned_to || null,
             assignedToName: r.assigned_name || "-",
             teamIds: Array.isArray(r.team_ids) ? r.team_ids.map((t: any) => Number(t)) : [],
             team: Array.isArray(r.team) ? r.team.map((m: any) => ({ user_id: Number(m.user_id), status: String(m.status || "pending") })) : [],
             assignedDate: r.created_at || "-",
-            estimatedCompletion: r.estimated_completion_date || "-",
+            estimatedCompletion: r.sla_due_at || r.estimated_completion_date || "-",
             beforeImg: r.before_image_path || "",
             afterImg: r.after_image_path || "",
             receiverName: r.receiver_name || "-",

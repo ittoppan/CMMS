@@ -98,6 +98,19 @@ export interface DashboardAlerts {
   waiting_parts: number;
   waiting_external: number;
   sla_at_risk: number;
+  /** ชั่วโมงเกณฑ์ "ใกล้ครบกำหนด" (settings planning_sla_risk_hours) */
+  sla_risk_hours?: number;
+  /** แจกแจงสถานะ SLA ตามระดับความสำคัญ (สำหรับแดชบอร์ด + drill-down) */
+  sla_by_priority?: SlaPriorityBucket[];
+}
+
+export interface SlaPriorityBucket {
+  priority: string;
+  total: number;
+  due_set: number;
+  at_risk: number;
+  overdue: number;
+  no_due: number;
 }
 
 export interface PmMetrics {

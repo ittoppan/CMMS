@@ -90,6 +90,14 @@ const RANGES = D.RANGE_OPTIONS.filter((r) =>
   ["today", "this_week", "this_month", "last_month", "this_quarter", "this_year", ""].includes(r.value),
 );
 
+/* ── ระดับความสำคัญ → ป้ายไทย/สี (ใช้ในแถบ SLA) ─────────────────────── */
+const PRIORITY_META: Record<string, { label: string; color: string }> = {
+  critical: { label: "วิกฤต", color: C.red },
+  high: { label: "ด่วน", color: C.amber },
+  medium: { label: "ปกติ", color: C.blue },
+  low: { label: "ไม่เร่งด่วน", color: C.green },
+};
+
 /** แหล่งข้อมูลที่หน้านี้อ่าน (ใช้ระบุในหมายเหตุ N/A) */
 const SRC = {
   overview: "dashboard.php?action=overview",
@@ -528,6 +536,10 @@ export default function DashboardPage() {
 
   const openPending = useCallback(() => setPendingOpen(true), []);
 
+  /* SLA ตามระดับความสำคัญ — ตัวเลขจริงจาก alerts (ยังไม่มีกำหนดส่ง = no_due) */
+  const slaBreak = ov?.alerts?.sla_by_priority ?? [];
+  const slaRiskHours = ov?.alerts?.sla_risk_hours ?? 24;
+
   useEffect(() => {
     if (!pendingOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -715,6 +727,57 @@ export default function DashboardPage() {
       </div>
 
       {/* ── ROW 2: MAIN ANALYTICS ───────────────────────────────────── */}
+      {/* ── ROW 1.5: SLA ตามระดับความสำคัญ (กดเพื่อไปยังรายการที่กรองแล้ว) ── */}
+      <div className="grid shrink-0 grid-cols-2 gap-2 md:grid-cols-4 lg:gap-3" aria-label="สถานะ SLA ตามระดับความสำคัญ">
+        {(slaBreak.length > 0
+          ? slaBreak
+          : ["critical", "high", "medium", "low"].map((p) => ({
+              priority: p,
+              total: 0,
+              due_set: 0,
+              at_risk: 0,
+              overdue: 0,
+              no_due: 0,
+            }))
+        ).map((p) => {
+          const meta = PRIORITY_META[p.priority] ?? { label: p.priority, color: C.blue };
+          return (
+            <div
+              key={p.priority}
+              className="flex min-w-0 flex-col gap-1 rounded-[0.5em] border border-solid border-[color:var(--tower-border)] bg-[var(--tower-panel)] px-2 py-1.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-1.5 text-[0.6em] font-bold">
+                  <i
+                    className="tower-dot"
+                    data-tone={p.overdue > 0 ? "red" : p.at_risk > 0 ? "amber" : "green"}
+                  />
+                  <span className="truncate" style={{ color: meta.color }}>
+                    {meta.label}
+                  </span>
+                </span>
+                <span className="tower-panel-sub shrink-0">
+                  มีกำหนดส่ง {fmtNumber(p.due_set)}/{fmtNumber(p.total)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-[0.58em]">
+                <Link href={`/repair?priority=${p.priority}&status=overdue`} className="tower-panel-link">
+                  เลยกำหนด <strong>{fmtNumber(p.overdue)}</strong>
+                </Link>
+                <Link
+                  href={`/repair?priority=${p.priority}&status=sla_risk`}
+                  className="tower-panel-link"
+                  title={`ใกล้ครบกำหนดภายใน ${slaRiskHours} ชั่วโมง`}
+                >
+                  ใกล้ครบ <strong>{fmtNumber(p.at_risk)}</strong>
+                </Link>
+                <span className="tower-panel-sub">ไม่มีกำหนดส่ง {fmtNumber(p.no_due)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="tower-band grid grid-cols-1 gap-2 md:grid-cols-2 lg:min-h-0 lg:flex-[1.6] lg:grid-cols-[2.3fr_1fr_1fr_1fr] lg:grid-rows-1 lg:gap-3 lg:overflow-hidden">
         <Panel
           title="Maintenance Overview (Last 12 Months)"

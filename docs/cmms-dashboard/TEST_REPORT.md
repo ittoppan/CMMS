@@ -80,3 +80,27 @@ assets: total 82 / running 82 / down(=มีใบงานค้าง) 82
 
 1. การค้นหาโค้ดด้วย `grep` ทั้ง `frontend/` จะโดนไฟล์ build ใน `frontend/.next` (ไฟล์ .map ขนาดใหญ่) — ควรจำกัด path หรือใช้ `-g '!*.map'`
 2. `work_assignees.ref_id` = 1,2,3 แต่ `repair.id` เริ่มที่ 6 → ข้อมูลมอบหมายช่างเป็น orphan ทั้ง 5 แถว
+
+## SLA view + alerts (2026-11-14 รอบ 2) — เทสต์ที่รันจริง
+
+| # | รายการ | คำสั่ง/วิธี | ผล |
+|---|---|---|---|
+| 1 | PHP syntax 4 ไฟล์ | `php -l` บน `src/helpers/kpi.php`, `public/api/v1/repair.php`, `scripts/notification_engine.php`, `scripts/alert_check.php` | **PASS** |
+| 2 | `kpi_alerts()` บนฐานจริง | เรียกด้วย role 1 / user 1 ทาง CLI | **PASS** — `sla_risk_hours=24`, `sla_by_priority`: medium total 99 / no_due 99, ระดับอื่น 0 (ตรงกับข้อมูลจริงที่ยังไม่มีกำหนดส่ง) |
+| 3 | นับ due จริงในแต่ละ bucket | สร้าง 2 ใบงาน critical ใน transaction (due −2 ชม. และ +3 ชม.) แล้วเรียก `kpi_alerts()` | **PASS** — critical total 2, due_set 2, overdue 1, at_risk 1, `sla_at_risk`=1 |
+| 4 | filter ของ drill-down | รัน SQL ชุดเดียวกับ `repair.php` (`status=overdue` และ `status=sla_risk`) กับใบงานทดสอบ | **PASS** — คืน 1 แถวทั้งสองแบบ |
+| 5 | ไม่ทิ้งข้อมูลทดสอบ | `ROLLBACK` + นับ `title LIKE 'TEST-SLA-ALERT-%'` | **PASS** — 0 แถว |
+| 6 | TypeScript | `cd frontend && npx tsc --noEmit` | **PASS** |
+| 7 | Design audit (strict) | `python scripts/design-audit.py --strict` | **PASS** (FAIL 0 / WARN 0) |
+| 8 | Production build | `cd frontend && npm run build` | **PASS** |
+| 9 | dev server ขึ้นจริง | `npx next dev -p 3100` แล้ว `GET /login` | **PASS** — HTTP 200 (Ready in 876ms) |
+
+### NOT TESTED (รอบ 2)
+
+| รายการ | เหตุผล |
+|---|---|
+| login เข้า `/repair/assign` เพื่อดู prefill SLA | ไม่มีบัญชี/รหัสที่ใช้ได้ (ตรวจ `flag_default_passwords.php --list` แล้ว ไม่มีบัญชีที่ยังใช้รหัสเริ่มต้น) — เปิดได้ถึงหน้า login เท่านั้น |
+| กด "จ่ายงาน" จริง | เป็นการเขียนข้อมูลจริง (ห้ามแก้ production records ระหว่างทดสอบ) |
+| แถบ SLA บนแดชบอร์ดแสดงผลจริง | ต้อง login ก่อน; ตรวจแล้วเฉพาะ type/build/audit |
+| ส่ง LINE/Telegram แจ้งเตือน SLA | ข้อมูลจริงทุกใบยัง `no_due` และ env ของ LINE/Telegram ไม่ได้ตั้งบนเครื่องนี้ |
+| รัน `notification_engine.php` / `alert_check.php` ตาม scheduler | ยังไม่มี cron/task ตั้งไว้ในรอบนี้ |

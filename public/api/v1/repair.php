@@ -119,7 +119,13 @@ try {
                     $stFilter = strtolower(trim((string)$_GET['status']));
                     // รองรับกลุ่มสถานะที่ UI ใช้บ่อย
                     if ($stFilter === 'overdue') {
-                        $where[] = "r.estimated_completion_date IS NOT NULL AND r.estimated_completion_date < CURDATE() AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
+                        // ใช้กำหนดส่งจริง (sla_due_at ก่อน → estimated_completion_date) ให้ตรงกับ kpi_is_overdue()
+                        $where[] = "COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL AND COALESCE(r.sla_due_at, r.estimated_completion_date) < NOW() AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
+                    } elseif ($stFilter === 'sla_risk') {
+                        // ใกล้ครบกำหนด SLA (ยังไม่เกิน) — ใช้เกณฑ์ชั่วโมงเดียวกับ KPI planning_sla_risk_hours
+                        require_once __DIR__ . '/../../../src/helpers/settings.php';
+                        $riskHours = max(1, (int)setting_value('planning_sla_risk_hours', '24'));
+                        $where[] = "COALESCE(r.sla_due_at, r.estimated_completion_date) IS NOT NULL AND COALESCE(r.sla_due_at, r.estimated_completion_date) >= NOW() AND COALESCE(r.sla_due_at, r.estimated_completion_date) <= DATE_ADD(NOW(), INTERVAL " . $riskHours . " HOUR) AND LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
                     } elseif ($stFilter === 'open_active') {
                         $where[] = "LOWER(COALESCE(r.status,'')) NOT IN ('completed','closed','resolved','rejected','cancelled')";
                     } elseif ($stFilter === 'completed_all') {

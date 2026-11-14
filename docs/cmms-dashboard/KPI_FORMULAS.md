@@ -49,6 +49,22 @@ estimated_completion_date = เวลาที่สัญญากับผู�
 - ผลต่อ KPI: ใบงานที่จ่ายงานหลัง deploy จะมี due date จริง → Overdue อ่านจาก `sla_due_at`/`estimated_completion_date` เป็นหลัก กฎ 7 วันเหลือไว้เฉพาะใบงานเก่าที่ยังไม่ถูกจ่าย
 - ใบงาน 99 ใบที่ค้างอยู่ **ยังไม่ถูก backfill** (ห้ามแก้ข้อมูลจริง) — จะมี due date เมื่อถูกจ่ายงานหรือตั้งแผน
 
+### 2.2 SLA breakdown ตาม priority (2026-11-14)
+
+`kpi_alerts()` คืนเพิ่ม:
+
+```
+sla_risk_hours   = settings.planning_sla_risk_hours (default 24)
+sla_by_priority  = [{ priority, total, due_set, at_risk, overdue, no_due }, ...]
+```
+
+- `at_risk` = due ในอนาคตแต่ ≤ `sla_risk_hours` ชม. (เกณฑ์เดียวกับ KPI alert)
+- `overdue` = due < now
+- `no_due` = ยังไม่มี `sla_due_at`/`estimated_completion_date`/`planned_end_at` → ไม่สามารถตัดสินว่าเกินกำหนดได้
+- drill-down: `/repair?priority=<p>&status=overdue` และ `/repair?priority=<p>&status=sla_risk`
+  (เพิ่ม filter `sla_risk` ใน `repair.php` + หน้า `/repair`; filter `overdue` ใน API เปลี่ยนมาใช้ COALESCE ให้ตรงกับ KPI)
+- **ผลจริงวันนี้:** medium 99 ใบ / `no_due` 99 → ทุกช่อง overdue/at_risk = 0 จนกว่าจะจ่ายงาน (ตัวเลขนี้เป็นความจริงของข้อมูล ไม่ใช่ 0 ที่หมายถึง "งานไม่มีปัญหา")
+
 ## 3. Completion Rate
 
 ```

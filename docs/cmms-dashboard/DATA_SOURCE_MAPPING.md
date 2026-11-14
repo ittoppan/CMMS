@@ -69,3 +69,13 @@ kpi_done_statuses()   = closed, cancelled, rejected, verified, done, skipped
 
 - Endpoint ที่ใช้ตั้งค่าหน้าจอ: `GET /api/v1/repair.php?reference=codes` คืน `sla.hours` + `sla.auto_apply` เพิ่มจาก `failure_codes`/`repair_codes` เดิม
 - หน้าการตั้งค่าจะแสดงช่อง SLA หลังรัน `database/migration_20261114_sla_priority.sql` (INSERT IGNORE, ไม่ทับค่าที่มีอยู่)
+
+### SLA alerts (ช่องทางเดิม ไม่ได้สร้างระบบใหม่)
+
+| งาน | ไฟล์ | อ่านข้อมูลจาก | เกณฑ์ |
+|---|---|---|---|
+| SLA at-risk / breached (Notification Center + push) | `scripts/notification_engine.php` | `COALESCE(repair.sla_due_at, repair.estimated_completion_date)` | due < now = breached, due ≤ now + `planning_sla_risk_hours` = at-risk |
+| SLA เกินกำหนดเข่า LINE (legacy check) | `scripts/alert_check.php` | `COALESCE(sla_due_at, estimated_completion_date, planned_end_at)` | due < now (กันแจ้งซ้ำ 24 ชม. ด้วย needle `SLA-OVERDUE-WO<id>`) |
+
+- ทั้งสองที่ถูกแก้ให้อ่าน `estimated_completion_date` ด้วย — ใบงานที่ได้กำหนดส่งจาก SLA ตอนจ่ายงานจะไม่ถูกข้ามการแจ้งเตือน
+- ต้องมี cron/task เรียก `scripts/notification_engine.php` (และ/หรือ `alert_check.php`) ตามรอบ — **ยังไม่ได้ตั้ง scheduler ในรอบนี้**
