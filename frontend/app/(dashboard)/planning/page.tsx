@@ -65,6 +65,9 @@ import {
 } from "lucide-react";
 
 const GROUP_ORDER: PlanGroup[] = ["new_request", "unplanned", "unscheduled", "scheduled", "at_risk", "overdue"];
+// backend รับ limit ได้สูงสุด 300 ต่อคำขอ (default 120) — โหลดคิวทีละหน้า
+const QUEUE_PAGE = 120;
+const QUEUE_MAX = 300;
 
 function toDbDT(v: string): string {
   return v ? `${v.slice(0, 10)} ${v.slice(11, 16)}:00` : "";
@@ -153,6 +156,8 @@ export default function PlanningCenterPage() {
   const [queue, setQueue] = useState<QueueResponse | null>(null);
   const [techs, setTechs] = useState<TechnicianItem[]>([]);
   const [queueLoading, setQueueLoading] = useState(true);
+  // API คืนสูงสุด 300 แถว/ครั้ง (default 120) — แสดงทีละหน้าพร้อมบอกจำนวนจริง
+  const [queueLimit, setQueueLimit] = useState(QUEUE_PAGE);
 
   const [group, setGroup] = useState<PlanGroup | null>(null);
   const [search, setSearch] = useState("");
@@ -224,7 +229,7 @@ export default function PlanningCenterPage() {
   const reloadQueue = useCallback(async () => {
     setQueueLoading(true);
     try {
-      const q = await getPlanningQueue(queryKey);
+      const q = await getPlanningQueue({ ...queryKey, limit: queueLimit });
       setQueue(q);
     } catch (e) {
       const status = (e as { status?: number })?.status;
@@ -233,6 +238,11 @@ export default function PlanningCenterPage() {
     } finally {
       setQueueLoading(false);
     }
+  }, [queryKey, queueLimit]);
+
+  // เปลี่ยนกลุ่ม/คำค้น → กลับไปหน้าแรกของคิว
+  useEffect(() => {
+    setQueueLimit((n) => (n === QUEUE_PAGE ? n : QUEUE_PAGE));
   }, [queryKey]);
 
   useEffect(() => {
@@ -759,6 +769,22 @@ export default function PlanningCenterPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2 text-xs text-[var(--cmms-text-muted)]">
+            <span>
+              แสดง {items.length} จาก {queue?.total ?? items.length} งาน
+              {canPlan && selected.size > 0 ? ` · เลือกแล้ว ${selected.size}` : ""}
+            </span>
+            {(queue?.total ?? 0) > items.length && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={queueLoading || queueLimit >= QUEUE_MAX}
+                onClick={() => setQueueLimit((n) => Math.min(QUEUE_MAX, n + QUEUE_PAGE))}
+              >
+                {queueLoading ? "กำลังโหลด…" : "โหลดเพิ่ม"}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
