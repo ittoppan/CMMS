@@ -274,6 +274,8 @@ export default function RepairAssignPage() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // กันส่งซ้ำ (ดับเบิลคลิก/เน็ตหลุดแล้ว retry) — API ใช้ client_action_id กันการจ่ายงานซ้ำ (src/helpers/idempotency.php)
+          client_action_id: `assign-${selectedWo.rawId}-${Date.now()}`,
           assigned_to: Number(selectedTech),
           team_ids: [Number(selectedTech), ...selectedTeam],
           estimated_completion_date: dueAtSql,
