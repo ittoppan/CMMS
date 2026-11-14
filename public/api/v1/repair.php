@@ -925,10 +925,12 @@ try {
             try {
                 $isCompleted = (isset($data['status']) && $data['status'] === 'completed') || isset($data['completed_at']);
                 if ($isCompleted) {
-                    $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name
+                    $q = $pdo->prepare("SELECT r.*, a.code AS asset_code, a.name AS asset_name, u.full_name AS assigned_name,
+                                               uc.line_user_id AS creator_line_id, uc.email AS creator_email, uc.full_name AS creator_name
                                         FROM repair r
                                         LEFT JOIN asset_registry a ON a.id = r.asset_id
                                         LEFT JOIN users u ON u.id = r.assigned_to
+                                        LEFT JOIN users uc ON uc.id = r.created_by
                                         WHERE r.id = ?");
                     $q->execute([$id]);
                     $row = $q->fetch(PDO::FETCH_ASSOC);
@@ -957,6 +959,9 @@ try {
                                 $lid = $st->fetchColumn();
                                 if ($lid) $targets[] = (string)$lid;
                             }
+                            // ผู้แจ้ง (requester/created_by) รับ LINE ด้วย
+                            $creatorLineId = trim((string)($row['creator_line_id'] ?? ''));
+                            if ($creatorLineId !== '') $targets[] = $creatorLineId;
                             $grp = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_maintenance_group_id'")->fetchColumn();
                             if ($grp && getSettingValue('line_group_enabled', '1') === '1') $targets[] = (string)$grp;
                             $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
@@ -969,22 +974,46 @@ try {
                         if (getSettingValue('telegram_enabled', '1') === '1') {
                             telegramAdminAlert(
                                 "ซ่อมเสร็จเรียบร้อย " . ($row['work_order_no'] ?? 'EN-????-???'),
-                                "ใบงาน: " . ($row['work_order_no'] ?? 'EN-????-???') . "\n" .
-                                "เครื่อง: " . ($row['asset_code'] ?? '-') . ($row['asset_name'] ? " {$row['asset_name']}" : '') . "\n" .
-                                "อาการ: " . mb_substr((string)($row['title'] ?? ''), 0, 200) . "\n" .
-                                "Downtime: " . number_format($dt, 1) . " ชม.\n" .
-                                "ค่าซ่อมรวม: " . number_format($totalCost) . " บาท\n" .
+                                "ใบงาน: " . ($row['work_order_no'] ?? 'EN-????-???') . "
+" .
+                                "เครื่อง: " . ($row['asset_code'] ?? '-') . ($row['asset_name'] ? " {$row['asset_name']}" : '') . "
+" .
+                                "อาการ: " . mb_substr((string)($row['title'] ?? ''), 0, 200) . "
+" .
+                                "Downtime: " . number_format($dt, 1) . " ชม.
+" .
+                                "ค่าซ่อมรวม: " . number_format($totalCost) . " บาท
+" .
                                 "ช่างผู้ปิดงาน: " . ($row['assigned_name'] ?? '-'),
                                 $detailUrl,
                                 'SUCCESS'
                             );
+                        }
+                        // อีเมลแจ้งผู้แจ้ง (requester/created_by) เมื่อปิดงาน
+                        $creatorEmail = trim((string)($row['creator_email'] ?? ''));
+                        if ($creatorEmail !== '' && filter_var($creatorEmail, FILTER_VALIDATE_EMAIL)) {
+                            $creatorName = trim((string)($row['creator_name'] ?? 'ผู้แจ้ง'));
+                            $subj = '[CMMS-TPT] งานซ่อมเสร็จเรียบร้อย ' . (string)($row['work_order_no'] ?? '');
+                            $msgBody = "ใบงาน: " . (string)($row['work_order_no'] ?? '-') . "
+"
+                                . "เครื่อง: " . (string)($row['asset_code'] ?? '-') . "
+"
+                                . "อาการ/งาน: " . mb_substr((string)($row['title'] ?? ''), 0, 200) . "
+"
+                                . "ช่างผู้ปิดงาน: " . (string)($row['assigned_name'] ?? '-') . "
+"
+                                . "ค่าใช้จ่ายรวม: " . number_format($totalCost) . " บาท";
+                            try {
+                                sendEmailNotification($creatorEmail, $creatorName, $subj, $msgBody, $detailUrl);
+                            } catch (Throwable $e) {
+                                error_log('[repair.php] creator email notify failed: ' . $e->getMessage());
+                            }
                         }
                     }
                 }
             } catch (Exception $e) {
                 error_log("[repair.php] completed notify failed: " . $e->getMessage());
             }
-            break;
         case 'DELETE':
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if (!$id) { http_response_code(400); echo json_encode(['error' => 'Missing id']); exit; }
