@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -623,6 +625,23 @@ export default function PMChecksheetPage() {
       </div>
 
       {/* เลือกแผน */}
+      <ModuleGuide
+        name="เช็คชีท PM"
+        summary="บันทึกผลทำ PM ตามเช็กลิสต์ของแผนที่ครบกำหนด — ติ๊กผลรายข้อ กรอกค่าที่วัดได้ แนบรูป และส่งเข้าระบบ (รองรับการทำแบบออฟไลน์)"
+        steps={[
+          "เลือกแผน PM ที่ครบกำหนดวันนี้ (ระบบแสดงเฉพาะแผนที่ถึงวันกำหนด)",
+          "ทำรายการทีละข้อ หรือกด “ตรวจทั้งหมดผ่าน” แล้วแก้เฉพาะข้อที่ไม่ผ่าน",
+          "แนบรูปหลักฐานในข้อที่ต้องมีภาพ",
+          "กดบันทึก — ถ้าขาดเน็ต ระบบเก็บงานไว้ในเครื่องและส่งให้เมื่อกลับมาออนไลน์ (มีปุ่ม “ส่งงานค้างทั้งหมดตอนนี้”)",
+        ]}
+        source="อ่านแผนและบันทึกผลผ่าน /api/v1/pm_am.php — งานที่ค้างส่งเก็บในคิวออฟไลน์ของอุปกรณ์"
+        note="ทำเช็คชีทได้เฉพาะแผนที่ถึงวันครบกำหนด — แผนที่ยังไม่ถึงหรือเลยกำหนดจะไม่ขึ้นในรายการ"
+        related={[
+          { href: "/pm_am", label: "ตารางแผน PM" },
+          { href: "/pm_am/calendar", label: "ปฏิทินแผน PM" },
+          { href: "/inspections/run", label: "ตรวจเช็ค (รอบตรวจ)" },
+        ]}
+      />
       <Card>
         <CardContent className="p-4">
           <label htmlFor="pm-plan" className="text-sm font-medium text-[var(--cmms-text-primary)]">เลือกแผน PM ที่ต้องการทำเช็คชีท *</label>

@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero, t } from "@/lib/i18n";
@@ -357,6 +359,23 @@ export default function PMCalendarPage() {
         </div>
       </div>
 
+      <ModuleGuide
+        name="ปฏิทินแผน PM"
+        summary="มุมปฏิทินของรอบ PM/AM จากข้อมูลจริง — เห็นว่าแต่ละวันมีเครื่องไหนครบกำหนด พร้อมสถานะตามกำหนดและทางเข้าไปทำเช็คชีท"
+        steps={[
+          "เลือกช่วงดู (วัน/สัปดาห์/เดือน) และกรองเครื่อง/แผนก/สถานะที่แถบตัวกรอง",
+          "กดที่รายการในปฏิทินเพื่อเปิดรายละเอียดแผนหรือไปหน้าเช็คชีท",
+          "“ดูแผนทั้งหมด” สลับจากมุมปฏิทินเป็นมุมรายการ เพื่อหางานที่ตกค้างได้ง่าย",
+          "“ส่งออก iCal” เพื่อนำรอบ PM ไปใส่ปฏิทิน Google/Outlook ของทีม",
+        ]}
+        source="ตาราง pm_am ผ่าน /api/v1/pm_am.php และไฟล์ปฏิทิน /api/v1/pm_ical.php"
+        note="ปฏิทินแสดงเฉพาะแผนที่มีอยู่จริงในระบบ — เครื่องที่ยังไม่มีแผนจะไม่ปรากฏ ต้องสร้างแผนก่อนที่หน้าสร้างแผน PM"
+        related={[
+          { href: "/pm_am", label: "ตารางแผน PM" },
+          { href: "/pm_am/checksheet", label: "เช็คชีท PM" },
+          { href: "/pm_am/create", label: "สร้างแผน PM" },
+        ]}
+      />
       <Card>
         <CardContent className="space-y-4 p-4">
           <div className="flex flex-wrap items-center gap-3">

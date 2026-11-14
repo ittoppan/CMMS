@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -165,6 +167,23 @@ export default function BatchSchedulePage() {
         </div>
       </div>
 
+      <ModuleGuide
+        name="สร้างแผน PM แบบกลุ่ม"
+        summary="สร้างแผน PM ให้เครื่องจักรหลายเครื่องในครั้งเดียว ด้วยรายการตรวจ/เช็คชีทชุดเดียวกัน — ลดการสร้างแผนทีละเครื่อง"
+        steps={[
+          "ตั้งรอบ/ความถี่และรายละเอียดที่จะใช้ร่วมกัน",
+          "เลือกเครื่องเป้าหมายหลายเครื่อง (สูงสุดตามที่หน้าจออนุญาต)",
+          "ตรวจรายการเครื่องที่จะสร้าง แล้วยืนยัน — ระบบสร้างแผนรายเครื่องให้อัตโนมัติ",
+          "เข้า “ตารางแผน PM” เพื่อตรวจว่าแต่ละเครื่องได้รอบถูกต้อง",
+        ]}
+        source="สร้างผ่าน /api/v1/pm_am.php (หนึ่งคำขอต่อหนึ่งแผน)"
+        note="ทุกเครื่องที่เลือกจะได้รอบเวลาเดียวกัน — เครื่องที่รอบไม่เหมือนกลุ่มควรสร้างแยกที่หน้าสร้างแผน PM"
+        related={[
+          { href: "/pm_am", label: "ตารางแผน PM" },
+          { href: "/pm_am/create", label: "สร้างแผน PM" },
+          { href: "/pm_am/calendar", label: "ปฏิทินแผน PM" },
+        ]}
+      />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* คอลัมน์ซ้าย: ข้อมูลแผน */}
         <div className="space-y-4">

@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Grid } from "@/components/layout";
@@ -178,6 +180,21 @@ export default function EquipmentBorrowingPage() {
         </Button>
       }
     >
+      <ModuleGuide
+        name="ยืม-คืนอุปกรณ์"
+        summary="ควบคุมการยืม-คืนเครื่องมือช่างราคาสูง อุปกรณ์วัดค่า และเครื่องตรวจวัดพิเศษ — ใครยืมอะไร เมื่อไร และคืนแล้วหรือยัง"
+        steps={[
+          "กด “ขอยืมอุปกรณ์ใหม่” เพื่อสร้างรายการยืม (ระบุผู้ยืม/อุปกรณ์/กำหนดคืน)",
+          "ติดตามรายการที่ยังไม่คืนจากตัวเลขสรุปและตาราง",
+          "เมื่อคืนแล้วให้ปิดรายการ — รายการที่สร้างผิดสามารถลบได้",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/equipment_borrowing.php"
+        note="หน้านี้ติดตามการยืม-คืนเท่านั้น ไม่ได้ตัดสต็อกอะไหล่ — การเบิกจ่ายอะไหล่ทำในโมดูลอะไหล่"
+        related={[
+          { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
+        ]}
+      />
+
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">

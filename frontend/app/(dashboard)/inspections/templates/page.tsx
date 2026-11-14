@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
 import { Card, CardContent } from "@/components/ui/card";
@@ -214,6 +216,22 @@ export default function InspectionTemplatesPage() {
         )}
       </div>
 
+      <ModuleGuide
+        name="Template ตรวจเช็ค"
+        summary="นิยามหัวข้อตรวจเช็คที่ใช้ซ้ำได้ — ข้อตรวจ ชนิดคำตอบ ค่าเกณฑ์ และความถี่ (รายวัน/สัปดาห์/เดือน/ปี) เพื่อนำไปสร้างรอบตรวจ"
+        steps={[
+          "สร้าง Template ใหม่ หรือกดแก้ไขจากรายการด้านล่าง",
+          "เพิ่มข้อตรวจ: ชนิดคำตอบ (ผ่าน/ไม่ผ่าน, ค่าที่วัดได้, ข้อความ) และเกณฑ์ที่ถือว่าผ่าน",
+          "กำหนดความถี่ เพื่อใช้เป็นแม่แบบตอนสร้างรอบตรวจ",
+          "บันทึก แล้วไปสร้างรอบจริงที่หน้า “ตรวจเช็ค”",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/inspections.php (template และ item)"
+        note="การแก้ Template มีผลกับรอบตรวจที่จะสร้างใหม่ — รอบที่สร้างไปแล้วเก็บข้อตรวจตามที่บันทึกไว้ตอนนั้น"
+        related={[
+          { href: "/inspections", label: "กำหนดการตรวจ" },
+          { href: "/inspections/run", label: "ทำรายการตรวจ" },
+        ]}
+      />
       {/* Form สร้าง/แก้ */}
       <Card>
         <CardContent className="space-y-4 p-5">
