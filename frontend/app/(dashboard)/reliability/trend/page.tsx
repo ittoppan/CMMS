@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense } from "react";
 import { RefreshCw } from "lucide-react";
 
@@ -97,6 +98,22 @@ function TrendInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="แนวโน้มความน่าเชื่อถือ (Trend)"
+        summary="แสดงแนวโน้มตัวชี้วัดความน่าเชื่อถือรายช่วงเวลา (bucket) ตามขอบเขตที่เลือก เพื่อเห็นทิศทางการเปลี่ยนแปลง"
+        steps={[
+          "ตั้งค่าตัวกรอง/ขอบเขตและรูปแบบการแสดงผล",
+          "อ่านกราฟและตารางรายช่วงเวลา (failures, downtime, ชั่วโมงเดินเครื่อง ฯลฯ ตามที่ engine คืนค่า)",
+          "เปรียบเทียบช่วงเวลาเพื่อระบุการดีขึ้น/แย่ลงและเชื่อมโยงสาเหตุ",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=trend) ผ่าน lib/reliability.ts — ขนาด bucket และค่าต่าง ๆ กำหนดโดย engine"
+        note="ช่วงเวลาที่ข้อมูลไม่ครบจะแสดงค่าว่าง/ตามสถานะที่ระบบคืน — ไม่ควรสรุปเกินจากช่วงที่ข้อมูลขาด"
+        related={[
+          { href: "/reliability", label: "ภาพรวม Reliability" },
+          { href: "/reliability/growth", label: "Reliability Growth" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} />
 
       {error && <RelError message={error.message} />}

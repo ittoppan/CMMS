@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/critical — Phase 28
 // อันดับเครื่องสำคัญ (A-D) จากข้อมูลจริง — เป็นข้อมูล ไม่ใช่คำแนะนำอัตโนมัติ
 
@@ -94,6 +95,22 @@ export default function CriticalAssetsPage() {
       title={hero.title}
       description="อันดับความสำคัญจากคะแนน criticality (ข้อมูลจริงในระบบ) — เป็นสถิติประกอบการตัดสินใจ ไม่ใช่คำแนะนำอัตโนมัติ"
     >
+
+      <ModuleGuide
+        name="เครื่องสำคัญ (Criticality A–D)"
+        summary="จัดอันดับและสำรวจเครื่องจักรตามระดับความสำคัญ (A–D) และคะแนน/บริบทที่เกี่ยวข้อง จากข้อมูลจริงในระบบ"
+        steps={[
+          "กรองตามคลาสความสำคัญและค้นหาด้วยรหัส/ชื่อเครื่อง",
+          "ดูคะแนน/สถานะ/ตัวชี้วัดประกอบ (ตามที่ระบบมี) ของแต่ละเครื่อง",
+          "เปิดรายละเอียดเครื่องเพื่อวางแผนการดูแล/ทบทวนความสำคัญ",
+        ]}
+        source="อ่านจาก /api/v1/asset_reliability.php (action=critical) — ข้อมูลจริง ไม่ใช่คำแนะนำอัตโนมัติ"
+        note="ระดับความสำคัญควรทบทวนตามรอบและหลักฐาน — การตัดสินใจเชิงบริหารต้องใช้ข้อมูลร่วมหลายมิติ"
+        related={[
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+          { href: "/asset-reliability/config", label: "ตั้งค่า Reliability/Criticality" },
+        ]}
+      />
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

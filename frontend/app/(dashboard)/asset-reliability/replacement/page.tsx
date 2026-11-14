@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/replacement — Phase 28
 // ประวัติการเปลี่ยนชิ้นส่วน/components ทุกเครื่อง (ข้อมูลจริงจาก component_replacements)
 
@@ -76,6 +77,22 @@ export default function ReplacementPage() {
       title={hero.title}
       description="ประวัติการเปลี่ยนชิ้นส่วนสำคัญของเครื่องจักรทุกเครื่อง — บันทึกผ่านโปรไฟล์เครื่อง (แท็บ Components)"
     >
+
+      <ModuleGuide
+        name="ประวัติเปลี่ยนชิ้นส่วน (Replacement)"
+        summary="ประวัติการเปลี่ยนชิ้นส่วน/คอมโพเนนต์ของเครื่องจักร เพื่อใช้ติดตามอายุชิ้นส่วนและรูปแบบการบำรุง"
+        steps={[
+          "ค้นหา/กรองรายการเปลี่ยนชิ้นส่วนตามเครื่องหรือชิ้นส่วน",
+          "ตรวจวันที่ เหตุผล serial ใหม่ และผู้ดำเนินการ",
+          "ใช้ข้อมูลร่วมกับความเสียหายซ้ำ/ต้นทุนเพื่อวางแผนอะไหล่และการยกเครื่อง",
+        ]}
+        source="อ่านจาก /api/v1/asset_reports.php?report=replacement_summary — ข้อมูลจริงจากบันทึกการเปลี่ยนชิ้นส่วน"
+        note="ความครบถ้วนของประวัติขึ้นกับการบันทึกหน้างาน — รายการที่ไม่บันทึกจะไม่ปรากฏในรายงาน"
+        related={[
+          { href: "/asset-reliability/overhaul", label: "งานยกเครื่อง (Overhaul)" },
+          { href: "/spare_parts/issue_center", label: "ศูนย์เบิก-จ่ายอะไหล่" },
+        ]}
+      />
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

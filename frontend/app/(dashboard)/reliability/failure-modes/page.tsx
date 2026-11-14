@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useMemo } from "react";
 import { CircleHelp, RefreshCw } from "lucide-react";
 
@@ -180,6 +181,23 @@ function FailureModesInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="รูปแบบการเสีย & Pareto"
+        summary="วิเคราะห์รูปแบบการเสียที่ถูกจัดกลุ่มและลำดับ Pareto (ABC) เพื่อระบุโหมดที่กระทบสูงสุดตามตัวชี้วัดที่เลือก"
+        steps={[
+          "เลือกขอบเขต/ช่วงเวลา และตัวชี้วัดการจัดอันดับ (เช่น downtime หรือจำนวนครั้ง)",
+          "อ่านตาราง Pareto (ค่า สัดส่วน สะสม และกลุ่ม A/B/C) และการจัดกลุ่มโหมดความเสียหาย",
+          "ใช้ผลเพื่อกำหนดลำดับการแก้ไขและเชื่อมโยงไป RCA/แผนป้องกัน",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=pareto, failure_modes) ผ่าน lib/reliability.ts — ค่าจัดอันดับ/สัดส่วน/กลุ่ม ABC คำนวณโดย engine"
+        note="การจัดกลุ่ม ABC และจุดตัดเป็นไปตามนโยบาย/นิยามในระบบ (ดูหน้า Config/Definitions) — ไม่ควรตีความเกินข้อมูลที่มี"
+        related={[
+          { href: "/reliability/bad-actors", label: "เครื่องที่มีปัญหาเป็นระบบ" },
+          { href: "/rca", label: "RCA (หาสาเหตุราก)" },
+          { href: "/reliability/config", label: "นิยาม & การตั้งค่า KPI" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} />
 
       {error && <RelError message={error.message} />}

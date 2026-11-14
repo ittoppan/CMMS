@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -116,6 +117,22 @@ export default function RcaTaxonomyPage() {
         </div>
       </div>
 
+
+      <ModuleGuide
+        name="RCA Taxonomy (ประเภท/โหมด/สาเหตุ)"
+        summary="จัดการชุดคำจำกัดความมาตรฐานสำหรับ RCA — ประเภทความเสียหาย โหมด สาเหตุ และหมวดสาเหตุราก เพื่อให้การวิเคราะห์สอดคล้องกัน"
+        steps={[
+          "เลือกหมวด taxonomy ที่ต้องการดู/แก้ไข",
+          "เพิ่มหรือแก้ไขรายการ (รหัส ชื่อ คำอธิบาย ความเชื่อมโยง) ตามสิทธิ์",
+          "ใช้ taxonomy ที่กำหนดนี้ให้สม่ำเสมอเมื่อบันทึกเหตุการณ์และ RCA",
+        ]}
+        source="อ่าน/บันทึกผ่าน lib/rca.ts และ /api/v1/rca.php (taxonomy และคำสั่งจัดการ) — สิทธิ์จัดการ taxonomy ควบคุมฝั่งเซิร์ฟเวอร์"
+        note="การเปลี่ยน taxonomy มีผลต่อการจัดหมวดข้อมูลใหม่และรายงานที่อิงหมวดเหล่านี้ — ควรแก้ไขอย่างระมัดระวังและสื่อสารกับผู้ใช้"
+        related={[
+          { href: "/rca/events", label: "เหตุการณ์ความเสียหาย" },
+          { href: "/reliability/failure-modes", label: "รูปแบบการเสีย & Pareto" },
+        ]}
+      />
       {!canTax && !loading && (
         <Alert variant="info" title="สิทธิ์อ่านอย่างเดียว" description="คุณมีสิทธิ์ดู Taxonomies ได้อย่างเดียว — ต้องมีสิทธิ์จัดการเพื่อเพิ่ม/แก้ไขรายการ" />
       )}

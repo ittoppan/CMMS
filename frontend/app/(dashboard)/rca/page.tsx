@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -112,6 +113,23 @@ export default function RcaDashboardPage() {
           <a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>
         </div>
       </div>
+
+      <ModuleGuide
+        name="RCA (วิเคราะห์สาเหตุราก)"
+        summary="ภาพรวมงานวิเคราะห์สาเหตุราก (Root Cause Analysis) — ติดตามสถานะเหตุการณ์ แนวโน้ม และรายการ RCA ที่กำลังดำเนินการ"
+        steps={[
+          "ตั้งค่าตัวกรอง (สินทรัพย์/ความรุนแรง ฯลฯ) เพื่อดูภาพรวมและแนวโน้ม",
+          "เปิดเหตุการณ์หรือรายการ RCA เพื่อดูรายละเอียดและความคืบหน้า",
+          "สร้าง/ติดตาม RCA และมาตรการแก้ไขผ่านหน้าที่เกี่ยวข้อง (events/taxonomy/รายละเอียด)",
+        ]}
+        source="อ่านผ่าน lib/rca.ts และ /api/v1/rca.php (dashboard, trend, assets/wos, rcas) — ข้อมูลเหตุการณ์และ RCA จริงจากระบบ"
+        note="คุณภาพผล RCA ขึ้นกับการบันทึกเหตุการณ์ สาเหตุ และมาตรการอย่างครบถ้วน — สถานะงานสะท้อนตาม workflow ที่ระบบกำหนด"
+        related={[
+          { href: "/rca/events", label: "เหตุการณ์ความเสียหาย" },
+          { href: "/rca/taxonomy", label: "Taxonomy (ประเภท/สาเหตุ)" },
+          { href: "/reliability/failure-modes", label: "รูปแบบการเสีย & Pareto" },
+        ]}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <Select value={assetId} onValueChange={setAssetId}>

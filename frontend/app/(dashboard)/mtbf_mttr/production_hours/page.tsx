@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
@@ -172,6 +173,22 @@ export default function ProductionHoursPage() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="ชั่วโมงการผลิต (Production Hours)"
+        summary="บันทึกชั่วโมงเดินเครื่อง/การผลิตรายวัน-กะ เพื่อใช้เป็นฐานคำนวณ MTBF และตัวชี้วัดความน่าเชื่อถือ"
+        steps={[
+          "ค้นหาและตรวจรายการบันทึกชั่วโมงของเครื่อง/วันที่/กะ",
+          "เพิ่มหรือแก้ไขรายการชั่วโมงเดินเครื่องตามสิทธิ์",
+          "ตรวจความสอดคล้องกับข้อมูล MTBF/MTTR และเหตุการณ์เสียหาย",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/production_hours.php — ข้อมูลชั่วโมงเดินเครื่องจริงที่ผู้ใช้บันทึก"
+        note="ชั่วโมงเดินเครื่องเป็นฐานสำคัญของ MTBF — การบันทึกขาด/ซ้ำจะทำให้ตัวชี้วัดคลาดเคลื่อน"
+        related={[
+          { href: "/mtbf_mttr", label: "MTBF / MTTR" },
+          { href: "/reliability", label: "ภาพรวม Reliability" },
+        ]}
+      />
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">

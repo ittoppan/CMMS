@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState, useCallback } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
@@ -97,6 +98,22 @@ export default function RcaEventsPage() {
           <a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>
         </div>
       </div>
+
+      <ModuleGuide
+        name="เหตุการณ์ความเสียหาย (RCA Events)"
+        summary="รายการเหตุการณ์ความเสียหายที่ใช้เป็นฐานทำ RCA — ค้นหา กรอง และเปิดดูรายละเอียดเพื่อเชื่อมโยงการวิเคราะห์"
+        steps={[
+          "กรองตามสินทรัพย์ ความรุนแรง สถานะ RCA/ซ้ำ และค้นหาด้วยคำสำคัญ",
+          "เปิดเหตุการณ์เพื่อดูรายละเอียด เวลา หยุดเครื่อง และบริบทที่บันทึก",
+          "สร้างหรือเชื่อมโยง RCA/มาตรการจากเหตุการณ์ตามที่ระบบรองรับ",
+        ]}
+        source="อ่านผ่าน lib/rca.ts และ /api/v1/rca.php (events, assets/wos) — ข้อมูลเหตุการณ์จริง"
+        note="การระบุเหตุซ้ำ/ความรุนแรงอิงข้อมูลที่บันทึก — เหตุการณ์ที่ข้อมูลไม่ครบอาจวิเคราะห์ได้จำกัด"
+        related={[
+          { href: "/rca", label: "ภาพรวม RCA" },
+          { href: "/rca/taxonomy", label: "Taxonomy (ประเภท/สาเหตุ)" },
+        ]}
+      />
 
       <Card>
         <CardContent className="flex flex-wrap items-end gap-3 p-4">

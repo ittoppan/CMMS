@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -222,6 +223,22 @@ function GrowthInner() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="Reliability Growth"
+        summary="บันทึกและติดตามความเชื่อมโยงระหว่างการเปลี่ยนแปลงทางวิศวกรรมกับหน้าต่างก่อน/หลัง เพื่อสังเกตผลที่เกิดขึ้นจากข้อมูลจริง"
+        steps={[
+          "ดูรายการความเชื่อมโยงและผลประเมิน (improved/degraded/no_change/insufficient/unassessed) ที่ engine รายงาน",
+          "ผู้มีสิทธิ์สามารถเพิ่มรายการเชื่อมโยง (engineering change, สินทรัพย์, หน้าต่างเวลา) ตามที่แบบฟอร์มรองรับ",
+          "ตีความผลเป็น “ข้อสังเกต” จากตัวเลขในหน้าต่างที่กำหนด ไม่ใช่หลักฐานเชิงสาเหตุเด็ดขาดเพียงอย่างเดียว",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/reliability.php (action=growth_analysis และการบันทึก growth link) ผ่าน lib/reliability.ts — การเปรียบเทียบหน้าต่างโดย engine; สิทธิ์การบันทึกควบคุมฝั่งเซิร์ฟเวอร์"
+        note="ผล ‘ดีขึ้น/แย่ลง’ หมายถึงค่าที่สังเกตเปลี่ยนในช่วงที่กำหนด — ต้องพิจารณาปัจจัยอื่นร่วมเสมอ"
+        related={[
+          { href: "/reliability/pm-effectiveness", label: "ประสิทธิผลของแผน PM" },
+          { href: "/engineering-changes", label: "Engineering Changes" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} showBasis={false} />
 
       {configQ.data && !canWrite && (

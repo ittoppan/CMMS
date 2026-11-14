@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense } from "react";
 import { RefreshCw } from "lucide-react";
 
@@ -144,6 +145,22 @@ function DqInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="คุณภาพข้อมูล (Reliability)"
+        summary="รายการข้อค้นพบด้านคุณภาพข้อมูลที่ส่งผลต่อการคำนวณ/การแสดงผลตัวชี้วัดความน่าเชื่อถือ — ใช้อธิบายว่าทำไมบางค่าเป็น NULL/ถูกบล็อก"
+        steps={[
+          "กรองตามประเภทการตรวจ (check) และสถานะเปิด/ปิด",
+          "อ่านรายละเอียดข้อค้นพบและแหล่งที่มา เพื่อไปแก้ไขข้อมูลต้นทาง",
+          "ติดตามว่าข้อค้นพบลดลงหลังแก้ไขข้อมูลในระบบต้นทาง",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=dq_findings) ผ่าน lib/reliability.ts — หน้านี้แสดงผลการตรวจแบบอ่านอย่างเดียว"
+        note="การแก้ไขข้อค้นพบทำที่ระบบ/ข้อมูลต้นทาง ไม่ใช่ที่หน้านี้ — ตัวชี้วัดจะสะท้อนเมื่อข้อมูลต้นทางถูกต้องครบถ้วน"
+        related={[
+          { href: "/reliability", label: "ภาพรวม Reliability" },
+          { href: "/reliability/config", label: "นิยาม & การตั้งค่า KPI" },
+        ]}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <Select value={check || "all"} onValueChange={(v) => setCheck(v === "all" ? "" : v)}>
           <SelectTrigger aria-label="กรองตามรายการตรวจ" className="w-72">

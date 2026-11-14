@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability — Phase 28 Dashboard
 // แสดง KPI fleet: criticality A-D, lifecycle, aging, fleet reliability/health/cost (ข้อมูลจริงจาก API)
 
@@ -93,6 +94,23 @@ export default function AssetReliabilityPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ความน่าเชื่อถือสินทรัพย์ (Asset Reliability)"
+        summary="แดชบอร์ดภาพรวม fleet ด้าน criticality, วงจรชีวิต, อายุเครื่อง และตัวชี้วัด reliability/health/cost ที่คำนวณจากข้อมูลจริง"
+        steps={[
+          "อ่านการ์ดสรุป (จำนวนเครื่อง, คลาสความสำคัญ, ถึงกำหนดทบทวน, อายุเฉลี่ย ฯลฯ)",
+          "ไปยังหน้ารายละเอียดย่อย (critical, lifecycle, aging, replacement, overhaul, data-quality, reports, config) ตามหัวข้อที่ต้องการ",
+          "ใช้ข้อมูลร่วมกับต้นทุน/ประวัติการซ่อมเพื่อสนับสนุนการตัดสินใจเชิงบริหาร (ไม่ใช่คำแนะนำอัตโนมัติ)",
+        ]}
+        source="อ่านจาก /api/v1/asset_reliability.php (action=dashboard และ endpoints ที่เกี่ยวข้อง) — ข้อมูลจริงจากระบบ"
+        note="ตัวชี้วัดบางส่วนขึ้นกับความครบถ้วนของข้อมูล (วันติดตั้ง/วงจรชีวิต/ประวัติซ่อม/ต้นทุน) — ค่าที่คำนวณไม่ได้จะแสดงตามที่ระบบมี"
+        related={[
+          { href: "/asset-reliability/critical", label: "เครื่องสำคัญ (A/B/C/D)" },
+          { href: "/asset-reliability/aging", label: "เครื่องถึงกำหนดศึกษา" },
+          { href: "/asset-reliability/reports", label: "รายงาน Reliability & Lifecycle" },
+        ]}
+      />
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

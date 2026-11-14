@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 
@@ -181,6 +182,22 @@ function PmInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="ประสิทธิผลของแผน PM"
+        summary="เปรียบเทียบผลก่อน/หลังช่วงเวลาเพื่อสังเกตความแตกต่างที่เกี่ยวข้องกับงาน PM — แสดงทิศทางจากหลักฐาน ไม่ใช่ข้อสรุปเชิงสาเหตุอัตโนมัติ"
+        steps={[
+          "กำหนดหน้าต่างเปรียบเทียบ (baseline/after) และขอบเขต",
+          "อ่านผลเปรียบเทียบและทิศทาง (ดีขึ้น/แย่ลง/ไม่เปลี่ยน/ข้อมูลไม่พอ) ตามที่ engine ประเมิน",
+          "ใช้เป็นหลักฐานประกอบร่วมกับบริบทงานซ่อมและการเปลี่ยนแปลงอื่น ๆ",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=pm_effectiveness) ผ่าน lib/reliability.ts — การประเมินความเพียงพอและทิศทางโดย engine"
+        note="ความแตกต่างที่สังเกตได้ไม่เท่ากับการพิสูจน์สาเหตุ — ควรพิจารณาปัจจัยร่วมและคุณภาพข้อมูลประกอบ"
+        related={[
+          { href: "/reliability/growth", label: "Reliability Growth" },
+          { href: "/pm_am/calendar", label: "ปฏิทิน PM/AM" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} showBasis={false} />
 
       <Card>

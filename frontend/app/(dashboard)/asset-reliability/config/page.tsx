@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/config — Phase 28
 // ตั้งค่า Reliability & Criticality (GET/POST asset_reliability.php?action=config)
 
@@ -79,6 +80,22 @@ export default function ConfigPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="ตั้งค่า Reliability & Criticality"
+        summary="กำหนดค่าตั้งค่าและน้ำหนักที่ใช้คำนวณ criticality/reliability (เกณฑ์คลาส, หน้าต่างเวลา, รอบทบทวน ฯลฯ)"
+        steps={[
+          "ตรวจค่าตั้งค่าปัจจุบัน (น้ำหนักปัจจัยและพารามิเตอร์ต่าง ๆ)",
+          "ปรับค่าและบันทึกตามสิทธิ์ — ควรเข้าใจผลกระทบต่อการจัดคลาส/ตัวชี้วัดก่อนเปลี่ยน",
+          "รีเฟรชและตรวจผลในหน้าสรุป/รายงานที่เกี่ยวข้อง",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/asset_reliability.php (action=config) — ค่าที่บันทึกมีผลต่อการคำนวณในโมดูล asset-reliability"
+        note="การเปลี่ยนเกณฑ์/น้ำหนักมีผลต่อการจัดอันดับและตัวชี้วัด — ควรบันทึกการตัดสินใจและทบทวนร่วมผู้เกี่ยวข้อง (การบันทึกถูกควบคุมสิทธิ์ที่ฝั่งเซิร์ฟเวอร์)"
+        related={[
+          { href: "/asset-reliability/critical", label: "เครื่องสำคัญ (A/B/C/D)" },
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+        ]}
+      />
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

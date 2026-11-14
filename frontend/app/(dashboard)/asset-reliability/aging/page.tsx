@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/aging — Phase 28
 // เครื่องที่มีอายุถึงเกณฑ์พิจารณา (ข้อมูลจริง ไม่ใช่คำแนะนำอัตโนมัติให้ปลด)
 
@@ -69,6 +70,22 @@ export default function AgingPage() {
       title={hero.title}
       description="เครื่องจักรที่อายุ ≥ เกณฑ์พิจารณา — ใช้ร่วมกับข้อมูล reliability/cost/profit เพื่อตัดสินใจเชิงมนุษย์ ไม่ใช่ระบบแนะนำให้ปลดระวางอัตโนมัติ"
     >
+
+      <ModuleGuide
+        name="เครื่องถึงกำหนดศึกษา (Aging)"
+        summary="แสดงเครื่องจักรที่อายุถึงหรือเกินเกณฑ์ที่กำหนด เพื่อใช้เป็นข้อมูลประกอบการทบทวน — ไม่ใช่คำสั่งปลดระวางอัตโนมัติ"
+        steps={[
+          "ตรวจรายชื่อเครื่อง อายุ และส่วนต่างเทียบเกณฑ์",
+          "พิจารณาร่วมกับความสำคัญ สภาพ reliability ต้นทุน และประวัติซ่อมก่อนตัดสินใจ",
+          "เปิดรายละเอียดเครื่องเพื่อดูข้อมูลประกอบเพิ่มเติม",
+        ]}
+        source="อ่านจาก /api/v1/asset_reliability.php (action=aging) — เกณฑ์อายุอ้างอิงค่าตั้งค่าระบบ"
+        note="อายุเป็นเพียงหนึ่งในปัจจัย — การตัดสินใจเปลี่ยน/ยกเครื่อง/ปลดระวางต้องใช้ดุลยพินิจเชิงวิศวกรรมและบริหาร"
+        related={[
+          { href: "/asset-reliability/replacement", label: "ประวัติเปลี่ยนชิ้นส่วน" },
+          { href: "/asset-reliability/overhaul", label: "งานยกเครื่อง (Overhaul)" },
+        ]}
+      />
       {isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

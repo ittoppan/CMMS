@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useMemo, useEffect } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
@@ -185,6 +186,23 @@ export default function MtbfMttrPage() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="MTBF / MTTR"
+        summary="บันทึกและติดตามค่า MTBF/MTTR รายเครื่องและรอบเวลา เพื่อประเมินความน่าเชื่อถือและเวลาซ่อมเฉลี่ยจากข้อมูลจริง"
+        steps={[
+          "ค้นหา/เลือกเครื่องและช่วงเวลาที่ต้องการดู",
+          "เพิ่มหรือแก้ไขรายการบันทึก (ชั่วโมงเดินเครื่อง จำนวนครั้งเสีย เวลาหยุดเครื่อง ฯลฯ) ตามสิทธิ์",
+          "ใช้ค่าที่คำนวณได้ประกอบการวิเคราะห์แนวโน้มและการวางแผนบำรุง",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/mtbf_mttr.php — คำนวณ MTBF/MTTR จากข้อมูลที่บันทึกในระบบ"
+        note="ความถูกต้องขึ้นกับการบันทึกชั่วโมงเดินเครื่อง/จำนวนครั้งเสีย/เวลาหยุดเครื่องให้ครบถ้วน — ข้อมูลไม่ครบจะทำให้ตัวชี้วัดคลาดเคลื่อนหรือแสดงไม่ได้"
+        related={[
+          { href: "/mtbf_mttr/production_hours", label: "ชั่วโมงการผลิต" },
+          { href: "/reliability/trend", label: "แนวโน้ม Reliability" },
+          { href: "/analytics/kpi", label: "KPI ซ่อมบำรุง" },
+        ]}
+      />
       {/* KPI */}
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         <Card className="p-4">

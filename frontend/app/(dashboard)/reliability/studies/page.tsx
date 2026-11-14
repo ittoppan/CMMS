@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useState } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -213,6 +214,22 @@ function StudiesInner() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="งานวิเคราะห์เชิงวิศวกรรม (Studies)"
+        summary="ทะเบียนงานศึกษา/วิเคราะห์เชิงวิศวกรรมด้านความน่าเชื่อถือ — บันทึกขอบเขต วิธีการ แหล่งข้อมูล สมมติฐาน และข้อค้นพบ"
+        steps={[
+          "ดูรายการ studies และสถานะ (draft/review/approved/closed ฯลฯ)",
+          "ผู้มีสิทธิ์สร้างหรือแก้ไขร่าง study ตามแบบฟอร์มที่ระบบกำหนด",
+          "อ้างอิงตัวชี้วัดจากโมดูล reliability อื่นเป็นหลักฐานประกอบ (ค่าคำนวณมาจาก engine ในหน้าที่เกี่ยวข้อง)",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/reliability.php (action=studies และการบันทึก study) ผ่าน lib/reliability.ts — สิทธิ์ควบคุมฝั่งเซิร์ฟเวอร์"
+        note="study เป็นบันทึกเชิงวิศวกรรม ไม่ใช่ค่าที่คำนวณอัตโนมัติ — ควรระบุแหล่งข้อมูล/คุณภาพข้อมูลและสมมติฐานให้ชัด"
+        related={[
+          { href: "/reliability/weibull", label: "การวิเคราะห์ Weibull" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+        ]}
+      />
       <div className="flex flex-wrap items-center gap-2">
         <Select value={status || "all"} onValueChange={(v) => setStatus(v === "all" ? "" : v)}>
           <SelectTrigger aria-label="กรองตามสถานะ" className="w-48">

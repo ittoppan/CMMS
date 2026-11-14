@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import {
@@ -131,6 +132,23 @@ function OverviewInner() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ภาพรวมวิศวกรรมความเสียหาย (Reliability)"
+        summary="ภาพรวมความน่าเชื่อถือของเครื่องจักร — สรุป KPI, แนวโน้ม, รูปแบบความเสียหายหลัก, รายการที่ถูกบล็อก/ข้อมูลไม่พร้อม และทางลัดไปโมดูลวิเคราะห์ย่อย"
+        steps={[
+          "ตั้งค่าตัวกรอง (ช่วงเวลา/ขอบเขต/สินทรัพย์ตามที่รองรับ) เพื่อกำหนดมุมมอง",
+          "อ่านการ์ด KPI, แนวโน้ม และรายการรูปแบบความเสียหาย/สัญญาณที่ระบบคำนวณให้",
+          "เจาะโมดูลย่อย (เครื่องจักร, รูปแบบความเสียหาย, แนวโน้ม, Weibull, Bad Actors, PM Effectiveness, Growth, Studies, Data Quality, Config) เพื่อตรวจสาเหตุและหลักฐาน",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=dashboard และชุดข้อมูลที่เกี่ยวข้อง) ผ่าน lib/reliability.ts — ตัวเลข/สถานะมาจาก Reliability Engine ตามข้อมูลจริง"
+        note="หากข้อมูลไม่ครบระบบจะแสดงสถานะบล็อก/NULL/N/A ตามที่ engine คืนค่า — หน้านี้ไม่คำนวณ KPI แทน engine"
+        related={[
+          { href: "/reliability/assets", label: "ความเสียหายรายเครื่อง" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+          { href: "/reliability/config", label: "นิยาม & การตั้งค่า KPI" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} />
 
       {error && <RelError message={error.message} />}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense } from "react";
 import { RefreshCw } from "lucide-react";
 
@@ -62,6 +63,22 @@ function ConfigInner() {
           size="sm"
           onClick={() => { configQ.refetch(); defsQ.refetch(); }}
         >
+
+      <ModuleGuide
+        name="การตั้งค่าและนิยาม KPI (Reliability)"
+        summary="แสดงค่าตั้งค่า เกณฑ์ ฐานข้อมูลที่อนุญาต และนิยาม KPI (พร้อมเวอร์ชัน/แหล่งข้อมูล) ที่ Reliability Engine ใช้งานจริง"
+        steps={[
+          "ตรวจค่าตั้งค่าและนิยาม KPI ที่ระบบใช้อยู่",
+          "อ้างอิงหน้านี้เมื่อผลตัวชี้วัดแตกต่างจากความคาดหมาย เพื่อเข้าใจเงื่อนไข/เกณฑ์",
+          "รีเฟรชเพื่อดูค่าล่าสุดจากระบบ",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=config, definitions) ผ่าน lib/reliability.ts — ข้อมูลอ่านอย่างเดียวจาก backend"
+        note="หน้านี้สะท้อนพฤติกรรมจริงของ engine — หากต้องการเปลี่ยนนโยบาย/เกณฑ์ให้เป็นไปตามสิทธิ์และกระบวนการที่ระบบกำหนด"
+        related={[
+          { href: "/reliability", label: "ภาพรวม Reliability" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+        ]}
+      />
           <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
           รีเฟรช
         </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/reports — Phase 28
 // Hub รายงาน Reliability & Lifecycle (ดึงจาก asset_reports.php)
 
@@ -108,6 +109,22 @@ export default function ReportsPage() {
       title={hero.title}
       description={hero.desc}
     >
+
+      <ModuleGuide
+        name="รายงาน Reliability & Lifecycle"
+        summary="ศูนย์รวมรายงานด้านความน่าเชื่อถือและวงจรชีวิตสินทรัพย์ — เลือกประเภทรายงานและดูผลจากข้อมูลจริง"
+        steps={[
+          "เลือกประเภทรายงาน (critical, aging, lifecycle, replacement, overhaul, data quality, reliability ranking)",
+          "ตรวจตาราง/ผลลัพธ์ที่ระบบสร้างจากข้อมูลจริง",
+          "ใช้ผลประกอบการทบทวนและวางแผนบำรุง/ทดแทน (ส่งออก/นำไปใช้ตามความเหมาะสม)",
+        ]}
+        source="อ่านจาก /api/v1/asset_reports.php?report=... — รายงานดึงจากข้อมูลจริงในระบบ"
+        note="ผลรายงานขึ้นกับความครบถ้วนของข้อมูลต้นทาง — ค่าที่ไม่มีข้อมูลจะแสดงตามที่ระบบคืน"
+        related={[
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+          { href: "/reports", label: "ศูนย์รายงาน" },
+        ]}
+      />
       <Grid columns={{ minWidth: 240, max: 4 }} gap={3}>
         {REPORTS.map((r) => (
           <Card key={r.key} className={report === r.key ? "border-[var(--cmms-border-focus)] ring-1 ring-[var(--cmms-border-focus)]" : ""}>

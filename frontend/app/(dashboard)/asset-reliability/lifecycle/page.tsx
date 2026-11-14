@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/lifecycle — Phase 28
 // สถานะวงจรชีวิตของเครื่องจักร + แจกแจง + ประวัติการเปลี่ยนสถานะ
 
@@ -65,6 +66,22 @@ export default function LifecyclePage() {
       title={hero.title}
       description="สถานะวงจรชีวิตของเครื่องจักรทั้งหมดในระบบ — การเปลี่ยนสถานะมีประวัติและบันทึกผู้แก้ไขเสมอ"
     >
+
+      <ModuleGuide
+        name="สถานะวงจรชีวิตสินทรัพย์"
+        summary="ติดตามสถานะวงจรชีวิตของเครื่องจักรและการกระจายสถานะ เพื่อสนับสนุนการวางแผนดูแล/ทดแทน"
+        steps={[
+          "ดูการกระจายสถานะวงจรชีวิตและกรองรายการเครื่องตามสถานะ",
+          "เปิดรายละเอียดเครื่องเพื่อดูประวัติ/บริบท",
+          "อัปเดตสถานะวงจรชีวิตตามกระบวนการที่ระบบกำหนด (หากมีสิทธิ์/ฟังก์ชันในหน้าที่เกี่ยวข้อง)",
+        ]}
+        source="อ่านจาก /api/v1/asset_reliability.php (action=dashboard, list) และข้อมูล lifecycle ที่เกี่ยวข้อง — ข้อมูลจริงจากระบบ"
+        note="การเปลี่ยนสถานะควรมีหลักฐาน/ประวัติการแก้ไขตามนโยบาย — สถานะไม่ครบอาจทำให้การวิเคราะห์ fleet ไม่สมบูรณ์"
+        related={[
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+          { href: "/asset-reliability/aging", label: "เครื่องถึงกำหนดศึกษา" },
+        ]}
+      />
       {dash.isLoading && (
         <div className="flex items-center justify-center py-16"><Spinner label="กำลังโหลด..." /></div>
       )}

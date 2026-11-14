@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import { Eye, RefreshCw } from "lucide-react";
@@ -199,6 +200,23 @@ function AssetsInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="ความเสียหายรายเครื่อง (Asset Matrix)"
+        summary="ตารางจัดอันดับเครื่องจักรตามตัวชี้วัดความน่าเชื่อถือ (downtime, failures, MTBF, MTTR, availability, cost) ภายในขอบเขตที่เลือก"
+        steps={[
+          "เลือกตัวกรอง ขอบเขต และตัวชี้วัด/ทิศทางการเรียง",
+          "ค้นหาข้อความเพื่อกรองเฉพาะแถวที่ engine ส่งกลับมา (ไม่คำนวณตัวชี้วัดใหม่)",
+          "เปิดรายละเอียดเครื่องเพื่อดูหลักฐานและบริบทเพิ่มเติม",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=asset_matrix) ผ่าน lib/reliability.ts — ลำดับ/การแบ่งหน้า/การแสดงต้นทุนเป็นไปตามที่ engine กำหนด"
+        note="ค่าที่คำนวณไม่ได้จะเป็นค่าว่าง/ตามสถานะที่ระบบคืน — การกรองข้อความเป็นการกรองผลลัพธ์ที่ได้ ไม่ใช่การคำนวณใหม่"
+        related={[
+          { href: "/reliability", label: "ภาพรวม Reliability" },
+          { href: "/reliability/bad-actors", label: "เครื่องที่มีปัญหาเป็นระบบ" },
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} showBasis={false} />
 
       {error && <RelError message={error.message} />}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/overhaul — Phase 28
 // งานยกเครื่อง (Overhaul) ทั้งหมด + สร้างแผนใหม่ (POST asset_overhauls)
 
@@ -130,6 +131,22 @@ export default function OverhaulPage() {
             </>
           }
         >
+
+      <ModuleGuide
+        name="งานยกเครื่อง (Overhaul)"
+        summary="ติดตามแผนและประวัติงานยกเครื่องของสินทรัพย์ รวมถึงการสร้างแผนใหม่ตามสิทธิ์"
+        steps={[
+          "ค้นหาและดูรายการงานยกเครื่อง (สถานะ แผน/จริง ผู้ตรวจรับ ฯลฯ)",
+          "สร้างแผนงานยกเครื่องใหม่ผ่านฟอร์ม (หากมีสิทธิ์) โดยระบุเครื่อง ขอบเขต และช่วงเวลา",
+          "ติดตามความคืบหน้าและบันทึกผลเมื่อดำเนินการจริง",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/asset_reports.php (report=overhaul_summary) และ endpoint ที่เกี่ยวข้องกับงานยกเครื่อง — ข้อมูลจริงจากระบบ"
+        note="การสร้าง/แก้ไขงานยกเครื่องอาจถูกจำกัดตามสิทธิ์และสถานะงาน — ควรบันทึกขอบเขต/เหตุผลให้ชัดเพื่ออ้างอิงย้อนหลัง"
+        related={[
+          { href: "/asset-reliability/aging", label: "เครื่องถึงกำหนดศึกษา" },
+          { href: "/shutdown", label: "งานปิดโรง (Shutdown)" },
+        ]}
+      />
           <div className="space-y-4">
             <Input label="ID เครื่องจักร" required placeholder="เช่น 89" value={form.asset_id} onChange={(e) => setForm({ ...form, asset_id: e.target.value })} />
             <Input label="หัวข้อ" required placeholder="เช่น Overhaul กดปั๊มหลัก ปี 2569" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />

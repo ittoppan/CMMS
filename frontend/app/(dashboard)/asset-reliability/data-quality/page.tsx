@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // asset-reliability/data-quality — Phase 28
 // คุณภาพข้อมูล asset: fleet summary (reuse ana_data_quality) + ตรวจเช็ครายเครื่อง
 
@@ -56,6 +57,22 @@ export default function DataQualityPage() {
       title={hero.title}
       description="สำรวจความครบถ้วนของข้อมูลใบงาน MTBF/MTTR และ cost —ข้อมูลไม่ครบ = KPI แสดง INSUFFICIENT DATA ตามหลักการไม่เดาค่า"
     >
+
+      <ModuleGuide
+        name="คุณภาพข้อมูลสินทรัพย์ (Asset Data Quality)"
+        summary="ตรวจความครบถ้วนของข้อมูลสินทรัพย์/ใบงานที่ใช้คำนวณตัวชี้วัด reliability — ทั้งภาพรวม fleet และตรวจรายเครื่อง"
+        steps={[
+          "ดูสรุปคุณภาพข้อมูลระดับ fleet (ฟิลด์ที่กรอกครบ การครอบคลุมข้อมูล reliability) และคำเตือน",
+          "ระบุรหัสสินทรัพย์เพื่อตรวจคุณภาพข้อมูลรายเครื่อง (ถ้าต้องการเจาะลึก)",
+          "แก้ไขข้อมูลต้นทางให้ครบถ้วนเพื่อให้ KPI คำนวณได้ถูกต้อง (หน้านี้เป็นมุมมองตรวจสอบ)",
+        ]}
+        source="อ่านจาก /api/v1/asset_data_quality.php (fleet และรายเครื่องเมื่อระบุ asset_id) — ผลตรวจจากข้อมูลจริง"
+        note="ข้อมูลไม่ครบทำให้ KPI บางตัวแสดง INSUFFICIENT DATA/NULL ตามหลักการไม่เดาค่า — ควรแก้ที่ข้อมูลต้นทาง"
+        related={[
+          { href: "/asset-reliability", label: "ความน่าเชื่อถือสินทรัพย์" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล (Reliability)" },
+        ]}
+      />
       <Grid columns={{ minWidth: 300, max: 2 }} gap={4}>
         <Card>
           <CardHeader>

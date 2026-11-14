@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense } from "react";
 import { RefreshCw } from "lucide-react";
 
@@ -85,6 +86,22 @@ function WeibullInner() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="การวิเคราะห์ Weibull"
+        summary="แสดงผลการ fit แบบจำลอง Weibull และประวัติการคำนวณ (เมื่อข้อมูลเพียงพอ) เพื่อประเมินลักษณะอัตราการเสีย"
+        steps={[
+          "ตั้งค่าขอบเขต/ตัวกรองที่ต้องการวิเคราะห์",
+          "ตรวจผล fit (พารามิเตอร์/วิธี/สถานะ) หรือข้อความว่าไม่สามารถ fit ได้เมื่อข้อมูลไม่พอ",
+          "ดูประวัติการ fit เพื่อเปรียบเทียบช่วงเวลา (ถ้ามี)",
+        ]}
+        source="อ่านจาก /api/v1/reliability.php (action=weibull_fit, weibull_history) ผ่าน lib/reliability.ts — ผลคำนวณโดย engine"
+        note="เมื่อข้อมูลไม่เพียงพอ (NOT_ENOUGH_DATA) ระบบจะไม่ fit หรือประมาณค่าแทน — ต้องเพิ่มข้อมูล/ขอบเขตให้เพียงพอก่อน"
+        related={[
+          { href: "/reliability/studies", label: "งานวิเคราะห์เชิงวิศวกรรม" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+        ]}
+      />
       <RelFilterBar value={filters} onChange={setFilters} options={scopeOptions ?? null} />
 
       {fitQ.error && <RelError message={fitQ.error.message} />}

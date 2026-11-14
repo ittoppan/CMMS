@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { Suspense, useState } from "react";
 import { Plus, RefreshCw, Settings2 } from "lucide-react";
 import { toast } from "sonner";
@@ -257,6 +258,23 @@ function BadActorsInner() {
             size="sm"
             onClick={() => { scoresQ.refetch(); criteriaQ.refetch(); }}
           >
+
+      <ModuleGuide
+        name="เครื่องที่มีปัญหาเป็นระบบ (Bad Actors)"
+        summary="ระบุสินทรัพย์ที่มีพฤติกรรมเสียซ้ำ/กระทบสูงตามเกณฑ์ (criteria) และคะแนน/หลักฐานที่ engine ประเมิน — รวมหน้าจัดการเกณฑ์สำหรับผู้มีสิทธิ์"
+        steps={[
+          "ตั้งค่าตัวกรองและดูอันดับคะแนน/หลักฐานที่เกณฑ์แต่ละข้อถูกกระตุ้น",
+          "ตรวจหลักฐานประกอบ (เหตุเสีย, downtime, ต้นทุน ฯลฯ ตามที่มี) ก่อนตัดสินใจ",
+          "ผู้มีสิทธิ์ดูแลระบบสามารถปรับเกณฑ์ (metric/threshold/weight ฯลฯ) ผ่านตัวแก้ไขที่หน้าจัดเตรียมไว้",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/reliability.php (bad_actor_scores, bad_actor_criteria, config) ผ่าน lib/reliability.ts — คะแนนและการตัดสินเกณฑ์คำนวณโดย engine; การแก้เกณฑ์ถูกตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์"
+        note="คะแนนสะท้อนหลักฐานตามเกณฑ์ที่กำหนด ไม่ใช่การสรุปสาเหตุเชิงเดียว — ควรใช้ร่วมกับ RCA/ข้อมูลคุณภาพข้อมูล"
+        related={[
+          { href: "/reliability/failure-modes", label: "รูปแบบการเสีย & Pareto" },
+          { href: "/rca/events", label: "เหตุการณ์ความเสียหาย (RCA)" },
+          { href: "/reliability/data-quality", label: "คุณภาพข้อมูล" },
+        ]}
+      />
             <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
             รีเฟรช
           </Button>
