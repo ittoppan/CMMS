@@ -60,8 +60,17 @@ interface SparePart {
   imageUrl?: string | null;
 }
 
+type StockSummary = {
+  total_items: number;
+  low_count: number;
+  out_count: number;
+  ok_count: number;
+  total_value: number;
+};
+
+// ต้องตรงกับตรรกะฝั่ง API (stock_status): <= 0 = หมด, 0 < qty <= min_stock = ใกล้หมด
 function getStockStatus(item: SparePart): "ok" | "low" | "out" {
-  if (item.stock === 0) return "out";
+  if (item.stock <= 0) return "out";
   if (item.stock <= item.minStock) return "low";
   return "ok";
 }
@@ -120,14 +129,23 @@ function MiniBar({ value, max, label }: { value: number; max: number; label: str
 }
 
 // ─── Side Panel (desktop) ────────────────────────────────────────────────────
-function PanelContent({ parts }: { parts: SparePart[] }) {
+function PanelContent({ parts, summary }: { parts: SparePart[]; summary?: StockSummary | null }) {
+  // ตัวเลขสรุปต้องมาจาก summary ของ API (ทั้งคลังตามตัวกรอง) ไม่ใช่เพจปัจจุบัน
   const kpis = useMemo(() => {
+    if (summary) {
+      return {
+        total: Number(summary.total_items || 0),
+        lowCount: Number(summary.low_count || 0),
+        outCount: Number(summary.out_count || 0),
+        totalValue: Number(summary.total_value || 0),
+      };
+    }
     const total = parts.length;
     const lowCount = parts.filter((p) => getStockStatus(p) === "low").length;
     const outCount = parts.filter((p) => getStockStatus(p) === "out").length;
     const totalValue = parts.reduce((sum, p) => sum + p.stock * p.price, 0);
     return { total, lowCount, outCount, totalValue };
-  }, [parts]);
+  }, [parts, summary]);
 
   const categories = useMemo(() => {
     const map = new Map<string, number>();
@@ -172,6 +190,11 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
 
       <details className="rounded-[var(--cmms-radius)] border border-border p-4" open>
         <summary className="cursor-pointer text-sm font-semibold text-foreground">ประเภทสต็อก (Sage 300)</summary>
+        {summary && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            นับจาก {parts.length} รายการในหน้านี้ (ตัวเลขรวมทั้งคลังอยู่ด้านบน)
+          </p>
+        )}
         <div className="mt-3 space-y-3">
           {categories.slice(0, 6).map(([cat, count]) => (
             <div key={cat} className="space-y-1">
@@ -188,14 +211,14 @@ function PanelContent({ parts }: { parts: SparePart[] }) {
       <hr className="border-border" />
 
       <details className="rounded-[var(--cmms-radius)] border border-border p-4" open>
-        <summary className="cursor-pointer text-sm font-semibold text-foreground">สถานะ Sage 300 Sync</summary>
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">การเชื่อมต่อ Sage 300</summary>
         <div className="mt-3 space-y-1 text-sm">
           <p className="flex items-center gap-2">
             <Database size={16} strokeWidth={1.75} aria-hidden="true" className="text-muted-foreground" />
-            เชื่อมต่อฐานข้อมูล Sage 300 ERP (I/C Inventory Control)
+            แหล่งข้อมูล: Sage 300 ERP (I/C Inventory Control)
           </p>
           <p className="text-muted-foreground">
-            กดปุ่ม &quot;Restock from Sage&quot; ที่หัวหน้ากระดานเพื่อดึงข้อมูลล่าสุด
+            กดปุ่ม &quot;ดึงสต็อกจาก Sage&quot; ด้านบนเพื่อดึงข้อมูลล่าสุด · ประวัติ/สถานะการซิงค์ดูได้ที่หน้าตั้งค่าการดึง Sage 300
           </p>
         </div>
       </details>
@@ -288,7 +311,11 @@ function ItemsCard({
         const fd = new FormData();
         fd.append("folder", "spares");
         fd.append("file", chosen.file);
-        const upRes = await fetch("/api/v1/upload.php", { method: "POST", body: fd });
+        const upRes = await fetch("/api/v1/upload.php", {
+          method: "POST",
+          headers: { ...(getCsrfToken() ? { "X-CSRF-Token": getCsrfToken() as string } : {}) },
+          body: fd,
+        });
         const upJson = await upRes.json();
         if (!upJson.url) throw new Error(upJson.error || "อัปโหลดไม่สำเร็จ");
                 const csrf = getCsrfToken();
@@ -629,7 +656,7 @@ export default function SparePartsPage() {
 
   const [totalItems, setTotalItems] = useState(0);
   const [serverPaged, setServerPaged] = useState(false);
-  const [summary, setSummary] = useState<{ total_items: number; low_count: number; out_count: number; ok_count: number; total_value: number } | null>(null);
+  const [summary, setSummary] = useState<StockSummary | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput.trim()), 350);
@@ -708,6 +735,13 @@ export default function SparePartsPage() {
     fetchParts({ p: page, q: search, sage: sageTypeFilter, tab: activeTab });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, sageTypeFilter, activeTab]);
+
+  // หลังลบ/เปลี่ยนตัวกรองแล้วหน้าปัจจุบันว่างแต่ยังมีข้อมูล → ถอยกลับหนึ่งหน้า
+  useEffect(() => {
+    if (!loading && serverPaged && parts.length === 0 && page > 1 && totalItems > 0) {
+      setPage(page - 1);
+    }
+  }, [loading, serverPaged, parts.length, page, totalItems]);
 
   // Sync from Sage 300 ERP
   const handleSageSync = async () => {
@@ -844,7 +878,7 @@ export default function SparePartsPage() {
       actions={
         <>
           <Badge variant="primary">{kpis.total} รายการในคลัง</Badge>
-          <Badge variant="success">ซิงค์สดกับ Sage 300</Badge>
+          <Badge variant="neutral">แหล่งข้อมูล: Sage 300 (I/C)</Badge>
           {!isNarrow && sageSyncButton}
           {!isNarrow && createButton}
         </>
@@ -894,10 +928,10 @@ export default function SparePartsPage() {
       <div className="flex w-full items-start gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {error && (
-            <Alert variant="danger" title="Error" description={error} />
+            <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
           )}
           {syncNotice && (
-            <Alert variant="success" title="Success" description={syncNotice} />
+            <Alert variant="success" title="สำเร็จ" description={syncNotice} />
           )}
 
           {/* KPI row */}
@@ -986,7 +1020,7 @@ export default function SparePartsPage() {
 
         {!isNarrow && showSidePanel && (
           <aside className="w-[320px] shrink-0" aria-label="สรุปคลังอะไหล่">
-            <PanelContent parts={parts} />
+            <PanelContent parts={parts} summary={summary} />
           </aside>
         )}
       </div>
@@ -997,7 +1031,7 @@ export default function SparePartsPage() {
         onClose={() => setPanelDialogOpen(false)}
         title="สรุปคลังอะไหล่"
       >
-        <PanelContent parts={parts} />
+        <PanelContent parts={parts} summary={summary} />
       </Dialog>
 
       {/* Delete Dialog */}
