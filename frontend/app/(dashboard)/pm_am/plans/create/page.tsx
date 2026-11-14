@@ -187,9 +187,21 @@ export default function PMPlanFormPage() {
       setError("กรุณาเลือกเครื่องจักรอย่างน้อย 1 เครื่อง");
       return;
     }
-    if (isMeter && !form.meter_interval) {
-      setError("แผนแบบ Meter-Based ต้องระบุรอบตามมิเตอร์ (meter interval)");
+    const freqIntervalNum = Number(form.frequency_interval);
+    if (!isMeter && (!Number.isFinite(freqIntervalNum) || freqIntervalNum < 1)) {
+      setError("กรุณาระบุจำนวนรอบ (Interval) ให้ถูกต้อง (อย่างน้อย 1)");
       return;
+    }
+    if (isMeter) {
+      const meterIntervalNum = Number(form.meter_interval);
+      if (!form.meter_unit.trim()) {
+        setError("แผนแบบตามมิเตอร์ต้องระบุหน่วยมิเตอร์ (เช่น ชั่วโมง, กม., รอบ)");
+        return;
+      }
+      if (!form.meter_interval || !Number.isFinite(meterIntervalNum) || meterIntervalNum <= 0) {
+        setError("แผนแบบตามมิเตอร์ต้องระบุช่วงตามมิเตอร์ (meter interval) มากกว่า 0");
+        return;
+      }
     }
     setLoading(true);
     setError("");
@@ -304,8 +316,8 @@ export default function PMPlanFormPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Input label={isMeter ? "รอบตามมิเตอร์ (ค่าเริ่มต้น)" : "จำนวนรอบ (Interval)"}
-              type="number" min={1} value={isMeter ? (form.meter_interval || "") : form.frequency_interval}
+            <Input label={isMeter ? "ช่วงตามมิเตอร์ (ทุกกี่หน่วย) *" : "จำนวนรอบ (Interval) *"}
+              type="number" min={1} step={isMeter ? "any" : 1} value={isMeter ? (form.meter_interval || "") : form.frequency_interval}
               onChange={(e) => isMeter
                 ? setForm({ ...form, meter_interval: e.target.value })
                 : setForm({ ...form, frequency_interval: e.target.value })} />
@@ -315,11 +327,15 @@ export default function PMPlanFormPage() {
             )}
           </div>
 
-          {isMeter && (
+          {isMeter ? (
             <div className="rounded-[10px] border p-3 text-sm" style={{ borderColor: "var(--cmms-info, #0284c7)", background: "var(--cmms-info-light, #e0f2fe)" }}>
-              Plan แบบ Meter-Based: ระบบจะนับรอบตามค่ามิเตอร์การใช้งาน (hours / distance / cycles) — เมื่อค่ามิเตอร์อ่านได้ถึงรอบถัดไป จะสร้างงาน PM ให้อัตโนมัติ
+              แผนแบบตามมิเตอร์ (Meter/CBM): การสร้างรอบและการถึงกำหนดขึ้นกับค่ามิเตอร์ที่บันทึกเทียบ baseline/ช่วงที่กำหนด — ต้องระบุหน่วยและช่วงมิเตอร์ให้ถูกต้อง และบันทึกค่ามิเตอร์ของเครื่องจักรให้สม่ำเสมอ (หากยังไม่มีข้อมูลมิเตอร์ ระบบอาจข้ามการสร้างรอบและแจ้งในรายละเอียด)
             </div>
-          )}
+          ) : form.frequency_type === "custom" ? (
+            <div className="rounded-[10px] border p-3 text-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
+              ความถี่แบบกำหนดเอง: ระบบตีความ interval เป็นจำนวนวันต่อรอบ (เช่น interval = 10 คือทุก 10 วัน)
+            </div>
+          ) : null}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="วันเริ่มแผน" type="date" value={form.start_date}

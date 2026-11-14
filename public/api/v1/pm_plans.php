@@ -106,7 +106,7 @@ requireLogin($pdo);
                 $st = $pdo->prepare("SELECT p.*, u.full_name AS responsible_name,
                         (SELECT COUNT(*) FROM pm_am_plan_assets pa WHERE pa.plan_id = p.id) AS asset_count,
                         (SELECT COUNT(*) FROM pm_am_plan_checklists pc WHERE pc.plan_id = p.id) AS template_count,
-                        (SELECT MIN(due_date) FROM pm_am WHERE pm_am.plan_id = p.id AND pm_am.status IN ('pending','in_progress')) AS next_due,
+                        (SELECT MIN(due_date) FROM pm_am WHERE pm_am.plan_id = p.id AND pm_am.status IN ('pending','in_progress','overdue')) AS next_due,
                         (SELECT MAX(completed_at) FROM pm_am WHERE pm_am.plan_id = p.id AND pm_am.status = 'completed') AS last_completed_at
                      FROM pm_am_plans p LEFT JOIN users u ON u.id = p.responsible_user_id WHERE p.id = ?");
                 $st->execute([$id]);
@@ -172,8 +172,8 @@ requireLogin($pdo);
                 foreach ($assets as $asset) {
                     // หารอบที่ค้างอยู่ของเครื่องนี้ (แผนนี้) เพื่อกันซ้ำ
                     $dup = $pdo->prepare(
-                        "SELECT id FROM pm_am WHERE plan_id = ? AND asset_id = ? AND status IN ('pending','in_progress')
-                         AND (due_date IS NULL OR due_date >= DATE_SUB(?, INTERVAL 1 DAY)) ORDER BY due_date DESC LIMIT 1"
+                        "SELECT id FROM pm_am WHERE plan_id = ? AND asset_id = ? AND status IN ('pending','in_progress','overdue')
+                         ORDER BY (CASE WHEN status='overdue' THEN 0 WHEN status='in_progress' THEN 1 ELSE 2 END), due_date ASC, id DESC LIMIT 1"
                     );
                     $dup->execute([$planId, $asset['id'], $now]);
                     if ($dup->fetchColumn()) { $skipped++; $details[] = $asset['code'] . ': มีรอบค้างอยู่แล้ว'; continue; }
@@ -465,20 +465,21 @@ requireLogin($pdo);
                 if ($c->fetchColumn()) { http_response_code(409); echo json_encode(['error' => 'รหัสแผนซ้ำกับระบบ']); exit; }
             }
 
-            $allowed = ['code', 'name', 'description', 'instructions', 'priority', 'start_date', 'end_date', 'plan_type',
-                'frequency_type', 'meter_unit', 'meter_interval', 'lead_days', 'reminder_days', 'is_active', 'status',
+            $allowed = ['code', 'name', 'description', 'instructions', 'priority', 'estimated_duration_minutes', 'start_date', 'end_date', 'plan_type',
+                'frequency_type', 'frequency_interval', 'meter_unit', 'meter_interval', 'lead_days', 'reminder_days', 'is_active', 'status',
                 'responsible_user_id', 'department_id', 'location_id', 'work_zone_id'];
-            $numeric = ['frequency_interval' => 1, 'lead_days' => 0, 'reminder_days' => 0];
+            $numericMin = ['frequency_interval' => 1, 'lead_days' => 0, 'reminder_days' => 0];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
                 if (!array_key_exists($col, $data)) continue;
                 $val = $data[$col];
-                if ($col === 'estimated_duration_minutes') { $fields[] = 'estimated_duration_minutes = ?'; $values[] = $val !== '' && $val !== null ? (int)$val : null; continue; }
-                if (in_array($col, ['frequency_interval'], true)) { $fields[] = "$col = ?"; $values[] = max($numeric[$col], (int)$val); continue; }
-                if (in_array($col, ['is_active', 'responsible_user_id', 'department_id', 'location_id', 'work_zone_id'], true)) {
-                    $fields[] = "$col = ?"; $values[] = $val !== '' && $val !== null ? (int)$val : null; continue;
+                if ($col === 'estimated_duration_minutes') { $fields[] = 'estimated_duration_minutes = ?'; $values[] = ($val !== '' && $val !== null) ? (int)$val : null; continue; }
+                if ($col === 'frequency_interval') { $fields[] = "frequency_interval = ?"; $values[] = max($numericMin['frequency_interval'], (int)$val); continue; }
+                if (in_array($col, ['lead_days','reminder_days'], true)) { $fields[] = "$col = ?"; $values[] = max($numericMin[$col], (int)$val); continue; }
+                if (in_array($col, ['is_active','responsible_user_id','department_id','location_id','work_zone_id'], true)) {
+                    $fields[] = "$col = ?"; $values[] = ($val !== '' && $val !== null) ? (int)$val : null; continue;
                 }
-                if (in_array($col, ['meter_interval'], true)) { $fields[] = "$col = ?"; $values[] = $val !== '' && $val !== null ? (float)$val : null; continue; }
+                if ($col === 'meter_interval') { $fields[] = "meter_interval = ?"; $values[] = ($val !== '' && $val !== null) ? (float)$val : null; continue; }
                 $fields[] = "$col = ?"; $values[] = $val;
             }
             if (!empty($fields)) {
