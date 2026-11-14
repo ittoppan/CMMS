@@ -65,13 +65,6 @@ const freqLabels: Record<string, string> = {
   meter_based: "ตามมิเตอร์",
 };
 
-const planTypeLabels: Record<string, string> = {
-  single: "เครื่องเดียว",
-  group: "กลุ่มเครื่อง",
-  usage_based: "ตามการใช้งาน",
-};
-
-// สถานะ CBM รวมทั้งโรงงาน (จาก /api/v1/pm_plans.php?meters=1)
 interface CbmPlantRow {
   plan_id: number;
   plan_code: string | null;
@@ -116,7 +109,7 @@ const freqChipStyle: Record<string, React.CSSProperties> = {
   weekly: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
   monthly: { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" },
   quarterly: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
-  semi_annual: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  semi_annual: { background: "var(--cmms-info-light, #e0f2fe)", color: "var(--cmms-info, #0284c7)" },
   yearly: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
   custom: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
   meter_based: { background: "var(--cmms-info-light, #e0f2fe)", color: "var(--cmms-info, #0284c7)" },
@@ -142,7 +135,7 @@ export default function PMPlansPage() {
       const json = await res.json();
       if (json?.status === "success" && Array.isArray(json.data)) setPlans(json.data);
       else setError(json?.error || "โหลดข้อมูลไม่สำเร็จ");
-    } catch (e) {
+    } catch {
       setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
@@ -154,21 +147,16 @@ export default function PMPlansPage() {
       const res = await fetch("/api/v1/pm_plans.php?meters=1", { credentials: "include" });
       const j = await res.json();
       if (Array.isArray(j?.items)) setCbm(j as CbmPlantResponse);
-    } catch {}
+    } catch { /* optional */ }
   }, []);
 
-  // CBM รวมทั้งโรงงาน — แยก fetch เพื่อไม่ให้กระทบรายการแผนถ้า endpoint นี้ผิดพลาด
   useEffect(() => {
     let alive = true;
     fetch("/api/v1/pm_plans.php?meters=1", { credentials: "include" })
       .then((r) => r.json())
-      .then((j) => {
-        if (alive && Array.isArray(j?.items)) setCbm(j as CbmPlantResponse);
-      })
+      .then((j) => { if (alive && Array.isArray(j?.items)) setCbm(j as CbmPlantResponse); })
       .catch(() => {});
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   const generateFromCbm = async (r: CbmPlantRow) => {
@@ -186,11 +174,8 @@ export default function PMPlansPage() {
       if (j?.success) {
         const created = Number(j.created || 0);
         const skipped = Number(j.skipped || 0);
-        setCbmNotice({
-          kind: "success",
-          text: `สร้างรอบ PM แผน ${r.plan_code || r.plan_name || r.plan_id} สำเร็จ ${created} รอบ (ข้าม ${skipped})`,
-        });
-        await loadCbm();
+        setCbmNotice({ kind: "success", text: `สร้างรอบ PM แผน ${r.plan_code || r.plan_name || r.plan_id} สำเร็จ ${created} รอบ (ข้าม ${skipped})` });
+        await Promise.all([loadCbm(), load()]);
       } else {
         setCbmNotice({ kind: "error", text: j?.error || "สร้างรอบไม่สำเร็จ" });
       }
@@ -203,12 +188,12 @@ export default function PMPlansPage() {
 
   useEffect(() => { load(); }, []);
 
-  const filtered = plans.filter((p) =>
-    (p.code + " " + p.name + " " + (p.description || "")).toLowerCase().includes(search.toLowerCase())
-  );
-
+  const today = new Date().toISOString().slice(0, 10);
+  const weekOut = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+  const filtered = plans.filter((p) => (p.code + " " + p.name + " " + (p.description || "")).toLowerCase().includes(search.toLowerCase()));
   const activeCount = plans.filter((p) => p.status === "active" && p.is_active === 1).length;
-  const dueSoonCount = plans.filter((p) => p.next_due && p.next_due <= new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)).length;
+  const dueSoonCount = plans.filter((p) => p.next_due && p.next_due <= weekOut && p.next_due >= today).length;
+  const overduePlanCount = plans.filter((p) => p.next_due && p.next_due < today && p.status === "active" && p.is_active === 1).length;
 
   const cbmActionable = (cbm?.items || []).filter((r) => r.status === "due" || r.status === "near");
   const cbmRows = cbmOnlyActionable ? cbmActionable : cbm?.items || [];
@@ -227,19 +212,19 @@ export default function PMPlansPage() {
             <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{hero.title}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">PM Master</span>
           </div>
-          <p className="cmms-hero-desc">{hero.desc}</p>
+          <p className="cmms-hero-desc">แผนแม่แบบบำรุงรักษา (กำหนดความถี่/เครื่องจักร/เช็คชีท) และสถานะรอบถัดไปจากข้อมูลจริง</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button onClick={() => router.push("/pm_am/plans/create")}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />สร้างแผน PM ใหม่
           </Button>
-          <Button variant="outline" onClick={() => router.push("/pm_am/dashboard")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
-            <Layers size={16} strokeWidth={1.75} aria-hidden="true" />แดชบอร์ด PM
+          <Button variant="outline" onClick={() => router.push("/pm_am")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+            <Layers size={16} strokeWidth={1.75} aria-hidden="true" />รอบงาน PM (PM Cycles)
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
         <Card className="cmms-kpi-card blue">
           <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="idle" size="sm" />
@@ -267,6 +252,15 @@ export default function PMPlansPage() {
             </div>
           </CardContent>
         </Card>
+        <Card className="cmms-kpi-card red">
+          <CardContent className="flex items-center gap-3 p-4">
+            <AndonLamp status={overduePlanCount > 0 ? "down" : "idle"} size="sm" />
+            <div>
+              <p className="text-sm text-[var(--cmms-text-secondary)]">รอบถัดไปเลยกำหนด (แผนใช้งาน)</p>
+              <h3 className="cmms-kpi-value">{overduePlanCount} <span className="cmms-kpi-unit">แผน</span></h3>
+            </div>
+          </CardContent>
+        </Card>
         <Card className="cmms-kpi-card cyan">
           <CardContent className="flex items-center gap-3 p-4">
             <AndonLamp status="warn" size="sm" />
@@ -284,7 +278,6 @@ export default function PMPlansPage() {
         </div>
       )}
 
-      {/* CBM รวมทั้งโรงงาน — แผนตามมิเตอร์ที่ถึง/ใกล้ถึงเป้าหมาย */}
       {cbm && cbm.summary.pairs > 0 && (
         <Card>
           <CardContent className="space-y-4 p-5">
@@ -295,12 +288,8 @@ export default function PMPlansPage() {
                 <span className="cmms-count-pill">{cbm.summary.pairs} คู่เครื่อง×แผน</span>
               </div>
               <div className="flex gap-2">
-                <Button variant={cbmOnlyActionable ? "primary" : "outline"} size="sm" onClick={() => setCbmOnlyActionable(true)}>
-                  ต้องดำเนินการ {cbmActionable.length}
-                </Button>
-                <Button variant={cbmOnlyActionable ? "outline" : "primary"} size="sm" onClick={() => setCbmOnlyActionable(false)}>
-                  ทั้งหมด {cbm.summary.pairs}
-                </Button>
+                <Button variant={cbmOnlyActionable ? "primary" : "outline"} size="sm" onClick={() => setCbmOnlyActionable(true)}>ต้องดำเนินการ {cbmActionable.length}</Button>
+                <Button variant={cbmOnlyActionable ? "outline" : "primary"} size="sm" onClick={() => setCbmOnlyActionable(false)}>ทั้งหมด {cbm.summary.pairs}</Button>
               </div>
             </div>
 
@@ -322,20 +311,16 @@ export default function PMPlansPage() {
             {cbmNotice && (
               <div
                 className="rounded-[10px] border p-3 text-sm font-medium"
-                style={
-                  cbmNotice.kind === "success"
-                    ? { borderColor: "var(--cmms-success)", background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
-                    : { borderColor: "var(--cmms-danger)", background: "var(--cmms-danger-light)" }
-                }
+                style={cbmNotice.kind === "success"
+                  ? { borderColor: "var(--cmms-success)", background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                  : { borderColor: "var(--cmms-danger)", background: "var(--cmms-danger-light)" }}
               >
                 {cbmNotice.text}
               </div>
             )}
 
             {cbmShown.length === 0 ? (
-              <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">
-                ไม่มีแผนตามมิเตอร์ที่ถึงหรือใกล้ถึงเป้าหมาย
-              </p>
+              <p className="py-4 text-center text-sm text-[var(--cmms-text-muted)]">ไม่มีแผนตามมิเตอร์ที่ถึงหรือใกล้ถึงเป้าหมาย</p>
             ) : (
               <div className="space-y-2">
                 {cbmShown.map((r) => {
@@ -343,48 +328,28 @@ export default function PMPlansPage() {
                   const unit = r.meter_unit || "";
                   const fmt = (v: number | null) => (v != null ? `${v.toLocaleString("th-TH")} ${unit}`.trim() : "—");
                   return (
-                    <div
-                      key={`${r.asset_id}-${r.plan_id}`}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3"
-                      style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}
-                    >
+                    <div key={`${r.asset_id}-${r.plan_id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}>
                       <div className="min-w-0">
                         <p className="text-sm font-bold">{r.asset_code}{r.asset_name ? ` · ${r.asset_name}` : ""}</p>
-                        <p className="text-xs text-[var(--cmms-text-secondary)]">
-                          {r.plan_code ? `${r.plan_code} · ` : ""}{r.plan_name}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--cmms-text-muted)]">
-                          ปัจจุบัน {fmt(r.current)} · เป้าหมาย {fmt(r.target)} · คงเหลือ {fmt(r.remaining)}
-                          {r.used_pct != null ? ` · ใช้ไป ${r.used_pct}%` : ""}
-                        </p>
+                        <p className="text-xs text-[var(--cmms-text-secondary)]">{r.plan_code ? `${r.plan_code} · ` : ""}{r.plan_name}</p>
+                        <p className="mt-1 text-xs text-[var(--cmms-text-muted)]">ปัจจุบัน {fmt(r.current)} · เป้าหมาย {fmt(r.target)} · คงเหลือ {fmt(r.remaining)}{r.used_pct != null ? ` · ใช้ไป ${r.used_pct}%` : ""}</p>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                         <Badge variant={ui.variant} dot>{ui.label}</Badge>
                         {r.open_pm_id ? (
-                          <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/view?id=${r.open_pm_id}`)}>
-                            เปิดรอบ PM <ArrowRight size={13} strokeWidth={2} aria-hidden="true" />
-                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/pm_am/view?id=${r.open_pm_id}`)}>เปิดรอบ PM <ArrowRight size={13} strokeWidth={2} aria-hidden="true" /></Button>
                         ) : (r.status === "due" || r.status === "near") ? (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            disabled={!!cbmBusy[`${r.asset_id}-${r.plan_id}`]}
-                            onClick={() => generateFromCbm(r)}
-                          >
+                          <Button variant="primary" size="sm" disabled={!!cbmBusy[`${r.asset_id}-${r.plan_id}`]} onClick={() => generateFromCbm(r)}>
                             {cbmBusy[`${r.asset_id}-${r.plan_id}`] ? "กำลังสร้าง..." : "สร้างรอบ PM"}
                           </Button>
                         ) : null}
-                        <Button variant="ghost" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>
-                          แผน
-                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => router.push(`/pm_am/plans/${r.plan_id}`)}>แผน</Button>
                       </div>
                     </div>
                   );
                 })}
                 {cbmRows.length > cbmShown.length && (
-                  <p className="text-center text-xs text-[var(--cmms-text-muted)]">
-                    แสดง {cbmShown.length} จาก {cbmRows.length} รายการ — ดูที่เหลือได้จากรายละเอียดแผน
-                  </p>
+                  <p className="text-center text-xs text-[var(--cmms-text-muted)]">แสดง {cbmShown.length} จาก {cbmRows.length} รายการ — ดูที่เหลือได้จากรายละเอียดแผน</p>
                 )}
               </div>
             )}
@@ -401,107 +366,81 @@ export default function PMPlansPage() {
               <span className="cmms-count-pill">{filtered.length} แผน</span>
             </div>
             <div className="relative min-w-0 max-w-[280px]">
-              <Search
-                size={16}
-                strokeWidth={1.75}
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]"
-              />
-              <Input
-                aria-label="ค้นหา"
-                className="pl-9"
-                placeholder="ค้นหารหัส / ชื่อแผน..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <Search size={16} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cmms-text-muted)]" />
+              <Input aria-label="ค้นหา" className="pl-9" placeholder="ค้นหารหัส / ชื่อแผน..." value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
 
           {loading ? (
             <p className="py-8 text-center text-sm text-[var(--cmms-text-muted)]">กำลังโหลดข้อมูล...</p>
           ) : filtered.length === 0 ? (
-            <EmptyState
-              icon={<CalendarDays size={28} strokeWidth={1.5} aria-hidden="true" />}
-              title={search ? "ไม่พบแผนที่ค้นหา" : "ยังไม่มีแผน PM"}
-              description={search ? "ลองค้นหาด้วยคำอื่น" : 'กด "สร้างแผน PM ใหม่" เพื่อเริ่มต้น'}
-            />
+            <EmptyState icon={<CalendarDays size={28} strokeWidth={1.5} aria-hidden="true" />} title={search ? "ไม่พบแผนที่ค้นหา" : "ยังไม่มีแผน PM"} description={search ? "ลองค้นหาด้วยคำอื่น" : 'กด "สร้างแผน PM ใหม่" เพื่อเริ่มต้น'} />
           ) : (
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              {filtered.map((p) => (
-                <div key={p.id} className="rounded-lg border p-4 transition-all hover:shadow-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-primary-hover)", fontFamily: "'Sarabun', sans-serif" }}>
-                          {p.code}
-                        </span>
-                        <span className="cmms-andon-chip" style={freqChipStyle[p.frequency_type] || freqChipStyle.monthly}>
-                          {freqLabels[p.frequency_type] || p.frequency_type}
-                        </span>
-                        <span className="cmms-andon-chip" style={priorityStyle[p.priority] || priorityStyle.medium}>
-                          {p.priority}
-                        </span>
+              {filtered.map((p) => {
+                const nextDue = p.next_due ? String(p.next_due).slice(0, 10) : "";
+                const isOverdueNext = !!(nextDue && nextDue < today && p.status === "active" && p.is_active === 1);
+                const isDueSoon = !!(nextDue && nextDue >= today && nextDue <= weekOut && p.status === "active" && p.is_active === 1);
+                return (
+                  <div key={p.id} className="rounded-lg border p-4 transition-all hover:shadow-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-card)" }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-primary-hover)", fontFamily: "'Sarabun', sans-serif" }}>{p.code}</span>
+                          <span className="cmms-andon-chip" style={freqChipStyle[p.frequency_type] || freqChipStyle.monthly}>{freqLabels[p.frequency_type] || p.frequency_type}</span>
+                          <span className="cmms-andon-chip" style={priorityStyle[p.priority] || priorityStyle.medium}>{p.priority}</span>
+                          {isOverdueNext && <span className="cmms-andon-chip" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>รอบถัดไปเลยกำหนด</span>}
+                          {!isOverdueNext && isDueSoon && <span className="cmms-andon-chip" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>ครบกำหนดเร็ว ๆ นี้</span>}
+                        </div>
+                        <button className="block text-left font-bold hover:text-[var(--cmms-primary)]" onClick={() => router.push(`/pm_am/plans/${p.id}`)}>
+                          {p.name}
+                        </button>
+                        {p.description && <p className="line-clamp-1 text-sm text-[var(--cmms-text-secondary)]">{p.description}</p>}
                       </div>
-                      <button className="block text-left font-bold hover:text-[var(--cmms-primary)]" onClick={() => router.push(`/pm_am/plans/${p.id}`)}>
-                        {p.name}
-                      </button>
-                      {p.description && <p className="line-clamp-1 text-sm text-[var(--cmms-text-secondary)]">{p.description}</p>}
+                      <div className="flex shrink-0 gap-1.5">
+                        <button type="button" onClick={() => router.push(`/pm_am/plans/${p.id}`)} aria-label="ดูรายละเอียด" className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-text-secondary)" }}>
+                          <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
+                        </button>
+                        <button type="button" onClick={() => router.push(`/pm_am/plans/create?edit=${p.id}`)} aria-label="แก้ไขแผน" className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-text-secondary)" }}>
+                          <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/pm_am/plans/${p.id}`)}
-                        aria-label="ดูรายละเอียด"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
-                        style={{ color: "var(--cmms-text-secondary)" }}
-                      >
-                        <Eye size={16} strokeWidth={1.75} aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/pm_am/plans/create?edit=${p.id}`)}
-                        aria-label="แก้ไขแผน"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]"
-                        style={{ color: "var(--cmms-text-secondary)" }}
-                      >
-                        <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
 
-                  <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3 text-center" style={{ borderColor: "var(--cmms-border)" }}>
-                    <div>
-                      <p className="text-xs text-[var(--cmms-text-secondary)]">เครื่องจักร</p>
-                      <p className="flex items-center justify-center gap-1 text-sm font-bold"><Wrench size={13} aria-hidden="true" />{p.asset_count}</p>
+                    <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3 text-center" style={{ borderColor: "var(--cmms-border)" }}>
+                      <div>
+                        <p className="text-xs text-[var(--cmms-text-secondary)]">เครื่องจักร</p>
+                        <p className="flex items-center justify-center gap-1 text-sm font-bold"><Wrench size={13} aria-hidden="true" />{p.asset_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[var(--cmms-text-secondary)]">เช็คชีท</p>
+                        <p className="flex items-center justify-center gap-1 text-sm font-bold"><ClipboardList size={13} aria-hidden="true" />{p.template_count}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[var(--cmms-text-secondary)]">รอบถัดไป</p>
+                        <p className="text-sm font-bold" style={{ color: isOverdueNext ? "var(--cmms-danger)" : isDueSoon ? "var(--cmms-warning-dark)" : "var(--cmms-text-primary)" }}>
+                          {nextDue || "-"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-[var(--cmms-text-secondary)]">เช็คชีท</p>
-                      <p className="flex items-center justify-center gap-1 text-sm font-bold"><ClipboardList size={13} aria-hidden="true" />{p.template_count}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-[var(--cmms-text-secondary)]">รอบถัดไป</p>
-                      <p className="text-sm font-bold" style={{ color: p.next_due && p.next_due < new Date().toISOString().slice(0, 10) ? "var(--cmms-danger)" : "var(--cmms-text-primary)" }}>
-                        {p.next_due || "-"}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                    {p.status === "active" && p.is_active === 1 ? (
-                      <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--cmms-success-dark)" }}>
-                        <CheckCircle2 size={13} aria-hidden="true" />เปิดใช้งาน
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                      {p.status === "active" && p.is_active === 1 ? (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--cmms-success-dark)" }}>
+                          <CheckCircle2 size={13} aria-hidden="true" />เปิดใช้งาน
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>
+                          <PauseCircle size={13} aria-hidden="true" />{p.status === "cancelled" ? "ยกเลิกแล้ว" : "ปิดใช้งาน"}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
+                        <Users size={13} aria-hidden="true" />{p.responsible_name || "ไม่ระบุ"}
                       </span>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>
-                        <PauseCircle size={13} aria-hidden="true" />{p.status === "cancelled" ? "ยกเลิกแล้ว" : "ปิดใช้งาน"}
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1 text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
-                      <Users size={13} aria-hidden="true" />{p.responsible_name || "ไม่ระบุ"}
-                    </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>

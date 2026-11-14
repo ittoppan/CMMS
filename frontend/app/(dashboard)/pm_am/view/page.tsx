@@ -326,9 +326,9 @@ export default function PMDetailPage() {
                 </Card>
               )}
 
-              {pm.status !== "completed" && (
+              {pm.status !== "completed" && pm.status !== "cancelled" && pm.status !== "skipped" && (
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="secondary" onClick={() => router.push("/pm_am/checksheet")}>
+                  <Button variant="secondary" onClick={() => router.push(`/pm_am/checksheet?plan_id=${pm.id}`)}>
                     <RefreshCcw size={16} strokeWidth={1.75} aria-hidden="true" />ไปทำเช็คชีท
                   </Button>
                 </div>

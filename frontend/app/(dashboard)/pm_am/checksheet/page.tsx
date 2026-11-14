@@ -179,11 +179,14 @@ export default function PMChecksheetPage() {
       const res = await fetch("/api/v1/pm_am.php");
       const json = await res.json();
       if (Array.isArray(json)) {
-        // ทำ PM ได้เฉพาะวันครบกำหนด (due_date) พอดี: แสดงเฉพาะแผนที่ครบกำหนดวันนี้เท่านั้น
-        const today = String(((await (await fetch("/api/v1/pm_am.php?today=1")).json())?.today) || new Date().toLocaleDateString("en-CA")).slice(0, 10);
-        const open = json.filter(
-          (p: any) => (p.status === "pending" || p.status === "in_progress") && String(p.due_date).slice(0, 10) === today
-        );
+        // ทำเช็คชีตได้ตั้งแต่วันครบกำหนดเป็นต้นไป (รวมงานที่เลยกำหนด) — สอดคล้องกติกา API
+        const today = String(((await (await fetch("/api/v1/pm_am.php?today=1")).json().catch(() => ({})))?.today) || new Date().toISOString().slice(0, 10)).slice(0, 10);
+        const isDoable = (p: any) => {
+          const st = String(p?.status || "pending");
+          const due = p?.due_date ? String(p.due_date).slice(0, 10) : "";
+          return (st === "pending" || st === "in_progress" || st === "overdue") && due !== "" && due <= today;
+        };
+        const open = json.filter(isDoable);
 
         // ถ้ามาจาก QR: filter เฉพาะเครื่องที่สแกน หรือเลือกแผนตรงตาม plan_id
         let list = open;
@@ -191,12 +194,22 @@ export default function PMChecksheetPage() {
         if (prefill?.planId) {
           list = open.filter((p: any) => String(p.id) === prefill.planId);
           if (list.length === 0) {
-            // แผนอาจไม่ใช่ของวันนี้ หรือไม่มีอยู่จริง → ค้นหาเพื่อแจ้งวันกำหนดที่แท้จริง
+            // แผนอาจยังไม่ถึงกำหนด/เสร็จแล้ว/ไม่มีอยู่จริง → ดึงรายตัวเพื่อแจ้งสาเหตุที่ถูกต้อง
             try {
               const single = await (await fetch(`/api/v1/pm_am.php?id=${prefill.planId}`)).json();
-              if (single?.due_date) {
-                setError(`แผนนี้กำหนดตรวจวันที่ ${String(single.due_date).slice(0, 10)} — ทำเช็คชีตได้เฉพาะวันครบกำหนดเท่านั้น`);
-              } else if (single?.error === "Not found") {
+              if (single && !single.error && isDoable(single)) {
+                list = [single];
+              } else if (single?.due_date) {
+                const dueDay = String(single.due_date).slice(0, 10);
+                const st = String(single.status || "");
+                if (st === "completed" || st === "skipped" || st === "cancelled") {
+                  setError(`รอบ PM นี้อยู่สถานะ “${st}” แล้ว ไม่สามารถทำเช็คชีตซ้ำจากหน้านี้ได้`);
+                } else if (dueDay > today) {
+                  setError(`แผนนี้กำหนดตรวจวันที่ ${dueDay} — ยังไม่ถึงวันครบกำหนด (ทำเช็คชีตได้ตั้งแต่วันครบกำหนดเป็นต้นไป)`);
+                } else {
+                  setError(`ไม่สามารถเปิดเช็คชีตของแผนนี้ได้ในขณะนี้ (สถานะ: ${st || "ไม่ทราบ"})`);
+                }
+              } else if (single?.error === "Not found" || single?.error) {
                 setError("ไม่พบแผน PM ที่ระบุ");
               }
             } catch { /* ignore */ }
@@ -220,12 +233,12 @@ export default function PMChecksheetPage() {
         setPlans(
           list.map((p: any) => ({
             value: String(p.id),
-            label: `${p.title || `แผน PM #${p.id}`}${p.due_date ? ` (ครบกำหนด ${p.due_date})` : ""}`,
+            label: `${p.title || `แผน PM #${p.id}`}${p.due_date ? ` (ครบกำหนด ${String(p.due_date).slice(0, 10)}${String(p.due_date).slice(0, 10) < today ? " · เลยกำหนด" : ""})` : ""}`,
             raw: p,
           }))
         );
         if (list.length === 0 && prefill?.assetCode) {
-          setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่ครบกำหนดวันนี้ (ทำเช็คชีตได้เฉพาะวัน due_date เท่านั้น)`);
+          setError(`เครื่อง ${prefill.assetCode} ไม่มีแผน PM ที่ถึงกำหนดทำในขณะนี้ (ทำเช็คชีตได้ตั้งแต่วันครบกำหนดเป็นต้นไป รวมงานที่เลยกำหนด)`);
         }
         // บันทึกเวลา "อัปเดตล่าสุด" — ใช้แสดงบน banner offline (ข้อมูล ณ ... กี่นาทีที่แล้ว)
         snapshotSave("pm_checksheet", { savedAt: Date.now() });
