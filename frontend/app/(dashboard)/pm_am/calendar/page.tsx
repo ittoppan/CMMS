@@ -181,6 +181,7 @@ export default function PMCalendarPage() {
   const [fTech, setFTech] = useState("all");
   const [fStatus, setFStatus] = useState("all");
   const [fFreq, setFFreq] = useState("all");
+  const [lookaheadWeeks, setLookaheadWeeks] = useState<4 | 8>(4);
 
   useEffect(() => {
     let cancelled = false;
@@ -294,6 +295,38 @@ export default function PMCalendarPage() {
     { v: "skipped", l: "ข้ามรอบ" },
     { v: "cancelled", l: "ยกเลิก" },
   ];
+
+  const lookahead = useMemo(() => {
+    const start = new Date(todayStr + "T00:00:00");
+    const end = new Date(start);
+    end.setDate(end.getDate() + lookaheadWeeks * 7);
+    const endStr = toYmd(end);
+    const openStatuses = new Set(["pending", "due", "in_progress", "overdue"]);
+    const inWindow = tasks.filter((t) => {
+      if (!t.date || !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) return false;
+      if (t.date < todayStr || t.date >= endStr) return false;
+      return openStatuses.has(t.displayStatus);
+    });
+    const byAssignee: Record<string, { total: number; days: Record<string, number> }> = {};
+    const byLoc: Record<string, number> = {};
+    let conflictSlots = 0;
+    for (const t of inWindow) {
+      const a = t.assignee && t.assignee !== "-" ? t.assignee : "ไม่ระบุผู้รับผิดชอบ";
+      if (!byAssignee[a]) byAssignee[a] = { total: 0, days: {} };
+      byAssignee[a].total += 1;
+      byAssignee[a].days[t.date] = (byAssignee[a].days[t.date] || 0) + 1;
+      const am = t.assetId ? assetMap[t.assetId] : undefined;
+      const loc = am?.location || "ไม่ระบุตำแหน่ง";
+      byLoc[loc] = (byLoc[loc] || 0) + 1;
+    }
+    const assigneeRows = Object.entries(byAssignee).map(([name, v]) => {
+      const conflictDays = Object.values(v.days).filter((c) => c > 1).length;
+      conflictSlots += Object.values(v.days).reduce((acc, c) => acc + (c > 1 ? c - 1 : 0), 0);
+      return { name, total: v.total, conflictDays, peak: Math.max(0, ...Object.values(v.days)) };
+    }).sort((a, b) => b.total - a.total || b.conflictDays - a.conflictDays);
+    const locRows = Object.entries(byLoc).map(([name, total]) => ({ name, total })).sort((a, b) => b.total - a.total);
+    return { endStr, count: inWindow.length, assigneeRows, locRows, conflictSlots };
+  }, [tasks, assetMap, lookaheadWeeks]);
 
   return (
     <div className="space-y-6">
@@ -458,6 +491,47 @@ export default function PMCalendarPage() {
               <div className="flex items-center gap-2"><AndonLamp status="warn" size="sm" /><span className="text-sm">ถึงกำหนด / กำลังทำ</span></div>
               <div className="flex items-center gap-2"><AndonLamp status="idle" size="sm" /><span className="text-sm">รอดำเนินการ</span></div>
               <div className="flex items-center gap-2"><AndonLamp status="ok" size="sm" /><span className="text-sm">เสร็จสิ้น</span></div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="space-y-3 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h5 className="font-bold">วางแผนล่วงหน้า (ภาระงาน)</h5>
+                <div className="flex gap-1">
+                  <Button type="button" size="sm" variant={lookaheadWeeks===4?"primary":"secondary"} onClick={()=>setLookaheadWeeks(4)}>4 สัปดาห์</Button>
+                  <Button type="button" size="sm" variant={lookaheadWeeks===8?"primary":"secondary"} onClick={()=>setLookaheadWeeks(8)}>8 สัปดาห์</Button>
+                </div>
+              </div>
+              <p className="text-xs text-[var(--cmms-text-secondary)]">รอบ PM ค้าง/ถึงกำหนด {todayStr} ถึง {lookahead.endStr} (ไม่รวมงานปิด/ข้าม/ยกเลิก) — จากข้อมูลจริง</p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="rounded-lg border p-2" style={{borderColor:"var(--cmms-border)"}}><div className="text-xs text-muted-foreground">งานในช่วง</div><div className="font-semibold">{lookahead.count} งาน</div></div>
+                <div className="rounded-lg border p-2" style={{borderColor:"var(--cmms-border)"}}><div className="text-xs text-muted-foreground">ช่วงชน/ซ้อน (คน-วัน)</div><div className="font-semibold" style={{color: lookahead.conflictSlots>0?"var(--cmms-warning-dark)":undefined}}>{lookahead.conflictSlots}</div></div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold">ตามผู้รับผิดชอบ (งาน / วันชน / peak)</p>
+                {lookahead.assigneeRows.length===0 ? <p className="text-xs text-muted-foreground">N/A — ไม่มีงานในช่วงนี้</p> : (
+                  <div className="max-h-40 space-y-1 overflow-auto pr-1">
+                    {lookahead.assigneeRows.slice(0,8).map((r)=>(
+                      <div key={r.name} className="flex items-center justify-between rounded border px-2 py-1 text-xs" style={{borderColor:"var(--cmms-border)", background: r.conflictDays>0?"var(--cmms-warning-light)":"transparent"}}>
+                        <span className="truncate pr-2" title={r.name}>{r.name}</span>
+                        <span className="whitespace-nowrap font-medium">{r.total} / {r.conflictDays} / {r.peak}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-semibold">ตามตำแหน่ง/พื้นที่ (สูงสุด 6)</p>
+                {lookahead.locRows.length===0 ? <p className="text-xs text-muted-foreground">N/A — ไม่มีข้อมูลตำแหน่ง/งานในช่วงนี้</p> : (
+                  <div className="space-y-1">
+                    {lookahead.locRows.slice(0,6).map((r)=>(
+                      <div key={r.name} className="flex items-center justify-between text-xs"><span className="truncate pr-2">{r.name}</span><span className="font-medium">{r.total}</span></div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground">“ชน/ซ้อน” = คนเดียวกันมี &gt;1 งานในวันเดียวกัน (ควรตรวจสอบการจัดสรร)</p>
             </CardContent>
           </Card>
         </div>
