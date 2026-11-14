@@ -212,6 +212,31 @@ function apiGetCenter(PDO $pdo): void {
     // Workload วันนี้ + readiness สรุป
     $workload = pln_technician_workload($pdo, $today, $tomorrow);
 
+    // ภาระงาน PM/AM ที่ยังไม่ถูกแปลงเป็นใบงาน — ให้ผู้วางแผนเห็นความต้องการ preventive ก่อนถึงรอบ
+    // (อ่านเฉพาะรอบที่ยังไม่จบและยังไม่มีใบงานค้าง เพื่อไม่นับงานที่เข้าระบบซ่อมแล้ว)
+    $pmDue = ['overdue' => 0, 'next7' => 0, 'next30' => 0];
+    try {
+        $pmSt = $pdo->prepare("SELECT pm.due_date
+                              FROM pm_am pm
+                              WHERE pm.due_date IS NOT NULL AND pm.due_date <> '0000-00-00'
+                                AND LOWER(COALESCE(pm.status, '')) NOT IN ('completed','cancelled','skipped','done')
+                                AND NOT EXISTS (SELECT 1 FROM repair r2 WHERE r2.pm_am_id = pm.id
+                                                AND r2.status NOT IN ('closed','cancelled','rejected'))");
+        $pmSt->execute();
+        $todayDate = $today->format('Y-m-d');
+        $in7 = (clone $today)->modify('+7 days')->format('Y-m-d');
+        $in30 = (clone $today)->modify('+30 days')->format('Y-m-d');
+        foreach ($pmSt->fetchAll(PDO::FETCH_COLUMN) as $dueDate) {
+            $d = substr((string)$dueDate, 0, 10);
+            if ($d === '' || $d === '0000-00-00') continue;
+            if ($d < $todayDate) $pmDue['overdue']++;
+            if ($d <= $in7) $pmDue['next7']++;
+            if ($d <= $in30) $pmDue['next30']++;
+        }
+    } catch (Exception $e) {
+        error_log('[planning.php] pm_due: ' . $e->getMessage());
+    }
+
     echo json_encode([
         'groups' => $groups,
         'sla' => $sla,
@@ -220,6 +245,7 @@ function apiGetCenter(PDO $pdo): void {
         'scheduled_today' => $scheduledToday,
         'conflicts' => array_slice($conflicts, 0, 40),
         'workload' => array_values($workload),
+        'pm_due' => $pmDue,
         'can' => ['plan' => canPlanWork(), 'role_id' => currentRoleId()],
     ], JSON_UNESCAPED_UNICODE);
 }
@@ -332,12 +358,43 @@ function apiGetCalendar(PDO $pdo): void {
         $workload = array_values(pln_technician_workload($pdo, $from, $to));
     }
 
+    // รอบ PM/AM ที่ครบกำหนดในช่วงนี้ แต่ยังไม่มีใบงาน — แสดงร่วมกันปฏิทินเพื่อไม่ให้จองช่างทับงานป้องกัน
+    // อ่านอย่างเดียว (ไม่สร้าง/เลื่อนรอบ PM จากที่นี่)
+    $pmDue = [];
+    try {
+        $pmSt = $pdo->prepare("SELECT pm.id, pm.title, pm.due_date, pm.priority, pm.status,
+                                     a.code AS asset_code, a.name AS asset_name
+                              FROM pm_am pm
+                              LEFT JOIN asset_registry a ON a.id = pm.asset_id
+                              WHERE pm.due_date IS NOT NULL AND pm.due_date <> '0000-00-00'
+                                AND pm.due_date >= ? AND pm.due_date < ?
+                                AND LOWER(COALESCE(pm.status, '')) NOT IN ('completed','cancelled','skipped','done')
+                                AND NOT EXISTS (SELECT 1 FROM repair r2 WHERE r2.pm_am_id = pm.id
+                                                AND r2.status NOT IN ('closed','cancelled','rejected'))
+                              ORDER BY pm.due_date ASC, pm.id ASC
+                              LIMIT 300");
+        $pmSt->execute([$from->format('Y-m-d'), $to->format('Y-m-d')]);
+        foreach ($pmSt->fetchAll(PDO::FETCH_ASSOC) as $p) {
+            $pmDue[] = [
+                'id' => (int)$p['id'],
+                'title' => (string)$p['title'],
+                'due_date' => substr((string)$p['due_date'], 0, 10),
+                'priority' => (string)($p['priority'] ?? ''),
+                'asset_code' => $p['asset_code'] ?? null,
+                'asset_name' => $p['asset_name'] ?? null,
+            ];
+        }
+    } catch (Exception $e) {
+        error_log('[planning.php] calendar pm_due: ' . $e->getMessage());
+    }
+
     echo json_encode([
         'view' => $view,
         'from' => $from->format('Y-m-d'),
         'to' => $to->format('Y-m-d'),
         'items' => $items,
         'workload' => $workload,
+        'pm_due' => $pmDue,
         'can' => ['plan' => canPlanWork(), 'role_id' => currentRoleId()],
     ], JSON_UNESCAPED_UNICODE);
 }

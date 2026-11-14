@@ -294,9 +294,18 @@ requireLogin($pdo);
 
                 $woNo = generateWorkOrderNo($pdo);
                 $desc = trim(($pm['description'] ?: '') . "\n\nแผน PM: " . ($pm['plan_id'] ?: '-'));
+                // กำหนดส่งของงาน PM ตามรอบ (due_date) ไม่ใช่ "เวลาจ่ายงาน + ชั่วโมง SLA"
+                // ปลายวันของวันครบกำหนด = เวลาที่สัญญากับผู้วางแผนไว้ (ไม่ถูกคิดเป็นเกินกำหนดก่อนถึงรอบ)
+                // ตั้งplanned_start_at/planned_end_at ว่างไว้ตั้งใจ — ให้ศูนย์วางแผนจัดรอบเวลา/ทีมเอง
+                $pmDue = trim((string)($pm['due_date'] ?? ''));
+                $slaDue = null;
+                if ($pmDue !== '' && $pmDue !== '0000-00-00') {
+                    $dueTs = strtotime($pmDue);
+                    if ($dueTs !== false) $slaDue = date('Y-m-d 23:59:59', $dueTs);
+                }
                 $ins = $pdo->prepare(
-                    "INSERT INTO repair (work_order_no, asset_id, assigned_to, created_by, department_id, location_id, work_zone_id, priority, status, source_type, pm_am_id, pm_plan_id, title, description, machine_status, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', 'pm', ?, ?, ?, ?, ?, NOW(), NOW())"
+                    "INSERT INTO repair (work_order_no, asset_id, assigned_to, created_by, department_id, location_id, work_zone_id, priority, status, source_type, work_order_type, sla_due_at, estimated_completion_date, pm_am_id, pm_plan_id, title, description, machine_status, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', 'pm', 'preventive', ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())"
                 );
                 $ins->execute([
                     $woNo,
@@ -307,6 +316,8 @@ requireLogin($pdo);
                     $pm['location_id'] ?: null,
                     $pm['work_zone_id'] ?: null,
                     $pm['priority'],
+                    $slaDue,
+                    $slaDue,
                     $pmId,
                     $pm['plan_id'] ?: null,
                     '[PM] ' . $pm['title'],

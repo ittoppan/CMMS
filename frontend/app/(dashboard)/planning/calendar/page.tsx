@@ -15,6 +15,7 @@ import {
   type ReadinessState,
   type BulkResponse,
   type BulkResult,
+  type PmDueItem,
   READINESS_LABEL,
   fmtSlot,
 } from "@/lib/planning";
@@ -201,6 +202,16 @@ export default function PlanningCalendarPage() {
   }, [items]);
 
   // ── Month/week grid ──
+  // รอบ PM ที่ครบกำหนดแต่ยังไม่มีใบงาน — แสดงจาง ๆ เพื่อไม่ให้จองช่างทับงานป้องกัน
+  const pmByDay = useMemo(() => {
+    const map: Record<string, PmDueItem[]> = {};
+    for (const p of data?.pm_due || []) {
+      const k = p.due_date.slice(0, 10);
+      (map[k] ||= []).push(p);
+    }
+    return map;
+  }, [data]);
+
   const gridCells = useMemo(() => {
     const start = new Date(range.from + "T00:00:00");
     const end = new Date(range.to + "T00:00:00");
@@ -274,6 +285,9 @@ export default function PlanningCalendarPage() {
             <span className="flex items-center gap-1"><AndonLamp status="ok" size="sm" />พร้อม</span>
             <span className="flex items-center gap-1"><AndonLamp status="warn" size="sm" />พร้อมบางส่วน</span>
             <span className="flex items-center gap-1"><AndonLamp status="down" size="sm" />ไม่พร้อม</span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block h-3 w-4 rounded border border-dashed border-[var(--cmms-text-muted)]" /> PM ครบกำหนด (ยังไม่เปิดใบงาน)
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -282,7 +296,25 @@ export default function PlanningCalendarPage() {
       <Card>
         <CardContent className="p-0">
           {view === "day" ? (
-            <DayTimeline items={byDay[isoDay(anchor)] || []} />
+            <>
+              <DayTimeline items={byDay[isoDay(anchor)] || []} />
+              {(pmByDay[isoDay(anchor)] || []).length > 0 && (
+                <div className="border-t border-border px-3 py-2">
+                  <p className="text-xs font-semibold text-[var(--cmms-text-secondary)]">
+                    รอบ PM ครบกำหนดวันนี้ (ยังไม่เปิดใบงาน) {(pmByDay[isoDay(anchor)] || []).length} รอบ
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {(pmByDay[isoDay(anchor)] || []).map((p) => (
+                      <li key={`pmd-${p.id}`} className="flex flex-wrap items-center gap-2 rounded-md border border-dashed border-border px-2 py-1 text-xs">
+                        <span className="font-bold">PM</span>
+                        <span className="font-semibold">{p.asset_code || "—"}</span>
+                        <span className="truncate text-[var(--cmms-text-muted)]">{p.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-sm">
@@ -300,13 +332,14 @@ export default function PlanningCalendarPage() {
                   <tr>
                     {gridCells.map((c) => {
                       const dayItems = byDay[c.key] || [];
+                      const pmDay = pmByDay[c.key] || [];
                       const isToday = sameDay(c.date, today);
                       return (
                         <td key={c.key} className={cn("min-w-[140px] align-top border-b border-l first:border-l-0 px-1 py-1", !c.inMonth && "bg-[var(--cmms-bg-wash)] opacity-70")}>
                           <div className="min-h-[120px] space-y-1" style={{ borderColor: isToday ? "var(--cmms-primary)" : undefined }}>
-                            {dayItems.length === 0 ? (
+                            {dayItems.length === 0 && pmDay.length === 0 ? (
                               <p className="px-1 pt-2 text-center text-xs text-[var(--cmms-text-muted)]">—</p>
-                            ) : (
+                            ) : dayItems.length === 0 ? null : (
                               dayItems.slice(0, 6).map((w) => (
                                 <div
                                   key={w.id}
@@ -327,6 +360,15 @@ export default function PlanningCalendarPage() {
                             )}
                             {dayItems.length > 6 && (
                               <p className="px-1 text-center text-xs text-[var(--cmms-text-muted)]">+{dayItems.length - 6} งาน</p>
+                            )}
+                            {pmDay.slice(0, 2).map((p) => (
+                              <div key={`pm-${p.id}`} className="rounded-md border border-dashed border-border px-1.5 py-1">
+                                <p className="truncate text-xs font-bold text-[var(--cmms-text-secondary)]">PM · {p.asset_code || "—"}</p>
+                                <p className="truncate text-xs text-[var(--cmms-text-muted)]">{p.title}</p>
+                              </div>
+                            ))}
+                            {pmDay.length > 2 && (
+                              <p className="px-1 text-center text-xs text-[var(--cmms-text-muted)]">+{pmDay.length - 2} รอบ PM</p>
                             )}
                           </div>
                         </td>
