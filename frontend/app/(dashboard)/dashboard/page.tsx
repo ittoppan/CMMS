@@ -27,7 +27,9 @@ import {
   Gauge,
   Maximize2,
   Minimize2,
+  Pause,
   Package,
+  Play,
   RefreshCw,
   Timer,
   UserCheck,
@@ -49,6 +51,7 @@ import {
   YAxis,
 } from "recharts";
 import * as D from "@/lib/dashboard";
+import { useTvRotate } from "@/lib/use-tv-rotate";
 import {
   TOWER_PALETTE as C,
   fetchMonthlyTrend,
@@ -319,6 +322,8 @@ export default function DashboardPage() {
   const [pendingOpen, setPendingOpen] = useState(false);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const chartFont = useChartFont();
+  /* โหมดจอ TV: สลับหน้าแดชบอร์ดอัตโนมัติ (ปิดได้ด้วย ?tv=0) */
+  const tv = useTvRotate();
 
   /* นาฬิกา + สถานะเครือข่าย (client only — กัน hydration mismatch) */
   useEffect(() => {
@@ -596,6 +601,24 @@ export default function DashboardPage() {
           <button type="button" className="tower-btn" onClick={() => setTick((v) => v + 1)} aria-label="รีเฟรชข้อมูลทันที">
             <RefreshCw size="1em" className={loading ? "animate-spin" : undefined} aria-hidden />
           </button>
+          {tv.enabled ? (
+            <div className="flex items-center gap-1">
+              <span className="tower-chip" title="สลับหน้าอัตโนมัติ (โหมดจอ TV)">
+                <i className="tower-dot" data-tone={tv.paused ? "amber" : "green"} />
+                {tv.paused ? "หยุดสลับหน้า" : `สลับหน้าอีก ${tv.secondsLeft}s`}
+              </span>
+              <button
+                type="button"
+                className="tower-btn"
+                onClick={tv.togglePaused}
+                aria-pressed={tv.paused}
+                aria-label={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
+                title={tv.paused ? "เริ่มสลับหน้าอัตโนมัติ" : "หยุดสลับหน้าอัตโนมัติ"}
+              >
+                {tv.paused ? <Play size="1em" aria-hidden /> : <Pause size="1em" aria-hidden />}
+              </button>
+            </div>
+          ) : null}
           <button
             type="button"
             className="tower-btn"

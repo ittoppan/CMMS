@@ -169,6 +169,7 @@
 }
 .tower-dot[data-tone="red"] { background: var(--tower-red); box-shadow: 0 0 0.3em var(--tower-red); }
 .tower-dot[data-tone="green"] { animation: tower-pulse 2s ease-in-out infinite; }
+.tower-dot[data-tone="amber"] { background: var(--tower-amber); box-shadow: 0 0 0.3em var(--tower-amber); }
 
 /* ── KPI cards (gradient tile ตามสี KPI) ────────────────────────────────── */
 .tower-kpi {
