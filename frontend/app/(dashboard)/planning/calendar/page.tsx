@@ -108,7 +108,7 @@ export default function PlanningCalendarPage() {
     setError(null);
     setDenied(false);
     try {
-      const cal = await getPlanningCalendar(view);
+      const cal = await getPlanningCalendar(view, range.from, range.to);
       setData(cal);
       const cf = await getPlanningConflicts(range.from, range.to).catch(() => null);
       setConflicts(cf?.items || []);
@@ -144,13 +144,14 @@ export default function PlanningCalendarPage() {
     const q = await getPlanningQueue({ group: "unscheduled", limit: 200 }).catch(() => null);
     setUnsched(q?.items || []);
     setBulkIds(new Set(q?.items?.slice(0, 50).map((w) => w.id) || []));
-    const s = new Date();
+    // เริ่มต้นที่วันที่กำลังดูอยู่ในปฏิทิน (08:00) ไม่ใช่ "วันนี้" เสมอ
+    const s = new Date(anchor);
     s.setHours(8, 0, 0, 0);
     const e = new Date(s.getTime() + 60 * 60 * 1000);
     const pad = (d: Date) => `${String(d.getFullYear())}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     setBStart(pad(s));
     setBEnd(pad(e));
-  }, []);
+  }, [anchor]);
 
   const runBulk = async (confirm = false) => {
     if (bulkIds.size === 0) {
