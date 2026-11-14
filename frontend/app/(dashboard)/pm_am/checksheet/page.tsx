@@ -681,6 +681,9 @@ export default function PMChecksheetPage() {
                         onChange={(e) => setMeterReading(e.target.value)}
                       />
                       <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">บันทึกเป็น baseline สำหรับรอบถัดไป (ถ้าเว้นว่างระบบจะพยายามใช้ค่ามิเตอร์ล่าสุดของเครื่องตามหน่วย/พารามิเตอร์ที่ตรงกัน) — สำหรับมิเตอร์น้ำ/ไฟควรบันทึกค่าจริง ณ ตอนปิดงาน</p>
+                      {meterReading.trim() === "" && (
+                        <p className="mt-1 text-xs font-medium text-[var(--cmms-warning-dark)]">แนะนำให้กรอกค่ามิเตอร์ก่อนปิดงาน เพื่อความถูกต้องของรอบถัดไป/CBM (หากเว้นว่างและไม่มีค่าล่าสุดที่ตรงหน่วย สถานะมิเตอร์อาจแสดง N/A)</p>
+                      )}
                     </div>
                   )}
                 </div>
