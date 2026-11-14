@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // Inspection Run (Execute) — Phase 13
 // Mobile-first execution wizard: ทุก item type (check/yes_no/pass_fail/numeric/measurement/text/dropdown/date_time)
 // + auto-save (draft ฝั่ง server + localStorage) + ถ่ายรูปหลักฐาน (อัปโหลดทันที, ออฟไลน์รอส่ง)
@@ -440,6 +442,22 @@ export default function InspectionRunPage() {
       </div>
 
       {/* เลือกรอบ */}
+      <ModuleGuide
+        name="ทำรายการตรวจเช็ค"
+        summary="หน้าทำงานจริงของรอบตรวจ — เลือกรอบ ลงผลรายข้อ แนบรูปหลักฐาน และบันทึกร่างอัตโนมัติทุกครั้งที่แก้ เหมาะกับใช้บนมือถือ"
+        steps={[
+          "เลือกรอบตรวจที่รอดำเนินการจากรายการ",
+          "กดเริ่มทำ — ระบบบันทึกเวลาเริ่มของรอบ",
+          "กรอกผล/แนบรูปทีละข้อ (ร่างถูกบันทึกอัตโนมัติ แสดงเวลาบันทึกล่าสุด)",
+          "ตรวจความครบถ้วนแล้วส่งผล — ข้อที่ไม่ผ่านสามารถแจ้งซ่อมต่อได้",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/inspection_execute.php (start, autosave, photo)"
+        note="ถ้าปิดหน้าหรือเน็ตหลุด ร่างที่บันทึกไว้จะยังอยู่ — กลับมาเปิดรอบเดิมเพื่อทำต่อได้"
+        related={[
+          { href: "/inspections", label: "กำหนดการตรวจ" },
+          { href: "/inspections/templates", label: "จัดการ Template" },
+        ]}
+      />
       <Card>
         <CardContent className="p-4">
           <div className="max-w-[640px] space-y-1.5">

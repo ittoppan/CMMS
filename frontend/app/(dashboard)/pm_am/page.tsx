@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -568,6 +570,23 @@ export default function PMSchedulePage() {
         </div>
       </div>
 
+        <ModuleGuide
+          name="ตารางแผน PM"
+          summary="รวมแผนบำรุงรักษาเชิงป้องกัน (PM/AM) ของทุกเครื่องไว้ที่เดียว — ดูรอบที่ใกล้ครบกำหนด/เลยกำหนด สถานะแต่ละแผน และเปิดดูรายละเอียดพร้อมไฟล์แนบ"
+          steps={[
+            "กรองตามเครื่อง/แผนก/สถานะ แล้วเปิดแผนที่ต้องการเพื่อดูรายละเอียด",
+            "สร้างแผนใหม่รายเครื่องที่ปุ่ม “สร้างแผน PM” หรือสร้างทีละหลายเครื่องที่หน้า “สร้างแผน PM แบบกลุ่ม”",
+            "เมื่อยังทำตามกำหนดไม่ได้ ใช้ “เลื่อนรอบ” พร้อมระบุเหตุผล — ระบบเก็บประวัติการเลื่อนไว้",
+            "เมื่อถึงวันครบกำหนด เข้า “เช็คชีท PM” เพื่อบันทึกผลการทำ",
+          ]}
+          source="ตาราง pm_am ผ่าน /api/v1/pm_am.php (รอบ/สถานะ/ไฟล์แนบ)"
+          note="หน้านี้เก็บ “แผนและรอบ” — งานที่ต้องใช้ช่างหลายคนหรือตัดอะไหล่ ให้ต่อไปที่เมนูงานซ่อมบำรุง"
+          related={[
+            { href: "/pm_am/calendar", label: "ปฏิทินแผน PM" },
+            { href: "/pm_am/checksheet", label: "เช็คชีท PM" },
+            { href: "/pm_am/batch_schedule", label: "สร้างแผนแบบกลุ่ม" },
+          ]}
+        />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <Card className="cmms-kpi-card">
           <CardContent className="flex items-center gap-3 p-4">

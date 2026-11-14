@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // asset_registry — migrate ui kit (PageShell, ui/Card, ui/Select, SimpleDataTable, ui/Dialog, Badge, Lucide)
 // business logic ครบเดิม: fetch asset_registry.php, delete, filter search/criticality/status
 
@@ -298,6 +300,24 @@ export default function AssetRegistryPage() {
         </>
       }
     >
+      <ModuleGuide
+        name="ทะเบียนเครื่องจักร"
+        summary="ข้อมูลหลักของเครื่องจักรที่ทุกโมดูลอ้างอิง — รหัส/ชื่อเครื่อง แผนก ตำแหน่ง สถานะ และข้อมูลประกอบการซ่อมบำรุง"
+        steps={[
+          "ค้นหา/กรองเครื่องที่ต้องการจากรายการ",
+          "กดที่เครื่องเพื่อดูรายละเอียดและแก้ไขข้อมูล",
+          "ใช้ปุ่มในหน้านี้เพื่อไปต่อที่การประเมินความสำคัญหรือผังอะไหล่ (BOM)",
+          "ตรวจให้ข้อมูลเครื่องถูกต้องก่อนใช้งาน PM/ตรวจเช็ค/แจ้งซ่อม เพราะโมดูลอื่นอ่านจากที่นี่",
+        ]}
+        source="อ่าน/บันทึกผ่าน /api/v1/asset_registry.php"
+        note="แก้รหัสหรือชื่อเครื่องมีผลกับป้าย QR เอกสาร และรายงานที่อ้างถึงเครื่องนั้น"
+        related={[
+          { href: "/asset_registry/criticality", label: "ประเมินความสำคัญ" },
+          { href: "/asset_registry/bom_tree", label: "ผังอะไหล่ (BOM)" },
+          { href: "/qr-sheet", label: "พิมพ์ป้าย QR" },
+        ]}
+      />
+
       {error && (
         <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}

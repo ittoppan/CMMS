@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // Inspections Dashboard — Phase 13
 // KPI (จริงจาก v_inspection_dashboard_kpis) + ตัวกรอง (แผนก/ที่ตั้ง/ช่วงวัน/สถานะ)
 // + รายการรอบตรวจ + สร้างรอบ (ใหม่: department/location/priority/inspector) + ลิงก์ประวัติ
@@ -224,6 +226,23 @@ export default function InspectionsPage() {
         </div>
       </div>
 
+      <ModuleGuide
+        name="ตรวจเช็ค"
+        summary="ศูนย์กำหนดการตรวจเช็ค — รวมรอบตรวจตามเครื่อง/แผนก พร้อมสถานะและตัวเลขสรุปจากข้อมูลจริง และทางเข้าไปทำรายการตรวจ"
+        steps={[
+          "กรองตามเครื่อง/แผนก/ช่วงวันที่ เพื่อดูรอบที่ครบกำหนด",
+          "กด “สร้างรอบตรวจ” เพื่อกำหนดรอบใหม่ โดยอิง Template ที่มีอยู่",
+          "กดเข้าไปที่รอบ → หน้าทำรายการตรวจเช็ค เพื่อลงผลจริง",
+          "ตามผลย้อนหลังที่ “ประวัติตรวจเช็ค” และแก้หัวข้อตรวจที่ “จัดการ Template”",
+        ]}
+        source="/api/v1/inspections.php (รอบ/เทมเพลต) และ /api/v1/inspection_dashboard.php (ตัวเลขสรุป)"
+        note="ข้อตรวจที่ไม่ผ่านสามารถตั้งให้สร้างใบแจ้งซ่อมอัตโนมัติได้ — ตรวจการตั้งค่า Template ก่อนใช้งานจริง"
+        related={[
+          { href: "/inspections/templates", label: "จัดการ Template" },
+          { href: "/inspections/run", label: "ทำรายการตรวจ" },
+          { href: "/inspections/history", label: "ประวัติตรวจเช็ค" },
+        ]}
+      />
       {/* KPI */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {kpiCards.map((k) => (

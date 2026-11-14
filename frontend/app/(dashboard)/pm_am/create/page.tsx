@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -149,6 +151,23 @@ export default function PMCreatePage() {
         </div>
       </div>
 
+      <ModuleGuide
+        name="สร้างแผน PM"
+        summary="สร้างแผนบำรุงรักษาเชิงป้องกันรายเครื่อง — เลือกเครื่อง ความถี่ของรอบ ผู้รับผิดชอบ และรายละเอียดงานบำรุง"
+        steps={[
+          "เลือกเครื่องจักรจากทะเบียน (รายการมาจาก /api/v1/asset_registry.php)",
+          "กำหนดความถี่/รอบและผู้รับผิดชอบ — เลือกผู้รับผิดชอบจากรายชื่อผู้ใช้ที่ใช้งานอยู่",
+          "กรอกรายละเอียดงาน/รายการตรวจที่จะใช้ทำเช็คชีท",
+          "บันทึกแผน แล้วตรวจผลได้ที่ “ตารางแผน PM” หรือ “ปฏิทินแผน PM”",
+        ]}
+        source="บันทึกผ่าน /api/v1/pm_am.php — รายชื่อเครื่องจาก /api/v1/asset_registry.php, ผู้ใช้จาก /api/v1/index.php?resource=users"
+        note="ต้องมีเครื่องในทะเบียนก่อน — ถ้ายังไม่มี ให้เพิ่มที่เมนู “ทะเบียนเครื่องจักร”"
+        related={[
+          { href: "/pm_am", label: "ตารางแผน PM" },
+          { href: "/pm_am/batch_schedule", label: "สร้างแบบกลุ่ม" },
+          { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
+        ]}
+      />
       <Card>
         <CardContent className="max-w-[760px] space-y-5 p-6">
           {error && <Alert variant="danger" description={error} />}

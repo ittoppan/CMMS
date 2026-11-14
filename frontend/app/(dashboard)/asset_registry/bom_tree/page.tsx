@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // asset_registry/bom_tree — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Dialog, Badge, Lucide)
 // business logic ครบเดิม: machine_bom.php CRUD, spare-parts index, side panel เลือกชิ้นส่วน
 
@@ -262,6 +264,22 @@ export default function BOMTreePage() {
         </Button>
       }
     >
+      <ModuleGuide
+        name="ผังอะไหล่ (BOM)"
+        summary="โครงสร้างชิ้นส่วน/อะไหล่ประกอบของแต่ละเครื่อง พร้อมจำนวนที่ใช้ต่อเครื่องและจำนวนคงเหลือในคลัง — ใช้เตรียมของก่อน PM หรือซ่อม"
+        steps={[
+          "เลือกเครื่องจักรที่ต้องการดู",
+          "เพิ่มชิ้นส่วนเข้า BOM หรือแก้จำนวนต่อเครื่อง/ตำแหน่งติดตั้ง",
+          "ดูจำนวนคงเหลือในคลังเทียบกับความต้องการ เพื่อวางแผนสั่งของ",
+        ]}
+        source="ข้อมูลเครื่องและชิ้นส่วนจาก /api/v1/asset_registry.php และข้อมูลคงเหลือจากโมดูลอะไหล่"
+        note="จำนวนคงเหลือเป็นข้อมูลอ่านเพื่อการวางแผน — การรับเข้า/เบิกจ่ายทำในโมดูลอะไหล่"
+        related={[
+          { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
+          { href: "/asset_registry/criticality", label: "ประเมินความสำคัญ" },
+        ]}
+      />
+
       {error && (
         <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}

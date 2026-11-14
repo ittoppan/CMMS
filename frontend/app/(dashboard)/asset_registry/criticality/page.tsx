@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 // asset_registry/criticality — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Button, Lucide)
 // business logic ครบเดิม: fetch index.php?resource=assets, PUT asset_registry.php (criticality), scoring matrix
 
@@ -165,6 +167,23 @@ export default function AssetCriticalityPage() {
         </span>
       }
     >
+      <ModuleGuide
+        name="ประเมินความสำคัญเครื่องจักร"
+        summary="ให้คะแนนความเสี่ยงและผลกระทบของเครื่องตามเมทริกซ์ แล้วจัดเกรด A/B/C อัตโนมัติ — ใช้จัดลำดับความสำคัญของงานบำรุงรักษาและอะไหล่สำรอง"
+        steps={[
+          "เลือกเครื่องจักรที่ต้องการประเมิน",
+          "ให้คะแนนตามเกณฑ์ในเมทริกซ์ความเสี่ยง (โอกาสเสีย × ผลกระทบ)",
+          "บันทึก — ระบบคำนวณเกรดและเก็บไว้กับข้อมูลเครื่อง",
+          "ใช้เกรดที่ได้ประกอบการตัดสินใจในทะเบียนเครื่องจักรและแผน PM",
+        ]}
+        source="อ่านรายการเครื่องจาก /api/v1/index.php?resource=assets และบันทึกผลผ่าน /api/v1/asset_registry.php"
+        note="การเปลี่ยนเกณฑ์ให้คะแนนภายหลังจะไม่ย้อนไปแก้เกรดที่ประเมินไว้แล้ว — ต้องประเมินซ้ำ"
+        related={[
+          { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
+          { href: "/asset_registry/bom_tree", label: "ผังอะไหล่ (BOM)" },
+        ]}
+      />
+
       {error && (
         <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />
       )}

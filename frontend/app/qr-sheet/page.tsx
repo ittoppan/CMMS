@@ -1,5 +1,7 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
+
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { qrDarkColor } from "@/lib/qr-color";
@@ -116,6 +118,23 @@ export default function QrSheetPage() {
           </Button>
         </div>
       </div>
+
+      <ModuleGuide
+        className="no-print"
+        name="พิมพ์ป้าย QR"
+        summary="สร้างป้าย QR ประจำเครื่องจักรเพื่อพิมพ์ติดที่เครื่อง — ผู้ใช้สแกนแล้วแจ้งซ่อมด่วนหรือทำเช็คชีท PM ของเครื่องนั้นได้ทันที"
+        steps={[
+          "ตรวจรายการเครื่องที่จะพิมพ์ (ป้ายสร้างจากรหัส/เพย์โหลดมาตรฐานของเครื่อง)",
+          "กด “ปริ้นติกเกอร์” — ระบบบันทึกประวัติการพิมพ์ไว้",
+          "ติดป้ายที่เครื่องในตำแหน่งที่สแกนง่าย แล้วทดสอบสแกนหนึ่งครั้งก่อนแจกจ่าย",
+        ]}
+        source="รายการเครื่องและเพย์โหลด QR จาก /api/v1/scan.php?action=labels (ประวัติพิมพ์ที่ action=print_log)"
+        note="ป้ายที่พิมพ์ก่อนแก้รหัสเครื่องจะชี้ไปรหัสเดิม — พิมพ์ใหม่เมื่อข้อมูลเครื่องเปลี่ยน"
+        related={[
+          { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
+          { href: "/pm_am/checksheet", label: "เช็คชีท PM" },
+        ]}
+      />
 
       {error && (
         <Card className="w-full qr-sheet-note" style={{ background: "var(--cmms-danger-light)", borderLeftColor: "var(--cmms-danger)", marginBottom: 16 }}>
