@@ -280,17 +280,27 @@ requireLogin($pdo);
                             } catch (Exception $e) { /* ตาราง/คอลัมน์อาจไม่พร้อม */ }
                         }
                     } elseif ($freq !== '') {
-                        $base = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
                         $interval = max(1, (int)($parent['frequency_interval'] ?: 1));
-                        $nextDue = match ($freq) {
-                            'daily'       => date('Y-m-d', strtotime("$base + $interval days")),
-                            'weekly'      => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
-                            'monthly'     => date('Y-m-d', strtotime("$base + $interval months")),
-                            'quarterly'   => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
-                            'semi_annual' => date('Y-m-d', strtotime("$base + " . ($interval * 6) . " months")),
-                            'yearly'      => date('Y-m-d', strtotime("$base + $interval years")),
-                            default       => date('Y-m-d', strtotime("$base + $interval days")), // custom
+                        $completedRef = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
+                        $baseDue = !empty($parent['due_date']) ? date('Y-m-d', strtotime((string)$parent['due_date'])) : $completedRef;
+                        $calcNext = function (string $from) use ($freq, $interval): string {
+                            return match ($freq) {
+                                'daily'       => date('Y-m-d', strtotime("$from + $interval days")),
+                                'weekly'      => date('Y-m-d', strtotime("$from + " . ($interval * 7) . " days")),
+                                'monthly'     => date('Y-m-d', strtotime("$from + $interval months")),
+                                'quarterly'   => date('Y-m-d', strtotime("$from + " . ($interval * 3) . " months")),
+                                'semi_annual' => date('Y-m-d', strtotime("$from + " . ($interval * 6) . " months")),
+                                'yearly'      => date('Y-m-d', strtotime("$from + $interval years")),
+                                default       => date('Y-m-d', strtotime("$from + $interval days")), // custom
+                            };
                         };
+                        $nextDue = $calcNext($baseDue);
+                        $guard = 0;
+                        // fixed schedule: ยึด cadence จากกำหนดเดิม แล้วเลื่อนไปจนรอบถัดไปอยู่หลังวันที่ปิดงานจริง
+                        while ($nextDue <= $completedRef && $guard < 120) {
+                            $nextDue = $calcNext($nextDue);
+                            $guard++;
+                        }
 
                         // Dedup: มีรอบเดียวกัน (เครื่อง+ชื่อ) ที่ยังค้างอยู่แล้วไหม — กันสร้างซ้ำ
                         $dup = $pdo->prepare("SELECT COUNT(*) FROM pm_am WHERE asset_id = ? AND title = ? AND status IN ('pending','in_progress')");
@@ -327,6 +337,32 @@ requireLogin($pdo);
                                  SELECT 'pm_am', ?, user_id, role, assigned_by, NOW() FROM work_assignees WHERE ref_type = 'pm_am' AND ref_id = ?"
                             );
                             $cpTeam->execute([$newPmId, $id]);
+
+                            // แจ้งเตือนผู้รับผิดชอบเมื่อออกรอบถัดไปอัตโนมัติ (ถ้าระบบ/ช่องทางพร้อม)
+                            $notifyUid = (int)($parent['assigned_to'] ?? 0);
+                            if ($notifyUid > 0) {
+                                try {
+                                    require_once __DIR__ . '/../../../src/helpers/notification.php';
+                                    $assetCode = '';
+                                    try {
+                                        $qa = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
+                                        $qa->execute([$parent['asset_id']]);
+                                        $ar = $qa->fetch(PDO::FETCH_ASSOC) ?: [];
+                                        $assetCode = trim((string)($ar['code'] ?? ''));
+                                    } catch (Exception $e2) {}
+                                    $titleN = '📋 รอบ PM ถัดไป: ' . (string)$parent['title'];
+                                    $msgN = "สร้างรอบ PM ถัดไปแล้ว
+รายการ: " . (string)$parent['title']
+                                        . ($assetCode !== '' ? "
+เครื่องจักร: {$assetCode}" : '')
+                                        . "
+กำหนด: {$nextDue}"
+                                        . "
+(ออกรอบอัตโนมัติจากการปิดงานรอบก่อนหน้า)";
+                                    $urlN = rtrim((string)publicBaseUrl(), '/') . '/pm_am/checksheet?id=' . $newPmId . '&plan_id=' . (int)($parent['plan_id'] ?? 0);
+                                    sendNotificationToUser($notifyUid, $titleN, $msgN, $urlN);
+                                } catch (Exception $eN) { /* ไม่ให้ล้ม flow หลัก */ }
+                            }
                         }
                     }
                 }
