@@ -181,13 +181,13 @@ export default function QrSheetPage() {
           onChange={(e) => setQ(e.target.value)}
           placeholder="ค้นหารหัส/ชื่อเครื่อง"
           aria-label="ค้นหาเครื่องก่อนพิมพ์"
-          style={{ border: "1px solid #c9ced6", borderRadius: 6, padding: "8px 10px", fontSize: 14, minWidth: 220 }}
+          style={{ border: "1px solid var(--cmms-border)", borderRadius: 6, padding: "8px 10px", fontSize: 14, minWidth: 220 }}
         />
         <select
           value={dept}
           onChange={(e) => setDept(e.target.value)}
           aria-label="กรองตามแผนก"
-          style={{ border: "1px solid #c9ced6", borderRadius: 6, padding: "8px 10px", fontSize: 14 }}
+          style={{ border: "1px solid var(--cmms-border)", borderRadius: 6, padding: "8px 10px", fontSize: 14 }}
         >
           <option value="all">ทุกแผนก</option>
           {departments.map((d) => (
