@@ -52,7 +52,12 @@ try {
                 $fCodes = $pdo->query("SELECT id, code, name, category FROM failure_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
                 $rCodes = $pdo->query("SELECT id, code, name, category FROM repair_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
                 // SLA ตามระดับความสำคัญ — ให้หน้าจ่ายงานตั้งเวลาคาดเสร็จเริ่มต้นได้ตรงกับที่ server ใช้จริง
-                $sla = ['hours' => sla_hours_map($pdo), 'auto_apply' => sla_auto_apply_enabled($pdo)];
+                $sla = [
+                    'hours' => sla_hours_map($pdo),
+                    'auto_apply' => sla_auto_apply_enabled($pdo),
+                    // เกณฑ์ "ใกล้ครบกำหนด" ชุดเดียวกับ KPI alerts — ให้ drill-down ตรงกับตัวเลขบนแดชบอร์ด
+                    'risk_hours' => max(1, (int)setting_value('planning_sla_risk_hours', '24')),
+                ];
                 echo json_encode(['failure_codes' => $fCodes, 'repair_codes' => $rCodes, 'sla' => $sla], JSON_UNESCAPED_UNICODE);
                 break;
             }

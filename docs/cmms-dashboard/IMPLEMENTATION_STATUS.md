@@ -72,6 +72,7 @@
 | DE-7 | เปิดช่องแก้ค่า SLA ในหน้า `/settings` (กลุ่ม `repair_config`) + migration `INSERT IGNORE` | PASS (โค้ดพร้อม; ต้องรัน migration บนเครื่องนั้นก่อนช่องจะโผล่) | `frontend/app/(dashboard)/settings/page.tsx`, `database/migration_20261114_sla_priority.sql` |
 | DE-8 | แถบ "SLA ตามระดับความสำคัญ" บนแดชบอร์ด: มีกำหนดส่ง/ไม่ถึงกำหนด/เกินกำหนด แยก 4 priority + กดไปรายการที่กรองแล้ว | PASS (type/build) | `frontend/app/(dashboard)/dashboard/page.tsx`, `frontend/lib/dashboard.ts` |
 | DE-9 | filter `status=sla_risk` + แก้ filter `overdue` ใน API ให้ใช้ `COALESCE(sla_due_at, estimated_completion_date)` | PASS | `public/api/v1/repair.php`, `frontend/app/(dashboard)/repair/page.tsx`, `frontend/lib/repair-status.ts` |
+| DE-11 | drill-down ใช้เกณฑ์ "ใกล้ครบ" จาก settings ชุดเดียวกัน: `?reference=codes` คืน `sla.risk_hours` และหน้า `/repair` ใช้ค่านั้นแทนเลข 24 ที่ hard-code | PASS (tsc + php -l; หน้าเว็บรับ `?priority=&status=` แล้วตั้ง chip เอง) | `public/api/v1/repair.php`, `frontend/app/(dashboard)/repair/page.tsx` |
 | DE-10 | แจ้งเตือน SLA ใช้กำหนดส่งจริง (รวม `estimated_completion_date`) ทั้ง Notification Center และ alert_check | PASS (php -l; ไม่ได้ส่งข้อความจริงเพราะยังไม่มี due date ในข้อมูลและ Telegram/LINE ไม่ได้ตั้งค่า) | `scripts/notification_engine.php`, `scripts/alert_check.php` |
 
 ### ผลต่อ KPI

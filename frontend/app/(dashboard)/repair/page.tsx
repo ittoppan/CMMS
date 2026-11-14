@@ -144,6 +144,8 @@ export default function WorkOrdersPage() {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // เกณฑ์ "ใกล้ครบกำหนด SLA" (ชม.) — อ่านจาก settings เพื่อให้ตรงกับตัวเลขบนแดชบอร์ด
+  const [slaRiskHours, setSlaRiskHours] = useState(24);
   const initialFilters = useMemo(() => readRepairFilters(new URLSearchParams(searchParams.toString())), [searchParams]);
   const [search, setSearch] = useState(initialFilters.search);
   const [statusFilter, setStatusFilter] = useState(initialFilters.statusFilter);
@@ -206,7 +208,19 @@ export default function WorkOrdersPage() {
   const fetchWO = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/v1/repair.php");
+      const [res, codesRes] = await Promise.all([
+        fetch("/api/v1/repair.php"),
+        fetch("/api/v1/repair.php?reference=codes").catch(() => null),
+      ]);
+      let riskHours = 24;
+      try {
+        const codes = codesRes && codesRes.ok ? await codesRes.json() : null;
+        const h = Number(codes?.sla?.risk_hours);
+        if (Number.isFinite(h) && h > 0) riskHours = h;
+      } catch {
+        // ใช้ค่าเริ่มต้น 24 ชม. ถ้าอ่าน settings ไม่ได้
+      }
+      setSlaRiskHours(riskHours);
       const json = await res.json();
       if (Array.isArray(json)) {
         const fetched = json.map((row: any) => ({
@@ -220,7 +234,7 @@ export default function WorkOrdersPage() {
           date: row.created_at ? row.created_at.split(" ")[0] : "-",
           // กำหนดส่งจริง: sla_due_at ก่อน → estimated_completion_date (ตรงกับ kpi_is_overdue)
           overdue: isRepairOverdue(row.sla_due_at || row.estimated_completion_date, row.status),
-          dueSoon: isRepairDueSoon(row.sla_due_at || row.estimated_completion_date, row.status),
+          dueSoon: isRepairDueSoon(row.sla_due_at || row.estimated_completion_date, row.status, riskHours),
           outsourceBy: row.outsource_by || "",
           costOutsource: Number(row.cost_outsource || 0)
         }));
@@ -829,7 +843,7 @@ export default function WorkOrdersPage() {
               <SelectItem value="open">งานใหม่ (Open)</SelectItem>
               <SelectItem value="in_progress">กำลังซ่อม</SelectItem>
               <SelectItem value="overdue">เกินกำหนด (ไฟแดง)</SelectItem>
-              <SelectItem value="sla_risk">ใกล้ครบกำหนด SLA (24 ชม.)</SelectItem>
+              <SelectItem value="sla_risk">ใกล้ครบกำหนด SLA ({slaRiskHours} ชม.)</SelectItem>
               <SelectItem value="completed">เสร็จสิ้น</SelectItem>
             </SelectContent>
           </Select>
