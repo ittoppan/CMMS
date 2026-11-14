@@ -181,6 +181,11 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   escalation_alert: { label: "เปิดการแจ้งเตือนงานด่วนค้าง (Escalation)" },
   escalation_hours: { label: "งานค้างเกินกี่ชั่วโมงถึงแจ้งเตือน", hint: "ค่าเริ่มต้น 24 ชม." },
   sla_overdue_alert: { label: "เปิดการแจ้งเตือนงานเกินกำหนด SLA", hint: "แจ้งเตือนเมื่อเลย sla_due_at หรือ planned_end_at" },
+  sla_hours_critical: { label: "SLA งานด่วนวิกฤต (ชั่วโมง)", hint: "นับจากเวลาจ่ายงาน — ใช้คำนวณ sla_due_at / เวลาคาดเสร็จ" },
+  sla_hours_high: { label: "SLA งานด่วนสูง (ชั่วโมง)" },
+  sla_hours_medium: { label: "SLA งานปกติ (ชั่วโมง)" },
+  sla_hours_low: { label: "SLA งานไม่เร่งด่วน (ชั่วโมง)" },
+  sla_auto_apply: { label: "ประทับ SLA อัตโนมัติเมื่อจ่ายงาน", hint: "เปิด = ระบบเติม sla_due_at และเวลาคาดเสร็จจาก priority ให้ใบงานที่ยังไม่มีค่า" },
   rca_action_alert: { label: "เปิดการแจ้งเตือน RCA Action เกินกำหนด", hint: "แจ้งเตือนเมื่อ RCA action ค้างและเลยวันครบกำหนด (due date)" },
   // data retention
   lang_default: { label: "ภาษาหลักของระบบ", hint: "ไทย / English — ใช้เป็นค่าเริ่มต้นของหน้า UI (ฐานภาษา)" },
@@ -282,6 +287,7 @@ const NUMBER_KEYS = new Set([
   "max_login_attempts", "session_timeout_mins", "work_hours_per_day", "standard_labor_rate",
   "escalation_hours", "maintenance_alert_days", "calibration_alert_days", "pm_lead_days",
   "pm_reminder_days", "smtp_port", "spare_approval_level",
+  "sla_hours_critical", "sla_hours_high", "sla_hours_medium", "sla_hours_low",
   "budget_warning_pct", "budget_exceed_pct",
 ]);
 
@@ -293,6 +299,7 @@ const BOOLEAN_KEYS = new Set([
   "spare_require_approval", "escalation_alert", "sla_overdue_alert", "rca_action_alert", "push_alert_enabled", "smtp_enabled",
   "line_group_enabled", "spare_deduct_stock", "log_retention_enabled",
   "daily_summary_enabled", "auto_req_low_stock", "pm_deferral_enabled",
+  "sla_auto_apply",
   "animations_enabled",
   "cost_labor_enabled", "budget_dept_filter_enabled",
 ]);

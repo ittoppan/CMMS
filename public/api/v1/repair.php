@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/failure.php';
 require_once __DIR__ . '/../../../src/helpers/repair_time.php';
+require_once __DIR__ . '/../../../src/helpers/sla.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -50,7 +51,9 @@ try {
             if (isset($_GET['reference']) && $_GET['reference'] === 'codes') {
                 $fCodes = $pdo->query("SELECT id, code, name, category FROM failure_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
                 $rCodes = $pdo->query("SELECT id, code, name, category FROM repair_codes WHERE is_active = 1 ORDER BY id")->fetchAll();
-                echo json_encode(['failure_codes' => $fCodes, 'repair_codes' => $rCodes], JSON_UNESCAPED_UNICODE);
+                // SLA ตามระดับความสำคัญ — ให้หน้าจ่ายงานตั้งเวลาคาดเสร็จเริ่มต้นได้ตรงกับที่ server ใช้จริง
+                $sla = ['hours' => sla_hours_map($pdo), 'auto_apply' => sla_auto_apply_enabled($pdo)];
+                echo json_encode(['failure_codes' => $fCodes, 'repair_codes' => $rCodes, 'sla' => $sla], JSON_UNESCAPED_UNICODE);
                 break;
             }
             // อะไหล่ที่ใช้ซ่อม: ?parts=1&id=N (รายเดียว -> array) หรือ ?parts=1&ids=1,2,3 (หลาย -> map keyed by repair_id)
@@ -655,6 +658,16 @@ try {
             }
 
             repair_autofill_downtime($data);
+            // จ่ายงาน/รับงาน = ต้องมีกำหนดส่ง: ให้ server เติมจาก SLA ของ priority หรือบังคับส่งมาก่อน
+            $assignmentTouchedNow = isset($data['assigned_to']) || isset($data['team_ids']) || !empty($data['assignee_accept']);
+            if ($assignmentTouchedNow
+                && empty($data['estimated_completion_date']) && empty($data['sla_due_at'])
+                && empty($curRow['sla_due_at']) && empty($curRow['estimated_completion_date'])
+                && !sla_auto_apply_enabled($pdo)) {
+                http_response_code(422);
+                echo json_encode(['error' => 'ต้องระบุเวลาคาดเสร็จ (estimated_completion_date) ก่อนจ่ายงาน', 'code' => 'SLA_DUE_REQUIRED'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path', 'attachment_path'];
             // Phase 14: ฟิลด์วางแผนเปิดเฉพาะหัวหน้างาน (Admin/Manager/ASST Manager/Foreman)
             if (canSupervisor()) {
@@ -721,6 +734,16 @@ try {
                     repair_time_stamp($pdo, $id);
                 } catch (Throwable $e) {
                     error_log('[repair.php] repair_time_stamp failed: ' . $e->getMessage());
+                }
+            }
+
+            // จ่ายงาน / เปลี่ยนความสำคัญ → ประทับ SLA + เวลาคาดเสร็จจาก priority (เฉพาะช่องที่ยังว่าง)
+            $assignmentTouched = isset($data['assigned_to']) || isset($data['team_ids']) || !empty($data['assignee_accept']);
+            if ($assignmentTouched || isset($data['priority'])) {
+                try {
+                    sla_apply_to_work_order($pdo, (int)$id, isset($data['priority']) ? (string)$data['priority'] : null);
+                } catch (Throwable $e) {
+                    error_log('[repair.php] sla_apply failed: ' . $e->getMessage());
                 }
             }
 

@@ -29,6 +29,8 @@ interface AssignWO extends Record<string, unknown> {
   assigneeAvatar?: string | null;
   requestDate: string;
   description: string;
+  /** เวลาคาดเสร็จที่บันทึกไว้ (ใช้ prefilled ตอนเปลี่ยนช่าง) */
+  estimatedCompletion?: string | null;
 }
 
 interface Technician {
@@ -60,6 +62,22 @@ const statusColors: Record<string, React.CSSProperties> = {
 
 // สถานะที่ยังรอจ่ายงาน / ทำงานอยู่ (ยังไม่เสร็จ)
 const OPEN_STATUSES = ["open", "pending", "assigned", "accepted", "in_progress", "waiting_parts", "pending_parts"];
+
+// ค่าเริ่มต้น SLA (ชั่วโมง) — ใช้ก่อน API ตอบ แล้วถูกแทนด้วยค่าจริงจาก settings
+const SLA_FALLBACK_HOURS: Record<string, number> = { critical: 4, high: 24, medium: 72, low: 168 };
+
+/** Date → ค่าสำหรับ <input type="datetime-local"> (เวลา local ของเครื่อง) */
+function toLocalInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** ค่า datetime-local → รูปแบบ SQL DATETIME */
+function toSqlDateTime(v: string): string | null {
+  if (!v) return null;
+  const s = v.length === 16 ? `${v}:00` : v;
+  return s.replace("T", " ");
+}
 
 // Avatar เล็ก (รูปจริง / initial) — ui kit ยังไม่มี Avatar component
 function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | null; size?: number }) {
@@ -112,6 +130,9 @@ export default function RepairAssignPage() {
   const [selectedWo, setSelectedWo] = useState<AssignWO | null>(null);
   const [selectedTech, setSelectedTech] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<number[]>([]);
+  // เวลาคาดเสร็จ (SLA) — บังคับกรอกตอนจ่ายงาน เพื่อให้ KPI overdue มีความหมาย
+  const [dueAt, setDueAt] = useState("");
+  const [slaHours, setSlaHours] = useState<Record<string, number>>(SLA_FALLBACK_HOURS);
   // มอบหมายอย่างเดียว (ไม่เริ่มงาน) → actual_start_at จะประทับตอนช่างกดเริ่มงานจริง
   // ทำให้ "เวลาซ่อมจริง" (repair_time_minutes) ไม่นับเวลารอช่าง
   const [startNow, setStartNow] = useState(false);
@@ -136,12 +157,22 @@ export default function RepairAssignPage() {
     setLoading(true);
     setError(null);
     try {
-      const [woRes, userRes] = await Promise.all([
+      const [woRes, userRes, refRes] = await Promise.all([
         fetch("/api/v1/repair.php"),
         fetch("/api/v1/users.php"),
+        fetch("/api/v1/repair.php?reference=codes"),
       ]);
       const woJson = await woRes.json();
       const userJson = await userRes.json();
+      const refJson = await refRes.json().catch(() => null);
+      if (refJson?.sla?.hours) {
+        const hours: Record<string, number> = { ...SLA_FALLBACK_HOURS };
+        Object.entries(refJson.sla.hours as Record<string, unknown>).forEach(([k, v]) => {
+          const n = Number(v);
+          if (n > 0) hours[k] = n;
+        });
+        setSlaHours(hours);
+      }
       if (Array.isArray(woJson)) {
         const fetched = woJson
           .filter((row: any) => !row.status || OPEN_STATUSES.includes(row.status))
@@ -158,6 +189,7 @@ export default function RepairAssignPage() {
             teamIds: Array.isArray(row.team_ids) ? row.team_ids.map((t: any) => Number(t)) : [],
             requestDate: row.created_at ? row.created_at.split(" ")[0] : "-",
             description: row.description || row.failure_report || row.symptoms || "",
+            estimatedCompletion: row.estimated_completion_date || null,
           }));
         setWorkOrders(fetched);
       }
@@ -214,11 +246,27 @@ export default function RepairAssignPage() {
     setSelectedTech(wo.assigneeId ? String(wo.assigneeId) : "");
     setSelectedTeam((wo.teamIds || []).filter((id) => id !== wo.assigneeId));
     setStartNow(!canAssignOnly || wo.status === "in_progress");
+    if (wo.estimatedCompletion) {
+      // API ส่งมาเป็น "YYYY-MM-DD HH:MM:SS" — แปลงเป็นค่า datetime-local
+      setDueAt(wo.estimatedCompletion.replace(" ", "T").slice(0, 16));
+    } else {
+      const hours = slaHours[String(wo.priority || "medium").toLowerCase()] ?? slaHours.medium ?? 72;
+      setDueAt(toLocalInput(new Date(Date.now() + hours * 3600 * 1000)));
+    }
     setAssignOpen(true);
   };
 
   const submitAssign = async () => {
     if (!selectedWo || !selectedTech) return;
+    if (!dueAt) {
+      showToast("error", "กรุณาระบุเวลาคาดเสร็จ (SLA) ก่อนจ่ายงาน");
+      return;
+    }
+    const dueAtSql = toSqlDateTime(dueAt);
+    if (!dueAtSql || new Date(dueAt).getTime() <= Date.now()) {
+      showToast("error", "เวลาคาดเสร็จต้องเป็นเวลาในอนาคต");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -228,6 +276,8 @@ export default function RepairAssignPage() {
         body: JSON.stringify({
           assigned_to: Number(selectedTech),
           team_ids: [Number(selectedTech), ...selectedTeam],
+          estimated_completion_date: dueAtSql,
+          sla_due_at: dueAtSql,
           status: startNow || !canAssignOnly ? "in_progress" : "assigned",
           ...(startNow || !canAssignOnly
             ? {
@@ -504,6 +554,25 @@ export default function RepairAssignPage() {
                   );
                 })}
             </div>
+          </div>
+
+          <div className="space-y-1.5 rounded-[10px] border border-[var(--cmms-border)] p-3">
+            <label htmlFor="assign-due-at" className="block text-sm font-bold">
+              เวลาคาดเสร็จ (SLA) <span style={{ color: "var(--cmms-danger)" }}>*</span>
+            </label>
+            <input
+              id="assign-due-at"
+              type="datetime-local"
+              value={dueAt}
+              onChange={(e) => setDueAt(e.target.value)}
+              required
+              className="w-full rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-3 py-2 text-sm"
+            />
+            <p className="text-sm text-[var(--cmms-text-secondary)]">
+              ระบบตั้งต้นจาก SLA ของงานระดับ <b>{selectedWo?.priority || "medium"}</b>{" "}
+              ({(slaHours[String(selectedWo?.priority || "medium").toLowerCase()] ?? slaHours.medium ?? 72)} ชม.) —
+              ใบงานจะถูกนับ &quot;เกินกำหนด&quot; เมื่อเลยเวลานี้
+            </p>
           </div>
 
           {canAssignOnly && (

@@ -55,4 +55,17 @@ kpi_done_statuses()   = closed, cancelled, rejected, verified, done, skipped
 - แผนผลิต/เวลาตามแผน (scheduled time) → ไม่มี → Availability/OEE = NOT AVAILABLE
 - ต้นทุนค่าแรงต่อชั่วโมง → ไม่มี rate table → คำนวณต้นทุนย้อนหลังไม่ได้ (มีแต่ค่าที่บันทึกในใบงาน)
 - Root cause category ต่อ failure → มี `repair.rca_category` แต่ยังไม่มีข้อมูลกรอก
-- SLA definition ต่อ priority → มี `sla_due_at` รายใบ แต่ไม่มีตาราง SLA master
+- ~~SLA definition ต่อ priority~~ → **มีแล้วตั้งแต่ 2026-11-14** (ไม่ใช้ตาราง master แต่ใช้ `settings` + `src/helpers/sla.php`) ดูหัวข้อถัดไป
+
+## SLA / กำหนดส่ง (2026-11-14)
+
+| ข้อมูล | แหล่งจริง | ใช้ที่ไหน | หมายเหตุ |
+|---|---|---|---|
+| ชั่วโมง SLA ต่อ priority | `settings.sla_hours_critical\|high\|medium\|low` (กลุ่ม `repair_config`) | `sla_hours_map()` ใน `src/helpers/sla.php` | ค่าเริ่มต้น 4/24/72/168 ชม. ถ้าไม่มีแถวใน settings |
+| เปิด/ปิดการประทับอัตโนมัติ | `settings.sla_auto_apply` | `sla_auto_apply_enabled()` | ค่าเริ่มต้น 1 = เปิด |
+| กำหนดส่งรายใบ | `repair.sla_due_at` | `kpi_is_overdue()`, planning, analytics | ประทับเมื่อจ่ายงาน (ถ้าว่าง) |
+| เวลาที่สัญญากับผู้แจ้ง | `repair.estimated_completion_date` | KPI overdue, `/repair/my_tasks`, Gantt | ประทับคู่กับ `sla_due_at` |
+| หน้าจอกรอก | `/repair/assign` (บังคับกรอก, prefill จาก SLA ของ priority) | ส่ง `estimated_completion_date` + `sla_due_at` | server บังคับซ้ำ: ถ้าปิด auto และไม่ส่งมา → 422 `SLA_DUE_REQUIRED` |
+
+- Endpoint ที่ใช้ตั้งค่าหน้าจอ: `GET /api/v1/repair.php?reference=codes` คืน `sla.hours` + `sla.auto_apply` เพิ่มจาก `failure_codes`/`repair_codes` เดิม
+- หน้าการตั้งค่าจะแสดงช่อง SLA หลังรัน `database/migration_20261114_sla_priority.sql` (INSERT IGNORE, ไม่ทับค่าที่มีอยู่)

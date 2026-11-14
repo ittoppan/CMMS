@@ -132,6 +132,13 @@ function settingsDefaultValues(): array {
         'default_repair_priority' => 'medium',
         'require_approval_repair' => '0',
 
+        // ── SLA ต่อระดับความสำคัญ (ชั่วโมง นับจากเวลาจ่ายงาน) ──
+        'sla_hours_critical'    => '4',
+        'sla_hours_high'        => '24',
+        'sla_hours_medium'      => '72',
+        'sla_hours_low'         => '168',
+        'sla_auto_apply'        => '1',  // ประทับ sla_due_at/estimated_completion_date อัตโนมัติเมื่อจ่ายงาน
+
         // ── kpi targets ──
         'kpi_sla_target_minutes' => '120',
         'kpi_pm_ontime_target'   => '80',

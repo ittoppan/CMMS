@@ -35,6 +35,7 @@
 | 19 | Security audit | PASS (ตรวจโค้ด) | `SECURITY_REPORT.md` — ไม่ได้ pen-test |
 | 20 | Testing | PARTIAL | `TEST_REPORT.md` — tsc/build/audit ผ่าน; UI ไม่ได้คลิกทดสอบด้วยตา |
 | 21 | Production readiness | BLOCKED (deploy ยังไม่ทำในรอบนี้) | `PRODUCTION_READINESS.md` |
+| 22 | SLA ตาม priority + บังคับเวลาคาดเสร็จตอนจ่ายงาน | PASS (ตรวจเฉพาะ syntax/type/build — UI ยังไม่คลิกทดสอบ) | `src/helpers/sla.php` (ใหม่), `repair.php`, `supervisor.php`, `/repair/assign`, `/settings` |
 
 ## ไฟล์ที่แก้/เพิ่มในรอบนี้
 
@@ -65,11 +66,15 @@
 | DE-2 | รวมสูตรเวลาซ่อมให้เหลือที่เดียว (supervisor เดิมคิดรวม `planned_start_at` และไม่หักเวลาหยุด → แก้ให้ตรงกัน) | PASS | `public/api/v1/supervisor.php` |
 | DE-3 | ขั้นตอนมอบหมายงาน: เพิ่มตัวเลือก "มอบหมายอย่างเดียว" (สถานะ `assigned`, ยังไม่ประทับเวลาเริ่มซ่อม) และ "เริ่มงานทันที" | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx` |
 | DE-4 | ให้หน้ามอบหมายเห็นงานที่ "มอบหมายแล้ว/ช่างรับงานแล้ว" (เดิมกรองเฉพาะ open/in_progress → งานหายจากลิสต์หลังจ่ายงาน) | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx` |
+| DE-5 | SLA ตาม priority: `sla_hours_<priority>` ใน settings + ประทับ `sla_due_at`/`estimated_completion_date` เมื่อจ่ายงาน (เฉพาะช่องว่าง) | PASS | `src/helpers/sla.php` (ใหม่), `src/config/settings_defaults.php`, `public/api/v1/repair.php`, `public/api/v1/supervisor.php` |
+| DE-6 | บังคับกรอกเวลาคาดเสร็จในหน้าจ่ายงาน (prefill จาก SLA ของ priority) + server บังคับซ้ำด้วย 422 `SLA_DUE_REQUIRED` เมื่อปิด auto-apply | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx`, `public/api/v1/repair.php` |
+| DE-7 | เปิดช่องแก้ค่า SLA ในหน้า `/settings` (กลุ่ม `repair_config`) + migration `INSERT IGNORE` | PASS (โค้ดพร้อม; ต้องรัน migration บนเครื่องนั้นก่อนช่องจะโผล่) | `frontend/app/(dashboard)/settings/page.tsx`, `database/migration_20261114_sla_priority.sql` |
 
 ### ผลต่อ KPI
 
 - MTTR/ต้นทุนค่าแรง/ภาระงาน จะมี `repair_time_minutes` จริงตั้งแต่ใบงานแรกที่ปิดหลัง deploy
 - ใบงาน 99 ใบที่ค้างอยู่ **ยังไม่มี** เวลาซ่อม (ยังไม่เคยปิดงาน) — ต้องปิดงานจริงก่อน ตัวเลขจะขึ้น
+- ใบงานที่จ่ายงานหลัง deploy จะได้ `sla_due_at`/`estimated_completion_date` จริงทันที → KPI Overdue ไม่พึ่งกฎ 7 วันอีกต่อไป (ใบงานเก่าที่ไม่ถูกจ่ายยังใช้กฎเดิม และไม่ถูก backfill)
 - MTTR บนแดชบอร์ดยัง fallback `actual_start_at → completed_at` ได้อยู่ (สอดคล้องกัน)
 - `assigned` เป็นสถานะใน Phase 14 ที่ backend อนุญาตเฉพาะ canSupervisor (role 1,2,6,7) — UI ตรวจบทบาทก่อนแสดงตัวเลือก จึงไม่ทำให้บทบาท 8 ใช้งานไม่ได้
 

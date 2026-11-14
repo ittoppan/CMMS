@@ -31,6 +31,7 @@ require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/kpi.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
 require_once __DIR__ . '/../../../src/helpers/repair_time.php';
+require_once __DIR__ . '/../../../src/helpers/sla.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -943,6 +944,13 @@ function apiAssignWork(PDO $pdo, bool $bulk): void {
                             WHERE id = ?')
                 ->execute([$leadId, $newStart, $newEnd, $assigner, $sla, $rid]);
 
+            // SLA/เวลาคาดเสร็จ: ถ้าใบงานยังไม่มี estimated_completion_date ให้ใช้เวลาที่สัญญาไว้ (sla/planned end)
+            try {
+                sla_apply_to_work_order($pdo, (int)$rid);
+            } catch (Throwable $e) {
+                error_log('[supervisor.php] sla_apply (assign): ' . $e->getMessage());
+            }
+
             p14_log_repair($pdo, $rid, 'assigned', 'มอบหมายงานให้ ' . p14_name($pdo, $leadId) . ($note !== '' ? ' — ' . $note : ''), $from, 'assigned');
             foreach ($set['added'] as $uid) {
                 p14_notify_user($pdo, (int)$uid, 'คุณได้รับมอบหมายงาน ' . $wo['work_order_no'], $wo['title'], publicBaseUrl() . '/repair/view?id=' . $rid);
@@ -999,6 +1007,11 @@ function apiRescheduleWork(PDO $pdo): void {
     $pdo->prepare('UPDATE repair SET planned_start_at = ?, planned_end_at = ?, planner_id = ?,
                     sla_due_at = COALESCE(sla_due_at, ?) WHERE id = ?')
         ->execute([$start, $end, p14_uid(), $end, $id]);
+    try {
+        sla_apply_to_work_order($pdo, (int)$id);
+    } catch (Throwable $e) {
+        error_log('[supervisor.php] sla_apply (reschedule): ' . $e->getMessage());
+    }
     p14_log_repair($pdo, $id, 'rescheduled', 'เลื่อนกำหนดงาน', "{$wo['planned_start_at']} → {$wo['planned_end_at']}", "{$start} → {$end}");
     echo json_encode(['success' => true, 'conflicts' => $conflicts], JSON_UNESCAPED_UNICODE);
 }

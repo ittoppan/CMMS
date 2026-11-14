@@ -52,6 +52,30 @@ assets: total 82 / running 82 / down(=มีใบงานค้าง) 82
 | ทดสอบสิทธิ์ 2 บทบาท | ไม่ได้ล็อกอินด้วยบัญชีอื่นในรอบนี้ |
 | Responsive ที่ความละเอียดอื่น | รอบก่อนตรวจ 1920×1080 / 2560×1440 / 3840×2160 แล้ว; รอบนี้ไม่ได้ตรวจซ้ำ |
 
+## SLA ตาม priority + บังคับเวลาคาดเสร็จ (2026-11-14) — เทสต์ที่รันจริง
+
+| # | รายการ | คำสั่ง/วิธี | ผล |
+|---|---|---|---|
+| 1 | PHP syntax | `php -l` บน `src/helpers/sla.php`, `public/api/v1/repair.php`, `public/api/v1/supervisor.php` | **PASS** (3/3 ไม่มี syntax error) |
+| 2 | ค่า SLA ตาม priority | `sla_hours_map()` + `sla_due_for()` กับฐานจริง | **PASS** — critical/high/medium/low = 4/24/72/168; `due_high` จาก 2026-11-14 08:00 → 2026-11-15 08:00, `due_low` → 2026-11-21 08:00 |
+| 3 | ประทับเมื่อไม่มีค่า | `sla_apply_to_work_order()` กับใบงานจำลอง priority=critical ใน transaction | **PASS** — เขียนทั้ง `sla_due_at` และ `estimated_completion_date` = เวลาปัจจุบัน + 4 ชม. |
+| 4 | Idempotent | เรียกซ้ำบนใบงานเดิม | **PASS** — คืน `[]` ไม่เขียนทับค่าที่มีแล้ว |
+| 5 | ไม่ประทับงานที่จบแล้ว | เปลี่ยนสถานะเป็น `completed` แล้วเรียกซ้ำ | **PASS** — คืน `[]` (เข้า `sla_done_statuses()`) |
+| 6 | ไม่ทิ้งข้อมูลทดสอบ | `ROLLBACK` + `SELECT COUNT(*) FROM repair WHERE title='SLA TEST'` | **PASS** — 0 แถว |
+| 7 | TypeScript | `cd frontend && npx tsc --noEmit` | **PASS** |
+| 8 | Design audit (strict) | `python scripts/design-audit.py --strict` | **PASS** (242 หน้า, FAIL 0, WARN 0) |
+| 9 | Production build | `cd frontend && npm run build` | **PASS** (exit 0) |
+
+### SLA — NOT TESTED (รอบนี้)
+
+| รายการ | เหตุผล |
+|---|---|
+| กดจ่ายงานจริงบนเบราว์เซอร์ (บังคับกรอก/prefill) | ไม่ได้เปิดเบราว์เซอร์ตรวจด้วยตา — ตรวจเฉพาะ type/build |
+| `GET /api/v1/repair.php?reference=codes` คืนค่า `sla` | endpoint ต้อง login — ไม่มี session ในเทอร์มินัลรอบนี้ |
+| ช่อง SLA ในหน้า `/settings` | ต้องรัน `database/migration_20261114_sla_priority.sql` บนฐานนั้นก่อน (ยังไม่ได้รัน — เป็นการเปลี่ยนข้อมูลจริง) |
+| ปฏิเสธ 422 `SLA_DUE_REQUIRED` | ต้องปิด `sla_auto_apply` ในฐานจริงก่อนทดสอบ |
+| การจ่ายงานผ่าน `supervisor.php` (batch assign/reschedule) | ต้องมี session หัวหน้างาน + ข้อมูลวางแผนจริง |
+
 ## ข้อควรระวังที่พบระหว่างทดสอบ
 
 1. การค้นหาโค้ดด้วย `grep` ทั้ง `frontend/` จะโดนไฟล์ build ใน `frontend/.next` (ไฟล์ .map ขนาดใหญ่) — ควรจำกัด path หรือใช้ `-g '!*.map'`

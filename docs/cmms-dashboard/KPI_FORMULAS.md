@@ -25,7 +25,29 @@ overdue(row) =
 ```
 
 - `overdue_days` = จำนวนวันจาก due date ที่ผ่านมา หรือจาก `created_at` (กรณีกฎ 7 วัน)
-- **ผลจริง:** 71 ใบ (เพราะใบงาน 99 ใบไม่มี `estimated_completion_date`/`sla_due_at` เลย → มาจากกฎ 7 วันทั้งหมด)
+- **ผลจริงก่อน 2026-11-14:** 71 ใบ (เพราะใบงาน 99 ใบไม่มี `estimated_completion_date`/`sla_due_at` เลย → มาจากกฎ 7 วันทั้งหมด)
+
+### 2.1 SLA ต่อ priority (2026-11-14) — ทำให้ "เกินกำหนด" มีความหมาย
+
+`src/helpers/sla.php` เป็นแหล่งเดียวที่กำหนดกำหนดส่งของใบงาน:
+
+```
+sla_due_at                = เวลาจ่ายงาน + sla_hours_<priority> ชั่วโมง
+estimated_completion_date = เวลาที่สัญญากับผู้แจ้ง (ถ้ามี sla_due_at อยู่แล้ว ใช้ค่านั้น)
+```
+
+| priority | คีย์ settings | ค่าเริ่มต้น (ชม.) |
+|---|---|---|
+| critical | `sla_hours_critical` | 4 |
+| high | `sla_hours_high` | 24 |
+| medium | `sla_hours_medium` | 72 |
+| low | `sla_hours_low` | 168 |
+
+- ประทับ **เฉพาะช่องที่ยังว่าง** — ไม่ทับวันที่หัวหน้างาน/แผนงานตั้งไว้
+- ไม่ประทับใบงานที่จบแล้ว (`sla_done_statuses()`) และปิดทั้งกลไกได้ด้วย `sla_auto_apply=0`
+- เรียกจาก `public/api/v1/repair.php` (จ่ายงาน/ช่างรับงาน/เปลี่ยน priority) และ `public/api/v1/supervisor.php` (assign/reschedule)
+- ผลต่อ KPI: ใบงานที่จ่ายงานหลัง deploy จะมี due date จริง → Overdue อ่านจาก `sla_due_at`/`estimated_completion_date` เป็นหลัก กฎ 7 วันเหลือไว้เฉพาะใบงานเก่าที่ยังไม่ถูกจ่าย
+- ใบงาน 99 ใบที่ค้างอยู่ **ยังไม่ถูก backfill** (ห้ามแก้ข้อมูลจริง) — จะมี due date เมื่อถูกจ่ายงานหรือตั้งแผน
 
 ## 3. Completion Rate
 
