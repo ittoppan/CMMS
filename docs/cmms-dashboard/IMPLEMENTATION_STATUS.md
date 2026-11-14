@@ -57,6 +57,31 @@
 > รอบนี้ (2026-11-14) ไม่ได้จับภาพใหม่ — การเปลี่ยน KPI drill-down ไม่กระทบหน้าตา (เฉพาะ overlay link)
 > และยังไม่มี screenshot ของ `/repair/workload` ที่มีรูปจริง เพราะข้อมูล `before_image_path` ว่างทั้งหมด
 
+## Data enablement — 2026-11-14 (ปลดล็อก KPI ด้วยข้อมูลจริง)
+
+| Task | รายการ | สถานะ | ไฟล์ |
+|---|---|---|---|
+| DE-1 | บันทึกเวลาซ่อมจริงอัตโนมัติเมื่อปิดงาน (`repair_time_minutes`) = (completed − actual_start/acknowledged) − เวลาหยุดงาน | PASS | `src/helpers/repair_time.php` (ใหม่), `public/api/v1/repair.php`, `public/api/v1/supervisor.php` |
+| DE-2 | รวมสูตรเวลาซ่อมให้เหลือที่เดียว (supervisor เดิมคิดรวม `planned_start_at` และไม่หักเวลาหยุด → แก้ให้ตรงกัน) | PASS | `public/api/v1/supervisor.php` |
+| DE-3 | ขั้นตอนมอบหมายงาน: เพิ่มตัวเลือก "มอบหมายอย่างเดียว" (สถานะ `assigned`, ยังไม่ประทับเวลาเริ่มซ่อม) และ "เริ่มงานทันที" | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx` |
+| DE-4 | ให้หน้ามอบหมายเห็นงานที่ "มอบหมายแล้ว/ช่างรับงานแล้ว" (เดิมกรองเฉพาะ open/in_progress → งานหายจากลิสต์หลังจ่ายงาน) | PASS | `frontend/app/(dashboard)/repair/assign/page.tsx` |
+
+### ผลต่อ KPI
+
+- MTTR/ต้นทุนค่าแรง/ภาระงาน จะมี `repair_time_minutes` จริงตั้งแต่ใบงานแรกที่ปิดหลัง deploy
+- ใบงาน 99 ใบที่ค้างอยู่ **ยังไม่มี** เวลาซ่อม (ยังไม่เคยปิดงาน) — ต้องปิดงานจริงก่อน ตัวเลขจะขึ้น
+- MTTR บนแดชบอร์ดยัง fallback `actual_start_at → completed_at` ได้อยู่ (สอดคล้องกัน)
+- `assigned` เป็นสถานะใน Phase 14 ที่ backend อนุญาตเฉพาะ canSupervisor (role 1,2,6,7) — UI ตรวจบทบาทก่อนแสดงตัวเลือก จึงไม่ทำให้บทบาท 8 ใช้งานไม่ได้
+
+### Tests (รันจริง)
+
+| รายการ | ผล |
+|---|---|
+| `php -l` ทั้ง 3 ไฟล์ PHP | PASS |
+| Self-test helper ใน transaction + rollback (สร้างใบงานจำลอง 120 นาที, pause 20 นาที) | PASS — preview/stamp/stored = 100, เรียกซ้ำไม่เขียนทับ, rollback แล้วไม่มีแถวทดสอบเหลือ (0) |
+| `npx tsc --noEmit` | PASS |
+| UI: กดมอบหมาย/ปิดงานผ่านเบราว์เซอร์ | NOT TESTED |
+
 ## งานถัดไป (ลำดับที่แนะนำ)
 
 1. **Data enablement (สำคัญสุด):** มอบหมายช่างให้ใบงาน (`repair.assigned_to` หรือ `work_assignees` ที่ชี้ id จริง), บันทึก `completed_at`/`repair_time_minutes`, อัปรูปก่อนซ่อม → ปลดล็อก MTTR/Completion/Technician dashboard ทันทีโดยไม่ต้องแก้สูตร

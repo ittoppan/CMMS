@@ -31,7 +31,7 @@ kpi_done_statuses()   = closed, cancelled, rejected, verified, done, skipped
 | Department Performance | `repair.department_id` → `departments.name` | `overview` + `action=wo` | group by department | login (scope) | `department_id` มีค่า 99/99 |
 | Machine / Asset Health | `asset_registry.status`, `criticality`, `repair.asset_id` | `action=assets` | ดู KPI_FORMULAS §7 | login | 82 assets active, 82 มีใบงานค้าง |
 | Downtime | `repair.downtime_minutes`, `downtime_start/end` | `action=downtime` | `SUM(downtime_minutes)` | login | 0 นาที ทุกแถว |
-| MTTR | `repair.repair_time_minutes` หรือ `actual_start_at/acknowledged_at` → `completed_at` | `overview` (`core.mttr_hours`) | เฉลี่ย(TIMESTAMPDIFF MINUTE)/60 | login | **NOT AVAILABLE** (ไม่มีใบปิด) |
+| MTTR | `repair.repair_time_minutes` (ประทับอัตโนมัติโดย `src/helpers/repair_time.php` ตอนปิดงาน) หรือ `actual_start_at/acknowledged_at` → `completed_at` | `overview` (`core.mttr_hours`) | เฉลี่ย(TIMESTAMPDIFF MINUTE)/60 | login | **NOT AVAILABLE** จนกว่าจะมีใบงานที่ปิด (ตอนนี้ 0 ใบ); ใบที่ปิดใหม่จะมีค่านี้ทันที |
 | MTBF | `repair.completed_at`, `source_type='breakdown'`, `asset_id` | `overview` (`core.mtbf_hours`) | ระยะห่างระหว่างรอบซ่อมของเครื่องเดียวกัน 180 วัน | login | **NOT AVAILABLE** |
 | SLA Compliance | `repair.completed_at`, `sla_due_at`, `estimated_completion_date`, `planned_end_at` | `overview` (`core.sla_compliance_pct`) | ปิดทันกำหนด / ใบที่ปิดและมี due | login | **NOT AVAILABLE** |
 | PM Compliance | `pm_am.due_date`, `completed_at`, `status`; view `v_inspection_dashboard_kpis` | `overview` (`core.pm_compliance_pct`, `pm.*`) | ดู KPI_FORMULAS §5 | login | **NOT AVAILABLE** (0 แถว) |

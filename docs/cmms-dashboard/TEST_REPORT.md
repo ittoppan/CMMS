@@ -29,6 +29,18 @@ overdue_wo = 71             (กฎเปิดเกิน 7 วัน)
 assets: total 82 / running 82 / down(=มีใบงานค้าง) 82
 ```
 
+## Data enablement (2026-11-14) — เทสต์ที่รันจริง
+
+| # | รายการ | คำสั่ง/วิธี | ผล |
+|---|---|---|---|
+| 1 | PHP syntax | `php -l` บน `src/helpers/repair_time.php`, `repair.php`, `supervisor.php` | **PASS** |
+| 2 | สูตรเวลาซ่อมจริง | สร้างใบงานจำลองใน transaction (actual_start = NOW()-120min, completed = NOW(), pause 20 นาที), เรียก `repair_time_preview()` + `repair_time_stamp()` | **PASS** — ได้ 100 นาที (120−20) ทั้ง preview และค่าที่บันทึก |
+| 3 | Idempotent | เรียก `repair_time_stamp()` ซ้ำ | **PASS** — คงค่า 100 ไม่เขียนทับ |
+| 4 | ไม่ทิ้งข้อมูลทดสอบ | `ROLLBACK` + `SELECT COUNT(*) ... LIKE 'TEST-RT-%'` | **PASS** — 0 แถว |
+| 5 | TypeScript | `cd frontend && npx tsc --noEmit` | **PASS** |
+
+> หมายเหตุ: ไม่ได้ทดสอบผ่าน HTTP (กดจ่ายงาน/ปิดงานจริง) เพราะต้องใช้ session ผู้ใช้และจะเปลี่ยนข้อมูล production
+
 ## สิ่งที่ยังไม่ได้ทดสอบ (NOT TESTED)
 
 | รายการ | เหตุผล |

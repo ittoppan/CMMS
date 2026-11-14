@@ -51,13 +51,15 @@ const priorityColors: Record<string, React.CSSProperties> = {
 const statusColors: Record<string, React.CSSProperties> = {
   open: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
   pending: { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" },
+  assigned: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
+  accepted: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
   in_progress: { background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" },
   waiting_parts: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
   pending_parts: { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" },
 };
 
 // สถานะที่ยังรอจ่ายงาน / ทำงานอยู่ (ยังไม่เสร็จ)
-const OPEN_STATUSES = ["open", "pending", "in_progress", "waiting_parts", "pending_parts"];
+const OPEN_STATUSES = ["open", "pending", "assigned", "accepted", "in_progress", "waiting_parts", "pending_parts"];
 
 // Avatar เล็ก (รูปจริง / initial) — ui kit ยังไม่มี Avatar component
 function TechAvatar({ name, src, size = 28 }: { name: string; src?: string | null; size?: number }) {
@@ -110,8 +112,25 @@ export default function RepairAssignPage() {
   const [selectedWo, setSelectedWo] = useState<AssignWO | null>(null);
   const [selectedTech, setSelectedTech] = useState("");
   const [selectedTeam, setSelectedTeam] = useState<number[]>([]);
+  // มอบหมายอย่างเดียว (ไม่เริ่มงาน) → actual_start_at จะประทับตอนช่างกดเริ่มงานจริง
+  // ทำให้ "เวลาซ่อมจริง" (repair_time_minutes) ไม่นับเวลารอช่าง
+  const [startNow, setStartNow] = useState(false);
+  // บทบาทที่ backend อนุญาตให้ตั้งสถานะ "assigned" ได้ (canSupervisor = 1,2,6,7)
+  const [canAssignOnly, setCanAssignOnly] = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/menu_permissions.php?user=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!alive || !j?.user) return;
+        setCanAssignOnly([1, 2, 6, 7].includes(Number(j.user.role_id || 0)));
+      })
+      .catch(() => { /* ไม่ทราบบทบาท → ใช้พฤติกรรมเดิม (เริ่มงานทันที) */ });
+    return () => { alive = false; };
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -194,6 +213,7 @@ export default function RepairAssignPage() {
     setSelectedWo(wo);
     setSelectedTech(wo.assigneeId ? String(wo.assigneeId) : "");
     setSelectedTeam((wo.teamIds || []).filter((id) => id !== wo.assigneeId));
+    setStartNow(!canAssignOnly || wo.status === "in_progress");
     setAssignOpen(true);
   };
 
@@ -208,9 +228,13 @@ export default function RepairAssignPage() {
         body: JSON.stringify({
           assigned_to: Number(selectedTech),
           team_ids: [Number(selectedTech), ...selectedTeam],
-          status: "in_progress",
-          acknowledged_at: new Date().toISOString().slice(0, 19).replace("T", " "),
-          actual_start_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+          status: startNow || !canAssignOnly ? "in_progress" : "assigned",
+          ...(startNow || !canAssignOnly
+            ? {
+                acknowledged_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+                actual_start_at: new Date().toISOString().slice(0, 19).replace("T", " "),
+              }
+            : {}),
         }),
       });
       const json = await res.json().catch(() => ({}));
@@ -274,7 +298,11 @@ export default function RepairAssignPage() {
         return (
           <div className="flex items-center gap-2">
             <span className="cmms-andon-chip" style={statusColors[item.status] || { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
-              {item.status === "in_progress" ? "กำลังซ่อม" : "มอบหมายแล้ว"}
+              {item.status === "in_progress"
+                ? "กำลังซ่อม"
+                : item.status === "accepted"
+                ? "ช่างรับงานแล้ว"
+                : "มอบหมายแล้ว"}
             </span>
             <TechAvatar name={item.assignee} src={item.assigneeAvatar} />
             <span className="text-sm">{item.assignee}</span>
@@ -477,6 +505,26 @@ export default function RepairAssignPage() {
                 })}
             </div>
           </div>
+
+          {canAssignOnly && (
+          <div className="rounded-[10px] border border-[var(--cmms-border)] p-3">
+            <label className="flex cursor-pointer items-start gap-2">
+              <input
+                type="checkbox"
+                checked={startNow}
+                onChange={(e) => setStartNow(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span className="space-y-0.5">
+                <span className="block text-sm font-bold">เริ่มงานทันที (ช่างลงมือซ่อมตอนนี้)</span>
+                <span className="block text-sm text-[var(--cmms-text-secondary)]">
+                  ถ้าไม่ติ๊ก ระบบจะบันทึกเป็น &ldquo;มอบหมายแล้ว&rdquo; และเริ่มนับเวลาซ่อมจริงเมื่อช่างกดรับงาน/เริ่มงาน
+                  ใน &ldquo;งานของฉัน&rdquo; — ทำให้ MTTR ไม่ปนเวลารอช่าง
+                </span>
+              </span>
+            </label>
+          </div>
+          )}
         </div>
       </Dialog>
     </div>

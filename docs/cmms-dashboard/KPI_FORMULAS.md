@@ -39,6 +39,11 @@ completed_in_range = COUNT(repair.completed_at อยู่ในช่วง AN
 
 ## 4. MTTR
 
+> ตั้งแต่ 2026-11-14 `repair_time_minutes` ถูกคำนวณและบันทึกอัตโนมัติเมื่อปิดงาน
+> โดย `src/helpers/repair_time.php` (`repair_time_stamp()`) = `(completed_at − actual_start_at/acknowledged_at) − เวลาที่หยุดงาน (work_pause_logs)`
+> เรียกจากทั้ง `repair.php` (ช่างปิดงาน) และ `supervisor.php` (หัวหน้างานปิดงาน) — สูตรเดียว
+> ไม่ทับค่าที่มีอยู่แล้ว (> 0) และไม่ใช้ `planned_start_at` (แผนไม่ใช่เวลาทำงานจริง)
+
 ```
 mttr_minutes = AVG(
     repair.repair_time_minutes            -- ถ้า > 0 ใช้ค่านี้

@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../../src/helpers/idempotency.php';
 require_once __DIR__ . '/../../../src/services/NotificationCenterService.php';
 require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/failure.php';
+require_once __DIR__ . '/../../../src/helpers/repair_time.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -713,6 +714,15 @@ try {
             $oldAssignedTo = (int)($qOld->fetchColumn() ?: 0);
             $stmt = $pdo->prepare("UPDATE repair SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // เวลาซ่อมจริง: ประทับอัตโนมัติเมื่อปิดงาน (คำนวณใน helper เดียวกับ supervisor.php)
+            if ($completedNow) {
+                try {
+                    repair_time_stamp($pdo, $id);
+                } catch (Throwable $e) {
+                    error_log('[repair.php] repair_time_stamp failed: ' . $e->getMessage());
+                }
+            }
 
             // ---- อะไหล่ที่ใช้ซ่อม (ใบเบิกจากใบซ่อม) — แทนที่รายการ + ตัดสต็อก + คำนวณต้นทุนรวม ----
             if (isset($data['spare_parts']) && is_array($data['spare_parts'])) {

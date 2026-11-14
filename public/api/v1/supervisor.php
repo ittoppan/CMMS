@@ -30,6 +30,7 @@ require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/kpi.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
+require_once __DIR__ . '/../../../src/helpers/repair_time.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -1126,11 +1127,11 @@ function apiCompleteWork(PDO $pdo): void {
     }
     p14_sync_mr_status($pdo, $id, 'resolved');
 
-    $completeAt = date('Y-m-d H:i:s');
-    if (!empty($wo['actual_start_at']) || !empty($wo['planned_start_at'])) {
-        $start = strtotime((string)($wo['actual_start_at'] ?: $wo['planned_start_at']));
-        $dur = max(0, (strtotime($completeAt) - $start) / 60);
-        if ($dur > 0) $pdo->prepare('UPDATE repair SET repair_time_minutes = ? WHERE id = ?')->execute([(int)round($dur), $id]);
+    // เวลาซ่อมจริง — สูตรเดียวกับตอนช่างปิดงานเอง (helper กลาง: actual_start_at → completed_at หักเวลาหยุดงาน)
+    try {
+        repair_time_stamp($pdo, (int)$id);
+    } catch (Throwable $e) {
+        error_log('[supervisor.php] repair_time_stamp: ' . $e->getMessage());
     }
     p14_log_repair($pdo, $id, 'completed', 'ช่างทำงานเสร็จ รอหัวหน้าตรวจรับ', $wo['status'], 'completed');
     p14_center($pdo, 'repair', 'completed', 'work_order', [
