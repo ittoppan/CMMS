@@ -222,17 +222,26 @@ requireLogin($pdo);
                         $dueDate = $now;
                         $meterNote = 'ครบกำหนดตามมิเตอร์ ' . $meterUnit . ' (ปัจจุบัน ' . rtrim(rtrim(number_format($currentReading, 2, '.', ''), '0'), '.') . ', เป้าหมาย ' . rtrim(rtrim(number_format($targetReading, 2, '.', ''), '0'), '.') . ')';
                     } else {
+                        $interval = (int)$plan['frequency_interval'];
                         if ($lastRow) {
-                            $base = $lastRow['last_done_date'] ?: $lastRow['due_date'];
-                            $dueDate = $calcNextDue($base, $plan['frequency_type'], (int)$plan['frequency_interval']);
+                            // fixed schedule: ยึด cadence จากกำหนดเดิมของรอบล่าสุด (fallback วันทำเสร็จ) แล้วเลื่อนไปจนเป็นรอบถัดไปที่ไม่ย้อนหลัง
+                            $base = $lastRow['due_date'] ?: $lastRow['last_done_date'];
+                            $dueDate = $calcNextDue($base, $plan['frequency_type'], $interval);
+                        } else {
+                            $dueDate = $plan['start_date'] ?: $now;
                         }
                         $guard = 0;
-                        while ($dueDate < $now && $guard < 60) {
-                            $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], (int)$plan['frequency_interval']);
+                        while ($dueDate <= $now && $guard < 120) {
+                            $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], $interval);
                             $guard++;
                         }
                         if (workday_skip_holidays_enabled($pdo)) {
                             $dueDate = workday_next_working_day($pdo, $dueDate);
+                            while ($dueDate <= $now && $guard < 180) {
+                                $dueDate = $calcNextDue($dueDate, $plan['frequency_type'], $interval);
+                                $dueDate = workday_next_working_day($pdo, $dueDate);
+                                $guard++;
+                            }
                         }
                     }
 
