@@ -74,7 +74,7 @@
 | DE-9 | filter `status=sla_risk` + แก้ filter `overdue` ใน API ให้ใช้ `COALESCE(sla_due_at, estimated_completion_date)` | PASS | `public/api/v1/repair.php`, `frontend/app/(dashboard)/repair/page.tsx`, `frontend/lib/repair-status.ts` |
 | DE-11 | drill-down ใช้เกณฑ์ "ใกล้ครบ" จาก settings ชุดเดียวกัน: `?reference=codes` คืน `sla.risk_hours` และหน้า `/repair` ใช้ค่านั้นแทนเลข 24 ที่ hard-code | PASS (tsc + php -l; หน้าเว็บรับ `?priority=&status=` แล้วตั้ง chip เอง) | `public/api/v1/repair.php`, `frontend/app/(dashboard)/repair/page.tsx` |
 | DE-10 | แจ้งเตือน SLA ใช้กำหนดส่งจริง (รวม `estimated_completion_date`) ทั้ง Notification Center และ alert_check | PASS — ทดสอบยิงจริงแล้วทั้ง at-risk และ breached (ดู TEST_REPORT รอบ 4) | `scripts/notification_engine.php`, `scripts/alert_check.php` |
-| DE-12 | รอบรันอัตโนมัติของ engine | **BLOCKED** — ยังไม่มี scheduled task/cron เรียก `notification_engine.php` บนเครื่องนี้ (ตรวจ `schtasks` แล้ว) ต้องตั้งก่อนการแจ้งเตือนจึงเกิดขึ้นเอง | ops (Windows Task Scheduler) |
+| DE-12 | รอบรันอัตโนมัติของ engine | PASS — ลงทะเบียน Windows Task Scheduler ชื่อ `CMMS-Notify` (`C:\PHP\php.exe` + สคริปต์ในโฟลเดอร์ deploy) ทุก 1 ชม. รันจริงแล้ว Result 0 | Windows Task Scheduler (`schtasks /delete /tn CMMS-Notify` เพื่อถอน) |
 
 ### ผลต่อ KPI
 
