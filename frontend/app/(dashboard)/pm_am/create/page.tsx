@@ -234,7 +234,7 @@ export default function PMCreatePage() {
               min={1}
               value={frequencyInterval}
               onChange={(e) => setFrequencyInterval(e.target.value)}
-              description={frequency === "meter_based" ? "ระบบจะติดตามถึงกำหนดหลักจากค่ามิเตอร์/แผนแม่แบบ กำหนดค่านี้เป็นรอบอ้างอิงตามวันได้หากต้องการ" : "เช่น 1 = ทุก 1 เดือน, 3 = ทุก 3 เดือน (ขึ้นกับความถี่ที่เลือก)"}
+              hint={frequency === "meter_based" ? "ระบบจะติดตามถึงกำหนดหลักจากค่ามิเตอร์/แผนแม่แบบ กำหนดค่านี้เป็นรอบอ้างอิงตามวันได้หากต้องการ" : "เช่น 1 = ทุก 1 เดือน, 3 = ทุก 3 เดือน (ขึ้นกับความถี่ที่เลือก)"}
             />
           </div>
 
@@ -247,7 +247,7 @@ export default function PMCreatePage() {
                   placeholder="เช่น ชั่วโมง, กม., รอบ, ชิ้น"
                   value={meterUnit}
                   onChange={(e) => setMeterUnit(e.target.value)}
-                  description={frequency === "meter_based" ? "จำเป็นสำหรับงานตามมิเตอร์" : "ระบุถ้าต้องการบันทึกค่ามิเตอร์กับรอบนี้"}
+                  hint={frequency === "meter_based" ? "จำเป็นสำหรับงานตามมิเตอร์" : "ระบุถ้าต้องการบันทึกค่ามิเตอร์กับรอบนี้"}
                 />
                 <Input
                   label="ค่ามิเตอร์ baseline/ล่าสุด (ถ้าทราบ)"
@@ -256,7 +256,7 @@ export default function PMCreatePage() {
                   placeholder="เช่น 1250"
                   value={meterReading}
                   onChange={(e) => setMeterReading(e.target.value)}
-                  description="ใช้เป็นค่าตั้งต้นอ้างอิงรอบปัจจุบัน (ถ้ามี)"
+                  hint="ใช้เป็นค่าตั้งต้นอ้างอิงรอบปัจจุบัน (ถ้ามี)"
                 />
               </div>
               <p className="text-xs text-[var(--cmms-text-secondary)]">
@@ -304,7 +304,7 @@ export default function PMCreatePage() {
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            description={frequency === "meter_based" ? "ใช้เป็นวันอ้างอิง/แผนเบื้องต้นร่วมกับการติดตามตามมิเตอร์" : "วันครบกำหนดของรอบนี้"}
+            hint={frequency === "meter_based" ? "ใช้เป็นวันอ้างอิง/แผนเบื้องต้นร่วมกับการติดตามตามมิเตอร์" : "วันครบกำหนดของรอบนี้"}
           />
 
           <div className="flex justify-end gap-3">

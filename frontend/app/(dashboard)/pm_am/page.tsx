@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { DataTable } from "@/components/ui/table";
+import { DataTable, type UiTableFeatures } from "@/components/ui/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Search,
@@ -365,7 +365,7 @@ export default function PMSchedulePage() {
     });
   }, [tasks, search, frequency, statusFilter, outsourceFilter, today]);
 
-  const columns: ColumnDef<any, PMTask, any>[] = [
+  const columns: ColumnDef<UiTableFeatures, PMTask, unknown>[] = [
     { accessorKey: "id", header: t("tbl.pm_no") },
     { accessorKey: "asset", header: t("tbl.asset_full") },
     {
