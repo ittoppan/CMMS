@@ -322,14 +322,24 @@ export default function PMPlanFormPage() {
                 ? setForm({ ...form, meter_interval: e.target.value })
                 : setForm({ ...form, frequency_interval: e.target.value })} />
             {isMeter && (
-              <Input label="หน่วยมิเตอร์" placeholder="เช่น ชม. / km / รอบ" value={form.meter_unit}
-                onChange={(e) => setForm({ ...form, meter_unit: e.target.value })} />
+              <div className="space-y-2 sm:col-span-2">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+                <div className="flex flex-wrap gap-2">
+                  {[{label:"มิเตอร์ไฟฟ้า",unit:"kWh"},{label:"มิเตอร์น้ำ",unit:"m³"},{label:"ชั่วโมงเดินเครื่อง",unit:"ชั่วโมง"}].map((p)=>(
+                    <Button key={p.unit} type="button" variant={form.meter_unit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:p.unit})}>{p.label} ({p.unit})</Button>
+                  ))}
+                  <Button type="button" variant={!["kWh","m³","ชั่วโมง"].includes(form.meter_unit)?"ghost":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:""})}>กำหนดเอง</Button>
+                </div>
+                <Input label="หน่วยมิเตอร์ *" placeholder="เช่น kWh, m³, ชั่วโมง, กม., รอบ" value={form.meter_unit}
+                  onChange={(e) => setForm({ ...form, meter_unit: e.target.value })}
+                  hint="ใช้จับคู่ค่าบันทึกมิเตอร์ของเครื่อง (parameter/หน่วย) — แนะนำ ไฟฟ้า kWh, น้ำ m³" />
+              </div>
             )}
           </div>
 
           {isMeter ? (
             <div className="rounded-[10px] border p-3 text-sm" style={{ borderColor: "var(--cmms-info, #0284c7)", background: "var(--cmms-info-light, #e0f2fe)" }}>
-              แผนแบบตามมิเตอร์ (Meter/CBM): การสร้างรอบและการถึงกำหนดขึ้นกับค่ามิเตอร์ที่บันทึกเทียบ baseline/ช่วงที่กำหนด — ต้องระบุหน่วยและช่วงมิเตอร์ให้ถูกต้อง และบันทึกค่ามิเตอร์ของเครื่องจักรให้สม่ำเสมอ (หากยังไม่มีข้อมูลมิเตอร์ ระบบอาจข้ามการสร้างรอบและแจ้งในรายละเอียด)
+              แผนแบบตามมิเตอร์ (Meter/CBM) — รวมมิเตอร์น้ำ/ไฟ: การถึงกำหนดขึ้นกับค่ามิเตอร์ที่บันทึกเทียบ baseline/ช่วงที่กำหนด ต้องระบุหน่วยและช่วงให้ถูกต้อง (ไฟฟ้าแนะนำ kWh, น้ำแนะนำ m³) และบันทึกค่ามิเตอร์ของเครื่องสม่ำเสมอโดยใช้หน่วย/พารามิเตอร์ให้ตรงกัน
             </div>
           ) : form.frequency_type === "custom" ? (
             <div className="rounded-[10px] border p-3 text-sm" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>

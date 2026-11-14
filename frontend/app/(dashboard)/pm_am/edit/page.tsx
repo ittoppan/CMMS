@@ -286,12 +286,22 @@ function EditPMContent() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+                <div className="flex flex-wrap gap-2">
+                  {[{label:"มิเตอร์ไฟฟ้า",unit:"kWh"},{label:"มิเตอร์น้ำ",unit:"m³"},{label:"ชั่วโมงเดินเครื่อง",unit:"ชั่วโมง"}].map((p)=>(
+                    <Button key={p.unit} type="button" variant={meterUnit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setMeterUnit(p.unit)}>{p.label} ({p.unit})</Button>
+                  ))}
+                  <Button type="button" variant={!["kWh","m³","ชั่วโมง"].includes(meterUnit)?"ghost":"secondary"} size="sm" onClick={()=>setMeterUnit("")}>กำหนดเอง</Button>
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   label={`หน่วยมิเตอร์${frequency === "meter_based" ? " *" : ""}`}
-                  placeholder="เช่น ชั่วโมง, กม., รอบ"
+                  placeholder="เช่น kWh, m³, ชั่วโมง, กม., รอบ"
                   value={meterUnit}
                   onChange={(e) => setMeterUnit(e.target.value)}
+                  hint="ใช้จับคู่ค่าบันทึกมิเตอร์ (parameter/หน่วย) — แนะนำ ไฟฟ้า kWh, น้ำ m³"
                 />
                 <Input
                   label="ค่ามิเตอร์ (baseline/บันทึก)"

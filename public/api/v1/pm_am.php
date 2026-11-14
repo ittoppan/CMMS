@@ -283,12 +283,13 @@ requireLogin($pdo);
                         $base = $data['last_done_date'] ?? $parent['last_done_date'] ?? date('Y-m-d');
                         $interval = max(1, (int)($parent['frequency_interval'] ?: 1));
                         $nextDue = match ($freq) {
-                            'daily'     => date('Y-m-d', strtotime("$base + $interval days")),
-                            'weekly'    => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
-                            'monthly'   => date('Y-m-d', strtotime("$base + $interval months")),
-                            'quarterly' => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
-                            'yearly'    => date('Y-m-d', strtotime("$base + $interval years")),
-                            default     => date('Y-m-d', strtotime("$base + $interval days")), // custom
+                            'daily'       => date('Y-m-d', strtotime("$base + $interval days")),
+                            'weekly'      => date('Y-m-d', strtotime("$base + " . ($interval * 7) . " days")),
+                            'monthly'     => date('Y-m-d', strtotime("$base + $interval months")),
+                            'quarterly'   => date('Y-m-d', strtotime("$base + " . ($interval * 3) . " months")),
+                            'semi_annual' => date('Y-m-d', strtotime("$base + " . ($interval * 6) . " months")),
+                            'yearly'      => date('Y-m-d', strtotime("$base + $interval years")),
+                            default       => date('Y-m-d', strtotime("$base + $interval days")), // custom
                         };
 
                         // Dedup: มีรอบเดียวกัน (เครื่อง+ชื่อ) ที่ยังค้างอยู่แล้วไหม — กันสร้างซ้ำ
@@ -296,8 +297,8 @@ requireLogin($pdo);
                         $dup->execute([$parent['asset_id'], $parent['title']]);
                         if ((int)$dup->fetchColumn() === 0) {
                             $ins = $pdo->prepare(
-                                "INSERT INTO pm_am (asset_id, assigned_to, plan_id, title, description, frequency_type, frequency_interval, due_date, status, department_id, location_id, work_zone_id, created_at)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())"
+                                "INSERT INTO pm_am (asset_id, assigned_to, plan_id, title, description, frequency_type, frequency_interval, meter_unit, meter_interval, priority, estimated_duration_minutes, is_outsource, outsource_by, cost_outsource, due_date, status, department_id, location_id, work_zone_id, created_at)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())"
                             );
                             $ins->execute([
                                 $parent['asset_id'],
@@ -307,6 +308,13 @@ requireLogin($pdo);
                                 $parent['description'],
                                 $freq,
                                 $interval,
+                                $parent['meter_unit'] ?? null,
+                                $parent['meter_interval'] ?? null,
+                                $parent['priority'] ?? 'normal',
+                                $parent['estimated_duration_minutes'] ?? null,
+                                $parent['is_outsource'] ?? 0,
+                                $parent['outsource_by'] ?? null,
+                                $parent['cost_outsource'] ?? null,
                                 $nextDue,
                                 $parent['department_id'],
                                 $parent['location_id'],
