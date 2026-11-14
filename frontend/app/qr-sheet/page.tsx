@@ -3,6 +3,7 @@
 import { ModuleGuide } from "@/components/dashboard/module-guide";
 
 import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import QRCode from "qrcode";
 import { qrDarkColor } from "@/lib/qr-color";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,24 @@ export default function QrSheetPage() {
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [printed, setPrinted] = useState(false);
+  const [q, setQ] = useState("");
+  const [dept, setDept] = useState("all");
+
+  // ตัวกรองก่อนพิมพ์: เครื่อง/แผนก — ปริ้นเฉพาะรายการที่กรองอยู่
+  const departments = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of machines) if (m.department) set.add(m.department);
+    return [...set].sort((a, b) => a.localeCompare(b, "th"));
+  }, [machines]);
+
+  const filtered = useMemo(() => {
+    const key = q.trim().toLowerCase();
+    return machines.filter((m) => {
+      if (dept !== "all" && (m.department || "") !== dept) return false;
+      if (!key) return true;
+      return `${m.code} ${m.name}`.toLowerCase().includes(key);
+    });
+  }, [machines, q, dept]);
 
   useEffect(() => {
     fetch("/api/v1/scan.php?action=labels", { credentials: "include" })
@@ -69,13 +88,13 @@ export default function QrSheetPage() {
     const firstLog = !printed;
     setPrinted(true);
     window.print();
-    if (!firstLog || machines.length === 0) return;
+    if (!firstLog || filtered.length === 0) return;
     try {
       await fetch("/api/v1/scan.php?action=print_log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ asset_ids: machines.map((m) => m.id), template: "a4-sheet" }),
+        body: JSON.stringify({ asset_ids: filtered.map((m) => m.id), template: "a4-sheet" }),
       });
     } catch {
       /* การบันทึกประวัติพิมพ์ไม่บล็อกการพิมพ์ */
@@ -105,7 +124,9 @@ export default function QrSheetPage() {
           <h1 style={{ margin: 0, fontSize: "inherit", fontWeight: 700 }}>QR Sheet — เครื่องจักร (ปริ้นติกเกอร์)</h1>
           <p className="text-sm text-[var(--cmms-text-secondary)] supporting">
             สแกน QR แล้วเลือก: แจ้งซ่อมด่วน หรือ ทำเช็คชีท PM พร้อมเครื่องอัตโนมัติ
-            {" · "}{machines.length} เครื่อง{machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}
+            {" · "}
+            {filtered.length === machines.length ? `${machines.length} เครื่อง` : `${filtered.length} จาก ${machines.length} เครื่อง`}
+            {machines.length > 0 && (generating ? " · กำลังสร้าง QR..." : "")}
           </p>
         </div>
         <div className="no-print">
@@ -153,8 +174,39 @@ export default function QrSheetPage() {
         </CardContent>
       </Card>
 
+      <div className="no-print" style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 12 }}>
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="ค้นหารหัส/ชื่อเครื่อง"
+          aria-label="ค้นหาเครื่องก่อนพิมพ์"
+          style={{ border: "1px solid #c9ced6", borderRadius: 6, padding: "8px 10px", fontSize: 14, minWidth: 220 }}
+        />
+        <select
+          value={dept}
+          onChange={(e) => setDept(e.target.value)}
+          aria-label="กรองตามแผนก"
+          style={{ border: "1px solid #c9ced6", borderRadius: 6, padding: "8px 10px", fontSize: 14 }}
+        >
+          <option value="all">ทุกแผนก</option>
+          {departments.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+        {(q !== "" || dept !== "all") && (
+          <Button variant="outline" onClick={() => { setQ(""); setDept("all"); }}>ล้างตัวกรอง</Button>
+        )}
+        <span className="text-sm text-[var(--cmms-text-secondary)]">จะพิมพ์ {filtered.length} ป้าย</span>
+      </div>
+
       <div className="qr-sheet-grid">
-        {machines.map((m) => (
+        {filtered.length === 0 && (
+          <p className="text-sm" style={{ gridColumn: "1 / -1", color: "var(--cmms-text-secondary)" }}>
+            ไม่พบเครื่องตามตัวกรอง — ล้างคำค้นหาหรือเปลี่ยนแผนกก่อนพิมพ์
+          </p>
+        )}
+        {filtered.map((m) => (
           <Card key={m.code} className="qr-sheet-card">
             <CardContent className="flex flex-col items-center gap-2 p-3">
               {qrMap[m.code] ? (
