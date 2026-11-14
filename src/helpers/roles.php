@@ -69,7 +69,12 @@ function canReviewRequest(): bool {
 
 /** วางแผน + มอบหมายงาน + จัดตาราง (planner) */
 function canPlanWork(): bool {
-    return in_array(currentRoleId(), [1, 2, 6, 7], true);
+    return roleCanPlanWork(currentRoleId());
+}
+
+/** ตรวจจาก role_id ที่ระบ (ใช้เมื่อมี role จาก DB สด ๆ ไม่ใช่ session) */
+function roleCanPlanWork(int $roleId): bool {
+    return in_array($roleId, [1, 2, 6, 7], true);
 }
 
 /** ตรวจรับงาน (verify / close / reopen) */
