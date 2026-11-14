@@ -12,14 +12,19 @@ try {
     // สถานะที่ถือว่า "ยังไม่ปิดงาน"
     $openCond = "r.status NOT IN ('completed','closed','resolved','cancelled')";
 
+    // กำหนดส่งจริง: ใช้ตัวเดียวกับ KPI/SLA (sla_due_at ก่อน → estimated_completion_date)
+    // เดิมนับเฉพาะ estimated_completion_date ทำให้ตัวเลข "เกินกำหนด" ในหน้านี้ไม่ตรงกับ /repair และแดชบอร์ด
+    $dueExpr = 'COALESCE(r.sla_due_at, r.estimated_completion_date)';
+    $dueExprNoAlias = 'COALESCE(sla_due_at, estimated_completion_date)';
+
     $techs = $pdo->query("
         SELECT u.id AS user_id, u.full_name,
                COUNT(DISTINCT CASE WHEN {$openCond} THEN r.id END)                                       AS open_count,
-               COUNT(DISTINCT CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
-                         AND r.estimated_completion_date < NOW() THEN r.id END)                          AS overdue_count,
+               COUNT(DISTINCT CASE WHEN {$openCond} AND {$dueExpr} IS NOT NULL
+                         AND {$dueExpr} < NOW() THEN r.id END)                                           AS overdue_count,
                COUNT(DISTINCT CASE WHEN r.status IN ('In Progress','in_progress','open') THEN r.id END)  AS active_count,
-               COUNT(DISTINCT CASE WHEN {$openCond} AND r.estimated_completion_date IS NOT NULL
-                         AND r.estimated_completion_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
+               COUNT(DISTINCT CASE WHEN {$openCond} AND {$dueExpr} IS NOT NULL
+                         AND {$dueExpr} BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
                          THEN r.id END)                                                                  AS due_7d_count,
                COUNT(DISTINCT CASE WHEN r.status IN ('completed','closed','resolved')
                          AND r.updated_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN r.id END)              AS done_7d_count,
@@ -49,11 +54,11 @@ try {
     $unassigned = $pdo->query("
         SELECT
                COUNT(DISTINCT r.id) AS open_count,
-               COUNT(DISTINCT CASE WHEN r.estimated_completion_date IS NOT NULL
-                         AND r.estimated_completion_date < NOW() THEN r.id END)                          AS overdue_count,
+               COUNT(DISTINCT CASE WHEN {$dueExpr} IS NOT NULL
+                         AND {$dueExpr} < NOW() THEN r.id END)                                           AS overdue_count,
                COUNT(DISTINCT CASE WHEN r.status IN ('In Progress','in_progress','open') THEN r.id END)  AS active_count,
-               COUNT(DISTINCT CASE WHEN r.estimated_completion_date IS NOT NULL
-                         AND r.estimated_completion_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
+               COUNT(DISTINCT CASE WHEN {$dueExpr} IS NOT NULL
+                         AND {$dueExpr} BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 7 DAY)
                          THEN r.id END)                                                                  AS due_7d_count,
                0                                                                                          AS done_7d_count,
                COUNT(DISTINCT CASE WHEN r.priority IN ('high','critical') THEN r.id END) AS urgent_count
@@ -78,7 +83,7 @@ try {
     $techCount = count(array_filter($techs, fn($t) => (int)$t['user_id'] > 0));
     $summary = [
         'total_open'    => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias}")->fetchColumn(),
-        'total_overdue' => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias} AND estimated_completion_date IS NOT NULL AND estimated_completion_date < NOW()")->fetchColumn(),
+        'total_overdue' => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias} AND {$dueExprNoAlias} IS NOT NULL AND {$dueExprNoAlias} < NOW()")->fetchColumn(),
         'total_urgent'  => (int)$pdo->query("SELECT COUNT(*) FROM repair WHERE {$openCondNoAlias} AND priority IN ('high','critical')")->fetchColumn(),
         'unassigned'    => (int)$unassigned['open_count'],
         'technicians'   => $techCount,
