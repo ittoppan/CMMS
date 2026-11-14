@@ -675,11 +675,12 @@ export default function PMChecksheetPage() {
                       <Input
                         label={`ค่ามิเตอร์ปัจจุบัน${selectedPlan.meter_unit ? ` (${selectedPlan.meter_unit})` : ""}`}
                         type="number"
-                        placeholder="ระบุค่ามิเตอร์ ณ ตอนปิดงาน"
+                        step="any"
+                        placeholder={selectedPlan.meter_unit === 'kWh' ? 'เช่น ค่ามิเตอร์ไฟฟ้า (kWh)' : selectedPlan.meter_unit === 'm³' ? 'เช่น ค่ามิเตอร์น้ำ (m³)' : 'ระบุค่ามิเตอร์ ณ ตอนปิดงาน'}
                         value={meterReading}
                         onChange={(e) => setMeterReading(e.target.value)}
                       />
-                      <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">บันทึกเป็น baseline สำหรับรอบถัดไป (ถ้าเว้นว่างระบบจะพยายามใช้ค่ามิเตอร์ล่าสุด)</p>
+                      <p className="mt-1 text-xs text-[var(--cmms-text-secondary)]">บันทึกเป็น baseline สำหรับรอบถัดไป (ถ้าเว้นว่างระบบจะพยายามใช้ค่ามิเตอร์ล่าสุดของเครื่องตามหน่วย/พารามิเตอร์ที่ตรงกัน) — สำหรับมิเตอร์น้ำ/ไฟควรบันทึกค่าจริง ณ ตอนปิดงาน</p>
                     </div>
                   )}
                 </div>

@@ -241,13 +241,28 @@ export default function PMCreatePage() {
           {(frequency === "meter_based" || meterUnit || meterReading) && (
             <div className="space-y-3 rounded-[10px] border p-4" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg-wash)" }}>
               <p className="text-sm font-semibold">ข้อมูลตามมิเตอร์ {frequency === "meter_based" ? "*" : "(ถ้ามี)"}</p>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "มิเตอร์ไฟฟ้า", unit: "kWh", desc: "หน่วยไฟฟ้าสะสม" },
+                    { label: "มิเตอร์น้ำ", unit: "m³", desc: "ปริมาตรน้ำสะสม" },
+                    { label: "ชั่วโมงเดินเครื่อง", unit: "ชั่วโมง", desc: "ชั่วโมงการทำงาน" },
+                  ].map((p) => (
+                    <Button key={p.unit} type="button" variant={meterUnit === p.unit ? "primary" : "secondary"} size="sm" onClick={() => setMeterUnit(p.unit)} title={p.desc}>
+                      {p.label} ({p.unit})
+                    </Button>
+                  ))}
+                  <Button type="button" variant={!["kWh","m³","ชั่วโมง"].includes(meterUnit) ? "ghost" : "secondary"} size="sm" onClick={() => setMeterUnit("")}>กำหนดเอง</Button>
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   label="หน่วยมิเตอร์"
-                  placeholder="เช่น ชั่วโมง, กม., รอบ, ชิ้น"
+                  placeholder="เช่น kWh, m³, ชั่วโมง, กม., รอบ"
                   value={meterUnit}
                   onChange={(e) => setMeterUnit(e.target.value)}
-                  hint={frequency === "meter_based" ? "จำเป็นสำหรับงานตามมิเตอร์" : "ระบุถ้าต้องการบันทึกค่ามิเตอร์กับรอบนี้"}
+                  hint={frequency === "meter_based" ? "จำเป็น — ใช้จับคู่กับค่าที่บันทึก (parameter/หน่วย). แนะนำ: ไฟฟ้า kWh, น้ำ m³" : "ระบุถ้าต้องการบันทึกค่ามิเตอร์กับรอบนี้ (แนะนำ kWh / m³)"}
                 />
                 <Input
                   label="ค่ามิเตอร์ baseline/ล่าสุด (ถ้าทราบ)"
@@ -256,11 +271,11 @@ export default function PMCreatePage() {
                   placeholder="เช่น 1250"
                   value={meterReading}
                   onChange={(e) => setMeterReading(e.target.value)}
-                  hint="ใช้เป็นค่าตั้งต้นอ้างอิงรอบปัจจุบัน (ถ้ามี)"
+                  hint="ใช้เป็นค่าตั้งต้นอ้างอิงรอบปัจจุบัน (ถ้ามี) — ควรสอดคล้องกับหน่วยที่เลือก"
                 />
               </div>
               <p className="text-xs text-[var(--cmms-text-secondary)]">
-                สำหรับ PM ตามมิเตอร์ การถึงกำหนดควรยึดค่ามิเตอร์ปัจจุบันเทียบ baseline/รอบตามแผน (CBM) — ตรวจสอบให้มีการบันทึกค่ามิเตอร์ของเครื่องจักรอย่างสม่ำเสมอ
+                สำหรับ PM ตามมิเตอร์ (รวมมิเตอร์น้ำ/ไฟ) การถึงกำหนดควรยึดค่ามิเตอร์ปัจจุบันเทียบ baseline/รอบตามแผน (CBM) — บันทึกค่ามิเตอร์ของเครื่องจักรสม่ำเสมอ และใช้หน่วย/พารามิเตอร์ให้ตรงกัน
               </p>
             </div>
           )}
