@@ -70,6 +70,8 @@ export default function PMChecksheetPage() {
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [assetName, setAssetName] = useState("");
   const [meterReading, setMeterReading] = useState<string>("");
+  const [todayYmd, setTodayYmd] = useState<string>("");
+  const [overdueNote, setOverdueNote] = useState<string>("");
   const [checklist, setChecklist] = useState<CheckItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -183,6 +185,7 @@ export default function PMChecksheetPage() {
       if (Array.isArray(json)) {
         // ทำเช็คชีตได้ตั้งแต่วันครบกำหนดเป็นต้นไป (รวมงานที่เลยกำหนด) — สอดคล้องกติกา API
         const today = String(((await (await fetch("/api/v1/pm_am.php?today=1")).json().catch(() => ({})))?.today) || new Date().toISOString().slice(0, 10)).slice(0, 10);
+        setTodayYmd(today);
         const isDoable = (p: any) => {
           const st = String(p?.status || "pending");
           const due = p?.due_date ? String(p.due_date).slice(0, 10) : "";
@@ -405,8 +408,19 @@ export default function PMChecksheetPage() {
     setPdfBusy(false);
   };
 
+  // แผนที่เลยกำหนด: อนุญาตให้ทำย้อนหลังได้ แต่ต้องระบุหมายเหตุ
+  const planDueDay = selectedPlan?.due_date ? String(selectedPlan.due_date).slice(0, 10) : "";
+  const planOverdue = !!planDueDay && !!todayYmd && planDueDay < todayYmd;
+  const planOverdueDays = planOverdue
+    ? Math.max(1, Math.round((new Date(todayYmd).getTime() - new Date(planDueDay).getTime()) / 86400000))
+    : 0;
+
   const confirmSave = async () => {
     if (!selectedPlan) return;
+    if (planOverdue && !overdueNote.trim()) {
+      showToast("error", `แผนนี้เลยกำหนดมา ${planOverdueDays} วัน — กรุณาระบุหมายเหตุการทำย้อนหลัง`);
+      return;
+    }
     if (!inspectorSig.trim() || !operatorSig.trim()) {
       showToast("error", "กรุณาเซ็นครบทั้ง 2 ช่องก่อนบันทึก (ผู้ตรวจเช็ค และ ผู้ควบคุมเครื่อง)");
       return;
@@ -433,7 +447,10 @@ export default function PMChecksheetPage() {
         checklist: JSON.stringify(
           checklist.map((i) => ({ task: i.task, type: i.type, status: i.status, value: i.value, note: i.note }))
         ),
-        notes: failCount > 0 ? `พบรายการไม่ผ่าน ${failCount} รายการ` : "ผ่านทุกรายการ",
+        notes: [
+          failCount > 0 ? `พบรายการไม่ผ่าน ${failCount} รายการ` : "ผ่านทุกรายการ",
+          planOverdue ? `[ทำย้อนหลัง ${planOverdueDays} วัน] ${overdueNote.trim()}` : "",
+        ].filter(Boolean).join(" · "),
       };
       if (typeof navigator !== "undefined" && !navigator.onLine) {
         enqueue({ kind: "pm_checksheet", label: `เช็คชีท PM: ${selectedPlan.title}`, url: `/api/v1/pm_am.php?id=${selectedPlan.id}`, method: "PUT", body });
@@ -446,6 +463,7 @@ export default function PMChecksheetPage() {
         setChecklist([]);
         setAssetName("");
         setMeterReading("");
+        setOverdueNote("");
         return;
       }
       const res = await fetch(`/api/v1/pm_am.php?id=${selectedPlan.id}`, {
@@ -463,6 +481,7 @@ export default function PMChecksheetPage() {
         setChecklist([]);
         setAssetName("");
         setMeterReading("");
+        setOverdueNote("");
         fetchPlans();
       } else {
         setError(json.error || "ไม่สามารถบันทึกผลได้");
@@ -499,6 +518,7 @@ export default function PMChecksheetPage() {
       setChecklist([]);
       setAssetName("");
       setMeterReading("");
+      setOverdueNote("");
     }
     setSubmitting(false);
   };
@@ -635,7 +655,7 @@ export default function PMChecksheetPage() {
           "กดบันทึก — ถ้าขาดเน็ต ระบบเก็บงานไว้ในเครื่องและส่งให้เมื่อกลับมาออนไลน์ (มีปุ่ม “ส่งงานค้างทั้งหมดตอนนี้”)",
         ]}
         source="อ่านแผนและบันทึกผลผ่าน /api/v1/pm_am.php — งานที่ค้างส่งเก็บในคิวออฟไลน์ของอุปกรณ์"
-        note="ทำเช็คชีทได้เฉพาะแผนที่ถึงวันครบกำหนด — แผนที่ยังไม่ถึงหรือเลยกำหนดจะไม่ขึ้นในรายการ"
+        note="ทำได้ตั้งแต่วันครบกำหนดเป็นต้นไป รวมแผนที่เลยกำหนด (ต้องระบุหมายเหตุการทำย้อนหลัง) — ส่วนงานตรวจตาม Template ใช้เมนู ตรวจเช็ค ไม่ใช่ที่นี่"
         related={[
           { href: "/pm_am", label: "ตารางแผน PM" },
           { href: "/pm_am/calendar", label: "ปฏิทินแผน PM" },
@@ -663,7 +683,7 @@ export default function PMChecksheetPage() {
             </Select>
           </div>
           {plans.length === 0 && (
-            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ทำเช็คชีต PM ได้เฉพาะวันครบกำหนด (due date) ของแต่ละแผนเท่านั้น — แผนที่ยังไม่ถึงวัน / เลยวันกำหนด จะไม่ขึ้นในรายการ</p>
+            <p className="mt-2 text-sm text-[var(--cmms-text-secondary)]">ทำเช็คชีทได้ตั้งแต่วันครบกำหนดเป็นต้นไป (รวมแผนที่เลยกำหนดแล้ว) — แผนที่ยังไม่ถึงวันกำหนดจะยังไม่ขึ้นในรายการ และการบันทึกย้อนหลังต้องระบุหมายเหตุ</p>
           )}
         </CardContent>
       </Card>
@@ -683,6 +703,21 @@ export default function PMChecksheetPage() {
                   </div>
                   <p className="font-bold">{selectedPlan.title}</p>
                   <p className="text-sm text-[var(--cmms-text-secondary)]">เครื่องจักร: {assetName} {selectedPlan.due_date ? `• ครบกำหนด: ${selectedPlan.due_date}` : ""}</p>
+                  {planOverdue && (
+                    <div className="mt-2 w-full max-w-xl space-y-1">
+                      <p className="text-sm font-semibold" style={{ color: "var(--cmms-warning-dark)" }}>
+                        เลยกำหนดมา {planOverdueDays} วัน (ครบกำหนด {planDueDay}) — บันทึกย้อนหลังได้ แต่ต้องระบุหมายเหตุ
+                      </p>
+                      <textarea
+                        value={overdueNote}
+                        onChange={(e) => setOverdueNote(e.target.value)}
+                        rows={2}
+                        aria-label="หมายเหตุการทำย้อนหลัง"
+                        placeholder="เช่น ครบกำหนดตรงกับวันหยุด / รออะไหล่ / เครื่องหยุดผลิต"
+                        className="w-full rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-surface)] px-3 py-2 text-sm"
+                      />
+                    </div>
+                  )}
                   {!!Number(selectedPlan.is_outsource) && (
                     <span className="cmms-andon-chip w-fit" style={{ background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}>
                       งานภายนอก · {selectedPlan.outsource_by || "ไม่ระบุบริษัท"}

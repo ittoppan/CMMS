@@ -58,6 +58,20 @@ export default function InspectionTemplatesPage() {
   const [form, setForm] = useState({ code: "", title: "", category: "", frequency: "daily", description: "" });
   const [items, setItems] = useState<Item[]>([]);
 
+  // สิทธิ์จัดการ Template: บทบาท 1, 2, 6, 7 — null = ยังไม่ทราบ ให้แสดงตามทำเดิม
+  const [canManage, setCanManage] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/menu_permissions.php?user=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!alive || !j?.user) return;
+        setCanManage([1, 2, 6, 7].includes(Number(j.user.role_id || 0)));
+      })
+      .catch(() => { /* ไม่ทราบบทบาท → ไม่บล็อก UI */ });
+    return () => { alive = false; };
+  }, []);
+
   const fetchTemplates = async () => {
     setLoading(true);
     setError(null);
@@ -233,6 +247,13 @@ export default function InspectionTemplatesPage() {
         ]}
       />
       {/* Form สร้าง/แก้ */}
+      {canManage === false ? (
+        <Alert
+          variant="info"
+          title="ดู Template ได้ แต่แก้ไขไม่ได้ในบทบาทของคุณ"
+          description="การสร้าง/แก้ไข/ลบ Template สงวนไว้สำหรับหัวหน้างานหรือผู้วางแผน (บทบาท 1, 2, 6, 7) — ติดต่อผู้ดูแลระบบหากต้องแก้ไขข้อตรวจ"
+        />
+      ) : (
       <Card>
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
@@ -407,6 +428,7 @@ export default function InspectionTemplatesPage() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* รายการ templates */}
       <div className="space-y-3">
@@ -435,8 +457,14 @@ export default function InspectionTemplatesPage() {
                   <p className="text-sm text-[var(--cmms-text-secondary)]">
                     {tpl.item_count} รายการตรวจ • {tpl.open_schedules} รอบที่เปิดค้าง{tpl.category ? ` • ${tpl.category}` : ""}
                   </p>
+                  {tpl.updated_at && (
+                    <p className="text-xs text-[var(--cmms-text-muted)]">
+                      แก้ไขล่าสุด: {String(tpl.updated_at).slice(0, 16).replace("T", " ")}
+                    </p>
+                  )}
                 </div>
               </div>
+              {canManage !== false && (
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -457,6 +485,7 @@ export default function InspectionTemplatesPage() {
                   ลบ
                 </button>
               </div>
+              )}
             </CardContent>
           </Card>
         ))}

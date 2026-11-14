@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { usePageHero, t } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -278,6 +279,29 @@ export default function PMCalendarPage() {
   }, [tasks, viewAll, selectedDate, q, fAsset, fLoc, fDept, fTech, fStatus, fFreq, assetMap]);
 
   const overdueCount = tasks.filter((t) => t.displayStatus === "overdue").length;
+  // ความซ้ำซ้อนภายในแผน PM เอง: เครื่องเดียวมีหลายรอบครบกำหนดวันเดียว / ช่างคนเดียวมีหลายรอบวันเดียว
+  const pmDayClashes = useMemo(() => {
+    const open = new Set(["pending", "due", "in_progress", "overdue"]);
+    const assets = new Map<string, { label: string; ids: string[] }>();
+    const techs = new Map<string, { label: string; ids: string[] }>();
+    for (const t of tasks) {
+      if (!t.date || !open.has(String(t.displayStatus))) continue;
+      const aKey = `${t.assetId ?? t.asset}||${t.date}`;
+      const a = assets.get(aKey) ?? { label: `${t.asset} · ${t.date}`, ids: [] };
+      a.ids.push(t.id);
+      assets.set(aKey, a);
+      if (t.assignee && t.assignee !== "-") {
+        const tKey = `${t.assignee}||${t.date}`;
+        const b = techs.get(tKey) ?? { label: `${t.assignee} · ${t.date}`, ids: [] };
+        b.ids.push(t.id);
+        techs.set(tKey, b);
+      }
+    }
+    return {
+      assetClash: [...assets.values()].filter((x) => x.ids.length > 1),
+      techClash: [...techs.values()].filter((x) => x.ids.length > 1),
+    };
+  }, [tasks]);
   const todayCount = tasks.filter((t) => t.date === todayStr && t.displayStatus !== "completed" && t.displayStatus !== "cancelled" && t.displayStatus !== "skipped").length;
   const activeTechCount = new Set(tasks.filter((t) => t.displayStatus === "in_progress").map((t: any) => t.assignee).filter((a: string) => a && a !== "-")).size;
   const completedTodayCount = tasks.filter((t) => t.displayStatus === "completed" && t.date === todayStr).length;
@@ -376,6 +400,30 @@ export default function PMCalendarPage() {
           { href: "/pm_am/create", label: "สร้างแผน PM" },
         ]}
       />
+
+      {(pmDayClashes.assetClash.length > 0 || pmDayClashes.techClash.length > 0) && (
+        <Alert variant="warning" title="พบรอบ PM ซ้อนกันในวันเดียวกัน">
+          <div className="space-y-1 text-sm">
+            {pmDayClashes.assetClash.length > 0 && (
+              <p>
+                เครื่องเดียวกันมีหลายรอบครบกำหนดวันเดียว:{" "}
+                {pmDayClashes.assetClash.slice(0, 3).map((x) => `${x.label} (${x.ids.length} รอบ)`).join(" · ")}
+                {pmDayClashes.assetClash.length > 3 ? ` และอีก ${pmDayClashes.assetClash.length - 3} กลุ่ม` : ""}
+              </p>
+            )}
+            {pmDayClashes.techClash.length > 0 && (
+              <p>
+                ช่างคนเดียวมีหลายรอบในวันเดียว:{" "}
+                {pmDayClashes.techClash.slice(0, 3).map((x) => `${x.label} (${x.ids.length} รอบ)`).join(" · ")}
+                {pmDayClashes.techClash.length > 3 ? ` และอีก ${pmDayClashes.techClash.length - 3} กลุ่ม` : ""}
+              </p>
+            )}
+            <p className="text-xs text-[var(--cmms-text-muted)]">
+              ตรวจจากตารางแผน PM เท่านั้น — ภาระงานที่รวมกับงานซ่อม/งานขัดข้อง ดูที่ศูนย์วางแผน (Planning)
+            </p>
+          </div>
+        </Alert>
+      )}
       <Card>
         <CardContent className="space-y-4 p-4">
           <div className="flex flex-wrap items-center gap-3">

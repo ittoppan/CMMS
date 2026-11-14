@@ -26,6 +26,7 @@ function EditAssetContent() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [originalCode, setOriginalCode] = useState("");
 
   const [form, setForm] = useState({
     code: "",
@@ -64,6 +65,7 @@ function EditAssetContent() {
             model: row.model || "",
             image_path: row.image_path || "",
           });
+          setOriginalCode(row.code || "");
         } else {
           setErrorMessage("ไม่พบข้อมูลเครื่องจักร");
         }
@@ -76,6 +78,17 @@ function EditAssetContent() {
     if (!form.code || !form.name) {
       setErrorMessage("กรุณากรอกรหัสเครื่องจักร และชื่อเครื่องจักร");
       return;
+    }
+    const nextCode = form.code.trim();
+    if (originalCode && nextCode && nextCode !== originalCode) {
+      const proceed = window.confirm(
+        `ยืนยันเปลี่ยนรหัสเครื่องจาก “${originalCode}” เป็น “${nextCode}”?\n\n` +
+          "ผลกระทบที่ตรวจได้จากระบบ:\n" +
+          "• สติกเกอร์/ป้าย QR ที่พิมพ์ไปแล้วยังชี้รหัสเดิม — ต้องพิมพ์ใหม่\n" +
+          "• รายการที่บันทึกด้วยรหัสเดิม (BOM, ประวัติ/เอกสารอ้างอิง) จะไม่ถูกจับคู่กับรหัสใหม่อัตโนมัติ\n" +
+          "• หากต้องการแค่แก้ชื่อ/สถานะ ไม่ต้องเปลี่ยนรหัส"
+      );
+      if (!proceed) return;
     }
     setSubmitting(true);
     setErrorMessage("");

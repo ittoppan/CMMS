@@ -90,6 +90,20 @@ export default function InspectionsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [cf, setCf] = useState<any>({ template_id: "", asset_id: "", assignee_id: "", due_date: "", priority: "normal", department_id: "", location_id: "" });
 
+  // สิทธิ์จัดการ (สร้าง/ลบรอบตรวจ): บทบาท 1, 2, 6, 7 — null = ยังไม่ทราบ ให้แสดงปุ่มตามทำเดิม
+  const [canManage, setCanManage] = useState<boolean | null>(null);
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/menu_permissions.php?user=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!alive || !j?.user) return;
+        setCanManage([1, 2, 6, 7].includes(Number(j.user.role_id || 0)));
+      })
+      .catch(() => { /* ไม่ทราบบทบาท → ไม่บล็อก UI */ });
+    return () => { alive = false; };
+  }, []);
+
   const apiUrl = useCallback(() => {
     const q: string[] = [];
     if (scope && scope !== "all") q.push(`scope=${scope}`);
@@ -216,13 +230,19 @@ export default function InspectionsPage() {
           <a href="/inspections/templates" className="inline-flex items-center gap-2 rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-white/20">
             <ClipboardCheck size={16} strokeWidth={1.75} aria-hidden="true" /> จัดการ Template
           </a>
-          <button
-            type="button"
-            onClick={() => { setShowCreate((v) => !v); setError(null); }}
-            className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> สร้างรอบตรวจ
-          </button>
+          {canManage === false ? (
+            <span className="inline-flex items-center rounded-[var(--cmms-radius)] border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-semibold text-white">
+              เฉพาะหัวหน้างาน/ผู้วางแผน (บทบาท 1, 2, 6, 7) สร้างหรือลบรอบตรวจ — คุณยังทำรายการตรวจและดูประวัติได้
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => { setShowCreate((v) => !v); setError(null); }}
+              className="cmms-btn-primary inline-flex items-center gap-2 rounded-[var(--cmms-radius)] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              <Plus size={16} strokeWidth={1.75} aria-hidden="true" /> สร้างรอบตรวจ
+            </button>
+          )}
         </div>
       </div>
 
@@ -236,11 +256,12 @@ export default function InspectionsPage() {
           "ตามผลย้อนหลังที่ “ประวัติตรวจเช็ค” และแก้หัวข้อตรวจที่ “จัดการ Template”",
         ]}
         source="/api/v1/inspections.php (รอบ/เทมเพลต) และ /api/v1/inspection_dashboard.php (ตัวเลขสรุป)"
-        note="ข้อตรวจที่ไม่ผ่านสามารถตั้งให้สร้างใบแจ้งซ่อมอัตโนมัติได้ — ตรวจการตั้งค่า Template ก่อนใช้งานจริง"
+        note="ข้อตรวจที่ไม่ผ่านสามารถตั้งให้สร้างใบแจ้งซ่อมอัตโนมัติได้ — ตรวจการตั้งค่า Template ก่อนใช้งานจริง · ที่นี่คือ “งานตรวจตามรอบ/ตาม Template” ซึ่งไม่ใช่ช่องเดียวกับเช็คชีท PM: ถ้างานมาจากแผน PM ของเครื่อง (มอบหมายช่าง + รอบตามความถี่ของเครื่อง) ให้ทำที่เมนู แผน PM & เครื่องจักร → เช็คชีท PM"
         related={[
           { href: "/inspections/templates", label: "จัดการ Template" },
           { href: "/inspections/run", label: "ทำรายการตรวจ" },
           { href: "/inspections/history", label: "ประวัติตรวจเช็ค" },
+          { href: "/pm_am/checksheet", label: "เช็คชีท PM (งานจากแผน PM)" },
         ]}
       />
       {/* KPI */}
@@ -439,10 +460,12 @@ export default function InspectionsPage() {
                     <a href={`/inspections/history?asset_id=${s.asset_id}`} className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all duration-300" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
                       <History size={14} strokeWidth={1.75} aria-hidden="true" /> ประวัติ
                     </a>
-                    <button type="button" title="ลบรอบ" aria-label={`ลบรอบ ${s.template_title || s.id}`} onClick={() => deleteSchedule(s)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
-                      <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
-                    </button>
+                    {canManage !== false && (
+                      <button type="button" title="ลบรอบ" aria-label={`ลบรอบ ${s.template_title || s.id}`} onClick={() => deleteSchedule(s)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300" style={{ background: "var(--cmms-danger-light)", color: "var(--cmms-danger-dark)" }}>
+                        <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

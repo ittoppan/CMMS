@@ -580,11 +580,12 @@ export default function PMSchedulePage() {
             "เมื่อถึงวันครบกำหนด เข้า “เช็คชีท PM” เพื่อบันทึกผลการทำ",
           ]}
           source="ตาราง pm_am ผ่าน /api/v1/pm_am.php (รอบ/สถานะ/ไฟล์แนบ)"
-          note="หน้านี้เก็บ “แผนและรอบ” — งานที่ต้องใช้ช่างหลายคนหรือตัดอะไหล่ ให้ต่อไปที่เมนูงานซ่อมบำรุง"
+          note="หน้านี้เก็บ “แผนและรอบ PM ของเครื่อง” — งานที่ต้องใช้ช่างหลายคนหรือตัดอะไหล่ ไปที่เมนูงานซ่อมบำรุง ส่วนงานตรวจตาม Template มาตรฐานใช้เมนู ตรวจเช็ค (อีกระบบหนึ่ง) — ไม่ต้องบันทึกงานเดียวกันซ้ำสองที่"
           related={[
             { href: "/pm_am/calendar", label: "ปฏิทินแผน PM" },
             { href: "/pm_am/checksheet", label: "เช็คชีท PM" },
             { href: "/pm_am/batch_schedule", label: "สร้างแผนแบบกลุ่ม" },
+            { href: "/inspections", label: "ตรวจเช็ค (Template)" },
           ]}
         />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
@@ -736,7 +737,7 @@ export default function PMSchedulePage() {
             columns={columns}
             data={filtered}
             loading={loading}
-            pageSize={10}
+            pageSize={25}
             getRowId={(row) => String(row.rawId)}
             emptyTitle={tasks.length === 0 ? "ยังไม่มีแผน/รอบ PM" : "ไม่พบรายการตามตัวกรอง"}
             emptyDescription={tasks.length === 0 ? "สร้างแผน PM หรือรอบงานบำรุงรักษาเพื่อเริ่มติดตาม" : "ลองล้างตัวกรองหรือเปลี่ยนคำค้นหา"}
