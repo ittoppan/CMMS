@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,6 @@ import AndonLamp from "@/components/AndonLamp";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import {
   CalendarDays,
-  Clock,
   Wrench,
   ClipboardList,
   Users,
@@ -21,11 +20,23 @@ import {
   FilePlus2,
   Eye,
   SquarePen,
-  CheckCircle2,
-  AlertTriangle,
   Timer,
   Gauge,
 } from "lucide-react";
+
+const freqLabels: Record<string, string> = {
+  daily: "รายวัน", weekly: "รายสัปดาห์", monthly: "รายเดือน", quarterly: "รายไตรมาส",
+  semi_annual: "ทุก 6 เดือน", yearly: "รายปี", custom: "กำหนดเอง (วัน)", meter_based: "ตามมิเตอร์",
+};
+
+const statusLabel: Record<string, string> = {
+  pending: "รอดำเนินการ",
+  in_progress: "กำลังดำเนินการ",
+  overdue: "เกินกำหนด",
+  completed: "เสร็จสิ้น",
+  skipped: "ข้ามรอบ",
+  cancelled: "ยกเลิก",
+};
 
 export default function PMPlanViewPage() {
   const params = useParams<{ id: string }>();
@@ -41,6 +52,8 @@ export default function PMPlanViewPage() {
   const [busy, setBusy] = useState(false);
   const [meterProgress, setMeterProgress] = useState<Record<number, { current: number | null; measuredAt?: string }>>({});
 
+  const today = new Date().toISOString().slice(0, 10);
+
   const load = async () => {
     try {
       setLoading(true);
@@ -55,15 +68,10 @@ export default function PMPlanViewPage() {
     }
   };
 
-  useEffect(() => { load(); }, [planId]);
-
-  const freqLabels: Record<string, string> = {
-    daily: "รายวัน", weekly: "รายสัปดาห์", monthly: "รายเดือน", quarterly: "รายไตรมาส",
-    semi_annual: "ทุก 6 เดือน", yearly: "รายปี", custom: "กำหนดเอง", meter_based: "ตามมิเตอร์",
-  };
+  useEffect(() => { if (planId) load(); }, [planId]);
 
   const handleGenerate = async () => {
-    if (!(await swalConfirm({ title: `สร้างรอบ PM ตามแผน "${plan.name}" สำหรับทุกเครื่องจักรในแผน?`, text: "ระบบกันรอบซ้ำอัตโนมัติ" }))) return;
+    if (!(await swalConfirm({ title: `สร้างรอบ PM ตามแผน "${plan?.name || ""}" สำหรับเครื่องจักรในแผน?`, text: "ระบบกันรอบซ้ำอัตโนมัติ (รวมรอบค้าง/เลยกำหนด)" }))) return;
     setBusy(true); setActionMsg(""); setActionErr("");
     try {
       const res = await fetch("/api/v1/pm_plans.php?action=generate", {
@@ -73,8 +81,8 @@ export default function PMPlanViewPage() {
       });
       const j = await res.json();
       if (j.success) {
-        setActionMsg(`สร้างรอบสำเร็จ ${j.created} รอบ (ข้าม ${j.skipped} รอบ)\n` + (j.details || []).join("\n"));
-        load();
+        setActionMsg(`สร้างรอบสำเร็จ ${j.created} รอบ (ข้าม ${j.skipped} รอบ)` + (Array.isArray(j.details) && j.details.length ? `\n${j.details.join("\n")}` : ""));
+        await load();
       } else {
         setActionErr(j.error || "สร้างรอบไม่สำเร็จ");
       }
@@ -86,7 +94,7 @@ export default function PMPlanViewPage() {
   };
 
   const handleDelete = async () => {
-    if (!(await swalConfirm({ title: `ลบแผน "${plan.name}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
+    if (!(await swalConfirm({ title: `ลบแผน "${plan?.name || ""}"?`, destructive: true, confirmText: "ลบเลย" }))) return;
     setBusy(true); setActionErr("");
     try {
       const res = await fetch(`/api/v1/pm_plans.php?id=${planId}`, { method: "DELETE" });
@@ -100,12 +108,11 @@ export default function PMPlanViewPage() {
     }
   };
 
-
   useEffect(() => {
     if (!plan || plan.frequency_type !== "meter_based") return;
     const unit = String(plan.meter_unit || "").trim();
     const assets = Array.isArray(plan.assets) ? plan.assets : [];
-    if (!unit || assets.length === 0) return;
+    if (!unit || assets.length === 0) { setMeterProgress({}); return; }
     let cancelled = false;
     (async () => {
       const entries = await Promise.all(
@@ -114,9 +121,11 @@ export default function PMPlanViewPage() {
             const res = await fetch(`/api/v1/asset_measurements.php?asset_id=${a.id}`, { credentials: "include" });
             const j = await res.json();
             const rows = Array.isArray(j?.measurements) ? j.measurements : Array.isArray(j) ? j : [];
-            const m = rows.find((r: any) => String(r.parameter || "") === unit || String(r.unit || "") === unit) || rows[0];
-            const val = m && m.value_numeric !== undefined && m.value_numeric !== null && m.value_numeric !== "" ? Number(m.value_numeric) : null;
-            return [Number(a.id), { current: Number.isFinite(val as number) ? (val as number) : null, measuredAt: m?.measured_at }] as const;
+            const m = rows.find((r: any) => String(r.parameter || "").trim() === unit || String(r.unit || "").trim() === unit)
+              || rows.find((r: any) => String(r.parameter || "").toLowerCase().includes(unit.toLowerCase()) || String(r.unit || "").toLowerCase().includes(unit.toLowerCase()));
+            const raw = m ? m.value_numeric ?? m.value ?? m.reading : null;
+            const val = raw !== undefined && raw !== null && raw !== "" ? Number(raw) : null;
+            return [Number(a.id), { current: Number.isFinite(val as number) ? (val as number) : null, measuredAt: m?.measured_at || m?.created_at }] as const;
           } catch {
             return [Number(a.id), { current: null }] as const;
           }
@@ -134,18 +143,29 @@ export default function PMPlanViewPage() {
   if (loading) return <p className="p-8 text-sm text-[var(--cmms-text-muted)]">กำลังโหลด...</p>;
   if (error) return <div className="space-y-4 p-6"><Alert variant="danger" description={error} /><Button variant="secondary" onClick={() => router.push("/pm_am/plans")}><ArrowLeft size={16} aria-hidden="true" />กลับ</Button></div>;
   if (!plan) return null;
+  if (!canShow("pm_am/plans")) {
+    return <EmptyState icon={<ClipboardList size={28} strokeWidth={1.5} />} title="ไม่มีสิทธิ์เข้าถึง" description="โปรดติดต่อผู้ดูแลระบบ" />;
+  }
 
+  const history = Array.isArray(plan.history) ? plan.history : [];
   const cycleStats = (() => {
-    const s = { completed: 0, pending: 0, overdue: 0, in_progress: 0, other: 0, total: plan.history?.length || 0 };
-    (plan.history || []).forEach((h: any) => {
-      if (h.status === "completed") s.completed++;
-      else if (h.status === "overdue") s.overdue++;
-      else if (h.status === "in_progress") s.in_progress++;
-      else if (h.status === "pending") s.pending++;
+    const s = { completed: 0, pending: 0, overdue: 0, in_progress: 0, skipped: 0, cancelled: 0, other: 0, total: history.length, open: 0 };
+    history.forEach((h: any) => {
+      const st = String(h.status || "");
+      if (st === "completed") s.completed++;
+      else if (st === "overdue") s.overdue++;
+      else if (st === "in_progress") s.in_progress++;
+      else if (st === "pending") s.pending++;
+      else if (st === "skipped") s.skipped++;
+      else if (st === "cancelled") s.cancelled++;
       else s.other++;
     });
+    s.open = s.pending + s.in_progress + s.overdue;
     return s;
   })();
+
+  const nextDue = plan.next_due ? String(plan.next_due).slice(0, 10) : "";
+  const nextOverdue = !!(nextDue && nextDue < today);
 
   return (
     <div className="space-y-6">
@@ -155,8 +175,13 @@ export default function PMPlanViewPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="cmms-hero-title text-2xl font-bold tracking-tight">{plan.name}</h1>
             <span className="cmms-andon-chip" data-on-dark="true">{plan.code}</span>
+            {plan.status && plan.status !== "active" && (
+              <span className="cmms-andon-chip" data-on-dark="true" style={{ background: "rgba(255,255,255,0.15)" }}>
+                {plan.status === "cancelled" ? "ยกเลิก" : plan.status === "draft" ? "ฉบับร่าง" : plan.status}
+              </span>
+            )}
           </div>
-          <p className="cmms-hero-desc">{plan.description || "แผนบำรุงรักษาเชิงป้องกัน"}</p>
+          <p className="cmms-hero-desc">{plan.description || "แผนบำรุงรักษาเชิงป้องกัน (PM Master)"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" onClick={() => router.push("/pm_am/plans")} className="border-white/20 bg-white/10 text-white hover:bg-white/20">
@@ -176,31 +201,30 @@ export default function PMPlanViewPage() {
       {actionErr && <Alert variant="danger" description={actionErr} />}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* ── ข้อมูลแผน ── */}
         <div className="space-y-4">
           <Card>
             <CardContent className="space-y-3 p-5">
               <h4 className="flex items-center gap-2 font-bold"><ClipboardList size={16} strokeWidth={1.75} aria-hidden="true" />ข้อมูลแผน</h4>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-[var(--cmms-text-secondary)]">ประเภท</p><p className="font-semibold">{plan.plan_type === "single" ? "เครื่องเดียว" : plan.plan_type === "group" ? "กลุ่มเครื่อง" : "ตามการใช้งาน"}</p></div>
-                <div><p className="text-[var(--cmms-text-secondary)]">ความถี่</p><p className="font-semibold">{freqLabels[plan.frequency_type] || plan.frequency_type}</p></div>
+                <div><p className="text-[var(--cmms-text-secondary)]">ความถี่</p><p className="font-semibold">{freqLabels[plan.frequency_type] || plan.frequency_type}{plan.frequency_interval ? ` (ทุก ${plan.frequency_interval})` : ""}</p></div>
                 {plan.frequency_type === "meter_based" && (
                   <>
                     <div><p className="text-[var(--cmms-text-secondary)]">หน่วยมิเตอร์</p><p className="font-semibold">{plan.meter_unit || "-"}</p></div>
-                    <div><p className="text-[var(--cmms-text-secondary)]">รอบตามมิเตอร์</p><p className="font-semibold flex items-center gap-1"><Gauge size={13} aria-hidden="true" />{plan.meter_interval != null ? `${Number(plan.meter_interval).toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                    <div><p className="text-[var(--cmms-text-secondary)]">ช่วงตามมิเตอร์</p><p className="font-semibold flex items-center gap-1"><Gauge size={13} aria-hidden="true" />{plan.meter_interval != null ? `${Number(plan.meter_interval).toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
                   </>
                 )}
-                <div><p className="text-[var(--cmms-text-secondary)]">ความเร่งด่วน</p><p className="font-semibold capitalize">{plan.priority}</p></div>
-                <div><p className="text-[var(--cmms-text-secondary)]">ระยะเวลา</p><p className="flex items-center gap-1 font-semibold"><Timer size={13} aria-hidden="true" />{plan.estimated_duration_minutes ? `${plan.estimated_duration_minutes} นาที` : "-"}</p></div>
-                <div><p className="text-[var(--cmms-text-secondary)]">วันเริ่ม/สิ้นสุด</p><p className="font-semibold">{plan.start_date || "-"} {plan.end_date ? `→ ${plan.end_date}` : ""}</p></div>
-                <div><p className="text-[var(--cmms-text-secondary)]">รอบถัดไป</p><p className="font-semibold" style={{ color: plan.next_due < new Date().toISOString().slice(0, 10) ? "var(--cmms-danger)" : "var(--cmms-primary)" }}>{plan.next_due || "-"}</p></div>
+                <div><p className="text-[var(--cmms-text-secondary)]">ความเร่งด่วน</p><p className="font-semibold capitalize">{plan.priority || "-"}</p></div>
+                <div><p className="text-[var(--cmms-text-secondary)]">ระยะเวลาโดยประมาณ</p><p className="flex items-center gap-1 font-semibold"><Timer size={13} aria-hidden="true" />{plan.estimated_duration_minutes ? `${plan.estimated_duration_minutes} นาที` : "-"}</p></div>
+                <div><p className="text-[var(--cmms-text-secondary)]">วันเริ่ม/สิ้นสุด</p><p className="font-semibold">{plan.start_date || "-"}{plan.end_date ? ` → ${plan.end_date}` : ""}</p></div>
+                <div><p className="text-[var(--cmms-text-secondary)]">รอบถัดไป/รอบค้าง</p><p className="font-semibold" style={{ color: nextOverdue ? "var(--cmms-danger)" : "var(--cmms-primary)" }}>{nextDue || "-"}</p></div>
               </div>
               <div className="border-t pt-3" style={{ borderColor: "var(--cmms-border)" }}>
                 <p className="flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--cmms-text-secondary)" }}>
                   <Users size={14} aria-hidden="true" />ผู้รับผิดชอบ: {plan.responsible_name || "ไม่ระบุ"}
                 </p>
                 <p className="text-xs" style={{ color: "var(--cmms-text-muted)" }}>
-                  รอบที่แล้วเสร็จ: {plan.last_completed_at ? new Date(plan.last_completed_at).toLocaleDateString("th-TH") : "-"}
+                  รอบล่าสุดที่เสร็จ: {plan.last_completed_at ? new Date(plan.last_completed_at).toLocaleDateString("th-TH") : "-"}
                 </p>
               </div>
             </CardContent>
@@ -218,14 +242,14 @@ export default function PMPlanViewPage() {
           <Card>
             <CardContent className="space-y-2 p-5">
               <h4 className="font-bold">เครื่องจักร ({plan.assets?.length || 0})</h4>
-              {plan.assets?.length ? (
+              {Array.isArray(plan.assets) && plan.assets.length ? (
                 <div className="space-y-1.5">
                   {plan.assets.map((a: any) => (
                     <button key={a.id} onClick={() => router.push(`/asset_registry/view?id=${a.id}`)}
                       className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm hover:bg-[var(--cmms-bg-muted)]"
                       style={{ borderColor: "var(--cmms-border)" }}>
-                      <span className="flex items-center gap-2"><Wrench size={14} aria-hidden="true" /><span className="font-bold">{a.code}</span> {a.name}</span>
-                      <span className="text-xs" style={{ color: "var(--cmms-text-muted)" }}>{a.location || "-"}</span>
+                      <span className="flex items-center gap-2 min-w-0"><Wrench size={14} aria-hidden="true" /><span className="font-bold">{a.code}</span> <span className="truncate">{a.name}</span></span>
+                      <span className="ml-2 shrink-0 text-xs" style={{ color: "var(--cmms-text-muted)" }}>{a.location || "-"}</span>
                     </button>
                   ))}
                 </div>
@@ -238,36 +262,42 @@ export default function PMPlanViewPage() {
               <CardContent className="space-y-3 p-5">
                 <h4 className="flex items-center gap-2 font-bold"><Gauge size={16} strokeWidth={1.75} aria-hidden="true" />ความคืบหน้าตามมิเตอร์</h4>
                 <p className="text-xs" style={{ color: "var(--cmms-text-secondary)" }}>
-                  เป้าหมายรอบถัดไป = baseline (ค่ามิเตอร์ที่บันทึกตอนปิดรอบล่าสุดของเครื่อง/แผน) + {plan.meter_interval != null ? Number(plan.meter_interval).toLocaleString("th-TH") : "-"} {plan.meter_unit || ""}
+                  เป้าหมายรอบถัดไป (โดยประมาณ) = baseline ที่บันทึกจากรอบที่เสร็จล่าสุดของเครื่อง/แผน + {plan.meter_interval != null ? Number(plan.meter_interval).toLocaleString("th-TH") : "-"} {plan.meter_unit || ""}
+                  {" "}— การถึงกำหนดจริงควรยึดค่ามิเตอร์ที่บันทึกและตรรกะ CBM ของระบบ
                 </p>
-                {plan.assets?.length ? (
+                {Array.isArray(plan.assets) && plan.assets.length ? (
                   <div className="space-y-2">
                     {plan.assets.map((a: any) => {
-                      const cur = meterProgress[a.id]?.current;
-                      const completed = (plan.history || []).filter((h: any) => h.status === "completed" && (h.asset_code === a.code || String(h.asset_name || "").includes(a.name)));
-                      const lastWithMeter = [...completed].reverse().find((h: any) => h.meter_reading !== null && h.meter_reading !== undefined && h.meter_reading !== "") || completed[completed.length - 1];
+                      const curEntry = meterProgress[a.id];
+                      const cur = curEntry?.current;
+                      const completed = history.filter((h: any) => h.status === "completed" && (String(h.asset_code || "") === String(a.code || "") || String(h.asset_id || "") === String(a.id || "")));
+                      const lastWithMeter = [...completed].reverse().find((h: any) => h.meter_reading !== null && h.meter_reading !== undefined && h.meter_reading !== "");
                       const baseline = lastWithMeter && lastWithMeter.meter_reading !== null && lastWithMeter.meter_reading !== undefined && lastWithMeter.meter_reading !== "" ? Number(lastWithMeter.meter_reading) : null;
                       const interval = plan.meter_interval != null ? Number(plan.meter_interval) : null;
                       const target = baseline != null && interval != null ? baseline + interval : null;
                       const remaining = cur != null && target != null ? target - cur : null;
                       const due = remaining != null ? remaining <= 0 : false;
+                      const hasReading = cur != null;
+                      const hasBaseline = baseline != null;
                       return (
                         <div key={a.id} className="rounded-lg border p-3 text-sm" style={{ borderColor: "var(--cmms-border)" }}>
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-semibold"><span className="font-bold">{a.code}</span> {a.name}</span>
-                            {target != null && cur != null && (
+                            {target != null && hasReading && (
                               <span className="cmms-andon-chip" style={due ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger)" } : { background: "var(--cmms-success-light)", color: "var(--cmms-success, #059669)" }}>
-                                {due ? "ถึงกำหนด/เกิน" : "ยังไม่ถึง"}
+                                {due ? "ถึง/เกินเป้าหมาย" : "ยังไม่ถึงเป้าหมาย"}
                               </span>
                             )}
+                            {!hasReading && <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>ไม่มีค่ามิเตอร์ล่าสุด</span>}
                           </div>
                           <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>ค่าปัจจุบัน</p><p className="font-semibold">{cur != null ? `${cur.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "ไม่มีข้อมูล"}</p></div>
-                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>Baseline ล่าสุด</p><p className="font-semibold">{baseline != null ? `${baseline.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
-                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>เป้าหมาย</p><p className="font-semibold">{target != null ? `${target.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
-                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>คงเหลือ</p><p className="font-semibold" style={{ color: remaining != null && remaining <= 0 ? "var(--cmms-danger)" : undefined }}>{remaining != null ? `${remaining.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>ค่าปัจจุบัน</p><p className="font-semibold">{hasReading ? `${cur.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A (ยังไม่มีข้อมูล)"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>Baseline ล่าสุด</p><p className="font-semibold">{hasBaseline ? `${baseline.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A (ยังไม่มีรอบที่บันทึกมิเตอร์)"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>เป้าหมาย</p><p className="font-semibold">{target != null ? `${target.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A"}</p></div>
+                            <div><p style={{ color: "var(--cmms-text-secondary)" }}>คงเหลือ</p><p className="font-semibold" style={{ color: remaining != null && remaining <= 0 ? "var(--cmms-danger)" : undefined }}>{remaining != null ? `${remaining.toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "N/A"}</p></div>
                           </div>
-                          {meterProgress[a.id]?.measuredAt && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>วัดล่าสุด: {String(meterProgress[a.id]?.measuredAt).replace("T", " ").slice(0, 16)}</p>}
+                          {curEntry?.measuredAt && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>อ่านค่าล่าสุด: {String(curEntry.measuredAt).replace("T", " ").slice(0, 16)}</p>}
+                          {!hasReading && <p className="mt-1 text-[11px]" style={{ color: "var(--cmms-text-muted)" }}>บันทึกค่ามิเตอร์ของเครื่องจักร (หน่วย/พารามิเตอร์ให้ตรงกับแผน) เพื่อให้ระบบประเมินรอบตามมิเตอร์ได้</p>}
                         </div>
                       );
                     })}
@@ -280,13 +310,13 @@ export default function PMPlanViewPage() {
           <Card>
             <CardContent className="space-y-2 p-5">
               <h4 className="font-bold">Checklist Templates ({plan.templates?.length || 0})</h4>
-              {plan.templates?.length ? (
+              {Array.isArray(plan.templates) && plan.templates.length ? (
                 <div className="space-y-1.5">
                   {plan.templates.map((tpl: any) => (
                     <div key={tpl.id} className="rounded-lg border px-3 py-2" style={{ borderColor: "var(--cmms-border)" }}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-semibold">{tpl.code} - {tpl.name}</span>
-                        <span className="cmms-count-pill">{tpl.items?.length || 0} ข้อ</span>
+                        <span className="cmms-count-pill">{Array.isArray(tpl.items) ? tpl.items.length : 0} ข้อ</span>
                       </div>
                     </div>
                   ))}
@@ -296,24 +326,23 @@ export default function PMPlanViewPage() {
           </Card>
         </div>
 
-        {/* ── ประวัติรอบ + สถิติ ── */}
         <div className="space-y-4 lg:col-span-2">
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <Card className="cmms-kpi-card green">
               <CardContent className="p-4 text-center">
-                <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จเรียบร้อย</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">เสร็จสิ้น</p>
                 <h3 className="cmms-kpi-value">{cycleStats.completed}</h3>
               </CardContent>
             </Card>
             <Card className="cmms-kpi-card blue">
               <CardContent className="p-4 text-center">
-                <p className="text-sm text-[var(--cmms-text-secondary)]">รอดำเนินการ</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">รอ/กำลังดำเนินการ</p>
                 <h3 className="cmms-kpi-value">{cycleStats.pending + cycleStats.in_progress}</h3>
               </CardContent>
             </Card>
             <Card className="cmms-kpi-card red">
               <CardContent className="p-4 text-center">
-                <p className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด</p>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">เกินกำหนด (ค้าง)</p>
                 <h3 className="cmms-kpi-value">{cycleStats.overdue}</h3>
               </CardContent>
             </Card>
@@ -321,6 +350,9 @@ export default function PMPlanViewPage() {
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-[var(--cmms-text-secondary)]">รอบทั้งหมด</p>
                 <h3 className="cmms-kpi-value">{cycleStats.total}</h3>
+                {(cycleStats.skipped > 0 || cycleStats.cancelled > 0) && (
+                  <p className="text-[11px] text-[var(--cmms-text-muted)]">ข้าม {cycleStats.skipped} · ยกเลิก {cycleStats.cancelled}</p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -333,31 +365,42 @@ export default function PMPlanViewPage() {
               </div>
               {cycleStats.total === 0 ? (
                 <EmptyState icon={<CalendarDays size={28} strokeWidth={1.5} />} title="ยังไม่มีรอบ PM"
-                  description='กดปุ่ม "สร้างรอบ PM" เพื่อสร้างรอบแรกให้เครื่องจักรในแผน' />
+                  description='กด "สร้างรอบ PM" เพื่อสร้างรอบตามแผน (ระบบจะกันรอบซ้ำ/ข้ามกรณีที่ยังไม่ถึงเงื่อนไข เช่น มิเตอร์)' />
               ) : (
                 <div className="space-y-2">
-                  {(plan.history ?? []).map((h: any) => {
-                    const woCount = h.wo_count || 0;
+                  {history.map((h: any) => {
+                    const st = String(h.status || "pending");
+                    const woCount = Number(h.wo_count || 0);
+                    const lamp = st === "completed" ? "ok" : st === "overdue" ? "down" : st === "in_progress" ? "warn" : "idle";
+                    const chipStyle = st === "completed"
+                      ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
+                      : st === "overdue"
+                        ? { background: "var(--cmms-danger-light)", color: "var(--cmms-danger)" }
+                        : st === "in_progress"
+                          ? { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
+                          : { background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" };
                     return (
                       <div key={h.id} className="flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between"
                         style={{ borderColor: "var(--cmms-border)" }}>
-                        <div className="flex items-center gap-3">
-                          <AndonLamp status={h.status === "completed" ? "ok" : h.status === "overdue" ? "down" : h.status === "in_progress" ? "warn" : "idle"} size="sm" />
-                          <div>
-                            <p className="text-sm font-bold">{h.title}</p>
-                            <p className="text-xs text-[var(--cmms-text-secondary)]">
-                              {h.asset_code} - {h.asset_name} · ช่าง: {h.assigned_name || "-"}
+                        <div className="flex items-center gap-3 min-w-0">
+                          <AndonLamp status={lamp as any} size="sm" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold truncate">{h.title || `รอบ PM #${h.id}`}</p>
+                            <p className="text-xs text-[var(--cmms-text-secondary)] truncate">
+                              {h.asset_code || "-"} {h.asset_name ? `- ${h.asset_name}` : ""} · ช่าง: {h.assigned_name || "-"}
                             </p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                          <span className="cmms-andon-chip" style={chipStyle}>{statusLabel[st] || st}</span>
                           {woCount > 0 && (
                             <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
                               <FilePlus2 size={12} aria-hidden="true" /> {woCount} WO
                             </span>
                           )}
                           <span className="text-xs text-right" style={{ color: "var(--cmms-text-secondary)" }}>
-                            ครบ: {h.due_date || "-"}{h.status === "completed" ? ` · เสร็จ: ${(h.completed_at || "").slice(0, 10)}` : ""}
+                            ครบกำหนด: {h.due_date ? String(h.due_date).slice(0, 10) : "-"}
+                            {st === "completed" ? ` · เสร็จ: ${(h.completed_at || h.last_done_date || "").toString().slice(0, 10) || "-"}` : ""}
                             {(h.meter_reading !== null && h.meter_reading !== undefined && h.meter_reading !== "") && (
                               <> · มิเตอร์: {Number(h.meter_reading).toLocaleString("th-TH")} {h.meter_unit || plan.meter_unit || ""}</>
                             )}
