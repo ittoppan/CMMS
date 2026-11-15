@@ -37,6 +37,8 @@ const TARGET_GRANTS = [
     'approval'                    => [1, 2, 3, 6, 7],       // request:view/approve
     'planning'                    => [1, 2, 6, 7],           // repair:view/schedule
     'supervisor'                  => [1, 2, 6, 7],           // repair:view/verify
+    'calibration'                 => [1, 2, 3, 5, 6, 7],     // calibration:view
+    'contractor'                  => [1, 2, 5, 6, 7],        // contractor:view
     // Phase 3: ปรับเมนูให้ตรง PERMISSION_MATRIX (module:action)
     'analytics'                   => [1, 2, 3, 5, 6, 7, 8], // report:view
     'cost'                        => [1, 2, 3, 5, 6, 7, 8], // report:view

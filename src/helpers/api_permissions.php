@@ -204,6 +204,12 @@ const API_PERMISSION_ENFORCED = [
     'approval.php',
     'planning.php',
     'supervisor.php',
+    // Calibration
+    'calibration.php',
+    'calibration_management.php',
+    'calibration_tracking.php',
+    // Contractor
+    'contractor.php',
     // Workforce
     'workforce.php',
     // Settings (read settings:view)
