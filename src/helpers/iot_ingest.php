@@ -294,6 +294,14 @@ function iot_rate_check(PDO $pdo, string $scopeKey, int $limitPerMin, int $penal
     if ($limitPerMin <= 0) {
         return ['ok' => true];
     }
+    // iot_err() อาศัยอยู่ใน iot.php ซึ่งบาง endpoint (login / spare_image / user_lookup)
+    // ไม่ได้ include — ใช้ fallback รูปแบบเดียวกันเพื่อไม่ให้เกิด fatal 500 ตอนถึงขีดจำกัด
+    $rlErr = static function (string $code, string $message, array $extra = []): array {
+        if (function_exists('iot_err')) {
+            return iot_err($code, $message, $extra);
+        }
+        return array_merge(['error' => $code, 'message' => $message], $extra);
+    };
     $window = date('Y-m-d H:00:00');
     try {
         $ins = $pdo->prepare('INSERT INTO iot_rate_limits (scope_key, window_start, event_count)
@@ -309,14 +317,14 @@ function iot_rate_check(PDO $pdo, string $scopeKey, int $limitPerMin, int $penal
             // Log the penalty without deleting counters: an over-limit caller must serve
             // out its whole window, not get a free pass by having its state cleared.
             error_log('[iot] rate limit exceeded for ' . $scopeKey . ' (' . $count . ' > ' . $limitPerMin . ')');
-            return iot_err('RATE_LIMITED',
+            return $rlErr('RATE_LIMITED',
                 'ส่งข้อมูลเร็วเกินกำหนด (สูงสุด ' . $limitPerMin . ' ครั้งต่อนาที) กรุณารอ ' . $penaltyMinutes . ' นาที',
                 ['limit_per_min' => $limitPerMin, 'retry_after_min' => $penaltyMinutes]);
         }
         return ['ok' => true, 'count' => $count, 'limit' => $limitPerMin];
     } catch (Throwable $e) {
         error_log('[iot] rate_check failed (fail-closed): ' . $e->getMessage());
-        return iot_err('RATE_LIMIT_UNAVAILABLE',
+        return $rlErr('RATE_LIMIT_UNAVAILABLE',
             'ระบบจำกัดอัตราการส่งข้อมูลไม่ทำงาน จึงปฏิเสธคำขอเพื่อความปลอดภัย');
     }
 }
