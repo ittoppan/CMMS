@@ -171,6 +171,9 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | `spare_parts` | เพิ่มรายการ / แก้ไข / ลบ / อัปโหลดรูปหลายรายการ / ดึงสต็อกจาก Sage | `spare_parts:edit`, `sage:write` |
 | `contractors` | สร้างผู้รับเหมาใหม่ (hero + empty state) | `contractor:create` |
 | `spare_parts/sage_shipments` | ตัด / ตัดบางส่วน / ตัดครบ | `sage:write` (ผ่าน header `X-CMMS-Can-Write`) |
+| `spare_parts/issue_center` | ปุ่ม "ยืนยันการเบิก-จ่ายอะไหล่" | `spare_parts:request` |
+| `spare_parts/stock_take` | สร้างรอบนับ / ปิดรอบ / ช่องนับจริง / ปุ่มบันทึก | `spare_parts:plan` |
+| `spare_parts/returns` | ฟอร์มบันทึกคืนซาก (แสดงข้อความอ่านอย่างเดียวแทน) | `spare_parts:return` |
 
 ### ผลต่อแต่ละบทบาท (spare_parts / contractor)
 | role | spare_parts | contractor |
@@ -180,6 +183,6 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | 7 Foreman | view/request/issue/return → **อ่านอย่างเดียว** | view/execute → ไม่มีปุ่มสร้าง |
 | 3 Operate | view/request → อ่านอย่างเดียว | ไม่มีสิทธิ์ |
 | 5 Viewer | view → อ่านอย่างเดียว | view → อ่านอย่างเดียว |
-| 8 Officer (Office) | view/request/issue/return/**edit** (ดูแลสต็อก) | ไม่มีสิทธิ์ |
+| 8 Officer (Office) | view/plan/request/issue/return/**edit** (ดูแลสต็อกครบวงจร) | ไม่มีสิทธิ์ |
 
 > เพิ่มหน้าใหม่: เพิ่ม action ที่ต้องการใน `PERMISSION_MATRIX` ของ module นั้น → เรียก `useCan("<module>")` ในหน้า → ครอบปุ่มด้วยเงื่อนไข

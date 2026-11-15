@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import { useToast } from "@/components/ToastProvider";
 import { sendOrEnqueueDetailed } from "@/lib/offlineQueue";
+import { useCan } from "@/lib/useCan";
 import { QrScanner } from "@/components/field/QrScanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,8 @@ interface CartItem {
 }
 
 export default function SageIssueCenterPage() {
+  // การสร้างใบเบิกต้องมี spare_parts:request — บทบาทอื่นเห็นข้อมูลอย่างเดียว
+  const canRequest = useCan("spare_parts")("request");
   const hero = usePageHero("spare_parts/issue_center");
   const [workOrders, setWorkOrders] = useState<{ value: string; label: string }[]>([]);
   const [users, setUsers] = useState<{ value: string; label: string }[]>([]);
@@ -508,17 +511,23 @@ export default function SageIssueCenterPage() {
             )}
           </Card>
 
-          <Button
-            className="w-full"
-            size="lg"
-            disabled={submitting || !workOrder || !technician || cart.length === 0}
-            loading={submitting}
-            loadingText="กำลังเบิกจ่าย..."
-            onClick={handleSubmit}
-          >
-            <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            ยืนยันการเบิก-จ่ายอะไหล่
-          </Button>
+          {canRequest ? (
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={submitting || !workOrder || !technician || cart.length === 0}
+              loading={submitting}
+              loadingText="กำลังเบิกจ่าย..."
+              onClick={handleSubmit}
+            >
+              <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
+              ยืนยันการเบิก-จ่ายอะไหล่
+            </Button>
+          ) : (
+            <p className="rounded-[var(--cmms-radius)] border border-border bg-[var(--cmms-bg-muted)] p-3 text-center text-sm text-muted-foreground">
+              คุณมีสิทธิ์ดูข้อมูลเท่านั้น — การสร้างใบเบิกอะไหล่เป็นหน้าที่ของช่าง/หัวหน้าชุด
+            </p>
+          )}
         </div>
       </div>
 

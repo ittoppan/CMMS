@@ -169,7 +169,7 @@ const PERMISSION_MATRIX = [
         // เพิ่มเฉพาะที่จำเป็นเพื่อไม่ให้การบังคับใช้ permission ใหม่ตัดสิทธิ์ที่เคยใช้ได้
         // Office เป็นคนดูแลสต็อก: เบิกใน CMMS แล้วไปตัดสต็อกใน Shipments ของ Sage 300
         'sage'       => ['view', 'write'],
-        'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit'],
+        'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit', 'plan'],
         'users'      => ['view'],
         'settings'   => ['view'],
         'audit_log'  => ['view'],

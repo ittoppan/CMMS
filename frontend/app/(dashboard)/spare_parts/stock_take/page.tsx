@@ -9,6 +9,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "../../../../components/ToastProvider";
 import { swalConfirm } from "@/lib/swal";
+import { useCan } from "@/lib/useCan";
 import {
   Plus,
   ClipboardCheck,
@@ -51,6 +52,8 @@ const STATUS_META: Record<string, { label: string; style: React.CSSProperties }>
 };
 
 export default function StockTakePage() {
+  // การนับ/ปิดรอบปรับสต็อกต้องมี spare_parts:plan — บทบาทอื่นเห็นข้อมูลอย่างเดียว
+  const canPlan = useCan("spare_parts")("plan");
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -232,14 +235,18 @@ export default function StockTakePage() {
             สร้างรอบนับ → กรอกจำนวนที่พบจริงบนมือถือ → ปิดรอบเพื่อปรับ stock_qty ตามจริง
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
-        >
-          <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
-          สร้างรอบนับใหม่
-        </button>
+        {canPlan ? (
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white cmms-btn-primary"
+          >
+            <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
+            สร้างรอบนับใหม่
+          </button>
+        ) : (
+          <span className="text-xs font-semibold text-[var(--cmms-text-secondary)]">อ่านอย่างเดียว</span>
+        )}
       </div>
 
       {activeId && round ? (
@@ -263,7 +270,7 @@ export default function StockTakePage() {
                   onClick={() => { setActiveId(null); setRound(null); }}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
                 >← กลับรายการ</button>
-                {round.status === "draft" && (
+                {round.status === "draft" && canPlan && (
                   <>
                     <button
                       type="button"
@@ -342,6 +349,7 @@ export default function StockTakePage() {
                             placeholder="จำนวนจริง"
                             inputMode="decimal"
                             value={inputs[it.spare_part_id] ?? ""}
+                            disabled={!canPlan}
                             onChange={(e) => setInputs((f) => ({ ...f, [it.spare_part_id]: e.target.value }))}
                           />
                         </div>
@@ -356,7 +364,7 @@ export default function StockTakePage() {
                         </div>
                         <button
                           type="button"
-                          disabled={busy}
+                          disabled={busy || !canPlan}
                           onClick={() => saveItem(it)}
                           className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
                             counted

@@ -7,6 +7,7 @@ import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import { Undo2, Clock3, History, Save } from "lucide-react";
 import { useToast } from "@/components/ToastProvider";
+import { useCan } from "@/lib/useCan";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -36,6 +37,8 @@ interface ReturnItem {
 }
 
 export default function SpareReturnsPage() {
+  // บทบาทที่ดูได้แต่คืนชากไม่ได้ → เห็นรายการอย่างเดียว
+  const canReturn = useCan("spare_parts")("return");
   const { showToast } = useToast();
   const [tab, setTab] = useState<"pending" | "returned">("pending");
   const [pending, setPending] = useState<ReturnItem[]>([]);
@@ -165,7 +168,12 @@ export default function SpareReturnsPage() {
             </Card>
           ) : (
             <div className="space-y-3">
-              {pending.map((it) => (
+              {!canReturn && (
+                <Card className="p-4 text-sm text-muted-foreground">
+                  คุณมีสิทธิ์ดูรายการคืนซากเท่านั้น — การบันทึกคืนซากเป็นหน้าที่ของหัวหน้าชุด/ผู้ดูแลสต็อก
+                </Card>
+              )}
+              {canReturn && pending.map((it) => (
                 <ReturnEntryCard
                   key={it.item_id}
                   item={it}
