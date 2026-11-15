@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
@@ -48,6 +49,8 @@ interface Item {
 }
 
 export default function InspectionTemplatesPage() {
+  const hero = usePageHero("inspections/templates");
+
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

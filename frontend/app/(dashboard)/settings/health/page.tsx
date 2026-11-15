@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,6 +90,8 @@ function SectionCard({ title, ok, ms, children }: { title: string; ok?: boolean;
 }
 
 export default function SystemHealthPage() {
+  const hero = usePageHero("settings/health");
+
   const [health, setHealth] = useState<Health | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

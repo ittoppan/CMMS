@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,8 @@ function Avatar({ name, src, size = 44 }: { name?: string | null; src?: string; 
 }
 
 export default function AndonBoardPage() {
+  const hero = usePageHero("andon-board");
+
   const { canShow } = useMenuPermission();
   const [repairs, setRepairs] = useState<RepairRow[]>([]);
   const [pms, setPms] = useState<PmRow[]>([]);

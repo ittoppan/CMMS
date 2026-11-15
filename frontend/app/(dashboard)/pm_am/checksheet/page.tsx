@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/components/ToastProvider";
@@ -60,6 +61,8 @@ function defaultChecklist(frequencyType: string): CheckItem[] {
 }
 
 export default function PMChecksheetPage() {
+  const hero = usePageHero("pm_am/checksheet");
+
   useLiffLang(); // re-render ตามภาษาที่สลับ
   const router = useRouter();
   const [plans, setPlans] = useState<{ value: string; label: string; raw: any }[]>([]);

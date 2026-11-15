@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -180,6 +181,8 @@ const actionLabel = (a?: RowAction) => {
 };
 
 export default function ImportExcelPage() {
+  const hero = usePageHero("reports/import_excel");
+
   const [datasetKey, setDatasetKey] = useState("repair");
   const [mode, setMode] = useState<ImportMode>("insert");
   const [file, setFile] = useState<File | null>(null);

@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 // asset_registry/criticality — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Button, Lucide)
 // business logic ครบเดิม: fetch index.php?resource=assets, PUT asset_registry.php (criticality), scoring matrix
@@ -69,6 +70,8 @@ const WEIGHTS: Record<string, number> = {
 };
 
 export default function AssetCriticalityPage() {
+  const hero = usePageHero("asset_registry/criticality");
+
   const [assets, setAssets] = useState<{ value: string; label: string; raw: any }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

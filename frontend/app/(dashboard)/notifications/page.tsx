@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 // notifications — Phase 16 Notification Center
 // ข้อมูลจริงจาก /api/v1/notifications.php (ตาราง notifications ผ่าน NotificationCenterService)
 // + tabs all/unread/read + กรองประเภท + ค้นหา + mark read/all read (บันทึกจริง)
@@ -121,6 +122,8 @@ const deliveryColumns: SimpleColumn<any>[] = [
 ];
 
 export default function NotificationCenterPage() {
+  const hero = usePageHero("notifications");
+
   const router = useRouter();
   const [items, setItems] = useState<NotifItem[]>([]);
   const [counts, setCounts] = useState<NotifCounts | null>(null);

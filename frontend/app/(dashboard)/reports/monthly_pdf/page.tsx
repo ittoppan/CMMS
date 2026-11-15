@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,8 @@ interface WorkOrder {
 }
 
 export default function MonthlyPdfReportPage() {
+  const hero = usePageHero("reports/monthly_pdf");
+
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(7);
   const [monthly, setMonthly] = useState<MonthStat[]>([]);

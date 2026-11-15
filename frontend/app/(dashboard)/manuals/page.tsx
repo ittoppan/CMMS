@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { assetUrl } from "@/lib/utils";
@@ -41,6 +42,8 @@ interface ManualRecord extends Record<string, unknown> {
 }
 
 export default function ManualsPage() {
+  const hero = usePageHero("manuals");
+
   const router = useRouter();
   const [data, setData] = useState<ManualRecord[]>([]);
   const [search, setSearch] = useState("");

@@ -5,6 +5,7 @@
 // เครื่องมืออ่านตอนนี้: scripts/notification_engine.php (scheduler) + hooks ใน supervisor/repair
 
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,8 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function NotificationRulesPage() {
+  const hero = usePageHero("settings/notification-rules");
+
   const [rules, setRules] = useState<RuleRow[]>([]);
   const [meta, setMeta] = useState<NotifMeta | null>(null);
   const [loading, setLoading] = useState(true);

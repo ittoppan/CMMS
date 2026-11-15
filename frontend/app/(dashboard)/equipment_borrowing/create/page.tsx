@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -22,6 +23,8 @@ import {
 type ISODate = `${number}${number}${number}${number}-${number}${number}-${number}${number}`;
 
 export default function BorrowingCreatePage() {
+  const hero = usePageHero("equipment_borrowing/create");
+
   const router = useRouter();
 
   const [assets, setAssets] = useState<any[]>([]);

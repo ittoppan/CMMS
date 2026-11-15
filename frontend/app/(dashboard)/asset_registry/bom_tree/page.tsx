@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 // asset_registry/bom_tree — migrate ui kit (PageShell, ui/Card, ui/Select, ui/Dialog, Badge, Lucide)
 // business logic ครบเดิม: machine_bom.php CRUD, spare-parts index, side panel เลือกชิ้นส่วน
@@ -81,6 +82,8 @@ const statusBadgeVariant: Record<string, "success" | "neutral" | "warning"> = {
 };
 
 export default function BOMTreePage() {
+  const hero = usePageHero("asset_registry/bom_tree");
+
   const [machines, setMachines] = useState<Machine[]>([]);
   const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
   const [machine, setMachine] = useState<Machine | null>(null);

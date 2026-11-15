@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { usePageHero } from "@/lib/i18n";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
@@ -324,6 +325,8 @@ function Kpi({
 
 /* ── หน้าเพจ ─────────────────────────────────────────────────────────── */
 export default function DashboardPage() {
+  const hero = usePageHero("dashboard");
+
   const [q, setQ] = useState<D.DashboardQuery>({ range: "this_month" });
   const [data, setData] = useState<Loaded>(EMPTY);
   const [loading, setLoading] = useState(true);

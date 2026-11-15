@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -55,6 +56,8 @@ function StatCard({ icon: Icon, label, value, sub, tone }: {
 }
 
 export default function WorkPermitPage() {
+  const hero = usePageHero("safety/work_permit");
+
   const [cfg, setCfg] = useState<ConfigResponse | null>(null);
   const [types, setTypes] = useState<PermitType[]>([]);
   const [dashboard, setDashboard] = useState<DashboardSummary | null>(null);

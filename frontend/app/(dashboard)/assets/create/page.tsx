@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Plus, ClipboardList } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 
 const categoryOptions = [
   { value: "pump", label: t("field.pump") },
@@ -34,6 +35,8 @@ const departmentOptions = [
 ];
 
 export default function CreateAssetPage() {
+  const hero = usePageHero("assets/create");
+
   return (
     <PageShell
       eyebrow={<p className="cmms-eyebrow">ASSETS · CMMS-TOPPAN</p>}

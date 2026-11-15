@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert } from "@/components/ui/alert";
@@ -52,6 +53,8 @@ const STATUS_META: Record<string, { label: string; style: React.CSSProperties }>
 };
 
 export default function StockTakePage() {
+  const hero = usePageHero("spare_parts/stock_take");
+
   // การนับ/ปิดรอบปรับสต็อกต้องมี spare_parts:plan — บทบาทอื่นเห็นข้อมูลอย่างเดียว
   const canPlan = useCan("spare_parts")("plan");
   const { showToast } = useToast();

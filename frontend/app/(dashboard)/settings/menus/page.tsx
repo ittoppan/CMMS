@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useMemo, type ComponentType } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -95,6 +96,8 @@ const BN_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 const MAX_BN = 5; // ปุ่มล่างสูงสุดที่แนะนำ (flex:1 ต่อปุ่ม เหมือนแอปจริง)
 
 export default function MenuPermissionsPage() {
+  const hero = usePageHero("settings/menus");
+
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [roles, setRoles] = useState<RoleItem[]>([]);
   const [perms, setPerms] = useState<Record<number, Record<string, number>>>({});

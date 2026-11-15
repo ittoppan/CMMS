@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 // editor/builder — v3 design system (shadcn-style)
 // logic ครบเดิม: embed GrapesJS ผ่าน GrapesBuilder (ไม่แตะ integration)
 
@@ -10,6 +11,8 @@ import { LayoutGrid } from "lucide-react";
 import GrapesBuilder from "@/components/GrapesBuilder";
 
 export default function VisualBuilderPage() {
+  const hero = usePageHero("editor/builder");
+
   return (
     <PageShell
       eyebrow={<p className="cmms-eyebrow">PAGE BUILDER · CMMS-TOPPAN</p>}

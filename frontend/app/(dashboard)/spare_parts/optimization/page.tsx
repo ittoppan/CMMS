@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
@@ -99,6 +100,8 @@ function computeEOQ(item: any): EOQItem {
 }
 
 export default function InventoryOptimizationPage() {
+  const hero = usePageHero("spare_parts/optimization");
+
   const [items, setItems] = useState<EOQItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

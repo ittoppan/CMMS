@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -26,6 +27,8 @@ import SuccessDialog from "@/components/SuccessDialog";
 import { Plus } from "lucide-react";
 
 export default function ProductionHoursCreatePage() {
+  const hero = usePageHero("mtbf_mttr/production_hours/create");
+
   const router = useRouter();
 
   const [assets, setAssets] = useState<any[]>([]);

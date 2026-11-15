@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Input } from "@/components/ui/input";
@@ -153,6 +154,8 @@ const SETTING_FIELDS: { key: string; label: string; hint: string; secret?: boole
 ];
 
 export default function NotificationsSettingsPage() {
+  const hero = usePageHero("settings/notifications");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);

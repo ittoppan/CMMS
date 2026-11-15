@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,8 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Plus } from "lucide-react";
 
 export default function SupplierCreatePage() {
+  const hero = usePageHero("suppliers/create");
+
   const router = useRouter();
   
   const [code, setCode] = useState("");

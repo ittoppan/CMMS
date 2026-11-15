@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@/components/layout";
@@ -211,6 +212,8 @@ function SectionTitle({ eyebrow, title, desc }: { eyebrow: string; title: string
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function PageDesignerPage() {
+  const hero = usePageHero("settings/design");
+
   const router = useRouter();
   const isNarrow = useIsNarrow();
   const [activeSection, setActiveSection] = useState<string>("theme");

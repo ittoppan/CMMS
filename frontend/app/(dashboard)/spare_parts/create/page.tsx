@@ -16,6 +16,7 @@ import {
 import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 
 const EMPTY_FORM = {
   code: "",
@@ -32,6 +33,8 @@ const EMPTY_FORM = {
 };
 
 export default function CreateSparePartPage() {
+  const hero = usePageHero("spare_parts/create");
+
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);

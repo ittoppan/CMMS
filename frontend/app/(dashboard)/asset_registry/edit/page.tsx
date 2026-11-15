@@ -4,6 +4,7 @@
 // business logic ครบเดิม: GET/PUT /api/v1/asset_registry.php?id= + SuccessDialog flow
 
 import { Suspense, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
@@ -305,6 +306,8 @@ function EditAssetContent() {
 }
 
 export default function EditAssetPage() {
+  const hero = usePageHero("asset_registry/edit");
+
   return (
     <Suspense fallback={<div className="flex items-center justify-center p-10 text-sm text-muted-foreground">กำลังโหลด...</div>}>
       <EditAssetContent />

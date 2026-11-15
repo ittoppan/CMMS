@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,6 +69,8 @@ function LinkRow({
 }
 
 export default function SystemServicesPage() {
+  const hero = usePageHero("settings/services");
+
   const [services, setServices] = useState<ServiceInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);

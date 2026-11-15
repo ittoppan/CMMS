@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect, useRef, type MouseEvent, type TouchEvent } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Wrench,
@@ -678,6 +679,8 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function EditWorkOrderPage() {
+  const hero = usePageHero("repair/edit");
+
   return (
     <Suspense fallback={<div className="p-8 text-muted-foreground">กำลังโหลด...</div>}>
       <EditWorkOrderContent />

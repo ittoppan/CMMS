@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 // roles — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Alert)
 // business logic ครบเดิม: fetch/delete roles.php, client search filter
 
@@ -33,6 +34,8 @@ interface Role extends Record<string, unknown> {
 const PAGE_SIZE = 10;
 
 export default function RolesPage() {
+  const hero = usePageHero("roles");
+
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [roles, setRoles] = useState<Role[]>([]);

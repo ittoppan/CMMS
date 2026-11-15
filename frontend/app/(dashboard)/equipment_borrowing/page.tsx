@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,8 @@ const statusLabel: Record<string, string> = {
 };
 
 export default function EquipmentBorrowingPage() {
+  const hero = usePageHero("equipment_borrowing");
+
   const router = useRouter();
   const can = useCan("spare_parts");
   const canIssue = can("issue");

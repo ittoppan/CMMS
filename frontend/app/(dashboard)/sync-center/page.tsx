@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { useConnectivity } from "@/lib/offline/connectivity";
 import { syncEngine, RETRY_SCHEDULE_MS } from "@/lib/offline/engine";
 import { idbGetAll, idbEstimateBytes, estimateTotalStorage } from "@/lib/offline/idb";
@@ -55,6 +56,8 @@ function fmtTime(iso: string | null | undefined): string {
 }
 
 export default function SyncCenterPage() {
+  const hero = usePageHero("sync-center");
+
   const { net, syncing, stats, syncNow } = useConnectivity();
   const [items, setItems] = useState<SyncQueueItem[]>([]);
   const [showSucceeded, setShowSucceeded] = useState(false);

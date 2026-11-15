@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 // suppliers — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Badge)
 // business logic ครบเดิม: fetch/delete suppliers.php, client search filter, KPI calculations
@@ -71,6 +72,8 @@ function buildParams(state: { search: string }, base?: URLSearchParams) {
 }
 
 export default function SuppliersPage() {
+  const hero = usePageHero("suppliers");
+
   const can = useCan("supplier");
   const router = useRouter();
   const pathname = usePathname();

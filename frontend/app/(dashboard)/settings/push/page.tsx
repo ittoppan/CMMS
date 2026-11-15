@@ -10,6 +10,7 @@
  *             | default (ยังไม่อนุญาต) | no-sub (อนุญาตแต่อุปกรณ์นี้ยังไม่ลง) | active
  */
 import { useCallback, useEffect, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
@@ -47,6 +48,8 @@ interface DeviceRow {
 type Phase = "loading" | "unsupported" | "ios-needs-install" | "disabled-admin" | "denied" | "default" | "no-sub" | "active";
 
 export default function PushDevicePage() {
+  const hero = usePageHero("settings/push");
+
   const [phase, setPhase] = useState<Phase>("loading");
   const [currentEndpoint, setCurrentEndpoint] = useState<string>("");
   const [devices, setDevices] = useState<DeviceRow[]>([]);

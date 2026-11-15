@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { HStack, Grid } from "@/components/layout";
 import { Card } from "@/components/ui/card";
@@ -45,6 +46,8 @@ const statusBadge: Record<ApprovalItem["status"], { label: string; variant: "suc
 };
 
 export default function ApprovalCenterPage() {
+  const hero = usePageHero("approval");
+
   const [items, setItems] = useState<ApprovalItem[]>([]);
   const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0 });
   const [loading, setLoading] = useState(true);

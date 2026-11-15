@@ -4,6 +4,7 @@
 // อ่าน/บันทึก จริงผ่าน /api/v1/notifications.php (notification_preferences)
 
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,8 @@ const MASTER_SWITCH: Record<string, string> = {
 };
 
 export default function NotificationPrefsPage() {
+  const hero = usePageHero("settings/notification-prefs");
+
   const [meta, setMeta] = useState<NotifMeta | null>(null);
   const [matrix, setMatrix] = useState<Record<string, Record<string, boolean>>>({});
   const [loaded, setLoaded] = useState(false);

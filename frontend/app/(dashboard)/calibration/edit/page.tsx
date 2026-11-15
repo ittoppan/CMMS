@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -352,6 +353,8 @@ function EditCalibrationContent() {
 }
 
 export default function EditCalibrationPage() {
+  const hero = usePageHero("calibration/edit");
+
   return (
     <Suspense fallback={<p className="text-sm">{t("common.loading")}</p>}>
       <EditCalibrationContent />

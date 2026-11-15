@@ -17,6 +17,7 @@ import AnimatedDialog from "@/components/AnimatedDialog";
 import { PageShell } from "@/components/PageShell";
 import { apiJson, apiFetch } from "@/lib/api";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import {
   CheckCircle2 as CheckCircleIcon,
   Plus as PlusIcon,
@@ -671,6 +672,8 @@ const TABS: { key: TabKey; label: string; icon: any }[] = [
 ];
 
 export default function RepairOptionsPage() {
+  const hero = usePageHero("settings/repair-options");
+
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const initial: TabKey = tabParam === "departments" || tabParam === "locations" ? tabParam : "repair_options";

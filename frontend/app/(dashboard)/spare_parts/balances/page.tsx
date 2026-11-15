@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useMemo, useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -61,6 +62,8 @@ function num(v: number | string | null | undefined): number {
 }
 
 export default function SpareBalancesPage() {
+  const hero = usePageHero("spare_parts/balances");
+
   const [parts, setParts] = useState<Part[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

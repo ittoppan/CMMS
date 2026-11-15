@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Download, Table, CheckCircle2, Database, Upload } from "lucide-react";
 
 export default function ExportExcelReportPage() {
+  const hero = usePageHero("reports/export_excel");
+
   const [reportType, setReportType] = useState("repair_all");
   const [year, setYear] = useState("2026");
   const [month, setMonth] = useState("all");

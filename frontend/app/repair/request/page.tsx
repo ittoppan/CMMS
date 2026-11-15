@@ -15,6 +15,7 @@ export const metadata: Metadata = {
  *   ขณะ LIFF กำลัง init บน URL ที่ไม่ใช่ endpoint)
  */
 export default function RepairRequestPage() {
+
   return (
     <main
       className="min-h-screen cmms-liff-page"

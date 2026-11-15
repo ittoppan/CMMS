@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { useInlineValidation } from "@/lib/use-inline-validation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -419,6 +420,8 @@ function EditUserContent() {
 }
 
 export default function EditUserPage() {
+  const hero = usePageHero("users/edit");
+
   return (
     <Suspense fallback={<div className="p-10 text-center text-sm text-muted-foreground">{t("common.loading")}</div>}>
       <EditUserContent />

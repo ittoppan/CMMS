@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,6 +50,8 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 };
 
 export default function FeedbackPage() {
+  const hero = usePageHero("feedback");
+
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [scope, setScope] = useState<"own" | "all">("own");
   const [loading, setLoading] = useState(true);

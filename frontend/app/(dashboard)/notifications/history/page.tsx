@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 // notifications/history — v3 design system (shadcn-style)
 // logic ครบเดิม: โหลด notification_logs + ตัวกรอง + export CSV
 
@@ -57,6 +58,8 @@ function fmtTime(dt: string): string {
 const ALL_SENTINEL = "__all__";
 
 export default function LineDeliveryHistoryPage() {
+  const hero = usePageHero("notifications/history");
+
   const [logs, setLogs] = useState<any[]>([]);
   const [stats, setStats] = useState<any>({ total: 0, sent: 0, failed: 0, today: 0 });
   const [templates, setTemplates] = useState<string[]>([]);

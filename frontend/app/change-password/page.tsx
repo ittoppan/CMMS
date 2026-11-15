@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn';
 import { Key, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function ChangePasswordPage() {
+
   return (
     <>
       <ThemeProvider />

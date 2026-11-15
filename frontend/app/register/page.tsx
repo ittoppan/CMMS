@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ function LineAvatar({
 }
 
 export default function RegisterPage() {
+  const hero = usePageHero("register");
+
   return (
     <>
       <ThemeProvider />

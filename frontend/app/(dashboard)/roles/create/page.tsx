@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,8 @@ import { Alert } from "@/components/ui/alert";
 import { ArrowLeft, Plus } from "lucide-react";
 
 export default function RoleCreatePage() {
+  const hero = usePageHero("roles/create");
+
   const router = useRouter();
   
   const [name, setName] = useState("");

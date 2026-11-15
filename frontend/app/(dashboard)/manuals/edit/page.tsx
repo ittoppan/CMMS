@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -228,6 +229,8 @@ function EditManualContent() {
 }
 
 export default function EditManualPage() {
+  const hero = usePageHero("manuals/edit");
+
   return (
     <Suspense fallback={<p className="text-sm text-muted-foreground">กำลังโหลด...</p>}>
       <EditManualContent />

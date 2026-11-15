@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import { assetUrl } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
@@ -415,6 +416,8 @@ function EditPMContent() {
 }
 
 export default function EditPMPage() {
+  const hero = usePageHero("pm_am/edit");
+
   return (
     <Suspense fallback={<p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>}>
       <EditPMContent />

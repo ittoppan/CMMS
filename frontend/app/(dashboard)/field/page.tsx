@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import {
   ScanLine,
@@ -58,6 +59,8 @@ const STATUS_LABEL: Record<string, { label: string; variant: "neutral" | "primar
 };
 
 export default function FieldHomePage() {
+  const hero = usePageHero("field");
+
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [myWos, setMyWos] = useState<MyWo[]>([]);

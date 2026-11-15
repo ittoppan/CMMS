@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 // pages — v3 design system (shadcn-style)
 // logic ครบเดิม: ตรวจสิทธิ์ useMenuPermission + โหลดรายการ custom_pages
 
@@ -24,6 +25,8 @@ interface PageRow {
 }
 
 export default function CustomPagesListPage() {
+  const hero = usePageHero("pages");
+
   const [pages, setPages] = useState<PageRow[] | null>(null);
   const { canShow, loading: permLoading } = useMenuPermission();
   const canBuild = canShow("editor/builder");

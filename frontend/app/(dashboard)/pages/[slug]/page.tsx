@@ -4,6 +4,7 @@
 // logic ครบเดิม: ตรวจสิทธิ์ + โหลดหน้าตาม slug + hydrateDynamicPage
 
 import { useEffect, useRef, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,8 @@ interface CustomPage {
 }
 
 export default function CustomPageView() {
+  const hero = usePageHero("pages/[slug]");
+
   const params = useParams<{ slug: string }>();
   const { canShow, loading: permLoading } = useMenuPermission();
   const canBuild = canShow("editor/builder");

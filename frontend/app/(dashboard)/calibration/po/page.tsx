@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -77,6 +78,8 @@ const FILTERS = [
 ];
 
 export default function CalibrationPoPage() {
+  const hero = usePageHero("calibration/po");
+
   const router = useRouter();
   const { showToast } = useToast();
   const [rows, setRows] = useState<CalRow[]>([]);

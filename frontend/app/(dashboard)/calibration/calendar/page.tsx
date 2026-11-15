@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -32,6 +33,8 @@ function pad2(n: number) {
 }
 
 export default function CalibrationCalendar() {
+  const hero = usePageHero("calibration/calendar");
+
   const router = useRouter();
   const [rows, setRows] = useState<CalRow[]>([]);
   const [loading, setLoading] = useState(true);

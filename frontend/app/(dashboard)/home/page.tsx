@@ -7,6 +7,7 @@ import { NAV_GROUPS, type NavItemDef } from "@/components/dashboard/sidebar-nav"
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { getFrequentMenuItems } from "@/lib/frequent-menus";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import type { LucideIcon } from "lucide-react";
 
 /** หน้าแรกแบบเมนูหลัก (app launcher) — ฉากเปิดหลังล็อกอิน โทนสว่าง (light launcher) */
@@ -82,6 +83,8 @@ function MenuTileLink({ href, icon, label, counts }: { href: string; icon: Lucid
 }
 
 export default function HomePage() {
+  const hero = usePageHero("home");
+
   const { canShow, permission, userFullName } = useMenuPermission();
   const [kpis, setKpis] = useState<Kpis | null>(null);
   const [nowLabel, setNowLabel] = useState("");

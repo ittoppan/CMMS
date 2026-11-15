@@ -11,5 +11,6 @@ export const metadata: Metadata = {
  * แก้ไขจาก scan/page.tsx:144 ที่เคยอ้างอิง path นี้
  */
 export default function RepairRequestRedirect() {
+
   redirect("/repair/request");
 }

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { useInlineValidation } from "@/lib/use-inline-validation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,8 @@ const PRESET_AVATARS = [
 ];
 
 export default function CreateUserPage() {
+  const hero = usePageHero("users/create");
+
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,6 +77,8 @@ const MODE_LABELS: Record<string, { label: string; desc: string }> = {
 };
 
 export default function SageSyncConfigPage() {
+  const hero = usePageHero("spare_parts/sage_sync");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<Record<string, string | number> | null>(null);

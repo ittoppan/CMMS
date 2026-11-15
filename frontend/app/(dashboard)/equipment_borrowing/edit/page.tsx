@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
@@ -323,6 +324,8 @@ function EditBorrowingContent() {
 }
 
 export default function EditBorrowingPage() {
+  const hero = usePageHero("equipment_borrowing/edit");
+
   return (
     <Suspense fallback={<p className="text-sm">กำลังโหลด...</p>}>
       <EditBorrowingContent />

@@ -18,6 +18,7 @@ import ImageUploadField from "@/components/ImageUploadField";
 import { useInlineValidation } from "@/lib/use-inline-validation";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 
 function EditSparePartContent() {
   const searchParams = useSearchParams();
@@ -297,6 +298,8 @@ function EditSparePartContent() {
 }
 
 export default function EditSparePartPage() {
+  const hero = usePageHero("spare_parts/edit");
+
   return (
     <Suspense fallback={
       <div className="space-y-4 p-10" aria-busy="true">

@@ -1374,6 +1374,391 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     th: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "นิยาม & การตั้งค่า KPI", desc: "สูตร · หน่วย · แหล่งข้อมูล และข้อจำกัดของแต่ละ KPI พร้อมนโยบายเกณฑ์ขั้นต่ำของเอนจิน" },
     en: { eyebrow: "KPI DEFINITIONS · CMMS-TOPPAN", title: "KPI Definitions & Settings", desc: "Formula, unit, data sources and limitations of each KPI, plus the engine's minimum-data thresholds" },
   },
+  "andon-board": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Andon Board", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Andon Board", desc: "" },
+  },
+  "approval": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Approval", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Approval", desc: "" },
+  },
+  "approval/center": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Center", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Center", desc: "" },
+  },
+  "asset_registry/bom_tree": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Bom_Tree", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Bom_Tree", desc: "" },
+  },
+  "asset_registry/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "asset_registry/criticality": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Criticality", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Criticality", desc: "" },
+  },
+  "asset_registry/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "assets": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Assets", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Assets", desc: "" },
+  },
+  "assets/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "calibration/calendar": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Calendar", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Calendar", desc: "" },
+  },
+  "calibration/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "calibration/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "calibration/po": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Po", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Po", desc: "" },
+  },
+  "calibration/tracking": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Tracking", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Tracking", desc: "" },
+  },
+  "change-password": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Change Password", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Change Password", desc: "" },
+  },
+  "contractors/permits": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Permits", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Permits", desc: "" },
+  },
+  "documents/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "documents/engineering-changes": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Engineering Changes", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Engineering Changes", desc: "" },
+  },
+  "documents/forms": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Forms", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Forms", desc: "" },
+  },
+  "documents/manuals": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Manuals", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Manuals", desc: "" },
+  },
+  "documents/review": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Review", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Review", desc: "" },
+  },
+  "documents/shutdown": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Shutdown", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Shutdown", desc: "" },
+  },
+  "editor": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Editor", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Editor", desc: "" },
+  },
+  "editor/builder": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Builder", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Builder", desc: "" },
+  },
+  "engineering-changes/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "engineering-changes/requests": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Requests", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Requests", desc: "" },
+  },
+  "equipment_borrowing": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Equipment_Borrowing", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Equipment_Borrowing", desc: "" },
+  },
+  "equipment_borrowing/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "equipment_borrowing/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "feedback": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Feedback", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Feedback", desc: "" },
+  },
+  "field": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Field", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Field", desc: "" },
+  },
+  "field/work/[id]": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "[Id]", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "[Id]", desc: "" },
+  },
+  "forms": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Forms", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Forms", desc: "" },
+  },
+  "home": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Home", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Home", desc: "" },
+  },
+  "inspections/run": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Run", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Run", desc: "" },
+  },
+  "inspections/templates": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Templates", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Templates", desc: "" },
+  },
+  "iot/monitor": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Monitor", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Monitor", desc: "" },
+  },
+  "knowledge/articles/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "login": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Login", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Login", desc: "" },
+  },
+  "manuals": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Manuals", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Manuals", desc: "" },
+  },
+  "manuals/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "manuals/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "mtbf_mttr/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "mtbf_mttr/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "mtbf_mttr/production_hours/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "mtbf_mttr/production_hours/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "notifications": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Notifications", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Notifications", desc: "" },
+  },
+  "notifications/history": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "History", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "History", desc: "" },
+  },
+  "page.tsx": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Page.Tsx", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Page.Tsx", desc: "" },
+  },
+  "pages": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Pages", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Pages", desc: "" },
+  },
+  "pages/[slug]": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "[Slug]", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "[Slug]", desc: "" },
+  },
+  "pm_am/batch_schedule": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Batch_Schedule", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Batch_Schedule", desc: "" },
+  },
+  "pm_am/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "pm_am/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "profile": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Profile", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Profile", desc: "" },
+  },
+  "qr-sheet": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Qr Sheet", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Qr Sheet", desc: "" },
+  },
+  "register": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Register", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Register", desc: "" },
+  },
+  "repair/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "repair/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "repair/history": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "History", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "History", desc: "" },
+  },
+  "repair/print": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Print", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Print", desc: "" },
+  },
+  "repair/request": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Request", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Request", desc: "" },
+  },
+  "repair/view": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "View", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "View", desc: "" },
+  },
+  "reports/export_excel": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Export_Excel", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Export_Excel", desc: "" },
+  },
+  "reports/import_excel": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Import_Excel", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Import_Excel", desc: "" },
+  },
+  "reports/monthly_pdf": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Monthly_Pdf", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Monthly_Pdf", desc: "" },
+  },
+  "roles": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Roles", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Roles", desc: "" },
+  },
+  "roles/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "roles/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "safety/work_permit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Work_Permit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Work_Permit", desc: "" },
+  },
+  "safety/work_permit/[id]": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "[Id]", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "[Id]", desc: "" },
+  },
+  "safety/work_permit/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "settings/design": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Design", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Design", desc: "" },
+  },
+  "settings/health": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Health", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Health", desc: "" },
+  },
+  "settings/menus": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Menus", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Menus", desc: "" },
+  },
+  "settings/notification-prefs": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Notification Prefs", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Notification Prefs", desc: "" },
+  },
+  "settings/notification-rules": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Notification Rules", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Notification Rules", desc: "" },
+  },
+  "settings/notifications": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Notifications", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Notifications", desc: "" },
+  },
+  "settings/push": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Push", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Push", desc: "" },
+  },
+  "settings/pwa": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Pwa", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Pwa", desc: "" },
+  },
+  "settings/repair-options": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Repair Options", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Repair Options", desc: "" },
+  },
+  "settings/services": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Services", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Services", desc: "" },
+  },
+  "spare_parts/balances": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Balances", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Balances", desc: "" },
+  },
+  "spare_parts/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "spare_parts/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "spare_parts/optimization": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Optimization", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Optimization", desc: "" },
+  },
+  "spare_parts/overview": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Overview", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Overview", desc: "" },
+  },
+  "spare_parts/returns": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Returns", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Returns", desc: "" },
+  },
+  "spare_parts/sage_sync": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Sage_Sync", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Sage_Sync", desc: "" },
+  },
+  "spare_parts/stock_take": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Stock_Take", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Stock_Take", desc: "" },
+  },
+  "suppliers": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Suppliers", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Suppliers", desc: "" },
+  },
+  "suppliers/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "suppliers/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+  "sync-center": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Sync Center", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Sync Center", desc: "" },
+  },
+  "users/create": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Create", desc: "" },
+  },
+  "users/edit": {
+    th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+    en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
+  },
+
 };
 
 // ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════

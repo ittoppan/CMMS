@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import {
@@ -63,6 +64,8 @@ function formatSize(bytes: number): string {
 }
 
 export default function FormsPage() {
+  const hero = usePageHero("forms");
+
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

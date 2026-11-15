@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Card } from "@/components/ui/card";
@@ -43,6 +44,8 @@ interface Profile {
 }
 
 export default function ProfilePage() {
+  const hero = usePageHero("profile");
+
   const router = useRouter();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);

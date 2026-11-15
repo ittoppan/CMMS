@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -37,6 +38,8 @@ interface ReturnItem {
 }
 
 export default function SpareReturnsPage() {
+  const hero = usePageHero("spare_parts/returns");
+
   // บทบาทที่ดูได้แต่คืนชากไม่ได้ → เห็นรายการอย่างเดียว
   const canReturn = useCan("spare_parts")("return");
   const { showToast } = useToast();

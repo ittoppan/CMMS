@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 // Inspection Run (Execute) — Phase 13
 // Mobile-first execution wizard: ทุก item type (check/yes_no/pass_fail/numeric/measurement/text/dropdown/date_time)
@@ -74,6 +75,8 @@ function isNumericItem(t: ItemType): boolean {
 }
 
 export default function InspectionRunPage() {
+  const hero = usePageHero("inspections/run");
+
   const { showToast } = useToast();
   const [schedules, setSchedules] = useState<{ value: string; label: string; priority: string; due: string }[]>([]);
   const [loading, setLoading] = useState(true);

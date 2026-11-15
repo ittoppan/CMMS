@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -83,6 +84,8 @@ const CONTAM_OPTIONS = [
 ];
 
 export default function WorkModePage() {
+  const hero = usePageHero("field/work/[id]");
+
   const params = useParams<{ id: string }>();
   const woId = Number(params?.id);
   const { showToast } = useToast();

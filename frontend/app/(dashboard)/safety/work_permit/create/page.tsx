@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +27,8 @@ function toLocalInput(v: Date): string {
 }
 
 export default function WorkPermitCreatePage() {
+  const hero = usePageHero("safety/work_permit/create");
+
   const router = useRouter();
   const { showToast } = useToast();
   const [opts, setOpts] = useState<OptionsResponse | null>(null);

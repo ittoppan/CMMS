@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { t, statusText } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { normalizeRepairStatus } from "@/lib/repair-status";
 import AndonLamp from "@/components/AndonLamp";
 import { useRouter } from "next/navigation";
@@ -47,6 +48,8 @@ const statusColors: Record<string, React.CSSProperties> = {
 const CLOSED_STATUSES = ["completed", "closed", "resolved", "rejected", "cancelled"];
 
 export default function RepairHistoryPage() {
+  const hero = usePageHero("repair/history");
+
   const router = useRouter();
   const [workOrders, setWorkOrders] = useState<HistoryWO[]>([]);
   const [loading, setLoading] = useState(true);

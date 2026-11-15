@@ -4,6 +4,7 @@
 // data: GET /api/v1/repair.php?id=N + GET /api/v1/repair.php?parts=1&id=N
 
 import { useEffect, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useParams } from "next/navigation";
 import { Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 export default function RepairPrintPage() {
+  const hero = usePageHero("repair/print");
+
   const params = useParams<{ id: string }>();
   const id = Number(params?.id || params?.["id"] || 0);
   const [row, setRow] = useState<RepairRow | null>(null);

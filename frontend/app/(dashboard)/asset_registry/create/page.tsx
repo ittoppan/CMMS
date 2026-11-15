@@ -4,6 +4,7 @@
 // business logic ครบเดิม: POST /api/v1/asset_registry.php + SuccessDialog flow
 
 import { useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { Grid } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
@@ -18,6 +19,8 @@ import ImageUploadField from "@/components/ImageUploadField";
 import SuccessDialog from "@/components/SuccessDialog";
 
 export default function CreateAssetPage() {
+  const hero = usePageHero("asset_registry/create");
+
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);

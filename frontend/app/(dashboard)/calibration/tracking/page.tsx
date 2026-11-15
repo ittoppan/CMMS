@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -39,6 +40,8 @@ interface CalRow {
 }
 
 export default function CalibrationTrackingPage() {
+  const hero = usePageHero("calibration/tracking");
+
   const router = useRouter();
   const [rows, setRows] = useState<CalRow[]>([]);
   const [loading, setLoading] = useState(true);

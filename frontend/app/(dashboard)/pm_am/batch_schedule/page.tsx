@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useMemo, useEffect } from "react";
 import { useToast } from "@/components/ToastProvider";
@@ -22,6 +23,8 @@ interface AssetItem {
 }
 
 export default function BatchSchedulePage() {
+  const hero = usePageHero("pm_am/batch_schedule");
+
   const [assets, setAssets] = useState<AssetItem[]>([]);
   const [users, setUsers] = useState<{ value: string; label: string }[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { HStack, VStack, Grid } from "@/components/layout";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,8 @@ interface IoTSensorNode {
 }
 
 export default function IotMonitorPage() {
+  const hero = usePageHero("iot/monitor");
+
   const [sensors, setSensors] = useState<IoTSensorNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

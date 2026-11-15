@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -31,6 +32,8 @@ const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 export default function MtbfMttrCreatePage() {
+  const hero = usePageHero("mtbf_mttr/create");
+
   const router = useRouter();
 
   const [assets, setAssets] = useState<any[]>([]);

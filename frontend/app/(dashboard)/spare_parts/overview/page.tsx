@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { PageShell } from "@/components/PageShell";
@@ -38,6 +39,8 @@ const emptyData: DashboardData = {
 const fmt = (n: number | null | undefined) => (n ?? 0).toLocaleString("th-TH", { maximumFractionDigits: 2 });
 
 export default function SparePartsOverviewPage() {
+  const hero = usePageHero("spare_parts/overview");
+
   const [data, setData] = useState<DashboardData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);

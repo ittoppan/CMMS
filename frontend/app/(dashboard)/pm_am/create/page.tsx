@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import SuccessDialog from "@/components/SuccessDialog";
 
 export default function PMCreatePage() {
+  const hero = usePageHero("pm_am/create");
+
   const router = useRouter();
 
   const [assets, setAssets] = useState<any[]>([]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
@@ -27,6 +28,8 @@ import SuccessDialog from "@/components/SuccessDialog";
 import { Upload } from "lucide-react";
 
 export default function ManualCreatePage() {
+  const hero = usePageHero("manuals/create");
+
   const router = useRouter();
   
   const [assets, setAssets] = useState<any[]>([]);

@@ -4,6 +4,7 @@
 // logic ครบเดิม: โหลด/บันทึก page_editor.php, live preview iframe, DnD layout
 
 import { useState, useEffect, useRef } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
 import { Grid } from "@/components/layout";
 import { Card } from "@/components/ui/card";
@@ -84,6 +85,8 @@ function useMediaQuery(query: string): boolean {
 }
 
 export default function InteractiveStylePageEditor() {
+  const hero = usePageHero("editor");
+
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [selectedRoute, setSelectedRoute] = useState<string>("/dashboard");
   const [viewport, setViewport] = useState<ViewportSize>("desktop");

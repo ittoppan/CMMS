@@ -5,6 +5,7 @@
 // + Saved views v1 (localStorage per entity, URL เป็น source of truth) — เฟสถัดไปจาก /repair
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { usePageHero } from "@/lib/i18n";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Grid } from "@/components/layout";
@@ -120,6 +121,8 @@ function buildAssetParams(state: { search: string; deptFilter: string; statusFil
 }
 
 export default function AssetsPage() {
+  const hero = usePageHero("assets");
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

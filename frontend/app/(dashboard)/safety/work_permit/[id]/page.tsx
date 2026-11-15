@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePageHero } from "@/lib/i18n";
 import { useParams, useRouter } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -63,6 +64,8 @@ function permAndon(s: string): "ok" | "warn" | "down" | "idle" {
 const sel = (v: string, opts: { value: string; label: string }[]) => opts.find((o) => o.value === v);
 
 export default function PermitDetailPage() {
+  const hero = usePageHero("safety/work_permit/[id]");
+
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
   const router = useRouter();

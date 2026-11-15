@@ -50,6 +50,7 @@ function friendlyAuthError(raw: string): string {
 }
 
 export default function LoginPage() {
+
   return (
     <>
       <ThemeProvider />

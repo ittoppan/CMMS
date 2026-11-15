@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { usePageHero } from "@/lib/i18n";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,8 @@ interface PwaStatus {
 }
 
 export default function PwaSettingsPage() {
+  const hero = usePageHero("settings/pwa");
+
   const [status, setStatus] = useState<PwaStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

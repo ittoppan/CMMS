@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { t, statusText, priorityText } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { assetUrl } from "@/lib/utils";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import { snapshotSave, snapshotLoad } from "@/lib/offline-store";
@@ -195,6 +196,8 @@ const actionIcon = (action: string) => {
 };
 
 export default function RepairViewDetailsPage() {
+  const hero = usePageHero("repair/view");
+
   const [woId, setWoId] = useState<string>("1");
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);

@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import SuccessDialog from "@/components/SuccessDialog";
 import { t } from "@/lib/i18n";
+import { usePageHero } from "@/lib/i18n";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -248,6 +249,8 @@ function EditSupplierContent() {
 }
 
 export default function EditSupplierPage() {
+  const hero = usePageHero("suppliers/edit");
+
   return (
     <Suspense fallback={<p className="text-sm text-muted-foreground">{t("common.loading")}</p>}>
       <EditSupplierContent />
