@@ -13,7 +13,7 @@
  *   - roles                 → roles:view        (1,2,6)
  *   - reports/import_excel  → report:export     (1,2,6)
  *   - spare_parts/sage_sync → sage:view/write   (1,2,6)
- *   - spare_parts/sage_shipments → sage:view/write (1,2,6,7) [Foreman ติดตามการรับของ]
+ *   - spare_parts/sage_shipments → sage:view (1,2,6,7) [Foreman ติดตามการรับของ แบบอ่านอย่างเดียว]
  *   - spare_parts/sage_po   → sage:view         (1,2,6,7)  [Foreman ออก PO หน้างาน]
  */
 

@@ -28,6 +28,12 @@ try {
     requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
 
+    // UI ใช้ header นี้เพื่อซ่อน/ปิดปุ่มตัด Sage สำหรับบทบาทที่อ่านได้อย่างเดียว
+    // (GET ยังคงตอบเป็น array รูปเดิม ไม่เปลี่ยน contract)
+    if (in_array($method, ['GET', 'HEAD'], true)) {
+        header('X-CMMS-Can-Write: ' . (canPerm($pdo, 'sage', 'write') ? '1' : '0'));
+    }
+
     switch ($method) {
         case 'GET':
             $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';

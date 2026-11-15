@@ -100,6 +100,8 @@ export default function SageShipmentsPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
   const [showOnlyPending, setShowOnlyPending] = useState(false);
+  // สิทธิ์เขียน (sage:write) — API แจ้งมาทาง header; ไม่มีสิทธิ์ = ซ่อนปุ่มตัด Sage
+  const [canWrite, setCanWrite] = useState(true);
 
   type ModalType = "request-shipment" | "item-qty" | "item-shipment";
   interface ModalState {
@@ -121,6 +123,7 @@ export default function SageShipmentsPage() {
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || `HTTP ${res.status}`);
       setRequests(Array.isArray(json) ? json : []);
+      setCanWrite(res.headers.get("X-CMMS-Can-Write") !== "0");
     } catch (e: unknown) {
       const msg = e instanceof Error && !/failed to fetch|network|load failed/i.test(e.message) ? e.message : "ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง";
       setError(msg);
@@ -418,6 +421,9 @@ export default function SageShipmentsPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           {req.sage_shipment_status !== "completed" ? (
+                            !canWrite ? (
+                              <span className="text-xs text-muted-foreground">อ่านอย่างเดียว</span>
+                            ) : (
                             <>
                               <Button
                                 variant="outline"
@@ -442,6 +448,7 @@ export default function SageShipmentsPage() {
                                 <CheckCircle2 size={12} strokeWidth={2} /> ตัดครบ
                               </Button>
                             </>
+                            )
                           ) : (
                             <span className="text-xs text-muted-foreground">เสร็จสิ้น</span>
                           )}
@@ -499,6 +506,9 @@ export default function SageShipmentsPage() {
                                       </td>
                                       <td className="py-2 px-3 text-center">
                                         {item.sage_item_status !== "completed" ? (
+                                          !canWrite ? (
+                                            <span className="text-xs text-muted-foreground">อ่านอย่างเดียว</span>
+                                          ) : (
                                           <Button
                                             variant="outline"
                                             size="sm"
@@ -507,6 +517,7 @@ export default function SageShipmentsPage() {
                                           >
                                             <Truck size={12} strokeWidth={2} /> ตัด
                                           </Button>
+                                          )
                                         ) : (
                                           <span className="text-xs text-[var(--cmms-success)]">✓ ตัดครบแล้ว</span>
                                         )}

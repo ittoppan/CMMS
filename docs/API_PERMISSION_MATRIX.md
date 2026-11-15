@@ -147,6 +147,6 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | `spare_parts/sage_po` | 1,2,6,7,8 | **1,2,6,7** |
 
 - เขียน 17 แถว (`is_granted = 0` = ซ่อนเมนู; ไม่ลบแถว) — สำรองค่าเดิมเป็น JSON ทุกครั้งก่อนเขียน
-- **ภายหลังคืนสิทธิ์ `spare_parts/sage_shipments` ให้ Foreman (role 7)** เพราะทีมคลังต้องติดตาม/บันทึกการรับของ → `sage:view` + `sage:write` สำหรับ role 7 (คงความสามารถเดิมก่อนบังคับใช้ ไม่ให้เจอ 403)
+- **ภายหลังคืนสิทธิ์ `spare_parts/sage_shipments` ให้ Foreman (role 7)** เพราะทีมคลังต้องติดตามการรับของ → `sage:view` **อ่านอย่างเดียว**; UI ซ่อนปุ่ม "ตัด/ตัดบางส่วน/ตัดครบ" และแสดงคำว่า "อ่านอย่างเดียว" เมื่อ API ตอบ header `X-CMMS-Can-Write: 0`
 - **ย้อนกลับ**: `php scripts/align_menu_permissions.php --restore=backups/menu_permissions_YYYYmmdd_HHMMSS.json`
 - `menu_permissions` ยังกว้างกว่า matrix ในโมดูลอื่นที่ยังไม่บังคับ (`reports/*`, `cost`, `workforce/reports`) — ปรับเพิ่มได้ด้วยการเพิ่มคู่ menu_key → role ในสคริปต์
