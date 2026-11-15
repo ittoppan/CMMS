@@ -112,12 +112,13 @@ try {
     $maxBytes = 6 * 1024 * 1024;
     $mimeExtMap = [
         'image/png' => 'png', 'image/jpeg' => 'jpg', 'image/gif' => 'gif',
-        'image/webp' => 'webp', 'image/svg+xml' => 'svg',
+        'image/webp' => 'webp',
+        // ไม่อนุญาต SVG: ฝัง <script> ได้ → stored XSS (ดู public/uploads/web.config)
         'application/pdf' => 'pdf', 'application/msword' => 'doc',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
         'application/vnd.ms-excel' => 'xls', 'text/csv' => 'csv', 'text/plain' => 'txt',
     ];
-    $imageExts = ['png', 'jpg', 'gif', 'webp', 'svg'];
+    $imageExts = ['png', 'jpg', 'gif', 'webp'];
 
     $binary = null;
     $mime = null;
@@ -145,7 +146,7 @@ try {
     if (strlen($binary) > $maxBytes) { http_response_code(413); echo json_encode(['error' => 'ไฟล์ใหญ่เกิน 6 MB']); exit; }
 
     $ext = $mimeExtMap[$mime] ?? 'bin';
-    if (in_array($ext, $imageExts, true) && $ext !== 'svg') {
+    if (in_array($ext, $imageExts, true)) {
         $img = @imagecreatefromstring($binary);
         if ($img === false) {
             clientActionFinish($pdo, $idemKey, 'failed', null, null, 400);
