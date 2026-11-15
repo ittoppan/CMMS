@@ -167,6 +167,8 @@ const PERMISSION_MATRIX = [
     ],
     8 => [ // Officer — ธุรการ/ผู้ดูแลเอกสาร (สิทธิ์อิงเมนูที่ได้รับจริงใน menu_permissions)
         // เพิ่มเฉพาะที่จำเป็นเพื่อไม่ให้การบังคับใช้ permission ใหม่ตัดสิทธิ์ที่เคยใช้ได้
+        // Office เป็นคนดูแลสต็อก: พอเบิกใน CMMS แล้วต้องไปตัดสต็อกใน Shipments ของ Sage 300
+        'sage'       => ['view', 'write'],
         'users'      => ['view'],
         'settings'   => ['view'],
         'audit_log'  => ['view'],

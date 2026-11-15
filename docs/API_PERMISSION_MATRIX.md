@@ -143,10 +143,14 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | `roles` | 1,2,3,5,6,7,8 | **1,2,6** |
 | `reports/import_excel` | 1,2,3,5,6,7,8 | **1,2,6** |
 | `spare_parts/sage_sync` | 1,2,3,5,6,7,8 | **1,2,6** |
-| `spare_parts/sage_shipments` | 1,2,3,5,6,7,8 | **1,2,6,7** (คืนให้ Foreman — ทีมคลังติดตาม/บันทึกการรับของ) |
+| `spare_parts/sage_shipments` | 1,2,3,5,6,7,8 | **1,2,6,7,8** (8 = Office ตัดสต็อกได้, 7 = Foreman ดูอย่างเดียว) |
 | `spare_parts/sage_po` | 1,2,6,7,8 | **1,2,6,7** |
 
 - เขียน 17 แถว (`is_granted = 0` = ซ่อนเมนู; ไม่ลบแถว) — สำรองค่าเดิมเป็น JSON ทุกครั้งก่อนเขียน
-- **ภายหลังคืนสิทธิ์ `spare_parts/sage_shipments` ให้ Foreman (role 7)** เพราะทีมคลังต้องติดตามการรับของ → `sage:view` **อ่านอย่างเดียว**; UI ซ่อนปุ่ม "ตัด/ตัดบางส่วน/ตัดครบ" และแสดงคำว่า "อ่านอย่างเดียว" เมื่อ API ตอบ header `X-CMMS-Can-Write: 0`
+- **กระบวนการจริง:** เบิกอะไหล่ใน CMMS → **Office (role 8)** ไปตัดสต็อกใน Shipments ของ Sage 300 (คนละระบบ)
+  - role 8 Officer = `sage:view` + `sage:write` (ตัดสต็อกได้)
+  - role 7 Foreman = `sage:view` อ่านอย่างเดียว (ติดตามว่าตัดแล้วหรือยัง)
+  - UI ซ่อนปุ่ม "ตัด/ตัดบางส่วน/ตัดครบ" และแสดง "อ่านอย่างเดียว" เมื่อ API ตอบ header `X-CMMS-Can-Write: 0`
+  - role 1/2/6 คง write ไว้เพื่อแก้ข้อมูลแทน Office ได้
 - **ย้อนกลับ**: `php scripts/align_menu_permissions.php --restore=backups/menu_permissions_YYYYmmdd_HHMMSS.json`
 - `menu_permissions` ยังกว้างกว่า matrix ในโมดูลอื่นที่ยังไม่บังคับ (`reports/*`, `cost`, `workforce/reports`) — ปรับเพิ่มได้ด้วยการเพิ่มคู่ menu_key → role ในสคริปต์

@@ -13,7 +13,7 @@
  *   - roles                 → roles:view        (1,2,6)
  *   - reports/import_excel  → report:export     (1,2,6)
  *   - spare_parts/sage_sync → sage:view/write   (1,2,6)
- *   - spare_parts/sage_shipments → sage:view (1,2,6,7) [Foreman ติดตามการรับของ แบบอ่านอย่างเดียว]
+ *   - spare_parts/sage_shipments → sage:view/write (1,2,6,8) + Foreman 7 อ่านอย่างเดียว
  *   - spare_parts/sage_po   → sage:view         (1,2,6,7)  [Foreman ออก PO หน้างาน]
  */
 
@@ -29,7 +29,7 @@ const TARGET_GRANTS = [
     'roles'                       => [1, 2, 6],
     'reports/import_excel'        => [1, 2, 6],
     'spare_parts/sage_sync'       => [1, 2, 6],
-    'spare_parts/sage_shipments'  => [1, 2, 6, 7], // Foreman (ทีมคลัง) ต้องติดตาม/บันทึกการรับของ
+    'spare_parts/sage_shipments'  => [1, 2, 6, 7, 8], // 8 = Office (ตัดสต็อกใน Sage 300), 7 = Foreman (ติดตาม)
     'spare_parts/sage_po'         => [1, 2, 6, 7],
 ];
 
