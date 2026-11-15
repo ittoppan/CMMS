@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // editor/builder — v3 design system (shadcn-style)
 // logic ครบเดิม: embed GrapesJS ผ่าน GrapesBuilder (ไม่แตะ integration)
 
@@ -21,6 +22,15 @@ export default function VisualBuilderPage() {
         </Badge>
       }
     >
+
+      <ModuleGuide
+        name="ตัวสร้างหน้า/Editor Builder"
+        summary="เครื่องมือสร้างหรือแก้ไขหน้า/เลย์เอาต์ตามฟีเจอร์ที่ระบบรองรับ (editor/builder) สำหรับผู้ดูแลที่มีสิทธิ์"
+        steps={["เปิด builder และแก้ไขเนื้อหา/เลย์เอาต์ตามที่ต้องการ","บันทึกและตรวจสอบผลบนหน้าปลายทาง","หากมีการเผยแพร่ ให้ระวังผลกระทบต่อผู้ใช้และทดสอบก่อน"]}
+        source="ทำงานผ่านหน้า builder และ API/บริการที่เกี่ยวข้องกับการจัดเก็บหน้า (ตามโค้ดในหน้านี้)"
+        note="การแก้ไข builder อาจมีผลกับหน้าที่เผยแพร่แล้ว — ควรทดสอบและมีผู้รับผิดชอบกำกับ"
+        related={[{"href":"/pages","label":"จัดการหน้า (Pages)"},{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
       <div className="pb-24 lg:pb-8">
         <GrapesBuilder />
       </div>

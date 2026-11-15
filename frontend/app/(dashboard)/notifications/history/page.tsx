@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // notifications/history — v3 design system (shadcn-style)
 // logic ครบเดิม: โหลด notification_logs + ตัวกรอง + export CSV
 
@@ -225,6 +226,15 @@ export default function LineDeliveryHistoryPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ประวัติการแจ้งเตือน (Notification History)"
+        summary="ดูประวัติการส่ง/บันทึกการแจ้งเตือนย้อนหลัง เพื่อใช้ตรวจสอบว่าแจ้งเตือนไปยังใคร เมื่อไร และสถานะที่บันทึกไว้"
+        steps={["ค้นหา/กรองตามช่วงเวลา ประเภท หรือเงื่อนไขที่หน้ารองรับ","ตรวจรายละเอียดรายการ (ผู้รับ/หัวข้อ/สถานะ/เวลา) ตามข้อมูลที่ระบบบันทึก","ใช้ร่วมกับหน้า ตั้งค่าการแจ้งเตือน เพื่อปรับกฎหรือช่องทาง"]}
+        source="ดึงจาก API ประวัติการแจ้งเตือนที่หน้าเรียกใช้ (ตามโค้ดในหน้านี้) — ข้อมูลจริงจากฐานข้อมูล"
+        note="ข้อมูลบางฟิลด์อาจว่างถ้าแหล่งต้นทางไม่บันทึกครบ — ไม่ควรตีความเกินจากที่ระบบเก็บไว้"
+        related={[{"href":"/notifications","label":"ศูนย์แจ้งเตือน"},{"href":"/settings/notifications","label":"ตั้งค่าการแจ้งเตือน"}]}
+      />
       <div className="space-y-6 pb-24 lg:pb-8">
         {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 

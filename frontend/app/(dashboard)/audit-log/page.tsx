@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePageHero, t, useLang } from "@/lib/i18n";
 import { PageShell } from "@/components/PageShell";
@@ -228,6 +229,15 @@ export default function AuditLogPage() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="บันทึกการใช้งาน (Audit Log)"
+        summary="ตรวจสอบประวัติการกระทำสำคัญในระบบ (ใคร ทำอะไร เมื่อไร) เพื่อการตรวจสอบความโปร่งใสและการแก้ไขปัญหา"
+        steps={["ค้นหา/กรองตามผู้ใช้ การกระทำ หรือช่วงเวลาที่หน้ารองรับ","เปิดดูรายละเอียดรายการบันทึกที่เกี่ยวข้อง","ใช้เป็นหลักฐานประกอบการสอบสวนภายในตามนโยบายขององค์กร"]}
+        source="ดึงจาก API audit log ที่หน้านี้เรียกใช้ — ข้อมูลตามที่ระบบบันทึกไว้จริง"
+        note="รายการที่ไม่ถูกบันทึกไว้ก็จะไม่ปรากฏ — การอ่านบันทึกควรสอดคล้องกับนโยบายความเป็นส่วนตัวและการเข้าถึงข้อมูล"
+        related={[{"href":"/users","label":"ผู้ใช้งาน"},{"href":"/roles","label":"บทบาทและสิทธิ์"}]}
+      />
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {/* filter bar */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -128,6 +129,15 @@ export default function PwaSettingsPage() {
         </span>
       }
     >
+
+      <ModuleGuide
+        name="ตั้งค่า PWA"
+        summary="กำหนดค่าการทำงานของ Progressive Web App (เช่น ชื่อ/ไอคอน/พฤติกรรมที่รองรับ) ตามที่ระบบอนุญาต"
+        steps={["ตรวจค่าปัจจุบันของ PWA","แก้ไขการตั้งค่าแล้วบันทึก","ทดสอบติดตั้ง/เปิดแอปบนอุปกรณ์จริงเพื่อยืนยันผล"]}
+        source="อ่าน/บันทึกผ่าน API/การตั้งค่า PWA ที่หน้านี้เรียกใช้"
+        note="การเปลี่ยนบางค่าอาจต้องเคลียร์แคชหรือ re-install PWA บนอุปกรณ์ผู้ใช้"
+        related={[{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
       {/* BISECT START */}
       <VStack gap={6} data-bisect="full">
       {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}

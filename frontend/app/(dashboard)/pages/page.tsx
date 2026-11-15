@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // pages — v3 design system (shadcn-style)
 // logic ครบเดิม: ตรวจสิทธิ์ useMenuPermission + โหลดรายการ custom_pages
 
@@ -59,6 +60,15 @@ export default function CustomPagesListPage() {
         title="หน้าเว็บที่สร้างเอง"
         description="หน้าทั้งหมดที่สร้างจาก Visual Page Builder"
       >
+
+      <ModuleGuide
+        name="จัดการหน้า (Pages)"
+        summary="จัดการรายการหน้าเนื้อหา/เพจที่ระบบรองรับ (เช่น สร้าง แก้ไข ลิงก์) สำหรับการนำเสนอหรือเอกสารภายใน"
+        steps={["ดูรายการหน้าและค้นหา","สร้าง/แก้ไข/ลบตามสิทธิ์ และตรวจสอบผลบนลิงก์จริง","ใช้ร่วมกับ editor/builder หากต้องการแก้ไขรูปแบบหน้า"]}
+        source="ดึง/จัดการผ่าน API pages ที่หน้านี้เรียกใช้ — ข้อมูลจริงจากระบบ"
+        note="การลบหน้าที่มีลิงก์ภายนอกอ้างอิงอาจทำให้เข้าถึงไม่ได้ — ควรตรวจสอบก่อนลบ"
+        related={[{"href":"/editor/builder","label":"ตัวสร้างหน้า/Builder"},{"href":"/documents","label":"เอกสาร (ถ้าเกี่ยวข้อง)"}]}
+      />
         <p className="py-10 text-sm text-muted-foreground">กำลังตรวจสอบสิทธิ์การเข้าถึง...</p>
       </PageShell>
     );

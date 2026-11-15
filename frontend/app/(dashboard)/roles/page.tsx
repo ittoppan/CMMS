@@ -1,5 +1,6 @@
-﻿"use client";
+"use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // roles — migrate ui kit (PageShell, ui/Card, ui/Input, SimpleDataTable, ui/Alert)
 // business logic ครบเดิม: fetch/delete roles.php, client search filter
 
@@ -130,6 +131,15 @@ export default function RolesPage() {
         </Button>
       }
     >
+
+      <ModuleGuide
+        name="บทบาทและสิทธิ์ (Roles)"
+        summary="จัดการบทบาท (roles) และโครงสร้างสิทธิ์การเข้าถึงเมนู/ฟังก์ชันต่าง ๆ ของระบบ"
+        steps={["ค้นหารายการบทบาทที่มีอยู่","เพิ่ม/แก้ไขบทบาทและกำหนดสิทธิ์ตามความต้องการของหน่วยงาน","ตรวจสอบผลกับผู้ใช้ที่สังกัดบทบาทนั้น และดูประวัติการเปลี่ยนแปลงใน Audit Log หากต้องการ"]}
+        source="ดึง/จัดการผ่าน API บทบาท (เช่น /api/v1/roles.php) ตามการเรียกใช้ในหน้านี้"
+        note="การปรับสิทธิ์มีผลต่อทุกผู้ใช้ในบทบาทนั้น — แนะนำทดสอบด้วยบัญชีทดสอบก่อนใช้งานจริง"
+        related={[{"href":"/users","label":"ผู้ใช้งาน"},{"href":"/settings/menus","label":"จัดการเมนู"}]}
+      />
       {/* KPI */}
       <Card className="p-4">
         <div className="flex items-center gap-3">

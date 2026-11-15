@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { VStack, HStack, Grid } from "@/components/layout";
@@ -688,6 +689,15 @@ export default function RepairOptionsPage() {
       title="ตัวเลือกแจ้งซ่อม · แผนก · ที่ตั้ง/สถานที่"
       description="จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน"
     >
+
+      <ModuleGuide
+        name="ตัวเลือกแจ้งซ่อม / แผนก / ที่ตั้ง"
+        summary="จัดการรายการตัวเลือกที่ใช้ในกระบวนการแจ้งซ่อมและข้อมูลอ้างอิง (เช่น แผนก/ที่ตั้ง/ตัวเลือก dropdown) เพื่อความสอดคล้องในการบันทึกงาน"
+        steps={["ตรวจรายการตัวเลือกปัจจุบันที่ใช้จริงในฟอร์มแจ้งซ่อม","เพิ่ม/แก้ไข/จัดลำดับ (ถ้ามี) แล้วบันทึก","ทดสอบที่หน้าฟอร์มแจ้งซ่อมหรือหน้าที่เกี่ยวข้อง"]}
+        source="อ่าน/บันทึกผ่าน API ตัวเลือกแจ้งซ่อม/ข้อมูลอ้างอิงที่หน้านี้เรียกใช้"
+        note="การลบตัวเลือกที่เคยถูกใช้อาจส่งผลต่อข้อมูลย้อนหลัง — ควรระวังและตรวจสอบก่อนดำเนินการ"
+        related={[{"href":"/repair/request","label":"แจ้งซ่อม"},{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
       <VStack gap={6}>
         <Card>
           <CardContent className="p-2">

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // users — migrate ui kit (PageShell, ui/Card, ui/Input, Radix Select, SimpleDataTable, ui/Dialog, ui/Badge, ui/Avatar)
 // business logic ครบเดิม: fetch/delete users.php, client filter (search + role), KPI counters
 // + Saved views v1 (localStorage per entity, URL เป็น source of truth)
@@ -489,6 +490,15 @@ export default function UsersPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ผู้ใช้งาน (Users)"
+        summary="จัดการบัญชีผู้ใช้ในระบบ — ดูรายการ ค้นหา กรองตามบทบาท เปิดเพิ่ม/แก้ไข และจัดการสิทธิ์ตามที่ระบบกำหนด"
+        steps={["ค้นหา/กรองผู้ใช้ตามชื่อ อีเมล หรือบทบาท","เปิดดูรายละเอียดหรือแก้ไขข้อมูลผู้ใช้ และกำหนดบทบาท/สิทธิ์ตามนโยบาย","ตรวจสอบผลหลังบันทึก (เช่น การเข้าถึงเมนู/การทำงาน) โดยผู้ใช้ที่เกี่ยวข้อง"]}
+        source="ดึง/จัดการผ่าน API ผู้ใช้ (เช่น /api/v1/users.php) ตามการเรียกใช้ในหน้านี้ — ข้อมูลจริงจากฐานข้อมูลระบบ"
+        note="การลบหรือเปลี่ยนบทบาทอาจกระทบการเข้าถึงทันที — ควรตรวจสอบก่อนยืนยัน และหลีกเลี่ยงการเปลี่ยนบัญชีที่ใช้ระบบอยู่โดยไม่จำเป็น"
+        related={[{"href":"/roles","label":"บทบาทและสิทธิ์ (Roles)"},{"href":"/audit-log","label":"บันทึกการใช้งาน (Audit Log)"}]}
+      />
       {error && (
         <Alert variant="danger" title="Error" description={error} />
       )}

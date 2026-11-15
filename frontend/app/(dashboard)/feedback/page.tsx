@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -137,6 +138,15 @@ export default function FeedbackPage() {
       title="Feedback & Issues"
       description={scope === "all" ? "ฟีดแบ็กทั้งหมด — admin ปรับสถานะได้" : "แจ้งปัญหาและเสนอความคิดเห็น — ผู้ดูแลระบบจะนำไปพิจารณาในการปรับปรุง"}
     >
+
+      <ModuleGuide
+        name="ข้อเสนอแนะ/Feedback"
+        summary="รับและตรวจสอบข้อเสนอแนะหรือรายงานปัญหาจากผู้ใช้ (ตามฟอร์มหรือกระบวนการที่ระบบกำหนด) เพื่อปรับปรุงการใช้งาน"
+        steps={["ตรวจรายการ feedback ที่ส่งเข้ามา และอ่านรายละเอียด","ติดตามผลหรือสื่อสารกลับไปยังผู้ส่งตามช่องทางที่เหมาะสม (นอกระบบ/ในระบบตามที่ทำได้)","นำข้อมูลไปวางแผนปรับปรุง UI/กระบวนการทำงาน"]}
+        source="ดึง/จัดการผ่าน API feedback ที่หน้านี้เรียกใช้ — ข้อมูลจริงจากระบบ"
+        note="ข้อมูลอาจมีเนื้อหาที่ผู้ใช้กรอกเอง — ควรใช้เพื่อปรับปรุงระบบตามนโยบายและความปลอดภัยของข้อมูล"
+        related={[{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
       <VStack gap={6}>
         {error && <Alert variant="danger" title="เกิดข้อผิดพลาด">{error}</Alert>}
         {notice && <Alert variant="info" title="ผลลัพธ์">{notice}</Alert>}

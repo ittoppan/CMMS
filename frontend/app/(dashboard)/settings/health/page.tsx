@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -145,6 +146,15 @@ export default function SystemHealthPage() {
                 : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }
             }
           >
+
+      <ModuleGuide
+        name="สถานะระบบ (System Health)"
+        summary="ดูภาพรวมสถานะสุขภาพระบบ/บริการที่ระบบตรวจวัด (ตามที่ API ให้มา) เพื่อติดตามความพร้อมใช้งานและจุดเสี่ยง"
+        steps={["ตรวจค่าดัชนี/สถานะที่แสดง (เช่น การเชื่อมต่อฐานข้อมูล, บริการที่เกี่ยวข้อง) ตามที่หน้าแสดง","หากมีสถานะผิดปกติ ให้บันทึกหลักฐานและตรวจสอบ log/infra ภายนอกระบบ","ติดตามซ้ำหลังแก้ไข"]}
+        source="ดึงข้อมูลสถานะจาก API health ที่หน้านี้เรียกใช้ — สะท้อนสภาพ ณ เวลาที่ตรวจสอบ"
+        note="หน้านี้เป็นมุมมองตรวจสอบ ไม่ได้แก้ไขสาเหตุอัตโนมัติ — การวินิจฉัยเชิงลึกอาจต้องดู log เซิร์ฟเวอร์/ฐานข้อมูล"
+        related={[{"href":"/settings","label":"ตั้งค่าระบบ"},{"href":"/sync-center","label":"ศูนย์ซิงก์ (ถ้ามีการใช้งาน)"}]}
+      />
             {status === "ok" && !statusWarn ? "ระบบปกติ" : "ต้องตรวจสอบ"}
           </span>
           <Button variant="secondary" disabled={loading} onClick={() => fetchHealth()}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { VStack, HStack } from "@/components/layout";
@@ -811,6 +812,15 @@ export default function PageDesignerPage() {
         title="ปรับแต่งหน้าตาระบบทั้งหมด"
         description="ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า — ดูตัวอย่างสดก่อนบันทึก"
       >
+
+      <ModuleGuide
+        name="ตั้งค่าการออกแบบ (Design/Theme)"
+        summary="ปรับค่าการแสดงผลธีม/การออกแบบที่ระบบรองรับ (ผ่าน ThemeSettingsPanel/การตั้งค่า) ให้สอดคล้องกับองค์กร"
+        steps={["เลือก/ปรับค่าการออกแบบที่ต้องการ","บันทึกและตรวจผลบนหน้าต่าง ๆ ที่เกี่ยวข้อง","หากมีการกำหนดระดับองค์กร ควรสื่อสารให้ผู้ใช้ทราบ"]}
+        source="ใช้ ThemeSettingsPanel และ API/การตั้งค่าการออกแบบที่ระบบเรียกใช้"
+        note="การเปลี่ยนธีมอาจกระทบความคมชัด/ความอ่านได้ — ควรตรวจสอบกับผู้ใช้ปลายทาง"
+        related={[{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
         <Card>
           <CardContent className="space-y-3 p-2">
             <HStack hAlign="between" vAlign="center" style={{ padding: "8px 12px 0" }}>

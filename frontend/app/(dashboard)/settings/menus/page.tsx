@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo, type ComponentType } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -255,6 +256,15 @@ export default function MenuPermissionsPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="จัดการเมนู (Menu Settings)"
+        summary="ปรับโครงสร้าง/การแสดงผลเมนูตามการตั้งค่าที่ระบบรองรับ (เช่น เรียงลำดับ/ซ่อนแสดงตามกลุ่ม) เพื่อให้สอดคล้องกับบทบาทการใช้งาน"
+        steps={["ตรวจสอบโครงสร้างเมนูปัจจุบัน","แก้ไขการตั้งค่าเมนูตามความเหมาะสม และบันทึก","ทดสอบด้วยบัญชีผู้ใช้ที่มีสิทธิ์ต่างกันเพื่อยืนยันผลการแสดงเมนู"]}
+        source="อ่าน/บันทึกผ่าน API/การตั้งค่าที่หน้านี้เรียกใช้"
+        note="การซ่อนเมนูไม่เท่ากับการปิดสิทธิ์ API — สิทธิ์จริงยังควรควบคุมที่ฝั่งเซิร์ฟเวอร์/บทบาท"
+        related={[{"href":"/roles","label":"บทบาทและสิทธิ์"},{"href":"/settings","label":"ตั้งค่าระบบ"}]}
+      />
       <VStack gap={6}>
       <style>{`
         /* minmax(0, …) สำคัญ: 1fr เปล่าใช้ min-content เป็นพื้น ทำให้ตารางสิทธิ์

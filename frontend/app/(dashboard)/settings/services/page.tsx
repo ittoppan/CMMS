@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useCallback } from "react";
 import { VStack, HStack } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -162,6 +163,15 @@ export default function SystemServicesPage() {
               ? { background: "var(--cmms-success-light)", color: "var(--cmms-success-dark)" }
               : { background: "var(--cmms-warning-light)", color: "var(--cmms-warning-dark)" }}
           >
+
+      <ModuleGuide
+        name="ตั้งค่าบริการ/Service Settings"
+        summary="กำหนดค่าบริการหรือการเชื่อมต่อภายนอกที่ระบบรองรับ (ตามหัวข้อในหน้า) เพื่อให้โมดูลทำงานถูกต้อง"
+        steps={["ตรวจค่าปัจจุบันและความสอดคล้องกับสภาพแวดล้อมใช้งาน","แก้ไขค่าตามเอกสาร/นโยบาย และบันทึก","ตรวจสอบผลลัพธ์ในโมดูลที่ใช้บริการนั้น"]}
+        source="อ่าน/บันทึกผ่าน API ตั้งค่าบริการที่หน้านี้เรียกใช้ — ค่าที่บันทึกมีผลต่อการทำงานของระบบ"
+        note="ห้ามบันทึกหรือเผยแพร่ secret/token ในที่ไม่ปลอดภัย — ใช้การตั้งค่าที่ระบบกำหนดและสิทธิ์ที่เหมาะสม"
+        related={[{"href":"/settings","label":"ตั้งค่าระบบ"},{"href":"/settings/health","label":"สถานะระบบ"}]}
+      />
             {allRunning ? "ทุก service รันปกติ" : "มี service ที่ยังไม่รัน"}
           </span>
           <Button

@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { setUserLang } from "@/lib/i18n";
@@ -779,6 +780,15 @@ export default function SettingsPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ตั้งค่าระบบ (System Settings)"
+        summary="ศูนย์รวมเมนูการตั้งค่าหลักของระบบ CMMS — นำทางไปยังการตั้งค่าองค์กร, ความปลอดภัย/สิทธิ์, การแจ้งเตือน, PWA, การออกแบบ และโมดูลย่อยอื่น ๆ ตามสิทธิ์การเข้าถึง"
+        steps={["เลือกหมวดตั้งค่าที่ต้องการจากการ์ดเมนู (เช่น ข้อมูลองค์กร, ความปลอดภัย, การแจ้งเตือน, PWA, การออกแบบ)","เปิดหน้าตั้งค่าย่อยเพื่อตรวจสอบหรือแก้ไขค่าตามนโยบายองค์กรและสิทธิ์ผู้ใช้","หลังเปลี่ยนค่า สำคัญ ควรทดสอบผลในหน้าที่เกี่ยวข้อง (เช่น การแจ้งเตือน, เมนู, PWA) ตามความเหมาะสม"]}
+        source="หน้าเมนูตั้งค่าหลัก (frontend/app/(dashboard)/settings/page.tsx) — ลิงก์ไปยังหน้าตั้งค่าย่อยอื่น ๆ ที่อยู่ภายใต้ /settings/* และโมดูลที่เกี่ยวข้อง"
+        note="การเข้าถึงแต่ละเมนูขึ้นกับสิทธิ์ (permission) ที่ผู้ใช้มี — การเปลี่ยนค่าบางอย่างมีผลทันทีหรือมีผลหลังรีเฟรชขึ้นกับโมดูลนั้น"
+        related={[{"href":"/settings/notifications","label":"ตั้งค่าการแจ้งเตือน"},{"href":"/settings/menus","label":"จัดการเมนู"},{"href":"/settings/health","label":"สถานะระบบ"}]}
+      />
       {error && <Alert variant="danger" title="Error" description={error} />}
 
       {saveMessage && <Alert variant="success" title="สำเร็จ" description={saveMessage} />}

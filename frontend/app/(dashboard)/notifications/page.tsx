@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 // notifications — Phase 16 Notification Center
 // ข้อมูลจริงจาก /api/v1/notifications.php (ตาราง notifications ผ่าน NotificationCenterService)
 // + tabs all/unread/read + กรองประเภท + ค้นหา + mark read/all read (บันทึกจริง)
@@ -243,6 +244,15 @@ export default function NotificationCenterPage() {
         </>
       }
     >
+
+      <ModuleGuide
+        name="ศูนย์แจ้งเตือน (Notifications)"
+        summary="แสดงรายการแจ้งเตือนในระบบ (จาก notification center/logs ตามที่ API ให้มา) พร้อมตัวกรองแท็บ/ประเภท/ค้นหาและการทำเครื่องหมายอ่าน"
+        steps={["เลือกแท็บ (ทั้งหมด/ยังไม่อ่าน/อ่านแล้ว) และกรองประเภท/คำค้นหา","เปิดรายการเพื่อดูรายละเอียดหรือไปยังลิงก์ที่เกี่ยวข้อง (ถ้ามี)","ใช้ตัวเลือกทำเครื่องหมายอ่าน/อ่านทั้งหมดเมื่อเหมาะสม"]}
+        source="ข้อมูลจาก /api/v1/notifications.php และข้อมูลที่เกี่ยวข้องตามการใช้งานในหน้า (รวมประวัติการส่งตามที่หน้าแสดง)"
+        note="รายการขึ้นกับการตั้งค่ากฎ/การส่งแจ้งเตือนและสิทธิ์ผู้ใช้ — การทำเครื่องหมายอ่านบันทึกลงระบบตาม API"
+        related={[{"href":"/notifications/history","label":"ประวัติการแจ้งเตือน"},{"href":"/settings/notifications","label":"ตั้งค่าการแจ้งเตือน"}]}
+      />
       <div className="space-y-6 pb-24 lg:pb-8">
         {error && <Alert variant="danger" title="เกิดข้อผิดพลาด" description={error} />}
 

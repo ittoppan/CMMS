@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { VStack, HStack, Grid } from "@/components/layout";
 import { Input } from "@/components/ui/input";
@@ -503,6 +504,15 @@ export default function NotificationsSettingsPage() {
               size="sm"
               onClick={() => window.open("/bind_line.php", "_blank")}
             >
+
+      <ModuleGuide
+        name="ตั้งค่าการแจ้งเตือน"
+        summary="กำหนดกฎ/ช่องทาง/เงื่อนไขการแจ้งเตือน (ตามโมดูลที่ระบบรองรับ) เพื่อให้การแจ้งเตือนตรงกับกระบวนการทำงาน"
+        steps={["ตรวจรายการกฎหรือการตั้งค่าการแจ้งเตือนที่มีอยู่","แก้ไข/เพิ่มกฎตามความต้องการ และบันทึก","ทดสอบด้วยเหตุการณ์จริงหรือหน้า Notifications เพื่อยืนยันผล"]}
+        source="อ่าน/บันทึกผ่าน API ตั้งค่าการแจ้งเตือน/กฎที่หน้านี้เรียกใช้"
+        note="การเปลี่ยนกฎอาจส่งผลต่อปริมาณการแจ้งเตือน — ควรทดสอบก่อนใช้งานจริง"
+        related={[{"href":"/notifications","label":"ศูนย์แจ้งเตือน"},{"href":"/notifications/history","label":"ประวัติการแจ้งเตือน"}]}
+      />
               <LinkIcon className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />
               ผูกบัญชี LINE
             </Button>
