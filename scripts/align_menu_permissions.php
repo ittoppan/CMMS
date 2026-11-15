@@ -34,6 +34,9 @@ const TARGET_GRANTS = [
     'spare_parts/sage_po'         => [1, 2, 6, 7, 8], // 8 = Office (ดูแลใบสั่งซื้อ/รับของ)
     'spare_parts/stock_take'      => [1, 2, 6, 8],     // นับ/ปิดรอบสต็อก (ต้องมี spare_parts:plan ด้วย)
     'pm_am'                       => [1, 2, 3, 5, 6, 7],   // pm_am:view (Officer 8 ไม่มีสิทธิ์ PM)
+    'approval'                    => [1, 2, 3, 6, 7],       // request:view/approve
+    'planning'                    => [1, 2, 6, 7],           // repair:view/schedule
+    'supervisor'                  => [1, 2, 6, 7],           // repair:view/verify
     // Phase 3: ปรับเมนูให้ตรง PERMISSION_MATRIX (module:action)
     'analytics'                   => [1, 2, 3, 5, 6, 7, 8], // report:view
     'cost'                        => [1, 2, 3, 5, 6, 7, 8], // report:view

@@ -200,6 +200,10 @@ const API_PERMISSION_ENFORCED = [
     // Failure / equipment borrowing
     'failure.php',
     'equipment_borrowing.php',
+    // Work order flow
+    'approval.php',
+    'planning.php',
+    'supervisor.php',
     // Workforce
     'workforce.php',
     // Settings (read settings:view)
