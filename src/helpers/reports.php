@@ -22,6 +22,12 @@ require_once __DIR__ . '/xlsx.php';
 /* ───────────────────────── 0. Indexes (performance) ───────────────────────── */
 
 function rpt_ensure_indexes(PDO $pdo): void {
+    // สร้าง index เฉพาะเมื่อสั่งผ่าน env (REPORTS_AUTO_INDEX=1) — ไม่รัน DDL ในทุก request
+    // ค่าเริ่มต้น: index ถูกสร้างไว้แล้ว (8 ตัว) และตรวจสอบย้อนหลังผ่าน CLI:
+    //   php -r 'require "src/helpers/reports.php"; $GLOBALS["REPORTS_FORCE_INDEX"]=1; rpt_ensure_indexes(getDb());'
+    if (getenv('REPORTS_AUTO_INDEX') !== '1' && empty($GLOBALS['REPORTS_FORCE_INDEX'])) {
+        return;
+    }
     $want = [
         ['repair', ['status']],
         ['repair', ['created_at']],

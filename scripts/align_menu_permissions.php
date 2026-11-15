@@ -31,6 +31,7 @@ const TARGET_GRANTS = [
     'spare_parts/sage_sync'       => [1, 2, 6, 8], // 8 = Office (ดึงสต็อกจาก Sage 300)
     'spare_parts/sage_shipments'  => [1, 2, 6, 7, 8], // 8 = Office (ตัดสต็อกใน Sage 300), 7 = Foreman (ติดตาม)
     'spare_parts/sage_po'         => [1, 2, 6, 7, 8], // 8 = Office (ดูแลใบสั่งซื้อ/รับของ)
+    'spare_parts/stock_take'      => [1, 2, 6, 8],     // นับ/ปิดรอบสต็อก (ต้องมี spare_parts:plan ด้วย)
 ];
 
 /** role ทั้งหมดที่มีในระบบ (ใช้คำนวณว่าใครต้องถูกตั้ง 0) */

@@ -217,6 +217,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "suppliers", labelKey: "menu.suppliers", href: "/suppliers", icon: Truck },
       { perm: "spare_parts/overview", labelKey: "menu.spare_overview", href: "/spare_parts/overview", icon: ChartPie, secondary: true },
       { perm: "spare_parts/returns", labelKey: "menu.spare_returns", href: "/spare_parts/returns", icon: History, secondary: true },
+      { perm: "spare_parts/stock_take", labelKey: "menu.stock_take", href: "/spare_parts/stock_take", icon: ClipboardCheck, secondary: true },
       { perm: "spare_parts/sage_shipments", labelKey: "menu.sage_shipments", href: "/spare_parts/sage_shipments", icon: Truck, secondary: true },
       { perm: "spare_parts/sage_po", labelKey: "menu.sage_po", href: "/spare_parts/sage_po", icon: FileCheck2, secondary: true },
       { perm: "spare_parts/sage_sync", labelKey: "menu.sage_sync", href: "/spare_parts/sage_sync", icon: Database, secondary: true },

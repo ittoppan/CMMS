@@ -22,6 +22,20 @@ requireLogin(getDb(), true); // ต้องเป็น admin
 $pdo = getDb();
 
 /* ------------------------------------------------------------
+ * ค่าตั้งต้นจาก environment (ห้ามฝัง path/port ของเครื่อง dev ไว้ในโค้ด)
+ * ------------------------------------------------------------ */
+function svc_env(string $key, $default) {
+    $v = getenv($key);
+    return ($v === false || $v === '') ? $default : $v;
+}
+function svc_next_port(): int { return (int)svc_env('NEXTJS_PORT', 3001); }
+function svc_api_port(): int { return (int)svc_env('API_PORT', 8081); }
+function svc_mysql_port(): int { return (int)svc_env('MYSQL_PORT', 3306); }
+function svc_app_root(): string {
+    return rtrim(str_replace('\\', '/', (string)svc_env('APP_ROOT', dirname(__DIR__, 3))), '/');
+}
+
+/* ------------------------------------------------------------
  * ฟังก์ชันตรวจสถานะ (ทุกตัวไม่พึ่งพา shell — ปลอดภัย)
  * ------------------------------------------------------------ */
 function portListening(int $port): bool {
@@ -54,7 +68,7 @@ function processPidByName(string $name): ?int {
 function zrokInfo(): array {
     // ดูจาก local zrok API (port 9191) — ถ้ามี
     $ctx = stream_context_create(['http' => ['timeout' => 2]]);
-    $json = @file_get_contents('http://127.0.0.1:9191/api/tunnels', false, $ctx);
+    $json = @file_get_contents(rtrim((string)svc_env('ZROK_API_URL', 'http://127.0.0.1:9191'), '/') . '/api/tunnels', false, $ctx);
     if ($json === false) return [];
     $j = json_decode($json, true);
     $tunnels = [];
@@ -87,7 +101,7 @@ function websiteStatus(string $site): string {
 function ngrokInfo(): array {
     // ดูจาก local ngrok API (port 4040) — ไม่พึ่งพา shell
     $ctx = stream_context_create(['http' => ['timeout' => 2]]);
-    $json = @file_get_contents('http://127.0.0.1:4040/api/tunnels', false, $ctx);
+    $json = @file_get_contents(rtrim((string)svc_env('NGROK_API_URL', 'http://127.0.0.1:4040'), '/') . '/api/tunnels', false, $ctx);
     if ($json === false) return [];
     $j = json_decode($json, true);
     $tunnels = [];
@@ -120,10 +134,11 @@ function httpCheck(string $url, int $timeout = 4): array {
  * ------------------------------------------------------------ */
 function getServiceStatuses(PDO $pdo): array {
     // 1. Web App (Next.js)
-    $webListen = portListening(3001);
-    $webPid = processPidOnPort(3001);
+    $webPort = svc_next_port();
+    $webListen = portListening($webPort);
+    $webPid = processPidOnPort($webPort);
     // ตรวจ HTTP ของเว็บ
-    $webHttp = $webListen ? httpCheck('http://127.0.0.1:3001/') : ['reachable' => false, 'http_code' => 0];
+    $webHttp = $webListen ? httpCheck('http://127.0.0.1:' . $webPort . '/') : ['reachable' => false, 'http_code' => 0];
 
     // 2. ngrok
     $ngrokPid = processPidByName('ngrok.exe');
@@ -134,7 +149,7 @@ function getServiceStatuses(PDO $pdo): array {
     // 2.5 Cloudflare Tunnel (quick tunnel — URL อ่านจาก log ของ cloudflared)
     $cfPid = processPidByName('cloudflared.exe');
     $cfUrl = '';
-    $cfLogPath = 'C:\\cloudflared\\cf_tunnel_err.log';
+    $cfLogPath = (string)svc_env('CLOUDFLARED_LOG', 'C:\\cloudflared\\cf_tunnel_err.log');
     if (file_exists($cfLogPath)) {
         $cfLog = (string)@file_get_contents($cfLogPath);
         if (preg_match('#https://[a-z0-9\-]+\.trycloudflare\.com#', $cfLog, $m)) $cfUrl = $m[0];
@@ -146,18 +161,20 @@ function getServiceStatuses(PDO $pdo): array {
     $zrokUrl = '';
     foreach ($zrokTunnels as $t) { if ($t['public_url']) { $zrokUrl = $t['public_url']; break; } }
 
-    // 3. IIS site cmms-tpt (PHP API)
-    $siteState = websiteStatus('cmms-tpt');
-    $iisListen = portListening(8081);
-    $apiHttp = $iisListen ? httpCheck('http://127.0.0.1:8081/') : ['reachable' => false, 'http_code' => 0];
+    // 3. IIS site (PHP API)
+    $apiPort = svc_api_port();
+    $iisSite = (string)svc_env('IIS_SITE_NAME', 'cmms-tpt');
+    $siteState = websiteStatus($iisSite);
+    $iisListen = portListening($apiPort);
+    $apiHttp = $iisListen ? httpCheck('http://127.0.0.1:' . $apiPort . '/') : ['reachable' => false, 'http_code' => 0];
 
     // 4. MySQL — ใช้พอร์ต + PDO ping (IIS AppPool ไม่มีสิทธิ์รัน sc/Get-Service)
-    $mysqlListen = portListening(3306);
+    $mysqlListen = portListening(svc_mysql_port());
     $mysqlOk = false;
     try { $pdo->query('SELECT 1'); $mysqlOk = true; } catch (Exception $e) {}
 
     // 5. LINE Webhook (ใช้ tunnel-url.txt → ngrok ก่อน cloudflared)
-    $tunnelUrlFile = dirname(__DIR__, 3) . '/logs/tunnel-url.txt';
+    $tunnelUrlFile = svc_app_root() . '/logs/tunnel-url.txt';
     $fileUrl = '';
     if (file_exists($tunnelUrlFile)) {
         $raw = (string)@file_get_contents($tunnelUrlFile);
@@ -176,15 +193,15 @@ function getServiceStatuses(PDO $pdo): array {
         'key' => 'web',
         'name' => 'Web App (Next.js)',
         'icon' => '🖥️',
-        'desc' => 'หน้าจอระบบ CMMS — production server บนพอร์ต 3001',
+        'desc' => 'หน้าจอระบบ CMMS — production server บนพอร์ต ' . $webPort,
         'status' => $webStatus,
         'running' => $webListen,
         'detail' => $webListen
             ? "กำลังรัน • PID $webPid • HTTP {$webHttp['http_code']}"
             : 'หยุดอยู่ — กดรันเพื่อเปิดเว็บ',
         'pid' => $webPid,
-        'port' => 3001,
-        'url' => 'http://localhost:3001',
+        'port' => $webPort,
+        'url' => 'http://localhost:' . $webPort,
     ];
 
     $ngrokStatus = ($ngrokPid && $ngrokUrl) ? 'running' : (($ngrokPid || $ngrokUrl) ? 'warning' : 'stopped');
@@ -242,15 +259,15 @@ function getServiceStatuses(PDO $pdo): array {
         'key' => 'iis',
         'name' => 'PHP API (IIS — cmms-tpt)',
         'icon' => '⚙️',
-        'desc' => 'REST API + ฐานข้อมูลของระบบ (พอร์ต 8081)',
+        'desc' => 'REST API + ฐานข้อมูลของระบบ (พอร์ต ' . $apiPort . ')',
         'status' => $iisStatus,
         'running' => $iisListen,
         'detail' => $iisListen
             ? "กำลังรัน • HTTP {$apiHttp['http_code']}" . ($siteState ? " • W3SVC: $siteState" : '')
-            : ($siteState ? "W3SVC: $siteState แต่ port 8081 ยังไม่ตอบ" : 'หยุดอยู่ — กดรันเพื่อเปิด'),
+            : ($siteState ? "W3SVC: $siteState แต่ port $apiPort ยังไม่ตอบ" : 'หยุดอยู่ — กดรันเพื่อเปิด'),
         'pid' => null,
-        'port' => 8081,
-        'url' => 'http://localhost:8081',
+        'port' => $apiPort,
+        'url' => 'http://localhost:' . $apiPort,
     ];
 
     $mysqlRunning = $mysqlListen && $mysqlOk;
@@ -265,7 +282,7 @@ function getServiceStatuses(PDO $pdo): array {
             ? 'กำลังรัน • พอร์ต 3306 เปิด • เชื่อมต่อ DB OK'
             : ($mysqlListen ? 'พอร์ตเปิดแต่ PDO ต่อไม่ได้' : 'หยุดอยู่ — กดรันเพื่อเปิดฐานข้อมูล'),
         'pid' => null,
-        'port' => 3306,
+        'port' => svc_mysql_port(),
         'url' => '',
     ];
 
@@ -293,27 +310,35 @@ function getServiceStatuses(PDO $pdo): array {
 function startService(string $key): array {
     switch ($key) {
         case 'web':
-            $logDir = 'C:\\Users\\ADMINI~1.MAJ\\AppData\\Local\\Temp\\opencode';
+            $logDir = (string)svc_env('NODE_LOG_DIR', sys_get_temp_dir());
+            $nodeExe = (string)svc_env('NODE_EXE', 'node');
+            $standalone = svc_app_root() . '/frontend/.next/standalone/frontend';
             $ps = 'powershell -NoProfile -Command "' .
-                '$env:PORT = \'3001\'; ' .
-                'Start-Process -FilePath \'node\' -ArgumentList \'server.js\' -WorkingDirectory \'C:\\inetpub\\wwwroot\\cmms-tpt\\frontend\\.next\\standalone\\frontend\' -WindowStyle Hidden -RedirectStandardOutput \'' . $logDir . '\\next-prod.log\' -RedirectStandardError \'' . $logDir . '\\next-prod-err.log\'' .
+                '$env:PORT = \'' . svc_next_port() . '\'; ' .
+                'Start-Process -FilePath \'' . $nodeExe . '\' -ArgumentList \'server.js\' -WorkingDirectory \'' . str_replace('/', '\\', $standalone) . '\' -WindowStyle Hidden -RedirectStandardOutput \'' . str_replace('/', '\\', $logDir) . '\\next-prod.log\' -RedirectStandardError \'' . str_replace('/', '\\', $logDir) . '\\next-prod-err.log\'' .
                 '"';
             shell_exec($ps);
             break;
         case 'ngrok':
-            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'C:\\ngrok\\ngrok.exe\' -ArgumentList \'start\',\'cmms-tpt\' -WorkingDirectory \'C:\\ngrok\' -WindowStyle Hidden"');
+            $ngrokExe = str_replace('/', '\\', (string)svc_env('NGROK_EXE', 'C:/ngrok/ngrok.exe'));
+            $ngrokDir = str_replace('/', '\\', dirname(str_replace('\\', '/', $ngrokExe)));
+            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'' . $ngrokExe . '\' -ArgumentList \'start\',\'' . svc_env('IIS_SITE_NAME', 'cmms-tpt') . '\' -WorkingDirectory \'' . $ngrokDir . '\' -WindowStyle Hidden"');
             break;
         case 'cloudflared':
-            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'C:\\cloudflared\\cloudflared.exe\' -ArgumentList \'tunnel\',\'--url\',\'http://localhost:3001\',\'--no-autoupdate\',\'--protocol\',\'http2\' -WindowStyle Hidden -RedirectStandardOutput \'C:\\cloudflared\\cf_tunnel_out.log\' -RedirectStandardError \'C:\\cloudflared\\cf_tunnel_err.log\'"');
+            $cfExe = str_replace('/', '\\', (string)svc_env('CLOUDFLARED_EXE', 'C:/cloudflared/cloudflared.exe'));
+            $cfOut = str_replace('/', '\\', (string)svc_env('CLOUDFLARED_OUT', 'C:/cloudflared/cf_tunnel_out.log'));
+            $cfErr = str_replace('/', '\\', (string)svc_env('CLOUDFLARED_LOG', 'C:/cloudflared/cf_tunnel_err.log'));
+            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'' . $cfExe . '\' -ArgumentList \'tunnel\',\'--url\',\'http://localhost:' . svc_next_port() . '\',\'--no-autoupdate\',\'--protocol\',\'http2\' -WindowStyle Hidden -RedirectStandardOutput \'' . $cfOut . '\' -RedirectStandardError \'' . $cfErr . '\'"');
             break;
         case 'zrok':
-            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'cmd\' -ArgumentList \'/c\',\'C:\\inetpub\\wwwroot\\cmms-tpt\\zrok2\\zrok2.bat\' -WorkingDirectory \'C:\\inetpub\\wwwroot\\cmms-tpt\\zrok2\' -WindowStyle Hidden"');
+            $zrokDir = str_replace('/', '\\', svc_app_root() . '/zrok2');
+            shell_exec('powershell -NoProfile -Command "Start-Process -FilePath \'cmd\' -ArgumentList \'/c\',\'' . $zrokDir . '\\zrok2.bat\' -WorkingDirectory \'' . $zrokDir . '\' -WindowStyle Hidden"');
             break;
         case 'iis':
-            shell_exec('powershell -NoProfile -Command "Import-Module WebAdministration; Start-Website -Name \'cmms-tpt\'; if (-not (Get-Service W3SVC | Where-Object {$_.Status -ne \'Running\'})) { Start-Service W3SVC }"');
+            shell_exec('powershell -NoProfile -Command "Import-Module WebAdministration; Start-Website -Name \'' . svc_env('IIS_SITE_NAME', 'cmms-tpt') . '\'; if (-not (Get-Service W3SVC | Where-Object {$_.Status -ne \'Running\'})) { Start-Service W3SVC }"');
             break;
         case 'mysql':
-            shell_exec('powershell -NoProfile -Command "Start-Service -Name MySQL80"');
+            shell_exec('powershell -NoProfile -Command "Start-Service -Name ' . svc_env('MYSQL_SERVICE', 'MySQL80') . '"');
             break;
         default:
             return ['error' => 'Unknown service: ' . $key];
@@ -325,7 +350,7 @@ function startService(string $key): array {
 function stopService(string $key): array {
     switch ($key) {
         case 'web':
-            shell_exec('powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"');
+            shell_exec('powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort ' . svc_next_port() . ' -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"');
             break;
         case 'ngrok':
             shell_exec('powershell -NoProfile -Command "Get-Process ngrok -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue"');

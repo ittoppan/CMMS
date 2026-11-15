@@ -30,10 +30,11 @@ function publicBaseUrl() {
         }
     }
 
-    // 4. ngrok (dev) — อ่านจาก local API (port 4040) เฉพาะเมื่อตั้ง NGROK_ENABLED=1
+    // 4. ngrok (dev) — อ่านจาก local API เฉพาะเมื่อตั้ง NGROK_ENABLED=1
     if (getenv('NGROK_ENABLED') === '1') {
         $ctx = stream_context_create(['http' => ['timeout' => 2]]);
-        $json = @file_get_contents('http://127.0.0.1:4040/api/tunnels', false, $ctx);
+        $ngrokApi = rtrim((string)(getenv('NGROK_API_URL') ?: 'http://127.0.0.1:4040'), '/');
+        $json = @file_get_contents($ngrokApi . '/api/tunnels', false, $ctx);
         if ($json !== false) {
             $j = json_decode($json, true);
             foreach (($j['tunnels'] ?? []) as $t) {

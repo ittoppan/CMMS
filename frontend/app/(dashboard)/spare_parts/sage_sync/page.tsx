@@ -17,6 +17,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useCan } from "@/lib/useCan";
 
 interface SyncLog {
   id: number | string;
@@ -132,6 +133,9 @@ export default function SageSyncConfigPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  // บทบาทที่ไม่มี sage:write เห็นการตั้งค่าได้ แต่บันทึก/สั่งดึงไม่ได้
+  const canWrite = useCan("sage")("write");
 
   const handleSyncCategory = async (catId: string) => {
     const cat = categories.find((c) => c.id === catId);
@@ -422,7 +426,7 @@ export default function SageSyncConfigPage() {
                 role="switch"
                 aria-checked={syncConfig.overwrite}
                 aria-label="ทับข้อมูลรายการเดิม"
-                onClick={() => setSyncConfig(prev => prev ? { ...prev, overwrite: !prev.overwrite } : prev)}
+                onClick={() => canWrite && setSyncConfig(prev => prev ? { ...prev, overwrite: !prev.overwrite } : prev)}
                 className="relative inline-flex h-10 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cmms-border-focus)]"
               >
                 <span
@@ -449,7 +453,7 @@ export default function SageSyncConfigPage() {
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                disabled={savingConfig}
+                disabled={savingConfig || !canWrite}
                 onClick={handleSaveConfig}
                 className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -511,14 +515,14 @@ export default function SageSyncConfigPage() {
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => toggleCategory(cat.id)}
+                          onClick={() => canWrite && toggleCategory(cat.id)}
                           className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] px-3 py-2 text-xs font-semibold text-[var(--cmms-text-secondary)] transition-all duration-300 hover:bg-[var(--cmms-bg-wash)]"
                         >
                           {cat.enabled ? "ปิดสิทธิ์" : "เปิดสิทธิ์"}
                         </button>
                         <button
                           type="button"
-                          disabled={syncingCat === cat.id}
+                          disabled={syncingCat === cat.id || !canWrite}
                           onClick={() => handleSyncCategory(cat.id)}
                           className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white cmms-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                         >
