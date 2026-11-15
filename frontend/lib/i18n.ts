@@ -1764,6 +1764,11 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     en: { eyebrow: "PREDICTIVE MAINTENANCE · CMMS-TOPPAN", title: "Predictive Maintenance", desc: "Asset risk prediction from MTBF and repair history" },
   },
 
+  "spare-reorder": {
+    th: { eyebrow: "SPARE REORDER · CMMS-TOPPAN", title: "แนะนำสั่งซื้ออะไหล่", desc: "รายการอะไหล่ที่สต็อกต่ำกว่า min พร้อมจำนวนแนะนำ" },
+    en: { eyebrow: "SPARE REORDER · CMMS-TOPPAN", title: "Spare Parts Reorder", desc: "Parts below min stock with suggested quantities" },
+  },
+
 };
 
 // ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════
