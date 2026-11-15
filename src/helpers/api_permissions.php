@@ -210,6 +210,16 @@ const API_PERMISSION_ENFORCED = [
     'calibration_tracking.php',
     // Contractor
     'contractor.php',
+    // Safety / Document / Engineering change / Shutdown
+    'work_permit.php',
+    'document.php',
+    'manuals.php',
+    'engineering_change.php',
+    'shutdown.php',
+    // IoT / Supplier / Knowledge
+    'iot.php',
+    'suppliers.php',
+    'knowledge.php',
     // Workforce
     'workforce.php',
     // Settings (read settings:view)

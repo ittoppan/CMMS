@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -70,6 +71,7 @@ function buildParams(state: { search: string }, base?: URLSearchParams) {
 }
 
 export default function SuppliersPage() {
+  const can = useCan("supplier");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -308,6 +310,7 @@ export default function SuppliersPage() {
       align: "right",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-1.5">
+          {can("edit") && (
           <Button
             variant="secondary"
             size="sm"
@@ -317,6 +320,8 @@ export default function SuppliersPage() {
             <SquarePen className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             แก้ไข
           </Button>
+          )}
+          {can("delete") && (
           <Button
             variant="danger"
             size="sm"
@@ -326,6 +331,7 @@ export default function SuppliersPage() {
             <Trash2 className="w-3.5 h-3.5" strokeWidth={1.75} aria-hidden="true" />
             ลบ
           </Button>
+          )}
         </div>
       ),
     },
@@ -342,10 +348,12 @@ export default function SuppliersPage() {
       title="ข้อมูลผู้ผลิต (Suppliers)"
       description="จัดการข้อมูลผู้ผลิต/ผู้จำหน่ายอะไหล่ คะแนน และมูลค่าสต็อก"
       actions={
+        can("create") ? (
         <Button onClick={() => router.push("/suppliers/create")}>
           <Plus className="w-4 h-4" strokeWidth={1.75} aria-hidden="true" />
           เพิ่ม Supplier ใหม่
         </Button>
+        ) : null
       }
     >
       <ModuleGuide

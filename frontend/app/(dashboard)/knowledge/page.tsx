@@ -15,6 +15,7 @@ import { usePageLayout } from "@/lib/pageLayout";
 import AndonBadge from "@/components/AndonBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -82,6 +83,7 @@ const FEATURE_TEXT: Record<string, { tone: "success" | "warning" | "danger"; lab
 
 export default function KnowledgePage() {
   const hero = usePageHero("knowledge");
+  const can = useCan("knowledge");
   const layout = usePageLayout("/knowledge", ["hero", "kpi", "content"]);
   const layoutStyle = (id: string) => ({
     order: layout.orderOf(id),
@@ -141,9 +143,11 @@ export default function KnowledgePage() {
           <Button variant="secondary" onClick={load} disabled={refreshing}>
             <RefreshCw size={15} aria-hidden="true" /> รีเฟรช
           </Button>
+          {can("create") && (
           <Link href="/knowledge/articles/create" className={buttonVariants({ variant: "primary" })}>
             <Plus size={16} aria-hidden="true" /> เขียนบทความ
           </Link>
+          )}
         </div>
       </div>
 
@@ -254,11 +258,11 @@ export default function KnowledgePage() {
                   title="ยังไม่มีบทความในหมวดหมู่ใดเลย"
                   description="เริ่มจากงานที่เจอบ่อยในหน้างาน แล้วเขียนเป็นอาการ–วิธีแก้ปัญหา ผู้ใช้จะค้นหาเจอในเวลาไม่กี่วินาที"
                   icon={<GraduationCap size={40} />}
-                  action={
+                  action={can("create") ? (
                     <Link href="/knowledge/articles/create" className={buttonVariants({ variant: "primary" })}>
                       <Plus size={15} aria-hidden="true" /> เขียนบทความแรก
                     </Link>
-                  }
+                  ) : undefined}
                 />
               </div>
             ) : (
