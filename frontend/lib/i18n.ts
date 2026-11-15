@@ -1769,6 +1769,11 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     en: { eyebrow: "SPARE REORDER · CMMS-TOPPAN", title: "Spare Parts Reorder", desc: "Parts below min stock with suggested quantities" },
   },
 
+  "alert-center": {
+    th: { eyebrow: "ALERT CENTER · CMMS-TOPPAN", title: "ศูนย์แจ้งเตือน", desc: "รวมการแจ้งเตือนจาก PM, อะไหล่, IoT" },
+    en: { eyebrow: "ALERT CENTER · CMMS-TOPPAN", title: "Alert Center", desc: "Aggregated alerts from PM, spare parts, IoT" },
+  },
+
 };
 
 // ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════
