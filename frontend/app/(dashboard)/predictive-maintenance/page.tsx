@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import AndonBadge from "@/components/AndonBadge";
 import { usePageHero } from "@/lib/i18n";
 
 type Item = {
@@ -32,11 +32,10 @@ export default function PredictiveMaintenancePage() {
       .finally(() => setLoading(false));
   }, [horizon]);
 
-  const riskColor = (r: string) => {
-    if (r === "high") return "danger";
-    if (r === "medium") return "warning";
-    if (r === "overdue") return "danger";
-    return "secondary";
+  const riskStatus = (r: string): "ok" | "warn" | "down" | "idle" => {
+    if (r === "high" || r === "overdue") return "down";
+    if (r === "medium") return "warn";
+    return "idle";
   };
 
   return (
@@ -59,7 +58,7 @@ export default function PredictiveMaintenancePage() {
                   Last failure: {it.last_failure || "—"} · MTBF: {it.mtbf_hours ?? "—"}h · Predicted: {it.predicted_failure || "—"}
                 </div>
               </div>
-              <Badge variant={riskColor(it.risk) as any}>{it.risk} {it.days_until !== null ? `(${it.days_until}d)` : ""}</Badge>
+              <AndonBadge tone={riskStatus(it.risk)}>{it.risk} {it.days_until !== null ? `(${it.days_until}d)` : ""}</AndonBadge>
             </Card>
           ))}
         </div>

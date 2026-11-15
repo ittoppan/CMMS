@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import AndonBadge from "@/components/AndonBadge";
 import { usePageHero } from "@/lib/i18n";
 
 type Item = {
@@ -55,7 +55,7 @@ export default function SpareReorderPage() {
                   Stock: {it.stock_qty} / Min: {it.min_stock} {it.unit} · Shortage: {it.shortage} · Suggested: {it.suggested_qty} · Est. {it.estimated_cost.toLocaleString()} ฿
                 </div>
               </div>
-              <Badge variant="warning">reorder</Badge>
+              <AndonBadge tone="warn">reorder</AndonBadge>
             </Card>
           ))}
         </div>
