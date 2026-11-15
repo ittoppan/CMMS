@@ -13,6 +13,22 @@ export default function AlertCenterPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const exportCsv = () => {
+    const header = "source,severity,title,detail";
+    const rows = alerts.map((a) =>
+      [a.source, a.severity, a.title, a.detail]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const blob = new Blob(["\ufeff" + header + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `alert-center-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     const all: Alert[] = [];
     Promise.allSettled([
@@ -43,6 +59,7 @@ export default function AlertCenterPage() {
 
   return (
     <PageShell eyebrow={<p className="cmms-eyebrow">{hero.eyebrow}</p>} title={hero.title} description={hero.desc}>
+      <div className="mb-4"><button onClick={exportCsv} className="border rounded px-3 py-1 text-sm">Export CSV</button></div>
       {loading ? <p>Loading...</p> : alerts.length === 0 ? <p>No active alerts.</p> : (
         <div className="grid gap-3">
           {alerts.map((a, i) => (

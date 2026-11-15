@@ -23,6 +23,22 @@ export default function PredictiveMaintenancePage() {
   const [loading, setLoading] = useState(true);
   const [horizon, setHorizon] = useState(30);
 
+  const exportCsv = () => {
+    const header = "code,name,risk,days_until,predicted_failure,last_failure,mtbf_hours";
+    const rows = items.map((it) =>
+      [it.code, it.name, it.risk, it.days_until ?? "", it.predicted_failure ?? "", it.last_failure ?? "", it.mtbf_hours ?? ""]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const blob = new Blob(["\ufeff" + header + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `predictive-maintenance-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     setLoading(true);
     fetch(`/api/v1/predictive_maintenance.php?horizon=${horizon}`, { credentials: "include" })
@@ -43,6 +59,7 @@ export default function PredictiveMaintenancePage() {
       <div className="flex items-center gap-3 mb-4">
         <label className="text-sm">Horizon (days)</label>
         <input type="number" value={horizon} onChange={(e) => setHorizon(Number(e.target.value))} className="border rounded px-2 py-1 w-20" />
+        <button onClick={exportCsv} className="border rounded px-3 py-1 text-sm">Export CSV</button>
       </div>
       {loading ? (
         <p>Loading...</p>
