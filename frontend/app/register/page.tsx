@@ -1,5 +1,6 @@
 "use client";
 
+import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useEffect, useState } from "react";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
@@ -258,6 +259,21 @@ function RegisterContent() {
 
         <Card>
           <CardContent className="p-5">
+          <ModuleGuide
+            name="ลงทะเบียนผูกบัญชี LINE (Register)"
+            summary="หน้าสำหรับผูกบัญชี LINE กับบัญชีผู้ใช้ CMMS เพื่อให้แจ้งซ่อม/รับการแจ้งเตือนผ่าน LINE ได้สะดวก (กระบวนการอิงข้อมูลที่กรอกและการยืนยันจากระบบ)"
+            steps={[
+              "เปิดหน้านี้จากลิงก์ที่ระบบกำหนด (มักผ่าน LINE) และรอให้ระบบดึงข้อมูลบัญชี LINE",
+              "กรอกรหัสพนักงานให้ตรงกับข้อมูลในระบบ แล้วตรวจสอบข้อมูลที่แสดงเพื่อยืนยันว่าถูกต้อง",
+              "กดยืนยันผูกบัญชี เมื่อสำเร็จสามารถกลับไปใช้เมนูแจ้งซ่อม/รับแจ้งเตือนได้ตามที่ระบบตั้งค่า",
+            ]}
+            source="หน้า frontend/app/register/page.tsx เรียก /api/v1/line_register.php (ตรวจสอบสถานะ/ผูกบัญชี) และ /api/v1/user_lookup.php (ตรวจสอบรหัสพนักงาน) — ข้อมูลและผลลัพธ์ขึ้นกับ API/การตั้งค่า LINE ของระบบ"
+            note="ต้องใช้รหัสพนักงานที่มีในระบบ หากผูกแล้วจะแสดงข้อมูลที่ผูกไว้ การแก้ไขการผูกอาจต้องติดต่อผู้ดูแลระบบ"
+            related={[
+              { href: "/settings", label: "ตั้งค่าระบบ" },
+              { href: "/repair/request", label: "แจ้งซ่อม" },
+            ]}
+          />
             <div className="flex flex-col gap-4">
               {liffStatus === "loading" && (
                 <p className="text-sm text-[var(--cmms-text-secondary)]">กำลังโหลดข้อมูล LINE...</p>
