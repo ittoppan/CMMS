@@ -1759,6 +1759,11 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
     en: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },
   },
 
+  "predictive-maintenance": {
+    th: { eyebrow: "PREDICTIVE MAINTENANCE · CMMS-TOPPAN", title: "พยากรณ์การซ่อมบำรุง", desc: "คาดการณ์ความเสี่ยงเครื่องจักรจาก MTBF และประวัติการซ่อม" },
+    en: { eyebrow: "PREDICTIVE MAINTENANCE · CMMS-TOPPAN", title: "Predictive Maintenance", desc: "Asset risk prediction from MTBF and repair history" },
+  },
+
 };
 
 // ════════════════ helper: สถานะ / ความเร่งด่วน ════════════════
