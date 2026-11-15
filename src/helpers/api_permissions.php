@@ -102,7 +102,8 @@ const API_ENDPOINT_PERMISSIONS = [
     /* ---------- Report / Analytics / Cost ---------- */
     'reports.php'                => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
     'report_schedule.php'        => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
-    'import_excel.php'           => ['read' => ['report', 'view'],        'write' => ['report', 'export']],
+    // import: ทั้งอ่านและเขียนต้องมี report:export เพราะเมนู reports/import_excel จำกัดเฉพาะ 1,2,6
+    'import_excel.php'           => ['read' => ['report', 'export'],      'write' => ['report', 'export']],
     'analytics_advanced.php'     => ['read' => ['report', 'view'],        'write' => null],
     'analytics_monthly.php'      => ['read' => ['report', 'view'],        'write' => null],
     'intelligence.php'           => ['read' => ['report', 'view'],        'write' => null],
@@ -113,6 +114,8 @@ const API_ENDPOINT_PERMISSIONS = [
     // → บังคับสิทธิ์เฉพาะการอ่านข้อมูลรายบุคคล (?id=) ซึ่งมี email/phone
     'users.php'                  => ['read' => ['users', 'view', 'param' => 'id'], 'write' => ['users', 'manage']],
     'roles.php'                  => ['read' => ['roles', 'view'],        'write' => ['roles', 'manage']],
+    // sage_items.php: ยังไม่บังคับ — SagePartAddModal ใช้จากหน้า repair/view (ช่าง) และ pm_am/plans/create
+    // ถ้าจะบังคับ ต้องเพิ่ม sage:view ให้ role 3/7 ก่อน (ดู docs/API_PERMISSION_MATRIX.md)
     'settings.php'               => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'master_data.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'menu_permissions.php'       => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
@@ -160,8 +163,11 @@ const API_ENDPOINT_PERMISSIONS = [
  * เป็น admin-only อยู่แล้วโดย requireLogin($pdo, true)) + ปิดช่องอ่านข้อมูลส่วนบุคคลรายคน
  */
 const API_PERMISSION_ENFORCED = [
-    'users.php',  // read เฉพาะ ?id= (PII) + write = admin
-    'roles.php',  // write = admin (read ยังเปิดให้บทบาทที่เมนู roles อนุญาต)
+    'users.php',            // read เฉพาะ ?id= (PII) + write = admin
+    'roles.php',            // read roles:view / write roles:manage (เมนู roles ปรับแล้ว: 1,2,6)
+    'import_excel.php',     // report:view / report:export (เมนู import ปรับแล้ว: 1,2,6)
+    'sage_sync.php',        // sage:view / sage:write (เมนู sage_sync ปรับแล้ว: 1,2,6)
+    'sage_shipments.php',   // sage:view / sage:write (เมนู sage_shipments ปรับแล้ว: 1,2,6)
 ];
 
 /** ชื่อไฟล์ endpoint ปัจจุบัน (ทนต่อ IIS rewrite / proxy) */

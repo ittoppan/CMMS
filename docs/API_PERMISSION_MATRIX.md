@@ -11,7 +11,7 @@
 
 ## สถานะการบังคับใช้
 
-บังคับใช้แล้วในรอบนี้ (**2 endpoint**): `users.php`, `roles.php`
+บังคับใช้แล้วในรอบนี้ (**5 endpoint**): `users.php`, `roles.php`, `import_excel.php`, `sage_sync.php`, `sage_shipments.php`
 
 endpoint อื่นทั้งหมดถูกประกาศสิทธิ์ไว้แล้ว แต่ **ยังไม่บังคับ** จนกว่าจะยืนยันกับผู้ใช้จริงในบทบาทนั้น
 (เหตุผล: หน้าเว็บของช่าง/พนักงานคลังเรียกบาง endpoint เพื่อเติม dropdown และเมนูใน `menu_permissions`
@@ -54,7 +54,7 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | 31 | `feedback.php` | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — | requireLogin |
 | 32 | `form_templates.php` | `inspection:view` | `inspection:create` | — | CSRF, requireLogin |
 | 33 | `forms.php` | `inspection:view` | `inspection:execute` | — | CSRF, requireLogin |
-| 34 | `import_excel.php` | `report:view` | `report:export` | — | CSRF, requireLogin |
+| 34 | `import_excel.php` | `report:export` | `report:export` | ✅ | CSRF, requireLogin |
 | 35 | `index.php` | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — | CSRF, requireLogin |
 | 36 | `inspection_dashboard.php` | `inspection:view` | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — | CSRF, requireLogin |
 | 37 | `inspection_execute.php` | `inspection:view` | `inspection:execute` | — | CSRF, requireLogin |
@@ -96,8 +96,8 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 | 73 | `reports.php` | `report:view` | `report:export` | — | requireLogin |
 | 74 | `roles.php` | `roles:view` | `roles:manage` | ✅ | admin-only, CSRF, requireLogin |
 | 75 | `sage_items.php` | `sage:view` | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — | requireLogin |
-| 76 | `sage_shipments.php` | `sage:view` | `sage:write` | — | CSRF, requireLogin |
-| 77 | `sage_sync.php` | `sage:view` | `sage:write` | — | CSRF, requireLogin |
+| 76 | `sage_shipments.php` | `sage:view` | `sage:write` | ✅ | CSRF, requireLogin |
+| 77 | `sage_sync.php` | `sage:view` | `sage:write` | ✅ | CSRF, requireLogin |
 | 78 | `scan.php` | `asset:view` | — (เปิดให้ผู้ใช้ที่ล็อกอิน) | — | requirePerm, requireLogin |
 | 79 | `settings.php` | `settings:view` | `settings:manage` | — | requirePerm, CSRF, requireLogin |
 | 80 | `shutdown.php` | `shutdown:view` | `shutdown:plan` | — | requirePerm, CSRF, requireLogin |
@@ -131,4 +131,21 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
 1. **Officer (role 8)** เดิมไม่มีใน `PERMISSION_MATRIX` → `canPerm()` คืน false ทุกอย่าง; รอบนี้เพิ่มเฉพาะที่เมนูอนุญาต (`users/settings/audit_log/document/report/dashboard`)
 2. `users.php` — ระบุ `?id=` = ข้อมูลรายบุคคล (email/phone) จึงบังคับ `users:view`; โหมด list ยังเปิดเพราะหน้า `repair/assign`, `spare_parts/issue_center`, `pm_am/batch_schedule`, `equipment_borrowing` ใช้เติม dropdown
 3. endpoint ที่ยังไม่บังคับ: เปิดได้ทีละกลุ่มหลัง UAT กับบทบาท Foreman/Operate/Officer — แก้แค่ `API_PERMISSION_ENFORCED`
-4. เมนู `menu_permissions` (DB) ยังกว้างกว่า matrix ในบางโมดูล (sage, import_excel, roles) — ควรปรับให้ตรงกันก่อนเปิดบังคับกลุ่มนั้น
+4. **`sage_items.php` ยังไม่บังคับ**: `SagePartAddModal` ถูกใช้จากหน้า `repair/view` (ช่าง) และ `pm_am/plans/create` — ถ้าจะบังคับต้องเพิ่ม `sage:view` ให้ role 3/7 ก่อน
+5. `import_excel.php` ใช้ `report:export` ทั้งอ่านและเขียน เพราะเมนู `reports/import_excel` ถูกจำกัดเหลือ 1,2,6 แล้ว
+
+## การปรับ `menu_permissions` ให้ตรงกับ matrix (รอบล่าสุด)
+
+สคริปต์: `php scripts/align_menu_permissions.php` (dry-run) / `--apply` / `--restore=backups/<ไฟล์>.json`
+
+| menu_key | เดิม | ใหม่ |
+|---|---|---|
+| `roles` | 1,2,3,5,6,7,8 | **1,2,6** |
+| `reports/import_excel` | 1,2,3,5,6,7,8 | **1,2,6** |
+| `spare_parts/sage_sync` | 1,2,3,5,6,7,8 | **1,2,6** |
+| `spare_parts/sage_shipments` | 1,2,3,5,6,7,8 | **1,2,6** |
+| `spare_parts/sage_po` | 1,2,6,7,8 | **1,2,6,7** |
+
+- เขียน 17 แถว (`is_granted = 0` = ซ่อนเมนู; ไม่ลบแถว) — สำรองค่าเดิมเป็น JSON ทุกครั้งก่อนเขียน
+- **ย้อนกลับ**: `php scripts/align_menu_permissions.php --restore=backups/menu_permissions_YYYYmmdd_HHMMSS.json`
+- `menu_permissions` ยังกว้างกว่า matrix ในโมดูลอื่นที่ยังไม่บังคับ (`reports/*`, `cost`, `workforce/reports`) — ปรับเพิ่มได้ด้วยการเพิ่มคู่ menu_key → role ในสคริปต์
