@@ -170,6 +170,44 @@ const API_PERMISSION_ENFORCED = [
     'import_excel.php',     // report:view / report:export (เมนู import ปรับแล้ว: 1,2,6)
     'sage_sync.php',        // sage:view / sage:write (เมนู sage_sync ปรับแล้ว: 1,2,6)
     'sage_shipments.php',   // sage:view / sage:write (เมนู sage_shipments ปรับแล้ว: 1,2,6)
+    // Phase 3: endpoint read-only (write=null) — บังคับอ่านตาม permission
+    'dashboard.php',
+    'kpi_dashboard.php',
+    'workload.php',
+    'system_health.php',
+    // Report center (GET only)
+    'reports.php',
+    'report_schedule.php',
+    'analytics_advanced.php',
+    'analytics_monthly.php',
+    'intelligence.php',
+    'cost.php',
+    // PM / Inspection
+    'pm_am.php',
+    'pm_plans.php',
+    'pm_reminders.php',
+    'inspection_dashboard.php',
+    'inspection_history.php',
+    // Asset (menu asset_registry ปรับแล้ว: 1,2,3,5,6,7)
+    'asset_registry.php',
+    'asset_components.php',
+    'asset_criticality.php',
+    'asset_lifecycle.php',
+    'asset_measurements.php',
+    'asset_overhauls.php',
+    'asset_relationships.php',
+    'machine_bom.php',
+    // Failure / equipment borrowing
+    'failure.php',
+    'equipment_borrowing.php',
+    // Workforce
+    'workforce.php',
+    // Settings (read settings:view)
+    'settings.php',
+    'master_data.php',
+    'menu_permissions.php',
+    'departments.php',
+    'repair_options.php',
 ];
 
 /** ชื่อไฟล์ endpoint ปัจจุบัน (ทนต่อ IIS rewrite / proxy) */

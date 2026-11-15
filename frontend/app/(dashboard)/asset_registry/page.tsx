@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import { Dialog } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -78,6 +79,7 @@ const criticalityBadgeVariant: Record<string, "danger" | "warning" | "neutral"> 
 const PAGE_SIZE = 10;
 
 export default function AssetRegistryPage() {
+  const can = useCan("asset");
   const hero = usePageHero("asset_registry");
   const router = useRouter();
   const [assets, setAssets] = useState<AssetRecord[]>([]);
@@ -254,6 +256,7 @@ export default function AssetRegistryPage() {
           >
             <Network size={16} strokeWidth={1.75} aria-hidden="true" />
           </Button>
+          {can("edit") && (
           <Button
             variant="ghost"
             size="icon"
@@ -264,6 +267,8 @@ export default function AssetRegistryPage() {
           >
             <SquarePen size={16} strokeWidth={1.75} aria-hidden="true" />
           </Button>
+          )}
+          {can("delete") && (
           <Button
             variant="ghost"
             size="icon"
@@ -274,6 +279,7 @@ export default function AssetRegistryPage() {
           >
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
           </Button>
+          )}
         </div>
       ),
     },
@@ -293,10 +299,12 @@ export default function AssetRegistryPage() {
             <Network size={16} strokeWidth={1.75} aria-hidden="true" />
             วิเคราะห์ความสำคัญ
           </Button>
+          {can("create") && (
           <Button onClick={() => router.push("/asset_registry/create")}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
             เพิ่มเครื่องจักรใหม่
           </Button>
+          )}
         </>
       }
     >

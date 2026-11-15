@@ -28,10 +28,22 @@ require __DIR__ . '/../src/config/db.php';
 const TARGET_GRANTS = [
     'roles'                       => [1, 2, 6],
     'reports/import_excel'        => [1, 2, 6],
+    'reports/export_excel'        => [1, 2, 6],
     'spare_parts/sage_sync'       => [1, 2, 6, 8], // 8 = Office (ดึงสต็อกจาก Sage 300)
     'spare_parts/sage_shipments'  => [1, 2, 6, 7, 8], // 8 = Office (ตัดสต็อกใน Sage 300), 7 = Foreman (ติดตาม)
     'spare_parts/sage_po'         => [1, 2, 6, 7, 8], // 8 = Office (ดูแลใบสั่งซื้อ/รับของ)
     'spare_parts/stock_take'      => [1, 2, 6, 8],     // นับ/ปิดรอบสต็อก (ต้องมี spare_parts:plan ด้วย)
+    'pm_am'                       => [1, 2, 3, 5, 6, 7],   // pm_am:view (Officer 8 ไม่มีสิทธิ์ PM)
+    // Phase 3: ปรับเมนูให้ตรง PERMISSION_MATRIX (module:action)
+    'analytics'                   => [1, 2, 3, 5, 6, 7, 8], // report:view
+    'cost'                        => [1, 2, 3, 5, 6, 7, 8], // report:view
+    'workforce'                   => [1, 2, 5, 6, 7],       // workforce:view
+    'inspections'                 => [1, 2, 3, 5, 6, 7],    // inspection:view
+    'asset_registry'              => [1, 2, 3, 5, 6, 7],    // asset:view
+    'repair/workload'             => [1, 2, 3, 6, 7],       // repair:view
+    'settings'                    => [1, 2, 6, 8],          // settings:view
+    'rca'                         => [1, 2, 3, 5, 6, 7],   // failure:view
+    'failure'                     => [1, 2, 3, 5, 6, 7],    // failure:view
 ];
 
 /** role ทั้งหมดที่มีในระบบ (ใช้คำนวณว่าใครต้องถูกตั้ง 0) */

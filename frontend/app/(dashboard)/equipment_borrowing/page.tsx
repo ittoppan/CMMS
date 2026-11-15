@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,8 @@ const statusLabel: Record<string, string> = {
 
 export default function EquipmentBorrowingPage() {
   const router = useRouter();
+  const can = useCan("spare_parts");
+  const canIssue = can("issue");
   const [data, setData] = useState<BorrowRecord[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -140,6 +143,7 @@ export default function EquipmentBorrowingPage() {
       align: "right",
       renderCell: (item) => (
         <div className="flex items-center justify-end gap-1.5">
+          {canIssue && (
           <Button
             variant="secondary"
             size="sm"
@@ -149,6 +153,8 @@ export default function EquipmentBorrowingPage() {
             <SquarePen className="w-3.5 h-3.5" />
             แก้ไข
           </Button>
+          )}
+          {canIssue && (
           <Button
             variant="danger"
             size="sm"
@@ -158,6 +164,7 @@ export default function EquipmentBorrowingPage() {
             <Trash2 className="w-3.5 h-3.5" />
             ลบ
           </Button>
+          )}
         </div>
       ),
     },
@@ -174,10 +181,12 @@ export default function EquipmentBorrowingPage() {
       title="ระบบยืม-คืนเครื่องมือช่างและอุปกรณ์พิเศษ"
       description="ควบคุมการยืม-คืนเครื่องมือช่างราคาสูง อุปกรณ์วัดค่า และเครื่องตรวจวัดพิเศษ"
       actions={
+        canIssue ? (
         <Button variant="primary" onClick={() => router.push("/equipment_borrowing/create")}>
           <Plus className="w-4 h-4" />
           ขอยืมอุปกรณ์ใหม่
         </Button>
+        ) : null
       }
     >
       <ModuleGuide

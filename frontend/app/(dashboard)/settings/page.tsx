@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import AnimatedDialog from "@/components/AnimatedDialog";
 import ThemeSettingsPanel from "../../../components/ThemeSettingsPanel";
 import { PageShell } from "@/components/PageShell";
@@ -454,6 +455,8 @@ const SUB_PAGES = [
 export default function SettingsPage() {
   const hero = usePageHero("settings");
   const router = useRouter();
+  const can = useCan("settings");
+  const canManage = can("manage");
   const [settings, setSettings] = useState<SettingRow[]>([]);
   const [defaults, setDefaults] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
@@ -899,7 +902,7 @@ export default function SettingsPage() {
                   คลิกที่หมวดเพื่อดูและแก้ไขการตั้งค่ารายละเอียด
                 </p>
               </VStack>
-              {totalDirty > 0 && (
+              {canManage && totalDirty > 0 && (
                 <Button
                   disabled={totalDirty === 0}
                   onClick={handleSave}
@@ -1158,7 +1161,7 @@ export default function SettingsPage() {
                               JSON
                             </span>
                           )}
-                          {canReset && !isReadonly && (
+                          {canReset && !isReadonly && canManage && (
                             <button
                               type="button"
                               title={`รีเซ็ตเป็นค่าเริ่มต้น: ${String(defaultValue).slice(0, 80)}${String(defaultValue).length > 80 ? "…" : ""}`}
@@ -1258,7 +1261,7 @@ export default function SettingsPage() {
                           <Select
                             value={form[row.setting_key] ?? ""}
                             onValueChange={(v) => setForm((f) => ({ ...f, [row.setting_key]: String(v ?? "") }))}
-                            disabled={isReadonly}
+                            disabled={isReadonly || !canManage}
                           >
                             <SelectTrigger aria-label={meta.label} className="sm:max-w-xs">
                               <SelectValue placeholder="เลือกค่า..." />
@@ -1306,7 +1309,7 @@ export default function SettingsPage() {
                             label={meta.label}
                             isLabelHidden
                             value={form[row.setting_key] ?? ""}
-                            disabled={isReadonly}
+                            disabled={isReadonly || !canManage}
                             rows={row.setting_key === "company_address" ? 3 : 2}
                             onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
                           />
@@ -1316,7 +1319,7 @@ export default function SettingsPage() {
                             isLabelHidden
                             type={isEmail ? "email" : "text"}
                             value={form[row.setting_key] ?? ""}
-                            disabled={isReadonly}
+                            disabled={isReadonly || !canManage}
                             onChange={(e) => setForm((f) => ({ ...f, [row.setting_key]: e.target.value }))}
                           />
                         )}

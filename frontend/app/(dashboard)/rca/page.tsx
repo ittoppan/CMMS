@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useCan } from "@/lib/useCan";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -51,6 +52,7 @@ function StatCard({ icon: Icon, label, value, sub, tone }: {
 }
 
 export default function RcaDashboardPage() {
+  const can = useCan("failure");
   const hero = usePageHero("rca");
   const [assets, setAssets] = useState<AssetOption[]>([]);
   const [assetId, setAssetId] = useState("");
@@ -110,7 +112,7 @@ export default function RcaDashboardPage() {
         <div className="flex flex-wrap items-center gap-2">
           <a href="/rca/events" className={buttonVariants({ variant: "secondary" })}><History size={16} aria-hidden="true" /> เหตุการณ์</a>
           <a href="/rca/taxonomy" className={buttonVariants({ variant: "secondary" })}><ListChecks size={16} aria-hidden="true" /> Taxonomy</a>
-          <a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>
+          {can("create") && (<a href="/rca/new" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> บันทึกเหตุการณ์ใหม่</a>)}
         </div>
       </div>
 

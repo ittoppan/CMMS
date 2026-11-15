@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { usePageHero, t, statusText } from "@/lib/i18n";
 import { assetUrl } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
+import { useCan } from "@/lib/useCan";
 import { swalConfirm } from "@/lib/swal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -149,6 +150,7 @@ function isActionableDisplay(status: string) {
 export default function PMSchedulePage() {
   const hero = usePageHero("pm_am");
   const router = useRouter();
+  const can = useCan("pm_am");
   const [tasks, setTasks] = useState<PMTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -476,7 +478,7 @@ export default function PMSchedulePage() {
                 ดูผล
               </button>
             )}
-            {canDoNow && item.deferralStatus !== "pending" && (
+            {can("edit") && canDoNow && item.deferralStatus !== "pending" && (
               <button
                 type="button"
                 onClick={() => {
@@ -513,6 +515,7 @@ export default function PMSchedulePage() {
               <Eye size={14} strokeWidth={1.75} aria-hidden="true" />
               รายละเอียด
             </button>
+            {can("edit") && (
             <button
               type="button"
               onClick={() => router.push(`/pm_am/edit?id=${item.rawId}`)}
@@ -521,6 +524,8 @@ export default function PMSchedulePage() {
             >
               <SquarePen size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.update")}
             </button>
+            )}
+            {can("delete") && (
             <button
               type="button"
               onClick={() => handleDelete(item)}
@@ -529,6 +534,7 @@ export default function PMSchedulePage() {
             >
               <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />{t("action.delete")}
             </button>
+            )}
           </div>
         );
       },
