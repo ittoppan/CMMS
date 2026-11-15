@@ -154,3 +154,32 @@ endpoint อื่นทั้งหมดถูกประกาศสิท�
   - role 1/2/6 คง write ไว้เพื่อแก้ข้อมูลแทน Office ได้
 - **ย้อนกลับ**: `php scripts/align_menu_permissions.php --restore=backups/menu_permissions_YYYYmmdd_HHMMSS.json`
 - `menu_permissions` ยังกว้างกว่า matrix ในโมดูลอื่นที่ยังไม่บังคับ (`reports/*`, `cost`, `workforce/reports`) — ปรับเพิ่มได้ด้วยการเพิ่มคู่ menu_key → role ในสคริปต์
+
+## Read-only UI — ซ่อน/ปิดปุ่มเมื่อ “ดูได้แต่แก้ไม่ได้”
+
+กลไกกลาง (ใช้ซ้ำได้ทุกหน้า ไม่ต้องแก้ endpoint ทีละตัว):
+
+| ชิ้นส่วน | หน้าที่ |
+|---|---|
+| `src/helpers/ui_permissions.php` | `perm_module_actions()` / `ui_perm_for($pdo,$module)` / `ui_perm_header($pdo,$module)` — คำนวณสิทธิ์ราย action จาก `PERMISSION_MATRIX` |
+| `GET /api/v1/my_permissions.php?module=<module>` | คืน `{module, actions:{view,create,edit,...}}` ของผู้ใช้ปัจจุบัน (ไม่มี PII, ต้องล็อกอิน) |
+| `frontend/lib/useCan.ts` | hook `const can = useCan("spare_parts")` → `can("edit")`; cache ต่อ module, ค่าเริ่มต้น false (fail-closed) |
+
+### หน้าจอที่ใช้แล้ว
+| หน้า | ปุ่มที่ซ่อนเมื่อไม่มีสิทธิ์ | สิทธิ์ที่ใช้ |
+|---|---|---|
+| `spare_parts` | เพิ่มรายการ / แก้ไข / ลบ / อัปโหลดรูปหลายรายการ / ดึงสต็อกจาก Sage | `spare_parts:edit`, `sage:write` |
+| `contractors` | สร้างผู้รับเหมาใหม่ (hero + empty state) | `contractor:create` |
+| `spare_parts/sage_shipments` | ตัด / ตัดบางส่วน / ตัดครบ | `sage:write` (ผ่าน header `X-CMMS-Can-Write`) |
+
+### ผลต่อแต่ละบทบาท (spare_parts / contractor)
+| role | spare_parts | contractor |
+|---|---|---|
+| 1 Admin | ทุกอย่าง (bypass) | ทุกอย่าง |
+| 2 Manager / 6 Asst.Manager | view/plan/request/issue/return/approve/**edit** | view/create/edit/approve/execute |
+| 7 Foreman | view/request/issue/return → **อ่านอย่างเดียว** | view/execute → ไม่มีปุ่มสร้าง |
+| 3 Operate | view/request → อ่านอย่างเดียว | ไม่มีสิทธิ์ |
+| 5 Viewer | view → อ่านอย่างเดียว | view → อ่านอย่างเดียว |
+| 8 Officer (Office) | view/request/issue/return/**edit** (ดูแลสต็อก) | ไม่มีสิทธิ์ |
+
+> เพิ่มหน้าใหม่: เพิ่ม action ที่ต้องการใน `PERMISSION_MATRIX` ของ module นั้น → เรียก `useCan("<module>")` ในหน้า → ครอบปุ่มด้วยเงื่อนไข

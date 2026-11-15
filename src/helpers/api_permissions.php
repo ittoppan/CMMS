@@ -119,6 +119,8 @@ const API_ENDPOINT_PERMISSIONS = [
     'settings.php'               => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'master_data.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'menu_permissions.php'       => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    // ใช้ตัดสินการแสดงปุ่มใน UI: คืนเฉพาะสิทธิ์ของตัวเอง (ไม่มี PII) จึงเปิดให้ผู้ที่ล็อกอินทุกคน
+    'my_permissions.php'         => ['read' => null,                      'write' => null],
     'repair_options.php'         => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'departments.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
     'pwa_settings.php'           => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],

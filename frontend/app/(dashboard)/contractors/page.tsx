@@ -5,6 +5,7 @@ import { ModuleGuide } from "@/components/dashboard/module-guide";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePageHero } from "@/lib/i18n";
+import { useCan } from "@/lib/useCan";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
@@ -46,6 +47,8 @@ function KpiCard({ label, value, sub, lamp, tone }: {
 }
 
 export default function ContractorsPage() {
+  // บทบาทที่ดูได้แต่สร้าง/แก้ไม่ได้ → ซ่อนปุ่มสร้าง (fail-closed ระหว่างรอโหลดสิทธิ์)
+  const canCreate = useCan("contractor")("create");
   const hero = usePageHero("contractors");
   const layout = usePageLayout("/contractors", ["hero", "kpi", "filters", "content"]);
   const layoutStyle = (id: string) => ({
@@ -122,7 +125,7 @@ export default function ContractorsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <a href="/contractors/work" className={buttonVariants({ variant: "secondary" })}><ClipboardList size={16} aria-hidden="true" /> งานภายนอก</a>
-          <a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> สร้างผู้รับเหมาใหม่</a>
+          {canCreate && <a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={16} aria-hidden="true" /> สร้างผู้รับเหมาใหม่</a>}
         </div>
       </div>
 
@@ -215,7 +218,7 @@ export default function ContractorsPage() {
                   title={search || status || category || owner ? "ไม่พบรายการที่ตรงเงื่อนไข" : "ยังไม่มีผู้รับเหมา"}
                   description={search || status || category || owner ? "ลองเปลี่ยนเงื่อนไขการกรอง" : "สร้างผู้รับเหมารายแรกเพื่อเริ่มต้น"}
                   icon={<HardHat size={40} />}
-                  action={<a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={15} aria-hidden="true" /> สร้างผู้รับเหมา</a>}
+                  action={canCreate ? <a href="/contractors/create" className={buttonVariants({ variant: "primary" })}><Plus size={15} aria-hidden="true" /> สร้างผู้รับเหมา</a> : undefined}
                 />
               </div>
             ) : (

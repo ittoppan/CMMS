@@ -41,7 +41,7 @@ const PERMISSION_MATRIX = [
         'asset'      => ['view', 'create', 'edit', 'deactivate', 'delete'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close', 'delete'],
         'inspection' => ['view', 'create', 'execute', 'approve', 'close'],
-        'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve'],
+        'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve', 'edit'],
         'supplier'   => ['view', 'create', 'edit', 'delete'],
         'calibration'=> ['view', 'create', 'edit', 'delete'],
         'report'     => ['view', 'export'],
@@ -74,7 +74,7 @@ const PERMISSION_MATRIX = [
         'asset'      => ['view', 'create', 'edit', 'deactivate', 'delete'],
         'pm_am'      => ['view', 'create', 'edit', 'generate', 'execute', 'close', 'delete'],
         'inspection' => ['view', 'create', 'execute', 'approve', 'close'],
-        'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve'],
+        'spare_parts'=> ['view', 'plan', 'request', 'issue', 'return', 'approve', 'edit'],
         'supplier'   => ['view', 'create', 'edit', 'delete'],
         'calibration'=> ['view', 'create', 'edit', 'delete'],
         'report'     => ['view', 'export'],
@@ -167,8 +167,9 @@ const PERMISSION_MATRIX = [
     ],
     8 => [ // Officer — ธุรการ/ผู้ดูแลเอกสาร (สิทธิ์อิงเมนูที่ได้รับจริงใน menu_permissions)
         // เพิ่มเฉพาะที่จำเป็นเพื่อไม่ให้การบังคับใช้ permission ใหม่ตัดสิทธิ์ที่เคยใช้ได้
-        // Office เป็นคนดูแลสต็อก: พอเบิกใน CMMS แล้วต้องไปตัดสต็อกใน Shipments ของ Sage 300
+        // Office เป็นคนดูแลสต็อก: เบิกใน CMMS แล้วไปตัดสต็อกใน Shipments ของ Sage 300
         'sage'       => ['view', 'write'],
+        'spare_parts'=> ['view', 'request', 'issue', 'return', 'edit'],
         'users'      => ['view'],
         'settings'   => ['view'],
         'audit_log'  => ['view'],
