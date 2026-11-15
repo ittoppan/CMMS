@@ -118,6 +118,8 @@ const PERMISSION_MATRIX = [
         'engineering_change' => ['view', 'create', 'edit', 'submit', 'implement'],
         'document'   => ['view', 'create', 'revise'],
         'training'   => ['view'],
+        // ทีมคลัง/หัวหน้าชุดติดตามและบันทึกการรับของที่ตัดใน Sage 300 (คงความสามารถเดิมไว้)
+        'sage'       => ['view', 'write'],
         // Foreman authors and submits knowledge for the equipment he runs, and he
         // triages the gaps his crew keeps hitting. He cannot approve or publish —
         // publishing is what tells the shop floor to trust it.
