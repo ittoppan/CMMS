@@ -162,6 +162,15 @@ const PERMISSION_MATRIX = [
         'training'   => ['view'],
         'knowledge'  => ['read', 'search'],
     ],
+    8 => [ // Officer — ธุรการ/ผู้ดูแลเอกสาร (สิทธิ์อิงเมนูที่ได้รับจริงใน menu_permissions)
+        // เพิ่มเฉพาะที่จำเป็นเพื่อไม่ให้การบังคับใช้ permission ใหม่ตัดสิทธิ์ที่เคยใช้ได้
+        'users'      => ['view'],
+        'settings'   => ['view'],
+        'audit_log'  => ['view'],
+        'document'   => ['view'],
+        'report'     => ['view'],
+        'dashboard'  => ['view'],
+    ],
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],
         'request'    => ['view'],

@@ -18,6 +18,7 @@
 
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/helpers/api.php';
+require_once __DIR__ . '/helpers/api_permissions.php'; // permission matrix ระดับ endpoint (บังคับใช้จาก requireLogin)
 
 /** cookie hardened สำหรับ session — เรียกก่อน session_start() ใน entry point */
 function cmms_secure_session(): void {
@@ -106,6 +107,9 @@ function requireLogin(PDO $pdo, bool $adminOnly = false) {
 
     // Lifecycle: idle timeout + regenerate (ทำงานหลังยืนยัน identity แล้ว)
     cmms_enforce_session_lifecycle($pdo);
+
+    // Permission matrix ของ endpoint (เฉพาะที่อยู่ใน API_PERMISSION_ENFORCED)
+    api_enforce_endpoint_permission($pdo);
 
     if ($adminOnly && (int)$user['role_id'] !== 1) {
         api_fail(403, 'FORBIDDEN', 'ต้องเป็นผู้ดูแลระบบ (Admin)');
