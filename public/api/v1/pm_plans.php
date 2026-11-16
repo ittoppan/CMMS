@@ -19,6 +19,7 @@ require_once __DIR__ . '/../../../src/helpers/assignees.php';
 require_once __DIR__ . '/../../../src/helpers/sage300.php';
 require_once __DIR__ . '/../../../src/helpers/calendar.php';
 require_once __DIR__ . '/../../../src/helpers/pm_meter.php';
+require_once __DIR__ . '/../../../src/helpers/meter_register.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -415,35 +416,84 @@ requireLogin($pdo);
             $codeExists->execute([trim($data['code'])]);
             if ($codeExists->fetchColumn()) { http_response_code(409); echo json_encode(['error' => 'รหัสแผนซ้ำกับระบบ']); exit; }
 
-            $ins = $pdo->prepare(
-                "INSERT INTO pm_am_plans (code, name, description, instructions, priority, estimated_duration_minutes, start_date, end_date,
-                    plan_type, frequency_type, frequency_interval, meter_unit, meter_interval, lead_days, reminder_days, is_active, status,
-                    responsible_user_id, department_id, location_id, work_zone_id, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())"
-            );
-            $ins->execute([
-                trim($data['code']),
-                trim($data['name']),
-                $data['description'] ?? null,
-                $data['instructions'] ?? null,
-                $data['priority'] ?? 'medium',
-                isset($data['estimated_duration_minutes']) && $data['estimated_duration_minutes'] !== '' ? (int)$data['estimated_duration_minutes'] : null,
-                $data['start_date'] ?? null,
-                $data['end_date'] ?? null,
-                $data['plan_type'] ?? 'single',
-                $data['frequency_type'] ?? 'monthly',
-                max(1, (int)($data['frequency_interval'] ?? 1)),
-                $data['meter_unit'] ?? null,
-                isset($data['meter_interval']) && $data['meter_interval'] !== '' ? (float)$data['meter_interval'] : null,
-                max(0, (int)($data['lead_days'] ?? 7)),
-                max(0, (int)($data['reminder_days'] ?? 3)),
-                (int)($data['is_active'] ?? 1),
-                $data['status'] ?? 'active',
-                isset($data['responsible_user_id']) && $data['responsible_user_id'] ? (int)$data['responsible_user_id'] : null,
-                isset($data['department_id']) && $data['department_id'] ? (int)$data['department_id'] : null,
-                isset($data['location_id']) && $data['location_id'] ? (int)$data['location_id'] : null,
-                isset($data['work_zone_id']) && $data['work_zone_id'] ? (int)$data['work_zone_id'] : null,
-            ]);
+            $schema = meter_schema_state($pdo);
+            $meterId = null;
+            $meterUnit = $data['meter_unit'] ?? null;
+            // เตรียมรองรับ meter_id (ต้องรอ migration คอลัมน์ pm_am_plans.meter_id) — fallback เดิมใช้ meter_unit
+            if (!empty($schema['plan_link_ready']) && array_key_exists('meter_id', $data) && $data['meter_id'] !== '' && $data['meter_id'] !== null) {
+                $meterId = (int)$data['meter_id'];
+                if ($meterId > 0) {
+                    $meter = meter_find_registered($pdo, $meterId);
+                    if ($meter && ($meterUnit === null || $meterUnit === '') && !empty($meter['unit'])) {
+                        $meterUnit = $meter['unit']; // sync หน่วยจากทะเบียนถ้ามี
+                    }
+                } else {
+                    $meterId = null;
+                }
+            }
+            if (!empty($schema['plan_meter_id'])) {
+                $ins = $pdo->prepare(
+                    "INSERT INTO pm_am_plans (code, name, description, instructions, priority, estimated_duration_minutes, start_date, end_date,
+                        plan_type, frequency_type, frequency_interval, meter_unit, meter_id, meter_interval, lead_days, reminder_days, is_active, status,
+                        responsible_user_id, department_id, location_id, work_zone_id, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())"
+                );
+                $ins->execute([
+                    trim($data['code']),
+                    trim($data['name']),
+                    $data['description'] ?? null,
+                    $data['instructions'] ?? null,
+                    $data['priority'] ?? 'medium',
+                    isset($data['estimated_duration_minutes']) && $data['estimated_duration_minutes'] !== '' ? (int)$data['estimated_duration_minutes'] : null,
+                    $data['start_date'] ?? null,
+                    $data['end_date'] ?? null,
+                    $data['plan_type'] ?? 'single',
+                    $data['frequency_type'] ?? 'monthly',
+                    max(1, (int)($data['frequency_interval'] ?? 1)),
+                    $meterUnit,
+                    $meterId,
+                    isset($data['meter_interval']) && $data['meter_interval'] !== '' ? (float)$data['meter_interval'] : null,
+                    max(0, (int)($data['lead_days'] ?? 7)),
+                    max(0, (int)($data['reminder_days'] ?? 3)),
+                    (int)($data['is_active'] ?? 1),
+                    $data['status'] ?? 'active',
+                    isset($data['responsible_user_id']) && $data['responsible_user_id'] ? (int)$data['responsible_user_id'] : null,
+                    isset($data['department_id']) && $data['department_id'] ? (int)$data['department_id'] : null,
+                    isset($data['location_id']) && $data['location_id'] ? (int)$data['location_id'] : null,
+                    isset($data['work_zone_id']) && $data['work_zone_id'] ? (int)$data['work_zone_id'] : null,
+                ]);
+            } else {
+                // ยังไม่มีคอลัมน์ meter_id (ก่อน migration): เก็บ meter_unit ตามเดิม, meter_id ที่ส่งมาจะถูกละไว้
+                $ins = $pdo->prepare(
+                    "INSERT INTO pm_am_plans (code, name, description, instructions, priority, estimated_duration_minutes, start_date, end_date,
+                        plan_type, frequency_type, frequency_interval, meter_unit, meter_interval, lead_days, reminder_days, is_active, status,
+                        responsible_user_id, department_id, location_id, work_zone_id, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())"
+                );
+                $ins->execute([
+                    trim($data['code']),
+                    trim($data['name']),
+                    $data['description'] ?? null,
+                    $data['instructions'] ?? null,
+                    $data['priority'] ?? 'medium',
+                    isset($data['estimated_duration_minutes']) && $data['estimated_duration_minutes'] !== '' ? (int)$data['estimated_duration_minutes'] : null,
+                    $data['start_date'] ?? null,
+                    $data['end_date'] ?? null,
+                    $data['plan_type'] ?? 'single',
+                    $data['frequency_type'] ?? 'monthly',
+                    max(1, (int)($data['frequency_interval'] ?? 1)),
+                    $meterUnit,
+                    isset($data['meter_interval']) && $data['meter_interval'] !== '' ? (float)$data['meter_interval'] : null,
+                    max(0, (int)($data['lead_days'] ?? 7)),
+                    max(0, (int)($data['reminder_days'] ?? 3)),
+                    (int)($data['is_active'] ?? 1),
+                    $data['status'] ?? 'active',
+                    isset($data['responsible_user_id']) && $data['responsible_user_id'] ? (int)$data['responsible_user_id'] : null,
+                    isset($data['department_id']) && $data['department_id'] ? (int)$data['department_id'] : null,
+                    isset($data['location_id']) && $data['location_id'] ? (int)$data['location_id'] : null,
+                    isset($data['work_zone_id']) && $data['work_zone_id'] ? (int)$data['work_zone_id'] : null,
+                ]);
+            }
             $planId = (int)$pdo->lastInsertId();
 
             // ลิงก์ assets
@@ -485,9 +535,12 @@ requireLogin($pdo);
                 if ($c->fetchColumn()) { http_response_code(409); echo json_encode(['error' => 'รหัสแผนซ้ำกับระบบ']); exit; }
             }
 
+            $schema = meter_schema_state($pdo);
             $allowed = ['code', 'name', 'description', 'instructions', 'priority', 'estimated_duration_minutes', 'start_date', 'end_date', 'plan_type',
                 'frequency_type', 'frequency_interval', 'meter_unit', 'meter_interval', 'lead_days', 'reminder_days', 'is_active', 'status',
                 'responsible_user_id', 'department_id', 'location_id', 'work_zone_id'];
+            // รองรับ meter_id เฉพาะเมื่อ schema พร้อม (หลัง migration); ก่อน migration จะละค่า meter_id ที่ส่งมา
+            if (!empty($schema['plan_meter_id'])) $allowed[] = 'meter_id';
             $numericMin = ['frequency_interval' => 1, 'lead_days' => 0, 'reminder_days' => 0];
             $fields = []; $values = [];
             foreach ($allowed as $col) {
@@ -500,6 +553,17 @@ requireLogin($pdo);
                     $fields[] = "$col = ?"; $values[] = ($val !== '' && $val !== null) ? (int)$val : null; continue;
                 }
                 if ($col === 'meter_interval') { $fields[] = "meter_interval = ?"; $values[] = ($val !== '' && $val !== null) ? (float)$val : null; continue; }
+                if ($col === 'meter_id') {
+                    $mid = ($val !== '' && $val !== null) ? (int)$val : null;
+                    if ($mid !== null && $mid <= 0) $mid = null;
+                    $fields[] = "meter_id = ?"; $values[] = $mid;
+                    // sync หน่วยจากทะเบียนถ้าผู้ใช้ไม่ได้ส่ง meter_unit มา
+                    if ($mid && !array_key_exists('meter_unit', $data)) {
+                        $m = meter_find_registered($pdo, $mid);
+                        if ($m && !empty($m['unit'])) { $fields[] = "meter_unit = ?"; $values[] = $m['unit']; }
+                    }
+                    continue;
+                }
                 $fields[] = "$col = ?"; $values[] = $val;
             }
             if (!empty($fields)) {

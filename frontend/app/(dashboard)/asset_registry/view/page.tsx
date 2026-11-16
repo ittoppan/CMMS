@@ -243,6 +243,35 @@ interface CbmItem {
   open_pm_id: number | null;
   open_pm_status: string | null;
   open_pm_due_date: string | null;
+  meter_id?: number | null;
+  meter_code?: string | null;
+  meter_name?: string | null;
+  meter_source?: string | null;
+}
+
+interface MeterItem {
+  id: number | null;
+  legacy_key?: string | null;
+  asset_id?: number;
+  meter_code?: string | null;
+  meter_type?: string | null;
+  name?: string | null;
+  serial_number?: string | null;
+  location_note?: string | null;
+  unit?: string | null;
+  reading_mode?: string | null;
+  is_active?: number | boolean;
+  source?: "registered" | "legacy_derived" | string;
+  plan_refs?: Array<{ plan_id?: number; plan_code?: string | null; meter_interval?: number | null }>;
+  has_measurements?: boolean;
+}
+
+interface MetersResponse {
+  asset_id: number;
+  items: MeterItem[];
+  mode?: "registered" | "legacy_derived";
+  schema?: { register_ready?: boolean; plan_link_ready?: boolean; readings_ready?: boolean };
+  migration_note?: string | null;
 }
 
 interface CbmResponse {
@@ -297,6 +326,8 @@ export default function AssetRegistryViewPage() {
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [cbm, setCbm] = useState<CbmResponse | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementRow[]>([]);
+  const [meters, setMeters] = useState<MetersResponse | null>(null);
+  const [selectedMeterKey, setSelectedMeterKey] = useState<string>("");
   const [facilityLayout, setFacilityLayout] = useState<any | null>(null);
   const [measLoading, setMeasLoading] = useState(false);
   const [measSaving, setMeasSaving] = useState(false);
@@ -461,9 +492,20 @@ export default function AssetRegistryViewPage() {
 
   const applyMeasPreset = (p: "electric" | "water" | "hours" | "custom") => {
     setMeasPreset(p);
+    setSelectedMeterKey("");
     if (p === "electric") setMeasForm((f) => ({ ...f, parameter: "มิเตอร์ไฟฟ้า", unit: "kWh" }));
     else if (p === "water") setMeasForm((f) => ({ ...f, parameter: "มิเตอร์น้ำ", unit: "m³" }));
     else if (p === "hours") setMeasForm((f) => ({ ...f, parameter: "ชั่วโมงเดินเครื่อง", unit: "ชั่วโมง" }));
+  };
+
+  const selectMeterForMeasurement = (key: string) => {
+    setSelectedMeterKey(key);
+    setMeasError(""); setMeasOk("");
+    if (!key) return;
+    const m = meters?.items?.find((x) => String(x.id ?? x.legacy_key ?? "") === key);
+    if (!m) return;
+    setMeasPreset("custom");
+    setMeasForm((f) => ({ ...f, parameter: String(m.name || f.parameter || ""), unit: String(m.unit || f.unit || "") }));
   };
 
   const saveMeasurement = async () => {
@@ -474,7 +516,9 @@ export default function AssetRegistryViewPage() {
     setMeasSaving(true); setMeasError(""); setMeasOk("");
     try {
       const csrf = getCsrfToken();
-      const body = {
+      const selectedMeter = meters?.items?.find((x) => String(x.id ?? x.legacy_key ?? "") === selectedMeterKey);
+      const meterId = selectedMeter && typeof selectedMeter.id === "number" && selectedMeter.id > 0 ? selectedMeter.id : null;
+      const body: any = {
         action: "add",
         asset_id: Number(assetId),
         parameter: String(measForm.parameter || "").trim(),
@@ -483,20 +527,25 @@ export default function AssetRegistryViewPage() {
         measured_at: measForm.measured_at ? new Date(measForm.measured_at).toISOString().slice(0, 19).replace("T", " ") : null,
         notes: String(measForm.notes || "").trim() || null,
       };
+      if (meterId) body.meter_id = meterId; // ผูกทะเบียนจริงเมื่อมี (หลัง migration); มิเตอร์สังเคราะห์ fallback asset_measurements เดิม
       const res = await fetch("/api/v1/asset_measurements.php", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
         body: JSON.stringify(body),
       });
       const j = await res.json().catch(() => ({}));
-      if (!res.ok || j?.error) throw new Error(j?.error || j?.message || "บันทึกไม่สำเร็จ");
-      setMeasOk("บันทึกค่ามิเตอร์เรียบร้อย");
+      if (!res.ok || j?.error || j?.error_code || j?.success === false) throw new Error(j?.message || j?.error || "บันทึกไม่สำเร็จ");
+      setMeasOk(j?.mode === "registered" ? "บันทึกค่ามิเตอร์เรียบร้อย (ผูกทะเบียนมิเตอร์)" : "บันทึกค่ามิเตอร์เรียบร้อย");
       setMeasForm((f) => ({ ...f, value: "", notes: "" }));
       await fetchMeasurements(assetId);
       try {
-        const r = await fetch(`/api/v1/pm_plans.php?asset_id=${encodeURIComponent(assetId)}&meters=1`);
-        const jj = await r.json();
+        const [r, mt] = await Promise.all([
+          fetch(`/api/v1/pm_plans.php?asset_id=${encodeURIComponent(assetId)}&meters=1`),
+          fetch(`/api/v1/asset_meters.php?asset_id=${encodeURIComponent(assetId)}`),
+        ]);
+        const [jj, mtj] = await Promise.all([r.json().catch(() => ({})), mt.json().catch(() => ({}))]);
         if (Array.isArray(jj?.items)) setCbm(jj as CbmResponse);
+        if (Array.isArray(mtj?.items)) setMeters(mtj as MetersResponse);
       } catch {}
     } catch (e: any) {
       setMeasError(e?.message || "บันทึกค่ามิเตอร์ไม่สำเร็จ (ตรวจสอบสิทธิ์/การเชื่อมต่อ)");
@@ -571,11 +620,17 @@ export default function AssetRegistryViewPage() {
           if (Array.isArray(j?.items)) setCbm(j as CbmResponse);
         }
         try {
-          const mr = await fetch(`/api/v1/asset_measurements.php?asset_id=${encodeURIComponent(assetId)}`);
-          const mj = await mr.json().catch(() => ({}));
+          const [mr, mt] = await Promise.all([
+            fetch(`/api/v1/asset_measurements.php?asset_id=${encodeURIComponent(assetId)}`),
+            fetch(`/api/v1/asset_meters.php?asset_id=${encodeURIComponent(assetId)}`),
+          ]);
+          const [mj, mtj] = await Promise.all([mr.json().catch(() => ({})), mt.json().catch(() => ({}))]);
           const mlist = Array.isArray(mj?.measurements) ? mj.measurements : Array.isArray(mj) ? mj : [];
           setMeasurements(mlist as MeasurementRow[]);
-        } catch {}
+          if (Array.isArray(mtj?.items)) setMeters(mtj as MetersResponse); else setMeters(null);
+        } catch {
+          setMeters(null);
+        }
       } catch (e) {
         console.error("Fetch asset detail error:", e);
         setError("ไม่พบข้อมูลเครื่องจักร หรือโหลดข้อมูลไม่สำเร็จ");
@@ -938,6 +993,47 @@ export default function AssetRegistryViewPage() {
             <CardContent className="space-y-4">
               {measError && <Alert variant="danger" description={measError} />}
               {measOk && <Alert variant="success" description={measOk} />}
+
+              <div className="rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-subtle)]/30 p-3 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">ทะเบียนมิเตอร์ (เบื้องต้น)</p>
+                  <Badge variant={meters?.mode === "registered" ? "success" : "neutral"}>
+                    {meters?.mode === "registered" ? "ทะเบียนจริง" : "สังเคราะห์จากข้อมูลเดิม"}
+                  </Badge>
+                </div>
+                {meters?.migration_note && (
+                  <p className="text-xs text-[var(--cmms-warning-dark)]">{meters.migration_note}</p>
+                )}
+                {!meters || meters.items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">ยังไม่พบมิเตอร์ที่สืบค้นได้จากแผน/ค่ามิเตอร์เดิมของเครื่องนี้ — สามารถบันทึกค่าด้วยพารามิเตอร์/หน่วยแบบเดิมได้</p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {meters.items.slice(0, 12).map((m) => {
+                      const key = String(m.id ?? m.legacy_key ?? "");
+                      const active = selectedMeterKey === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => selectMeterForMeasurement(key)}
+                          className={`rounded-md border px-2 py-1 text-left text-xs transition ${active ? "border-[var(--cmms-primary)] bg-[var(--cmms-primary)]/10" : "border-[var(--cmms-border)] bg-white hover:bg-[var(--cmms-bg-subtle)]"}`}
+                          title={m.source === "registered" ? "มิเตอร์ทะเบียน (พร้อมผูก meter_id เมื่อ schema ครบ)" : "มิเตอร์สังเคราะห์จากข้อมูลเดิม (fallback)"}
+                        >
+                          <div className="font-medium">{m.name || m.meter_code || m.unit || "มิเตอร์"}</div>
+                          <div className="text-muted-foreground">{m.unit ? `หน่วย: ${m.unit}` : "ไม่ระบุหน่วย"}{m.meter_type ? ` · ${m.meter_type}` : ""}{m.plan_refs?.length ? ` · ${m.plan_refs.length} แผน` : ""}</div>
+                        </button>
+                      );
+                    })}
+                    {meters.items.length > 12 && <span className="text-xs text-muted-foreground self-center">+{meters.items.length - 12}</span>}
+                  </div>
+                )}
+                {selectedMeterKey && (
+                  <p className="text-xs text-muted-foreground">
+                    เลือกมิเตอร์เพื่อเติมพารามิเตอร์/หน่วยอัตโนมัติ {meters?.mode === "registered" ? "(จะผูก meter_id เมื่อบันทึก)" : "(โหมด fallback: บันทึกผ่าน asset_measurements แบบเดิม)"}
+                  </p>
+                )}
+              </div>
+
               <div className="flex flex-wrap gap-2">
                 <Button type="button" size="sm" variant={measPreset === "electric" ? "primary" : "secondary"} onClick={() => applyMeasPreset("electric")}><Zap size={14} aria-hidden="true" /> มิเตอร์ไฟฟ้า (kWh)</Button>
                 <Button type="button" size="sm" variant={measPreset === "water" ? "primary" : "secondary"} onClick={() => applyMeasPreset("water")}><Droplets size={14} aria-hidden="true" /> มิเตอร์น้ำ (m³)</Button>
@@ -945,9 +1041,9 @@ export default function AssetRegistryViewPage() {
                 <Button type="button" size="sm" variant={measPreset === "custom" ? "primary" : "secondary"} onClick={() => applyMeasPreset("custom")}><Plus size={14} aria-hidden="true" /> กำหนดเอง</Button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Input label="พารามิเตอร์/ประเภท" value={measForm.parameter} onChange={(e) => setMeasForm({ ...measForm, parameter: e.target.value })} hint="ใช้จับคู่กับแผน PM ตามมิเตอร์ (แนะนำตรงกับหน่วย เช่น มิเตอร์ไฟฟ้า/kWh)" />
+                <Input label="พารามิเตอร์/ประเภท" value={measForm.parameter} onChange={(e) => setMeasForm({ ...measForm, parameter: e.target.value })} hint="ใช้จับคู่กับแผน PM ตามมิเตอร์/ทะเบียน (fallback: parameter/unit)" />
                 <Input label="ค่าที่อ่านได้ *" type="number" step="any" value={measForm.value} onChange={(e) => setMeasForm({ ...measForm, value: e.target.value })} placeholder="เช่น 1250.5" />
-                <Input label="หน่วย" value={measForm.unit} onChange={(e) => setMeasForm({ ...measForm, unit: e.target.value })} placeholder="เช่น kWh, m³, ชั่วโมง" hint="ควรตรงกับ meter_unit ของแผน" />
+                <Input label="หน่วย" value={measForm.unit} onChange={(e) => setMeasForm({ ...measForm, unit: e.target.value })} placeholder="เช่น kWh, m³, ชั่วโมง" hint="ควรตรงกับหน่วยมิเตอร์/แผน (meter_unit)" />
                 <Input label="วัน-เวลาที่วัด" type="datetime-local" value={measForm.measured_at} onChange={(e) => setMeasForm({ ...measForm, measured_at: e.target.value })} />
               </div>
               <Input label="หมายเหตุ (ถ้ามี)" value={measForm.notes} onChange={(e) => setMeasForm({ ...measForm, notes: e.target.value })} placeholder="เช่น อ่านจากหน้าปัดรอบบ่าย" />
@@ -1025,7 +1121,7 @@ export default function AssetRegistryViewPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold">{m.plan_name}</p>
-                            <p className="text-xs text-muted-foreground font-mono">{m.plan_code}</p>
+                            <p className="text-xs text-muted-foreground font-mono">{m.plan_code}{m.meter_name ? ` · ${m.meter_name}` : ""}{m.meter_code ? ` (${m.meter_code})` : ""}</p>
                           </div>
                           <Badge variant={ui.variant} dot>{ui.label}</Badge>
                         </div>

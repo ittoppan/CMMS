@@ -5,12 +5,15 @@
  * ใช้ร่วมกันระหว่าง API (pm_plans.php) และหน้าจอ — ห้ามคัดลอก
  * ตรรกะจับคู่หน่วยมิเตอร์ (parameter/unit กับ meter_unit ของแผน) ไปไว้ที่อื่น
  *
- * แหล่งค่ามิเตอร์จริง: ตาราง asset_measurements
- * เป้าหมายของรอบ: baseline (ค่าตอนปิดรอบล่าสุด) + meter_interval ของแผน
+ * แหล่งค่ามิเตอร์จริง (fallback เดิม): ตาราง asset_measurements
+ * รองรับทะเบียนมิเตอร์ (เตรียมไว้): ถ้ามี schema/meter_id หลัง migration จะ prefer ข้อมูลจากทะเบียน
+ * ส่วนที่ต้องรอ migration: asset_meters, asset_meter_readings, pm_am_plans.meter_id และการผูกทะเบียนจริง
  */
 
-/** ค่ามิเตอร์ล่าสุดของเครื่อง ณ วันที่กำหนด (null = ล่าสุดเสมอ) */
-function pm_meter_reading(PDO $pdo, int $assetId, string $unit, ?string $untilDate = null): ?float
+require_once __DIR__ . '/meter_register.php';
+
+/** ค่ามิเตอร์ล่าสุดของเครื่อง ณ วันที่กำหนด (legacy: จับคู่ parameter/unit กับหน่วย) */
+function pm_meter_reading_legacy(PDO $pdo, int $assetId, string $unit, ?string $untilDate = null): ?float
 {
     $unit = trim($unit);
     if ($unit === '') return null;
@@ -28,12 +31,31 @@ function pm_meter_reading(PDO $pdo, int $assetId, string $unit, ?string $untilDa
 }
 
 /**
+ * ค่ามิเตอร์ล่าสุด: prefer ทะเบียน/reading table เมื่อมี meter_id และ schema พร้อม
+ * มิฉะนั้น fallback การจับคู่ parameter/unit แบบเดิม (ทำงานร่วมกับข้อมูลเดิมได้)
+ */
+function pm_meter_reading(PDO $pdo, int $assetId, string $unit, ?string $untilDate = null, ?int $meterId = null): ?float
+{
+    if ($meterId) {
+        $schema = meter_schema_state($pdo);
+        if ($schema['readings_ready']) {
+            $v = meter_latest_reading_registered($pdo, $meterId, $untilDate);
+            if ($v !== null) return $v;
+        }
+        $meter = meter_find_registered($pdo, $meterId);
+        if ($meter && !empty($meter['unit'])) {
+            $v = pm_meter_reading_legacy($pdo, $assetId, (string)$meter['unit'], $untilDate);
+            if ($v !== null) return $v;
+        }
+    }
+    return pm_meter_reading_legacy($pdo, $assetId, $unit, $untilDate);
+}
+
+/**
  * baseline ของมิเตอร์ = ค่าที่บันทึกตอนปิดรอบล่าสุด (meter_reading)
  * ถ้ารอบนั้นไม่มีการบันทึกค่า ใช้ค่าวัดที่ใกล้ที่สุด ณ วันปิดรอบ
- *
- * @return array{value: ?float, source: string, since: ?string}
  */
-function pm_meter_baseline(PDO $pdo, int $assetId, int $planId, string $unit): array
+function pm_meter_baseline(PDO $pdo, int $assetId, int $planId, string $unit, ?int $meterId = null): array
 {
     $st = $pdo->prepare("SELECT id, last_done_date, completed_at, meter_reading FROM pm_am
                          WHERE plan_id = ? AND asset_id = ? AND status = 'completed'
@@ -46,25 +68,27 @@ function pm_meter_baseline(PDO $pdo, int $assetId, int $planId, string $unit): a
     if ($row['meter_reading'] !== null && $row['meter_reading'] !== '') {
         return ['value' => (float)$row['meter_reading'], 'source' => 'pm_record', 'since' => $since];
     }
-    $m = pm_meter_reading($pdo, $assetId, $unit, $since);
+    $m = pm_meter_reading($pdo, $assetId, $unit, $since, $meterId);
     if ($m !== null) return ['value' => $m, 'source' => 'measurement', 'since' => $since];
     return ['value' => null, 'source' => 'none', 'since' => $since];
 }
 
-/**
- * คำนวณสถานะ CBM ของหนึ่งคู่ (เครื่อง × แผนตามมิเตอร์)
- *
- * status: due (ถึงเป้าหมายแล้ว) | near (ใช้ไป ≥ 90% ของรอบ) | ok |
- *         no_reading (ยังไม่มีค่าวัด) | no_baseline (ยังไม่เคยปิดรอบจึงไม่มีจุดเริ่ม)
- */
 function pm_meter_row(PDO $pdo, int $assetId, array $plan): array
 {
     $planId = (int)$plan['id'];
     $unit = trim((string)($plan['meter_unit'] ?? ''));
     $interval = (float)($plan['meter_interval'] ?? 0);
+    $meterId = isset($plan['meter_id']) && $plan['meter_id'] !== null && $plan['meter_id'] !== '' ? (int)$plan['meter_id'] : null;
 
-    $current = pm_meter_reading($pdo, $assetId, $unit);
-    $base = pm_meter_baseline($pdo, $assetId, $planId, $unit);
+    $meter = null;
+    $schema = meter_schema_state($pdo);
+    if ($meterId && $schema['register_ready']) {
+        $meter = meter_find_registered($pdo, $meterId);
+        if ($meter && $unit === '' && !empty($meter['unit'])) $unit = (string)$meter['unit'];
+    }
+
+    $current = pm_meter_reading($pdo, $assetId, $unit, null, $meterId);
+    $base = pm_meter_baseline($pdo, $assetId, $planId, $unit, $meterId);
     $baseline = $base['value'];
     $target = $baseline !== null ? $baseline + $interval : null;
     $used = ($current !== null && $baseline !== null) ? max(0.0, $current - $baseline) : null;
@@ -84,7 +108,7 @@ function pm_meter_row(PDO $pdo, int $assetId, array $plan): array
     $openSt->execute([$planId, $assetId]);
     $open = $openSt->fetch(PDO::FETCH_ASSOC) ?: null;
 
-    return [
+    $out = [
         'plan_id' => $planId,
         'plan_code' => $plan['code'] ?? null,
         'plan_name' => $plan['name'] ?? null,
@@ -103,25 +127,24 @@ function pm_meter_row(PDO $pdo, int $assetId, array $plan): array
         'open_pm_status' => $open['status'] ?? null,
         'open_pm_due_date' => $open['due_date'] ?? null,
     ];
+    return meter_attach_info_to_cbm_row($out, $meter);
 }
 
-/** เตรียม summary เปล่า */
 function pm_meter_summary_seed(): array
 {
     return ['pairs' => 0, 'due' => 0, 'near' => 0, 'ok' => 0, 'no_reading' => 0, 'no_baseline' => 0];
 }
 
-/**
- * สถานะ CBM ของเครื่องหนึ่งเครื่อง — หนึ่งแถวต่อหนึ่งแผน PM ตามมิเตอร์ที่ใช้งานอยู่
- */
 function pm_meter_asset_status(PDO $pdo, int $assetId): array
 {
-    $st = $pdo->prepare("SELECT p.id, p.code, p.name, p.meter_unit, p.meter_interval
+    $schema = meter_schema_state($pdo);
+    $meterSelect = $schema['plan_meter_id'] ? ', p.meter_id' : ', NULL AS meter_id';
+    $st = $pdo->prepare("SELECT p.id, p.code, p.name, p.meter_unit, p.meter_interval{$meterSelect}
                          FROM pm_am_plans p
                          JOIN pm_am_plan_assets pa ON pa.plan_id = p.id
                          WHERE pa.asset_id = ?
                            AND p.frequency_type = 'meter_based'
-                           AND p.meter_unit IS NOT NULL AND p.meter_unit <> ''
+                           AND ((p.meter_unit IS NOT NULL AND p.meter_unit <> '') OR " . ($schema['plan_meter_id'] ? "p.meter_id IS NOT NULL" : "0") . ")
                            AND p.meter_interval IS NOT NULL AND p.meter_interval > 0
                            AND COALESCE(p.is_active, 1) = 1
                            AND COALESCE(p.status, 'active') <> 'cancelled'
@@ -140,24 +163,20 @@ function pm_meter_asset_status(PDO $pdo, int $assetId): array
     return ['asset_id' => $assetId, 'items' => $items, 'summary' => $summary];
 }
 
-/**
- * สถานะ CBM รวมทั้งโรงงาน — ทุกคู่ (เครื่อง × แผนตามมิเตอร์) ที่ยังใช้งาน
- *
- * @param array{only?: string, limit?: int} $opts only = all|due|near|actionable
- * @return array{items: array, summary: array, counts: array, total: int}
- */
 function pm_meter_plant_status(PDO $pdo, array $opts = []): array
 {
     $only = (string)($opts['only'] ?? 'all');
     if (!in_array($only, ['all', 'due', 'near', 'actionable'], true)) $only = 'all';
+    $schema = meter_schema_state($pdo);
+    $meterSelect = $schema['plan_meter_id'] ? ', p.meter_id' : ', NULL AS meter_id';
 
-    $st = $pdo->prepare("SELECT p.id, p.code, p.name, p.meter_unit, p.meter_interval,
+    $st = $pdo->prepare("SELECT p.id, p.code, p.name, p.meter_unit, p.meter_interval{$meterSelect},
                                 a.id AS asset_id, a.code AS asset_code, a.name AS asset_name
                          FROM pm_am_plans p
                          JOIN pm_am_plan_assets pa ON pa.plan_id = p.id
                          JOIN asset_registry a ON a.id = pa.asset_id
                          WHERE p.frequency_type = 'meter_based'
-                           AND p.meter_unit IS NOT NULL AND p.meter_unit <> ''
+                           AND ((p.meter_unit IS NOT NULL AND p.meter_unit <> '') OR " . ($schema['plan_meter_id'] ? "p.meter_id IS NOT NULL" : "0") . ")
                            AND p.meter_interval IS NOT NULL AND p.meter_interval > 0
                            AND COALESCE(p.is_active, 1) = 1
                            AND COALESCE(p.status, 'active') <> 'cancelled'
@@ -184,7 +203,6 @@ function pm_meter_plant_status(PDO $pdo, array $opts = []): array
         if (count($rows) < $max) $rows[] = $row;
     }
 
-    // เร่งด่วนก่อน: due → near → ok → ยังไม่มีข้อมูล แล้วเรียงตามเครื่อง
     $rank = ['due' => 0, 'near' => 1, 'ok' => 2, 'no_baseline' => 3, 'no_reading' => 4];
     usort($rows, function ($a, $b) use ($rank) {
         $ra = $rank[$a['status']] ?? 9;
