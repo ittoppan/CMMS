@@ -163,7 +163,7 @@ export default function WorkforceShiftsPage() {
         method: "POST",
         body,
         kind: "workforce_shift",
-        label: `บันทึกกะของ ${options?.people.find((p) => p.id === body.user_id)?.full_name ?? "ช่าง"}`,
+        label: `บันทึกกะของ ${options?.people?.find((p) => p.id === body.user_id)?.full_name ?? "ช่าง"}`,
       }),
     onSuccess: (res, body) => {
       if (res.outcome === "sent") {
@@ -195,7 +195,7 @@ export default function WorkforceShiftsPage() {
         method: "POST",
         body,
         kind: "workforce_leave",
-        label: `บันทึกวันลาของ ${options?.people.find((p) => p.id === body.user_id)?.full_name ?? "ช่าง"}`,
+        label: `บันทึกวันลาของ ${options?.people?.find((p) => p.id === body.user_id)?.full_name ?? "ช่าง"}`,
       }),
     onSuccess: (res) => {
       if (res.outcome === "sent") {
@@ -425,7 +425,7 @@ export default function WorkforceShiftsPage() {
                   disabled={shiftUser === ""}
                   onClick={() => {
                     const pid = Number(shiftUser);
-                    const person = options?.people.find((p) => p.id === pid);
+                    const person = options?.people?.find((p) => p.id === pid);
                     setShiftTarget({
                       userId: pid,
                       name: person?.full_name ?? "ช่าง",
@@ -548,7 +548,7 @@ export default function WorkforceShiftsPage() {
 
       <LeaveDialog
         open={leaveOpen}
-        personName={options?.people.find((p) => p.id === Number(leaveUser))?.full_name ?? ""}
+        personName={options?.people?.find((p) => p.id === Number(leaveUser))?.full_name ?? ""}
         pending={saveLeave.isPending}
         onClose={() => setLeaveOpen(false)}
         onSubmit={(body) => saveLeave.mutate({ ...body, user_id: Number(leaveUser) })}

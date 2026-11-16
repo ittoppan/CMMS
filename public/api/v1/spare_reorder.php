@@ -9,7 +9,7 @@ header('Content-Type: application/json; charset=utf-8');
 session_start();
 $pdo = getDb();
 requireLogin($pdo);
-if (!requirePerm('spare_parts', 'view')) { http_response_code(403); echo json_encode(['error'=>'forbidden']); exit; }
+requirePerm($pdo, 'spare_parts', 'view');
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 200;
 if ($limit < 1) $limit = 50;
 if ($limit > 1000) $limit = 1000;

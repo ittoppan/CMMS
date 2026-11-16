@@ -116,9 +116,12 @@ const API_ENDPOINT_PERMISSIONS = [
     'roles.php'                  => ['read' => ['roles', 'view'],        'write' => ['roles', 'manage']],
     // sage_items.php: ยังไม่บังคับ — SagePartAddModal ใช้จากหน้า repair/view (ช่าง) และ pm_am/plans/create
     // ถ้าจะบังคับ ต้องเพิ่ม sage:view ให้ role 3/7 ก่อน (ดู docs/API_PERMISSION_MATRIX.md)
-    'settings.php'               => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    // settings/menu_permissions = endpoint bootstrap ที่ทุกหน้าต้องเรียก (ธีม/i18n/สิทธิ์เมนู)
+    // read เปิดให้ผู้ใช้ที่ login ทุกบทบาท (ค่า secret ถูก mask แล้ว; matrix ทั้งหมดยัง admin-only ในไฟล์)
+    // write ยังบังคับ settings:manage ตามเดิม
+    'settings.php'               => ['read' => null,                      'write' => ['settings', 'manage']],
     'master_data.php'            => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
-    'menu_permissions.php'       => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],
+    'menu_permissions.php'       => ['read' => null,                      'write' => ['settings', 'manage']],
     // ใช้ตัดสินการแสดงปุ่มใน UI: คืนเฉพาะสิทธิ์ของตัวเอง (ไม่มี PII) จึงเปิดให้ผู้ที่ล็อกอินทุกคน
     'my_permissions.php'         => ['read' => null,                      'write' => null],
     'repair_options.php'         => ['read' => ['settings', 'view'],      'write' => ['settings', 'manage']],

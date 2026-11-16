@@ -240,13 +240,15 @@ export default function PushDevicePage() {
           เปิดการแจ้งเตือน
         </Button>
         <p className="break-words text-xs text-muted-foreground">
-          กดแล้วเบราว์เซอร์จะถาม “อนุญาตการแจ้งเตือนจาก {typeof window !== "undefined" ? window.location.host : "CMMS"} หรือไม่” — เลือกอนุญาต
+          กดแล้วเบราว์เซอร์จะถาม “อนุญาตการแจ้งเตือนจาก {host || "CMMS"} หรือไม่” — เลือกอนุญาต
         </p>
       </CardContent>
     );
   };
 
-  const host = typeof window !== "undefined" ? window.location.host : "";
+  // อ่านค่าจากเบราว์เซอร์หลัง hydrate เท่านั้น (กัน hydration mismatch: server ไม่มี window)
+  const [host, setHost] = useState("");
+  useEffect(() => { setHost(window.location.host); }, []);
 
   return (
     <PageShell
@@ -360,7 +362,8 @@ function StatusHeader({ icon: Icon, tone, title }: { icon: LucideIcon; tone: "su
 
 /** วิธีเปิดสิทธิ์เมื่อเคยกดบล็อก — แยกตามเบราว์เซอร์ยอดนิยม */
 function DeniedGuide() {
-  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  const [ua, setUa] = useState("");
+  useEffect(() => { setUa(navigator.userAgent); }, []);
   const isAndroid = /Android/i.test(ua);
   const isIOS = /iPad|iPhone|iPod/.test(ua);
   const steps: Array<[string, string]> = isIOS

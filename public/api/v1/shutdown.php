@@ -447,7 +447,13 @@ try {
         409 => 'CONFLICT',
         default => 'VALIDATION_ERROR',
     };
-    api_fail($status, $code, $e->getMessage());
+    // อย่า leak รายละเอียด SQL ออกไปยัง client (เช่น ตาราง sd_* ยังไม่ถูก migrate)
+    $msg = $e->getMessage();
+    if (preg_match('/SQLSTATE|Base table or view not found|Unknown column/i', $msg)) {
+        error_log('[shutdown.php] ' . $msg);
+        $msg = 'โมดูล Shutdown/Turnaround ยังไม่พร้อมใช้งานในฐานข้อมูลนี้ (ต้องรัน migration Phase 35 ก่อน)';
+    }
+    api_fail($status, $code, $msg);
 } catch (Throwable $e) {
     api_safe_catch($e);
 }

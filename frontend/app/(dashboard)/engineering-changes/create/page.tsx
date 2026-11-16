@@ -90,7 +90,15 @@ export default function CreateEngineeringChangePage() {
     return <div className="space-y-4"><Skeleton className="h-32 rounded-2xl" /><Skeleton className="h-96 rounded-2xl" /></div>;
   }
 
-  const changeTypes = (cfg?.config?.change_types ?? {}) as Record<string, string>;
+  // API คืน change_types ได้ทั้ง string และ { key, label } — render เฉพาะข้อความ (กัน React #31)
+  type ChangeTypeValue = string | { key?: string; label?: string };
+  const rawChangeTypes = (cfg?.config?.change_types ?? {}) as Record<string, ChangeTypeValue>;
+  const changeTypes: Record<string, string> = Object.fromEntries(
+    Object.entries(rawChangeTypes).map(([k, v]) => [
+      k,
+      typeof v === "string" ? v : (v?.label || v?.key || k),
+    ])
+  );
   const depts = options?.departments ?? [];
   const assets = options?.assets ?? [];
   const sla = cfg?.config?.sla ?? {};
