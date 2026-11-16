@@ -299,7 +299,7 @@ export default function AssetRegistryPage() {
             <Network size={16} strokeWidth={1.75} aria-hidden="true" />
             วิเคราะห์ความสำคัญ
           </Button>
-          {can("create") && (
+          {(can("create") || can("edit") || can("manage")) && (
           <Button onClick={() => router.push("/asset_registry/create")}>
             <Plus size={16} strokeWidth={1.75} aria-hidden="true" />
             เพิ่มเครื่องจักรใหม่
