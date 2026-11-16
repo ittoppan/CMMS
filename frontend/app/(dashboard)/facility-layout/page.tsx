@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCan } from "@/lib/useCan";
-import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network } from "lucide-react";
+import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network, Search, AlertTriangle, CircleCheck, CircleDashed } from "lucide-react";
+import AndonBadge from "@/components/AndonBadge";
 
 type Location = { id: number; parent_id: number | null; code: string; name: string; type: string; description: string; is_active: number };
 type Asset = { id: number; code: string; name: string; status: string; location_id: number | null; location_name: string | null; location_type: string | null };
@@ -71,6 +72,9 @@ export default function FacilityLayoutPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
   const [drillApplied, setDrillApplied] = useState(false);
+  const [portSearch, setPortSearch] = useState("");
+  const [portTypeFilter, setPortTypeFilter] = useState<string>("all");
+  const [portStatusFilter, setPortStatusFilter] = useState<string>("all");
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -165,6 +169,19 @@ export default function FacilityLayoutPage() {
   };
   const updateRoomPorts = (rid: number, ports: Port[]) => updateRoom(rid, { ports });
   const updateRoomCabinets = (rid: number, cabinets: Cabinet[]) => updateRoom(rid, { cabinets });
+
+  const selectRoomById = (rid: number | null) => {
+    if (!rid) { setSelectedRoom(null); return; }
+    const byId: Record<number, Location> = {};
+    for (const l of locations) byId[l.id] = l;
+    const chain: number[] = [];
+    let cur: number | null = rid; let guard = 0;
+    while (cur && byId[cur] && guard < 20) { chain.unshift(cur); cur = byId[cur].parent_id; guard++; }
+    if (chain.length >= 3) { setSelectedBuilding(chain[0]); setSelectedFloor(chain[1]); setSelectedRoom(chain[chain.length - 1]); }
+    else if (chain.length === 2) { setSelectedBuilding(chain[0]); setSelectedFloor(chain[1]); setSelectedRoom(chain[1]); }
+    else if (chain.length === 1) { setSelectedBuilding(chain[0]); setSelectedRoom(chain[0]); }
+    else { setSelectedRoom(rid); }
+  };
   const save = async () => {
     setSaving(true); setError(null); setSavedMsg("");
     try {
@@ -189,8 +206,19 @@ export default function FacilityLayoutPage() {
   }, [byParent, selectedBuilding, selectedFloor]);
 
   const portSummary = useMemo(() => {
-    let total = 0, active = 0, spare = 0, faulty = 0, cabinets = 0;
-    const scan = (ports: Port[]) => { for (const p of (ports||[])) { total++; if (p.status==='active') active++; if (p.status==='spare') spare++; if (p.status==='faulty') faulty++; } };
+    let total = 0, active = 0, spare = 0, faulty = 0, reserved = 0, planned = 0, inactive = 0, cabinets = 0;
+    const scan = (ports: Port[]) => {
+      for (const p of (ports||[])) {
+        total++;
+        if (p.status==='active') active++;
+        else if (p.status==='spare') spare++;
+        else if (p.status==='faulty') faulty++;
+        else if (p.status==='reserved') reserved++;
+        else if (p.status==='planned') planned++;
+        else if (p.status==='inactive') inactive++;
+        else active++; // unknown -> count as active-ish bucket fallback? better count as other not needed
+      }
+    };
     Object.values(config.rooms).forEach(r => {
       scan((r as any)?.ports||[]);
       const cabs = ((r as any)?.cabinets||[]) as Cabinet[];
@@ -198,8 +226,54 @@ export default function FacilityLayoutPage() {
       cabs.forEach(c => scan(c?.ports||[]));
     });
     Object.values(config.assets).forEach(a => scan((a as any)?.ports||[]));
-    return { total, active, spare, faulty, cabinets };
+    return { total, active, spare, faulty, reserved, planned, inactive, cabinets };
   }, [config]);
+
+  const flatPorts = useMemo(() => {
+    const locById: Record<number, Location> = {};
+    for (const l of locations) locById[l.id] = l;
+    const assetById: Record<number, Asset> = {};
+    for (const a of assets) assetById[a.id] = a;
+    const rows: Array<{ key: string; roomId: number | null; roomName: string; roomCode: string; source: string; sourceName: string; port: Port }> = [];
+    const roomNameOf = (rid: number) => {
+      const l = locById[rid];
+      return l ? `${l.name}${l.code ? ` (${l.code})` : ""}` : `ห้อง #${rid}`;
+    };
+    // room + cabinet ports
+    Object.entries(config.rooms || {}).forEach(([ridStr, r]: any) => {
+      const rid = Number(ridStr);
+      const rn = roomNameOf(rid);
+      const rcode = locById[rid]?.code || "";
+      (r?.ports || []).forEach((p: Port) => rows.push({ key: `room-${rid}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "room", sourceName: "พอร์ตห้อง", port: p }));
+      (r?.cabinets || []).forEach((cab: Cabinet) => {
+        const cName = cab?.name || cab?.code || "ตู้/แผง";
+        (cab?.ports || []).forEach((p: Port) => rows.push({ key: `cab-${rid}-${cab.id}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "cabinet", sourceName: `ตู้: ${cName}${cab?.code && cab.code !== cName ? ` (${cab.code})` : ""}`, port: p }));
+      });
+    });
+    // asset ports
+    Object.entries(config.assets || {}).forEach(([aidStr, a]: any) => {
+      const aid = Number(aidStr);
+      const asset = assetById[aid];
+      const an = asset ? `${asset.code} · ${asset.name}` : `เครื่อง #${aid}`;
+      const rid = asset?.location_id ?? null;
+      const rn = rid ? roomNameOf(rid) : "ไม่ระบุห้อง";
+      const rcode = rid ? (locById[rid]?.code || "") : "";
+      (a?.ports || []).forEach((p: Port) => rows.push({ key: `asset-${aid}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "asset", sourceName: `เครื่อง: ${an}`, port: p }));
+    });
+    return rows;
+  }, [config, locations, assets]);
+
+  const filteredPorts = useMemo(() => {
+    const q = portSearch.trim().toLowerCase();
+    return flatPorts.filter(r => {
+      const p = r.port || ({} as Port);
+      if (portTypeFilter !== "all" && p.port_type !== portTypeFilter) return false;
+      if (portStatusFilter !== "all" && p.status !== portStatusFilter) return false;
+      if (!q) return true;
+      const hay = [r.roomName, r.roomCode, r.sourceName, p.label, p.port_type, p.port_no, p.endpoint, p.status, p.notes, p.spec].filter(Boolean).join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }, [flatPorts, portSearch, portTypeFilter, portStatusFilter]);
 
   return (
     <PageShell
@@ -217,12 +291,20 @@ export default function FacilityLayoutPage() {
       {error && <Alert variant="danger">{error}</Alert>}
       {savedMsg && <Alert variant="success">{savedMsg}</Alert>}
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">อาคาร/ตำแหน่ง</div><div className="text-2xl font-bold">{locations.length}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">เครื่องจักร</div><div className="text-2xl font-bold">{assets.length}</div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">ตู้ไฟ/ตู้ควบคุม</div><div className="text-2xl font-bold">{(portSummary as any).cabinets || 0}</div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">พอร์ต/จุดเชื่อมต่อ</div><div className="text-2xl font-bold">{portSummary.total}</div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">ใช้งาน / ว่าง / ชำรุด</div><div className="text-lg font-bold">{portSummary.active} / {portSummary.spare} / <span className="text-red-600">{portSummary.faulty}</span></div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">ตู้ไฟ/ตู้ควบคุม</div><div className="text-2xl font-bold">{portSummary.cabinets || 0}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">พอร์ต/จุดทั้งหมด</div><div className="text-2xl font-bold">{portSummary.total}</div></CardContent></Card>
+        <Card className={portSummary.faulty > 0 ? "border-red-300 bg-red-50" : ""}><CardContent className="p-4"><div className="text-xs text-muted-foreground flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 text-red-600"/>ชำรุด (ต้องตรวจสอบ)</div><div className="text-2xl font-bold text-red-700">{portSummary.faulty}</div></CardContent></Card>
+        <Card className={portSummary.spare > 0 ? "border-emerald-300 bg-emerald-50" : ""}><CardContent className="p-4"><div className="text-xs text-muted-foreground flex items-center gap-1"><CircleDashed className="w-3.5 h-3.5 text-emerald-700"/>ว่าง/สำรอง</div><div className="text-2xl font-bold text-emerald-700">{portSummary.spare}</div></CardContent></Card>
+      </div>
+      <div className="flex flex-wrap gap-2 text-sm items-center">
+        <AndonBadge tone="ok">ใช้งาน {portSummary.active}</AndonBadge>
+        <Badge variant="neutral">จอง {portSummary.reserved}</Badge>
+        <Badge variant="info">วางแผน/รอติดตั้ง {portSummary.planned}</Badge>
+        <Badge variant="neutral">ไม่ใช้งาน {portSummary.inactive}</Badge>
+        {portSummary.faulty > 0 && <AndonBadge tone="down">ชำรุด {portSummary.faulty} จุด — ตรวจสอบด่วน</AndonBadge>}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -373,6 +455,87 @@ export default function FacilityLayoutPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><Search className="w-4 h-4"/>ค้นหา/กรองทะเบียนพอร์ต</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">ค้นหาและกรองพอร์ต/จุดเชื่อมต่อทั้งหมด (พอร์ตห้อง ตู้/เบรกเกอร์ และพอร์ตเครื่อง) จากข้อมูล config เดิม — ค้นหาจากชื่อ, เลขพอร์ต/วงจร, ปลายทาง, สเปก, หมายเหตุ หรือห้อง/ตู้</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <div className="md:col-span-2">
+              <Label className="text-xs">ค้นหา (ชื่อ/เลขพอร์ต/ปลายทาง/สเปก/ห้อง/ตู้)</Label>
+              <Input value={portSearch} onChange={e=>setPortSearch(e.target.value)} placeholder="เช่น DB1-12, Cat6, PLC, MDB-1, ปั๊ม, 220V..." />
+            </div>
+            <div>
+              <Label className="text-xs">ประเภทพอร์ต</Label>
+              <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portTypeFilter} onChange={e=>setPortTypeFilter(e.target.value)}>
+                <option value="all">ทุกประเภท</option>
+                {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs">สถานะ</Label>
+              <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={portStatusFilter} onChange={e=>setPortStatusFilter(e.target.value)}>
+                <option value="all">ทุกสถานะ</option>
+                {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <div className="text-muted-foreground">พบ {filteredPorts.length} รายการ จากทั้งหมด {flatPorts.length} จุด</div>
+            {(portSearch || portTypeFilter!=="all" || portStatusFilter!=="all") && (
+              <Button size="sm" variant="ghost" onClick={()=>{ setPortSearch(""); setPortTypeFilter("all"); setPortStatusFilter("all"); }}>ล้างตัวกรอง</Button>
+            )}
+          </div>
+          {filteredPorts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">ไม่พบพอร์ตที่ตรงกับเงื่อนไข</p>
+          ) : (
+            <div className="space-y-2 max-h-[420px] overflow-auto pr-1">
+              {filteredPorts.slice(0, 200).map(r => {
+                const p = r.port;
+                const typeLabel = PORT_TYPES.find(t=>t.value===p.port_type)?.label || p.port_type || "-";
+                const statusLabel = PORT_STATUS.find(s=>s.value===p.status)?.label || p.status || "-";
+                const statusCls = p.status==="faulty" ? "border-red-200 bg-red-50" : p.status==="spare" ? "border-emerald-200 bg-emerald-50/40" : p.status==="planned" ? "border-sky-200 bg-sky-50/40" : "";
+                return (
+                  <div key={r.key} className={`rounded-lg border p-2 text-sm ${statusCls}`}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="space-y-0.5">
+                        <div className="font-semibold flex flex-wrap items-center gap-2">
+                          <span>{p.label || "(ไม่ระบุชื่อ)"}</span>
+                          {p.status === "faulty" ? <AndonBadge tone="down">{statusLabel}</AndonBadge>
+                            : p.status === "active" ? <AndonBadge tone="ok">{statusLabel}</AndonBadge>
+                            : p.status === "spare" ? <AndonBadge tone="idle">{statusLabel}</AndonBadge>
+                            : p.status === "planned" ? <AndonBadge tone="warn">{statusLabel}</AndonBadge>
+                            : <Badge variant="neutral">{statusLabel}</Badge>}
+                          <Badge variant="neutral">{typeLabel}</Badge>
+                          {p.port_no ? <span className="text-xs font-mono text-muted-foreground">#{p.port_no}</span> : null}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground/80">{r.roomName}</span> · {r.sourceName}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          ปลายทาง: <span className="text-foreground/80">{p.endpoint || "-"}</span>
+                          {p.spec ? <> · สเปก: <span className="text-foreground/80">{p.spec}</span></> : null}
+                          {p.notes ? <> · หมายเหตุ: {p.notes}</> : null}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {r.roomId && (
+                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>{ selectRoomById(r.roomId); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                            ไปที่ห้อง
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredPorts.length > 200 && <p className="text-xs text-muted-foreground">แสดง 200 รายการแรก — ปรับตัวกรองให้แคบลงเพื่อดูรายการที่ต้องการ</p>}
             </div>
           )}
         </CardContent>
