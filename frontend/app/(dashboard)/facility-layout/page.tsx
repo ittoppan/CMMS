@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ function newCabinet(): Cabinet { return { id: `cab_${Date.now()}_${Math.random()
 
 export default function FacilityLayoutPage() {
   const canManage = useCan("settings")("manage");
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,7 @@ export default function FacilityLayoutPage() {
   const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"2d" | "3d">("2d");
+  const [drillApplied, setDrillApplied] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -89,6 +92,36 @@ export default function FacilityLayoutPage() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    if (drillApplied || locations.length === 0) return;
+    const roomParam = searchParams.get("room") || searchParams.get("location_id") || searchParams.get("location");
+    const bParam = searchParams.get("building");
+    const fParam = searchParams.get("floor");
+    if (!roomParam && !bParam && !fParam) { setDrillApplied(true); return; }
+    const byId: Record<number, Location> = {};
+    for (const l of locations) byId[l.id] = l;
+    const chain = (id: number): number[] => {
+      const out: number[] = [];
+      let cur: number | null = id;
+      let guard = 0;
+      while (cur && byId[cur] && guard < 20) { out.unshift(cur); cur = byId[cur].parent_id; guard++; }
+      return out;
+    };
+    if (roomParam) {
+      const rid = Number(roomParam);
+      if (rid && byId[rid]) {
+        const c = chain(rid);
+        if (c.length >= 3) { setSelectedBuilding(c[0]); setSelectedFloor(c[1]); setSelectedRoom(c[c.length - 1]); }
+        else if (c.length === 2) { setSelectedBuilding(c[0]); setSelectedFloor(c[1]); setSelectedRoom(c[1]); }
+        else if (c.length === 1) { setSelectedBuilding(c[0]); setSelectedRoom(c[0]); }
+        else { setSelectedRoom(rid); }
+      }
+    }
+    if (bParam) { const bid = Number(bParam); if (bid && byId[bid]) setSelectedBuilding(bid); }
+    if (fParam) { const fid = Number(fParam); if (fid && byId[fid]) setSelectedFloor(fid); }
+    setDrillApplied(true);
+  }, [locations, searchParams, drillApplied]);
 
   const byParent = useMemo(() => {
     const m: Record<number, Location[]> = {};

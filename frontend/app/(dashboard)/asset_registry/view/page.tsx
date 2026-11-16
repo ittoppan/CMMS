@@ -44,6 +44,8 @@ import {
   Droplets,
   Zap,
   Plus,
+  Cable,
+  Box,
 } from "lucide-react";
 
 // ── mobile detection (pattern เดียวกับ spare_parts page) ──
@@ -295,6 +297,7 @@ export default function AssetRegistryViewPage() {
   const [schedules, setSchedules] = useState<ScheduleRow[]>([]);
   const [cbm, setCbm] = useState<CbmResponse | null>(null);
   const [measurements, setMeasurements] = useState<MeasurementRow[]>([]);
+  const [facilityLayout, setFacilityLayout] = useState<any | null>(null);
   const [measLoading, setMeasLoading] = useState(false);
   const [measSaving, setMeasSaving] = useState(false);
   const [measError, setMeasError] = useState("");
@@ -412,6 +415,17 @@ export default function AssetRegistryViewPage() {
     return users.find((u) => String(u.id) === String(asset.responsible_user_id))?.full_name;
   }, [asset, users]);
 
+  const layoutInfo = useMemo(() => {
+    if (!facilityLayout) return null as any;
+    const locId = asset?.location_id ? Number(asset.location_id) : null;
+    const roomCfg = locId ? ((facilityLayout.config?.rooms || {})[String(locId)] || null) : null;
+    const roomPorts: any[] = roomCfg?.ports || [];
+    const cabinets: any[] = roomCfg?.cabinets || [];
+    const assetPorts: any[] = ((facilityLayout.config?.assets || {})[String(assetId || "")]?.ports) || [];
+    const loc = locId ? (facilityLayout.locations || []).find((l: any) => Number(l.id) === locId) : null;
+    return { locId, loc, roomCfg, roomPorts, cabinets, assetPorts };
+  }, [facilityLayout, asset?.location_id, assetId]);
+
   
 
   const fetchMeasurements = useCallback(async (id: string) => {
@@ -427,6 +441,22 @@ export default function AssetRegistryViewPage() {
     } finally {
       setMeasLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/v1/facility_layout.php");
+        const json = await res.json().catch(() => null);
+        if (!mounted) return;
+        if (res.ok && json?.success) setFacilityLayout(json);
+        else setFacilityLayout(null);
+      } catch {
+        if (mounted) setFacilityLayout(null);
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   const applyMeasPreset = (p: "electric" | "water" | "hours" | "custom") => {
@@ -670,7 +700,15 @@ export default function AssetRegistryViewPage() {
     { label: "Serial Number", icon: Timer, value: asset.serial_number || "-" },
     { label: "รุ่น (Model)", icon: Layers, value: asset.model || "-" },
     { label: "ผู้ผลิต", icon: Building2, value: asset.manufacturer || "-" },
-    { label: "ตำแหน่งที่ตั้ง", icon: MapPin, value: asset.location || "-" },
+    {
+      label: "ตำแหน่งที่ตั้ง",
+      icon: MapPin,
+      value: asset.location_id ? (
+        <button className="text-left text-primary hover:underline inline-flex items-center gap-1" onClick={() => router.push(`/facility-layout?room=${asset.location_id}&asset=${assetId}`)}>
+          {asset.location || `ห้อง #${asset.location_id}`} <ArrowRight size={14} aria-hidden="true" />
+        </button>
+      ) : (asset.location || "-"),
+    },
     { label: "แผนก", icon: User, value: asset.department || "-" },
     { label: "วันที่ติดตั้ง", icon: CalendarClock, value: asset.purchase_date ? String(asset.purchase_date).slice(0, 10) : "-" },
     { label: "ประกันหมดอายุ", icon: CalendarClock, value: asset.warranty_expiry ? String(asset.warranty_expiry).slice(0, 10) : "-" },
@@ -830,6 +868,62 @@ export default function AssetRegistryViewPage() {
                   </VStack>
                 ))}
               </Grid>
+            </CardContent>
+          </Card>
+
+          {/* ผังอาคาร / ห้อง / พอร์ต */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-base">
+                <span className="flex items-center gap-2"><Network size={16} strokeWidth={1.75} aria-hidden="true" />ผังอาคาร / ห้อง / พอร์ต (Facility Layout)</span>
+                <Button variant="secondary" size="sm" onClick={() => router.push(layoutInfo?.locId ? `/facility-layout?room=${layoutInfo.locId}&asset=${assetId}` : "/facility-layout")}>
+                  <MapPin size={14} strokeWidth={1.75} aria-hidden="true" />เปิดผังอาคาร
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!facilityLayout ? (
+                <p className="text-sm text-muted-foreground">กำลังโหลดข้อมูลผัง/พอร์ต...</p>
+              ) : !layoutInfo?.locId ? (
+                <Alert variant="warning" description="เครื่องนี้ยังไม่ผูกตำแหน่ง (location/ห้อง) — กำหนดตำแหน่งให้เครื่องเพื่อเชื่อมกับผังอาคารและพอร์ตของห้อง" />
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <Badge variant="neutral" className="flex items-center gap-1"><MapPin className="w-3 h-3" />ห้อง/ตำแหน่ง: {layoutInfo.loc?.name || "-"} {layoutInfo.loc?.code ? `(${layoutInfo.loc.code})` : ""}</Badge>
+                    <Badge variant="info">พอร์ตห้อง {layoutInfo.roomPorts.length}</Badge>
+                    <Badge variant="info">ตู้/แผง {layoutInfo.cabinets.length}</Badge>
+                    <Badge variant="info">พอร์ตเครื่อง {layoutInfo.assetPorts.length}</Badge>
+                  </div>
+                  {layoutInfo.assetPorts.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold">พอร์ตของเครื่องนี้</p>
+                      <div className="flex flex-wrap gap-1">
+                        {layoutInfo.assetPorts.slice(0, 12).map((p: any) => (
+                          <span key={p.id} className="text-xs px-2 py-0.5 rounded border bg-slate-50"><Cable className="inline w-3 h-3 mr-1" />{p.label || p.port_type || "พอร์ต"} {p.port_no ? `#${p.port_no}` : ""} {p.endpoint ? `→ ${p.endpoint}` : ""} {p.spec ? `(${p.spec})` : ""}</span>
+                        ))}
+                        {layoutInfo.assetPorts.length > 12 && <span className="text-xs text-muted-foreground">+{layoutInfo.assetPorts.length - 12}</span>}
+                      </div>
+                    </div>
+                  )}
+                  {(layoutInfo.roomPorts.length > 0 || layoutInfo.cabinets.length > 0) && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold">พอร์ต/ตู้ในห้อง (สรุป)</p>
+                      <div className="flex flex-wrap gap-1">
+                        {layoutInfo.roomPorts.slice(0, 10).map((p: any) => (
+                          <span key={p.id} className="text-xs px-2 py-0.5 rounded border">{p.label || p.port_type || "จุด"} {p.port_no ? `#${p.port_no}` : ""}</span>
+                        ))}
+                        {layoutInfo.cabinets.slice(0, 8).map((c: any) => (
+                          <span key={c.id} className="text-xs px-2 py-0.5 rounded border border-amber-200 bg-amber-50"><Box className="inline w-3 h-3 mr-1" />{c.name || c.code || "ตู้"} ({(c.ports||[]).length} จุด)</span>
+                        ))}
+                        {(layoutInfo.roomPorts.length > 10 || layoutInfo.cabinets.length > 8) && <span className="text-xs text-muted-foreground">ดูทั้งหมดในผังอาคาร</span>}
+                      </div>
+                    </div>
+                  )}
+                  {layoutInfo.assetPorts.length === 0 && layoutInfo.roomPorts.length === 0 && layoutInfo.cabinets.length === 0 && (
+                    <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลพอร์ต/ตู้สำหรับห้องหรือเครื่องนี้ — เปิดผังอาคารเพื่อเพิ่มได้ (ข้อมูลใส่ทีหลังได้)</p>
+                  )}
+                </>
+              )}
             </CardContent>
           </Card>
 

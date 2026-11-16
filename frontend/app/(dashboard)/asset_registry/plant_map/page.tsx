@@ -11,13 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Factory, RefreshCw, Wrench } from "lucide-react";
+import { Factory, RefreshCw, Wrench, MapPinned, Network } from "lucide-react";
 
 interface MapRow {
   id: number;
   code: string;
   name: string;
   status: string;
+  location_id: number | null;
   location_name: string;
   zone_name: string;
   active_repairs: number;
@@ -103,21 +104,36 @@ export default function PlantMapPage() {
                         return r.status || "inactive";
                       })()] || "bg-slate-100 text-slate-500";
                       const hot = String(r.max_priority || "") === "critical" && Number(r.active_repairs) > 0;
+                      const layoutHref = r.location_id ? `/facility-layout?room=${r.location_id}&asset=${r.id}` : "";
                       return (
-                        <button
+                        <div
                           key={r.id}
-                          onClick={() => router.push(`/asset_registry/view?id=${r.id}`)}
-                          className={`text-left rounded-lg border-2 ${hot ? "border-rose-400" : "border-transparent"} ${cls} p-3 hover:opacity-85 transition-shadow`}
+                          className={`text-left rounded-lg border-2 ${hot ? "border-rose-400" : "border-transparent"} ${cls} p-3`}
                         >
-                          <div className="font-mono text-xs font-bold">{r.code}</div>
-                          <div className="text-sm font-semibold leading-snug line-clamp-2">{r.name}</div>
-                          <div className="mt-1 text-xs opacity-70">{r.location_name || "ไม่ระบุตำแหน่ง"}</div>
-                          {Number(r.active_repairs) > 0 ? (
-                            <div className="mt-1 text-xs font-bold text-rose-600 flex items-center gap-1"><Wrench className="w-3.5 h-3.5" aria-hidden="true" />{r.active_repairs} งานเปิด</div>
-                          ) : (
-                            <div className="mt-1 text-xs opacity-60">ไม่มีงานค้าง</div>
-                          )}
-                        </button>
+                          <button
+                            onClick={() => router.push(`/asset_registry/view?id=${r.id}`)}
+                            className="w-full text-left hover:opacity-85 transition-shadow"
+                            title="ดูรายละเอียดเครื่องจักร"
+                          >
+                            <div className="font-mono text-xs font-bold">{r.code}</div>
+                            <div className="text-sm font-semibold leading-snug line-clamp-2">{r.name}</div>
+                            <div className="mt-1 text-xs opacity-70 flex items-center gap-1"><MapPinned className="w-3 h-3" aria-hidden="true" />{r.location_name || "ไม่ระบุตำแหน่ง"}</div>
+                            {Number(r.active_repairs) > 0 ? (
+                              <div className="mt-1 text-xs font-bold text-rose-600 flex items-center gap-1"><Wrench className="w-3.5 h-3.5" aria-hidden="true" />{r.active_repairs} งานเปิด</div>
+                            ) : (
+                              <div className="mt-1 text-xs opacity-60">ไม่มีงานค้าง</div>
+                            )}
+                          </button>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {layoutHref ? (
+                              <Button size="sm" variant="secondary" className="h-7 px-2 text-xs" onClick={() => router.push(layoutHref)}>
+                                <Network className="w-3 h-3" aria-hidden="true" />ผัง/พอร์ตห้อง
+                              </Button>
+                            ) : (
+                              <span className="text-[11px] opacity-60">ยังไม่ผูกตำแหน่ง (location)</span>
+                            )}
+                          </div>
+                        </div>
                       );
                     })}
                   </div>

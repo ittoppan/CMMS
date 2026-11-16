@@ -54,7 +54,7 @@ try {
 
         case 'plant_map': {
             $rows = $pdo->query("
-                SELECT a.id, a.code, a.name, a.status, a.image_path,
+                SELECT a.id, a.code, a.name, a.status, a.image_path, a.location_id,
                        loc.name AS location_name, wz.name AS zone_name,
                        (SELECT COUNT(*) FROM repair r WHERE r.asset_id = a.id
                          AND r.status IN ('open', 'acknowledged', 'in_progress', 'waiting_parts')) AS active_repairs,
