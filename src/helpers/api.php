@@ -30,6 +30,7 @@ const API_SECRET_KEYS = [
     'smtp_pass',
     'telegram_bot_token',
     'telegram_chat_id',
+    'teams_webhook_url',
     'sage300_db_pass',
     'sage300_db_user',
     'sage300_odbc_dsn',

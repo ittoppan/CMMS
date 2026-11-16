@@ -33,8 +33,8 @@ try {
 
     switch ($method) {
         case 'GET':
-            // 1) LINE-related settings + Telegram
-            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            // 1) LINE-related settings + Telegram + Teams
+            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
             $settings = [];
             $in = implode(',', array_fill(0, count($keys), '?'));
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
@@ -86,6 +86,7 @@ try {
                     'liff_id_env' => getenv('LINE_LIFF_ID') ?: '',
                     'telegram_bot_token_set' => !empty(getenv('TELEGRAM_BOT_TOKEN')),
                     'telegram_chat_id_set' => !empty(getenv('TELEGRAM_CHAT_ID')),
+                    'teams_webhook_set' => !empty(getenv('TEAMS_WEBHOOK_URL')),
                 ],
                 'help' => [
                     'variables' => ['{work_order_id}','{asset_code}','{asset_name}','{title}','{priority}','{status}','{reporter_name}','{assigned_name}','{assigner_name}','{due_date}','{days_overdue}','{item_code}','{item_name}','{qty}','{min_stock}','{downtime_hours}','{total_cost}','{requisition_no}','{items_summary}','{requester_name}','{total_amount}'],
@@ -101,12 +102,12 @@ try {
             $upsert = $pdo->prepare("INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?, ?, 'notification', ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
             $count = 0;
 
-            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, $allowedSettings, true)) continue;
                 // ค่าลับที่ UI ส่งคืนแบบ "••••••••" = ผู้ใช้ไม่ได้ตั้งใหม่ → ข้าม (ห้ามเขียนทับด้วย mask)
                 if (apiIsSecretKey((string)$k) && (string)$v === SETTING_MASKED) continue;
-                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_liff_register_id' => 'LIFF App ID ของหน้า /register (ผูกบัญชี — เปิดใน LINE แล้วได้ LINE ID อัตโนมัติ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'line_group_enabled' => 'ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (0=ปิด,1=เปิด - default เปิด)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน', 'line_system_alerts' => 'ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE (0=ปิด,1=เปิด - default ปิด)', 'line_weekly_report' => 'ส่งรายงานสรุปประจำสัปดาห์เข้า LINE (0=ปิด,1=เปิด - default เปิด)', 'push_alert_enabled' => 'เปิด/ปิดการแจ้งเตือน PWA Web Push (0=ปิด,1=เปิด)'][$k] ?? '';
+                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_liff_register_id' => 'LIFF App ID ของหน้า /register (ผูกบัญชี — เปิดใน LINE แล้วได้ LINE ID อัตโนมัติ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'line_group_enabled' => 'ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (0=ปิด,1=เปิด - default เปิด)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน', 'teams_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน Microsoft Teams', 'teams_webhook_url' => 'Microsoft Teams Incoming Webhook URL', 'line_system_alerts' => 'ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE (0=ปิด,1=เปิด - default ปิด)', 'line_weekly_report' => 'ส่งรายงานสรุปประจำสัปดาห์เข้า LINE (0=ปิด,1=เปิด - default เปิด)', 'push_alert_enabled' => 'เปิด/ปิดการแจ้งเตือน PWA Web Push (0=ปิด,1=เปิด)'][$k] ?? '';
                 $upsert->execute([$k, (string)$v, $desc]);
                 $count++;
             }
@@ -195,6 +196,19 @@ try {
                 } else {
                     http_response_code(500);
                     echo json_encode(['error' => 'ส่ง Telegram ไม่สำเร็จ — ตรวจ Bot Token / Chat ID (ตั้งในหน้า Settings หรือ .env)']);
+                }
+                exit;
+            }
+
+            // B3) Teams test send: { teams_test: true, message? }
+            if (!empty($data['teams_test'])) {
+                $msg = mb_substr((string)($data['message'] ?? '🧪 ทดสอบการแจ้งเตือน CMMS-TPT — Microsoft Teams เชื่อมต่อเรียบร้อย'), 0, 1000);
+                $ok = sendTeamsMessage('ทดสอบการแจ้งเตือน (Teams)', $msg, publicBaseUrl(), 'INFO');
+                if ($ok) {
+                    echo json_encode(['success' => true, 'message' => 'ส่งข้อความทดสอบ Microsoft Teams สำเร็จ']);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'ส่ง Teams ไม่สำเร็จ — ตรวจ Webhook URL (ตั้งในหน้า Settings หรือ TEAMS_WEBHOOK_URL)']);
                 }
                 exit;
             }

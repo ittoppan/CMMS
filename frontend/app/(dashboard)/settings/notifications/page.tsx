@@ -164,12 +164,14 @@ export default function NotificationsSettingsPage() {
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [tgTesting, setTgTesting] = useState(false);
   const [tgTestResult, setTgTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [teamsTesting, setTeamsTesting] = useState(false);
+  const [teamsTestResult, setTeamsTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [activeChannel, setActiveChannel] = useState<string>("line");
 
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [templates, setTemplates] = useState<Record<string, TemplateDef>>({});
   const [me, setMe] = useState<{ id: number; full_name: string; line_bound: boolean } | null>(null);
-  const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string; telegram_bot_token_set: boolean; telegram_chat_id_set: boolean } | null>(null);
+  const [envInfo, setEnvInfo] = useState<{ channel_token_set: boolean; channel_secret_set: boolean; liff_id_env: string; telegram_bot_token_set: boolean; telegram_chat_id_set: boolean; teams_webhook_set?: boolean } | null>(null);
   const [activeTemplate, setActiveTemplate] = useState<string>("line_tpl_breakdown");
   const [showJson, setShowJson] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
@@ -288,6 +290,24 @@ export default function NotificationsSettingsPage() {
       setTgTestResult({ ok: false, msg: e.message || "ส่งข้อความทดสอบ Telegram ไม่สำเร็จ" });
     }
     setTgTesting(false);
+  };
+
+  const handleTeamsTest = async () => {
+    setTeamsTesting(true);
+    setTeamsTestResult(null);
+    try {
+      const res = await fetch("/api/v1/line_notify.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teams_test: true }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "ส่งไม่สำเร็จ");
+      setTeamsTestResult({ ok: true, msg: json.message ?? "ส่งข้อความทดสอบ Microsoft Teams สำเร็จ" });
+    } catch (e: any) {
+      setTeamsTestResult({ ok: false, msg: e.message || "ส่งข้อความทดสอบ Microsoft Teams ไม่สำเร็จ" });
+    }
+    setTeamsTesting(false);
   };
 
   const handleTestSend = async () => {
@@ -533,6 +553,7 @@ export default function NotificationsSettingsPage() {
           <TabsTrigger value="push">Web Push / PWA</TabsTrigger>
           <TabsTrigger value="email">อีเมล (Email)</TabsTrigger>
           <TabsTrigger value="telegram">Telegram (แอดมิน)</TabsTrigger>
+          <TabsTrigger value="teams">Microsoft Teams</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -710,6 +731,98 @@ export default function NotificationsSettingsPage() {
                 </div>
               </CardContent>
             </Card>
+          </Grid>
+        </VStack>
+      )}
+
+      {activeChannel === "teams" && (
+        <VStack gap={6}>
+          <VStack gap={1}>
+            <p className="cmms-eyebrow text-sm text-muted-foreground">MICROSOFT TEAMS · ADMIN CONSOLE</p>
+            <HStack gap={3} vAlign="center">
+              <h2 className="text-base font-semibold">แจ้งเตือนผ่าน Microsoft Teams</h2>
+              <Badge variant={settings.teams_enabled === "1" ? "success" : "neutral"}>
+                {settings.teams_enabled === "1" ? "Teams เปิดใช้งาน" : "Teams ปิดใช้งาน"}
+              </Badge>
+            </HStack>
+            <p className="text-sm text-muted-foreground">
+              ส่งการแจ้งเตือน CMMS เข้า Microsoft Teams channel ผ่าน Incoming Webhook
+            </p>
+          </VStack>
+
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-5 p-4">
+              <HStack gap={2} vAlign="center">
+                <ShieldCheckIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: (settings.teams_webhook_url || envInfo?.teams_webhook_set) ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+                <span className="text-sm font-medium">
+                  Webhook URL: {(settings.teams_webhook_url || envInfo?.teams_webhook_set) ? "พร้อม" : "ยังไม่ตั้ง (กรอกด้านล่างหรือใส่ TEAMS_WEBHOOK_URL)"}
+                </span>
+              </HStack>
+            </CardContent>
+          </Card>
+
+          <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
+            <VStack gap={6}>
+              <Card>
+                <CardContent className="space-y-4 p-5">
+                  <HStack gap={2} vAlign="center">
+                    <ChatBubbleLeftRightIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                    <VStack gap={0}>
+                      <h3 className="text-base font-semibold">การเชื่อมต่อ Microsoft Teams Webhook</h3>
+                      <p className="text-sm text-muted-foreground">สร้าง Incoming Webhook ใน Teams channel แล้ววาง URL ที่นี่</p>
+                    </VStack>
+                  </HStack>
+
+                  <Switch
+                    label="เปิดใช้งานการแจ้งเตือนผ่าน Microsoft Teams"
+                    value={settings.teams_enabled === "1"}
+                    onChange={(c) => setSettingField("teams_enabled", c ? "1" : "0")}
+                  />
+
+                  <Input
+                    label="Incoming Webhook URL"
+                    type="password"
+                    hint="URL จาก Teams Incoming Webhook connector (https://...)"
+                    value={settings.teams_webhook_url ?? ""}
+                    onChange={(e) => setSettingField("teams_webhook_url", e.target.value)}
+                  />
+
+                  <HStack gap={2} wrap="wrap">
+                    <Button disabled={teamsTesting} onClick={handleTeamsTest}>
+                      <PaperAirplaneIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                      {teamsTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า Teams"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      disabled={!hasChanges || saving}
+                      onClick={handleSave}
+                    >
+                      บันทึกการตั้งค่า
+                    </Button>
+                  </HStack>
+
+                  {teamsTestResult && (
+                    <Card style={{
+                      background: teamsTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      border: `1px solid ${teamsTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
+                    }}>
+                      <CardContent className="p-3">
+                        <span className="text-sm font-bold" style={{ color: teamsTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                          {teamsTestResult.ok ? "✅ " : ""}{teamsTestResult.msg}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="space-y-3 p-5">
+                  <h3 className="text-base font-semibold">การทำงาน</h3>
+                  <p className="text-sm">เมื่อ Notification Center ส่ง event ผ่าน channel <strong>teams</strong> ระบบจะโพสต์ MessageCard ไปยัง webhook ที่ตั้งค่าไว้ พร้อมหัวข้อ รายละเอียด และลิงก์เปิดในระบบ</p>
+                </CardContent>
+              </Card>
+            </VStack>
           </Grid>
         </VStack>
       )}

@@ -21,6 +21,7 @@ const CHANNEL_LABEL: Record<string, { th: string; en: string; note: string }> = 
   line: { th: "LINE", en: "LINE", note: "ส่งผ่าน LINE Notify / Rich Menu" },
   email: { th: "อีเมล", en: "Email", note: "อีเมลตามที่อยู่ในโปรไฟล์" },
   telegram: { th: "Telegram", en: "Telegram", note: "Telegram Admin Alert" },
+  teams: { th: "Microsoft Teams", en: "Teams", note: "แจ้งผ่าน Incoming Webhook" },
   push: { th: "Web Push", en: "Web Push", note: "Push เบราว์เซอร์ (ถ้าอนุญาต)" },
 };
 
@@ -28,6 +29,7 @@ const MASTER_SWITCH: Record<string, string> = {
   line: "line_notify_enabled",
   email: "email_notify_enabled",
   telegram: "telegram_enabled",
+  teams: "teams_enabled",
   push: "push_alert_enabled",
 };
 
