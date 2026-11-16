@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCan } from "@/lib/useCan";
-import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network, Search, AlertTriangle, CircleCheck, CircleDashed } from "lucide-react";
+import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw, Map, Box, ChevronRight, Network, Search, AlertTriangle, CircleCheck, CircleDashed, Wrench } from "lucide-react";
 import AndonBadge from "@/components/AndonBadge";
 
 type Location = { id: number; parent_id: number | null; code: string; name: string; type: string; description: string; is_active: number };
@@ -791,7 +792,15 @@ export default function FacilityLayoutPage() {
                         {!isCab && ast && (
                           <div className="text-sm space-y-1">
                             <div className="text-xs text-muted-foreground">สถานะเครื่อง: {ast.status || '-'}{ast.location_name ? ` · ${ast.location_name}` : ''}</div>
-                            <div className="flex flex-wrap gap-1 items-center">{ar>0 ? <AndonBadge tone={String(assetHealth[ast.id]?.max_priority||'').toLowerCase()==='critical'?'down':'warn'}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {ar}</AndonBadge> : <Badge variant="neutral">ไม่มีงานซ่อมเปิด</Badge>} <Badge variant="neutral">พอร์ตเครื่อง {(config.assets[String(ast.id)]?.ports||[]).length}</Badge></div>
+                            <div className="flex flex-wrap gap-1 items-center">
+                              {ar>0 ? <AndonBadge tone={String(assetHealth[ast.id]?.max_priority||'').toLowerCase()==='critical'?'down':'warn'}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {ar}</AndonBadge> : <Badge variant="neutral">ไม่มีงานซ่อมเปิด</Badge>}
+                              <Badge variant="neutral">พอร์ตเครื่อง {(config.assets[String(ast.id)]?.ports||[]).length}</Badge>
+                              {ar>0 && (
+                                <Link href={`/repair?q=${encodeURIComponent(ast.code || ast.name || String(ast.id))}`} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline" title="เปิดรายการใบแจ้งซ่อมที่เกี่ยวข้องกับเครื่องนี้">
+                                  <Wrench className="w-3 h-3" aria-hidden="true" />ดูใบแจ้งซ่อม
+                                </Link>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -827,6 +836,9 @@ export default function FacilityLayoutPage() {
                     <div className="flex flex-wrap gap-1 items-center">
                       <AndonBadge tone={repairTone === "down" ? "down" : "warn"}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {activeRepairs}</AndonBadge>
                       {ah?.max_priority ? <Badge variant="neutral">Priority: {String(ah.max_priority)}</Badge> : null}
+                      <Link href={`/repair?q=${encodeURIComponent(a.code || a.name || String(a.id))}`} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline" title="เปิดรายการใบแจ้งซ่อมที่เกี่ยวข้องกับเครื่องนี้">
+                        <Wrench className="w-3 h-3" aria-hidden="true" />ดูใบแจ้งซ่อม
+                      </Link>
                     </div>
                   )}
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><Network className="w-3 h-3"/>พอร์ตเครื่อง: {(config.assets[String(a.id)]?.ports||[]).length} จุด</div>
@@ -1002,7 +1014,12 @@ export default function FacilityLayoutPage() {
                                 {loc ? <span>· {loc.name}</span> : <span>· ไม่ระบุตำแหน่ง</span>}
                               </div>
                             </div>
-                            {a.location_id ? <Button size="sm" variant="outline" className="h-7 text-xs" onClick={()=> { selectRoomById(a.location_id as number); setFocusPort({ key: `asset:${a.id}:*`, roomId: a.location_id as number, source: "asset", assetId: a.id, label: a.code }); setTimeout(()=>{ const el=document.getElementById(`asset-card-${a.id}`); if(el) el.scrollIntoView({behavior:"smooth", block:"center"}); }, 80); }}>ไปที่เครื่อง</Button> : null}
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Link href={`/repair?q=${encodeURIComponent(a.code || a.name || String(a.id))}`} className="inline-flex h-7 items-center gap-1 rounded-md border px-2 text-xs font-medium text-primary hover:bg-primary/5" title="เปิดรายการใบแจ้งซ่อมที่เกี่ยวข้องกับเครื่องนี้">
+                                <Wrench className="w-3 h-3" aria-hidden="true" />ดูใบแจ้งซ่อม
+                              </Link>
+                              {a.location_id ? <Button size="sm" variant="outline" className="h-7 text-xs" onClick={()=> { selectRoomById(a.location_id as number); setFocusPort({ key: `asset:${a.id}:*`, roomId: a.location_id as number, source: "asset", assetId: a.id, label: a.code }); setTimeout(()=>{ const el=document.getElementById(`asset-card-${a.id}`); if(el) el.scrollIntoView({behavior:"smooth", block:"center"}); }, 80); }}>ไปที่เครื่อง</Button> : null}
+                            </div>
                           </div>
                         );
                       })}
@@ -1325,7 +1342,7 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
                       {planned>0 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800">พอร์ตวางแผน {planned}</span>}
                     </div>
                   )}
-                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=>{ const ar = assetHealth?.[a.id]?.active_repairs || 0; return <span key={a.id} className={`text-[10px] px-1.5 py-0.5 rounded border ${ar>0?"bg-red-50 border-red-300 text-red-800":"bg-slate-100"}`} title={ar>0?`มีใบแจ้งซ่อมเปิด ${ar}`:undefined}>{a.code}{ar>0?" !":""}</span>; })}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
+                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=>{ const ar = assetHealth?.[a.id]?.active_repairs || 0; const chip = <span className={`text-[10px] px-1.5 py-0.5 rounded border ${ar>0?"bg-red-50 border-red-300 text-red-800 hover:bg-red-100":"bg-slate-100"}`} title={ar>0?`มีใบแจ้งซ่อมเปิด ${ar} — คลิกเพื่อดูรายการซ่อม`:undefined}>{a.code}{ar>0?" !":""}</span>; return ar>0 ? <Link key={a.id} href={`/repair?q=${encodeURIComponent(a.code || a.name || String(a.id))}`}>{chip}</Link> : <span key={a.id}>{chip}</span>; })}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
                   {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=>{ const bad=["faulty","inactive","maintenance"].includes(c.status); return <span key={c.id} className={`text-[10px] px-1.5 py-0.5 rounded border ${bad?"bg-red-50 border-red-300 text-red-800":"bg-amber-50 border-amber-200"}`}>{c.name||c.code||"ตู้"}{bad?" !":""}</span>; })}{cabs.length>3 && <span className="text-[10px] text-muted-foreground">+{cabs.length-3}</span>}</div>}
                 </div>
               );
