@@ -100,8 +100,8 @@ export interface NavItemDef {
 }
 
 /**
- * section accent — palette ใหม่ 9 หมวด แยกสีเห็นชัดบน light (ทองแดง/ส้ม/น้ำเงิน/ม่วง/ฟ้า/เขียว/แดง/เทา/คราม)
- * ใช้กับ chip จำนวนรายการ + icon tile ช่วยแยกโซนเมนู
+ * section accent — palette แยกสีเห็นชัดบน light ช่วยแยกโซนเมนู
+ * ใช้กับ chip จำนวนรายการ + icon tile
  */
 export const SECTION_ACCENTS = {
   work_orders:        '#0068B5', // งานซ่อม — น้ำเงิน brand
@@ -109,6 +109,8 @@ export const SECTION_ACCENTS = {
   calibration:        '#0E7490', // สอบเทียบ — คราม
   parts_external:     '#B45309', // อะไหล่/ผู้รับจ้าง — ทองแดง
   planning:           '#15803D', // วางแผน — เขียว
+  supervisor:         '#0F766E', // หัวหน้างาน — ทีล
+  workforce:          '#0369A1', // กำลังคน — ฟ้า
   analytics_reports:  '#0E7490', // วิเคราะห์/รายงาน — ฟ้าเข้ม
   reliability:        '#DC2626', // ความเชื่อถือได้ — แดง
   knowledge_ops:      '#6D28D9', // องค์ความรู้/ปฏิบัติการ — ม่วงโท้ก
@@ -131,6 +133,8 @@ export const SECTION_ICONS: Record<string, LucideIcon> = {
   calibration: Gauge,
   parts_external: Boxes,
   planning: CalendarClock,
+  supervisor: BadgeCheck,
+  workforce: Users,
   analytics_reports: BarChart3,
   reliability: ShieldCheck,
   knowledge_ops: BookOpen,
@@ -230,28 +234,40 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.planning",
-    pathPrefixes: ["/planning", "/field/plan", "/workforce", "/supervisor", "/process-flows", "/shutdown"],
+    pathPrefixes: ["/planning", "/field/plan", "/shutdown", "/process-flows"],
     items: [
       { perm: "planning", labelKey: "menu.planning", href: "/planning", icon: LayoutDashboard },
       { perm: "planning/calendar", labelKey: "menu.planning_calendar", href: "/planning/calendar", icon: CalendarDays },
       { perm: "field/plan", labelKey: "menu.field_my_plan", href: "/field/plan", icon: CalendarClock },
+      { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power },
+      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
+    ],
+  },
+  {
+    titleKey: "nav.supervisor",
+    pathPrefixes: ["/supervisor"],
+    items: [
+      { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck },
+      { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks },
+      { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck },
+      { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays },
+      { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck },
+    ],
+  },
+  {
+    titleKey: "nav.workforce",
+    pathPrefixes: ["/workforce"],
+    items: [
       { perm: "workforce", labelKey: "menu.workforce", href: "/workforce", icon: Users },
-      { perm: "supervisor", labelKey: "menu.supervisor", href: "/supervisor", icon: BadgeCheck, secondary: true },
-      { perm: "supervisor/queue", labelKey: "menu.supervisor_queue", href: "/supervisor/queue", icon: ListChecks, secondary: true },
-      { perm: "supervisor/review", labelKey: "menu.supervisor_review", href: "/supervisor/review", icon: BadgeCheck, secondary: true },
-      { perm: "supervisor/plan", labelKey: "menu.supervisor_plan", href: "/supervisor/plan", icon: CalendarDays, secondary: true },
-      { perm: "supervisor/verify", labelKey: "menu.supervisor_verify", href: "/supervisor/verify", icon: ShieldCheck, secondary: true },
-      { perm: "workforce/technicians", labelKey: "menu.workforce_people", href: "/workforce/technicians", icon: UserCog, secondary: true },
-      { perm: "workforce/skills", labelKey: "menu.workforce_skills", href: "/workforce/skills", icon: GraduationCap, secondary: true },
-      { perm: "workforce/certifications", labelKey: "menu.workforce_certs", href: "/workforce/certifications", icon: BadgeCheck, secondary: true },
-      { perm: "workforce/training", labelKey: "menu.workforce_training", href: "/workforce/training", icon: BookOpenCheck, secondary: true },
+      { perm: "workforce/technicians", labelKey: "menu.workforce_people", href: "/workforce/technicians", icon: UserCog },
+      { perm: "workforce/skills", labelKey: "menu.workforce_skills", href: "/workforce/skills", icon: GraduationCap },
+      { perm: "workforce/certifications", labelKey: "menu.workforce_certs", href: "/workforce/certifications", icon: BadgeCheck },
+      { perm: "workforce/training", labelKey: "menu.workforce_training", href: "/workforce/training", icon: BookOpenCheck },
       { perm: "workforce/capacity", labelKey: "menu.workforce_capacity", href: "/workforce/capacity", icon: Activity, secondary: true },
       { perm: "workforce/shifts", labelKey: "menu.workforce_shifts", href: "/workforce/shifts", icon: CalendarClock, secondary: true },
       { perm: "workforce/crews", labelKey: "menu.workforce_crews", href: "/workforce/crews", icon: Users, secondary: true },
       { perm: "workforce/conflicts", labelKey: "menu.workforce_conflicts", href: "/workforce/conflicts", icon: ShieldAlert, secondary: true },
       { perm: "workforce/mine", labelKey: "menu.workforce_mine", href: "/workforce/mine", icon: IdCard, secondary: true },
-      { perm: "process_flows", labelKey: "menu.process_flows", href: "/process-flows", icon: Workflow, secondary: true },
-      { perm: "shutdown", labelKey: "menu.shutdown", href: "/shutdown", icon: Power, secondary: true },
     ],
   },
   {
