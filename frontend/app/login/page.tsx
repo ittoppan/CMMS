@@ -144,7 +144,9 @@ function LoginContent() {
       {/* Mobile compact brand band */}
       <div className="cmms-login-band cmms-login-band--neo">
         <div className="cmms-login-brand">
-          <div className="cmms-login-brand-mark cmms-login-brand-mark--neo"><Cog size={22} strokeWidth={1.75} className="cmms-login-spin-slow" /></div>
+          <div className="cmms-login-brand-mark cmms-login-brand-mark--neo cmms-login-brand-mark--logo">
+            <img src="/logo.png" alt="TOPPAN" className="cmms-login-logo-img" />
+          </div>
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
             <div className="cmms-login-brand-sub">Smart Maintenance Platform</div>
@@ -163,8 +165,8 @@ function LoginContent() {
       <aside className="cmms-login-hero cmms-login-hero--neo">
         <div className="cmms-login-holo-grid" aria-hidden="true" />
 
-        <div className="cmms-login-brand">
-          <div className="cmms-login-brand-mark cmms-login-brand-mark--neo"><Cpu size={22} strokeWidth={1.75} /></div>
+        <div className="cmms-login-brand cmms-login-brand--hero">
+          <img src="/logo.png" alt="TOPPAN logo" className="cmms-login-logo-img cmms-login-logo-img--hero" />
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
             <div className="cmms-login-brand-sub">Smart Maintenance Platform</div>
@@ -202,7 +204,9 @@ function LoginContent() {
         <form className="cmms-login-form cmms-login-form--glass" onSubmit={onSubmit} noValidate>
           <h1 className="sr-only">เข้าสู่ระบบ CMMS-TOPPAN</h1>
           <div className="cmms-login-logo">
-            <div className="cmms-login-logo-icon cmms-login-logo-icon--neo"><Wrench size={20} strokeWidth={1.75} /></div>
+            <div className="cmms-login-logo-icon cmms-login-logo-icon--neo cmms-login-brand-mark--logo">
+              <img src="/logo.png" alt="TOPPAN" className="cmms-login-logo-img cmms-login-logo-img--form" />
+            </div>
             <div>
               <div className="cmms-login-logo-text">CMMS-TOPPAN</div>
               <div className="cmms-login-logo-sub">Maintenance Command Center</div>
