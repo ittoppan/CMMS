@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import SuccessDialog from "@/components/SuccessDialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle2, Plus, Search, X } from "lucide-react";
+import { CheckCircle2, Plus, Search, X, Gauge } from "lucide-react";
 
 const FREQ_OPTIONS: { value: string; label: string }[] = [
   { value: "daily", label: "รายวัน" },
@@ -27,6 +27,18 @@ const FREQ_OPTIONS: { value: string; label: string }[] = [
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
 const TYPE_OPTIONS = ["single", "group", "usage_based"];
 const STATUS_OPTIONS = ["draft", "active", "cancelled"];
+
+type MeterOption = {
+  key: string;
+  id: number | null;
+  name: string;
+  unit: string;
+  meter_code?: string | null;
+  source?: string;
+  asset_id?: number;
+  asset_label?: string;
+  linkable?: boolean;
+};
 
 export default function PMPlanFormPage() {
   const hero = usePageHero("pm_am/plans");
@@ -51,6 +63,7 @@ export default function PMPlanFormPage() {
     frequency_type: "monthly",
     frequency_interval: "1",
     meter_unit: "",
+    meter_id: "",
     meter_interval: "",
     lead_days: "7",
     reminder_days: "3",
@@ -72,6 +85,10 @@ export default function PMPlanFormPage() {
   const [loadErr, setLoadErr] = useState("");
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [meterOptions, setMeterOptions] = useState<MeterOption[]>([]);
+  const [metersLoading, setMetersLoading] = useState(false);
+  const [meterSchema, setMeterSchema] = useState<{ plan_link_ready?: boolean; register_ready?: boolean } | null>(null);
+  const [meterMode, setMeterMode] = useState<string>("");
 
   useEffect(() => {
     fetch("/api/v1/asset_registry.php")
@@ -113,6 +130,7 @@ export default function PMPlanFormPage() {
           frequency_type: p.frequency_type || "monthly",
           frequency_interval: String(p.frequency_interval || 1),
           meter_unit: p.meter_unit || "",
+          meter_id: p.meter_id != null && p.meter_id !== "" ? String(p.meter_id) : "",
           meter_interval: p.meter_interval != null ? String(p.meter_interval) : "",
           lead_days: String(p.lead_days ?? 7),
           reminder_days: String(p.reminder_days ?? 3),
@@ -138,6 +156,77 @@ export default function PMPlanFormPage() {
   }, [editId]);
 
   const isMeter = form.frequency_type === "meter_based";
+
+  useEffect(() => {
+    if (!isMeter) {
+      setMeterOptions([]);
+      setMetersLoading(false);
+      setMeterSchema(null);
+      setMeterMode("");
+      return;
+    }
+    if (assetIds.length === 0) {
+      setMeterOptions([]);
+      setMeterSchema(null);
+      setMeterMode("");
+      return;
+    }
+    let cancelled = false;
+    setMetersLoading(true);
+    (async () => {
+      try {
+        const results = await Promise.all(
+          assetIds.map(async (aid) => {
+            try {
+              const res = await fetch(`/api/v1/asset_meters.php?asset_id=${aid}`, { credentials: "include" });
+              const j = await res.json();
+              return { aid, j };
+            } catch {
+              return { aid, j: null };
+            }
+          })
+        );
+        if (cancelled) return;
+        const map = new Map();
+        let schema = null;
+        let mode = "";
+        for (const { aid, j } of results) {
+          if (!j) continue;
+          if (!schema && j.schema) schema = j.schema;
+          if (!mode && j.mode) mode = j.mode;
+          const a = assets.find((x) => Number(x.id) === Number(aid));
+          const assetLabel = a ? `${a.code || a.id} - ${a.name || ""}`.trim() : `Asset #${aid}`;
+          const items = Array.isArray(j.items) ? j.items : [];
+          for (const it of items) {
+            const idNum = it?.id != null && it?.id !== "" ? Number(it.id) : null;
+            const hasRealId = typeof idNum === "number" && Number.isFinite(idNum) && idNum > 0;
+            const key = hasRealId ? `id:${idNum}` : String(it?.legacy_key || `u:${(it?.unit || it?.name || aid)}`);
+            if (map.has(key)) continue;
+            const unit = String(it?.unit || "").trim();
+            const name = String(it?.name || it?.meter_code || (unit ? `มิเตอร์ (${unit})` : "มิเตอร์")).trim();
+            map.set(key, {
+              key,
+              id: hasRealId ? idNum : null,
+              name,
+              unit,
+              meter_code: it?.meter_code || null,
+              source: it?.source || j.mode || "",
+              asset_id: aid,
+              asset_label: assetLabel,
+              linkable: !!(hasRealId && schema?.plan_link_ready),
+            });
+          }
+        }
+        const opts = Array.from(map.values()).map((o) => ({ ...o, linkable: !!(o.id && schema?.plan_link_ready) }));
+        setMeterOptions(opts);
+        setMeterSchema(schema);
+        setMeterMode(mode);
+      } finally {
+        if (!cancelled) setMetersLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isMeter, assetIds.join(","), assets]);
 
   const toggleAsset = (id: number) =>
     setAssetIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -206,7 +295,8 @@ export default function PMPlanFormPage() {
     setLoading(true);
     setError("");
     try {
-      const body = {
+      const linkMeterId = isMeter && meterSchema?.plan_link_ready && form.meter_id && Number(form.meter_id) > 0 ? Number(form.meter_id) : null;
+      const body: any = {
         ...form,
         frequency_interval: Number(form.frequency_interval) || 1,
         estimated_duration_minutes: form.estimated_duration_minutes ? Number(form.estimated_duration_minutes) : null,
@@ -219,6 +309,7 @@ export default function PMPlanFormPage() {
         planned_parts: plannedParts,
         is_active: form.is_active,
       };
+      if (linkMeterId) body.meter_id = linkMeterId; else delete body.meter_id;
       const url = editId ? `/api/v1/pm_plans.php?id=${editId}` : "/api/v1/pm_plans.php";
       const res = await fetch(url, {
         method: editId ? "PUT" : "POST",
@@ -322,17 +413,57 @@ export default function PMPlanFormPage() {
                 ? setForm({ ...form, meter_interval: e.target.value })
                 : setForm({ ...form, frequency_interval: e.target.value })} />
             {isMeter && (
-              <div className="space-y-2 sm:col-span-2">
-                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset)</label>
+              <div className="space-y-3 sm:col-span-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ลิงก์มิเตอร์จากทะเบียน/รายการที่เตรียมไว้ (ถ้ามี)</label>
+                  {assetIds.length === 0 ? (
+                    <p className="text-xs text-[var(--cmms-text-muted)]">เลือกเครื่องจักรในแผนก่อนเพื่อโหลดรายการมิเตอร์ของเครื่อง</p>
+                  ) : metersLoading ? (
+                    <p className="text-xs text-[var(--cmms-text-muted)]">กำลังโหลดรายการมิเตอร์...</p>
+                  ) : meterOptions.length === 0 ? (
+                    <p className="text-xs text-[var(--cmms-text-muted)]">ยังไม่พบรายการมิเตอร์ — สามารถระบุหน่วยมิเตอร์ด้านล่างเพื่อใช้งานแบบ fallback ได้</p>
+                  ) : (
+                    <Select
+                      value={form.meter_id ? ("id:" + form.meter_id) : (meterOptions.find(o => !o.id && o.unit && o.unit === form.meter_unit)?.key || "__manual__")}
+                      onValueChange={(v) => {
+                        if (v === "__manual__") { setForm({ ...form, meter_id: "" }); return; }
+                        const opt = meterOptions.find((o) => o.key === v);
+                        if (!opt) return;
+                        setForm({ ...form, meter_id: opt.linkable && opt.id ? String(opt.id) : "", meter_unit: opt.unit || form.meter_unit });
+                      }}
+                    >
+                      <SelectTrigger aria-label="เลือกมิเตอร์"><SelectValue placeholder="เลือกมิเตอร์จากทะเบียน/รายการ..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__manual__">ไม่ลิงก์ (ระบุหน่วยเอง / fallback)</SelectItem>
+                        {meterOptions.map((o) => (
+                          <SelectItem key={o.key} value={o.key}>
+                            {(o.meter_code ? o.meter_code + " · " : "")}{o.name}{o.unit ? " (" + o.unit + ")" : ""}{o.asset_label ? " — " + o.asset_label : ""}{o.linkable ? " · พร้อมผูก meter_id" : (o.id ? " · ทะเบียน (รอ schema)" : " · ข้อมูลเดิม/fallback")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <p className="text-xs text-[var(--cmms-text-muted)]">
+                    {meterSchema?.plan_link_ready
+                      ? "schema พร้อมผูก meter_id — เมื่อเลือกมิเตอร์ทะเบียน ระบบจะส่ง meter_id พร้อมคง meter_unit เป็น fallback"
+                      : "ก่อน migration: ยังไม่ผูก meter_id ลงแผนถาวร ระบบจะใช้ meter_unit/ข้อมูลเดิม (fallback) และส่ง meter_id เมื่อ schema พร้อม"}
+                    {meterMode ? ` (โหมด: ${meterMode === "registered" ? "ทะเบียน" : "สังเคราะห์จากข้อมูลเดิม"})` : ""}
+                  </p>
+                </div>
+
+                <label className="text-sm font-medium text-[var(--cmms-text-primary)]">ประเภทมิเตอร์ (preset) / หน่วย</label>
                 <div className="flex flex-wrap gap-2">
                   {[{label:"มิเตอร์ไฟฟ้า",unit:"kWh"},{label:"มิเตอร์น้ำ",unit:"m³"},{label:"ชั่วโมงเดินเครื่อง",unit:"ชั่วโมง"}].map((p)=>(
-                    <Button key={p.unit} type="button" variant={form.meter_unit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:p.unit})}>{p.label} ({p.unit})</Button>
+                    <Button key={p.unit} type="button" variant={form.meter_unit===p.unit?"primary":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:p.unit, meter_id: ""})}>{p.label} ({p.unit})</Button>
                   ))}
-                  <Button type="button" variant={!["kWh","m³","ชั่วโมง"].includes(form.meter_unit)?"ghost":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:""})}>กำหนดเอง</Button>
+                  <Button type="button" variant={!["kWh","m³","ชั่วโมง"].includes(form.meter_unit)?"ghost":"secondary"} size="sm" onClick={()=>setForm({...form, meter_unit:"", meter_id: ""})}>กำหนดเอง</Button>
                 </div>
                 <Input label="หน่วยมิเตอร์ *" placeholder="เช่น kWh, m³, ชั่วโมง, กม., รอบ" value={form.meter_unit}
-                  onChange={(e) => setForm({ ...form, meter_unit: e.target.value })}
-                  hint="ใช้จับคู่ค่าบันทึกมิเตอร์ของเครื่อง (parameter/หน่วย) — แนะนำ ไฟฟ้า kWh, น้ำ m³" />
+                  onChange={(e) => setForm({ ...form, meter_unit: e.target.value, meter_id: "" })}
+                  hint="ใช้จับคู่ค่าบันทึกมิเตอร์ของเครื่อง (parameter/หน่วย) และเป็น fallback เสมอ — แนะนำ ไฟฟ้า kWh, น้ำ m³" />
+                {form.meter_id && meterSchema?.plan_link_ready && (
+                  <p className="text-xs flex items-center gap-1" style={{ color: "var(--cmms-success, #059669)" }}><Gauge size={13} aria-hidden="true" />จะส่ง meter_id #{form.meter_id} พร้อม meter_unit เมื่อบันทึก</p>
+                )}
               </div>
             )}
           </div>

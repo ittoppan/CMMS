@@ -210,7 +210,16 @@ export default function PMPlanViewPage() {
                 <div><p className="text-[var(--cmms-text-secondary)]">ความถี่</p><p className="font-semibold">{freqLabels[plan.frequency_type] || plan.frequency_type}{plan.frequency_interval ? ` (ทุก ${plan.frequency_interval})` : ""}</p></div>
                 {plan.frequency_type === "meter_based" && (
                   <>
-                    <div><p className="text-[var(--cmms-text-secondary)]">หน่วยมิเตอร์</p><p className="font-semibold">{plan.meter_unit || "-"}</p></div>
+                    <div>
+                      <p className="text-[var(--cmms-text-secondary)]">หน่วยมิเตอร์</p>
+                      <p className="font-semibold">{plan.meter_unit || "-"}</p>
+                      {plan.meter_id != null && plan.meter_id !== "" && (
+                        <p className="text-xs text-[var(--cmms-text-muted)]">ลิงก์มิเตอร์ทะเบียน #{plan.meter_id}{plan.meter_name ? ` · ${plan.meter_name}` : ""}{plan.meter_code ? ` (${plan.meter_code})` : ""}</p>
+                      )}
+                      {(plan.meter_id == null || plan.meter_id === "") && (
+                        <p className="text-xs text-[var(--cmms-text-muted)]">โหมด fallback: ใช้หน่วย/ข้อมูลเดิม (ยังไม่ผูก meter_id)</p>
+                      )}
+                    </div>
                     <div><p className="text-[var(--cmms-text-secondary)]">ช่วงตามมิเตอร์</p><p className="font-semibold flex items-center gap-1"><Gauge size={13} aria-hidden="true" />{plan.meter_interval != null ? `${Number(plan.meter_interval).toLocaleString("th-TH")} ${plan.meter_unit || ""}` : "-"}</p></div>
                   </>
                 )}

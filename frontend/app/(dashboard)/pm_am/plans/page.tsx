@@ -37,6 +37,9 @@ interface PMPlan {
   frequency_interval: number;
   meter_unit: string | null;
   meter_interval: number | null;
+  meter_id?: number | null;
+  meter_name?: string | null;
+  meter_code?: string | null;
   lead_days: number;
   reminder_days: number;
   is_active: number;
@@ -396,6 +399,12 @@ export default function PMPlansPage() {
                           {p.name}
                         </button>
                         {p.description && <p className="line-clamp-1 text-sm text-[var(--cmms-text-secondary)]">{p.description}</p>}
+                        {p.frequency_type === "meter_based" && (
+                          <p className="text-xs text-[var(--cmms-text-muted)]">
+                            มิเตอร์: {p.meter_unit || "-"}{p.meter_interval != null ? ` · ทุก ${Number(p.meter_interval).toLocaleString("th-TH")} ${p.meter_unit || ""}` : ""}
+                            {p.meter_id != null ? ` · ลิงก์ทะเบียน #${p.meter_id}` : " · fallback (หน่วย/ข้อมูลเดิม)"}
+                          </p>
+                        )}
                       </div>
                       <div className="flex shrink-0 gap-1.5">
                         <button type="button" onClick={() => router.push(`/pm_am/plans/${p.id}`)} aria-label="ดูรายละเอียด" className="inline-flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--cmms-bg-muted)]" style={{ color: "var(--cmms-text-secondary)" }}>
