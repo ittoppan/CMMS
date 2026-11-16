@@ -70,6 +70,27 @@ function facility_layout_sanitize_port(array $p): ?array {
     if ($type === '') $type = 'other';
     $status = (string)($p['status'] ?? 'active');
     if (!in_array($status, ['active','spare','faulty','reserved','inactive','planned'], true)) $status = 'active';
+    $feeds = [];
+    foreach ((is_array($p['feeds'] ?? null) ? $p['feeds'] : []) as $ref) {
+        if (!is_array($ref)) continue;
+        $scope = (string)($ref['scope'] ?? '');
+        $rid = (int)($ref['room_id'] ?? 0);
+        $pid = mb_substr(trim((string)($ref['port_id'] ?? '')), 0, 80);
+        if ($rid <= 0 || $pid === '' || !in_array($scope, ['room','cabinet','asset'], true)) continue;
+        $sr = ['scope' => $scope, 'room_id' => $rid, 'port_id' => $pid];
+        if ($scope === 'cabinet') {
+            $cid = mb_substr(trim((string)($ref['cabinet_id'] ?? '')), 0, 80);
+            if ($cid === '') continue;
+            $sr['cabinet_id'] = $cid;
+        }
+        if ($scope === 'asset') {
+            $aid = (int)($ref['asset_id'] ?? 0);
+            if ($aid <= 0) continue;
+            $sr['asset_id'] = $aid;
+        }
+        $feeds[] = $sr;
+        if (count($feeds) >= 20) break;
+    }
     return [
         'id' => mb_substr(trim((string)($p['id'] ?? ('p_' . bin2hex(random_bytes(4))))), 0, 80),
         'label' => mb_substr($label, 0, 120),
@@ -79,6 +100,7 @@ function facility_layout_sanitize_port(array $p): ?array {
         'status' => $status,
         'notes' => mb_substr(trim((string)($p['notes'] ?? '')), 0, 800),
         'spec' => mb_substr(trim((string)($p['spec'] ?? '')), 0, 200), // e.g. voltage, amperage, media, connector
+        'feeds' => array_values($feeds),
     ];
 }
 

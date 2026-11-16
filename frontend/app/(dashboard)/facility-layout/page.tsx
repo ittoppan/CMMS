@@ -16,7 +16,8 @@ import AndonBadge from "@/components/AndonBadge";
 
 type Location = { id: number; parent_id: number | null; code: string; name: string; type: string; description: string; is_active: number };
 type Asset = { id: number; code: string; name: string; status: string; location_id: number | null; location_name: string | null; location_type: string | null };
-type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string };
+type PortRef = { scope: "room"|"cabinet"|"asset"; room_id: number; cabinet_id?: string; asset_id?: number; port_id: string };
+type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string; feeds?: PortRef[] };
 type Cabinet = { id: string; name: string; code: string; cabinet_type: string; location_note: string; status: string; notes: string; ports: Port[] };
 type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: { grid_w: number; grid_h: number; image_url: string } };
 type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
@@ -54,7 +55,13 @@ const CABINET_TYPES = [
 ];
 
 function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "" } }; }
-function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "" }; }
+function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "", feeds: [] }; }
+
+function portRefKey(ref: PortRef): string {
+  if (ref.scope === "cabinet") return `cab:${ref.room_id}:${ref.cabinet_id || ""}:${ref.port_id}`;
+  if (ref.scope === "asset") return `asset:${ref.asset_id || 0}:${ref.port_id}`;
+  return `room:${ref.room_id}:${ref.port_id}`;
+}
 function newCabinet(): Cabinet { return { id: `cab_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, name: "", code: "", cabinet_type: "electrical", location_note: "", status: "active", notes: "", ports: [] }; }
 
 export default function FacilityLayoutPage() {
@@ -276,6 +283,107 @@ export default function FacilityLayoutPage() {
     });
   }, [flatPorts, portSearch, portTypeFilter, portStatusFilter]);
 
+  const portIndex = useMemo(() => {
+    const map: Record<string, { ref: PortRef; label: string; context: string; status: string; roomId: number | null; cabinetId?: string; assetId?: number; port: Port; sourceName: string; roomName: string }> = {};
+    const locById: Record<number, Location> = {};
+    for (const l of locations) locById[l.id] = l;
+    const assetById: Record<number, Asset> = {};
+    for (const a of assets) assetById[a.id] = a;
+    const roomLabel = (rid: number) => { const l = locById[rid]; return l ? `${l.name}${l.code ? ` (${l.code})` : ""}` : `ห้อง #${rid}`; };
+    Object.entries(config.rooms || {}).forEach(([ridStr, r]: any) => {
+      const rid = Number(ridStr);
+      const rn = roomLabel(rid);
+      (r?.ports || []).forEach((p: Port) => {
+        const ref: PortRef = { scope: "room", room_id: rid, port_id: p.id };
+        map[portRefKey(ref)] = { ref, label: p.label || p.id, context: `${rn} · พอร์ตห้อง`, status: p.status || "active", roomId: rid, port: p, sourceName: "พอร์ตห้อง", roomName: rn };
+      });
+      (r?.cabinets || []).forEach((cab: Cabinet) => {
+        const cn = cab?.name || cab?.code || "ตู้/แผง";
+        (cab?.ports || []).forEach((p: Port) => {
+          const ref: PortRef = { scope: "cabinet", room_id: rid, cabinet_id: cab.id, port_id: p.id };
+          map[portRefKey(ref)] = { ref, label: p.label || p.id, context: `${rn} · ตู้ ${cn}${p.port_no ? ` #${p.port_no}` : ""}`, status: p.status || "active", roomId: rid, cabinetId: cab.id, port: p, sourceName: `ตู้: ${cn}`, roomName: rn };
+        });
+      });
+    });
+    Object.entries(config.assets || {}).forEach(([aidStr, a]: any) => {
+      const aid = Number(aidStr);
+      const asset = assetById[aid];
+      const an = asset ? `${asset.code} · ${asset.name}` : `เครื่อง #${aid}`;
+      const rid = asset?.location_id ?? null;
+      const rn = rid ? roomLabel(rid) : "ไม่ระบุห้อง";
+      (a?.ports || []).forEach((p: Port) => {
+        const ref: PortRef = { scope: "asset", room_id: rid || 0, asset_id: aid, port_id: p.id };
+        map[portRefKey(ref)] = { ref, label: p.label || p.id, context: `${rn} · เครื่อง ${an}`, status: p.status || "active", roomId: rid, assetId: aid, port: p, sourceName: `เครื่อง: ${an}`, roomName: rn };
+      });
+    });
+    return map;
+  }, [config, locations, assets]);
+
+  const describePortRef = useCallback((ref: PortRef) => {
+    const info = portIndex[portRefKey(ref)];
+    if (!info) return "ปลายทางไม่พบ (อาจถูกลบ)";
+    return `${info.label}${info.port.port_no ? ` [${info.port.port_no}]` : ""} — ${info.context}`;
+  }, [portIndex]);
+
+  const impactInfo = useMemo(() => {
+    // build adjacency: source key -> downstream keys, and reverse upstreams
+    const downstream: Record<string, string[]> = {};
+    const upstreamOf: Record<string, string[]> = {};
+    const allKeys = Object.keys(portIndex);
+    allKeys.forEach(k => { downstream[k] = []; upstreamOf[k] = []; });
+    allKeys.forEach(k => {
+      const feeds = portIndex[k]?.port?.feeds || [];
+      feeds.forEach((ref: PortRef) => {
+        const tk = portRefKey(ref);
+        if (!portIndex[tk]) return;
+        downstream[k].push(tk);
+        upstreamOf[tk].push(k);
+      });
+    });
+    // sources causing impact: faulty/inactive ports; also ports inside faulty/inactive cabinets
+    const badSources = new Set<string>();
+    allKeys.forEach(k => {
+      const st = portIndex[k]?.status;
+      if (st === "faulty" || st === "inactive") badSources.add(k);
+    });
+    // cabinets with issue propagate to their ports as sources
+    Object.entries(config.rooms || {}).forEach(([ridStr, r]: any) => {
+      const rid = Number(ridStr);
+      (r?.cabinets || []).forEach((cab: Cabinet) => {
+        if (cab?.status === "faulty" || cab?.status === "inactive" || cab?.status === "maintenance") {
+          (cab?.ports || []).forEach((p: Port) => {
+            const k = portRefKey({ scope: "cabinet", room_id: rid, cabinet_id: cab.id, port_id: p.id });
+            if (portIndex[k]) badSources.add(k);
+          });
+        }
+      });
+    });
+    // propagate downstream from bad sources
+    const affected = new Set<string>();
+    const causeOf: Record<string, string> = {};
+    const q: string[] = Array.from(badSources);
+    q.forEach(s => { affected.add(s); causeOf[s] = s; });
+    for (let i = 0; i < q.length; i++) {
+      const cur = q[i];
+      (downstream[cur] || []).forEach(nk => {
+        if (affected.has(nk)) return;
+        affected.add(nk);
+        causeOf[nk] = causeOf[cur] || cur;
+        q.push(nk);
+      });
+    }
+    const impactedAssets = new Set<number>();
+    affected.forEach(k => { const aid = portIndex[k]?.assetId; if (aid) impactedAssets.add(aid); });
+    // edges for display
+    const edges: Array<{ from: string; to: string }> = [];
+    allKeys.forEach(k => (downstream[k] || []).forEach(tk => edges.push({ from: k, to: tk })));
+    return { downstream, upstreamOf, badSources, affected, causeOf, impactedAssets, edges };
+  }, [portIndex, config]);
+
+  const allPortOptions = useMemo(() => {
+    return Object.values(portIndex).sort((a,b)=> (a.roomName+a.context+a.label).localeCompare(b.roomName+b.context+b.label, "th"));
+  }, [portIndex]);
+
   const jumpToPort = (r: typeof flatPorts[number]) => {
     if (r.roomId) selectRoomById(r.roomId);
     const label = `${r.port?.label || "พอร์ต"}${r.port?.port_no ? ` #${r.port.port_no}` : ""}`;
@@ -388,25 +496,66 @@ export default function FacilityLayoutPage() {
                 <p className="text-xs text-muted-foreground">รองรับทุกรูปแบบ (LAN/ไฟฟ้า/เบรกเกอร์/I-O/Sensor/ลม/น้ำ/Utility ฯลฯ) — ใส่ข้อมูลภายหลังได้ ระบุสเปก/แรงดัน/ขนาดในช่อง “สเปก” หรือ “หมายเหตุ”</p>
                 {(roomCfg.ports||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีพอร์ตในห้องนี้ — กด “เพิ่มพอร์ต” เพื่อบันทึกจุดเชื่อมต่อ</p> : (
                   <div className="space-y-2">
-                    {(roomCfg.ports||[]).map((p, idx) => (
-                      <div key={p.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end rounded-lg border p-2">
-                        <div className="md:col-span-2"><Label className="text-xs">ชื่อ/Label</Label><Input value={p.label} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,label:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="LAN-01, CB-01" /></div>
-                        <div className="md:col-span-2"><Label className="text-xs">ประเภท</Label>
-                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.port_type} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_type:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
-                            {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
-                          </select>
+                    {(roomCfg.ports||[]).map((p, idx) => {
+                      const selfKey = portRefKey({ scope: "room", room_id: effectiveRoomId, port_id: p.id });
+                      const feeds = p.feeds || [];
+                      const isBad = p.status === "faulty" || p.status === "inactive";
+                      const isAffected = impactInfo.affected.has(selfKey) && !impactInfo.badSources.has(selfKey);
+                      return (
+                      <div key={p.id} className={`rounded-lg border p-2 space-y-2 ${impactInfo.badSources.has(selfKey) ? "border-red-300 bg-red-50/40" : isAffected ? "border-amber-300 bg-amber-50/40" : ""}`}>
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                          <div className="md:col-span-2"><Label className="text-xs">ชื่อ/Label</Label><Input value={p.label} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,label:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="LAN-01, CB-01" /></div>
+                          <div className="md:col-span-2"><Label className="text-xs">ประเภท</Label>
+                            <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.port_type} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_type:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
+                              {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
+                            </select>
+                          </div>
+                          <div className="md:col-span-2"><Label className="text-xs">Port/ช่อง/วงจร</Label><Input value={p.port_no} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_no:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="SW1-P24, DB1-12" /></div>
+                          <div className="md:col-span-2"><Label className="text-xs">สเปก (V/A/ชนิด)</Label><Input value={p.spec || ""} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,spec:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="220V 16A, Cat6" /></div>
+                          <div className="md:col-span-2"><Label className="text-xs">ปลายทาง (ข้อความ)</Label><Input value={p.endpoint} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,endpoint:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เครื่อง/ตู้ไฟ/อุปกรณ์" /></div>
+                          <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
+                            <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.status} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,status:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
+                              {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </div>
+                          <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" onClick={()=> updateRoomPorts(effectiveRoomId, roomCfg.ports.filter((_,i)=>i!==idx))}><Trash2 className="w-4 h-4 text-red-500"/></Button>}</div>
                         </div>
-                        <div className="md:col-span-2"><Label className="text-xs">Port/ช่อง/วงจร</Label><Input value={p.port_no} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_no:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="SW1-P24, DB1-12" /></div>
-                        <div className="md:col-span-2"><Label className="text-xs">สเปก (V/A/ชนิด)</Label><Input value={p.spec || ""} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,spec:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="220V 16A, Cat6" /></div>
-                        <div className="md:col-span-2"><Label className="text-xs">ปลายทาง/เชื่อมกับ</Label><Input value={p.endpoint} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,endpoint:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เครื่อง/ตู้ไฟ/อุปกรณ์" /></div>
-                        <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
-                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.status} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,status:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
-                            {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
-                          </select>
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          {impactInfo.badSources.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
+                          {isAffected && <AndonBadge tone="warn">ได้รับผลกระทบจาก {describePortRef(portIndex[impactInfo.causeOf[selfKey]]?.ref || {scope:"room",room_id:effectiveRoomId,port_id:""})}</AndonBadge>}
+                          {(impactInfo.upstreamOf[selfKey]||[]).length > 0 && <span className="text-muted-foreground">รับจาก: {(impactInfo.upstreamOf[selfKey]||[]).map(k=>portIndex[k]?.label||k).join(", ")}</span>}
                         </div>
-                        <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" onClick={()=> updateRoomPorts(effectiveRoomId, roomCfg.ports.filter((_,i)=>i!==idx))}><Trash2 className="w-4 h-4 text-red-500"/></Button>}</div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">ความเชื่อมโยงปลายทาง (จ่ายไปยังพอร์ต/เครื่อง)</Label>
+                          <div className="flex flex-wrap gap-1">
+                            {feeds.length === 0 ? <span className="text-xs text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
+                              <span key={fi} className="inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs bg-background">
+                                → {describePortRef(ref)}
+                                {canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const np=[...roomCfg.ports]; np[idx]={...p,feeds:nf}; updateRoomPorts(effectiveRoomId,np); }}>×</button>}
+                              </span>
+                            ))}
+                          </div>
+                          {canManage && (
+                            <div className="flex items-center gap-2">
+                              <select className="flex-1 h-9 rounded-md border bg-background px-2 text-xs" defaultValue="" onChange={e=>{
+                                const key = e.target.value; if (!key) return;
+                                const target = portIndex[key]; if (!target) return;
+                                const ref = target.ref;
+                                if (portRefKey(ref) === selfKey) { e.target.value = ""; return; }
+                                if (feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value = ""; return; }
+                                const np=[...roomCfg.ports]; np[idx]={...p,feeds:[...feeds, ref]}; updateRoomPorts(effectiveRoomId,np);
+                                e.target.value = "";
+                              }}>
+                                <option value="">+ เพิ่มปลายทาง (พอร์ต/จุด/เครื่อง)...</option>
+                                {allPortOptions.filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
+                                  <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 )}
                 <div className="pt-2">
@@ -450,7 +599,7 @@ export default function FacilityLayoutPage() {
                       <div><Label className="text-xs">หมายเหตุ/รายละเอียดตู้</Label><Input value={cab.notes||""} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,notes:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="โหลดรวม, ระบบจ่ายไฟ, ผู้รับผิดชอบ" /></div>
                       <details className="text-xs rounded border bg-muted/20 p-2">
                         <summary className="cursor-pointer font-medium">พอร์ต/เบรกเกอร์/วงจรในตู้ ({(cab.ports||[]).length} จุด)</summary>
-                        <CabinetPortEditor roomId={effectiveRoomId} cabinetIndex={cidx} config={config} setConfig={setConfig} />
+                        <CabinetPortEditor roomId={effectiveRoomId} cabinetIndex={cidx} config={config} setConfig={setConfig} portIndex={portIndex} impactInfo={impactInfo} describePortRef={describePortRef} allPortOptions={allPortOptions} canManage={canManage} />
                       </details>
                     </div>
                   ))}
@@ -476,7 +625,7 @@ export default function FacilityLayoutPage() {
                   {canManage && (
                     <details className="text-xs">
                       <summary className="cursor-pointer text-primary">จัดการพอร์ตเครื่อง</summary>
-                      <AssetPortEditor assetId={a.id} config={config} setConfig={setConfig} />
+                      <AssetPortEditor assetId={a.id} config={config} setConfig={setConfig} portIndex={portIndex} impactInfo={impactInfo} describePortRef={describePortRef} allPortOptions={allPortOptions} canManage={canManage} />
                     </details>
                   )}
                 </div>
@@ -561,7 +710,13 @@ export default function FacilityLayoutPage() {
                           {p.notes ? <> · หมายเหตุ: {p.notes}</> : null}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col items-end gap-1">
+                        {(() => { const selfKey = r.key; const feeds = r.port?.feeds || []; const aff = impactInfo.affected.has(selfKey) && !impactInfo.badSources.has(selfKey); const bad = impactInfo.badSources.has(selfKey); return (<>
+                          {bad && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
+                          {aff && <AndonBadge tone="warn">ได้รับผลกระทบ</AndonBadge>}
+                          {feeds.length > 0 && <Badge variant="info">จ่ายไป {feeds.length} ปลายทาง</Badge>}
+                          {(impactInfo.upstreamOf[selfKey]||[]).length > 0 && <Badge variant="neutral">รับจาก {(impactInfo.upstreamOf[selfKey]||[]).length}</Badge>}
+                        </>); })()}
                         {r.roomId ? (
                           <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=> jumpToPort(r)}>
                             ไปที่ตำแหน่ง
@@ -574,6 +729,75 @@ export default function FacilityLayoutPage() {
               })}
               {filteredPorts.length > 200 && <p className="text-xs text-muted-foreground">แสดง 200 รายการแรก — ปรับตัวกรองให้แคบลงเพื่อดูรายการที่ต้องการ</p>}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><Network className="w-4 h-4"/>ความเชื่อมโยงต้นทาง-ปลายทาง และผลกระทบ</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <p className="text-xs text-muted-foreground">บันทึกความเชื่อมโยงโครงสร้างใน <code>facility_layout_config</code> เดิม (ฟิลด์ <code>feeds</code> ของพอร์ต) เพื่อแสดงสายการจ่าย เช่น ตู้/เบรกเกอร์ → จุด/พอร์ต → เครื่อง และคำนวณผลกระทบเมื่อจุดต้นทางมีปัญหา/ถูกตัดการจ่าย (สถานะชำรุด/ไม่ใช้งาน หรือสถานะตู้มีปัญหา)</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="rounded border p-2"><div className="text-xs text-muted-foreground">ความเชื่อมโยงที่กำหนด</div><div className="text-xl font-semibold">{impactInfo.edges.length}</div></div>
+            <div className={`rounded border p-2 ${impactInfo.badSources.size>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">ต้นทางมีปัญหา/ตัดการจ่าย</div><div className="text-xl font-semibold text-red-700">{impactInfo.badSources.size}</div></div>
+            <div className={`rounded border p-2 ${impactInfo.affected.size>impactInfo.badSources.size?"border-amber-300 bg-amber-50":""}`}><div className="text-xs text-muted-foreground">จุด/พอร์ตที่ได้รับผลกระทบ</div><div className="text-xl font-semibold">{impactInfo.affected.size}</div></div>
+            <div className={`rounded border p-2 ${impactInfo.impactedAssets.size>0?"border-amber-300 bg-amber-50":""}`}><div className="text-xs text-muted-foreground">เครื่องจักรที่ได้รับผลกระทบ</div><div className="text-xl font-semibold">{impactInfo.impactedAssets.size}</div></div>
+          </div>
+          {impactInfo.badSources.size === 0 ? (
+            <div className="text-xs text-muted-foreground">ไม่พบต้นทางที่มีสถานะชำรุด/ไม่ใช้งาน/ตู้มีปัญหาในขณะนี้ (หากกำหนดความเชื่อมโยงไว้ ระบบจะแสดงผลกระทบปลายทางอัตโนมัติเมื่อมีปัญหา)</div>
+          ) : (
+            <div className="space-y-2">
+              <div className="font-medium">ต้นทางที่มีปัญหา/ตัดการจ่าย และผลกระทบปลายทาง</div>
+              <div className="space-y-2 max-h-80 overflow-auto pr-1">
+                {Array.from(impactInfo.badSources).slice(0, 60).map((sk) => {
+                  const src = portIndex[sk]; if (!src) return null;
+                  const downs = Object.entries(impactInfo.causeOf).filter(([,c]) => c === sk && sk !== ("" as string));
+                  const downKeys = Object.keys(impactInfo.causeOf).filter(k => impactInfo.causeOf[k] === sk && k !== sk);
+                  const downAssets = Array.from(new Set(downKeys.map(k=>portIndex[k]?.assetId).filter(Boolean))) as number[];
+                  return (
+                    <div key={sk} className="rounded border border-red-200 bg-red-50/30 p-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <AndonBadge tone="down">ต้นทาง</AndonBadge>
+                        <span className="font-medium">{src.label}{src.port.port_no?` [${src.port.port_no}]`:""}</span>
+                        <span className="text-xs text-muted-foreground">{src.context} · สถานะ: {src.status}</span>
+                        {src.roomId ? <Button size="sm" variant="outline" className="h-7 text-xs" onClick={()=> jumpToPort({ key: sk, roomId: src.roomId, roomName: src.roomName, roomCode: "", sourceName: src.sourceName, cabinetCode: "", cabinetLocation: "", port: src.port, source: src.ref.scope as any, cabinetId: src.cabinetId, assetId: src.assetId })}>ไปที่ตำแหน่ง</Button> : null}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">ส่งผลกระทบไปยัง {downKeys.length} จุด/พอร์ต {downAssets.length>0 ? `· เครื่องที่เกี่ยวข้อง ${downAssets.length} เครื่อง` : ""}</div>
+                      {downKeys.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {downKeys.slice(0, 12).map(dk => {
+                            const d = portIndex[dk]; if (!d) return null;
+                            return <span key={dk} className="inline-flex items-center rounded border border-amber-300 bg-amber-50 px-1.5 py-0.5 text-[11px]">→ {d.label} ({d.sourceName}{d.assetId ? " · เครื่อง" : ""})</span>;
+                          })}
+                          {downKeys.length > 12 && <span className="text-[11px] text-muted-foreground">+{downKeys.length - 12} จุด</span>}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {impactInfo.edges.length > 0 && (
+            <details className="rounded border p-2">
+              <summary className="cursor-pointer text-sm font-medium">รายการความเชื่อมโยงที่บันทึกไว้ ({impactInfo.edges.length} เส้นทาง)</summary>
+              <div className="mt-2 space-y-1 max-h-64 overflow-auto pr-1">
+                {impactInfo.edges.slice(0, 120).map((e: any, i: number) => {
+                  const from = portIndex[e.from]; const to = portIndex[e.to];
+                  if (!from || !to) return null;
+                  const hit = impactInfo.affected.has(e.from) || impactInfo.affected.has(e.to);
+                  return (
+                    <div key={i} className={`text-xs rounded px-2 py-1 border ${hit?"border-amber-300 bg-amber-50/40":"border-transparent"}`}>
+                      <span className="font-medium">{from.label}</span> <span className="text-muted-foreground">({from.context})</span> → <span className="font-medium">{to.label}</span> <span className="text-muted-foreground">({to.context})</span>
+                      {hit && <span className="ml-2 text-amber-700">· อยู่ในเส้นทางผลกระทบ</span>}
+                    </div>
+                  );
+                })}
+                {impactInfo.edges.length > 120 && <div className="text-xs text-muted-foreground">แสดง 120 รายการแรก</div>}
+              </div>
+            </details>
           )}
         </CardContent>
       </Card>
@@ -599,7 +823,7 @@ export default function FacilityLayoutPage() {
   );
 }
 
-function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig }: { roomId: number; cabinetIndex: number; config: LayoutConfig; setConfig: (c: any)=>void }) {
+function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig, portIndex, impactInfo, describePortRef, allPortOptions, canManage }: { roomId: number; cabinetIndex: number; config: LayoutConfig; setConfig: (c: any)=>void; portIndex: any; impactInfo: any; describePortRef: (r: PortRef)=>string; allPortOptions: any[]; canManage: boolean }) {
   const rkey = String(roomId);
   const room = { ...defaultRoom(), ...(config.rooms[rkey] || {}) } as RoomCfg;
   const cabinets = [...(room.cabinets || [])];
@@ -611,42 +835,113 @@ function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig }: { roomId
   };
   return (
     <div className="mt-2 space-y-2 border-t pt-2">
-      {ports.map((p, idx) => (
-        <div key={p.id} className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end">
-          <div className="md:col-span-3"><Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/เบรกเกอร์/เทอร์มินัล" className="h-8 text-xs" /></div>
-          <div className="md:col-span-2">
-            <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.port_type} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_type:e.target.value}; update(n); }}>
-              {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
+      {ports.map((p, idx) => {
+        const selfKey = portRefKey({ scope: "cabinet", room_id: roomId, cabinet_id: cab.id, port_id: p.id });
+        const feeds = p.feeds || [];
+        const isAffected = impactInfo?.affected?.has(selfKey) && !impactInfo?.badSources?.has(selfKey);
+        return (
+        <div key={p.id} className={`rounded border p-2 space-y-1 ${impactInfo?.badSources?.has(selfKey) ? "border-red-300 bg-red-50/40" : isAffected ? "border-amber-300 bg-amber-50/40" : ""}`}>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end">
+            <div className="md:col-span-2"><Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/เบรกเกอร์/เทอร์มินัล" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2">
+              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.port_type} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_type:e.target.value}; update(n); }}>
+                {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div className="md:col-span-1"><Input value={p.port_no} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_no:e.target.value}; update(n); }} placeholder="ช่อง/วงจร" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก (V/A)" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง (ข้อความ)" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2">
+              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
+                {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button>}</div>
           </div>
-          <div className="md:col-span-2"><Input value={p.port_no} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_no:e.target.value}; update(n); }} placeholder="ช่อง/วงจร" className="h-8 text-xs" /></div>
-          <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก (V/A)" className="h-8 text-xs" /></div>
-          <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง/โหลด" className="h-8 text-xs" /></div>
-          <div className="md:col-span-1 flex justify-end"><Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button></div>
+          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+            {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
+            {isAffected && <AndonBadge tone="warn">ได้รับผลกระทบ</AndonBadge>}
+            {(impactInfo?.upstreamOf?.[selfKey]||[]).length > 0 && <span className="text-muted-foreground">รับจาก: {(impactInfo.upstreamOf[selfKey]||[]).map((k:string)=>portIndex[k]?.label||k).join(", ")}</span>}
+          </div>
+          <div className="space-y-1">
+            <div className="flex flex-wrap gap-1">
+              {feeds.length === 0 ? <span className="text-[11px] text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
+                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
+              ))}
+            </div>
+            {canManage && (
+              <select className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+                const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
+                if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
+                const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
+              }}>
+                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)...</option>
+                {(allPortOptions||[]).filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
+                  <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
-      ))}
-      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>update([...ports, { ...newPort(), port_type: "electrical" }])}><Plus className="w-3 h-3 mr-1"/>เพิ่มพอร์ต/เบรกเกอร์</Button>
+      );})}
+      {canManage && <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>update([...ports, { ...newPort(), port_type: "electrical" }])}><Plus className="w-3 h-3 mr-1"/>เพิ่มพอร์ต/เบรกเกอร์</Button>}
     </div>
   );
 }
 
-function AssetPortEditor({ assetId, config, setConfig }: { assetId: number; config: LayoutConfig; setConfig: (c: any)=>void }) {
+function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, describePortRef, allPortOptions, canManage }: { assetId: number; config: LayoutConfig; setConfig: (c: any)=>void; portIndex: any; impactInfo: any; describePortRef: (r: PortRef)=>string; allPortOptions: any[]; canManage: boolean }) {
   const key = String(assetId);
   const entry = config.assets[key] || { ports: [], notes: "" };
   const ports: Port[] = (entry as any).ports || [];
+  const roomId = ((Object.values(portIndex || {}) as any[]).find((v: any) => v?.assetId === assetId)?.roomId as number) || 0;
   const update = (np: Port[]) => setConfig((c: LayoutConfig) => ({ ...c, assets: { ...c.assets, [key]: { ...(c.assets[key]||{notes:""}), ports: np } } }));
   return (
     <div className="mt-2 space-y-2 border-t pt-2">
-      {ports.map((p, idx) => (
-        <div key={p.id} className="grid grid-cols-2 gap-1">
-          <Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/Port" className="h-8 text-xs" />
-          <div className="flex gap-1">
-            <Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="เชื่อมกับ" className="h-8 text-xs" />
-            <Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button>
+      {ports.map((p, idx) => {
+        const selfKey = portRefKey({ scope: "asset", room_id: roomId, asset_id: assetId, port_id: p.id });
+        const feeds = p.feeds || [];
+        const isAffected = impactInfo?.affected?.has(selfKey) && !impactInfo?.badSources?.has(selfKey);
+        return (
+        <div key={p.id} className={`rounded border p-2 space-y-1 ${impactInfo?.badSources?.has(selfKey) ? "border-red-300 bg-red-50/40" : isAffected ? "border-amber-300 bg-amber-50/40" : ""}`}>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end">
+            <div className="md:col-span-3"><Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/Port" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2"><Input value={p.port_no} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_no:e.target.value}; update(n); }} placeholder="ช่อง/เทอร์มินัล" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง (ข้อความ)" className="h-8 text-xs" /></div>
+            <div className="md:col-span-2">
+              <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.status} onChange={e=>{ const n=[...ports]; n[idx]={...p,status:e.target.value}; update(n); }}>
+                {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+            <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button>}</div>
+          </div>
+          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+            {impactInfo?.badSources?.has(selfKey) && <AndonBadge tone="down">ต้นทางมีปัญหา/ตัดการจ่าย</AndonBadge>}
+            {isAffected && <AndonBadge tone="warn">ได้รับผลกระทบ</AndonBadge>}
+            {(impactInfo?.upstreamOf?.[selfKey]||[]).length > 0 && <span className="text-muted-foreground">รับจาก: {(impactInfo.upstreamOf[selfKey]||[]).map((k:string)=>portIndex[k]?.label||k).join(", ")}</span>}
+          </div>
+          <div className="space-y-1">
+            <div className="flex flex-wrap gap-1">
+              {feeds.length === 0 ? <span className="text-[11px] text-muted-foreground">ยังไม่กำหนดปลายทางโครงสร้าง</span> : feeds.map((ref, fi) => (
+                <span key={fi} className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] bg-background">→ {describePortRef(ref)}{canManage && <button className="text-red-600 ml-1" onClick={()=>{ const nf=feeds.filter((_,i)=>i!==fi); const n=[...ports]; n[idx]={...p,feeds:nf}; update(n); }}>×</button>}</span>
+              ))}
+            </div>
+            {canManage && (
+              <select className="w-full h-8 rounded-md border bg-background px-2 text-[11px]" defaultValue="" onChange={e=>{
+                const v = e.target.value; if (!v) return; const target = portIndex[v]; if (!target) return; const ref = target.ref;
+                if (portRefKey(ref) === selfKey || feeds.some(f=>portRefKey(f)===portRefKey(ref))) { e.target.value=""; return; }
+                const n=[...ports]; n[idx]={...p,feeds:[...feeds, ref]}; update(n); e.target.value="";
+              }}>
+                <option value="">+ เพิ่มปลายทาง (จ่ายไปยังพอร์ต/จุด/เครื่อง)...</option>
+                {(allPortOptions||[]).filter(o=>portRefKey(o.ref)!==selfKey).map(o => (
+                  <option key={portRefKey(o.ref)} value={portRefKey(o.ref)}>{o.label}{o.port.port_no?` [${o.port.port_no}]`:""} — {o.context}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
-      ))}
-      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>update([...ports, newPort()])}><Plus className="w-3 h-3 mr-1"/>เพิ่มพอร์ตเครื่อง</Button>
+      );})}
+      {canManage && <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>update([...ports, newPort()])}><Plus className="w-3 h-3 mr-1"/>เพิ่มพอร์ตเครื่อง</Button>}
     </div>
   );
 }
