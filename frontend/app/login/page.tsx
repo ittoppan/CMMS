@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import ThemeProvider from '../../components/ThemeProvider';
+import CmmsScene3D from './CmmsScene3D';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
-import { Wrench, ChartBar, Clock, Box, Eye, EyeOff, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Wrench, ChartBar, Clock, Box, Eye, EyeOff, AlertCircle, ShieldCheck, Cpu, Activity, Cog } from 'lucide-react';
 
 // LINE Login button — ไอคอนทางการจาก LINE Login button template
 // (line-login-64.png = 32dp 2x, line-login-88.png = 44dp 2x) ห้ามใช้ SVG วาดเอง
@@ -26,11 +27,12 @@ function LineLoginIcon() {
 
 const FEATURES = [
   { icon: Clock, text: 'ติดตามงานซ่อมแบบ Real-time' },
-  { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF/MTTR' },
-  { icon: Box, text: 'บริหารคลังอะไหล่อัจฉริยะ' },
+  { icon: ChartBar, text: 'วิเคราะห์ข้อมูล MTBF / MTTR / OEE' },
+  { icon: Box, text: 'บริหารคลังอะไหล่และสต็อกอัจฉริยะ' },
+  { icon: Activity, text: 'Predictive Maintenance & Condition Monitoring' },
 ];
 
-const STATUS = ['ระบบ', 'ฐานข้อมูล', 'LINE แจ้งเตือน'];
+const STATUS = ['ระบบพร้อมใช้งาน', 'ฐานข้อมูลเชื่อมต่อ', 'LINE แจ้งเตือนพร้อม'];
 
 // แปลงข้อความ error จากฝั่ง PHP/query → ภาษาไทยที่เข้าใจได้
 // (ห้ามโชว์ internal code หรือข้อความ System Error ดิบๆ ให้ผู้ใช้)
@@ -132,18 +134,24 @@ function LoginContent() {
   };
 
   return (
-    <div className="cmms-login-container">
+    <div className="cmms-login-container cmms-login-container--neo">
+      {/* 3D animated background */}
+      <div className="cmms-login-3d-bg" aria-hidden="true">
+        <CmmsScene3D />
+        <div className="cmms-login-3d-vignette" />
+      </div>
+
       {/* Mobile compact brand band */}
-      <div className="cmms-login-band">
+      <div className="cmms-login-band cmms-login-band--neo">
         <div className="cmms-login-brand">
-          <div className="cmms-login-brand-mark"><Wrench size={22} strokeWidth={1.75} /></div>
+          <div className="cmms-login-brand-mark cmms-login-brand-mark--neo"><Cog size={22} strokeWidth={1.75} className="cmms-login-spin-slow" /></div>
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
-            <div className="cmms-login-brand-sub">Enterprise Maintenance Suite</div>
+            <div className="cmms-login-brand-sub">Smart Maintenance Platform</div>
           </div>
         </div>
         <div className="cmms-login-status">
-          {STATUS.map((s) => (
+          {STATUS.slice(0, 2).map((s) => (
             <span key={s} className="cmms-login-status-item">
               <span className="cmms-login-lamp" />{s}
             </span>
@@ -152,26 +160,26 @@ function LoginContent() {
       </div>
 
       {/* Desktop brand hero */}
-      <aside className="cmms-login-hero">
-        <div className="cmms-login-hero-mark" aria-hidden="true"><span /><span /><span /></div>
+      <aside className="cmms-login-hero cmms-login-hero--neo">
+        <div className="cmms-login-holo-grid" aria-hidden="true" />
 
         <div className="cmms-login-brand">
-          <div className="cmms-login-brand-mark"><Wrench size={22} strokeWidth={1.75} /></div>
+          <div className="cmms-login-brand-mark cmms-login-brand-mark--neo"><Cpu size={22} strokeWidth={1.75} /></div>
           <div>
             <div className="cmms-login-brand-name">CMMS-TOPPAN</div>
-            <div className="cmms-login-brand-sub">Enterprise Maintenance Suite</div>
+            <div className="cmms-login-brand-sub">Smart Maintenance Platform</div>
           </div>
         </div>
 
         <div className="cmms-login-hero-body">
           <div>
-            <p className="cmms-login-hero-eyebrow">CMMS · Enterprise Maintenance</p>
-            <h1>ระบบจัดการ<br />งานซ่อมบำรุง</h1>
+            <p className="cmms-login-hero-eyebrow">INDUSTRIAL INTELLIGENCE · CMMS</p>
+            <h1>ระบบจัดการ<br /><span className="cmms-login-gradient-text">งานซ่อมบำรุง</span><br />อัจฉริยะ</h1>
           </div>
           <p className="cmms-login-hero-lede">
-            CMMS-TOPPAN — Computerized Maintenance Management System สำหรับ TOPPAN Flexible Packaging (Thailand)
+            Computerized Maintenance Management System สำหรับ TOPPAN Flexible Packaging (Thailand) — ควบคุมเครื่องจักร งานซ่อม อะไหล่ และการวิเคราะห์เชิงพยากรณ์ในแพลตฟอร์มเดียว
           </p>
-          <ul className="cmms-login-features">
+          <ul className="cmms-login-features cmms-login-features--neo">
             {FEATURES.map((f) => (
               <li key={f.text} className="cmms-login-feature">
                 <span className="cmms-login-feature-icon"><f.icon size={18} strokeWidth={1.75} /></span>
@@ -190,21 +198,21 @@ function LoginContent() {
       </aside>
 
       {/* Login form */}
-      <main className="cmms-login-panel">
-        <form className="cmms-login-form" onSubmit={onSubmit} noValidate>
+      <main className="cmms-login-panel cmms-login-panel--neo">
+        <form className="cmms-login-form cmms-login-form--glass" onSubmit={onSubmit} noValidate>
           <h1 className="sr-only">เข้าสู่ระบบ CMMS-TOPPAN</h1>
           <div className="cmms-login-logo">
-            <div className="cmms-login-logo-icon"><Wrench size={20} strokeWidth={1.75} /></div>
+            <div className="cmms-login-logo-icon cmms-login-logo-icon--neo"><Wrench size={20} strokeWidth={1.75} /></div>
             <div>
               <div className="cmms-login-logo-text">CMMS-TOPPAN</div>
-              <div className="cmms-login-logo-sub">Enterprise Maintenance</div>
+              <div className="cmms-login-logo-sub">Maintenance Command Center</div>
             </div>
           </div>
 
           <header className="flex flex-col gap-1.5">
-            <p className="cmms-eyebrow">Secure Sign-in</p>
+            <p className="cmms-eyebrow">SECURE ACCESS · AUTHENTICATED</p>
             <h2 className="cmms-login-title">เข้าสู่ระบบ</h2>
-            <p className="cmms-login-subtitle">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน</p>
+            <p className="cmms-login-subtitle">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งานศูนย์ควบคุมงานซ่อมบำรุง</p>
           </header>
 
           {loginFailed && errorMessage && (
@@ -257,7 +265,7 @@ function LoginContent() {
             )}
           </div>
 
-          <Button type="submit" className="w-full h-11" loading={isLoading} loadingText="กำลังเข้าสู่ระบบ…">
+          <Button type="submit" className="w-full h-11 cmms-login-submit-neo" loading={isLoading} loadingText="กำลังตรวจสอบสิทธิ์…">
             <ShieldCheck size={18} strokeWidth={1.75} /> เข้าสู่ระบบ
           </Button>
 
