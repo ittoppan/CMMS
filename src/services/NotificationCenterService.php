@@ -24,7 +24,7 @@ require_once __DIR__ . '/WebPushService.php';
 class NotificationCenterService
 {
     public const TYPES = ['work_order', 'priority', 'sla', 'pm', 'inspection', 'spare_part', 'request', 'system', 'calibration', 'maintenance'];
-    public const CHANNELS = ['app', 'line', 'email', 'telegram', 'push'];
+    public const CHANNELS = ['app', 'line', 'email', 'telegram', 'teams', 'push'];
     public const PRIORITIES = ['critical', 'high', 'medium', 'low', 'info'];
 
     private const PRIORITY_COLORS = [
@@ -287,6 +287,7 @@ class NotificationCenterService
 
             $created = 0;
             $telegramSentOnce = false;
+            $teamsSentOnce = false;
             foreach ($users as $uid) {
                 if (!isset($meta[$uid])) continue;
                 $ch = self::channelsForUser($pdo, $uid, $type, $channels);
@@ -300,12 +301,19 @@ class NotificationCenterService
                 $created++;
 
                 foreach ($ch as $channel) {
+                    $level = ['critical' => 'ERROR', 'high' => 'WARN', 'medium' => 'INFO', 'low' => 'INFO', 'info' => 'INFO'][$priority] ?? 'INFO';
                     if ($channel === 'telegram') {
                         if (!$telegramSentOnce) {
-                            $level = ['critical' => 'ERROR', 'high' => 'WARN', 'medium' => 'INFO', 'low' => 'INFO', 'info' => 'INFO'][$priority] ?? 'INFO';
                             $telegramSentOnce = self::sendTelegramOnce($title, $message, $url, $level);
                         }
                         self::recordDelivery($pdo, $nid, $uid, 'telegram', $telegramSentOnce);
+                        continue;
+                    }
+                    if ($channel === 'teams') {
+                        if (!$teamsSentOnce) {
+                            $teamsSentOnce = self::sendTeamsOnce($title, $message, $url, $level);
+                        }
+                        self::recordDelivery($pdo, $nid, $uid, 'teams', $teamsSentOnce);
                         continue;
                     }
                     $ok = self::dispatchChannel($pdo, $meta[$uid], $nid, $channel, $title, $message, $url, $payloadJson);
@@ -348,6 +356,7 @@ class NotificationCenterService
             'line'     => getSettingValue('line_notify_enabled', '1') === '1',
             'email'    => getSettingValue('email_notify_enabled', '0') === '1',
             'telegram' => getSettingValue('telegram_enabled', '1') === '1',
+            'teams'    => getSettingValue('teams_enabled', '1') === '1',
             'push'     => getSettingValue('push_alert_enabled', '1') === '1',
         ];
         $prefs = [];
@@ -372,6 +381,16 @@ class NotificationCenterService
             return $ok;
         } catch (Throwable $e) {
             error_log('[NotificationCenter] telegram: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function sendTeamsOnce(string $title, string $message, string $url, string $level): bool
+    {
+        try {
+            return teamsAdminAlert($title, $message, $url, $level);
+        } catch (Throwable $e) {
+            error_log('[NotificationCenter] teams: ' . $e->getMessage());
             return false;
         }
     }

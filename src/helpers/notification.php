@@ -834,6 +834,62 @@ function telegramAdminAlert($title, $message, $url = '', $level = 'INFO') {
 }
 
 /* ============================================================
+ * 2.7 MICROSOFT TEAMS — Incoming Webhook
+ * ============================================================ */
+
+/**
+ * ส่งข้อความไปยัง Microsoft Teams ผ่าน Incoming Webhook (MessageCard)
+ * อ่านค่า: settings (teams_webhook_url) → env (TEAMS_WEBHOOK_URL)
+ */
+function sendTeamsMessage($title, $message, $url = '', $level = 'INFO') {
+    $webhookUrl = getSettingValue('teams_webhook_url', '') ?: (getenv('TEAMS_WEBHOOK_URL') ?: '');
+    if (empty($webhookUrl)) {
+        error_log('[teams] TEAMS_WEBHOOK_URL missing (settings หรือ .env)');
+        return false;
+    }
+
+    $theme = ['INFO' => '0078D4', 'WARN' => 'FFA500', 'ERROR' => 'D13438', 'SUCCESS' => '107C10'][$level] ?? '0078D4';
+    $card = [
+        '@type' => 'MessageCard',
+        '@context' => 'http://schema.org/extensions',
+        'summary' => mb_substr((string)$title, 0, 120),
+        'themeColor' => $theme,
+        'title' => mb_substr((string)$title, 0, 200),
+        'text' => nl2br(htmlspecialchars((string)$message, ENT_QUOTES, 'UTF-8')),
+    ];
+    if (!empty($url)) {
+        $card['potentialAction'] = [[
+            '@type' => 'OpenUri',
+            'name' => 'เปิดในระบบ',
+            'targets' => [['os' => 'default', 'uri' => $url]],
+        ]];
+    }
+
+    $ch = curl_init($webhookUrl);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($card, JSON_UNESCAPED_UNICODE));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $ok = ($httpCode >= 200 && $httpCode < 300);
+    try {
+        $pdo = getDb();
+        $pdo->prepare("INSERT INTO notification_logs (channel, status, content, raw_response, created_at) VALUES ('TEAMS', ?, ?, ?, NOW())")
+            ->execute([$ok ? 'SENT' : 'FAILED', mb_substr((string)$title . "\n" . (string)$message, 0, 500), $ok ? null : mb_substr((string)$response, 0, 2000)]);
+    } catch (Exception $e) {}
+    return $ok;
+}
+
+function teamsAdminAlert($title, $message, $url = '', $level = 'INFO') {
+    if (getSettingValue('teams_enabled', '1') !== '1') return false;
+    return sendTeamsMessage($title, $message, $url, $level);
+}
+
+/* ============================================================
  * 3. EMAIL — template helpers
  * ============================================================ */
 
