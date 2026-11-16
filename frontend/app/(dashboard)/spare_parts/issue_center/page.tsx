@@ -36,6 +36,17 @@ interface CartItem {
   unit: string;
   unitPrice: number;
   stockQty: number;
+  imageUrl?: string | null;
+}
+
+function partImageSrc(part: { id?: number; partId?: number; image_url?: string | null; imageUrl?: string | null }) {
+  const id = part.partId ?? part.id;
+  const raw = (part.image_url ?? part.imageUrl ?? "").toString().trim();
+  if (raw) {
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return raw.startsWith("/") ? raw : `/${raw.replace(/^\/+/, "")}`;
+  }
+  return id ? `/api/v1/spare_image.php?id=${id}` : "/api/v1/spare_image.php?id=0";
 }
 
 export default function SageIssueCenterPage() {
@@ -110,7 +121,7 @@ export default function SageIssueCenterPage() {
   const partOptions = useMemo(() => {
     const q = partSearch.toLowerCase();
     return parts
-      .filter((p) => !q || p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q))
+      .filter((p) => !q || String(p.code || "").toLowerCase().includes(q) || String(p.name || "").toLowerCase().includes(q))
       .map((p) => ({
         value: String(p.id),
         label: `${p.code}: ${p.name} (คงเหลือ ${p.stock_qty} ${p.unit})`,
@@ -118,9 +129,10 @@ export default function SageIssueCenterPage() {
       }));
   }, [parts, partSearch]);
 
-  const handleAddPart = () => {
-    if (!selectedPart) return;
-    const part = parts.find((p) => String(p.id) === selectedPart);
+  const handleAddPart = (partId?: string) => {
+    const idToAdd = partId ?? selectedPart;
+    if (!idToAdd) return;
+    const part = parts.find((p) => String(p.id) === idToAdd);
     if (!part) return;
     const stockQty = parseFloat(part.stock_qty) || 0;
     const existing = cart.find((i) => i.partId === part.id);
@@ -143,6 +155,7 @@ export default function SageIssueCenterPage() {
           unit: part.unit || "ชิ้น",
           unitPrice: parseFloat(part.unit_price) || 0,
           stockQty: stockQty,
+          imageUrl: part.image_url ?? null,
         },
       ]);
     }
@@ -258,9 +271,21 @@ export default function SageIssueCenterPage() {
       id: "code",
       header: t("tbl.spare_item"),
       cell: ({ row }: { row: { original: CartItem } }) => (
-        <div className="space-y-0.5">
-          <div className="text-sm font-semibold">{row.original.code}</div>
-          <div className="text-sm text-[var(--cmms-text-secondary)]">{row.original.name}</div>
+        <div className="flex items-center gap-3">
+          <img
+            src={partImageSrc({ partId: row.original.partId, imageUrl: row.original.imageUrl })}
+            alt={row.original.name}
+            className="h-12 w-12 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
+            loading="lazy"
+            onError={(e) => {
+              const t = e.currentTarget;
+              if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${row.original.partId}`;
+            }}
+          />
+          <div className="space-y-0.5 min-w-0">
+            <div className="text-sm font-semibold">{row.original.code}</div>
+            <div className="text-sm text-[var(--cmms-text-secondary)] truncate">{row.original.name}</div>
+          </div>
         </div>
       ),
     },
@@ -445,30 +470,52 @@ export default function SageIssueCenterPage() {
                   <Camera size={20} strokeWidth={1.75} aria-hidden="true" />
                 </button>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="min-w-0 flex-1">
-                  <div className="space-y-1.5">
-                    <Label className="sr-only">เลือกอะไหล่</Label>
-                    <Select
-                      value={selectedPart || "__none__"}
-                      onValueChange={(v) => setSelectedPart(v === "__none__" ? "" : v)}
-                    >
-                      <SelectTrigger size="lg">
-                        <SelectValue placeholder="เลือกอะไหล่..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__" disabled>เลือกอะไหล่...</SelectItem>
-                        {partOptions.map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              <div className="space-y-2">
+                <Label>รายการอะไหล่ (คลิกเพื่อเพิ่ม)</Label>
+                <div className="max-h-[360px] overflow-y-auto rounded-xl border border-[var(--cmms-border)] bg-[var(--cmms-bg-surface)]">
+                  {partOptions.length === 0 ? (
+                    <p className="p-4 text-sm text-[var(--cmms-text-secondary)]">ไม่พบอะไหล่ที่ตรงกับคำค้น</p>
+                  ) : (
+                    <ul className="divide-y divide-[var(--cmms-border)]">
+                      {partOptions.map((o) => {
+                        const p = o.raw;
+                        const selected = selectedPart === o.value;
+                        return (
+                          <li key={o.value}>
+                            <button
+                              type="button"
+                              onClick={() => handleAddPart(o.value)}
+                              className={`flex w-full items-center gap-3 p-3 text-left transition-colors hover:bg-[var(--cmms-bg-muted)] ${selected ? "bg-[var(--cmms-primary-light)]" : ""}`}
+                            >
+                              <img
+                                src={partImageSrc(p)}
+                                alt={p.name || p.code}
+                                className="h-14 w-14 rounded-lg border border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)] object-cover flex-shrink-0"
+                                loading="lazy"
+                                onError={(e) => {
+                                  const t = e.currentTarget;
+                                  if (!t.src.includes("spare_image.php")) t.src = `/api/v1/spare_image.php?id=${p.id}`;
+                                }}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-semibold text-[var(--cmms-text-primary)]">{p.code}</span>
+                                  <span className={`text-xs font-medium ${(parseFloat(p.stock_qty) || 0) <= 0 ? "text-[var(--cmms-danger)]" : "text-[var(--cmms-text-secondary)]"}`}>
+                                    คงเหลือ {p.stock_qty} {p.unit}
+                                  </span>
+                                </div>
+                                <div className="truncate text-sm text-[var(--cmms-text-secondary)]">{p.name}</div>
+                              </div>
+                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--cmms-primary)] text-white flex-shrink-0">
+                                <Plus size={16} strokeWidth={2} aria-hidden="true" />
+                              </span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
-                <Button disabled={!selectedPart} onClick={handleAddPart} size="lg">
-                  <Plus size={18} strokeWidth={1.75} aria-hidden="true" />
-                  เพิ่ม
-                </Button>
               </div>
             </CardContent>
           </Card>
