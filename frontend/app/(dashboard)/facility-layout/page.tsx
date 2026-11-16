@@ -75,6 +75,7 @@ export default function FacilityLayoutPage() {
   const [portSearch, setPortSearch] = useState("");
   const [portTypeFilter, setPortTypeFilter] = useState<string>("all");
   const [portStatusFilter, setPortStatusFilter] = useState<string>("all");
+  const [focusPort, setFocusPort] = useState<{ key: string; roomId: number | null; source: "room"|"cabinet"|"asset"; cabinetId?: string; assetId?: number; label: string } | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -234,7 +235,7 @@ export default function FacilityLayoutPage() {
     for (const l of locations) locById[l.id] = l;
     const assetById: Record<number, Asset> = {};
     for (const a of assets) assetById[a.id] = a;
-    const rows: Array<{ key: string; roomId: number | null; roomName: string; roomCode: string; source: string; sourceName: string; port: Port }> = [];
+    const rows: Array<{ key: string; roomId: number | null; roomName: string; roomCode: string; source: "room"|"cabinet"|"asset"; sourceName: string; cabinetId?: string; cabinetCode?: string; cabinetLocation?: string; assetId?: number; port: Port }> = [];
     const roomNameOf = (rid: number) => {
       const l = locById[rid];
       return l ? `${l.name}${l.code ? ` (${l.code})` : ""}` : `ห้อง #${rid}`;
@@ -247,7 +248,7 @@ export default function FacilityLayoutPage() {
       (r?.ports || []).forEach((p: Port) => rows.push({ key: `room-${rid}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "room", sourceName: "พอร์ตห้อง", port: p }));
       (r?.cabinets || []).forEach((cab: Cabinet) => {
         const cName = cab?.name || cab?.code || "ตู้/แผง";
-        (cab?.ports || []).forEach((p: Port) => rows.push({ key: `cab-${rid}-${cab.id}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "cabinet", sourceName: `ตู้: ${cName}${cab?.code && cab.code !== cName ? ` (${cab.code})` : ""}`, port: p }));
+        (cab?.ports || []).forEach((p: Port) => rows.push({ key: `cab-${rid}-${cab.id}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "cabinet", sourceName: `ตู้: ${cName}${cab?.code && cab.code !== cName ? ` (${cab.code})` : ""}`, cabinetId: cab.id, cabinetCode: cab?.code || "", cabinetLocation: cab?.location_note || "", port: p }));
       });
     });
     // asset ports
@@ -258,7 +259,7 @@ export default function FacilityLayoutPage() {
       const rid = asset?.location_id ?? null;
       const rn = rid ? roomNameOf(rid) : "ไม่ระบุห้อง";
       const rcode = rid ? (locById[rid]?.code || "") : "";
-      (a?.ports || []).forEach((p: Port) => rows.push({ key: `asset-${aid}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "asset", sourceName: `เครื่อง: ${an}`, port: p }));
+      (a?.ports || []).forEach((p: Port) => rows.push({ key: `asset-${aid}-${p.id}`, roomId: rid, roomName: rn, roomCode: rcode, source: "asset", sourceName: `เครื่อง: ${an}`, assetId: aid, port: p }));
     });
     return rows;
   }, [config, locations, assets]);
@@ -270,10 +271,35 @@ export default function FacilityLayoutPage() {
       if (portTypeFilter !== "all" && p.port_type !== portTypeFilter) return false;
       if (portStatusFilter !== "all" && p.status !== portStatusFilter) return false;
       if (!q) return true;
-      const hay = [r.roomName, r.roomCode, r.sourceName, p.label, p.port_type, p.port_no, p.endpoint, p.status, p.notes, p.spec].filter(Boolean).join(" ").toLowerCase();
+      const hay = [r.roomName, r.roomCode, r.sourceName, r.cabinetCode, r.cabinetLocation, p.label, p.port_type, p.port_no, p.endpoint, p.status, p.notes, p.spec].filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
     });
   }, [flatPorts, portSearch, portTypeFilter, portStatusFilter]);
+
+  const jumpToPort = (r: typeof flatPorts[number]) => {
+    if (r.roomId) selectRoomById(r.roomId);
+    const label = `${r.port?.label || "พอร์ต"}${r.port?.port_no ? ` #${r.port.port_no}` : ""}`;
+    setFocusPort({ key: r.key, roomId: r.roomId, source: r.source, cabinetId: r.cabinetId, assetId: r.assetId, label });
+    setTimeout(() => {
+      let targetId = r.roomId ? `room-ports-card` : "";
+      if (r.source === "cabinet" && r.cabinetId) targetId = `cabinet-card-${r.cabinetId}`;
+      if (r.source === "asset" && r.assetId) targetId = `asset-card-${r.assetId}`;
+      const el = targetId ? document.getElementById(targetId) : null;
+      if (el) {
+        if (r.source === "cabinet") {
+          const details = el.querySelector("details");
+          if (details) (details as HTMLDetailsElement).open = true;
+        }
+        if (r.source === "asset") {
+          const details = el.querySelector("details");
+          if (details) (details as HTMLDetailsElement).open = true;
+        }
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 60);
+  };
 
   return (
     <PageShell
@@ -352,7 +378,7 @@ export default function FacilityLayoutPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card id="room-ports-card" className={`lg:col-span-2 ${focusPort && effectiveRoomId && focusPort.roomId===effectiveRoomId && focusPort.source==="room" ? "ring-2 ring-primary border-primary" : ""}`}>
           <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Cable className="w-4 h-4"/>ทะเบียนพอร์ต/จุดเชื่อมต่อของห้อง (ทุกรูปแบบ)</CardTitle>
             {canManage && effectiveRoomId && <Button size="sm" variant="outline" onClick={()=> updateRoomPorts(effectiveRoomId, [...(roomCfg.ports||[]), newPort()])}><Plus className="w-4 h-4"/>เพิ่มพอร์ต</Button>}
           </CardHeader>
@@ -404,7 +430,7 @@ export default function FacilityLayoutPage() {
               {(roomCfg.cabinets||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีตู้ในห้องนี้ — กด “เพิ่มตู้/แผง”</p> : (
                 <div className="space-y-3">
                   {(roomCfg.cabinets||[]).map((cab, cidx) => (
-                    <div key={cab.id} className="rounded-lg border p-3 space-y-2">
+                    <div key={cab.id} id={`cabinet-card-${cab.id}`} className={`rounded-lg border p-3 space-y-2 ${focusPort?.source==="cabinet" && focusPort?.cabinetId===cab.id ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}>
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                         <div className="md:col-span-3"><Label className="text-xs">ชื่อตู้/แผง</Label><Input value={cab.name} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,name:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="เช่น MDB-1, DB-F1, PLC Panel" /></div>
                         <div className="md:col-span-2"><Label className="text-xs">รหัส/Code</Label><Input value={cab.code} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,code:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="รหัสตู้" /></div>
@@ -443,7 +469,7 @@ export default function FacilityLayoutPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {roomAssets.map(a => (
-                <div key={a.id} className="rounded-lg border p-3 space-y-1">
+                <div key={a.id} id={`asset-card-${a.id}`} className={`rounded-lg border p-3 space-y-1 ${focusPort?.source==="asset" && focusPort?.assetId===a.id ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}>
                   <div className="flex items-center justify-between"><span className="font-mono text-xs font-bold">{a.code}</span><Badge variant="neutral">{a.status || "-"}</Badge></div>
                   <div className="font-semibold text-sm">{a.name}</div>
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><Network className="w-3 h-3"/>พอร์ตเครื่อง: {(config.assets[String(a.id)]?.ports||[]).length} จุด</div>
@@ -465,11 +491,11 @@ export default function FacilityLayoutPage() {
           <CardTitle className="text-base flex items-center gap-2"><Search className="w-4 h-4"/>ค้นหา/กรองทะเบียนพอร์ต</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-xs text-muted-foreground">ค้นหาและกรองพอร์ต/จุดเชื่อมต่อทั้งหมด (พอร์ตห้อง ตู้/เบรกเกอร์ และพอร์ตเครื่อง) จากข้อมูล config เดิม — ค้นหาจากชื่อ, เลขพอร์ต/วงจร, ปลายทาง, สเปก, หมายเหตุ หรือห้อง/ตู้</p>
+          <p className="text-xs text-muted-foreground">ค้นหาและกรองพอร์ต/จุดเชื่อมต่อทั้งหมดจากข้อมูล config เดิม — ค้นหาได้จากเลขเบรกเกอร์/ช่อง-เทอร์มินัล, ชื่อพอร์ต, สเปก, ปลายทาง, หมายเหตุ รวมถึงห้อง/ตู้/เครื่อง แล้วกด “ไปที่ตำแหน่ง” เพื่อกระโดดไปยัง อาคาร/ชั้น/ห้อง/ตู้/เครื่อง ที่เกี่ยวข้องพร้อมไฮไลต์บริบท</p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div className="md:col-span-2">
               <Label className="text-xs">ค้นหา (ชื่อ/เลขพอร์ต/ปลายทาง/สเปก/ห้อง/ตู้)</Label>
-              <Input value={portSearch} onChange={e=>setPortSearch(e.target.value)} placeholder="เช่น DB1-12, Cat6, PLC, MDB-1, ปั๊ม, 220V..." />
+              <Input value={portSearch} onChange={e=>setPortSearch(e.target.value)} placeholder="เช่น เลขเบรกเกอร์ DB1-12, ชื่อพอร์ต, ช่อง/เทอร์มินัล, สเปก 220V/Cat6, ปลายทาง/เครื่อง..." />
             </div>
             <div>
               <Label className="text-xs">ประเภทพอร์ต</Label>
@@ -488,10 +514,21 @@ export default function FacilityLayoutPage() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
             <div className="text-muted-foreground">พบ {filteredPorts.length} รายการ จากทั้งหมด {flatPorts.length} จุด</div>
-            {(portSearch || portTypeFilter!=="all" || portStatusFilter!=="all") && (
-              <Button size="sm" variant="ghost" onClick={()=>{ setPortSearch(""); setPortTypeFilter("all"); setPortStatusFilter("all"); }}>ล้างตัวกรอง</Button>
-            )}
+            <div className="flex items-center gap-2">
+              {(portSearch || portTypeFilter!=="all" || portStatusFilter!=="all") && (
+                <Button size="sm" variant="ghost" onClick={()=>{ setPortSearch(""); setPortTypeFilter("all"); setPortStatusFilter("all"); }}>ล้างตัวกรอง</Button>
+              )}
+              {focusPort && <Button size="sm" variant="ghost" onClick={()=>setFocusPort(null)}>ล้างการไฮไลต์ตำแหน่ง</Button>}
+            </div>
           </div>
+          {focusPort && (
+            <div className="rounded-md border border-primary/40 bg-primary/5 p-2 text-sm flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <span className="font-medium">กำลังแสดงตำแหน่ง:</span> {focusPort.label} · {focusPort.source==="cabinet"?"ตู้/แผง":focusPort.source==="asset"?"เครื่องจักร":"พอร์ตห้อง"} {focusPort.roomId ? `(ห้องที่เลือกแล้ว)` : ""}
+              </div>
+              <span className="text-xs text-muted-foreground">ระบบเลือก อาคาร/ชั้น/ห้อง ให้ตามผลการค้นหา และไฮไลต์ส่วนที่เกี่ยวข้อง</span>
+            </div>
+          )}
           {filteredPorts.length === 0 ? (
             <p className="text-sm text-muted-foreground">ไม่พบพอร์ตที่ตรงกับเงื่อนไข</p>
           ) : (
@@ -525,11 +562,11 @@ export default function FacilityLayoutPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {r.roomId && (
-                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>{ selectRoomById(r.roomId); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
-                            ไปที่ห้อง
+                        {r.roomId ? (
+                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=> jumpToPort(r)}>
+                            ไปที่ตำแหน่ง
                           </Button>
-                        )}
+                        ) : <span className="text-xs text-muted-foreground">ไม่ระบุห้อง</span>}
                       </div>
                     </div>
                   </div>
