@@ -88,6 +88,10 @@ export default function FacilityLayoutPage() {
   const [focusPort, setFocusPort] = useState<{ key: string; roomId: number | null; source: "room"|"cabinet"|"asset"; cabinetId?: string; assetId?: number; label: string } | null>(null);
   const [planPlaceTarget, setPlanPlaceTarget] = useState<{ type: "cabinet"|"asset"; ref_id: string } | null>(null);
   const [selectedPlanItemId, setSelectedPlanItemId] = useState<string | null>(null);
+  type HealthFocusKey = "faulty" | "planned" | "cabinet" | "repair";
+  const [healthFocus, setHealthFocus] = useState<HealthFocusKey[]>([]);
+  const toggleHealthFocus = (k: HealthFocusKey) => setHealthFocus(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
+  const healthFocusActive = healthFocus.length > 0;
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -449,6 +453,32 @@ export default function FacilityLayoutPage() {
     return { faultyPorts, plannedPorts, issueCabinets, roomsWithIssues, assetsWithActiveRepairs, activeRepairs };
   }, [roomHealthMap]);
 
+  const roomMatchesHealthFocus = (rid: number) => {
+    if (!healthFocusActive) return true;
+    const h = roomHealthMap[rid] || { faultyPorts: 0, plannedPorts: 0, issueCabinets: 0, assetsWithActiveRepairs: 0 };
+    return (healthFocus.includes("faulty") && (h.faultyPorts || 0) > 0)
+      || (healthFocus.includes("planned") && (h.plannedPorts || 0) > 0)
+      || (healthFocus.includes("cabinet") && (h.issueCabinets || 0) > 0)
+      || (healthFocus.includes("repair") && (h.assetsWithActiveRepairs || 0) > 0);
+  };
+  const cabinetMatchesHealthFocus = (cab: Cabinet) => {
+    if (!healthFocusActive) return true;
+    const portCabFilters = healthFocus.some(k => k === "faulty" || k === "planned" || k === "cabinet");
+    if (!portCabFilters) return true;
+    const hasFaulty = (cab.ports || []).some(p => p.status === "faulty");
+    const hasPlanned = (cab.ports || []).some(p => p.status === "planned");
+    const issue = ["faulty", "inactive", "maintenance"].includes(cab.status);
+    return (healthFocus.includes("faulty") && hasFaulty)
+      || (healthFocus.includes("planned") && hasPlanned)
+      || (healthFocus.includes("cabinet") && issue);
+  };
+  const assetMatchesHealthFocus = (assetId: number) => {
+    if (!healthFocusActive) return true;
+    if (!healthFocus.includes("repair")) return true;
+    const ar = assetHealth[assetId]?.active_repairs || 0;
+    return ar > 0;
+  };
+
   const jumpToPort = (r: typeof flatPorts[number]) => {
     if (r.roomId) selectRoomById(r.roomId);
     const label = `${r.port?.label || "พอร์ต"}${r.port?.port_no ? ` #${r.port.port_no}` : ""}`;
@@ -643,9 +673,14 @@ export default function FacilityLayoutPage() {
           {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อจัดการตู้ไฟและตู้ควบคุม</p> : (
             <>
               <p className="text-xs text-muted-foreground">เพิ่มตู้ MDB/DB/MCC/ตู้คอนโทรล/Network rack ฯลฯ และบันทึกพอร์ต/เบรกเกอร์/เทอร์มินัลภายในตู้ (ข้อมูลใส่ทีหลังได้)</p>
-              {(roomCfg.cabinets||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีตู้ในห้องนี้ — กด “เพิ่มตู้/แผง”</p> : (
+              {(() => {
+                const allCabs = roomCfg.cabinets || [];
+                const visibleCabEntries = allCabs.map((cab, cidx) => ({ cab, cidx })).filter(({ cab }) => cabinetMatchesHealthFocus(cab));
+                if (allCabs.length === 0) return <p className="text-sm text-muted-foreground">ยังไม่มีตู้ในห้องนี้ — กด “เพิ่มตู้/แผง”</p>;
+                if (visibleCabEntries.length === 0) return <p className="text-sm text-muted-foreground">ไม่พบตู้/แผงที่ตรงกับตัวกรองสุขภาพที่เลือกในห้องนี้</p>;
+                return (
                 <div className="space-y-3">
-                  {(roomCfg.cabinets||[]).map((cab, cidx) => (
+                  {visibleCabEntries.map(({ cab, cidx }) => (
                     <div key={cab.id} id={`cabinet-card-${cab.id}`} className={`rounded-lg border p-3 space-y-2 ${focusPort?.source==="cabinet" && focusPort?.cabinetId===cab.id ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}>
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                         <div className="md:col-span-3"><Label className="text-xs">ชื่อตู้/แผง</Label><Input value={cab.name} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,name:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="เช่น MDB-1, DB-F1, PLC Panel" /></div>
@@ -671,7 +706,8 @@ export default function FacilityLayoutPage() {
                     </div>
                   ))}
                 </div>
-              )}
+                );
+              })()}
             </>
           )}
         </CardContent>
@@ -819,11 +855,13 @@ export default function FacilityLayoutPage() {
       <Card>
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><Cpu className="w-4 h-4"/>เครื่องจักรในห้องที่เลือก</CardTitle></CardHeader>
         <CardContent>
-          {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อดูเครื่องจักรที่ผูกกับตำแหน่งนี้</p> : roomAssets.length === 0 ? (
-            <p className="text-sm text-muted-foreground">ยังไม่มีเครื่องจักรผูกกับห้องนี้ — กำหนด location ของ asset ให้ชี้มาที่ห้องนี้ (ผ่านทะเบียนเครื่องจักร/asset) เพื่อให้ปรากฏในผัง</p>
-          ) : (
+          {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อดูเครื่องจักรที่ผูกกับตำแหน่งนี้</p> : (() => {
+            if (roomAssets.length === 0) return <p className="text-sm text-muted-foreground">ยังไม่มีเครื่องจักรผูกกับห้องนี้ — กำหนด location ของ asset ให้ชี้มาที่ห้องนี้ (ผ่านทะเบียนเครื่องจักร/asset) เพื่อให้ปรากฏในผัง</p>;
+            const visibleRoomAssets = roomAssets.filter(a => assetMatchesHealthFocus(a.id));
+            if (visibleRoomAssets.length === 0) return <p className="text-sm text-muted-foreground">ไม่พบเครื่องจักรที่ตรงกับตัวกรองสุขภาพที่เลือกในห้องนี้</p>;
+            return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {roomAssets.map(a => {
+              {visibleRoomAssets.map(a => {
                 const ah = assetHealth[a.id];
                 const activeRepairs = ah ? Number(ah.active_repairs || 0) : 0;
                 const maxP = String(ah?.max_priority || "").toLowerCase();
@@ -851,7 +889,8 @@ export default function FacilityLayoutPage() {
                 </div>
               );})}
             </div>
-          )}
+            );
+          })()}
         </CardContent>
       </Card>
 
@@ -959,6 +998,15 @@ export default function FacilityLayoutPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p className="text-xs text-muted-foreground">ซ้อนทับสถานะจากข้อมูลที่มีอยู่: สถานะพอร์ต/ตู้ใน <code>facility_layout_config</code> (ชำรุด, วางแผน ฯลฯ) และข้อมูลใบแจ้งซ่อม/สถานะเครื่องจากระบบซ่อม (active repairs) ผูกกับตำแหน่ง/เครื่องจักร — แสดงบนผัง 2D/3D และสรุปรายห้อง/ตู้/เครื่อง</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">โฟกัสจุดที่ต้องดูแล:</span>
+            <Button size="sm" variant={healthFocus.includes("faulty") ? "primary" : "outline"} className="h-8 text-xs" onClick={() => toggleHealthFocus("faulty")}>พอร์ตชำรุด</Button>
+            <Button size="sm" variant={healthFocus.includes("planned") ? "primary" : "outline"} className="h-8 text-xs" onClick={() => toggleHealthFocus("planned")}>พอร์ตวางแผน</Button>
+            <Button size="sm" variant={healthFocus.includes("cabinet") ? "primary" : "outline"} className="h-8 text-xs" onClick={() => toggleHealthFocus("cabinet")}>ตู้มีปัญหา</Button>
+            <Button size="sm" variant={healthFocus.includes("repair") ? "primary" : "outline"} className="h-8 text-xs" onClick={() => toggleHealthFocus("repair")}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ</Button>
+            {healthFocusActive && <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setHealthFocus([])}>ล้างตัวกรอง</Button>}
+            {healthFocusActive && <Badge variant="info">กำลังกรองมุมมองสุขภาพ</Badge>}
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             <div className={`rounded border p-2 ${healthSummary.faultyPorts>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดชำรุด</div><div className="text-xl font-semibold text-red-700">{healthSummary.faultyPorts}</div></div>
             <div className={`rounded border p-2 ${healthSummary.plannedPorts>0?"border-sky-300 bg-sky-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดวางแผน</div><div className="text-xl font-semibold">{healthSummary.plannedPorts}</div></div>
@@ -969,15 +1017,18 @@ export default function FacilityLayoutPage() {
             const byId: Record<number, Location> = {}; locations.forEach(l => { byId[l.id] = l; });
             const roomRows = Object.entries(roomHealthMap).map(([ridStr, h]) => {
               const rid = Number(ridStr); const loc = byId[rid];
-              const has = h.faultyPorts>0 || h.plannedPorts>0 || h.issueCabinets>0 || h.assetsWithActiveRepairs>0;
+              const has = healthFocusActive ? roomMatchesHealthFocus(rid) : (h.faultyPorts>0 || h.plannedPorts>0 || h.issueCabinets>0 || h.assetsWithActiveRepairs>0);
               return { rid, name: loc ? `${loc.name}${loc.code?` (${loc.code})`:''}` : `ห้อง #${rid}`, has, ...h };
             }).filter(r => r.has).sort((a,b)=> (b.faultyPorts+b.assetsWithActiveRepairs*10) - (a.faultyPorts+a.assetsWithActiveRepairs*10));
-            const repairAssets = assets.map(a => ({ a, ah: assetHealth[a.id], ar: assetHealth[a.id]?.active_repairs || 0 })).filter(x => x.ar > 0).sort((x,y)=> (y.ar - x.ar));
+            const repairAssets = assets.map(a => ({ a, ah: assetHealth[a.id], ar: assetHealth[a.id]?.active_repairs || 0 })).filter(x => {
+              if (x.ar <= 0) return false;
+              return !healthFocusActive || healthFocus.includes("repair");
+            }).sort((x,y)=> (y.ar - x.ar));
             return (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <div className="rounded border p-2 space-y-2">
-                  <div className="font-medium">ห้อง/จุดที่ต้องติดตาม ({roomRows.length})</div>
-                  {roomRows.length === 0 ? <div className="text-xs text-muted-foreground">ไม่พบห้องที่มีพอร์ตชำรุด/วางแผน ตู้มีปัญหา หรือเครื่องที่มีใบแจ้งซ่อมเปิด</div> : (
+                  <div className="font-medium">ห้อง/จุดที่ต้องติดตาม ({roomRows.length}){healthFocusActive ? " · ตามตัวกรอง" : ""}</div>
+                  {roomRows.length === 0 ? <div className="text-xs text-muted-foreground">{healthFocusActive ? "ไม่พบห้องที่ตรงกับตัวกรองสุขภาพที่เลือก" : "ไม่พบห้องที่มีพอร์ตชำรุด/วางแผน ตู้มีปัญหา หรือเครื่องที่มีใบแจ้งซ่อมเปิด"}</div> : (
                     <div className="space-y-1 max-h-64 overflow-auto pr-1">
                       {roomRows.slice(0, 40).map(r => (
                         <div key={r.rid} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
@@ -998,8 +1049,8 @@ export default function FacilityLayoutPage() {
                   )}
                 </div>
                 <div className="rounded border p-2 space-y-2">
-                  <div className="font-medium">เครื่องจักรที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ ({repairAssets.length})</div>
-                  {repairAssets.length === 0 ? <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ (จากข้อมูลซ่อมที่มีอยู่)</div> : (
+                  <div className="font-medium">เครื่องจักรที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ ({repairAssets.length}){healthFocusActive && !healthFocus.includes("repair") ? " · ซ่อนตามตัวกรอง" : ""}</div>
+                  {repairAssets.length === 0 ? <div className="text-xs text-muted-foreground">{healthFocusActive && !healthFocus.includes("repair") ? "เลือกตัวกรอง “ใบแจ้งซ่อมเปิด/กำลังดำเนินการ” เพื่อแสดงรายการเครื่องที่มีงานซ่อม" : "ไม่พบเครื่องที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ (จากข้อมูลซ่อมที่มีอยู่)"}</div> : (
                     <div className="space-y-1 max-h-64 overflow-auto pr-1">
                       {repairAssets.slice(0, 40).map(({a, ah, ar}) => {
                         const loc = a.location_id ? byId[a.location_id] : null;
@@ -1112,9 +1163,9 @@ export default function FacilityLayoutPage() {
         </CardHeader>
         <CardContent>
           {viewMode === "2d" ? (
-            <Layout2D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} selectedRoom={effectiveRoomId} assetHealth={assetHealth} roomHealthMap={roomHealthMap} />
+            <Layout2D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} selectedRoom={effectiveRoomId} assetHealth={assetHealth} roomHealthMap={roomHealthMap} healthFocus={healthFocus} />
           ) : (
-            <Layout3D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} assetHealth={assetHealth} roomHealthMap={roomHealthMap} />
+            <Layout3D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} assetHealth={assetHealth} roomHealthMap={roomHealthMap} healthFocus={healthFocus} />
           )}
           <p className="text-xs text-muted-foreground mt-3">หมายเหตุ: ผัง 2D/3D สร้างจากโครงสร้างอาคาร (locations), ตู้ไฟ/ตู้ควบคุม และพอร์ต/จุดเชื่อมต่อทุกรูปแบบที่บันทึกไว้ — ข้อมูลพอร์ต/ตู้ไฟสามารถใส่ทีหลังได้เสมอ และรองรับการแนบรูป floor plan จริง/ขยายเป็นผังตามพิกัดเมื่อมีแบบแปลน</p>
         </CardContent>
@@ -1246,10 +1297,21 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
   );
 }
 
-function Layout2D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, selectedRoom, assetHealth, roomHealthMap }: any) {
+function Layout2D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, selectedRoom, assetHealth, roomHealthMap, healthFocus }: any) {
+  const focusArr: string[] = Array.isArray(healthFocus) ? healthFocus : [];
+  const focusActive = focusArr.length > 0;
+  const roomMatches = (rid: number) => {
+    if (!focusActive) return true;
+    const h = (roomHealthMap || {})[rid] || { faultyPorts: 0, plannedPorts: 0, issueCabinets: 0, assetsWithActiveRepairs: 0 };
+    return (focusArr.includes("faulty") && (h.faultyPorts || 0) > 0)
+      || (focusArr.includes("planned") && (h.plannedPorts || 0) > 0)
+      || (focusArr.includes("cabinet") && (h.issueCabinets || 0) > 0)
+      || (focusArr.includes("repair") && (h.assetsWithActiveRepairs || 0) > 0);
+  };
   const showBuildings = !selectedBuilding ? buildings : [];
   const showFloors = selectedBuilding && !selectedFloor ? floors : [];
-  const showRooms = selectedFloor ? rooms : (selectedBuilding && floors.length===0 ? (byParent[selectedBuilding]||[]) : []);
+  const baseRooms = selectedFloor ? rooms : (selectedBuilding && floors.length===0 ? (byParent[selectedBuilding]||[]) : []);
+  const showRooms = (baseRooms || []).filter((r: Location) => roomMatches(r.id));
   return (
     <div className="space-y-4">
       {showBuildings.length > 0 && (
@@ -1304,9 +1366,10 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
       )}
       {selectedFloor && (
         <div>
-          <div className="text-sm font-semibold mb-2 flex items-center gap-2"><DoorOpen className="w-4 h-4"/>ผังห้อง (2D)</div>
+          <div className="text-sm font-semibold mb-2 flex items-center gap-2"><DoorOpen className="w-4 h-4"/>ผังห้อง (2D){focusActive ? <Badge variant="info" className="ml-1">กรองตามสุขภาพ</Badge> : null}</div>
+          {showRooms.length === 0 ? <p className="text-sm text-muted-foreground">{focusActive ? "ไม่พบห้องที่ตรงกับตัวกรองสุขภาพที่เลือกในชั้น/บริบทนี้" : "ไม่มีห้องให้แสดง"}</p> : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {(rooms||[]).map((r: Location) => {
+            {showRooms.map((r: Location) => {
               const ra = assets.filter((a:Asset)=>a.location_id===r.id);
               const roomObj = (config.rooms[String(r.id)] || {}) as any;
               const rp = (roomObj.ports||[]) as Port[];
@@ -1348,7 +1411,8 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
               );
             })}
           </div>
-          {(rooms||[]).length===0 && <p className="text-sm text-muted-foreground">ชั้นนี้ยังไม่มีห้องย่อยใน locations — เพิ่มห้อง (parent = ชั้นนี้) เพื่อแสดงผังห้อง</p>}
+          )}
+          {!focusActive && (rooms||[]).length===0 && <p className="text-sm text-muted-foreground">ชั้นนี้ยังไม่มีห้องย่อยใน locations — เพิ่มห้อง (parent = ชั้นนี้) เพื่อแสดงผังห้อง</p>}
         </div>
       )}
       {!selectedBuilding && buildings.length===0 && <p className="text-sm text-muted-foreground">ยังไม่มีโครงสร้างอาคารใน Locations — เพิ่ม location ระดับอาคาร (ไม่มี parent) แล้วเพิ่มชั้นและห้องเป็นลูกตามลำดับ</p>}
@@ -1356,7 +1420,7 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
   );
 }
 
-function Layout3D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, assetHealth, roomHealthMap }: any) {
+function Layout3D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, assetHealth, roomHealthMap, healthFocus }: any) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
