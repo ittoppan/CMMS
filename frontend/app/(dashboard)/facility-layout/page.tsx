@@ -14,29 +14,46 @@ import { Building2, Layers, DoorOpen, Cpu, Cable, Plus, Trash2, Save, RefreshCw,
 
 type Location = { id: number; parent_id: number | null; code: string; name: string; type: string; description: string; is_active: number };
 type Asset = { id: number; code: string; name: string; status: string; location_id: number | null; location_name: string | null; location_type: string | null };
-type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string };
-type RoomCfg = { notes: string; ports: Port[]; floor_plan: { grid_w: number; grid_h: number; image_url: string } };
+type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string };
+type Cabinet = { id: string; name: string; code: string; cabinet_type: string; location_note: string; status: string; notes: string; ports: Port[] };
+type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: { grid_w: number; grid_h: number; image_url: string } };
 type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
 
 const PORT_TYPES = [
   { value: "lan", label: "LAN / Network" },
   { value: "fiber", label: "Fiber / Optical" },
   { value: "patch", label: "Patch Panel" },
-  { value: "power", label: "Power / Outlet" },
+  { value: "power", label: "Power / ปลั๊กไฟ" },
+  { value: "electrical", label: "ไฟฟ้า / เบรกเกอร์ / วงจร" },
+  { value: "control", label: "Control / PLC / Terminal" },
   { value: "io", label: "I/O / Signal" },
-  { value: "sensor", label: "Sensor" },
-  { value: "other", label: "อื่นๆ" },
+  { value: "sensor", label: "Sensor / Instrument" },
+  { value: "pneumatic", label: "ลม / Pneumatic" },
+  { value: "water", label: "น้ำ / Water" },
+  { value: "steam", label: "ไอน้ำ / Steam" },
+  { value: "utility", label: "Utility / สาธารณูปโภคอื่น" },
+  { value: "other", label: "อื่นๆ (ระบุในหมายเหตุ/สเปก)" },
 ];
 const PORT_STATUS = [
   { value: "active", label: "ใช้งาน" },
   { value: "spare", label: "ว่าง/สำรอง" },
   { value: "reserved", label: "จอง" },
+  { value: "planned", label: "วางแผน/รอติดตั้ง" },
   { value: "faulty", label: "ชำรุด" },
   { value: "inactive", label: "ไม่ใช้งาน" },
 ];
+const CABINET_TYPES = [
+  { value: "electrical", label: "ตู้ไฟ / MDB / DB" },
+  { value: "control", label: "ตู้คอนโทรล / PLC Panel" },
+  { value: "mcc", label: "MCC / Motor Control" },
+  { value: "network", label: "ตู้ Network / Rack" },
+  { value: "instrument", label: "ตู้ Instrument / Junction Box" },
+  { value: "other", label: "ตู้/แผงอื่นๆ" },
+];
 
-function defaultRoom(): RoomCfg { return { notes: "", ports: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "" } }; }
-function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "" }; }
+function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "" } }; }
+function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "" }; }
+function newCabinet(): Cabinet { return { id: `cab_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, name: "", code: "", cabinet_type: "electrical", location_note: "", status: "active", notes: "", ports: [] }; }
 
 export default function FacilityLayoutPage() {
   const canManage = useCan("settings")("manage");
@@ -89,12 +106,32 @@ export default function FacilityLayoutPage() {
   const rooms = selectedFloor ? (byParent[selectedFloor] || []) : (selectedBuilding ? [] : []);
   const effectiveRoomId = selectedRoom ?? (rooms[0]?.id ?? null);
   const roomAssets = useMemo(() => assets.filter(a => a.location_id === effectiveRoomId), [assets, effectiveRoomId]);
-  const roomCfg: RoomCfg = useMemo(() => (effectiveRoomId ? (config.rooms[String(effectiveRoomId)] || defaultRoom()) : defaultRoom()), [config, effectiveRoomId]);
+  const roomCfg: RoomCfg = useMemo(() => {
+    if (!effectiveRoomId) return defaultRoom();
+    const r = config.rooms[String(effectiveRoomId)];
+    if (!r) return defaultRoom();
+    return { ...defaultRoom(), ...r, ports: r.ports || [], cabinets: (r as any).cabinets || [], floor_plan: { ...defaultRoom().floor_plan, ...(r.floor_plan || {}) } };
+  }, [config, effectiveRoomId]);
 
   const updateRoom = (rid: number, patch: Partial<RoomCfg>) => {
-    setConfig(c => ({ ...c, rooms: { ...c.rooms, [String(rid)]: { ...(c.rooms[String(rid)] || defaultRoom()), ...patch } } }));
+    setConfig(c => {
+      const prev = (c.rooms[String(rid)] || {}) as any;
+      return {
+        ...c,
+        rooms: {
+          ...c.rooms,
+          [String(rid)]: {
+            ...defaultRoom(),
+            ...prev,
+            cabinets: prev.cabinets || [],
+            ...patch,
+          } as RoomCfg,
+        },
+      };
+    });
   };
   const updateRoomPorts = (rid: number, ports: Port[]) => updateRoom(rid, { ports });
+  const updateRoomCabinets = (rid: number, cabinets: Cabinet[]) => updateRoom(rid, { cabinets });
   const save = async () => {
     setSaving(true); setError(null); setSavedMsg("");
     try {
@@ -119,11 +156,16 @@ export default function FacilityLayoutPage() {
   }, [byParent, selectedBuilding, selectedFloor]);
 
   const portSummary = useMemo(() => {
-    let total = 0, active = 0, spare = 0, faulty = 0;
-    const scan = (ports: Port[]) => { for (const p of ports) { total++; if (p.status==='active') active++; if (p.status==='spare') spare++; if (p.status==='faulty') faulty++; } };
-    Object.values(config.rooms).forEach(r => scan(r?.ports||[]));
+    let total = 0, active = 0, spare = 0, faulty = 0, cabinets = 0;
+    const scan = (ports: Port[]) => { for (const p of (ports||[])) { total++; if (p.status==='active') active++; if (p.status==='spare') spare++; if (p.status==='faulty') faulty++; } };
+    Object.values(config.rooms).forEach(r => {
+      scan((r as any)?.ports||[]);
+      const cabs = ((r as any)?.cabinets||[]) as Cabinet[];
+      cabinets += cabs.length;
+      cabs.forEach(c => scan(c?.ports||[]));
+    });
     Object.values(config.assets).forEach(a => scan((a as any)?.ports||[]));
-    return { total, active, spare, faulty };
+    return { total, active, spare, faulty, cabinets };
   }, [config]);
 
   return (
@@ -131,7 +173,7 @@ export default function FacilityLayoutPage() {
       eyebrow={<p className="cmms-eyebrow">FACILITY & LAYOUT</p>}
       breadcrumbs={[{ label: "แดชบอร์ด", href: "/dashboard" }, { label: "ผังอาคารและพอร์ต" }]}
       title="ผังอาคาร / ชั้น / ห้อง และพอร์ต"
-      description="กำหนดโครงสร้างอาคาร ผูกเครื่องจักรกับห้อง และจัดการทะเบียนพอร์ต (LAN/Power/I/O/Sensor) แบบครบวงจร — พร้อมมุมมอง 2D/3D"
+      description="กำหนดโครงสร้างอาคาร ผูกเครื่องจักรกับห้อง จัดการตู้ไฟ/ตู้ควบคุม และทะเบียนพอร์ตทุกรูปแบบ (LAN/ไฟฟ้า/เบรกเกอร์/I-O/Sensor/Utility ฯลฯ) — กรอกข้อมูลภายหลังได้ พร้อมมุมมอง 2D/3D"
       actions={
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={fetchData}><RefreshCw className="w-4 h-4" /> รีเฟรช</Button>
@@ -142,10 +184,11 @@ export default function FacilityLayoutPage() {
       {error && <Alert variant="danger">{error}</Alert>}
       {savedMsg && <Alert variant="success">{savedMsg}</Alert>}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">อาคาร/ตำแหน่ง</div><div className="text-2xl font-bold">{locations.length}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">เครื่องจักร</div><div className="text-2xl font-bold">{assets.length}</div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">พอร์ตทั้งหมด</div><div className="text-2xl font-bold">{portSummary.total}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">ตู้ไฟ/ตู้ควบคุม</div><div className="text-2xl font-bold">{(portSummary as any).cabinets || 0}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">พอร์ต/จุดเชื่อมต่อ</div><div className="text-2xl font-bold">{portSummary.total}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">ใช้งาน / ว่าง / ชำรุด</div><div className="text-lg font-bold">{portSummary.active} / {portSummary.spare} / <span className="text-red-600">{portSummary.faulty}</span></div></CardContent></Card>
       </div>
 
@@ -188,31 +231,33 @@ export default function FacilityLayoutPage() {
               <div className="rounded-lg border p-3 text-sm space-y-1 bg-muted/30">
                 <div className="font-semibold flex items-center gap-2"><DoorOpen className="w-4 h-4"/>ห้องที่เลือก</div>
                 <div>{locations.find(l=>l.id===effectiveRoomId)?.name} <span className="text-muted-foreground">({locations.find(l=>l.id===effectiveRoomId)?.code || `#${effectiveRoomId}`})</span></div>
-                <div className="text-muted-foreground">เครื่องจักร {roomAssets.length} เครื่อง · พอร์ตห้อง {(roomCfg.ports||[]).length} จุด</div>
+                <div className="text-muted-foreground">เครื่องจักร {roomAssets.length} เครื่อง · ตู้ไฟ/ตู้ควบคุม {(roomCfg.cabinets||[]).length} ตู้ · พอร์ต/จุด {(roomCfg.ports||[]).length} จุด</div>
               </div>
             )}
           </CardContent>
         </Card>
 
         <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Cable className="w-4 h-4"/>ทะเบียนพอร์ตของห้อง (Network/Power/I/O)</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Cable className="w-4 h-4"/>ทะเบียนพอร์ต/จุดเชื่อมต่อของห้อง (ทุกรูปแบบ)</CardTitle>
             {canManage && effectiveRoomId && <Button size="sm" variant="outline" onClick={()=> updateRoomPorts(effectiveRoomId, [...(roomCfg.ports||[]), newPort()])}><Plus className="w-4 h-4"/>เพิ่มพอร์ต</Button>}
           </CardHeader>
           <CardContent className="space-y-3">
-            {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อจัดการพอร์ต</p> : (
+            {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อจัดการพอร์ตและจุดเชื่อมต่อ</p> : (
               <>
-                {(roomCfg.ports||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีพอร์ตในห้องนี้ — กด “เพิ่มพอร์ต” เพื่อบันทึกจุด LAN/Power/I-O/Sensor</p> : (
+                <p className="text-xs text-muted-foreground">รองรับทุกรูปแบบ (LAN/ไฟฟ้า/เบรกเกอร์/I-O/Sensor/ลม/น้ำ/Utility ฯลฯ) — ใส่ข้อมูลภายหลังได้ ระบุสเปก/แรงดัน/ขนาดในช่อง “สเปก” หรือ “หมายเหตุ”</p>
+                {(roomCfg.ports||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีพอร์ตในห้องนี้ — กด “เพิ่มพอร์ต” เพื่อบันทึกจุดเชื่อมต่อ</p> : (
                   <div className="space-y-2">
                     {(roomCfg.ports||[]).map((p, idx) => (
                       <div key={p.id} className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end rounded-lg border p-2">
-                        <div className="md:col-span-3"><Label className="text-xs">ชื่อ/Label</Label><Input value={p.label} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,label:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เช่น LAN-01, Outlet-A" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">ชื่อ/Label</Label><Input value={p.label} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,label:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="LAN-01, CB-01" /></div>
                         <div className="md:col-span-2"><Label className="text-xs">ประเภท</Label>
                           <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.port_type} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_type:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
                             {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
                           </select>
                         </div>
-                        <div className="md:col-span-2"><Label className="text-xs">Port/ช่อง</Label><Input value={p.port_no} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_no:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="SW1-P24" /></div>
-                        <div className="md:col-span-3"><Label className="text-xs">ปลายทาง/เชื่อมกับ</Label><Input value={p.endpoint} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,endpoint:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เครื่อง/Panel/อุปกรณ์" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">Port/ช่อง/วงจร</Label><Input value={p.port_no} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,port_no:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="SW1-P24, DB1-12" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">สเปก (V/A/ชนิด)</Label><Input value={p.spec || ""} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,spec:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="220V 16A, Cat6" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">ปลายทาง/เชื่อมกับ</Label><Input value={p.endpoint} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,endpoint:e.target.value}; updateRoomPorts(effectiveRoomId,np); }} placeholder="เครื่อง/ตู้ไฟ/อุปกรณ์" /></div>
                         <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
                           <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={p.status} onChange={e=>{ const np=[...roomCfg.ports]; np[idx]={...p,status:e.target.value}; updateRoomPorts(effectiveRoomId,np); }}>
                             {PORT_STATUS.map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -232,6 +277,48 @@ export default function FacilityLayoutPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="text-base flex items-center gap-2"><Box className="w-4 h-4"/>ตู้ไฟ / ตู้ควบคุม / แผงวงจรในห้อง</CardTitle>
+          {canManage && effectiveRoomId && <Button size="sm" variant="outline" onClick={()=> updateRoomCabinets(effectiveRoomId, [...(roomCfg.cabinets||[]), newCabinet()])}><Plus className="w-4 h-4"/>เพิ่มตู้/แผง</Button>}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อจัดการตู้ไฟและตู้ควบคุม</p> : (
+            <>
+              <p className="text-xs text-muted-foreground">เพิ่มตู้ MDB/DB/MCC/ตู้คอนโทรล/Network rack ฯลฯ และบันทึกพอร์ต/เบรกเกอร์/เทอร์มินัลภายในตู้ (ข้อมูลใส่ทีหลังได้)</p>
+              {(roomCfg.cabinets||[]).length === 0 ? <p className="text-sm text-muted-foreground">ยังไม่มีตู้ในห้องนี้ — กด “เพิ่มตู้/แผง”</p> : (
+                <div className="space-y-3">
+                  {(roomCfg.cabinets||[]).map((cab, cidx) => (
+                    <div key={cab.id} className="rounded-lg border p-3 space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                        <div className="md:col-span-3"><Label className="text-xs">ชื่อตู้/แผง</Label><Input value={cab.name} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,name:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="เช่น MDB-1, DB-F1, PLC Panel" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">รหัส/Code</Label><Input value={cab.code} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,code:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="รหัสตู้" /></div>
+                        <div className="md:col-span-2"><Label className="text-xs">ประเภทตู้</Label>
+                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.cabinet_type} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,cabinet_type:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
+                            {CABINET_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
+                          </select>
+                        </div>
+                        <div className="md:col-span-3"><Label className="text-xs">ตำแหน่ง/จุดติดตั้ง</Label><Input value={cab.location_note} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,location_note:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="ผนังด้านเหนือ, ใต้บันได" /></div>
+                        <div className="md:col-span-1"><Label className="text-xs">สถานะ</Label>
+                          <select className="w-full h-10 rounded-md border bg-background px-2 text-sm" value={cab.status} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,status:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }}>
+                            {PORT_STATUS.filter(s=>s.value!=="spare"&&s.value!=="reserved").map(s=> <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
+                        </div>
+                        <div className="md:col-span-1 flex justify-end">{canManage && <Button variant="ghost" size="sm" onClick={()=> updateRoomCabinets(effectiveRoomId, roomCfg.cabinets.filter((_,i)=>i!==cidx))}><Trash2 className="w-4 h-4 text-red-500"/></Button>}</div>
+                      </div>
+                      <div><Label className="text-xs">หมายเหตุ/รายละเอียดตู้</Label><Input value={cab.notes||""} onChange={e=>{ const nc=[...roomCfg.cabinets]; nc[cidx]={...cab,notes:e.target.value}; updateRoomCabinets(effectiveRoomId,nc); }} placeholder="โหลดรวม, ระบบจ่ายไฟ, ผู้รับผิดชอบ" /></div>
+                      <details className="text-xs rounded border bg-muted/20 p-2">
+                        <summary className="cursor-pointer font-medium">พอร์ต/เบรกเกอร์/วงจรในตู้ ({(cab.ports||[]).length} จุด)</summary>
+                        <CabinetPortEditor roomId={effectiveRoomId} cabinetIndex={cidx} config={config} setConfig={setConfig} />
+                      </details>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><Cpu className="w-4 h-4"/>เครื่องจักรในห้องที่เลือก</CardTitle></CardHeader>
@@ -272,10 +359,41 @@ export default function FacilityLayoutPage() {
           ) : (
             <Layout3D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} />
           )}
-          <p className="text-xs text-muted-foreground mt-3">หมายเหตุ: ผัง 2D/3D นี้สร้างจากโครงสร้างอาคาร (locations) และข้อมูลพอร์ตที่บันทึกไว้ สามารถแนบรูป floor plan จริงเพิ่มเติมทีหลังได้ในรายละเอียดห้อง (รองรับการขยายเป็นผังตามพิกัด)</p>
+          <p className="text-xs text-muted-foreground mt-3">หมายเหตุ: ผัง 2D/3D สร้างจากโครงสร้างอาคาร (locations), ตู้ไฟ/ตู้ควบคุม และพอร์ต/จุดเชื่อมต่อทุกรูปแบบที่บันทึกไว้ — ข้อมูลพอร์ต/ตู้ไฟสามารถใส่ทีหลังได้เสมอ และรองรับการแนบรูป floor plan จริง/ขยายเป็นผังตามพิกัดเมื่อมีแบบแปลน</p>
         </CardContent>
       </Card>
     </PageShell>
+  );
+}
+
+function CabinetPortEditor({ roomId, cabinetIndex, config, setConfig }: { roomId: number; cabinetIndex: number; config: LayoutConfig; setConfig: (c: any)=>void }) {
+  const rkey = String(roomId);
+  const room = { ...defaultRoom(), ...(config.rooms[rkey] || {}) } as RoomCfg;
+  const cabinets = [...(room.cabinets || [])];
+  const cab = cabinets[cabinetIndex] || newCabinet();
+  const ports: Port[] = cab.ports || [];
+  const update = (np: Port[]) => {
+    cabinets[cabinetIndex] = { ...cab, ports: np };
+    setConfig((c: LayoutConfig) => ({ ...c, rooms: { ...c.rooms, [rkey]: { ...(defaultRoom()), ...(c.rooms[rkey] || {}), cabinets } } }));
+  };
+  return (
+    <div className="mt-2 space-y-2 border-t pt-2">
+      {ports.map((p, idx) => (
+        <div key={p.id} className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end">
+          <div className="md:col-span-3"><Input value={p.label} onChange={e=>{ const n=[...ports]; n[idx]={...p,label:e.target.value}; update(n); }} placeholder="Label/เบรกเกอร์/เทอร์มินัล" className="h-8 text-xs" /></div>
+          <div className="md:col-span-2">
+            <select className="w-full h-8 rounded-md border bg-background px-2 text-xs" value={p.port_type} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_type:e.target.value}; update(n); }}>
+              {PORT_TYPES.map(t=> <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+          <div className="md:col-span-2"><Input value={p.port_no} onChange={e=>{ const n=[...ports]; n[idx]={...p,port_no:e.target.value}; update(n); }} placeholder="ช่อง/วงจร" className="h-8 text-xs" /></div>
+          <div className="md:col-span-2"><Input value={p.spec || ""} onChange={e=>{ const n=[...ports]; n[idx]={...p,spec:e.target.value}; update(n); }} placeholder="สเปก (V/A)" className="h-8 text-xs" /></div>
+          <div className="md:col-span-2"><Input value={p.endpoint} onChange={e=>{ const n=[...ports]; n[idx]={...p,endpoint:e.target.value}; update(n); }} placeholder="ปลายทาง/โหลด" className="h-8 text-xs" /></div>
+          <div className="md:col-span-1 flex justify-end"><Button variant="ghost" size="sm" className="h-8 px-2" onClick={()=>update(ports.filter((_,i)=>i!==idx))}><Trash2 className="w-3 h-3"/></Button></div>
+        </div>
+      ))}
+      <Button size="sm" variant="outline" className="h-8 text-xs" onClick={()=>update([...ports, { ...newPort(), port_type: "electrical" }])}><Plus className="w-3 h-3 mr-1"/>เพิ่มพอร์ต/เบรกเกอร์</Button>
+    </div>
   );
 }
 
@@ -313,7 +431,13 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
             {showBuildings.map((b: Location) => {
               const childFloors = byParent[b.id] || [];
               let assetCount = 0; let portCount = 0;
-              const walk = (id:number) => { assetCount += assets.filter((a:Asset)=>a.location_id===id).length; portCount += (config.rooms[String(id)]?.ports||[]).length; (byParent[id]||[]).forEach((c: Location)=>walk(c.id)); };
+              const walk = (id:number) => {
+                assetCount += assets.filter((a:Asset)=>a.location_id===id).length;
+                const ro: any = config.rooms[String(id)] || {};
+                const cabs: any[] = ro.cabinets || [];
+                portCount += (ro.ports||[]).length + cabs.reduce((s,c)=>s+((c?.ports||[]).length),0);
+                (byParent[id]||[]).forEach((c: Location)=>walk(c.id));
+              };
               walk(b.id);
               return (
                 <div key={b.id} className="rounded-xl border-2 border-sky-200 bg-sky-50 p-4">
@@ -333,7 +457,12 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
             {showFloors.map((f: Location) => {
               const rs = byParent[f.id] || [];
               let assetCount = 0; let portCount = 0;
-              rs.forEach((r: any) => { assetCount += assets.filter((a:Asset)=>a.location_id===r.id).length; portCount += (config.rooms[String(r.id)]?.ports||[]).length; });
+              rs.forEach((r: any) => {
+                assetCount += assets.filter((a:Asset)=>a.location_id===r.id).length;
+                const ro: any = config.rooms[String(r.id)] || {};
+                const cabs: any[] = ro.cabinets || [];
+                portCount += (ro.ports||[]).length + cabs.reduce((s,c)=>s+((c?.ports||[]).length),0);
+              });
               return (
                 <div key={f.id} className="rounded-xl border-2 border-indigo-200 bg-indigo-50 p-4">
                   <div className="font-bold">{f.name}</div>
@@ -351,18 +480,24 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {(rooms||[]).map((r: Location) => {
               const ra = assets.filter((a:Asset)=>a.location_id===r.id);
-              const rp = (config.rooms[String(r.id)]?.ports||[]) as Port[];
-              const faulty = rp.filter(p=>p.status==='faulty').length;
+              const roomObj = (config.rooms[String(r.id)] || {}) as any;
+              const rp = (roomObj.ports||[]) as Port[];
+              const cabs = (roomObj.cabinets||[]) as Cabinet[];
+              const cabPorts = cabs.flatMap(c => c?.ports || []);
+              const allPorts = [...rp, ...cabPorts];
+              const faulty = allPorts.filter(p=>p.status==='faulty').length;
               const active = selectedRoom === r.id;
               return (
                 <div key={r.id} className={`rounded-xl border-2 p-3 ${active?"border-emerald-500 bg-emerald-50":"border-slate-200 bg-white"}`}>
-                  <div className="font-semibold text-sm flex items-center justify-between"><span>{r.name}</span>{faulty>0 && <Badge variant="danger">พอร์ตชำรุด {faulty}</Badge>}</div>
+                  <div className="font-semibold text-sm flex items-center justify-between"><span>{r.name}</span>{faulty>0 && <Badge variant="danger">จุดชำรุด {faulty}</Badge>}</div>
                   <div className="text-xs text-muted-foreground">{r.code || `#${r.id}`}</div>
                   <div className="mt-2 text-xs space-y-1">
                     <div className="flex items-center gap-1"><Cpu className="w-3 h-3"/>{ra.length} เครื่อง</div>
-                    <div className="flex items-center gap-1"><Cable className="w-3 h-3"/>{rp.length} พอร์ต (ใช้งาน {rp.filter(p=>p.status==='active').length} / ว่าง {rp.filter(p=>p.status==='spare').length})</div>
+                    <div className="flex items-center gap-1"><Box className="w-3 h-3"/>{cabs.length} ตู้/แผง</div>
+                    <div className="flex items-center gap-1"><Cable className="w-3 h-3"/>{allPorts.length} พอร์ต/จุด (ใช้งาน {allPorts.filter(p=>p.status==='active').length} / ว่าง {allPorts.filter(p=>p.status==='spare').length})</div>
                   </div>
                   {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=><span key={a.id} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 border">{a.code}</span>)}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
+                  {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=><span key={c.id} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200">{c.name||c.code||"ตู้"}</span>)}{cabs.length>3 && <span className="text-[10px] text-muted-foreground">+{cabs.length-3}</span>}</div>}
                 </div>
               );
             })}
@@ -420,9 +555,12 @@ function Layout3D({ buildings, floors, rooms, byParent, assets, config, selected
               const rx = bx + 0.2 + (ri%3)*0.75;
               const ry = bi*0.2 + 0.2 + Math.floor(ri/3)*0.8;
               const ac = assets.filter((a:any)=>a.location_id===r.id).length;
-              const pc = (config.rooms[String(r.id)]?.ports||[]).length;
-              const mh = 0.18 + Math.min(0.35, ac*0.05 + pc*0.02);
-              drawBox(rx, ry, z + h*0.85, 0.5, 0.45, mh, ac>0?'rgb(110,231,183)':'rgb(226,232,240)', 'rgb(52,211,153)', 'rgb(16,185,129)', 'rgb(4,120,87)');
+              const ro: any = config.rooms[String(r.id)] || {};
+              const cabs: any[] = ro.cabinets || [];
+              const pc = (ro.ports||[]).length + cabs.reduce((s,c)=>s+((c?.ports||[]).length),0);
+              const cc = cabs.length;
+              const mh = 0.18 + Math.min(0.4, ac*0.05 + pc*0.015 + cc*0.06);
+              drawBox(rx, ry, z + h*0.85, 0.5, 0.45, mh, ac>0?'rgb(110,231,183)':(cc>0?'rgb(253,230,138)':'rgb(226,232,240)'), ac>0?'rgb(52,211,153)':(cc>0?'rgb(251,191,36)':'rgb(203,213,225)'), ac>0?'rgb(16,185,129)':(cc>0?'rgb(245,158,11)':'rgb(148,163,184)'), ac>0?'rgb(4,120,87)':(cc>0?'rgb(180,83,9)':'rgb(100,116,139)'));
             });
           });
         }

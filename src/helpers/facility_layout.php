@@ -66,14 +66,42 @@ function facility_layout_save(PDO $pdo, array $config, int $userId = 0, string $
 function facility_layout_sanitize_port(array $p): ?array {
     $label = trim((string)($p['label'] ?? ''));
     if ($label === '') return null;
+    $type = mb_substr(trim((string)($p['port_type'] ?? 'other')), 0, 60);
+    if ($type === '') $type = 'other';
+    $status = (string)($p['status'] ?? 'active');
+    if (!in_array($status, ['active','spare','faulty','reserved','inactive','planned'], true)) $status = 'active';
     return [
-        'id' => trim((string)($p['id'] ?? ('p_' . bin2hex(random_bytes(4))))),
-        'label' => mb_substr($label, 0, 100),
-        'port_type' => mb_substr(trim((string)($p['port_type'] ?? 'other')), 0, 40), // lan,power,io,sensor,fiber,patch,other
-        'port_no' => mb_substr(trim((string)($p['port_no'] ?? '')), 0, 60),
-        'endpoint' => mb_substr(trim((string)($p['endpoint'] ?? '')), 0, 200),
-        'status' => in_array($p['status'] ?? 'active', ['active','spare','faulty','reserved','inactive'], true) ? (string)$p['status'] : 'active',
-        'notes' => mb_substr(trim((string)($p['notes'] ?? '')), 0, 500),
+        'id' => mb_substr(trim((string)($p['id'] ?? ('p_' . bin2hex(random_bytes(4))))), 0, 80),
+        'label' => mb_substr($label, 0, 120),
+        'port_type' => $type,
+        'port_no' => mb_substr(trim((string)($p['port_no'] ?? '')), 0, 80),
+        'endpoint' => mb_substr(trim((string)($p['endpoint'] ?? '')), 0, 240),
+        'status' => $status,
+        'notes' => mb_substr(trim((string)($p['notes'] ?? '')), 0, 800),
+        'spec' => mb_substr(trim((string)($p['spec'] ?? '')), 0, 200), // e.g. voltage, amperage, media, connector
+    ];
+}
+
+function facility_layout_sanitize_cabinet(array $c): ?array {
+    $name = trim((string)($c['name'] ?? $c['label'] ?? ''));
+    if ($name === '') return null;
+    $ports = [];
+    foreach ((is_array($c['ports'] ?? null) ? $c['ports'] : []) as $p) {
+        if (!is_array($p)) continue;
+        $sp = facility_layout_sanitize_port($p);
+        if ($sp) $ports[] = $sp;
+    }
+    $type = mb_substr(trim((string)($c['cabinet_type'] ?? $c['type'] ?? 'electrical')), 0, 60);
+    if ($type === '') $type = 'electrical';
+    return [
+        'id' => mb_substr(trim((string)($c['id'] ?? ('cab_' . bin2hex(random_bytes(4))))), 0, 80),
+        'name' => mb_substr($name, 0, 120),
+        'code' => mb_substr(trim((string)($c['code'] ?? '')), 0, 60),
+        'cabinet_type' => $type,
+        'location_note' => mb_substr(trim((string)($c['location_note'] ?? '')), 0, 240),
+        'status' => in_array($c['status'] ?? 'active', ['active','inactive','maintenance','faulty','planned'], true) ? (string)$c['status'] : 'active',
+        'notes' => mb_substr(trim((string)($c['notes'] ?? '')), 0, 1000),
+        'ports' => array_values($ports),
     ];
 }
 
@@ -92,10 +120,17 @@ function facility_layout_sanitize(array $input): array {
             $sp = facility_layout_sanitize_port($p);
             if ($sp) $ports[] = $sp;
         }
+        $cabinets = [];
+        foreach ((is_array($room['cabinets'] ?? null) ? $room['cabinets'] : []) as $c) {
+            if (!is_array($c)) continue;
+            $sc = facility_layout_sanitize_cabinet($c);
+            if ($sc) $cabinets[] = $sc;
+        }
         $fp = is_array($room['floor_plan'] ?? null) ? $room['floor_plan'] : [];
         $roomsOut[$lid] = [
             'notes' => mb_substr(trim((string)($room['notes'] ?? '')), 0, 1000),
             'ports' => array_values($ports),
+            'cabinets' => array_values($cabinets),
             'floor_plan' => [
                 'grid_w' => max(1, min(50, (int)($fp['grid_w'] ?? 8))),
                 'grid_h' => max(1, min(50, (int)($fp['grid_h'] ?? 6))),
