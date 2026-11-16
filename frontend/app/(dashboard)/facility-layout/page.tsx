@@ -20,9 +20,11 @@ type Asset = { id: number; code: string; name: string; status: string; location_
 type PortRef = { scope: "room"|"cabinet"|"asset"; room_id: number; cabinet_id?: string; asset_id?: number; port_id: string };
 type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string; feeds?: PortRef[] };
 type Cabinet = { id: string; name: string; code: string; cabinet_type: string; location_note: string; status: string; notes: string; ports: Port[] };
-type FloorPlanItem = { id: string; type: "cabinet"|"asset"; ref_id: string; x: number; y: number; label?: string };
-type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: { grid_w: number; grid_h: number; image_url: string; items: FloorPlanItem[] } };
-type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
+type FloorPlanItem = { id: string; type: "cabinet"|"asset"; ref_id: string; room_id?: number; x: number; y: number; label?: string };
+type FloorPlanData = { grid_w: number; grid_h: number; image_url: string; items: FloorPlanItem[] };
+type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: FloorPlanData };
+type FloorCfg = { floor_plan: FloorPlanData };
+type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; floors?: Record<string, FloorCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
 
 const PORT_TYPES = [
   { value: "lan", label: "LAN / Network" },
@@ -56,7 +58,9 @@ const CABINET_TYPES = [
   { value: "other", label: "ตู้/แผงอื่นๆ" },
 ];
 
-function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "", items: [] } }; }
+function defaultFloorPlan(): FloorPlanData { return { grid_w: 8, grid_h: 6, image_url: "", items: [] }; }
+function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: defaultFloorPlan() }; }
+function defaultFloor(): FloorCfg { return { floor_plan: defaultFloorPlan() }; }
 function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "", feeds: [] }; }
 
 function portRefKey(ref: PortRef): string {
@@ -73,7 +77,7 @@ export default function FacilityLayoutPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
-  const [config, setConfig] = useState<LayoutConfig>({ version: 1, rooms: {}, assets: {} });
+  const [config, setConfig] = useState<LayoutConfig>({ version: 1, rooms: {}, floors: {}, assets: {} });
   const [locations, setLocations] = useState<Location[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assetHealth, setAssetHealth] = useState<Record<number, { status: string; active_repairs: number; max_priority: string | null; location_id: number | null }>>({});
@@ -92,6 +96,12 @@ export default function FacilityLayoutPage() {
   const suppressPlanClickRef = useRef(false);
   const dragStateRef = useRef<{ id: string; pointerId: number; startClientX: number; startClientY: number; origX: number; origY: number; moved: boolean } | null>(null);
   const [dragOverride, setDragOverride] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [floorPlanPlaceTarget, setFloorPlanPlaceTarget] = useState<{ type: "cabinet"|"asset"; ref_id: string; room_id: number } | null>(null);
+  const [selectedFloorPlanItemId, setSelectedFloorPlanItemId] = useState<string | null>(null);
+  const floorPlanContainerRef = useRef<HTMLDivElement>(null);
+  const suppressFloorPlanClickRef = useRef(false);
+  const floorDragStateRef = useRef<{ id: string; pointerId: number; startClientX: number; startClientY: number; origX: number; origY: number; moved: boolean } | null>(null);
+  const [floorDragOverride, setFloorDragOverride] = useState<{ id: string; x: number; y: number } | null>(null);
   type HealthFocusKey = "faulty" | "planned" | "cabinet" | "repair";
   const [healthFocus, setHealthFocus] = useState<HealthFocusKey[]>([]);
   const toggleHealthFocus = (k: HealthFocusKey) => setHealthFocus(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
@@ -107,10 +117,11 @@ export default function FacilityLayoutPage() {
       const json = await res.json();
       if (!res.ok || !json?.success) throw new Error(json?.error || "โหลดข้อมูลไม่สำเร็จ");
       setConfig({
-        version: json.config?.version ?? 1,
+        version: Number(json.config?.version ?? 1),
         updated_at: json.config?.updated_at ?? null,
-        rooms: json.config?.rooms ?? {},
-        assets: json.config?.assets ?? {},
+        rooms: (json.config?.rooms && typeof json.config.rooms === "object") ? json.config.rooms : {},
+        floors: (json.config?.floors && typeof json.config.floors === "object") ? json.config.floors : {},
+        assets: (json.config?.assets && typeof json.config.assets === "object") ? json.config.assets : {},
       });
       setLocations(Array.isArray(json.locations) ? json.locations : []);
       setAssets(Array.isArray(json.assets) ? json.assets : []);
@@ -181,10 +192,32 @@ export default function FacilityLayoutPage() {
     if (!effectiveRoomId) return defaultRoom();
     const r = config.rooms[String(effectiveRoomId)];
     if (!r) return defaultRoom();
-    const fp = { ...defaultRoom().floor_plan, ...(r.floor_plan || {}) } as any;
+    const fp = { ...defaultFloorPlan(), ...(r.floor_plan || {}) } as any;
     fp.items = Array.isArray(fp.items) ? fp.items : [];
     return { ...defaultRoom(), ...r, ports: r.ports || [], cabinets: (r as any).cabinets || [], floor_plan: fp };
   }, [config, effectiveRoomId]);
+
+  const floorCfg: FloorCfg = useMemo(() => {
+    if (!selectedFloor) return defaultFloor();
+    const f = (config.floors || {})[String(selectedFloor)] as any;
+    if (!f) return defaultFloor();
+    const fpSrc = f.floor_plan || f;
+    const fp = { ...defaultFloorPlan(), ...(fpSrc || {}) } as any;
+    fp.items = Array.isArray(fp.items) ? fp.items : [];
+    return { floor_plan: fp };
+  }, [config, selectedFloor]);
+
+  const floorRooms = useMemo(() => selectedFloor ? (byParent[selectedFloor] || []) : [], [byParent, selectedFloor]);
+  const floorRoomIds = useMemo(() => new Set(floorRooms.map(r => r.id)), [floorRooms]);
+  const floorAssets = useMemo(() => assets.filter(a => a.location_id != null && floorRoomIds.has(a.location_id)), [assets, floorRoomIds]);
+  const floorCabinetOptions = useMemo(() => {
+    const out: Array<{ room: Location; cabinet: Cabinet }> = [];
+    floorRooms.forEach(r => {
+      const rc = ((config.rooms[String(r.id)] as any)?.cabinets || []) as Cabinet[];
+      rc.forEach(c => out.push({ room: r, cabinet: c }));
+    });
+    return out;
+  }, [floorRooms, config.rooms]);
 
   useEffect(() => {
     setSelectedPlanItemId(null);
@@ -192,6 +225,13 @@ export default function FacilityLayoutPage() {
     setDragOverride(null);
     dragStateRef.current = null;
   }, [effectiveRoomId]);
+
+  useEffect(() => {
+    setSelectedFloorPlanItemId(null);
+    setFloorPlanPlaceTarget(null);
+    setFloorDragOverride(null);
+    floorDragStateRef.current = null;
+  }, [selectedFloor]);
 
   const updateRoom = (rid: number, patch: Partial<RoomCfg>) => {
     setConfig(c => {
@@ -217,6 +257,27 @@ export default function FacilityLayoutPage() {
     const items = (roomCfg.floor_plan?.items || []).filter(i => i.id !== itemId);
     updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items } as any });
     setSelectedPlanItemId(prev => (prev === itemId ? null : prev));
+  };
+
+  const updateFloor = (fid: number, patch: Partial<FloorCfg> | { floor_plan: Partial<FloorPlanData> }) => {
+    setConfig(c => {
+      const prev = ((c.floors || {})[String(fid)] || defaultFloor()) as any;
+      const prevFp = { ...defaultFloorPlan(), ...(prev.floor_plan || prev || {}) };
+      const patchFp = (patch as any).floor_plan ? { ...prevFp, ...(patch as any).floor_plan } : prevFp;
+      return {
+        ...c,
+        floors: {
+          ...(c.floors || {}),
+          [String(fid)]: { ...defaultFloor(), ...prev, floor_plan: patchFp } as FloorCfg,
+        },
+      };
+    });
+  };
+  const removeFloorPlanItem = (itemId: string) => {
+    if (!selectedFloor) return;
+    const items = (floorCfg.floor_plan?.items || []).filter(i => i.id !== itemId);
+    updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items } });
+    setSelectedFloorPlanItemId(prev => (prev === itemId ? null : prev));
   };
 
   const selectRoomById = (rid: number | null) => {
@@ -1230,6 +1291,235 @@ export default function FacilityLayoutPage() {
           )}
         </CardContent>
       </Card>
+
+      {selectedFloor && (
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Map className="w-4 h-4"/>แปลนจริงระดับชั้น/โซน และหมุดตำแหน่ง</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">แนบ URL รูปแปลนจริงของชั้น/โซนนี้ แล้ววางหมุดตู้/แผงหรือเครื่องจักร (ที่อยู่ในห้องภายใต้ชั้นนี้) บนรูป — เก็บพิกัดใน <code>facility_layout_config.floors</code> คลิกหมุดเพื่อดูรายละเอียดและไปยังห้อง/รายการที่เกี่ยวข้อง</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+            <div className="md:col-span-2">
+              <Label className="text-xs">URL รูปแปลนจริง (ชั้น/โซน)</Label>
+              <Input value={floorCfg.floor_plan?.image_url || ""} onChange={e=> updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: e.target.value } })} placeholder="https://.../floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+            </div>
+            <div className="flex gap-2">
+              {floorCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, image_url: "" } }); setSelectedFloorPlanItemId(null); }}>ลบรูป</Button> : null}
+              {(floorCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items: [] } }); setSelectedFloorPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
+            </div>
+          </div>
+          {canManage && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <Label className="text-xs">วางหมุด:</Label>
+              <select
+                className="h-9 rounded-md border bg-background px-2 text-xs min-w-[260px]"
+                value={floorPlanPlaceTarget ? `${floorPlanPlaceTarget.type}:${floorPlanPlaceTarget.room_id}:${floorPlanPlaceTarget.ref_id}` : ""}
+                onChange={e=>{
+                  const v = e.target.value;
+                  if (!v) { setFloorPlanPlaceTarget(null); return; }
+                  const [type, roomStr, ...rest] = v.split(":");
+                  const ref_id = rest.join(":");
+                  const room_id = Number(roomStr);
+                  if ((type === "cabinet" || type === "asset") && room_id > 0 && ref_id) setFloorPlanPlaceTarget({ type, ref_id, room_id });
+                }}
+              >
+                <option value="">-- เลือกตู้/เครื่อง (ในชั้นนี้) เพื่อวางหมุด --</option>
+                <optgroup label="ตู้/แผงในห้องใต้ชั้นนี้">
+                  {floorCabinetOptions.map(({ room, cabinet }) => (
+                    <option key={`c:${room.id}:${cabinet.id}`} value={`cabinet:${room.id}:${cabinet.id}`}>{room.name} · {cabinet.name || cabinet.code || cabinet.id}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="เครื่องจักรในห้องใต้ชั้นนี้">
+                  {floorAssets.map(a => {
+                    const r = a.location_id ? floorRooms.find(x => x.id === a.location_id) : null;
+                    return <option key={`a:${a.location_id}:${a.id}`} value={`asset:${a.location_id || 0}:${a.id}`}>{r ? `${r.name} · ` : ""}{a.code} · {a.name}</option>;
+                  })}
+                </optgroup>
+              </select>
+              {floorPlanPlaceTarget && <Badge variant="info">โหมดวางหมุด (ชั้น): คลิกบนรูปเพื่อวางตำแหน่ง</Badge>}
+              {floorPlanPlaceTarget && <Button size="sm" variant="ghost" onClick={()=>setFloorPlanPlaceTarget(null)}>ยกเลิก</Button>}
+            </div>
+          )}
+          {floorCfg.floor_plan?.image_url ? (
+            <div className="space-y-2">
+              <div
+                ref={floorPlanContainerRef}
+                className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${floorPlanPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
+                style={{ minHeight: 320 }}
+                onClick={(e)=>{
+                  if (suppressFloorPlanClickRef.current) { suppressFloorPlanClickRef.current = false; return; }
+                  if (!canManage || !floorPlanPlaceTarget || !selectedFloor) return;
+                  const targetExists = floorPlanPlaceTarget.type === "cabinet"
+                    ? floorCabinetOptions.some(o => String(o.cabinet.id) === String(floorPlanPlaceTarget.ref_id) && o.room.id === floorPlanPlaceTarget.room_id)
+                    : floorAssets.some(a => String(a.id) === String(floorPlanPlaceTarget.ref_id));
+                  if (!targetExists) { setFloorPlanPlaceTarget(null); return; }
+                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                  if (rect.width <= 0 || rect.height <= 0) return;
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  if (x < 0 || x > 100 || y < 0 || y > 100) return;
+                  const items = [...(floorCfg.floor_plan?.items || [])];
+                  const existingIdx = items.findIndex(it => it.type === floorPlanPlaceTarget.type && String(it.ref_id) === String(floorPlanPlaceTarget.ref_id) && (it.room_id == null || Number(it.room_id) === floorPlanPlaceTarget.room_id));
+                  const px = Math.round(x * 1000) / 1000;
+                  const py = Math.round(y * 1000) / 1000;
+                  const baseItem = { type: floorPlanPlaceTarget.type, ref_id: floorPlanPlaceTarget.ref_id, room_id: floorPlanPlaceTarget.room_id, x: px, y: py } as const;
+                  const newItem: FloorPlanItem = existingIdx >= 0
+                    ? { ...items[existingIdx], ...baseItem }
+                    : { id: `m_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, ...baseItem };
+                  if (existingIdx >= 0) items[existingIdx] = newItem; else items.push(newItem);
+                  updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items } });
+                  setSelectedFloorPlanItemId(newItem.id);
+                  setFloorPlanPlaceTarget(null);
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={floorCfg.floor_plan.image_url} alt="Floor plan" className="w-full h-auto block select-none pointer-events-none" />
+                {(floorCfg.floor_plan?.items || []).map((it) => {
+                  const isCab = it.type === "cabinet";
+                  const itemRoomId = it.room_id != null ? Number(it.room_id) : (isCab ? undefined : (assets.find(a => String(a.id) === String(it.ref_id))?.location_id ?? undefined));
+                  const cabEntry = isCab ? floorCabinetOptions.find(o => String(o.cabinet.id) === String(it.ref_id) && (itemRoomId == null || o.room.id === itemRoomId)) || floorCabinetOptions.find(o => String(o.cabinet.id) === String(it.ref_id)) : null;
+                  const cab = cabEntry?.cabinet || null;
+                  const cabRoom = cabEntry?.room || (itemRoomId ? floorRooms.find(r => r.id === itemRoomId) : null) || null;
+                  const ast = !isCab ? assets.find(a => String(a.id) === String(it.ref_id)) : null;
+                  const label = isCab ? (cab?.name || cab?.code || "ตู้") : (ast ? `${ast.code}` : "เครื่อง");
+                  const cabBad = isCab && cab && ["faulty","inactive","maintenance"].includes(cab.status);
+                  const cabFaultyPorts = isCab && cab ? (cab.ports||[]).filter(p=>p.status==='faulty').length : 0;
+                  const ar = !isCab && ast ? (assetHealth[ast.id]?.active_repairs || 0) : 0;
+                  const bad = cabBad || cabFaultyPorts>0 || ar>0;
+                  const planned = isCab && cab ? (cab.ports||[]).some(p=>p.status==='planned') : false;
+                  const color = bad ? "bg-red-600 border-red-800" : planned ? "bg-amber-500 border-amber-700" : isCab ? "bg-indigo-600 border-indigo-800" : "bg-emerald-600 border-emerald-800";
+                  const selected = selectedFloorPlanItemId === it.id;
+                  const pos = floorDragOverride && floorDragOverride.id === it.id ? { x: floorDragOverride.x, y: floorDragOverride.y } : { x: it.x, y: it.y };
+                  const dragging = floorDragOverride?.id === it.id;
+                  const cursorCls = canManage ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-pointer";
+                  return (
+                    <button
+                      key={it.id}
+                      type="button"
+                      className={`absolute -translate-x-1/2 -translate-y-full flex flex-col items-center group touch-none ${cursorCls} ${selected ? "z-20" : "z-10"}`}
+                      style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                      title={canManage ? `${label} — ลากเพื่อย้ายตำแหน่ง` : label}
+                      onPointerDown={(ev) => {
+                        ev.stopPropagation();
+                        if (!canManage || !selectedFloor) { setSelectedFloorPlanItemId(it.id); return; }
+                        if (ev.button !== 0) return;
+                        const rect = floorPlanContainerRef.current?.getBoundingClientRect();
+                        if (!rect || rect.width <= 0 || rect.height <= 0) return;
+                        try { (ev.currentTarget as HTMLButtonElement).setPointerCapture(ev.pointerId); } catch { /* ignore */ }
+                        floorDragStateRef.current = { id: it.id, pointerId: ev.pointerId, startClientX: ev.clientX, startClientY: ev.clientY, origX: it.x, origY: it.y, moved: false };
+                        setFloorDragOverride({ id: it.id, x: it.x, y: it.y });
+                      }}
+                      onPointerMove={(ev) => {
+                        const ds = floorDragStateRef.current;
+                        if (!ds || ds.id !== it.id || ds.pointerId !== ev.pointerId) return;
+                        const rect = floorPlanContainerRef.current?.getBoundingClientRect();
+                        if (!rect || rect.width <= 0 || rect.height <= 0) return;
+                        const dxPx = ev.clientX - ds.startClientX;
+                        const dyPx = ev.clientY - ds.startClientY;
+                        if (!ds.moved && Math.hypot(dxPx, dyPx) > 4) ds.moved = true;
+                        const nx = Math.min(100, Math.max(0, ds.origX + (dxPx / rect.width) * 100));
+                        const ny = Math.min(100, Math.max(0, ds.origY + (dyPx / rect.height) * 100));
+                        setFloorDragOverride({ id: it.id, x: Math.round(nx * 1000) / 1000, y: Math.round(ny * 1000) / 1000 });
+                      }}
+                      onPointerUp={(ev) => {
+                        const ds = floorDragStateRef.current;
+                        if (!ds || ds.id !== it.id || ds.pointerId !== ev.pointerId) return;
+                        try { (ev.currentTarget as HTMLButtonElement).releasePointerCapture(ev.pointerId); } catch { /* ignore */ }
+                        floorDragStateRef.current = null;
+                        const finalPos = floorDragOverride && floorDragOverride.id === it.id ? { x: floorDragOverride.x, y: floorDragOverride.y } : { x: it.x, y: it.y };
+                        setFloorDragOverride(null);
+                        if (ds.moved) {
+                          suppressFloorPlanClickRef.current = true;
+                          if (selectedFloor) {
+                            const items = (floorCfg.floor_plan?.items || []).map(p => p.id === it.id ? { ...p, x: finalPos.x, y: finalPos.y } : p);
+                            updateFloor(selectedFloor, { floor_plan: { ...floorCfg.floor_plan, items } });
+                          }
+                          setSelectedFloorPlanItemId(it.id);
+                        } else {
+                          setSelectedFloorPlanItemId(it.id);
+                        }
+                      }}
+                      onPointerCancel={(ev) => {
+                        const ds = floorDragStateRef.current;
+                        if (!ds || ds.id !== it.id) return;
+                        try { (ev.currentTarget as HTMLButtonElement).releasePointerCapture(ev.pointerId); } catch { /* ignore */ }
+                        floorDragStateRef.current = null;
+                        setFloorDragOverride(null);
+                      }}
+                      onClick={(ev) => { ev.stopPropagation(); }}
+                    >
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
+                      <span className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${bad?"border-t-red-700":planned?"border-t-amber-700":isCab?"border-t-indigo-800":"border-t-emerald-800"}`}></span>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedFloorPlanItemId && (() => {
+                const it = (floorCfg.floor_plan?.items || []).find(i => i.id === selectedFloorPlanItemId);
+                if (!it) return null;
+                const isCab = it.type === "cabinet";
+                const itemRoomId = it.room_id != null ? Number(it.room_id) : (!isCab ? (assets.find(a => String(a.id) === String(it.ref_id))?.location_id ?? undefined) : undefined);
+                const cabEntry = isCab ? floorCabinetOptions.find(o => String(o.cabinet.id) === String(it.ref_id) && (itemRoomId == null || o.room.id === itemRoomId)) || floorCabinetOptions.find(o => String(o.cabinet.id) === String(it.ref_id)) : null;
+                const cab = cabEntry?.cabinet || null;
+                const cabRoom = cabEntry?.room || (itemRoomId ? floorRooms.find(r => r.id === itemRoomId) : null) || null;
+                const ast = !isCab ? assets.find(a => String(a.id) === String(it.ref_id)) : null;
+                const astRoomId = !isCab ? (ast?.location_id ?? itemRoomId ?? null) : null;
+                if (isCab && !cab) return <div className="text-xs text-muted-foreground">ไม่พบตู้ที่อ้างอิง (อาจถูกลบ/ย้าย) {canManage && <Button size="sm" variant="ghost" onClick={() => removeFloorPlanItem(it.id)}>ลบหมุด</Button>}</div>;
+                if (!isCab && !ast) return <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่อ้างอิง (อาจถูกลบ/ย้าย) {canManage && <Button size="sm" variant="ghost" onClick={() => removeFloorPlanItem(it.id)}>ลบหมุด</Button>}</div>;
+                const ar = ast ? (assetHealth[ast.id]?.active_repairs || 0) : 0;
+                const faultyPorts = isCab && cab ? (cab.ports||[]).filter(p=>p.status==='faulty').length : 0;
+                const goToCab = () => {
+                  if (!cabRoom || !cab) return;
+                  selectRoomById(cabRoom.id);
+                  setFocusPort({ key: `cabinet:${cab.id}`, roomId: cabRoom.id, source: "cabinet", cabinetId: cab.id, label: cab.name||cab.code||"ตู้" });
+                  setTimeout(()=>{ const el=document.getElementById(`cabinet-card-${cab.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },80);
+                };
+                const goToAsset = () => {
+                  if (!ast || !astRoomId) return;
+                  selectRoomById(astRoomId as number);
+                  setFocusPort({ key: `asset:${ast.id}:*`, roomId: astRoomId as number, source: "asset", assetId: ast.id, label: ast.code });
+                  setTimeout(()=>{ const el=document.getElementById(`asset-card-${ast.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },80);
+                };
+                return (
+                  <div className="rounded-lg border p-3 space-y-2 bg-background">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="font-semibold flex items-center gap-2">{isCab ? <><Box className="w-4 h-4"/>ตู้/แผง: {cab?.name || cab?.code}</> : <><Cpu className="w-4 h-4"/>เครื่อง: {ast?.code} · {ast?.name}</>}</div>
+                      <div className="flex gap-2">
+                        {(isCab ? !!cabRoom : !!astRoomId) && <Button size="sm" variant="outline" onClick={isCab ? goToCab : goToAsset}>ไปที่รายละเอียด/พอร์ต</Button>}
+                        {canManage && <Button size="sm" variant="ghost" className="text-red-600" onClick={() => removeFloorPlanItem(it.id)}>ลบหมุด</Button>}
+                      </div>
+                    </div>
+                    {isCab && cab && (
+                      <div className="text-sm space-y-1">
+                        <div className="text-xs text-muted-foreground">{cabRoom ? `ห้อง: ${cabRoom.name} · ` : ""}{cab.cabinet_type} · {cab.location_note || "-"} · สถานะ: {cab.status}</div>
+                        <div className="flex flex-wrap gap-1">{faultyPorts>0 && <AndonBadge tone="down">พอร์ตชำรุด {faultyPorts}</AndonBadge>} {(cab.ports||[]).some(p=>p.status==='planned') && <Badge variant="info">มีพอร์ตวางแผน</Badge>} <Badge variant="neutral">พอร์ต/วงจร {(cab.ports||[]).length}</Badge></div>
+                        {(cab.ports||[]).length > 0 && <div className="text-xs text-muted-foreground">ตัวอย่างพอร์ต: {(cab.ports||[]).slice(0,4).map(p=>`${p.label}${p.port_no?` #${p.port_no}`:''}`).join(', ')}{(cab.ports||[]).length>4?' …':''}</div>}
+                      </div>
+                    )}
+                    {!isCab && ast && (
+                      <div className="text-sm space-y-1">
+                        <div className="text-xs text-muted-foreground">สถานะเครื่อง: {ast.status || '-'}{ast.location_name ? ` · ${ast.location_name}` : ''}</div>
+                        <div className="flex flex-wrap gap-1 items-center">
+                          {ar>0 ? <AndonBadge tone={String(assetHealth[ast.id]?.max_priority||'').toLowerCase()==='critical'?'down':'warn'}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {ar}</AndonBadge> : <Badge variant="neutral">ไม่มีงานซ่อมเปิด</Badge>}
+                          <Badge variant="neutral">พอร์ตเครื่อง {(config.assets[String(ast.id)]?.ports||[]).length}</Badge>
+                          {ar>0 && (
+                            <Link href={`/repair?q=${encodeURIComponent(ast.code || ast.name || String(ast.id))}`} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline" title="เปิดรายการใบแจ้งซ่อมที่เกี่ยวข้องกับเครื่องนี้">
+                              <Wrench className="w-3 h-3" aria-hidden="true" />ดูใบแจ้งซ่อม
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              <div className="text-xs text-muted-foreground">หมุดทั้งหมด {(floorCfg.floor_plan?.items||[]).length} จุด {canManage?"(เลือกตู้/เครื่องในชั้นนี้แล้วคลิกบนรูปเพื่อวางหมุด, ลากหมุดที่มีอยู่เพื่อย้ายตำแหน่ง)":"(โหมดดูอย่างเดียว)"}</div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">ยังไม่มีรูปแปลนจริงระดับชั้น/โซน — ใส่ URL รูปแปลนด้านบนเพื่อเริ่มวางหมุดตำแหน่งตู้และเครื่องจักรในชั้นนี้</div>
+          )}
+        </CardContent>
+      </Card>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

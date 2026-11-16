@@ -11,6 +11,7 @@ function facility_layout_default(): array {
         'version' => 1,
         'updated_at' => null,
         'rooms' => new stdClass(), // keyed by location_id (string): { floor_plan: {width,height,image_url?,shapes?}, ports: [...], notes: "" }
+        'floors' => new stdClass(), // keyed by floor/zone location_id (string): { floor_plan: {grid_w,grid_h,image_url,items} }
         'assets' => new stdClass(), // keyed by asset_id (string): { ports: [...] }
     ];
 }
@@ -25,6 +26,7 @@ function facility_layout_load(?PDO $pdo = null): array {
     $data = json_decode($raw, true);
     if (!is_array($data)) return facility_layout_default();
     if (!isset($data['rooms']) || !is_array($data['rooms'])) $data['rooms'] = [];
+    if (!isset($data['floors']) || !is_array($data['floors'])) $data['floors'] = [];
     if (!isset($data['assets']) || !is_array($data['assets'])) $data['assets'] = [];
     $data['version'] = (int)($data['version'] ?? 1);
     return $data;
@@ -34,6 +36,7 @@ function facility_layout_save(PDO $pdo, array $config, int $userId = 0, string $
     $config['version'] = (int)($config['version'] ?? 1);
     $config['updated_at'] = date('c');
     if (!isset($config['rooms']) || !is_array($config['rooms'])) $config['rooms'] = [];
+    if (!isset($config['floors']) || !is_array($config['floors'])) $config['floors'] = [];
     if (!isset($config['assets']) || !is_array($config['assets'])) $config['assets'] = [];
     $json = json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($json === false) return false;
@@ -159,7 +162,7 @@ function facility_layout_sanitize(array $input): array {
             $x = (float)($it['x'] ?? -1);
             $y = (float)($it['y'] ?? -1);
             if ($x < 0 || $x > 100 || $y < 0 || $y > 100) continue;
-            $fpItems[] = [
+            $itemOut = [
                 'id' => mb_substr(trim((string)($it['id'] ?? ('m_' . bin2hex(random_bytes(4))))), 0, 80),
                 'type' => $itype,
                 'ref_id' => mb_substr($ref, 0, 80),
@@ -167,6 +170,9 @@ function facility_layout_sanitize(array $input): array {
                 'y' => round($y, 3),
                 'label' => mb_substr(trim((string)($it['label'] ?? '')), 0, 120),
             ];
+            $rid = (int)($it['room_id'] ?? 0);
+            if ($rid > 0) $itemOut['room_id'] = $rid;
+            $fpItems[] = $itemOut;
             if (count($fpItems) >= 200) break;
         }
         $roomsOut[$lid] = [
@@ -181,6 +187,47 @@ function facility_layout_sanitize(array $input): array {
             ],
         ];
     }
+    $floorsIn = is_array($input['floors'] ?? null) ? $input['floors'] : [];
+    $floorsOut = [];
+    foreach ($floorsIn as $locId => $floor) {
+        if (!is_array($floor)) continue;
+        $lid = (string)$locId;
+        if ($lid === '' || !ctype_digit($lid)) continue;
+        $fp = is_array($floor['floor_plan'] ?? null) ? $floor['floor_plan'] : $floor;
+        if (!is_array($fp)) $fp = [];
+        $fpItems = [];
+        foreach ((is_array($fp['items'] ?? null) ? $fp['items'] : []) as $it) {
+            if (!is_array($it)) continue;
+            $itype = (string)($it['type'] ?? '');
+            if (!in_array($itype, ['cabinet', 'asset'], true)) continue;
+            $ref = trim((string)($it['ref_id'] ?? ''));
+            if ($ref === '') continue;
+            $x = (float)($it['x'] ?? -1);
+            $y = (float)($it['y'] ?? -1);
+            if ($x < 0 || $x > 100 || $y < 0 || $y > 100) continue;
+            $itemOut = [
+                'id' => mb_substr(trim((string)($it['id'] ?? ('m_' . bin2hex(random_bytes(4))))), 0, 80),
+                'type' => $itype,
+                'ref_id' => mb_substr($ref, 0, 80),
+                'x' => round($x, 3),
+                'y' => round($y, 3),
+                'label' => mb_substr(trim((string)($it['label'] ?? '')), 0, 120),
+            ];
+            $rid = (int)($it['room_id'] ?? 0);
+            if ($rid > 0) $itemOut['room_id'] = $rid;
+            $fpItems[] = $itemOut;
+            if (count($fpItems) >= 300) break;
+        }
+        $floorsOut[$lid] = [
+            'floor_plan' => [
+                'grid_w' => max(1, min(50, (int)($fp['grid_w'] ?? 8))),
+                'grid_h' => max(1, min(50, (int)($fp['grid_h'] ?? 6))),
+                'image_url' => mb_substr(trim((string)($fp['image_url'] ?? '')), 0, 500),
+                'items' => array_values($fpItems),
+            ],
+        ];
+    }
+
     $assetsIn = is_array($input['assets'] ?? null) ? $input['assets'] : [];
     $assetsOut = [];
     foreach ($assetsIn as $assetId => $a) {
@@ -196,6 +243,7 @@ function facility_layout_sanitize(array $input): array {
         $assetsOut[$aid] = ['ports' => array_values($ports), 'notes' => mb_substr(trim((string)($a['notes'] ?? '')), 0, 1000)];
     }
     $out['rooms'] = $roomsOut;
+    $out['floors'] = $floorsOut;
     $out['assets'] = $assetsOut;
     return $out;
 }
