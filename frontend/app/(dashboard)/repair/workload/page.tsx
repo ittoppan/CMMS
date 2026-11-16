@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
 import { usePageHero, t } from "@/lib/i18n";
 import AndonLamp from "@/components/AndonLamp";
 import {
@@ -119,6 +119,42 @@ function Avatar({ name, src, size = 56 }: { name?: string | null; src?: string; 
         <span aria-hidden="true">{initials(name)}</span>
       )}
     </div>
+  );
+}
+
+function RepairPhoto({
+  src,
+  alt,
+  label,
+  emptyTitle,
+  emptyLabel,
+}: {
+  src?: string;
+  alt: string;
+  label: string;
+  emptyTitle: string;
+  emptyLabel: ReactNode;
+}) {
+  const [err, setErr] = useState(false);
+  const placeholder = (
+    <div
+      className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5"
+      title={emptyTitle}
+    >
+      {emptyLabel}
+    </div>
+  );
+  if (!src || err) return placeholder;
+  return (
+    <a href={src} target="_blank" rel="noopener noreferrer" className="shrink-0" title={label}>
+      <img
+        src={src}
+        alt={alt}
+        className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
+        loading="lazy"
+        onError={() => setErr(true)}
+      />
+    </a>
   );
 }
 
@@ -483,20 +519,20 @@ export default function WorkloadPage() {
                         >
                           <div className="flex items-start gap-2">
                             <div className="flex shrink-0 gap-1">
-                              {problemImg ? (
-                                <a href={problemImg} target="_blank" rel="noopener noreferrer" className="shrink-0" title="รูปปัญหา (ก่อนซ่อม)">
-                                  <img src={problemImg} alt={`รูปก่อนซ่อม ${job.work_order_no || job.id}`} className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover" loading="lazy" />
-                                </a>
-                              ) : (
-                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5" title="ไม่มีรูปก่อนซ่อม">ก่อนซ่อม<br/>-</div>
-                              )}
-                              {afterImg ? (
-                                <a href={afterImg} target="_blank" rel="noopener noreferrer" className="shrink-0" title="รูปหลังซ่อม">
-                                  <img src={afterImg} alt={`รูปหลังซ่อม ${job.work_order_no || job.id}`} className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover" loading="lazy" />
-                                </a>
-                              ) : (
-                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5" title="ไม่มีรูปหลังซ่อม">หลังซ่อม<br/>-</div>
-                              )}
+                              <RepairPhoto
+                                src={problemImg}
+                                alt={`รูปก่อนซ่อม ${job.work_order_no || job.id}`}
+                                label="รูปปัญหา (ก่อนซ่อม)"
+                                emptyTitle="ไม่มีรูปก่อนซ่อม"
+                                emptyLabel={<>ก่อนซ่อม<br />-</>}
+                              />
+                              <RepairPhoto
+                                src={afterImg}
+                                alt={`รูปหลังซ่อม ${job.work_order_no || job.id}`}
+                                label="รูปหลังซ่อม"
+                                emptyTitle="ไม่มีรูปหลังซ่อม"
+                                emptyLabel={<>หลังซ่อม<br />-</>}
+                              />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
