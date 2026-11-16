@@ -105,6 +105,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const router = useRouter();
   const lang = useLang();
+  // โหมดจอ TV/Kiosk: ซ่อน sidebar/topbar/เมนูมือถือ ให้เนื้อหาเต็มจอ (ใช้ ?kiosk=1 หรือ ?display=tv)
+  // อ่านจาก window.location แทน useSearchParams เพราะ hook นั้นทำให้ static prerender ของทุกหน้า
+  // ใน (dashboard) bail out (build error: missing-suspense-with-csr-bailout)
+  const [kioskMode, setKioskMode] = useState(false);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const k = (q.get("kiosk") || "").toLowerCase();
+    const d = (q.get("display") || "").toLowerCase();
+    setKioskMode(k === "1" || k === "true" || k === "yes" || d === "tv" || d === "kiosk");
+  }, [pathname]);
   const { canShow, permission, roleName, userFullName, avatar, simulated, bottomNavKeys, refresh } = useMenuPermission();
   const unreadCount = useUnreadCount(60000);
 
@@ -205,6 +215,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // UX P4: route-level guard — path ที่ perm ถูกปิด "ครบทุกตัว" (fail-open: ไม่รู้จัก/ยังโหลด = ผ่าน)
   const routeBlocked = routeIsBlocked(pathname, permission);
+
+  if (kioskMode) {
+    return (
+      <ToastProvider>
+        <ThemeProvider />
+        <ConnectivityProvider>
+          <LiffBridge />
+          <div className="min-h-dvh w-full bg-background">
+            <main id="cmms-main-scroll" className="min-h-dvh w-full overflow-y-auto">
+              <div className={isTower ? "h-full w-full p-3 lg:p-4" : "w-full p-3 lg:p-6"}>
+                {children}
+              </div>
+            </main>
+          </div>
+        </ConnectivityProvider>
+      </ToastProvider>
+    );
+  }
 
   return (
     <ToastProvider>
@@ -374,127 +402,131 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      {/* ═══════════ MOBILE NATIVE APP BAR (<1024px) ═══════════ */}
-      <header className="cmms-mobile-app-bar lg:!hidden">
-        <button
-          type="button"
-          className="cmms-mobile-app-bar-btn"
-          aria-label="เปิดเมนู"
-          onClick={() => setDrawerOpen(true)}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
-        </button>
-        {canGoBack && (
-          <button
-            type="button"
-            className="cmms-mobile-app-bar-btn"
-            aria-label="ย้อนกลับ"
-            onClick={() => router.back()}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-        )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
-        <div className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</div>
-        <a
-          href="/repair/request"
-          className="cmms-mobile-app-bar-btn"
-          aria-label={`แจ้งซ่อม${pendingCount > 0 ? ` — มีงานค้างส่ง ${pendingCount} รายการ` : ""}`}
-          title="แจ้งซ่อมด่วน"
-          style={{ textDecoration: "none" }}
-        >
-          <span className="cmms-mobile-nav-icon-wrap">
-            <Wrench size={20} strokeWidth={1.75} aria-hidden="true" />
-            {pendingCount > 0 && (
-              <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
-                {pendingCount > 99 ? "99+" : pendingCount}
-              </span>
-            )}
-          </span>
-        </a>
-        <ConnectivityStatus variant="icon" />
-        <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
-      </header>
-
-      {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
-      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="left" showCloseButton={false} className="bg-sidebar p-0">
-          <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
-          <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto object-contain" />
-            <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]">
-              CMMS-TOPPAN
-            </span>
-          </div>
-          <SidebarNav
-            canShow={canShow}
-            isSelected={isSelected}
-            onNavigate={() => setDrawerOpen(false)}
-          />
-        </SheetContent>
-      </Sheet>
-
-      {/* Global scan shortcut (ทุกหน้าใน dashboard) — สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม */}
-      <Link
-        href="/scan"
-        className="cmms-global-scan-fab"
-        aria-label="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
-        title="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
-      >
-        <Scan size={22} strokeWidth={2} aria-hidden="true" />
-        <span className="cmms-global-scan-fab-label">สแกน</span>
-      </Link>
-
-      {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
-      <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูหลัก">
-        {(() => {
-          const items = bottomNav.slice();
-          const scanIndex = items.findIndex((item) => item.key === "scan" || item.href === "/scan");
-          let scanItem = null as typeof items[0] | null;
-          if (scanIndex >= 0) {
-            scanItem = items.splice(scanIndex, 1)[0];
-          } else {
-            const scanDef = (BOTTOM_NAV_ITEMS as any)["scan"];
-            if (scanDef) {
-              scanItem = { key: "scan", href: scanDef.href, icon: scanDef.icon, label: t(scanDef.labelKey) } as typeof items[0];
-            }
-          }
-          const left = items.slice(0, Math.ceil(items.length / 2));
-          const right = items.slice(Math.ceil(items.length / 2));
-          const renderItem = (item: (typeof bottomNav)[0], forcedScan = false) => {
-            const ItemIcon = item.icon;
-            const isScan = forcedScan || item.key === "scan" || item.href === "/scan";
-            return (
-              <a
-                key={`${item.key}-${item.href}`}
-                href={item.href}
-                className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
-                aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
-                title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+      {!kioskMode && (
+        <>
+          {/* ═══════════ MOBILE NATIVE APP BAR (<1024px) ═══════════ */}
+          <header className="cmms-mobile-app-bar lg:!hidden">
+            <button
+              type="button"
+              className="cmms-mobile-app-bar-btn"
+              aria-label="เปิดเมนู"
+              onClick={() => setDrawerOpen(true)}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+            </button>
+            {canGoBack && (
+              <button
+                type="button"
+                className="cmms-mobile-app-bar-btn"
+                aria-label="ย้อนกลับ"
+                onClick={() => router.back()}
               >
-                <span className={`cmms-mobile-nav-icon-wrap ${isScan ? "cmms-mobile-nav-icon-wrap-scan" : ""}`}>
-                  <ItemIcon size={isScan ? 24 : 22} strokeWidth={1.75} aria-hidden="true" />
-                  {item.href === "/repair/request" && pendingCount > 0 && (
-                    <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
-                      {pendingCount > 99 ? "99+" : pendingCount}
-                    </span>
-                  )}
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+              </button>
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="TOPPAN" className="cmms-mobile-app-bar-logo" />
+            <div className="cmms-mobile-app-bar-title">{pageTitle || "CMMS-TOPPAN"}</div>
+            <a
+              href="/repair/request"
+              className="cmms-mobile-app-bar-btn"
+              aria-label={`แจ้งซ่อม${pendingCount > 0 ? ` — มีงานค้างส่ง ${pendingCount} รายการ` : ""}`}
+              title="แจ้งซ่อมด่วน"
+              style={{ textDecoration: "none" }}
+            >
+              <span className="cmms-mobile-nav-icon-wrap">
+                <Wrench size={20} strokeWidth={1.75} aria-hidden="true" />
+                {pendingCount > 0 && (
+                  <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
+                    {pendingCount > 99 ? "99+" : pendingCount}
+                  </span>
+                )}
+              </span>
+            </a>
+            <ConnectivityStatus variant="icon" />
+            <NotificationBell variant="link" className="cmms-mobile-app-bar-btn cmms-mobile-nav-icon-wrap" unreadCount={unreadCount} />
+          </header>
+
+          {/* ═══════════ MOBILE DRAWER — same nav tree as desktop sidebar ═══════════ */}
+          <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <SheetContent side="left" showCloseButton={false} className="bg-sidebar p-0">
+              <SheetTitle className="sr-only">เมนูหลัก</SheetTitle>
+              <div className="flex items-center gap-2.5 px-4 pb-2 pt-5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto object-contain" />
+                <span className="text-sm font-semibold tracking-tight text-[var(--cmms-sidebar-text-strong)]">
+                  CMMS-TOPPAN
                 </span>
-                <span>{item.label}</span>
-              </a>
-            );
-          };
-          return (
-            <>
-              {left.map((item) => renderItem(item))}
-              {scanItem ? renderItem(scanItem, true) : null}
-              {right.map((item) => renderItem(item))}
-            </>
-          );
-        })()}
-      </nav>
+              </div>
+              <SidebarNav
+                canShow={canShow}
+                isSelected={isSelected}
+                onNavigate={() => setDrawerOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+
+          {/* Global scan shortcut (ทุกหน้าใน dashboard) — สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม */}
+          <Link
+            href="/scan"
+            className="cmms-global-scan-fab"
+            aria-label="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+            title="สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม"
+          >
+            <Scan size={22} strokeWidth={2} aria-hidden="true" />
+            <span className="cmms-global-scan-fab-label">สแกน</span>
+          </Link>
+
+          {/* ═══════════ MOBILE BOTTOM NAVIGATION BAR (<1024px) ═══════════ */}
+          <nav className="cmms-mobile-bottom-nav cmms-mobile-bottom-nav-centered lg:!hidden" aria-label="เมนูหลัก">
+            {(() => {
+              const items = bottomNav.slice();
+              const scanIndex = items.findIndex((item) => item.key === "scan" || item.href === "/scan");
+              let scanItem = null as typeof items[0] | null;
+              if (scanIndex >= 0) {
+                scanItem = items.splice(scanIndex, 1)[0];
+              } else {
+                const scanDef = (BOTTOM_NAV_ITEMS as any)["scan"];
+                if (scanDef) {
+                  scanItem = { key: "scan", href: scanDef.href, icon: scanDef.icon, label: t(scanDef.labelKey) } as typeof items[0];
+                }
+              }
+              const left = items.slice(0, Math.ceil(items.length / 2));
+              const right = items.slice(Math.ceil(items.length / 2));
+              const renderItem = (item: (typeof bottomNav)[0], forcedScan = false) => {
+                const ItemIcon = item.icon;
+                const isScan = forcedScan || item.key === "scan" || item.href === "/scan";
+                return (
+                  <a
+                    key={`${item.key}-${item.href}`}
+                    href={item.href}
+                    className={`cmms-mobile-nav-item ${isScan ? "cmms-mobile-nav-item-scan" : ""} ${isSelected(item.href) ? "active" : ""}`}
+                    aria-label={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+                    title={isScan ? "สแกนบาร์โค้ดเพื่อทำ PM หรือแจ้งซ่อม" : undefined}
+                  >
+                    <span className={`cmms-mobile-nav-icon-wrap ${isScan ? "cmms-mobile-nav-icon-wrap-scan" : ""}`}>
+                      <ItemIcon size={isScan ? 24 : 22} strokeWidth={1.75} aria-hidden="true" />
+                      {item.href === "/repair/request" && pendingCount > 0 && (
+                        <span className="cmms-mobile-nav-badge" title={`งานแจ้งซ่อมค้างส่ง ${pendingCount} รายการ`}>
+                          {pendingCount > 99 ? "99+" : pendingCount}
+                        </span>
+                      )}
+                    </span>
+                    <span>{item.label}</span>
+                  </a>
+                );
+              };
+              return (
+                <>
+                  {left.map((item) => renderItem(item))}
+                  {scanItem ? renderItem(scanItem, true) : null}
+                  {right.map((item) => renderItem(item))}
+                </>
+              );
+            })()}
+          </nav>
+        </>
+      )}
       </ConnectivityProvider>
     </ToastProvider>
   );

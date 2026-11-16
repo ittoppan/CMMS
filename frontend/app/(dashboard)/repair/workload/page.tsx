@@ -24,6 +24,9 @@ import { useTvRotate } from "@/lib/use-tv-rotate";
 interface WorkloadApiRow {
   user_id: number;
   full_name: string;
+  avatar_path?: string | null;
+  avatar?: string | null;
+  avatar_legacy?: string | null;
   open_count: number;
   overdue_count: number;
   active_count: number;
@@ -72,11 +75,19 @@ interface TechCard {
   jobs: RepairRow[];
 }
 
+function normalizeAvatarPath(v?: string | null) {
+  const raw = (v || "").trim();
+  if (!raw) return "";
+  if (/^(https?:|data:|blob:)/i.test(raw)) return raw;
+  return raw.startsWith("/") ? raw : `/${raw}`;
+}
+
 function avatarSrc(r: { assigned_avatar?: string | null; assigned_avatar_legacy?: string | null }) {
-  const v = (r.assigned_avatar || r.assigned_avatar_legacy || "").trim();
-  if (!v) return "";
-  if (/^(https?:|data:|blob:)/i.test(v)) return v;
-  return v.startsWith("/") ? v : `/${v}`;
+  return normalizeAvatarPath(r.assigned_avatar) || normalizeAvatarPath(r.assigned_avatar_legacy);
+}
+
+function techAvatarSrc(r: { avatar_path?: string | null; avatar?: string | null; avatar_legacy?: string | null }) {
+  return normalizeAvatarPath(r.avatar_path) || normalizeAvatarPath(r.avatar) || normalizeAvatarPath(r.avatar_legacy);
 }
 
 function imageSrc(path?: string | null) {
@@ -295,10 +306,12 @@ export default function WorkloadPage() {
 
     const cards: TechCard[] = rows.map((r) => {
       const uid = Number(r.user_id || 0);
+      const fromWorkload = techAvatarSrc(r);
+      const fromJobs = uid > 0 ? avatarByUser.get(uid) || "" : "";
       return {
         userId: uid,
         name: r.full_name || `ผู้ใช้ #${uid}`,
-        avatar: uid > 0 ? avatarByUser.get(uid) || "" : "",
+        avatar: fromWorkload || fromJobs,
         openCount: Number(r.open_count || 0),
         overdueCount: Number(r.overdue_count || 0),
         activeCount: Number(r.active_count || 0),

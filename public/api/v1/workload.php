@@ -18,7 +18,7 @@ try {
     $dueExprNoAlias = 'COALESCE(sla_due_at, estimated_completion_date)';
 
     $techs = $pdo->query("
-        SELECT u.id AS user_id, u.full_name,
+        SELECT u.id AS user_id, u.full_name, u.avatar_path, u.avatar AS avatar_legacy,
                COUNT(DISTINCT CASE WHEN {$openCond} THEN r.id END)                                       AS open_count,
                COUNT(DISTINCT CASE WHEN {$openCond} AND {$dueExpr} IS NOT NULL
                          AND {$dueExpr} < NOW() THEN r.id END)                                           AS overdue_count,
@@ -37,7 +37,7 @@ try {
         ) wa ON wa.user_id = u.id
         LEFT JOIN repair r ON r.id = wa.rid
         WHERE u.is_active = 1
-        GROUP BY u.id, u.full_name
+        GROUP BY u.id, u.full_name, u.avatar_path, u.avatar
         HAVING open_count > 0 OR done_7d_count > 0
         ORDER BY open_count DESC, overdue_count DESC
     ")->fetchAll(PDO::FETCH_ASSOC);
