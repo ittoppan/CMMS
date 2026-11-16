@@ -88,6 +88,10 @@ export default function FacilityLayoutPage() {
   const [focusPort, setFocusPort] = useState<{ key: string; roomId: number | null; source: "room"|"cabinet"|"asset"; cabinetId?: string; assetId?: number; label: string } | null>(null);
   const [planPlaceTarget, setPlanPlaceTarget] = useState<{ type: "cabinet"|"asset"; ref_id: string } | null>(null);
   const [selectedPlanItemId, setSelectedPlanItemId] = useState<string | null>(null);
+  const planContainerRef = useRef<HTMLDivElement>(null);
+  const suppressPlanClickRef = useRef(false);
+  const dragStateRef = useRef<{ id: string; pointerId: number; startClientX: number; startClientY: number; origX: number; origY: number; moved: boolean } | null>(null);
+  const [dragOverride, setDragOverride] = useState<{ id: string; x: number; y: number } | null>(null);
   type HealthFocusKey = "faulty" | "planned" | "cabinet" | "repair";
   const [healthFocus, setHealthFocus] = useState<HealthFocusKey[]>([]);
   const toggleHealthFocus = (k: HealthFocusKey) => setHealthFocus(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
@@ -185,6 +189,8 @@ export default function FacilityLayoutPage() {
   useEffect(() => {
     setSelectedPlanItemId(null);
     setPlanPlaceTarget(null);
+    setDragOverride(null);
+    dragStateRef.current = null;
   }, [effectiveRoomId]);
 
   const updateRoom = (rid: number, patch: Partial<RoomCfg>) => {
@@ -764,9 +770,11 @@ export default function FacilityLayoutPage() {
               {roomCfg.floor_plan?.image_url ? (
                 <div className="space-y-2">
                   <div
+                    ref={planContainerRef}
                     className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
                     style={{ minHeight: 320 }}
                     onClick={(e)=>{
+                      if (suppressPlanClickRef.current) { suppressPlanClickRef.current = false; return; }
                       if (!canManage || !planPlaceTarget || !effectiveRoomId) return;
                       const targetExists = planPlaceTarget.type === "cabinet"
                         ? (roomCfg.cabinets || []).some(c => String(c.id) === String(planPlaceTarget.ref_id))
@@ -804,14 +812,64 @@ export default function FacilityLayoutPage() {
                       const planned = isCab && cab ? (cab.ports||[]).some(p=>p.status==='planned') : false;
                       const color = bad ? "bg-red-600 border-red-800" : planned ? "bg-amber-500 border-amber-700" : isCab ? "bg-indigo-600 border-indigo-800" : "bg-emerald-600 border-emerald-800";
                       const selected = selectedPlanItemId === it.id;
+                      const pos = dragOverride && dragOverride.id === it.id ? { x: dragOverride.x, y: dragOverride.y } : { x: it.x, y: it.y };
+                      const dragging = dragOverride?.id === it.id;
+                      const cursorCls = canManage ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-pointer";
                       return (
                         <button
                           key={it.id}
                           type="button"
-                          className={`absolute -translate-x-1/2 -translate-y-full flex flex-col items-center group ${selected ? "z-20" : "z-10"}`}
-                          style={{ left: `${it.x}%`, top: `${it.y}%` }}
-                          onClick={(ev)=>{ ev.stopPropagation(); setSelectedPlanItemId(it.id); }}
-                          title={label}
+                          className={`absolute -translate-x-1/2 -translate-y-full flex flex-col items-center group touch-none ${cursorCls} ${selected ? "z-20" : "z-10"}`}
+                          style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+                          title={canManage ? `${label} — ลากเพื่อย้ายตำแหน่ง` : label}
+                          onPointerDown={(ev) => {
+                            ev.stopPropagation();
+                            if (!canManage || !effectiveRoomId) { setSelectedPlanItemId(it.id); return; }
+                            if (ev.button !== 0) return;
+                            const rect = planContainerRef.current?.getBoundingClientRect();
+                            if (!rect || rect.width <= 0 || rect.height <= 0) return;
+                            try { (ev.currentTarget as HTMLButtonElement).setPointerCapture(ev.pointerId); } catch { /* ignore */ }
+                            dragStateRef.current = { id: it.id, pointerId: ev.pointerId, startClientX: ev.clientX, startClientY: ev.clientY, origX: it.x, origY: it.y, moved: false };
+                            setDragOverride({ id: it.id, x: it.x, y: it.y });
+                          }}
+                          onPointerMove={(ev) => {
+                            const ds = dragStateRef.current;
+                            if (!ds || ds.id !== it.id || ds.pointerId !== ev.pointerId) return;
+                            const rect = planContainerRef.current?.getBoundingClientRect();
+                            if (!rect || rect.width <= 0 || rect.height <= 0) return;
+                            const dxPx = ev.clientX - ds.startClientX;
+                            const dyPx = ev.clientY - ds.startClientY;
+                            if (!ds.moved && Math.hypot(dxPx, dyPx) > 4) ds.moved = true;
+                            const nx = Math.min(100, Math.max(0, ds.origX + (dxPx / rect.width) * 100));
+                            const ny = Math.min(100, Math.max(0, ds.origY + (dyPx / rect.height) * 100));
+                            setDragOverride({ id: it.id, x: Math.round(nx * 1000) / 1000, y: Math.round(ny * 1000) / 1000 });
+                          }}
+                          onPointerUp={(ev) => {
+                            const ds = dragStateRef.current;
+                            if (!ds || ds.id !== it.id || ds.pointerId !== ev.pointerId) return;
+                            try { (ev.currentTarget as HTMLButtonElement).releasePointerCapture(ev.pointerId); } catch { /* ignore */ }
+                            dragStateRef.current = null;
+                            const finalPos = dragOverride && dragOverride.id === it.id ? { x: dragOverride.x, y: dragOverride.y } : { x: it.x, y: it.y };
+                            setDragOverride(null);
+                            if (ds.moved) {
+                              suppressPlanClickRef.current = true;
+                              if (effectiveRoomId) {
+                                const items = (roomCfg.floor_plan?.items || []).map(p => p.id === it.id ? { ...p, x: finalPos.x, y: finalPos.y } : p);
+                                updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items } as any });
+                              }
+                              setSelectedPlanItemId(it.id);
+                            } else {
+                              setSelectedPlanItemId(it.id);
+                            }
+                          }}
+                          onPointerCancel={(ev) => {
+                            const ds = dragStateRef.current;
+                            if (!ds || ds.id !== it.id) return;
+                            try { (ev.currentTarget as HTMLButtonElement).releasePointerCapture(ev.pointerId); } catch { /* ignore */ }
+                            dragStateRef.current = null;
+                            setDragOverride(null);
+                          }}
+                          onClick={(ev) => { ev.stopPropagation(); }}
                         >
                           <span className={`px-1.5 py-0.5 rounded text-[10px] text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
                           <span className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${bad?"border-t-red-700":planned?"border-t-amber-700":isCab?"border-t-indigo-800":"border-t-emerald-800"}`}></span>
@@ -862,7 +920,7 @@ export default function FacilityLayoutPage() {
                       </div>
                     );
                   })()}
-                  <div className="text-xs text-muted-foreground">หมุดทั้งหมด {(roomCfg.floor_plan?.items||[]).length} จุด — สีแดง: มีปัญหา/งานซ่อมเปิด, เหลือง: มีรายการวางแผน, น้ำเงิน: ตู้, เขียว: เครื่อง {canManage?"(เลือกตู้/เครื่องแล้วคลิกบนรูปเพื่อวาง/ย้ายหมุด)":"(โหมดดูอย่างเดียว)"}</div>
+                  <div className="text-xs text-muted-foreground">หมุดทั้งหมด {(roomCfg.floor_plan?.items||[]).length} จุด — สีแดง: มีปัญหา/งานซ่อมเปิด, เหลือง: มีรายการวางแผน, น้ำเงิน: ตู้, เขียว: เครื่อง {canManage?"(เลือกตู้/เครื่องแล้วคลิกบนรูปเพื่อวางหมุดใหม่, ลากหมุดที่มีอยู่เพื่อย้ายตำแหน่ง)":"(โหมดดูอย่างเดียว)"}</div>
                 </div>
               ) : (
                 <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">ยังไม่มีรูปแปลนจริง — ใส่ URL รูปแปลนของห้อง/ชั้นด้านบนเพื่อเริ่มวางหมุดตำแหน่งตู้และเครื่องจักร</div>
