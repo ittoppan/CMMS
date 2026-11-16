@@ -149,6 +149,26 @@ function facility_layout_sanitize(array $input): array {
             if ($sc) $cabinets[] = $sc;
         }
         $fp = is_array($room['floor_plan'] ?? null) ? $room['floor_plan'] : [];
+        $fpItems = [];
+        foreach ((is_array($fp['items'] ?? null) ? $fp['items'] : []) as $it) {
+            if (!is_array($it)) continue;
+            $itype = (string)($it['type'] ?? '');
+            if (!in_array($itype, ['cabinet', 'asset'], true)) continue;
+            $ref = trim((string)($it['ref_id'] ?? ''));
+            if ($ref === '') continue;
+            $x = (float)($it['x'] ?? -1);
+            $y = (float)($it['y'] ?? -1);
+            if ($x < 0 || $x > 100 || $y < 0 || $y > 100) continue;
+            $fpItems[] = [
+                'id' => mb_substr(trim((string)($it['id'] ?? ('m_' . bin2hex(random_bytes(4))))), 0, 80),
+                'type' => $itype,
+                'ref_id' => mb_substr($ref, 0, 80),
+                'x' => round($x, 3),
+                'y' => round($y, 3),
+                'label' => mb_substr(trim((string)($it['label'] ?? '')), 0, 120),
+            ];
+            if (count($fpItems) >= 200) break;
+        }
         $roomsOut[$lid] = [
             'notes' => mb_substr(trim((string)($room['notes'] ?? '')), 0, 1000),
             'ports' => array_values($ports),
@@ -157,6 +177,7 @@ function facility_layout_sanitize(array $input): array {
                 'grid_w' => max(1, min(50, (int)($fp['grid_w'] ?? 8))),
                 'grid_h' => max(1, min(50, (int)($fp['grid_h'] ?? 6))),
                 'image_url' => mb_substr(trim((string)($fp['image_url'] ?? '')), 0, 500),
+                'items' => array_values($fpItems),
             ],
         ];
     }

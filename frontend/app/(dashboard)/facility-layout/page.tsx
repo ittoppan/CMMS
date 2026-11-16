@@ -19,7 +19,8 @@ type Asset = { id: number; code: string; name: string; status: string; location_
 type PortRef = { scope: "room"|"cabinet"|"asset"; room_id: number; cabinet_id?: string; asset_id?: number; port_id: string };
 type Port = { id: string; label: string; port_type: string; port_no: string; endpoint: string; status: string; notes: string; spec?: string; feeds?: PortRef[] };
 type Cabinet = { id: string; name: string; code: string; cabinet_type: string; location_note: string; status: string; notes: string; ports: Port[] };
-type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: { grid_w: number; grid_h: number; image_url: string } };
+type FloorPlanItem = { id: string; type: "cabinet"|"asset"; ref_id: string; x: number; y: number; label?: string };
+type RoomCfg = { notes: string; ports: Port[]; cabinets: Cabinet[]; floor_plan: { grid_w: number; grid_h: number; image_url: string; items: FloorPlanItem[] } };
 type LayoutConfig = { version: number; updated_at?: string | null; rooms: Record<string, RoomCfg>; assets: Record<string, { ports: Port[]; notes?: string }> };
 
 const PORT_TYPES = [
@@ -54,7 +55,7 @@ const CABINET_TYPES = [
   { value: "other", label: "ตู้/แผงอื่นๆ" },
 ];
 
-function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "" } }; }
+function defaultRoom(): RoomCfg { return { notes: "", ports: [], cabinets: [], floor_plan: { grid_w: 8, grid_h: 6, image_url: "", items: [] } }; }
 function newPort(): Port { return { id: `p_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, label: "", port_type: "lan", port_no: "", endpoint: "", status: "active", notes: "", spec: "", feeds: [] }; }
 
 function portRefKey(ref: PortRef): string {
@@ -84,6 +85,8 @@ export default function FacilityLayoutPage() {
   const [portTypeFilter, setPortTypeFilter] = useState<string>("all");
   const [portStatusFilter, setPortStatusFilter] = useState<string>("all");
   const [focusPort, setFocusPort] = useState<{ key: string; roomId: number | null; source: "room"|"cabinet"|"asset"; cabinetId?: string; assetId?: number; label: string } | null>(null);
+  const [planPlaceTarget, setPlanPlaceTarget] = useState<{ type: "cabinet"|"asset"; ref_id: string } | null>(null);
+  const [selectedPlanItemId, setSelectedPlanItemId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
@@ -169,7 +172,9 @@ export default function FacilityLayoutPage() {
     if (!effectiveRoomId) return defaultRoom();
     const r = config.rooms[String(effectiveRoomId)];
     if (!r) return defaultRoom();
-    return { ...defaultRoom(), ...r, ports: r.ports || [], cabinets: (r as any).cabinets || [], floor_plan: { ...defaultRoom().floor_plan, ...(r.floor_plan || {}) } };
+    const fp = { ...defaultRoom().floor_plan, ...(r.floor_plan || {}) } as any;
+    fp.items = Array.isArray(fp.items) ? fp.items : [];
+    return { ...defaultRoom(), ...r, ports: r.ports || [], cabinets: (r as any).cabinets || [], floor_plan: fp };
   }, [config, effectiveRoomId]);
 
   const updateRoom = (rid: number, patch: Partial<RoomCfg>) => {
@@ -665,6 +670,137 @@ export default function FacilityLayoutPage() {
                     </div>
                   ))}
                 </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Map className="w-4 h-4"/>แปลนจริงของห้อง/ชั้น และหมุดตำแหน่ง</CardTitle></CardHeader>
+        <CardContent className="space-y-3">
+          {!effectiveRoomId ? <p className="text-sm text-muted-foreground">เลือกห้องเพื่อแนบแปลนจริงและวางตำแหน่งตู้/เครื่อง</p> : (
+            <>
+              <p className="text-xs text-muted-foreground">แนบ URL รูปแปลนจริงของห้อง แล้ววางหมุดตู้ไฟ/ตู้ควบคุมหรือเครื่องจักรบนรูป (เก็บพิกัดใน <code>facility_layout_config</code>) — คลิกหมุดเพื่อดูรายละเอียด พอร์ต/สถานะ/งานซ่อม จากตำแหน่งบนแปลน</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
+                <div className="md:col-span-2">
+                  <Label className="text-xs">URL รูปแปลนจริง (ห้อง/ชั้น)</Label>
+                  <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value } as any })} placeholder="https://.../floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
+                </div>
+                <div className="flex gap-2">
+                  {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any })}>ลบรูป</Button> : null}
+                  {(roomCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items: [] } as any })}>ล้างหมุดทั้งหมด</Button> : null}
+                </div>
+              </div>
+              {canManage && (
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Label className="text-xs">วางหมุด:</Label>
+                  <select className="h-9 rounded-md border bg-background px-2 text-xs min-w-[220px]" value={planPlaceTarget ? `${planPlaceTarget.type}:${planPlaceTarget.ref_id}` : ""} onChange={e=>{
+                    const v = e.target.value;
+                    if (!v) { setPlanPlaceTarget(null); return; }
+                    const [type, ref_id] = v.split(":");
+                    if (type === "cabinet" || type === "asset") setPlanPlaceTarget({ type, ref_id });
+                  }}>
+                    <option value="">-- เลือกตู้/เครื่องเพื่อวางหมุด --</option>
+                    <optgroup label="ตู้ไฟ/ตู้ควบคุมในห้อง">
+                      {(roomCfg.cabinets||[]).map(c => <option key={c.id} value={`cabinet:${c.id}`}>{c.name || c.code || c.id}</option>)}
+                    </optgroup>
+                    <optgroup label="เครื่องจักรในห้อง">
+                      {roomAssets.map(a => <option key={a.id} value={`asset:${a.id}`}>{a.code} · {a.name}</option>)}
+                    </optgroup>
+                  </select>
+                  {planPlaceTarget && <Badge variant="info">โหมดวางหมุด: คลิกบนรูปเพื่อวางตำแหน่ง</Badge>}
+                  {planPlaceTarget && <Button size="sm" variant="ghost" onClick={()=>setPlanPlaceTarget(null)}>ยกเลิก</Button>}
+                </div>
+              )}
+              {roomCfg.floor_plan?.image_url ? (
+                <div className="space-y-2">
+                  <div
+                    className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
+                    style={{ minHeight: 320 }}
+                    onClick={(e)=>{
+                      if (!canManage || !planPlaceTarget) return;
+                      const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                      const x = ((e.clientX - rect.left) / rect.width) * 100;
+                      const y = ((e.clientY - rect.top) / rect.height) * 100;
+                      if (x < 0 || x > 100 || y < 0 || y > 100) return;
+                      const items = [...(roomCfg.floor_plan?.items || [])];
+                      const existingIdx = items.findIndex(it => it.type === planPlaceTarget.type && String(it.ref_id) === String(planPlaceTarget.ref_id));
+                      const newItem: FloorPlanItem = { id: existingIdx >= 0 ? items[existingIdx].id : `m_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, type: planPlaceTarget.type, ref_id: planPlaceTarget.ref_id, x: Math.round(x*1000)/1000, y: Math.round(y*1000)/1000 };
+                      if (existingIdx >= 0) items[existingIdx] = newItem; else items.push(newItem);
+                      updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items } as any });
+                      setSelectedPlanItemId(newItem.id);
+                      setPlanPlaceTarget(null);
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={roomCfg.floor_plan.image_url} alt="Floor plan" className="w-full h-auto block select-none pointer-events-none" />
+                    {(roomCfg.floor_plan?.items || []).map((it) => {
+                      const isCab = it.type === "cabinet";
+                      const cab = isCab ? (roomCfg.cabinets||[]).find(c => String(c.id) === String(it.ref_id)) : null;
+                      const ast = !isCab ? assets.find(a => String(a.id) === String(it.ref_id)) : null;
+                      const label = isCab ? (cab?.name || cab?.code || "ตู้") : (ast ? `${ast.code}` : "เครื่อง");
+                      const cabBad = isCab && cab && ["faulty","inactive","maintenance"].includes(cab.status);
+                      const cabFaultyPorts = isCab && cab ? (cab.ports||[]).filter(p=>p.status==='faulty').length : 0;
+                      const ar = !isCab && ast ? (assetHealth[ast.id]?.active_repairs || 0) : 0;
+                      const bad = cabBad || cabFaultyPorts>0 || ar>0;
+                      const planned = isCab && cab ? (cab.ports||[]).some(p=>p.status==='planned') : false;
+                      const color = bad ? "bg-red-600 border-red-800" : planned ? "bg-amber-500 border-amber-700" : isCab ? "bg-indigo-600 border-indigo-800" : "bg-emerald-600 border-emerald-800";
+                      const selected = selectedPlanItemId === it.id;
+                      return (
+                        <button
+                          key={it.id}
+                          type="button"
+                          className={`absolute -translate-x-1/2 -translate-y-full flex flex-col items-center group ${selected ? "z-20" : "z-10"}`}
+                          style={{ left: `${it.x}%`, top: `${it.y}%` }}
+                          onClick={(ev)=>{ ev.stopPropagation(); setSelectedPlanItemId(it.id); }}
+                          title={label}
+                        >
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] text-white whitespace-nowrap shadow ${color} ${selected?"ring-2 ring-white":""}`}>{isCab?"ตู้":"เครื่อง"}: {label}{bad?" !":""}</span>
+                          <span className={`w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent ${bad?"border-t-red-700":planned?"border-t-amber-700":isCab?"border-t-indigo-800":"border-t-emerald-800"}`}></span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedPlanItemId && (() => {
+                    const it = (roomCfg.floor_plan?.items || []).find(i => i.id === selectedPlanItemId);
+                    if (!it) return null;
+                    const isCab = it.type === "cabinet";
+                    const cab = isCab ? (roomCfg.cabinets||[]).find(c => String(c.id) === String(it.ref_id)) : null;
+                    const ast = !isCab ? assets.find(a => String(a.id) === String(it.ref_id)) : null;
+                    if (isCab && !cab) return <div className="text-xs text-muted-foreground">ไม่พบตู้ที่อ้างอิง (อาจถูกลบ) {canManage && <Button size="sm" variant="ghost" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}</div>;
+                    if (!isCab && !ast) return <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่อ้างอิง (อาจถูกลบ/ย้ายห้อง) {canManage && <Button size="sm" variant="ghost" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}</div>;
+                    const ar = ast ? (assetHealth[ast.id]?.active_repairs || 0) : 0;
+                    const faultyPorts = isCab && cab ? (cab.ports||[]).filter(p=>p.status==='faulty').length : 0;
+                    return (
+                      <div className="rounded-lg border p-3 space-y-2 bg-background">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="font-semibold flex items-center gap-2">{isCab ? <><Box className="w-4 h-4"/>ตู้/แผง: {cab?.name || cab?.code}</> : <><Cpu className="w-4 h-4"/>เครื่อง: {ast?.code} · {ast?.name}</>}</div>
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" onClick={()=>{ if (isCab && cab) { setFocusPort({ key: `cabinet:${cab.id}`, roomId: effectiveRoomId, source: "cabinet", cabinetId: cab.id, label: cab.name||cab.code||"ตู้" }); setTimeout(()=>{ const el=document.getElementById(`cabinet-card-${cab.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },50); } else if (ast) { setFocusPort({ key: `asset:${ast.id}:*`, roomId: effectiveRoomId, source: "asset", assetId: ast.id, label: ast.code }); setTimeout(()=>{ const el=document.getElementById(`asset-card-${ast.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },50); } }}>ไปที่รายละเอียด/พอร์ต</Button>
+                            {canManage && <Button size="sm" variant="ghost" className="text-red-600" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}
+                          </div>
+                        </div>
+                        {isCab && cab && (
+                          <div className="text-sm space-y-1">
+                            <div className="text-xs text-muted-foreground">{cab.cabinet_type} · {cab.location_note || "-"} · สถานะ: {cab.status}</div>
+                            <div className="flex flex-wrap gap-1">{faultyPorts>0 && <AndonBadge tone="down">พอร์ตชำรุด {faultyPorts}</AndonBadge>} {(cab.ports||[]).some(p=>p.status==='planned') && <Badge variant="info">มีพอร์ตวางแผน</Badge>} <Badge variant="neutral">พอร์ต/วงจร {(cab.ports||[]).length}</Badge></div>
+                            {(cab.ports||[]).length > 0 && <div className="text-xs text-muted-foreground">ตัวอย่างพอร์ต: {(cab.ports||[]).slice(0,4).map(p=>`${p.label}${p.port_no?` #${p.port_no}`:''}`).join(', ')}{(cab.ports||[]).length>4?' …':''}</div>}
+                          </div>
+                        )}
+                        {!isCab && ast && (
+                          <div className="text-sm space-y-1">
+                            <div className="text-xs text-muted-foreground">สถานะเครื่อง: {ast.status || '-'}{ast.location_name ? ` · ${ast.location_name}` : ''}</div>
+                            <div className="flex flex-wrap gap-1 items-center">{ar>0 ? <AndonBadge tone={String(assetHealth[ast.id]?.max_priority||'').toLowerCase()==='critical'?'down':'warn'}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {ar}</AndonBadge> : <Badge variant="neutral">ไม่มีงานซ่อมเปิด</Badge>} <Badge variant="neutral">พอร์ตเครื่อง {(config.assets[String(ast.id)]?.ports||[]).length}</Badge></div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  <div className="text-xs text-muted-foreground">หมุดทั้งหมด {(roomCfg.floor_plan?.items||[]).length} จุด — สีแดง: มีปัญหา/งานซ่อมเปิด, เหลือง: มีรายการวางแผน, น้ำเงิน: ตู้, เขียว: เครื่อง {canManage?"(เลือกตู้/เครื่องแล้วคลิกบนรูปเพื่อวาง/ย้ายหมุด)":"(โหมดดูอย่างเดียว)"}</div>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">ยังไม่มีรูปแปลนจริง — ใส่ URL รูปแปลนของห้อง/ชั้นด้านบนเพื่อเริ่มวางหมุดตำแหน่งตู้และเครื่องจักร</div>
               )}
             </>
           )}
