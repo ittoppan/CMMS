@@ -182,6 +182,11 @@ export default function FacilityLayoutPage() {
     return { ...defaultRoom(), ...r, ports: r.ports || [], cabinets: (r as any).cabinets || [], floor_plan: fp };
   }, [config, effectiveRoomId]);
 
+  useEffect(() => {
+    setSelectedPlanItemId(null);
+    setPlanPlaceTarget(null);
+  }, [effectiveRoomId]);
+
   const updateRoom = (rid: number, patch: Partial<RoomCfg>) => {
     setConfig(c => {
       const prev = (c.rooms[String(rid)] || {}) as any;
@@ -201,6 +206,12 @@ export default function FacilityLayoutPage() {
   };
   const updateRoomPorts = (rid: number, ports: Port[]) => updateRoom(rid, { ports });
   const updateRoomCabinets = (rid: number, cabinets: Cabinet[]) => updateRoom(rid, { cabinets });
+  const removePlanItem = (itemId: string) => {
+    if (!effectiveRoomId) return;
+    const items = (roomCfg.floor_plan?.items || []).filter(i => i.id !== itemId);
+    updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items } as any });
+    setSelectedPlanItemId(prev => (prev === itemId ? null : prev));
+  };
 
   const selectRoomById = (rid: number | null) => {
     if (!rid) { setSelectedRoom(null); return; }
@@ -725,8 +736,8 @@ export default function FacilityLayoutPage() {
                   <Input value={roomCfg.floor_plan?.image_url || ""} onChange={e=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: e.target.value } as any })} placeholder="https://.../floorplan.jpg หรือ path รูปที่เข้าถึงได้" />
                 </div>
                 <div className="flex gap-2">
-                  {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any })}>ลบรูป</Button> : null}
-                  {(roomCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items: [] } as any })}>ล้างหมุดทั้งหมด</Button> : null}
+                  {roomCfg.floor_plan?.image_url ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, image_url: "" } as any }); setSelectedPlanItemId(null); }}>ลบรูป</Button> : null}
+                  {(roomCfg.floor_plan?.items||[]).length > 0 && canManage ? <Button size="sm" variant="outline" onClick={()=> { updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items: [] } as any }); setSelectedPlanItemId(null); }}>ล้างหมุดทั้งหมด</Button> : null}
                 </div>
               </div>
               {canManage && (
@@ -756,14 +767,23 @@ export default function FacilityLayoutPage() {
                     className={`relative w-full overflow-hidden rounded-lg border bg-slate-100 ${planPlaceTarget ? "cursor-crosshair" : "cursor-default"}`}
                     style={{ minHeight: 320 }}
                     onClick={(e)=>{
-                      if (!canManage || !planPlaceTarget) return;
+                      if (!canManage || !planPlaceTarget || !effectiveRoomId) return;
+                      const targetExists = planPlaceTarget.type === "cabinet"
+                        ? (roomCfg.cabinets || []).some(c => String(c.id) === String(planPlaceTarget.ref_id))
+                        : roomAssets.some(a => String(a.id) === String(planPlaceTarget.ref_id));
+                      if (!targetExists) { setPlanPlaceTarget(null); return; }
                       const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                      if (rect.width <= 0 || rect.height <= 0) return;
                       const x = ((e.clientX - rect.left) / rect.width) * 100;
                       const y = ((e.clientY - rect.top) / rect.height) * 100;
                       if (x < 0 || x > 100 || y < 0 || y > 100) return;
                       const items = [...(roomCfg.floor_plan?.items || [])];
                       const existingIdx = items.findIndex(it => it.type === planPlaceTarget.type && String(it.ref_id) === String(planPlaceTarget.ref_id));
-                      const newItem: FloorPlanItem = { id: existingIdx >= 0 ? items[existingIdx].id : `m_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, type: planPlaceTarget.type, ref_id: planPlaceTarget.ref_id, x: Math.round(x*1000)/1000, y: Math.round(y*1000)/1000 };
+                      const px = Math.round(x * 1000) / 1000;
+                      const py = Math.round(y * 1000) / 1000;
+                      const newItem: FloorPlanItem = existingIdx >= 0
+                        ? { ...items[existingIdx], x: px, y: py }
+                        : { id: `m_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, type: planPlaceTarget.type, ref_id: planPlaceTarget.ref_id, x: px, y: py };
                       if (existingIdx >= 0) items[existingIdx] = newItem; else items.push(newItem);
                       updateRoom(effectiveRoomId, { floor_plan: { ...roomCfg.floor_plan, items } as any });
                       setSelectedPlanItemId(newItem.id);
@@ -805,8 +825,8 @@ export default function FacilityLayoutPage() {
                     const isCab = it.type === "cabinet";
                     const cab = isCab ? (roomCfg.cabinets||[]).find(c => String(c.id) === String(it.ref_id)) : null;
                     const ast = !isCab ? assets.find(a => String(a.id) === String(it.ref_id)) : null;
-                    if (isCab && !cab) return <div className="text-xs text-muted-foreground">ไม่พบตู้ที่อ้างอิง (อาจถูกลบ) {canManage && <Button size="sm" variant="ghost" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}</div>;
-                    if (!isCab && !ast) return <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่อ้างอิง (อาจถูกลบ/ย้ายห้อง) {canManage && <Button size="sm" variant="ghost" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}</div>;
+                    if (isCab && !cab) return <div className="text-xs text-muted-foreground">ไม่พบตู้ที่อ้างอิง (อาจถูกลบ) {canManage && <Button size="sm" variant="ghost" onClick={() => removePlanItem(it.id)}>ลบหมุด</Button>}</div>;
+                    if (!isCab && !ast) return <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่อ้างอิง (อาจถูกลบ/ย้ายห้อง) {canManage && <Button size="sm" variant="ghost" onClick={() => removePlanItem(it.id)}>ลบหมุด</Button>}</div>;
                     const ar = ast ? (assetHealth[ast.id]?.active_repairs || 0) : 0;
                     const faultyPorts = isCab && cab ? (cab.ports||[]).filter(p=>p.status==='faulty').length : 0;
                     return (
@@ -815,7 +835,7 @@ export default function FacilityLayoutPage() {
                           <div className="font-semibold flex items-center gap-2">{isCab ? <><Box className="w-4 h-4"/>ตู้/แผง: {cab?.name || cab?.code}</> : <><Cpu className="w-4 h-4"/>เครื่อง: {ast?.code} · {ast?.name}</>}</div>
                           <div className="flex gap-2">
                             <Button size="sm" variant="outline" onClick={()=>{ if (isCab && cab) { setFocusPort({ key: `cabinet:${cab.id}`, roomId: effectiveRoomId, source: "cabinet", cabinetId: cab.id, label: cab.name||cab.code||"ตู้" }); setTimeout(()=>{ const el=document.getElementById(`cabinet-card-${cab.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },50); } else if (ast) { setFocusPort({ key: `asset:${ast.id}:*`, roomId: effectiveRoomId, source: "asset", assetId: ast.id, label: ast.code }); setTimeout(()=>{ const el=document.getElementById(`asset-card-${ast.id}`); const d=el?.querySelector('details'); if(d)(d as HTMLDetailsElement).open=true; el?.scrollIntoView({behavior:'smooth',block:'center'}); },50); } }}>ไปที่รายละเอียด/พอร์ต</Button>
-                            {canManage && <Button size="sm" variant="ghost" className="text-red-600" onClick={()=>{ const items=(roomCfg.floor_plan?.items||[]).filter(i=>i.id!==it.id); updateRoom(effectiveRoomId,{floor_plan:{...roomCfg.floor_plan,items} as any}); setSelectedPlanItemId(null); }}>ลบหมุด</Button>}
+                            {canManage && <Button size="sm" variant="ghost" className="text-red-600" onClick={() => removePlanItem(it.id)}>ลบหมุด</Button>}
                           </div>
                         </div>
                         {isCab && cab && (
