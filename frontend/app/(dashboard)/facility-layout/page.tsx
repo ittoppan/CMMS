@@ -74,6 +74,7 @@ export default function FacilityLayoutPage() {
   const [config, setConfig] = useState<LayoutConfig>({ version: 1, rooms: {}, assets: {} });
   const [locations, setLocations] = useState<Location[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [assetHealth, setAssetHealth] = useState<Record<number, { status: string; active_repairs: number; max_priority: string | null; location_id: number | null }>>({});
   const [selectedBuilding, setSelectedBuilding] = useState<number | null>(null);
   const [selectedFloor, setSelectedFloor] = useState<number | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null);
@@ -87,7 +88,10 @@ export default function FacilityLayoutPage() {
   const fetchData = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch("/api/v1/facility_layout.php");
+      const [res, hres] = await Promise.all([
+        fetch("/api/v1/facility_layout.php"),
+        fetch("/api/v1/asset_stats.php?resource=plant_map"),
+      ]);
       const json = await res.json();
       if (!res.ok || !json?.success) throw new Error(json?.error || "โหลดข้อมูลไม่สำเร็จ");
       setConfig({
@@ -98,6 +102,16 @@ export default function FacilityLayoutPage() {
       });
       setLocations(Array.isArray(json.locations) ? json.locations : []);
       setAssets(Array.isArray(json.assets) ? json.assets : []);
+      const hjson = await hres.json().catch(() => []);
+      const amap: Record<number, { status: string; active_repairs: number; max_priority: string | null; location_id: number | null }> = {};
+      if (Array.isArray(hjson)) {
+        hjson.forEach((r: any) => {
+          const id = Number(r?.id);
+          if (!id) return;
+          amap[id] = { status: String(r?.status || ""), active_repairs: Number(r?.active_repairs || 0), max_priority: r?.max_priority ?? null, location_id: r?.location_id != null ? Number(r.location_id) : null };
+        });
+      }
+      setAssetHealth(amap);
     } catch (e: any) {
       setError(e.message || "โหลดข้อมูลไม่สำเร็จ");
     } finally { setLoading(false); }
@@ -384,6 +398,51 @@ export default function FacilityLayoutPage() {
     return Object.values(portIndex).sort((a,b)=> (a.roomName+a.context+a.label).localeCompare(b.roomName+b.context+b.label, "th"));
   }, [portIndex]);
 
+  const roomHealthMap = useMemo(() => {
+    const map: Record<number, { faultyPorts: number; plannedPorts: number; issueCabinets: number; totalPorts: number; assets: number; assetsWithActiveRepairs: number; activeRepairs: number; criticalRepairs: number }> = {};
+    const ensure = (rid: number) => {
+      if (!map[rid]) map[rid] = { faultyPorts: 0, plannedPorts: 0, issueCabinets: 0, totalPorts: 0, assets: 0, assetsWithActiveRepairs: 0, activeRepairs: 0, criticalRepairs: 0 };
+      return map[rid];
+    };
+    Object.entries(config.rooms || {}).forEach(([ridStr, r]: any) => {
+      const rid = Number(ridStr); if (!rid) return;
+      const h = ensure(rid);
+      const scanPorts = (arr: any[]) => (arr||[]).forEach((p:any) => {
+        h.totalPorts++;
+        if (p?.status === "faulty") h.faultyPorts++;
+        if (p?.status === "planned") h.plannedPorts++;
+      });
+      scanPorts(r?.ports || []);
+      (r?.cabinets || []).forEach((cab: any) => {
+        if (["faulty","inactive","maintenance"].includes(cab?.status)) h.issueCabinets++;
+        scanPorts(cab?.ports || []);
+      });
+    });
+    assets.forEach(a => {
+      const rid = a.location_id;
+      if (!rid) return;
+      const h = ensure(Number(rid));
+      h.assets++;
+      const ah = assetHealth[a.id];
+      const ar = ah ? Number(ah.active_repairs || 0) : 0;
+      if (ar > 0) { h.assetsWithActiveRepairs++; h.activeRepairs += ar; }
+      const mp = String(ah?.max_priority || "").toLowerCase();
+      if (mp === "critical" || mp === "high") h.criticalRepairs += ar || 1;
+    });
+    return map;
+  }, [config, assets, assetHealth]);
+
+  const healthSummary = useMemo(() => {
+    let faultyPorts = 0, plannedPorts = 0, issueCabinets = 0, roomsWithIssues = 0, assetsWithActiveRepairs = 0, activeRepairs = 0;
+    Object.values(roomHealthMap).forEach(h => {
+      faultyPorts += h.faultyPorts; plannedPorts += h.plannedPorts; issueCabinets += h.issueCabinets;
+      assetsWithActiveRepairs += h.assetsWithActiveRepairs; activeRepairs += h.activeRepairs;
+      if (h.faultyPorts > 0 || h.issueCabinets > 0 || h.assetsWithActiveRepairs > 0 || h.plannedPorts > 0) roomsWithIssues++;
+    });
+    // also count assets with repairs even if room not in map (no location)
+    return { faultyPorts, plannedPorts, issueCabinets, roomsWithIssues, assetsWithActiveRepairs, activeRepairs };
+  }, [roomHealthMap]);
+
   const jumpToPort = (r: typeof flatPorts[number]) => {
     if (r.roomId) selectRoomById(r.roomId);
     const label = `${r.port?.label || "พอร์ต"}${r.port?.port_no ? ` #${r.port.port_no}` : ""}`;
@@ -439,6 +498,8 @@ export default function FacilityLayoutPage() {
         <Badge variant="info">วางแผน/รอติดตั้ง {portSummary.planned}</Badge>
         <Badge variant="neutral">ไม่ใช้งาน {portSummary.inactive}</Badge>
         {portSummary.faulty > 0 && <AndonBadge tone="down">ชำรุด {portSummary.faulty} จุด — ตรวจสอบด่วน</AndonBadge>}
+        {healthSummary.assetsWithActiveRepairs > 0 && <AndonBadge tone="warn">เครื่องมีใบแจ้งซ่อมเปิด/กำลังดำเนินการ {healthSummary.assetsWithActiveRepairs} เครื่อง ({healthSummary.activeRepairs} ใบงาน)</AndonBadge>}
+        {healthSummary.roomsWithIssues > 0 && <Badge variant="info">ห้อง/จุดที่ต้องติดตาม {healthSummary.roomsWithIssues} แห่ง</Badge>}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -617,10 +678,21 @@ export default function FacilityLayoutPage() {
             <p className="text-sm text-muted-foreground">ยังไม่มีเครื่องจักรผูกกับห้องนี้ — กำหนด location ของ asset ให้ชี้มาที่ห้องนี้ (ผ่านทะเบียนเครื่องจักร/asset) เพื่อให้ปรากฏในผัง</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {roomAssets.map(a => (
-                <div key={a.id} id={`asset-card-${a.id}`} className={`rounded-lg border p-3 space-y-1 ${focusPort?.source==="asset" && focusPort?.assetId===a.id ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}>
-                  <div className="flex items-center justify-between"><span className="font-mono text-xs font-bold">{a.code}</span><Badge variant="neutral">{a.status || "-"}</Badge></div>
+              {roomAssets.map(a => {
+                const ah = assetHealth[a.id];
+                const activeRepairs = ah ? Number(ah.active_repairs || 0) : 0;
+                const maxP = String(ah?.max_priority || "").toLowerCase();
+                const repairTone = activeRepairs > 0 ? (maxP === "critical" || maxP === "high" ? "down" : "warn") : null;
+                return (
+                <div key={a.id} id={`asset-card-${a.id}`} className={`rounded-lg border p-3 space-y-1 ${focusPort?.source==="asset" && focusPort?.assetId===a.id ? "ring-2 ring-primary border-primary bg-primary/5" : activeRepairs > 0 ? "border-amber-300 bg-amber-50/30" : ""}`}>
+                  <div className="flex items-center justify-between gap-2"><span className="font-mono text-xs font-bold">{a.code}</span><Badge variant="neutral">{a.status || "-"}</Badge></div>
                   <div className="font-semibold text-sm">{a.name}</div>
+                  {activeRepairs > 0 && (
+                    <div className="flex flex-wrap gap-1 items-center">
+                      <AndonBadge tone={repairTone === "down" ? "down" : "warn"}>ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {activeRepairs}</AndonBadge>
+                      {ah?.max_priority ? <Badge variant="neutral">Priority: {String(ah.max_priority)}</Badge> : null}
+                    </div>
+                  )}
                   <div className="text-xs text-muted-foreground flex items-center gap-1"><Network className="w-3 h-3"/>พอร์ตเครื่อง: {(config.assets[String(a.id)]?.ports||[]).length} จุด</div>
                   {canManage && (
                     <details className="text-xs">
@@ -629,7 +701,7 @@ export default function FacilityLayoutPage() {
                     </details>
                   )}
                 </div>
-              ))}
+              );})}
             </div>
           )}
         </CardContent>
@@ -735,6 +807,81 @@ export default function FacilityLayoutPage() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="w-4 h-4"/>สรุปสถานะสุขภาพบนผัง (ห้อง/ตู้/เครื่อง)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <p className="text-xs text-muted-foreground">ซ้อนทับสถานะจากข้อมูลที่มีอยู่: สถานะพอร์ต/ตู้ใน <code>facility_layout_config</code> (ชำรุด, วางแผน ฯลฯ) และข้อมูลใบแจ้งซ่อม/สถานะเครื่องจากระบบซ่อม (active repairs) ผูกกับตำแหน่ง/เครื่องจักร — แสดงบนผัง 2D/3D และสรุปรายห้อง/ตู้/เครื่อง</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className={`rounded border p-2 ${healthSummary.faultyPorts>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดชำรุด</div><div className="text-xl font-semibold text-red-700">{healthSummary.faultyPorts}</div></div>
+            <div className={`rounded border p-2 ${healthSummary.plannedPorts>0?"border-sky-300 bg-sky-50":""}`}><div className="text-xs text-muted-foreground">พอร์ต/จุดวางแผน</div><div className="text-xl font-semibold">{healthSummary.plannedPorts}</div></div>
+            <div className={`rounded border p-2 ${healthSummary.issueCabinets>0?"border-red-300 bg-red-50":""}`}><div className="text-xs text-muted-foreground">ตู้/แผงมีปัญหา</div><div className="text-xl font-semibold">{healthSummary.issueCabinets}</div></div>
+            <div className={`rounded border p-2 ${healthSummary.assetsWithActiveRepairs>0?"border-amber-300 bg-amber-50":""}`}><div className="text-xs text-muted-foreground">เครื่องมีใบแจ้งซ่อมเปิด/กำลังดำเนินการ</div><div className="text-xl font-semibold">{healthSummary.assetsWithActiveRepairs}</div><div className="text-[11px] text-muted-foreground">{healthSummary.activeRepairs} ใบงาน</div></div>
+          </div>
+          {(() => {
+            const byId: Record<number, Location> = {}; locations.forEach(l => { byId[l.id] = l; });
+            const roomRows = Object.entries(roomHealthMap).map(([ridStr, h]) => {
+              const rid = Number(ridStr); const loc = byId[rid];
+              const has = h.faultyPorts>0 || h.plannedPorts>0 || h.issueCabinets>0 || h.assetsWithActiveRepairs>0;
+              return { rid, name: loc ? `${loc.name}${loc.code?` (${loc.code})`:''}` : `ห้อง #${rid}`, has, ...h };
+            }).filter(r => r.has).sort((a,b)=> (b.faultyPorts+b.assetsWithActiveRepairs*10) - (a.faultyPorts+a.assetsWithActiveRepairs*10));
+            const repairAssets = assets.map(a => ({ a, ah: assetHealth[a.id], ar: assetHealth[a.id]?.active_repairs || 0 })).filter(x => x.ar > 0).sort((x,y)=> (y.ar - x.ar));
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div className="rounded border p-2 space-y-2">
+                  <div className="font-medium">ห้อง/จุดที่ต้องติดตาม ({roomRows.length})</div>
+                  {roomRows.length === 0 ? <div className="text-xs text-muted-foreground">ไม่พบห้องที่มีพอร์ตชำรุด/วางแผน ตู้มีปัญหา หรือเครื่องที่มีใบแจ้งซ่อมเปิด</div> : (
+                    <div className="space-y-1 max-h-64 overflow-auto pr-1">
+                      {roomRows.slice(0, 40).map(r => (
+                        <div key={r.rid} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{r.name}</div>
+                            <div className="text-[11px] text-muted-foreground flex flex-wrap gap-1 mt-0.5">
+                              {r.faultyPorts>0 && <span className="text-red-700">พอร์ตชำรุด {r.faultyPorts}</span>}
+                              {r.plannedPorts>0 && <span className="text-sky-700">วางแผน {r.plannedPorts}</span>}
+                              {r.issueCabinets>0 && <span className="text-red-700">ตู้มีปัญหา {r.issueCabinets}</span>}
+                              {r.assetsWithActiveRepairs>0 && <span className="text-amber-800">เครื่องเปิดซ่อม {r.assetsWithActiveRepairs} ({r.activeRepairs} ใบงาน)</span>}
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={()=> selectRoomById(r.rid)}>ไปที่ห้อง</Button>
+                        </div>
+                      ))}
+                      {roomRows.length > 40 && <div className="text-xs text-muted-foreground">แสดง 40 รายการแรก</div>}
+                    </div>
+                  )}
+                </div>
+                <div className="rounded border p-2 space-y-2">
+                  <div className="font-medium">เครื่องจักรที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ ({repairAssets.length})</div>
+                  {repairAssets.length === 0 ? <div className="text-xs text-muted-foreground">ไม่พบเครื่องที่มีใบแจ้งซ่อมเปิด/กำลังดำเนินการ (จากข้อมูลซ่อมที่มีอยู่)</div> : (
+                    <div className="space-y-1 max-h-64 overflow-auto pr-1">
+                      {repairAssets.slice(0, 40).map(({a, ah, ar}) => {
+                        const loc = a.location_id ? byId[a.location_id] : null;
+                        const mp = String(ah?.max_priority || "");
+                        return (
+                          <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded border p-2">
+                            <div className="min-w-0">
+                              <div className="font-medium truncate"><span className="font-mono text-xs mr-1">{a.code}</span>{a.name}</div>
+                              <div className="text-[11px] text-muted-foreground flex flex-wrap gap-1 mt-0.5">
+                                <AndonBadge tone={mp.toLowerCase()==='critical'||mp.toLowerCase()==='high' ? 'down' : 'warn'}>เปิด/กำลังดำเนินการ {ar}</AndonBadge>
+                                {mp && <span>Priority: {mp}</span>}
+                                {loc ? <span>· {loc.name}</span> : <span>· ไม่ระบุตำแหน่ง</span>}
+                              </div>
+                            </div>
+                            {a.location_id ? <Button size="sm" variant="outline" className="h-7 text-xs" onClick={()=> { selectRoomById(a.location_id as number); setFocusPort({ key: `asset:${a.id}:*`, roomId: a.location_id as number, source: "asset", assetId: a.id, label: a.code }); setTimeout(()=>{ const el=document.getElementById(`asset-card-${a.id}`); if(el) el.scrollIntoView({behavior:"smooth", block:"center"}); }, 80); }}>ไปที่เครื่อง</Button> : null}
+                          </div>
+                        );
+                      })}
+                      {repairAssets.length > 40 && <div className="text-xs text-muted-foreground">แสดง 40 รายการแรก</div>}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base flex items-center gap-2"><Network className="w-4 h-4"/>ความเชื่อมโยงต้นทาง-ปลายทาง และผลกระทบ</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
@@ -812,9 +959,9 @@ export default function FacilityLayoutPage() {
         </CardHeader>
         <CardContent>
           {viewMode === "2d" ? (
-            <Layout2D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} selectedRoom={effectiveRoomId} />
+            <Layout2D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} selectedRoom={effectiveRoomId} assetHealth={assetHealth} roomHealthMap={roomHealthMap} />
           ) : (
-            <Layout3D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} />
+            <Layout3D buildings={buildings} floors={floors} rooms={rooms} byParent={byParent} assets={assets} config={config} selectedBuilding={selectedBuilding} selectedFloor={selectedFloor} assetHealth={assetHealth} roomHealthMap={roomHealthMap} />
           )}
           <p className="text-xs text-muted-foreground mt-3">หมายเหตุ: ผัง 2D/3D สร้างจากโครงสร้างอาคาร (locations), ตู้ไฟ/ตู้ควบคุม และพอร์ต/จุดเชื่อมต่อทุกรูปแบบที่บันทึกไว้ — ข้อมูลพอร์ต/ตู้ไฟสามารถใส่ทีหลังได้เสมอ และรองรับการแนบรูป floor plan จริง/ขยายเป็นผังตามพิกัดเมื่อมีแบบแปลน</p>
         </CardContent>
@@ -946,7 +1093,7 @@ function AssetPortEditor({ assetId, config, setConfig, portIndex, impactInfo, de
   );
 }
 
-function Layout2D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, selectedRoom }: any) {
+function Layout2D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, selectedRoom, assetHealth, roomHealthMap }: any) {
   const showBuildings = !selectedBuilding ? buildings : [];
   const showFloors = selectedBuilding && !selectedFloor ? floors : [];
   const showRooms = selectedFloor ? rooms : (selectedBuilding && floors.length===0 ? (byParent[selectedBuilding]||[]) : []);
@@ -1011,21 +1158,39 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
               const roomObj = (config.rooms[String(r.id)] || {}) as any;
               const rp = (roomObj.ports||[]) as Port[];
               const cabs = (roomObj.cabinets||[]) as Cabinet[];
-              const cabPorts = cabs.flatMap(c => c?.ports || []);
+              const cabPorts = cabs.flatMap((c: any) => c?.ports || []);
               const allPorts = [...rp, ...cabPorts];
               const faulty = allPorts.filter(p=>p.status==='faulty').length;
+              const planned = allPorts.filter(p=>p.status==='planned').length;
+              const issueCabs = cabs.filter((c:any)=>['faulty','inactive','maintenance'].includes(c?.status)).length;
+              const rh = (roomHealthMap || {})[r.id] || { assetsWithActiveRepairs: 0, activeRepairs: 0 };
+              const assetsRepair = ra.filter((a:Asset)=> (assetHealth?.[a.id]?.active_repairs || 0) > 0).length;
+              const hasIssue = faulty>0 || issueCabs>0 || assetsRepair>0;
+              const hasWarn = !hasIssue && (planned>0);
               const active = selectedRoom === r.id;
+              const borderCls = active ? "border-emerald-500 bg-emerald-50" : hasIssue ? "border-red-300 bg-red-50/40" : hasWarn ? "border-amber-300 bg-amber-50/30" : "border-slate-200 bg-white";
               return (
-                <div key={r.id} className={`rounded-xl border-2 p-3 ${active?"border-emerald-500 bg-emerald-50":"border-slate-200 bg-white"}`}>
-                  <div className="font-semibold text-sm flex items-center justify-between"><span>{r.name}</span>{faulty>0 && <Badge variant="danger">จุดชำรุด {faulty}</Badge>}</div>
+                <div key={r.id} className={`rounded-xl border-2 p-3 ${borderCls}`}>
+                  <div className="font-semibold text-sm flex items-center justify-between gap-2"><span className="truncate">{r.name}</span>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {faulty>0 && <Badge variant="danger">ชำรุด {faulty}</Badge>}
+                      {issueCabs>0 && <Badge variant="danger">ตู้มีปัญหา {issueCabs}</Badge>}
+                    </div>
+                  </div>
                   <div className="text-xs text-muted-foreground">{r.code || `#${r.id}`}</div>
                   <div className="mt-2 text-xs space-y-1">
-                    <div className="flex items-center gap-1"><Cpu className="w-3 h-3"/>{ra.length} เครื่อง</div>
+                    <div className="flex items-center gap-1"><Cpu className="w-3 h-3"/>{ra.length} เครื่อง{assetsRepair>0 ? <span className="text-red-700 font-medium"> · เปิดซ่อม {assetsRepair}</span> : ""}</div>
                     <div className="flex items-center gap-1"><Box className="w-3 h-3"/>{cabs.length} ตู้/แผง</div>
-                    <div className="flex items-center gap-1"><Cable className="w-3 h-3"/>{allPorts.length} พอร์ต/จุด (ใช้งาน {allPorts.filter(p=>p.status==='active').length} / ว่าง {allPorts.filter(p=>p.status==='spare').length})</div>
+                    <div className="flex items-center gap-1"><Cable className="w-3 h-3"/>{allPorts.length} พอร์ต/จุด (ใช้งาน {allPorts.filter(p=>p.status==='active').length} / ว่าง {allPorts.filter(p=>p.status==='spare').length}{planned>0?` / วางแผน ${planned}`:""})</div>
                   </div>
-                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=><span key={a.id} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 border">{a.code}</span>)}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
-                  {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=><span key={c.id} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200">{c.name||c.code||"ตู้"}</span>)}{cabs.length>3 && <span className="text-[10px] text-muted-foreground">+{cabs.length-3}</span>}</div>}
+                  {(assetsRepair>0 || planned>0) && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {assetsRepair>0 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-900">ใบแจ้งซ่อมเปิด/กำลังดำเนินการ {rh.activeRepairs || assetsRepair}</span>}
+                      {planned>0 && <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-sky-800">พอร์ตวางแผน {planned}</span>}
+                    </div>
+                  )}
+                  {ra.length>0 && <div className="mt-2 flex flex-wrap gap-1">{ra.slice(0,4).map((a:Asset)=>{ const ar = assetHealth?.[a.id]?.active_repairs || 0; return <span key={a.id} className={`text-[10px] px-1.5 py-0.5 rounded border ${ar>0?"bg-red-50 border-red-300 text-red-800":"bg-slate-100"}`} title={ar>0?`มีใบแจ้งซ่อมเปิด ${ar}`:undefined}>{a.code}{ar>0?" !":""}</span>; })}{ra.length>4 && <span className="text-[10px] text-muted-foreground">+{ra.length-4}</span>}</div>}
+                  {cabs.length>0 && <div className="mt-1 flex flex-wrap gap-1">{cabs.slice(0,3).map((c:Cabinet)=>{ const bad=["faulty","inactive","maintenance"].includes(c.status); return <span key={c.id} className={`text-[10px] px-1.5 py-0.5 rounded border ${bad?"bg-red-50 border-red-300 text-red-800":"bg-amber-50 border-amber-200"}`}>{c.name||c.code||"ตู้"}{bad?" !":""}</span>; })}{cabs.length>3 && <span className="text-[10px] text-muted-foreground">+{cabs.length-3}</span>}</div>}
                 </div>
               );
             })}
@@ -1038,7 +1203,7 @@ function Layout2D({ buildings, floors, rooms, byParent, assets, config, selected
   );
 }
 
-function Layout3D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor }: any) {
+function Layout3D({ buildings, floors, rooms, byParent, assets, config, selectedBuilding, selectedFloor, assetHealth, roomHealthMap }: any) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -1085,22 +1250,31 @@ function Layout3D({ buildings, floors, rooms, byParent, assets, config, selected
               const ac = assets.filter((a:any)=>a.location_id===r.id).length;
               const ro: any = config.rooms[String(r.id)] || {};
               const cabs: any[] = ro.cabinets || [];
-              const pc = (ro.ports||[]).length + cabs.reduce((s,c)=>s+((c?.ports||[]).length),0);
+              const allP = [...(ro.ports||[]), ...cabs.flatMap((c:any)=>c?.ports||[])];
+              const faulty = allP.filter((p:any)=>p?.status==='faulty').length + cabs.filter((c:any)=>['faulty','inactive','maintenance'].includes(c?.status)).length;
+              const planned = allP.filter((p:any)=>p?.status==='planned').length;
+              const arCount = assets.filter((a:any)=>a.location_id===r.id).reduce((s:number,a:any)=>s + (assetHealth?.[a.id]?.active_repairs || 0), 0);
+              const pc = allP.length;
               const cc = cabs.length;
               const mh = 0.18 + Math.min(0.4, ac*0.05 + pc*0.015 + cc*0.06);
-              drawBox(rx, ry, z + h*0.85, 0.5, 0.45, mh, ac>0?'rgb(110,231,183)':(cc>0?'rgb(253,230,138)':'rgb(226,232,240)'), ac>0?'rgb(52,211,153)':(cc>0?'rgb(251,191,36)':'rgb(203,213,225)'), ac>0?'rgb(16,185,129)':(cc>0?'rgb(245,158,11)':'rgb(148,163,184)'), ac>0?'rgb(4,120,87)':(cc>0?'rgb(180,83,9)':'rgb(100,116,139)'));
+              let top='rgb(226,232,240)', side='rgb(203,213,225)', front='rgb(148,163,184)', stroke='rgb(100,116,139)';
+              if (faulty>0 || arCount>0) { top='rgb(252,165,165)'; side='rgb(248,113,113)'; front='rgb(239,68,68)'; stroke='rgb(185,28,28)'; }
+              else if (planned>0) { top='rgb(253,230,138)'; side='rgb(251,191,36)'; front='rgb(245,158,11)'; stroke='rgb(180,83,9)'; }
+              else if (ac>0) { top='rgb(110,231,183)'; side='rgb(52,211,153)'; front='rgb(16,185,129)'; stroke='rgb(4,120,87)'; }
+              else if (cc>0) { top='rgb(253,230,138)'; side='rgb(251,191,36)'; front='rgb(245,158,11)'; stroke='rgb(180,83,9)'; }
+              drawBox(rx, ry, z + h*0.85, 0.5, 0.45, mh, top, side, front, stroke);
             });
           });
         }
         bx += 3.6;
       });
       if (blds.length===0) { ctx.fillStyle='rgb(100,116,139)'; ctx.font='14px sans-serif'; ctx.textAlign='center'; ctx.fillText('ยังไม่มีข้อมูลอาคาร/ชั้น/ห้อง ให้เพิ่มใน Locations', W()/2, H()/2); }
-      ctx.fillStyle='rgb(51,65,85)'; ctx.font='12px sans-serif'; ctx.textAlign='left'; ctx.fillText('3D Isometric View — อาคาร/ชั้น/ห้อง และจุดเครื่องจักร-พอร์ต', 12, 20);
+      ctx.fillStyle='rgb(51,65,85)'; ctx.font='12px sans-serif'; ctx.textAlign='left'; ctx.fillText('3D Isometric — ซ้อนทับสถานะสุขภาพ: แดง=ชำรุด/ซ่อมเปิด, เหลือง=วางแผน, เขียว=มีเครื่อง', 12, 20);
       raf = requestAnimationFrame(draw);
     };
     draw();
     window.addEventListener('resize', resize);
     return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, [buildings,floors,rooms,byParent,assets,config,selectedBuilding,selectedFloor]);
+  }, [buildings,floors,rooms,byParent,assets,config,selectedBuilding,selectedFloor,assetHealth,roomHealthMap]);
   return <div className="w-full h-[420px] rounded-xl border overflow-hidden bg-slate-50"><canvas ref={canvasRef} className="w-full h-full block" /></div>;
 }
