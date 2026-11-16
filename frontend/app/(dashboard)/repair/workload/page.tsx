@@ -475,35 +475,29 @@ export default function WorkloadPage() {
                     {tech.jobs.map((job) => {
                       const overdue = isOverdue(job);
                       const problemImg = imageSrc(job.before_image_path);
+                      const afterImg = imageSrc(job.after_image_path);
                       return (
                         <li
                           key={job.id}
                           className="rounded-md border border-[var(--cmms-border)] bg-white px-3 py-2"
                         >
                           <div className="flex items-start gap-2">
-                            {problemImg ? (
-                              <a
-                                href={problemImg}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="shrink-0"
-                                title="รูปปัญหา (ก่อนซ่อม)"
-                              >
-                                <img
-                                  src={problemImg}
-                                  alt={`รูปปัญหา ${job.work_order_no || job.id}`}
-                                  className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover"
-                                  loading="lazy"
-                                />
-                              </a>
-                            ) : (
-                              <div
-                                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)]"
-                                title="ไม่มีรูปปัญหา"
-                              >
-                                ไม่มีรูป
-                              </div>
-                            )}
+                            <div className="flex shrink-0 gap-1">
+                              {problemImg ? (
+                                <a href={problemImg} target="_blank" rel="noopener noreferrer" className="shrink-0" title="รูปปัญหา (ก่อนซ่อม)">
+                                  <img src={problemImg} alt={`รูปก่อนซ่อม ${job.work_order_no || job.id}`} className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover" loading="lazy" />
+                                </a>
+                              ) : (
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5" title="ไม่มีรูปก่อนซ่อม">ก่อนซ่อม<br/>-</div>
+                              )}
+                              {afterImg ? (
+                                <a href={afterImg} target="_blank" rel="noopener noreferrer" className="shrink-0" title="รูปหลังซ่อม">
+                                  <img src={afterImg} alt={`รูปหลังซ่อม ${job.work_order_no || job.id}`} className="h-14 w-14 rounded-md border border-[var(--cmms-border)] object-cover" loading="lazy" />
+                                </a>
+                              ) : (
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-dashed border-[var(--cmms-border)] bg-[var(--cmms-bg-muted)]/30 text-[10px] text-[var(--cmms-text-muted)] text-center leading-tight px-0.5" title="ไม่มีรูปหลังซ่อม">หลังซ่อม<br/>-</div>
+                              )}
+                            </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
@@ -550,7 +544,7 @@ export default function WorkloadPage() {
       )}
 
       <p className="text-sm text-[var(--cmms-text-muted)]">
-        หมายเหตุ: รายชื่อช่าง ตัวชี้วัด รายการงานค้าง รูปช่าง และรูปปัญหา (ก่อนซ่อม) อ่านจากข้อมูลจริงในระบบ
+        หมายเหตุ: รายชื่อช่าง ตัวชี้วัด รายการงานค้าง รูปช่าง และรูปภาพงานซ่อม (ก่อน/หลังซ่อม) อ่านจากข้อมูลจริงในระบบ
         (workload/repair) — งานเกินกำหนดนับจาก estimated_completion_date ของใบงานที่ยังไม่ปิด
         {jobs.length >= 500 ? " (แสดงรายละเอียดงานค้างสูงสุด 500 ใบแรก)" : ""}
       </p>
