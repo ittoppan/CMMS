@@ -22,6 +22,7 @@ import {
   ListChecks,
   PlayCircle,
   Building2,
+  Network,
   Box,
   Scale,
   ArrowLeftRight,
@@ -169,7 +170,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
   },
   {
     titleKey: "nav.pm_machines",
-    pathPrefixes: ["/pm_am", "/inspections", "/asset_registry", "/assets", "/qr-sheet", "/equipment_borrowing"],
+    pathPrefixes: ["/pm_am", "/inspections", "/asset_registry", "/assets", "/qr-sheet", "/equipment_borrowing", "/facility-layout"],
     items: [
       { perm: "pm_am", labelKey: "menu.pm_am", href: "/pm_am", icon: CalendarDays },
       { perm: "pm_am/calendar", labelKey: "menu.pm_calendar", href: "/pm_am/calendar", icon: CalendarDays },
@@ -177,6 +178,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
       { perm: "pm_am/create", labelKey: "menu.pm_create", href: "/pm_am/create", icon: FilePlus2 },
       { perm: "inspections", labelKey: "menu.inspections", href: "/inspections", icon: ListChecks },
       { perm: "asset_registry", labelKey: "menu.asset_registry", href: "/asset_registry", icon: Building2 },
+      { perm: "asset_registry", labelKey: "menu.facility_layout", href: "/facility-layout", icon: Network },
       { perm: "qr-sheet", labelKey: "menu.qr_sheet", href: "/qr-sheet", icon: Map },
       { perm: "pm_am/batch_schedule", labelKey: "menu.pm_batch", href: "/pm_am/batch_schedule", icon: RectangleHorizontal, secondary: true },
       { perm: "inspections/run", labelKey: "menu.inspections_run", href: "/inspections/run", icon: PlayCircle, secondary: true },

@@ -91,6 +91,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "menu.inspections_templates": { th: "จัดการ Template ตรวจ", en: "Inspection Templates" },
   "menu.asset_registry": { th: "ทะเบียนเครื่องจักร", en: "Machine Registry" },
   "menu.qr_sheet": { th: "แผ่น QR เครื่องจักร", en: "Machine QR Sheets" },
+  "menu.facility_layout": { th: "ผังอาคารและพอร์ต", en: "Facility Layout & Ports" },
   "menu.bom_tree": { th: "ผังชิ้นส่วน (BOM)", en: "Parts Tree (BOM)" },
   "menu.criticality": { th: "ลำดับความสำคัญ A/B/C", en: "Criticality A/B/C" },
   "menu.asset_reliability": { th: "ความน่าเชื่อถือ & วงจรชีวิต (Reliability)", en: "Asset Reliability & Lifecycle" },
@@ -729,6 +730,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/inspections/run": { th: "ทำรายการตรวจเช็ค", en: "Run Inspection" },
   "/inspections/history": { th: "ประวัติการตรวจเช็ค", en: "Inspection History" },
   "/asset_registry": { th: "ทะเบียนเครื่องจักร", en: "Machine Registry" },
+  "/facility-layout": { th: "ผังอาคารและพอร์ต", en: "Facility Layout & Ports" },
   "/asset_registry/view": { th: "รายละเอียดเครื่องจักร", en: "Machine Detail" },
   "/qr-sheet": { th: "QR Sheet เครื่องจักร", en: "Machine QR Sheets" },
   "/asset_registry/bom_tree": { th: "BOM Tree ชิ้นส่วน", en: "Parts Tree (BOM)" },
@@ -904,6 +906,7 @@ const SECTION_MAP: Record<string, { th: string; en: string }> = {
   "/pm_am": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/asset-reliability": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/asset_registry": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
+  "/facility-layout": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/assets": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/equipment_borrowing": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
   "/calibration": { th: "แผน PM & เครื่องจักร", en: "PM Plans & Machines" },
@@ -1115,6 +1118,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   asset_registry: {
     th: { eyebrow: "ASSET REGISTRY · CMMS-TOPPAN", title: "ทะเบียนเครื่องจักรและทรัพย์สิน", desc: "ฐานข้อมูลเครื่องจักร อุปกรณ์ และสายการผลิตทั้งหมดของโรงงาน TOPPAN" },
     en: { eyebrow: "ASSET REGISTRY · CMMS-TOPPAN", title: "Machine & Asset Registry", desc: "Database of all TOPPAN machines, equipment and production lines" },
+  },
+  "facility-layout": {
+    th: { eyebrow: "FACILITY LAYOUT · CMMS-TOPPAN", title: "ผังอาคาร / ชั้น / ห้อง และพอร์ต", desc: "บริหารโครงสร้างอาคาร ผูกเครื่องจักรกับตำแหน่ง และทะเบียนพอร์ต (LAN/Power/I-O/Sensor) พร้อมมุมมองผัง 2D/3D" },
+    en: { eyebrow: "FACILITY LAYOUT · CMMS-TOPPAN", title: "Facility Layout & Ports", desc: "Manage building/floor/room hierarchy, asset locations, and port registry with 2D/3D layout views" },
   },
   inspections: {
     th: { eyebrow: "INSPECTION CHECKLIST · CMMS-TOPPAN", title: "ตรวจเช็ครอบ (Checklist)", desc: "รอบตรวจตามเครื่อง/สาธารณูปโภค — ตรวจเช็คเสร็จแล้วบันทึกผลได้ทันที" },
