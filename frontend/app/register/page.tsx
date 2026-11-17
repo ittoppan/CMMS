@@ -8,8 +8,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, LinkIcon, User, AlertCircle, Phone, Mail } from "lucide-react";
+import { ShieldCheck, LinkIcon, User, AlertCircle } from "lucide-react";
 import SuccessDialog from "@/components/SuccessDialog";
+import SupportContactStrip from "@/components/SupportContactStrip";
 import {
   UNBOUND_TITLE,
   UNBOUND_BODY,
@@ -63,7 +64,7 @@ function RegisterContent() {
   const [linePic, setLinePic] = useState("");
   const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
   const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
-  // ช่องทางติดต่อแอดมิน (settings: company_phone / smtp_from_email) — ชุดเดียวกับหน้า /repair/request
+  // ช่องทางติดต่อแอดมิน — ชุดเดียวกับหน้า /repair/request (แสดงผลด้วย SupportContactStrip)
   const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
 
   const [empCode, setEmpCode] = useState("");
@@ -346,34 +347,7 @@ function RegisterContent() {
                         <li key={s}>{s}</li>
                       ))}
                     </ol>
-                    {(supportContact?.phone || supportContact?.email) && (
-                      <div
-                        className="mt-1 rounded-lg border px-3 py-2"
-                        style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg)" }}
-                      >
-                        <p className="m-0 mb-1 text-xs font-bold text-[var(--cmms-text-secondary)]">ติดต่อแอดมิน</p>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                          {supportContact?.phone && (
-                            <a
-                              href={`tel:${supportContact.phone.replace(/[^0-9+]/g, "")}`}
-                              className="flex items-center gap-1.5"
-                              style={{ color: "var(--cmms-primary)" }}
-                            >
-                              <Phone size={14} strokeWidth={1.75} /> {supportContact.phone}
-                            </a>
-                          )}
-                          {supportContact?.email && (
-                            <a
-                              href={`mailto:${supportContact.email}`}
-                              className="flex min-w-0 items-center gap-1.5 break-all"
-                              style={{ color: "var(--cmms-primary)" }}
-                            >
-                              <Mail size={14} strokeWidth={1.75} /> {supportContact.email}
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                    <SupportContactStrip contact={supportContact} className="mt-1" />
                   </div>
 
                   <div className="mt-3">

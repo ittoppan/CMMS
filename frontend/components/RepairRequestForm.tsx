@@ -48,6 +48,7 @@ import {
   ListChecks,
 } from "lucide-react";
 import LiffLangToggle from "./LiffLangToggle";
+import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { liffAuthHeaders } from "@/lib/liff-session";
@@ -300,7 +301,8 @@ export default function RepairRequestForm() {
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
-  // ช่องทางติดต่อแอดมิน (settings: company_phone / smtp_from_email) สำหรับสถานะ unbound
+  // ช่องทางติดต่อแอดมินสำหรับสถานะ unbound — จาก settings_support_contact()
+  // (support_phone / support_email → fallback company_phone / smtp_from_email); แสดงผลด้วย SupportContactStrip
   const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
 
   useEffect(() => {
@@ -976,34 +978,7 @@ const flushQueue = async () => {
                 ))}
               </ol>
 
-              {(supportContact?.phone || supportContact?.email) && (
-                <div
-                  className="rounded-lg border px-3 py-2"
-                  style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg)" }}
-                >
-                  <p className="m-0 mb-1 text-xs font-bold text-[var(--cmms-text-secondary)]">ติดต่อแอดมิน</p>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                    {supportContact?.phone && (
-                      <a
-                        href={`tel:${supportContact.phone.replace(/[^0-9+]/g, "")}`}
-                        className="flex items-center gap-1.5"
-                        style={{ color: "var(--cmms-primary)" }}
-                      >
-                        <Phone size={14} strokeWidth={1.75} /> {supportContact.phone}
-                      </a>
-                    )}
-                    {supportContact?.email && (
-                      <a
-                        href={`mailto:${supportContact.email}`}
-                        className="flex min-w-0 items-center gap-1.5 break-all"
-                        style={{ color: "var(--cmms-primary)" }}
-                      >
-                        <Mail size={14} strokeWidth={1.75} /> {supportContact.email}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
+              <SupportContactStrip contact={supportContact} />
 
               <Input
                 label="เลขพนักงาน (กรอกหลังแอดมินเพิ่มผู้ใช้แล้ว)"
