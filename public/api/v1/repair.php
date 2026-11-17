@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../../src/helpers/failure.php';
 require_once __DIR__ . '/../../../src/helpers/repair_time.php';
 require_once __DIR__ . '/../../../src/helpers/sla.php';
 require_once __DIR__ . '/../../../src/helpers/repair_owner.php';
+require_once __DIR__ . '/../../../src/helpers/repair_links.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -481,9 +482,11 @@ try {
                         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $lid) $targets[] = (string)$lid;
                     }
 
+                    // ปุ่มในข้อความ LINE = หน้าติดตามงานของผู้แจ้ง (LIFF) ไม่ใช่ /repair/view ที่ต้อง login
+                    $trackUrl = repair_track_liff_url();
                     foreach (array_unique($targets) as $tid) {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
-                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
+                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $trackUrl, $photos);
                     }
                 }
             } catch (Exception $e) {
@@ -981,7 +984,8 @@ try {
                                     '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
                                 ];
                                 $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
-                                sendLineTemplatePush($creatorLineId, 'line_tpl_completed', $cv, $detailUrl, $photos);
+                                // ผู้แจ้งเปิดใน LINE — ชี้ไปหน้าติดตามงานของฉัน ไม่ใช่ /repair/view (ติด login)
+                                sendLineTemplatePush($creatorLineId, 'line_tpl_completed', $cv, repair_track_liff_url(), $photos);
                             }
                         }
 
@@ -1019,7 +1023,7 @@ try {
 "
                                 . "ค่าใช้จ่ายรวม: " . number_format($totalCost) . " บาท";
                             try {
-                                sendEmailNotification($creatorEmail, $creatorName, $subj, $msgBody, $detailUrl);
+                                sendEmailNotification($creatorEmail, $creatorName, $subj, $msgBody, repair_track_url());
                             } catch (Throwable $e) {
                                 error_log('[repair.php] creator email notify failed: ' . $e->getMessage());
                             }
