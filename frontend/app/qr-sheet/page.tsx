@@ -76,9 +76,11 @@ export default function QrSheetPage() {
           // ลิงก์ LIFF (?asset_code=…) — กล้องมือถือสแกนแล้วเปิดหน้าแจ้งซ่อมได้จริง
           // ถ้ายังไม่ได้ตั้ง LIFF ID จะ fallback เป็น payload มาตรฐาน CMMS-A-<token>
           const payload = m.liff_url || (m.payload && m.payload.startsWith("CMMS-") ? m.payload : m.code);
+          // margin = 4 โมดูล = quiet zone ตามมาตรฐาน QR — ลิงก์ LIFF ยาวขึ้นเป็น QR
+          // ระดับ 4 (33×33) ถ้า margin แนบเกินไปกล้องมือถือจะหามุม QR ไม่เจอ
           map[m.code] = await QRCode.toDataURL(payload, {
             width: 300,
-            margin: 1,
+            margin: 4,
             color: { dark, light: "#FFFFFF" },
           });
         } catch {
