@@ -7,8 +7,15 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, LinkIcon, User, AlertCircle } from "lucide-react";
+import { ShieldCheck, LinkIcon, User, AlertCircle, Phone, Mail } from "lucide-react";
 import SuccessDialog from "@/components/SuccessDialog";
+import {
+  UNBOUND_TITLE,
+  UNBOUND_BODY,
+  UNBOUND_STEPS,
+  bindErrorMessage,
+  type SupportContact,
+} from "@/lib/liff-bind-copy";
 
 declare global {
   interface Window {
@@ -56,6 +63,8 @@ function RegisterContent() {
   const [linePic, setLinePic] = useState("");
   const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
   const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
+  // ช่องทางติดต่อแอดมิน (settings: company_phone / smtp_from_email) — ชุดเดียวกับหน้า /repair/request
+  const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
 
   const [empCode, setEmpCode] = useState("");
   const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
@@ -79,6 +88,7 @@ function RegisterContent() {
         const json = await res.json().catch(() => ({}));
         // LIFF App ของหน้า /register (line_liff_register_id) ก่อน ถ้ายังไม่ได้ตั้ง → ใช้ตัวเดิม (frontend จะ fallback เป็น external)
         liffId = (json?.line_liff_register_id || json?.line_liff_id || "") as string;
+        if (json?.contact) setSupportContact(json.contact as SupportContact);
       } catch { /* ignore */ }
       if (cancelled) return;
 
@@ -161,7 +171,7 @@ function RegisterContent() {
       return;
     }
     if (!/^[A-Z0-9]{3,10}$/.test(code)) {
-      setError("รูปแบบรหัสพนักงานไม่ถูกต้อง (ตัวอย่าง: E01117 หรือ EMP005)");
+      setError(bindErrorMessage({ format: true, contact: supportContact }));
       return;
     }
     setSubmitting(true);
@@ -182,10 +192,11 @@ function RegisterContent() {
         setDone(true);
         try { localStorage.setItem("cmms_line_bound", "1"); } catch { /* ignore */ }
       } else {
-        setError(json.error || "ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง");
+        // ถ้อยคำชุดเดียวกับหน้า /repair/request — 404/409 บอกชัดว่าต้องให้แอดมินเพิ่มผู้ใช้ก่อน + ช่องทางติดต่อ
+        setError(bindErrorMessage({ status: res.status, raw: json.error, contact: supportContact }));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+      setError(bindErrorMessage({ offline: true, contact: supportContact }));
     }
     setSubmitting(false);
   };
@@ -271,7 +282,7 @@ function RegisterContent() {
               "กดยืนยันผูกบัญชี เมื่อสำเร็จสามารถกลับไปใช้เมนูแจ้งซ่อม/รับแจ้งเตือนได้ตามที่ระบบตั้งค่า",
             ]}
             source="หน้า frontend/app/register/page.tsx เรียก /api/v1/line_register.php (ตรวจสอบสถานะ/ผูกบัญชี) และ /api/v1/user_lookup.php (ตรวจสอบรหัสพนักงาน) — ข้อมูลและผลลัพธ์ขึ้นกับ API/การตั้งค่า LINE ของระบบ"
-            note="ต้องใช้รหัสพนักงานที่มีในระบบ หากผูกแล้วจะแสดงข้อมูลที่ผูกไว้ การแก้ไขการผูกอาจต้องติดต่อผู้ดูแลระบบ"
+            note="ต้องให้แอดมินเพิ่มผู้ใช้ในระบบก่อน แล้วจึงกรอกเลขพนักงานเพื่อผูกบัญชี (ทำครั้งเดียวจบ) — ถ้ายังไม่มีบัญชี ให้แจ้งแอดมิน/หัวหน้างานพร้อมเลขพนักงานของคุณ"
             related={[
               { href: "/settings", label: "ตั้งค่าระบบ" },
               { href: "/repair/request", label: "แจ้งซ่อม" },
@@ -318,6 +329,48 @@ function RegisterContent() {
                     <p className="cmms-reg-tile-sub flex-1">
                       {lineName ? `สำหรับ ${lineName}` : "ต้องผูกกับผู้ใช้ที่แอดมินสร้างไว้ในระบบ"}
                     </p>
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-1.5">
+                    <p className="m-0 text-sm font-bold" style={{ color: "var(--cmms-text-primary)" }}>
+                      {UNBOUND_TITLE}
+                    </p>
+                    <p className="m-0 text-sm leading-relaxed" style={{ color: "var(--cmms-text-secondary)" }}>
+                      {UNBOUND_BODY}
+                    </p>
+                    <ol className="m-0 pl-5 text-sm leading-relaxed" style={{ color: "var(--cmms-text-secondary)" }}>
+                      {UNBOUND_STEPS.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ol>
+                    {(supportContact?.phone || supportContact?.email) && (
+                      <div
+                        className="mt-1 rounded-lg border px-3 py-2"
+                        style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg)" }}
+                      >
+                        <p className="m-0 mb-1 text-xs font-bold text-[var(--cmms-text-secondary)]">ติดต่อแอดมิน</p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                          {supportContact?.phone && (
+                            <a
+                              href={`tel:${supportContact.phone.replace(/[^0-9+]/g, "")}`}
+                              className="flex items-center gap-1.5"
+                              style={{ color: "var(--cmms-primary)" }}
+                            >
+                              <Phone size={14} strokeWidth={1.75} /> {supportContact.phone}
+                            </a>
+                          )}
+                          {supportContact?.email && (
+                            <a
+                              href={`mailto:${supportContact.email}`}
+                              className="flex min-w-0 items-center gap-1.5 break-all"
+                              style={{ color: "var(--cmms-primary)" }}
+                            >
+                              <Mail size={14} strokeWidth={1.75} /> {supportContact.email}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-3">
