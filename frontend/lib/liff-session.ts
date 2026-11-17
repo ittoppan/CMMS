@@ -61,6 +61,18 @@ export function subscribeLiffSession(listener: () => void): () => void {
 }
 
 /**
+ * เบราว์เซอร์นี้เป็น in-app browser ของ LINE (LIFF client) หรือไม่
+ *
+ * ถ้าไม่ใช่ LINE จะไม่มีทางได้ ID token เลย — ใช้ตัดสินใจ "ยิงแบบไม่ผูกบัญชี
+ * ทันที" แทนการรอ init SDK หลายวินาทีก่อนรู้ว่าเป็น external
+ * (LINE ต่อท้าย UA ของ in-app browser ด้วย `Line/<version>`)
+ */
+export function isLiffClientBrowser(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return / Line\/[\d.]+/i.test(navigator.userAgent);
+}
+
+/**
  * header สำหรับยืนยันตัวตนผู้ใช้ LINE กับ API (เช่น repair.php ที่ต้องรู้เจ้าของงาน)
  * อ่าน token สด ๆ ตอนยิง request — ใช้ได้ทั้งตอน submit และตอน replay คิว offline
  */

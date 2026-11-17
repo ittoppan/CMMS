@@ -11,13 +11,15 @@
  *  - รอผล init LIFF จาก store (useLiffSession) แบบ event-driven ไม่มี polling
  *    (หน้านั้นไม่มี LiffBridge เลย เช่น /my-repairs แบบ standalone จะรอไม่เกิน
  *    liffWaitMs แล้วยิงต่อด้วย session/localStorage แทนการค้างตลอดไป)
+ *  - ถ้าเปิดนอกแอป LINE (ไม่ใช่ LIFF client) จะไม่มีทางได้ ID token — ยิงแบบ
+ *    ไม่ผูกบัญชีทันที ไม่ต้องรอ liffWaitMs
  *  - แนบ `X-LIFF-Id-Token` (ถ้ามี) เพื่อให้ API ตรวจตัวตนกับ LINE
  *  - ยิงใหม่เมื่อ url เปลี่ยน (ได้ code/uid มาแล้ว), เมื่อ reload(), และยกเลิก
  *    คำขอเก่าด้วย AbortController เมื่อ unmount/เปลี่ยน url
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { useLiffSession } from "./liff-session";
+import { isLiffClientBrowser, useLiffSession } from "./liff-session";
 
 export type LiffFetchOptions = {
   /** URL ที่จะยิง — null = ยังไม่ต้องยิง (เช่นยังไม่มีรหัสเครื่อง) */
@@ -46,7 +48,14 @@ export function useLiffFetch<T>({
   liffWaitMs = 2000,
 }: LiffFetchOptions): LiffFetchResult<T> {
   const session = useLiffSession();
-  const resolved = session.status !== "idle";
+
+  // เช็กหลัง mount (ไม่ใช่ตอน render แรก) เพื่อไม่ให้ HTML จาก server กับ client ไม่ตรงกัน
+  const [outsideLiff, setOutsideLiff] = useState(false);
+  useEffect(() => {
+    setOutsideLiff(!isLiffClientBrowser());
+  }, []);
+
+  const resolved = session.status !== "idle" || outsideLiff;
 
   const [waitedEnough, setWaitedEnough] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -55,6 +64,7 @@ export function useLiffFetch<T>({
   const [error, setError] = useState<string | null>(null);
 
   // กันค้าง: หน้าไหนไม่มี LiffBridge เลย status จะอยู่ที่ idle ตลอด — รอไม่เกิน liffWaitMs
+  // (นอกแอป LINE resolved = true ตั้งแต่ต้น จึงไม่รอเลย)
   useEffect(() => {
     if (resolved) {
       setWaitedEnough(false);

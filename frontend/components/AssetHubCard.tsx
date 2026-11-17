@@ -120,6 +120,8 @@ export default function AssetHubCard() {
   }, []);
 
   // ตัวตน (LIFF ID token)/การรอ LiffBridge/loading/error จัดการโดย hook กลางตัวเดียวกับ MyRepairs
+  // เปิดนอกแอป LINE: hook รู้ทันทีว่าไม่มีทางได้ ID token → ยิงแบบไม่ผูกบัญชีเลย
+  // (ไม่รอ ~6 วิ เหมือนตอนที่ต้อง poll รอ token) การ์ดจึงขึ้นข้อมูลเร็วเท่าเดิม
   const hubUrl = assetCode
     ? `/api/v1/asset_hub.php?${new URLSearchParams({ code: assetCode }).toString()}`
     : null;

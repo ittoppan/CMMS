@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { publishLiffSession } from "@/lib/liff-session";
+import { isLiffClientBrowser, publishLiffSession } from "@/lib/liff-session";
 
 declare global {
   interface Window {
@@ -24,6 +24,14 @@ export default function LiffBridge() {
 
     // LIFF endpoint จริงเท่านั้น — หน้า /register ทำ LIFF เอง (ดู register/page.tsx)
     if (window.location.pathname !== "/repair/request") {
+      publishLiffSession({ status: "external" });
+      return;
+    }
+
+    // เปิดลิงก์นอกแอป LINE (เบราว์เซอร์ปกติ/PWA) — ไม่มีทางได้ ID token
+    // จึงไม่ต้อง fetch LIFF ID/โหลด SDK/รอ init (เดิมรอหลายวินาทีกว่าจะรู้ว่า external
+    // ทำให้ AssetHubCard ขึ้นช้า ทั้งที่ควรแสดงข้อมูลแบบไม่ผูกบัญชีได้ทันที)
+    if (!isLiffClientBrowser()) {
       publishLiffSession({ status: "external" });
       return;
     }
