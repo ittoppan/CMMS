@@ -38,6 +38,7 @@ import {
   ShieldCheck as ShieldCheckIcon,
   MessagesSquare as ChatBubbleLeftRightIcon,
   Smartphone as DevicePhoneMobileIcon,
+  QrCode as QrCodeIcon,
   Server as ServerStackIcon,
   ArrowRight as ArrowRightIcon,
   Lock as LockClosedIcon,
@@ -448,6 +449,7 @@ const SUB_PAGES = [
   { href: "/settings/master/locations", label: "ที่ตั้ง/สถานที่ (ข้อมูลหลัก)", desc: "จัดการสถานที่/ตำแหน่งกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
   { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
+  { href: "/install", label: "ติดตั้งแอปบนมือถือ", desc: "หน้าแนะนำการติดตั้ง + QR สำหรับส่งให้พนักงาน", icon: QrCodeIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
   { href: "/settings/design", label: "ปรับแต่งหน้าตาของระบบ", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
 ];
