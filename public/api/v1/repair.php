@@ -321,6 +321,17 @@ try {
                     $data['asset_id'] = null;
                 }
             }
+            // ผู้แจ้งจาก LINE (LIFF): server แปลง line_user_id → users.id เองเท่านั้น
+            // (ไม่เชื่อ created_by ที่ client ส่งมา) — ทำให้หน้า "ติดตามงานของฉัน"
+            // และการแจ้งเตือนกลับหาผู้แจ้งทำงานได้
+            if (!empty($data['line_user_id'])) {
+                $stLu = $pdo->prepare('SELECT id FROM users WHERE line_user_id = ? AND is_active = 1 LIMIT 1');
+                $stLu->execute([trim((string)$data['line_user_id'])]);
+                $luRow = $stLu->fetch(PDO::FETCH_ASSOC);
+                if ($luRow) {
+                    $data['created_by'] = (int)$luRow['id'];
+                }
+            }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path', 'attachment_path'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
             $closingNow = (isset($data['status']) && strtolower((string)$data['status']) === 'completed') || isset($data['completed_at']);

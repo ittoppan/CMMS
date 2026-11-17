@@ -837,6 +837,9 @@ const flushQueue = async () => {
         is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
+        // ให้ server ผูกเจ้าของงาน (created_by) จาก LINE user ที่ผูกบัญชีแล้ว
+        // → หน้า "ติดตามงานของฉัน" และการแจ้งเตือนกลับหาผู้แจ้งใช้ได้
+        line_user_id: effectiveUid || undefined,
       };
 
       let res: Response;
@@ -893,8 +896,8 @@ const flushQueue = async () => {
             {"\n"}{offlineQueued > 0 ? "ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว"}
           </p>
           <div className="flex flex-col gap-2 w-full">
-            <Button className="w-full" onClick={() => (window.location.href = "/repair")}>
-              <ListChecks className="w-4 h-4" /> ดูรายการงานซ่อม
+            <Button className="w-full" onClick={() => (window.location.href = "/repair/request?view=track")}>
+              <ListChecks className="w-4 h-4" /> ดูรายการงานซ่อมของฉัน
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
