@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { isUsableSupportPhone } from "@/lib/support-contact";
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { setUserLang } from "@/lib/i18n";
@@ -1127,6 +1128,18 @@ export default function SettingsPage() {
                     const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
                     const isColor = COLOR_KEYS.has(row.setting_key);
                     const isEmail = EMAIL_KEYS.has(row.setting_key);
+                    // เตือนเมื่อเบอร์ที่จะแสดงให้ผู้ใช้ถูกกรองออก (placeholder/ว่าง)
+                    const phoneValue = String(form[row.setting_key] ?? "");
+                    const phoneWarning =
+                      row.setting_key === "company_phone"
+                        ? !isUsableSupportPhone(phoneValue)
+                          ? phoneValue.trim() === ""
+                            ? "ว่างอยู่ — ผู้ใช้จะไม่เห็นเบอร์ในหน้าแจ้งซ่อม เว้นแต่จะตั้ง “เบอร์ติดต่อแอดมิน”"
+                            : "ผู้ใช้จะไม่เห็นเบอร์นี้ในหน้าแจ้งซ่อม (ระบบกรองค่า placeholder/เบอร์ปลอมออก) จนกว่าจะใส่เบอร์จริงหรือตั้ง “เบอร์ติดต่อแอดมิน”"
+                          : null
+                        : row.setting_key === "support_phone" && phoneValue.trim() !== "" && !isUsableSupportPhone(phoneValue)
+                          ? "ผู้ใช้จะไม่เห็นเบอร์นี้ (ระบบกรองเบอร์ placeholder ออก) และจะกลับไปใช้เบอร์โทรบริษัทแทน"
+                          : null;
                     const isLang = row.setting_key === "lang_default";
                     const hexValue = String(form[row.setting_key] ?? "").trim();
                     const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
@@ -1154,6 +1167,11 @@ export default function SettingsPage() {
                               {meta.hint || row.description || row.setting_key}
                               {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
                             </p>
+                            {phoneWarning && (
+                              <p className="text-sm" style={{ color: "var(--cmms-warning)", fontWeight: 600 }}>
+                                ⚠ {phoneWarning}
+                              </p>
+                            )}
                           </VStack>
                           {isReadonly && (
                             <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>
