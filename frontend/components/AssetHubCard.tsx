@@ -10,12 +10,14 @@
  *       2) PM ของเครื่องนี้ (ถึงกำหนด/ค้าง)
  *       3) ประวัติการซ่อม (ซ่อมอะไรมาบ้าง ใครซ่อม เมื่อไร)
  *
- * ข้อมูลมาจาก /api/v1/asset_hub.php ซึ่งตรวจ line_user_id ใน localStorage
- * (LiffBridge เขียนไว้) — ยังไม่ผูกบัญชีจะเห็นแค่ชื่อเครื่อง + คำแนะนำให้แอดมินเพิ่มผู้ใช้
+ * ข้อมูลมาจาก /api/v1/asset_hub.php ซึ่งตรวจ LIFF ID token (liff.getIDToken())
+ * ฝั่งเซิร์ฟเวอร์แล้วจึงรู้ว่าเป็น LINE user คนไหน — ไม่ได้เชื่อ userId ที่ client ส่งมา
+ * ยังไม่ผูกบัญชีจะเห็นแค่ชื่อเครื่อง + คำแนะนำให้แอดมินเพิ่มผู้ใช้
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { History, Wrench, CalendarClock, Loader2, ShieldAlert, ChevronDown } from "lucide-react";
+import { getLiffIdToken } from "@/lib/liff-token";
 
 type HubAsset = {
   code: string;
@@ -120,24 +122,15 @@ export default function AssetHubCard() {
     setLoading(true);
     setError(null);
     try {
-      // LiffBridge เขียน line_user_id ลง localStorage แบบ async — ลองอ่านซ้ำสั้น ๆ
-      let lineUserId = "";
-      for (let i = 0; i < 8; i++) {
-        try {
-          lineUserId = localStorage.getItem("cmms_line_user_id") || "";
-        } catch {
-          lineUserId = "";
-        }
-        if (lineUserId) break;
-        await new Promise((r) => setTimeout(r, 400));
-        if (!mounted.current) return;
-      }
+      // LIFF ID token = หลักฐานตัวตนที่เซิร์ฟเวอร์ตรวจกับ LINE (รอ SDK init จาก LiffBridge)
+      const idToken = await getLiffIdToken();
+      if (!mounted.current) return;
 
       const qs = new URLSearchParams({ code });
-      if (lineUserId) qs.set("line_user_id", lineUserId);
       const res = await fetch(`/api/v1/asset_hub.php?${qs.toString()}`, {
         credentials: "include",
         cache: "no-store",
+        headers: idToken ? { "X-LIFF-Id-Token": idToken } : undefined,
       });
       const json = (await res.json()) as HubResponse;
       if (!res.ok || json.success === false) {
