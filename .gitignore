@@ -79,3 +79,6 @@ polish-*.png
 
 # ไบนารีของ zrok2 (94MB) — ไม่ commit เข้า repo
 zrok2/*.exe
+
+# print artifacts: HTML  regenerate ได้ (ฝังฟอนต์/QR ใหม่ทุกครั้ง)
+scripts/print/out/*.html
