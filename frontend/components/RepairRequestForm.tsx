@@ -1025,7 +1025,6 @@ const flushQueue = async () => {
 
               <Input
                 label="เลขพนักงาน (กรอกหลังแอดมินเพิ่มผู้ใช้แล้ว)"
-                isLabelHidden
                 placeholder="เช่น E01117"
                 value={bindEmpCode}
                 onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}

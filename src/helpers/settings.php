@@ -39,3 +39,61 @@ if (!function_exists('setting_value')) {
         return (isset($src[$key]) && $src[$key] !== '') ? (string)$src[$key] : $default;
     }
 }
+
+if (!function_exists('settings_support_contact')) {
+    /**
+     * ช่องทางติดต่อที่ "ใช้ได้จริง" สำหรับข้อความถึงผู้ใช้ (เช่นหน้า unbound ของ /repair/request)
+     *
+     * ปัญหา: settings_defaults.php ใส่ค่า seed ไว้ เช่น company_phone = '02-123-4567'
+     * ซึ่งไม่ใช่เบอร์จริง — ถ้าแอดมินยังไม่แก้ หน้าเว็บจะโชว์เบอร์ปลอมให้ผู้ใช้โทร
+     * ฟังก์ชันนี้จึงกรอง placeholder/ค่าที่ไม่ใช่ช่องทางติดต่อจริงออก (คืน '' = ซ่อน)
+     *
+     * @return array{company:string,phone:string,email:string}
+     */
+    function settings_support_contact(?PDO $pdo = null): array {
+        return [
+            'company' => trim(setting_value('company_name', '', $pdo)),
+            'phone'   => settings_support_phone(setting_value('company_phone', '', $pdo)),
+            'email'   => settings_support_email(setting_value('smtp_from_email', '', $pdo)),
+        ];
+    }
+}
+
+if (!function_exists('settings_support_phone')) {
+    /** คืนเบอร์ถ้าเป็นเบอร์ที่โทรได้จริง; คืน '' ถ้าไม่ใช่ (seed / dummy / จำนวนหลักผิด) */
+    function settings_support_phone(string $raw): string {
+        $raw = trim($raw);
+        if ($raw === '') return '';
+
+        $digits = preg_replace('/\D+/', '', $raw);
+        if (strlen((string)$digits) < 9 || strlen((string)$digits) > 13) return '';
+
+        // ค่า placeholder ที่มากับ seed หรือที่คนมักพิมพ์เล่น
+        $dummy = [
+            '021234567', '0212345678', '012345678', '0123456789', '123456789',
+            '1234567890', '0000000000', '1111111111', '9999999999', '0211111111',
+        ];
+        if (in_array($digits, $dummy, true)) return '';
+        if (preg_match('/^(\d)\1+$/', (string)$digits)) return '';   // ตัวเลขซ้ำทั้งหมด
+
+        return $raw;
+    }
+}
+
+if (!function_exists('settings_support_email')) {
+    /** คืนอีเมลถ้าใช้ติดต่อได้จริง; คืน '' ถ้าไม่ใช่อีเมล/เป็นโดเมนตัวอย่าง/noreply */
+    function settings_support_email(string $raw): string {
+        $raw = trim($raw);
+        if ($raw === '' || !filter_var($raw, FILTER_VALIDATE_EMAIL)) return '';
+
+        [$local, $domain] = explode('@', strtolower($raw), 2);
+        $domain = rtrim($domain, '.');
+        $placeholderDomains = ['example.com', 'example.org', 'example.net', 'test.com', 'test.local', 'localhost'];
+        if (in_array($domain, $placeholderDomains, true)) return '';
+        if (preg_match('/\.(test|invalid|example|local)$/', $domain)) return '';
+        // กล่องที่ไม่ได้รับคำตอบ (เป็น sender ของระบบได้ แต่ไม่ใช่ช่องทางติดต่อแอดมิน)
+        if (preg_match('/^(no-?reply|do-?not-?reply|noreply|test|example|demo)$/', $local)) return '';
+
+        return $raw;
+    }
+}

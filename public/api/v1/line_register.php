@@ -13,6 +13,7 @@
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/helpers/settings.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
@@ -33,16 +34,10 @@ try {
                 if ($liffId === '' && $regId !== '') { $liffId = $regId; }
 
                 // ช่องทางติดต่อสำหรับข้อความ "ยังไม่ถูกเพิ่มในระบบ" (หน้า /repair/request)
+                // กรองค่า seed/placeholder ออก (เช่น company_phone = 02-123-4567) — คืน '' = หน้าเว็บซ่อนบรรทัดนั้น
                 $contact = ['company' => '', 'phone' => '', 'email' => ''];
                 try {
-                    $cs = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('company_name','company_phone','smtp_from_email')");
-                    $map = [];
-                    foreach ($cs->fetchAll() as $row) { $map[$row['setting_key']] = trim((string)$row['setting_value']); }
-                    $contact = [
-                        'company' => $map['company_name'] ?? '',
-                        'phone'   => $map['company_phone'] ?? '',
-                        'email'   => $map['smtp_from_email'] ?? '',
-                    ];
+                    $contact = settings_support_contact($pdo);
                 } catch (Throwable $e) {
                     /* ไม่มี settings ก็ไม่เป็นไร — หน้าเว็บจะซ่อนบรรทัดติดต่อ */
                 }

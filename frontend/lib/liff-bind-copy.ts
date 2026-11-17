@@ -12,7 +12,7 @@ export type SupportContact = {
   email?: string | null;
 };
 
-/** "โทร 02-123-4567 · อีเมล xxx@yyy" (คืน "" ถ้าไม่มีข้อมูลติดต่อเลย) */
+/** "โทร 02-xxx-xxxx · อีเมล xxx@yyy" (คืน "" ถ้าไม่มีข้อมูลติดต่อเลย — ค่า placeholder ถูกกรองฝั่ง API) */
 export function supportContactLine(contact?: SupportContact | null): string {
   if (!contact) return "";
   const parts: string[] = [];
