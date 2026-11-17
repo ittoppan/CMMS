@@ -5,22 +5,28 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 /**
  * CommandPalette — กล่องค้นหาเมนูทั้งแอป (Ctrl/Cmd + K)
- * - ดัชนี: เก็บจาก SideNav ที่แสดงจริง (DOM) + รายการที่ส่งเข้ามา (bottom nav)
- * - คีย์บอร์ด: ↑↓ เลื่อน, ↵ เปิด, ESC ปิด
+ * - ดัชนีหลักมาจาก `items` ที่ shell ส่งเข้ามา (ทุกเมนูที่ role มีสิทธิ์ + เมนูใช้บ่อย)
+ * - เสริมด้วย anchor ที่ render จริงใน DOM (bottom nav มือถือ, ทางลัดในหน้า) เผื่อมีรายการที่ไม่อยู่ใน NAV_GROUPS
+ * - เปิดได้จากคีย์บอร์ด หรือ event "cmms:open-palette" (ปุ่ม ⌘K ใน sidebar)
+ * - คีย์บอร์ด: ↑↓ เลือก, ↵ เปิด, ESC ปิด
  */
-interface NavItem {
+export interface CommandPaletteItem {
   label: string;
   href: string;
+  /** หมวดของเมนู (เช่น "ใช้บ่อย" / "งานซ่อม") — แสดงจาง ๆ ท้ายบรรทัด */
+  section?: string;
+  /** เมนูที่ผู้ใช้เปิดบ่อย — ติดป้ายและอยู่บนสุดตอนยังไม่พิมพ์ */
+  frequent?: boolean;
 }
 
-export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
+export default function CommandPalette({ items = [] }: { items?: CommandPaletteItem[] }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [domItems, setDomItems] = useState<NavItem[]>([]);
+  const [index, setIndex] = useState<CommandPaletteItem[]>([]);
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // เปิด/ปิดด้วย Ctrl/Cmd+K และ ESC
+  // เปิด/ปิดด้วย Ctrl/Cmd+K, ESC และ event จากปุ่ม ⌘K ใน sidebar
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -30,18 +36,30 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
         setOpen(false);
       }
     };
+    const onOpenEvent = () => setOpen(true);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener("cmms:open-palette", onOpenEvent);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("cmms:open-palette", onOpenEvent);
+    };
   }, []);
 
-  // เก็บดัชนีเมนูจาก SideNav ที่แสดงจริงทุกครั้งที่เปิด
+  // สร้างดัชนีทุกครั้งที่เปิด: เมนูจาก shell ก่อน (ลำดับ/สิทธิ์ถูกต้องสุด) แล้วค่อยเก็บ anchor ใน DOM ที่ยังไม่มี
   useEffect(() => {
     if (!open) return;
     const seen = new Set<string>();
-    const collected: NavItem[] = [];
+    const collected: CommandPaletteItem[] = [];
+
+    for (const it of items) {
+      if (!it.href || seen.has(it.href)) continue;
+      seen.add(it.href);
+      collected.push(it);
+    }
+
     document
       .querySelectorAll<HTMLAnchorElement>(
-        '[class*="SideNav_sideNav"] a[href], .cmms-mobile-nav-item'
+        '.cmms-mobile-nav-item[href], [class*="SideNav_sideNav"] a[href]'
       )
       .forEach((a) => {
         const href = a.getAttribute("href") || "";
@@ -52,11 +70,8 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
           label: (a.textContent || href).trim().replace(/\s+/g, " "),
         });
       });
-    // เพิ่มรายการที่ส่งเข้ามา (bottom nav ตามสิทธิ์) — กันกรณี SideNav ยุบอยู่
-    items.forEach((it) => {
-      if (!seen.has(it.href)) collected.push(it);
-    });
-    setDomItems(collected);
+
+    setIndex(collected);
     setQuery("");
     setActive(0);
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -65,14 +80,14 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return domItems.slice(0, 14);
-    return domItems
+    if (!q) return index.slice(0, 14);
+    return index
       .filter(
         (it) =>
           it.label.toLowerCase().includes(q) || it.href.toLowerCase().includes(q)
       )
       .slice(0, 14);
-  }, [query, domItems]);
+  }, [query, index]);
 
   if (!open) return null;
 
@@ -111,7 +126,11 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
               setActive(0);
             }}
             onKeyDown={onKeyDown}
-            placeholder="ค้นหาเมนูหรือฟีเจอร์ (พิมพ์เพื่อกรองทันที)..."
+            placeholder={
+              index.length > 0
+                ? `ค้นหาเมนู (${index.length} รายการ) — พิมพ์เช่น PM, อะไหล่, Sage`
+                : "ค้นหาเมนูหรือฟีเจอร์ (พิมพ์เพื่อกรองทันที)..."
+            }
             autoComplete="off"
             spellCheck={false}
             className="w-full text-sm font-medium focus:outline-none bg-transparent text-[var(--cmms-text-primary)] placeholder:text-[var(--cmms-text-muted)]"
@@ -133,10 +152,17 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
                 onMouseEnter={() => setActive(i)}
                 className={`cmms-palette-item ${i === active ? "active" : ""}`}
               >
-                <span className="min-w-0 truncate text-[13px] font-medium">
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
                   {it.label}
+                  {it.frequent && (
+                    <span className="ml-2 rounded-full bg-[var(--cmms-primary-light)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[var(--cmms-primary-dark)]">
+                      ใช้บ่อย
+                    </span>
+                  )}
                 </span>
-                <span className="cmms-palette-arrow">เปิด →</span>
+                <span className="shrink-0 text-[10px] font-medium text-[var(--cmms-text-muted)]">
+                  {it.section && it.section !== it.label ? it.section : ""}
+                </span>
               </button>
             ))
           )}
@@ -151,6 +177,9 @@ export default function CommandPalette({ items = [] }: { items?: NavItem[] }) {
           </span>
           <span>
             <kbd className="cmms-palette-kbd">ESC</kbd> ปิด
+          </span>
+          <span className="ml-auto">
+            <kbd className="cmms-palette-kbd">Ctrl/⌘ K</kbd> เปิดได้ทุกหน้า
           </span>
         </div>
       </div>

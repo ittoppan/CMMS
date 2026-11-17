@@ -366,9 +366,17 @@ interface SidebarNavProps {
   isSelected: (href: string) => boolean;
   onNavigate?: () => void;
   showSearch?: boolean;
+  /** เมนู "ใช้บ่อย" ของผู้ใช้ (คำนวณจากประวัติใน localStorage ที่ shell) — แสดงบนสุดของ sidebar */
+  frequentItems?: NavItemDef[];
 }
 
-export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true }: SidebarNavProps) {
+export function SidebarNav({
+  canShow,
+  isSelected,
+  onNavigate,
+  showSearch = true,
+  frequentItems = [],
+}: SidebarNavProps) {
   const [query, setQuery] = React.useState("");
   const q = query.trim().toLowerCase();
   const searching = q.length > 0;
@@ -400,8 +408,19 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
               onChange={(e) => setQuery(e.target.value)}
               placeholder={`${t("sidebar.search")} · ${totalVisible}`}
               aria-label="ค้นหาเมนู"
-              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-3 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-all placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
+              className="h-10 w-full rounded-full border border-border bg-muted/60 pl-9 pr-12 text-sm shadow-[inset_0_1px_2px_rgba(15,35,75,0.04)] outline-none transition-all placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-2 focus:ring-ring/20"
             />
+            {!query && (
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new CustomEvent("cmms:open-palette"))}
+                aria-label="เปิดค้นหาทั่วทั้งแอป (Ctrl+K)"
+                title="ค้นหาทั่วทั้งแอป — Ctrl/⌘ K"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md border border-border bg-card px-1.5 py-0.5 text-[0.6rem] font-bold text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
+              >
+                ⌘K
+              </button>
+            )}
             {query && (
               <button
                 type="button"
@@ -419,6 +438,46 @@ export function SidebarNav({ canShow, isSelected, onNavigate, showSearch = true 
         aria-label="เมนูหลัก"
         className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 pb-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
       >
+        {!searching && frequentItems.length > 0 && (
+          <div className="rounded-[var(--cmms-radius-lg)] border border-border bg-card/70 p-1.5 shadow-[var(--cmms-shadow-sm)]">
+            <p className="px-2.5 pb-1 pt-1.5 text-[0.66rem] font-extrabold uppercase tracking-[0.09em] text-muted-foreground">
+              {t("nav.frequent")}
+            </p>
+            <ul className="space-y-0.5">
+              {frequentItems.map((item) => {
+                const active = isSelected(item.href);
+                const Icon = item.icon;
+                return (
+                  <li key={`freq-${item.href}`}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      className={cn(
+                        "flex h-9 items-center gap-2.5 rounded-[var(--cmms-radius)] pl-3 pr-2 text-sm font-medium transition-all",
+                        active
+                          ? "bg-primary font-semibold text-primary-foreground shadow-[var(--cmms-shadow-sm)]"
+                          : "text-[var(--cmms-sidebar-text)] hover:bg-muted/70 hover:text-[var(--cmms-sidebar-text-strong)]"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--cmms-radius-sm)]",
+                          active ? "bg-white/15 text-white" : "bg-muted/70 text-primary"
+                        )}
+                      >
+                        <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {item.label ?? (item.labelKey ? t(item.labelKey) : "")}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
         {groups.map((group) => (
           <SidebarGroup
             key={group.titleKey}

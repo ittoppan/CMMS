@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Home,
@@ -33,12 +33,12 @@ import { offlineQueueCount } from "../../lib/offline-store";
 import { runQueueMigrationOnce } from "../../lib/queue-migration";
 import ToastProvider from "../../components/ToastProvider";
 import ThemeProvider from "../../components/ThemeProvider";
-import CommandPalette from "../../components/CommandPalette";
+import CommandPalette, { type CommandPaletteItem } from "../../components/CommandPalette";
 import { NotificationBell } from "../../components/NotificationBell";
-import { SidebarNav } from "../../components/dashboard/sidebar-nav";
+import { SidebarNav, NAV_GROUPS, type NavItemDef } from "../../components/dashboard/sidebar-nav";
 import { getMenuHrefs } from "../../lib/quick-links";
 import { routeIsBlocked } from "../../lib/route-perms";
-import { recordMenuUsage } from "../../lib/frequent-menus";
+import { recordMenuUsage, getFrequentMenuItems } from "../../lib/frequent-menus";
 import { Sheet, SheetContent, SheetTitle } from "../../components/ui/sheet";
 import { useMenuPermission } from "../../lib/useMenuPermission";
 import { useUnreadCount } from "../../lib/notifications";
@@ -144,10 +144,40 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener("cmms:profile-updated", onProfileUpdated);
   }, [refresh]);
 
-  // UX P5: นับการใช้งานเมนูจริง (localStorage) → ไว้เรียงแถว "ใช้บ่อย" บน /home
+  // UX P5: นับการใช้งานเมนูจริง (localStorage) → ใช้เรียง "ใช้บ่อย" ทั้งบน /home, sidebar และ command palette
+  // คำนวณใน effect เท่านั้น (localStorage ไม่มีฝั่ง server) — กัน hydration mismatch
+  const [frequentItems, setFrequentItems] = useState<NavItemDef[]>([]);
   useEffect(() => {
     recordMenuUsage(pathname);
-  }, [pathname]);
+    setFrequentItems(getFrequentMenuItems(6, canShow));
+    // canShow ถูกสร้างใหม่ทุก render — ใช้ค่าล่าสุดผ่าน closure; dep จริงคือ pathname/permission
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, permission]);
+
+  // ดัชนีของ CommandPalette: เมนูใช้บ่อยก่อน แล้วตามด้วยเมนูทั้งหมดที่ role นี้มีสิทธิ์
+  // (เดิม palette ได้แค่ bottom nav 5 ปุ่ม → ค้นไม่เจอเมนูอื่นเลย)
+  const paletteItems = useMemo<CommandPaletteItem[]>(() => {
+    const labelOf = (it: NavItemDef) => it.label ?? (it.labelKey ? t(it.labelKey) : it.href);
+    const seen = new Set<string>();
+    const out: CommandPaletteItem[] = [];
+
+    for (const it of frequentItems) {
+      if (seen.has(it.href)) continue;
+      seen.add(it.href);
+      // ไม่ใส่ section ให้เมนูใช้บ่อย — มีป้าย "ใช้บ่อย" อยู่แล้ว กันข้อความซ้ำ
+      out.push({ label: labelOf(it), href: it.href, frequent: true });
+    }
+    for (const g of NAV_GROUPS) {
+      for (const it of g.items) {
+        if (seen.has(it.href) || !canShow(it.perm)) continue;
+        seen.add(it.href);
+        out.push({ label: labelOf(it), href: it.href, section: t(g.titleKey) });
+      }
+    }
+    return out;
+    // canShow อ่านจาก permission — ใส่ตัวแปรข้อมูลแทน identity ของฟังก์ชัน
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frequentItems, permission, lang]);
 
   // badge งานแจ้งซ่อมค้างส่ง (offline queue)
   useEffect(() => {
@@ -238,7 +268,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <ToastProvider>
       <ThemeProvider />
       <ConnectivityProvider>
-      <CommandPalette items={bottomNav.map((item) => ({ label: item.label, href: item.href }))} />
+      <CommandPalette items={paletteItems} />
       <LiffBridge />
 
       {/* Skip link — ให้คีย์บอร์ด/Screen reader ข้าม sidebar+topbar ไปเนื้อหา */}
@@ -263,7 +293,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <img src="/logo.png" alt="TOPPAN" className="h-7 w-auto max-w-[104px] shrink-0 object-contain" />
             <span className="min-w-0 truncate text-sm font-bold tracking-tight text-[var(--cmms-sidebar-text-strong)]">CMMS-TOPPAN</span>
           </Link>
-          <SidebarNav canShow={canShow} isSelected={isSelected} />
+          <SidebarNav canShow={canShow} isSelected={isSelected} frequentItems={frequentItems} />
           <div className="border-t border-border p-3">
             <button
               type="button"
@@ -461,6 +491,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SidebarNav
                 canShow={canShow}
                 isSelected={isSelected}
+                frequentItems={frequentItems}
                 onNavigate={() => setDrawerOpen(false)}
               />
             </SheetContent>

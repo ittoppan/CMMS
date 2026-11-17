@@ -44,6 +44,7 @@ const DICT: Record<string, { th: string; en: string }> = {
   "nav.calibration": { th: "สอบเทียบเครื่องมือวัด", en: "Calibration" },
   "nav.parts_external": { th: "อะไหล่ & ผู้รับเหมา", en: "Spare Parts & Contractors" },
   "nav.knowledge_ops": { th: "ความรู้ เอกสาร & ความปลอดภัย", en: "Knowledge, Docs & Safety" },
+  "nav.frequent": { th: "ใช้บ่อย", en: "Frequently used" },
   "nav.show_more": { th: "แสดงเพิ่มเติม", en: "Show more" },
   "nav.show_less": { th: "ย่อรายการ", en: "Show less" },
   "sidebar.search": { th: "ค้นหาเมนู...", en: "Search menu..." },
