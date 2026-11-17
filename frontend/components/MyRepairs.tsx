@@ -87,6 +87,10 @@ const STATUS_LABEL: Record<string, string> = {
 
 const OPEN_STATUSES = ["pending", "open", "assigned", "in_progress", "reopened", "waiting_parts", "on_hold"];
 const DONE_STATUSES = ["completed", "verified", "closed"];
+// ต้องตรงกับ REPAIR_RATING_COMMENT_MAX / REPAIR_RATING_DONE_STATUSES ฝั่ง PHP (src/helpers/repair_rating.php)
+const RATING_COMMENT_MAX = 500;
+const RATING_STARS = [1, 2, 3, 4, 5];
+const STAR_ON = "var(--cmms-warning)";
 
 function statusStep(status: string | null): number {
   const s = (status || "").toLowerCase();
@@ -130,8 +134,6 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
 
-  const STARS = [1, 2, 3, 4, 5];
-
   async function submit() {
     if (score < 1) {
       setError("เลือกคะแนนก่อนบันทึก");
@@ -147,7 +149,7 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
           action: "rate",
           repair_id: item.id,
           rating_score: score,
-          rating_comment: comment.trim(),
+          rating_comment: comment, // เซิร์ฟเวอร์ trim/จำกัด 500 ตัวอักษรให้เอง
         }),
       });
       setJustSaved(true);
@@ -170,13 +172,13 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
         </span>
         {/* ชุดวาดดาวชุดเดียว: โหมดแก้ไขหุ้มด้วย <button> (hover + aria-label), โหมดแสดงผลหุ้มด้วย <span> */}
         <div className="flex items-center gap-0.5">
-          {STARS.map((n) => {
+          {RATING_STARS.map((n) => {
             const filled = n <= shown;
             const star = (
               <Star
                 size={open ? 18 : 14}
                 strokeWidth={1.75}
-                style={{ color: filled ? "#F59E0B" : "var(--cmms-border)", fill: filled ? "#F59E0B" : "none" }}
+                style={{ color: filled ? STAR_ON : "var(--cmms-border)", fill: filled ? STAR_ON : "none" }}
               />
             );
             return open ? (
@@ -206,7 +208,8 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
             onClick={() => {
               setOpen(true);
               setJustSaved(false);
-              setScore(existing || 0);
+              setError(null);
+              setScore(existing);
               setComment(item.rating_comment ?? "");
             }}
             style={{ background: "none", border: 0, padding: 0, cursor: "pointer", fontSize: 11.5, fontWeight: 700, color: "var(--cmms-primary)" }}
@@ -215,7 +218,7 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
           </button>
         )}
         {justSaved && !open && (
-          <span style={{ fontSize: 11.5, color: "#04703B" }}>บันทึกแล้ว ขอบคุณสำหรับความคิดเห็น</span>
+          <span style={{ fontSize: 11.5, color: "var(--cmms-success)" }}>บันทึกแล้ว ขอบคุณสำหรับความคิดเห็น</span>
         )}
       </div>
 
@@ -230,7 +233,7 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            maxLength={500}
+            maxLength={RATING_COMMENT_MAX}
             rows={2}
             placeholder="ความคิดเห็นเพิ่มเติม (ไม่บังคับ)"
             className="w-full rounded-lg border px-3 py-2"
@@ -243,7 +246,7 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
             }}
           />
           {error && (
-            <p className="m-0" style={{ fontSize: 12, color: "#B42318" }}>
+            <p className="m-0" style={{ fontSize: 12, color: "var(--cmms-danger)" }}>
               {error}
             </p>
           )}
