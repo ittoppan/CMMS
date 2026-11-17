@@ -117,6 +117,61 @@ export function RelLamp({
  * KPI card
  * ────────────────────────────────────────────────────────────────────────── */
 
+/**
+ * "ตัวอย่าง" line under a KPI: the inputs the engine actually reported for that
+ * KPI. Every KPI carries a different input set, so anything the engine did not
+ * send is left out — printing a missing key used to render `NaN ชม.`.
+ */
+function rlKpiInputExample(card: DashboardCard): string | null {
+  const inputs = card.inputs ?? {};
+  const count = (key: string): number | null => {
+    const v = inputs[key];
+    return typeof v === "number" && Number.isFinite(v) ? v : null;
+  };
+  const fmt = (v: number, digits = 0) =>
+    v.toLocaleString("th-TH", { minimumFractionDigits: 0, maximumFractionDigits: digits });
+
+  const parts: string[] = [];
+  const push = (v: number | null, unit: string, digits = 0) => {
+    if (v !== null) parts.push(`${fmt(v, digits)} ${unit}`);
+  };
+
+  switch (card.kpi_code) {
+    case "MTBF":
+    case "FAILURE_RATE":
+      push(count("failures"), "เหตุ");
+      push(count("operating_hours"), "ชม.", 2);
+      break;
+    case "MTTR":
+      push(count("repairs_measured"), "งานซ่อมที่วัดได้");
+      push(count("repairs_dropped"), "งานที่ถูกตัดออก");
+      break;
+    case "AVAILABILITY_OBSERVED":
+      push(count("downtime_rows"), "แถว downtime");
+      push(count("downtime_hours"), "ชม. ที่หยุด", 2);
+      break;
+    case "DOWNTIME":
+      push(count("work_order_minutes"), "นาทีจากใบงาน");
+      push(count("unlinked_event_minutes"), "นาทีจากเหตุที่ไม่มีใบงาน");
+      break;
+    case "REPEAT_FAILURE_RATE":
+      push(count("repeat_suspected"), "เหตุที่สงสัยว่าเสียซ้ำ");
+      push(count("classified_failures"), "เหตุที่จำแนกได้");
+      break;
+    case "ALARM_FREQUENCY":
+      push(count("occurrences"), "ครั้งที่แจ้ง", 0);
+      push(count("period_days"), "วันในช่วงวัด");
+      break;
+    case "MAINT_COST_PER_OP_HOUR":
+      push(count("cost_rows"), "ใบงานที่มีต้นทุน");
+      push(count("operating_hours"), "ชม.", 2);
+      break;
+    default:
+      break;
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 export function RelKpiCard({
   card,
   className,
@@ -129,6 +184,7 @@ export function RelKpiCard({
     RL_KPI_LABELS[card.kpi_code]?.th ?? card.definition?.name_th ?? card.kpi_code;
   const hasValue = card.value !== null && card.value !== undefined;
   const isPercent = card.unit === "%";
+  const example = rlKpiInputExample(card);
 
   return (
     <Card className={cn("flex flex-col", className)}>
@@ -168,14 +224,9 @@ export function RelKpiCard({
             สูตร: {card.definition.formula_display}
           </p>
         )}
-        {card.inputs && (
+        {example && (
           <p className="text-xs text-muted-foreground/90">
-            ตัวอย่าง: {card.inputs.failures} เหตุ ·{" "}
-            {card.inputs.operating_hours === null
-              ? `${RL_DASH} ชม.`
-              : `${Number(card.inputs.operating_hours).toLocaleString("th-TH", {
-                  maximumFractionDigits: 0,
-                })} ชม.`}
+            ตัวอย่าง: {example}
           </p>
         )}
       </CardContent>

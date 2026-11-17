@@ -287,7 +287,10 @@ export default function AnalyticsDashboardPage() {
               {loading ? (
                 <Skeleton className="mt-1 h-7 w-20" />
               ) : (
-                <p className="cmms-kpi-value">{mttr} <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ชั่วโมง</span></p>
+                <p className="cmms-kpi-value">
+                  {mttr.toLocaleString("th-TH", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{" "}
+                  <span className="text-sm font-normal text-[var(--cmms-text-secondary)]">ชั่วโมง</span>
+                </p>
               )}
             </div>
           </CardContent>

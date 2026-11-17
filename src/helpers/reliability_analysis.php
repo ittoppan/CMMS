@@ -118,6 +118,9 @@ function rel_trend(PDO $pdo, array $ctx, int $maxBuckets = 0): array {
         return ['buckets' => [], 'status' => RL_DQ_NOT_ENOUGH, 'note' => 'window produced no month bucket'];
     }
 
+    // Failures per bucket. Downtime is NOT taken from these events here: it is
+    // aggregated below with the same rule the DOWNTIME KPI uses, so one event can
+    // never contribute its minutes twice (once as the event, once as its work order).
     foreach ($ctx['failures_valid'] as $f) {
         if ($f['ts_ts'] === null) {
             continue;
@@ -125,7 +128,6 @@ function rel_trend(PDO $pdo, array $ctx, int $maxBuckets = 0): array {
         $key = date('Y-m', $f['ts_ts']);
         if (isset($buckets[$key])) {
             $buckets[$key]['failures']++;
-            $buckets[$key]['downtime'] += (float)($f['downtime_minutes'] ?? 0);
         }
     }
 
@@ -136,9 +138,45 @@ function rel_trend(PDO $pdo, array $ctx, int $maxBuckets = 0): array {
         $key = substr($r['completed_at'], 0, 7);
         if (isset($buckets[$key])) {
             $buckets[$key]['repair_minutes'][] = (float)$r['minutes'];
-            if ($r['downtime_minutes'] !== null && $r['downtime_minutes'] > 0) {
-                $buckets[$key]['downtime'] += (float)$r['downtime_minutes'];
+        }
+    }
+
+    // Downtime per bucket = work orders + failure events with no linked work order
+    // (identical to rel_downtime_aggregate). A linked event's minutes are recorded on
+    // its work order only, so adding the event too would double count them and make
+    // the trend disagree with the DOWNTIME card computed from the same rows.
+    $scopeIds = $ctx['scope']['asset_ids'] ?? [];
+    if ($scopeIds !== []) {
+        $inScope = rel_id_in($scopeIds, 'asset_id');
+        try {
+            $st = $pdo->prepare('SELECT DATE_FORMAT(created_at, "%Y-%m") AS ym,
+                                        COALESCE(SUM(CASE WHEN downtime_minutes > 0 THEN downtime_minutes ELSE 0 END),0) AS m
+                                   FROM repair
+                                  WHERE created_at BETWEEN ? AND ?
+                                    AND status NOT IN (' . rel_quote_list(RL_EXCLUDED_STATUSES) . ')' . $inScope . '
+                                  GROUP BY ym');
+            $st->execute([$period['start'], $period['end']]);
+            foreach ($st->fetchAll() as $r) {
+                $key = (string)$r['ym'];
+                if (isset($buckets[$key])) {
+                    $buckets[$key]['downtime'] += (float)$r['m'];
+                }
             }
+            $st = $pdo->prepare('SELECT DATE_FORMAT(failure_date, "%Y-%m") AS ym,
+                                        COALESCE(SUM(CASE WHEN downtime_minutes > 0 THEN downtime_minutes ELSE 0 END),0) AS m
+                                   FROM failure_events
+                                  WHERE failure_date BETWEEN ? AND ?
+                                    AND repair_id IS NULL' . $inScope . '
+                                  GROUP BY ym');
+            $st->execute([$period['start'], $period['end']]);
+            foreach ($st->fetchAll() as $r) {
+                $key = (string)$r['ym'];
+                if (isset($buckets[$key])) {
+                    $buckets[$key]['downtime'] += (float)$r['m'];
+                }
+            }
+        } catch (Throwable $e) {
+            $buckets = $buckets;
         }
     }
 

@@ -371,8 +371,7 @@ if ($cmd === 'up') {
                 $taxCauseIds[$causeCode] ?? null,
                 $i === 3 ? 'high' : 'medium',
                 $dt >= 120 ? 'line_stopped' : 'slowdown',
-                // downtime บันทึกที่ใบงานแล้ว — failure event ที่ผูกใบงานจึงไม่ใส่ซ้ำ (engine นับเฉพาะ event ที่ไม่มีใบงาน)
-                0,
+                $dt,
                 'E2E seed failure #' . ($i + 1),
                 'สังเกตเสียงผิดปกติ',
                 $adminId,
@@ -394,7 +393,7 @@ if ($cmd === 'up') {
             $taxCauseIds[TAX_PREFIX . 'CAUSE-WEAR'] ?? null,
             'medium',
             'slowdown',
-            0, // ใบงานเปิดอยู่และบันทึก downtime 45 นาทีไว้แล้ว
+            45,
             'E2E seed failure open WO',
             'รั่วที่ข้อต่อ',
             $adminId,

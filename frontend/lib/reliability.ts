@@ -371,13 +371,20 @@ export interface KpiDefinitionRow {
   created_at: string;
 }
 
+/**
+ * Inputs the engine exposes for a KPI. The set differs per KPI (MTBF carries
+ * failures/operating_hours, MTTR carries repairs_measured, availability carries
+ * uptime/downtime hours, ...), so the keys are optional and every reader must
+ * check presence instead of assuming a number.
+ */
 export interface KpiInputs {
-  operating_hours: number | null;
-  operating_basis: string;
-  failures: number;
-  failure_source: string;
-  period_days: number;
-  scope_assets: number;
+  [key: string]: number | string | null | undefined;
+  operating_hours?: number | null;
+  operating_basis?: string;
+  failures?: number;
+  failure_source?: string;
+  period_days?: number;
+  scope_assets?: number;
 }
 
 export interface KpiEnvelope {
