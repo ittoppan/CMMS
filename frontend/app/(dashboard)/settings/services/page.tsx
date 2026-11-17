@@ -150,7 +150,7 @@ export default function SystemServicesPage() {
   const zrokUrl = zrokService?.url || "";
   const baseUrl = cfUrl || ngrokUrl || zrokUrl;
   const webhookUrl = baseUrl ? `${baseUrl.replace(/\/+$/, "")}/api/v1/line_webhook.php` : "";
-  const liffUrl = cfUrl || ngrokUrl || "";
+  const liffUrl = cfUrl || ngrokUrl || zrokUrl || "";
 
   return (
     <PageShell

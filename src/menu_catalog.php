@@ -30,6 +30,7 @@ return [
     ['key' => 'pm_am/checksheet',          'href' => '/pm_am/checksheet',          'label' => 'ทำเช็คชีท PM',           'section' => 'PM & เครื่องจักร'],
     ['key' => 'asset_registry',            'href' => '/asset_registry',            'label' => 'ทะเบียนเครื่องจักร',     'section' => 'PM & เครื่องจักร'],
     ['key' => 'qr-sheet',                  'href' => '/qr-sheet',                  'label' => 'QR Sheet เครื่องจักร',   'section' => 'PM & เครื่องจักร'],
+    ['key' => 'scan',                      'href' => '/scan',                      'label' => 'สแกน QR',               'section' => 'PM & เครื่องจักร'],
     ['key' => 'asset_reliability',                           'href' => '/asset-reliability',                           'label' => 'ความน่าเชื่อถือเครื่องจักร',  'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
     ['key' => 'asset_reliability/dashboard',                 'href' => '/asset-reliability',                           'label' => 'แดชบอร์ด Reliability',       'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
     ['key' => 'asset_reliability/critical',                  'href' => '/asset-reliability/critical',                  'label' => 'เครื่องวิกฤต (A–D)',          'section' => 'ความน่าเชื่อถือ & วงจรชีวิต'],
@@ -78,6 +79,7 @@ return [
 
     // ---- 4. วิเคราะห์ & รายงาน ----
     ['key' => 'analytics',                 'href' => '/analytics',                 'label' => 'Data Warehouse & BI',    'section' => 'วิเคราะห์ & รายงาน'],
+    ['key' => 'analytics/kpi',             'href' => '/analytics/kpi',             'label' => 'KPI',                   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'andon-board',               'href' => '/andon-board',               'label' => 'จอ Andon TV (โรงงาน)',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/monthly_pdf',       'href' => '/reports/monthly_pdf',       'label' => 'รายงาน PDF ผู้บริหาร',   'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports',                     'href' => '/reports',                     'label' => 'ศูนย์รวมรายงาน',          'section' => 'วิเคราะห์ & รายงาน'],
@@ -155,6 +157,7 @@ return [
     ['key' => 'users',                     'href' => '/users',                     'label' => 'ผู้ใช้งานระบบ',          'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'audit_log',                 'href' => '/audit-log',                 'label' => 'บันทึกการตรวจสอบ',      'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'settings',                  'href' => '/settings',                  'label' => 'ตั้งค่าทั้งหมด',          'section' => 'ระบบ & ตั้งค่า'],
+    ['key' => 'profile',                   'href' => '/profile',                   'label' => 'โปรไฟล์',               'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'editor/builder',            'href' => '/editor/builder',            'label' => 'สร้างหน้าเว็บ (Visual Builder)', 'section' => 'ระบบ & ตั้งค่า'],
     ['key' => 'pages',                     'href' => '/pages',                     'label' => 'หน้าเว็บที่สร้างเอง',    'section' => 'ระบบ & ตั้งค่า'],
 

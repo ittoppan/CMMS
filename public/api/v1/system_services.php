@@ -180,7 +180,7 @@ function getServiceStatuses(PDO $pdo): array {
         $raw = (string)@file_get_contents($tunnelUrlFile);
         if (preg_match('#https://[^\s]+#', $raw, $m)) $fileUrl = rtrim($m[0], '/');
     }
-    $publicUrl = $fileUrl ?: ($ngrokUrl ?: $cfUrl);
+    $publicUrl = $fileUrl ?: ($zrokUrl ?: $ngrokUrl ?: $cfUrl);
     $lineWebhook = ['reachable' => false, 'http_code' => 0];
     if ($publicUrl) {
         $lineWebhook = httpCheck(rtrim($publicUrl, '/') . '/api/v1/line_webhook.php', 6);

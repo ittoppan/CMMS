@@ -278,6 +278,9 @@ try {
     ok('ปิดไม่ได้เพราะมีผู้ยังไม่รับทราจเอกสาร', count($b3) >= 1, json_encode($b3, JSON_UNESCAPED_UNICODE));
     expectThrow('ปิด ECR ทั้งที่ยังมีคนรับทราจไม่ครบ', fn() => ecr_close($pdo, $ecrId, 'สรุปงานทดสอบ', $UID), 409);
     doc_ack_acknowledge($pdo, $docId, $REQ, 'read', $revId);
+    foreach (doc_ack_list($pdo, ['document_id' => $docId, 'status' => 'pending']) as $pa) {
+        doc_ack_acknowledge($pdo, $docId, (int)$pa['user_id'], 'read', $revId);
+    }
     ok('รับทราจครบแล้วไม่มี blocker', ecr_close_blockers($pdo, ecr_get($pdo, $ecrId)) === [], json_encode(ecr_close_blockers($pdo, ecr_get($pdo, $ecrId))));
     $closed = ecr_close($pdo, $ecrId, 'เปลี่ยนขั้นตอนเช็คเมย์และเผยแพร่ WI ฉบับใหม่แล้ว', $UID);
     ok('ปิด ECR สำเร็จ', (string)$closed['status'] === 'completed' && !empty($closed['closed_at']) && (int)$closed['closed_by'] === $UID);

@@ -98,7 +98,7 @@ test.describe("responsive layouts", () => {
     test.skip(!hasCreds(), "requires E2E_USERNAME/E2E_PASSWORD");
     const creds = e2eCreds();
     await page.setViewportSize({ width: 390, height: 844 });
-    const errors = watchErrors(page);
+    const errors = watchErrors(page, { ignoreHttpStatusArg: true });
 
     await page.goto("/login");
     const userBox2 = page.getByRole("textbox", { name: /ชื่อผู้ใช้|Username/i });

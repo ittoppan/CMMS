@@ -92,9 +92,25 @@ $urlFile  = Join-Path $logDir "tunnel-url.txt"
             if ($tunnelUrl -match "^https://") {
                 if (-not ((Test-Url "$tunnelUrl/login") -eq 200)) {
                     Write-Log "WARN tunnel URL ลง ($tunnelUrl)"
+                    # --- Primary tunnel: zrok (reserved share — restart ได้ปลอดภัย URL ไม่เปลี่ยน) ---
+                    $isZrok = ($tunnelUrl -match "shares\.zrok\.io")
                     # --- Primary tunnel: ngrok (static domain — restart ได้ปลอดภัย ไม่กระทบผู้ใช้ภายนอก) ---
                     $isNgrok = ($tunnelUrl -match "\.ngrok-free\.app")
-                    if ($isNgrok) {
+                    if ($isZrok) {
+                        Write-Log "zrok tunnel down — auto-restart via zrok2.bat"
+                        Get-Process zrok2 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+                        Start-Sleep -Seconds 2
+                        $zrokDir = Join-Path $root "zrok2"
+                        Start-Process -FilePath "cmd.exe" -ArgumentList "/c",(Join-Path $zrokDir "zrok2.bat") -WorkingDirectory $zrokDir -WindowStyle Hidden
+                        Start-Sleep -Seconds 12
+                        if ((Test-Url "$tunnelUrl/login") -eq 200) {
+                            Write-Log "zrok tunnel RECOVERED ($tunnelUrl)"
+                            Send-Alert "✅ [CMMS Watchdog] zrok tunnel กลับมาทำงานแล้ว ($tunnelUrl)"
+                            if (Test-Path -LiteralPath $stateFile) { Remove-Item -LiteralPath $stateFile -Force -ErrorAction SilentlyContinue }
+                        } else {
+                            Write-Log "zrok tunnel STILL DOWN after restart — alert (throttled)"
+                        }
+                    } elseif ($isNgrok) {
                         Write-Log "ngrok tunnel down — auto-restart via tunnel-ngrok.ps1"
                         & powershell -NoProfile -ExecutionPolicy Bypass -File $tunnelNgrokScript | Out-Null
                         Start-Sleep -Seconds 10

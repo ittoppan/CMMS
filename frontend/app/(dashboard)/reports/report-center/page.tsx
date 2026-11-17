@@ -42,7 +42,7 @@ export default function ReportCenterPage() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+      <div className="cmms-page-hero flex flex-col justify-between gap-6 sm:flex-row sm:items-center" suppressHydrationWarning>
         <div>
           <p className="cmms-eyebrow" data-on-dark="true">{hero.eyebrow}</p>
           <div className="flex flex-wrap items-center gap-3">

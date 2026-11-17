@@ -1,6 +1,6 @@
 # คู่มือการใช้งาน CMMS-TPT
 > จัดทำตามแนวทางคู่มือระบบ CMMS ต้นฉบับ และปรับให้ตรงกับระบบที่ใช้งานจริงของเราที่นี่
-> เข้าถึงได้ผ่าน `https://ommatophorous-robert-fortifyingly.ngrok-free.app/` บนมือถือ/เว็บ/LINE
+> เข้าถึงได้ผ่าน `https://cmms-tpt.shares.zrok.io/` บนมือถือ/เว็บ/LINE (zrok tunnel — URL ถาวร)
 
 ## การเข้าสู่ระบบ (ทุกหน้าที่)
 | ช่องทาง | วิธี |
@@ -244,7 +244,7 @@
 
 ---
 # ข้อแนะนำเพิ่มเติม (แนะนำเร็วๆ นี้)
-1. **สร้าง LIFF App ของหน้า /register** ใน LINE Developers (endpoint = `https://ommatophorous-robert-fortifyingly.ngrok-free.app/register`) → วาง ID ใน `ตั้งค่า > การแจ้งเตือน` — ลดขั้นตอนล็อกอิน 2 คลิก
+1. **สร้าง LIFF App ของหน้า /register** ใน LINE Developers (endpoint = `https://cmms-tpt.shares.zrok.io/register`) → วาง ID ใน `ตั้งค่า > การแจ้งเตือน` — ลดขั้นตอนล็อกอิน 2 คลิก
 2. **อัปเดต `TELEGRAM_BOT_TOKEN` ใน .env** — token เดิมถูก revoke (LINE push ทำงานปกติ แต่แจ้งแอดมินทาง Telegram ยังไม่ได้)
 3. **ตั้ง Rich Menu** จริง + เพิ่ม **Deep-link ไปหน้าใบงาน** ในทุกการ์ด (เช่น ปุ่มการ์ด "มอบหมายงาน" → ชี้ `/repair/view?id=`)
 4. **ทดสอบ e2e บน LINE**: ผูก → แจ้งซ่อม → มอบหมาย → ช่างรับ/เริ่ม/ปิด → เบิกอะไหล่ → ผู้อนุมัติกดปุ่ม LINE/Email

@@ -39,9 +39,22 @@ function isPublicUrl(string $u): bool {
 }
 $publicUrl = '';
 
-// (a) ngrok admin API — ตัวหลัก
+// (a0) zrok admin API — ตัวหลักเมื่อใช้ zrok (reserved share, URL ไม่เปลี่ยน)
+$zrokApi = rtrim((string)(getenv('ZROK_API_URL') ?: 'http://127.0.0.1:9191'), '/');
+$zrokBody = @file_get_contents($zrokApi . '/api/tunnels');
+if ($zrokBody !== false) {
+    $zj = json_decode($zrokBody, true);
+    foreach (($zj['tunnels'] ?? []) as $t) {
+        if (isset($t['public_url']) && isPublicUrl((string)$t['public_url'])) {
+            $publicUrl = rtrim((string)$t['public_url'], '/');
+            break;
+        }
+    }
+}
+
+// (a) ngrok admin API — ทางสำรอง
 $body = @file_get_contents('http://127.0.0.1:4040/api/tunnels');
-if ($body !== false) {
+if ($publicUrl === '' && $body !== false) {
     $j = json_decode($body, true);
     foreach (($j['tunnels'] ?? []) as $t) {
         if (isset($t['public_url']) && isPublicUrl((string)$t['public_url'])) {
