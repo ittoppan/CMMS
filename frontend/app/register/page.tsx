@@ -11,13 +11,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, LinkIcon, User, AlertCircle } from "lucide-react";
 import SuccessDialog from "@/components/SuccessDialog";
 import SupportContactStrip from "@/components/SupportContactStrip";
-import {
-  UNBOUND_TITLE,
-  UNBOUND_BODY,
-  UNBOUND_STEPS,
-  bindErrorMessage,
-  type SupportContact,
-} from "@/lib/liff-bind-copy";
+import { loadLineRegisterConfig, useSupportContact } from "@/lib/use-support-contact";
+import { UNBOUND_TITLE, UNBOUND_BODY, UNBOUND_STEPS, bindErrorMessage } from "@/lib/liff-bind-copy";
 
 declare global {
   interface Window {
@@ -64,8 +59,8 @@ function RegisterContent() {
   const [linePic, setLinePic] = useState("");
   const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
   const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
-  // ช่องทางติดต่อแอดมิน — ชุดเดียวกับหน้า /repair/request (แสดงผลด้วย SupportContactStrip)
-  const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
+  // ช่องทางติดต่อแอดมิน — hook กลางชุดเดียวกับหน้า /repair/request (แสดงผลด้วย SupportContactStrip)
+  const supportContact = useSupportContact();
 
   const [empCode, setEmpCode] = useState("");
   const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
@@ -85,11 +80,10 @@ function RegisterContent() {
     async function boot() {
       let liffId = "";
       try {
-        const res = await fetch("/api/v1/line_register.php?liff_id=1");
-        const json = await res.json().catch(() => ({}));
+        // คำขอเดียวกับ hook support contact (cache ระดับโมดูล) — ใช้ค่า LIFF app ของหน้า /register
+        const cfg = await loadLineRegisterConfig();
         // LIFF App ของหน้า /register (line_liff_register_id) ก่อน ถ้ายังไม่ได้ตั้ง → ใช้ตัวเดิม (frontend จะ fallback เป็น external)
-        liffId = (json?.line_liff_register_id || json?.line_liff_id || "") as string;
-        if (json?.contact) setSupportContact(json.contact as SupportContact);
+        liffId = cfg.line_liff_register_id || cfg.line_liff_id;
       } catch { /* ignore */ }
       if (cancelled) return;
 

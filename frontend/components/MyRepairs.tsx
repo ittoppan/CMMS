@@ -12,7 +12,7 @@
  * ตรวจกับ LINE เอง ไม่มีการวนอ่าน localStorage และไม่ส่ง line_user_id จาก client
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLiffFetch } from "@/lib/useLiffFetch";
 import { useLiffSession } from "@/lib/liff-session";
 
@@ -28,8 +28,9 @@ import {
   Wrench,
 } from "lucide-react";
 import { apiJson } from "@/lib/api";
-import { UNBOUND_BODY, UNBOUND_TITLE, type SupportContact } from "@/lib/liff-bind-copy";
+import { UNBOUND_BODY, UNBOUND_TITLE } from "@/lib/liff-bind-copy";
 import SupportContactStrip from "@/components/SupportContactStrip";
+import { useSupportContact } from "@/lib/use-support-contact";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -251,7 +252,6 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
 
 export default function MyRepairs() {
   const [tab, setTab] = useState<Tab>("all");
-  const [contact, setContact] = useState<SupportContact | null>(null);
   // ตัวตน: ไม่ส่ง line_user_id จาก client แล้ว — useLiffFetch แนบ X-LIFF-Id-Token
   // (LiffBridge เป็นคนประกาศ token) ให้เซิร์ฟเวอร์ตรวจกับ LINE เอง; ถ้าไม่มี token/session
   // จะได้ registered=false แล้วขึ้นคำแนะนำให้แอดมินเพิ่มผู้ใช้
@@ -263,21 +263,9 @@ export default function MyRepairs() {
     errorMessage: "โหลดรายการงานไม่สำเร็จ",
   });
 
-  // ยังไม่ผูกบัญชี → ขอช่องทางติดต่อแอดมิน (ชุดเดียวกับหน้า /repair/request)
+  // ยังไม่ผูกบัญชี → ขอช่องทางติดต่อแอดมินผ่าน hook กลาง (คำขอเดียวร่วมกับหน้า /repair/request, /register)
   const unbound = data?.registered === false;
-  useEffect(() => {
-    if (!unbound) return;
-    let alive = true;
-    fetch("/api/v1/line_register.php?liff_id=1")
-      .then((r) => r.json())
-      .then((j) => {
-        if (alive) setContact((j?.contact as SupportContact) || null);
-      })
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [unbound]);
+  const contact = useSupportContact(unbound);
 
   const items = data?.items ?? [];
   const filtered = useMemo(() => {

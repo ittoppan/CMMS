@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { isLiffClientBrowser, publishLiffSession } from "@/lib/liff-session";
+import { loadLineRegisterConfig } from "@/lib/use-support-contact";
 
 declare global {
   interface Window {
@@ -40,12 +41,11 @@ export default function LiffBridge() {
     publishLiffSession({ status: "idle" });
 
     async function init() {
-      // Fetch configured LIFF ID จาก endpoint สาธารณะ (ไม่ต้อง login — line_notify.php 401 เมื่อไม่มี session)
+      // Fetch configured LIFF ID จาก endpoint สาธารณะ (คำขอเดียว/แคชร่วมกับ hook support contact)
       try {
-        const res = await fetch("/api/v1/line_register.php?liff_id=1");
-        const json = await res.json();
+        const cfg = await loadLineRegisterConfig();
         if (cancelled) return;
-        const id = json?.line_liff_id || "";
+        const id = cfg.line_liff_id || "";
         if (!id) {
           publishLiffSession({ status: "external" });
           return;

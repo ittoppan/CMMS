@@ -53,13 +53,8 @@ import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { liffAuthHeaders } from "@/lib/liff-session";
 import { serverResponds } from "@/lib/server-check";
-import {
-  UNBOUND_BODY,
-  UNBOUND_STEPS,
-  UNBOUND_TITLE,
-  bindErrorMessage,
-  type SupportContact,
-} from "@/lib/liff-bind-copy";
+import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
+import { useSupportContact } from "@/lib/use-support-contact";
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -301,24 +296,8 @@ export default function RepairRequestForm() {
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
-  // ช่องทางติดต่อแอดมินสำหรับสถานะ unbound — จาก settings_support_contact()
-  // (support_phone / support_email → fallback company_phone / smtp_from_email); แสดงผลด้วย SupportContactStrip
-  const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    fetch("/api/v1/line_register.php?liff_id=1")
-      .then((r) => r.json())
-      .then((j) => {
-        if (alive && j?.contact) setSupportContact(j.contact as SupportContact);
-      })
-      .catch(() => {
-        /* ไม่มีข้อมูลติดต่อ — แสดงข้อความโดยไม่มีเบอร์/อีเมล */
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
+  // ช่องทางติดต่อแอดมินสำหรับสถานะ unbound — hook กลาง (settings_support_contact()) แสดงผลด้วย SupportContactStrip
+  const supportContact = useSupportContact();
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
