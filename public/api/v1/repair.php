@@ -489,11 +489,13 @@ try {
                         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $lid) $targets[] = (string)$lid;
                     }
 
-                    // ปุ่มในข้อความ LINE = หน้าติดตามงานของผู้แจ้ง (LIFF) ไม่ใช่ /repair/view ที่ต้อง login
-                    $trackUrl = repair_track_liff_url();
+                    // ปุ่มในข้อความ LINE แยกตามผู้รับ: ผู้แจ้ง → ติดตามงานของฉัน (?view=track),
+                    // ช่าง/แอดมิน/กลุ่ม → ใบงาน /repair/view (งานที่ได้รับมอบหมาย ไม่ได้อยู่ในหน้าติดตามของผู้แจ้ง)
+                    $creatorLineId = (string)($owner['line_user_id'] ?? '');
                     foreach (array_unique($targets) as $tid) {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
-                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $trackUrl, $photos);
+                        $notifyUrl = repair_notify_url_for_recipient((string)$tid, $creatorLineId, $newId);
+                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $notifyUrl, $photos);
                     }
                 }
             } catch (Exception $e) {
