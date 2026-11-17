@@ -757,6 +757,7 @@ const PAGE_TITLES: Record<string, { th: string; en: string }> = {
   "/safety/work_permit/create": { th: "ออกใบอนุญาตทำงานเสี่ยงใหม่", en: "New Work Permit" },
   "/safety/work_permit/[id]": { th: "รายละเอียดใบอนุญาตทำงานเสี่ยง", en: "Work Permit Detail" },
   "/iot/monitor": { th: "มอนิเตอร์เซนเซอร์ IoT", en: "IoT Sensor Monitor" },
+  "/iot/condition": { th: "สภาพเครื่องจักร (IoT)", en: "IoT Condition" },
   "/sync-center": { th: "ศูนย์ซิงก์ Offline", en: "Sync Center" },
   "/notifications": { th: "ศูนย์แจ้งเตือน", en: "Notifications" },
   "/notifications/history": { th: "ประวัติการส่ง LINE", en: "LINE Send History" },
@@ -1529,6 +1530,10 @@ const PAGE_HERO: Record<string, { th: PageHero; en: PageHero }> = {
   "iot/monitor": {
     th: { eyebrow: "CMMS-TOPPAN", title: "Monitor", desc: "" },
     en: { eyebrow: "CMMS-TOPPAN", title: "Monitor", desc: "" },
+  },
+  "iot/condition": {
+    th: { eyebrow: "IOT CONDITION · CMMS-TOPPAN", title: "สภาพเครื่องจักร (IoT)", desc: "" },
+    en: { eyebrow: "IOT CONDITION · CMMS-TOPPAN", title: "IoT Condition", desc: "" },
   },
   "knowledge/articles/edit": {
     th: { eyebrow: "CMMS-TOPPAN", title: "Edit", desc: "" },

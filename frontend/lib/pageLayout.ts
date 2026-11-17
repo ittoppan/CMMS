@@ -114,6 +114,7 @@ export const PAGE_CATEGORIES: PageCategory[] = [
     pages: [
       { value: "/safety/work_permit", label: "ใบอนุญาตทำงานเสี่ยง (PTW)" },
       { value: "/iot/monitor", label: "มอนิเตอร์เซนเซอร์ IoT" },
+      { value: "/iot/condition", label: "สภาพเครื่องจักร (IoT)" },
     ],
   },
   {
