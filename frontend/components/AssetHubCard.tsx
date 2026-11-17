@@ -10,14 +10,15 @@
  *       2) PM ของเครื่องนี้ (ถึงกำหนด/ค้าง)
  *       3) ประวัติการซ่อม (ซ่อมอะไรมาบ้าง ใครซ่อม เมื่อไร)
  *
- * ข้อมูลมาจาก /api/v1/asset_hub.php ซึ่งตรวจ LIFF ID token (liff.getIDToken())
- * ฝั่งเซิร์ฟเวอร์แล้วจึงรู้ว่าเป็น LINE user คนไหน — ไม่ได้เชื่อ userId ที่ client ส่งมา
+ * ข้อมูลมาจาก /api/v1/asset_hub.php ซึ่งตรวจ LIFF ID token ฝั่งเซิร์ฟเวอร์แล้ว
+ * จึงรู้ว่าเป็น LINE user คนไหน — ไม่ได้เชื่อ userId ที่ client ส่งมา
+ * token/สถานะ LIFF รับจาก LiffBridge ผ่าน useLiffSession() (event) ไม่ต้องรอ/วนอ่าน localStorage
  * ยังไม่ผูกบัญชีจะเห็นแค่ชื่อเครื่อง + คำแนะนำให้แอดมินเพิ่มผู้ใช้
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { History, Wrench, CalendarClock, Loader2, ShieldAlert, ChevronDown } from "lucide-react";
-import { getLiffIdToken } from "@/lib/liff-token";
+import { useLiffSession } from "@/lib/liff-session";
 
 type HubAsset = {
   code: string;
@@ -105,9 +106,8 @@ function thaiDate(value?: string | null): string {
   return d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
 }
 
-function nextRepairId() {
-  return "repair-request-form";
-}
+/** id ของฟอร์มแจ้งซ่อมด้านล่างการ์ด (ปุ่ม "แจ้งซ่อมเครื่องนี้" เลื่อนไปที่นั่น) */
+const FORM_ANCHOR_ID = "repair-request-form";
 
 export default function AssetHubCard() {
   const [assetCode, setAssetCode] = useState("");
@@ -117,15 +117,15 @@ export default function AssetHubCard() {
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
   const mounted = useRef(true);
+  const liff = useLiffSession();
+  // LiffBridge ประกาศสถานะเมื่อ init จบ (ready = อยู่ใน LINE, external = เปิดนอก LINE, error = init ไม่ผ่าน)
+  const liffResolved = liff.status !== "idle";
 
-  const load = useCallback(async (code: string) => {
+  const load = useCallback(async (code: string, idToken: string) => {
     setLoading(true);
     setError(null);
     try {
-      // LIFF ID token = หลักฐานตัวตนที่เซิร์ฟเวอร์ตรวจกับ LINE (รอ SDK init จาก LiffBridge)
-      const idToken = await getLiffIdToken();
-      if (!mounted.current) return;
-
+      // LIFF ID token = หลักฐานตัวตนที่เซิร์ฟเวอร์ตรวจกับ LINE (ได้จาก LiffBridge โดยตรง)
       const qs = new URLSearchParams({ code });
       const res = await fetch(`/api/v1/asset_hub.php?${qs.toString()}`, {
         credentials: "include",
@@ -151,15 +151,20 @@ export default function AssetHubCard() {
     const code = assetCodeFromUrl();
     setAssetCode(code);
     setTab(tabFromUrl());
-    if (code) void load(code);
-    else setLoading(false);
+    if (!code) {
+      setLoading(false);
+      return;
+    }
+    // รอผล init จาก LiffBridge (event ผ่าน useLiffSession) — ไม่มี timer/วนอ่าน localStorage
+    if (!liffResolved) return;
+    void load(code, liff.idToken);
     return () => {
       mounted.current = false;
     };
-  }, [load]);
+  }, [load, liffResolved, liff.idToken]);
 
   const jumpToForm = () => {
-    const el = document.getElementById(nextRepairId());
+    const el = document.getElementById(FORM_ANCHOR_ID);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 

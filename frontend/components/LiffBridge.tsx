@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { publishLiffSession } from "@/lib/liff-session";
 
 declare global {
   interface Window {
@@ -13,21 +14,22 @@ declare global {
  * - Init เฉพาะหน้า LIFF endpoint (`/repair/request`) เท่านั้น
  *   (หน้า admin อื่นไม่ต้อง init → ไม่มี warn "not related to the endpoint URL")
  * - Loads LIFF SDK lazily, inits with the LIFF ID from backend settings
- * - When opened inside LINE: fetches profile and binds line_user_id to the logged-in user
- * - Rewrites in-app links to liif:// so navigation stays inside the LINE browser
+ * - When opened inside LINE: fetches profile + ID token, binds line_user_id to the logged-in user,
+ *   แล้วประกาศทุกอย่างผ่าน `frontend/lib/liff-session.ts` (component อื่นอ่านด้วย useLiffSession())
+ * - Rewrites in-app links to liff:// so navigation stays inside the LINE browser
  */
 export default function LiffBridge() {
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error" | "external">("idle");
-  const [liffId, setLiffId] = useState<string>("");
-
   useEffect(() => {
     let cancelled = false;
 
     // LIFF endpoint จริงเท่านั้น — หน้า /register ทำ LIFF เอง (ดู register/page.tsx)
     if (window.location.pathname !== "/repair/request") {
-      setStatus("external");
+      publishLiffSession({ status: "external" });
       return;
     }
+
+    // รีเซ็ตก่อน init รอบใหม่ (กรณี client-side navigation เข้ามาที่หน้านี้)
+    publishLiffSession({ status: "idle" });
 
     async function init() {
       // Fetch configured LIFF ID จาก endpoint สาธารณะ (ไม่ต้อง login — line_notify.php 401 เมื่อไม่มี session)
@@ -36,9 +38,8 @@ export default function LiffBridge() {
         const json = await res.json();
         if (cancelled) return;
         const id = json?.line_liff_id || "";
-        setLiffId(id);
         if (!id) {
-          setStatus("external");
+          publishLiffSession({ status: "external" });
           return;
         }
 
@@ -58,9 +59,19 @@ export default function LiffBridge() {
 
         // If opened inside the LINE app, capture the user profile and check binding status
         if (window.liff.isInClient?.()) {
-          setStatus("ready");
           const profile = await window.liff.getProfile();
-          if (profile?.userId && !cancelled) {
+          const idToken = window.liff.getIDToken?.() || "";
+          if (cancelled) return;
+
+          // ประกาศก่อนทำ binding check — AssetHubCard ฯลฯ เริ่มยิง API ได้ทันที
+          publishLiffSession({
+            status: "ready",
+            lineUserId: profile?.userId || "",
+            displayName: profile?.displayName || "",
+            idToken,
+          });
+
+          if (profile?.userId) {
             try {
               // เก็บ LINE user id + เช็คสถานะผูกกับเลขพนักงาน (ผ่าน line_register.php)
               localStorage.setItem("cmms_line_user_id", profile.userId);
@@ -87,11 +98,11 @@ export default function LiffBridge() {
             }
           }
         } else {
-          setStatus("external");
+          publishLiffSession({ status: "external" });
         }
       } catch (e) {
         console.warn("LIFF init soft warning:", e);
-        if (!cancelled) setStatus("error");
+        if (!cancelled) publishLiffSession({ status: "error" });
       }
     }
 
