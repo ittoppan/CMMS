@@ -57,7 +57,9 @@ function linePhpAppBaseUrl(PDO $pdo, string $override = ''): string {
     if ($scheme !== 'https') {
         fwrite(STDERR, "WARNING: APP_URL ยังเป็น http — PWA จะติดตั้งไม่ได้และ LINE จะเตือนว่าไม่ปลอดภัย\n");
     }
-    if (preg_match('/(ngrok|zrok|trycloudflare|localtunnel)/i', (string)$parts['host'])) {
+    // zrok แบบ reserved share (cmms-tpt/zrok2) เป็น origin ที่คงที่แล้ว — ไม่ต้องเตือน
+    // เตือนเฉพาะ tunnel ที่ URL เปลี่ยนเองได้ (ตัวที่เคยทำให้ลิงก์ตายมาแล้ว)
+    if (preg_match('/(ngrok-free|ngrok\.io|trycloudflare|localtunnel|lhr\.life)/i', (string)$parts['host'])) {
         fwrite(STDERR, "WARNING: APP_URL ชี้ไป tunnel ชั่วคราว ({$parts['host']}) — PWA ที่ติดตั้งจะเปิดไม่ขึ้นเมื่อ URL เปลี่ยน\n");
     }
     return $raw;
