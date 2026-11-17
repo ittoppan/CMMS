@@ -48,6 +48,7 @@ import {
   Scale as ScaleIcon,
   RefreshCw as ArrowPathIcon,
   Hammer as WrenchIcon,
+  TriangleAlert as TriangleAlertIcon,
 } from "lucide-react";
 
 interface SettingRow {
@@ -1169,8 +1170,8 @@ export default function SettingsPage() {
                               {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
                             </p>
                             {phoneWarning && (
-                              <p className="text-sm" style={{ color: "var(--cmms-warning)", fontWeight: 600 }}>
-                                ⚠ {phoneWarning}
+                              <p className="flex items-center gap-1.5 text-sm" style={{ color: "var(--cmms-warning)", fontWeight: 600 }}>
+                                <TriangleAlertIcon size={14} strokeWidth={2} /> {phoneWarning}
                               </p>
                             )}
                           </VStack>
