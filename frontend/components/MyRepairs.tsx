@@ -22,14 +22,14 @@ import {
   CalendarClock,
   ClipboardList,
   Loader2,
-  Mail,
-  Phone,
+
   RefreshCw,
   Star,
   Wrench,
 } from "lucide-react";
 import { apiJson } from "@/lib/api";
 import { UNBOUND_BODY, UNBOUND_TITLE, type SupportContact } from "@/lib/liff-bind-copy";
+import SupportContactStrip from "@/components/SupportContactStrip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -351,23 +351,8 @@ export default function MyRepairs() {
           <p className="mt-2 mb-0 text-sm text-[var(--cmms-text-secondary)]">
             แจ้งแอดมิน/หัวหน้างานเพื่อเพิ่มผู้ใช้ก่อน แล้วเปิดลิงก์นี้อีกครั้ง
           </p>
-          {(contact?.phone || contact?.email) && (
-            <div className="mt-3 rounded-lg border px-3 py-2" style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg)" }}>
-              <p className="m-0 mb-1 text-xs font-bold text-[var(--cmms-text-secondary)]">ติดต่อแอดมิน</p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                {contact?.phone && (
-                  <a href={`tel:${contact.phone.replace(/[^0-9+]/g, "")}`} className="flex items-center gap-1.5" style={{ color: "var(--cmms-primary)" }}>
-                    <Phone size={14} strokeWidth={1.75} /> {contact.phone}
-                  </a>
-                )}
-                {contact?.email && (
-                  <a href={`mailto:${contact.email}`} className="flex min-w-0 items-center gap-1.5 break-all" style={{ color: "var(--cmms-primary)" }}>
-                    <Mail size={14} strokeWidth={1.75} /> {contact.email}
-                  </a>
-                )}
-              </div>
-            </div>
-          )}
+          {/* กล่องติดต่อแอดมิน — ซ่อนอัตโนมัติเมื่อเบอร์/อีเมลว่าง (component กลาง) */}
+          <SupportContactStrip contact={contact} className="mt-3" />
           <Button className="mt-3 w-full" onClick={() => (window.location.href = "/repair/request")}>
             ไปหน้าผูกบัญชี / แจ้งซ่อม
           </Button>
