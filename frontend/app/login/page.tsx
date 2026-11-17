@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ThemeProvider from '../../components/ThemeProvider';
 import CmmsScene3D from './CmmsScene3D';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,28 @@ function LoginContent() {
   const [loginFailed, setLoginFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Spotlight + tilt 3D เบาๆ ตามเมาส์ (เขียน CSS var ตรง ไม่ re-render)
+  const onFormMove = (e: React.MouseEvent<HTMLFormElement>) => {
+    const el = formRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const fx = (e.clientX - r.left) / r.width;
+    const fy = (e.clientY - r.top) / r.height;
+    el.style.setProperty('--spot-x', `${(fx * 100).toFixed(2)}%`);
+    el.style.setProperty('--spot-y', `${(fy * 100).toFixed(2)}%`);
+    el.style.setProperty('--tilt-x', `${((0.5 - fy) * 2.4).toFixed(2)}deg`);
+    el.style.setProperty('--tilt-y', `${((fx - 0.5) * 2.4).toFixed(2)}deg`);
+  };
+  const onFormLeave = () => {
+    const el = formRef.current;
+    if (!el) return;
+    el.style.setProperty('--tilt-x', '0deg');
+    el.style.setProperty('--tilt-y', '0deg');
+    el.style.setProperty('--spot-x', '72%');
+    el.style.setProperty('--spot-y', '0%');
+  };
 
   const [bindLine, setBindLine] = useState(false);
   const [nextPath, setNextPath] = useState('');
@@ -201,7 +223,16 @@ function LoginContent() {
 
       {/* Login form */}
       <main className="cmms-login-panel cmms-login-panel--neo">
-        <form className="cmms-login-form cmms-login-form--glass" onSubmit={onSubmit} noValidate>
+        <form
+      ref={formRef}
+      onMouseMove={onFormMove}
+      onMouseLeave={onFormLeave}
+      className="cmms-login-form cmms-login-form--glass"
+      onSubmit={onSubmit}
+      noValidate
+    >
+          <span className="cmms-login-ring" aria-hidden="true" />
+          <span className="cmms-login-spot" aria-hidden="true" />
           <h1 className="sr-only">เข้าสู่ระบบ CMMS-TOPPAN</h1>
           <div className="cmms-login-logo">
             <div className="cmms-login-logo-icon cmms-login-logo-icon--neo cmms-login-brand-mark--logo">

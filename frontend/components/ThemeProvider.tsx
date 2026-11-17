@@ -54,7 +54,8 @@ const isDark = () =>
 
 let lastApplied: { primary: string; gradient: string; sidebar: string; body: string } | null = null;
 // เก็บ getter ของ settings ล่าสุดไว้ re-apply ตอนสลับ light/dark
-let lastSettingsGet: ((k: string) => string) | null = null;
+// (undefined = ไม่มี key ใน settings — ให้ caller จัดการ default เอง)
+let lastSettingsGet: ((k: string) => string | undefined) | null = null;
 
 /** hex → rgba tint string */
 const tint = (hex: string, alpha: number): string => {
@@ -135,7 +136,7 @@ const DESIGN_VAR_MAP: Record<string, string[]> = {
 // keys ที่เป็น "สีพื้นหลังโหมดสว่าง" — ใน dark mode ต้องข้าม ให้ .dark tokens ชนะ
 const LIGHT_ONLY_DESIGN_KEYS = new Set(["design_body_bg", "design_sidebar_bg"]);
 
-const applyDesign = (get: (k: string) => string) => {
+const applyDesign = (get: (k: string) => string | undefined) => {
   const root = document.documentElement;
   const dark = isDark();
   for (const [key, vars] of Object.entries(DESIGN_VAR_MAP)) {
@@ -150,8 +151,10 @@ const applyDesign = (get: (k: string) => string) => {
 
 /**
  * สวิตช์ "เปิด animation ของระบบ" (settings → animations_enabled)
+ * NOTE: get() คืน undefined เมื่อไม่มี key ใน settings — ต้อง fallback "1" จริง
+ * (เดิม get คืน "" ทำให้ ("" ?? "1") = "" → enabled=false → ปิด animation ทั้งระบบผิดดีฟอลต์)
  */
-const applyAnimSetting = (get: (k: string) => string) => {
+const applyAnimSetting = (get: (k: string) => string | undefined) => {
   const root = document.documentElement;
   const enabled = (get("animations_enabled") ?? "1") === "1";
   root.classList.toggle("cmms-no-anim", !enabled);
@@ -206,12 +209,15 @@ export default function ThemeProvider() {
         const res = await fetch("/api/v1/settings.php", { cache: "no-store" });
         const json = await res.json();
         if (!Array.isArray(json)) return;
-        const get = (k: string) => json.find((s: any) => s.setting_key === k)?.setting_value ?? "";
+        const get = (k: string) => {
+          const hit = json.find((s: any) => s.setting_key === k);
+          return hit === undefined ? undefined : String(hit.setting_value ?? "");
+        };
         const preset = get("theme_preset") || "toppan";
-        const customPrimary = get("theme_primary_hex");
+        const customPrimary = get("theme_primary_hex") || "";
         const base = THEME_PRESETS[preset] ?? THEME_PRESETS.toppan;
         const primary = /^#[0-9a-fA-F]{3,8}$/.test(customPrimary) ? customPrimary : base.primary;
-        const secondary = get("theme_secondary_hex");
+        const secondary = get("theme_secondary_hex") || "";
         const gradient = /^#[0-9a-fA-F]{3,8}$/.test(secondary)
           ? `linear-gradient(135deg, ${primary}, ${secondary})`
           : base.gradient;

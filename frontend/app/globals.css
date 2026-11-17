@@ -896,13 +896,15 @@ h1, h2, h3, h4 {
   background: var(--cmms-bg-card, #fff);
   box-shadow: 0 1px 3px rgba(16,24,40,0.05);
   color: var(--cmms-text-primary); cursor: pointer; text-align: left; width: 100%;
-  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  transition: border-color 200ms cubic-bezier(0.2,0.8,0.2,1), transform 200ms cubic-bezier(0.2,0.8,0.2,1), box-shadow 200ms cubic-bezier(0.2,0.8,0.2,1), background 200ms ease;
+  animation: cmms-home-fade-up 420ms cubic-bezier(0.2,0.8,0.2,1) both;
 }
 .cmms-home-tile:hover {
   border-color: color-mix(in srgb, var(--cmms-primary) 45%, var(--cmms-border));
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(16,24,40,0.10);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(16,24,40,0.12);
 }
+
 .cmms-home-tile-ico {
   width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
   background: var(--cmms-primary-light); color: var(--cmms-primary);
@@ -921,6 +923,26 @@ h1, h2, h3, h4 {
 .cmms-home-tone-amber { color: var(--cmms-warning); }
 .cmms-home-tone-red { color: var(--cmms-danger); }
 .cmms-home-tone-blue { color: var(--cmms-primary); }
+
+@keyframes cmms-home-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cmms-home .cmms-home-tile:nth-child(1) { animation-delay: 0ms; }
+.cmms-home .cmms-home-tile:nth-child(2) { animation-delay: 40ms; }
+.cmms-home .cmms-home-tile:nth-child(3) { animation-delay: 80ms; }
+.cmms-home .cmms-home-tile:nth-child(4) { animation-delay: 120ms; }
+.cmms-home-hero { animation: cmms-home-fade-up 480ms cubic-bezier(0.2,0.8,0.2,1) both; }
+.cmms-home-lamp { animation: cmms-home-fade-up 360ms cubic-bezier(0.2,0.8,0.2,1) both; }
+.cmms-home-lamp:nth-child(1) { animation-delay: 0ms; }
+.cmms-home-lamp:nth-child(2) { animation-delay: 50ms; }
+.cmms-home-lamp:nth-child(3) { animation-delay: 100ms; }
+.cmms-home-lamp:nth-child(4) { animation-delay: 150ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cmms-home-tile, .cmms-home-hero, .cmms-home-lamp { animation: none !important; }
+  .cmms-home-tile:hover, .cmms-home-lamp:hover, .cmms-home-hero-stat:hover { transform: none !important; }
+}
 
 .cmms-home-signature, .cmms-home-signature:active { padding-top: 20px !important; padding-bottom: 20px !important; }
 .cmms-home-signature .cmms-home-tile-name { font-size: 1.02rem; }
@@ -3292,6 +3314,174 @@ html.cmms-no-anim *::after {
 }
 @media (prefers-reduced-motion: reduce) {
   .cmms-login-spin-slow { animation: none; }
+}
+
+/* =========================
+   LOGIN — Living Machine refresh
+   Energy ring / spotlight / tilt / blur-in stagger
+   ========================= */
+@property --cmms-ring-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.cmms-login-container--neo .cmms-login-form--glass {
+  position: relative;
+  transform: perspective(1100px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.cmms-login-ring,
+.cmms-login-spot {
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* ขอบพลังงานหมุนรอบการ์ด — ใช้ longhands กัน lightningcss รวม shorthand ผิด (mask ตก → ทึบทั้งใบ) */
+.cmms-login-ring {
+  inset: -1px;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--cmms-ring-angle, 0deg),
+    rgba(0, 225, 255, 0.75),
+    rgba(64, 255, 210, 0.4) 90deg,
+    rgba(124, 184, 255, 0.35) 160deg,
+    rgba(0, 225, 255, 0.12) 240deg,
+    rgba(0, 225, 255, 0.75) 360deg
+  );
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+}
+/* สปอตไลต์เรืองแสงตามเมาส์ */
+.cmms-login-spot {
+  inset: 0;
+  background: radial-gradient(
+    340px circle at var(--spot-x, 72%) var(--spot-y, 0%),
+    rgba(0, 220, 255, 0.1),
+    transparent 62%
+  );
+}
+/* ปุ่ม submit — ลำแสงกวาด */
+.cmms-login-submit-neo { position: relative; overflow: hidden; }
+.cmms-login-submit-neo::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -70%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.5) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+/* ไฟสถานะ — เรดาร์ชั่วคราว */
+.cmms-login-container--neo .cmms-login-lamp { position: relative; }
+.cmms-login-container--neo .cmms-login-lamp::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(53, 255, 208, 0.55);
+}
+/* ชื่อไล่สี — shimmer เลื่อนไม่หยุด */
+.cmms-login-container--neo .cmms-login-gradient-text { background-size: 220% auto; }
+/* feature list — hover เลื่อน + เรืองแสง */
+.cmms-login-features--neo .cmms-login-feature {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s, background 0.35s, box-shadow 0.35s;
+}
+.cmms-login-features--neo .cmms-login-feature-icon { transition: box-shadow 0.35s, color 0.35s; }
+.cmms-login-features--neo .cmms-login-feature:hover {
+  transform: translateX(7px);
+  border-color: rgba(140, 230, 255, 0.4);
+  background: linear-gradient(90deg, rgba(0, 200, 255, 0.14), transparent);
+  box-shadow: 0 6px 22px rgba(0, 190, 255, 0.1);
+}
+.cmms-login-features--neo .cmms-login-feature:hover .cmms-login-feature-icon {
+  box-shadow: 0 0 22px rgba(0, 220, 255, 0.35);
+  color: #d9fbff;
+}
+/* ฟิลด์กรอก — focus เรืองแสงฟ้า */
+.cmms-login-form--glass input:focus-visible,
+.cmms-login-form--glass [data-slot="input"]:focus-visible {
+  border-color: rgba(0, 220, 255, 0.65) !important;
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.14), 0 0 26px rgba(0, 190, 255, 0.14) !important;
+  outline: none !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cmms-login-ring {
+    animation:
+      cmms-login-ring-spin 8s linear infinite,
+      cmms-login-ring-pulse 3.6s ease-in-out infinite;
+  }
+  .cmms-login-submit-neo::after { animation: cmms-login-shine 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+  .cmms-login-container--neo .cmms-login-lamp::after { animation: cmms-login-radar 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+  .cmms-login-container--neo .cmms-login-gradient-text { animation: cmms-login-shimmer 7s linear infinite; }
+  .cmms-login-logo-img--hero { animation: cmms-login-float 6s ease-in-out infinite; }
+  .cmms-login-container--neo .cmms-login-error { animation: cmms-login-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+}
+
+/* entrance: การ์ดทั้งใบ fade-in + ลูกภายใน blur-in ทีละชิ้น
+   (one-shot สั้น/เล็ก — เกิดนอก media query เพื่อให้ reduce-motion ยังเห็น)
+   หมายเหตุ: ห้ามใส่ :not() ใน rule นี้ — specificity สูงกว่า nth-child delay จะ override delay เป็น 0 */
+.cmms-login-container--neo .cmms-login-panel { animation: cmms-fadeIn 0.4s ease-out both; }
+.cmms-login-container--neo .cmms-login-form { animation: none; }
+.cmms-login-container--neo .cmms-login-form > * {
+  animation: cmms-login-blur-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cmms-login-container--neo .cmms-login-form > *:nth-child(1) { animation-delay: 0.05s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(2) { animation-delay: 0.1s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(3) { animation-delay: 0.15s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(4) { animation-delay: 0.2s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(5) { animation-delay: 0.25s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(6) { animation-delay: 0.3s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(7) { animation-delay: 0.35s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(8) { animation-delay: 0.4s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(9) { animation-delay: 0.45s; }
+.cmms-login-container--neo .cmms-login-form > *:nth-child(10) { animation-delay: 0.5s; }
+/* hero: เปลี่ยนจาก fade เป็น blur-in ให้เข้าชุดกัน */
+.cmms-login-container--neo .cmms-login-hero-body > * { animation-name: cmms-login-blur-in; }
+  @keyframes cmms-login-ring-spin { to { --cmms-ring-angle: 360deg; } }
+@keyframes cmms-login-ring-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 0.45; }
+}
+@keyframes cmms-login-blur-in {
+  from { opacity: 0; transform: translateY(14px); filter: blur(7px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes cmms-login-shimmer { to { background-position: 220% center; } }
+@keyframes cmms-login-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes cmms-login-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+@keyframes cmms-login-radar {
+  0% { transform: scale(0.55); opacity: 0.9; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes cmms-login-shine {
+  0% { left: -70%; }
+  55%, 100% { left: 135%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* ปิดเฉพาะ loop ตกแต่งแบบ infinite — one-shot entrance ยังทำงาน (สั้น เล็ก ไม่กวน) */
+  .cmms-login-container--neo .cmms-login-form--glass { transform: none; transition: none; }
+  .cmms-login-ring,
+  .cmms-login-spot,
+  .cmms-login-container--neo .cmms-login-gradient-text,
+  .cmms-login-logo-img--hero { animation: none !important; }
+  .cmms-login-submit-neo::after { display: none; }
+  .cmms-login-container--neo .cmms-login-lamp::after { display: none; }
 }
 
 /* Login logo */
