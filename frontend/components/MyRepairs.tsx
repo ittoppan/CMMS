@@ -11,7 +11,9 @@
  * แล้วดึงงานที่ตัวเองแจ้งจาก /api/v1/my_repairs.php — ไม่เห็นงานของคนอื่น
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLiffFetch } from "@/lib/useLiffFetch";
+import { getLegacyLineUserId, useLiffSession } from "@/lib/liff-session";
 import {
   AlertCircle,
   ArrowLeft,
@@ -107,55 +109,37 @@ function formatDate(value?: string | null, withTime = false): string {
 }
 
 export default function MyRepairs() {
-  const [data, setData] = useState<Api | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("all");
   const [contact, setContact] = useState<SupportContact | null>(null);
+  const liff = useLiffSession();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      let lineUserId = "";
-      for (let i = 0; i < 6; i++) {
-        try {
-          lineUserId = localStorage.getItem("cmms_line_user_id") || "";
-        } catch {
-          lineUserId = "";
-        }
-        if (lineUserId) break;
-        await new Promise((r) => setTimeout(r, 400));
-      }
+  // ตัวตน: store ของ LiffBridge ก่อน (ไม่ต้องรอ/วนอ่าน localStorage), แล้วค่อย fallback
+  // ค่าเดิมที่เคยเก็บไว้ — เซิร์ฟเวอร์ยังตรวจได้เองอีกชั้นจาก session/token
+  const lineUserId = liff.lineUserId || getLegacyLineUserId();
+  const url = lineUserId
+    ? `/api/v1/my_repairs.php?${new URLSearchParams({ line_user_id: lineUserId }).toString()}`
+    : "/api/v1/my_repairs.php";
 
-      const qs = new URLSearchParams();
-      if (lineUserId) qs.set("line_user_id", lineUserId);
-      const res = await fetch(`/api/v1/my_repairs.php?${qs.toString()}`, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const json = (await res.json()) as Api;
-      if (!res.ok || json.success === false) {
-        throw new Error(json.error || "โหลดรายการงานไม่สำเร็จ");
-      }
-      setData(json);
+  const { data, loading, error, reload: load } = useLiffFetch<Api>({
+    url,
+    errorMessage: "โหลดรายการงานไม่สำเร็จ",
+  });
 
-      if (json.registered === false) {
-        fetch("/api/v1/line_register.php?liff_id=1")
-          .then((r) => r.json())
-          .then((j) => setContact((j?.contact as SupportContact) || null))
-          .catch(() => {});
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "โหลดรายการงานไม่สำเร็จ");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // ยังไม่ผูกบัญชี → ขอช่องทางติดต่อแอดมิน (ชุดเดียวกับหน้า /repair/request)
+  const unbound = data?.registered === false;
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (!unbound) return;
+    let alive = true;
+    fetch("/api/v1/line_register.php?liff_id=1")
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive) setContact((j?.contact as SupportContact) || null);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [unbound]);
 
   const items = data?.items ?? [];
   const filtered = useMemo(() => {

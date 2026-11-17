@@ -40,6 +40,19 @@ export function getLiffSession(): LiffSession {
   return session;
 }
 
+/**
+ * LINE user id แบบเดิมที่ LiffBridge เคยเขียนลง localStorage — อ่านครั้งเดียวเพื่อ
+ * รองรับหน้าที่ยังไม่มี LiffBridge (เช่น /my-repairs แบบ standalone) ระหว่างเปลี่ยนผ่าน
+ * (ไม่ใช่การรอ/poll; ค่าใหม่ให้อ่านจาก useLiffSession().lineUserId)
+ */
+export function getLegacyLineUserId(): string {
+  try {
+    return localStorage.getItem("cmms_line_user_id") || "";
+  } catch {
+    return "";
+  }
+}
+
 export function subscribeLiffSession(listener: () => void): () => void {
   listeners.add(listener);
   return () => {

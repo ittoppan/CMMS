@@ -12,13 +12,13 @@
  *
  * ข้อมูลมาจาก /api/v1/asset_hub.php ซึ่งตรวจ LIFF ID token ฝั่งเซิร์ฟเวอร์แล้ว
  * จึงรู้ว่าเป็น LINE user คนไหน — ไม่ได้เชื่อ userId ที่ client ส่งมา
- * token/สถานะ LIFF รับจาก LiffBridge ผ่าน useLiffSession() (event) ไม่ต้องรอ/วนอ่าน localStorage
+ * การรอ LiffBridge + แนบ ID token + loading/error ทำโดย useLiffFetch() (hook กลางใน lib)
  * ยังไม่ผูกบัญชีจะเห็นแค่ชื่อเครื่อง + คำแนะนำให้แอดมินเพิ่มผู้ใช้
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { History, Wrench, CalendarClock, Loader2, ShieldAlert, ChevronDown } from "lucide-react";
-import { useLiffSession } from "@/lib/liff-session";
+import { useLiffFetch } from "@/lib/useLiffFetch";
 
 type HubAsset = {
   code: string;
@@ -112,56 +112,21 @@ const FORM_ANCHOR_ID = "repair-request-form";
 export default function AssetHubCard() {
   const [assetCode, setAssetCode] = useState("");
   const [tab, setTab] = useState<Tab>("repair");
-  const [data, setData] = useState<HubResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
-  const mounted = useRef(true);
-  const liff = useLiffSession();
-  // LiffBridge ประกาศสถานะเมื่อ init จบ (ready = อยู่ใน LINE, external = เปิดนอก LINE, error = init ไม่ผ่าน)
-  const liffResolved = liff.status !== "idle";
-
-  const load = useCallback(async (code: string, idToken: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // LIFF ID token = หลักฐานตัวตนที่เซิร์ฟเวอร์ตรวจกับ LINE (ได้จาก LiffBridge โดยตรง)
-      const qs = new URLSearchParams({ code });
-      const res = await fetch(`/api/v1/asset_hub.php?${qs.toString()}`, {
-        credentials: "include",
-        cache: "no-store",
-        headers: idToken ? { "X-LIFF-Id-Token": idToken } : undefined,
-      });
-      const json = (await res.json()) as HubResponse;
-      if (!res.ok || json.success === false) {
-        throw new Error(json.error || "โหลดข้อมูลเครื่องจักรไม่สำเร็จ");
-      }
-      if (!mounted.current) return;
-      setData(json);
-    } catch (e) {
-      if (!mounted.current) return;
-      setError(e instanceof Error ? e.message : "โหลดข้อมูลเครื่องจักรไม่สำเร็จ");
-    } finally {
-      if (mounted.current) setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    mounted.current = true;
-    const code = assetCodeFromUrl();
-    setAssetCode(code);
+    setAssetCode(assetCodeFromUrl());
     setTab(tabFromUrl());
-    if (!code) {
-      setLoading(false);
-      return;
-    }
-    // รอผล init จาก LiffBridge (event ผ่าน useLiffSession) — ไม่มี timer/วนอ่าน localStorage
-    if (!liffResolved) return;
-    void load(code, liff.idToken);
-    return () => {
-      mounted.current = false;
-    };
-  }, [load, liffResolved, liff.idToken]);
+  }, []);
+
+  // ตัวตน (LIFF ID token)/การรอ LiffBridge/loading/error จัดการโดย hook กลางตัวเดียวกับ MyRepairs
+  const hubUrl = assetCode
+    ? `/api/v1/asset_hub.php?${new URLSearchParams({ code: assetCode }).toString()}`
+    : null;
+  const { data, loading, error } = useLiffFetch<HubResponse>({
+    url: hubUrl,
+    errorMessage: "โหลดข้อมูลเครื่องจักรไม่สำเร็จ",
+  });
 
   const jumpToForm = () => {
     const el = document.getElementById(FORM_ANCHOR_ID);
