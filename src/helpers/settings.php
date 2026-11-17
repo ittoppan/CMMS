@@ -48,13 +48,20 @@ if (!function_exists('settings_support_contact')) {
      * ซึ่งไม่ใช่เบอร์จริง — ถ้าแอดมินยังไม่แก้ หน้าเว็บจะโชว์เบอร์ปลอมให้ผู้ใช้โทร
      * ฟังก์ชันนี้จึงกรอง placeholder/ค่าที่ไม่ใช่ช่องทางติดต่อจริงออก (คืน '' = ซ่อน)
      *
+     * ลำดับคีย์: `support_phone` / `support_email` (ช่องทางติดต่อที่แอดมินตั้งเอง) ก่อน
+     * แล้วค่อย fallback ไป `company_phone` / `smtp_from_email` เดิม — แยกจากอีเมลผู้ส่งของระบบ
+     * ไม่ให้แอดมินแก้ From ของ SMTP แล้วช่องทางติดต่อของผู้ใช้เปลี่ยนตาม
+     * (ค่าที่ตั้งไว้แต่ยังเป็น placeholder จะตกไปใช้ fallback ต่อ)
+     *
      * @return array{company:string,phone:string,email:string}
      */
     function settings_support_contact(?PDO $pdo = null): array {
         return [
             'company' => trim(setting_value('company_name', '', $pdo)),
-            'phone'   => settings_support_phone(setting_value('company_phone', '', $pdo)),
-            'email'   => settings_support_email(setting_value('smtp_from_email', '', $pdo)),
+            'phone'   => settings_support_phone(setting_value('support_phone', '', $pdo))
+                ?: settings_support_phone(setting_value('company_phone', '', $pdo)),
+            'email'   => settings_support_email(setting_value('support_email', '', $pdo))
+                ?: settings_support_email(setting_value('smtp_from_email', '', $pdo)),
         ];
     }
 }

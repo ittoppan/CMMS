@@ -3,7 +3,8 @@
  *
  * ผู้ใช้ LINE ที่ยังไม่ถูกเพิ่มในระบบ (unbound) ต้องเข้าใจตรงกันทั้งหน้าและ error:
  * "ต้องให้แอดมินเพิ่มผู้ใช้ก่อน แล้วค่อยกรอกเลขพนักงานเพื่อผูกบัญชี"
- * ช่องทางติดต่อดึงจาก settings (company_phone / smtp_from_email) ไม่ hardcode
+ * ช่องทางติดต่อดึงจาก settings (support_phone / support_email → fallback company_phone /
+ * smtp_from_email ผ่าน settings_support_contact()) ไม่ hardcode
  */
 
 export type SupportContact = {

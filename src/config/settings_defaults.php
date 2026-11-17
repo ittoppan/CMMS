@@ -21,6 +21,9 @@ function settingsDefaultValues(): array {
         'company_address'       => '700/842 หมู่ 3 นิคมอุตสาหกรรมอมตะซิตี้ ชลบุรี ต.หนองกะขะ อ.พานทอง จ.ชลบุรี 20160',
         'company_tax_id'        => '0999999999999',
         'company_phone'         => '02-123-4567',
+        // ช่องทางติดต่อแอดมินที่หน้า LIFF ใช้ (ว่าง = ใช้ company_phone / smtp_from_email)
+        'support_phone'         => '',
+        'support_email'         => '',
         'company_tagline'       => 'ระบบบริหารจัดการงานซ่อมบำรุงรักษาและคลังอะไหล่อุตสาหกรรม',
         'iso_header_title'      => 'บริษัท ท็อปพาน เฟล็กซิเบิ้ล แพคเกจจิ้ง (ประเทศไทย) จำกัด — ฝ่ายวิศวกรรมและซ่อมบำรุง',
         'login_welcome_text'    => '',

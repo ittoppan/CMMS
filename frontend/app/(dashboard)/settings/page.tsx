@@ -155,6 +155,8 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   company_address: { label: "ที่อยู่บริษัท" },
   company_tax_id: { label: "เลขประจำตัวผู้เสียภาษี" },
   company_phone: { label: "เบอร์โทรบริษัท" },
+  support_phone: { label: "เบอร์ติดต่อแอดมิน (ผู้ใช้เห็น)", hint: "ใช้ในข้อความ/หน้าแจ้งซ่อมตอนยังไม่ผูกบัญชี — ว่าง = ใช้เบอร์โทรบริษัท" },
+  support_email: { label: "อีเมลติดต่อแอดมิน (ผู้ใช้เห็น)", hint: "แยกจากอีเมลผู้ส่งของระบบ (SMTP From) — ว่าง = ใช้ smtp_from_email" },
   // branding
   company_tagline: { label: "คำโปรยระบบ", hint: "ข้อความใต้ชื่อระบบบนหน้าเข้าสู่ระบบ" },
   iso_header_title: { label: "หัวข้อเอกสาร ISO", hint: "ชื่อหัวกระดาษสำหรับเอกสาร ISO" },
@@ -319,7 +321,7 @@ const TEXTAREA_KEYS = new Set([
 const COLOR_KEYS = new Set(["theme_primary_hex", "theme_secondary_hex"]);
 
 // คีย์ที่เป็นอีเมล
-const EMAIL_KEYS = new Set(["smtp_from_email"]);
+const EMAIL_KEYS = new Set(["smtp_from_email", "support_email"]);
 
 // คีย์ที่เป็นตัวเลือกจำกัด (dropdown) — ค่าในลิสต์เดียวกับหน้า PHP เก่า
 const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
