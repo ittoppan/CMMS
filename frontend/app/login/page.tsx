@@ -172,6 +172,7 @@ function LoginContent() {
         ) : (
           <LoginVideoBg
             src="/media/login-bg.mp4"
+            mobileSrc="/media/login-bg-mobile.mp4"
             poster="/media/login-bg-poster.jpg"
             onUnavailable={() => setBgVideoFailed(true)}
           />

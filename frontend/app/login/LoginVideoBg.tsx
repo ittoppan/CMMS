@@ -5,21 +5,29 @@ import { useEffect, useRef, useState } from "react";
 /**
  * LoginVideoBg — พื้นหลังวิดีโอวนลูปของหน้า /login
  *
- * ทำไมต้องตั้งค่าแบบ imperative: บราวเซอร์บล็อก autoplay ถ้า element ไม่ได้ถูก mark ว่า muted
+ * เลือกไฟล์ตามอุปกรณ์ (ไม่โหลดเกินจำเป็น):
+ *   - จอกว้าง/เน็ตปกติ → ไฟล์หลัก 1080p (~3.2 MB)
+ *   - จอ ≤820px, saveData เปิด, หรือเน็ต 2G → ไฟล์เบา 540p (~1 MB)
+ * เลือกใน effect แล้วตั้ง video.src เอง (ไม่ใส่ src ใน JSX) เพื่อไม่ให้ SSR/CSR ไม่ตรงกัน
+ * และให้ poster แสดงทันทีระหว่างรอไฟล์
+ *
+ * ทำไมตั้งค่าแบบ imperative: บราวเซอร์บล็อก autoplay ถ้า element ไม่ได้ถูก mark ว่า muted
  * จริง ๆ (React บางจังหวะตั้งแค่ property แต่ attribute ไม่ติดตอน hydration) ทำให้วิดีโอค้างที่
  * เฟรมแรกและดูเหมือน "ภาพนิ่ง" — จึงเซ็ต muted/playsInline แล้วเรียก play() เอง
- * และถ้ายังถูกบล็อก (นโยบาย autoplay เข้ม) จะลองอีกครั้งเมื่อผู้ใช้มี interaction แรก
+ * ถ้ายังถูกบล็อก (นโยบาย autoplay เข้ม) จะลองอีกครั้งเมื่อผู้ใช้มี interaction แรก
  *
- * ถ้าวิดีโอโหลด/เล่นไม่ได้จริง ๆ จะถอยไปใช้ภาพนิ่ง (poster) เพื่อไม่ให้พื้นหลังเป็นจอเปล่า
+ * ถ้าวิดีโอโหลด/เล่นไม่ได้จริง ๆ → แจ้งหน้าพ่อด้วย onUnavailable เพื่อสลับไปฉาก three.js
+ * (และ gradient/glow CSS ถ้า WebGL ใช้ไม่ได้อีก)
  */
 export default function LoginVideoBg({
   src,
+  mobileSrc,
   poster,
   onUnavailable,
 }: {
   src: string;
+  mobileSrc: string;
   poster: string;
-  /** แจ้งให้หน้าพ่อสลับไปชั้นถัดไป (three.js → CSS gradient) ถ้าวิดีโอเล่นไม่ได้ */
   onUnavailable?: () => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -28,6 +36,15 @@ export default function LoginVideoBg({
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
+
+    // จอเล็ก/ประหยัดดาต้า/เน็ตช้า → ไฟล์เบา ไม่ต้องโหลด 1080p ให้เปลือง
+    const smallScreen = window.matchMedia("(max-width: 820px)").matches;
+    const conn = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    const saveData = conn?.saveData === true;
+    const slowNet = /(^|-)2g$/.test(conn?.effectiveType ?? "");
+    video.src = smallScreen || saveData || slowNet ? mobileSrc : src;
 
     video.muted = true;
     video.defaultMuted = true;
@@ -67,7 +84,7 @@ export default function LoginVideoBg({
       detach();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [src, mobileSrc]);
 
   if (failed) {
     return <img className="cmms-login-video" src={poster} alt="" />;
@@ -77,7 +94,6 @@ export default function LoginVideoBg({
     <video
       ref={ref}
       className="cmms-login-video"
-      src={src}
       poster={poster}
       autoPlay
       muted
