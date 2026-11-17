@@ -82,8 +82,10 @@ export default function LiffBridge() {
           if (profile?.userId) {
             try {
               // เก็บ LINE user id + เช็คสถานะผูกกับเลขพนักงาน (ผ่าน line_register.php)
+              // API ไม่รับ line_user_id จาก client — ต้องแนบ ID token ที่ตรวจกับ LINE เท่านั้น
               localStorage.setItem("cmms_line_user_id", profile.userId);
-              const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(profile.userId)}`);
+              const authHeaders: Record<string, string> = idToken ? { "X-LIFF-Id-Token": idToken } : {};
+              const res = await fetch("/api/v1/line_register.php", { headers: authHeaders });
               const json = await res.json().catch(() => ({}));
               if (json?.bound && json?.user) {
                 localStorage.setItem("cmms_line_bound", "1");
@@ -91,7 +93,7 @@ export default function LiffBridge() {
                 // role ของผู้ใช้ (ใช้ filter เมนู PWA ตามบทบาท)
                 if (json.user.role) localStorage.setItem("cmms_line_role", json.user.role);
                 try {
-                  const roleRes = await fetch(`/api/v1/menu_permissions.php?line_user_id=${encodeURIComponent(profile.userId)}`);
+                  const roleRes = await fetch("/api/v1/menu_permissions.php?user=1", { headers: authHeaders });
                   const roleJson = await roleRes.json().catch(() => ({}));
                   if (roleJson?.user) {
                     localStorage.setItem("cmms_line_role_id", String(roleJson.user.role_id || ""));

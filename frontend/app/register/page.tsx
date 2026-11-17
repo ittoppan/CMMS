@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { apiFetch } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -23,8 +24,7 @@ declare global {
   }
 }
 
-const apiFetch = (url: string, init?: RequestInit) =>
-  fetch(url, { ...init });
+// ใช้ apiFetch กลาง — แนบ X-LIFF-Id-Token (และ CSRF ตอน POST) ให้อัตโนมัติ
 
 function LineAvatar({
   src,
@@ -121,7 +121,9 @@ function RegisterContent() {
         setLineUserId(pUid);
         setLiffStatus(profile?.userId ? "ready" : "external");
         try {
-          const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
+          // ตรวจสถานะผูกด้วย LINE ที่ยืนยันแล้ว (token จาก LIFF หรือ session จาก line_callback.php)
+          // — ไม่ส่ง line_user_id จาก client แล้ว
+          const res = await apiFetch("/api/v1/line_register.php");
           const json = await res.json().catch(() => ({}));
           if (!cancelled && json?.bound && json?.user) setBoundUser({
             full_name: json.user.full_name,
@@ -180,7 +182,8 @@ function RegisterContent() {
       const res = await apiFetch("/api/v1/line_register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ line_user_id: lineUserId, employee_code: code }),
+        // ไม่ส่ง line_user_id แล้ว — เซิร์ฟเวอร์ใช้ LINE ที่ token/session ยืนยัน
+        body: JSON.stringify({ employee_code: code }),
       });
       const json = await res.json().catch(() => ({}));
       if (json.success && json.user) {

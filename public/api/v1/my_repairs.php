@@ -2,13 +2,14 @@
 /**
  * my_repairs.php — "ติดตามงานของฉัน" สำหรับผู้แจ้งซ่อม (LIFF rich menu ปุ่มที่ 2)
  *
- * GET /api/v1/my_repairs.php?line_user_id=<U...>&limit=30
- *   → งานที่ผู้ใช้ LINE คนนี้เคยแจ้ง (repair.created_by) + สรุปจำนวน
+ * GET /api/v1/my_repairs.php?limit=30  (header: X-LIFF-Id-Token จาก liff.getIDToken())
+ *   → งานที่ผู้ใช้ LINE ที่ token ยืนยันแล้วเคยแจ้ง (repair.created_by) + สรุปจำนวน
  *
- * GET (ไม่ส่ง line_user_id) + มี session → งานที่ผู้ใช้ที่ล็อกอินแจ้งไว้
+ * GET + มี session → งานที่ผู้ใช้ที่ล็อกอินแจ้งไว้
  *
  * ความปลอดภัย:
- *  - ระบุตัวตนด้วย line_user_id ที่ผูกกับ users และ is_active เท่านั้น (QR/URL ไม่ใช่ auth)
+ *  - ตัวตนมาจาก LIFF ID token ที่ตรวจกับ LINE (src/helpers/liff.php) หรือ session เท่านั้น
+ *  - **ไม่รับ `line_user_id` จาก client อีกต่อไป** (ใครรู้ LINE user id ของคนอื่นก็อ่านงานเขาได้)
  *  - ไม่คืนข้อมูลต้นทุน/อะไหล่ — เฉพาะสิ่งที่ผู้แจ้งควรเห็น
  *  - อ่านอย่างเดียว (GET) ไม่ต้อง CSRF
  */
@@ -16,6 +17,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/api.php';
 require_once __DIR__ . '/../../../src/helpers/my_repairs.php';
+require_once __DIR__ . '/../../../src/helpers/liff.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -28,18 +30,20 @@ session_start();
 
 try {
     $pdo = getDb();
-    $lineUserId = trim((string)($_GET['line_user_id'] ?? ''));
     $limit = (int)($_GET['limit'] ?? 30);
 
-    $user = $lineUserId !== '' ? my_repairs_user($pdo, $lineUserId) : null;
-    $viaSession = false;
-    if (!$user) {
-        $sessionUser = currentUser($pdo);
-        if ($sessionUser) {
-            $user = $sessionUser;
-            $viaSession = true;
-        }
+    // ตัวตน: session ผู้ใช้ระบบ หรือ LIFF ID token ที่ตรวจกับ LINE แล้ว (ไม่ใช้ line_user_id จาก query)
+    $identity = liff_request_identity($pdo, null, currentUser($pdo));
+    if (!$identity['ok'] && $identity['code'] !== 'MISSING_ID_TOKEN') {
+        api_fail(401, 'UNAUTHORIZED', $identity['error'] !== '' ? $identity['error'] : 'ตรวจสอบตัวตนผู้ใช้ LINE ไม่ผ่าน');
     }
+    $claimed = trim((string)($_GET['line_user_id'] ?? ''));
+    if ($claimed !== '' && $claimed !== $identity['line_user_id']) {
+        error_log('my_repairs: ignored client-supplied line_user_id');
+    }
+
+    $user = $identity['user'] ?? null;
+    $viaSession = $identity['source'] === 'session';
 
     if (!$user) {
         // ยังไม่ผูกบัญชี LINE: หน้าเว็บจะบอกให้แอดมินเพิ่มผู้ใช้

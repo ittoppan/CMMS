@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/api.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
 require_once __DIR__ . '/../../../src/helpers/permissions.php';
+require_once __DIR__ . '/../../../src/helpers/liff.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -181,10 +182,17 @@ try {
             break;
 
         case 'POST':
-            // A) LIFF binding: { bind_liff_user_id, display_name? }
+            // A) LIFF binding: header X-LIFF-Id-Token (ผู้เรียกผูก LINE ของตัวเองกับบัญชีที่ล็อกอินอยู่)
             $data = json_decode(file_get_contents('php://input'), true) ?? [];
             if (!empty($data['bind_liff_user_id'])) {
-                $liffUid = mb_substr(trim($data['bind_liff_user_id']), 0, 100);
+                // ไม่รับ line user id จาก client — ต้องเป็น LINE ที่ token ยืนยันแล้วเท่านั้น
+                $verified = liff_verified_line_user(is_array($data) ? $data : null);
+                if (!$verified['ok']) {
+                    http_response_code(401);
+                    echo json_encode(['error' => $verified['error'], 'code' => $verified['code']]);
+                    exit;
+                }
+                $liffUid = $verified['line_user_id'];
                 $pdo->prepare("UPDATE users SET line_user_id = ? WHERE id = ?")->execute([$liffUid, $userId]);
                 notifyLineBinding($userId, $liffUid);
                 echo json_encode(['success' => true, 'bound' => true, 'line_user_id' => $liffUid]);

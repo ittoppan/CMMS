@@ -5,9 +5,10 @@
  * GET  /api/v1/menu_permissions.php
  *   -> { menus: [...catalog], roles: [...], permissions: { role_id: { menu_key: 1|0 } } }
  *
- * GET  ?user=1
+ * GET  ?user=1   (+ header X-LIFF-Id-Token เมื่อเรียกจาก LIFF)
  *   -> { user: { id, full_name, role_id, role_name }, permission: { menu_key: 1|0 } }
- *      (ระบุ role ผ่าน ?role_id= หรือ ?line_user_id= หรือ ?uid= เพื่อจำลอง)
+ *      ตัวตนมาจาก session หรือ LIFF ID token ที่ตรวจกับ LINE เท่านั้น
+ *      (?role_id = จำลองบทบาท ไม่มีข้อมูลส่วนตัว; ?line_user_id/?uid ถูกเลิกใช้)
  *
  * POST /api/v1/menu_permissions.php  body: { role_id, grants: { menu_key: 1|0 } }
  *   -> upsert ทีละ role
@@ -17,6 +18,7 @@ require_once __DIR__ . '/../../../src/menu_catalog.php';
 require_once __DIR__ . '/../../../src/bottom_nav.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
+require_once __DIR__ . '/../../../src/helpers/liff.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 require_once __DIR__ . '/../../../src/csrf.php';
@@ -38,29 +40,44 @@ try {
 
             if ($wantsUser) {
                 // ?role_id เท่านั้น = จำลองบทบาท (ไม่มีข้อมูลส่วนตัว) → เปิดได้
-                // กรณีอื่น (?user / ?line_user_id / ?uid / session ตัวเอง) → ต้อง login
+                // กรณีอื่น (?user / session ตัวเอง / LIFF) → ต้องมี session หรือ LIFF ID token ที่ตรวจแล้ว
                 $simulateOnly = isset($_GET['role_id'])
                     && !isset($_GET['user']) && !isset($_GET['line_user_id']) && !isset($_GET['uid']);
-                if (!$simulateOnly) {
-                    requireLogin($pdo);
-                }
-                // ---- หา role ของผู้ใช้ ----
-                $roleId = isset($_GET['role_id']) ? (int)$_GET['role_id'] : 0;
-                $lineUid = '';
-                if (isset($_GET['line_user_id'])) $lineUid = trim((string)$_GET['line_user_id']);
-                if (!$lineUid && isset($_GET['uid'])) $lineUid = trim((string)$_GET['uid']);
 
+                $roleId = isset($_GET['role_id']) ? (int)$_GET['role_id'] : 0;
+
+                // ไม่รับ ?line_user_id / ?uid จาก client — ตัวตนมาจาก token (ตรวจกับ LINE) หรือ session
+                $identity = null;
+                $liffUser = null;
+                if (!$simulateOnly) {
+                    $identity = liff_request_identity($pdo, null, currentUser($pdo));
+                    if (!$identity['ok'] && $identity['code'] !== 'MISSING_ID_TOKEN') {
+                        http_response_code(401);
+                        echo json_encode(['error' => $identity['error'] !== '' ? $identity['error'] : 'ตรวจสอบตัวตนผู้ใช้ LINE ไม่ผ่าน', 'permission' => null]);
+                        exit;
+                    }
+                }
+
+                // ---- หา role ของผู้ใช้ ----
                 $user = null;
                 if ($roleId) {
                     $user = ['id' => 0, 'full_name' => 'จำลองบทบาท', 'role_id' => $roleId, 'simulated' => true];
-                } elseif ($lineUid !== '') {
-                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path, must_change_password FROM users WHERE line_user_id = ? AND is_active = 1");
-                    $stmt->execute([$lineUid]);
-                    $user = $stmt->fetch();
-                } elseif (!empty($_SESSION['user_id'])) {
-                    $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path, must_change_password FROM users WHERE id = ? AND is_active = 1");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $user = $stmt->fetch();
+                } else {
+                    $viewerId = 0;
+                    if ($identity && $identity['ok']) {
+                        $viewerId = (int)($identity['user']['id'] ?? 0);
+                    }
+                    if ($viewerId <= 0) {
+                        // ไม่มีตัวตนจาก token → ต้องเป็นผู้ใช้ที่ล็อกอิน (หน้าเว็บหลังบ้าน)
+                        requireLogin($pdo);
+                        $viewerId = (int)($_SESSION['user_id'] ?? 0);
+                    }
+                    if ($viewerId > 0) {
+                        $stmt = $pdo->prepare("SELECT id, full_name, role_id, avatar, avatar_path, must_change_password FROM users WHERE id = ? AND is_active = 1");
+                        $stmt->execute([$viewerId]);
+                        $liffUser = $stmt->fetch() ?: null;
+                    }
+                    $user = $liffUser;
                 }
 
                 if (!$user) {

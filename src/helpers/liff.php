@@ -80,6 +80,125 @@ function liff_request_id_token(?array $body = null): string
 }
 
 /**
+ * ผู้ใช้ในระบบที่ผูกกับ LINE user ID นี้ (is_active เท่านั้น)
+ *
+ * ใช้แทนการแปลง `line_user_id` ที่ client ส่งมาตรง ๆ — เรียกได้หลังยืนยันตัวตนแล้วเท่านั้น
+ */
+function liff_user_by_line_id(
+    PDO $pdo,
+    string $lineUserId,
+    string $columns = 'id, full_name, role_id, employee_code, department_id, role, phone, avatar_path, must_change_password, line_user_id'
+): ?array {
+    if ($lineUserId === '') return null;
+    $st = $pdo->prepare("SELECT {$columns} FROM users WHERE line_user_id = ? AND is_active = 1 LIMIT 1");
+    $st->execute([$lineUserId]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    return $row ?: null;
+}
+
+/**
+ * เก็บ LINE user ID ที่ยืนยันจาก LINE แล้ว (ออกโดย public/line_callback.php) ไว้ใน session
+ *
+ * ใช้กับหน้า /register ที่ไม่ได้เปิดผ่าน LIFF endpoint (จึงไม่มี ID token) แต่ผ่าน LINE Login
+ * callback ซึ่งเซิร์ฟเวอร์แลก code เป็น token กับ LINE เองแล้ว — ไม่ใช่ค่าที่ client แนบมา
+ */
+function liff_session_set_verified_line_user(string $lineUserId, string $displayName = ''): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) return;
+    $lineUserId = trim($lineUserId);
+    if (!preg_match('/^U[0-9a-f]{32}$/i', $lineUserId)) return;
+    $_SESSION['liff_verified_uid'] = $lineUserId;
+    $_SESSION['liff_verified_at'] = time();
+    if ($displayName !== '') $_SESSION['liff_verified_name'] = $displayName;
+}
+
+/** LINE user ID ที่ยืนยันแล้วใน session นี้ (หมดอายุตาม $maxAgeSeconds) — '' = ไม่มี */
+function liff_session_verified_line_user(int $maxAgeSeconds = 900): string
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) return '';
+    $uid = trim((string)($_SESSION['liff_verified_uid'] ?? ''));
+    $at = (int)($_SESSION['liff_verified_at'] ?? 0);
+    if ($uid === '' || $at <= 0 || (time() - $at) > $maxAgeSeconds) return '';
+    return preg_match('/^U[0-9a-f]{32}$/i', $uid) ? $uid : '';
+}
+
+/**
+ * LINE user ID ของ "ผู้เรียก" จากหลักฐานที่ตรวจได้เท่านั้น
+ *  1) LIFF ID token (liff.getIDToken()) ที่ตรวจกับ LINE ผ่าน
+ *  2) session ที่ line_callback.php ยืนยัน LINE Login มาแล้ว (หน้าละเภท /register)
+ * ค่า `line_user_id` ที่ client แนบมาไม่ถูกใช้เลย
+ *
+ * @return array{ok:bool,line_user_id:string,via:string,error:string,code:string}
+ */
+function liff_verified_line_user(?array $body = null): array
+{
+    $token = liff_request_id_token($body);
+    if ($token !== '') {
+        $verified = liff_verify_id_token($token);
+        return $verified['ok']
+            ? ['ok' => true, 'line_user_id' => $verified['line_user_id'], 'via' => 'id_token', 'error' => '', 'code' => '']
+            : ['ok' => false, 'line_user_id' => '', 'via' => '', 'error' => $verified['error'], 'code' => $verified['code']];
+    }
+
+    $sessUid = liff_session_verified_line_user();
+    if ($sessUid !== '') {
+        return ['ok' => true, 'line_user_id' => $sessUid, 'via' => 'line_login', 'error' => '', 'code' => ''];
+    }
+
+    return [
+        'ok' => false,
+        'line_user_id' => '',
+        'via' => '',
+        'error' => 'ต้องแนบ LIFF ID token (liff.getIDToken()) มาด้วย',
+        'code' => 'MISSING_ID_TOKEN',
+    ];
+}
+
+/**
+ * ตัวตนผู้เรียกสำหรับ endpoint ที่ต้องรู้ว่า "ฉันคือใคร"
+ *  1) session ผู้ใช้ระบบ (หน้าเว็บหลังบ้าน) — เชื่อได้
+ *  2) LINE ที่ยืนยันแล้ว (liff_verified_line_user) — ไม่มี session หรือเป็นผู้ใช้ LIFF
+ *
+ * @param array|null $sessionUser ผลของ currentUser($pdo) ถ้ามี
+ * @param array|null $body        body ที่อาจมี id_token (สำหรับ endpoint ที่ส่งทาง JSON)
+ * @return array{ok:bool,source:string,line_user_id:string,user:?array,error:string,code:string}
+ */
+function liff_request_identity(PDO $pdo, ?array $body = null, ?array $sessionUser = null, string $columns = 'id, full_name, role_id, employee_code, department_id, role, phone, avatar_path, must_change_password, line_user_id'): array
+{
+    if ($sessionUser && !empty($sessionUser['id'])) {
+        return [
+            'ok' => true,
+            'source' => 'session',
+            'line_user_id' => (string)($sessionUser['line_user_id'] ?? ''),
+            'user' => $sessionUser,
+            'error' => '',
+            'code' => '',
+        ];
+    }
+
+    $verified = liff_verified_line_user($body);
+    if (!$verified['ok']) {
+        return [
+            'ok' => false,
+            'source' => 'none',
+            'line_user_id' => '',
+            'user' => null,
+            'error' => $verified['error'],
+            'code' => $verified['code'],
+        ];
+    }
+
+    return [
+        'ok' => true,
+        'source' => $verified['via'],
+        'line_user_id' => $verified['line_user_id'],
+        'user' => liff_user_by_line_id($pdo, $verified['line_user_id'], $columns),
+        'error' => '',
+        'code' => '',
+    ];
+}
+
+/**
  * ตรวจ LIFF ID token กับ LINE
  *
  * @return array{ok:bool,line_user_id:string,profile:array{name:string,picture:string},error:string,code:string}

@@ -478,9 +478,10 @@ export default function RepairRequestForm() {
     const applyGate = (uid: string | null, bound: boolean) => {
       setBindGate(bound ? "bound" : uid ? "unbound" : "anonymous");
     };
-    const checkBound = async (uid: string): Promise<boolean> => {
+    // ตรวจสถานะผูกด้วย LINE ID token ที่แนบไป (API ไม่รับ line_user_id จาก client แล้ว)
+    const checkBound = async (): Promise<boolean> => {
       try {
-        const r = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`);
+        const r = await fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() });
         const j = await r.json().catch(() => ({}));
         return !!(j?.bound && j?.user);
       } catch {
@@ -498,7 +499,7 @@ export default function RepairRequestForm() {
         const storedUid = localStorage.getItem("cmms_line_user_id");
         if (storedUid) {
           setLineBound(false);
-          checkBound(storedUid).then((b) => {
+          checkBound().then((b) => {
             setLineBound(b);
             applyGate(storedUid, b);
             if (b) {
@@ -513,7 +514,7 @@ export default function RepairRequestForm() {
           window.setTimeout(() => {
             const uid = localStorage.getItem("cmms_line_user_id");
             if (uid) {
-              checkBound(uid).then((b) => {
+              checkBound().then((b) => {
                 setLineBound(b);
                 applyGate(uid, b);
               });
@@ -538,27 +539,7 @@ export default function RepairRequestForm() {
       }
     } catch { /* ignore */ }
 
-    const simUid = new URLSearchParams(window.location.search).get("uid");
-    if (simUid) {
-      try { localStorage.setItem("cmms_line_user_id", simUid); } catch { /* ignore */ }
-      fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(simUid)}`)
-        .then((r) => r.json())
-        .then((j) => {
-          if (j?.bound && j?.user) {
-            setLineBound(true);
-            setBindGate("bound");
-            setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
-            try {
-              localStorage.setItem("cmms_line_bound", "1");
-              localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
-            } catch { /* ignore */ }
-          } else {
-            setLineBound(false);
-            setBindGate("unbound");
-          }
-        })
-        .catch(() => { setLineBound(false); setBindGate("unbound"); });
-    }
+    // เลิกใช้ ?uid= เพื่อจำลองตัวตน — ตัวตนยืนยันได้จาก LINE ID token เท่านั้น
 
     const tryLiff = () => {
       try {
@@ -567,7 +548,7 @@ export default function RepairRequestForm() {
             setLineProfile({ name: p.displayName || "", pic: p.pictureUrl || "", userId: p.userId || "" });
             setForm((prev) => ({ ...prev, reporterName: p.displayName || prev.reporterName }));
             if (p.userId) {
-              fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(p.userId)}`)
+              fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
                 .then((r) => r.json())
                 .then((j) => {
                   if (j?.bound && j?.user) {
@@ -614,7 +595,8 @@ export default function RepairRequestForm() {
       const r = await apiFetch("/api/v1/line_register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ line_user_id: uid, employee_code: code }),
+        // ไม่ส่ง line_user_id แล้ว — เซิร์ฟเวอร์ใช้ LINE ที่ token ยืนยัน (apiFetch แนบ header ให้)
+        body: JSON.stringify({ employee_code: code }),
       });
       const j = await r.json().catch(() => ({}));
       if (j?.success && j?.user) {

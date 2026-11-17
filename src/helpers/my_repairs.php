@@ -2,21 +2,10 @@
 /**
  * my_repairs.php — รายการ "งานของฉัน" สำหรับผู้แจ้งซ่อม (หน้า LIFF /my-repairs)
  *
- * ผู้แจ้งจาก LINE ถูกผูกเป็น repair.created_by ตอนสร้างงาน (repair.php แปลง
- * line_user_id → users.id ให้) จึงดึงงานของเจ้าของบัญชีได้ตรง ๆ
+ * ผู้แจ้งจาก LINE ถูกผูกเป็น repair.created_by ตอนสร้างงาน (repair_owner_resolve() ใน
+ * src/helpers/repair_owner.php แปลง LINE ที่ยืนยันแล้ว → users.id) จึงดึงงานของเจ้าของบัญชีได้ตรง ๆ
+ * การแปลง LINE user id → users.id อยู่ที่ liff_user_by_line_id() (src/helpers/liff.php)
  */
-
-function my_repairs_user(PDO $pdo, string $lineUserId): ?array
-{
-    if ($lineUserId === '') return null;
-    $st = $pdo->prepare(
-        'SELECT id, employee_code, full_name, role, department_id, line_user_id
-         FROM users WHERE line_user_id = ? AND is_active = 1 LIMIT 1'
-    );
-    $st->execute([$lineUserId]);
-    $row = $st->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
-}
 
 function my_repairs_list(PDO $pdo, int $userId, int $limit = 30): array
 {

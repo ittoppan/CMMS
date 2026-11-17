@@ -13,7 +13,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLiffFetch } from "@/lib/useLiffFetch";
-import { getLegacyLineUserId, useLiffSession } from "@/lib/liff-session";
+
 import {
   AlertCircle,
   ArrowLeft,
@@ -111,14 +111,10 @@ function formatDate(value?: string | null, withTime = false): string {
 export default function MyRepairs() {
   const [tab, setTab] = useState<Tab>("all");
   const [contact, setContact] = useState<SupportContact | null>(null);
-  const liff = useLiffSession();
-
-  // ตัวตน: store ของ LiffBridge ก่อน (ไม่ต้องรอ/วนอ่าน localStorage), แล้วค่อย fallback
-  // ค่าเดิมที่เคยเก็บไว้ — เซิร์ฟเวอร์ยังตรวจได้เองอีกชั้นจาก session/token
-  const lineUserId = liff.lineUserId || getLegacyLineUserId();
-  const url = lineUserId
-    ? `/api/v1/my_repairs.php?${new URLSearchParams({ line_user_id: lineUserId }).toString()}`
-    : "/api/v1/my_repairs.php";
+  // ตัวตน: ไม่ส่ง line_user_id จาก client แล้ว — useLiffFetch แนบ X-LIFF-Id-Token
+  // (LiffBridge เป็นคนประกาศ token) ให้เซิร์ฟเวอร์ตรวจกับ LINE เอง; ถ้าไม่มี token/session
+  // จะได้ registered=false แล้วขึ้นคำแนะนำให้แอดมินเพิ่มผู้ใช้
+  const url = "/api/v1/my_repairs.php";
 
   const { data, loading, error, reload: load } = useLiffFetch<Api>({
     url,
