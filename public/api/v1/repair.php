@@ -225,7 +225,8 @@ try {
                 }
                 $rid = (int)($data['repair_id'] ?? 0);
                 $score = (int)($data['rating_score'] ?? 0);
-                $comment = trim((string)($data['rating_comment'] ?? ''));
+                // จำกัดความยาวฝั่งเซิร์ฟเวอร์ (UI maxLength กันได้แค่ผู้ใช้ทั่วไป — client ยิงตรงข้ามได้)
+                $comment = repair_rating_normalize_comment($data['rating_comment'] ?? '');
                 if ($rid <= 0 || $score < 1 || $score > 5) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Invalid rating data', 'success' => false], JSON_UNESCAPED_UNICODE);

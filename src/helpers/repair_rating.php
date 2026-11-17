@@ -60,6 +60,40 @@ if (!function_exists('repair_rating_identity')) {
     }
 }
 
+if (!defined('REPAIR_RATING_COMMENT_MAX')) {
+    /** ความยาวสูงสุดของ rating_comment ที่รับจาก client (ตัวอักษร UTF-8) */
+    define('REPAIR_RATING_COMMENT_MAX', 500);
+}
+
+if (!function_exists('repair_rating_normalize_comment')) {
+    /**
+     * จำกัดความคิดเห็นการประเมิน "ฝั่งเซิร์ฟเวอร์" — maxLength ใน UI อย่างเดียวกันไม่ได้
+     * เพราะ client ยิง API ตรงข้ามได้
+     *
+     * - trim และตัดอักขระควบคุม (เก็บไว้แค่ \n ขึ้นบรรทัดใหม่)
+     * - ตัดที่ REPAIR_RATING_COMMENT_MAX ตัวอักษรด้วย mb_substr (ไม่ตัดกลางตัวอักษรไทย/emoji)
+     * - ค่าว่างคืน '' ให้ผู้เรียกแปลงเป็น NULL เอง
+     */
+    function repair_rating_normalize_comment($raw, int $max = REPAIR_RATING_COMMENT_MAX): string
+    {
+        $text = trim((string)($raw ?? ''));
+        if ($text === '') return '';
+        if ($max <= 0) $max = REPAIR_RATING_COMMENT_MAX;
+
+        // ตัดอักขระควบคุมที่ไม่ใช่การขึ้นบรรทัดใหม่/แท็บ (กันข้อมูลแปลกปลอมลง DB)
+        $cleaned = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $text);
+        if ($cleaned !== null) $text = $cleaned;
+
+        if (function_exists('mb_substr')) {
+            $text = mb_substr($text, 0, $max, 'UTF-8');
+        } else {
+            $text = substr($text, 0, $max);
+        }
+
+        return trim($text);
+    }
+}
+
 if (!function_exists('repair_rating_can_rate')) {
     /**
      * @param array      $repairRow        แถวจาก repair (ต้องมี created_by)
