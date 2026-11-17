@@ -53,7 +53,7 @@ function liff_verify_endpoint(): string {
 /** ข้อความไทยของ error จาก LINE */
 function liff_verify_error_message(string $code): string {
     return [
-        'invalid_request'      => 'รูปแบบ ID token ไม่ถูกต้อง',
+        'invalid_request'      => 'LINE ไม่ยอมรับ ID token นี้ (invalid_request) — เปิดหน้าจาก LINE ใหม่แล้วลองอีกครั้ง',
         'invalid_client'       => 'LINE Channel ID ไม่ตรงกับแอปที่ออก token',
         'unsupported_token_type' => 'token ชนิดนี้ไม่รองรับ',
         'invalid_grant'        => 'ID token หมดอายุแล้ว — เปิดหน้าจาก LINE ใหม่อีกครั้ง',
