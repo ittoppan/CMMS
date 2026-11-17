@@ -32,6 +32,18 @@ function liff_channel_id(): string {
     return $cid;
 }
 
+/**
+ * URL ของหน้า LIFF (endpoint เดียวกับ /repair/request) — ใช้กับปุ่มในข้อความ LINE
+ * เพื่อให้ liff.init ทำงานและหน้ารู้ตัวตนผู้ใช้ LINE; คืน '' ถ้ายังไม่ได้ตั้งค่า LIFF ID
+ */
+function liff_url(array $query = []): string {
+    $liffId = trim(setting_value('line_liff_id', ''));
+    if ($liffId === '') $liffId = trim((string)(getenv('LINE_LIFF_ID') ?: ''));
+    if ($liffId === '') return '';
+    $qs = $query ? '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986) : '';
+    return 'https://liff.line.me/' . rawurlencode($liffId) . $qs;
+}
+
 /** endpoint ตรวจ token — override ได้ด้วย LINE_VERIFY_URL สำหรับทดสอบ (stub server) */
 function liff_verify_endpoint(): string {
     $url = trim((string)(getenv('LINE_VERIFY_URL') ?: ''));
