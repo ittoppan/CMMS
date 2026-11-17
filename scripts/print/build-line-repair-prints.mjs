@@ -8,6 +8,8 @@
  *   node scripts/print/build-line-repair-prints.mjs --asset-code A-BM06 --asset-name "Blow Molding 06"
  *   node scripts/print/build-line-repair-prints.mjs --liff-id 2007374280-xxxxxxxx
  *   node scripts/print/build-line-repair-prints.mjs --no-render        # HTML อย่างเดียว
+ *   node scripts/print/build-line-repair-prints.mjs --all              # สติกเกอร์ทุกเครื่องใน asset_registry (ไฟล์ละเครื่อง)
+ *   node scripts/print/build-line-repair-prints.mjs --all --machines-only   # เฉพาะรหัสเครื่องรูปแบบ A-XX-NN
  *
  * ไม่ hardcode โดเมน/LIFF ID — LIFF ID อ่านตามลำดับ
  *   --liff-id → env LINE_LIFF_ID → .env LINE_LIFF_ID → settings.line_liff_id (ผ่าน php CLI)
@@ -37,6 +39,8 @@ const C = { ...PALETTE, line: "#06C755", lineDark: "#04A94A", lineTint: "#F1FBF4
 const assetCode = arg("asset-code", "M-0000").trim().toUpperCase();
 const assetName = arg("asset-name", "ชื่อเครื่องจักร (ตัวอย่าง)").trim();
 const oaQrPath = arg("oa-qr", join(HERE, "assets", "line-oa-qr.png"));
+const batchAll = process.argv.includes("--all");
+const machinesOnly = process.argv.includes("--machines-only");
 
 // ── LIFF ID ─────────────────────────────────────────────────────────────────
 function liffIdFromSettings() {
@@ -46,6 +50,43 @@ function liffIdFromSettings() {
     '$s->execute(["line_liff_id"]); echo trim((string)$s->fetchColumn());';
   const r = spawnSync("php", ["-r", code], { cwd: ROOT, encoding: "utf8" });
   return r.status === 0 ? (r.stdout || "").trim() : "";
+}
+
+/** รายการเครื่องทั้งหมดจาก asset_registry — ผ่าน php CLI (อ่าน DB จริง ไม่ hardcode) */
+function assetsFromDb() {
+  const code =
+    'require "src/config/db.php"; $p=getDb(); ' +
+    '$rows=$p->query("SELECT id, code, name FROM asset_registry ORDER BY code")->fetchAll(PDO::FETCH_ASSOC); ' +
+    'echo json_encode($rows, JSON_UNESCAPED_UNICODE);';
+  const r = spawnSync("php", ["-r", code], { cwd: ROOT, encoding: "utf8" });
+  if (r.status !== 0) {
+    console.error("ERROR: อ่าน asset_registry ไม่สำเร็จ:", (r.stderr || "").trim());
+    process.exit(1);
+  }
+  try {
+    return JSON.parse(r.stdout || "[]");
+  } catch {
+    console.error("ERROR: คำตอบจาก asset_registry ไม่ใช่ JSON");
+    process.exit(1);
+  }
+}
+
+/** รหัสเครื่อง → slug ASCII (ใช้ตั้งชื่อไฟล์; อักขระอื่นยุบเป็น -) */
+function stickerSlug(code) {
+  return String(code || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** ชื่อไฟล์ต่อเครื่อง — slug เดียวกัน (เช่น "A - DL- 01" กับ "A-DL-01") เติม id กันทับกัน */
+function stickerNames(assets) {
+  const slugs = assets.map((a) => stickerSlug(a.code) || `asset-${a.id}`);
+  const count = new Map();
+  for (const s of slugs) count.set(s, (count.get(s) || 0) + 1);
+  return slugs.map((s, i) =>
+    `line-repair-sticker-${count.get(s) > 1 ? `${s}-${assets[i].id}` : s}`
+  );
 }
 
 const liffId =
@@ -64,15 +105,18 @@ const liffUrl = `https://liff.line.me/${liffId}`;
 const assetUrl = `${liffUrl}?asset_code=${encodeURIComponent(assetCode)}`;
 
 // ── assets ──────────────────────────────────────────────────────────────────
-if (!existsSync(oaQrPath)) {
+// โหมด --all ออกสติกเกอร์อย่างเดียว (ไม่มีโปสเตอร์) จึงไม่ต้องใช้รูป QR ของ OA
+if (!batchAll && !existsSync(oaQrPath)) {
   console.error(`ERROR: ไม่พบรูป QR ของ LINE OA: ${oaQrPath} (ดาวน์โหลดจาก LINE OA Manager แล้ววางไว้)`);
   process.exit(1);
 }
 
 const QRCode = qrcodeFor(FRONTEND);
 const qrColor = { dark: C.navyDark, light: "#FFFFFF" };
-const oaQr = dataUrl(oaQrPath, "image/png");
-const machineQr = await QRCode.toDataURL(assetUrl, { errorCorrectionLevel: "M", margin: 0, width: 900, color: qrColor });
+const oaQr = batchAll ? "" : dataUrl(oaQrPath, "image/png");
+const machineQr = batchAll
+  ? ""
+  : await QRCode.toDataURL(assetUrl, { errorCorrectionLevel: "M", margin: 0, width: 900, color: qrColor });
 const logo = logoSrc(FRONTEND);
 
 // ── โปสเตอร์ A5: ชวนเพิ่มเพื่อน + แจ้งซ่อมผ่าน LINE ─────────────────────────
@@ -174,17 +218,56 @@ h1{margin-top:1.4mm;font-size:9.8pt;font-weight:800;color:${C.navyDark};line-hei
 .line-pill{position:absolute;right:3.6mm;bottom:2.4mm;background:${C.line};color:#fff;
   font-size:5.2pt;font-weight:700;padding:.9mm 2mm;border-radius:99mm;letter-spacing:.02em;}`;
 
-const stickerBody = `<div class="sheet">
-  <div class="panel"><span class="pad"><img src="${machineQr}" alt="QR แจ้งซ่อมเครื่องนี้"></span></div>
+const stickerBody = (qr, code, name) => `<div class="sheet">
+  <div class="panel"><span class="pad"><img src="${qr}" alt="QR แจ้งซ่อมเครื่องนี้"></span></div>
   <div class="body">
     <span class="brand">CMMS-TOPPAN · แจ้งซ่อม</span>
     <h1>แจ้งซ่อม · PM · ประวัติ</h1>
-    <span class="machine">${assetName}</span>
-    <span class="code">${assetCode}</span>
+    <span class="machine">${name}</span>
+    <span class="code">${code}</span>
     <div class="s-steps">${stickerSteps}</div>
   </div>
   <span class="line-pill">ผ่าน LINE OA</span>
 </div>`;
+
+// ── โหมด --all: สติกเกอร์แยกไฟล์ทุกเครื่องใน asset_registry ──────────────────
+if (batchAll) {
+  const all = assetsFromDb();
+  const assets = machinesOnly
+    ? all.filter((a) => /^A-[A-Z]{2}-\d{2}$/.test(String(a.code || "").trim()))
+    : all;
+  if (!assets.length) {
+    console.error("ERROR: asset_registry ไม่มีรายการที่ตรงเงื่อนไข (--machines-only ใช้รหัสรูปแบบ A-XX-NN)");
+    process.exit(1);
+  }
+
+  const names = stickerNames(assets);
+  const pieces = [];
+  for (let i = 0; i < assets.length; i++) {
+    const code = String(assets[i].code || "").trim();
+    const name = String(assets[i].name || "").trim() || code;
+    const qr = await QRCode.toDataURL(`${liffUrl}?asset_code=${encodeURIComponent(code)}`, {
+      errorCorrectionLevel: "M",
+      margin: 0,
+      width: 900,
+      color: qrColor,
+    });
+    pieces.push({
+      name: names[i],
+      title: `แจ้งซ่อมเครื่องนี้ — ${code}`,
+      width: 99.1,
+      height: 57,
+      accent: C.line,
+      css: stickerCss,
+      body: stickerBody(qr, code, name),
+    });
+  }
+
+  renderPieces(pieces, { outDir: OUT, frontendDir: FRONTEND, htmlOnly: process.argv.includes("--no-render") });
+  console.log(`\nสติกเกอร์ ${pieces.length} เครื่อง → ${OUT}`);
+  console.log(`QR ทุกดวงชี้: ${liffUrl}?asset_code=<รหัสเครื่อง>\n`);
+  process.exit(0);
+}
 
 // ── build ───────────────────────────────────────────────────────────────────
 renderPieces(
@@ -205,7 +288,7 @@ renderPieces(
       height: 57,
       accent: C.line,
       css: stickerCss,
-      body: stickerBody,
+      body: stickerBody(machineQr, assetCode, assetName),
     },
   ],
   { outDir: OUT, frontendDir: FRONTEND, htmlOnly: process.argv.includes("--no-render") }
