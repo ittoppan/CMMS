@@ -329,9 +329,16 @@ try {
             $sessionUser = currentUser($pdo);
             $owner = repair_owner_resolve($pdo, $data, $sessionUser, liff_request_id_token(is_array($data) ? $data : null));
             $rejectedClientClaim = $owner['client_claim_rejected'];
+            $hadAssignmentClaim = isset($data['assigned_to']) || (isset($data['team_ids']) && is_array($data['team_ids']) && !empty($data['team_ids']));
             unset($data['line_user_id'], $data['created_by']);
             if (!empty($owner['user_id'])) {
                 $data['created_by'] = (int)$owner['user_id'];
+            } else {
+                // ผู้แจ้งแบบ anonymous/ยังไม่ผูกบัญชี ห้ามมอบหมายงานหรือแตะทีม — กันไปกวน my_tasks/แจ้งเตือน
+                unset($data['assigned_to'], $data['team_ids']);
+                if ($hadAssignmentClaim) {
+                    error_log('[repair.php] stripped assignment from anonymous/unbound reporter ip=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+                }
             }
             if ($rejectedClientClaim || ($owner['source'] === 'none' && $owner['reason'] !== '')) {
                 error_log('[repair.php] owner claim rejected: ' . $owner['reason'] . ' ip=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
