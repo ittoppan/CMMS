@@ -171,6 +171,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   sage_sync_config: { label: "ค่าเชื่อมต่อ Sage 300", hint: "JSON — จัดการผ่านการซิงค์ Sage" },
   sage300_allowed_categories: { label: "หมวดอะไหล่ที่ซิงค์จาก Sage" },
   // general
+  public_base_url: { label: "URL หลักของระบบ (public base URL)", hint: "ใช้สร้างลิงก์ในอีเมล/LINE — มาก่อน APP_URL, ไม่ต้องมี / ปิดท้าย (เช่น https://cmms-tpt.shares.zrok.io)" },
   app_name: { label: "ชื่อระบบ" },
   app_version: { label: "เวอร์ชันระบบ" },
   animations_enabled: { label: "เปิด animation ของระบบ", hint: "ปิด = ทุกหน้าแสดงผลแบบนิ่ง (ไม่มีการ์ดเลื่อน/เฟด/เด้ง) เหมาะกับเครื่องเก่าหรือพนักงานที่เมารถ — แยกจากค่าตั้งค่า OS" },
