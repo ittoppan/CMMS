@@ -51,6 +51,13 @@ import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { serverResponds } from "@/lib/server-check";
+import {
+  UNBOUND_BODY,
+  UNBOUND_STEPS,
+  UNBOUND_TITLE,
+  bindErrorMessage,
+  type SupportContact,
+} from "@/lib/liff-bind-copy";
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -292,6 +299,23 @@ export default function RepairRequestForm() {
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
+  // ช่องทางติดต่อแอดมิน (settings: company_phone / smtp_from_email) สำหรับสถานะ unbound
+  const [supportContact, setSupportContact] = useState<SupportContact | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/v1/line_register.php?liff_id=1")
+      .then((r) => r.json())
+      .then((j) => {
+        if (alive && j?.contact) setSupportContact(j.contact as SupportContact);
+      })
+      .catch(() => {
+        /* ไม่มีข้อมูลติดต่อ — แสดงข้อความโดยไม่มีเบอร์/อีเมล */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -580,9 +604,9 @@ export default function RepairRequestForm() {
 
   const handleInlineBind = async () => {
     const uid = effectiveUid;
-    if (!uid) { setBindError("ยังไม่ได้รับ LINE ID — รอสักครู่แล้วลองอีกครั้ง"); return; }
+    if (!uid) { setBindError(bindErrorMessage({ noLineId: true, contact: supportContact })); return; }
     const code = bindEmpCode.trim().toUpperCase();
-    if (!/^[A-Z0-9]{3,10}$/.test(code)) { setBindError("รูปแบบรหัสพนักงานไม่ถูกต้อง (เช่น E01117 หรือ EMP005)"); return; }
+    if (!/^[A-Z0-9]{3,10}$/.test(code)) { setBindError(bindErrorMessage({ format: true, contact: supportContact })); return; }
     setBindSubmitting(true);
     setBindError(null);
     try {
@@ -603,10 +627,12 @@ export default function RepairRequestForm() {
         setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
         showToast("success", "ผูกบัญชี LINE สำเร็จ");
       } else {
-        setBindError(j?.error || "ผูกไม่สำเร็จ — ตรวจรหัสพนักงานแล้วลองอีกครั้ง");
+        setBindError(
+          bindErrorMessage({ status: r.status, raw: j?.error, contact: supportContact })
+        );
       }
     } catch {
-      setBindError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ ลองอีกครั้ง");
+      setBindError(bindErrorMessage({ offline: true, contact: supportContact }));
     }
     setBindSubmitting(false);
   };
@@ -947,16 +973,55 @@ const flushQueue = async () => {
 
           {bindGate === "unbound" && (
             <div className="flex flex-col gap-4">
-              <div className="text-center">
-                <div className="cmms-header-emoji mb-2"><Link size={24} strokeWidth={1.75} /></div>
-                <h4 className="text-base font-bold m-0 mb-1.5">ผูกบัญชี LINE กับเลขพนักงาน</h4>
-                <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name}` : "สวัสดี"}
-                  {"\n"}กรอกรหัสพนักงานเพื่อเริ่มแจ้งซ่อม (ครั้งเดียวจบ)
+              <div>
+                <div className="cmms-header-emoji mb-2"><ShieldAlert size={24} strokeWidth={1.75} /></div>
+                <h4 className="text-base font-bold m-0 mb-1.5">{UNBOUND_TITLE}</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)] m-0">
+                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name} — ` : ""}
+                  {UNBOUND_BODY}
                 </p>
               </div>
+
+              <ol
+                className="m-0 flex list-decimal flex-col gap-1.5 pl-5 text-sm"
+                style={{ color: "var(--cmms-text-primary)" }}
+              >
+                {UNBOUND_STEPS.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ol>
+
+              {(supportContact?.phone || supportContact?.email) && (
+                <div
+                  className="rounded-lg border px-3 py-2"
+                  style={{ borderColor: "var(--cmms-border)", background: "var(--cmms-bg)" }}
+                >
+                  <p className="m-0 mb-1 text-xs font-bold text-[var(--cmms-text-secondary)]">ติดต่อแอดมิน</p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                    {supportContact?.phone && (
+                      <a
+                        href={`tel:${supportContact.phone.replace(/[^0-9+]/g, "")}`}
+                        className="flex items-center gap-1.5"
+                        style={{ color: "var(--cmms-primary)" }}
+                      >
+                        <Phone size={14} strokeWidth={1.75} /> {supportContact.phone}
+                      </a>
+                    )}
+                    {supportContact?.email && (
+                      <a
+                        href={`mailto:${supportContact.email}`}
+                        className="flex min-w-0 items-center gap-1.5 break-all"
+                        style={{ color: "var(--cmms-primary)" }}
+                      >
+                        <Mail size={14} strokeWidth={1.75} /> {supportContact.email}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <Input
-                label="เลขพนักงาน"
+                label="เลขพนักงาน (กรอกหลังแอดมินเพิ่มผู้ใช้แล้ว)"
                 isLabelHidden
                 placeholder="เช่น E01117"
                 value={bindEmpCode}

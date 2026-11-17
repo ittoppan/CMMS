@@ -31,9 +31,26 @@ try {
                 $liffId = $rows['line_liff_id'] ?? (string)(getenv('LINE_LIFF_ID') ?: '');
                 $regId  = $rows['line_liff_register_id'] ?? (string)(getenv('LINE_LIFF_REGISTER_ID') ?: '');
                 if ($liffId === '' && $regId !== '') { $liffId = $regId; }
+
+                // ช่องทางติดต่อสำหรับข้อความ "ยังไม่ถูกเพิ่มในระบบ" (หน้า /repair/request)
+                $contact = ['company' => '', 'phone' => '', 'email' => ''];
+                try {
+                    $cs = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ('company_name','company_phone','smtp_from_email')");
+                    $map = [];
+                    foreach ($cs->fetchAll() as $row) { $map[$row['setting_key']] = trim((string)$row['setting_value']); }
+                    $contact = [
+                        'company' => $map['company_name'] ?? '',
+                        'phone'   => $map['company_phone'] ?? '',
+                        'email'   => $map['smtp_from_email'] ?? '',
+                    ];
+                } catch (Throwable $e) {
+                    /* ไม่มี settings ก็ไม่เป็นไร — หน้าเว็บจะซ่อนบรรทัดติดต่อ */
+                }
+
                 echo json_encode([
                     'line_liff_id'             => $liffId,
                     'line_liff_register_id'    => $regId !== '' ? $regId : $liffId,
+                    'contact'                  => $contact,
                 ]);
                 exit;
             }
@@ -88,7 +105,7 @@ try {
             if (count($rows) === 0) {
                 $pdo->rollBack();
                 http_response_code(404);
-                echo json_encode(['error' => 'ไม่พบเลขพนักงานในระบบ กรุณาติดต่อผู้ดูแล']);
+                echo json_encode(['error' => 'ไม่พบเลขพนักงานนี้ในระบบ — ต้องให้แอดมินเพิ่มผู้ใช้ก่อน แล้วลองอีกครั้ง']);
                 exit;
             }
             if (count($rows) > 1) {
@@ -104,7 +121,7 @@ try {
             if (!empty($user['line_user_id']) && $user['line_user_id'] !== $lineUid) {
                 $pdo->rollBack();
                 http_response_code(409);
-                echo json_encode(['error' => 'เลขพนักงานนี้ถูกผูกกับบัญชี LINE อื่นแล้ว กรุณาติดต่อผู้ดูแล']);
+                echo json_encode(['error' => 'เลขพนักงานนี้ผูกกับบัญชี LINE อื่นอยู่แล้ว — ให้แอดมินปลดหรือย้ายบัญชีให้ก่อน']);
                 exit;
             }
 
@@ -114,7 +131,7 @@ try {
             if ($stmt->fetch()) {
                 $pdo->rollBack();
                 http_response_code(409);
-                echo json_encode(['error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว']);
+                echo json_encode(['error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว — ให้แอดมินตรวจสอบ']);
                 exit;
             }
 
