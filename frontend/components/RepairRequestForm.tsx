@@ -991,7 +991,7 @@ const flushQueue = async () => {
   const displayName = form.reporterName || sessionName || "...";
 
   return (
-    <div className="cmms-mobile-page">
+    <div className="cmms-mobile-page" id="repair-request-form">
       {/* Header */}
 <div className="cmms-liff-hero">
         <div className="flex items-center gap-3">

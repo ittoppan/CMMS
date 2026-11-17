@@ -186,7 +186,7 @@ h1{margin-top:4mm;color:#fff;font-size:22pt;font-weight:800;line-height:1.15;let
   <div class="steps">${posterSteps}</div>
   <div class="footer">
     <span><b>ครั้งแรก:</b> ผูก LINE กับเลขพนักงาน (ถ้ายังไม่มีในระบบ แจ้งแอดมินเพิ่มผู้ใช้ก่อน)</span>
-    <span>ที่เครื่องจักร: สแกน QR ประจำเครื่อง</span>
+    <span>ที่เครื่องจักร: สแกน QR = แจ้งซ่อม · PM · ประวัติ</span>
   </div>
 </div></body></html>`;
 
@@ -194,7 +194,7 @@ h1{margin-top:4mm;color:#fff;font-size:22pt;font-weight:800;line-height:1.15;let
 const stickerSteps = [
   "สแกน QR ด้วยกล้องมือถือ",
   "เปิดใน LINE — ระบบเลือกเครื่องนี้ให้",
-  "กรอกอาการ / แนบรูป แล้วส่ง",
+  "แจ้งซ่อม · ดูแผน PM · ดูประวัติซ่อม",
 ]
   .map((t, i) => `<div class="s-step"><span class="num">${i + 1}</span><span>${t}</span></div>`)
   .join("");
@@ -228,7 +228,7 @@ h1{margin-top:1.4mm;font-size:9.8pt;font-weight:800;color:${C.navyDark};line-hei
   <div class="panel"><span class="pad"><img src="${machineQr}" alt="QR แจ้งซ่อมเครื่องนี้"></span></div>
   <div class="body">
     <span class="brand">CMMS-TOPPAN · แจ้งซ่อม</span>
-    <h1>แจ้งซ่อมเครื่องนี้</h1>
+    <h1>แจ้งซ่อม · PM · ประวัติ</h1>
     <span class="machine">${assetName}</span>
     <span class="code">${assetCode}</span>
     <div class="s-steps">${stickerSteps}</div>

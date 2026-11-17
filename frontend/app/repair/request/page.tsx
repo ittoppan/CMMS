@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import RepairRequestForm from "@/components/RepairRequestForm";
+import AssetHubCard from "@/components/AssetHubCard";
 import LiffBridge from "@/components/LiffBridge";
 
 export const metadata: Metadata = {
@@ -22,6 +23,8 @@ export default function RepairRequestPage() {
       style={{ padding: "20px 16px 0" }}
     >
       <LiffBridge />
+      {/* QR บนตัวเครื่อง → ?asset_code=… : แสดงข้อมูลเครื่อง + PM + ประวัติ ก่อนฟอร์มแจ้งซ่อม */}
+      <AssetHubCard />
       <RepairRequestForm />
     </main>
   );
