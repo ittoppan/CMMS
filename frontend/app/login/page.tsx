@@ -1,8 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import ThemeProvider from '../../components/ThemeProvider';
 import LoginVideoBg from './LoginVideoBg';
+
+// three.js โหลดเฉพาะเมื่อวิดีโอพื้นหลังเล่นไม่ได้ (fallback ชั้นที่ 2)
+// ถ้า WebGL ใช้ไม่ได้อีก ตัว component จะแสดง gradient/glow จาก CSS ให้เอง
+const CmmsScene3D = dynamic(() => import('./CmmsScene3D'), { ssr: false });
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
@@ -68,6 +73,8 @@ function LoginContent() {
   const [capsOn, setCapsOn] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // วิดีโอพื้นหลังเล่นไม่ได้ → ลองฉาก three.js ต่อ (แล้วแต่ WebGL จะมีหรือไม่)
+  const [bgVideoFailed, setBgVideoFailed] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
@@ -158,9 +165,17 @@ function LoginContent() {
 
   return (
     <div className="cmms-login-container cmms-login-container--neo">
-      {/* Animated background — วิดีโอวนลูป 1920x1080 ~8s (Pixabay Content License) + ชั้น vignette */}
+      {/* พื้นหลัง 3 ชั้น: วิดีโอ → (ถ้าเล่นไม่ได้) ฉาก three.js → (ถ้าไม่มี WebGL) gradient/glow CSS */}
       <div className="cmms-login-3d-bg" aria-hidden="true">
-        <LoginVideoBg src="/media/login-bg.mp4" poster="/media/login-bg-poster.jpg" />
+        {bgVideoFailed ? (
+          <CmmsScene3D />
+        ) : (
+          <LoginVideoBg
+            src="/media/login-bg.mp4"
+            poster="/media/login-bg-poster.jpg"
+            onUnavailable={() => setBgVideoFailed(true)}
+          />
+        )}
         <div className="cmms-login-3d-vignette" />
       </div>
 

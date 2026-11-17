@@ -3539,3 +3539,49 @@ html.cmms-no-anim *::after {
     filter: brightness(0.6) saturate(1.1);
   }
 }
+
+/* ── Fallback ของฉาก three.js เมื่อ WebGL ใช้ไม่ได้ (RDP/VM/ไดรเวอร์ปิด/kiosk) ──
+   แสดง gradient + glow เคลื่อนไหวช้า ๆ แทนการปล่อยพื้นหลังเป็นจอเปล่า/สีเดียว
+   ถ้าผู้ใช้ตั้ง prefers-reduced-motion จะหยุดนิ่ง (ไม่มีการขยับเลย) */
+.cmms-login-3d-fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 108%, rgba(23, 224, 192, 0.16) 0%, rgba(4, 16, 31, 0) 58%),
+    linear-gradient(160deg, #04101f 0%, #061726 45%, #031019 100%);
+}
+
+.cmms-login-3d-fallback::before,
+.cmms-login-3d-fallback::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(closest-side, rgba(42, 125, 240, 0.34), transparent 72%),
+    radial-gradient(closest-side, rgba(23, 224, 192, 0.26), transparent 72%);
+  background-position: 22% 32%, 74% 66%;
+  background-size: 58% 58%, 46% 46%;
+  background-repeat: no-repeat;
+  filter: blur(12px);
+  animation: cmms-login-glow 18s ease-in-out infinite alternate;
+}
+
+.cmms-login-3d-fallback::after {
+  animation-duration: 26s;
+  animation-direction: alternate-reverse;
+  opacity: 0.72;
+}
+
+@keyframes cmms-login-glow {
+  from { transform: translate3d(-3%, 2%, 0) scale(1); }
+  50%  { transform: translate3d(2%, -2%, 0) scale(1.06); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmms-login-3d-fallback::before,
+  .cmms-login-3d-fallback::after {
+    animation: none;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -134,12 +134,39 @@ void main() {
 }
 `;
 
+/**
+ * ตรวจว่าเบราว์เซอร์สร้าง WebGL context ได้จริงไหม
+ * เครื่องที่ไม่มี GPU/ไดรเวอร์ปิด WebGL (RDP, VM, kiosk ที่ล็อกไว้) จะได้ false
+ * แล้วเราไม่ต้องโหลด three.js + post-processing ให้หนักเปล่า ๆ
+ */
+function canUseWebGL(): boolean {
+  try {
+    if (typeof window === "undefined" || !window.WebGLRenderingContext) return false;
+    const probe = document.createElement("canvas");
+    const gl = probe.getContext("webgl2") || probe.getContext("webgl");
+    if (!gl) return false;
+    // คืน resource ทันที — เบราว์เซอร์จำกัดจำนวน context ต่อหน้า
+    const lose = gl.getExtension("WEBGL_lose_context");
+    lose?.loseContext();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function CmmsScene3D() {
   const ref = useRef<HTMLCanvasElement>(null);
+  // WebGL ใช้ไม่ได้ → แสดงพื้นหลัง gradient/glow จาก CSS แทน (ไม่ปล่อยให้เป็นจอเปล่า)
+  const [webglFailed, setWebglFailed] = useState(false);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
+
+    if (!canUseWebGL()) {
+      setWebglFailed(true);
+      return;
+    }
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const motionScale = reduced ? 0.35 : 1;
@@ -153,7 +180,8 @@ export default function CmmsScene3D() {
         powerPreference: "high-performance",
       });
     } catch {
-      return; // ไม่มี WebGL — ปล่อยพื้นหลัง CSS QUIET mode
+      setWebglFailed(true); // สร้าง renderer ไม่สำเร็จ (ไดรเวอร์/หน่วยความจำ) — ใช้ CSS แทน
+      return;
     }
     // เครื่องไม่มี GPU (SwiftShader/llvmpipe เช่น VM, remote desktop) — ลดงานลงเพื่อไม่ให้กระตุก
     const gl = renderer.getContext();
@@ -540,6 +568,10 @@ export default function CmmsScene3D() {
       renderer.dispose();
     };
   }, []);
+
+  if (webglFailed) {
+    return <div className="cmms-login-3d-fallback" aria-hidden="true" />;
+  }
 
   return <canvas ref={ref} className="cmms-login-3d-canvas" aria-hidden="true" />;
 }

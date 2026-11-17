@@ -12,7 +12,16 @@ import { useEffect, useRef, useState } from "react";
  *
  * ถ้าวิดีโอโหลด/เล่นไม่ได้จริง ๆ จะถอยไปใช้ภาพนิ่ง (poster) เพื่อไม่ให้พื้นหลังเป็นจอเปล่า
  */
-export default function LoginVideoBg({ src, poster }: { src: string; poster: string }) {
+export default function LoginVideoBg({
+  src,
+  poster,
+  onUnavailable,
+}: {
+  src: string;
+  poster: string;
+  /** แจ้งให้หน้าพ่อสลับไปชั้นถัดไป (three.js → CSS gradient) ถ้าวิดีโอเล่นไม่ได้ */
+  onUnavailable?: () => void;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -75,7 +84,10 @@ export default function LoginVideoBg({ src, poster }: { src: string; poster: str
       loop
       playsInline
       preload="auto"
-      onError={() => setFailed(true)}
+      onError={() => {
+        setFailed(true);
+        onUnavailable?.();
+      }}
     />
   );
 }
