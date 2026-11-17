@@ -75,7 +75,9 @@ export default function AnalyticsDashboardPage() {
       setMonthly(rows);
       if (rows.length > 0) {
         setMtbf(Math.round(rows.reduce((s: number, m: MonthlyStat) => s + m.mtbf, 0) / rows.length));
-        setMttr(rows.reduce((s: number, m: MonthlyStat) => s + m.mttr, 0) / rows.length);
+        // ค่าเฉลี่ยของ mttr รายเดือนเป็นทศนิยมยาว (เช่น 1.0916666666666666) — ปัดที่ต้นทาง
+        // 1 ตำแหน่งให้เท่าการ์ด MTBF ที่ปัดเป็นจำนวนเต็ม
+        setMttr(Math.round((rows.reduce((s: number, m: MonthlyStat) => s + m.mttr, 0) / rows.length) * 10) / 10);
       }
 
       const wo = indexJson?.data ?? indexJson?.work_orders;
