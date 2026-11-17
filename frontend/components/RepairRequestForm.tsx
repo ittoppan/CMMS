@@ -50,6 +50,7 @@ import {
 import LiffLangToggle from "./LiffLangToggle";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
+import { liffAuthHeaders } from "@/lib/liff-session";
 import { serverResponds } from "@/lib/server-check";
 import {
   UNBOUND_BODY,
@@ -672,7 +673,7 @@ const flushQueue = async () => {
         try {
           const res = await apiFetch("/api/v1/repair.php", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
             body: JSON.stringify(item.payload),
           });
           const json = await res.json().catch(() => ({}));
@@ -837,16 +838,15 @@ const flushQueue = async () => {
         is_urgent: form.isUrgent ? 1 : 0,
         reporter_email: form.email || null,
         office: form.office,
-        // ให้ server ผูกเจ้าของงาน (created_by) จาก LINE user ที่ผูกบัญชีแล้ว
-        // → หน้า "ติดตามงานของฉัน" และการแจ้งเตือนกลับหาผู้แจ้งใช้ได้
-        line_user_id: effectiveUid || undefined,
       };
+      // เจ้าของงาน (created_by) ให้ server ตัดสินจาก LIFF ID token (header ด้านล่าง) หรือ session
+      // — ไม่ส่ง line_user_id จาก client อีก เพราะใครก็ส่ง uid ของคนอื่นได้
 
       let res: Response;
       try {
         res = await apiFetch("/api/v1/repair.php", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
           body: JSON.stringify(payload),
         });
       } catch {

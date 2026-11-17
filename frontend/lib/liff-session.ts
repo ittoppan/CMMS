@@ -47,6 +47,15 @@ export function subscribeLiffSession(listener: () => void): () => void {
   };
 }
 
+/**
+ * header สำหรับยืนยันตัวตนผู้ใช้ LINE กับ API (เช่น repair.php ที่ต้องรู้เจ้าของงาน)
+ * อ่าน token สด ๆ ตอนยิง request — ใช้ได้ทั้งตอน submit และตอน replay คิว offline
+ */
+export function liffAuthHeaders(): Record<string, string> {
+  const token = session.idToken;
+  return token ? { "X-LIFF-Id-Token": token } : {};
+}
+
 /** hook สำหรับ component — re-render เมื่อ LiffBridge ประกาศสถานะใหม่ */
 export function useLiffSession(): LiffSession {
   return useSyncExternalStore(subscribeLiffSession, getLiffSession, () => EMPTY);

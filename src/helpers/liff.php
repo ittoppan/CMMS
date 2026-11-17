@@ -49,6 +49,25 @@ function liff_verify_error_message(string $code): string {
 }
 
 /**
+ * ดึง LIFF ID token ออกจากคำขอ — header X-LIFF-Id-Token ก่อน, แล้ว Authorization: Bearer, แล้ว body.id_token
+ * (ทุก endpoint ที่ต้องรู้ตัวตนผู้ใช้ LINE ใช้ตัวเดียวกัน จะได้ไม่ตีความต่างกัน)
+ */
+function liff_request_id_token(?array $body = null): string
+{
+    $token = trim((string)($_SERVER['HTTP_X_LIFF_ID_TOKEN'] ?? ''));
+    if ($token === '') {
+        $auth = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
+        if ($auth !== '' && preg_match('/^Bearer\s+(.+)$/i', $auth, $m)) {
+            $token = trim($m[1]);
+        }
+    }
+    if ($token === '' && is_array($body) && isset($body['id_token'])) {
+        $token = trim((string)$body['id_token']);
+    }
+    return $token;
+}
+
+/**
  * ตรวจ LIFF ID token กับ LINE
  *
  * @return array{ok:bool,line_user_id:string,profile:array{name:string,picture:string},error:string,code:string}

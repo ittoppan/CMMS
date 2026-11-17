@@ -59,16 +59,7 @@ try {
     }
 
     // ── ตัวตนผู้ใช้ LINE: ตรวจ LIFF ID token เท่านั้น (header มาก่อน แล้วจึง body) ──
-    $idToken = trim((string)($_SERVER['HTTP_X_LIFF_ID_TOKEN'] ?? ''));
-    if ($idToken === '') {
-        $authHeader = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
-        if ($authHeader !== '' && preg_match('/^Bearer\s+(.+)$/i', $authHeader, $m)) {
-            $idToken = trim($m[1]);
-        }
-    }
-    if ($idToken === '' && isset($input['id_token'])) {
-        $idToken = trim((string)$input['id_token']);
-    }
+    $idToken = liff_request_id_token(is_array($input) ? $input : null);
 
     $viewer = null;
     $isStaff = false;
