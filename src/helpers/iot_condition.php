@@ -459,9 +459,10 @@ function iot_condition_history(PDO $pdo, int $assetId, int $limit = 50): array {
 /** Existing manual condition, clearly labelled so it is never read as telemetry. */
 function iot_manual_condition_context(PDO $pdo, int $assetId): array {
     try {
-        $st = $pdo->prepare('SELECT m.*, mp.name AS param_name, mp.unit, mp.category
+        // asset_measurements is the source of truth for manual condition values: it stores the
+        // parameter NAME and unit directly, so there is no parameter master table to join.
+        $st = $pdo->prepare('SELECT m.*, m.parameter AS param_name, NULL AS category
                              FROM asset_measurements m
-                             LEFT JOIN measurement_params mp ON mp.id = m.param_id
                              WHERE m.asset_id = ? ORDER BY m.measured_at DESC LIMIT 20');
         $st->execute([$assetId]);
         $rows = $st->fetchAll(PDO::FETCH_ASSOC);
