@@ -166,6 +166,13 @@ export default function PushDevicePage() {
               <p className="text-sm text-muted-foreground">
                 iOS อนุญาตให้เว็บส่ง Push ได้เฉพาะตอนเปิดผ่านแอปที่ติดตั้งแล้วเท่านั้น (นโยบายของ Apple)
               </p>
+              <a
+                href="/install?src=settings-push"
+                className="inline-flex min-h-10 items-center gap-1 py-1 text-sm underline"
+                style={{ color: "var(--cmms-primary)" }}
+              >
+                เปิดหน้าแนะนำการติดตั้ง (มีขั้นตอนตามรุ่นเครื่อง)
+              </a>
             </VStack>
           ) : (
             <Alert variant="info" title="วิธีแก้" description="ใช้ Chrome / Edge / Firefox เวอร์ชันล่าสุด เปิดตัวเว็บ CMMS แล้วค่อยกลับมาหน้านี้ — บนมือถือ Android แนะนำ Chrome" />

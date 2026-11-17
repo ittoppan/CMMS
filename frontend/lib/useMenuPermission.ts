@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "./api";
 
 /**
  * useMenuPermission — สิทธิ์เมนู PWA ตามบทบาท (role-based) + ข้อมูลผู้ใช้
  *
  * - อ่าน role ของผู้ใช้จาก localStorage (LiffBridge เก็บไว้เมื่อเปิดจาก LINE)
  * - fetch /api/v1/menu_permissions.php เพื่อขอ permission ของบทบาทนั้น
+ *   (ระบุตัวตนด้วย X-LIFF-Id-Token จาก apiFetch หรือ session — ไม่ส่ง line_user_id แล้ว)
  * - คืน canShow(menuKey) ใช้ filter เมนูใน Sidebar
  * - คืน avatar ผู้ใช้เพื่อแสดงรูปโปรไฟล์ (หลีกเลี่ยง fetch ซ้ำหน้า layout)
  *
@@ -29,28 +31,18 @@ export function useMenuPermission() {
   const load = useCallback(async () => {
     // 1) หา role ของผู้ใช้ปัจจุบัน
     let roleId = "";
-    let uid = "";
     try {
-      uid = localStorage.getItem("cmms_line_user_id") || "";
       roleId = localStorage.getItem("cmms_line_role_id") || "";
     } catch { /* ignore */ }
 
-    let url = "/api/v1/menu_permissions.php?";
-    if (uid) {
-      url += `line_user_id=${encodeURIComponent(uid)}`;
-    } else if (roleId) {
-      url += `role_id=${encodeURIComponent(roleId)}`;
-    } else {
-      // ไม่มีข้อมูล LINE -> ใช้ session (ผู้ดูแลระบบเห็นหมด)
-      url += "user=1";
-    }
+    // ไม่ส่ง line_user_id (client ปลอมได้) — ?user=1 ให้เซิร์ฟเวอร์ตัดสินจาก token/session
+    let url = "/api/v1/menu_permissions.php?user=1";
+    let res = await apiFetch(url);
 
-    let res = await fetch(url);
-
-    // ถ้า uid ไม่มีใน DB (เช่น ยังไม่ผูก / จำลอง) -> ลอง role_id ที่เก็บไว้ก่อน fallback
+    // หา user ไม่เจอ (ยังไม่ผูก LINE) -> ใช้ role ที่จำลองไว้ ไม่ให้เมนูว่าง
     if (!res.ok && roleId) {
       url = `/api/v1/menu_permissions.php?role_id=${encodeURIComponent(roleId)}`;
-      res = await fetch(url);
+      res = await apiFetch(url);
     }
     // auth guard: session หมดอายุ (401) -> กลับเข้า /login
     if (res.status === 401) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { isUsableSupportPhone } from "@/lib/support-contact";
 import { useState, useEffect, useMemo } from "react";
 import { usePageHero } from "@/lib/i18n";
 import { setUserLang } from "@/lib/i18n";
@@ -38,6 +39,7 @@ import {
   ShieldCheck as ShieldCheckIcon,
   MessagesSquare as ChatBubbleLeftRightIcon,
   Smartphone as DevicePhoneMobileIcon,
+  QrCode as QrCodeIcon,
   Server as ServerStackIcon,
   ArrowRight as ArrowRightIcon,
   Lock as LockClosedIcon,
@@ -154,6 +156,8 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   company_address: { label: "ที่อยู่บริษัท" },
   company_tax_id: { label: "เลขประจำตัวผู้เสียภาษี" },
   company_phone: { label: "เบอร์โทรบริษัท" },
+  support_phone: { label: "เบอร์ติดต่อแอดมิน (ผู้ใช้เห็น)", hint: "ใช้ในข้อความ/หน้าแจ้งซ่อมตอนยังไม่ผูกบัญชี — ว่าง = ใช้เบอร์โทรบริษัท" },
+  support_email: { label: "อีเมลติดต่อแอดมิน (ผู้ใช้เห็น)", hint: "แยกจากอีเมลผู้ส่งของระบบ (SMTP From) — ว่าง = ใช้ smtp_from_email" },
   // branding
   company_tagline: { label: "คำโปรยระบบ", hint: "ข้อความใต้ชื่อระบบบนหน้าเข้าสู่ระบบ" },
   iso_header_title: { label: "หัวข้อเอกสาร ISO", hint: "ชื่อหัวกระดาษสำหรับเอกสาร ISO" },
@@ -167,6 +171,7 @@ const KEY_META: Record<string, { label: string; hint?: string }> = {
   sage_sync_config: { label: "ค่าเชื่อมต่อ Sage 300", hint: "JSON — จัดการผ่านการซิงค์ Sage" },
   sage300_allowed_categories: { label: "หมวดอะไหล่ที่ซิงค์จาก Sage" },
   // general
+  public_base_url: { label: "URL หลักของระบบ (public base URL)", hint: "ใช้สร้างลิงก์ในอีเมล/LINE — มาก่อน APP_URL, ไม่ต้องมี / ปิดท้าย (เช่น https://cmms-tpt.shares.zrok.io)" },
   app_name: { label: "ชื่อระบบ" },
   app_version: { label: "เวอร์ชันระบบ" },
   animations_enabled: { label: "เปิด animation ของระบบ", hint: "ปิด = ทุกหน้าแสดงผลแบบนิ่ง (ไม่มีการ์ดเลื่อน/เฟด/เด้ง) เหมาะกับเครื่องเก่าหรือพนักงานที่เมารถ — แยกจากค่าตั้งค่า OS" },
@@ -318,7 +323,7 @@ const TEXTAREA_KEYS = new Set([
 const COLOR_KEYS = new Set(["theme_primary_hex", "theme_secondary_hex"]);
 
 // คีย์ที่เป็นอีเมล
-const EMAIL_KEYS = new Set(["smtp_from_email"]);
+const EMAIL_KEYS = new Set(["smtp_from_email", "support_email"]);
 
 // คีย์ที่เป็นตัวเลือกจำกัด (dropdown) — ค่าในลิสต์เดียวกับหน้า PHP เก่า
 const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
@@ -448,6 +453,7 @@ const SUB_PAGES = [
   { href: "/settings/master/locations", label: "ที่ตั้ง/สถานที่ (ข้อมูลหลัก)", desc: "จัดการสถานที่/ตำแหน่งกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
   { href: "/settings/repair-options", label: "ตัวเลือกฟอร์มแจ้งซ่อม", desc: "จัดการตัวเลือก dropdown เฉพาะฟอร์มแจ้งซ่อม (F-EN-03)", icon: WrenchScrewdriverIcon },
   { href: "/settings/pwa", label: "ไอคอน PWA (Mobile App)", desc: "ไอคอนแอปสำหรับติดตั้งบนมือถือ", icon: DevicePhoneMobileIcon },
+  { href: "/install", label: "ติดตั้งแอปบนมือถือ", desc: "หน้าแนะนำการติดตั้ง + QR สำหรับส่งให้พนักงาน", icon: QrCodeIcon },
   { href: "/settings/services", label: "บริการและสถานะการรันระบบ", desc: "ตรวจ Apache / Next.js / watchdog", icon: ServerStackIcon },
   { href: "/settings/design", label: "ปรับแต่งหน้าตาของระบบ", desc: "ธีม สี เมนู การ์ด ฟอนต์ และรายหน้า", icon: PaintBrushIcon },
 ];
@@ -1123,6 +1129,18 @@ export default function SettingsPage() {
                     const isTextarea = TEXTAREA_KEYS.has(row.setting_key);
                     const isColor = COLOR_KEYS.has(row.setting_key);
                     const isEmail = EMAIL_KEYS.has(row.setting_key);
+                    // เตือนเมื่อเบอร์ที่จะแสดงให้ผู้ใช้ถูกกรองออก (placeholder/ว่าง)
+                    const phoneValue = String(form[row.setting_key] ?? "");
+                    const phoneWarning =
+                      row.setting_key === "company_phone"
+                        ? !isUsableSupportPhone(phoneValue)
+                          ? phoneValue.trim() === ""
+                            ? "ว่างอยู่ — ผู้ใช้จะไม่เห็นเบอร์ในหน้าแจ้งซ่อม เว้นแต่จะตั้ง “เบอร์ติดต่อแอดมิน”"
+                            : "ผู้ใช้จะไม่เห็นเบอร์นี้ในหน้าแจ้งซ่อม (ระบบกรองค่า placeholder/เบอร์ปลอมออก) จนกว่าจะใส่เบอร์จริงหรือตั้ง “เบอร์ติดต่อแอดมิน”"
+                          : null
+                        : row.setting_key === "support_phone" && phoneValue.trim() !== "" && !isUsableSupportPhone(phoneValue)
+                          ? "ผู้ใช้จะไม่เห็นเบอร์นี้ (ระบบกรองเบอร์ placeholder ออก) และจะกลับไปใช้เบอร์โทรบริษัทแทน"
+                          : null;
                     const isLang = row.setting_key === "lang_default";
                     const hexValue = String(form[row.setting_key] ?? "").trim();
                     const hexValid = /^#[0-9a-fA-F]{6}$/.test(hexValue);
@@ -1150,6 +1168,11 @@ export default function SettingsPage() {
                               {meta.hint || row.description || row.setting_key}
                               {isSensitive && " — ค่าปัจจุบันถูกซ่อนไว้เพื่อความปลอดภัย"}
                             </p>
+                            {phoneWarning && (
+                              <p className="text-sm" style={{ color: "var(--cmms-warning)", fontWeight: 600 }}>
+                                ⚠ {phoneWarning}
+                              </p>
+                            )}
                           </VStack>
                           {isReadonly && (
                             <span className="cmms-andon-chip" style={{ background: "var(--cmms-bg-muted)", color: "var(--cmms-text-secondary)" }}>

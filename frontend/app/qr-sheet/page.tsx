@@ -19,6 +19,7 @@ type Asset = {
   criticality: string | null;
   status: string | null;
   payload: string;
+  liff_url?: string;
 };
 
 export default function QrSheetPage() {
@@ -27,6 +28,7 @@ export default function QrSheetPage() {
   const [machines, setMachines] = useState<Asset[]>([]);
   const [qrMap, setQrMap] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [liffId, setLiffId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [printed, setPrinted] = useState(false);
   const [q, setQ] = useState("");
@@ -57,6 +59,7 @@ export default function QrSheetPage() {
           .filter((a) => /^A-[A-Z]{2}-\d{2}$/.test(a.code))
           .sort((a, b) => a.code.localeCompare(b.code));
         setMachines(list);
+        setLiffId(typeof json?.liff_id === "string" ? json.liff_id : "");
       })
       .catch(() => setError("โหลดข้อมูลเครื่องจักรไม่สำเร็จ"));
   }, []);
@@ -70,11 +73,14 @@ export default function QrSheetPage() {
       const dark = qrDarkColor();
       for (const m of machines) {
         try {
-          // ใช้ payload มาตรฐาน CMMS-A-<token> — resolver รองรับทั้งในแอปและ LINE
-          const payload = m.payload && m.payload.startsWith("CMMS-") ? m.payload : m.code;
+          // ลิงก์ LIFF (?asset_code=…) — กล้องมือถือสแกนแล้วเปิดหน้าแจ้งซ่อมได้จริง
+          // ถ้ายังไม่ได้ตั้ง LIFF ID จะ fallback เป็น payload มาตรฐาน CMMS-A-<token>
+          const payload = m.liff_url || (m.payload && m.payload.startsWith("CMMS-") ? m.payload : m.code);
+          // margin = 4 โมดูล = quiet zone ตามมาตรฐาน QR — ลิงก์ LIFF ยาวขึ้นเป็น QR
+          // ระดับ 4 (33×33) ถ้า margin แนบเกินไปกล้องมือถือจะหามุม QR ไม่เจอ
           map[m.code] = await QRCode.toDataURL(payload, {
             width: 300,
-            margin: 1,
+            margin: 4,
             color: { dark, light: "#FFFFFF" },
           });
         } catch {
@@ -148,11 +154,11 @@ export default function QrSheetPage() {
         name="พิมพ์ป้าย QR"
         summary="สร้างป้าย QR ประจำเครื่องจักรเพื่อพิมพ์ติดที่เครื่อง — ผู้ใช้สแกนแล้วแจ้งซ่อมด่วนหรือทำเช็คชีท PM ของเครื่องนั้นได้ทันที"
         steps={[
-          "ตรวจรายการเครื่องที่จะพิมพ์ (ป้ายสร้างจากรหัส/เพย์โหลดมาตรฐานของเครื่อง)",
+          "ตรวจรายการเครื่องที่จะพิมพ์ (ป้ายเป็นลิงก์ LIFF ของ LINE OA ประจำเครื่อง)",
           "กด “ปริ้นติกเกอร์” — ระบบบันทึกประวัติการพิมพ์ไว้",
           "ติดป้ายที่เครื่องในตำแหน่งที่สแกนง่าย แล้วทดสอบสแกนหนึ่งครั้งก่อนแจกจ่าย",
         ]}
-        source="รายการเครื่องและเพย์โหลด QR จาก /api/v1/scan.php?action=labels (ประวัติพิมพ์ที่ action=print_log)"
+        source="รายการเครื่องและลิงก์ QR จาก /api/v1/scan.php?action=labels (ประวัติพิมพ์ที่ action=print_log)"
         note="ป้ายที่พิมพ์ก่อนแก้รหัสเครื่องจะชี้ไปรหัสเดิม — พิมพ์ใหม่เมื่อข้อมูลเครื่องเปลี่ยน"
         related={[
           { href: "/asset_registry", label: "ทะเบียนเครื่องจักร" },
@@ -168,11 +174,23 @@ export default function QrSheetPage() {
         </Card>
       )}
 
+      {liffId === "" && machines.length > 0 && (
+        <Card className="w-full qr-sheet-note" style={{ background: "var(--cmms-warning-light)", borderLeftColor: "var(--cmms-warning)", marginBottom: 16 }}>
+          <CardContent className="p-4">
+            <p className="text-sm">
+              <b>ยังไม่ได้ตั้ง LIFF ID</b> — QR จะถูกพิมพ์เป็นเพย์โหลดภายใน (CMMS-A-…) ซึ่งกล้องมือถือเปิดไม่ได้
+              ให้ตั้งค่า <b>LIFF App ID</b> ในการตั้งค่า LINE ก่อนพิมพ์ แล้วโหลดหน้านี้ใหม่
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="w-full qr-sheet-note" style={{ background: "var(--cmms-bg-muted)", marginBottom: 16 }}>
         <CardContent className="p-4">
           <p className="text-sm text-[var(--cmms-text-secondary)]">
             <b>วิธีติดตั้ง:</b> ปริ้นหน้านี้เป็นกระดาษ A4 แล้วตัดเป็นสติกเกอร์แปะที่ตัวเครื่อง (หรือข้างกล่องสายไฟ)
-            — พนักงานสแกน QR ด้วย LINE/กล้อง จะได้หน้าเลือก: <b>แจ้งซ่อมด่วน</b> หรือ <b>ทำเช็คชีท PM</b> พร้อมเครื่องถูกต้องทันที
+            — QR เป็นลิงก์ LIFF ของ LINE OA: พนักงานสแกนด้วยกล้องมือถือหรือกล้องใน LINE
+            จะเปิดหน้า <b>แจ้งซ่อม · PM · ประวัติ</b> ของเครื่องนั้นทันที
           </p>
         </CardContent>
       </Card>
@@ -221,7 +239,7 @@ export default function QrSheetPage() {
               )}
               <p className="font-bold text-[var(--cmms-primary)] text-sm">{m.code}</p>
               <p className="text-sm text-[var(--cmms-text-secondary)]">{m.name}</p>
-              <p className="text-xs text-[var(--cmms-text-secondary)] tip">สแกน → แจ้งซ่อมด่วน</p>
+              <p className="text-xs text-[var(--cmms-text-secondary)] tip">สแกน → เปิด LINE แจ้งซ่อม</p>
             </CardContent>
           </Card>
         ))}

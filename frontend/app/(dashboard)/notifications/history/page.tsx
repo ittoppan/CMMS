@@ -283,6 +283,7 @@ export default function LineDeliveryHistoryPage() {
                   <SelectItem value={ALL_SENTINEL}>ทุกช่องทาง</SelectItem>
                   <SelectItem value="LINE">LINE</SelectItem>
                   <SelectItem value="TELEGRAM">Telegram</SelectItem>
+                  <SelectItem value="NTFY">ntfy</SelectItem>
                   <SelectItem value="EMAIL">Email</SelectItem>
                 </SelectContent>
               </Select>

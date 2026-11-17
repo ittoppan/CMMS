@@ -72,6 +72,54 @@ function scan_asset_payload(array $asset): string {
     return (string)($asset['code'] ?? '');
 }
 
+/** LIFF ID ของหน้าแจ้งซ่อม (settings → env) — คืน '' ถ้ายังไม่ได้ตั้ง */
+function scan_liff_id(PDO $pdo): string {
+    try {
+        $st = $pdo->prepare('SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1');
+        $st->execute(['line_liff_id']);
+        $id = trim((string)$st->fetchColumn());
+        if ($id !== '') return $id;
+    } catch (Throwable $e) {
+        // ตาราง settings ยังไม่พร้อม — ลอง env ต่อ
+    }
+    return trim((string)(getenv('LINE_LIFF_ID') ?: ''));
+}
+
+/** ลิงก์ LIFF ประจำเครื่อง: กล้องมือถือสแกนแล้วเปิดหน้าแจ้งซ่อมพร้อมรหัสเครื่อง */
+function scan_asset_liff_url(string $liffId, string $assetCode): string {
+    $liffId = trim($liffId);
+    $code = trim($assetCode);
+    if ($liffId === '' || $code === '') return '';
+    return 'https://liff.line.me/' . rawurlencode($liffId) . '?asset_code=' . rawurlencode($code);
+}
+
+/** ดึง asset_code จากลิงก์ LIFF (คืน '' ถ้า payload ไม่ใช่ลิงก์ liff.line.me) */
+function scan_liff_asset_code(string $raw): string {
+    $raw = trim($raw);
+    if ($raw === '' || !preg_match('~^https?://liff\.line\.me/~i', $raw)) return '';
+    $q = (string)parse_url($raw, PHP_URL_QUERY);
+    if ($q === '') return '';
+    parse_str($q, $params);
+    foreach (['asset_code', 'code'] as $k) {
+        if (isset($params[$k]) && trim((string)$params[$k]) !== '') return trim((string)$params[$k]);
+    }
+    return '';
+}
+
+/**
+ * ลิงก์ LIFF → payload มาตรฐานของเครื่อง (CMMS-A-<token> ถ้ามี token, ไม่งั้นรหัสเครื่อง)
+ * คืน '' เมื่อ payload ไม่ใช่ลิงก์ LIFF หรือหาเครื่องไม่เจอ (ให้ผู้เรียกใช้ค่าที่ scan_extract ได้)
+ */
+function scan_liff_payload(PDO $pdo, string $raw): string {
+    $code = scan_liff_asset_code($raw);
+    if ($code === '') return '';
+    $st = $pdo->prepare('SELECT code, qr_token FROM asset_registry WHERE code = ? OR qr_token = ? LIMIT 1');
+    $st->execute([$code, strtoupper($code)]);
+    $row = $st->fetch(PDO::FETCH_ASSOC);
+    if (!$row) return '';
+    return scan_asset_payload($row);
+}
+
 /** สร้าง token ให้เครื่องจักรถ้ายังไม่มี (idempotent) — คืน token */
 function scan_ensure_asset_token(PDO $pdo, int $assetId): string {
     $st = $pdo->prepare('SELECT qr_token FROM asset_registry WHERE id = ?');
@@ -140,7 +188,9 @@ function scan_purge_old(PDO $pdo, int $days = 180): int {
  * คืน ['type', 'restricted'?, 'data'?, 'meta'?]
  */
 function scan_resolve(PDO $pdo, string $raw, array $user): array {
-    $code = scan_extract($raw);
+    // QR ที่พิมพ์จาก /qr-sheet เป็นลิงก์ LIFF (?asset_code=…) — แปลงกลับเป็น payload มาตรฐาน
+    // ของเครื่องนั้นก่อน resolve เพื่อให้สแกนในแอปได้ผลเหมือนสแกน token เดิม
+    $code = scan_liff_payload($pdo, $raw) ?: scan_extract($raw);
     $parsed = scan_parse($code);
     $uid = (int)($user['id'] ?? 0);
     $roleId = (int)($user['role_id'] ?? 0);

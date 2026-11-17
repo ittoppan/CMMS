@@ -100,7 +100,10 @@ try {
                 requirePerm($pdo, 'asset', 'view', 'ไม่มีสิทธิ์ดูรายการเครื่องจักร');
                 $rows = $pdo->query('SELECT id, code, name, department, criticality, status, qr_token
                                      FROM asset_registry ORDER BY code ASC LIMIT 2000')->fetchAll(PDO::FETCH_ASSOC);
-                $items = array_map(function (array $r): array {
+                // QR ที่พิมพ์ใช้ลิงก์ LIFF (?asset_code=…) เพื่อให้กล้องมือถือเปิดหน้าแจ้งซ่อมได้
+                // — ถ้ายังไม่ตั้ง LIFF ID ให้ส่ง liff_url ว่าง แล้วหน้าเว็บ fallback เป็น payload เดิม
+                $liffId = scan_liff_id($pdo);
+                $items = array_map(function (array $r) use ($liffId): array {
                     return [
                         'id' => (int)$r['id'],
                         'code' => (string)$r['code'],
@@ -109,9 +112,10 @@ try {
                         'criticality' => $r['criticality'],
                         'status' => $r['status'],
                         'payload' => scan_asset_payload($r),
+                        'liff_url' => scan_asset_liff_url($liffId, (string)$r['code']),
                     ];
                 }, $rows);
-                echo json_encode(['success' => true, 'items' => $items], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => true, 'liff_id' => $liffId, 'items' => $items], JSON_UNESCAPED_UNICODE);
                 break;
             }
             case 'document_labels': {

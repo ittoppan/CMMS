@@ -11,6 +11,7 @@ ini_set('session.cookie_samesite', 'Lax');
 session_start();
 require_once __DIR__ . '/../src/config/db.php';
 require_once __DIR__ . '/../src/helpers/notification.php';
+require_once __DIR__ . '/../src/helpers/liff.php';
 
 $envPath = __DIR__ . '/../.env';
 if (file_exists($envPath)) loadEnv($envPath);
@@ -128,6 +129,9 @@ try {
         // - ฝั่ง React: พาไปกรอกรหัสพนักงานเลย (มี LINE UID พร้อม)
         // - ฝั่ง PHP หลังบ้าน: ยังใช้ flow เดิม (ล็อกอินแล้วผูกอัตโนมัติ)
         if ($isReactUi) {
+            // จำ LINE ที่ยืนยันจาก LINE Login ไว้ใน session — หน้า /register ใช้ผูกบัญชีโดยไม่ต้อง
+            // ส่ง line_user_id กลับมาเอง (line_register.php จะอ่านจาก session นี้เท่านั้น)
+            liff_session_set_verified_line_user($lineUserId, (string)$displayName);
             header('Location: /register?uid=' . urlencode($lineUserId) . '&name=' . urlencode($displayName));
         } else {
             header('Location: /login.php?bind_line=1&error=' . urlencode('บัญชี LINE (' . $displayName . ') ยังไม่ได้ถูกผูกกับผู้ใช้ในระบบ กรุณาล็อกอินด้วยชื่อผู้ใช้ เพื่อผูกบัญชีอัตโนมัติในขั้นตอนถัดไป'));

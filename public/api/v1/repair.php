@@ -12,6 +12,9 @@ require_once __DIR__ . '/../../../src/helpers/workforce.php';
 require_once __DIR__ . '/../../../src/helpers/failure.php';
 require_once __DIR__ . '/../../../src/helpers/repair_time.php';
 require_once __DIR__ . '/../../../src/helpers/sla.php';
+require_once __DIR__ . '/../../../src/helpers/repair_owner.php';
+require_once __DIR__ . '/../../../src/helpers/repair_links.php';
+require_once __DIR__ . '/../../../src/helpers/repair_rating.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -213,7 +216,13 @@ try {
 
             // ประเมินงานซ่อม (tracking) — บันทึกคะแนน/ความคิดเห็นลง repair_ratings
             if (($data['action'] ?? '') === 'rate') {
-                requireLogin($pdo);
+                // ตัวตน: session หรือ LIFF ID token ที่ผูกบัญชีแล้ว (ผู้แจ้งจาก LINE ไม่มี PHP session)
+                $rater = repair_rating_identity($pdo, is_array($data) ? $data : null);
+                if (!$rater['ok']) {
+                    http_response_code(401);
+                    echo json_encode(['error' => $rater['error'], 'code' => $rater['code'], 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
                 $rid = (int)($data['repair_id'] ?? 0);
                 $score = (int)($data['rating_score'] ?? 0);
                 $comment = trim((string)($data['rating_comment'] ?? ''));
@@ -231,19 +240,15 @@ try {
                     exit;
                 }
                 $rStatus = strtolower(trim((string)($repairRow['status'] ?? '')));
-                if (!in_array($rStatus, ['completed', 'closed', 'resolved'], true)) {
+                if (!in_array($rStatus, ['completed', 'closed', 'resolved', 'verified'], true)) {
                     http_response_code(400);
                     echo json_encode(['error' => 'สามารถประเมินได้เฉพาะงานที่ปิดงาน/เสร็จสิ้นแล้ว', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
-                $cu = currentUser($pdo);
-                $ratedBy = $cu['id'] ?? null;
-                $createdBy = isset($repairRow['created_by']) ? (int)$repairRow['created_by'] : 0;
-                $canRate = false;
-                if (function_exists('canSupervisor') && canSupervisor()) $canRate = true;
-                if ($ratedBy && $createdBy > 0 && (int)$ratedBy === $createdBy) $canRate = true;
-                if ($createdBy <= 0 && $ratedBy) $canRate = true; // ผู้แจ้งสาธารณะ/ไม่ระบุตัวตนผู้สร้าง — อนุญาตผู้ใช้ที่ล็อกอิน
-                if (!$canRate) {
+                $cu = $rater['user'];
+                $ratedBy = isset($cu['id']) ? (int)$cu['id'] : null;
+                $canSupervisorNow = function_exists('canSupervisor') && canSupervisor();
+                if (!repair_rating_can_rate($repairRow, $cu, (bool)$rater['session'], $canSupervisorNow)) {
                     http_response_code(403);
                     echo json_encode(['error' => 'ไม่มีสิทธิ์ประเมินงานนี้', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
@@ -320,6 +325,26 @@ try {
                 if ($aid === '' || $aid === '0' || $aid === 0 || $aid === null || $aid === 'null') {
                     $data['asset_id'] = null;
                 }
+            }
+            // เจ้าของงาน (created_by) ตัดสินฝั่งเซิร์ฟเวอร์เท่านั้น — session หรือ LIFF ID token ที่ตรวจกับ LINE แล้ว
+            // ค่า line_user_id/created_by ที่ client ส่งมาถูกทิ้งเสมอ (กันการสร้างงานในนามคนอื่น → งานไปโผล่
+            // ใน "งานของฉัน" ของเหยื่อ และแจ้งเตือนตอนปิดงานไปหาผิดคน)
+            $sessionUser = currentUser($pdo);
+            $owner = repair_owner_resolve($pdo, $data, $sessionUser, liff_request_id_token(is_array($data) ? $data : null));
+            $rejectedClientClaim = $owner['client_claim_rejected'];
+            $hadAssignmentClaim = isset($data['assigned_to']) || (isset($data['team_ids']) && is_array($data['team_ids']) && !empty($data['team_ids']));
+            unset($data['line_user_id'], $data['created_by']);
+            if (!empty($owner['user_id'])) {
+                $data['created_by'] = (int)$owner['user_id'];
+            } else {
+                // ผู้แจ้งแบบ anonymous/ยังไม่ผูกบัญชี ห้ามมอบหมายงานหรือแตะทีม — กันไปกวน my_tasks/แจ้งเตือน
+                unset($data['assigned_to'], $data['team_ids']);
+                if ($hadAssignmentClaim) {
+                    error_log('[repair.php] stripped assignment from anonymous/unbound reporter ip=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+                }
+            }
+            if ($rejectedClientClaim || ($owner['source'] === 'none' && $owner['reason'] !== '')) {
+                error_log('[repair.php] owner claim rejected: ' . $owner['reason'] . ' ip=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
             }
             $allowed = ['work_order_no', 'asset_id', 'assigned_to', 'created_by', 'priority', 'status', 'title', 'description', 'failure_report', 'diagnosis', 'resolution', 'downtime_start', 'downtime_end', 'downtime_minutes', 'cost_parts', 'cost_labor', 'cost_outsource', 'notes', 'repair_type_id', 'failure_code_id', 'repair_code_id', 'work_zone_id', 'location_id', 'department_id', 'safety_related', 'product_lot_no', 'machine_status', 'production_line_status', 'estimated_completion_date', 'actual_start_at', 'acknowledged_at', 'root_cause', 'solution', 'rejection_reason_id', 'rejection_note', 'before_image_path', 'after_image_path', 'receiver_name', 'receiver_signature_path', 'reporter_phone', 'reporter_email', 'office', 'completed_at', 'contaminate_checking', 'outsource_by', 'requested_parts', 'video_path', 'attachment_path'];
             // ---- บังคับผลตรวจการปนเปื้อนก่อนปิดงานซ่อม (โรงงานอาหาร — กันลืมตรวจ) ----
@@ -467,6 +492,10 @@ try {
                         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $lid) $targets[] = (string)$lid;
                     }
 
+                    // ปุ่มในข้อความ "รับงานซ่อมด่วน" = หน้าใบงาน /repair/view (ผู้รับคือช่าง/กลุ่มซ่อมบำรุง
+                    // ที่ต้องเปิดงานและกดรับงาน — หน้าติดตามงานของผู้แจ้งว่างสำหรัยช่าง)
+                    // ข้อความตอนปิดงาน (line_tpl_completed) และอีเมลยังใช้ ?view=track สำหรับผู้แจ้ง
+                    $detailUrl = repair_view_url($newId);
                     foreach (array_unique($targets) as $tid) {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
                         sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
@@ -967,7 +996,8 @@ try {
                                     '{assigned_name}' => (string)($row['assigned_name'] ?? '-'),
                                 ];
                                 $photos = ['before' => repairPhotoUrls($id, 'failure_image', 2), 'after' => repairPhotoUrls($id, 'after_image', 2)];
-                                sendLineTemplatePush($creatorLineId, 'line_tpl_completed', $cv, $detailUrl, $photos);
+                                // ผู้แจ้งเปิดใน LINE — ชี้ไปหน้าติดตามงานของฉัน ไม่ใช่ /repair/view (ติด login)
+                                sendLineTemplatePush($creatorLineId, 'line_tpl_completed', $cv, repair_track_liff_url(), $photos);
                             }
                         }
 
@@ -1005,7 +1035,7 @@ try {
 "
                                 . "ค่าใช้จ่ายรวม: " . number_format($totalCost) . " บาท";
                             try {
-                                sendEmailNotification($creatorEmail, $creatorName, $subj, $msgBody, $detailUrl);
+                                sendEmailNotification($creatorEmail, $creatorName, $subj, $msgBody, repair_track_url());
                             } catch (Throwable $e) {
                                 error_log('[repair.php] creator email notify failed: ' . $e->getMessage());
                             }

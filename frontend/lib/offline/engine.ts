@@ -23,6 +23,7 @@ import {
 } from "./idb";
 import type { SyncQueueItem, SyncRunResult, SyncStats } from "./types";
 import { getCsrfToken } from "../api";
+import { liffAuthHeaders } from "../liff-session";
 
 const MAX_RETRIES = 3;
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -288,6 +289,8 @@ export class SyncEngine {
         "X-Client-Action-Id": item.local_action_id,
       };
       if (token) headers["X-CSRF-Token"] = token;
+      // replay คิว offline ก็ต้องแนบ LIFF ID token สด ๆ ด้วย ไม่งานจะไม่ผูกกับเจ้าของ
+      Object.assign(headers, liffAuthHeaders());
       const resp = await fetch(item.endpoint, {
         method: item.method,
         headers,

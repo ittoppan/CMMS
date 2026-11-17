@@ -48,9 +48,13 @@ import {
   ListChecks,
 } from "lucide-react";
 import LiffLangToggle from "./LiffLangToggle";
+import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
+import { liffAuthHeaders } from "@/lib/liff-session";
 import { serverResponds } from "@/lib/server-check";
+import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
+import { useSupportContact } from "@/lib/use-support-contact";
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -292,6 +296,8 @@ export default function RepairRequestForm() {
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
+  // ช่องทางติดต่อแอดมินสำหรับสถานะ unbound — hook กลาง (settings_support_contact()) แสดงผลด้วย SupportContactStrip
+  const supportContact = useSupportContact();
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -453,9 +459,10 @@ export default function RepairRequestForm() {
     const applyGate = (uid: string | null, bound: boolean) => {
       setBindGate(bound ? "bound" : uid ? "unbound" : "anonymous");
     };
-    const checkBound = async (uid: string): Promise<boolean> => {
+    // ตรวจสถานะผูกด้วย LINE ID token ที่แนบไป (API ไม่รับ line_user_id จาก client แล้ว)
+    const checkBound = async (): Promise<boolean> => {
       try {
-        const r = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(uid)}`);
+        const r = await fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() });
         const j = await r.json().catch(() => ({}));
         return !!(j?.bound && j?.user);
       } catch {
@@ -473,7 +480,7 @@ export default function RepairRequestForm() {
         const storedUid = localStorage.getItem("cmms_line_user_id");
         if (storedUid) {
           setLineBound(false);
-          checkBound(storedUid).then((b) => {
+          checkBound().then((b) => {
             setLineBound(b);
             applyGate(storedUid, b);
             if (b) {
@@ -488,7 +495,7 @@ export default function RepairRequestForm() {
           window.setTimeout(() => {
             const uid = localStorage.getItem("cmms_line_user_id");
             if (uid) {
-              checkBound(uid).then((b) => {
+              checkBound().then((b) => {
                 setLineBound(b);
                 applyGate(uid, b);
               });
@@ -513,27 +520,7 @@ export default function RepairRequestForm() {
       }
     } catch { /* ignore */ }
 
-    const simUid = new URLSearchParams(window.location.search).get("uid");
-    if (simUid) {
-      try { localStorage.setItem("cmms_line_user_id", simUid); } catch { /* ignore */ }
-      fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(simUid)}`)
-        .then((r) => r.json())
-        .then((j) => {
-          if (j?.bound && j?.user) {
-            setLineBound(true);
-            setBindGate("bound");
-            setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
-            try {
-              localStorage.setItem("cmms_line_bound", "1");
-              localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
-            } catch { /* ignore */ }
-          } else {
-            setLineBound(false);
-            setBindGate("unbound");
-          }
-        })
-        .catch(() => { setLineBound(false); setBindGate("unbound"); });
-    }
+    // เลิกใช้ ?uid= เพื่อจำลองตัวตน — ตัวตนยืนยันได้จาก LINE ID token เท่านั้น
 
     const tryLiff = () => {
       try {
@@ -542,7 +529,7 @@ export default function RepairRequestForm() {
             setLineProfile({ name: p.displayName || "", pic: p.pictureUrl || "", userId: p.userId || "" });
             setForm((prev) => ({ ...prev, reporterName: p.displayName || prev.reporterName }));
             if (p.userId) {
-              fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(p.userId)}`)
+              fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
                 .then((r) => r.json())
                 .then((j) => {
                   if (j?.bound && j?.user) {
@@ -580,16 +567,17 @@ export default function RepairRequestForm() {
 
   const handleInlineBind = async () => {
     const uid = effectiveUid;
-    if (!uid) { setBindError("ยังไม่ได้รับ LINE ID — รอสักครู่แล้วลองอีกครั้ง"); return; }
+    if (!uid) { setBindError(bindErrorMessage({ noLineId: true, contact: supportContact })); return; }
     const code = bindEmpCode.trim().toUpperCase();
-    if (!/^[A-Z0-9]{3,10}$/.test(code)) { setBindError("รูปแบบรหัสพนักงานไม่ถูกต้อง (เช่น E01117 หรือ EMP005)"); return; }
+    if (!/^[A-Z0-9]{3,10}$/.test(code)) { setBindError(bindErrorMessage({ format: true, contact: supportContact })); return; }
     setBindSubmitting(true);
     setBindError(null);
     try {
       const r = await apiFetch("/api/v1/line_register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ line_user_id: uid, employee_code: code }),
+        // ไม่ส่ง line_user_id แล้ว — เซิร์ฟเวอร์ใช้ LINE ที่ token ยืนยัน (apiFetch แนบ header ให้)
+        body: JSON.stringify({ employee_code: code }),
       });
       const j = await r.json().catch(() => ({}));
       if (j?.success && j?.user) {
@@ -603,10 +591,12 @@ export default function RepairRequestForm() {
         setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
         showToast("success", "ผูกบัญชี LINE สำเร็จ");
       } else {
-        setBindError(j?.error || "ผูกไม่สำเร็จ — ตรวจรหัสพนักงานแล้วลองอีกครั้ง");
+        setBindError(
+          bindErrorMessage({ status: r.status, raw: j?.error, contact: supportContact })
+        );
       }
     } catch {
-      setBindError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ ลองอีกครั้ง");
+      setBindError(bindErrorMessage({ offline: true, contact: supportContact }));
     }
     setBindSubmitting(false);
   };
@@ -646,7 +636,7 @@ const flushQueue = async () => {
         try {
           const res = await apiFetch("/api/v1/repair.php", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
             body: JSON.stringify(item.payload),
           });
           const json = await res.json().catch(() => ({}));
@@ -812,12 +802,14 @@ const flushQueue = async () => {
         reporter_email: form.email || null,
         office: form.office,
       };
+      // เจ้าของงาน (created_by) ให้ server ตัดสินจาก LIFF ID token (header ด้านล่าง) หรือ session
+      // — ไม่ส่ง line_user_id จาก client อีก เพราะใครก็ส่ง uid ของคนอื่นได้
 
       let res: Response;
       try {
         res = await apiFetch("/api/v1/repair.php", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
           body: JSON.stringify(payload),
         });
       } catch {
@@ -867,8 +859,8 @@ const flushQueue = async () => {
             {"\n"}{offlineQueued > 0 ? "ไม่มีอินเทอร์เน็ต — งานถูกบันทึกไว้ในเครื่อง จะส่งให้อัตโนมัติเมื่อกลับมาออนไลน์" : "ช่างซ่อมได้รับแจ้งเตือนทาง LINE แล้ว"}
           </p>
           <div className="flex flex-col gap-2 w-full">
-            <Button className="w-full" onClick={() => (window.location.href = "/repair")}>
-              <ListChecks className="w-4 h-4" /> ดูรายการงานซ่อม
+            <Button className="w-full" onClick={() => (window.location.href = "/repair/request?view=track")}>
+              <ListChecks className="w-4 h-4" /> ดูรายการงานซ่อมของฉัน
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
@@ -947,17 +939,28 @@ const flushQueue = async () => {
 
           {bindGate === "unbound" && (
             <div className="flex flex-col gap-4">
-              <div className="text-center">
-                <div className="cmms-header-emoji mb-2"><Link size={24} strokeWidth={1.75} /></div>
-                <h4 className="text-base font-bold m-0 mb-1.5">ผูกบัญชี LINE กับเลขพนักงาน</h4>
-                <p className="text-sm text-[var(--cmms-text-secondary)]">
-                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name}` : "สวัสดี"}
-                  {"\n"}กรอกรหัสพนักงานเพื่อเริ่มแจ้งซ่อม (ครั้งเดียวจบ)
+              <div>
+                <div className="cmms-header-emoji mb-2"><ShieldAlert size={24} strokeWidth={1.75} /></div>
+                <h4 className="text-base font-bold m-0 mb-1.5">{UNBOUND_TITLE}</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)] m-0">
+                  {lineProfile?.name ? `สวัสดีคุณ ${lineProfile.name} — ` : ""}
+                  {UNBOUND_BODY}
                 </p>
               </div>
+
+              <ol
+                className="m-0 flex list-decimal flex-col gap-1.5 pl-5 text-sm"
+                style={{ color: "var(--cmms-text-primary)" }}
+              >
+                {UNBOUND_STEPS.map((s) => (
+                  <li key={s}>{s}</li>
+                ))}
+              </ol>
+
+              <SupportContactStrip contact={supportContact} />
+
               <Input
-                label="เลขพนักงาน"
-                isLabelHidden
+                label="เลขพนักงาน (กรอกหลังแอดมินเพิ่มผู้ใช้แล้ว)"
                 placeholder="เช่น E01117"
                 value={bindEmpCode}
                 onChange={(e) => setBindEmpCode(e.target.value.toUpperCase().slice(0, 6))}
@@ -991,7 +994,7 @@ const flushQueue = async () => {
   const displayName = form.reporterName || sessionName || "...";
 
   return (
-    <div className="cmms-mobile-page">
+    <div className="cmms-mobile-page" id="repair-request-form">
       {/* Header */}
 <div className="cmms-liff-hero">
         <div className="flex items-center gap-3">

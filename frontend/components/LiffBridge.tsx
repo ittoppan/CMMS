@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { isLiffClientBrowser, publishLiffSession } from "@/lib/liff-session";
+import { loadLineRegisterConfig } from "@/lib/use-support-contact";
 
 declare global {
   interface Window {
@@ -13,32 +15,39 @@ declare global {
  * - Init เฉพาะหน้า LIFF endpoint (`/repair/request`) เท่านั้น
  *   (หน้า admin อื่นไม่ต้อง init → ไม่มี warn "not related to the endpoint URL")
  * - Loads LIFF SDK lazily, inits with the LIFF ID from backend settings
- * - When opened inside LINE: fetches profile and binds line_user_id to the logged-in user
- * - Rewrites in-app links to liif:// so navigation stays inside the LINE browser
+ * - When opened inside LINE: fetches profile + ID token, binds line_user_id to the logged-in user,
+ *   แล้วประกาศทุกอย่างผ่าน `frontend/lib/liff-session.ts` (component อื่นอ่านด้วย useLiffSession())
+ * - Rewrites in-app links to liff:// so navigation stays inside the LINE browser
  */
 export default function LiffBridge() {
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error" | "external">("idle");
-  const [liffId, setLiffId] = useState<string>("");
-
   useEffect(() => {
     let cancelled = false;
 
     // LIFF endpoint จริงเท่านั้น — หน้า /register ทำ LIFF เอง (ดู register/page.tsx)
     if (window.location.pathname !== "/repair/request") {
-      setStatus("external");
+      publishLiffSession({ status: "external" });
       return;
     }
 
+    // เปิดลิงก์นอกแอป LINE (เบราว์เซอร์ปกติ/PWA) — ไม่มีทางได้ ID token
+    // จึงไม่ต้อง fetch LIFF ID/โหลด SDK/รอ init (เดิมรอหลายวินาทีกว่าจะรู้ว่า external
+    // ทำให้ AssetHubCard ขึ้นช้า ทั้งที่ควรแสดงข้อมูลแบบไม่ผูกบัญชีได้ทันที)
+    if (!isLiffClientBrowser()) {
+      publishLiffSession({ status: "external" });
+      return;
+    }
+
+    // รีเซ็ตก่อน init รอบใหม่ (กรณี client-side navigation เข้ามาที่หน้านี้)
+    publishLiffSession({ status: "idle" });
+
     async function init() {
-      // Fetch configured LIFF ID จาก endpoint สาธารณะ (ไม่ต้อง login — line_notify.php 401 เมื่อไม่มี session)
+      // Fetch configured LIFF ID จาก endpoint สาธารณะ (คำขอเดียว/แคชร่วมกับ hook support contact)
       try {
-        const res = await fetch("/api/v1/line_register.php?liff_id=1");
-        const json = await res.json();
+        const cfg = await loadLineRegisterConfig();
         if (cancelled) return;
-        const id = json?.line_liff_id || "";
-        setLiffId(id);
+        const id = cfg.line_liff_id || "";
         if (!id) {
-          setStatus("external");
+          publishLiffSession({ status: "external" });
           return;
         }
 
@@ -58,13 +67,25 @@ export default function LiffBridge() {
 
         // If opened inside the LINE app, capture the user profile and check binding status
         if (window.liff.isInClient?.()) {
-          setStatus("ready");
           const profile = await window.liff.getProfile();
-          if (profile?.userId && !cancelled) {
+          const idToken = window.liff.getIDToken?.() || "";
+          if (cancelled) return;
+
+          // ประกาศก่อนทำ binding check — AssetHubCard ฯลฯ เริ่มยิง API ได้ทันที
+          publishLiffSession({
+            status: "ready",
+            lineUserId: profile?.userId || "",
+            displayName: profile?.displayName || "",
+            idToken,
+          });
+
+          if (profile?.userId) {
             try {
               // เก็บ LINE user id + เช็คสถานะผูกกับเลขพนักงาน (ผ่าน line_register.php)
+              // API ไม่รับ line_user_id จาก client — ต้องแนบ ID token ที่ตรวจกับ LINE เท่านั้น
               localStorage.setItem("cmms_line_user_id", profile.userId);
-              const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(profile.userId)}`);
+              const authHeaders: Record<string, string> = idToken ? { "X-LIFF-Id-Token": idToken } : {};
+              const res = await fetch("/api/v1/line_register.php", { headers: authHeaders });
               const json = await res.json().catch(() => ({}));
               if (json?.bound && json?.user) {
                 localStorage.setItem("cmms_line_bound", "1");
@@ -72,7 +93,7 @@ export default function LiffBridge() {
                 // role ของผู้ใช้ (ใช้ filter เมนู PWA ตามบทบาท)
                 if (json.user.role) localStorage.setItem("cmms_line_role", json.user.role);
                 try {
-                  const roleRes = await fetch(`/api/v1/menu_permissions.php?line_user_id=${encodeURIComponent(profile.userId)}`);
+                  const roleRes = await fetch("/api/v1/menu_permissions.php?user=1", { headers: authHeaders });
                   const roleJson = await roleRes.json().catch(() => ({}));
                   if (roleJson?.user) {
                     localStorage.setItem("cmms_line_role_id", String(roleJson.user.role_id || ""));
@@ -87,11 +108,11 @@ export default function LiffBridge() {
             }
           }
         } else {
-          setStatus("external");
+          publishLiffSession({ status: "external" });
         }
       } catch (e) {
         console.warn("LIFF init soft warning:", e);
-        if (!cancelled) setStatus("error");
+        if (!cancelled) publishLiffSession({ status: "error" });
       }
     }
 

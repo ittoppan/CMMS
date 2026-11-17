@@ -84,6 +84,7 @@ return [
     ['key' => 'reports/import_excel',        'href' => '/reports/import_excel',        'label' => 'นำเข้า Excel',            'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'reports/export_excel',      'href' => '/reports/export_excel',      'label' => 'Export Excel / CSV',     'section' => 'วิเคราะห์ & รายงาน'],
     ['key' => 'iot/monitor',               'href' => '/iot/monitor',               'label' => 'IoT Sensor Monitor',     'section' => 'วิเคราะห์ & รายงาน'],
+    ['key' => 'iot/condition',             'href' => '/iot/condition',             'label' => 'สภาพเครื่องจักร (IoT)',  'section' => 'วิเคราะห์ & รายงาน'],
 
     // ---- 4.47 ความปลอดภัย & ใบอนุญาตทำงานเสี่ยง (Phase 30) ----
     ['key' => 'safety/work_permit',        'href' => '/safety/work_permit',        'label' => 'ใบอนุญาตทำงานเสี่ยง (PTW)','section' => 'ความปลอดภัย & งานที่เสี่ยง'],

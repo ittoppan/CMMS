@@ -2,18 +2,24 @@
 /**
  * LINE ลงทะเบียนผูกบัญชีด้วยเลขพนักงาน (ไม่ต้อง login — ใช้จาก LIFF ใน LINE)
  *
- * GET  ?line_user_id=Uxxx        -> เช็คสถานะผูกของ LINE user นั้น
- * POST { line_user_id, employee_code } -> ผูกบัญชี (ตรวจ employee_code ตรงกับ DB)
+ * GET  ?liff_id=1               -> LIFF App ID + ช่องทางติดต่อ (สาธารณะ ไม่มีข้อมูลบุคคล)
+ * GET  (header X-LIFF-Id-Token)  -> เช็คสถานะผูกของ LINE user ที่ token ยืนยันแล้ว
+ * POST { employee_code }         -> ผูกบัญชี (header X-LIFF-Id-Token) — ตรวจ employee_code ตรงกับ DB
  *
  * เงื่อนไขความปลอดภัย:
+ *  - **ไม่รับ `line_user_id` จาก client** — ผู้เรียกคือเจ้าของ ID token ที่ตรวจกับ LINE แล้ว
+ *    (หรือ session ที่ public/line_callback.php ยืนยัน LINE Login มาแล้ว สำหรับหน้า /register)
  *  - employee_code ต้องตรงกับ users.is_active = 1
  *  - ถ้า employee_code นั้นผูก LINE กับ userId อื่นอยู่แล้ว -> ปฏิเสธ (กันแย่ง)
- *  - ถ้า line_user_id นั้นผูกกับ user อื่นอยู่แล้ว -> ปฏิเสธ (กันผูกซ้ำ)
+ *  - ถ้า LINE ของผู้เรียกผูกกับ user อื่นอยู่แล้ว -> ปฏิเสธ (กันผูกซ้ำ)
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/notification.php';
+require_once __DIR__ . '/../../../src/helpers/settings.php';
+require_once __DIR__ . '/../../../src/helpers/liff.php';
 header('Content-Type: application/json; charset=utf-8');
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 try {
     $pdo = getDb();
@@ -31,15 +37,37 @@ try {
                 $liffId = $rows['line_liff_id'] ?? (string)(getenv('LINE_LIFF_ID') ?: '');
                 $regId  = $rows['line_liff_register_id'] ?? (string)(getenv('LINE_LIFF_REGISTER_ID') ?: '');
                 if ($liffId === '' && $regId !== '') { $liffId = $regId; }
+
+                // ช่องทางติดต่อสำหรับข้อความ "ยังไม่ถูกเพิ่มในระบบ" (หน้า /repair/request)
+                // กรองค่า seed/placeholder ออก (เช่น company_phone = 02-123-4567) — คืน '' = หน้าเว็บซ่อนบรรทัดนั้น
+                $contact = ['company' => '', 'phone' => '', 'email' => ''];
+                try {
+                    $contact = settings_support_contact($pdo);
+                } catch (Throwable $e) {
+                    /* ไม่มี settings ก็ไม่เป็นไร — หน้าเว็บจะซ่อนบรรทัดติดต่อ */
+                }
+
                 echo json_encode([
                     'line_liff_id'             => $liffId,
                     'line_liff_register_id'    => $regId !== '' ? $regId : $liffId,
+                    'contact'                  => $contact,
                 ]);
                 exit;
             }
 
-            $lineUid = isset($_GET['line_user_id']) ? trim((string)$_GET['line_user_id']) : '';
-            if ($lineUid === '') { http_response_code(400); echo json_encode(['error' => 'Missing line_user_id']); exit; }
+            // ไม่รับ ?line_user_id จาก client — ใช้ LINE user ที่ token/session ยืนยันแล้วเท่านั้น
+            $verified = liff_verified_line_user();
+            if (!$verified['ok']) {
+                $noToken = $verified['code'] === 'MISSING_ID_TOKEN';
+                http_response_code(401);
+                echo json_encode(['error' => $verified['error'], 'bound' => false, 'user' => null, 'code' => $verified['code'], 'need_liff' => $noToken]);
+                exit;
+            }
+            $lineUid = $verified['line_user_id'];
+            $claimed = isset($_GET['line_user_id']) ? trim((string)$_GET['line_user_id']) : '';
+            if ($claimed !== '' && $claimed !== $lineUid) {
+                error_log('line_register: ignored client-supplied line_user_id');
+            }
 
             $stmt = $pdo->prepare(
                 "SELECT id, employee_code, full_name, role, department_id, phone, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1"
@@ -57,10 +85,21 @@ try {
             enforceCsrf();
 
             $data = json_decode(file_get_contents('php://input'), true) ?? [];
-            $lineUid = isset($data['line_user_id']) ? trim((string)$data['line_user_id']) : '';
             $empCode = isset($data['employee_code']) ? strtoupper(trim((string)$data['employee_code'])) : '';
 
-            if ($lineUid === '' || $empCode === '') {
+            // ผู้ผูกคือเจ้าของ LINE ID token (หรือ session จาก LINE Login) — ไม่ใช่ค่าที่ client อ้าง
+            $verified = liff_verified_line_user(is_array($data) ? $data : null);
+            if (!$verified['ok']) {
+                http_response_code(401);
+                echo json_encode(['error' => $verified['error'], 'code' => $verified['code'], 'need_liff' => $verified['code'] === 'MISSING_ID_TOKEN']);
+                exit;
+            }
+            $lineUid = $verified['line_user_id'];
+            if (isset($data['line_user_id']) && trim((string)$data['line_user_id']) !== '' && trim((string)$data['line_user_id']) !== $lineUid) {
+                error_log('line_register: ignored client-supplied line_user_id on bind');
+            }
+
+            if ($empCode === '') {
                 http_response_code(400);
                 echo json_encode(['error' => 'กรุณากรอกเลขพนักงานให้ครบถ้วน']);
                 exit;
@@ -88,7 +127,7 @@ try {
             if (count($rows) === 0) {
                 $pdo->rollBack();
                 http_response_code(404);
-                echo json_encode(['error' => 'ไม่พบเลขพนักงานในระบบ กรุณาติดต่อผู้ดูแล']);
+                echo json_encode(['error' => 'ไม่พบเลขพนักงานนี้ในระบบ — ต้องให้แอดมินเพิ่มผู้ใช้ก่อน แล้วลองอีกครั้ง']);
                 exit;
             }
             if (count($rows) > 1) {
@@ -104,7 +143,7 @@ try {
             if (!empty($user['line_user_id']) && $user['line_user_id'] !== $lineUid) {
                 $pdo->rollBack();
                 http_response_code(409);
-                echo json_encode(['error' => 'เลขพนักงานนี้ถูกผูกกับบัญชี LINE อื่นแล้ว กรุณาติดต่อผู้ดูแล']);
+                echo json_encode(['error' => 'เลขพนักงานนี้ผูกกับบัญชี LINE อื่นอยู่แล้ว — ให้แอดมินปลดหรือย้ายบัญชีให้ก่อน']);
                 exit;
             }
 
@@ -114,7 +153,7 @@ try {
             if ($stmt->fetch()) {
                 $pdo->rollBack();
                 http_response_code(409);
-                echo json_encode(['error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว']);
+                echo json_encode(['error' => 'บัญชี LINE นี้ถูกผูกกับผู้ใช้อื่นแล้ว — ให้แอดมินตรวจสอบ']);
                 exit;
             }
 

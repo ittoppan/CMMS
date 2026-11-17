@@ -18,13 +18,14 @@
  */
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../helpers/notification.php';
+require_once __DIR__ . '/../helpers/ntfy.php';
 require_once __DIR__ . '/NotificationService.php';
 require_once __DIR__ . '/WebPushService.php';
 
 class NotificationCenterService
 {
     public const TYPES = ['work_order', 'priority', 'sla', 'pm', 'inspection', 'spare_part', 'request', 'system', 'calibration', 'maintenance'];
-    public const CHANNELS = ['app', 'line', 'email', 'telegram', 'teams', 'push'];
+    public const CHANNELS = ['app', 'line', 'email', 'telegram', 'teams', 'ntfy', 'push'];
     public const PRIORITIES = ['critical', 'high', 'medium', 'low', 'info'];
 
     private const PRIORITY_COLORS = [
@@ -288,6 +289,7 @@ class NotificationCenterService
             $created = 0;
             $telegramSentOnce = false;
             $teamsSentOnce = false;
+            $ntfySentOnce = false;
             foreach ($users as $uid) {
                 if (!isset($meta[$uid])) continue;
                 $ch = self::channelsForUser($pdo, $uid, $type, $channels);
@@ -314,6 +316,14 @@ class NotificationCenterService
                             $teamsSentOnce = self::sendTeamsOnce($title, $message, $url, $level);
                         }
                         self::recordDelivery($pdo, $nid, $uid, 'teams', $teamsSentOnce);
+                        continue;
+                    }
+                    if ($channel === 'ntfy') {
+                        // ntfy เป็น topic เดียวทั้งทีม (เหมือน telegram/teams) — ส่งครั้งเดียวต่อ event
+                        if (!$ntfySentOnce) {
+                            $ntfySentOnce = self::sendNtfyOnce($title, $message, $url, $level);
+                        }
+                        self::recordDelivery($pdo, $nid, $uid, 'ntfy', $ntfySentOnce);
                         continue;
                     }
                     $ok = self::dispatchChannel($pdo, $meta[$uid], $nid, $channel, $title, $message, $url, $payloadJson);
@@ -357,6 +367,7 @@ class NotificationCenterService
             'email'    => getSettingValue('email_notify_enabled', '0') === '1',
             'telegram' => getSettingValue('telegram_enabled', '1') === '1',
             'teams'    => getSettingValue('teams_enabled', '1') === '1',
+            'ntfy'     => getSettingValue('ntfy_enabled', '0') === '1',
             'push'     => getSettingValue('push_alert_enabled', '1') === '1',
         ];
         $prefs = [];
@@ -395,6 +406,16 @@ class NotificationCenterService
         }
     }
 
+    private static function sendNtfyOnce(string $title, string $message, string $url, string $level): bool
+    {
+        try {
+            return ntfyAdminAlert($title, $message, $url, $level);
+        } catch (Throwable $e) {
+            error_log('[NotificationCenter] ntfy: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     /** ส่งช่องทางเดียวให้ user หนึ่ง (line/email/push) — คืน true เมื่อสำเร็จ */
     private static function dispatchChannel(PDO $pdo, array $user, int $notificationId, string $channel, string $title, string $message, string $url, ?string $payloadJson): bool
     {
@@ -414,6 +435,13 @@ class NotificationCenterService
                 case 'email':
                     if (empty($user['email'])) return false;
                     return sendEmailNotification((string)$user['email'], (string)($user['full_name'] ?? ''), $title, $message, $url);
+                case 'ntfy':
+                    // retry ไม่มี level ติดมา — อนุมานจาก priority ของ notification
+                    $st = $pdo->prepare('SELECT priority FROM notifications WHERE id = ?');
+                    $st->execute([$notificationId]);
+                    $prio = (string)$st->fetchColumn();
+                    $level = $prio === 'critical' ? 'ERROR' : ($prio === 'high' ? 'WARN' : 'INFO');
+                    return ntfyAdminAlert($title, $message, $url, $level);
                 case 'push':
                     return WebPushService::sendToUsers($pdo, (int)$user['id'], $title, $message, $url) > 0;
                 default:

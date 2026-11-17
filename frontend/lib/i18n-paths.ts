@@ -66,6 +66,7 @@ export const KNOWN_PATHS: Record<string, string> = {
   "/inspections/templates": "/inspections/templates",
   "/iot": "/iot",
   "/iot/monitor": "/iot/monitor",
+  "/iot/condition": "/iot/condition",
   "/knowledge": "/knowledge",
   "/knowledge/articles": "/knowledge/articles",
   "/knowledge/articles/[id]": "/knowledge/articles/[id]",

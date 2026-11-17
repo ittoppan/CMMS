@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { liffAuthHeaders } from "./liff-session";
 
 /**
  * lib/api.ts — central API client (Phase 0.7)
@@ -8,6 +9,8 @@ import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
  * - apiFetch: fetch wrapper เดียวทั้งระบบ
  *   - credentials: "include" (PHP session cookie)
  *   - POST/PUT/DELETE: เพิ่ม header X-CSRF-Token อัตโนมัติ (จาก /api/v1/csrf.php)
+ *   - แนบ X-LIFF-Id-Token อัตโนมัติเมื่ออยู่ในแอป LINE (API ที่ต้องรู้ตัวตนผู้ใช้ LINE
+ *     จะตรวจ token กับ LINE เอง ไม่รับ line_user_id จาก client)
  *   - normalize error → ApiError (message จาก JSON error ของ backend)
  * - useApiQuery: react-query hook สำหรับ GET
  *
@@ -49,6 +52,10 @@ const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 export async function apiFetch(url: string, init?: RequestInit): Promise<Response> {
   const method = (init?.method || "GET").toUpperCase();
   const headers = new Headers(init?.headers);
+  const liffHeaders = liffAuthHeaders();
+  for (const [key, value] of Object.entries(liffHeaders)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
   if (MUTATION_METHODS.has(method)) {
     const token = await getCsrfToken();
     if (token) headers.set("X-CSRF-Token", token);

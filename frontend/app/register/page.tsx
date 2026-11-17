@@ -1,6 +1,7 @@
 "use client";
 
 import { ModuleGuide } from "@/components/dashboard/module-guide";
+import { apiFetch } from "@/lib/api";
 import { usePageHero } from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import ThemeProvider from "@/components/ThemeProvider";
@@ -9,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, LinkIcon, User, AlertCircle } from "lucide-react";
 import SuccessDialog from "@/components/SuccessDialog";
+import SupportContactStrip from "@/components/SupportContactStrip";
+import { loadLineRegisterConfig, useSupportContact } from "@/lib/use-support-contact";
+import { UNBOUND_TITLE, UNBOUND_BODY, UNBOUND_STEPS, bindErrorMessage } from "@/lib/liff-bind-copy";
 
 declare global {
   interface Window {
@@ -16,8 +20,7 @@ declare global {
   }
 }
 
-const apiFetch = (url: string, init?: RequestInit) =>
-  fetch(url, { ...init });
+// ใช้ apiFetch กลาง — แนบ X-LIFF-Id-Token (และ CSRF ตอน POST) ให้อัตโนมัติ
 
 function LineAvatar({
   src,
@@ -56,6 +59,8 @@ function RegisterContent() {
   const [linePic, setLinePic] = useState("");
   const [liffStatus, setLiffStatus] = useState<"loading" | "ready" | "external" | "error">("loading");
   const [boundUser, setBoundUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null } | null>(null);
+  // ช่องทางติดต่อแอดมิน — hook กลางชุดเดียวกับหน้า /repair/request (แสดงผลด้วย SupportContactStrip)
+  const supportContact = useSupportContact();
 
   const [empCode, setEmpCode] = useState("");
   const [previewUser, setPreviewUser] = useState<{ full_name: string; employee_code: string; avatar_path?: string | null; position?: string | null; department?: string | null } | null>(null);
@@ -75,10 +80,10 @@ function RegisterContent() {
     async function boot() {
       let liffId = "";
       try {
-        const res = await fetch("/api/v1/line_register.php?liff_id=1");
-        const json = await res.json().catch(() => ({}));
+        // คำขอเดียวกับ hook support contact (cache ระดับโมดูล) — ใช้ค่า LIFF app ของหน้า /register
+        const cfg = await loadLineRegisterConfig();
         // LIFF App ของหน้า /register (line_liff_register_id) ก่อน ถ้ายังไม่ได้ตั้ง → ใช้ตัวเดิม (frontend จะ fallback เป็น external)
-        liffId = (json?.line_liff_register_id || json?.line_liff_id || "") as string;
+        liffId = cfg.line_liff_register_id || cfg.line_liff_id;
       } catch { /* ignore */ }
       if (cancelled) return;
 
@@ -111,7 +116,9 @@ function RegisterContent() {
         setLineUserId(pUid);
         setLiffStatus(profile?.userId ? "ready" : "external");
         try {
-          const res = await fetch(`/api/v1/line_register.php?line_user_id=${encodeURIComponent(pUid)}`);
+          // ตรวจสถานะผูกด้วย LINE ที่ยืนยันแล้ว (token จาก LIFF หรือ session จาก line_callback.php)
+          // — ไม่ส่ง line_user_id จาก client แล้ว
+          const res = await apiFetch("/api/v1/line_register.php");
           const json = await res.json().catch(() => ({}));
           if (!cancelled && json?.bound && json?.user) setBoundUser({
             full_name: json.user.full_name,
@@ -161,7 +168,7 @@ function RegisterContent() {
       return;
     }
     if (!/^[A-Z0-9]{3,10}$/.test(code)) {
-      setError("รูปแบบรหัสพนักงานไม่ถูกต้อง (ตัวอย่าง: E01117 หรือ EMP005)");
+      setError(bindErrorMessage({ format: true, contact: supportContact }));
       return;
     }
     setSubmitting(true);
@@ -170,7 +177,8 @@ function RegisterContent() {
       const res = await apiFetch("/api/v1/line_register.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ line_user_id: lineUserId, employee_code: code }),
+        // ไม่ส่ง line_user_id แล้ว — เซิร์ฟเวอร์ใช้ LINE ที่ token/session ยืนยัน
+        body: JSON.stringify({ employee_code: code }),
       });
       const json = await res.json().catch(() => ({}));
       if (json.success && json.user) {
@@ -182,10 +190,11 @@ function RegisterContent() {
         setDone(true);
         try { localStorage.setItem("cmms_line_bound", "1"); } catch { /* ignore */ }
       } else {
-        setError(json.error || "ลงทะเบียนไม่สำเร็จ ลองอีกครั้ง");
+        // ถ้อยคำชุดเดียวกับหน้า /repair/request — 404/409 บอกชัดว่าต้องให้แอดมินเพิ่มผู้ใช้ก่อน + ช่องทางติดต่อ
+        setError(bindErrorMessage({ status: res.status, raw: json.error, contact: supportContact }));
       }
     } catch {
-      setError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+      setError(bindErrorMessage({ offline: true, contact: supportContact }));
     }
     setSubmitting(false);
   };
@@ -271,7 +280,7 @@ function RegisterContent() {
               "กดยืนยันผูกบัญชี เมื่อสำเร็จสามารถกลับไปใช้เมนูแจ้งซ่อม/รับแจ้งเตือนได้ตามที่ระบบตั้งค่า",
             ]}
             source="หน้า frontend/app/register/page.tsx เรียก /api/v1/line_register.php (ตรวจสอบสถานะ/ผูกบัญชี) และ /api/v1/user_lookup.php (ตรวจสอบรหัสพนักงาน) — ข้อมูลและผลลัพธ์ขึ้นกับ API/การตั้งค่า LINE ของระบบ"
-            note="ต้องใช้รหัสพนักงานที่มีในระบบ หากผูกแล้วจะแสดงข้อมูลที่ผูกไว้ การแก้ไขการผูกอาจต้องติดต่อผู้ดูแลระบบ"
+            note="ต้องให้แอดมินเพิ่มผู้ใช้ในระบบก่อน แล้วจึงกรอกเลขพนักงานเพื่อผูกบัญชี (ทำครั้งเดียวจบ) — ถ้ายังไม่มีบัญชี ให้แจ้งแอดมิน/หัวหน้างานพร้อมเลขพนักงานของคุณ"
             related={[
               { href: "/settings", label: "ตั้งค่าระบบ" },
               { href: "/repair/request", label: "แจ้งซ่อม" },
@@ -318,6 +327,21 @@ function RegisterContent() {
                     <p className="cmms-reg-tile-sub flex-1">
                       {lineName ? `สำหรับ ${lineName}` : "ต้องผูกกับผู้ใช้ที่แอดมินสร้างไว้ในระบบ"}
                     </p>
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-1.5">
+                    <p className="m-0 text-sm font-bold" style={{ color: "var(--cmms-text-primary)" }}>
+                      {UNBOUND_TITLE}
+                    </p>
+                    <p className="m-0 text-sm leading-relaxed" style={{ color: "var(--cmms-text-secondary)" }}>
+                      {UNBOUND_BODY}
+                    </p>
+                    <ol className="m-0 pl-5 text-sm leading-relaxed" style={{ color: "var(--cmms-text-secondary)" }}>
+                      {UNBOUND_STEPS.map((s) => (
+                        <li key={s}>{s}</li>
+                      ))}
+                    </ol>
+                    <SupportContactStrip contact={supportContact} className="mt-1" />
                   </div>
 
                   <div className="mt-3">
