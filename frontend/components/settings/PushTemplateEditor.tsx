@@ -189,7 +189,7 @@ export default function PushTemplateEditor() {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
-            รูปแบบเดียว ใช้กับทุกช่องทาง — แจ้งเตือนบนหน้าเว็บ (App), Web Push บนมือถือ/เดสก์ท็อป, อีเมล, และ LINE (เมื่อเปิด)
+            รูปแบบเดียว ใช้กับทุกช่องทาง — แจ้งเตือนบนหน้าเว็บ (App), Web Push บนมือถือ/เดสก์ท็อป, อีเมล, LINE, Telegram, Teams และ ntfy (เมื่อเปิด)
             ใส่ตัวแปรรูปแบบ {"{"}ชื่อตัวแปร{"}"} เช่น {"{work_order_no}"} {"{asset_name}"} — ระบบแทนค่าจริงตอนเกิดเหตุการณ์
           </p>
           {flash && (

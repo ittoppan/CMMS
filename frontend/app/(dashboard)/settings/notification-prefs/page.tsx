@@ -22,6 +22,7 @@ const CHANNEL_LABEL: Record<string, { th: string; en: string; note: string }> = 
   email: { th: "อีเมล", en: "Email", note: "อีเมลตามที่อยู่ในโปรไฟล์" },
   telegram: { th: "Telegram", en: "Telegram", note: "Telegram Admin Alert" },
   teams: { th: "Microsoft Teams", en: "Teams", note: "แจ้งผ่าน Incoming Webhook" },
+  ntfy: { th: "ntfy (มือถือ/PWA)", en: "ntfy", note: "Push ผ่าน ntfy topic ที่ Subscribe ไว้" },
   push: { th: "Web Push", en: "Web Push", note: "Push เบราว์เซอร์ (ถ้าอนุญาต)" },
 };
 
@@ -30,6 +31,7 @@ const MASTER_SWITCH: Record<string, string> = {
   email: "email_notify_enabled",
   telegram: "telegram_enabled",
   teams: "teams_enabled",
+  ntfy: "ntfy_enabled",
   push: "push_alert_enabled",
 };
 

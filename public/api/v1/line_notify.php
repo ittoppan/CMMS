@@ -34,7 +34,7 @@ try {
     switch ($method) {
         case 'GET':
             // 1) LINE-related settings + Telegram + Teams
-            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
             $settings = [];
             $in = implode(',', array_fill(0, count($keys), '?'));
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
@@ -42,6 +42,10 @@ try {
             foreach ($stmt->fetchAll() as $r) { $settings[$r['setting_key']] = $r['setting_value']; }
             // Phase 18: ห้ามคืนค่าลับจริงสู่นัก client — ส่ง mask แทน
             $settings = apiMaskSecretArray($settings);
+            // ntfy: ยังไม่เคยบันทึก → ส่งค่าเริ่มต้นไปให้ UI แสดง (ค่าเหล่านี้ไม่ใช่ความลับ)
+            foreach (['ntfy_enabled' => '0', 'ntfy_server_url' => 'https://ntfy.sh', 'ntfy_topic' => '', 'ntfy_token' => '', 'ntfy_priority' => '', 'ntfy_tags' => '', 'ntfy_click_url' => '1'] as $nk => $nv) {
+                if (!array_key_exists($nk, $settings)) $settings[$nk] = $nv;
+            }
 
             // 2) Notification templates (settings key prefix line_tpl_)
             $tplRows = $pdo->query("SELECT setting_key, setting_value FROM settings WHERE setting_key LIKE 'line_tpl_%'")->fetchAll();
@@ -102,12 +106,12 @@ try {
             $upsert = $pdo->prepare("INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?, ?, 'notification', ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
             $count = 0;
 
-            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, $allowedSettings, true)) continue;
                 // ค่าลับที่ UI ส่งคืนแบบ "••••••••" = ผู้ใช้ไม่ได้ตั้งใหม่ → ข้าม (ห้ามเขียนทับด้วย mask)
                 if (apiIsSecretKey((string)$k) && (string)$v === SETTING_MASKED) continue;
-                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_liff_register_id' => 'LIFF App ID ของหน้า /register (ผูกบัญชี — เปิดใน LINE แล้วได้ LINE ID อัตโนมัติ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'line_group_enabled' => 'ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (0=ปิด,1=เปิด - default เปิด)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน', 'teams_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน Microsoft Teams', 'teams_webhook_url' => 'Microsoft Teams Incoming Webhook URL', 'line_system_alerts' => 'ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE (0=ปิด,1=เปิด - default ปิด)', 'line_weekly_report' => 'ส่งรายงานสรุปประจำสัปดาห์เข้า LINE (0=ปิด,1=เปิด - default เปิด)', 'push_alert_enabled' => 'เปิด/ปิดการแจ้งเตือน PWA Web Push (0=ปิด,1=เปิด)'][$k] ?? '';
+                $desc = ['line_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน LINE', 'line_notify_token' => 'LINE Notify Access Token (รูปแบบ xxxx:xxxx)', 'line_channel_access_token' => 'LINE Messaging API Channel Access Token', 'line_channel_secret' => 'LINE Channel Secret', 'line_channel_id' => 'LINE Channel ID / Login Client ID', 'line_liff_id' => 'LIFF App ID (สำหรับเปิดระบบใน LINE มือถือ)', 'line_liff_register_id' => 'LIFF App ID ของหน้า /register (ผูกบัญชี — เปิดใน LINE แล้วได้ LINE ID อัตโนมัติ)', 'line_callback_url' => 'URL รับ callback จาก LINE Login (ต้องเป็น HTTPS)', 'line_maintenance_group_id' => 'Group ID ของห้อง LINE กลุ่มช่าง (เมื่องานใหม่เข้า → push เข้ากลุ่ม)', 'line_group_enabled' => 'ส่งงานซ่อมใหม่เข้ากลุ่ม LINE ช่าง (0=ปิด,1=เปิด - default เปิด)', 'low_stock_alert' => 'แจ้งเตือนเมื่อสต็อกต่ำกว่าขั้นต่ำ (0=ปิด,1=เปิด)', 'maintenance_alert_days' => 'จำนวนวันแจ้งเตือนล่วงหน้าก่อนถึงกำหนดบำรุงรักษา', 'email_notify_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่านอีเมล', 'telegram_enabled' => 'เปิด/ปิดการแจ้งเตือนแอดมินผ่าน Telegram', 'telegram_bot_token' => 'Telegram Bot Token (จาก @BotFather)', 'telegram_chat_id' => 'Telegram Chat ID ที่รับการแจ้งเตือนแอดมิน', 'teams_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน Microsoft Teams', 'teams_webhook_url' => 'Microsoft Teams Incoming Webhook URL', 'ntfy_enabled' => 'เปิด/ปิดการแจ้งเตือนผ่าน ntfy (มือถือ/PWA)', 'ntfy_server_url' => 'ntfy server URL (เช่น https://ntfy.sh หรือ self-host)', 'ntfy_topic' => 'ntfy topic ปลายทาง (ใช้ร่วมกับ PWA/handheld)', 'ntfy_token' => 'ntfy access token (ถ้า topic ถูกปิดสิทธิ์)', 'ntfy_priority' => 'บังคับระดับความสำคัญ ntfy: ค่าว่าง = ตามระดับเหตุการณ์ (min/low/default/high/urgent)', 'ntfy_tags' => 'แท็ก/อีโมจิ ntfy คั่นด้วย , (ค่าว่าง = ตามระดับเหตุการณ์)', 'ntfy_click_url' => 'แตะการแจ้งเตือน ntfy แล้วเปิดหน้าในระบบ (0/1)', 'line_system_alerts' => 'ส่งการแจ้งเตือนระบบ/process (watchdog) เข้า LINE (0=ปิด,1=เปิด - default ปิด)', 'line_weekly_report' => 'ส่งรายงานสรุปประจำสัปดาห์เข้า LINE (0=ปิด,1=เปิด - default เปิด)', 'push_alert_enabled' => 'เปิด/ปิดการแจ้งเตือน PWA Web Push (0=ปิด,1=เปิด)'][$k] ?? '';
                 $upsert->execute([$k, (string)$v, $desc]);
                 $count++;
             }
@@ -209,6 +213,31 @@ try {
                 } else {
                     http_response_code(500);
                     echo json_encode(['error' => 'ส่ง Teams ไม่สำเร็จ — ตรวจ Webhook URL (ตั้งในหน้า Settings หรือ TEAMS_WEBHOOK_URL)']);
+                }
+                exit;
+            }
+
+            // B4) ntfy test send: { ntfy_test: true, message? }
+            if (!empty($data['ntfy_test'])) {
+                require_once __DIR__ . '/../../../src/helpers/ntfy.php';
+                $cfg = ntfy_config();
+                if ($cfg['topic'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'ยังไม่ได้ตั้ง ntfy topic — กรอก topic แล้วกดบันทึกก่อนทดสอบ']);
+                    exit;
+                }
+                $msg = mb_substr((string)($data['message'] ?? '🧪 ทดสอบ ntfy — CMMS-TOPPAN เชื่อมต่อเรียบร้อย'), 0, 1000);
+                $res = ntfy_send($msg, [
+                    'title'    => 'ทดสอบการแจ้งเตือน (ntfy)',
+                    'priority' => NTFY_PRIORITIES[$cfg['priority']] ?? 4,
+                    'tags'     => ['test_tube'],
+                    'click'    => publicBaseUrl(),
+                ]);
+                if ($res['ok']) {
+                    echo json_encode(['success' => true, 'message' => 'ส่งข้อความทดสอบไปยัง ntfy topic สำเร็จ — ถ้าไม่ขึ้นบนมือถือให้กด Subscribe ที่ ' . ntfy_topic_url($cfg)]);
+                } else {
+                    http_response_code(500);
+                    echo json_encode(['error' => 'ส่ง ntfy ไม่สำเร็จ: ' . $res['error']]);
                 }
                 exit;
             }

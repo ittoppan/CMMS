@@ -51,6 +51,7 @@ const CHANNEL_LABEL: Record<string, string> = {
   line: "LINE",
   email: "อีเมล",
   telegram: "Telegram",
+  ntfy: "ntfy (มือถือ/PWA)",
   push: "Web Push",
 };
 

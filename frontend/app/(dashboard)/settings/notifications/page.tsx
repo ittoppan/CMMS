@@ -166,6 +166,8 @@ export default function NotificationsSettingsPage() {
   const [tgTestResult, setTgTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [teamsTesting, setTeamsTesting] = useState(false);
   const [teamsTestResult, setTeamsTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [ntfyTesting, setNtfyTesting] = useState(false);
+  const [ntfyTestResult, setNtfyTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [activeChannel, setActiveChannel] = useState<string>("line");
 
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -308,6 +310,24 @@ export default function NotificationsSettingsPage() {
       setTeamsTestResult({ ok: false, msg: e.message || "ส่งข้อความทดสอบ Microsoft Teams ไม่สำเร็จ" });
     }
     setTeamsTesting(false);
+  };
+
+  const handleNtfyTest = async () => {
+    setNtfyTesting(true);
+    setNtfyTestResult(null);
+    try {
+      const res = await fetch("/api/v1/line_notify.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ntfy_test: true }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "ส่งไม่สำเร็จ");
+      setNtfyTestResult({ ok: true, msg: json.message ?? "ส่งข้อความทดสอบ ntfy สำเร็จ" });
+    } catch (e: any) {
+      setNtfyTestResult({ ok: false, msg: e.message || "ส่งข้อความทดสอบ ntfy ไม่สำเร็จ" });
+    }
+    setNtfyTesting(false);
   };
 
   const handleTestSend = async () => {
@@ -554,6 +574,7 @@ export default function NotificationsSettingsPage() {
           <TabsTrigger value="email">อีเมล (Email)</TabsTrigger>
           <TabsTrigger value="telegram">Telegram (แอดมิน)</TabsTrigger>
           <TabsTrigger value="teams">Microsoft Teams</TabsTrigger>
+          <TabsTrigger value="ntfy">ntfy (มือถือ/PWA)</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -820,6 +841,191 @@ export default function NotificationsSettingsPage() {
                 <CardContent className="space-y-3 p-5">
                   <h3 className="text-base font-semibold">การทำงาน</h3>
                   <p className="text-sm">เมื่อ Notification Center ส่ง event ผ่าน channel <strong>teams</strong> ระบบจะโพสต์ MessageCard ไปยัง webhook ที่ตั้งค่าไว้ พร้อมหัวข้อ รายละเอียด และลิงก์เปิดในระบบ</p>
+                </CardContent>
+              </Card>
+            </VStack>
+          </Grid>
+        </VStack>
+      )}
+
+      {activeChannel === "ntfy" && (
+        <VStack gap={6}>
+          <VStack gap={1}>
+            <p className="cmms-eyebrow text-sm text-muted-foreground">NTFY · HANDHELD / PWA PUSH</p>
+            <HStack gap={3} vAlign="center">
+              <h2 className="text-base font-semibold">แจ้งเตือนผ่าน ntfy (มือถือ / เดสก์ท็อป)</h2>
+              <Badge variant={settings.ntfy_enabled === "1" ? "success" : "neutral"}>
+                {settings.ntfy_enabled === "1" ? "ntfy เปิดใช้งาน" : "ntfy ปิดใช้งาน"}
+              </Badge>
+            </HStack>
+            <p className="text-sm text-muted-foreground">
+              ช่องทางสำรองที่ไม่ผูกกับ LINE/Telegram — ผู้รับติดตั้ง ntfy เป็น PWA บนมือถือแล้ว
+              Subscribe topic เดียวกัน จะได้ push ทันที (ใช้ ntfy.sh หรือเซิร์ฟเวอร์ของบริษัทก็ได้)
+            </p>
+          </VStack>
+
+          <Card>
+            <CardContent className="flex flex-wrap items-center gap-5 p-4">
+              <HStack gap={2} vAlign="center">
+                <ShieldCheckIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: settings.ntfy_server_url ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+                <span className="text-sm font-medium">
+                  Server: {settings.ntfy_server_url || "ยังไม่ตั้ง (default https://ntfy.sh)"}
+                </span>
+              </HStack>
+              <HStack gap={2} vAlign="center">
+                <LinkIcon size={16} strokeWidth={1.75} aria-hidden="true" style={{ color: settings.ntfy_topic ? "var(--cmms-success)" : "var(--cmms-danger)" }} />
+                <span className="text-sm font-medium">
+                  Topic: {settings.ntfy_topic || "ยังไม่ตั้ง — ผู้รับจะไม่ได้รับการแจ้งเตือน"}
+                </span>
+              </HStack>
+              <HStack gap={2} vAlign="center">
+                <BoltIcon size={16} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-text-secondary)]" />
+                <span className="text-sm font-medium">
+                  Token: {settings.ntfy_token ? "ตั้งไว้แล้ว" : "ไม่ใช้ (topic สาธารณะ)"}
+                </span>
+              </HStack>
+            </CardContent>
+          </Card>
+
+          <Grid columns={{ minWidth: 340 }} gap={6} style={{ alignItems: "start" }}>
+            <VStack gap={6}>
+              <Card>
+                <CardContent className="space-y-4 p-5">
+                  <HStack gap={2} vAlign="center">
+                    <ChatBubbleLeftRightIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                    <VStack gap={0}>
+                      <h3 className="text-base font-semibold">การเชื่อมต่อ ntfy</h3>
+                      <p className="text-sm text-muted-foreground">กรอก server + topic แล้วกดยิงทดสอบก่อนเปิดใช้งานจริง</p>
+                    </VStack>
+                  </HStack>
+
+                  <Switch
+                    label="เปิดใช้งานการแจ้งเตือนผ่าน ntfy"
+                    value={settings.ntfy_enabled === "1"}
+                    onChange={(c) => setSettingField("ntfy_enabled", c ? "1" : "0")}
+                  />
+
+                  <Input
+                    label="ntfy Server"
+                    hint="https://ntfy.sh หรือ URL เซิร์ฟเวอร์ของบริษัท (ห้ามมี / ปิดท้าย topic)"
+                    value={settings.ntfy_server_url ?? ""}
+                    placeholder="https://ntfy.sh"
+                    onChange={(e) => setSettingField("ntfy_server_url", e.target.value)}
+                  />
+
+                  <Input
+                    label="Topic"
+                    hint="ชื่อห้องที่ผู้รับ Subscribe — ใช้ a-z 0-9 . _ - เท่านั้น (เช่น cmms-tpt-alert)"
+                    value={settings.ntfy_topic ?? ""}
+                    placeholder="cmms-tpt-alert"
+                    onChange={(e) => setSettingField("ntfy_topic", e.target.value)}
+                  />
+
+                  <Input
+                    label="Access Token (ถ้ามี)"
+                    type="password"
+                    hint="สำหรับ topic ที่ตั้งสิทธิ์ไว้ — ปล่อยว่างถ้าใช้ topic สาธารณะ"
+                    value={settings.ntfy_token ?? ""}
+                    onChange={(e) => setSettingField("ntfy_token", e.target.value)}
+                  />
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium">ระดับความสำคัญ (priority)</label>
+                    <Select
+                      value={settings.ntfy_priority || "auto"}
+                      onValueChange={(v) => setSettingField("ntfy_priority", v === "auto" ? "" : v)}
+                    >
+                      <SelectTrigger aria-label="ระดับความสำคัญ ntfy"><SelectValue placeholder="ตามระดับเหตุการณ์" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">อัตโนมัติ (ตามระดับเหตุการณ์)</SelectItem>
+                        <SelectItem value="min">min — เงียบที่สุด</SelectItem>
+                        <SelectItem value="low">low</SelectItem>
+                        <SelectItem value="default">default</SelectItem>
+                        <SelectItem value="high">high</SelectItem>
+                        <SelectItem value="urgent">urgent — เด้งสุด</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Input
+                    label="แท็ก / อีโมจิ"
+                    hint="คั่นด้วย , เช่น warning,rotating_light — ว่าง = ตามระดับเหตุการณ์"
+                    value={settings.ntfy_tags ?? ""}
+                    onChange={(e) => setSettingField("ntfy_tags", e.target.value)}
+                  />
+
+                  <Switch
+                    label="แตะการแจ้งเตือนแล้วเปิดหน้าในระบบ"
+                    value={settings.ntfy_click_url === "1"}
+                    onChange={(c) => setSettingField("ntfy_click_url", c ? "1" : "0")}
+                  />
+
+                  <HStack gap={2} wrap="wrap">
+                    <Button disabled={ntfyTesting} onClick={handleNtfyTest}>
+                      <PaperAirplaneIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                      {ntfyTesting ? "กำลังส่ง..." : "ยิงทดสอบเข้า ntfy"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      disabled={!hasChanges || saving}
+                      onClick={handleSave}
+                    >
+                      บันทึกการตั้งค่า
+                    </Button>
+                  </HStack>
+
+                  {ntfyTestResult && (
+                    <Card style={{
+                      background: ntfyTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      border: `1px solid ${ntfyTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
+                    }}>
+                      <CardContent className="p-3">
+                        <span className="text-sm font-bold" style={{ color: ntfyTestResult.ok ? "var(--cmms-success)" : "#b91c1c" }}>
+                          {ntfyTestResult.ok ? "✅ " : ""}{ntfyTestResult.msg}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </VStack>
+
+            <VStack gap={6}>
+              <Card>
+                <CardContent className="space-y-2 p-5">
+                  <h3 className="text-base font-semibold">วิธีรับการแจ้งเตือนบนมือถือ</h3>
+                  <ol className="ml-4 list-decimal space-y-1 text-sm text-muted-foreground">
+                    <li>เปิด {(settings.ntfy_server_url || "https://ntfy.sh") + "/" + (settings.ntfy_topic || "<topic>")} บนมือถือ</li>
+                    <li>กด <b>Subscribe</b> (ตั้งชื่อ topic ให้ตรงกับช่อง Topic ด้านบน)</li>
+                    <li>เพิ่ม ntfy ไปหน้าจอโฮม (PWA) แล้วอนุญาต notification</li>
+                    <li>กลับมากด <b>ยิงทดสอบ</b> — ต้องมี push เด้งขึ้นบนเครื่อง</li>
+                  </ol>
+                  <HStack gap={3} wrap="wrap" className="pt-1">
+                    <a className="text-sm font-medium text-[var(--cmms-primary)] hover:underline" href="https://docs.ntfy.sh/subscribe/pwa/" target="_blank" rel="noreferrer">
+                      วิธีติดตั้ง PWA ของ ntfy
+                    </a>
+                    <a className="text-sm font-medium text-[var(--cmms-primary)] hover:underline" href="https://github.com/binwiederhier/ntfy" target="_blank" rel="noreferrer">
+                      ntfy (self-host)
+                    </a>
+                  </HStack>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="space-y-2 p-5">
+                  <h3 className="text-base font-semibold">ข้อความและเงื่อนไขการส่ง</h3>
+                  <p className="text-sm">
+                    หัวข้อ/รายละเอียดของทุกช่องทาง (รวม ntfy) มาจาก<b>เทมเพลตการแจ้งเตือน</b> —
+                    แก้ได้ทุกเหตุการณ์ที่แท็บ <b>Web Push / PWA</b> (เลือกเหตุการณ์ → แก้ข้อความ → บันทึก)
+                    โดยใช้ตัวแปร เช่น {"{"}work_order_no{"}"}, {"{"}asset_code{"}"}, {"{"}title{"}"}
+                  </p>
+                  <p className="text-sm">
+                    การส่งจริงเกิดเมื่อ: สวิตช์ด้านบนเปิด + เหตุการณ์นั้นเปิดใน<b>กฎการแจ้งเตือน</b> +
+                    ผู้ใช้ไม่ได้ปิดช่อง ntfy ใน<b>การตั้งค่าการแจ้งเตือนของฉัน</b>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    ทุกครั้งที่ส่ง ระบบบันทึกผลลง <code>notification_logs</code> (channel = NTFY) เพื่อตรวจย้อนหลัง
+                  </p>
                 </CardContent>
               </Card>
             </VStack>
