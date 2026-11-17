@@ -87,3 +87,6 @@ scripts/print/out/*.html
 /ntfy_2.37.2_windows_amd64/
 /ntfy_2.37.2_windows_amd64.zip
 /ntfy-server.yml
+
+# E2E seed state (transient)
+frontend/tests/e2e/fixtures/.e2e-seed-wo.json

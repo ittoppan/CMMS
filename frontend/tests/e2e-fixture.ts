@@ -19,13 +19,16 @@ function php(script: string, args: string[] = []): string {
   return execFileSync("php", [script, ...args], { encoding: "utf8" });
 }
 
-/** เติมข้อมูลขั้นต่ำที่หน้า/test ต้องใช้ (ลบทิ้งใน teardown) */
+/** เติมข้อมูลขั้นต่ำที่หน้า/test ต้องใช้ (ลบทิ้งใน teardown)
+ *  seed-data.php ทำทั้ง pm/ใบเบิก และ work order + failure history + operating hours
+ *  + mtbf_mttr + failure taxonomy แล้ว log จำนวนแถวที่ใส่/ลบออกมาให้ fixture พ่นต่อ
+ */
 function seed(cmd: "up" | "down"): void {
   if (!fs.existsSync(SEED_SCRIPT)) return;
   try {
-    console.log("[e2e-seed]", php(SEED_SCRIPT, [cmd]).trim());
+    console.log(`[e2e-seed] ${cmd} ->`, php(SEED_SCRIPT, [cmd]).trim());
   } catch (e) {
-    console.log("[e2e-seed] failed:", e instanceof Error ? e.message : String(e));
+    console.log(`[e2e-seed] ${cmd} failed:`, e instanceof Error ? e.message : String(e));
   }
 }
 
@@ -65,8 +68,9 @@ if ($cmd === 'up') {
 
 async function globalTeardown(): Promise<void> {
   if (process.env.E2E_USERNAME || process.env.E2E_NO_FIXTURE === "1") return;
-  if (!fs.existsSync(AUTH_FILE)) return;
+  // ลบ seed ก่อนเสมอ แม้ AUTH_FILE หาย (suite ถูก interrupt) — แถวที่ seed ไว้ลบตัวเองได้
   seed("down");
+  if (!fs.existsSync(AUTH_FILE)) return;
   const tmp = path.join(process.env.TEMP || "/tmp", `e2e-fixture-${Date.now()}.php`);
   fs.writeFileSync(tmp, `<?php
 require_once 'C:/inetpub/wwwroot/cmms-tpt/src/config/db.php';
