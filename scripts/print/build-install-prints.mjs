@@ -15,11 +15,10 @@
  * ฟอนต์ + โลโก้ + QR ฝังในไฟล์ HTML (base64) → ย้ายไปเครื่องอื่น/ส่งร้านพิมพ์ได้เลย
  */
 
-import { mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
+import { fontFaces, logoSrc, qrcodeFor, renderPiece } from "./print-kit.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "../..");
@@ -38,10 +37,6 @@ const C = {
   body: "#475569",
   faint: "#64748B",
 };
-
-const THAI_RANGE = "U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC";
-const LATIN_RANGE =
-  "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
 
 // ── args ────────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
@@ -97,10 +92,9 @@ if (/(ngrok-free|ngrok\.io|trycloudflare|localtunnel|lhr\.life)/i.test(baseHost)
 const installPath = `${base}/install`;
 
 // ── QR ──────────────────────────────────────────────────────────────────────
-const qrFrom = createRequire(join(FRONTEND, "package.json"));
 let QRCode;
 try {
-  QRCode = qrFrom("qrcode");
+  QRCode = qrcodeFor(FRONTEND);
 } catch {
   console.error("ERROR: ไม่พบแพ็กเกจ qrcode — รัน `npm install` ใน frontend ก่อน");
   process.exit(1);
@@ -114,30 +108,8 @@ const qrFor = (src) =>
     color: { dark: C.navyDark, light: "#FFFFFF" },
   });
 
-// ── assets (ฝัง base64 เพื่อให้ไฟล์พกพาได้) ─────────────────────────────────
-const dataUrl = (path, mime) =>
-  `data:${mime};base64,${readFileSync(path).toString("base64")}`;
-
-function fontFaces() {
-  const dir = join(FRONTEND, "public", "fonts");
-  return [400, 700, 800]
-    .flatMap((w) =>
-      [
-        ["thai", THAI_RANGE],
-        ["latin", LATIN_RANGE],
-      ]
-        .map(([subset, range]) => {
-          const file = join(dir, `sarabun-${w}-${subset}.woff2`);
-          if (!existsSync(file)) return "";
-          return `@font-face{font-family:'Sarabun';font-style:normal;font-display:block;font-weight:${w};src:url(${dataUrl(file, "font/woff2")}) format('woff2');unicode-range:${range};}`;
-        })
-        .filter(Boolean)
-    )
-    .join("\n");
-}
-
-const logoFile = join(FRONTEND, "public", "logo.png");
-const logoUrl = existsSync(logoFile) ? dataUrl(logoFile, "image/png") : "";
+// ── assets (ฝัง base64 เพื่อให้ไฟล์พกพาได้ — helper อยู่ใน print-kit.mjs) ─────
+const logoUrl = logoSrc(FRONTEND);
 
 // ── shared CSS ──────────────────────────────────────────────────────────────
 const baseCss = `
@@ -167,7 +139,7 @@ function posterHtml({ qr, url }) {
 <html lang="th"><head><meta charset="utf-8">
 <title>ติดตั้งแอป CMMS — โปสเตอร์ A5</title>
 <style>
-${fontFaces()}
+${fontFaces(FRONTEND)}
 @page{size:148mm 210mm;margin:0;}
 ${baseCss}
 .sheet{width:148mm;height:210mm;}
@@ -229,7 +201,7 @@ function stickerHtml({ qr, url }) {
 <html lang="th"><head><meta charset="utf-8">
 <title>ติดตั้งแอป CMMS — สติกเกอร์ 99.1 × 57 mm</title>
 <style>
-${fontFaces()}
+${fontFaces(FRONTEND)}
 @page{size:99.1mm 57mm;margin:0;}
 ${baseCss}
 .sheet{width:99.1mm;height:57mm;display:flex;}
@@ -277,78 +249,13 @@ const jobs = [
 mkdirSync(OUT, { recursive: true });
 
 for (const job of jobs) {
-  const htmlPath = join(OUT, `${job.name}.html`);
-  writeFileSync(htmlPath, job.html, "utf8");
-  console.log(`✓ ${htmlPath}`);
-}
-
-// ── PDF / PNG ผ่าน Chrome (ถ้ามี) ───────────────────────────────────────────
-function chromePath() {
-  const candidates = [
-    process.env.CHROME_PATH,
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-  ].filter(Boolean);
-  return candidates.find((p) => existsSync(p)) ?? "";
-}
-
-if (render) {
-  const chrome = chromePath();
-  if (!chrome) {
-    console.warn("\nWARNING: ไม่พบ Chrome/Edge — ได้แค่ HTML (เปิดแล้วกด Ctrl+P ได้เลย)");
-  } else {
-    const pxPerMm = 96 / 25.4;
-    for (const job of jobs) {
-      const htmlPath = join(OUT, `${job.name}.html`);
-      const fileUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
-      const pdf = join(OUT, `${job.name}.pdf`);
-      const png = join(OUT, `${job.name}.png`);
-
-      const r1 = spawnSync(
-        chrome,
-        [
-          "--headless=new",
-          "--disable-gpu",
-          "--no-first-run",
-          "--no-default-browser-check",
-          "--virtual-time-budget=4000",
-          "--no-pdf-header-footer",
-          "--print-to-pdf-no-header",
-          `--print-to-pdf=${pdf}`,
-          fileUrl,
-        ],
-        { encoding: "utf8" }
-      );
-      if (r1.status === 0 && existsSync(pdf)) console.log(`✓ ${pdf}`);
-      else console.warn(`! PDF ไม่สำเร็จ (${job.name}): ${(r1.stderr || "").split("\n")[0]}`);
-
-      const r2 = spawnSync(
-        chrome,
-        [
-          "--headless=new",
-          "--disable-gpu",
-          "--hide-scrollbars",
-          "--force-device-scale-factor=2",
-          "--virtual-time-budget=4000",
-          `--window-size=${Math.ceil(job.size.w * pxPerMm) + 2},${Math.ceil(job.size.h * pxPerMm) + 2}`,
-          `--screenshot=${png}`,
-          fileUrl,
-        ],
-        { encoding: "utf8" }
-      );
-      if (r2.status === 0 && existsSync(png)) console.log(`✓ ${png}`);
-      else console.warn(`! PNG ไม่สำเร็จ (${job.name}): ${(r2.stderr || "").split("\n")[0]}`);
-    }
+  if (!render) {
+    writeFileSync(join(OUT, `${job.name}.html`), job.html, "utf8");
+    console.log(`✓ ${join(OUT, `${job.name}.html`)}`);
+    continue;
   }
+  renderPiece(job, OUT);
 }
-
-const sizes = jobs
-  .flatMap((j) => [`${j.name}.pdf`, `${j.name}.png`])
-  .map((f) => join(OUT, f))
-  .filter((f) => existsSync(f))
-  .map((f) => `${f} (${Math.round(statSync(f).size / 1024)}KB)`);
-if (sizes.length) console.log(`\nไฟล์พร้อมพิมพ์:\n  ${sizes.join("\n  ")}`);
 
 console.log(`
 ปลายทาง QR:
