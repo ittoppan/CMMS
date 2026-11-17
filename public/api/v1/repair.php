@@ -14,6 +14,7 @@ require_once __DIR__ . '/../../../src/helpers/repair_time.php';
 require_once __DIR__ . '/../../../src/helpers/sla.php';
 require_once __DIR__ . '/../../../src/helpers/repair_owner.php';
 require_once __DIR__ . '/../../../src/helpers/repair_links.php';
+require_once __DIR__ . '/../../../src/helpers/repair_rating.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -215,7 +216,13 @@ try {
 
             // ประเมินงานซ่อม (tracking) — บันทึกคะแนน/ความคิดเห็นลง repair_ratings
             if (($data['action'] ?? '') === 'rate') {
-                requireLogin($pdo);
+                // ตัวตน: session หรือ LIFF ID token ที่ผูกบัญชีแล้ว (ผู้แจ้งจาก LINE ไม่มี PHP session)
+                $rater = repair_rating_identity($pdo, is_array($data) ? $data : null);
+                if (!$rater['ok']) {
+                    http_response_code(401);
+                    echo json_encode(['error' => $rater['error'], 'code' => $rater['code'], 'success' => false], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
                 $rid = (int)($data['repair_id'] ?? 0);
                 $score = (int)($data['rating_score'] ?? 0);
                 $comment = trim((string)($data['rating_comment'] ?? ''));
@@ -233,19 +240,15 @@ try {
                     exit;
                 }
                 $rStatus = strtolower(trim((string)($repairRow['status'] ?? '')));
-                if (!in_array($rStatus, ['completed', 'closed', 'resolved'], true)) {
+                if (!in_array($rStatus, ['completed', 'closed', 'resolved', 'verified'], true)) {
                     http_response_code(400);
                     echo json_encode(['error' => 'สามารถประเมินได้เฉพาะงานที่ปิดงาน/เสร็จสิ้นแล้ว', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
-                $cu = currentUser($pdo);
-                $ratedBy = $cu['id'] ?? null;
-                $createdBy = isset($repairRow['created_by']) ? (int)$repairRow['created_by'] : 0;
-                $canRate = false;
-                if (function_exists('canSupervisor') && canSupervisor()) $canRate = true;
-                if ($ratedBy && $createdBy > 0 && (int)$ratedBy === $createdBy) $canRate = true;
-                if ($createdBy <= 0 && $ratedBy) $canRate = true; // ผู้แจ้งสาธารณะ/ไม่ระบุตัวตนผู้สร้าง — อนุญาตผู้ใช้ที่ล็อกอิน
-                if (!$canRate) {
+                $cu = $rater['user'];
+                $ratedBy = isset($cu['id']) ? (int)$cu['id'] : null;
+                $canSupervisorNow = function_exists('canSupervisor') && canSupervisor();
+                if (!repair_rating_can_rate($repairRow, $cu, (bool)$rater['session'], $canSupervisorNow)) {
                     http_response_code(403);
                     echo json_encode(['error' => 'ไม่มีสิทธิ์ประเมินงานนี้', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;

@@ -25,8 +25,10 @@ import {
   Mail,
   Phone,
   RefreshCw,
+  Star,
   Wrench,
 } from "lucide-react";
+import { apiJson } from "@/lib/api";
 import { UNBOUND_BODY, UNBOUND_TITLE, type SupportContact } from "@/lib/liff-bind-copy";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,6 +52,8 @@ type Item = {
   asset_name: string | null;
   asset_location: string | null;
   technician: string | null;
+  rating_score: number | string | null;
+  rating_comment: string | null;
 };
 
 type Api = {
@@ -108,6 +112,141 @@ function formatDate(value?: string | null, withTime = false): string {
   const date = d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" });
   if (!withTime) return date;
   return `${date} ${d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+/**
+ * RepairRating — ฟอร์มให้คะแนนผลงานซ่อม (rating_score / rating_comment)
+ * ใช้ endpoint เดิม POST /api/v1/repair.php { action: "rate" } ซึ่งบันทึก currentUser
+ * หรือผู้ใช้ที่ LIFF ID token ยืนยันแล้ว — แสดงเฉพาะงานที่ปิดแล้ว (DONE_STATUSES)
+ */
+function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
+  const existing = Number(item.rating_score ?? 0) || 0;
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState(0);
+  const [score, setScore] = useState(existing);
+  const [comment, setComment] = useState(item.rating_comment ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+
+  const STARS = [1, 2, 3, 4, 5];
+
+  async function submit() {
+    if (score < 1) {
+      setError("เลือกคะแนนก่อนบันทึก");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      await apiJson("/api/v1/repair.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "rate",
+          repair_id: item.id,
+          rating_score: score,
+          rating_comment: comment.trim(),
+        }),
+      });
+      setJustSaved(true);
+      setOpen(false);
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "บันทึกคะแนนไม่สำเร็จ");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const shown = open ? hover || score : existing;
+
+  return (
+    <div className="mt-2 border-t pt-2" style={{ borderColor: "var(--cmms-border)" }}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--cmms-text-secondary)" }}>
+          {existing > 0 ? "คะแนนที่ให้" : "ประเมินผลงาน"}
+        </span>
+        <div className="flex items-center gap-0.5">
+          {STARS.map((n) =>
+            open ? (
+              <button
+                key={n}
+                type="button"
+                aria-label={`ให้ ${n} ดาว`}
+                aria-pressed={score === n}
+                onClick={() => setScore(n)}
+                onMouseEnter={() => setHover(n)}
+                onMouseLeave={() => setHover(0)}
+                className="p-0.5"
+                style={{ background: "none", border: 0, cursor: "pointer", lineHeight: 0 }}
+              >
+                <Star size={18} strokeWidth={1.75} style={{ color: n <= shown ? "#F59E0B" : "var(--cmms-border)", fill: n <= shown ? "#F59E0B" : "none" }} />
+              </button>
+            ) : (
+              <Star key={n} size={14} strokeWidth={1.75} style={{ color: n <= shown ? "#F59E0B" : "var(--cmms-border)", fill: n <= shown ? "#F59E0B" : "none" }} />
+            )
+          )}
+        </div>
+        {!open && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(true);
+              setJustSaved(false);
+              setScore(existing || 0);
+              setComment(item.rating_comment ?? "");
+            }}
+            style={{ background: "none", border: 0, padding: 0, cursor: "pointer", fontSize: 11.5, fontWeight: 700, color: "var(--cmms-primary)" }}
+          >
+            {existing > 0 ? "แก้ไข" : "ให้คะแนน"}
+          </button>
+        )}
+        {justSaved && !open && (
+          <span style={{ fontSize: 11.5, color: "#04703B" }}>บันทึกแล้ว ขอบคุณสำหรับความคิดเห็น</span>
+        )}
+      </div>
+
+      {!open && existing > 0 && item.rating_comment ? (
+        <p className="m-0 mt-1" style={{ fontSize: 12, color: "var(--cmms-text-secondary)" }}>
+          {item.rating_comment}
+        </p>
+      ) : null}
+
+      {open && (
+        <div className="mt-2 flex flex-col gap-2">
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            maxLength={500}
+            rows={2}
+            placeholder="ความคิดเห็นเพิ่มเติม (ไม่บังคับ)"
+            className="w-full rounded-lg border px-3 py-2"
+            style={{
+              borderColor: "var(--cmms-border)",
+              background: "var(--cmms-bg)",
+              color: "var(--cmms-text-primary)",
+              fontSize: 13,
+              resize: "vertical",
+            }}
+          />
+          {error && (
+            <p className="m-0" style={{ fontSize: 12, color: "#B42318" }}>
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button className="flex-1" disabled={saving || score < 1} onClick={submit}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Star className="w-4 h-4" />} บันทึกคะแนน
+            </Button>
+            <Button variant="secondary" disabled={saving} onClick={() => { setOpen(false); setError(null); }}>
+              ยกเลิก
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function MyRepairs() {
@@ -367,6 +506,10 @@ export default function MyRepairs() {
                               .filter(Boolean)
                               .join(" · ")}
                       </p>
+                    )}
+
+                    {DONE_STATUSES.includes((item.status || "").toLowerCase()) && (
+                      <RepairRating item={item} onSaved={load} />
                     )}
                   </Card>
                 );

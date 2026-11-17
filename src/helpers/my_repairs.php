@@ -15,10 +15,13 @@ function my_repairs_list(PDO $pdo, int $userId, int $limit = 30): array
                 r.created_at, r.acknowledged_at, r.actual_start_at, r.completed_at, r.closed_at,
                 r.downtime_minutes, r.resolution, r.root_cause, r.rejection_note,
                 a.code AS asset_code, a.name AS asset_name, a.location AS asset_location,
-                t.full_name AS technician
+                t.full_name AS technician,
+                rr.rating_score, rr.rating_comment
          FROM repair r
          LEFT JOIN asset_registry a ON a.id = r.asset_id
          LEFT JOIN users t ON t.id = r.assigned_to
+         LEFT JOIN repair_ratings rr ON rr.repair_id = r.id
+              AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id)
          WHERE r.created_by = ?
          ORDER BY r.created_at DESC, r.id DESC
          LIMIT $limit"
