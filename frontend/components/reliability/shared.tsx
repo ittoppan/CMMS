@@ -224,7 +224,7 @@ export function RelKpiCard({
             สูตร: {card.definition.formula_display}
           </p>
         )}
-        {example && (
+        {hasValue && example && (
           <p className="text-xs text-muted-foreground/90">
             ตัวอย่าง: {example}
           </p>
