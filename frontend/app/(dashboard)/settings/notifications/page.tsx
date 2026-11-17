@@ -168,6 +168,8 @@ export default function NotificationsSettingsPage() {
   const [teamsTestResult, setTeamsTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [ntfyTesting, setNtfyTesting] = useState(false);
   const [ntfyTestResult, setNtfyTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  // แก้เทมเพลตข้อความในแท็บ ntfy ได้เลย ไม่ต้องสลับไปแท็บ Web Push / PWA
+  const [ntfyTemplateOpen, setNtfyTemplateOpen] = useState(false);
   const [activeChannel, setActiveChannel] = useState<string>("line");
 
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -1016,7 +1018,7 @@ export default function NotificationsSettingsPage() {
                   <h3 className="text-base font-semibold">ข้อความและเงื่อนไขการส่ง</h3>
                   <p className="text-sm">
                     หัวข้อ/รายละเอียดของทุกช่องทาง (รวม ntfy) มาจาก<b>เทมเพลตการแจ้งเตือน</b> —
-                    แก้ได้ทุกเหตุการณ์ที่แท็บ <b>Web Push / PWA</b> (เลือกเหตุการณ์ → แก้ข้อความ → บันทึก)
+                    แก้ได้ทุกเหตุการณ์จากปุ่มด้านล่าง (หรือแท็บ <b>Web Push / PWA</b>) เลือกเหตุการณ์ → แก้ข้อความ → บันทึก
                     โดยใช้ตัวแปร เช่น {"{"}work_order_no{"}"}, {"{"}asset_code{"}"}, {"{"}title{"}"}
                   </p>
                   <p className="text-sm">
@@ -1026,10 +1028,26 @@ export default function NotificationsSettingsPage() {
                   <p className="text-sm text-muted-foreground">
                     ทุกครั้งที่ส่ง ระบบบันทึกผลลง <code>notification_logs</code> (channel = NTFY) เพื่อตรวจย้อนหลัง
                   </p>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    aria-expanded={ntfyTemplateOpen}
+                    aria-controls="ntfy-template-editor"
+                    onClick={() => setNtfyTemplateOpen((v) => !v)}
+                  >
+                    <PaintBrushIcon size={16} strokeWidth={1.75} aria-hidden="true" />
+                    {ntfyTemplateOpen ? "ซ่อนเทมเพลตข้อความ" : "แก้เทมเพลตข้อความ"}
+                  </Button>
                 </CardContent>
               </Card>
             </VStack>
           </Grid>
+
+          {ntfyTemplateOpen && (
+            <div id="ntfy-template-editor">
+              <PushTemplateEditor />
+            </div>
+          )}
         </VStack>
       )}
 
