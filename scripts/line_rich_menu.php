@@ -75,10 +75,14 @@ foreach ($args as $a) {
 }
 
 $pdo = getDb();
-$token = linePhpConfig($pdo, 'LINE_CHANNEL_ACCESS_TOKEN', 'line_channel_access_token');
-if ($token === '') {
-    fwrite(STDERR, "ERROR: LINE_CHANNEL_ACCESS_TOKEN ไม่พบ (env หรือ settings)\n");
-    exit(1);
+// dry-run ต้องไม่ต้องใช้ secret — ตรวจ token เฉพาะตอนยิง LINE API จริง
+$token = '';
+if (!$dryRun) {
+    $token = linePhpConfig($pdo, 'LINE_CHANNEL_ACCESS_TOKEN', 'line_channel_access_token');
+    if ($token === '') {
+        fwrite(STDERR, "ERROR: LINE_CHANNEL_ACCESS_TOKEN ไม่พบ (env หรือ settings)\n");
+        exit(1);
+    }
 }
 
 $imagePath = __DIR__ . '/richmenu.png';
