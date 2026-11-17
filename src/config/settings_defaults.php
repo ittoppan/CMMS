@@ -59,6 +59,7 @@ function settingsDefaultValues(): array {
         'notification_sound'    => 'chime',
         'ntfy_enabled'          => '0',
         'ntfy_server_url'       => 'https://ntfy.sh',
+        'ntfy_publish_url'      => '',
         'ntfy_topic'            => '',
         'ntfy_token'            => '',
         'ntfy_priority'         => '',

@@ -7,7 +7,9 @@
  *
  * ตั้งค่าทั้งหมดอยู่ในตาราง settings (ไม่ hardcode):
  *   ntfy_enabled    0/1                       — สวิตช์หลัก
- *   ntfy_server_url https://ntfy.sh           — เซิร์ฟเวอร์ (self-host ได้)
+ *   ntfy_server_url https://ntfy.sh           — เซิร์ฟเวอร์ที่ผู้รับ subscribe (URL public ก็ได้)
+ *   ntfy_publish_url                          — URL สำหรับ "ส่ง" จากเซิร์ฟเวอร์นี้ (ถ้าไม่ตั้ง = ใช้ ntfy_server_url)
+ *                                              เช่นตั้ง http://127.0.0.1:2586 เพื่อส่งภายในเครื่อง ไม่ต้องออกเน็ต
  *   ntfy_topic      <ชื่อ topic>               — ปลายทาง (เทียบเท่า "รหัสห้อง")
  *   ntfy_token      tk_xxx                    — access token ของ topic ที่ป้องกันไว้ (ถ้ามี)
  *   ntfy_priority   ''|min|low|default|high|urgent — บังคับระดับ (ว่าง = ตามระดับเหตุการณ์)
@@ -27,11 +29,18 @@ function ntfy_config(): array {
     if (!preg_match('~^https?://[^/\s]+~i', $server)) {
         $server = 'https://ntfy.sh';
     }
+    // ปลายทางสำหรับส่ง (publish) แยกจาก server ที่ผู้รับใช้ subscribe ได้: ตั้งเป็น loopback
+    // เพื่อให้ PHP ส่งเข่า ntfy บนเครื่องเดียวกันได้ตรง ๆ แม้ ntfy_server_url จะเป็น URL ผ่าน tunnel
+    $publish = trim(setting_value('ntfy_publish_url', ''));
+    if (!preg_match('~^https?://[^/\s]+~i', $publish)) {
+        $publish = $server;
+    }
     $topic = preg_replace('/[^A-Za-z0-9._-]/', '', trim(setting_value('ntfy_topic', '')));
     $priority = strtolower(trim(setting_value('ntfy_priority', '')));
     return [
         'enabled'  => setting_value('ntfy_enabled', '0') === '1',
         'server'   => rtrim($server, '/'),
+        'publish'  => rtrim($publish, '/'),
         'topic'    => mb_substr((string)$topic, 0, 64),
         'token'    => trim(setting_value('ntfy_token', '')) ?: trim((string)(getenv('NTFY_TOKEN') ?: '')),
         'priority' => array_key_exists($priority, NTFY_PRIORITIES) ? $priority : '',
@@ -77,7 +86,7 @@ function ntfy_send(string $message, array $opts = []): array {
     if (!empty($opts['click']) && preg_match('~^https?://~i', (string)$opts['click'])) $payload['click'] = (string)$opts['click'];
     if (!empty($opts['attach']) && preg_match('~^https?://~i', (string)$opts['attach'])) $payload['attach'] = (string)$opts['attach'];
 
-    $url = $cfg['server'] . '/';
+    $url = $cfg['publish'] . '/';
     $headers = ['Content-Type: application/json'];
     if ($cfg['token'] !== '') $headers[] = 'Authorization: Bearer ' . $cfg['token'];
 

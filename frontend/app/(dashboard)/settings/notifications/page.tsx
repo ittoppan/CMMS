@@ -916,6 +916,14 @@ export default function NotificationsSettingsPage() {
                   />
 
                   <Input
+                    label="ntfy Publish URL (ภายในเครื่อง — ถ้ามี)"
+                    hint="URL ที่เซิร์ฟเวอร์นี้ใช้ส่งข้อความ (ปล่อยว่าง = ใช้ Server ด้านบน). ถ้า Server เป็น URL public ผ่าน tunnel ให้ใส่ http://127.0.0.1:2586 เพื่อส่งภายในเร็วและไม่ต้องพึ่ง tunnel"
+                    value={settings.ntfy_publish_url ?? ""}
+                    placeholder="http://127.0.0.1:2586"
+                    onChange={(e) => setSettingField("ntfy_publish_url", e.target.value)}
+                  />
+
+                  <Input
                     label="Topic"
                     hint="ชื่อห้องที่ผู้รับ Subscribe — ใช้ a-z 0-9 . _ - เท่านั้น (เช่น cmms-tpt-alert)"
                     value={settings.ntfy_topic ?? ""}

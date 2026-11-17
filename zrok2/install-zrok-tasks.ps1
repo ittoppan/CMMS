@@ -2,6 +2,7 @@
 # Re-run as Administrator after moving the project or switching zrok account.
 #   CMMS-zrok-tpt : cmms-tpt.shares.zrok.io      -> localhost:3001  (Next.js frontend)
 #   CMMS-zrok-api : cmms-tpt-api.shares.zrok.io  -> localhost:8081  (PHP/IIS API)
+#   CMMS-zrok-ntfy: cmms-tpt-ntfy.shares.zrok.io -> localhost:2586  (ntfy push สำหรับมือถือ)
 $ErrorActionPreference = 'Stop'
 
 $wrapper = Join-Path $PSScriptRoot 'run-share.cmd'
@@ -20,7 +21,8 @@ function New-ZrokTask([string]$name, [string]$argline) {
     Write-Host "Registered $name -> $argline"
 }
 
-New-ZrokTask 'CMMS-zrok-tpt' '3001 cmms-tpt'
-New-ZrokTask 'CMMS-zrok-api' '8081 cmms-tpt-api'
+New-ZrokTask 'CMMS-zrok-tpt'  '3001 cmms-tpt'
+New-ZrokTask 'CMMS-zrok-api'  '8081 cmms-tpt-api'
+New-ZrokTask 'CMMS-zrok-ntfy' '2586 cmms-tpt-ntfy'
 
 Get-ScheduledTask -TaskName 'CMMS-zrok-*' | Select-Object TaskName, State | Format-Table -AutoSize
