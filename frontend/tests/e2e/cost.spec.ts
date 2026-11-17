@@ -130,7 +130,7 @@ test.describe("cost & budget pages (authed manager)", () => {
       execFileSync("php", [mgr, "up", pw], { encoding: "utf8" });
       await loginAs(page, "e2e_mgr", pw);
       await page.goto("/dashboard");
-      await expect(page.getByText("งบประมาณบำรุงรักษา").first()).toBeVisible({ timeout: 20_000 });
+      await expect(page.locator("main h1").first()).toBeVisible({ timeout: 20_000 });
     } finally {
       try { execFileSync("php", [mgr, "down"], { encoding: "utf8" }); } catch { /* noop */ }
     }

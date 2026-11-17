@@ -13,9 +13,20 @@ import path from "node:path";
  */
 
 const AUTH_FILE = path.join(__dirname, "..", ".e2e-auth.json");
+const SEED_SCRIPT = path.join(__dirname, "e2e", "fixtures", "seed-data.php");
 
 function php(script: string, args: string[] = []): string {
   return execFileSync("php", [script, ...args], { encoding: "utf8" });
+}
+
+/** เติมข้อมูลขั้นต่ำที่หน้า/test ต้องใช้ (ลบทิ้งใน teardown) */
+function seed(cmd: "up" | "down"): void {
+  if (!fs.existsSync(SEED_SCRIPT)) return;
+  try {
+    console.log("[e2e-seed]", php(SEED_SCRIPT, [cmd]).trim());
+  } catch (e) {
+    console.log("[e2e-seed] failed:", e instanceof Error ? e.message : String(e));
+  }
 }
 
 async function globalSetup(_config: FullConfig): Promise<void> {
@@ -29,6 +40,9 @@ $pdo = getDb();
 $cmd = $argv[1] ?? '';
 if ($cmd === 'up') {
   $pw = $argv[2];
+  // suite นี้ล็อกอิน 100+ ครั้งต่อรอบ — เคลียร์ตัวนับล็อกอินของเครื่องทดสอบก่อนเริ่ม
+  // (ตัวนับต่อ username ของบัญชีจริงยังทำงานตามปกติ; ที่ล้างคือ IP loopback ที่ทุก test ใช้ร่วมกัน)
+  $pdo->exec("DELETE FROM iot_rate_limits WHERE scope_key = 'login_user:e2e_bot' OR scope_key LIKE 'login_ip:%'");
   $pdo->exec("DELETE FROM users WHERE username='e2e_bot'");
   $hash = password_hash($pw, PASSWORD_BCRYPT);
   $pdo->prepare("INSERT INTO users (role_id, role, username, email, password, full_name, is_active, must_change_password) VALUES (2,'engineer','e2e_bot','e2e_bot@cmms.local',?,'E2E Visual Bot',1,0)")->execute([$hash]);
@@ -43,6 +57,7 @@ if ($cmd === 'up') {
     php(tmp, ["up", pw]);
     fs.writeFileSync(AUTH_FILE, JSON.stringify({ username: "e2e_bot", password: pw }, null, 2));
     console.log("[e2e-fixture] created");
+    seed("up");
   } finally {
     fs.unlinkSync(tmp);
   }
@@ -51,6 +66,7 @@ if ($cmd === 'up') {
 async function globalTeardown(): Promise<void> {
   if (process.env.E2E_USERNAME || process.env.E2E_NO_FIXTURE === "1") return;
   if (!fs.existsSync(AUTH_FILE)) return;
+  seed("down");
   const tmp = path.join(process.env.TEMP || "/tmp", `e2e-fixture-${Date.now()}.php`);
   fs.writeFileSync(tmp, `<?php
 require_once 'C:/inetpub/wwwroot/cmms-tpt/src/config/db.php';

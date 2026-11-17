@@ -196,6 +196,8 @@ export default function SageShipmentsPage() {
           showToast("error", msg);
         } finally {
           setUpdating((prev) => ({ ...prev, [key]: false }));
+          // ปิด dialog เสมอ ไม่งั้นฟอร์มค้างที่ "กำลังบันทึก..." และแก้ไขต่อไม่ได้
+          closeModal();
         }
       },
     });
@@ -252,7 +254,10 @@ export default function SageShipmentsPage() {
                 const msg = e instanceof Error ? e.message : "อัปเดตไม่สำเร็จ";
                 showToast("error", msg);
               })
-              .finally(() => setUpdating((prev) => ({ ...prev, [key]: false })));
+              .finally(() => {
+                setUpdating((prev) => ({ ...prev, [key]: false }));
+                closeModal();
+              });
           },
         });
       },

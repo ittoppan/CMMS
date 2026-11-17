@@ -99,12 +99,17 @@ test.describe("planning center (authed planner)", () => {
     await page.goto("/planning");
     await expect(page.getByRole("heading", { name: /คิวงานวางแผน/i })).toBeVisible({ timeout: 15_000 });
 
-    const sel = page.locator('tbody input[type="checkbox"]').first();
-    if ((await sel.count()) === 0) {
+    // คิวโหลดแบบ async — รอให้แถวแรกมาถึงก่อน แล้วค่อยข้ามถ้าว่างจริง
+    const sel = page.locator('tbody [role="checkbox"]').first();
+    const empty = await sel
+      .waitFor({ timeout: 15_000 })
+      .then(() => false)
+      .catch(() => true);
+    if (empty) {
       test.skip(true, "queue empty (clean install - no work orders yet)");
       return;
     }
-    await sel.check({ timeout: 15_000 });
+    await sel.click();
     await page.getByRole("button", { name: /ดูตัวอย่างวางแผนกลุ่ม \(1\)/ }).click();
 
     await expect(page.getByText("วางแผนแบบกลุ่ม — ตัวอย่างผลลัพธ์", { exact: false }).first()).toBeVisible();

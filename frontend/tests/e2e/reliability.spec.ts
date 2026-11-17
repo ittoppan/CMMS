@@ -99,7 +99,7 @@ test.describe("reliability workspace (authed)", () => {
       expect(errors, `console errors on ${p.path}`).toEqual([]);
       // every page is identified by its ASCII eyebrow and can walk back up
       await expect(page.locator("main").getByText(p.eyebrow).first()).toBeVisible();
-      await expect(page.locator('main a[href^="/reliability"]').first()).toBeVisible();
+      await expect(page.locator('main a[href^="/reliability"]:visible').first()).toBeVisible();
     }
   });
 
