@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ThemeProvider from '../../components/ThemeProvider';
+import LoginVideoBg from './LoginVideoBg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
@@ -67,13 +68,7 @@ function LoginContent() {
   const [capsOn, setCapsOn] = useState(false);
   const [loginFailed, setLoginFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // พื้นหลังเคลื่อนไหว: วิดีโอ abstract square จาก Pixabay (Pixabay Content License — ใช้เชิงพาณิชย์ได้ ไม่ต้องอ้างอิง)
-  // ถ้าวิดีโอโหลดไม่ได้จะถอยไปใช้ฉาก three.js เดิม; ผู้ใช้ที่ตั้งค่า reduced-motion จะเห็นภาพนิ่ง (poster)
-  const [bgVideoFailed, setBgVideoFailed] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  useEffect(() => {
-    setReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, []);
+
   const [errorMessage, setErrorMessage] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -163,23 +158,9 @@ function LoginContent() {
 
   return (
     <div className="cmms-login-container cmms-login-container--neo">
-      {/* Animated background — วิดีโอวนลูป (1280x720, ~8s, 3 MB) + ชั้น vignette ให้เนื้อหาอ่านง่าย */}
+      {/* Animated background — วิดีโอวนลูป 1920x1080 ~8s (Pixabay Content License) + ชั้น vignette */}
       <div className="cmms-login-3d-bg" aria-hidden="true">
-        {bgVideoFailed || reduceMotion ? (
-          <img className="cmms-login-video" src="/media/login-bg-poster.jpg" alt="" />
-        ) : (
-          <video
-            className="cmms-login-video"
-            src="/media/login-bg.mp4"
-            poster="/media/login-bg-poster.jpg"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            onError={() => setBgVideoFailed(true)}
-          />
-        )}
+        <LoginVideoBg src="/media/login-bg.mp4" poster="/media/login-bg-poster.jpg" />
         <div className="cmms-login-3d-vignette" />
       </div>
 
