@@ -82,3 +82,8 @@ zrok2/*.exe
 
 # print artifacts: HTML  regenerate ได้ (ฝังฟอนต์/QR ใหม่ทุกครั้ง)
 scripts/print/out/*.html
+
+# ntfy self-host (binary/config ของเครื่องนี้ — ไม่ขึ้น git)
+/ntfy_2.37.2_windows_amd64/
+/ntfy_2.37.2_windows_amd64.zip
+/ntfy-server.yml

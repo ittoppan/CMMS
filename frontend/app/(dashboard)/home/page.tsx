@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/PageShell";
-import { NAV_GROUPS, type NavItemDef } from "@/components/dashboard/sidebar-nav";
+import { NAV_GROUPS, sectionAccent, sectionIcon, type NavItemDef } from "@/components/dashboard/sidebar-nav";
 import { useMenuPermission } from "@/lib/useMenuPermission";
 import { getFrequentMenuItems } from "@/lib/frequent-menus";
 import { t } from "@/lib/i18n";
 import { usePageHero } from "@/lib/i18n";
 import type { LucideIcon } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 /** หน้าแรกแบบเมนูหลัก (app launcher) — ฉากเปิดหลังล็อกอิน โทนสว่าง (light launcher) */
 
@@ -49,12 +50,12 @@ const TILE_BADGE: Record<string, (k: Kpis["counts"]) => { n?: number; warn?: boo
   "/repair/tracking": (k) => (k?.overdue ? { n: k.overdue, crit: true } : undefined),
 };
 
-function TileIcon({ ico }: { ico: ReactNode }) {
-  return <span className="cmms-home-tile-ico" aria-hidden="true">{ico}</span>;
+function TileIcon({ ico, style }: { ico: ReactNode; style?: React.CSSProperties }) {
+  return <span className="cmms-home-tile-ico" aria-hidden="true" style={style}>{ico}</span>;
 }
 
 /** การ์ดเมนู (แถว "ใช้บ่อย" + กลุ่มเมนูปกติ ใช้หน้าตาเดียวกัน) */
-function MenuTileLink({ href, icon, label, counts }: { href: string; icon: LucideIcon; label: string; counts: Kpis["counts"] }) {
+function MenuTileLink({ href, icon, label, counts, accent }: { href: string; icon: LucideIcon; label: string; counts: Kpis["counts"]; accent?: string }) {
   const badge = TILE_BADGE[href]?.(counts);
   const Icon = icon;
   return (
@@ -62,7 +63,7 @@ function MenuTileLink({ href, icon, label, counts }: { href: string; icon: Lucid
       <span
         className={`cmms-home-tile${href === "/repair/request" ? " cmms-home-signature" : ""}`}
       >
-        <TileIcon ico={<Icon className="w-5 h-5" strokeWidth={1.75} />} />
+        <TileIcon ico={<Icon className="w-5 h-5" strokeWidth={1.75} />} style={accent && href !== "/repair/request" ? { background: `${accent}1A`, color: accent } : undefined} />
         <span className="cmms-home-tile-name">{label}</span>
         {badge ? (
           <span
@@ -113,7 +114,10 @@ export default function HomePage() {
   const groups = useMemo(
     () =>
       NAV_GROUPS.map((g) => ({
+        titleKey: g.titleKey,
         title: t(g.titleKey),
+        accent: sectionAccent(g.titleKey),
+        groupIcon: sectionIcon(g.titleKey),
         items: g.items
           .filter((it) => !it.secondary && canShow(it.perm))
           .map((it) => ({ href: it.href, icon: it.icon, label: it.label ?? (it.labelKey ? t(it.labelKey) : "") })),
@@ -144,9 +148,32 @@ export default function HomePage() {
       title="หน้าแรก"
       description={`สวัสดี${userFullName ? ` คุณ${userFullName}` : ""}${nowLabel ? ` · ${nowLabel}` : ""}`}
     >
-      <div className="cmms-home p-4 sm:p-6 space-y-6">
+      <div className="cmms-home p-5 sm:p-7 space-y-8">
+        <section className="cmms-home-hero" aria-label="ยินดีต้อนรับ">
+          <div className="cmms-home-hero-text">
+            <p className="cmms-eyebrow" style={{ color: "rgba(255,255,255,0.72)" }}>CMMS-TOPPAN · จุดเริ่มการทำงานทุกวัน</p>
+            <h2 className="cmms-home-hero-title">
+              สวัสดี{userFullName ? ` คุณ${userFullName}` : ""}
+            </h2>
+            <p className="cmms-home-hero-sub">{nowLabel || "กำลังโหลดเวลา..."}</p>
+          </div>
+          <div className="cmms-home-hero-stats" aria-label="สถิติด่วน">
+            {lamps.map((l) => (
+              <button
+                key={l.label}
+                type="button"
+                className="cmms-home-hero-stat"
+                onClick={() => goto(l.href)}
+              >
+                <span className="cmms-home-hero-stat-num">{l.count}</span>
+                <span className="cmms-home-hero-stat-label">{l.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         <section aria-label="สถานะพื้นที่การผลิต (ANDON)">
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap gap-3">
             {lamps.map((l) => (
               <button
                 key={l.label}
@@ -173,8 +200,13 @@ export default function HomePage() {
 
         {freqItems && freqItems.length > 0 && (
           <section aria-label="เมนูที่ใช้บ่อย">
-            <h3 className="cmms-home-group-title">ใช้บ่อย</h3>
-            <div className="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            <h3 className="cmms-home-group-title flex items-center gap-2">
+              <span className="cmms-home-group-icon" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)" }}>
+                <Sparkles className="w-3.5 h-3.5" strokeWidth={2} />
+              </span>
+              ใช้บ่อย
+            </h3>
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
               {freqItems.map((it) => (
                 <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label ?? (it.labelKey ? t(it.labelKey) : "")} counts={kpis?.counts ?? {}} />
               ))}
@@ -182,16 +214,24 @@ export default function HomePage() {
           </section>
         )}
 
-        {groups.map((g) => (
+        {groups.map((g) => {
+          const GroupIcon = g.groupIcon;
+          return (
           <section key={g.title} aria-label={g.title}>
-            <h3 className="cmms-home-group-title">{g.title}</h3>
-            <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <h3 className="cmms-home-group-title flex items-center gap-2">
+              <span className="cmms-home-group-icon" style={{ background: `${g.accent}1A`, color: g.accent }}>
+                <GroupIcon className="w-3.5 h-3.5" strokeWidth={2} />
+              </span>
+              {g.title}
+            </h3>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {g.items.map((it) => (
-                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label} counts={kpis?.counts ?? {}} />
+                <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label} counts={kpis?.counts ?? {}} accent={g.accent} />
               ))}
             </div>
           </section>
-        ))}
+          );
+        })}
       </div>
     </PageShell>
   );

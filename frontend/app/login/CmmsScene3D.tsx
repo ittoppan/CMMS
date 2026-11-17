@@ -1,17 +1,138 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-
-type Ripple = { x: number; y: number; r: number; a: number };
+import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 /**
- * CmmsScene3D — "Digital Sensor Terrain"
- * ภูมิประเทศคลื่น 3D แบบ wireframe grid (มองมุมสูง) แทนพื้นผิว sensor data
- * - คลื่นหลายชั้นเคลื่อนที่ช้าๆ  สีไล่ตามความสูง (ฟ้า → มิ้นต์)
- * - Scan sweep พาดผ่าน: กริดช่วงนั้นสว่าง/ยกตัวขึ้นเหมือนถูกสแกน
- * - Sensor nodes: เสาเซ็นเซอร์บนเนิน + วงแหวน pulse (เครื่องจักรที่ถูกมอนิเตอร์)
- * - Parallax ตามเมาส์ + click ripple
+ * CmmsScene3D — "Aurora Data Terrain" (three.js / WebGL)
+ * ภูมิประเทศคลื่น low-poly บน GPU (ShaderMaterial) + bloom post-processing
+ * - terrain แข็งแรงด้วย vertex displacement บน shader (สมูท 60fps)
+ * - scan sweep ไฮไลต์ผิว, data sun แบบ synthwave, starfield
+ * - sensor nodes + pulse rings + anomaly ripples (predictive maintenance)
+ * - data packets วิ่งเข้าหากล้อง, bloom ทำ glow ทั้งฉาก
+ * - parallax กล้องตามเมาส์ + click ripple บนผิว terrain
+ * - เคารพ prefers-reduced-motion (uTime ช้าลง 35%)
  */
+
+const TERRAIN_W = 3800;
+const TERRAIN_D = 2600;
+const H_MAX = 138;
+
+// สูตรคลื่นเดียวกับใน shader — ใช้บน CPU หา y ของ packet/ring/pole
+function heightAtJS(x: number, z: number, t: number): number {
+  return (
+    Math.sin(x * 0.0032 + t * 0.8) * 24 +
+    Math.sin(z * 0.0046 - t * 0.55) * 18 +
+    Math.sin((x + z) * 0.0021 + t * 0.35) * 24 +
+    Math.sin(x * 0.009 - t * 1.1) * 8 +
+    Math.cos(z * 0.008 + t * 0.9) * 8 +
+    Math.sin(x * 0.0011 + t * 0.2) * 30 +
+    Math.cos(z * 0.0009 - t * 0.15) * 26
+  );
+}
+
+const TERRAIN_VERT = /* glsl */ `
+uniform float uTime;
+uniform float uAmp;
+varying float vHn;
+varying float vFog;
+varying vec3 vWorld;
+
+float heightAt(vec2 p, float t) {
+  float h = 0.0;
+  h += sin(p.x * 0.0032 + t * 0.8) * 24.0;
+  h += sin(p.y * 0.0046 - t * 0.55) * 18.0;
+  h += sin((p.x + p.y) * 0.0021 + t * 0.35) * 24.0;
+  h += sin(p.x * 0.009 - t * 1.1) * 8.0;
+  h += cos(p.y * 0.008 + t * 0.9) * 8.0;
+  h += sin(p.x * 0.0011 + t * 0.2) * 30.0;
+  h += cos(p.y * 0.0009 - t * 0.15) * 26.0;
+  return h;
+}
+
+void main() {
+  vec3 pos = position;
+  float h = heightAt(pos.xz, uTime) * uAmp;
+  pos.y += h;
+  vHn = clamp(h / ${H_MAX.toFixed(1)} * 0.5 + 0.5, 0.0, 1.0);
+  vec4 wp = modelMatrix * vec4(pos, 1.0);
+  vWorld = wp.xyz;
+  vec4 mv = viewMatrix * wp;
+  float d = max(0.0, -mv.z);
+  vFog = 1.0 - exp(-pow(d * 0.00082, 2.0));
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+const TERRAIN_FRAG = /* glsl */ `
+uniform float uScanZ;
+uniform float uWire;
+uniform vec3 uFogColor;
+varying float vHn;
+varying float vFog;
+varying vec3 vWorld;
+
+void main() {
+  float lit = exp(-pow((vWorld.z - uScanZ) / 95.0, 2.0));
+  vec3 deep = vec3(0.014, 0.06, 0.115);
+  vec3 peak = vec3(0.09, 0.78, 0.68);
+  vec3 col = mix(deep, peak, pow(vHn, 1.6));
+  col += vec3(0.18, 1.0, 0.83) * lit * (uWire > 0.5 ? 0.6 : 0.3);
+  col = mix(col, uFogColor, clamp(vFog, 0.0, 1.0));
+  float alpha = uWire > 0.5 ? 0.3 : 1.0;
+  gl_FragColor = vec4(col, alpha);
+}
+`;
+
+const POINTS_VERT = /* glsl */ `
+uniform float uTime;
+uniform float uAmp;
+varying float vHn;
+varying float vFog;
+
+float heightAt(vec2 p, float t) {
+  float h = 0.0;
+  h += sin(p.x * 0.0032 + t * 0.8) * 24.0;
+  h += sin(p.y * 0.0046 - t * 0.55) * 18.0;
+  h += sin((p.x + p.y) * 0.0021 + t * 0.35) * 24.0;
+  h += sin(p.x * 0.009 - t * 1.1) * 8.0;
+  h += cos(p.y * 0.008 + t * 0.9) * 8.0;
+  h += sin(p.x * 0.0011 + t * 0.2) * 30.0;
+  h += cos(p.y * 0.0009 - t * 0.15) * 26.0;
+  return h;
+}
+
+void main() {
+  vec3 pos = position;
+  float h = heightAt(pos.xz, uTime) * uAmp;
+  pos.y += h;
+  vHn = clamp(h / ${H_MAX.toFixed(1)} * 0.5 + 0.5, 0.0, 1.0);
+  vec4 mv = viewMatrix * modelMatrix * vec4(pos, 1.0);
+  float d = max(0.0, -mv.z);
+  vFog = 1.0 - exp(-pow(d * 0.00082, 2.0));
+  gl_PointSize = (2.0 + vHn * 4.0) * (320.0 / d);
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+const POINTS_FRAG = /* glsl */ `
+uniform float uScanZ;
+varying float vHn;
+varying float vFog;
+
+void main() {
+  vec2 c = gl_PointCoord - 0.5;
+  float d = length(c);
+  if (d > 0.5) discard;
+  float a = smoothstep(0.5, 0.08, d);
+  vec3 col = mix(vec3(0.15, 0.62, 1.0), vec3(0.3, 1.0, 0.85), vHn);
+  gl_FragColor = vec4(col, a * (0.25 + vHn * 0.6) * (1.0 - vFog));
+}
+`;
 
 export default function CmmsScene3D() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -19,320 +140,404 @@ export default function CmmsScene3D() {
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // reduce-motion: ทุกอย่างยังเคลื่อนที่แต่ช้าลง (calm mode) — ไม่ freeze สนิท
     const motionScale = reduced ? 0.35 : 1;
 
-    let raf = 0;
-    let t = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let W = 0;
-    let H = 0;
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance",
+      });
+    } catch {
+      return; // ไม่มี WebGL — ปล่อยพื้นหลัง CSS QUIET mode
+    }
+    // เครื่องไม่มี GPU (SwiftShader/llvmpipe เช่น VM, remote desktop) — ลดงานลงเพื่อไม่ให้กระตุก
+    const gl = renderer.getContext();
+    const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    const gpuName = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "") : "";
+    const softwareGPU = /swiftshader|llvmpipe|software|basic render/i.test(gpuName);
 
-    // ---- pointer parallax (-1..1, smoothed) + click ripples ----
-    const mouse = { tx: 0, ty: 0, x: 0, y: 0 };
-    const ripples: Ripple[] = [];
-    const onMove = (e: PointerEvent) => {
-      mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.ty = (e.clientY / window.innerHeight) * 2 - 1;
+    // มือถือ/จอแคบ: ลด polygon + pixel ratio ลงเพื่อกันความร้อนและอาการกระตุก
+    const lightMode = softwareGPU || window.innerWidth < 820;
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, softwareGPU ? 1 : lightMode ? 1.4 : 1.75));
+    renderer.setClearColor(0x030c18, 1);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+
+    const scene = new THREE.Scene();
+    const FOG_COLOR = new THREE.Color(0x03101d);
+    scene.background = new THREE.Color(0x04101f);
+
+    const camera = new THREE.PerspectiveCamera(55, 1, 1, 6000);
+    camera.position.set(0, 235, -320);
+
+    const disposables: { dispose: () => void }[] = [];
+    const track = <T extends { dispose: () => void }>(x: T): T => {
+      disposables.push(x);
+      return x;
     };
-    const onDown = (e: PointerEvent) => {
-      if (reduced) return;
-      ripples.push({ x: e.clientX, y: e.clientY, r: 8, a: 0.18 });
-      if (ripples.length > 5) ripples.shift();
+
+    // ---- shared uniforms ----
+    const uniforms = {
+      uTime: { value: 0 },
+      uAmp: { value: 1 },
+      uScanZ: { value: -700 },
+      uWire: { value: 0 },
+      uFogColor: { value: FOG_COLOR },
     };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerdown", onDown, { passive: true });
 
-    // ---- terrain grid (world space) ----
-    // กล้องบินเหนือภูมิประเทศ: สูง CAM_H, ก้มลง PITCH (horizon อยู่ ~0.30h),
-    // แกน y โลกชี้ขึ้น — ผิวดินอยู่ที่ wy ≈ -CAM_H, ยอดคลื่น wy สูงกว่านั้น
-    const CAM_H = 360;
-    const PITCH = 0.196;
-    const FOV = 900;
-    const CP = Math.cos(PITCH);
-    const SP = Math.sin(PITCH);
+    // ---- terrain solid + wireframe ----
+    const terrainGeo = track(
+      new THREE.PlaneGeometry(TERRAIN_W, TERRAIN_D, lightMode ? 90 : 150, lightMode ? 60 : 100),
+    );
+    terrainGeo.rotateX(-Math.PI / 2);
+    terrainGeo.translate(0, 0, 500);
 
-    const NX = 46;
-    const NZ = 26;
-    const XS: number[] = [];
-    for (let i = 0; i < NX; i++) XS.push(-950 + (i * 1900) / (NX - 1));
-    const ZS: number[] = [];
-    for (let j = 0; j < NZ; j++) ZS.push(30 + Math.pow(j / (NZ - 1), 1.3) * 1570);
+    const solidMat = track(
+      new THREE.ShaderMaterial({
+        vertexShader: TERRAIN_VERT,
+        fragmentShader: TERRAIN_FRAG,
+        uniforms: { ...uniforms, uWire: { value: 0 } },
+      }),
+    );
+    const wireMat = track(
+      new THREE.ShaderMaterial({
+        vertexShader: TERRAIN_VERT,
+        fragmentShader: TERRAIN_FRAG,
+        uniforms: { ...uniforms, uWire: { value: 1 } },
+        wireframe: true,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
+      }),
+    );
+    const terrainSolid = new THREE.Mesh(terrainGeo, solidMat);
+    const terrainWire = new THREE.Mesh(terrainGeo, wireMat);
+    scene.add(terrainSolid, terrainWire);
 
-    // คลื่นผิว (sensor data landscape) — หลายชั้นซ้อนกันให้เป็นเนินธรรมชาติ
-    const heightAt = (wx: number, wz: number, tt: number) =>
-      Math.sin(wx * 0.0032 + tt * 0.8) * 24 +
-      Math.sin(wz * 0.0046 - tt * 0.55) * 18 +
-      Math.sin((wx + wz) * 0.0021 + tt * 0.35) * 24 +
-      Math.sin(wx * 0.009 - tt * 1.1) * 8 +
-      Math.cos(wz * 0.008 + tt * 0.9) * 8;
-    const H_MAX = 82;
+    // ---- glow points บนยอด ----
+    const PG = 96;
+    const ptsPos = new Float32Array(PG * PG * 3);
+    let pi = 0;
+    for (let iz = 0; iz < PG; iz++) {
+      for (let ix = 0; ix < PG; ix++) {
+        ptsPos[pi++] = -TERRAIN_W / 2 + (ix * TERRAIN_W) / (PG - 1);
+        ptsPos[pi++] = 0;
+        ptsPos[pi++] = -TERRAIN_D / 2 + 500 + (iz * TERRAIN_D) / (PG - 1);
+      }
+    }
+    const pointsGeo = track(new THREE.BufferGeometry());
+    pointsGeo.setAttribute("position", new THREE.BufferAttribute(ptsPos, 3));
+    const pointsMat = track(
+      new THREE.ShaderMaterial({
+        vertexShader: POINTS_VERT,
+        fragmentShader: POINTS_FRAG,
+        uniforms: { ...uniforms },
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      }),
+    );
+    scene.add(new THREE.Points(pointsGeo, pointsMat));
 
-    // ตำแหน่ง sensor node (world) — ตัวแทนเครื่องจักรที่ถูกมอนิเตอร์
-    const SENSORS = [
-      { x: -640, z: 540, ph: 0.0 },
-      { x: -210, z: 900, ph: 0.6 },
-      { x: 330, z: 660, ph: 1.2 },
-      { x: 720, z: 1020, ph: 1.8 },
-      { x: 40, z: 400, ph: 2.4 },
-      { x: 540, z: 1280, ph: 3.0 },
-      { x: -440, z: 1180, ph: 3.6 },
-      { x: 860, z: 430, ph: 4.2 },
-    ];
+    // ---- textures (canvas-baked) ----
+    const bakeTexture = (draw: (c: CanvasRenderingContext2D, s: number) => void, s = 256) => {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = s;
+      const c = cv.getContext("2d")!;
+      draw(c, s);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      track(tex);
+      return tex;
+    };
 
-    // dust ลอยบนฟ้า + stars นิ่งกะพริบ
-    const dust = Array.from({ length: 26 }, () => ({
-      x: Math.random(),
-      y: Math.random() * 0.55,
-      v: 0.02 + Math.random() * 0.05,
-      r: 0.8 + Math.random() * 1.1,
-      a: 0.1 + Math.random() * 0.25,
-    }));
-    const stars = Array.from({ length: 42 }, () => ({
-      x: Math.random(),
-      y: Math.random() * 0.5,
-      r: 0.6 + Math.random() * 1.1,
-      ph: Math.random() * Math.PI * 2,
-      sp: 0.6 + Math.random() * 1.6,
-    }));
+    // data sun — radial glow + cut bands (synthwave)
+    const sunTex = bakeTexture((c, s) => {
+      const g = c.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      g.addColorStop(0, "rgba(190, 250, 255, 0.95)");
+      g.addColorStop(0.18, "rgba(120, 230, 255, 0.5)");
+      g.addColorStop(0.5, "rgba(60, 180, 255, 0.16)");
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      c.fillStyle = g;
+      c.fillRect(0, 0, s, s);
+      c.globalCompositeOperation = "destination-out";
+      [[0.6, 0.03], [0.68, 0.045], [0.77, 0.06], [0.87, 0.08]].forEach(([dy, hh]) => {
+        c.fillStyle = "rgba(0,0,0,0.85)";
+        c.fillRect(0, s * dy, s, s * hh);
+      });
+    });
+    const sun = new THREE.Sprite(
+      track(
+        new THREE.SpriteMaterial({
+          map: sunTex,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      ),
+    );
+    sun.position.set(-140, 90, 1500);
+    sun.scale.setScalar(760);
+    scene.add(sun);
 
+    // glow dot texture (packets / sensor heads)
+    const dotTex = bakeTexture((c, s) => {
+      const g = c.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      g.addColorStop(0, "rgba(255, 255, 255, 1)");
+      g.addColorStop(0.25, "rgba(140, 255, 230, 0.8)");
+      g.addColorStop(1, "rgba(0, 0, 0, 0)");
+      c.fillStyle = g;
+      c.fillRect(0, 0, s, s);
+    }, 128);
+
+    const mkSprite = (scale: number, opacity = 1) => {
+      const sp = new THREE.Sprite(
+        track(
+          new THREE.SpriteMaterial({
+            map: dotTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity,
+          }),
+        ),
+      );
+      sp.scale.setScalar(scale);
+      return sp;
+    };
+
+    // ---- starfield ----
+    const starCount = 320;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      starPos[i * 3] = (Math.random() - 0.5) * 4200;
+      starPos[i * 3 + 1] = 220 + Math.random() * 900;
+      starPos[i * 3 + 2] = 900 + Math.random() * 2200;
+    }
+    const starGeo = track(new THREE.BufferGeometry());
+    starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
+    const starMat = track(
+      new THREE.PointsMaterial({
+        color: 0xbfeaff,
+        size: 2.6,
+        sizeAttenuation: false,
+        transparent: true,
+        opacity: 0.75,
+        depthWrite: false,
+      }),
+    );
+    scene.add(new THREE.Points(starGeo, starMat));
+
+    // ---- sensor nodes ----
+    const SENSOR_XZ = [
+      [-640, 540], [-210, 900], [330, 660], [720, 1020],
+      [40, 400], [540, 1280], [-440, 1180], [860, 430],
+    ] as const;
+    const poleGeo = track(new THREE.CylinderGeometry(2.2, 3.2, 52, 6));
+    const poleMat = track(
+      new THREE.MeshBasicMaterial({ color: 0x64e8ff, transparent: true, opacity: 0.5 }),
+    );
+    const ringGeo = track(new THREE.RingGeometry(0.86, 1, 48));
+    const sensorHeads: THREE.Sprite[] = [];
+    const sensorPulseRings: { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial; ph: number; x: number; z: number }[] = [];
+    for (const [sx, sz] of SENSOR_XZ) {
+      const head = mkSprite(26, 0.95);
+      sensorHeads.push(head);
+      scene.add(head);
+      const pulse = new THREE.Mesh(
+        track(ringGeo.clone()),
+        track(
+          new THREE.MeshBasicMaterial({
+            color: 0x40ffd2,
+            transparent: true,
+            opacity: 0.4,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          }),
+        ),
+      );
+      pulse.rotation.x = -Math.PI / 2;
+      scene.add(pulse);
+      sensorPulseRings.push({ mesh: pulse, mat: pulse.material as THREE.MeshBasicMaterial, ph: Math.random(), x: sx, z: sz });
+    }
+
+    // ---- data packets ----
+    const LANES = [-1080, -660, -240, 180, 600, 1020, 1230, -1290];
+    const packets: { sp: THREE.Sprite; lane: number; off: number; v: number }[] = [];
+    for (let i = 0; i < 10; i++) {
+      const sp = mkSprite(17, 0.95);
+      scene.add(sp);
+      packets.push({
+        sp,
+        lane: LANES[i % LANES.length],
+        off: Math.random() * 1700,
+        v: 150 + Math.random() * 170,
+      });
+    }
+
+    // ---- anomaly + click ripples (วงแหวนบนผิว) ----
+    type Ripple3D = { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial; t0: number; x: number; z: number; dur: number; maxR: number };
+    const ripples3D: Ripple3D[] = [];
+    const spawnRipple = (x: number, z: number, t: number, maxR: number, dur: number, color: number, op: number) => {
+      const mesh = new THREE.Mesh(
+        track(ringGeo.clone()),
+        track(
+          new THREE.MeshBasicMaterial({
+            color,
+            transparent: true,
+            opacity: op,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          }),
+        ),
+      );
+      mesh.rotation.x = -Math.PI / 2;
+      scene.add(mesh);
+      ripples3D.push({ mesh, mat: mesh.material as THREE.MeshBasicMaterial, t0: t, x, z, dur, maxR });
+    };
+    const nextAnomaly = SENSOR_XZ.map((_, i) => 2.5 + i * 1.4);
+
+    // ---- post-processing (bloom) ----
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    // bloom กิน GPU หนัก — ปิดอัตโนมัติเมื่อเป็น software renderer (ฉากยังสวยจาก additive glow ที่มีอยู่)
+    const useBloom = !softwareGPU;
+    const bloom = useBloom ? new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.7, 0.58) : null;
+    if (bloom) composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+    disposables.push({ dispose: () => composer.dispose() });
+
+    // ---- resize ----
     const resize = () => {
-      W = canvas.clientWidth;
-      H = canvas.clientHeight;
-      canvas.width = Math.max(1, Math.floor(W * dpr));
-      canvas.height = Math.max(1, Math.floor(H * dpr));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = canvas.clientWidth || 1;
+      const h = canvas.clientHeight || 1;
+      renderer.setSize(w, h, false);
+      composer.setSize(w, h);
+      bloom?.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
     };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    const drawScene = () => {
-      const w = W, h = H;
-      if (!w || !h) return;
-      const px = mouse.x, py = mouse.y;
-      ctx.clearRect(0, 0, w, h);
-
-      const yaw = -0.14 + px * 0.055;
-      const cy = Math.cos(yaw), sy = Math.sin(yaw);
-      const yBase = h * 0.3 + py * 12;
-
-      // project world -> screen: yaw รอบ Y แล้ว pitch ก้มลงรอบ X
-      // แกน y โลกชี้ขึ้น → สูตรมาตรฐาน screen_y = yBase - y2*s
-      // (เดิมบวก y2 ทำให้ภูมิประเทศกลับหัว — ผิวดินลอยเหนือ horizon)
-      const project = (wx: number, wy: number, wz: number) => {
-        const x1 = wx * cy - wz * sy;
-        const z1 = wx * sy + wz * cy;
-        const y2 = wy * CP + z1 * SP;
-        const z2 = -wy * SP + z1 * CP;
-        const zz = z2 + FOV;
-        const s = FOV / (zz || 1);
-        return { x: w / 2 + x1 * s, y: yBase - y2 * s, s };
-      };
-
-      // ---- aurora color fields (จางๆ ด้านบน) ----
-      const blob = (bx: number, by: number, r: number, hue: number, alpha: number) => {
-        const g = ctx.createRadialGradient(bx, by, 0, bx, by, r);
-        g.addColorStop(0, `hsla(${hue}, 90%, 60%, ${alpha})`);
-        g.addColorStop(1, "hsla(0, 0%, 0%, 0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-      };
-      blob(w * 0.3 + Math.sin(t * 0.4) * 40 - px * 24, h * 0.24 + Math.cos(t * 0.32) * 24 - py * 14, w * 0.42, 194, 0.09);
-      blob(w * 0.78 + Math.cos(t * 0.3) * 55 - px * 14, h * 0.16 + Math.sin(t * 0.38) * 30 - py * 8, w * 0.36, 163, 0.07);
-
-      // ---- stars กะพริบเบา (ครึ่งบน) ----
-      ctx.fillStyle = "#bfeaff";
-      for (const st of stars) {
-        const tw = 0.14 + 0.16 * (0.5 + 0.5 * Math.sin(t * st.sp * 2 + st.ph));
-        ctx.globalAlpha = tw;
-        ctx.beginPath();
-        ctx.arc(st.x * w, st.y * h, st.r, 0, Math.PI * 2);
-        ctx.fill();
+    // ---- pointer parallax + click ripple (raycast ลง terrain plane) ----
+    const mouse = { tx: 0, ty: 0, x: 0, y: 0 };
+    const raycaster = new THREE.Raycaster();
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const hit = new THREE.Vector3();
+    const onClick = (e: PointerEvent) => {
+      if (reduced) return;
+      const rect = canvas.getBoundingClientRect();
+      const ndc = new THREE.Vector2(
+        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(ndc, camera);
+      if (raycaster.ray.intersectPlane(groundPlane, hit)) {
+        spawnRipple(hit.x, hit.z, tNow, 260, 1.5, 0x3fe1ff, 0.5);
       }
-      ctx.globalAlpha = 1;
+    };
+    const onMove = (e: PointerEvent) => {
+      mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.ty = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerdown", onClick, { passive: true });
 
-      // ---- dust ลอยช้าๆ ----
-      for (const d of dust) {
-        if (!reduced) {
-          d.y -= d.v * 0.0016;
-          if (d.y < -0.02) d.y = 0.6;
-        }
-        ctx.globalAlpha = d.a;
-        ctx.fillStyle = "rgba(140, 230, 255, 1)";
-        ctx.beginPath();
-        ctx.arc(d.x * w, d.y * h, d.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1;
+    // ---- loop ----
+    let raf = 0;
+    let tNow = 0;
+    const clock = new THREE.Clock();
+    const lookTarget = new THREE.Vector3();
 
-      // ---- horizon glow line ----
-      const hg = ctx.createLinearGradient(0, yBase - 60, 0, yBase + 2);
-      hg.addColorStop(0, "rgba(0, 210, 255, 0)");
-      hg.addColorStop(1, "rgba(0, 210, 255, 0.07)");
-      ctx.fillStyle = hg;
-      ctx.fillRect(0, yBase - 60, w, 62);
+    const animate = () => {
+      const dt = Math.min(clock.getDelta(), 0.1);
+      tNow += dt * motionScale;
+      const t = tNow;
 
-      // ---- terrain points ----
-      // scan sweep: ตำแหน่ง z ที่กำลังถูกสแกน
-      const scanZ = 30 + ((t * 180) % 1600);
-      const scanLit = (wz: number) => Math.exp(-Math.pow((wz - scanZ) / 95, 2));
+      uniforms.uTime.value = t;
+      uniforms.uScanZ.value = -700 + ((t * 260) % 2400);
 
-      const rows: { x: number; y: number; s: number; hue: number; a: number }[][] = [];
-      for (let j = 0; j < NZ; j++) {
-        const wz = ZS[j];
-        const fog = Math.max(0.07, Math.min(0.8, 1.18 - (j / (NZ - 1)) * 1.12));
-        const lit = scanLit(wz);
-        const row: { x: number; y: number; s: number; hue: number; a: number }[] = [];
-        for (let i = 0; i < NX; i++) {
-          const wx = XS[i];
-          const hn = (heightAt(wx, wz, t) + H_MAX) / (H_MAX * 2);
-          const p = project(wx, heightAt(wx, wz, t) * motionScale + lit * 12 - CAM_H, wz);
-          const hue = 205 - hn * 45 + lit * 12;
-          const a = Math.min(1, fog * (0.35 + hn * 0.5) + lit * 0.35);
-          row.push({ x: p.x, y: p.y, s: p.s, hue, a });
-        }
-        rows.push(row);
+      // parallax กล้อง
+      mouse.x += (mouse.tx - mouse.x) * 0.04;
+      mouse.y += (mouse.ty - mouse.y) * 0.04;
+      camera.position.x = mouse.x * 70;
+      camera.position.y = 235 - mouse.y * 26;
+      lookTarget.set(mouse.x * 40, 10 - mouse.y * 16, 560);
+      camera.lookAt(lookTarget);
+
+      // sensor heads + pulse rings
+      for (let i = 0; i < SENSOR_XZ.length; i++) {
+        const [sx, sz] = SENSOR_XZ[i];
+        const y = heightAtJS(sx, sz, t) * motionScale;
+        sensorHeads[i].position.set(sx, y + 58, sz);
+        const r = sensorPulseRings[i];
+        const ph = (t * 0.45 + r.ph) % 1;
+        r.mesh.position.set(r.x, y + 8, r.z);
+        r.mesh.scale.setScalar(6 + ph * 46);
+        r.mat.opacity = (1 - ph) * 0.4;
       }
 
-      // เส้นตามแนวความลึก (z) — ทุก 3 คอลัมน์
-      ctx.lineWidth = 1;
-      for (let i = 0; i < NX; i += 3) {
-        ctx.beginPath();
-        for (let j = 0; j < NZ; j++) {
-          const p = rows[j][i];
-          if (j === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.strokeStyle = `rgba(70, 200, 255, ${0.09 + 0.06 * scanLit(ZS[NZ - 1])})`;
-        ctx.stroke();
-      }
-
-      // เส้นตามแนวกว้าง (x) — ทุกแถว
-      for (let j = 0; j < NZ; j++) {
-        const fog = Math.max(0.07, Math.min(0.8, 1.18 - (j / (NZ - 1)) * 1.12));
-        const lit = scanLit(ZS[j]);
-        ctx.beginPath();
-        for (let i = 0; i < NX; i++) {
-          const p = rows[j][i];
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.strokeStyle = `rgba(80, 215, 255, ${Math.min(0.55, 0.08 + fog * 0.2 + lit * 0.3).toFixed(3)})`;
-        ctx.stroke();
-      }
-
-      // จุด grid — hue/light ตามความสูง
-      for (let j = 0; j < NZ; j++) {
-        const wz = ZS[j];
-        const lit = scanLit(wz);
-        for (let i = 0; i < NX; i++) {
-          const p = rows[j][i];
-          const r = (0.5 + (p.hue - 160) / 45 * 0.9) * p.s * 1.5;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, Math.max(0.5, r), 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue}, 92%, ${58 + lit * 22}%, ${p.a})`;
-          if (lit > 0.55) {
-            ctx.shadowColor = "rgba(64, 255, 210, 0.9)";
-            ctx.shadowBlur = 8 * lit;
-          }
-          ctx.fill();
-          ctx.shadowBlur = 0;
+      // anomaly spawn + ripple update
+      for (let i = 0; i < SENSOR_XZ.length; i++) {
+        if (t >= nextAnomaly[i]) {
+          spawnRipple(SENSOR_XZ[i][0], SENSOR_XZ[i][1], t, 430, 2.2, 0x5affdc, 0.45);
+          nextAnomaly[i] = t + 9 + Math.random() * 10;
         }
       }
-
-      // เส้น scan ไล่ตามภูมิประเทศ (hug terrain) ที่ z = scanZ
-      {
-        const N = 28;
-        ctx.beginPath();
-        for (let i = 0; i <= N; i++) {
-          const wx = -950 + (i * 1900) / N;
-          const p = project(wx, heightAt(wx, scanZ, t) - CAM_H + 10, scanZ);
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        const a = project(-950, 0, scanZ);
-        const b = project(950, 0, scanZ);
-        const g = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-        g.addColorStop(0, "rgba(64, 255, 210, 0)");
-        g.addColorStop(0.5, "rgba(64, 255, 210, 0.55)");
-        g.addColorStop(1, "rgba(64, 255, 210, 0)");
-        ctx.strokeStyle = g;
-        ctx.lineWidth = 1.6;
-        ctx.stroke();
-        ctx.lineWidth = 1;
-      }
-
-      // ---- sensor nodes: เสา + หัวกะพริบ + pulse ring ----
-      for (let k = 0; k < SENSORS.length; k++) {
-        const sn = SENSORS[k];
-        const base = project(sn.x, heightAt(sn.x, sn.z, t) - CAM_H, sn.z);
-        const top = project(sn.x, heightAt(sn.x, sn.z, t) + 52 - CAM_H, sn.z);
-        const depthFade = Math.max(0.25, Math.min(1, base.s / 0.9));
-        // เสา
-        ctx.strokeStyle = `rgba(120, 235, 255, ${(0.3 * depthFade).toFixed(3)})`;
-        ctx.beginPath();
-        ctx.moveTo(base.x, base.y);
-        ctx.lineTo(top.x, top.y);
-        ctx.stroke();
-        // หัวเซ็นเซอร์
-        ctx.beginPath();
-        ctx.arc(top.x, top.y, 2.6, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(64, 255, 210, ${(0.95 * depthFade).toFixed(3)})`;
-        ctx.shadowColor = "rgba(64, 255, 210, 0.9)";
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        // วงแหวน pulse
-        const ph = (t * 0.45 + sn.ph) % 1;
-        const pr = 3 + ph * 22;
-        ctx.beginPath();
-        ctx.arc(top.x, top.y, pr, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(64, 255, 210, ${((1 - ph) * 0.45 * depthFade).toFixed(3)})`;
-        ctx.stroke();
-      }
-
-      // ---- click ripples ----
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const rp = ripples[i];
-        rp.r += 3.4;
-        rp.a *= 0.95;
-        if (rp.a < 0.01) {
-          ripples.splice(i, 1);
+      for (let i = ripples3D.length - 1; i >= 0; i--) {
+        const rp = ripples3D[i];
+        const age = (t - rp.t0) / rp.dur;
+        if (age >= 1) {
+          scene.remove(rp.mesh);
+          rp.mesh.geometry.dispose();
+          rp.mat.dispose();
+          ripples3D.splice(i, 1);
           continue;
         }
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(0, 225, 255, ${rp.a.toFixed(3)})`;
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(rp.x, rp.y, rp.r * 0.6, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(64, 255, 210, ${(rp.a * 0.7).toFixed(3)})`;
-        ctx.stroke();
+        rp.mesh.position.set(rp.x, heightAtJS(rp.x, rp.z, t) * motionScale + 10, rp.z);
+        rp.mesh.scale.setScalar(8 + age * rp.maxR);
+        rp.mat.opacity = (1 - age) * 0.45;
       }
-    };
 
-    const loop = () => {
-      t += 0.008 * motionScale;
-      mouse.x += (mouse.tx - mouse.x) * 0.045;
-      mouse.y += (mouse.ty - mouse.y) * 0.045;
-      drawScene();
-      raf = requestAnimationFrame(loop);
-    };
+      // data packets — วิ่งจากขอบฟ้าเข้าหากล้อง
+      for (const pk of packets) {
+        const wz = 1650 - ((t * pk.v + pk.off) % 1750);
+        const y = heightAtJS(pk.lane, wz, t) * motionScale + 10;
+        pk.sp.position.set(pk.lane, y, wz);
+        const fade = Math.max(0.1, Math.min(1, (wz + 500) / 1400));
+        (pk.sp.material as THREE.SpriteMaterial).opacity = fade;
+      }
 
-    // canvas เคลื่อนไหวตลอด — reduce-motion ใช้ความเร็ว 35% (calm mode)
-    raf = requestAnimationFrame(loop);
+      if (useBloom) composer.render();
+      else renderer.render(scene, camera);
+      raf = requestAnimationFrame(animate);
+    };
+    raf = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerdown", onClick);
+      for (const d of disposables) d.dispose();
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.Mesh || obj instanceof THREE.Points || obj instanceof THREE.Sprite) {
+          obj.geometry?.dispose?.();
+        }
+      });
+      renderer.dispose();
     };
   }, []);
 

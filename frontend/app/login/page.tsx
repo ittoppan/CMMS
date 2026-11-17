@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import ThemeProvider from '../../components/ThemeProvider';
-import CmmsScene3D from './CmmsScene3D';
+
+// three.js + post-processing หนักหลายร้อย KB — โหลดหลังฟอร์มขึ้นแล้ว ไม่บล็อกการพิมพ์/autoFocus
+const CmmsScene3D = dynamic(() => import('./CmmsScene3D'), { ssr: false });
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
