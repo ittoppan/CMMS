@@ -214,7 +214,8 @@ if ($cmd === 'up') {
     $phCount = 0;
     if (tbl_exists($pdo, 'production_hours')) {
         $insPh = $pdo->prepare("INSERT INTO production_hours (asset_id, record_date, hours, shift, notes, created_by) VALUES (?,?,?,?,?,?)");
-        for ($d = 89; $d >= 0; $d--) {
+        // ครอบ 180 วัน เพื่อให้คำนวณ MTBF ได้ตลอด 6 เดือนของ trend/work order timeline
+        for ($d = 179; $d >= 0; $d--) {
             $date = date('Y-m-d', strtotime("-{$d} days"));
             foreach ($assetIds as $aid) {
                 $hrs = 18 + (crc32($date . (string)$aid) % 5); // 18-22
@@ -225,20 +226,30 @@ if ($cmd === 'up') {
     }
 
     // ── work orders (repair) ──────────────────────────────────────────────────
+    // timeline อิงวันนี้ (relative) ไม่ hardcode ปี — เทสมีข้อมูลจริงทุกปี
+    $ts = fn(DateTimeImmutable $d): string => $d->format('Y-m-d H:i:s');
+    $monthFloor = (new DateTimeImmutable('now'))->modify('first day of this month')->setTime(8, 0, 0);
+    $woStart = [];
+    for ($i = 0; $i < 6; $i++) {
+        // วันที่ 15 ของเดือน ย้อนหลัง 5..0 เดือน (เดือนปัจจุบันเป็น breakdown ล่าสุด)
+        $woStart[$i] = $monthFloor->modify('-' . (5 - $i) . ' months')->modify('+14 days');
+    }
+    $pmStart = (new DateTimeImmutable('now'))->modify('-5 days')->setTime(9, 0, 0);
+    $openStart = (new DateTimeImmutable('now'))->modify('-7 days')->setTime(8, 0, 0);
+
     $woIds = [];
     $insWo = $pdo->prepare("INSERT INTO repair
         (work_order_no, asset_id, assigned_to, created_by, repair_type_id, failure_code_id,
          priority, status, source_type, work_order_type, title, description, root_cause, solution,
          actual_start_at, acknowledged_at, completed_at, downtime_start, downtime_end, downtime_minutes,
-         repair_time_minutes, cost_parts, cost_labor, cost_outsource, notes)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+         repair_time_minutes, cost_parts, cost_labor, cost_outsource, notes, created_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
     // asset 91: 6 completed breakdowns (ให้ Weibull มี beta + repeat)
     $assetA = (int)$assetIds[0];
     for ($i = 0; $i < 6; $i++) {
-        $month = 6 + $i; // Jun..Nov
-        $created = sprintf('2026-%02d-15 08:00:00', $month);
-        $completed = sprintf('2026-%02d-15 10:00:00', $month);
+        $created = $ts($woStart[$i]);
+        $completed = $ts($woStart[$i]->modify('+2 hours'));
         $dt = [120, 180, 90, 60, 240, 150][$i];
         $fc = ($i % 2 === 0) ? 1 : 2; // FC-MEC / FC-ELE
         $insWo->execute([
@@ -267,6 +278,7 @@ if ($cmd === 'up') {
             300.00 + $i * 50,
             0.00,
             WO_MARK,
+            $ts($woStart[$i]->modify('-1 day')),
         ]);
         $woIds[] = (int)$pdo->lastInsertId();
     }
@@ -287,9 +299,9 @@ if ($cmd === 'up') {
         'ข้อมูลทดสอบ E2E (ลบอัตโนมัติ)',
         null,
         'E2E solution',
-        '2026-11-01 09:00:00',
-        '2026-11-01 09:00:00',
-        '2026-11-01 10:00:00',
+        $ts($pmStart),
+        $ts($pmStart),
+        $ts($pmStart->modify('+1 hour')),
         null,
         null,
         0,
@@ -298,6 +310,7 @@ if ($cmd === 'up') {
         200.00,
         0.00,
         WO_MARK,
+        $ts($pmStart->modify('-1 day')),
     ]);
     $woIds[] = (int)$pdo->lastInsertId();
     // asset 93: 1 open breakdown (priority/aging)
@@ -320,7 +333,7 @@ if ($cmd === 'up') {
         null,
         null,
         null,
-        '2026-11-10 08:00:00',
+        $ts($openStart),
         null,
         45,
         null,
@@ -328,6 +341,7 @@ if ($cmd === 'up') {
         0.00,
         0.00,
         WO_MARK,
+        $ts($openStart->modify('-1 day')),
     ]);
     $woIds[] = (int)$pdo->lastInsertId();
 
@@ -342,8 +356,7 @@ if ($cmd === 'up') {
 
         // asset 91: 6 failures (first = not repeat, rest repeat)
         for ($i = 0; $i < 6; $i++) {
-            $month = 6 + $i;
-            $fd = sprintf('2026-%02d-15 08:00:00', $month);
+            $fd = $ts($woStart[$i]);
             $dt = [120, 180, 90, 60, 240, 150][$i];
             $modeCode = ($i % 2 === 0) ? (TAX_PREFIX . 'MODE-BRG') : (TAX_PREFIX . 'MODE-MOT');
             $typeCode = TAX_PREFIX . 'MECH';
@@ -358,7 +371,8 @@ if ($cmd === 'up') {
                 $taxCauseIds[$causeCode] ?? null,
                 $i === 3 ? 'high' : 'medium',
                 $dt >= 120 ? 'line_stopped' : 'slowdown',
-                $dt,
+                // downtime บันทึกที่ใบงานแล้ว — failure event ที่ผูกใบงานจึงไม่ใส่ซ้ำ (engine นับเฉพาะ event ที่ไม่มีใบงาน)
+                0,
                 'E2E seed failure #' . ($i + 1),
                 'สังเกตเสียงผิดปกติ',
                 $adminId,
@@ -374,13 +388,13 @@ if ($cmd === 'up') {
             EVT_PREFIX . '7',
             $assetC,
             $woIds[7],
-            '2026-11-10 08:00:00',
+            $ts($openStart),
             $taxTypeIds[TAX_PREFIX . 'HYD'] ?? null,
             $taxModeIds[TAX_PREFIX . 'MODE-PMP'] ?? null,
             $taxCauseIds[TAX_PREFIX . 'CAUSE-WEAR'] ?? null,
             'medium',
             'slowdown',
-            45,
+            0, // ใบงานเปิดอยู่และบันทึก downtime 45 นาทีไว้แล้ว
             'E2E seed failure open WO',
             'รั่วที่ข้อต่อ',
             $adminId,
@@ -400,28 +414,37 @@ if ($cmd === 'up') {
             (asset_id, year, month, operating_hours, total_failures, total_downtime_minutes, mtbf_hours, mttr_minutes)
             VALUES (?,?,?,?,?,?,?,?)");
 
-        // failures per asset per month
+        // failures / downtime per asset per ช่วงเดือนจริง (Y-m) ที่มาจาก $woStart/$openStart
         $failByAssetMonth = [];
-        for ($i = 0; $i < 6; $i++) {
-            $failByAssetMonth[$assetA][6 + $i] = 1;
-        }
-        $failByAssetMonth[$assetC][11] = 1;
         $dtByAssetMonth = [];
         $dtList = [120, 180, 90, 60, 240, 150];
+        $periods = []; // key 'Y-m' => [year, month]
         for ($i = 0; $i < 6; $i++) {
-            $dtByAssetMonth[$assetA][6 + $i] = $dtList[$i];
+            $key = $woStart[$i]->format('Y-m');
+            $failByAssetMonth[$assetA][$key] = 1;
+            $dtByAssetMonth[$assetA][$key] = $dtList[$i];
+            $periods[$key] = [(int)$woStart[$i]->format('Y'), (int)$woStart[$i]->format('n')];
         }
-        $dtByAssetMonth[$assetC][11] = 45;
+        $openKey = $openStart->format('Y-m');
+        $failByAssetMonth[$assetC][$openKey] = 1;
+        $dtByAssetMonth[$assetC][$openKey] = 45;
+        $periods[$openKey] = [(int)$openStart->format('Y'), (int)$openStart->format('n')];
+        ksort($periods);
+
+        // operating hours ต่อเครื่อง/เดือน ดึงจาก production_hours ที่ seed ไว้ — ให้ analytics/reliability ตรงกัน
+        $opSt = $pdo->prepare("SELECT COALESCE(SUM(hours),0) FROM production_hours
+            WHERE asset_id = ? AND DATE_FORMAT(record_date,'%Y-%m') = ? AND notes = '" . PH_MARK . "'");
 
         foreach ([$assetA, $assetB, $assetC] as $aid) {
-            for ($m = 6; $m <= 11; $m++) {
-                $op = 600.00;
-                $fails = (int)($failByAssetMonth[$aid][$m] ?? 0);
-                $dt = (int)($dtByAssetMonth[$aid][$m] ?? 0);
+            foreach ($periods as $key => [$yy, $mm]) {
+                $opSt->execute([$aid, $key]);
+                $op = round((float)$opSt->fetchColumn(), 2);
+                $fails = (int)($failByAssetMonth[$aid][$key] ?? 0);
+                $dt = (int)($dtByAssetMonth[$aid][$key] ?? 0);
                 $mtbf = $fails > 0 ? round($op / $fails, 2) : null;
                 $mttr = $fails > 0 ? round($dt / $fails, 2) : null;
-                $insMm->execute([$aid, 2026, $m, $op, $fails, $dt, $mtbf, $mttr]);
-                $mtbfTuples[] = [$aid, 2026, $m];
+                $insMm->execute([$aid, $yy, $mm, $op, $fails, $dt, $mtbf, $mttr]);
+                $mtbfTuples[] = [$aid, $yy, $mm];
                 $mtbfCount++;
             }
         }
