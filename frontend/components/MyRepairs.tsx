@@ -168,9 +168,18 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
         <span style={{ fontSize: 11.5, fontWeight: 700, color: "var(--cmms-text-secondary)" }}>
           {existing > 0 ? "คะแนนที่ให้" : "ประเมินผลงาน"}
         </span>
+        {/* ชุดวาดดาวชุดเดียว: โหมดแก้ไขหุ้มด้วย <button> (hover + aria-label), โหมดแสดงผลหุ้มด้วย <span> */}
         <div className="flex items-center gap-0.5">
-          {STARS.map((n) =>
-            open ? (
+          {STARS.map((n) => {
+            const filled = n <= shown;
+            const star = (
+              <Star
+                size={open ? 18 : 14}
+                strokeWidth={1.75}
+                style={{ color: filled ? "#F59E0B" : "var(--cmms-border)", fill: filled ? "#F59E0B" : "none" }}
+              />
+            );
+            return open ? (
               <button
                 key={n}
                 type="button"
@@ -182,12 +191,14 @@ function RepairRating({ item, onSaved }: { item: Item; onSaved: () => void }) {
                 className="p-0.5"
                 style={{ background: "none", border: 0, cursor: "pointer", lineHeight: 0 }}
               >
-                <Star size={18} strokeWidth={1.75} style={{ color: n <= shown ? "#F59E0B" : "var(--cmms-border)", fill: n <= shown ? "#F59E0B" : "none" }} />
+                {star}
               </button>
             ) : (
-              <Star key={n} size={14} strokeWidth={1.75} style={{ color: n <= shown ? "#F59E0B" : "var(--cmms-border)", fill: n <= shown ? "#F59E0B" : "none" }} />
-            )
-          )}
+              <span key={n} style={{ display: "inline-flex", lineHeight: 0 }}>
+                {star}
+              </span>
+            );
+          })}
         </div>
         {!open && (
           <button
