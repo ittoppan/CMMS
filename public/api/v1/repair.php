@@ -225,7 +225,8 @@ try {
                 }
                 $rid = (int)($data['repair_id'] ?? 0);
                 $score = (int)($data['rating_score'] ?? 0);
-                $comment = trim((string)($data['rating_comment'] ?? ''));
+                // จำกัดความยาวฝั่งเซิร์ฟเวอร์ (UI maxLength กันได้แค่ผู้ใช้ทั่วไป — client ยิงตรงข้ามได้)
+                $comment = repair_rating_normalize_comment($data['rating_comment'] ?? '');
                 if ($rid <= 0 || $score < 1 || $score > 5) {
                     http_response_code(400);
                     echo json_encode(['error' => 'Invalid rating data', 'success' => false], JSON_UNESCAPED_UNICODE);
@@ -240,15 +241,13 @@ try {
                     exit;
                 }
                 $rStatus = strtolower(trim((string)($repairRow['status'] ?? '')));
-                if (!in_array($rStatus, ['completed', 'closed', 'resolved', 'verified'], true)) {
+                if (!repair_rating_status_can_rate($rStatus)) {
                     http_response_code(400);
                     echo json_encode(['error' => 'สามารถประเมินได้เฉพาะงานที่ปิดงาน/เสร็จสิ้นแล้ว', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
-                $cu = $rater['user'];
-                $ratedBy = isset($cu['id']) ? (int)$cu['id'] : null;
-                $canSupervisorNow = function_exists('canSupervisor') && canSupervisor();
-                if (!repair_rating_can_rate($repairRow, $cu, (bool)$rater['session'], $canSupervisorNow)) {
+                $ratedBy = (int)$rater['user']['id'];
+                if (!repair_rating_can_rate($repairRow, $rater, canSupervisor())) {
                     http_response_code(403);
                     echo json_encode(['error' => 'ไม่มีสิทธิ์ประเมินงานนี้', 'success' => false], JSON_UNESCAPED_UNICODE);
                     exit;
@@ -257,13 +256,15 @@ try {
                 $ex->execute([$rid]);
                 $existing = $ex->fetch(PDO::FETCH_ASSOC);
                 $existingId = $existing ? (int)$existing['id'] : 0;
+                $commentValue = $comment !== '' ? $comment : null;
                 if ($existingId) {
-                    $u = $pdo->prepare('UPDATE repair_ratings SET rating_score = ?, rating_comment = ?, rated_by = ?, created_at = NOW() WHERE id = ?');
-                    $u->execute([$score, ($comment !== '' ? $comment : null), $ratedBy, $existingId]);
+                    // ตั้งใจไม่แตะ created_at — "แถวล่าสุด" ตัดสินจาก MAX(id) ทุกที่ที่อ่าน
+                    $u = $pdo->prepare('UPDATE repair_ratings SET rating_score = ?, rating_comment = ?, rated_by = ? WHERE id = ?');
+                    $u->execute([$score, $commentValue, $ratedBy, $existingId]);
                     $ratingId = $existingId;
                 } else {
                     $i = $pdo->prepare('INSERT INTO repair_ratings (repair_id, rating_score, rating_comment, rated_by) VALUES (?, ?, ?, ?)');
-                    $i->execute([$rid, $score, ($comment !== '' ? $comment : null), $ratedBy]);
+                    $i->execute([$rid, $score, $commentValue, $ratedBy]);
                     $ratingId = (int)$pdo->lastInsertId();
                 }
                 // บันทึกกิจกรรมการประเมิน (ถ้ามีตาราง)

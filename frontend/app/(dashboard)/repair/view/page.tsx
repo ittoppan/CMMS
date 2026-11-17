@@ -29,6 +29,7 @@ import {
   PackagePlus,
   ShieldAlert,
   ExternalLink,
+  Star,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -118,6 +119,9 @@ interface WorkOrderDetail {
   outsourceBy?: string;
   actualStartAt?: string;
   repairTimeMinutes?: number;
+  /** ผลประเมินล่าสุดจากผู้แจ้ง (repair_ratings แถวล่าสุด) — 0/undefined = ยังไม่ประเมิน */
+  ratingScore?: number;
+  ratingComment?: string | null;
   team: { user_id: number; role: string; full_name: string; status?: string; accepted_at?: string }[];
 }
 
@@ -306,6 +310,8 @@ export default function RepairViewDetailsPage() {
             outsourceBy: String(row.outsource_by || ""),
             actualStartAt: String(row.actual_start_at || ""),
             repairTimeMinutes: Number(row.repair_time_minutes || 0),
+            ratingScore: Number(row.rating_score || 0),
+            ratingComment: row.rating_comment ?? null,
             team: Array.isArray(row.team) ? row.team : []
           };
           setWo(mapped);
@@ -663,6 +669,8 @@ export default function RepairViewDetailsPage() {
   }, [sageQuery]);
 
   const partsTotal = partRows.reduce((a, r) => a + r.quantity_used * r.unit_price, 0);
+  // ผลประเมินล่าสุดจากผู้แจ้ง (0 = ยังไม่ประเมิน → ไม่แสดงการ์ด)
+  const ratingScore = Math.max(0, Math.min(5, Math.round(Number(wo.ratingScore ?? 0))));
 
   return (
     <PageShell
@@ -1354,6 +1362,50 @@ export default function RepairViewDetailsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* ── ผลตอบรับจากผู้แจ้ง (repair_ratings แถวล่าสุด) ── */}
+        {ratingScore > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+              <div>
+                <CardTitle className="text-base">ผลตอบรับจากผู้แจ้ง</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  คะแนนและความคิดเห็นจากการประเมินครั้งล่าสุด — ผู้แจ้งให้คะแนนจากหน้าติดตามงานของตัวเอง
+                </p>
+              </div>
+              <span className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
+                {ratingScore}/5
+              </span>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div
+                className="flex items-center gap-0.5"
+                role="img"
+                aria-label={`คะแนนจากผู้แจ้ง ${ratingScore} จาก 5 ดาว`}
+              >
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const filled = n <= ratingScore;
+                  return (
+                    <Star
+                      key={n}
+                      size={18}
+                      strokeWidth={1.75}
+                      style={{
+                        color: filled ? "var(--cmms-warning)" : "var(--cmms-border)",
+                        fill: filled ? "var(--cmms-warning)" : "none",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+              {wo.ratingComment ? (
+                <p className="m-0 whitespace-pre-wrap text-sm text-foreground">{wo.ratingComment}</p>
+              ) : (
+                <p className="m-0 text-sm text-muted-foreground">ผู้แจ้งให้คะแนนโดยไม่ได้เขียนความคิดเห็น</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Main Closure Document Sheet */}
