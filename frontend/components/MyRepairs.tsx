@@ -7,12 +7,14 @@
  *   • https://liff.line.me/<LIFF_ID>?view=track   → /repair/request?view=track (LIFF endpoint เดิม)
  *   • /my-repairs (เว็บ/PWA — ใช้ session ที่ล็อกอินอยู่)
  *
- * ระบุตัวตนจาก line_user_id ที่ LiffBridge เก็บไว้ใน localStorage (cmms_line_user_id)
- * แล้วดึงงานที่ตัวเองแจ้งจาก /api/v1/my_repairs.php — ไม่เห็นงานของคนอื่น
+ * ตัวตนมาจาก store ของ liff-session (LiffBridge เป็นผู้ประกาศ) — useLiffFetch รอสถานะ
+ * จาก store แบบ event-driven แล้วแนบ X-LIFF-Id-Token ให้ /api/v1/my_repairs.php
+ * ตรวจกับ LINE เอง ไม่มีการวนอ่าน localStorage และไม่ส่ง line_user_id จาก client
  */
 
 import { useEffect, useMemo, useState } from "react";
 import { useLiffFetch } from "@/lib/useLiffFetch";
+import { useLiffSession } from "@/lib/liff-session";
 
 import {
   AlertCircle,
@@ -114,6 +116,7 @@ export default function MyRepairs() {
   // ตัวตน: ไม่ส่ง line_user_id จาก client แล้ว — useLiffFetch แนบ X-LIFF-Id-Token
   // (LiffBridge เป็นคนประกาศ token) ให้เซิร์ฟเวอร์ตรวจกับ LINE เอง; ถ้าไม่มี token/session
   // จะได้ registered=false แล้วขึ้นคำแนะนำให้แอดมินเพิ่มผู้ใช้
+  const session = useLiffSession();
   const url = "/api/v1/my_repairs.php";
 
   const { data, loading, error, reload: load } = useLiffFetch<Api>({
@@ -145,6 +148,9 @@ export default function MyRepairs() {
   }, [items, tab]);
 
   const counts = data?.counts ?? { open: 0, done: 0, total: 0 };
+  // ชื่อจาก DB เมื่อผูกแล้ว ระหว่างโหลดใช้ชื่อจาก store (ไม่ต้องอ่าน localStorage)
+  const viewerName = data?.user?.full_name || session.displayName;
+  const viewerCode = data?.user?.employee_code || "";
 
   return (
     <div className="cmms-mobile-page">
@@ -173,10 +179,10 @@ export default function MyRepairs() {
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
-        {data?.user?.full_name && (
+        {viewerName && (
           <p className="mt-2 mb-0" style={{ fontSize: 12.5, color: "#C6D9EE" }}>
-            {data.user.full_name}
-            {data.user.employee_code ? ` · ${data.user.employee_code}` : ""}
+            {viewerName}
+            {viewerCode ? ` · ${viewerCode}` : ""}
           </p>
         )}
       </div>
