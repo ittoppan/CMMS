@@ -28,28 +28,11 @@ function repair_track_liff_url(): string
     return liff_url(['view' => 'track']) ?: repair_track_url();
 }
 
-/** URL หน้าใบงานสำหรับช่าง/ผู้ดูแล (dashboard — ต้อง login) */
+/**
+ * URL หน้าใบงานสำหรับช่าง/ผู้ดูแล (dashboard — ต้อง login)
+ * ใช้กับข้อความ "รับงานซ่อมด่วน" (line_tpl_breakdown) ที่ส่งถึงช่าง/กลุ่มซ่อมบำรุง
+ */
 function repair_view_url(int $repairId): string
 {
     return rtrim(publicBaseUrl(), '/') . '/repair/view?id=' . $repairId;
-}
-
-/**
- * เลือกลิงก์ปุ่มในข้อความ LINE ตาม "ผู้รับ" (ใช้กับการแจ้งซ่อมด่วน/มอบหมายงาน)
- * - ผู้แจ้ง (LINE user id ตรงกับผู้สร้างใบงาน) → หน้า "ติดตามงานของฉัน" (?view=track)
- *   เพราะเห็นเฉพาะงานที่ตนแจ้งเอง
- * - ช่าง/แอดมิน/กลุ่ม LINE → หน้าใบงาน /repair/view เพื่อเปิดจัดการงานที่ได้รับมอบหมาย
- *
- * @param string $recipientLineId LINE user/group/room id ของผู้รับข้อความ
- * @param string $creatorLineId   LINE user id ของผู้แจ้ง/ผู้สร้างใบงาน ('' ถ้าไม่มี/ไม่ทราบ)
- * @param int    $repairId        เลขใบงาน
- */
-function repair_notify_url_for_recipient(string $recipientLineId, string $creatorLineId, int $repairId): string
-{
-    $recipientLineId = trim($recipientLineId);
-    $creatorLineId = trim($creatorLineId);
-    if ($creatorLineId !== '' && $recipientLineId !== '' && $recipientLineId === $creatorLineId) {
-        return repair_track_liff_url();
-    }
-    return repair_view_url($repairId);
 }

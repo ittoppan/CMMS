@@ -492,13 +492,13 @@ try {
                         foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $lid) $targets[] = (string)$lid;
                     }
 
-                    // ปุ่มในข้อความ LINE แยกตามผู้รับ: ผู้แจ้ง → ติดตามงานของฉัน (?view=track),
-                    // ช่าง/แอดมิน/กลุ่ม → ใบงาน /repair/view (งานที่ได้รับมอบหมาย ไม่ได้อยู่ในหน้าติดตามของผู้แจ้ง)
-                    $creatorLineId = (string)($owner['line_user_id'] ?? '');
+                    // ปุ่มในข้อความ "รับงานซ่อมด่วน" = หน้าใบงาน /repair/view (ผู้รับคือช่าง/กลุ่มซ่อมบำรุง
+                    // ที่ต้องเปิดงานและกดรับงาน — หน้าติดตามงานของผู้แจ้งว่างสำหรัยช่าง)
+                    // ข้อความตอนปิดงาน (line_tpl_completed) และอีเมลยังใช้ ?view=track สำหรับผู้แจ้ง
+                    $detailUrl = repair_view_url($newId);
                     foreach (array_unique($targets) as $tid) {
                         $photos = ['before' => repairPhotoUrls($newId, 'failure_image', 2)];
-                        $notifyUrl = repair_notify_url_for_recipient((string)$tid, $creatorLineId, $newId);
-                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $notifyUrl, $photos);
+                        sendLineTemplatePush($tid, 'line_tpl_breakdown', $tplVars, $detailUrl, $photos);
                     }
                 }
             } catch (Exception $e) {
