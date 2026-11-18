@@ -28,25 +28,21 @@
     background: #0f172a;
     color: #fff;
     border-radius: 3mm;
-    padding: 3.4mm 5mm;
-    margin-bottom: 2.4mm;
+    padding: 2.6mm 5mm;
+    margin-bottom: 2mm;
   }
   .header h1 { margin: 0; font-size: 19pt; line-height: 1.1; letter-spacing: .3px; }
   .header .sub { margin: .8mm 0 0; font-size: 9.6pt; color: #bae6fd; }
   .header .sub-en { margin: .3mm 0 0; font-size: 8pt; color: #94a3b8; font-style: italic; }
   .header .badge { padding: 1.8mm 3mm; font-size: 7.5pt; }
   .header .badge strong { font-size: 11pt; }
-  .header .badge {
+  .logo-chip {
     flex: 0 0 auto;
-    text-align: center;
-    border: 1.2px solid #0ea5e9;
+    background: #ffffff;
     border-radius: 2mm;
-    padding: 2.5mm 3.5mm;
-    font-size: 8.5pt;
-    color: #7dd3fc;
-    line-height: 1.35;
+    padding: 2mm 2.6mm;
   }
-  .header .badge strong { display: block; font-size: 13pt; color: #fff; }
+  .logo-chip img { display: block; height: 8.4mm; width: auto; }
 
   /* ---------- start row ---------- */
   .start-row { display: flex; gap: 3mm; margin-bottom: 2.4mm; }
@@ -78,8 +74,8 @@
   .step {
     display: flex;
     gap: 2.5mm;
-    padding: 1.4mm 2.5mm;
-    margin-bottom: 1.4mm;
+    padding: 1.1mm 2.5mm;
+    margin-bottom: 1.1mm;
     background: #f8fafc;
     border-radius: 2mm;
     page-break-inside: avoid;
@@ -100,7 +96,7 @@
   .step-desc { margin: .2mm 0 0; font-size: 8.2pt; color: #334155; line-height: 1.25; }
 
   /* ---------- main tasks ---------- */
-  .tasks { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-bottom: 2.4mm; }
+  .tasks { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-bottom: 2mm; }
   .task {
     border: 1px solid #cbd5e1;
     border-top: 1.6mm solid #0ea5e9;
@@ -122,8 +118,8 @@
   }
 
   /* ---------- roles table ---------- */
-  table { width: 100%; border-collapse: collapse; font-size: 8.8pt; margin-bottom: 2.4mm; }
-  th, td { border: 1px solid #cbd5e1; padding: 1mm 2mm; text-align: left; vertical-align: top; }
+  table { width: 100%; border-collapse: collapse; font-size: 8.8pt; margin-bottom: 2mm; }
+  th, td { border: 1px solid #cbd5e1; padding: .9mm 2mm; text-align: left; vertical-align: top; }
   th { background: #0f172a; color: #fff; font-size: 8.4pt; }
   td.role { font-weight: 700; color: #0369a1; white-space: nowrap; background: #f0f9ff; }
   tr:nth-child(even) td { background: #f8fafc; }
@@ -134,8 +130,8 @@
     background: #fffbeb;
     border: 1.4px solid #f59e0b;
     border-radius: 3mm;
-    padding: 1.8mm 3mm;
-    margin-bottom: 2mm;
+    padding: 1.5mm 3mm;
+    margin-bottom: 1.8mm;
   }
   .tips h3 { margin: 0 0 1mm; font-size: 9.6pt; color: #92400e; }
   .tips ul { margin: 0; padding-left: 4mm; font-size: 8.5pt; color: #334155; line-height: 1.25; }
@@ -143,9 +139,19 @@
 
   .footer {
     border-top: 1px solid #e2e8f0;
-    padding-top: 2mm;
+    padding-top: 1.2mm;
     text-align: center;
-    font-size: 7.5pt;
+  }
+  .footer .contact {
+    margin: 0;
+    font-size: 9pt;
+    font-weight: 600;
+    color: #0369a1;
+  }
+  .footer .contact b { color: #0f172a; }
+  .footer .small {
+    margin: .3mm 0 0;
+    font-size: 7pt;
     color: #94a3b8;
   }
 </style>
@@ -159,9 +165,8 @@
       <p class="sub">เริ่มใช้งาน · แจ้งซ่อม · รับงาน · ตรวจ PM · เบิกอะไหล่</p>
       <p class="sub-en">Quick User Guide — the five things you do every day</p>
     </div>
-    <div class="badge">
-      <strong>A4</strong>
-      ฉบับพกพา<br>พิมพ์ติดบอร์ด
+    <div class="logo-chip">
+      <img src="toppan_logo.png" alt="TOPPAN">
     </div>
   </div>
 
@@ -298,7 +303,8 @@
   </div>
 
   <div class="footer">
-    CMMS-TPT | คู่มือใช้งานฉบับย่อ / Quick User Guide | ฉบับละเอียด: docs/USER_GUIDE.md
+    <p class="contact">แจ้งฝ่ายไอที / IT Support: <b>toppan.center@majend-makcs.co.th</b> · หรือแจ้งผ่านเมนู งานซ่อม ในระบบ</p>
+    <p class="small">CMMS-TPT · คู่มือใช้งานฉบับย่อ / Quick User Guide · ฉบับละเอียด: docs/USER_GUIDE.md</p>
   </div>
 
 </div>
