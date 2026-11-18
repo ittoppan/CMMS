@@ -26,10 +26,12 @@ import { Search, RefreshCw, Plus, GraduationCap, CircleAlert, ClipboardList, Boo
 import {
   fetchKnCatalog,
   fetchKnFeatureStatus,
+  fetchKnGaps,
   knStatusLabel,
   KN_STATUS_TONE,
   type KnCatalog,
   type KnFeatureStatus,
+  type KnGap,
 } from "@/lib/knowledge";
 import { cn } from "@/lib/cn";
 import { KNOWLEDGE_QUICK_LINKS } from "@/lib/quick-links";
@@ -92,6 +94,7 @@ export default function KnowledgePage() {
 
   const [cat, setCat] = useState<KnCatalog | null>(null);
   const [status, setStatus] = useState<KnFeatureStatus | null>(null);
+  const [topGaps, setTopGaps] = useState<KnGap[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -104,6 +107,12 @@ export default function KnowledgePage() {
       const [c, s] = await Promise.all([fetchKnCatalog(), fetchKnFeatureStatus()]);
       setCat(c);
       setStatus(s);
+      if (can("manage_gaps")) {
+        try {
+          const g = await fetchKnGaps({ open_only: true, limit: 5 });
+          setTopGaps(g.gaps ?? []);
+        } catch { setTopGaps([]); }
+      }
     } catch (e: any) {
       setError(e?.message || "โหลดข้อมูลศูนย์ความรู้ไม่สำเร็จ");
     } finally {
@@ -366,6 +375,24 @@ export default function KnowledgePage() {
               )}
             </CardContent>
           </Card>
+
+          {topGaps.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>ช่องว่างความรู้ (Top gaps)</CardTitle>
+                <CardDescription>คำค้นที่ไม่มีคำตอบ — ควรเขียนบทความ</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {topGaps.map((g) => (
+                  <div key={g.id} className="flex items-center justify-between gap-2">
+                    <span className="truncate">{g.search_term}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{g.occurrences} ครั้ง</span>
+                  </div>
+                ))}
+                <Link href="/knowledge/gaps" className={buttonVariants({ variant: "ghost", size: "sm", className: "min-h-10" })}>ดูทั้งหมด →</Link>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

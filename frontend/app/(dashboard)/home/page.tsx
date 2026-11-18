@@ -88,6 +88,7 @@ export default function HomePage() {
 
   const { canShow, permission, userFullName } = useMenuPermission();
   const [kpis, setKpis] = useState<Kpis | null>(null);
+  const [dqWarnings, setDqWarnings] = useState<string[]>([]);
   const [nowLabel, setNowLabel] = useState("");
   const canShowRef = useRef(canShow);
   canShowRef.current = canShow;
@@ -108,6 +109,15 @@ export default function HomePage() {
       .then((r) => r.json())
       .then((j) => { if (!cancelled && j && typeof j === "object") setKpis(j as Kpis); })
       .catch(() => { if (!cancelled) setKpis(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/v1/intelligence.php?section=data_quality")
+      .then((r) => r.json())
+      .then((j) => { if (!cancelled && j?.data?.warnings) setDqWarnings(j.data.warnings.slice(0, 3)); })
+      .catch(() => {});
     return () => { cancelled = true; };
   }, []);
 
@@ -210,6 +220,18 @@ export default function HomePage() {
               {freqItems.map((it) => (
                 <MenuTileLink key={it.href} href={it.href} icon={it.icon} label={it.label ?? (it.labelKey ? t(it.labelKey) : "")} counts={kpis?.counts ?? {}} />
               ))}
+            </div>
+          </section>
+        )}
+
+        {dqWarnings.length > 0 && (
+          <section aria-label="คุณภาพข้อมูล">
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="mb-1 font-semibold">คุณภาพข้อมูล (Data Quality)</p>
+              <ul className="list-disc pl-5 text-xs">
+                {dqWarnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+              <Link href="/analytics/intelligence" className="mt-2 inline-block text-xs font-semibold underline">ดูรายละเอียด →</Link>
             </div>
           </section>
         )}
