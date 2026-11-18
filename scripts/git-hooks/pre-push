@@ -49,6 +49,23 @@ while read -r local_ref local_oid remote_ref remote_oid; do
   fi
 done
 
+# ── PHP unit tests (เร็ว, ไม่ใช้ DB) — รันก่อน tsc/next build เพื่อให้รู้ผลเร็ว ──
+# รายการชุดทดสอบรวมอยู่ที่ scripts/php-unit-tests.sh (ไฟล์เดียวกับที่ CI เรียก)
+# ครอบคลุมกติกา reset ของ PM reminder (pm_reminders_should_reset) และ xlsx writer/reader
+PHP_TESTS="$REPO_ROOT/scripts/php-unit-tests.sh"
+if [ -f "$PHP_TESTS" ] && command -v php >/dev/null 2>&1; then
+  echo ""
+  echo "[pre-push] php unit tests (bash scripts/php-unit-tests.sh)"
+  if ! bash "$PHP_TESTS"; then
+    echo "[pre-push] ❌ BLOCKED: ชุดทดสอบ PHP ไม่ผ่าน — แก้ให้เทสต์ผ่านก่อน push"
+    FAILED=1
+  fi
+elif [ ! -f "$PHP_TESTS" ]; then
+  echo "[pre-push] ⚠️ ไม่พบ scripts/php-unit-tests.sh — ข้ามการตรวจชุดทดสอบ PHP"
+else
+  echo "[pre-push] ⚠️ ไม่พบ php ใน PATH — ข้ามการตรวจชุดทดสอบ PHP"
+fi
+
 # ── TypeScript check: บังคับ 0 error (ล้าง debt ครบแล้ว ไม่มี baseline) ──
 TSC_CHECK="$REPO_ROOT/scripts/tsc-check.sh"
 if [ -f "$TSC_CHECK" ]; then
@@ -60,23 +77,6 @@ if [ -f "$TSC_CHECK" ]; then
   fi
 else
   echo "[pre-push] ⚠️ ไม่พบ scripts/tsc-check.sh — ข้ามการตรวจ TypeScript"
-fi
-
-# ── PHP helper regression tests (เร็ว, ไม่ใช้ DB) — จับกติกา reset ของ PM reminder ถอยหลัง ──
-# เหตุผล: กติกา "กดรับงานไม่ล้าง last_notified_at / เปิดงานใหม่จากสถานะปิดต้องล้าง" อยู่ใน
-#   pm_reminders_should_reset() — ถ้าแก้แล้วลืมเทสต์ ช่างจะได้แจ้งเตือนซ้ำหรือไม่ได้รับเลย
-PHP_TEST="$REPO_ROOT/scripts/test_pm_reminders_reset.php"
-if [ -f "$PHP_TEST" ] && command -v php >/dev/null 2>&1; then
-  echo ""
-  echo "[pre-push] php scripts/test_pm_reminders_reset.php (กติกา reset ของ PM reminder)"
-  if ! php "$PHP_TEST"; then
-    echo "[pre-push] ❌ BLOCKED: กติกา reset ไม่ตรงดีไซน์ — แก้ให้เทสต์ผ่านก่อน push"
-    FAILED=1
-  fi
-elif [ ! -f "$PHP_TEST" ]; then
-  echo "[pre-push] ⚠️ ไม่พบ scripts/test_pm_reminders_reset.php — ข้ามการตรวจชุดทดสอบ PHP"
-else
-  echo "[pre-push] ⚠️ ไม่พบ php ใน PATH — ข้ามการตรวจชุดทดสอบ PHP"
 fi
 
 # ── Next build check: จับ build พัง (Turbopack parse error) ที่ tsc ตรวจไม่เจอ ──
