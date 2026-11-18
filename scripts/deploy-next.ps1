@@ -25,7 +25,8 @@ $root = "C:\inetpub\wwwroot\cmms-tpt"
 $frontend = Join-Path $root "frontend"
 $standalone = Join-Path $frontend ".next\standalone"
 $nodeExe = "C:\Program Files\nodejs\node.exe"
-$logDir = "C:\Users\ADMINI~1.MAJ\AppData\Local\Temp\opencode"
+$logDir = Join-Path $root "logs"   # project logs\ — same folder ensure-next.ps1 / nextjs-service.ps1 use
+if (-not (Test-Path -LiteralPath $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
 
 function Stop-NextServer {
     $procs = Get-Process node -ErrorAction SilentlyContinue
