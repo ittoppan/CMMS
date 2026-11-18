@@ -253,6 +253,9 @@ export default function MenuPermissionsPage() {
           <span className="cmms-andon-chip" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary-hover)" }}>
             {menus.length} เมนู × {roles.length} บทบาท
           </span>
+          <Button variant="secondary" onClick={() => (window.location.href = "/settings/permission-diff")}>
+            ตรวจ drift สิทธิ์
+          </Button>
           <Button disabled={saving} onClick={handleSave}>
             {saving ? "กำลังบันทึก..." : "บันทึกการตั้งค่า"}
           </Button>

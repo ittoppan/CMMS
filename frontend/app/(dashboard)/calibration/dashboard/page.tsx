@@ -20,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert } from "@/components/ui/alert";
 import AndonLamp from "@/components/AndonLamp";
+import { PermissionDeniedState } from "@/components/ui/state-panel";
+import { ApiError } from "@/lib/api";
 
 interface Compliance {
   total_instruments: number;
@@ -137,7 +139,11 @@ export default function CalibrationDashboardPage() {
         </div>
       }
     >
-      {error && <Alert variant="danger">โหลดข้อมูลล้มเหลว: {(error as Error).message}</Alert>}
+      {error && (error instanceof ApiError && error.status === 403 ? (
+        <PermissionDeniedState description="คุณไม่มีสิทธิ์ดูแดชบอร์ดสอบเทียบ — ติดต่อผู้ดูแลระบบ" />
+      ) : (
+        <Alert variant="danger">โหลดข้อมูลล้มเหลว: {(error as Error).message}</Alert>
+      ))}
 
       <Grid columns={{ minWidth: 220, max: 3 }} gap={4}>
         {stats.map((s) => (

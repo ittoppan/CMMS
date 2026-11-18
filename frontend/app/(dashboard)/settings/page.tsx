@@ -449,6 +449,7 @@ const SELECT_OPTIONS: Record<string, { value: string; label: string }[]> = {
 // ลิงก์หน้าย่อยตั้งค่า
 const SUB_PAGES = [
   { href: "/settings/menus", label: "สิทธิ์เมนูตามบทบาท", desc: "กำหนดเมนูที่แต่ละบทบาทเห็นได้", icon: ShieldCheckIcon },
+  { href: "/settings/permission-diff", label: "ตรวจ drift สิทธิ์เมนู vs API", desc: "เมนูที่เห็นได้แต่ข้อมูล 403", icon: ShieldCheckIcon },
   { href: "/settings/notifications", label: "รูปแบบการแจ้งเตือน LINE", desc: "เทมเพลตข้อความ LINE + Web Push", icon: ChatBubbleLeftRightIcon },
   { href: "/settings/master/departments", label: "แผนก (ข้อมูลหลัก)", desc: "จัดการรายชื่อแผนกกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
   { href: "/settings/master/locations", label: "ที่ตั้ง/สถานที่ (ข้อมูลหลัก)", desc: "จัดการสถานที่/ตำแหน่งกลาง ใช้ร่วมทุกฟังก์ชันในระบบ", icon: BuildingOffice2Icon },
