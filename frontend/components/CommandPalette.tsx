@@ -24,6 +24,7 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<CommandPaletteItem[]>([]);
   const [active, setActive] = useState(0);
+  const [globalItems, setGlobalItems] = useState<CommandPaletteItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // เปิด/ปิดด้วย Ctrl/Cmd+K, ESC และ event จากปุ่ม ⌘K ใน sidebar
@@ -78,16 +79,41 @@ export default function CommandPalette({ items = [] }: { items?: CommandPaletteI
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Global search across work orders / assets / knowledge (debounced)
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) { setGlobalItems([]); return; }
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/v1/global_search.php?q=${encodeURIComponent(q)}&limit=6`, { signal: ctrl.signal, credentials: "include" });
+        if (!res.ok) return;
+        const json = await res.json();
+        const items: CommandPaletteItem[] = [];
+        for (const w of json.work_orders || []) items.push({ label: `${w.no} — ${w.title}`, href: w.href, section: "ใบสั่งงาน" });
+        for (const a of json.assets || []) items.push({ label: `${a.code} — ${a.name}`, href: a.href, section: "เครื่องจักร" });
+        for (const k of json.knowledge || []) items.push({ label: k.title, href: k.href, section: "ความรู้" });
+        setGlobalItems(items);
+      } catch { /* ignore */ }
+    }, 250);
+    return () => { clearTimeout(t); ctrl.abort(); };
+  }, [query]);
+
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return index.slice(0, 14);
-    return index
-      .filter(
-        (it) =>
-          it.label.toLowerCase().includes(q) || it.href.toLowerCase().includes(q)
-      )
-      .slice(0, 14);
-  }, [query, index]);
+    const base = query.trim() ? index.filter((it) => it.label.toLowerCase().includes(query.trim().toLowerCase()) || it.href.toLowerCase().includes(query.trim().toLowerCase())) : index.slice(0, 14);
+    const merged = query.trim() ? [...base, ...globalItems] : base;
+    // dedupe by href
+    const seen = new Set<string>();
+    const out: CommandPaletteItem[] = [];
+    for (const it of merged) {
+      if (seen.has(it.href)) continue;
+      seen.add(it.href);
+      out.push(it);
+      if (out.length >= 20) break;
+    }
+    return out;
+  }, [query, index, globalItems]);
+
 
   if (!open) return null;
 
