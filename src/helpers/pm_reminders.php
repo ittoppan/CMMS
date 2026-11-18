@@ -282,7 +282,14 @@ function pm_reminders_run(PDO $pdo, ?string $today = null, int $limit = 500): ar
         }
 
         try {
-            sendNotificationToUser($pdo, (int)$uid, $built['message'], 'warning', '/pm_am', null);
+            // sendNotificationToUser($userId, $title, $message, $targetUrl) — ช่องทางจริงขึ้นกับผู้ใช้/settings
+            $title = ((int)$built['overdue'] > 0) ? 'แจ้งเตือน PM — เกินกำหนด' : 'แจ้งเตือน PM — ถึงกำหนดวันนี้';
+            $target = rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/';
+            $delivered = sendNotificationToUser((int)$uid, $title, $built['message'], $target);
+            if ($delivered === false) {
+                // ผู้ใช้ไม่มีในระบบ/ถูกปิดใช้งาน → ถือว่าส่งไม่สำเร็จ ให้รอบถัดไปลองใหม่
+                throw new RuntimeException('user not found or inactive (userId=' . (int)$uid . ')');
+            }
             $notifiedUsers++;
             $notifiedCycles += count($claimed);
         } catch (Throwable $e) {

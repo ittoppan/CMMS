@@ -58,6 +58,29 @@ php scripts/pm_reminders.php --limit=300
 3. **Trigger:** รายวันตามเวลาที่ต้องการ (เช่น 07:30)
 4. (แนะนำ) เปิด log/History และเก็บ output ไปยังไฟล์ log เพื่อตรวจสอบผล
 
+### 5.1 Task ที่ลงทะเบียนไว้แล้วบนเครื่องนี้ (2026-11-19)
+
+| รายการ | ค่า |
+|---|---|
+| ชื่อ Task | `CMMS-PMReminders` |
+| Execute | `C:\PHP\php.exe` |
+| Arguments | `C:\inetpub\wwwroot\cmms-tpt\scripts\pm_reminders.php` |
+| Trigger | รายวัน 07:30 (ทุกวัน) |
+| Principal | `Administrator` / Interactive / Limited (เหมือน `CMMS-Notify`) |
+| Settings | `StartWhenAvailable`, ไม่หยุดเมื่อใช้แบตเตอรี่, time limit 30 นาที |
+| Log | `logs/pm_reminders.log` (1 บรรทัดต่อการรัน) |
+
+ตรวจสอบ/ทดสอบ:
+
+```powershell
+Get-ScheduledTask -TaskName 'CMMS-PMReminders'
+Get-ScheduledTaskInfo -TaskName 'CMMS-PMReminders'   # LastTaskResult ต้องเป็น 0
+Start-ScheduledTask -TaskName 'CMMS-PMReminders'     # รันเดี๋ยวนี้ (ส่งจริง!) แล้วดู logs\pm_reminders.log
+Unregister-ScheduledTask -TaskName 'CMMS-PMReminders' -Confirm:$false   # ถอน
+```
+
+ผลการรันครั้งแรก (ตรวจสอบ wiring): `LastTaskResult=0`, log `... scanned=0 notified_users=0 ... dedupe=1` — ตรงกับข้อมูลจริงตอนนั้นที่ยังไม่มีรอบ PM ครบกำหนด
+
 ## 6) การตรวจสอบหลังตั้งค่า
 - รัน `--dry-run` แล้วเทียบ `summary/scanned_cycles` กับข้อมูลรอบ PM จริง (เกินกำหนด/ถึงกำหนดวันนี้, มี `assigned_to`)
 - รันส่งจริงครั้งแรกในช่วงทดสอบที่ยอมรับได้ และยืนยันผู้รับได้รับข้อความในช่องทางที่ตั้งค่า (LINE/Email/Telegram)
@@ -67,5 +90,6 @@ php scripts/pm_reminders.php --limit=300
 ## 7) ข้อควรระวัง
 - การส่งจริงขึ้นกับ env/settings และความพร้อมของช่องทาง — สคริปต์เป็น best-effort
 - การบันทึกว่า “รอบนี้แจ้งเมื่อไร” อยู่ใน `pm_am.last_notified_at`/`notify_count` — ถ้าต้องการเตือนถี่ขึ้นให้ลด `pm_reminder_cooldown_hours` (เช่น 10) ไม่ใช่เพิ่มความถี่ cron โดยไม่ดู cooldown
+- การเลื่อนกำหนด / เปลี่ยนสถานะ / เปลี่ยนผู้รับผิดชอบผ่าน `PUT /api/v1/pm_am.php` จะรีเซ็ต `last_notified_at`/`notify_count` ของรอบนั้นให้ทันที (ไม่ต้องรอครบ cooldown)
 - ต้องรัน migration `database/migration_20261118_pm_reminders_dedupe_proposal.sql` (schema ก่อนโค้ด) ไม่งั้นสคริปต์จะ error เรื่องคอลัมน์หาย
 - ห้ามใส่ token/secret ลงในคำสั่ง cron ที่ถูก commit หรือแชร์โดยไม่ปลอดภัย; ใช้ env/secret store ของระบบปฏิบัติการหรือกลไก deploy ที่มีอยู่

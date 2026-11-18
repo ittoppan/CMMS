@@ -219,11 +219,30 @@ requireLogin($pdo);
                 http_response_code(400); echo json_encode(['error' => 'No data']); exit;
             }
             $values[] = $id;
-            $qOld = $pdo->prepare('SELECT assigned_to FROM pm_am WHERE id = ?');
+            $qOld = $pdo->prepare('SELECT assigned_to, due_date, status FROM pm_am WHERE id = ?');
             $qOld->execute([$id]);
-            $oldAssignedTo = (int)($qOld->fetchColumn() ?: 0);
+            $oldRow = $qOld->fetch(PDO::FETCH_ASSOC) ?: [];
+            $oldAssignedTo = (int)($oldRow['assigned_to'] ?? 0);
             $stmt = $pdo->prepare("UPDATE pm_am SET " . implode(',', $fields) . " WHERE id = ?");
             $stmt->execute($values);
+
+            // ---- รีเซ็ต dedupe ของแจ้งเตือน PM (pm_am.last_notified_at/notify_count) ----
+            // เลื่อนกำหนด / เปลี่ยนสถานะ / เปลี่ยนผู้รับผิดชอบ = เงื่อนไขการเตือนรอบนี้เปลี่ยน
+            // → ผู้รับ (หรือกำหนดใหม่) ต้องได้รับการเตือนของตัวเอง ไม่ต้องรอพ้น cooldown
+            $notifyReset = false;
+            if (array_key_exists('due_date', $data) && (string)($data['due_date'] ?? '') !== (string)($oldRow['due_date'] ?? '')) $notifyReset = true;
+            if (array_key_exists('status', $data) && (string)($data['status'] ?? '') !== (string)($oldRow['status'] ?? '')) $notifyReset = true;
+            if (array_key_exists('assigned_to', $data) && (int)($data['assigned_to'] ?? 0) !== $oldAssignedTo) $notifyReset = true;
+            if ($notifyReset) {
+                require_once __DIR__ . '/../../../src/helpers/pm_reminders.php';
+                if (pm_reminders_dedupe_supported($pdo)) {
+                    try {
+                        $pdo->prepare('UPDATE pm_am SET last_notified_at = NULL, notify_count = 0 WHERE id = ?')->execute([$id]);
+                    } catch (Throwable $e) {
+                        error_log('pm_am dedupe reset error id=' . $id . ': ' . $e->getMessage());
+                    }
+                }
+            }
             // ---- ทีมผู้รับผิดชอบหลายคน ----
             if (isset($data['team_ids']) && is_array($data['team_ids'])) {
                 // ส่งรายการทีมเต็ม → แทนที่ทั้งหมด
