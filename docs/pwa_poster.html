@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>CMMS-TPT PWA Installation Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Sarabun', sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 182mm; /* A4 210 - 2*14 */
+    margin: 0 auto;
+  }
+  .header {
+    text-align: center;
+    border-bottom: 3px solid #0ea5e9;
+    padding-bottom: 8mm;
+    margin-bottom: 6mm;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 30pt;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 1px;
+  }
+  .header .sub {
+    margin: 2mm 0 0;
+    font-size: 12pt;
+    color: #475569;
+  }
+  .header .sub-en {
+    font-size: 10.5pt;
+    color: #64748b;
+    font-weight: 400;
+  }
+  .qr-wrap {
+    text-align: center;
+    margin: 4mm 0 2mm;
+  }
+  .qr-box {
+    display: inline-block;
+    padding: 4mm;
+    border: 2px solid #0ea5e9;
+    border-radius: 4mm;
+    background: #fff;
+  }
+  .qr-box img { width: 42mm; height: 42mm; display: block; }
+  .url {
+    text-align: center;
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0284c7;
+    margin: 3mm 0 6mm;
+    word-break: break-all;
+  }
+  .scan-hint {
+    text-align: center;
+    font-size: 10pt;
+    color: #64748b;
+    margin-bottom: 6mm;
+  }
+  .section-title {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    margin: 2mm 0 4mm;
+    padding: 2mm 0;
+    background: #e0f2fe;
+    border-radius: 2mm;
+  }
+  .steps { margin: 0 0 6mm; }
+  .step {
+    display: flex;
+    gap: 4mm;
+    margin-bottom: 4mm;
+    padding: 3mm 4mm;
+    background: #f8fafc;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 2mm;
+    page-break-inside: avoid;
+  }
+  .step-num {
+    flex: 0 0 10mm;
+    width: 10mm; height: 10mm;
+    background: #0ea5e9;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13pt;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1mm;
+  }
+  .step-body { flex: 1; }
+  .step-title-th {
+    font-size: 12.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+  .step-title-en {
+    font-size: 10pt;
+    font-weight: 600;
+    color: #0284c7;
+    margin: 0 0 1.5mm;
+  }
+  .step-desc-th {
+    font-size: 10pt;
+    color: #334155;
+    margin: 0;
+    line-height: 1.35;
+  }
+  .step-desc-en {
+    font-size: 9.5pt;
+    color: #64748b;
+    margin: 0.5mm 0 0;
+    line-height: 1.35;
+    font-style: italic;
+  }
+  .tips {
+    background: #fffbeb;
+    border: 1.5px solid #f59e0b;
+    border-radius: 3mm;
+    padding: 4mm 5mm;
+    margin-bottom: 4mm;
+  }
+  .tips h3 {
+    margin: 0 0 2mm;
+    font-size: 12pt;
+    font-weight: 700;
+    color: #92400e;
+  }
+  .tip {
+    margin-bottom: 2.5mm;
+  }
+  .tip:last-child { margin-bottom: 0; }
+  .tip-th { font-size: 10pt; color: #334155; }
+  .tip-en { font-size: 9pt; color: #64748b; font-style: italic; }
+  .footer {
+    text-align: center;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 3mm;
+    margin-top: 2mm;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>CMMS-TPT</h1>
+    <p class="sub">คู่มือติดตั้ง &amp; เข้าใช้งานระบบ (PWA)</p>
+    <p class="sub-en">Installation &amp; Usage Guide (Progressive Web App)</p>
+  </div>
+
+  <div class="qr-wrap">
+    <div class="qr-box">
+      <img src="qr_cmms.png" alt="QR Code">
+    </div>
+  </div>
+  <p class="url">https://cmms-tpt.shares.zrok.io/</p>
+  <p class="scan-hint">สแกน QR Code ด้วยมือถือ หรือเปิดลิงก์ด้านบน | Scan the QR code with your phone, or open the link above</p>
+
+  <div class="section-title">ขั้นตอนติดตั้งใช้งาน | Installation Steps</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p class="step-title-th">เปิดเว็บ / สแกน QR</p>
+        <p class="step-title-en">Open Web / Scan QR</p>
+        <p class="step-desc-th">เปิดเบราว์เซอร์บนมือถือ แล้วสแกน QR Code ด้านบน (หรือพิมพ์ URL)</p>
+        <p class="step-desc-en">Open the mobile browser, scan the QR code above (or type the URL).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p class="step-title-th">เข้าสู่ระบบ</p>
+        <p class="step-title-en">Sign In</p>
+        <p class="step-desc-th">กรอก Username/Password ที่ได้รับ หรือกด "เข้าสู่ระบบด้วย LINE"</p>
+        <p class="step-desc-en">Enter the provided Username/Password, or sign in with LINE.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p class="step-title-th">ติดตั้งเป็นแอป (PWA)</p>
+        <p class="step-title-en">Install as App (PWA)</p>
+        <p class="step-desc-th">เมนูเบราว์เซอร์ → "Add to Home Screen" / "ติดตั้งแอป" เพื่อใช้แบบแอป + offline</p>
+        <p class="step-desc-en">Browser menu → "Add to Home Screen" / "Install app" to use as an app + offline.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p class="step-title-th">เปิดใช้งาน</p>
+        <p class="step-title-en">Start Using</p>
+        <p class="step-desc-th">เปิดจากไอคอนบนหน้าจอ → ทำงานได้แม้ไม่มีเน็ต (sync ที่ /sync-center)</p>
+        <p class="step-desc-en">Open from the home-screen icon → works even offline (sync at /sync-center).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tips">
+    <h3>Tips / คำแนะนำ</h3>
+    <div class="tip">
+      <p class="tip-th">- iOS Safari: ต้อง Add to Home Screen ก่อนจึงจะใช้ Web Push ได้ (iOS 16.4+)</p>
+      <p class="tip-en">- iOS Safari: Add to Home Screen is required before Web Push works (iOS 16.4+).</p>
+    </div>
+    <div class="tip">
+      <p class="tip-th">- ไม่มีเน็ต: ทำงานต่อได้ แล้วเปิด /sync-center เพื่อ sync คิว</p>
+      <p class="tip-en">- No internet: keep working, then open /sync-center to sync queued tasks.</p>
+    </div>
+    <div class="tip">
+      <p class="tip-th">- สิทธิ์เมนู = ตามบทบาท (Admin / Manager / Technician / กำหนดเอง)</p>
+      <p class="tip-en">- Menu access = by role (Admin / Manager / Technician / custom).</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    CMMS-TPT | คู่มือติดตั้ง PWA / PWA Installation Guide | Sarabun
+  </div>
+</div>
+</body>
+</html>
