@@ -167,6 +167,7 @@ PHP ถูก serve จากโฟลเดอร์โปรเจกต์โ
 2. ✅ ตัด `last_notified_kind` ออกจากดีไซน์/migration
 3. ✅ ตรวจสภาพจริง + รัน migration บน `cmms_tpt` (2026-11-19): `last_notified_at datetime NULL`, `notify_count smallint unsigned NOT NULL DEFAULT 0`, index `idx_pm_am_reminder_scan (due_date, assigned_to, last_notified_at)`; `--dry-run` รายงาน `dedupe: true`
 4. ✅ เพิ่ม reset `last_notified_at = NULL, notify_count = 0` ใน `public/api/v1/pm_am.php` PUT (§5)
-5. ✅ ทดสอบผ่าน HTTP จริง (`http://127.0.0.1:8081`, login + `X-CSRF-Token`, temp admin + รอบ PM สมมติ แล้วลบทิ้ง): `pending→in_progress` ไม่ล้างค่า, reopen จาก completed/skipped/cancelled ล้างค่า, due_date เปลี่ยนล้างค่า, ไม่มี token ได้ 403 (17/17)
-6. ✅ ทดสอบบน scratch DB (`cmms_tpt_pmtest`, คัดลอกโครงสร้าง+ข้อมูลสมมติ, ลบทิ้งหลังจบ): migration รันจากไฟล์จริง, plan ไม่เขียน DB, claim ซ้ำใน cooldown ได้ 0, release คืนสิทธิ์, reset เปิดสิทธิ์ทันที, 2 process พร้อมกันได้รอบละครั้ง (17/17 checks)
-7. ✅ ตั้ง Scheduled Task `CMMS-PMReminders` (รายวัน 07:30, `C:\PHP\php.exe scripts\pm_reminders.php`, principal `SYSTEM` → รันได้แม้ไม่มีคนล็อกอิน) — รันทดสอบได้ `LastTaskResult=0` และเขียน log `logs/pm_reminders.log` (`dedupe=1`)
+5. ✅ ชุดทดสอบถาวรสำหรับกติกา reset: `php scripts/test_pm_reminders_reset.php` (33 checks — ครอบคลุม accept/auto-flip/closed→closed/ reopen/due_date/assigned_to) ไว้กัน regression
+6. ✅ ทดสอบผ่าน HTTP จริง (`http://127.0.0.1:8081`, login + `X-CSRF-Token`, temp admin + รอบ PM สมมติ แล้วลบทิ้ง): `pending→in_progress` ไม่ล้างค่า, reopen จาก completed/skipped/cancelled ล้างค่า, due_date เปลี่ยนล้างค่า, ไม่มี token ได้ 403 (17/17)
+7. ✅ ทดสอบบน scratch DB (`cmms_tpt_pmtest`, คัดลอกโครงสร้าง+ข้อมูลสมมติ, ลบทิ้งหลังจบ): migration รันจากไฟล์จริง, plan ไม่เขียน DB, claim ซ้ำใน cooldown ได้ 0, release คืนสิทธิ์, reset เปิดสิทธิ์ทันที, 2 process พร้อมกันได้รอบละครั้ง (17/17 checks)
+8. ✅ ตั้ง Scheduled Task `CMMS-PMReminders` (รายวัน 07:30, `C:\PHP\php.exe scripts\pm_reminders.php`, principal `SYSTEM` → รันได้แม้ไม่มีคนล็อกอิน) — รันทดสอบได้ `LastTaskResult=0` และเขียน log `logs/pm_reminders.log` (`dedupe=1`)
