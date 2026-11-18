@@ -12,6 +12,17 @@ import { useEffect } from "react";
  */
 export default function PwaRegister() {
   useEffect(() => {
+    // PWA: ensure the manifest link is in <head> early (before Chrome's
+    // installability check) — the metadata-based link is streamed and arrives
+    // too late on its own.
+    try {
+      if (!document.querySelector('link[rel="manifest"]')) {
+        const l = document.createElement("link");
+        l.rel = "manifest";
+        l.href = "/manifest.webmanifest";
+        document.head.appendChild(l);
+      }
+    } catch { /* ignore */ }
     if (!("serviceWorker" in navigator)) return;
     // dev: ไม่ register SW — ไม่อยากให้ reload หน้าอัตโนมัติรบกวนการพัฒนา/ทดสอบ
     // และ unregister SW ที่ค้างจาก session ก่อน (กัน cache /_next/ ค้าง → เห็นโค้ดเก่า)
