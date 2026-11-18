@@ -187,23 +187,7 @@ const PERMISSION_MATRIX = [
         // home KPI tile (supervisor.php?action=kpis) — อ่านสรุปได้เท่านั้น
         'repair'     => ['view'],
     ],
-    10 => [ // Officer-Read — ดูข้อมูลได้ แต่ไม่แก้ไข (bundle อ่านอย่างเดียว)
-        'sage'       => ['view'],
-        'spare_parts'=> ['view'],
-        'users'      => ['view'],
-        'settings'   => ['view'],
-        'audit_log'  => ['view'],
-        'document'   => ['view'],
-        'report'     => ['view', 'export'],
-        'dashboard'  => ['view'],
-        'calibration' => ['view'],
-        'pm_am'      => ['view'],
-        'inspection' => ['view'],
-        'asset'      => ['view'],
-        'knowledge'  => ['read', 'search', 'feedback'],
-        'training'   => ['view'],
-        'workforce'  => ['view', 'capacity_view'],
-    ],
+
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],
         'request'    => ['view'],
@@ -230,10 +214,55 @@ const PERMISSION_MATRIX = [
     ],
 ];
 
+/**
+ * Matrix สำหรับ role ที่ resolve ด้วยชื่อ (ไม่ fix role_id) — ใช้สำหรับ role ที่สร้างภายหลัง
+ * เช่น Officer-Read (bundle อ่านอย่างเดียว) ที่ role_id อาจต่างกันในแต่ละ DB
+ */
+const PERMISSION_MATRIX_BY_ROLE_NAME = [
+    'Officer-Read' => [
+        'sage'       => ['view'],
+        'spare_parts'=> ['view'],
+        'users'      => ['view'],
+        'settings'   => ['view'],
+        'audit_log'  => ['view'],
+        'document'   => ['view'],
+        'report'     => ['view', 'export'],
+        'dashboard'  => ['view'],
+        'calibration' => ['view'],
+        'pm_am'      => ['view'],
+        'inspection' => ['view'],
+        'asset'      => ['view'],
+        'knowledge'  => ['read', 'search', 'feedback'],
+        'training'   => ['view'],
+        'workforce'  => ['view', 'capacity_view'],
+    ],
+];
+
+/** cache ชื่อ role ตาม id */
+function _role_name_by_id(PDO $pdo, int $roleId): ?string {
+    static $cache = [];
+    if (array_key_exists($roleId, $cache)) return $cache[$roleId];
+    try {
+        $st = $pdo->prepare('SELECT name FROM roles WHERE id = ? LIMIT 1');
+        $st->execute([$roleId]);
+        $name = $st->fetchColumn();
+        $cache[$roleId] = ($name === false) ? null : (string)$name;
+    } catch (Throwable $e) {
+        $cache[$roleId] = null;
+    }
+    return $cache[$roleId];
+}
+
 /** ค่าเริ่มต้นของ matrix ว่าอนุญาตไหม (ก่อนนำ user_permissions มาทับ) */
-function perm_default_granted(int $roleId, string $module, string $action): bool {
+function perm_default_granted(int $roleId, string $module, string $action, ?PDO $pdo = null): bool {
     if ($roleId === 1) return true; // Admin
     $m = PERMISSION_MATRIX[$roleId] ?? [];
+    if ($m === [] && $pdo !== null) {
+        $name = _role_name_by_id($pdo, $roleId);
+        if ($name !== null && isset(PERMISSION_MATRIX_BY_ROLE_NAME[$name])) {
+            $m = PERMISSION_MATRIX_BY_ROLE_NAME[$name];
+        }
+    }
     if ($m === []) return false;
     if (!isset($m[$module])) return false;
     foreach ($m[$module] as $a) {
@@ -277,7 +306,7 @@ function perm_allowed(PDO $pdo, int $roleId, string $module, string $action, ?in
         error_log('[permissions] user_permissions read failed: ' . $e->getMessage());
     }
 
-    return perm_default_granted($roleId, $module, $action);
+    return perm_default_granted($roleId, $module, $action, $pdo);
 }
 
 /** ตรวจสิทธิ์ของผู้ใช้ใน session ปัจจุบัน */

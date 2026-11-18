@@ -189,6 +189,19 @@ function wp_create(PDO $pdo, int $userId, array $in): array {
         $repairId = (int)($st->fetchColumn() ?: 0) ?: null;
     }
     $typeCode = trim((string)($in['permit_type_code'] ?? 'general_work'));
+    // Certification check at creation time: ถ้าระบุ supervisor/safety reviewer ที่มี cert หมดอายุ → บล็อก (ตาม policy)
+    foreach (['supervisor_id', 'safety_reviewer_id', 'area_owner_id'] as $ck) {
+        if (empty($in[$ck])) continue;
+        $subj = (int)$in[$ck];
+        $cq = $pdo->prepare("SELECT COUNT(*) AS c, SUM(expiry_date IS NOT NULL AND expiry_date < CURDATE()) AS expired FROM worker_certifications WHERE subject_type = 'internal' AND user_id = ? AND is_active = 1");
+        $cq->execute([$subj]);
+        $row = $cq->fetch(PDO::FETCH_ASSOC);
+        if ($row && (int)($row['c'] ?? 0) > 0 && (int)($row['expired'] ?? 0) > 0) {
+            if ((int)wp_config($pdo)['cert_expired_block'] === 1) {
+                return ['error' => 'CERT_EXPIRED', 'detail' => 'ผู้เกี่ยวข้องมี certification หมดอายุ — ไม่ผ่าน authorization (ตาม policy)'];
+            }
+        }
+    }
     $t = $pdo->prepare('SELECT * FROM permit_types WHERE code = ? AND is_active = 1');
     $t->execute([$typeCode]);
     $type = $t->fetch();
