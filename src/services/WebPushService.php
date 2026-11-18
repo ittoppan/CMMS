@@ -271,7 +271,11 @@ class WebPushService
             try {
                 $pdo->prepare('DELETE FROM push_subscriptions WHERE endpoint = ?')->execute([$sub['endpoint']]);
             } catch (Throwable $e) {}
+            error_log("[WebPush] subscription expired/removed (HTTP " . $status . ") host=" . $host);
             return false;
+        }
+        if ($status < 200 || $status >= 300) {
+            error_log("[WebPush] send failed (HTTP " . $status . ") host=" . $host);
         }
         return $status >= 200 && $status < 300;
     }
