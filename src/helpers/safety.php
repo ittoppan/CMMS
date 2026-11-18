@@ -189,10 +189,9 @@ function wp_create(PDO $pdo, int $userId, array $in): array {
         $repairId = (int)($st->fetchColumn() ?: 0) ?: null;
     }
     $typeCode = trim((string)($in['permit_type_code'] ?? 'general_work'));
-    // Certification check at creation time: ถ้าระบุ supervisor/safety reviewer ที่มี cert หมดอายุ → บล็อก (ตาม policy)
-    foreach (['supervisor_id', 'safety_reviewer_id', 'area_owner_id'] as $ck) {
-        if (empty($in[$ck])) continue;
-        $subj = (int)$in[$ck];
+    // Certification check at creation time: ผู้สร้าง + supervisor/safety reviewer ที่มี cert หมดอายุ → บล็อก (ตาม policy)
+    $checkSubjects = array_merge([$userId], array_filter(array_map(fn($k) => !empty($in[$k]) ? (int)$in[$k] : null, ['supervisor_id','safety_reviewer_id','area_owner_id'])));
+    foreach ($checkSubjects as $subj) {
         $cq = $pdo->prepare("SELECT COUNT(*) AS c, SUM(expiry_date IS NOT NULL AND expiry_date < CURDATE()) AS expired FROM worker_certifications WHERE subject_type = 'internal' AND user_id = ? AND is_active = 1");
         $cq->execute([$subj]);
         $row = $cq->fetch(PDO::FETCH_ASSOC);
