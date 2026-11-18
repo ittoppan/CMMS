@@ -62,6 +62,23 @@ else
   echo "[pre-push] ⚠️ ไม่พบ scripts/tsc-check.sh — ข้ามการตรวจ TypeScript"
 fi
 
+# ── PHP helper regression tests (เร็ว, ไม่ใช้ DB) — จับกติกา reset ของ PM reminder ถอยหลัง ──
+# เหตุผล: กติกา "กดรับงานไม่ล้าง last_notified_at / เปิดงานใหม่จากสถานะปิดต้องล้าง" อยู่ใน
+#   pm_reminders_should_reset() — ถ้าแก้แล้วลืมเทสต์ ช่างจะได้แจ้งเตือนซ้ำหรือไม่ได้รับเลย
+PHP_TEST="$REPO_ROOT/scripts/test_pm_reminders_reset.php"
+if [ -f "$PHP_TEST" ] && command -v php >/dev/null 2>&1; then
+  echo ""
+  echo "[pre-push] php scripts/test_pm_reminders_reset.php (กติกา reset ของ PM reminder)"
+  if ! php "$PHP_TEST"; then
+    echo "[pre-push] ❌ BLOCKED: กติกา reset ไม่ตรงดีไซน์ — แก้ให้เทสต์ผ่านก่อน push"
+    FAILED=1
+  fi
+elif [ ! -f "$PHP_TEST" ]; then
+  echo "[pre-push] ⚠️ ไม่พบ scripts/test_pm_reminders_reset.php — ข้ามการตรวจชุดทดสอบ PHP"
+else
+  echo "[pre-push] ⚠️ ไม่พบ php ใน PATH — ข้ามการตรวจชุดทดสอบ PHP"
+fi
+
 # ── Next build check: จับ build พัง (Turbopack parse error) ที่ tsc ตรวจไม่เจอ ──
 # เหตุการณ์ 2026-08-30: build fail (Unterminated regexp) → .next ไม่มี standalone
 #   → :3001 ล่ม → เข้าใช้งานระบบไม่ได้ แต่ tsc ผ่านเพราะไม่ได้ตรวจ parse/build

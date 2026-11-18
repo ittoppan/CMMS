@@ -51,7 +51,9 @@ Restart-WebAppPool -Name "cmms-tpt"
 
 `deploy-next.ps1` จะ: build → เก็บ BUILD_ID → คัด `.next/standalone` → start/restart `node server.js` → ตรวจ 28 จุด (หน้า login 200, manifest, sw.js มี version, health 200 เป็นต้น). ถ้าตรวจไม่ครบจะแจ้งล้มเหลว — **ห้ามมองข้ามการตรวจนั้น** (กรณีเดิมเคยเจอได้ฝั่งนี้).
 
-ก่อน push ชุดนี้ถูก medicine ด้วย hook `scripts/git-hooks/pre-push`: `design-audit --diff --strict` + `tsc --noEmit` + `next build` (dist แยก เพื่อไม่ชนกับ server ที่รันอยู่) — ติดตั้ง hook: `git config core.hooksPath scripts/git-hooks`.
+ก่อน push ชุดนี้ถูก medicine ด้วย hook `scripts/git-hooks/pre-push`: `design-audit --diff --strict` + `tsc --noEmit` + `php scripts/test_pm_reminders_reset.php` (กติกา reset ของ PM reminder) + `next build` (dist แยก เพื่อไม่ชนกับ server ที่รันอยู่) — ติดตั้ง hook: `git config core.hooksPath scripts/git-hooks`.
+
+CI (`.github/workflows/ci.yml`) รันซ้ำอีกชั้น: typecheck + build + design-audit และ job `phplint` (`php -l` ทุกไฟล์ + ชุดทดสอบ PHP ที่ไม่ใช้ DB)
 
 ## Monitoring / Health
 

@@ -66,3 +66,7 @@ jobs:
         run: |
           set -e
           find src public scripts database -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      # ชุดทดสอบเชิงพฤติกรรมที่ไม่ใช้ DB (รันได้บน CI): กติกา reset ของ PM reminder
+      - name: PHP helper regression tests (no DB)
+        run: php scripts/test_pm_reminders_reset.php
