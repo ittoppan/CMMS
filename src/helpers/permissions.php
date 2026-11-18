@@ -129,6 +129,8 @@ const PERMISSION_MATRIX = [
         // Foreman plans and executes, but startup/closeout/cancel stay with an
         // approver: startup restores equipment, so it is not a foreman-level action.
         'shutdown'   => ['view', 'plan', 'readiness_manage', 'execute'],
+        // Foreman ต้องอ่าน departments/facility_layout (ตัวกรองแผนก + ผังอาคาร) แต่ไม่จัดการ settings
+        'settings'   => ['view'],
     ],
     3 => [ // Technician — ช่าง
         'repair'     => ['view', 'start', 'pause', 'resume', 'complete'],
@@ -174,8 +176,16 @@ const PERMISSION_MATRIX = [
         'settings'   => ['view'],
         'audit_log'  => ['view'],
         'document'   => ['view'],
-        'report'     => ['view'],
+        'report'     => ['view', 'export'],
         'dashboard'  => ['view'],
+        // เมนูที่ได้รับใน menu_permissions แต่ยังไม่มีใน matrix → เพิ่มให้ข้อมูลโหลดได้จริง
+        'calibration' => ['view', 'create', 'edit'],
+        'pm_am'      => ['view'],
+        'inspection' => ['view', 'create'],
+        'asset'      => ['view', 'edit'],
+        'knowledge'  => ['read', 'search', 'create', 'edit', 'submit', 'feedback'],
+        // home KPI tile (supervisor.php?action=kpis) — อ่านสรุปได้เท่านั้น
+        'repair'     => ['view'],
     ],
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],

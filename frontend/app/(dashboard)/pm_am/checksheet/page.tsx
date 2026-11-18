@@ -161,7 +161,7 @@ export default function PMChecksheetPage() {
 
   // ผู้ทำรายการ = ผู้ใช้ที่ login จริง (จาก session)
   useEffect(() => {
-    fetch("/api/v1/menu_permissions.php")
+    fetch("/api/v1/menu_permissions.php?user=1")
       .then((res) => res.json())
       .then((json) => {
         if (json?.user?.id) setCurrentUserId(Number(json.user.id));
