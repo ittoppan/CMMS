@@ -66,7 +66,7 @@ php scripts/pm_reminders.php --limit=300
 | Execute | `C:\PHP\php.exe` |
 | Arguments | `C:\inetpub\wwwroot\cmms-tpt\scripts\pm_reminders.php` |
 | Trigger | รายวัน 07:30 (ทุกวัน) |
-| Principal | `Administrator` / Interactive / Limited (เหมือน `CMMS-Notify`) |
+| Principal | `SYSTEM` / ServiceAccount / Highest — รันได้แม้ไม่มีใครล็อกอิน |
 | Settings | `StartWhenAvailable`, ไม่หยุดเมื่อใช้แบตเตอรี่, time limit 30 นาที |
 | Log | `logs/pm_reminders.log` (1 บรรทัดต่อการรัน) |
 
@@ -79,7 +79,7 @@ Start-ScheduledTask -TaskName 'CMMS-PMReminders'     # รันเดี๋ย�
 Unregister-ScheduledTask -TaskName 'CMMS-PMReminders' -Confirm:$false   # ถอน
 ```
 
-ผลการรันครั้งแรก (ตรวจสอบ wiring): `LastTaskResult=0`, log `... scanned=0 notified_users=0 ... dedupe=1` — ตรงกับข้อมูลจริงตอนนั้นที่ยังไม่มีรอบ PM ครบกำหนด
+ผลการรันทดสอบภายใต้ SYSTEM: `LastTaskResult=0`, log `... scanned=0 notified_users=0 ... dedupe=1` — ตรงกับข้อมูลจริงตอนนั้นที่ยังไม่มีรอบ PM ครบกำหนด
 
 ## 6) การตรวจสอบหลังตั้งค่า
 - รัน `--dry-run` แล้วเทียบ `summary/scanned_cycles` กับข้อมูลรอบ PM จริง (เกินกำหนด/ถึงกำหนดวันนี้, มี `assigned_to`)
@@ -90,6 +90,7 @@ Unregister-ScheduledTask -TaskName 'CMMS-PMReminders' -Confirm:$false   # ถอ
 ## 7) ข้อควรระวัง
 - การส่งจริงขึ้นกับ env/settings และความพร้อมของช่องทาง — สคริปต์เป็น best-effort
 - การบันทึกว่า “รอบนี้แจ้งเมื่อไร” อยู่ใน `pm_am.last_notified_at`/`notify_count` — ถ้าต้องการเตือนถี่ขึ้นให้ลด `pm_reminder_cooldown_hours` (เช่น 10) ไม่ใช่เพิ่มความถี่ cron โดยไม่ดู cooldown
-- การเลื่อนกำหนด / เปลี่ยนสถานะ / เปลี่ยนผู้รับผิดชอบผ่าน `PUT /api/v1/pm_am.php` จะรีเซ็ต `last_notified_at`/`notify_count` ของรอบนั้นให้ทันที (ไม่ต้องรอครบ cooldown)
+- การเลื่อนกำหนด / เปลี่ยนผู้รับผิดชอบ / **เปิดงานใหม่จากสถานะปิด** (completed/skipped/cancelled → สถานะเปิด) ผ่าน `PUT /api/v1/pm_am.php` จะรีเซ็ต `last_notified_at`/`notify_count` ของรอบนั้นให้ทันที (ไม่ต้องรอครบ cooldown)
+- การกดรับงาน (`pending → in_progress`) และ auto-flip เป็น `overdue` **ไม่รีเซ็ต** — กันช่างได้แจ้งเตือนซ้ำในรอบวันเดียวกัน
 - ต้องรัน migration `database/migration_20261118_pm_reminders_dedupe_proposal.sql` (schema ก่อนโค้ด) ไม่งั้นสคริปต์จะ error เรื่องคอลัมน์หาย
 - ห้ามใส่ token/secret ลงในคำสั่ง cron ที่ถูก commit หรือแชร์โดยไม่ปลอดภัย; ใช้ env/secret store ของระบบปฏิบัติการหรือกลไก deploy ที่มีอยู่

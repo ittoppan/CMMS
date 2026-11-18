@@ -122,6 +122,49 @@ function pm_reminders_group(array $rows): array {
     return $byUser;
 }
 
+/** สถานะที่ถือว่า "งานปิดแล้ว" — เปิดงานใหม่จากสถานะเหล่านี้ต้องรีเซ็ต dedupe */
+function pm_reminders_closed_statuses(): array {
+    return ['completed', 'skipped', 'cancelled'];
+}
+
+/**
+ * ต้องรีเซ็ต dedupe ของรอบ PM (`last_notified_at`/`notify_count`) หรือไม่ เมื่อแก้ไขผ่าน PUT pm_am
+ *
+ * รีเซ็ตเมื่อ:
+ *   - `due_date` เปลี่ยนจริง (เลื่อนกำหนด) → ต้องเตือนตามกำหนดใหม่
+ *   - `assigned_to` เปลี่ยนจริง → ผู้รับใหม่ต้องได้เตือนของตัวเอง
+ *   - `status` = **เปิดงานใหม่จากสถานะปิด** (completed/skipped/cancelled → สถานะเปิด)
+ *
+ * ไม่รีเซ็ตเมื่อ:
+ *   - กดรับงาน `pending → in_progress` (ช่างรับงานแล้วไม่ควรได้เตือนซ้ำในวันเดียวกัน)
+ *   - auto-flip `pending ↔ overdue` หรือ `in_progress → overdue` (ยังเป็นรอบเดิมที่แจ้งไปแล้ว)
+ *   - ส่งเพย์โหลดเดิมซ้ำ (ค่าไม่เปลี่ยน)
+ *
+ * @param array<string,mixed> $oldRow แถวเดิมใน DB (assigned_to, due_date, status)
+ * @param array<string,mixed> $data   เพย์โหลดที่ส่งมาแก้ไข
+ */
+function pm_reminders_should_reset(array $oldRow, array $data): bool {
+    if (array_key_exists('due_date', $data)
+        && (string)($data['due_date'] ?? '') !== (string)($oldRow['due_date'] ?? '')) {
+        return true;
+    }
+    if (array_key_exists('assigned_to', $data)
+        && (int)($data['assigned_to'] ?? 0) !== (int)($oldRow['assigned_to'] ?? 0)) {
+        return true;
+    }
+    if (array_key_exists('status', $data)) {
+        $oldStatus = (string)($oldRow['status'] ?? '');
+        $newStatus = (string)($data['status'] ?? '');
+        $closed = pm_reminders_closed_statuses();
+        if ($newStatus !== $oldStatus
+            && in_array($oldStatus, $closed, true)
+            && !in_array($newStatus, $closed, true)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /** Row is outside the cooldown window (or never notified) → eligible for a new reminder. */
 function pm_reminders_row_is_claimable(array $row, string $cutoff): bool {
     $last = $row['last_notified_at'] ?? null;

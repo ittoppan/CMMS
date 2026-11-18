@@ -227,14 +227,10 @@ requireLogin($pdo);
             $stmt->execute($values);
 
             // ---- รีเซ็ต dedupe ของแจ้งเตือน PM (pm_am.last_notified_at/notify_count) ----
-            // เลื่อนกำหนด / เปลี่ยนสถานะ / เปลี่ยนผู้รับผิดชอบ = เงื่อนไขการเตือนรอบนี้เปลี่ยน
-            // → ผู้รับ (หรือกำหนดใหม่) ต้องได้รับการเตือนของตัวเอง ไม่ต้องรอพ้น cooldown
-            $notifyReset = false;
-            if (array_key_exists('due_date', $data) && (string)($data['due_date'] ?? '') !== (string)($oldRow['due_date'] ?? '')) $notifyReset = true;
-            if (array_key_exists('status', $data) && (string)($data['status'] ?? '') !== (string)($oldRow['status'] ?? '')) $notifyReset = true;
-            if (array_key_exists('assigned_to', $data) && (int)($data['assigned_to'] ?? 0) !== $oldAssignedTo) $notifyReset = true;
-            if ($notifyReset) {
-                require_once __DIR__ . '/../../../src/helpers/pm_reminders.php';
+            // กติกาอยู่ใน pm_reminders_should_reset(): เลื่อนกำหนด / เปลี่ยนผู้รับผิดชอบ / เปิดงานใหม่จากสถานะปิด
+            // การกดรับงาน (pending→in_progress) หรือ auto-flip overdue ไม่ใช่การเปิดใหม่ → ไม่รีเซ็ต
+            require_once __DIR__ . '/../../../src/helpers/pm_reminders.php';
+            if (pm_reminders_should_reset($oldRow, $data)) {
                 if (pm_reminders_dedupe_supported($pdo)) {
                     try {
                         $pdo->prepare('UPDATE pm_am SET last_notified_at = NULL, notify_count = 0 WHERE id = ?')->execute([$id]);

@@ -99,14 +99,15 @@ PHP ถูก serve จากโฟลเดอร์โปรเจกต์โ
 
 ## 5) จุดที่ต้อง Reset `last_notified_at` (implement แล้วใน `public/api/v1/pm_am.php` PUT)
 
-รีเซ็ตเฉพาะเมื่อค่าเปลี่ยนจริง (เทียบกับค่าเดิมใน DB ก่อน UPDATE) — ส่งเพย์โหลดเดิมซ้ำจะไม่ทำให้เตือนซ้ำ
+กติกาอยู่ที่ `pm_reminders_should_reset($oldRow, $data)` ใน `src/helpers/pm_reminders.php` — รีเซ็ตเฉพาะเมื่อค่าเปลี่ยนจริง (เทียบกับค่าเดิมใน DB ก่อน UPDATE) และ **`status` รีเซ็ตเฉพาะการเปิดงานใหม่จากสถานะปิด** เท่านั้น
 ถ้าคอลัมน์ยังไม่มี (`pm_reminders_dedupe_supported()` = false) จะข้ามไปเงียบ ๆ endpoint จึงไม่ล่มบน schema เก่า
 
 | เหตุการณ์ | ทำอะไร | จุดแก้ |
 |---|---|---|
 | เลื่อนกำหนด (`due_date` เปลี่ยน / อนุมัติ `reschedule_to`) | `SET last_notified_at = NULL, notify_count = 0` | `public/api/v1/pm_am.php` PUT/PATCH (มี `due_date` ใน `$allowed`) — หลัง `UPDATE pm_am ... WHERE id = ?` สำเร็จ |
-| กลับมาเปิดงาน (`status` → `pending`/`in_progress` จาก completed/skipped/cancelled) | เหมือนกัน | จุดเดียวกัน (ตรวจ `$data['status']` ในเพย์โหลด) |
+| กลับมาเปิดงาน (`status` → `pending`/`in_progress`/`overdue` จาก completed/skipped/cancelled) | เหมือนกัน | จุดเดียวกัน — `pm_reminders_should_reset()` |
 | เปลี่ยนผู้รับผิดชอบ (`assigned_to`) | เหมือนกัน | จุดเดียวกัน — ผู้รับใหม่ต้องได้เตือนของตัวเอง |
+| **กดรับงาน** (`pending → in_progress`), auto-flip `pending ↔ overdue` / `in_progress → overdue` | **ไม่รีเซ็ต** | เป็นรอบเดิมที่แจ้งไปแล้ว — ถ้ารีเซ็ตช่างจะได้แจ้งเตือนซ้ำในวันเดียวกัน |
 | รอบใหม่ถูกสร้างจากแผน (`generate` cycle) | ไม่ต้องทำอะไร (ค่าเริ่มต้น `NULL`) | — |
 
 ผลที่ได้: งานที่เพิ่งเลื่อนกำหนด/เปลี่ยนผู้รับผิดชอบจะถูกเตือนได้ทันทีในรอบถัดไป ไม่ต้องรอพ้น cooldown
@@ -167,4 +168,4 @@ PHP ถูก serve จากโฟลเดอร์โปรเจกต์โ
 3. ✅ ตรวจสภาพจริง + รัน migration บน `cmms_tpt` (2026-11-19): `last_notified_at datetime NULL`, `notify_count smallint unsigned NOT NULL DEFAULT 0`, index `idx_pm_am_reminder_scan (due_date, assigned_to, last_notified_at)`; `--dry-run` รายงาน `dedupe: true`
 4. ✅ เพิ่ม reset `last_notified_at = NULL, notify_count = 0` ใน `public/api/v1/pm_am.php` PUT (§5)
 5. ✅ ทดสอบบน scratch DB (`cmms_tpt_pmtest`, คัดลอกโครงสร้าง+ข้อมูลสมมติ, ลบทิ้งหลังจบ): migration รันจากไฟล์จริง, plan ไม่เขียน DB, claim ซ้ำใน cooldown ได้ 0, release คืนสิทธิ์, reset เปิดสิทธิ์ทันที, 2 process พร้อมกันได้รอบละครั้ง (17/17 checks)
-6. ✅ ตั้ง Scheduled Task `CMMS-PMReminders` (รายวัน 07:30, `C:\PHP\php.exe scripts\pm_reminders.php`) — รันทดสอบได้ `LastTaskResult=0` และเขียน log `logs/pm_reminders.log` (`dedupe=1`)
+6. ✅ ตั้ง Scheduled Task `CMMS-PMReminders` (รายวัน 07:30, `C:\PHP\php.exe scripts\pm_reminders.php`, principal `SYSTEM` → รันได้แม้ไม่มีคนล็อกอิน) — รันทดสอบได้ `LastTaskResult=0` และเขียน log `logs/pm_reminders.log` (`dedupe=1`)
