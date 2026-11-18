@@ -70,3 +70,46 @@ jobs:
       # ชุดทดสอบ PHP ที่ไม่ต้องใช้ DB — รายการเดียวกับที่ pre-push hook เรียก
       - name: PHP unit tests (no DB)
         run: bash scripts/php-unit-tests.sh
+
+  phpdb:
+    name: PHP DB tests (MySQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # service MySQL สำหรับชุดทดสอบที่ต้องใช้ scratch database
+    # (test_*.php จะ clone schema ไปยัง <db>_coretest / <db>_misctest ของตัวเอง)
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: cmms_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, mysqli, zip
+
+      # ค่าใน .env นี้เป็น credential ชั่วคราวของ service container (ไม่ใช่ของจริง)
+      - name: Write ephemeral .env for CI
+        run: |
+          printf 'DB_HOST=127.0.0.1\nDB_PORT=3306\nDB_NAME=cmms_ci\nDB_USER=root\nDB_PASS=root\n' > .env
+
+      # สร้าง schema จาก database/ci_schema_structure.sql (structure-only)
+      # สคริปต์มี guard: ชื่อ DB ต้องลงท้าย _ci และตัด USE/CREATE DATABASE ออกจากไฟล์ SQL
+      - name: Rebuild CI schema
+        run: php scripts/ci-bootstrap-db.php cmms_ci
+
+      - name: PHP DB test suites (scratch databases)
+        run: bash scripts/php-db-tests.sh

@@ -55,7 +55,20 @@ Restart-WebAppPool -Name "cmms-tpt"
 
 `scripts/php-unit-tests.sh` เป็นรายการกลางของชุดทดสอบที่ไม่ต้องใช้ DB (`scripts/test_pm_reminders_reset.php`, `scripts/test_xlsx.php`) — เพิ่มชุดใหม่ได้ที่ array `TESTS` ในไฟล์นั้น (กติกา: ห้าม include `src/config/db.php`, ห้ามเรียก `getDb()`, ห้ามใช้ HTTP/scratch DB)
 
-CI (`.github/workflows/ci.yml`) รันซ้ำอีกชั้น: typecheck + build + design-audit และ job `phplint` (`php -l` ทุกไฟล์ + `bash scripts/php-unit-tests.sh`)
+CI (`.github/workflows/ci.yml`) รันซ้ำอีกชั้น 3 job:
+
+| job | ทำอะไร |
+|---|---|
+| `check` | typecheck + next build + design-audit |
+| `phplint` | `php -l` ทุกไฟล์ + `bash scripts/php-unit-tests.sh` (ชุดที่ไม่ใช้ DB) |
+| `phpdb` | service `mysql:8.0` → สร้าง schema → `bash scripts/php-db-tests.sh` (31 ชุดที่ต้องใช้ scratch database) |
+
+### CI schema (`phpdb`)
+
+- `php scripts/ci-bootstrap-db.php cmms_ci` สร้าง schema จาก `database/ci_schema_structure.sql` (structure-only, ไม่มีข้อมูล)
+- **guard สำคัญ**: ชื่อ DB ต้องลงท้าย `_ci`, สคริปต์ตัด `USE`/`CREATE DATABASE` ออกจากไฟล์ SQL ทุกไฟล์ และตรวจ `SELECT DATABASE()` หลังต่อ — เพราะไฟล์ SQL ในรีโปมี `USE cmms_tpt;` อยู่ 15 ไฟล์ (ถ้ารันตรง ๆ จะไปเขียน DB จริง)
+- อัปเดต schema หลัง migration ใหม่: `bash scripts/gen-ci-schema.sh` (mysqldump `--no-data`) แล้ว commit `database/ci_schema_structure.sql`
+- ชุดที่ไม่รันใน CI เพราะต้องมีข้อมูล seed จริง: `test_asset_reliability.php`, `test_shutdown.php`, `test_phase32_document_control.php`, `test_phase32_engineering_change.php`; ชุดที่ต้องมี HTTP: `test_csrf.php`, `test_phase32_api.php`, `test_phase35_api.php`
 
 ## Monitoring / Health
 
