@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>CMMS-TPT Quick User Guide (A4 Poster)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Sarabun', 'Leelawadee UI', 'TH Sarabun New', sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page { width: 190mm; margin: 0 auto; }
+
+  /* ---------- header ---------- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4mm;
+    background: #0f172a;
+    color: #fff;
+    border-radius: 3mm;
+    padding: 3.4mm 5mm;
+    margin-bottom: 2.4mm;
+  }
+  .header h1 { margin: 0; font-size: 19pt; line-height: 1.1; letter-spacing: .3px; }
+  .header .sub { margin: .8mm 0 0; font-size: 9.6pt; color: #bae6fd; }
+  .header .sub-en { margin: .3mm 0 0; font-size: 8pt; color: #94a3b8; font-style: italic; }
+  .header .badge { padding: 1.8mm 3mm; font-size: 7.5pt; }
+  .header .badge strong { font-size: 11pt; }
+  .header .badge {
+    flex: 0 0 auto;
+    text-align: center;
+    border: 1.2px solid #0ea5e9;
+    border-radius: 2mm;
+    padding: 2.5mm 3.5mm;
+    font-size: 8.5pt;
+    color: #7dd3fc;
+    line-height: 1.35;
+  }
+  .header .badge strong { display: block; font-size: 13pt; color: #fff; }
+
+  /* ---------- start row ---------- */
+  .start-row { display: flex; gap: 3mm; margin-bottom: 2.4mm; }
+  .start { flex: 1; }
+  .qr-card {
+    flex: 0 0 42mm;
+    border: 1.4px solid #0ea5e9;
+    border-radius: 3mm;
+    padding: 2.4mm;
+    text-align: center;
+    background: #f0f9ff;
+  }
+  .qr-card img { width: 30mm; height: 30mm; display: block; margin: 0 auto 1.2mm; }
+  .qr-card .qr-title { font-size: 8.5pt; font-weight: 700; color: #0369a1; }
+  .qr-card .qr-url { font-size: 7pt; color: #0284c7; word-break: break-all; margin-top: .8mm; }
+
+  .section-title {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    background: #e0f2fe;
+    border-left: 3mm solid #0ea5e9;
+    border-radius: 1.5mm;
+    padding: 1.2mm 2.5mm;
+    margin: 0 0 2mm;
+  }
+  .section-title span { font-weight: 400; font-size: 8.5pt; color: #0369a1; }
+
+  .step {
+    display: flex;
+    gap: 2.5mm;
+    padding: 1.4mm 2.5mm;
+    margin-bottom: 1.4mm;
+    background: #f8fafc;
+    border-radius: 2mm;
+    page-break-inside: avoid;
+  }
+  .step-num {
+    flex: 0 0 6mm;
+    width: 6mm; height: 6mm;
+    border-radius: 50%;
+    background: #0ea5e9;
+    color: #fff;
+    font-weight: 700;
+    font-size: 9pt;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: .6mm;
+  }
+  .step-body { flex: 1; }
+  .step-title { margin: 0; font-size: 9.6pt; font-weight: 700; color: #0f172a; }
+  .step-desc { margin: .2mm 0 0; font-size: 8.2pt; color: #334155; line-height: 1.25; }
+
+  /* ---------- main tasks ---------- */
+  .tasks { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm; margin-bottom: 2.4mm; }
+  .task {
+    border: 1px solid #cbd5e1;
+    border-top: 1.6mm solid #0ea5e9;
+    border-radius: 2.5mm;
+    padding: 2.2mm 3mm;
+    page-break-inside: avoid;
+  }
+  .task h3 { margin: 0 0 .8mm; font-size: 9.6pt; color: #0f172a; }
+  .task h3 small { display: block; font-size: 7pt; font-weight: 400; color: #64748b; font-style: italic; }
+  .task ol { margin: 0; padding-left: 4mm; font-size: 8pt; line-height: 1.22; color: #334155; }
+  .task .who {
+    display: inline-block;
+    margin-top: 1mm;
+    font-size: 7pt;
+    color: #0369a1;
+    background: #e0f2fe;
+    border-radius: 1mm;
+    padding: .4mm 1.5mm;
+  }
+
+  /* ---------- roles table ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 8pt; margin-bottom: 2.4mm; }
+  th, td { border: 1px solid #cbd5e1; padding: .8mm 2mm; text-align: left; vertical-align: top; }
+  th { background: #0f172a; color: #fff; font-size: 7.8pt; }
+  td.role { font-weight: 700; color: #0369a1; white-space: nowrap; background: #f0f9ff; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  tr:nth-child(even) td.role { background: #e0f2fe; }
+
+  /* ---------- tips ---------- */
+  .tips {
+    background: #fffbeb;
+    border: 1.4px solid #f59e0b;
+    border-radius: 3mm;
+    padding: 1.8mm 3mm;
+    margin-bottom: 2mm;
+  }
+  .tips h3 { margin: 0 0 1mm; font-size: 9.6pt; color: #92400e; }
+  .tips ul { margin: 0; padding-left: 4mm; font-size: 8pt; color: #334155; line-height: 1.25; }
+  .tips b { color: #92400e; }
+
+  .footer {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 2mm;
+    text-align: center;
+    font-size: 7.5pt;
+    color: #94a3b8;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div>
+      <h1>CMMS-TPT คู่มือใช้งานฉบับย่อ</h1>
+      <p class="sub">เริ่มใช้งาน · แจ้งซ่อม · รับงาน · ตรวจ PM · เบิกอะไหล่</p>
+      <p class="sub-en">Quick User Guide — the five things you do every day</p>
+    </div>
+    <div class="badge">
+      <strong>A4</strong>
+      ฉบับพกพา<br>พิมพ์ติดบอร์ด
+    </div>
+  </div>
+
+  <div class="start-row">
+    <div class="start">
+      <div class="section-title">เริ่มต้นใช้งาน <span>| Getting started</span></div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <p class="step-title">เปิดเว็บ / สแกน QR Code</p>
+          <p class="step-desc">เปิดเบราว์เซอร์มือถือหรือคอมพิวเตอร์ แล้วสแกน QR ด้านขวา หรือพิมพ์ลิงก์ที่ฝ่ายไอทีแจ้ง</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <p class="step-title">เข้าสู่ระบบ</p>
+          <p class="step-desc">กรอก Username / Password ที่ได้รับ หรือกด "เข้าสู่ระบบด้วย LINE" — เมนูที่เห็นขึ้นกับบทบาทของคุณ</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <p class="step-title">ติดตั้งเป็นแอป (PWA)</p>
+          <p class="step-desc">เมนูเบราว์เซอร์ → "Add to Home Screen" / "ติดตั้งแอป" เพื่อเปิดเร็วขึ้นและใช้งานได้แม้ไม่มีเน็ต</p>
+        </div>
+      </div>
+    </div>
+    <div class="qr-card">
+      <img src="qr_cmms.png" alt="QR Code CMMS-TPT">
+      <div class="qr-title">สแกนเพื่อเข้าใช้งาน</div>
+      <div class="qr-url">https://cmms-tpt.shares.zrok.io/</div>
+    </div>
+  </div>
+
+  <div class="section-title">5 งานหลักที่ใช้บ่อย <span>| Everyday tasks</span></div>
+  <div class="tasks">
+    <div class="task">
+      <h3>1. แจ้งซ่อมเครื่องจักร<small>Report a breakdown</small></h3>
+      <ol>
+        <li>เมนู <b>งานซ่อม / คำขอ</b> → "สร้างคำขอ/แจ้งซ่อม"</li>
+        <li>เลือกเครื่อง/ไลน์ที่พบ + อาการ + ความเร่งด่วน</li>
+        <li><b>ถ่ายรูปจุดที่ผิดปกติ</b> แล้วแนบ</li>
+        <li>ส่ง → รออนุมัติ → กลายเป็นงานซ่อม (WO)</li>
+      </ol>
+      <span class="who">Operator / ทุกคนที่พบปัญหา</span>
+    </div>
+    <div class="task">
+      <h3>2. รับงานซ่อม<small>Work on an assigned work order</small></h3>
+      <ol>
+        <li>เมนู <b>งานซ่อม</b> → กรอง "ของฉัน"</li>
+        <li>เปิดงาน ดูเครื่อง ปัญหา รูป และประวัติ</li>
+        <li>กด <b>Start</b> → Pause/Resume ตามสถานการณ์</li>
+        <li>แนบรูปก่อน–หลัง แล้วกด <b>Done</b> เพื่อส่งตรวจ</li>
+      </ol>
+      <span class="who">Technician</span>
+    </div>
+    <div class="task">
+      <h3>3. ตรวจ PM &amp; AM<small>Complete PM checklists</small></h3>
+      <ol>
+        <li>เมนู <b>PM&amp;AM</b> → รายการที่ถึงกำหนด</li>
+        <li>เปิดแบบฟอร์มตรวจ (checklist)</li>
+        <li>ทำเครื่องหมาย ผ่าน / ไม่ผ่าน + หมายเหตุ</li>
+        <li>ส่งผล — เลื่อนกำหนดต้องมีเหตุผลและรออนุมัติ</li>
+      </ol>
+      <span class="who">Technician / ผู้รับผิดชอบเครื่อง</span>
+    </div>
+    <div class="task">
+      <h3>4. เบิกอะไหล่<small>Request spare parts</small></h3>
+      <ol>
+        <li>เปิดงานซ่อมที่กำลังทำ → สร้างคำขอเบิก</li>
+        <li>ระบุรายการและจำนวนที่ต้องการ</li>
+        <li>รออนุมัติก่อนจ่ายของ</li>
+        <li>ยอดสต็อกจริงอ้างอิง <b>Sage 300</b></li>
+      </ol>
+      <span class="who">Technician / Planner</span>
+    </div>
+    <div class="task">
+      <h3>5. สแกน QR ที่เครื่องจักร<small>Scan the asset QR</small></h3>
+      <ol>
+        <li>เมนู <b>สแกน</b> → ส่อง QR ที่ติดเครื่อง</li>
+        <li>เปิดประวัติซ่อม / PM / คู่มือของเครื่องนั้น</li>
+        <li>แจ้งซ่อมหรือเปิดงานได้ทันทีจากหน้านั้น</li>
+      </ol>
+      <span class="who">ทุกบทบาท</span>
+    </div>
+    <div class="task" style="border-top-color:#0f172a;">
+      <h3>ตรวจรับและปิดงาน<small>Verify &amp; close (Supervisor)</small></h3>
+      <ol>
+        <li>เมนู <b>Supervisor / คิวตรวจ</b></li>
+        <li>ตรวจผลงาน + รูป + อะไหล่ที่ใช้</li>
+        <li>ผ่าน → ปิดงาน / ไม่ผ่าน → ตีกลับพร้อมเหตุผล</li>
+      </ol>
+      <span class="who">Supervisor / หัวหน้างาน</span>
+    </div>
+  </div>
+
+  <div class="section-title">ใครทำอะไร <span>| Who does what</span></div>
+  <table>
+    <tr>
+      <th style="width:26mm;">บทบาท / Role</th>
+      <th>งานหลักในระบบ / Main responsibilities</th>
+    </tr>
+    <tr>
+      <td class="role">Operator</td>
+      <td>แจ้งซ่อมพร้อมรูป ติดตามสถานะใน "คำขอของฉัน" — ไม่ปิดงานเอง</td>
+    </tr>
+    <tr>
+      <td class="role">Technician</td>
+      <td>รับงานซ่อม อัปเดตสถานะ ตรวจ PM/AM เบิกอะไหล่ แนบหลักฐานรูป</td>
+    </tr>
+    <tr>
+      <td class="role">Supervisor</td>
+      <td>มอบหมายงาน อนุมัติเลื่อนกำหนด ตรวจรับและปิดงาน ดูคิวงานค้าง</td>
+    </tr>
+    <tr>
+      <td class="role">Planner / Manager</td>
+      <td>วางแผน PM งบประมาณ อะไหล่ รายงาน KPI และ Dashboard ผู้บริหาร</td>
+    </tr>
+    <tr>
+      <td class="role">Admin</td>
+      <td>จัดการผู้ใช้/สิทธิ์ ทรัพย์สิน แผน PM ตั้งค่าระบบ และ Audit Log</td>
+    </tr>
+  </table>
+
+  <div class="tips">
+    <h3>ข้อควรรู้ / Tips</h3>
+    <ul>
+      <li><b>ไม่มีสัญญาณ:</b> ทำงานต่อได้ตามปกติ ระบบเก็บคิวไว้ แล้วเปิด <b>/sync-center</b> เพื่อซิงก์เมื่อกลับมาออนไลน์</li>
+      <li><b>รูปถ่ายคือหลักฐาน:</b> ถ่ายก่อน–หลังทุกครั้ง เพื่อให้ตรวจรับและวิเคราะห์ปัญหาได้</li>
+      <li><b>สิทธิ์ตามบทบาท:</b> ถ้าปุ่มที่ต้องการไม่แสดง ให้แจ้งหัวหน้าหรือ Admin — อย่าใช้บัญชีของผู้อื่น</li>
+      <li><b>แจ้งเตือน:</b> PM ที่ถึงกำหนด ระบบส่งเตือนอัตโนมัติ (LINE / อีเมล / กระดิ่งในระบบ) ตามที่ตั้งไว้</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    CMMS-TPT | คู่มือใช้งานฉบับย่อ / Quick User Guide | ฉบับละเอียด: docs/USER_GUIDE.md
+  </div>
+
+</div>
+</body>
+</html>
