@@ -6,7 +6,8 @@
  * POST action=run (CSRF required, login required): scan open PM cycles and notify assigned users.
  *
  * For cron/Task Scheduler prefer scripts/pm_reminders.php (CLI) which uses the same helper.
- * Delivery depends on env/settings/channels; no schema-backed dedupe.
+ * Dedupe: schema-backed via pm_am.last_notified_at + cooldown (settings pm_reminder_cooldown_hours).
+ * A cycle is only described in a message after this run claimed it; delivery still depends on env/settings/channels.
  */
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
@@ -30,7 +31,7 @@ try {
             'ok' => true,
             'today' => $out['today'],
             'summary' => $out['summary'],
-            'note' => 'POST action=run (CSRF) เพื่อส่งการแจ้งเตือน best-effort ให้ผู้รับผิดชอบ หรือใช้ scripts/pm_reminders.php ผ่าน cron (แนะนำ)',
+            'note' => 'POST action=run (CSRF) เพื่อส่งการแจ้งเตือน best-effort ให้ผู้รับผิดชอบ หรือใช้ scripts/pm_reminders.php ผ่าน cron (แนะนำ) — มี dedupe ต่อรอบ PM (pm_am.last_notified_at + cooldown)',
         ], JSON_UNESCAPED_UNICODE);
         return;
     }
@@ -51,7 +52,7 @@ try {
 
     $limit = isset($data['limit']) ? (int)$data['limit'] : 500;
     $res = pm_reminders_run($pdo, null, $limit);
-    $res['channel_note'] = 'การส่งจริงขึ้นกับ env/settings (LINE/Email/Telegram) และตาราง/ช่องทางที่ระบบรองรับ; best-effort และไม่มี dedupe ใน schema — แนะนำรันผ่าน cron ด้วย scripts/pm_reminders.php';
+    $res['channel_note'] = 'การส่งจริงขึ้นกับ env/settings (LINE/Email/Telegram) และตาราง/ช่องทางที่ระบบรองรับ; dedupe ต่อรอบ PM ด้วย last_notified_at + cooldown (skipped_duplicate/notified_cycles ในผลลัพธ์)';
     echo json_encode($res, JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     http_response_code(500);

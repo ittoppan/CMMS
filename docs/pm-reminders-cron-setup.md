@@ -6,7 +6,7 @@
 - **สคริปต์ (แนะนำสำหรับ cron):** `scripts/pm_reminders.php`
   - ใช้ helper ร่วม: `src/helpers/pm_reminders.php`
   - อ่าน DB ตามการตั้งค่าแอป (`src/config/db.php`/env ของระบบ) และส่งผ่าน `sendNotificationToUser`/ช่องทางที่ตั้งค่าไว้
-  - **ไม่ mutate สถานะ PM**, **ไม่มี dedupe ใน schema** (การส่งซ้ำขึ้นกับความถี่การรัน)
+  - **ไม่ mutate สถานะ PM** — dedupe ต่อรอบด้วย `pm_am.last_notified_at` + cooldown (settings `pm_reminder_cooldown_hours`, default 20 ชม.) ดู `docs/pm-reminders-dedupe-design.md`
 - **API (ทางเลือกเมื่อเรียกผ่านเว็บ/ผู้ใช้ที่ล็อกอิน):** `POST /api/v1/pm_reminders.php` `{"action":"run"}` (**ต้อง login + CSRF**), `GET` เพื่อดูสรุป
   - พฤติกรรมการสแกน/ส่งเหมือนกัน (helper เดียวกัน)
 
@@ -31,9 +31,9 @@ php scripts/pm_reminders.php --limit=300
 ```
 
 **Exit code:** `0` สำเร็จ (หรือส่งโดยไม่มี error ระดับ notify), `2` มี `notify_errors` บางส่วน, `1` ผิดพลาดรันสคริปต์  
-**ผลลัพธ์:** พิมพ์ JSON สรุป (`summary`, `scanned_cycles`, `users_targeted`, `users_notified`, `notify_errors`)
+**ผลลัพธ์:** พิมพ์ JSON สรุป (`summary`, `scanned_cycles`, `users_targeted`, `users_notified`, `skipped_duplicate`, `notified_cycles`, `cooldown_hours`, `notify_errors`) และเขียน 1 บรรทัดต่อการรันลง `logs/pm_reminders.log`
 
-> หมายเหตุ: `--dry-run` ไม่เรียกส่งข้อความจริง เหมาะสำหรับตรวจจำนวนงาน/ผู้รับก่อนเปิดใช้งาน
+> หมายเหตุ: `--dry-run` ไม่เรียกส่งข้อความจริงและ**ไม่เขียน DB** — แสดง `users_would_notify`/`claimable_cycles`/`skipped_duplicate` ตามกติกา cooldown เดียวกับตอนรันจริง
 
 ## 4) ตัวอย่างตั้ง Cron (Linux)
 แก้ crontab ของผู้ใช้ที่มีสิทธิ์รัน PHP และอ่าน env/config ของแอป:
@@ -44,7 +44,7 @@ php scripts/pm_reminders.php --limit=300
 ```
 
 แนวทาง:
-- รัน **วันละครั้ง** หรือความถี่ที่เหมาะสมเพื่อลดการแจ้งซ้ำ (ไม่มี dedupe)
+- รัน **วันละครั้ง** หรือความถี่ที่เหมาะสม — dedupe ต่อรอบกันการส่งซ้ำภายใน cooldown (20 ชม. ค่าเริ่มต้น) อยู่แล้ว
 - ให้ `cd` ไปที่ root โปรเจกต์เพื่อให้ path/include และการโหลด config ทำงานถูกต้อง
 - บันทึก log (stdout/stderr) เพื่อตรวจสอบ `notify_errors` และปัญหา env/DB
 - หากเซิร์ฟเวอร์ใช้ timezone ต่างจากที่ต้องการ ให้ตั้งเวลา/`TZ` ให้สอดคล้องกับวันทำงานจริง
@@ -61,10 +61,11 @@ php scripts/pm_reminders.php --limit=300
 ## 6) การตรวจสอบหลังตั้งค่า
 - รัน `--dry-run` แล้วเทียบ `summary/scanned_cycles` กับข้อมูลรอบ PM จริง (เกินกำหนด/ถึงกำหนดวันนี้, มี `assigned_to`)
 - รันส่งจริงครั้งแรกในช่วงทดสอบที่ยอมรับได้ และยืนยันผู้รับได้รับข้อความในช่องทางที่ตั้งค่า (LINE/Email/Telegram)
-- หาก `users_notified` เป็น 0 ทั้งที่มีงาน: ตรวจ `assigned_to`, สถานะ/วันครบกำหนด, และการตั้งค่าช่องทาง/สิทธิ์ส่งของระบบ
+- หาก `users_notified` เป็น 0 ทั้งที่มีงาน: ตรวจ `last_notified_at` ของรอบนั้น (อาจอยู่ใน cooldown = `skipped_duplicate` > 0), `assigned_to`, สถานะ/วันครบกำหนด, และการตั้งค่าช่องทาง/สิทธิ์ส่งของระบบ
 - ติดตาม log แอปสำหรับ `pm_reminders notify error` (error รายผู้ใช้จะถูก log และนับใน `notify_errors`)
 
 ## 7) ข้อควรระวัง
 - การส่งจริงขึ้นกับ env/settings และความพร้อมของช่องทาง — สคริปต์เป็น best-effort
-- ไม่มีการบันทึกว่า “เคยแจ้งแล้ว” ใน schema: ปรับความถี่ cron และพิจารณาเพิ่ม dedupe ในอนาคต (อาจต้องเปลี่ยน schema — ต้องอนุมัติ)
+- การบันทึกว่า “รอบนี้แจ้งเมื่อไร” อยู่ใน `pm_am.last_notified_at`/`notify_count` — ถ้าต้องการเตือนถี่ขึ้นให้ลด `pm_reminder_cooldown_hours` (เช่น 10) ไม่ใช่เพิ่มความถี่ cron โดยไม่ดู cooldown
+- ต้องรัน migration `database/migration_20261118_pm_reminders_dedupe_proposal.sql` (schema ก่อนโค้ด) ไม่งั้นสคริปต์จะ error เรื่องคอลัมน์หาย
 - ห้ามใส่ token/secret ลงในคำสั่ง cron ที่ถูก commit หรือแชร์โดยไม่ปลอดภัย; ใช้ env/secret store ของระบบปฏิบัติการหรือกลไก deploy ที่มีอยู่

@@ -23,22 +23,21 @@ SELECT COLUMN_NAME
   FROM information_schema.COLUMNS
  WHERE TABLE_SCHEMA = DATABASE()
    AND TABLE_NAME   = 'pm_am'
-   AND COLUMN_NAME IN ('last_notified_at', 'last_notified_kind', 'notify_count');
+   AND COLUMN_NAME IN ('last_notified_at', 'notify_count');
 
 -- ============================================================================
 -- 1) คอลัมน์ dedupe บนรอบ PM
 --    last_notified_at  NULL = ยังไม่เคยแจ้ง (ไม่ต้อง backfill)
+--    (ไม่มีคอลัมน์ประเภทการเตือน — ข้อความสร้างจากรอบที่ claim สำเร็จอยู่แล้ว)
 -- ============================================================================
 ALTER TABLE `pm_am`
-  ADD COLUMN `last_notified_at`   DATETIME NULL
+  ADD COLUMN `last_notified_at` DATETIME NULL
       COMMENT 'เวลาที่ส่งแจ้งเตือนรอบนี้สำเร็จครั้งล่าสุด (NULL = ยังไม่เคยแจ้ง)',
-  ADD COLUMN `last_notified_kind` ENUM('due_today','overdue') NULL
-      COMMENT 'ประเภทการเตือนครั้งล่าสุด',
-  ADD COLUMN `notify_count`       SMALLINT UNSIGNED NOT NULL DEFAULT 0
+  ADD COLUMN `notify_count`     SMALLINT UNSIGNED NOT NULL DEFAULT 0
       COMMENT 'จำนวนครั้งที่เตือนรอบนี้แล้ว';
 
 -- ============================================================================
--- 2) Index สำหรับสแกนรายวัน (dedupe filter: due_date + assigned_to + last_notified_at)
+-- 2) Index สำหรับสแกนรายวัน (candidate scan + claim guard)
 --    ตารางปัจจุบันยังเล็ก — index นี้เพื่อกันการสแกนเต็มตารางเมื่อข้อมูลโต
 -- ============================================================================
 ALTER TABLE `pm_am`
@@ -59,7 +58,6 @@ ALTER TABLE `pm_am`
 -- ALTER TABLE `pm_am`
 --   DROP KEY `idx_pm_am_reminder_scan`,
 --   DROP COLUMN `notify_count`,
---   DROP COLUMN `last_notified_kind`,
 --   DROP COLUMN `last_notified_at`;
 
 -- ============================================================================
