@@ -187,6 +187,23 @@ const PERMISSION_MATRIX = [
         // home KPI tile (supervisor.php?action=kpis) — อ่านสรุปได้เท่านั้น
         'repair'     => ['view'],
     ],
+    10 => [ // Officer-Read — ดูข้อมูลได้ แต่ไม่แก้ไข (bundle อ่านอย่างเดียว)
+        'sage'       => ['view'],
+        'spare_parts'=> ['view'],
+        'users'      => ['view'],
+        'settings'   => ['view'],
+        'audit_log'  => ['view'],
+        'document'   => ['view'],
+        'report'     => ['view', 'export'],
+        'dashboard'  => ['view'],
+        'calibration' => ['view'],
+        'pm_am'      => ['view'],
+        'inspection' => ['view'],
+        'asset'      => ['view'],
+        'knowledge'  => ['read', 'search', 'feedback'],
+        'training'   => ['view'],
+        'workforce'  => ['view', 'capacity_view'],
+    ],
     5 => [ // Viewer — อ่านอย่างเดียว
         'repair'     => ['view'],
         'request'    => ['view'],

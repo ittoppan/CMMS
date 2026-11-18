@@ -11,6 +11,8 @@ import QRCode from "qrcode";
 import { qrDarkColor } from "@/lib/qr-color";
 import { usePageHero } from "@/lib/i18n";
 import { useMenuPermission } from "@/lib/useMenuPermission";
+import { fetchKnRelated } from "@/lib/knowledge";
+import type { KnArticle } from "@/lib/knowledge";
 import { Grid, VStack, HStack } from "@/components/layout";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -318,6 +320,7 @@ export default function AssetRegistryViewPage() {
 
   const [assetId, setAssetId] = useState<string>("");
   const [asset, setAsset] = useState<AssetData | null>(null);
+  const [relatedKnowledge, setRelatedKnowledge] = useState<KnArticle[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [bom, setBom] = useState<BomPart[]>([]);
   const [repairs, setRepairs] = useState<RepairRow[]>([]);
@@ -575,6 +578,11 @@ export default function AssetRegistryViewPage() {
           throw new Error("Not found");
         }
         setAsset(assetJson as AssetData);
+        try {
+          const rel = await fetchKnRelated("asset", String(assetId));
+          if (Array.isArray(rel?.articles)) setRelatedKnowledge(rel.articles);
+        } catch {}
+
 
         if (usersRes.status === "fulfilled") {
           const uj = await usersRes.value.json();
@@ -1156,6 +1164,25 @@ export default function AssetRegistryViewPage() {
                     );
                   })}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+          {relatedKnowledge.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">บทความความรู้ที่เกี่ยวข้อง</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {relatedKnowledge.slice(0, 6).map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => router.push(`/knowledge/${a.id}`)}
+                    className="block w-full text-left rounded border px-3 py-2 hover:bg-muted/40"
+                  >
+                    <div className="text-sm font-medium">{a.title}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">{a.summary || a.resolution || a.diagnosis || ""}</div>
+                  </button>
+                ))}
               </CardContent>
             </Card>
           )}

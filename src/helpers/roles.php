@@ -141,6 +141,7 @@ function users_role_id_from_value(PDO $pdo, $value): ?int
         'asst.manager' => 'Asst.Manager', 'asstmanager' => 'Asst.Manager', 'assistantmanager' => 'Asst.Manager',
         'foreman' => 'Foreman', 'supervisor' => 'Foreman',
         'officer' => 'Officer', 'engineer' => 'Officer',
+        'officer-read' => 'Officer-Read', 'officer read' => 'Officer-Read',
     ];
     $key = strtolower(preg_replace('/\s+/', ' ', $raw));
     $name = $legacy[$key] ?? $legacy[str_replace(' ', '', $key)] ?? null;
