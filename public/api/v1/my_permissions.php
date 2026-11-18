@@ -12,6 +12,11 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/helpers/ui_permissions.php';
 
+// session_start() ที่นี่ — requireLogin() อ่าน $_SESSION['user_id'] (เดิมไม่มี → 401 ทุกครั้ง)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: private, no-store');
 
