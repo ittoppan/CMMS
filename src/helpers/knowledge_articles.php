@@ -773,6 +773,10 @@ function kn_article_publish(PDO $pdo, int $id, int $userId, array $opts = []): a
                     'à¹à¸—à¸™à¸—à¸µà¹ˆà¸‰à¸šà¸±à¸šà¸—à¸µà¹ˆ ' . (int)$previous['version_no'], null, null, null, null, $userId);
     }
 
+    if (function_exists('telegramAdminAlert')) {
+        @telegramAdminAlert('ความรู้ใหม่', "เผยแพร่บทความ: {$row['title']} (v{$row['version_no']})", null, 'INFO');
+    }
+
     return ['ok' => true, 'id' => $id, 'status' => 'published',
             'superseded_id' => $previous ? (int)$previous['id'] : null,
             'stale_flagged' => $staleRefs];
