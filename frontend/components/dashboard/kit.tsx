@@ -37,8 +37,8 @@ export function SectionHeading({
   return (
     <div className="flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0 space-y-1">
-        <h2 className="cmms-section-title text-base font-bold tracking-tight">{title}</h2>
-        {sub && <p className="cmms-caption">{sub}</p>}
+        <h2 className="cmms-section-title text-[0.95rem] font-semibold tracking-[-0.005em]">{title}</h2>
+        {sub && <p className="cmms-caption max-w-[68ch] leading-relaxed">{sub}</p>}
       </div>
       {right && <div className="flex flex-wrap items-center gap-2">{right}</div>}
     </div>

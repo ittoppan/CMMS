@@ -78,15 +78,16 @@ export function PageShell({
         </Breadcrumb>
       )}
 
-      {/* Header — Modern Enterprise: หัวเรื่องเด่น, เส้นใต้อ่อน, อธิบายสั้น */}
+      {/* Header — มาตรฐานเดียวกับ .cmms-page-hero: eyebrow → ชื่อเรื่อง → คำอธิบาย
+          ระยะห่าง/เส้นคั่น/สเกลตัวอักษรต้องตรงกันทุกหน้า (ดู globals.css) */}
       <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-2">
           {eyebrow}
-          <h1 className="max-w-3xl text-[1.7rem] font-bold leading-tight tracking-tight text-foreground">
+          <h1 className="max-w-3xl text-[1.75rem] font-bold leading-[1.2] tracking-[-0.01em] text-foreground text-balance">
             {title}
           </h1>
           {description && (
-            <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p>
+            <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground text-pretty">{description}</p>
           )}
         </div>
         {actions != null && (

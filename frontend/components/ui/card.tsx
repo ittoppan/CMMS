@@ -12,7 +12,7 @@ const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     <div
       ref={ref}
       className={cn(
-        "rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] shadow-[var(--cmms-shadow)]",
+        "rounded-[var(--cmms-radius-lg)] border border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] shadow-[var(--cmms-shadow-sm)]",
         className
       )}
       {...props}
@@ -25,7 +25,7 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex flex-col gap-1 border-b border-[var(--cmms-border)] p-5", className)}
+      className={cn("flex flex-col gap-1.5 border-b border-[var(--cmms-border)] p-5", className)}
       {...props}
     />
   )
@@ -36,7 +36,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
   ({ className, ...props }, ref) => (
     <h2
       ref={ref}
-      className={cn("text-base font-bold text-[var(--cmms-text-primary)]", className)}
+      className={cn("text-[0.95rem] font-semibold leading-snug text-[var(--cmms-text-primary)]", className)}
       {...props}
     />
   )
@@ -47,7 +47,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn("text-sm text-[var(--cmms-text-secondary)]", className)}
+      className={cn("text-[0.8125rem] leading-relaxed text-[var(--cmms-text-secondary)]", className)}
       {...props}
     />
   )

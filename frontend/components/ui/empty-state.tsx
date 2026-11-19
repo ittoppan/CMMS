@@ -23,21 +23,21 @@ function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center px-6 py-16 text-center",
+        "flex flex-col items-center justify-center px-6 py-14 text-center",
         className
       )}
     >
       {icon && (
         <div
           aria-hidden="true"
-          className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]"
+          className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]"
         >
           {icon}
         </div>
       )}
-      <h3 className="max-w-full break-words text-balance text-base font-bold text-[var(--cmms-text-primary)]">{title}</h3>
+      <h3 className="max-w-full break-words text-balance text-[0.95rem] font-semibold text-[var(--cmms-text-primary)]">{title}</h3>
       {description && (
-        <p className="mt-1 max-w-sm break-words text-sm text-[var(--cmms-text-secondary)]">
+        <p className="mt-1.5 max-w-[46ch] break-words text-[0.8125rem] leading-relaxed text-[var(--cmms-text-secondary)]">
           {description}
         </p>
       )}

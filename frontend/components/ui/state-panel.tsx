@@ -2,6 +2,7 @@
 
 import { LockClosedIcon, InboxIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
+import { EmptyState as UiEmptyState } from "@/components/ui/empty-state";
 
 interface BaseProps {
   title?: string;
@@ -10,6 +11,11 @@ interface BaseProps {
   onAction?: () => void;
 }
 
+/**
+ * สถานะระดับหน้า (ไม่มีสิทธิ์ / ไม่มีข้อมูล)
+ * EmptyState ที่นี่ห่อ components/ui/empty-state ตัวเดียวของระบบ —
+ * ไม่มีสไตล์ dashed-card ซ้ำอีก เพื่อให้ทุกหน้าใช้หน้าตาเดียวกัน
+ */
 export function PermissionDeniedState({
   title = "ไม่มีสิทธิ์เข้าถึง",
   description = "คุณไม่มีสิทธิ์ดูข้อมูลในหน้านี้ — ติดต่อผู้ดูแลระบบหากต้องการสิทธิ์เพิ่ม",
@@ -17,16 +23,18 @@ export function PermissionDeniedState({
   onAction,
 }: BaseProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cmms-danger-light)] text-[var(--cmms-danger)]">
-        <LockClosedIcon className="h-6 w-6" />
-      </div>
-      <h3 className="text-base font-semibold">{title}</h3>
-      <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-      {actionLabel && onAction && (
-        <Button variant="secondary" onClick={onAction}>{actionLabel}</Button>
-      )}
-    </div>
+    <UiEmptyState
+      icon={<LockClosedIcon className="h-5 w-5" />}
+      title={title}
+      description={description}
+      action={
+        actionLabel && onAction ? (
+          <Button variant="secondary" onClick={onAction}>
+            {actionLabel}
+          </Button>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -37,15 +45,17 @@ export function EmptyState({
   onAction,
 }: BaseProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed p-10 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cmms-bg-muted)] text-[var(--cmms-text-muted)]">
-        <InboxIcon className="h-6 w-6" />
-      </div>
-      <h3 className="text-base font-semibold">{title}</h3>
-      <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-      {actionLabel && onAction && (
-        <Button variant="primary" onClick={onAction}>{actionLabel}</Button>
-      )}
-    </div>
+    <UiEmptyState
+      icon={<InboxIcon className="h-5 w-5" />}
+      title={title}
+      description={description}
+      action={
+        actionLabel && onAction ? (
+          <Button variant="primary" onClick={onAction}>
+            {actionLabel}
+          </Button>
+        ) : undefined
+      }
+    />
   );
 }

@@ -6,6 +6,9 @@ import { cn } from "@/lib/cn";
 /**
  * PageHeader — หัวหน้าหน้าอัตโนมัติ (eyebrow + title + description + actions)
  * ใช้แทน hero มือทำในทุกหน้า
+ *
+ * สเกล/ระยะห่างต้องตรงกับ PageShell (components/PageShell.tsx) และ .cmms-page-hero
+ * ใน globals.css — ระบบมีหัวหน้าหน้า 3 แบบที่ต้องดูเป็นตระกูลเดียวกัน
  */
 function PageHeader({
   eyebrow,
@@ -23,23 +26,23 @@ function PageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-4 border-b border-[var(--cmms-border)] pb-5 sm:flex-row sm:items-end sm:justify-between",
         className
       )}
     >
-      <div className="min-w-0 space-y-1">
+      <div className="min-w-0 space-y-2">
         {eyebrow && (
           <p className="cmms-eyebrow">{eyebrow}</p>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--cmms-text-primary)]">
+        <h1 className="max-w-3xl text-[1.75rem] font-bold leading-[1.2] tracking-[-0.01em] text-[var(--cmms-text-primary)] text-balance">
           {title}
         </h1>
         {description && (
-          <p className="text-sm text-[var(--cmms-text-secondary)]">{description}</p>
+          <p className="max-w-[68ch] text-sm leading-relaxed text-[var(--cmms-text-secondary)] text-pretty">{description}</p>
         )}
       </div>
       {actions && (
-        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
       )}
     </div>
   );

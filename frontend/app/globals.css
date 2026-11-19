@@ -374,20 +374,34 @@ html, body {
   background: var(--cmms-bg-card);
   text-align: left;
   font-weight: 600;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cmms-text-secondary);
-  padding: 10px 12px;
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--cmms-text-muted);
+  padding: 11px 14px;
   border-bottom: 1px solid var(--cmms-border);
   white-space: nowrap;
 }
+.cmms-ui-table thead th:first-child,
+.cmms-card-table thead th:first-child {
+  padding-left: 16px;
+}
 .cmms-ui-table tbody td,
 .cmms-card-table tbody td {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--cmms-border);
   color: var(--cmms-text-primary);
   vertical-align: middle;
+}
+.cmms-ui-table tbody td:first-child,
+.cmms-card-table tbody td:first-child {
+  padding-left: 16px;
+}
+/* ตัวเลขในตาราง — กว้างเท่ากันทุกหลักเพื่อสแกนคอลัมน์ตัวเลขได้ไว */
+.cmms-ui-table tbody td.text-right,
+.cmms-card-table tbody td.text-right,
+.cmms-ui-table tbody td[data-numeric="true"] {
+  font-variant-numeric: tabular-nums;
 }
 .cmms-ui-table tbody tr,
 .cmms-card-table tbody tr {
@@ -440,10 +454,10 @@ html, body {
   }
   .cmms-ui-table tbody td::before {
     content: attr(data-label);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    text-transform: none;
+    letter-spacing: 0.01em;
     color: var(--cmms-text-muted);
     text-align: left;
     flex-shrink: 0;
@@ -2114,12 +2128,16 @@ next-route-announcer {
   font-feature-settings: "tnum" 1;
 }
 
+/* Eyebrow / kicker เหนือหัวเรื่อง — sentence case (ไม่บังคับ ALL-CAPS)
+   ภาษาไทยไม่มีการขึ้นตัวพิมพ์ใหญ่ จึงใช้ตัวหนา + สีแบรนด์เป็นตัวแยกชั้นวรรณะแทน
+   letter-spacing แคบ (0.01em) เพื่อไม่ให้ตัวอักษรไทยฉีกออกจากกัน */
 .cmms-eyebrow {
   font-family: var(--font-family-heading);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.75rem;
+  line-height: 1.45;
   color: var(--cmms-primary);
 }
 
@@ -2174,8 +2192,34 @@ next-route-announcer {
   background: #0F1E3D;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--cmms-radius-xl);
-  padding: 24px 28px;
+  padding: 26px 30px;
   box-shadow: var(--cmms-shadow-md);
+}
+
+/* มาตรฐานหัวเรื่องใน hero — 61 หน้าใช้ hero นี้ ต้องมีสเกลเดียวกันหมด
+   (selector เจาะจงกว่า utility text-2xl ในไฟล์หน้า จึงคุมได้จากที่เดียว) */
+.cmms-page-hero h1,
+.cmms-page-hero .cmms-hero-title {
+  font-size: clamp(1.4rem, 1.12rem + 0.85vw, 1.85rem);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.cmms-page-hero .cmms-eyebrow {
+  display: block;
+  margin: 0 0 6px;
+}
+
+@media (max-width: 640px) {
+  .cmms-page-hero {
+    padding: 20px 20px 22px;
+    border-radius: var(--cmms-radius-lg);
+  }
+  .cmms-page-hero::before {
+    display: none;
+  }
 }
 
 /* วงแหวนตกแต่งมุมขวาล่าง — น้อยชิ้น ไม่แย่งเนื้อหา */
@@ -3102,6 +3146,11 @@ html.cmms-no-anim *::after {
 }
 .cmms-hero-desc {
   color: var(--cmms-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  max-width: 68ch;
+  margin-top: 8px;
+  text-wrap: pretty;
 }
 /* .cmms-page-hero เป็นพื้น navy เข้ม (#0F1E3D) — คำอธิบายใต้หัวเรื่องต้องเป็นขาวนวล
    ไม่ใช่ text-secondary (เทาเข้ม) ไม่งั้นอ่านไม่ออกบน 61 หน้าที่ใช้ hero นี้ */
@@ -3611,5 +3660,61 @@ html.cmms-no-anim *::after {
   .cmms-mobile-page .cmms-job-card:active,
   .cmms-mobile-page .cmms-photo-empty:active {
     transform: none !important;
+  }
+}
+
+/* ============================================================
+   Cross-module baseline (241 หน้าใน (dashboard))
+   ชั้นนี้เติมสิ่งที่หน้าเว็บเรียกใช้แต่ยังไม่เคยมีสไตล์ + จัดระเบียบ
+   องค์ประกอบที่ซ้ำทุกเมนู ให้ดูเป็นระบบเดียวโดยไม่ต้องแก้ทีละหน้า
+   ============================================================ */
+
+/* ── 1. วรรณยุกต์บรรทัด: หัวเรื่องตัดบรรทัดสมดุล, ย่อหน้าตัดคำไม่ให้ค้าง ── */
+@layer base {
+  :where(h1, h2, h3) {
+    text-wrap: balance;
+  }
+  :where(p) {
+    text-wrap: pretty;
+  }
+}
+
+/* ── 2. ghost classes — ถูกเรียกใน JSX แต่ไม่เคยมีสไตล์ (ตรวจทั้งโปรเจกต์) ── */
+/* ฟอร์มไดนามิก (/forms/run/[id]) — หนึ่งบล็อก = หนึ่งฟิลด์ */
+.cmms-form-block {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+/* บล็อกที่เป็นหัวข้อของฟอร์ม — คั่นด้วยเส้นบางเพื่อแบ่งตอนให้อ่านง่าย */
+.cmms-form-block:has(> h2, > h3, > h4) {
+  margin-top: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--cmms-border);
+}
+
+.cmms-section-title {
+  color: var(--cmms-text-primary);
+  line-height: 1.35;
+}
+
+/* ── 3. ปุ่ม/ลิงก์ใน hero — 60+ หน้านิยามเองด้วย border-white/20 bg-white/10
+         รวมความสูง/รัศมี/น้ำหนักตัวอักษรให้เท่ากันจากที่เดียว ── */
+.cmms-page-hero :is(a, button)[class*="bg-white/10"] {
+  min-height: 40px;
+  border-radius: var(--cmms-radius);
+  font-weight: 600;
+}
+.cmms-page-hero :is(a, button)[class*="bg-white/10"]:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── 4. เนื้อหาหลัก: ระยะขอบแนวตั้งสม่ำเสมอเมื่อหน้าใช้ space-y-* ไม่ครบ ── */
+@layer components {
+  .cmms-page-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 }
