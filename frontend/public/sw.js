@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v95-20261119-1106";
+const SW_VERSION = "v96-20261119-1142";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -203,18 +203,31 @@ self.addEventListener("fetch", (event) => {
 
 /* ---------- Web Push (PWA push notifications) ---------- */
 self.addEventListener("push", (event) => {
+  console.log("[SW] push event received", event);
   let data = {};
   try {
-    data = event.data ? event.data.json() : {};
-  } catch (e) { /* ignore */ }
-  const title = data.title || "CMMS-TPT";
+    if (event.data) {
+      try { data = event.data.json(); }
+      catch (e) { data = { title: "CMMS-TPT", body: event.data.text() }; }
+    }
+  } catch (e) { console.warn("[SW] push parse error", e); }
+  const title = (data && data.title) || "CMMS-TPT";
   const options = {
-    body: data.body || "",
+    body: (data && data.body) || "",
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-192.png",
-    data: { url: data.url || "/" },
+    tag: "cmms-push",
+    renotify: true,
+    requireInteraction: false,
+    data: { url: (data && data.url) || "/" },
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(() => {
+      console.log("[SW] showNotification OK");
+    }).catch((err) => {
+      console.error("[SW] showNotification FAILED", err);
+    })
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
