@@ -70,9 +70,29 @@ function ctr_activity(PDO $pdo, ?int $contractorId, ?int $assignmentId, string $
 }
 
 function ctr_notify(PDO $pdo, string $event, string $title, string $message, string $url, ?int $targetUid = null): void {
-    if (!function_exists('sendLineTemplatePush')) return;
     if (!$targetUid) return;
-    try { sendLineTemplatePush($targetUid, 'contractor/' . $event, ['title' => $title, 'message' => $message], $url); } catch (Throwable $e) { error_log('ctr_notify: ' . $e->getMessage()); }
+    try {
+        if (!class_exists('NotificationCenterService')) {
+            $f = __DIR__ . '/../services/NotificationCenterService.php';
+            if (file_exists($f)) require_once $f;
+        }
+        if (class_exists('NotificationCenterService')) {
+            NotificationCenterService::notify($pdo, [
+                'module' => 'contractor', 'event' => $event,
+                'type' => 'contractor', 'priority' => 'medium',
+                'ref_type' => 'contractor', 'ref_id' => 0,
+                'template' => 'contractor:' . $event,
+                'vars' => ['title' => $title, 'message' => $message],
+                'users' => [(int)$targetUid], 'roles' => [], 'channels' => ['app', 'push'],
+                'url' => $url, 'source_user_id' => 0,
+            ]);
+        } else {
+            // fallback to legacy
+            if (function_exists('sendLineTemplatePush')) {
+                sendLineTemplatePush($targetUid, 'contractor/' . $event, ['title' => $title, 'message' => $message], $url);
+            }
+        }
+    } catch (Throwable $e) { error_log('ctr_notify: ' . $e->getMessage()); }
 }
 
 function ctr_contractor(PDO $pdo, int $id): array {

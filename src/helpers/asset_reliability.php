@@ -201,6 +201,10 @@ function ar_lifecycle_history(PDO $pdo, int $assetId, int $limit = 100): array {
 /** แจ้งเตือน lifecycle เปลี่ยน (ใช้ template ที่ seed ไว้) */
 function ar_notify_lifecycle_change(PDO $pdo, int $assetId, string $from, string $to, string $reason, array $targetUids = [], int $uid = 0): void {
     try {
+        if (!class_exists('NotificationCenterService')) {
+            $f = __DIR__ . '/../services/NotificationCenterService.php';
+            if (file_exists($f)) require_once $f;
+        }
         $asset = ar_asset($pdo, $assetId);
         if (!$asset) return;
         $vars = [
@@ -210,15 +214,26 @@ function ar_notify_lifecycle_change(PDO $pdo, int $assetId, string $from, string
             'reason' => $reason !== '' ? $reason : '-',
         ];
         $uids = $targetUids ?: ar_engine_user_ids($pdo, 6);
-        foreach ($uids as $targetUid) {
-            if ((int)$targetUid === (int)$uid) continue;
-            // ใช้ NotificationCenterService pattern (sendNotificationToUser)
-            if (function_exists('sendNotificationToUser') && function_exists('getLineTemplate')) {
-                $title = '{asset_code} เปลี่ยน lifecycle → {to_status}';
-                $msg = "เครื่อง {asset_code} ({asset_name})\n{from_status} → {to_status}\nเหตุผล: {reason}";
-                foreach ($vars as $k => $v) { $title = str_replace('{' . $k . '}', (string)$v, $title); $msg = str_replace('{' . $k . '}', (string)$v, $msg); }
-                sendNotificationToUser((int)$targetUid, $title, $msg, '/asset-reliability/' . $assetId);
-                sendLineTemplatePush((int)$targetUid, 'asset_reliability/lifecycle_change', $vars, '/asset-reliability/' . $assetId);
+        $uids = array_values(array_filter($uids, fn($u) => (int)$u !== (int)$uid));
+        if (class_exists('NotificationCenterService')) {
+            NotificationCenterService::notify($pdo, [
+                'module' => 'asset_reliability', 'event' => 'lifecycle_change',
+                'type' => 'asset_reliability', 'priority' => 'medium',
+                'ref_type' => 'asset_registry', 'ref_id' => $assetId,
+                'template' => 'asset_reliability:lifecycle_change', 'vars' => $vars,
+                'users' => $uids, 'roles' => [], 'channels' => ['app', 'push'],
+                'url' => '/asset-reliability/' . $assetId,
+                'source_user_id' => $uid,
+            ]);
+        } else {
+            // fallback to legacy
+            foreach ($uids as $targetUid) {
+                if (function_exists('sendNotificationToUser')) {
+                    $title = '{asset_code} เปลี่ยน lifecycle → {to_status}';
+                    $msg = "เครื่อง {asset_code} ({asset_name})\n{from_status} → {to_status}\nเหตุผล: {reason}";
+                    foreach ($vars as $k => $v) { $title = str_replace('{' . $k . '}', (string)$v, $title); $msg = str_replace('{' . $k . '}', (string)$v, $msg); }
+                    sendNotificationToUser((int)$targetUid, $title, $msg, '/asset-reliability/' . $assetId);
+                }
             }
         }
     } catch (Throwable $e) { error_log('[ar_notify_lifecycle_change] ' . $e->getMessage()); }
@@ -739,18 +754,34 @@ function ar_component_replacements(PDO $pdo, int $assetId, int $limit = 20): arr
 
 function ar_notify_component_replace(PDO $pdo, int $assetId, array $comp, string $reason, string $newSerial): void {
     try {
+        if (!class_exists('NotificationCenterService')) {
+            $f = __DIR__ . '/../services/NotificationCenterService.php';
+            if (file_exists($f)) require_once $f;
+        }
         $asset = ar_asset($pdo, $assetId);
         if (!$asset) return;
         $vars = ['asset_code' => $asset['code'], 'asset_name' => $asset['name'], 'asset_id' => $assetId,
             'component_name' => $comp['name'] ?? $comp['component_code'], 'old_serial' => $comp['serial_number'] ?? '-',
             'new_serial' => $newSerial !== '' ? $newSerial : '-', 'reason' => $reason !== '' ? $reason : '-'];
-        foreach (ar_engine_user_ids($pdo, 8) as $targetUid) {
-            if (function_exists('sendNotificationToUser')) {
-                $title = '{asset_code} เปลี่ยนชิ้นส่วน';
-                $msg = "{component_name}\nเดิม: {old_serial}\nใหม่: {new_serial}\nเหตุผล: {reason}";
-                foreach ($vars as $k => $v) { $title = str_replace('{' . $k . '}', (string)$v, $title); $msg = str_replace('{' . $k . '}', (string)$v, $msg); }
-                sendNotificationToUser((int)$targetUid, $title, $msg, '/asset-reliability/' . $assetId);
-                if (function_exists('sendLineTemplatePush')) sendLineTemplatePush((int)$targetUid, 'asset_reliability/component_replaced', $vars, '/asset-reliability/' . $assetId);
+        $uids = ar_engine_user_ids($pdo, 8);
+        if (class_exists('NotificationCenterService')) {
+            NotificationCenterService::notify($pdo, [
+                'module' => 'asset_reliability', 'event' => 'component_replaced',
+                'type' => 'asset_reliability', 'priority' => 'medium',
+                'ref_type' => 'asset_registry', 'ref_id' => $assetId,
+                'template' => 'asset_reliability:component_replaced', 'vars' => $vars,
+                'users' => $uids, 'roles' => [], 'channels' => ['app', 'push'],
+                'url' => '/asset-reliability/' . $assetId,
+            ]);
+        } else {
+            // fallback to legacy
+            foreach ($uids as $targetUid) {
+                if (function_exists('sendNotificationToUser')) {
+                    $title = '{asset_code} เปลี่ยนชิ้นส่วน';
+                    $msg = "{component_name}\nเดิม: {old_serial}\nใหม่: {new_serial}\nเหตุผล: {reason}";
+                    foreach ($vars as $k => $v) { $title = str_replace('{' . $k . '}', (string)$v, $title); $msg = str_replace('{' . $k . '}', (string)$v, $msg); }
+                    sendNotificationToUser((int)$targetUid, $title, $msg, '/asset-reliability/' . $assetId);
+                }
             }
         }
     } catch (Throwable $e) { error_log('[ar_notify_component_replace] ' . $e->getMessage()); }
