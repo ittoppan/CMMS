@@ -754,3 +754,26 @@
   .cmms-tower .tower-band > * { min-height: 200px !important; }
   #cmms-main-scroll { overflow-y: auto !important; }
 }
+
+/* ── Accessibility: focus-visible rings (design-skill quality floor) ──────── */
+.cmms-tower :where(button, select, a, [role="button"]):focus-visible {
+  outline: 2px solid var(--tower-blue-soft);
+  outline-offset: 2px;
+  border-radius: 0.35em;
+}
+.cmms-tower .tower-kpi-link:focus-visible {
+  outline: 2px solid var(--tower-blue-soft);
+  outline-offset: 2px;
+}
+
+/* ── Reduced motion: respect user preference (design-skill quality floor) ─── */
+@media (prefers-reduced-motion: reduce) {
+  .cmms-tower,
+  .cmms-tower * {
+    animation: none !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+  }
+  .tower-dot[data-tone="green"] { animation: none !important; }
+  .cmms-tower .tower-kpi-link:hover { transform: none !important; }
+}
