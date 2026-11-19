@@ -332,7 +332,7 @@ export default function AssetsPage() {
       key: "code",
       header: "รหัสเครื่องจักร",
       renderCell: (item: Asset) => (
-        <Link href={`/assets/${item.code}`} className="inline-flex min-h-10 items-center font-medium text-primary hover:underline">{item.code}</Link>
+        <Link href={`/assets/${item.code}`} className="inline-flex min-h-10 items-center font-medium text-primary hover:underline focus:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--cmms-primary)] rounded">{item.code}</Link>
       ),
     },
     { key: "name", header: "ชื่อเครื่องจักร" },
