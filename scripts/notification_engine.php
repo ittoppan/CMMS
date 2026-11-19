@@ -14,7 +14,7 @@
  *   7) Rule engine — ใช้ notification_rules ปรับผู้รับ/ช่องทาง/delay/repeat/dedup
  *   8) Retry การส่งช่องทางภายนอกที่ค้าง (notification_deliveries)
  *
- * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,retry]
+ * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,shutdown,engineering_change,retry]
  *      --force = ข้าม dedup (ใช้ทดสอบ)
  * exit 0 = ทำงานเสร็จ (ไม่ว่าจะเจอหรือไม่เจอรายการ)
  */
@@ -535,6 +535,73 @@ if (engHas('rca') || engHas('all')) {
         echo "rca overdue check done (" . count($rcas) . " candidates)\n";
     } catch (Throwable $e) {
         echo "rca overdue skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Shutdown ใกล้เริ่ม (created) ---------------- */
+if (engHas('shutdown') || engHas('all')) {
+    $sdDays = max(0, (int)engSetting($pdo, 'shutdown_alert_days', '7'));
+    try {
+        $sds = $pdo->query("
+            SELECT id, shutdown_no, title, planned_start_at, planned_end_at, status, owner_user_id, created_at
+            FROM sd_shutdowns
+            WHERE planned_start_at IS NOT NULL
+              AND planned_start_at <= DATE_ADD(NOW(), INTERVAL $sdDays DAY)
+              AND planned_start_at >= NOW()
+              AND status NOT IN ('cancelled','closed','completed')")->fetchAll();
+        foreach ($sds as $sd) {
+            $done += engFire($pdo, [
+                'module' => 'shutdown', 'event' => 'created',
+                'type' => 'shutdown', 'priority' => 'medium',
+                'ref_type' => 'sd_shutdowns', 'ref_id' => (int)$sd['id'],
+                'users' => (int)$sd['owner_user_id'] ? [(int)$sd['owner_user_id']] : [],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'shutdown:created',
+                'vars' => [
+                    'shutdown_no' => (string)$sd['shutdown_no'], 'title' => (string)$sd['title'],
+                    'planned_start_at' => (string)$sd['planned_start_at'], 'planned_end_at' => (string)$sd['planned_end_at'],
+                ],
+                'url' => '/shutdown/' . (int)$sd['id'],
+                'created_at' => (string)($sd['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "shutdown created check done (" . count($sds) . " candidates, {$sdDays}d)\n";
+    } catch (Throwable $e) {
+        echo "shutdown created skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Engineering Change implementation due ---------------- */
+if (engHas('engineering_change') || engHas('all')) {
+    $ecDays = max(0, (int)engSetting($pdo, 'engineering_change_alert_days', '7'));
+    try {
+        $ecs = $pdo->query("
+            SELECT id, ecr_no, title, planned_completion_date, status, requested_by, created_at
+            FROM engineering_changes
+            WHERE planned_completion_date IS NOT NULL
+              AND planned_completion_date <= DATE_ADD(CURDATE(), INTERVAL $ecDays DAY)
+              AND status IN ('approved','implementing')")->fetchAll();
+        foreach ($ecs as $ec) {
+            $done += engFire($pdo, [
+                'module' => 'engineering_change', 'event' => 'implementation_due',
+                'type' => 'engineering_change', 'priority' => 'medium',
+                'ref_type' => 'engineering_changes', 'ref_id' => (int)$ec['id'],
+                'users' => (int)$ec['requested_by'] ? [(int)$ec['requested_by']] : [],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'engineering_change:implementation_due',
+                'vars' => [
+                    'ecr_no' => (string)$ec['ecr_no'], 'title' => (string)$ec['title'],
+                    'planned_completion_date' => (string)$ec['planned_completion_date'],
+                ],
+                'url' => '/engineering-change/' . (int)$ec['id'],
+                'created_at' => (string)($ec['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "engineering_change implementation_due check done (" . count($ecs) . " candidates, {$ecDays}d)\n";
+    } catch (Throwable $e) {
+        echo "engineering_change implementation_due skipped (schema mismatch): " . $e->getMessage() . "\n";
     }
 }
 
