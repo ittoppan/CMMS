@@ -86,6 +86,7 @@ interface FormState {
   priority: string;
   channels: NotifChannel[];
   recipients_role: string[];
+  recipients_user: string[];
   delay_minutes: string;
   repeat_every_minutes: string;
   max_repeats: string;
@@ -100,6 +101,7 @@ const EMPTY_FORM: FormState = {
   priority: "medium",
   channels: ["app"],
   recipients_role: ["1"],
+  recipients_user: [],
   delay_minutes: "0",
   repeat_every_minutes: "0",
   max_repeats: "1",
@@ -112,6 +114,7 @@ export default function NotificationRulesPage() {
 
   const [rules, setRules] = useState<RuleRow[]>([]);
   const [meta, setMeta] = useState<NotifMeta | null>(null);
+  const [users, setUsers] = useState<{ id: number; full_name: string; role_name?: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
@@ -124,9 +127,10 @@ export default function NotificationRulesPage() {
     setLoading(true);
     setError(null);
     try {
-      const [r, m] = await Promise.all([fetchRules(), fetchMeta()]);
+      const [r, m, uRes] = await Promise.all([fetchRules(), fetchMeta(), fetch("/api/v1/users.php").then((res) => res.json())]);
       setRules(r as RuleRow[]);
       setMeta(m);
+      setUsers(Array.isArray(uRes) ? uRes : []);
     } catch {
       setError("ไม่สามารถโหลดกฎการแจ้งเตือนได้ กรุณาลองใหม่อีกครั้ง");
     }
@@ -150,6 +154,7 @@ export default function NotificationRulesPage() {
       priority: rule.priority ?? "medium",
       channels: parseList(rule.channels_json ?? String(rule.channels ?? "")) as NotifChannel[],
       recipients_role: parseList(rule.recipients_role_json ?? String(rule.recipients_role ?? "")),
+      recipients_user: parseList(rule.recipients_user_json ?? String(rule.recipients_user ?? "")),
       delay_minutes: String(rule.delay_minutes ?? 0),
       repeat_every_minutes: String(rule.repeat_every_minutes ?? 0),
       max_repeats: String(rule.max_repeats ?? 1),
@@ -175,6 +180,7 @@ export default function NotificationRulesPage() {
         priority: form.priority,
         channels: form.channels.length ? form.channels : ["app"],
         recipients_role: form.recipients_role.length ? form.recipients_role.map(Number) : [],
+        recipients_user: form.recipients_user.length ? form.recipients_user.map(Number) : [],
         delay_minutes: Number(form.delay_minutes || 0),
         repeat_every_minutes: Number(form.repeat_every_minutes || 0),
         max_repeats: Math.max(1, Number(form.max_repeats || 1)),
@@ -266,10 +272,16 @@ export default function NotificationRulesPage() {
       renderCell: (r) => {
         const roles = parseList(r.recipients_role_json ?? (r.recipients_role ? String(r.recipients_role) : ""))
           .map((x) => meta?.roles.find((ro) => ro.id === Number(x))?.name ?? x);
+        const recipientUsers = parseList(r.recipients_user_json ?? (r.recipients_user ? String(r.recipients_user) : ""))
+          .map((x) => users.find((uu) => uu.id === Number(x))?.full_name ?? `#${x}`);
         return (
           <div className="flex flex-wrap items-center gap-1">
-            {roles.length === 0 ? <span className="text-xs text-muted-foreground">ตาม hook</span> : roles.map((n) => (
-              <Badge key={n} variant="neutral" className="normal-case tracking-normal">{n}</Badge>
+            {roles.length === 0 && recipientUsers.length === 0 ? <span className="text-xs text-muted-foreground">ตาม hook</span> : null}
+            {roles.map((n) => (
+              <Badge key={`r-${n}`} variant="neutral" className="normal-case tracking-normal">{n}</Badge>
+            ))}
+            {recipientUsers.map((n) => (
+              <Badge key={`u-${n}`} variant="info" className="normal-case tracking-normal">{n}</Badge>
             ))}
             {Boolean(r.notify_creator) && <Badge variant="info" className="normal-case tracking-normal">+ผู้แจ้ง</Badge>}
           </div>
@@ -482,6 +494,29 @@ export default function NotificationRulesPage() {
                 />
                 + แจ้งผู้ที่สร้าง/เกี่ยวข้องในเหตุการณ์นี้ด้วย
               </label>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-sm font-medium text-foreground">ผู้รับ (รายบุคคล)</span>
+              <div className="flex flex-wrap gap-2">
+                {users.map((u) => (
+                  <label key={u.id} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Checkbox
+                      checked={form.recipients_user.includes(String(u.id))}
+                      onCheckedChange={(on) =>
+                        setForm({
+                          ...form,
+                          recipients_user: on === true
+                            ? [...form.recipients_user, String(u.id)]
+                            : form.recipients_user.filter((x) => x !== String(u.id)),
+                        })
+                      }
+                    />
+                    {u.full_name} {u.role_name ? `(${u.role_name})` : ""}
+                  </label>
+                ))}
+                {users.length === 0 && <span className="text-xs text-muted-foreground">กำลังโหลดผู้ใช้...</span>}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
