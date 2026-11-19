@@ -705,6 +705,44 @@ if (engHas('workforce') || engHas('all')) {
     }
 }
 
+/* ---------------- Workforce Training เกินกำหนด (overdue) ---------------- */
+if (engHas('workforce') || engHas('all')) {
+    try {
+        $trainings = $pdo->query("
+            SELECT tr.id, tr.user_id, tr.course_id, tr.status, tr.scheduled_date, tr.expires_at, tr.created_at,
+                   u.full_name, c.name_th AS course_name
+            FROM wf_training_records tr
+            LEFT JOIN users u ON u.id = tr.user_id
+            LEFT JOIN wf_courses c ON c.id = tr.course_id
+            WHERE tr.status IN ('assigned','scheduled')
+              AND (
+                (tr.expires_at IS NOT NULL AND tr.expires_at < CURDATE())
+                OR (tr.expires_at IS NULL AND tr.scheduled_date IS NOT NULL AND tr.scheduled_date < CURDATE())
+              )")->fetchAll();
+        foreach ($trainings as $t) {
+            $done += engFire($pdo, [
+                'module' => 'workforce', 'event' => 'training_overdue',
+                'type' => 'workforce', 'priority' => 'medium',
+                'ref_type' => 'wf_training_records', 'ref_id' => (int)$t['id'],
+                'users' => [(int)$t['user_id']],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'workforce:training_overdue',
+                'vars' => [
+                    'full_name' => (string)($t['full_name'] ?? ''),
+                    'course_name' => (string)($t['course_name'] ?? ''),
+                    'scheduled_date' => (string)($t['scheduled_date'] ?? ''),
+                ],
+                'url' => '/workforce/training',
+                'created_at' => (string)($t['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "workforce training overdue check done (" . count($trainings) . " candidates)\n";
+    } catch (Throwable $e) {
+        echo "workforce training overdue skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
 /* ---------------- Retry การส่งค้าง ---------------- */
 if (engHas('retry') || engHas('all')) {
     $retried = NotificationCenterService::retryPending($pdo, 3);
