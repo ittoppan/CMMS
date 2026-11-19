@@ -506,6 +506,11 @@ export default function RepairRequestForm() {
         const storedUid = localStorage.getItem("cmms_line_user_id");
         if (storedUid) {
           setLineBound(false);
+          // ถ้า LIFF ID token ยังไม่พร้อม (LiffBridge ยัง init ไม่เสร็จ) อย่ารีบสรุปว่ายังไม่ผูก —
+          // รอให้ tryLiff (1.5s) ตรวจซ้ำอีกครั้งเมื่อ token พร้อม (กัน false negative ตอนเปิดจาก LINE OA)
+          if (!liffAuthHeaders()["X-LIFF-Id-Token"]) {
+            // คงสถานะ checking ไว้ ไม่ applyGate(unbound)
+          } else {
           checkBound().then((b) => {
             setLineBound(b);
             applyGate(storedUid, b);
@@ -530,6 +535,7 @@ export default function RepairRequestForm() {
                 .catch(() => {});
             }
           });
+          }
         } else {
           window.setTimeout(() => {
             const uid = localStorage.getItem("cmms_line_user_id");

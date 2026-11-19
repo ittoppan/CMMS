@@ -21,13 +21,32 @@ require_once __DIR__ . '/settings.php';
 
 /** LINE Login channel ID ที่ใช้เป็น aud ของ ID token */
 function liff_channel_id(): string {
+    // ID token (LIFF) ถูกออกโดย LINE Login channel ที่เป็นเจ้าของ LIFF app — aud ต้องตรงกับ
+    // channel นั้น (prefix ก่อน '-' ของ LIFF ID). ค่า setting 'line_channel_id' เคยถูกตั้งเป็น
+    // Messaging API channel (ใช้ push) ทำให้ตรวจ token ไม่ผ่าน → ผู้ใช้ที่ผูกแล้วถูกมองว่ายังไม่ผูก.
+    // ดังนั้น: ถ้า setting ไม่ตรงกับ LIFF ID ใด ๆ ให้ derive จาก LIFF ID แทน (authoritative).
+    $liffIds = [];
+    foreach (['line_liff_id', 'line_liff_register_id'] as $k) {
+        $v = trim(setting_value($k, ''));
+        if ($v === '') $v = trim((string)(getenv(strtoupper($k)) ?: ''));
+        if ($v !== '') $liffIds[] = $v;
+    }
+    $liffPrefixes = [];
+    foreach ($liffIds as $lid) {
+        $dash = strpos($lid, '-');
+        if ($dash > 0) $liffPrefixes[] = substr($lid, 0, $dash);
+    }
+
     $cid = trim(setting_value('line_channel_id', ''));
+    if ($cid === '') $cid = trim((string)(getenv('LINE_LOGIN_CHANNEL_ID') ?: ''));
     if ($cid === '') $cid = trim((string)(getenv('LINE_CHANNEL_ID') ?: ''));
-    if ($cid === '') {
-        $liffId = trim(setting_value('line_liff_id', ''));
-        if ($liffId === '') $liffId = trim((string)(getenv('LINE_LIFF_ID') ?: ''));
-        $dash = strpos($liffId, '-');
-        if ($dash > 0) $cid = substr($liffId, 0, $dash);
+
+    // ถ้า cid ที่ตั้งไว้ไม่ตรงกับ LIFF ID ใดเลย → ใช้ prefix ของ LIFF ID แทน (แก้กรณีตั้งผิดช่อง)
+    if ($cid !== '' && !empty($liffPrefixes) && !in_array($cid, $liffPrefixes, true)) {
+        $cid = $liffPrefixes[0];
+    }
+    if ($cid === '' && !empty($liffPrefixes)) {
+        $cid = $liffPrefixes[0];
     }
     return $cid;
 }
