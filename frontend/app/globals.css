@@ -3586,3 +3586,30 @@ html.cmms-no-anim *::after {
     animation: none;
   }
 }
+
+/* ── Repair form (F-EN-03) accessibility: focus-visible rings + reduced-motion ── */
+.cmms-mobile-page :where(button, a, input, select, textarea, [role="button"], .cmms-chip, .cmms-option-row, .cmms-job-card, .cmms-photo-empty):focus-visible {
+  outline: 2px solid var(--cmms-primary);
+  outline-offset: 2px;
+  border-radius: var(--cmms-radius-sm);
+}
+.cmms-mobile-page .cmms-stepper .cmms-step:focus-visible {
+  outline: 2px solid var(--cmms-primary);
+  outline-offset: 2px;
+  border-radius: var(--cmms-radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmms-mobile-page,
+  .cmms-mobile-page * {
+    animation: none !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+  }
+  .cmms-mobile-page .cmms-chip:active,
+  .cmms-mobile-page .cmms-option-row:active,
+  .cmms-mobile-page .cmms-job-card:active,
+  .cmms-mobile-page .cmms-photo-empty:active {
+    transform: none !important;
+  }
+}
