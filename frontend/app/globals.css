@@ -886,8 +886,9 @@ h1, h2, h3, h4 {
 .cmms-home-lamp-num { font-size: 1.35rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--cmms-text-primary); }
 .cmms-home-lamp-label { font-size: 0.74rem; color: var(--cmms-text-secondary); }
 .cmms-home-group-title {
-  font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--cmms-text-muted); margin: 0 0 10px;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--cmms-text-primary); margin: 0 0 10px;
+  display: flex; align-items: center; gap: 8px;
 }
 .cmms-home-tile {
   display: flex; flex-direction: column; gap: 10px; align-items: flex-start;
