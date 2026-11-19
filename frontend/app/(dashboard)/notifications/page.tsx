@@ -365,7 +365,12 @@ export default function NotificationCenterPage() {
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-base font-semibold text-foreground">{item.title}</p>
                             {!isRead && <Badge variant="info" dot>ใหม่</Badge>}
-                            <Badge variant={badgeVariant[p] ?? "neutral"}>{p.toUpperCase()}</Badge>
+                            <Badge variant={badgeVariant[p] ?? "neutral"}>{
+                              p === "critical" ? "วิกฤต" :
+                              p === "high" ? "ด่วน" :
+                              p === "medium" ? "ปานกลาง" :
+                              p === "low" ? "ต่ำ" : "ข้อมูล"
+                            }</Badge>
                             {meta?.type_labels[item.type] && (
                               <Badge variant="neutral">{meta.type_labels[item.type].th}</Badge>
                             )}
