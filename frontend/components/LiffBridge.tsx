@@ -100,9 +100,12 @@ export default function LiffBridge() {
                     localStorage.setItem("cmms_line_role_name", roleJson.user.role_name || "");
                   }
                 } catch { /* role fetch เป็น secondary */ }
-              } else {
+              } else if (res.ok && !json?.code && json?.bound === false) {
+                // ยืนยันแล้วว่า LINE นี้ยังไม่ผูกบัญชีจริง ๆ (ไม่ใช่ token หมดอายุ/ตรวจไม่ผ่าน/เน็ตหลุด)
+                // เท่านั้นที่เคลียร์ cache — กัน transient failure ทำให้ผู้ใช้ที่ผูกแล้วถูกมองว่ายังไม่ผูก
                 localStorage.removeItem("cmms_line_bound");
               }
+              // กรณี token ตรวจไม่ผ่าน/เน็ตหลุด: เก็บ cache ไว้ ไม่สรุป "ยังไม่ผูก"
             } catch (e) {
               console.warn("LINE binding check failed:", e);
             }
