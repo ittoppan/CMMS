@@ -14,7 +14,7 @@
  *   7) Rule engine — ใช้ notification_rules ปรับผู้รับ/ช่องทาง/delay/repeat/dedup
  *   8) Retry การส่งช่องทางภายนอกที่ค้าง (notification_deliveries)
  *
- * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,shutdown,engineering_change,retry]
+ * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,shutdown,engineering_change,iot,retry]
  *      --force = ข้าม dedup (ใช้ทดสอบ)
  * exit 0 = ทำงานเสร็จ (ไม่ว่าจะเจอหรือไม่เจอรายการ)
  */
@@ -602,6 +602,68 @@ if (engHas('engineering_change') || engHas('all')) {
         echo "engineering_change implementation_due check done (" . count($ecs) . " candidates, {$ecDays}d)\n";
     } catch (Throwable $e) {
         echo "engineering_change implementation_due skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- IoT Connector ล้มเหลว (connector_failed) ---------------- */
+if (engHas('iot') || engHas('all')) {
+    try {
+        $conns = $pdo->query("
+            SELECT id, connector_code, name, last_status, last_error, consecutive_failures, last_run_at, created_at
+            FROM iot_connectors
+            WHERE enabled = 1
+              AND (last_status = 'failed' OR consecutive_failures >= 3)")->fetchAll();
+        foreach ($conns as $c) {
+            $done += engFire($pdo, [
+                'module' => 'iot', 'event' => 'connector_failed',
+                'type' => 'iot', 'priority' => 'high',
+                'ref_type' => 'iot_connectors', 'ref_id' => (int)$c['id'],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'iot:connector_failed',
+                'vars' => [
+                    'connector_code' => (string)$c['connector_code'], 'name' => (string)$c['name'],
+                    'last_error' => (string)($c['last_error'] ?? ''),
+                    'consecutive_failures' => (int)$c['consecutive_failures'],
+                ],
+                'url' => '/iot/connectors/' . (int)$c['id'],
+                'created_at' => (string)($c['last_run_at'] ?? $c['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "iot connector_failed check done (" . count($conns) . " candidates)\n";
+    } catch (Throwable $e) {
+        echo "iot connector_failed skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- IoT Device ออฟไลน์ (device_offline) ---------------- */
+if (engHas('iot') || engHas('all')) {
+    $offlineDays = max(1, (int)engSetting($pdo, 'iot_device_offline_days', '1'));
+    try {
+        $devs = $pdo->query("
+            SELECT id, device_code, sensor_name, status, last_ping, created_at
+            FROM iot_devices
+            WHERE status = 'active'
+              AND (last_ping IS NULL OR last_ping < DATE_SUB(NOW(), INTERVAL $offlineDays DAY))")->fetchAll();
+        foreach ($devs as $d) {
+            $done += engFire($pdo, [
+                'module' => 'iot', 'event' => 'device_offline',
+                'type' => 'iot', 'priority' => 'medium',
+                'ref_type' => 'iot_devices', 'ref_id' => (int)$d['id'],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'iot:device_offline',
+                'vars' => [
+                    'device_code' => (string)$d['device_code'], 'sensor_name' => (string)$d['sensor_name'],
+                    'last_ping' => (string)($d['last_ping'] ?? '-'),
+                ],
+                'url' => '/iot/devices/' . (int)$d['id'],
+                'created_at' => (string)($d['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "iot device_offline check done (" . count($devs) . " candidates, {$offlineDays}d)\n";
+    } catch (Throwable $e) {
+        echo "iot device_offline skipped (schema mismatch): " . $e->getMessage() . "\n";
     }
 }
 
