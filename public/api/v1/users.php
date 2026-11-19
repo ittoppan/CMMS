@@ -43,20 +43,23 @@ try {
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             $empCode = isset($_GET['employee_code']) ? strtoupper(trim((string)$_GET['employee_code'])) : '';
+            // ทุก SELECT แนบแผนกมาด้วย (department_id + ชื่อ/รหัส) — หน้าจัดการผู้ใช้และโปรไฟล์ใช้แสดง/แก้ไข
+            $userCols = 'u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.department_id, d.code AS dept_code, d.name AS dept_name, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at';
+            $userFrom = 'FROM users u LEFT JOIN roles r ON r.id = u.role_id LEFT JOIN departments d ON d.id = u.department_id';
             if ($id) {
-                $stmt = $pdo->prepare('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.id = ?');
+                $stmt = $pdo->prepare("SELECT {$userCols} {$userFrom} WHERE u.id = ?");
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
                 echo json_encode($row);
             } elseif ($empCode !== '') {
-                $stmt = $pdo->prepare('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id WHERE u.employee_code = ? AND u.is_active = 1');
+                $stmt = $pdo->prepare("SELECT {$userCols} {$userFrom} WHERE u.employee_code = ? AND u.is_active = 1");
                 $stmt->execute([$empCode]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'ไม่พบผู้ใช้งาน']); exit; }
                 echo json_encode($row);
             } else {
-                $stmt = $pdo->query('SELECT u.id, u.role_id, r.name AS role_name, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code, u.avatar, u.avatar_path, u.line_user_id, u.lang, u.is_active, u.must_change_password, u.created_at, u.updated_at FROM users u LEFT JOIN roles r ON r.id = u.role_id ORDER BY u.created_at DESC');
+                $stmt = $pdo->query("SELECT {$userCols} {$userFrom} ORDER BY u.created_at DESC");
                 echo json_encode($stmt->fetchAll());
             }
             break;

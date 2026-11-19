@@ -64,6 +64,7 @@ interface User extends Record<string, unknown> {
   roleName: string;
   position: string;
   employeeCode: string;
+  departmentName: string;
   isActive: boolean;
   lineUserId: string;
   createdAt: string;
@@ -213,6 +214,7 @@ export default function UsersPage() {
           roleName: String(row.role_name || roleLabels[row.role] || row.role || "—"),
           position: row.position || "-",
           employeeCode: row.employee_code || "-",
+          departmentName: row.dept_name || "-",
           isActive: row.is_active === 1 || row.is_active === "1" || row.is_active === true,
           lineUserId: row.line_user_id || "",
           createdAt: row.created_at ? row.created_at.split(" ")[0] : "-",
@@ -399,6 +401,15 @@ export default function UsersPage() {
           </div>
         );
       },
+    },
+    {
+      key: "departmentName",
+      header: t("field.department"),
+      renderCell: (item: User) => (
+        <span className={item.departmentName !== "-" ? "text-sm" : "text-sm text-muted-foreground"}>
+          {item.departmentName}
+        </span>
+      ),
     },
     { key: "email", header: t("tbl.email") },
     { key: "phone", header: t("tbl.phone") },

@@ -28,9 +28,13 @@ try {
 
     // ---------- GET: โปรไฟล์ปัจจุบัน ----------
     if ($method === 'GET') {
-        $stmt = $pdo->prepare('SELECT id, username, email, full_name, phone, role, position, employee_code,
-                                      department_id, avatar, avatar_path, line_user_id, lang, created_at
-                               FROM users WHERE id = ?');
+        // แนบชื่อ/รหัสแผนกมาด้วย — หน้าโปรไฟล์และฟอร์มแจ้งซ่อมใช้เติมแผนกอัตโนมัติ
+        $stmt = $pdo->prepare('SELECT u.id, u.username, u.email, u.full_name, u.phone, u.role, u.position, u.employee_code,
+                                      u.department_id, d.code AS department_code, d.name AS department_name,
+                                      u.avatar, u.avatar_path, u.line_user_id, u.lang, u.created_at
+                               FROM users u
+                               LEFT JOIN departments d ON d.id = u.department_id
+                               WHERE u.id = ?');
         $stmt->execute([$userId]);
         $u = $stmt->fetch();
         if (!$u) { http_response_code(404); echo json_encode(['error' => 'User not found']); exit; }
@@ -98,6 +102,24 @@ try {
             if (array_key_exists($col, $data)) {
                 $fields[] = "$col = ?";
                 $values[] = mb_substr(trim((string)$data[$col]), 0, $max);
+            }
+        }
+        // แผนก (departments.id) — ผู้ใช้แก้เองได้; ตรวจว่ามีอยู่และยังเปิดใช้งานก่อนบันทึก
+        if (array_key_exists('department_id', $data)) {
+            $deptId = $data['department_id'];
+            if ($deptId === null || $deptId === '') {
+                $fields[] = 'department_id = NULL';
+            } else {
+                $deptId = (int)$deptId;
+                $chk = $pdo->prepare('SELECT id FROM departments WHERE id = ? AND is_active = 1');
+                $chk->execute([$deptId]);
+                if (!$chk->fetch()) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'ไม่พบแผนกที่เลือก (อาจถูกปิดใช้งาน)']);
+                    exit;
+                }
+                $fields[] = 'department_id = ?';
+                $values[] = $deptId;
             }
         }
         // ภาษาประจำตัว (th/en) — บันทึกลง users.lang เพื่อให้ตามบัญชีผู้ใช้ข้ามเครื่อง

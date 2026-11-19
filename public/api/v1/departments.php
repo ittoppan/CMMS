@@ -1,13 +1,26 @@
 <?php
 require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/helpers/liff.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
 try {
     $pdo = getDb();
-    requireLogin($pdo);
     $method = $_SERVER['REQUEST_METHOD'];
+
+    // รายชื่อแผนกเป็น master data ที่ฟอร์มแจ้งซ่อม (LIFF ใน LINE) ต้องใช้เติมแผนกอัตโนมัติ
+    //  1) ผู้ใช้เว็บที่ล็อกอินแล้ว → ผ่านตามเดิม
+    //  2) ผู้ใช้ LIFF ที่ยืนยันตัวตนด้วย ID token (หรือ session จาก line_callback) และผูกบัญชีแล้ว → อ่านได้เท่านั้น
+    //     (ไม่รับ line_user_id จาก client; ตรวจ token กับ LINE ก่อนทุกครั้ง)
+    if (!currentUser($pdo)) {
+        $liffOk = false;
+        if (in_array($method, ['GET', 'HEAD'], true)) {
+            $identity = liff_request_identity($pdo);
+            $liffOk = !empty($identity['ok']) && !empty($identity['user']['id']);
+        }
+        if (!$liffOk) requireLogin($pdo); // ตอบ 401 รูปแบบเดิม
+    }
 
     switch ($method) {
         case 'GET':

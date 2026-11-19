@@ -55,10 +55,14 @@ export default function CreateUserPage() {
     password: "",
     roleId: "",
     position: "",
+    departmentId: "",
     avatar: PRESET_AVATARS[0].url,
     isActive: true,
     lineUserId: "",
   });
+
+  // แผนกจาก master data (departments) — ใช้เติมอัตโนมัติในฟอร์มแจ้งซ่อมของผู้ใช้นี้
+  const [depts, setDepts] = useState<{ id: number; code: string; name: string }[]>([]);
 
   useEffect(() => {
     fetch("/api/v1/roles.php")
@@ -70,6 +74,15 @@ export default function CreateUserPage() {
         // ค่าเริ่มต้น: บทบาท Operate (ช่างซ่อมบำรุง) ถ้ามี ไม่งั้นตัวแรก
         const fallback = list.find((r) => r.name.toLowerCase() === "operate") ?? list[0];
         if (fallback) setForm((prev) => (prev.roleId ? prev : { ...prev, roleId: String(fallback.id) }));
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/v1/departments.php")
+      .then((res) => res.json())
+      .then((json) => {
+        if (Array.isArray(json)) setDepts(json.map((d: any) => ({ id: Number(d.id), code: String(d.code ?? ""), name: String(d.name ?? "") })));
       })
       .catch(() => {});
   }, []);
@@ -118,6 +131,7 @@ export default function CreateUserPage() {
           password: form.password,
           role_id: form.roleId ? Number(form.roleId) : null,
           position: form.position,
+          department_id: form.departmentId ? Number(form.departmentId) : null,
           avatar: form.avatar,
           is_active: form.isActive ? 1 : 0,
           line_user_id: form.lineUserId || null,
@@ -146,7 +160,7 @@ export default function CreateUserPage() {
         onPrimary={() => router.push("/users")}
         onSecondary={() => {
           setSubmitted(false);
-          setForm({ username: "", employeeCode: "", fullName: "", email: "", phone: "", password: "", roleId: form.roleId, position: "", avatar: PRESET_AVATARS[0].url, isActive: true, lineUserId: "" });
+          setForm({ username: "", employeeCode: "", fullName: "", email: "", phone: "", password: "", roleId: form.roleId, position: "", departmentId: "", avatar: PRESET_AVATARS[0].url, isActive: true, lineUserId: "" });
         }}
         onBackdrop={() => router.push("/users")}
       />
@@ -323,6 +337,26 @@ export default function CreateUserPage() {
                   onChange={(e) => update("position", e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label id="create-dept-label" htmlFor="create-dept">แผนก (Department)</Label>
+              <Select value={form.departmentId || "__none__"} onValueChange={(v) => update("departmentId", v === "__none__" ? "" : v)}>
+                <SelectTrigger id="create-dept" aria-labelledby="create-dept-label">
+                  <SelectValue placeholder="— ไม่ระบุแผนก —" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— ไม่ระบุแผนก —</SelectItem>
+                  {depts.map((d) => (
+                    <SelectItem key={d.id} value={String(d.id)}>
+                      {d.name} <span className="text-muted-foreground">({d.code})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                แผนกจะถูกเติมอัตโนมัติในช่อง “แผนก” ของฟอร์มแจ้งซ่อมเมื่อผู้ใช้นี้แจ้งซ่อม
+              </p>
             </div>
 
             <div className="space-y-1.5">

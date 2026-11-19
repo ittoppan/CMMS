@@ -51,7 +51,7 @@ import LiffLangToggle from "./LiffLangToggle";
 import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
-import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, useLiffSession } from "@/lib/liff-session";
+import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, liffAuthHeaders, useLiffSession } from "@/lib/liff-session";
 import { clearRepairDraft, hasDraftContent, loadRepairDraft, saveRepairDraft } from "@/lib/repair-draft";
 import { canAdvanceFrom, firstIncompleteStep } from "@/lib/repair-form-steps";
 import { serverResponds } from "@/lib/server-check";
@@ -286,6 +286,8 @@ export default function RepairRequestForm() {
   const [lineProfile, setLineProfile] = useState<LineProfile>(null);
   const [sessionName, setSessionName] = useState("");
   const [reporterDeptId, setReporterDeptId] = useState<number | null>(null);
+  // ชื่อแผนกจากโปรไฟล์ที่ผูกไว้ — ใช้แสดงผลแม้ยังโหลดรายการแผนกไม่ได้ (เช่นใน LINE ที่ไม่มี session เว็บ)
+  const [reporterDeptName, setReporterDeptName] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [offlineNow, setOfflineNow] = useState(false);
@@ -346,7 +348,13 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const apiFetch = (url: string, init?: RequestInit) => fetch(url, init);
+  // แนบ LIFF ID token ไปกับ API ทุกครั้งที่มี (นอก LINE จะไม่มี header นี้) —
+  // ทำให้ endpoint ที่ปกติต้องมี session เว็บ (เช่น departments.php) ใช้กับผู้ใช้ LIFF ได้
+  const apiFetch = (url: string, init?: RequestInit) =>
+    fetch(url, {
+      ...init,
+      headers: { ...liffAuthHeaders(), ...((init?.headers as Record<string, string> | undefined) ?? {}) },
+    });
 
   /* เติมชื่อ-นามสกุลจากฐานข้อมูล ถ้าผู้ใช้ยังไม่ได้กรอก/แก้เอง */
   const seedReporter = (name?: string | null) => {
@@ -360,15 +368,20 @@ export default function RepairRequestForm() {
   const seedReporterFromRegistered = (u: {
     full_name?: string | null;
     department_id?: number | null;
+    department_code?: string | null;
+    department_name?: string | null;
     phone?: string | null;
     email?: string | null;
   } | null | undefined) => {
     if (!u) return;
+    // แผนกจากโปรไฟล์ผู้ใช้ — เติมให้เลยโดยไม่ต้องรอรายการแผนกโหลด (LINE ไม่มี session เว็บ)
+    if (u.department_name) setReporterDeptName(u.department_name);
     setForm((prev) => {
       const next = { ...prev };
       if (!prev.reporterName.trim() && u.full_name) next.reporterName = u.full_name;
       if (!prev.phone.trim() && u.phone) next.phone = u.phone;
       if (!prev.email.trim() && u.email) next.email = u.email;
+      if (!prev.departmentCode && u.department_code) next.departmentCode = u.department_code;
       return next;
     });
     if (u.department_id) setReporterDeptId(u.department_id);
@@ -498,6 +511,8 @@ export default function RepairRequestForm() {
                 seedReporterFromRegistered({
                   full_name: pj.user.full_name,
                   department_id: pj.user.department_id,
+                  department_code: pj.user.department_code,
+                  department_name: pj.user.department_name,
                   phone: pj.user.phone,
                   email: pj.user.email,
                 });
@@ -522,6 +537,10 @@ export default function RepairRequestForm() {
         if (boundEmail) setForm((prev) => ({ ...prev, email: prev.email || boundEmail }));
         const boundDept = localStorage.getItem("cmms_line_dept_id");
         if (boundDept) setReporterDeptId(Number(boundDept));
+        const boundDeptCode = localStorage.getItem("cmms_line_dept_code");
+        if (boundDeptCode) setForm((prev) => ({ ...prev, departmentCode: prev.departmentCode || boundDeptCode }));
+        const boundDeptName = localStorage.getItem("cmms_line_dept_name");
+        if (boundDeptName) setReporterDeptName(boundDeptName);
       }
     } catch { /* ignore */ }
   }, []);
@@ -553,6 +572,8 @@ export default function RepairRequestForm() {
             if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
             if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
             if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
+            if (j.user.department_code) localStorage.setItem("cmms_line_dept_code", String(j.user.department_code));
+            if (j.user.department_name) localStorage.setItem("cmms_line_dept_name", String(j.user.department_name));
           } catch { /* ignore */ }
           return;
         }
@@ -904,7 +925,8 @@ const flushQueue = async (notifyOnAuthFail = false) => {
         description: form.symptoms,
         failure_report: `Machine: ${machineDisplay} | JobType: ${jt?.en || "-"} | JobDescription: ${jd?.en || "-"} | Lot: ${form.lotNo || "-"}`,
         asset_id: selectedAsset?.id || null,
-        department_id: dept?.id || selectedAsset?.department_id || null,
+        // แผนก: ที่เลือกในฟอร์ม → แผนกในโปรไฟล์ผู้แจ้ง → แผนกของเครื่องจักร
+        department_id: dept?.id || reporterDeptId || selectedAsset?.department_id || null,
         source_type: sourceTypeMap[form.jobDescription] || "breakdown",
         machine_status: machineStatusOptions.find((s) => s.value === form.machineStatus)?.label,
         priority: priorityMap[form.machineStatus] || "medium",
@@ -1156,12 +1178,15 @@ const flushQueue = async (notifyOnAuthFail = false) => {
   }
 
   const displayName = form.reporterName || sessionName || "...";
+  // ชื่อแผนกที่ใช้แสดงผล: ตัวเลือกในฟอร์ม → แผนกจากโปรไฟล์ที่ผูกไว้
+  const deptLabel = depts.find((d) => d.code === form.departmentCode)?.name || reporterDeptName || "";
 
   return (
     <div className="cmms-mobile-page" id="repair-request-form">
       {/* Header */}
-<div className="cmms-liff-hero">
-        <div className="flex items-center gap-3">
+      <div className="cmms-liff-hero">
+        <span className="cmms-liff-orbit" aria-hidden="true" />
+        <div className="cmms-liff-hero-top">
           <div className="cmms-liff-logo"><Wrench size={20} strokeWidth={1.75} /></div>
           <div className="flex-1 min-w-0">
             <p className="cmms-liff-eyebrow">MAINTENANCE JOB REQUEST · F-EN-03</p>
@@ -1174,9 +1199,22 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             <div className="cmms-avatar cmms-avatar-fallback"><User size={18} strokeWidth={1.75} /></div>
           )}
         </div>
-        <div className="mt-3 flex items-center gap-2 flex-wrap">
-          <span className="cmms-liff-chip"><FileText size={13} strokeWidth={1.75} /> ใบแจ้งซ่อม F-EN-03</span>
-          <span className="cmms-liff-chip"><HardHat size={13} strokeWidth={1.75} /> แผนกซ่อมบำรุง</span>
+
+        {/* แถบตัวตนผู้แจ้ง + แผนก (เติมอัตโนมัติจากโปรไฟล์) */}
+        <div className="cmms-liff-identity">
+          <div className="cmms-liff-identity-avatar">{(displayName.trim().charAt(0) || "ผ").toUpperCase()}</div>
+          <div className="min-w-0 flex-1">
+            <p className="cmms-liff-identity-name">{displayName}</p>
+            <p className="cmms-liff-identity-meta">
+              <Building2 size={12} strokeWidth={1.75} />
+              <span className={deptLabel ? "" : "opacity-75"}>{deptLabel || "ยังไม่ระบุแผนก"}</span>
+              <span className="cmms-liff-dot" aria-hidden="true">·</span>
+              <span>{form.office}</span>
+            </p>
+          </div>
+          <span className="cmms-liff-badge">
+            <HardHat size={12} strokeWidth={1.75} /> {lineProfile ? "LINE" : "WEB"}
+          </span>
         </div>
       </div>
 
@@ -1285,10 +1323,12 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       {step === 0 && (
         <Card className="cmms-card-flat p-5">
           <div className="flex flex-col gap-5">
-            <div>
-              <p className="text-sm font-bold mb-0.5">1. เลือกเครื่องจักร / อุปกรณ์ <span className="cmms-req">*</span></p>
-              <p className="text-xs text-[var(--cmms-text-secondary)]">เลือกเครื่องที่ลงทะเบียน หรือกด “อื่นๆ” หากไม่มีเครื่องจักร/ต้องการพิมพ์ชื่อเอง</p>
-            </div>
+            <SectionHead
+              index="01"
+              title="เลือกเครื่องจักร / อุปกรณ์"
+              hint="เลือกเครื่องที่ลงทะเบียนไว้ หรือกด “อื่นๆ” หากไม่มีในรายการ"
+              required
+            />
 
             {MACHINE_GROUPS.map((g) => {
               const groupMachines = assets.filter((a) => a.code.startsWith(g.prefix));
@@ -1362,7 +1402,12 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             )}
 
             <div>
-              <p className="text-sm font-bold mb-2.5">2. สถานะเครื่องจักร (Machine Status) <span className="cmms-req">*</span></p>
+              <SectionHead
+                index="02"
+                title="สถานะเครื่องจักร (Machine Status)"
+                hint="แจ้งสถานะล่าสุดของเครื่อง เพื่อให้ช่างเตรียมการได้ถูก"
+                required
+              />
               <div className="flex flex-col gap-2">
                 {machineStatusOptions.map((s) => (
                   <button key={s.value} type="button"
@@ -1388,7 +1433,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
         <Card className="cmms-card-flat p-5">
           <div className="flex flex-col gap-5">
             <div>
-              <p className="text-sm font-bold mb-2.5">Ⓐ ประเภทงาน (Job Type) <span className="cmms-req">*</span></p>
+              <SectionHead index="01" title="ประเภทงาน (Job Type)" hint="งานซ่อมหรือปรับปรุงที่ต้องการแจ้ง" required />
               <div className="cmms-job-grid">
                 {jobTypeOptions.map((j) => (
                   <button key={j.value} type="button"
@@ -1403,7 +1448,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             </div>
 
             <div>
-              <p className="text-sm font-bold mb-2.5">Ⓑ ลักษณะงาน (Job Description) <span className="cmms-req">*</span></p>
+              <SectionHead index="02" title="ลักษณะงาน (Job Description)" hint="ระบุว่าเป็นงานลักษณะใดเพื่อจัดช่างได้ตรงงาน" required />
               <div className="cmms-job-grid">
                 {jobDescriptionOptions.map((j) => (
                   <button key={j.value} type="button"
@@ -1418,7 +1463,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             </div>
 
             <div>
-              <p className="text-sm font-bold mb-2">※ รายละเอียดของปัญหา (Problem Description) <span className="cmms-req">*</span></p>
+              <SectionHead index="03" title="รายละเอียดของปัญหา (Problem Description)" hint="อธิบายอาการที่พบให้ชัดเจน ยิ่งละเอียดช่างยิ่งเข้าถึงปัญหาได้เร็ว" required />
               <Textarea
                 label="รายละเอียดปัญหา"
                 isLabelHidden
@@ -1433,7 +1478,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             </div>
 
             <div>
-              <p className="text-sm font-bold mb-2">Lot No. ที่กำลังผลิต (ถ้ามี)</p>
+              <SectionHead index="04" title="Lot No. ที่กำลังผลิต" hint="ถ้ามี — ช่วยให้วางแผนหยุดเครื่องได้ปลอดภัย" />
               <Input
                 label="Lot No."
                 isLabelHidden
@@ -1451,12 +1496,11 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       {step === 2 && (
         <Card className="cmms-card-flat p-5">
           <div className="flex flex-col gap-5">
-            <div>
-              <p className="text-sm font-bold mb-0.5">ข้อมูลผู้แจ้ง</p>
-              <p className="text-xs text-[var(--cmms-text-secondary)]">
-                {lineProfile ? "ดึงข้อมูลจากบัญชี LINE แล้ว — แก้ไขได้ถ้าต้องการ" : "ดึงชื่อจากระบบให้อัตโนมัติ"}
-              </p>
-            </div>
+            <SectionHead
+              index="01"
+              title="ข้อมูลผู้แจ้ง"
+              hint={lineProfile ? "ดึงข้อมูลจากบัญชี LINE แล้ว — แก้ไขได้ถ้าต้องการ" : "ดึงชื่อและแผนกจากระบบให้อัตโนมัติ"}
+            />
 
             <FieldRow label="ชื่อ-นามสกุล (Requestor)" required>
               <Input
@@ -1485,6 +1529,12 @@ const flushQueue = async (notifyOnAuthFail = false) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {reporterDeptName && (
+                  <p className="cmms-field-hint">
+                    <User size={12} strokeWidth={1.75} />
+                    เติมจากโปรไฟล์ของคุณ: <b>{reporterDeptName}</b> — เปลี่ยนได้ถ้าแจ้งแทนแผนกอื่น
+                  </p>
+                )}
               </div>
             </FieldRow>
 
@@ -1688,13 +1738,13 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       {step === 3 && (
         <Card className="cmms-card-flat p-5">
           <div className="flex flex-col gap-4">
-            <h4 className="text-base font-bold">ตรวจสอบก่อนส่ง</h4>
+            <SectionHead index="✓" title="ตรวจสอบก่อนส่ง" hint="ตรวจข้อมูลอีกครั้งก่อนส่งให้แผนกซ่อมบำรุง" />
 
             <div className="cmms-summary-box">
               <SummaryRow label="เครื่องจักร" value={machineDisplay} />
               <SummaryRow label="สถานะเครื่อง" value={machineStatusOptions.find((s) => s.value === form.machineStatus)?.label || "—"} />
               <SummaryRow label="ประเภทงาน" value={`${jobTypeOptions.find((j) => j.value === form.jobType)?.label || "—"} / ${jobDescriptionOptions.find((j) => j.value === form.jobDescription)?.label || "—"}`} />
-              <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${depts.find((d) => d.code === form.departmentCode)?.name || "—"})`} icon={<User size={14} strokeWidth={1.75} />} />
+              <SummaryRow label="ผู้แจ้ง" value={`${form.reporterName} (${deptLabel || "—"})`} icon={<User size={14} strokeWidth={1.75} />} />
               <SummaryRow label="ติดต่อ" value={[form.phone, form.email].filter(Boolean).join(" · ") || "—"} icon={<Phone size={14} strokeWidth={1.75} />} />
               <SummaryRow label="สำนักงาน" value={form.office} />
               <SummaryRow label="Lot No." value={form.lotNo || "—"} />
@@ -1772,11 +1822,26 @@ const flushQueue = async (notifyOnAuthFail = false) => {
 
 function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-sm font-bold mb-2">
+    <div className="cmms-field">
+      <p className="cmms-field-label">
         {label} {required && <span className="cmms-req">*</span>}
       </p>
       {children}
+    </div>
+  );
+}
+
+/** หัวข้อของแต่ละส่วนในฟอร์ม — เลขลำดับ + ชื่อ + คำใบ้ (ไม่เปลี่ยนข้อความหลักที่ e2e ใช้ค้น) */
+function SectionHead({ index, title, hint, required }: { index: string; title: string; hint?: string; required?: boolean }) {
+  return (
+    <div className="cmms-form-section-head">
+      <span className="cmms-form-section-num" aria-hidden="true">{index}</span>
+      <div className="min-w-0">
+        <p className="cmms-form-section-title">
+          {title} {required && <span className="cmms-req">*</span>}
+        </p>
+        {hint && <p className="cmms-form-section-hint">{hint}</p>}
+      </div>
     </div>
   );
 }

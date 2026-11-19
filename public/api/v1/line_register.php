@@ -69,8 +69,11 @@ try {
                 error_log('line_register: ignored client-supplied line_user_id');
             }
 
+            // แนบชื่อ/รหัสแผนกมาด้วย — ฟอร์มแจ้งซ่อมเติมแผนกให้อัตโนมัติโดยไม่ต้องรอ session เว็บ
             $stmt = $pdo->prepare(
-                "SELECT id, employee_code, full_name, role, department_id, phone, email, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1"
+                "SELECT u.id, u.employee_code, u.full_name, u.role, u.department_id, d.code AS department_code, d.name AS department_name, u.phone, u.email, u.avatar_path
+                 FROM users u LEFT JOIN departments d ON d.id = u.department_id
+                 WHERE u.line_user_id = ? AND u.is_active = 1"
             );
             $stmt->execute([$lineUid]);
             $user = $stmt->fetch();

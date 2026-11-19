@@ -11,6 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageShell } from "@/components/PageShell";
 import { useToast } from "../../../components/ToastProvider";
 import {
@@ -23,6 +31,7 @@ import {
   CalendarDays,
   Languages,
   Trash2,
+  Building2,
 } from "lucide-react";
 import { useLang, setUserLang } from "../../../lib/i18n";
 import { swalConfirm } from "@/lib/swal";
@@ -36,6 +45,9 @@ interface Profile {
   role: string;
   position: string;
   employee_code: string;
+  department_id: number | null;
+  department_code: string | null;
+  department_name: string | null;
   avatar: string | null;
   avatar_path: string | null;
   line_user_id: string | null;
@@ -56,7 +68,9 @@ export default function ProfilePage() {
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState({ full_name: "", email: "", phone: "", position: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", phone: "", position: "", department_id: "" });
+  // รายชื่อแผนกจาก master data — ใช้เลือกแผนกของผู้ใช้ (ฟอร์มแจ้งซ่อมจะดึงไปเติมอัตโนมัติ)
+  const [depts, setDepts] = useState<{ id: number; code: string; name: string }[]>([]);
   const [pw, setPw] = useState({ current_password: "", new_password: "", confirm_password: "" });
   const [langSaving, setLangSaving] = useState(false);
   const lang = useLang();
@@ -74,6 +88,7 @@ export default function ProfilePage() {
         email: json.user.email ?? "",
         phone: json.user.phone ?? "",
         position: json.user.position ?? "",
+        department_id: json.user.department_id ? String(json.user.department_id) : "",
       });
     } catch (e: any) {
       setError(e.message || "ไม่สามารถโหลดโปรไฟล์ได้");
@@ -82,6 +97,19 @@ export default function ProfilePage() {
   };
 
   useEffect(() => { fetchProfile(); }, []);
+
+  useEffect(() => {
+    fetch("/api/v1/departments.php")
+      .then((res) => res.json())
+      .then((json) => {
+        if (Array.isArray(json)) {
+          setDepts(
+            json.map((d: any) => ({ id: Number(d.id), code: String(d.code ?? ""), name: String(d.name ?? "") }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // ลำดับเดียวกับ topbar (layout.tsx): avatar (base64 ที่อัปโหลดใหม่) ก่อน แล้วค่อย avatar_path
   // — avatar_path อาจเป็นรูป default เก่า (เช่น user_male.jpg) ที่ค้างจากการ seed
@@ -160,7 +188,10 @@ export default function ProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      const body: Record<string, string> = { ...form };
+      const body: Record<string, string | number | null> = {
+        ...form,
+        department_id: form.department_id ? Number(form.department_id) : null,
+      };
       if (pw.new_password) {
         body.current_password = pw.current_password;
         body.new_password = pw.new_password;
@@ -248,6 +279,13 @@ export default function ProfilePage() {
                 {profile?.position || profile?.role || "—"}
                 {profile?.employee_code ? ` · ${profile.employee_code}` : ""}
               </p>
+              {profile?.department_name && (
+                <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted-foreground">
+                  <Building2 className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden="true" />
+                  {profile.department_name}
+                  {profile.department_code ? ` (${profile.department_code})` : ""}
+                </p>
+              )}
             </VStack>
 
             <Badge variant={profile?.line_user_id ? "success" : "neutral"}>
@@ -303,6 +341,29 @@ export default function ProfilePage() {
                 value={form.position}
                 onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
               />
+
+              <div className="space-y-1.5">
+                <Label id="profile-dept-label" htmlFor="profile-dept">แผนก</Label>
+                <Select
+                  value={form.department_id || "__none__"}
+                  onValueChange={(v) => setForm((f) => ({ ...f, department_id: v === "__none__" ? "" : v }))}
+                >
+                  <SelectTrigger id="profile-dept" aria-labelledby="profile-dept-label">
+                    <SelectValue placeholder="— ไม่ระบุแผนก —" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— ไม่ระบุแผนก —</SelectItem>
+                    {depts.map((d) => (
+                      <SelectItem key={d.id} value={String(d.id)}>
+                        {d.name} <span className="text-muted-foreground">({d.code})</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  แผนกนี้จะถูกเติมอัตโนมัติในช่อง “แผนก” ของฟอร์มแจ้งซ่อม
+                </p>
+              </div>
 
               <HStack hAlign="end">
                 <Button disabled={saving} onClick={handleSave}>

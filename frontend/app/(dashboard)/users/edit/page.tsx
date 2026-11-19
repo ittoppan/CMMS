@@ -59,11 +59,15 @@ function EditUserContent() {
     password: "",
     roleId: "",
     position: "",
+    departmentId: "",
     avatar: PRESET_AVATARS[0].url,
     isActive: true,
     lineUserId: "",
     mustChange: false,
   });
+
+  // แผนกจาก master data (departments)
+  const [depts, setDepts] = useState<{ id: number; code: string; name: string }[]>([]);
 
   // inline validation — ตรวจเมื่อ blur / หลัง submit ครั้งแรก
   const iv = useInlineValidation();
@@ -93,6 +97,15 @@ function EditUserContent() {
   }, []);
 
   useEffect(() => {
+    fetch("/api/v1/departments.php")
+      .then((res) => res.json())
+      .then((json) => {
+        if (Array.isArray(json)) setDepts(json.map((d: any) => ({ id: Number(d.id), code: String(d.code ?? ""), name: String(d.name ?? "") })));
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (!userId) {
       setErrorMessage(t("msg.user_id_missing"));
       setLoading(false);
@@ -111,6 +124,7 @@ function EditUserContent() {
             password: "",
             roleId: user.role_id ? String(user.role_id) : "",
             position: user.position || "",
+            departmentId: user.department_id ? String(user.department_id) : "",
             avatar: user.avatar || user.avatar_path || PRESET_AVATARS[0].url,
             isActive: user.is_active === 1 || user.is_active === "1" || user.is_active === true,
             lineUserId: user.line_user_id || "",
@@ -150,6 +164,7 @@ function EditUserContent() {
           password: form.password || undefined,
           role_id: Number(form.roleId),
           position: form.position,
+          department_id: form.departmentId ? Number(form.departmentId) : null,
           avatar: form.avatar,
           is_active: form.isActive ? 1 : 0,
           line_user_id: form.lineUserId || null,
@@ -345,6 +360,26 @@ function EditUserContent() {
                       onChange={(e) => update("position", e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label id="edit-dept-label" htmlFor="edit-dept">แผนก (Department)</Label>
+                  <Select value={form.departmentId || "__none__"} onValueChange={(v) => update("departmentId", v === "__none__" ? "" : v)}>
+                    <SelectTrigger id="edit-dept" aria-labelledby="edit-dept-label">
+                      <SelectValue placeholder="— ไม่ระบุแผนก —" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— ไม่ระบุแผนก —</SelectItem>
+                      {depts.map((d) => (
+                        <SelectItem key={d.id} value={String(d.id)}>
+                          {d.name} <span className="text-muted-foreground">({d.code})</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    แผนกจะถูกเติมอัตโนมัติในช่อง “แผนก” ของฟอร์มแจ้งซ่อมเมื่อผู้ใช้นี้แจ้งซ่อม
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
