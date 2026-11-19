@@ -538,7 +538,7 @@ function iot_alarm_notify(PDO $pdo, int $alarmId): bool {
             (array)($cfg['iot_alarm_notify_roles'] ?? [])), static fn($r) => $r > 0));
         $made  = NotificationCenterService::notify($pdo, [
             'module'      => 'iot',
-            'event'       => 'alarm_' . strtolower((string)$a['severity']),
+            'event'       => 'alarm_detected',
             'type'        => 'maintenance',
             'priority'    => ((string)$a['severity'] === 'critical') ? 'critical' : 'high',
             'ref_type'    => 'iot_alarm',
