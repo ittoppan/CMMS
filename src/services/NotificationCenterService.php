@@ -619,9 +619,9 @@ class NotificationCenterService
     public static function saveQuietHours(PDO $pdo, int $userId, bool $enabled, string $start, string $end): void
     {
         self::install($pdo);
-        // validate HH:MM
-        if (!preg_match('/^\d{2}:\d{2}$/', $start)) $start = '22:00';
-        if (!preg_match('/^\d{2}:\d{2}$/', $end)) $end = '07:00';
+        // validate HH:MM (00-23:00-59)
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $start)) $start = '22:00';
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $end)) $end = '07:00';
         $st = $pdo->prepare('INSERT INTO user_quiet_hours (user_id, enabled, start_time, end_time)
                              VALUES (?, ?, ?, ?)
                              ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), start_time = VALUES(start_time), end_time = VALUES(end_time)');

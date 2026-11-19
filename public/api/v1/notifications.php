@@ -244,8 +244,9 @@ try {
                 }
                 break;
             }
-            // ตรวจสอบตัวแปรที่ใช้ในเทมเพลต (ไม่บันทึก)
+            // ตรวจสอบตัวแปรที่ใช้ในเทมเพลต (ไม่บันทึก) — ต้องมีสิทธิ์ settings.manage
             if ($action === 'template_validate') {
+                requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่ตรวจสอบรูปแบบข้อความแจ้งเตือนได้');
                 $d = json_decode(file_get_contents('php://input'), true);
                 if (!is_array($d)) $d = [];
                 $unknown = NotificationCenterService::validateTemplateVars($d);
@@ -253,8 +254,9 @@ try {
                 break;
             }
 
-            // พรีวิวเทมเพลต (แทนค่าตัวแปรตัวอย่าง, ไม่บันทึก)
+            // พรีวิวเทมเพลต (แทนค่าตัวแปรตัวอย่าง, ไม่บันทึก) — ต้องมีสิทธิ์ settings.manage
             if ($action === 'template_preview') {
+                requirePerm($pdo, 'settings', 'manage', 'เฉพาะผู้ดูแลระบบเท่านั้นที่พรีวิวรูปแบบข้อความแจ้งเตือนได้');
                 $d = json_decode(file_get_contents('php://input'), true);
                 if (!is_array($d)) $d = [];
                 $preview = NotificationCenterService::previewTemplate($d);
