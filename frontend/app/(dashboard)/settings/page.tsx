@@ -80,7 +80,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: BuildingOffice2Icon,
     hint: "ชื่อบริษัท ที่อยู่ เลขประจำตัวผู้เสียภาษี โลโก้ และแบรนด์ระบบ",
     color: "var(--cmms-primary)",
-    bgColor: "var(--cmms-primary-wash)",
+    bgColor: "var(--cmms-primary-light)",
     groups: ["company", "branding"],
   },
   repair: {
@@ -88,7 +88,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: WrenchScrewdriverIcon,
     hint: "ตั้งค่าใบแจ้งซ่อม การมอบหมาย สถานะเครื่องจักร Root Cause และ workflow งานซ่อม",
     color: "var(--cmms-danger)",
-    bgColor: "var(--cmms-danger-bg)",
+    bgColor: "var(--cmms-danger-light)",
     groups: ["repair_config"],
   },
   repair_options: {
@@ -96,7 +96,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: WrenchScrewdriverIcon,
     hint: "จัดการตัวเลือกฟอร์มแจ้งซ่อม (F-EN-03) และข้อมูลหลัก แผนก/ที่ตั้ง-สถานที่ (ลำดับชั้น) ในหน้าเดียว — ใช้ร่วมทุกฟังก์ชัน",
     color: "var(--cmms-danger)",
-    bgColor: "var(--cmms-danger-bg)",
+    bgColor: "var(--cmms-danger-light)",
     groups: ["repair_options"],
     link: "/settings/repair-options",
   },
@@ -105,7 +105,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: CalendarDaysIcon,
     hint: "ความถี่ PM การแจ้งเตือนล่วงหน้า การมอบหมายอัตโนมัติ และการเลื่อนกำหนด",
     color: "var(--cmms-success)",
-    bgColor: "var(--cmms-success-bg)",
+    bgColor: "var(--cmms-success-light)",
     groups: ["pm_config"],
   },
   spare: {
@@ -113,7 +113,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: CubeIcon,
     hint: "ระดับการอนุมัติเบิกอะไหล่ การตัดสต็อกอัตโนมัติ และการขอซื้อ",
     color: "var(--cmms-warning)",
-    bgColor: "var(--cmms-warning-bg)",
+    bgColor: "var(--cmms-warning-light)",
     groups: ["spare_config"],
   },
   notification: {
@@ -121,7 +121,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: BellAlertIcon,
     hint: "LINE, Email, Web Push, เทมเพลตข้อความ และการแจ้งเตือนสต็อกต่ำ",
     color: "var(--cmms-primary)",
-    bgColor: "var(--cmms-primary-bg)",
+    bgColor: "var(--cmms-primary-light)",
     groups: ["notification"],
   },
   calibration: {
@@ -137,7 +137,7 @@ const TOPICS: Record<string, TopicMeta> = {
     icon: CircleStackIcon,
     hint: "การเชื่อมต่อและซิงค์ข้อมูลกับ Sage 300 ERP",
     color: "var(--cmms-success)",
-    bgColor: "var(--cmms-success-bg)",
+    bgColor: "var(--cmms-success-light)",
     groups: ["ERP_Integrations"],
   },
   system: {
@@ -839,7 +839,7 @@ export default function SettingsPage() {
             onClick={() => router.push(p.href)}
           >
             <CardContent className="flex items-center gap-3 p-4">
-              <div className="rounded-lg p-2.5" style={{ background: "var(--cmms-primary-wash)", color: "var(--cmms-primary)" }}>
+              <div className="rounded-lg p-2.5" style={{ background: "var(--cmms-primary-light)", color: "var(--cmms-primary)" }}>
                 <p.icon className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">

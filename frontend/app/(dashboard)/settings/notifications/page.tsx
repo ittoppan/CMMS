@@ -672,7 +672,7 @@ export default function NotificationsSettingsPage() {
 
                   {tgTestResult && (
                     <Card style={{
-                      background: tgTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      background: tgTestResult.ok ? "var(--cmms-success-light)" : "var(--cmms-error-bg, #fef2f2)",
                       border: `1px solid ${tgTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                     }}>
                       <CardContent className="p-3">
@@ -826,7 +826,7 @@ export default function NotificationsSettingsPage() {
 
                   {teamsTestResult && (
                     <Card style={{
-                      background: teamsTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      background: teamsTestResult.ok ? "var(--cmms-success-light)" : "var(--cmms-error-bg, #fef2f2)",
                       border: `1px solid ${teamsTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                     }}>
                       <CardContent className="p-3">
@@ -986,7 +986,7 @@ export default function NotificationsSettingsPage() {
 
                   {ntfyTestResult && (
                     <Card style={{
-                      background: ntfyTestResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                      background: ntfyTestResult.ok ? "var(--cmms-success-light)" : "var(--cmms-error-bg, #fef2f2)",
                       border: `1px solid ${ntfyTestResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                     }}>
                       <CardContent className="p-3">
@@ -1681,7 +1681,7 @@ export default function NotificationsSettingsPage() {
 
               {testResult && (
                 <Card style={{
-                  background: testResult.ok ? "var(--cmms-success-bg)" : "var(--cmms-error-bg, #fef2f2)",
+                  background: testResult.ok ? "var(--cmms-success-light)" : "var(--cmms-error-bg, #fef2f2)",
                   border: `1px solid ${testResult.ok ? "var(--cmms-success)" : "var(--cmms-danger)"}`,
                 }}>
                   <CardContent className="p-3">
