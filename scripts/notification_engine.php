@@ -14,7 +14,7 @@
  *   7) Rule engine — ใช้ notification_rules ปรับผู้รับ/ช่องทาง/delay/repeat/dedup
  *   8) Retry การส่งช่องทางภายนอกที่ค้าง (notification_deliveries)
  *
- * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,retry]
+ * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,retry]
  *      --force = ข้าม dedup (ใช้ทดสอบ)
  * exit 0 = ทำงานเสร็จ (ไม่ว่าจะเจอหรือไม่เจอรายการ)
  */
@@ -401,6 +401,72 @@ if (engHas('inspection') || engHas('all')) {
         echo "inspection failed check done (" . count($rows) . " candidates)\n";
     } catch (Throwable $e) {
         echo "inspection check skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Calibration เกินกำหนด (overdue) ---------------- */
+if (engHas('calibration') || engHas('all')) {
+    try {
+        $calOverdue = $pdo->query("
+            SELECT c.id, c.asset_id, c.next_calibration_date, c.created_at,
+                   a.name AS asset_name, a.code AS asset_code
+            FROM calibration c
+            LEFT JOIN asset_registry a ON c.asset_id = a.id
+            WHERE c.next_calibration_date IS NOT NULL
+              AND c.next_calibration_date < CURDATE()")->fetchAll();
+        foreach ($calOverdue as $c) {
+            $days = (int)((strtotime('now') - strtotime((string)$c['next_calibration_date'])) / 86400);
+            $done += engFire($pdo, [
+                'module' => 'calibration', 'event' => 'overdue',
+                'type' => 'calibration', 'priority' => 'high',
+                'ref_type' => 'calibration', 'ref_id' => (int)$c['id'],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'calibration:overdue',
+                'vars' => [
+                    'asset_name' => (string)($c['asset_name'] ?? ''), 'asset_code' => (string)($c['asset_code'] ?? ''),
+                    'next_date' => (string)$c['next_calibration_date'], 'days_overdue' => max(1, $days),
+                ],
+                'url' => '/calibration',
+                'created_at' => (string)($c['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "calibration overdue check done (" . count($calOverdue) . " candidates)\n";
+    } catch (Throwable $e) {
+        echo "calibration overdue skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Work Permit ใกล้หมดอายุ (expiring) ---------------- */
+if (engHas('work_permit') || engHas('all')) {
+    $wpDays = max(0, (int)engSetting($pdo, 'work_permit_expiry_alert_days', '7'));
+    try {
+        $wps = $pdo->query("
+            SELECT id, permit_no, valid_until, created_at, requester_id AS assigned_to
+            FROM work_permits
+            WHERE valid_until IS NOT NULL
+              AND valid_until <= DATE_ADD(CURDATE(), INTERVAL $wpDays DAY)
+              AND valid_until >= CURDATE()
+              AND status NOT IN ('closed','cancelled','expired')")->fetchAll();
+        foreach ($wps as $wp) {
+            $done += engFire($pdo, [
+                'module' => 'work_permit', 'event' => 'expiring',
+                'type' => 'work_permit', 'priority' => 'high',
+                'ref_type' => 'work_permit', 'ref_id' => (int)$wp['id'],
+                'users' => (int)$wp['assigned_to'] ? [(int)$wp['assigned_to']] : [],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'work_permit:expiring',
+                'vars' => [
+                    'permit_no' => (string)$wp['permit_no'], 'valid_until' => (string)$wp['valid_until'],
+                ],
+                'url' => '/safety/work_permit/' . (int)$wp['id'],
+                'created_at' => (string)($wp['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "work_permit expiring check done (" . count($wps) . " candidates, {$wpDays}d)\n";
+    } catch (Throwable $e) {
+        echo "work_permit expiring skipped (schema mismatch): " . $e->getMessage() . "\n";
     }
 }
 
