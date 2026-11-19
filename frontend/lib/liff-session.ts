@@ -61,10 +61,11 @@ export function isLiffClientBrowser(): boolean {
 
 /**
  * header สำหรับยืนยันตัวตนผู้ใช้ LINE กับ API (เช่น repair.php ที่ต้องรู้เจ้าของงาน)
- * อ่าน token สด ๆ ตอนยิง request — ใช้ได้ทั้งตอน submit และตอน replay คิว offline
+ * ขอ token สดจาก SDK ทุกครั้ง (ไม่ใช่ค่าที่จำไว้ตั้งแต่เปิดหน้า) — token อายุ ~1 ชม.
+ * ถ้าใช้ค่าเก่า งานจะกลายเป็นงานไม่มีเจ้าของ หรือ API จะตอบ 401 ทั้งที่ผู้ใช้ยังอยู่ใน LINE
  */
 export function liffAuthHeaders(): Record<string, string> {
-  const token = session.idToken;
+  const token = freshLiffIdToken();
   return token ? { "X-LIFF-Id-Token": token } : {};
 }
 

@@ -19,7 +19,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { isLiffClientBrowser, useLiffSession } from "./liff-session";
+import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, useLiffSession } from "./liff-session";
 
 export type LiffFetchOptions = {
   /** URL ที่จะยิง — null = ยังไม่ต้องยิง (เช่นยังไม่มีรหัสเครื่อง) */
@@ -88,12 +88,22 @@ export function useLiffFetch<T>({
     setLoading(true);
     setError(null);
 
+    // token ที่จำไว้ตั้งแต่เปิดหน้าอาจหมดอายุ (อายุ ~1 ชม.) — ขอสดจาก SDK ก่อนยิงทุกครั้ง
+    // ไม่ยิงด้วย token ที่หมดอายุแล้ว เพราะเซิร์ฟเวอร์จะตอบ 401 ซึ่งผู้ใช้เข้าใจผิดว่า "ยังไม่ผูกบัญชี"
+    const requestToken = withToken ? freshLiffIdToken() : "";
+    const expiresAt = requestToken ? idTokenExpiresAt(requestToken) : 0;
+    if (expiresAt > 0 && expiresAt * 1000 <= Date.now()) {
+      setLoading(false);
+      setError("เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์จาก LINE อีกครั้ง");
+      return;
+    }
+
     (async () => {
       try {
         const res = await fetch(target, {
           credentials: "include",
           cache: "no-store",
-          headers: token ? { "X-LIFF-Id-Token": token } : undefined,
+          headers: requestToken ? { "X-LIFF-Id-Token": requestToken } : undefined,
           signal: ctrl.signal,
         });
         const json = (await res.json().catch(() => null)) as (T & JsonEnvelope) | null;
@@ -114,7 +124,7 @@ export function useLiffFetch<T>({
       alive = false;
       ctrl.abort();
     };
-  }, [target, token, reloadKey, errorMessage]);
+  }, [target, token, reloadKey, errorMessage, withToken]);
 
   const reload = useCallback(() => setReloadKey((n) => n + 1), []);
 

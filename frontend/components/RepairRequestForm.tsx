@@ -894,7 +894,8 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       }
       const expiresAt = token ? idTokenExpiresAt(token) : 0;
       if (needsLiff && navigator.onLine && expiresAt > 0 && expiresAt * 1000 <= Date.now()) {
-        showToast("error", "เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง (ข้อมูลที่กรอกยังอยู่)");
+        // ระบบไม่เก็บร่างฟอร์มไว้ (ไม่มี draft persistence) — เปิดหน้าใหม่แล้วต้องกรอกใหม่
+        showToast("error", "เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง (ข้อมูลที่กรอกไว้จะหาย ต้องกรอกใหม่)");
         setSubmitting(false);
         return;
       }
