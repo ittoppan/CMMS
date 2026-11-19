@@ -416,7 +416,12 @@ export default function FormRunPage() {
         title="ไม่พบแบบฟอร์ม"
       >
         <div className="space-y-4">
-          <Alert variant="danger" title="ไม่พบแบบฟอร์ม" description={error || "แบบฟอร์มนี้ถูกลบหรือไม่มีอยู่แล้ว"} />
+          {/* หัวข้อหน้าเป็น "ไม่พบแบบฟอร์ม" แล้ว — alert ไม่ต้องพูดซ้ำคำเดียวกันทั้ง title และ description */}
+          <Alert
+            variant="danger"
+            title={error && error !== "ไม่พบแบบฟอร์ม" ? error : "แบบฟอร์มนี้ไม่มีอยู่ในระบบ"}
+            description="อาจถูกลบไปแล้ว หรือลิงก์ที่เปิดมาไม่ถูกต้อง — กลับไปเลือกแบบฟอร์มจากศูนย์แบบฟอร์ม"
+          />
           <a href="/forms" className={buttonVariants({ variant: "secondary" })}>
             กลับไปศูนย์แบบฟอร์ม
           </a>

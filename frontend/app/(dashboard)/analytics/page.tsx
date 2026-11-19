@@ -27,12 +27,6 @@ interface MonthlyStat {
   mttr: number;
 }
 
-const MONTH_COLORS = [
-  "var(--cmms-primary)", "var(--cmms-success)", "var(--cmms-warning)", "var(--cmms-danger)",
-  "var(--cmms-info)", "var(--cmms-info)", "var(--cmms-danger)", "var(--cmms-success)",
-  "var(--cmms-warning)", "var(--cmms-info)", "var(--cmms-primary)", "var(--cmms-warning)",
-];
-
 export default function AnalyticsDashboardPage() {
   const hero = usePageHero("analytics");
   const [year, setYear] = useState(2026);
@@ -338,15 +332,16 @@ export default function AnalyticsDashboardPage() {
             <h3 className="font-bold">งานซ่อมรายเดือน (ปี {year})</h3>
             <p className="text-sm text-[var(--cmms-text-secondary)]">รวม {monthlyData.totalRepair} ใบงาน (เสร็จ + แจ้งซ่อม)</p>
           </div>
-          <div className="flex items-end justify-between gap-2" style={{ minHeight: 180, height: "100%" }}>
+          {/* 12 คอลัมน์ → บนมือถือบีบ gap/ซ่อนตัวเลขบนแท่ง เพื่อให้ครบปีในกรอบการ์ด */}
+          <div className="flex items-end justify-between gap-1 sm:gap-2" style={{ minHeight: 180, height: "100%" }}>
             {monthlyData.rows.length > 0 ? (
               monthlyData.rows.map((m) => {
                 const val = m.completed + m.breakdown;
                 const h = Math.max(6, (val / maxValue) * 150);
                 const scaleY = h / 150;
                 return (
-                  <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
-                    <span className="text-xs font-bold">{val}</span>
+                  <div key={m.monthNum} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
+                    <span className="hidden text-xs font-bold sm:block">{val}</span>
                     <div
                       className="bar-animate"
                       style={{
@@ -356,11 +351,11 @@ export default function AnalyticsDashboardPage() {
                         transform: `scaleY(${scaleY})`,
                         transformOrigin: "bottom",
                         borderRadius: "6px 6px 0 0",
-                        backgroundColor: MONTH_COLORS[(m.monthNum - 1) % 12],
+                        backgroundColor: "var(--cmms-primary)",
                       }}
                       title={`${m.month}: ${val} ใบงาน`}
                     />
-                    <span className="text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
+                    <span className="w-full truncate text-center text-[10px] text-[var(--cmms-text-secondary)] sm:text-xs">{m.month}</span>
                   </div>
                 );
               })
@@ -404,14 +399,14 @@ export default function AnalyticsDashboardPage() {
       <Card>
         <CardContent className="space-y-4">
           <h3 className="font-bold">ค่าใช้จ่ายซ่อมรายเดือน (ปี {year}) — หน่วย: หมื่นบาท</h3>
-          <div className="flex items-end justify-between gap-2" style={{ minHeight: 150 }}>
+          <div className="flex items-end justify-between gap-1 sm:gap-2" style={{ minHeight: 150 }}>
             {monthlyData.rows.length > 0 ? (
               monthlyData.rows.map((m) => {
                 const h = Math.max(6, (m.cost / maxCost) * 120);
                 const scaleY = h / 120;
                 return (
-                  <div key={m.monthNum} className="flex flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
-                    <span className="text-xs font-bold">{m.cost}</span>
+                  <div key={m.monthNum} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1" style={{ height: "100%" }}>
+                    <span className="hidden text-xs font-bold sm:block">{m.cost}</span>
                     <div
                       className="bar-animate"
                       style={{
@@ -421,11 +416,11 @@ export default function AnalyticsDashboardPage() {
                         transform: `scaleY(${scaleY})`,
                         transformOrigin: "bottom",
                         borderRadius: "6px 6px 0 0",
-                        backgroundColor: "var(--cmms-accent)",
+                        backgroundColor: "var(--cmms-info)",
                       }}
                       title={`${m.month}: ${m.cost} หมื่นบาท`}
                     />
-                    <span className="text-xs text-[var(--cmms-text-secondary)]">{m.month}</span>
+                    <span className="w-full truncate text-center text-[10px] text-[var(--cmms-text-secondary)] sm:text-xs">{m.month}</span>
                   </div>
                 );
               })

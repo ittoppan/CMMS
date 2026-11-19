@@ -515,11 +515,16 @@ html, body {
 /* ================================================
    Headings
    ================================================ */
-h1, h2, h3, h4 {
-  font-family: var(--font-family-heading);
-  font-weight: 700 !important;
-  letter-spacing: -0.02em;
-  color: var(--cmms-text-primary);
+/* อยู่ใน @layer base เพื่อให้น้ำหนัก/สีที่กำหนดผ่าน utility ทับได้
+   (กฎนอก layer จะชนะ utility ของ Tailwind เสมอ แม้ specificity จะต่ำกว่า)
+   ค่าเริ่มต้นยังเป็น 700 แต่การ์ด/หัวข้อย่อยใช้ font-semibold (600) เพื่อแยกชั้นได้จริง */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--cmms-text-primary);
+  }
 }
 
 /* ================================================
@@ -534,15 +539,8 @@ h1, h2, h3, h4 {
   transition: var(--cmms-transition-layout);
 }
 .cmms-kpi-card:hover { box-shadow: var(--cmms-shadow-md); transform: translateY(-2px); }
-.cmms-kpi-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-}
-/* แถบสีหัวการ์ด KPI — ใช้สีทึบ (flat) ตาม guideline ไม่ใช่ gradient */
-.cmms-kpi-card.blue::before { background: var(--cmms-primary); }
-.cmms-kpi-card.green::before { background: var(--cmms-success); }
-.cmms-kpi-card.amber::before { background: var(--cmms-warning); }
-.cmms-kpi-card.red::before { background: var(--cmms-danger); }
-.cmms-kpi-card.cyan::before { background: var(--cmms-info); }
+/* แถบสีประจำการ์ด KPI — เส้นซ้าย 2px เส้นเดียว (ดู ::after ด้านล่าง)
+   เคยมีแถบหัวการ์ด 3px ซ้อนอีกชั้น ทำให้การ์ดมีสองเส้นสีพร้อมกัน */
 
 /* Side accent borders (2px, subtle) — replaces inline borderLeft */
 .cmms-side-accent {
@@ -2540,6 +2538,12 @@ next-route-announcer {
   background: var(--color-primary);
   opacity: 0.4;
 }
+/* การ์ดที่มี tone → เส้นซ้ายใช้สีตาม tone แทนสีหลักจางๆ */
+.cmms-kpi-card.blue::after { background: var(--cmms-primary); opacity: 1; }
+.cmms-kpi-card.green::after { background: var(--cmms-success); opacity: 1; }
+.cmms-kpi-card.amber::after { background: var(--cmms-warning); opacity: 1; }
+.cmms-kpi-card.red::after { background: var(--cmms-danger); opacity: 1; }
+.cmms-kpi-card.cyan::after { background: var(--cmms-info); opacity: 1; }
 
 .cmms-kpi-value {
   display: flex;

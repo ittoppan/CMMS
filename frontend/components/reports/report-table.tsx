@@ -160,9 +160,12 @@ export function ReportTableCard({
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm">{title ?? "รายละเอียดข้อมูล"}</CardTitle>
-      </CardHeader>
+      {/* ไม่ใส่ชื่อซ้ำ: ผู้เรียกส่วนใหญ่มี SectionHeading "รายละเอียดข้อมูล" อยู่แล้ว */}
+      {title && (
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">{title}</CardTitle>
+        </CardHeader>
+      )}
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-sm">
