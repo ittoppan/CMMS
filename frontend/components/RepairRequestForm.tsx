@@ -53,6 +53,7 @@ import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, useLiffSession } from "@/lib/liff-session";
 import { clearRepairDraft, hasDraftContent, loadRepairDraft, saveRepairDraft } from "@/lib/repair-draft";
+import { canAdvanceFrom, firstIncompleteStep } from "@/lib/repair-form-steps";
 import { serverResponds } from "@/lib/server-check";
 import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, VERIFY_FAILED_BODY, VERIFY_FAILED_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
 import { useSupportContact } from "@/lib/use-support-contact";
@@ -187,28 +188,6 @@ const STEPS = [
   { key: "reporter", label: "ผู้แจ้ง & รูป", iconName: "user" },
   { key: "confirm", label: "ยืนยัน", iconName: "circle-check" },
 ];
-
-/**
- * ขั้นที่ปลอดภัยตอนกู้คืนร่าง — ไม่กระโดดข้ามขั้นที่ข้อมูลยังไม่ครบ
- * (ตรรกะเดียวกับ canNext() ด้านล่าง: ถ้าข้อมูลขั้นไหนขาด ให้เปิดที่ขั้นนั้น)
- */
-function resumeStepFor(form: {
-  machineCode: string;
-  machineOther: string;
-  machineStatus: string;
-  jobType: string;
-  jobDescription: string;
-  symptoms: string;
-  reporterName: string;
-  departmentCode: string;
-  phone: string;
-}): number {
-  if (!(form.machineCode || form.machineOther.trim()) || !form.machineStatus) return 0;
-  if (!form.jobType || !form.jobDescription || form.symptoms.trim().length < 5) return 1;
-  const phoneOk = /^[0-9+\-()\s]{9,}$/.test(form.phone.trim());
-  if (!form.reporterName.trim() || !form.departmentCode || !phoneOk) return 2;
-  return 3;
-}
 
 /** ย่อรูปให้พอดีกับ LINE แล้วคืน data URI (max 1000px, JPEG 0.72) */
 function resizeImageToDataUri(file: File, maxSize = 1000): Promise<string> {
@@ -788,7 +767,8 @@ const flushQueue = async (notifyOnAuthFail = false) => {
     if (draft) {
       // ทับค่าที่ระบบเติมให้ (ชื่อ/เบอร์จากบัญชี) ด้วยค่าที่ผู้ใช้กรอกค้างไว้
       setForm((prev) => ({ ...prev, ...draft.form }));
-      setStep(Math.min(draft.step, resumeStepFor(draft.form)));
+      // เปิดกลับไปขั้นที่กรอกค้างไว้ แต่ไม่ข้ามขั้นที่ข้อมูลยังขาด
+      setStep(Math.min(draft.step, firstIncompleteStep(draft.form, Boolean(draft.form.machineCode))));
       showToast("info", "กู้คืนร่างที่กรอกไว้แล้ว — กรอกต่อได้เลย");
     }
     setDraftHydrated(true);
@@ -796,9 +776,13 @@ const flushQueue = async (notifyOnAuthFail = false) => {
 
   /* เก็บร่างตามที่ผู้ใช้กรอก (debounce กันเขียน localStorage ทุกตัวอักษร) */
   const draftWarnedRef = useRef(false);
+  // อ่านค่าล่าสุดใน timer — กัน timer ที่ตั้งไว้ก่อนกดส่ง เขียนร่างกลับมาหลังส่งสำเร็จแล้วล้างทิ้ง
+  const submittedRef = useRef(false);
+  submittedRef.current = submitted;
   useEffect(() => {
     if (!draftHydrated || submitted) return;
     const timer = setTimeout(() => {
+      if (submittedRef.current) return;
       if (!hasDraftContent(form)) {
         clearRepairDraft();
         return;
@@ -815,18 +799,10 @@ const flushQueue = async (notifyOnAuthFail = false) => {
     return () => clearTimeout(timer);
   }, [form, step, submitted, draftHydrated, showToast]);
 
-  const canNext = () => {
-    if (step === 0) {
-      const hasMachine = isOtherMachine ? true : !!selectedAsset;
-      return hasMachine && !!form.machineStatus;
-    }
-    if (step === 1) return !!form.jobType && !!form.jobDescription && form.symptoms.trim().length >= 5;
-    if (step === 2) {
-      const phoneOk = /^[0-9+\-()\s]{9,}$/.test(form.phone.trim());
-      return !!form.reporterName.trim() && !!form.departmentCode && phoneOk;
-    }
-    return true;
-  };
+  // "อื่นๆ" นับว่าเลือกเครื่องแล้ว; เครื่องที่ลงทะเบียนต้องมีอยู่ในรายการจริง
+  const machineChosen = isOtherMachine || !!selectedAsset;
+  // ความครบของแต่ละขั้นมาจาก lib/repair-form-steps ที่เดียว (ใช้ร่วมกับการกู้คืนร่าง)
+  const canNext = () => canAdvanceFrom(step, form, machineChosen);
 
   const addPhotos = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
