@@ -68,6 +68,44 @@ export function liffAuthHeaders(): Record<string, string> {
   return token ? { "X-LIFF-Id-Token": token } : {};
 }
 
+/** เวลาหมดอายุ (วินาที) ของ JWT — 0 = อ่านไม่ได้ */
+export function idTokenExpiresAt(token: string): number {
+  try {
+    const part = token.split(".")[1];
+    if (!part) return 0;
+    const base64 = part.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded));
+    return Number(payload?.exp) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * ขอ ID token ล่าสุดจาก LIFF SDK ก่อนยิงคำขอที่ต้องมีเจ้าของงาน
+ *
+ * token อายุ ~1 ชั่วโมง: ใช้ค่าที่จำไว้ตั้งแต่เปิดหน้า อาจหมดอายุตอนกดส่ง
+ * หรือตอน replay คิว offline → งานถูกบันทึกเป็นงานไม่มีเจ้าของเงียบ ๆ
+ * การเรียก getIDToken() ตรงนี้ได้ token ที่ SDK ต่ออายุให้แล้ว (ถ้ามี) และ
+ * ประกาศลง store ให้ทั้งหน้าใช้ค่าเดียวกัน
+ */
+export function freshLiffIdToken(): string {
+  try {
+    const sdk = typeof window !== "undefined"
+      ? (window as unknown as { liff?: { isInClient?: () => boolean; getIDToken?: () => string | null } }).liff
+      : undefined;
+    if (sdk?.isInClient?.() && typeof sdk.getIDToken === "function") {
+      const token = String(sdk.getIDToken() || "").trim();
+      if (token) {
+        if (token !== session.idToken) publishLiffSession({ idToken: token });
+        return token;
+      }
+    }
+  } catch { /* ใช้ token ที่มีอยู่ */ }
+  return session.idToken;
+}
+
 /** hook สำหรับ component — re-render เมื่อ LiffBridge ประกาศสถานะใหม่ */
 export function useLiffSession(): LiffSession {
   return useSyncExternalStore(subscribeLiffSession, getLiffSession, () => EMPTY);

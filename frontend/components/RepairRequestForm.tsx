@@ -51,9 +51,9 @@ import LiffLangToggle from "./LiffLangToggle";
 import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
-import { liffAuthHeaders, useLiffSession } from "@/lib/liff-session";
+import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, useLiffSession } from "@/lib/liff-session";
 import { serverResponds } from "@/lib/server-check";
-import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
+import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, VERIFY_FAILED_BODY, VERIFY_FAILED_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
 import { useSupportContact } from "@/lib/use-support-contact";
 import { useToast } from "@/components/ToastProvider";
 import { Button } from "@/components/ui/button";
@@ -303,7 +303,7 @@ export default function RepairRequestForm() {
   const [rootCauseOptions, setRootCauseOptions] = useState<{ value: string; label: string; emoji?: string }[]>([]);
 
   const [lineBound, setLineBound] = useState<boolean | null>(null);
-  const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
+  const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "verify_failed" | "anonymous" | "webchoice">("checking");
   // ผล init LIFF ที่ LiffBridge ประกาศ (event-driven — ไม่ต้องอ่าน localStorage ซ้ำ ๆ หรือเดาเวลา)
   const liff = useLiffSession();
   const [bindEmpCode, setBindEmpCode] = useState("");
@@ -319,6 +319,7 @@ export default function RepairRequestForm() {
   const [attachBusy, setAttachBusy] = useState(false);
   const [attachErr, setAttachErr] = useState<string | null>(null);
   const offlineRef = useRef(false);
+  const flushingRef = useRef(false);
 
   const [form, setForm] = useState({
     machineCode: "",
@@ -529,7 +530,46 @@ export default function RepairRequestForm() {
      แล้วขึ้นว่ายังไม่ผูกทั้งที่ผูกแล้ว). ตัวตนยืนยันด้วย LIFF ID token เท่านั้น */
   const sessionUserRef = useRef(false);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [verifyError, setVerifyError] = useState("");
   const gateCheckedToken = useRef("");
+
+  /* ตรวจกับเซิร์ฟเวอร์ว่า LINE ที่ token ยืนยันแล้วผูกบัญชีอยู่ไหม — แยกผลเป็น 3 ทาง
+     ผูกแล้ว / token ตรวจไม่ผ่าน / ยืนยันแล้วแต่ยังไม่ผูก (เดิม token ไม่ผ่านถูกนับเป็น "ยังไม่ผูก") */
+  const checkBinding = (token: string) => {
+    gateCheckedToken.current = token;
+    setVerifyError("");
+    fetch("/api/v1/line_register.php", { headers: { "X-LIFF-Id-Token": token } })
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (j?.bound && j?.user) {
+          setLineBound(true);
+          setBindGate("bound");
+          seedReporterFromRegistered(j.user);
+          try {
+            localStorage.setItem("cmms_line_bound", "1");
+            localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
+            if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
+            if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
+            if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
+          } catch { /* ignore */ }
+          return;
+        }
+        if (!r.ok || j?.code) {
+          // 401 + code = token หมดอายุ/ตรวจไม่ผ่าน/ติดต่อ LINE ไม่ได้ — ไม่ใช่ "ยังไม่ผูก"
+          setLineBound(null);
+          setBindGate("verify_failed");
+          setVerifyError(j?.error || "ตรวจสอบสิทธิ์ LINE ไม่ผ่าน");
+          return;
+        }
+        setLineBound(false);
+        setBindGate("unbound");
+      })
+      .catch(() => {
+        // ตรวจไม่ได้เพราะเน็ตหลุด — ไม่ใช่ "ยังไม่ผูก"; แสดงสถานะแยกพร้อมปุ่มลองใหม่ (ไม่ค้าง checking)
+        setBindGate((gate) => (gate === "bound" ? gate : "verify_failed"));
+        setVerifyError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ตรวจสัญญาณแล้วลองอีกครั้ง");
+      });
+  };
 
   useEffect(() => {
     if (liff.status === "idle") return;            // LiffBridge ยังไม่ประกาศผล
@@ -542,36 +582,23 @@ export default function RepairRequestForm() {
 
     // มี ID token → ให้เซิร์ฟเวอร์ตรวจกับ LINE แล้วบอกว่าผูกอยู่ไหม (ได้ข้อมูลผู้แจ้งมาด้วยในคำขอเดียว)
     if (liff.idToken) {
-      if (gateCheckedToken.current === liff.idToken) return;
-      gateCheckedToken.current = liff.idToken;
-      fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
-        .then((r) => r.json())
-        .then((j) => {
-          if (j?.bound && j?.user) {
-            setLineBound(true);
-            setBindGate("bound");
-            seedReporterFromRegistered(j.user);
-            try {
-              localStorage.setItem("cmms_line_bound", "1");
-              localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
-              if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
-              if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
-              if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
-            } catch { /* ignore */ }
-          } else {
-            setLineBound(false);
-            setBindGate("unbound");
-          }
-        })
-        .catch(() => { /* ตรวจไม่ได้ (เน็ตหลุด) — คงสถานะเดิมไว้ */ });
+      if (gateCheckedToken.current !== liff.idToken) checkBinding(liff.idToken);
       return;
     }
 
-    // ไม่มี ID token: เปิดนอกแอป LINE (หรือ LIFF init ไม่ผ่าน) — ตัดสินหลังรู้ผล session แล้ว
     if (!sessionChecked) return;
+
+    // อยู่ใน LINE แต่ยังไม่ได้ ID token (init ล้ม/ยังไม่ทันได้) — ห้ามสรุปว่า "ยังไม่ผูก"
+    if (isLiffClientBrowser()) {
+      setBindGate((gate) => (gate === "bound" ? gate : "verify_failed"));
+      setVerifyError(liff.status === "error" ? "โหลดข้อมูล LINE ไม่สำเร็จ" : "ยังไม่ได้รับ ID token จาก LINE");
+      return;
+    }
+
+    // เปิดนอกแอป LINE — ตัดสินจาก LINE user id ที่เคยเก็บไว้
     const uid = storedLineUid();
     setBindGate((gate) => (gate === "bound" ? gate : uid ? "unbound" : "webchoice"));
-  }, [liff.status, liff.idToken, liff.lineUserId, sessionChecked]);
+  }, [liff.status, liff.idToken, liff.lineUserId, sessionChecked]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const effectiveUid = (() => {
     try {
@@ -594,10 +621,11 @@ export default function RepairRequestForm() {
     setBindSubmitting(true);
     setBindError(null);
     try {
+      const token = freshLiffIdToken(); // token อาจหมดอายุหลังเปิดหน้านาน — ขอใหม่ก่อนผูก
       const r = await apiFetch("/api/v1/line_register.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        // ไม่ส่ง line_user_id แล้ว — เซิร์ฟเวอร์ใช้ LINE ที่ token ยืนยัน (apiFetch แนบ header ให้)
+        headers: { "Content-Type": "application/json", ...(token ? { "X-LIFF-Id-Token": token } : {}) },
+        // ไม่ส่ง line_user_id — เซิร์ฟเวอร์ใช้ LINE ที่ token ยืนยัน
         body: JSON.stringify({ employee_code: code }),
       });
       const j = await r.json().catch(() => ({}));
@@ -651,8 +679,18 @@ export default function RepairRequestForm() {
     } catch { /* ลบไม่สำเร็จ */ }
   };
 
-const flushQueue = async () => {
-    if (!navigator.onLine) return;
+const flushQueue = async (notifyOnAuthFail = false) => {
+    if (!navigator.onLine || flushingRef.current) return;
+    // ขอ token สดก่อน replay — token ตอนกดคิวอาจหมดอายุแล้ว งานค้างจะกลายเป็นงานไม่มีเจ้าของ
+    const token = freshLiffIdToken();
+    if (!token && isLiffClientBrowser() && !sessionUserRef.current) {
+      // อยู่ใน LINE แต่ยังยืนยันตัวตนไม่ได้ — เก็บคิวไว้ ส่งต่อเมื่อ token พร้อม (effect ด้านล่าง)
+      if (notifyOnAuthFail) {
+        showToast("error", "ตรวจสอบสิทธิ์ LINE ไม่ผ่าน — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง");
+      }
+      return;
+    }
+    flushingRef.current = true;
     setFlushingQueue(true);
     try {
       const items = await queueAll();
@@ -660,7 +698,7 @@ const flushQueue = async () => {
         try {
           const res = await apiFetch("/api/v1/repair.php", {
             method: "POST",
-            headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
+            headers: { "Content-Type": "application/json", ...(token ? { "X-LIFF-Id-Token": token } : {}) },
             body: JSON.stringify(item.payload),
           });
           const json = await res.json().catch(() => ({}));
@@ -673,6 +711,7 @@ const flushQueue = async () => {
       }
       refreshQueueItems();
     } catch { /* ยังออฟไลน์อยู่ */ }
+    flushingRef.current = false;
     setFlushingQueue(false);
   };
 
@@ -686,9 +725,18 @@ const flushQueue = async () => {
         if (navigator.onLine) flushQueue();
       })
       .catch(() => { /* ยังออฟไลน์อยู่ */ });
-    window.addEventListener("online", flushQueue);
-    return () => window.removeEventListener("online", flushQueue);
+    const onOnline = () => { flushQueue(); };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // replay ตอน mount อาจยังไม่มี token (LiffBridge กำลัง init) — เมื่อ token มาถึง ให้ส่งคิวอีกครั้ง
+  const autoFlushToken = useRef("");
+  useEffect(() => {
+    if (!liff.idToken || autoFlushToken.current === liff.idToken) return;
+    autoFlushToken.current = liff.idToken;
+    if (offlineQueued > 0 && navigator.onLine) flushQueue();
+  }, [liff.idToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (selectedAsset?.department_id) {
@@ -835,12 +883,27 @@ const flushQueue = async () => {
       };
       // เจ้าของงาน (created_by) ให้ server ตัดสินจาก LIFF ID token (header ด้านล่าง) หรือ session
       // — ไม่ส่ง line_user_id จาก client อีก เพราะใครก็ส่ง uid ของคนอื่นได้
+      // token อายุ ~1 ชม.: ขอใหม่ก่อนส่งเสมอ ไม่งั้นงานจะถูกบันทึกเป็นงานไม่มีเจ้าของ
+      const token = freshLiffIdToken();
+      const needsLiff = isLiffClientBrowser() && !sessionUserRef.current;
+      // ออฟไลน์: ยังเก็บงานลงคิวได้ (replay จะขอ token ใหม่ตอนออนไลน์) — บล็อกเฉพาะตอนกำลังจะยิงจริง
+      if (needsLiff && navigator.onLine && !token) {
+        showToast("error", "ตรวจสอบสิทธิ์ LINE ไม่ผ่าน — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง");
+        setSubmitting(false);
+        return;
+      }
+      const expiresAt = token ? idTokenExpiresAt(token) : 0;
+      if (needsLiff && navigator.onLine && expiresAt > 0 && expiresAt * 1000 <= Date.now()) {
+        showToast("error", "เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง (ข้อมูลที่กรอกยังอยู่)");
+        setSubmitting(false);
+        return;
+      }
 
       let res: Response;
       try {
         res = await apiFetch("/api/v1/repair.php", {
           method: "POST",
-          headers: { "Content-Type": "application/json", ...liffAuthHeaders() },
+          headers: { "Content-Type": "application/json", ...(token ? { "X-LIFF-Id-Token": token } : {}) },
           body: JSON.stringify(payload),
         });
       } catch {
@@ -965,6 +1028,33 @@ const flushQueue = async () => {
               >
                 <Link className="w-4 h-4" /> เข้าด้วย LINE
               </Button>
+            </div>
+          )}
+
+          {bindGate === "verify_failed" && (
+            <div className="flex flex-col gap-4">
+              <div className="text-center">
+                <div className="cmms-header-emoji mb-2"><ShieldAlert size={24} strokeWidth={1.75} /></div>
+                <h4 className="text-base font-bold m-0 mb-1.5">{VERIFY_FAILED_TITLE}</h4>
+                <p className="text-sm text-[var(--cmms-text-secondary)]">
+                  {VERIFY_FAILED_BODY}
+                </p>
+                {verifyError && (
+                  <p className="text-xs text-[var(--cmms-text-secondary)] mt-1.5">{verifyError}</p>
+                )}
+              </div>
+              <Button
+                className="w-full"
+                disabled={!liff.idToken}
+                onClick={() => checkBinding(liff.idToken)}
+              >
+                ลองตรวจสอบสิทธิ์อีกครั้ง
+              </Button>
+              {!liff.idToken && (
+                <p className="text-sm text-[var(--cmms-text-secondary)] text-center mb-0">
+                  ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง
+                </p>
+              )}
             </div>
           )}
 
@@ -1100,7 +1190,7 @@ const flushQueue = async () => {
               variant="primary"
               size="sm"
               disabled={flushingQueue || !navigator.onLine}
-              onClick={flushQueue}
+              onClick={() => flushQueue(true)}
               className="shrink-0"
             >
               {flushingQueue ? "กำลังส่ง..." : "ส่งงานค้างทั้งหมดตอนนี้"}
@@ -1449,11 +1539,12 @@ const flushQueue = async () => {
                 className="hidden"
                 onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }}
               />
+              {/* ไม่ใส่ capture: บางเบราว์เซอร์ (โดยเฉพาะ iOS) เปิดกล้องโหมดถ่ายรูปให้แม้
+                  accept=video/* → ถ่ายวิดีโอไม่ได้; ปล่อยให้ระบบให้เลือก "ถ่ายวิดีโอ/เลือกจากคลัง" */}
               <input
                 ref={videoInputRef}
                 type="file"
                 accept="video/*"
-                capture="environment"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
