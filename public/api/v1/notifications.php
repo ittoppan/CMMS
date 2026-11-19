@@ -244,6 +244,24 @@ try {
                 }
                 break;
             }
+            // ตรวจสอบตัวแปรที่ใช้ในเทมเพลต (ไม่บันทึก)
+            if ($action === 'template_validate') {
+                $d = json_decode(file_get_contents('php://input'), true);
+                if (!is_array($d)) $d = [];
+                $unknown = NotificationCenterService::validateTemplateVars($d);
+                echo json_encode(['success' => true, 'unknown_vars' => $unknown, 'valid' => empty($unknown)], JSON_UNESCAPED_UNICODE);
+                break;
+            }
+
+            // พรีวิวเทมเพลต (แทนค่าตัวแปรตัวอย่าง, ไม่บันทึก)
+            if ($action === 'template_preview') {
+                $d = json_decode(file_get_contents('php://input'), true);
+                if (!is_array($d)) $d = [];
+                $preview = NotificationCenterService::previewTemplate($d);
+                echo json_encode(['success' => true, 'preview' => $preview], JSON_UNESCAPED_UNICODE);
+                break;
+            }
+
             http_response_code(400);
             echo json_encode(['error' => 'Unknown action'], JSON_UNESCAPED_UNICODE);
             break;

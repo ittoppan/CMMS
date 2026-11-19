@@ -245,6 +245,13 @@ function TemplateRow({
 }) {
   const d = t as Tpl;
   const sample = d.sample_vars ?? {};
+  // ตัวแปรที่ใช้ในเทมเพลตแต่ไม่อยู่ใน sample_vars (อาจเป็นตัวแปรเฉพาะโมดูล)
+  const usedVars = new Set<string>();
+  for (const f of [d.title_template, d.message_template, d.url_template]) {
+    const m = (f || "").match(/\{([a-z_0-9]+)\}/gi);
+    if (m) for (const v of m) usedVars.add(v.slice(1, -1));
+  }
+  const unknownVars = [...usedVars].filter((v) => !(v in sample));
   const priority = d.priority === "" ? "info" : (PRIORITY_LABELS[d.priority] ? d.priority : "info");
   return (
     <div className="space-y-3 px-5 pb-5">
@@ -292,6 +299,12 @@ function TemplateRow({
               {`{${v}}`}
             </button>
           ))}
+        </div>
+      )}
+      {unknownVars.length > 0 && (
+        <div className="rounded-lg border border-[var(--cmms-warning)] bg-[var(--cmms-warning-light)] px-3 py-2 text-xs text-[var(--cmms-warning)]">
+          <span className="font-semibold">ตัวแปรที่อาจไม่รู้จัก:</span>{" "}
+          {unknownVars.map((v) => `{${v}}`).join(", ")} — ระบบจะแทนค่าเป็นค่าว่างถ้าไม่มีข้อมูลจริง
         </div>
       )}
       {/* พรีวิวสไตล์ notification push */}

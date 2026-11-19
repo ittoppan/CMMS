@@ -820,6 +820,42 @@ class NotificationCenterService
         return $st->rowCount();
     }
 
+    /** ตรวจสอบตัวแปรที่ใช้ในเทมเพลต — คืนรายการตัวแปรที่ไม่รู้จัก (ไม่อยู่ใน sampleVars) */
+    public static function validateTemplateVars(array $d): array
+    {
+        $sample = self::sampleVars();
+        $unknown = [];
+        foreach (['title_template', 'message_template', 'url_template'] as $f) {
+            $text = (string)($d[$f] ?? '');
+            if (preg_match_all('/\{([a-z_0-9]+)\}/i', $text, $m)) {
+                foreach ($m[1] as $v) {
+                    if (!isset($sample[$v]) && !in_array($v, $unknown, true)) {
+                        $unknown[] = $v;
+                    }
+                }
+            }
+        }
+        return $unknown;
+    }
+
+    /** พรีวิวเทมเพลต — แทนค่าตัวแปรตัวอย่าง คืน title/message/url ที่ render แล้ว */
+    public static function previewTemplate(array $d): array
+    {
+        $sample = self::sampleVars();
+        $title = substituteVars((string)($d['title_template'] ?? ''), $sample);
+        $message = substituteVars((string)($d['message_template'] ?? ''), $sample);
+        $url = substituteVars((string)($d['url_template'] ?? ''), $sample);
+        if ($url !== '' && strpos($url, 'http') !== 0) {
+            $url = rtrim(publicBaseUrl(), '/') . '/' . ltrim($url, '/');
+        }
+        return [
+            'title' => $title,
+            'message' => $message,
+            'url' => $url,
+            'unknown_vars' => self::validateTemplateVars($d),
+        ];
+    }
+
     /** ส่ง push ทดสอบด้วยเทมเพลต (แทนค่าตัวแปรตัวอย่าง) ถึงผู้ใช้ที่ระบุ — คืนจำนวนอุปกรณ์ที่ส่งถึงจริง */
     public static function testPushTemplate(PDO $pdo, int $userId, array $d): int
     {
