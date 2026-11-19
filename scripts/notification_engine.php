@@ -14,7 +14,7 @@
  *   7) Rule engine — ใช้ notification_rules ปรับผู้รับ/ช่องทาง/delay/repeat/dedup
  *   8) Retry การส่งช่องทางภายนอกที่ค้าง (notification_deliveries)
  *
- * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,retry]
+ * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,retry]
  *      --force = ข้าม dedup (ใช้ทดสอบ)
  * exit 0 = ทำงานเสร็จ (ไม่ว่าจะเจอหรือไม่เจอรายการ)
  */
@@ -467,6 +467,74 @@ if (engHas('work_permit') || engHas('all')) {
         echo "work_permit expiring check done (" . count($wps) . " candidates, {$wpDays}d)\n";
     } catch (Throwable $e) {
         echo "work_permit expiring skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Document review ครบกำหนด (review_due) ---------------- */
+if (engHas('document') || engHas('all')) {
+    $docDays = max(0, (int)engSetting($pdo, 'document_review_alert_days', '14'));
+    try {
+        $docs = $pdo->query("
+            SELECT dr.id, dr.document_id, dr.revision_no, dr.next_review_date, dr.created_at,
+                   d.doc_no, d.title
+            FROM document_revisions dr
+            LEFT JOIN controlled_documents d ON d.id = dr.document_id
+            WHERE dr.next_review_date IS NOT NULL
+              AND dr.next_review_date <= DATE_ADD(CURDATE(), INTERVAL $docDays DAY)
+              AND dr.status IN ('effective','approved')")->fetchAll();
+        foreach ($docs as $dr) {
+            $overdue = strtotime((string)$dr['next_review_date']) < strtotime('now');
+            $done += engFire($pdo, [
+                'module' => 'document', 'event' => $overdue ? 'review_overdue' : 'review_due',
+                'type' => 'document', 'priority' => $overdue ? 'high' : 'medium',
+                'ref_type' => 'document', 'ref_id' => (int)$dr['document_id'],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'document:' . ($overdue ? 'review_overdue' : 'review_due'),
+                'vars' => [
+                    'doc_no' => (string)($dr['doc_no'] ?? ''), 'title' => (string)($dr['title'] ?? ''),
+                    'revision_no' => (string)$dr['revision_no'], 'next_review_date' => (string)$dr['next_review_date'],
+                ],
+                'url' => '/documents/' . (int)$dr['document_id'],
+                'created_at' => (string)($dr['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "document review check done (" . count($docs) . " candidates, {$docDays}d)\n";
+    } catch (Throwable $e) {
+        echo "document review skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- RCA เกินกำหนด (overdue) ---------------- */
+if (engHas('rca') || engHas('all')) {
+    try {
+        $rcas = $pdo->query("
+            SELECT id, rca_code, title, due_date, status, assignee_id, created_at
+            FROM rca
+            WHERE due_date IS NOT NULL
+              AND due_date < CURDATE()
+              AND status NOT IN ('closed','cancelled')")->fetchAll();
+        foreach ($rcas as $r) {
+            $days = (int)((strtotime('now') - strtotime((string)$r['due_date'])) / 86400);
+            $done += engFire($pdo, [
+                'module' => 'rca', 'event' => 'overdue',
+                'type' => 'rca', 'priority' => 'high',
+                'ref_type' => 'rca', 'ref_id' => (int)$r['id'],
+                'users' => (int)$r['assignee_id'] ? [(int)$r['assignee_id']] : [],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'rca:overdue',
+                'vars' => [
+                    'rca_code' => (string)$r['rca_code'], 'title' => (string)$r['title'],
+                    'due_date' => (string)$r['due_date'], 'days_overdue' => max(1, $days),
+                ],
+                'url' => '/rca/' . (int)$r['id'],
+                'created_at' => (string)($r['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "rca overdue check done (" . count($rcas) . " candidates)\n";
+    } catch (Throwable $e) {
+        echo "rca overdue skipped (schema mismatch): " . $e->getMessage() . "\n";
     }
 }
 
