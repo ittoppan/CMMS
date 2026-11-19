@@ -9,8 +9,8 @@ import { liffAuthHeaders } from "./liff-session";
  * - apiFetch: fetch wrapper เดียวทั้งระบบ
  *   - credentials: "include" (PHP session cookie)
  *   - POST/PUT/DELETE: เพิ่ม header X-CSRF-Token อัตโนมัติ (จาก /api/v1/csrf.php)
- *   - แนบ X-LIFF-Id-Token อัตโนมัติเมื่ออยู่ในแอป LINE (API ที่ต้องรู้ตัวตนผู้ใช้ LINE
- *     จะตรวจ token กับ LINE เอง ไม่รับ line_user_id จาก client)
+ *   - แนบ X-LIFF-Id-Token ให้เฉพาะ endpoint ที่ต้องรู้ตัวตนผู้ใช้ LINE (ดู LIFF_ENDPOINTS)
+ *     หรือเมื่อผู้เรียกขอผ่าน options.liff / init.liff อย่างชัดเจน — ไม่ส่ง token ไป endpoint อื่น
  *   - normalize error → ApiError (message จาก JSON error ของ backend)
  * - useApiQuery: react-query hook สำหรับ GET
  *
@@ -46,26 +46,63 @@ export function resetCsrfToken(): void {
 
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+// endpoint ที่ต้องใช้ LIFF ID token เพื่อยืนยันตัวตนผู้ใช้ LINE (ฝั่งเซิร์ฟเวอร์ตรวจกับ LINE)
+// นอกเหนือจากรายการนี้จะไม่แนบ token โดยอัตโนมัติ เพื่อไม่ส่ง token ไปยัง endpoint ที่ไม่จำเป็น
+const LIFF_ENDPOINTS = new Set([
+  "asset_hub.php",
+  "departments.php",
+  "line_register.php",
+  "menu_permissions.php",
+  "my_repairs.php",
+  "repair.php",
+]);
+
+function endpointNeedsLiff(url: string): boolean {
+  try {
+    const path = url.split("?")[0].split("#")[0];
+    const name = path.substring(path.lastIndexOf("/") + 1);
+    return LIFF_ENDPOINTS.has(name);
+  } catch {
+    return false;
+  }
+}
+
+type ApiFetchInit = RequestInit & { liff?: boolean };
+
+export type ApiFetchOptions = { liff?: boolean };
+
 /**
  * fetch wrapper กลาง — ใช้แทน fetch() ตรง ๆ ในหน้าใหม่/component ใหม่
  */
-export async function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+export async function apiFetch(
+  url: string,
+  init?: ApiFetchInit,
+  options?: ApiFetchOptions
+): Promise<Response> {
   const method = (init?.method || "GET").toUpperCase();
   const headers = new Headers(init?.headers);
-  const liffHeaders = liffAuthHeaders();
-  for (const [key, value] of Object.entries(liffHeaders)) {
-    if (!headers.has(key)) headers.set(key, value);
+
+  const wantsLiff = options?.liff ?? init?.liff ?? endpointNeedsLiff(url);
+  if (wantsLiff) {
+    const liffHeaders = liffAuthHeaders();
+    for (const [key, value] of Object.entries(liffHeaders)) {
+      if (!headers.has(key)) headers.set(key, value);
+    }
   }
+
   if (MUTATION_METHODS.has(method)) {
     const token = await getCsrfToken();
     if (token) headers.set("X-CSRF-Token", token);
   }
-  return fetch(url, { ...init, headers, credentials: "include" });
+
+  // ไม่ส่ง property liff ต่อไปยัง fetch
+  const { liff: _liff, ...restInit } = (init ?? {}) as ApiFetchInit;
+  return fetch(url, { ...restInit, headers, credentials: "include" });
 }
 
 /** fetch + parse JSON + normalize error (throw ApiError) */
-export async function apiJson<T = unknown>(url: string, init?: RequestInit): Promise<T> {
-  const res = await apiFetch(url, init);
+export async function apiJson<T = unknown>(url: string, init?: ApiFetchInit, options?: ApiFetchOptions): Promise<T> {
+  const res = await apiFetch(url, init, options);
   const text = await res.text();
   let data: any = null;
   try {

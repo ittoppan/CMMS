@@ -646,6 +646,10 @@ html, body {
   content: ''; position: absolute; top: 13px; left: calc(50% - 13px);
   height: 2px; width: calc(100% - 26px); transform: translateX(-100%);
   background: var(--cmms-border); z-index: 0;
+
+  top: 14px;
+  left: calc(50% - 14px);
+  width: calc(100% - 28px);
 }
 .cmms-step.done:not(:first-child)::before { background: var(--cmms-success); }
 .cmms-step-number {
@@ -655,10 +659,16 @@ html, body {
   font-weight: 700; font-size: 0.78rem;
   background: var(--cmms-bg-card); border: 1.5px solid var(--cmms-border);
   color: var(--cmms-text-muted); flex-shrink: 0; transition: all var(--cmms-transition);
+
+  width: 28px; height: 28px; font-size: 0.75rem;
 }
 .cmms-step.active .cmms-step-number {
   background: var(--cmms-primary); border-color: var(--cmms-primary);
   color: white; box-shadow: 0 0 0 4px var(--cmms-primary-glow);
+
+  background: var(--cmms-gradient-primary);
+  border-color: transparent;
+  box-shadow: 0 0 0 4px rgba(0, 104, 181, 0.14), 0 4px 10px -2px rgba(0, 104, 181, 0.5);
 }
 .cmms-step.done .cmms-step-number {
   background: var(--cmms-success); border-color: var(--cmms-success); color: white;
@@ -666,8 +676,12 @@ html, body {
 .cmms-step-label {
   font-size: 0.75rem; font-weight: 600; color: var(--cmms-text-muted);
   max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+
+  font-size: 0.68rem;
 }
-.cmms-step.active .cmms-step-label { color: var(--cmms-primary); font-weight: 700; }
+.cmms-step.active .cmms-step-label { color: var(--cmms-primary); font-weight: 700; 
+  font-weight: 800;
+}
 .cmms-step.done .cmms-step-label { color: var(--cmms-success); }
 
 /* ================================================
@@ -1187,6 +1201,10 @@ html.cmms-no-anim *::after {
   background:
     radial-gradient(760px 300px at 50% -140px, rgba(56,189,248,0.18), transparent 62%),
     var(--cmms-bg-page);
+
+  background:
+  radial-gradient(900px 420px at 50% -180px, rgba(0, 104, 181, 0.16), transparent 62%),
+  linear-gradient(180deg, #f6fafe 0%, #eef4fa 100%);
 }
 .cmms-liff-hero {
   position: relative;
@@ -1197,10 +1215,28 @@ html.cmms-no-anim *::after {
   color: #fff;
   box-shadow: 0 16px 32px -16px rgba(0, 87, 168, 0.55);
   overflow: hidden;
+
+  margin: 14px 14px 0;
+  padding: 18px 18px 24px;
+  border-radius: 24px;
+  background:
+  radial-gradient(130% 120% at 100% 0%, rgba(0, 168, 232, 0.5) 0%, transparent 58%),
+  linear-gradient(140deg, #00539c 0%, #0068b5 46%, #0093ff 100%);
+  box-shadow: 0 22px 44px -26px rgba(0, 56, 112, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 .cmms-liff-hero::before {
   content: ''; position: absolute; inset: 0;
   background: radial-gradient(360px 200px at 92% 0%, rgba(255,255,255,0.22), transparent 55%);
+  pointer-events: none;
+
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+  linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+  linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
   pointer-events: none;
 }
 .cmms-liff-hero > * { position: relative; z-index: 1; }
@@ -1208,6 +1244,10 @@ html.cmms-no-anim *::after {
   width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
   background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.26);
   display: flex; align-items: center; justify-content: center; color: #fff;
+
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .cmms-liff-eyebrow {
   font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
@@ -1216,6 +1256,8 @@ html.cmms-no-anim *::after {
 .cmms-liff-title {
   font-size: 1.42rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
   color: #fff; margin: 2px 0 0;
+
+  font-size: 1.5rem;
 }
 .cmms-liff-chip {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1245,6 +1287,15 @@ html.cmms-no-anim *::after {
   background: var(--cmms-bg-card);
   border: 1px solid var(--cmms-border);
   box-shadow: var(--cmms-shadow-md);
+
+  margin: -14px 14px 0;
+  padding: 14px 10px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 60, 120, 0.08);
+  box-shadow: 0 14px 30px -20px rgba(0, 50, 100, 0.5);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .cmms-card-flat {
@@ -1262,16 +1313,28 @@ html.cmms-no-anim *::after {
   border-radius: 12px; padding: 12px 8px; font-size: 0.82rem; font-weight: 700;
   cursor: pointer; transition: all var(--cmms-transition-fast); font-family: inherit;
   touch-action: manipulation;
+
+  border-radius: 14px; padding: 13px 8px;
+  background: linear-gradient(180deg, #ffffff, #f7fafd);
+  letter-spacing: 0.01em;
 }
 .cmms-chip:active { transform: scale(0.96); }
 .cmms-chip.selected {
   background: var(--cmms-primary); border-color: var(--cmms-primary); color: white;
   box-shadow: 0 4px 12px var(--cmms-primary-glow);
+
+  background: var(--cmms-gradient-primary);
+  border-color: transparent;
+  box-shadow: 0 12px 22px -14px rgba(0, 104, 181, 0.85);
 }
 
 .cmms-machine-summary {
   border: 1px solid var(--cmms-border); border-radius: 14px; padding: 14px;
   background: var(--cmms-bg-muted); animation: cmms-fadeInUp 0.3s ease;
+
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(0, 104, 181, 0.06), rgba(0, 104, 181, 0.02));
+  border-color: rgba(0, 104, 181, 0.14);
 }
 .cmms-machine-icon {
   width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
@@ -1285,11 +1348,15 @@ html.cmms-no-anim *::after {
   border: 1.5px solid var(--cmms-border); border-radius: 14px; padding: 12px 14px;
   background: var(--cmms-bg-card); cursor: pointer; transition: all var(--cmms-transition-fast); font-family: inherit;
   text-align: left; touch-action: manipulation;
+
+  border-radius: 16px; padding: 13px 14px;
 }
 .cmms-option-row:active { transform: scale(0.98); }
 .cmms-option-row.selected {
   border-color: var(--opt-color, var(--cmms-primary));
   background: color-mix(in srgb, var(--opt-color, var(--cmms-primary)) 6%, var(--cmms-bg-card));
+
+  box-shadow: inset 0 0 0 1px var(--opt-color, var(--cmms-primary));
 }
 .cmms-option-emoji { font-size: 1.5rem; }
 .cmms-radio-dot {
@@ -1309,11 +1376,18 @@ html.cmms-no-anim *::after {
   background: var(--cmms-bg-card); cursor: pointer; text-align: center; font-family: inherit;
   transition: all var(--cmms-transition-fast); touch-action: manipulation;
   display: flex; flex-direction: column; gap: 2px; align-items: center;
+
+  border-radius: 16px; padding: 15px 10px;
+  background: linear-gradient(180deg, #ffffff, #f7fafd);
 }
 .cmms-job-card:active { transform: scale(0.96); }
 .cmms-job-card.selected {
   border-color: var(--cmms-primary); background: var(--cmms-primary);
   color: white; box-shadow: 0 6px 16px var(--cmms-primary-glow);
+
+  background: var(--cmms-gradient-primary);
+  border-color: transparent;
+  box-shadow: 0 14px 26px -16px rgba(0, 104, 181, 0.9);
 }
 .cmms-job-card.selected .cmms-job-emoji { filter: none; }
 .cmms-job-emoji { font-size: 1.8rem; margin-bottom: 4px; }
@@ -1349,6 +1423,11 @@ html.cmms-no-anim *::after {
 .cmms-summary-box {
   border: 1px solid var(--cmms-border); border-radius: 14px; padding: 4px 14px;
   background: var(--cmms-bg-muted);
+
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(0, 104, 181, 0.05), rgba(0, 104, 181, 0.015));
+  border-color: rgba(0, 104, 181, 0.12);
+  padding: 2px 14px;
 }
 .cmms-summary-box > [class*="HStack"], .cmms-summary-box > div {
   padding: 10px 0; border-bottom: 1px solid var(--cmms-border);
@@ -1357,6 +1436,8 @@ html.cmms-no-anim *::after {
 .cmms-summary-text {
   background: var(--cmms-bg-card); border: 1px solid var(--cmms-border); border-radius: 10px;
   padding: 12px; font-size: 0.9rem; line-height: 1.6; margin-top: 6px;
+
+  border-radius: 12px;
 }
 .cmms-submit-error {
   display: flex; align-items: center; gap: 8px; color: var(--cmms-danger);
@@ -1371,8 +1452,13 @@ html.cmms-no-anim *::after {
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--cmms-border); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
   max-width: 560px; margin: 0 auto;
+
+  border-top: 1px solid rgba(0, 60, 120, 0.1);
+  box-shadow: 0 -14px 32px -26px rgba(0, 40, 80, 0.55);
 }
-.cmms-mobile-bottom-bar button { min-height: 48px; }
+.cmms-mobile-bottom-bar button { min-height: 48px; 
+  border-radius: 14px; font-weight: 800;
+}
 .cmms-bottom-meta {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   margin-bottom: 8px; font-size: 0.72rem; font-weight: 700;
@@ -1382,8 +1468,12 @@ html.cmms-no-anim *::after {
 .cmms-bottom-progress span {
   flex: 1; height: 4px; border-radius: 100px; background: var(--cmms-bg-muted);
   transition: background var(--cmms-transition);
+
+  height: 5px;
 }
-.cmms-bottom-progress span.on { background: var(--cmms-primary); }
+.cmms-bottom-progress span.on { background: var(--cmms-primary); 
+  background: var(--cmms-gradient-primary);
+}
 
 /* Success */
 .cmms-success-wo {
@@ -1393,7 +1483,14 @@ html.cmms-no-anim *::after {
 
 /* Mobile tweaks (F-EN-03) */
 @media (max-width: 768px) {
-  .cmms-stepper { padding: 11px 10px; }
+  .cmms-stepper { padding: 11px 10px; 
+  .cmms-liff-hero { margin: 12px 12px 0; padding: 16px 15px 22px; border-radius: 22px; }
+  .cmms-liff-title { font-size: 1.28rem; }
+  .cmms-liff-identity-name { font-size: 0.86rem; }
+  .cmms-stepper { margin: -12px 12px 0; padding: 12px 8px 10px; }
+  .cmms-step-label { font-size: 0.64rem; }
+  .cmms-form-section-title { font-size: 0.9rem; }
+}
   .cmms-step-label { font-size: 0.75rem; }
   .cmms-liff-title { font-size: 1.3rem; }
   .cmms-success-card { padding: 32px 20px; margin: 0 16px; }
@@ -1415,6 +1512,8 @@ html.cmms-no-anim *::after {
 .cmms-photo-thumb {
   position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden;
   border: 1px solid var(--cmms-border); background: var(--cmms-bg-muted);
+
+  border-radius: 14px;
 }
 .cmms-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cmms-photo-remove {
@@ -1427,8 +1526,123 @@ html.cmms-no-anim *::after {
   background: var(--cmms-bg-muted); color: var(--cmms-text-secondary);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   cursor: pointer; font-family: inherit; touch-action: manipulation; transition: all var(--cmms-transition-fast);
+
+  border-radius: 14px;
+  background: rgba(0, 104, 181, 0.04);
+  border-color: rgba(0, 104, 181, 0.22);
+  color: var(--cmms-primary);
 }
 .cmms-photo-add:active { background: var(--cmms-bg-wash); transform: scale(0.97); }
+
+
+/* Repair refresh (merged) */
+.cmms-liff-orbit {
+  position: absolute; right: -72px; bottom: -120px;
+  width: 230px; height: 230px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 66%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  pointer-events: none;
+}
+
+.cmms-liff-hero-top {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.cmms-liff-identity {
+  position: relative; z-index: 1;
+  margin-top: 14px; padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: cmms-fadeInUp 0.35s ease both;
+}
+
+.cmms-liff-identity-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.94); color: #00539c;
+  font-size: 0.95rem; font-weight: 800;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+}
+
+.cmms-liff-identity-name {
+  margin: 0; font-size: 0.9rem; font-weight: 800; color: #fff; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.cmms-liff-identity-meta {
+  margin: 3px 0 0;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 600; color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.cmms-liff-dot { opacity: 0.55; }
+
+.cmms-liff-badge {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  padding: 4px 8px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94); color: #00539c;
+  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.09em;
+}
+
+.cmms-step.done { cursor: pointer; }
+
+.cmms-mobile-page .cmms-card-flat {
+  border-radius: 20px;
+  border: 1px solid rgba(0, 60, 120, 0.08);
+  background: #fff;
+  box-shadow: 0 14px 32px -26px rgba(0, 45, 90, 0.55);
+}
+
+.cmms-form-section-head {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cmms-form-section-num {
+  flex-shrink: 0; width: 30px; height: 30px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 800;
+  color: #00539c;
+  background: linear-gradient(150deg, rgba(0, 104, 181, 0.15), rgba(0, 147, 255, 0.07));
+  border: 1px solid rgba(0, 104, 181, 0.18);
+}
+
+.cmms-form-section-title {
+  margin: 0; font-size: 0.95rem; font-weight: 800; line-height: 1.35;
+  color: var(--cmms-text-primary);
+}
+
+.cmms-form-section-hint {
+  margin: 3px 0 0; font-size: 0.72rem; line-height: 1.5;
+  color: var(--cmms-text-secondary);
+}
+
+.cmms-field-label {
+  margin: 0 0 8px; font-size: 0.8rem; font-weight: 700;
+  color: var(--cmms-text-primary); letter-spacing: 0.01em;
+}
+
+.cmms-field-hint {
+  display: flex; align-items: center; gap: 5px;
+  margin: 6px 0 0; font-size: 0.7rem;
+  color: var(--cmms-text-secondary);
+}
+
+.cmms-field-hint b { color: var(--cmms-primary); font-weight: 700; }
+
+.cmms-chip:hover { border-color: rgba(0, 104, 181, 0.38); transform: translateY(-1px); }
+
+.cmms-option-row:hover { border-color: rgba(0, 104, 181, 0.3); }
+
+.cmms-job-card:hover { border-color: rgba(0, 104, 181, 0.32); transform: translateY(-1px); }
+
+.cmms-photo-add:hover { background: rgba(0, 104, 181, 0.09); }
 
 /* ================================================
    Standalone Page (no sidebar, for LINE / LIFF)
@@ -3721,228 +3935,4 @@ html.cmms-no-anim *::after {
     flex-direction: column;
     gap: 1.5rem;
   }
-}
-
-/* ================================================
-   Repair Request (F-EN-03) — visual refresh v2
-   -------------------------------------------------
-   ใช้กับหน้า /repair/request (ฟอร์มแจ้งซ่อมใน LINE)
-   และ hero เดียวกันของ /repair/track — ชื่อคลาสชุดเดิมทั้งหมด
-   ================================================ */
-.cmms-liff-page {
-  background:
-    radial-gradient(900px 420px at 50% -180px, rgba(0, 104, 181, 0.16), transparent 62%),
-    linear-gradient(180deg, #f6fafe 0%, #eef4fa 100%);
-}
-.cmms-liff-hero {
-  margin: 14px 14px 0;
-  padding: 18px 18px 24px;
-  border-radius: 24px;
-  background:
-    radial-gradient(130% 120% at 100% 0%, rgba(0, 168, 232, 0.5) 0%, transparent 58%),
-    linear-gradient(140deg, #00539c 0%, #0068b5 46%, #0093ff 100%);
-  box-shadow: 0 22px 44px -26px rgba(0, 56, 112, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-.cmms-liff-hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
-  background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
-  mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
-  pointer-events: none;
-}
-.cmms-liff-orbit {
-  position: absolute; right: -72px; bottom: -120px;
-  width: 230px; height: 230px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 66%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  pointer-events: none;
-}
-.cmms-liff-hero-top {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; gap: 12px;
-}
-.cmms-liff-title { font-size: 1.5rem; }
-.cmms-liff-logo {
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-
-/* แถบตัวตนผู้แจ้ง (ชื่อ + แผนกอัตโนมัติ) */
-.cmms-liff-identity {
-  position: relative; z-index: 1;
-  margin-top: 14px; padding: 10px 12px;
-  display: flex; align-items: center; gap: 10px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  animation: cmms-fadeInUp 0.35s ease both;
-}
-.cmms-liff-identity-avatar {
-  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255, 255, 255, 0.94); color: #00539c;
-  font-size: 0.95rem; font-weight: 800;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
-}
-.cmms-liff-identity-name {
-  margin: 0; font-size: 0.9rem; font-weight: 800; color: #fff; line-height: 1.3;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.cmms-liff-identity-meta {
-  margin: 3px 0 0;
-  display: flex; align-items: center; gap: 5px;
-  font-size: 0.72rem; font-weight: 600; color: rgba(255, 255, 255, 0.88);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.cmms-liff-dot { opacity: 0.55; }
-.cmms-liff-badge {
-  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
-  padding: 4px 8px; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94); color: #00539c;
-  font-size: 0.6rem; font-weight: 800; letter-spacing: 0.09em;
-}
-
-/* Stepper — การ์ดลอยใต้ hero */
-.cmms-stepper {
-  margin: -14px 14px 0;
-  padding: 14px 10px 12px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.97);
-  border: 1px solid rgba(0, 60, 120, 0.08);
-  box-shadow: 0 14px 30px -20px rgba(0, 50, 100, 0.5);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-.cmms-step-number { width: 28px; height: 28px; font-size: 0.75rem; }
-.cmms-step:not(:first-child)::before {
-  top: 14px;
-  left: calc(50% - 14px);
-  width: calc(100% - 28px);
-}
-.cmms-step.active .cmms-step-number {
-  background: var(--cmms-gradient-primary);
-  border-color: transparent;
-  box-shadow: 0 0 0 4px rgba(0, 104, 181, 0.14), 0 4px 10px -2px rgba(0, 104, 181, 0.5);
-}
-.cmms-step-label { font-size: 0.68rem; }
-.cmms-step.active .cmms-step-label { font-weight: 800; }
-.cmms-step.done { cursor: pointer; }
-
-/* การ์ดแต่ละขั้น */
-.cmms-mobile-page .cmms-card-flat {
-  border-radius: 20px;
-  border: 1px solid rgba(0, 60, 120, 0.08);
-  background: #fff;
-  box-shadow: 0 14px 32px -26px rgba(0, 45, 90, 0.55);
-}
-
-/* หัวข้อส่วนในฟอร์ม (เลขลำดับ + ชื่อ + คำใบ้) */
-.cmms-form-section-head {
-  display: flex; align-items: flex-start; gap: 10px;
-  margin-bottom: 14px;
-}
-.cmms-form-section-num {
-  flex-shrink: 0; width: 30px; height: 30px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.72rem; font-weight: 800;
-  color: #00539c;
-  background: linear-gradient(150deg, rgba(0, 104, 181, 0.15), rgba(0, 147, 255, 0.07));
-  border: 1px solid rgba(0, 104, 181, 0.18);
-}
-.cmms-form-section-title {
-  margin: 0; font-size: 0.95rem; font-weight: 800; line-height: 1.35;
-  color: var(--cmms-text-primary);
-}
-.cmms-form-section-hint {
-  margin: 3px 0 0; font-size: 0.72rem; line-height: 1.5;
-  color: var(--cmms-text-secondary);
-}
-
-/* ฟิลด์ */
-.cmms-field-label {
-  margin: 0 0 8px; font-size: 0.8rem; font-weight: 700;
-  color: var(--cmms-text-primary); letter-spacing: 0.01em;
-}
-.cmms-field-hint {
-  display: flex; align-items: center; gap: 5px;
-  margin: 6px 0 0; font-size: 0.7rem;
-  color: var(--cmms-text-secondary);
-}
-.cmms-field-hint b { color: var(--cmms-primary); font-weight: 700; }
-
-/* ตัวเลือกเครื่องจักร */
-.cmms-chip {
-  border-radius: 14px; padding: 13px 8px;
-  background: linear-gradient(180deg, #ffffff, #f7fafd);
-  letter-spacing: 0.01em;
-}
-.cmms-chip:hover { border-color: rgba(0, 104, 181, 0.38); transform: translateY(-1px); }
-.cmms-chip.selected {
-  background: var(--cmms-gradient-primary);
-  border-color: transparent;
-  box-shadow: 0 12px 22px -14px rgba(0, 104, 181, 0.85);
-}
-
-/* สถานะเครื่อง / ประเภทงาน */
-.cmms-option-row { border-radius: 16px; padding: 13px 14px; }
-.cmms-option-row:hover { border-color: rgba(0, 104, 181, 0.3); }
-.cmms-option-row.selected { box-shadow: inset 0 0 0 1px var(--opt-color, var(--cmms-primary)); }
-.cmms-job-card {
-  border-radius: 16px; padding: 15px 10px;
-  background: linear-gradient(180deg, #ffffff, #f7fafd);
-}
-.cmms-job-card:hover { border-color: rgba(0, 104, 181, 0.32); transform: translateY(-1px); }
-.cmms-job-card.selected {
-  background: var(--cmms-gradient-primary);
-  border-color: transparent;
-  box-shadow: 0 14px 26px -16px rgba(0, 104, 181, 0.9);
-}
-
-/* เครื่องจักรที่เลือก + สรุปข้อมูล */
-.cmms-machine-summary {
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(0, 104, 181, 0.06), rgba(0, 104, 181, 0.02));
-  border-color: rgba(0, 104, 181, 0.14);
-}
-.cmms-summary-box {
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(0, 104, 181, 0.05), rgba(0, 104, 181, 0.015));
-  border-color: rgba(0, 104, 181, 0.12);
-  padding: 2px 14px;
-}
-.cmms-summary-text { border-radius: 12px; }
-
-/* แนบรูป */
-.cmms-photo-add {
-  border-radius: 14px;
-  background: rgba(0, 104, 181, 0.04);
-  border-color: rgba(0, 104, 181, 0.22);
-  color: var(--cmms-primary);
-}
-.cmms-photo-add:hover { background: rgba(0, 104, 181, 0.09); }
-.cmms-photo-thumb { border-radius: 14px; }
-
-/* แถบปุ่มล่าง */
-.cmms-mobile-bottom-bar {
-  border-top: 1px solid rgba(0, 60, 120, 0.1);
-  box-shadow: 0 -14px 32px -26px rgba(0, 40, 80, 0.55);
-}
-.cmms-mobile-bottom-bar button { border-radius: 14px; font-weight: 800; }
-.cmms-bottom-progress span { height: 5px; }
-.cmms-bottom-progress span.on { background: var(--cmms-gradient-primary); }
-
-@media (max-width: 768px) {
-  .cmms-liff-hero { margin: 12px 12px 0; padding: 16px 15px 22px; border-radius: 22px; }
-  .cmms-liff-title { font-size: 1.28rem; }
-  .cmms-liff-identity-name { font-size: 0.86rem; }
-  .cmms-stepper { margin: -12px 12px 0; padding: 12px 8px 10px; }
-  .cmms-step-label { font-size: 0.64rem; }
-  .cmms-form-section-title { font-size: 0.9rem; }
 }

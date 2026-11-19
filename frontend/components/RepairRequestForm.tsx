@@ -348,13 +348,18 @@ export default function RepairRequestForm() {
   const update = (key: string, value: string | boolean | string[]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  // แนบ LIFF ID token ไปกับ API ทุกครั้งที่มี (นอก LINE จะไม่มี header นี้) —
-  // ทำให้ endpoint ที่ปกติต้องมี session เว็บ (เช่น departments.php) ใช้กับผู้ใช้ LIFF ได้
-  const apiFetch = (url: string, init?: RequestInit) =>
-    fetch(url, {
+  // แนบ LIFF ID token ไปกับ API เฉพาะ endpoint ที่ต้องใช้ (departments.php / line_register.php / repair.php)
+  // endpoint อื่น (asset_registry, repair_options, line_notify, profile, csrf, upload) ไม่แนบ token เพื่อไม่ส่ง token ไปโดยไม่จำเป็น
+  const LIFF_ENDPOINTS = new Set(["departments.php", "line_register.php", "repair.php"]);
+  const apiFetch = (url: string, init?: RequestInit) => {
+    const path = url.split("?")[0];
+    const name = path.substring(path.lastIndexOf("/") + 1);
+    const liffHeaders = LIFF_ENDPOINTS.has(name) ? liffAuthHeaders() : {};
+    return fetch(url, {
       ...init,
-      headers: { ...liffAuthHeaders(), ...((init?.headers as Record<string, string> | undefined) ?? {}) },
+      headers: { ...liffHeaders, ...((init?.headers as Record<string, string> | undefined) ?? {}) },
     });
+  };
 
   /* เติมชื่อ-นามสกุลจากฐานข้อมูล ถ้าผู้ใช้ยังไม่ได้กรอก/แก้เอง */
   const seedReporter = (name?: string | null) => {
