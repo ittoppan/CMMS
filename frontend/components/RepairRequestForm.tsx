@@ -51,7 +51,7 @@ import LiffLangToggle from "./LiffLangToggle";
 import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
-import { liffAuthHeaders } from "@/lib/liff-session";
+import { liffAuthHeaders, useLiffSession } from "@/lib/liff-session";
 import { serverResponds } from "@/lib/server-check";
 import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
 import { useSupportContact } from "@/lib/use-support-contact";
@@ -211,6 +211,15 @@ function resizeImageToDataUri(file: File, maxSize = 1000): Promise<string> {
   });
 }
 
+/** LINE user id ที่เคยเก็บไว้จาก LIFF (ใช้แสดงผลเท่านั้น — ตัวตนจริงต้องมี ID token) */
+function storedLineUid(): string {
+  try {
+    return localStorage.getItem("cmms_line_user_id") || "";
+  } catch {
+    return "";
+  }
+}
+
 /* ============ Offline Queue (IndexedDB) ============
    ถ้า submit ไม่ออกเพราะไม่มีเน็ต → เก็บไว้ใน queue
    พอออนไลน์กลับมา → ส่งอัตโนมัติ
@@ -295,6 +304,8 @@ export default function RepairRequestForm() {
 
   const [lineBound, setLineBound] = useState<boolean | null>(null);
   const [bindGate, setBindGate] = useState<"checking" | "bound" | "unbound" | "anonymous" | "webchoice">("checking");
+  // ผล init LIFF ที่ LiffBridge ประกาศ (event-driven — ไม่ต้องอ่าน localStorage ซ้ำ ๆ หรือเดาเวลา)
+  const liff = useLiffSession();
   const [bindEmpCode, setBindEmpCode] = useState("");
   const [bindError, setBindError] = useState<string | null>(null);
   // ช่องทางติดต่อแอดมินสำหรับสถานะ unbound — hook กลาง (settings_support_contact()) แสดงผลด้วย SupportContactStrip
@@ -472,24 +483,30 @@ export default function RepairRequestForm() {
       .then((j) => {
         setSessionName(j?.me?.full_name || "");
         seedReporter(j?.me?.full_name);
-        if (j?.me?.id) setBindGate("bound");
+        if (j?.me?.id) {
+          sessionUserRef.current = true;
+          setLineBound(true);
+          setBindGate("bound");
+          // เติมข้อมูลผู้แจ้งเพิ่มเติม (โทร/อีเมล/แผนก) จาก profile ที่ลงทะเบียนไว้
+          apiFetch("/api/v1/profile.php")
+            .then((r) => r.json())
+            .then((pj) => {
+              if (pj?.success && pj?.user) {
+                seedReporterFromRegistered({
+                  full_name: pj.user.full_name,
+                  department_id: pj.user.department_id,
+                  phone: pj.user.phone,
+                  email: pj.user.email,
+                });
+              }
+            })
+            .catch(() => {});
+        }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSessionChecked(true));
 
-    const applyGate = (uid: string | null, bound: boolean) => {
-      setBindGate(bound ? "bound" : uid ? "unbound" : "anonymous");
-    };
-    // ตรวจสถานะผูกด้วย LINE ID token ที่แนบไป (API ไม่รับ line_user_id จาก client แล้ว)
-    const checkBound = async (): Promise<boolean> => {
-      try {
-        const r = await fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() });
-        const j = await r.json().catch(() => ({}));
-        return !!(j?.bound && j?.user);
-      } catch {
-        return false;
-      }
-    };
-
+    // แคชฝั่งเครื่อง: คนที่เคยผูกแล้วเห็นฟอร์มทันที — การยืนยันจริงอยู่ที่ effect ด้านล่าง
     try {
       if (localStorage.getItem("cmms_line_bound") === "1") {
         setLineBound(true);
@@ -502,120 +519,59 @@ export default function RepairRequestForm() {
         if (boundEmail) setForm((prev) => ({ ...prev, email: prev.email || boundEmail }));
         const boundDept = localStorage.getItem("cmms_line_dept_id");
         if (boundDept) setReporterDeptId(Number(boundDept));
-      } else {
-        const storedUid = localStorage.getItem("cmms_line_user_id");
-        if (storedUid) {
-          setLineBound(false);
-          // ถ้า LIFF ID token ยังไม่พร้อม (LiffBridge ยัง init ไม่เสร็จ) อย่ารีบสรุปว่ายังไม่ผูก —
-          // รอให้ tryLiff (1.5s) ตรวจซ้ำอีกครั้งเมื่อ token พร้อม (กัน false negative ตอนเปิดจาก LINE OA)
-          if (!liffAuthHeaders()["X-LIFF-Id-Token"]) {
-            // คงสถานะ checking ไว้ ไม่ applyGate(unbound)
-          } else {
-          checkBound().then((b) => {
-            setLineBound(b);
-            applyGate(storedUid, b);
-            if (b) {
-              try {
-                localStorage.setItem("cmms_line_bound", "1");
-              } catch { /* ignore */ }
-              // ดึงข้อมูลผู้แจ้งจากที่ลงทะเบียนไว้ในระบบ
-              fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
-                .then((r) => r.json())
-                .then((j) => {
-                  if (j?.bound && j?.user) {
-                    seedReporterFromRegistered(j.user);
-                    try {
-                      if (j.user.full_name) localStorage.setItem("cmms_line_full_name", j.user.full_name);
-                      if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
-                      if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
-                      if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
-                    } catch { /* ignore */ }
-                  }
-                })
-                .catch(() => {});
-            }
-          });
-          }
-        } else {
-          window.setTimeout(() => {
-            const uid = localStorage.getItem("cmms_line_user_id");
-            if (uid) {
-              checkBound().then((b) => {
-                setLineBound(b);
-                applyGate(uid, b);
-              });
-              return;
-            }
-            apiFetch("/api/v1/line_notify.php")
-              .then((r) => r.json())
-              .then((j) => {
-                if (j?.me?.id) {
-                  setSessionName(j.me.full_name || "");
-                  seedReporter(j.me.full_name);
-                  setBindGate("bound");
-                  // ดึงข้อมูลผู้แจ้งเพิ่มเติม (โทร/อีเมล/แผนก) จาก profile ที่ลงทะเบียนไว้
-                  apiFetch("/api/v1/profile.php")
-                    .then((r) => r.json())
-                    .then((pj) => {
-                      if (pj?.success && pj?.user) {
-                        seedReporterFromRegistered({
-                          full_name: pj.user.full_name,
-                          department_id: pj.user.department_id,
-                          phone: pj.user.phone,
-                          email: pj.user.email,
-                        });
-                      }
-                    })
-                    .catch(() => {});
-                } else if ((window as any).liff?.isInClient?.()) {
-                  setBindGate("unbound");
-                } else {
-                  setBindGate("webchoice");
-                }
-              })
-              .catch(() => setBindGate("webchoice"));
-          }, 2500);
-        }
       }
     } catch { /* ignore */ }
-
-    // เลิกใช้ ?uid= เพื่อจำลองตัวตน — ตัวตนยืนยันได้จาก LINE ID token เท่านั้น
-
-    const tryLiff = () => {
-      try {
-        if ((window as any).liff?.isLoggedIn?.()) {
-          (window as any).liff.getProfile().then((p: any) => {
-            setLineProfile({ name: p.displayName || "", pic: p.pictureUrl || "", userId: p.userId || "" });
-            setForm((prev) => ({ ...prev, reporterName: p.displayName || prev.reporterName }));
-            if (p.userId) {
-              fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
-                .then((r) => r.json())
-                .then((j) => {
-                  if (j?.bound && j?.user) {
-                    setLineBound(true);
-                    setBindGate("bound");
-                    seedReporterFromRegistered(j.user);
-                    try {
-                      localStorage.setItem("cmms_line_bound", "1");
-                      localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
-                      if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
-                      if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
-                      if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
-                    } catch { /* ignore */ }
-                  } else {
-                    setLineBound(false);
-                    setBindGate("unbound");
-                  }
-                })
-                .catch(() => {});
-            }
-          });
-        }
-      } catch { /* liff ยังไม่พร้อม */ }
-    };
-    const timer = window.setTimeout(tryLiff, 1500);
-    return () => window.clearTimeout(timer);
   }, []);
+
+  /* ---------- เกตผูกบัญชี LINE ----------
+     LiffBridge ประกาศผล init (status/idToken) ผ่าน lib/liff-session — effect นี้ตรวจต่อทันทีที่ token
+     พร้อม จึงไม่ต้องเดาเวลาด้วย timer และไม่สรุป "ยังไม่ผูก" ก่อนได้ token (บั๊กเดิม: เปิดจาก LINE OA
+     แล้วขึ้นว่ายังไม่ผูกทั้งที่ผูกแล้ว). ตัวตนยืนยันด้วย LIFF ID token เท่านั้น */
+  const sessionUserRef = useRef(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const gateCheckedToken = useRef("");
+
+  useEffect(() => {
+    if (liff.status === "idle") return;            // LiffBridge ยังไม่ประกาศผล
+    if (sessionUserRef.current) return;             // ล็อกอินหน้าเว็บอยู่แล้ว — ผ่านเกตด้วย session
+
+    if (liff.status === "ready" && liff.lineUserId) {
+      setLineProfile({ name: liff.displayName, pic: "", userId: liff.lineUserId });
+      seedReporter(liff.displayName);
+    }
+
+    // มี ID token → ให้เซิร์ฟเวอร์ตรวจกับ LINE แล้วบอกว่าผูกอยู่ไหม (ได้ข้อมูลผู้แจ้งมาด้วยในคำขอเดียว)
+    if (liff.idToken) {
+      if (gateCheckedToken.current === liff.idToken) return;
+      gateCheckedToken.current = liff.idToken;
+      fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
+        .then((r) => r.json())
+        .then((j) => {
+          if (j?.bound && j?.user) {
+            setLineBound(true);
+            setBindGate("bound");
+            seedReporterFromRegistered(j.user);
+            try {
+              localStorage.setItem("cmms_line_bound", "1");
+              localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
+              if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
+              if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
+              if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
+            } catch { /* ignore */ }
+          } else {
+            setLineBound(false);
+            setBindGate("unbound");
+          }
+        })
+        .catch(() => { /* ตรวจไม่ได้ (เน็ตหลุด) — คงสถานะเดิมไว้ */ });
+      return;
+    }
+
+    // ไม่มี ID token: เปิดนอกแอป LINE (หรือ LIFF init ไม่ผ่าน) — ตัดสินหลังรู้ผล session แล้ว
+    if (!sessionChecked) return;
+    const uid = storedLineUid();
+    setBindGate((gate) => (gate === "bound" ? gate : uid ? "unbound" : "webchoice"));
+  }, [liff.status, liff.idToken, liff.lineUserId, sessionChecked]);
 
   const effectiveUid = (() => {
     try {
