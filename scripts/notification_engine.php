@@ -14,7 +14,7 @@
  *   7) Rule engine — ใช้ notification_rules ปรับผู้รับ/ช่องทาง/delay/repeat/dedup
  *   8) Retry การส่งช่องทางภายนอกที่ค้าง (notification_deliveries)
  *
- * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,shutdown,engineering_change,iot,retry]
+ * ใช้: php notification_engine.php [--force] [--module=pm,low_stock,sla,escalation,calibration,inspection,work_permit,document,rca,shutdown,engineering_change,iot,workforce,retry]
  *      --force = ข้าม dedup (ใช้ทดสอบ)
  * exit 0 = ทำงานเสร็จ (ไม่ว่าจะเจอหรือไม่เจอรายการ)
  */
@@ -664,6 +664,44 @@ if (engHas('iot') || engHas('all')) {
         echo "iot device_offline check done (" . count($devs) . " candidates, {$offlineDays}d)\n";
     } catch (Throwable $e) {
         echo "iot device_offline skipped (schema mismatch): " . $e->getMessage() . "\n";
+    }
+}
+
+/* ---------------- Workforce Certification ใกล้หมดอายุ (expiring) ---------------- */
+if (engHas('workforce') || engHas('all')) {
+    $wfDays = max(0, (int)engSetting($pdo, 'workforce_cert_expiry_warn_days', '30'));
+    try {
+        $certs = $pdo->query("
+            SELECT wc.id, wc.user_id, wc.certification_code, wc.certification_name, wc.expiry_date, wc.verified_at AS created_at,
+                   u.full_name
+            FROM worker_certifications wc
+            LEFT JOIN users u ON u.id = wc.user_id
+            WHERE wc.subject_type = 'internal' AND wc.is_active = 1
+              AND wc.expiry_date IS NOT NULL
+              AND wc.expiry_date <= DATE_ADD(CURDATE(), INTERVAL $wfDays DAY)
+              AND wc.expiry_date >= CURDATE()")->fetchAll();
+        foreach ($certs as $c) {
+            $done += engFire($pdo, [
+                'module' => 'workforce', 'event' => 'certification_expiring',
+                'type' => 'workforce', 'priority' => 'medium',
+                'ref_type' => 'worker_certifications', 'ref_id' => (int)$c['id'],
+                'users' => [(int)$c['user_id']],
+                'roles' => engRolesSupervisors(),
+                'channels' => ['app', 'push'],
+                'template' => 'workforce:certification_expiring',
+                'vars' => [
+                    'full_name' => (string)($c['full_name'] ?? ''),
+                    'certification_code' => (string)$c['certification_code'],
+                    'certification_name' => (string)$c['certification_name'],
+                    'expiry_date' => (string)$c['expiry_date'],
+                ],
+                'url' => '/workforce/certifications',
+                'created_at' => (string)($c['created_at'] ?? (date('Y-m-d 00:00:00'))),
+            ]);
+        }
+        echo "workforce certification expiring check done (" . count($certs) . " candidates, {$wfDays}d)\n";
+    } catch (Throwable $e) {
+        echo "workforce certification expiring skipped (schema mismatch): " . $e->getMessage() . "\n";
     }
 }
 
