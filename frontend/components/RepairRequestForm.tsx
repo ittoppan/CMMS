@@ -274,6 +274,7 @@ export default function RepairRequestForm() {
   const [depts, setDepts] = useState<Dept[]>([]);
   const [lineProfile, setLineProfile] = useState<LineProfile>(null);
   const [sessionName, setSessionName] = useState("");
+  const [reporterDeptId, setReporterDeptId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [offlineNow, setOfflineNow] = useState(false);
@@ -338,6 +339,25 @@ export default function RepairRequestForm() {
     const n = (name || "").trim();
     if (!n) return;
     setForm((prev) => (prev.reporterName.trim() ? prev : { ...prev, reporterName: n }));
+  };
+
+  /* เติมข้อมูลผู้แจ้งจากข้อมูลที่ลงทะเบียนไว้ในระบบ (ชื่อ/แผนก/โทร/อีเมล)
+     — ไม่ทับค่าที่ผู้ใช้กรอกเองแล้ว */
+  const seedReporterFromRegistered = (u: {
+    full_name?: string | null;
+    department_id?: number | null;
+    phone?: string | null;
+    email?: string | null;
+  } | null | undefined) => {
+    if (!u) return;
+    setForm((prev) => {
+      const next = { ...prev };
+      if (!prev.reporterName.trim() && u.full_name) next.reporterName = u.full_name;
+      if (!prev.phone.trim() && u.phone) next.phone = u.phone;
+      if (!prev.email.trim() && u.email) next.email = u.email;
+      return next;
+    });
+    if (u.department_id) setReporterDeptId(u.department_id);
   };
 
   const qrPrefillRef = useRef<string | null>(null);
@@ -476,6 +496,12 @@ export default function RepairRequestForm() {
         setBindGate("bound");
         const boundName = localStorage.getItem("cmms_line_full_name");
         if (boundName) setForm((prev) => ({ ...prev, reporterName: boundName || prev.reporterName }));
+        const boundPhone = localStorage.getItem("cmms_line_phone");
+        if (boundPhone) setForm((prev) => ({ ...prev, phone: prev.phone || boundPhone }));
+        const boundEmail = localStorage.getItem("cmms_line_email");
+        if (boundEmail) setForm((prev) => ({ ...prev, email: prev.email || boundEmail }));
+        const boundDept = localStorage.getItem("cmms_line_dept_id");
+        if (boundDept) setReporterDeptId(Number(boundDept));
       } else {
         const storedUid = localStorage.getItem("cmms_line_user_id");
         if (storedUid) {
@@ -486,9 +512,22 @@ export default function RepairRequestForm() {
             if (b) {
               try {
                 localStorage.setItem("cmms_line_bound", "1");
-                const n = localStorage.getItem("cmms_line_full_name");
-                if (n) setForm((prev) => ({ ...prev, reporterName: n || prev.reporterName }));
               } catch { /* ignore */ }
+              // ดึงข้อมูลผู้แจ้งจากที่ลงทะเบียนไว้ในระบบ
+              fetch("/api/v1/line_register.php", { headers: liffAuthHeaders() })
+                .then((r) => r.json())
+                .then((j) => {
+                  if (j?.bound && j?.user) {
+                    seedReporterFromRegistered(j.user);
+                    try {
+                      if (j.user.full_name) localStorage.setItem("cmms_line_full_name", j.user.full_name);
+                      if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
+                      if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
+                      if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
+                    } catch { /* ignore */ }
+                  }
+                })
+                .catch(() => {});
             }
           });
         } else {
@@ -508,6 +547,20 @@ export default function RepairRequestForm() {
                   setSessionName(j.me.full_name || "");
                   seedReporter(j.me.full_name);
                   setBindGate("bound");
+                  // ดึงข้อมูลผู้แจ้งเพิ่มเติม (โทร/อีเมล/แผนก) จาก profile ที่ลงทะเบียนไว้
+                  apiFetch("/api/v1/profile.php")
+                    .then((r) => r.json())
+                    .then((pj) => {
+                      if (pj?.success && pj?.user) {
+                        seedReporterFromRegistered({
+                          full_name: pj.user.full_name,
+                          department_id: pj.user.department_id,
+                          phone: pj.user.phone,
+                          email: pj.user.email,
+                        });
+                      }
+                    })
+                    .catch(() => {});
                 } else if ((window as any).liff?.isInClient?.()) {
                   setBindGate("unbound");
                 } else {
@@ -535,8 +588,14 @@ export default function RepairRequestForm() {
                   if (j?.bound && j?.user) {
                     setLineBound(true);
                     setBindGate("bound");
-                    setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
-                    try { localStorage.setItem("cmms_line_bound", "1"); localStorage.setItem("cmms_line_full_name", j.user.full_name); } catch { /* ignore */ }
+                    seedReporterFromRegistered(j.user);
+                    try {
+                      localStorage.setItem("cmms_line_bound", "1");
+                      localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
+                      if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
+                      if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
+                      if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
+                    } catch { /* ignore */ }
                   } else {
                     setLineBound(false);
                     setBindGate("unbound");
@@ -585,10 +644,13 @@ export default function RepairRequestForm() {
           localStorage.setItem("cmms_line_bound", "1");
           localStorage.setItem("cmms_line_user_id", uid);
           localStorage.setItem("cmms_line_full_name", j.user.full_name || "");
+          if (j.user.phone) localStorage.setItem("cmms_line_phone", j.user.phone);
+          if (j.user.email) localStorage.setItem("cmms_line_email", j.user.email);
+          if (j.user.department_id) localStorage.setItem("cmms_line_dept_id", String(j.user.department_id));
         } catch { /* ignore */ }
         setLineBound(true);
         setBindGate("bound");
-        setForm((prev) => ({ ...prev, reporterName: j.user.full_name || prev.reporterName }));
+        seedReporterFromRegistered(j.user);
         showToast("success", "ผูกบัญชี LINE สำเร็จ");
       } else {
         setBindError(
@@ -672,6 +734,13 @@ const flushQueue = async () => {
       if (d && !form.departmentCode) update("departmentCode", d.code);
     }
   }, [selectedAsset?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ดึงข้อมูลผู้แจ้งจากข้อมูลที่ลงทะเบียนไว้ในระบบ (department/phone/email)
+  useEffect(() => {
+    if (reporterDeptId == null || depts.length === 0) return;
+    const d = depts.find((x) => x.id === reporterDeptId);
+    if (d) setForm((prev) => (prev.departmentCode ? prev : { ...prev, departmentCode: d.code }));
+  }, [reporterDeptId, depts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const canNext = () => {
     if (step === 0) {

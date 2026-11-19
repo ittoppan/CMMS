@@ -70,7 +70,7 @@ try {
             }
 
             $stmt = $pdo->prepare(
-                "SELECT id, employee_code, full_name, role, department_id, phone, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1"
+                "SELECT id, employee_code, full_name, role, department_id, phone, email, avatar_path FROM users WHERE line_user_id = ? AND is_active = 1"
             );
             $stmt->execute([$lineUid]);
             $user = $stmt->fetch();

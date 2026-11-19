@@ -108,20 +108,33 @@ export function isStandalone(): boolean {
   return (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
 }
 
-/** เก็บ event ที่ดักไว้ในระดับ module — กันพลาดตอน event ยิงก่อน React mount */
-let capturedPrompt: BeforeInstallPromptEvent | null = null;
+/** เก็บ event ที่ดักไว้ในระดับ module — กันพลาดตอน event ยิงก่อน React mount.
+ * ใช้ window global เป็นแหล่งความจริงเดียว เพื่อให้ PwaRegister (root layout) ที่ mount
+ * บนทุกหน้าสามารถจับ event ได้ แม้ผู้ใช้ไม่ได้เปิด /install เป็นหน้าแรก */
+const GLOBAL_KEY = "__cmmsInstallPrompt";
+
+function readCapturedPrompt(): BeforeInstallPromptEvent | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { [GLOBAL_KEY]?: BeforeInstallPromptEvent };
+  return w[GLOBAL_KEY] ?? null;
+}
+
+function storeCapturedPrompt(event: BeforeInstallPromptEvent) {
+  if (typeof window === "undefined") return;
+  (window as unknown as { [GLOBAL_KEY]?: BeforeInstallPromptEvent })[GLOBAL_KEY] = event;
+}
 
 if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (event) => {
     // ซ่อน mini-infobar ของ Chrome — ให้ปุ่มในหน้า /install เป็น CTA เดียว
     event.preventDefault();
-    capturedPrompt = event as BeforeInstallPromptEvent;
+    storeCapturedPrompt(event as BeforeInstallPromptEvent);
     window.dispatchEvent(new Event(INSTALL_PROMPT_EVENT));
   });
 }
 
 export function hasInstallPrompt(): boolean {
-  return capturedPrompt !== null;
+  return readCapturedPrompt() !== null;
 }
 
 /** subscribe event "ติดตั้งได้แล้ว" — คืนฟังก์ชัน unsubscribe */
@@ -133,12 +146,13 @@ export function onInstallPromptReady(cb: () => void): () => void {
 
 /** เรียก prompt ติดตั้งจริง — ใช้ได้ครั้งเดียวต่อ event */
 export async function promptInstall(): Promise<InstallPromptResult> {
-  const event = capturedPrompt;
+  const event = readCapturedPrompt();
   if (!event) return "unavailable";
   try {
     await event.prompt();
     const choice = await event.userChoice;
-    capturedPrompt = null;
+    // เคลียร์หลังใช้ (event ใช้ได้ครั้งเดียว)
+    delete (window as unknown as { [key: string]: unknown })[GLOBAL_KEY];
     return choice.outcome === "accepted" ? "accepted" : "dismissed";
   } catch {
     return "error";

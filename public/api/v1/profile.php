@@ -29,7 +29,7 @@ try {
     // ---------- GET: โปรไฟล์ปัจจุบัน ----------
     if ($method === 'GET') {
         $stmt = $pdo->prepare('SELECT id, username, email, full_name, phone, role, position, employee_code,
-                                      avatar, avatar_path, line_user_id, lang, created_at
+                                      department_id, avatar, avatar_path, line_user_id, lang, created_at
                                FROM users WHERE id = ?');
         $stmt->execute([$userId]);
         $u = $stmt->fetch();

@@ -288,6 +288,18 @@ export default function InstallPage() {
                         ใช้ Firefox อยู่หรือไม่? เบราว์เซอร์นี้ยังติดตั้ง PWA ไม่ได้ — ใช้ Chrome หรือ Edge แทน
                         (หรือสแกน QR ด้านล่างเพื่อติดตั้งบนมือถือ)
                       </p>
+                      <p className="text-sm text-muted-foreground">
+                        ยังไม่เห็นไอคอนติดตั้ง? Chrome จะแสดงตัวเลือกติดตั้งหลังใช้งานหน้านี้สักครู่
+                        — ลองคลิก/เลื่อนหน้านี้ แล้วกดปุ่มด้านล่างเพื่อตรวจสอบอีกครั้ง
+                      </p>
+                      <Button size="lg" onClick={installNow} loading={busy} loadingText="กำลังตรวจสอบ…">
+                        ลองเปิดหน้าต่างติดตั้ง
+                      </Button>
+                      {promptResult === "error" && (
+                        <p className="text-sm text-muted-foreground">
+                          ยังไม่พร้อม — ใช้งานหน้านี้อีกสักครู่ แล้วลองใหม่ หรือใช้เมนู ⋮ → “บันทึกและแชร์” → “ติดตั้งแอป”
+                        </p>
+                      )}
                     </VStack>
                   )}
                 </>

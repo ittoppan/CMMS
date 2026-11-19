@@ -12,6 +12,22 @@
   "background_color": "#0068B5",
   "theme_color": "#0068B5",
   "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "หน้าเข้าสู่ระบบ CMMS-TOPPAN (เดสก์ท็อป)"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "หน้าเข้าสู่ระบบ CMMS-TOPPAN (มือถือ)"
+    }
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
