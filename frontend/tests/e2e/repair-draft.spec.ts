@@ -23,7 +23,10 @@ const PHONE = "0812345678";
 // หน้าจอแนว LIFF (มือถือ) — toast อยู่เหนือ bottom bar ไม่บังปุ่มถัดไป
 test.use({ viewport: { width: 420, height: 900 }, serviceWorkers: "block" });
 
-async function openBoundForm(page: Page) {
+const REPAIR_PATH = "/repair/request";
+
+/** เตรียม context ให้ฟอร์มแสดงโดยไม่ต้องล็อกอิน (ยังไม่ navigate) */
+async function primeBoundPage(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("cmms_line_bound", "1");
     localStorage.setItem("cmms_line_user_id", "U_e2e_repair_draft");
@@ -40,7 +43,11 @@ async function openBoundForm(page: Page) {
       body: JSON.stringify([{ id: 1, code: "EN", name: "แผนกซ่อมบำรุง" }]),
     })
   );
-  await page.goto("/repair/request");
+}
+
+async function openBoundForm(page: Page) {
+  await primeBoundPage(page);
+  await page.goto(REPAIR_PATH);
   await expect(page.getByText("เลือกเครื่องจักร / อุปกรณ์")).toBeVisible();
 }
 
@@ -124,6 +131,54 @@ test("กรอกฟอร์มแล้ว reload — ร่างถูก�
   await page.getByRole("button", { name: /ย้อนกลับ/ }).click();
   await expect(page.getByPlaceholder(/พิมพ์ชื่อ\/รหัสเครื่องจักร/)).toHaveValue(MACHINE_NAME);
   await expect(page.locator("button.cmms-option-row").first()).toHaveClass(/selected/);
+});
+
+/** ร่างที่ค้างอยู่ขั้นยืนยัน แต่ข้อมูลผู้แจ้ง (ชื่อ/แผนก/เบอร์) ยังขาด */
+const STALE_FORM = {
+  machineCode: "__other__",
+  machineOther: MACHINE_NAME,
+  machineStatus: "breakdown",
+  jobType: "Machinery",
+  jobDescription: "Maintenance",
+  symptoms: "อาการที่กรอกไว้ในร่างเดิม",
+  lotNo: "",
+  reporterName: "",
+  departmentCode: "",
+  office: "โรงงานอมตะซิตี้ (ระยอง)",
+  phone: "",
+  email: "",
+  safetyRelated: false,
+  photos: [],
+  video: "",
+  attachment: "",
+  isUrgent: false,
+};
+
+test("ร่างค้างขั้นยืนยันแต่ข้อมูลผู้แจ้งขาด — เปิดกลับไปขั้นที่ขาด", async ({ page }) => {
+  // จำลองร่างที่บันทึกไว้ตอนอยู่ขั้นยืนยัน แล้วข้อมูลผู้แจ้งหาย/ถูกแก้ให้ขาด
+  await page.addInitScript((draft) => {
+    localStorage.setItem("cmms_repair_draft_v1", JSON.stringify(draft));
+  }, { savedAt: Date.now(), step: 3, ownerLineUserId: "U_e2e_repair_draft", form: STALE_FORM });
+
+  await primeBoundPage(page);
+  await page.goto(REPAIR_PATH);
+
+  await expect(page.getByText(/กู้คืนร่างที่กรอกไว้/)).toBeVisible();
+  // ต้องเปิดที่ขั้น "ผู้แจ้ง & รูป" (ขั้น 3) ไม่ใช่ข้ามไปขั้นยืนยัน
+  await expect(page.locator(".cmms-bottom-meta")).toContainText("3/4");
+  await expect(page.getByText("ข้อมูลผู้แจ้ง")).toBeVisible();
+  await expect(page.getByText("ตรวจสอบก่อนส่ง")).toHaveCount(0);
+
+  // เติมส่วนที่ขาดแล้วไปต่อได้ — ตรรกะเดียวกับตอนกู้คืน (canAdvanceFrom)
+  await dismissToasts(page);
+  await page.getByPlaceholder("เช่น สมชาย ใจดี").fill(REPORTER);
+  await page.getByPlaceholder("เช่น 083-0000000").fill(PHONE);
+  await page.getByRole("combobox").first().click();
+  await page.getByRole("option").filter({ hasNotText: "เลือกแผนก" }).first().click();
+  await dismissToasts(page);
+  await page.getByRole("button", { name: /ถัดไป · ยืนยัน/ }).click();
+  await expect(page.getByText("ตรวจสอบก่อนส่ง")).toBeVisible();
+  await expect(page.getByText(MACHINE_NAME).first()).toBeVisible();
 });
 
 test("ส่งแจ้งซ่อมสำเร็จแล้วร่างถูกล้าง", async ({ page }) => {
