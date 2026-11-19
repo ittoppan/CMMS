@@ -182,7 +182,7 @@ export default function FormRunPage() {
           <div key={i} className="cmms-form-block">
             {level === 1 && <h2 className="text-lg font-semibold tracking-tight text-foreground">{f.label}</h2>}
             {level === 2 && <h3 className="text-base font-semibold text-foreground">{f.label}</h3>}
-            {level >= 3 && <h4 className="text-sm font-medium text-foreground">{f.label}</h4>}
+            {level >= 3 && <h4 className="text-sm font-semibold text-foreground">{f.label}</h4>}
           </div>
         );
       }
