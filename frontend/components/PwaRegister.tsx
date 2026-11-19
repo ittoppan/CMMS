@@ -113,6 +113,21 @@ export default function PwaRegister() {
       window.location.reload();
     });
 
+    // Web Push: ถ้า SW แจ้งว่า subscription rotate แล้ว sync ไม่สำเร็จ → re-subscribe ใหม่
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      const data = event.data as { type?: string } | null;
+      if (!data || data.type !== "PUSH_SUBSCRIPTION_CHANGED") return;
+      (async () => {
+        try {
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (!reg) return;
+          await registerPush(reg);
+        } catch (err) {
+          console.warn("[PWA] push re-subscribe after rotation failed:", err);
+        }
+      })();
+    });
+
     const showUpdateAvailable = (worker: ServiceWorker) => {
       if (refreshingRef.current) return;
       waitingWorkerRef.current = worker;

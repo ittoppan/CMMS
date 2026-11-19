@@ -88,6 +88,15 @@ class NotificationCenterService
                 UNIQUE KEY uq_pref (user_id, type, channel)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+            // Quiet Hours — per-user time window ที่ระงับการส่งช่องทางภายนอก (in-app ยังสร้าง)
+            $pdo->exec("CREATE TABLE IF NOT EXISTS user_quiet_hours (
+                user_id INT NOT NULL PRIMARY KEY,
+                enabled TINYINT(1) NOT NULL DEFAULT 0,
+                start_time VARCHAR(5) NOT NULL DEFAULT '22:00',
+                end_time VARCHAR(5) NOT NULL DEFAULT '07:00',
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
             $pdo->exec("CREATE TABLE IF NOT EXISTS notification_rules (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(120) NOT NULL,
@@ -294,6 +303,12 @@ class NotificationCenterService
                 if (!isset($meta[$uid])) continue;
                 $ch = self::channelsForUser($pdo, $uid, $type, $channels);
                 if (!$ch) continue;
+
+                // Quiet Hours: ถ้า user อยู่ในช่วง quiet hours → ระงับช่องทางภายนอก (เก็บเฉพาะ in-app)
+                if (self::isInQuietHours($pdo, $uid)) {
+                    $ch = array_values(array_intersect($ch, ['app']));
+                    if (!$ch) continue;
+                }
 
                 // inbox row (app) — สร้างเสมอ
                 $pdo->prepare('INSERT INTO notifications (user_id, type, module, event, title, message, priority, ref_type, ref_id, url, payload, source_event_id)
@@ -577,6 +592,56 @@ class NotificationCenterService
             }
         }
         return $n;
+    }
+
+    /* ============================================================
+     * QUIET HOURS (per-user)
+     * ============================================================ */
+
+    /** ดึงการตั้งค่า Quiet Hours ของ user (default: disabled, 22:00-07:00) */
+    public static function getQuietHours(PDO $pdo, int $userId): array
+    {
+        self::install($pdo);
+        $st = $pdo->prepare('SELECT enabled, start_time, end_time FROM user_quiet_hours WHERE user_id = ?');
+        $st->execute([$userId]);
+        $r = $st->fetch(PDO::FETCH_ASSOC);
+        if (!$r) {
+            return ['enabled' => false, 'start_time' => '22:00', 'end_time' => '07:00'];
+        }
+        return [
+            'enabled' => (int)$r['enabled'] === 1,
+            'start_time' => (string)$r['start_time'],
+            'end_time' => (string)$r['end_time'],
+        ];
+    }
+
+    /** บันทึก Quiet Hours ของ user */
+    public static function saveQuietHours(PDO $pdo, int $userId, bool $enabled, string $start, string $end): void
+    {
+        self::install($pdo);
+        // validate HH:MM
+        if (!preg_match('/^\d{2}:\d{2}$/', $start)) $start = '22:00';
+        if (!preg_match('/^\d{2}:\d{2}$/', $end)) $end = '07:00';
+        $st = $pdo->prepare('INSERT INTO user_quiet_hours (user_id, enabled, start_time, end_time)
+                             VALUES (?, ?, ?, ?)
+                             ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), start_time = VALUES(start_time), end_time = VALUES(end_time)');
+        $st->execute([$userId, $enabled ? 1 : 0, $start, $end]);
+    }
+
+    /** ตรวจสอบว่า user อยู่ในช่วง Quiet Hours ตอนนี้หรือไม่ */
+    public static function isInQuietHours(PDO $pdo, int $userId): bool
+    {
+        $qh = self::getQuietHours($pdo, $userId);
+        if (!$qh['enabled']) return false;
+        $now = date('H:i');
+        $start = $qh['start_time'];
+        $end = $qh['end_time'];
+        // cross-midnight: start > end (e.g. 22:00-07:00)
+        if ($start > $end) {
+            return $now >= $start || $now < $end;
+        }
+        // same-day: start <= end
+        return $now >= $start && $now < $end;
     }
 
     /* ============================================================

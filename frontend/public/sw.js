@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v96-20261119-1142";
+const SW_VERSION = "v99-20261119-1222";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -245,5 +245,40 @@ self.addEventListener("notificationclick", (event) => {
         }
         return clients.openWindow(url);
       })
+  );
+});
+
+/* ---------- Web Push: subscription rotation / refresh ----------
+ * เมื่อเบราว์เซอร์ rotate endpoint (pushsubscriptionchange) ให้ re-subscribe
+ * ด้วย applicationServerKey เดิม แล้ว sync กับ backend; ถ้าทำไม่ได้ให้แจ้ง client
+ * เพื่อให้ PwaRegister ลอง re-subscribe ใหม่ (ต้องการ VAPID key จาก backend)
+ */
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      console.log("[SW] pushsubscriptionchange event", event);
+      try {
+        let sub = event.newSubscription || null;
+        if (!sub && event.oldSubscription && event.oldSubscription.options) {
+          sub = await self.registration.pushManager.subscribe(event.oldSubscription.options);
+        }
+        if (!sub) throw new Error("no new subscription available");
+        const subJson = sub.toJSON();
+        const res = await fetch("/api/v1/push_subscribe.php", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ endpoint: sub.endpoint, keys: subJson.keys }),
+        });
+        if (!res.ok) throw new Error("backend sync failed: " + res.status);
+        console.log("[SW] pushsubscriptionchange synced to backend", sub.endpoint);
+      } catch (err) {
+        console.warn("[SW] pushsubscriptionchange failed:", err);
+        const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+        for (const client of list) {
+          client.postMessage({ type: "PUSH_SUBSCRIPTION_CHANGED" });
+        }
+      }
+    })()
   );
 });

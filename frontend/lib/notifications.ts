@@ -148,6 +148,25 @@ export async function savePreferences(rows: PrefRow[]): Promise<number> {
   return Number(j?.updated ?? 0);
 }
 
+export interface QuietHours {
+  enabled: boolean;
+  start_time: string;
+  end_time: string;
+}
+
+export async function fetchQuietHours(): Promise<QuietHours> {
+  return apiJson<QuietHours>("/api/v1/notifications.php?action=quiet_hours");
+}
+
+export async function saveQuietHours(qh: QuietHours): Promise<QuietHours> {
+  const j = await apiJson<{ success: boolean; quiet_hours: QuietHours }>("/api/v1/notifications.php?action=quiet_hours", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(qh),
+  });
+  return j?.quiet_hours ?? qh;
+}
+
 export async function fetchRules(): Promise<NotifRule[]> {
   const j = await apiJson<{ items: NotifRule[] }>("/api/v1/notifications.php?action=rules");
   return j?.items ?? [];

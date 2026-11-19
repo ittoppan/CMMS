@@ -12,9 +12,9 @@ import { Alert } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { CheckCheck, Info, Settings2, BellRing } from "lucide-react";
+import { CheckCheck, Info, Settings2, BellRing, Clock } from "lucide-react";
 import Link from "next/link";
-import { fetchMeta, fetchPreferences, savePreferences, dispatchNotificationsChanged, type NotifMeta } from "@/lib/notifications";
+import { fetchMeta, fetchPreferences, savePreferences, fetchQuietHours, saveQuietHours, dispatchNotificationsChanged, type NotifMeta, type QuietHours } from "@/lib/notifications";
 
 const CHANNEL_LABEL: Record<string, { th: string; en: string; note: string }> = {
   app: { th: "ในแอป (Inbox)", en: "In-App", note: "แจ้งในกล่องข้อความ + กระดิ่ง" },
@@ -44,11 +44,13 @@ export default function NotificationPrefsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
+  const [quietHours, setQuietHours] = useState<QuietHours>({ enabled: false, start_time: "22:00", end_time: "07:00" });
+  const [qhSaving, setQhSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        const [m, p] = await Promise.all([fetchMeta(), fetchPreferences()]);
+        const [m, p, qh] = await Promise.all([fetchMeta(), fetchPreferences(), fetchQuietHours()]);
         setMeta(m);
         const initial: Record<string, Record<string, boolean>> = {};
         for (const t of m.types) {
@@ -56,6 +58,7 @@ export default function NotificationPrefsPage() {
           for (const c of m.channels) initial[t][c] = p.rows[t]?.[c] ?? true;
         }
         setMatrix(initial);
+        setQuietHours(qh);
       } catch {
         setError("ไม่สามารถโหลดการตั้งค่าการแจ้งเตือนได้");
       }
@@ -97,6 +100,21 @@ export default function NotificationPrefsPage() {
     setSaving(false);
   };
 
+  const handleSaveQuietHours = async () => {
+    setQhSaving(true);
+    setError(null);
+    setSavedMsg("");
+    try {
+      const saved = await saveQuietHours(quietHours);
+      setQuietHours(saved);
+      setSavedMsg("บันทึก Quiet Hours แล้ว");
+      setTimeout(() => setSavedMsg(""), 5000);
+    } catch {
+      setError("บันทึก Quiet Hours ไม่สำเร็จ");
+    }
+    setQhSaving(false);
+  };
+
   const typeDot: Record<string, string> = useMemo(() => ({
     work_order: "var(--cmms-primary)", priority: "var(--cmms-danger)",
     sla: "var(--cmms-warning)", pm: "var(--cmms-info)", inspection: "var(--cmms-success)",
@@ -134,6 +152,58 @@ export default function NotificationPrefsPage() {
       }
     >
       <div className="space-y-4 pb-24 lg:pb-8">
+        {/* Quiet Hours */}
+        <Card>
+          <CardContent className="space-y-4 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--cmms-info-light)] text-[var(--cmms-info)]">
+                <Clock size={18} strokeWidth={1.75} aria-hidden="true" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="text-base font-semibold">Quiet Hours (ช่วงเวลาเงียบ)</h3>
+                <p className="text-sm text-muted-foreground">
+                  ในช่วงเวลานี้ระบบจะระงับการส่งแจ้งเตือนผ่านช่องทางภายนอก (LINE, Email, Telegram, Teams, ntfy, Web Push) — แต่ยังสร้างข้อความในกล่องแจ้งเตือน (Inbox) ตามปกติ
+                </p>
+              </div>
+              <Switch
+                checked={quietHours.enabled}
+                onCheckedChange={(on) => setQuietHours((q) => ({ ...q, enabled: on }))}
+                aria-label="เปิด Quiet Hours"
+              />
+            </div>
+            {quietHours.enabled && (
+              <div className="flex flex-wrap items-center gap-4">
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-muted-foreground">เริ่ม</span>
+                  <input
+                    type="time"
+                    value={quietHours.start_time}
+                    onChange={(e) => setQuietHours((q) => ({ ...q, start_time: e.target.value }))}
+                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-muted-foreground">สิ้นสุด</span>
+                  <input
+                    type="time"
+                    value={quietHours.end_time}
+                    onChange={(e) => setQuietHours((q) => ({ ...q, end_time: e.target.value }))}
+                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  />
+                </label>
+                <span className="text-xs text-muted-foreground">
+                  (ข้ามเที่ยงคืนได้ เช่น 22:00 → 07:00)
+                </span>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button onClick={handleSaveQuietHours} disabled={qhSaving} size="sm">
+                {qhSaving ? "กำลังบันทึก..." : "บันทึก Quiet Hours"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {(error || savedMsg) && (
           <Alert
             variant={error ? "danger" : "success"}

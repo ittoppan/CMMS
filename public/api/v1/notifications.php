@@ -57,6 +57,10 @@ try {
                     echo json_encode(NotificationCenterService::preferences($pdo, $uid), JSON_UNESCAPED_UNICODE);
                     break;
 
+                case 'quiet_hours':
+                    echo json_encode(NotificationCenterService::getQuietHours($pdo, $uid), JSON_UNESCAPED_UNICODE);
+                    break;
+
                 case 'push_status':
                     $st = $pdo->prepare('SELECT id, endpoint, created_at, updated_at FROM push_subscriptions WHERE user_id = ? ORDER BY updated_at DESC');
                     $st->execute([$uid]);
@@ -141,6 +145,17 @@ try {
                     }
                     $n = NotificationCenterService::savePreferences($pdo, $uid, $d['rows']);
                     echo json_encode(['success' => true, 'updated' => $n], JSON_UNESCAPED_UNICODE);
+                    break;
+                }
+
+                case 'quiet_hours': {
+                    $d = json_decode(file_get_contents('php://input'), true);
+                    if (!is_array($d)) $d = [];
+                    $enabled = !empty($d['enabled']);
+                    $start = (string)($d['start_time'] ?? '22:00');
+                    $end = (string)($d['end_time'] ?? '07:00');
+                    NotificationCenterService::saveQuietHours($pdo, $uid, $enabled, $start, $end);
+                    echo json_encode(['success' => true, 'quiet_hours' => NotificationCenterService::getQuietHours($pdo, $uid)], JSON_UNESCAPED_UNICODE);
                     break;
                 }
 
