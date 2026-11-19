@@ -52,6 +52,7 @@ import SupportContactStrip from "./SupportContactStrip";
 import { tliff, useLiffLang } from "@/lib/i18n-liff";
 import { runQueueMigrationOnce, exposeQueueMigration } from "@/lib/queue-migration";
 import { freshLiffIdToken, idTokenExpiresAt, isLiffClientBrowser, useLiffSession } from "@/lib/liff-session";
+import { clearRepairDraft, hasDraftContent, loadRepairDraft, saveRepairDraft } from "@/lib/repair-draft";
 import { serverResponds } from "@/lib/server-check";
 import { UNBOUND_BODY, UNBOUND_STEPS, UNBOUND_TITLE, VERIFY_FAILED_BODY, VERIFY_FAILED_TITLE, bindErrorMessage } from "@/lib/liff-bind-copy";
 import { useSupportContact } from "@/lib/use-support-contact";
@@ -186,6 +187,28 @@ const STEPS = [
   { key: "reporter", label: "ผู้แจ้ง & รูป", iconName: "user" },
   { key: "confirm", label: "ยืนยัน", iconName: "circle-check" },
 ];
+
+/**
+ * ขั้นที่ปลอดภัยตอนกู้คืนร่าง — ไม่กระโดดข้ามขั้นที่ข้อมูลยังไม่ครบ
+ * (ตรรกะเดียวกับ canNext() ด้านล่าง: ถ้าข้อมูลขั้นไหนขาด ให้เปิดที่ขั้นนั้น)
+ */
+function resumeStepFor(form: {
+  machineCode: string;
+  machineOther: string;
+  machineStatus: string;
+  jobType: string;
+  jobDescription: string;
+  symptoms: string;
+  reporterName: string;
+  departmentCode: string;
+  phone: string;
+}): number {
+  if (!(form.machineCode || form.machineOther.trim()) || !form.machineStatus) return 0;
+  if (!form.jobType || !form.jobDescription || form.symptoms.trim().length < 5) return 1;
+  const phoneOk = /^[0-9+\-()\s]{9,}$/.test(form.phone.trim());
+  if (!form.reporterName.trim() || !form.departmentCode || !phoneOk) return 2;
+  return 3;
+}
 
 /** ย่อรูปให้พอดีกับ LINE แล้วคืน data URI (max 1000px, JPEG 0.72) */
 function resizeImageToDataUri(file: File, maxSize = 1000): Promise<string> {
@@ -752,6 +775,46 @@ const flushQueue = async (notifyOnAuthFail = false) => {
     if (d) setForm((prev) => (prev.departmentCode ? prev : { ...prev, departmentCode: d.code }));
   }, [reporterDeptId, depts]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ---------- ร่างฟอร์มในเครื่อง (lib/repair-draft) ----------
+     token LIFF อายุ ~1 ชม.: เปิดลิงก์จาก LINE ใหม่แล้วไม่ต้องกรอกเครื่องจักร/อาการ/รูปซ้ำ
+     ร่างเก็บใน localStorage ของเครื่องนี้เท่านั้น (ไม่ขึ้นเซิร์ฟเวอร์) และผูกกับ LINE user id เจ้าของร่าง */
+  const draftRestoredRef = useRef(false);
+  // true เมื่ออ่านร่างเสร็จแล้ว — กัน effect บันทึกด้านล่างลบร่างทิ้งก่อนที่ค่าจะถูกกู้คืน
+  const [draftHydrated, setDraftHydrated] = useState(false);
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+    const draft = loadRepairDraft();
+    if (draft) {
+      // ทับค่าที่ระบบเติมให้ (ชื่อ/เบอร์จากบัญชี) ด้วยค่าที่ผู้ใช้กรอกค้างไว้
+      setForm((prev) => ({ ...prev, ...draft.form }));
+      setStep(Math.min(draft.step, resumeStepFor(draft.form)));
+      showToast("info", "กู้คืนร่างที่กรอกไว้แล้ว — กรอกต่อได้เลย");
+    }
+    setDraftHydrated(true);
+  }, [showToast]);
+
+  /* เก็บร่างตามที่ผู้ใช้กรอก (debounce กันเขียน localStorage ทุกตัวอักษร) */
+  const draftWarnedRef = useRef(false);
+  useEffect(() => {
+    if (!draftHydrated || submitted) return;
+    const timer = setTimeout(() => {
+      if (!hasDraftContent(form)) {
+        clearRepairDraft();
+        return;
+      }
+      const result = saveRepairDraft({ step, form });
+      if (result === "failed" && !draftWarnedRef.current) {
+        draftWarnedRef.current = true;
+        showToast("error", "บันทึกร่างในเครื่องไม่สำเร็จ — อย่าปิดหน้านี้ก่อนกดส่งงาน");
+      } else if (result === "without_photos" && !draftWarnedRef.current) {
+        draftWarnedRef.current = true;
+        showToast("info", "พื้นที่เก็บร่างในเครื่องเต็ม — เก็บข้อความไว้แล้ว แต่ต้องแนบรูปใหม่");
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [form, step, submitted, draftHydrated, showToast]);
+
   const canNext = () => {
     if (step === 0) {
       const hasMachine = isOtherMachine ? true : !!selectedAsset;
@@ -894,8 +957,8 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       }
       const expiresAt = token ? idTokenExpiresAt(token) : 0;
       if (needsLiff && navigator.onLine && expiresAt > 0 && expiresAt * 1000 <= Date.now()) {
-        // ระบบไม่เก็บร่างฟอร์มไว้ (ไม่มี draft persistence) — เปิดหน้าใหม่แล้วต้องกรอกใหม่
-        showToast("error", "เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง (ข้อมูลที่กรอกไว้จะหาย ต้องกรอกใหม่)");
+        // ร่างฟอร์มถูกเก็บไว้ในเครื่องแล้ว (lib/repair-draft) — เปิดลิงก์ใหม่แล้วกรอกต่อได้
+        showToast("error", "เซสชัน LINE หมดอายุแล้ว — ปิดหน้านี้แล้วเปิดลิงก์แจ้งซ่อมจาก LINE อีกครั้ง (ร่างที่กรอกไว้ยังอยู่ เปิดมาแล้วกรอกต่อได้เลย)");
         setSubmitting(false);
         return;
       }
@@ -910,6 +973,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       } catch {
         try {
           await queueAdd(payload);
+          clearRepairDraft(); // งานถูกเก็บในคิว offline แล้ว — ไม่ต้องเก็บร่างซ้ำ
           setOfflineQueued((n) => n + 1);
           try { window.dispatchEvent(new Event("cmms:offline-queued")); } catch { /* ignore */ }
           setSubmitted(true);
@@ -923,6 +987,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
       }
       const json = await res.json();
       if (json.success || json.id) {
+        clearRepairDraft(); // ส่งสำเร็จแล้ว — ล้างร่างในเครื่อง
         setCreatedWoNo(json.work_order_no || `WO-${json.id}`);
         setSubmitted(true);
         showToast("success", "ส่งแจ้งซ่อมสำเร็จ");
@@ -959,6 +1024,7 @@ const flushQueue = async (notifyOnAuthFail = false) => {
             </Button>
             <Button variant="secondary" className="w-full" onClick={() => {
               setSubmitted(false); setStep(0);
+              clearRepairDraft();
               setForm({ machineCode: "", machineOther: "", machineStatus: "", jobType: "", jobDescription: "", symptoms: "", lotNo: "", reporterName: sessionName, departmentCode: "", office: OFFICES[0], phone: "", email: "", safetyRelated: false, photos: [], video: "", attachment: "", isUrgent: false });
             }}>
               แจ้งซ่อมอีก

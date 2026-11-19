@@ -75,7 +75,11 @@ export function useLiffFetch<T>({
   }, [resolved, liffWaitMs]);
 
   const ready = resolved || waitedEnough;
-  const token = withToken ? session.idToken : "";
+  // dependency เป็นแค่ "มี token ใน store หรือยัง" — ไม่ใช่ค่าตัว token
+  // เพราะ effect นี้เรียก freshLiffIdToken() ซึ่งประกาศ token ใหม่ลง store ได้ ถ้าเอาค่า token
+  // มาเป็น dependency ด้วยจะกลายเป็นวงจร: ยิง → ประกาศ token → rerun → ยิงซ้ำ (ลูป)
+  // และไม่ต้อง rerun เมื่อ token ต่ออายุกลางคัน เพราะรอบถัดไปขอสดอยู่แล้ว
+  const hasToken = withToken && Boolean(session.idToken);
   const target = ready ? url : null;
 
   useEffect(() => {
@@ -124,7 +128,7 @@ export function useLiffFetch<T>({
       alive = false;
       ctrl.abort();
     };
-  }, [target, token, reloadKey, errorMessage, withToken]);
+  }, [target, hasToken, reloadKey, errorMessage, withToken]);
 
   const reload = useCallback(() => setReloadKey((n) => n + 1), []);
 

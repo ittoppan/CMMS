@@ -32,6 +32,14 @@ const listeners = new Set<() => void>();
 
 /** LiffBridge เรียกหลัง init/profile เสร็จ (merge เฉพาะฟิลด์ที่ส่งมา) */
 export function publishLiffSession(patch: Partial<LiffSession>): void {
+  // ค่าเดิมอยู่แล้วไม่ต้องแจ้ง listener — กัน re-render ฟรี (และกัน effect ที่อิง store นี้
+  // ถูกกระตุ้นซ้ำเมื่อมีคนเรียก publish ด้วยค่าเดิม เช่นตอนขอ token สด)
+  const keys = Object.keys(patch) as (keyof LiffSession)[];
+  let changed = false;
+  for (const key of keys) {
+    if (patch[key] !== session[key]) { changed = true; break; }
+  }
+  if (!changed) return;
   session = { ...session, ...patch };
   listeners.forEach((listener) => listener());
 }
