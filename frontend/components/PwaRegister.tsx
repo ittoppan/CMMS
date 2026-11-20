@@ -23,14 +23,17 @@ export default function PwaRegister() {
 
   const applyUpdate = () => {
     if (refreshingRef.current) return;
-    const w = waitingWorkerRef.current;
-    if (!w) {
-      // ไม่มี waiting worker → reload ตรง ๆ
-      window.location.reload();
-      return;
-    }
     refreshingRef.current = true;
-    w.postMessage({ type: "SKIP_WAITING" });
+    const w = waitingWorkerRef.current;
+    if (w) {
+      try { w.postMessage({ type: "SKIP_WAITING" }); } catch { /* ignore */ }
+    }
+    // ถ้า SW ไม่ตอบ controllerchange (เช่น worker ถูก activate ไปแล้ว) ให้ reload เอง
+    window.setTimeout(() => {
+      if (refreshingRef.current) window.location.reload();
+    }, 1500);
+    // ไม่มี waiting worker → reload ตรง ๆ
+    if (!w) window.location.reload();
   };
 
   const handleUpdateNow = () => {

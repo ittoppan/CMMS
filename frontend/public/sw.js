@@ -11,7 +11,7 @@
  *    SW ใหม่ activate → ล้าง cache เก่าทั้งหมด (activate handler) → พนักงานเห็นของใหม่ทันที
  *    โดยไม่ต้องล้าง cache เอง (PwaRegister reload หน้าอัตโนมัติผ่าน SKIP_WAITING)
  */
-const SW_VERSION = "v124-20261120-0600";
+const SW_VERSION = "v125-20261120-0715";
 const SHELL_CACHE = `cmms-tpt-shell-${SW_VERSION}`;
 const ASSET_CACHE = `cmms-tpt-assets-${SW_VERSION}`;
 const API_CACHE = `cmms-tpt-api-${SW_VERSION}`;
@@ -85,7 +85,11 @@ self.addEventListener("install", (event) => {
       );
       // (v40) precache API ออกจาก install — บาง endpoint ค้างใน SW-fetch ทำให้ SW ติด installing ตลอดกาล
       // API cache ยังเก็บแบบ network-first + fallback ที่ fetch handler เหมือนเดิม
-      await self.skipWaiting();
+      // อัปเดต: activate ทันทีเฉพาะครั้งแรก (ไม่มี SW เก่า) — ถ้าเป็นอัปเดตให้รอ client ส่ง SKIP_WAITING
+      // เพื่อให้ PwaRegister ควบคุมเวลา reload (กันข้อมูลที่กำลังกรอกสูญหาย) และปุ่ม "รีโหลดตอนนี้" ทำงานได้
+      if (!self.registration.active) {
+        await self.skipWaiting();
+      }
     })()
   );
 });
