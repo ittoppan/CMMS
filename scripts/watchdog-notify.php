@@ -45,6 +45,17 @@ if ($sysAlertsOn === '1') {
     }
 }
 
+// อีเมลแจ้งผู้ดูแลระบบตามเทมเพลต "การแจ้งเตือนระบบ" (เปิด/ปิดที่หน้าตั้งค่าการแจ้งเตือน)
+try {
+    emailNotifyAdmins(getDb(), 'system', 'alert', [
+        'system_title' => 'สถานะระบบ / กระบวนการ',
+        'system_message' => $message,
+        'alert_time' => date('Y-m-d H:i'),
+    ], '');
+} catch (Throwable $e) {
+    // ไม่บล็อก exit code
+}
+
 // แจ้งเตือนแอดมินผ่าน Telegram ด้วย (สถานะระบบ/กระบวนการ)
 try {
     telegramAdminAlert('สถานะระบบ / กระบวนการ', $message, '', 'WARN');

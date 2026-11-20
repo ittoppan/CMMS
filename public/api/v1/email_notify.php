@@ -21,19 +21,29 @@ if (!in_array(($_SERVER['REQUEST_METHOD'] ?? 'GET'), ['GET', 'HEAD', 'OPTIONS'],
 
 // Map UI template keys → (module, event)
 const EMAIL_TPL_MAP = [
-    'email_tpl_breakdown'   => ['repair', 'created'],
-    'email_tpl_pm_overdue'  => ['pm_am', 'due_soon'],
-    'email_tpl_low_stock'   => ['inventory', 'low_stock'],
-    'email_tpl_completed'   => ['repair', 'resolved'],
+    'email_tpl_breakdown'     => ['repair', 'created'],
+    'email_tpl_work_assign'   => ['repair', 'assigned'],
+    'email_tpl_spare_request' => ['inventory', 'spare_request'],
+    'email_tpl_pm_overdue'    => ['pm_am', 'due_soon'],
+    'email_tpl_pm_due_soon'   => ['pm_am', 'due_soon_reminder'],
+    'email_tpl_low_stock'     => ['inventory', 'low_stock'],
+    'email_tpl_completed'     => ['repair', 'resolved'],
     'email_tpl_sage_approval' => ['sage', 'approval'],
+    'email_tpl_weekly_report' => ['report', 'weekly'],
+    'email_tpl_system_alerts' => ['system', 'alert'],
 ];
 
 const EMAIL_TPL_LABELS = [
-    'email_tpl_breakdown'   => ['label' => 'แจ้งซ่อมด่วน (Breakdown)', 'icon' => '🚨', 'hint' => 'ส่งเมื่อมีใบแจ้งซ่อมฉุกเฉิน / เครื่องหยุดทำงาน'],
-    'email_tpl_pm_overdue'  => ['label' => 'แผน PM เกินกำหนด', 'icon' => '📋', 'hint' => 'ส่งเมื่อแผน PM ยังไม่เสร็จเกินกำหนดชำระ'],
-    'email_tpl_low_stock'   => ['label' => 'สต็อกต่ำกว่าจุดสั่งซื้อ', 'icon' => '📦', 'hint' => 'ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock'],
-    'email_tpl_completed'   => ['label' => 'งานซ่อมเสร็จเรียบร้อย', 'icon' => '✅', 'hint' => 'ส่งเมื่อปิดใบสั่งงานซ่อมสำเร็จ'],
+    'email_tpl_breakdown'     => ['label' => 'แจ้งซ่อมด่วน / ใบแจ้งซ่อมใหม่', 'icon' => '🚨', 'hint' => 'ส่งถึงผู้แจ้งเมื่อมีใบแจ้งซ่อมเข้าใหม่'],
+    'email_tpl_work_assign'   => ['label' => 'งานถูกมอบหมาย (ถึงช่าง)', 'icon' => '🔧', 'hint' => 'ส่งถึงช่างเมื่อถูกมอบหมายงาน'],
+    'email_tpl_spare_request' => ['label' => 'ขอเบิกอะไหล่ (รออนุมัติ)', 'icon' => '🧰', 'hint' => 'ส่งถึงผู้ดูแลเมื่อช่างบันทึกอะไหล่ในใบซ่อม'],
+    'email_tpl_pm_overdue'    => ['label' => 'แผน PM เกินกำหนด', 'icon' => '📋', 'hint' => 'ส่งเมื่อแผน PM เลยกำหนดชำระแล้ว'],
+    'email_tpl_pm_due_soon'   => ['label' => 'PM ใกล้กำหนด', 'icon' => '⏰', 'hint' => 'ส่งเตือนก่อนถึงกำหนดชำระ'],
+    'email_tpl_low_stock'     => ['label' => 'สต็อกต่ำกว่าจุดสั่งซื้อ', 'icon' => '📦', 'hint' => 'ส่งเมื่ออะไหล่คงเหลือต่ำกว่า min_stock'],
+    'email_tpl_completed'     => ['label' => 'งานซ่อมเสร็จเรียบร้อย', 'icon' => '✅', 'hint' => 'ส่งถึงผู้แจ้งเมื่อปิดงานซ่อม'],
     'email_tpl_sage_approval' => ['label' => 'ขออนุมัติเบิก Sage', 'icon' => '📑', 'hint' => 'ส่งเมื่อมีการขออนุมัติเบิกอะไหล่ผ่าน Sage 300'],
+    'email_tpl_weekly_report' => ['label' => 'รายงานสรุปประจำสัปดาห์', 'icon' => '📊', 'hint' => 'ส่งสรุปงานซ่อม / PM / สต็อก ทุกวันจันทร์'],
+    'email_tpl_system_alerts' => ['label' => 'การแจ้งเตือนระบบ / process', 'icon' => '🛠️', 'hint' => 'ส่งจาก watchdog (สถานะระบบ / tunnel)'],
 ];
 
 const EMAIL_SETTING_KEYS = [
@@ -68,6 +78,12 @@ function sampleVars(): array {
         'item_name' => 'เทอร์มินอลโทรศัพท์สีขาว LINE', 'qty' => '3', 'min_stock' => '5',
         'downtime_hours' => '2.5', 'total_cost' => '4,500', 'requisition_no' => 'REQ-TEST-001',
         'items_summary' => 'Bearing 6204 x 2', 'requester_name' => 'วิชัย ช่างไฟและกลการ', 'total_amount' => '1,250',
+        'days_left' => '3',
+        'week_range' => '2026-11-09 → 2026-11-15', 'weekly_new' => '12', 'weekly_resolved' => '9',
+        'weekly_open' => '4', 'weekly_urgent' => '2', 'weekly_pm_done' => '7', 'weekly_pm_overdue' => '1',
+        'weekly_low_stock' => '8', 'weekly_downtime' => '6.5',
+        'system_title' => 'Tunnel URL เปลี่ยน', 'system_message' => 'tunnel URL เปลี่ยนเป็น https://example.zrok.io',
+        'alert_time' => date('Y-m-d H:i'),
     ];
 }
 

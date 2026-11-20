@@ -900,13 +900,7 @@ function getEmailTemplateConfig($module, $event) {
     $stmt->execute([$module, $event]);
     $row = $stmt->fetch();
 
-    $defaults = [
-        'repair/created' => ['subject' => '🚨 แจ้งซ่อมด่วน #{work_order_id}: {title}', 'header_color' => '#dc2626', 'body_html' => 'เครื่องจักร: <b>{asset_code}</b> - {asset_name}<br>อาการเสีย: {title}<br>ความเร่งด่วน: <b>{priority}</b> | สถานะ: {status}<br>ผู้แจ้งซ่อม: {reporter_name}', 'btn_label' => 'เปิดดูใบแจ้งซ่อม'],
-        'pm_am/due_soon' => ['subject' => '📋 แผน PM ถึงกำหนด/เกินกำหนด: {title}', 'header_color' => '#d97706', 'body_html' => 'เครื่องจักร: <b>{asset_code}</b><br>รายการ: {title}<br>กำหนดชำระ: {due_date} (เกินมา {days_overdue} วัน)', 'btn_label' => 'เปิดเช็คชีท PM'],
-        'inventory/low_stock' => ['subject' => '📦 อะไหล่ต่ำกว่าจุดสั่งซื้อ: {item_name}', 'header_color' => '#7c3aed', 'body_html' => 'รหัสอะไหล่: <b>{item_code}</b><br>ชื่ออะไหล่: {item_name}<br>คงเหลือ: {qty} (ขั้นต่ำ: {min_stock})', 'btn_label' => 'สั่งซื้อ/เบิกจ่าย'],
-        'repair/resolved' => ['subject' => '✅ ซ่อมเสร็จเรียบร้อย #{work_order_id}', 'header_color' => '#16a34a', 'body_html' => 'เครื่องจักร: <b>{asset_code}</b> - {asset_name}<br>Downtime: {downtime_hours} ชม.<br>ค่าซ่อมรวม: {total_cost} บาท<br>ช่างผู้ปิดงาน: {assigned_name}', 'btn_label' => 'ประเมินผลงาน'],
-        'sage/approval' => ['subject' => '📑 ขออนุมัติเบิกอะไหล่ #{requisition_no}', 'header_color' => '#7c3aed', 'body_html' => 'รายการ: {items_summary}<br>ผู้ขอเบิก: {requester_name}<br>รวมมูลค่า: <b>{total_amount} บาท</b>', 'btn_label' => 'อนุมัติการเบิก'],
-    ];
+    $defaults = emailTemplateDefaults();
 
     $key = "$module/$event";
     $d = $defaults[$key] ?? ['subject' => '🔔 CMMS-TPT Notification', 'header_color' => '#1d4ed8', 'body_html' => '{message}', 'btn_label' => 'เปิดดูในระบบ'];
@@ -928,6 +922,206 @@ function getEmailTemplateConfig($module, $event) {
         }
     }
     return $cfg;
+}
+
+/** ตารางข้อมูลในอีเมล (label / value) — ใช้ร่วมกันทุกเทมเพลตให้หน้าตาเดียวกัน */
+function emailInfoTable(array $rows): string {
+    $html = '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:separate;border-spacing:0;font-size:14px;color:#1e293b;margin:4px 0 16px;">';
+    $i = 0;
+    foreach ($rows as $label => $value) {
+        $bg = $i % 2 === 0 ? '#f8fafc' : '#ffffff';
+        $html .= '<tr>'
+            . '<td style="padding:9px 12px;background:' . $bg . ';border-bottom:1px solid #e2e8f0;width:40%;color:#64748b;font-size:13px;">' . htmlspecialchars((string)$label, ENT_QUOTES, 'UTF-8') . '</td>'
+            . '<td style="padding:9px 12px;background:' . $bg . ';border-bottom:1px solid #e2e8f0;font-weight:700;color:#0f172a;">' . (string)$value . '</td>'
+            . '</tr>';
+        $i++;
+    }
+    return $html . '</table>';
+}
+
+/** ป้ายสถานะสีในอีเมล */
+function emailPill($text, $bg = '#e0f2fe', $color = '#0369a1'): string {
+    return '<span style="display:inline-block;padding:2px 10px;border-radius:999px;background:' . $bg . ';color:' . $color . ';font-size:12px;font-weight:700;letter-spacing:0.2px;">' . htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8') . '</span>';
+}
+
+/** ข้อความสรุปปิดท้ายอีเมล */
+function emailNote($text): string {
+    return '<p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.6;">' . $text . '</p>';
+}
+
+/**
+ * เทมเพลตอีเมลเริ่มต้นของทุกเหตุการณ์ (ใช้เมื่อยังไม่มีการบันทึกใน email_notifications)
+ * หน้าตาเดียวกันทุกใบ: การ์ดสรุปข้อมูล + ปุ่มดำเนินการ
+ */
+function emailTemplateDefaults(): array {
+    return [
+        'repair/created' => [
+            'subject' => 'มีใบแจ้งซ่อมใหม่ #{work_order_id} — {title}',
+            'header_color' => '#dc2626',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">ระบบได้รับ<strong>ใบแจ้งซ่อมของท่านแล้ว</strong> ทีมซ่อมบำรุงจะตรวจสอบและดำเนินการโดยเร็วที่สุด</p>'
+                . emailInfoTable([
+                    'เลขใบงาน' => '{work_order_id}',
+                    'เครื่องจักร' => '{asset_code} — {asset_name}',
+                    'อาการ / งาน' => '{title}',
+                    'ความเร่งด่วน' => emailPill('{priority}', '#fee2e2', '#b91c1c'),
+                    'สถานะ' => '{status}',
+                    'ผู้แจ้ง' => '{reporter_name}',
+                ])
+                . emailNote('อีเมลฉบับนี้ส่งถึงผู้แจ้งเพื่อยืนยันว่าระบบได้รับงานแล้ว'),
+            'btn_label' => 'เปิดดูใบแจ้งซ่อม',
+        ],
+        'repair/assigned' => [
+            'subject' => 'งานซ่อม #{work_order_id} ถูกมอบหมายให้คุณ',
+            'header_color' => '#0891b2',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">คุณได้รับมอบหมาย<strong>งานซ่อมใหม่</strong> กรุณาตรวจสอบรายละเอียดและกดรับงาน</p>'
+                . emailInfoTable([
+                    'เลขใบงาน' => '{work_order_id}',
+                    'เครื่องจักร' => '{asset_code} — {asset_name}',
+                    'งาน' => '{title}',
+                    'ความเร่งด่วน' => emailPill('{priority}', '#fef3c7', '#b45309'),
+                    'ผู้มอบหมาย' => '{assigner_name}',
+                ])
+                . emailNote('หากไม่สามารถรับงานได้ กรุณาแจ้งหัวหน้างานทันที'),
+            'btn_label' => 'เปิดใบงาน',
+        ],
+        'inventory/spare_request' => [
+            'subject' => 'ขออนุมัติเบิกอะไหล่ #{work_order_id}',
+            'header_color' => '#b45309',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">มี<strong>คำขอเบิกอะไหล่</strong>จากใบซ่อม รอการตรวจสอบและอนุมัติ</p>'
+                . emailInfoTable([
+                    'เลขใบงาน' => '{work_order_id}',
+                    'รายการที่ขอเบิก' => '{items_summary}',
+                    'ผู้ขอเบิก' => '{requester_name}',
+                    'มูลค่ารวม' => '{total_cost} บาท',
+                ])
+                . emailNote('สามารถอนุมัติได้จากปุ่มด้านล่าง หรือกดปุ่มในข้อความ LINE'),
+            'btn_label' => 'ตรวจสอบ / อนุมัติ',
+        ],
+        'pm_am/due_soon' => [
+            'subject' => 'แผน PM เกินกำหนด: {title}',
+            'header_color' => '#d97706',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">แผนบำรุงรักษาเชิงป้องกัน<strong>เกินกำหนดชำระแล้ว</strong> กรุณาดำเนินการโดยเร็ว</p>'
+                . emailInfoTable([
+                    'เครื่องจักร' => '{asset_code} — {asset_name}',
+                    'รายการ' => '{title}',
+                    'กำหนดชำระ' => '{due_date}',
+                    'เกินกำหนด' => emailPill('{days_overdue} วัน', '#fee2e2', '#b91c1c'),
+                    'ผู้รับผิดชอบ' => '{assigned_name}',
+                ])
+                . emailNote('อีเมลนี้ส่งจากสคริปต์ตรวจสอบแผน PM รายวัน'),
+            'btn_label' => 'เปิดเช็คชีท PM',
+        ],
+        'pm_am/due_soon_reminder' => [
+            'subject' => 'PM ใกล้กำหนด: {title}',
+            'header_color' => '#f59e0b',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">แผนบำรุงรักษาเชิงป้องกัน<strong>ใกล้ถึงกำหนด</strong> กรุณาเตรียมความพร้อม</p>'
+                . emailInfoTable([
+                    'เครื่องจักร' => '{asset_code} — {asset_name}',
+                    'รายการ' => '{title}',
+                    'กำหนดชำระ' => '{due_date}',
+                    'เหลืออีก' => emailPill('{days_left} วัน', '#fef3c7', '#b45309'),
+                    'ผู้รับผิดชอบ' => '{assigned_name}',
+                ])
+                . emailNote('อีเมลนี้ส่งจากสคริปต์ตรวจสอบแผน PM รายวัน'),
+            'btn_label' => 'เปิดแผน PM',
+        ],
+        'inventory/low_stock' => [
+            'subject' => 'อะไหล่ต่ำกว่าจุดสั่งซื้อ: {item_name}',
+            'header_color' => '#7c3aed',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">พบ<strong>อะไหล่ที่คงเหลือต่ำกว่าจุดสั่งซื้อ</strong> กรุณาวางแผนสั่งซื้อ/เบิกจ่าย</p>'
+                . emailInfoTable([
+                    'รหัสอะไหล่' => '{item_code}',
+                    'ชื่ออะไหล่' => '{item_name}',
+                    'คงเหลือ' => emailPill('{qty}', '#fef3c7', '#b45309'),
+                    'ขั้นต่ำ' => '{min_stock}',
+                ])
+                . emailNote('ดูรายการอะไหล่ต่ำสต็อกทั้งหมดได้จากเมนูอะไหล่'),
+            'btn_label' => 'สั่งซื้อ / เบิกจ่าย',
+        ],
+        'repair/resolved' => [
+            'subject' => 'ซ่อมเสร็จเรียบร้อย #{work_order_id}',
+            'header_color' => '#16a34a',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">งานซ่อมของท่าน<strong>เสร็จเรียบร้อยแล้ว</strong> กรุณาตรวจสอบผลงานและให้คะแนนความพึงพอใจ</p>'
+                . emailInfoTable([
+                    'เลขใบงาน' => '{work_order_id}',
+                    'เครื่องจักร' => '{asset_code} — {asset_name}',
+                    'งาน' => '{title}',
+                    'Downtime' => '{downtime_hours} ชม.',
+                    'ค่าซ่อมรวม' => '{total_cost} บาท',
+                    'ช่างผู้ปิดงาน' => '{assigned_name}',
+                ])
+                . emailNote('ขอบคุณที่ใช้งานระบบ CMMS-TPT'),
+            'btn_label' => 'ประเมินผลงาน',
+        ],
+        'sage/approval' => [
+            'subject' => 'ขออนุมัติเบิกอะไหล่ #{requisition_no}',
+            'header_color' => '#7c3aed',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">มี<strong>คำขออนุมัติเบิกอะไหล่</strong>ผ่าน Sage 300 รอการอนุมัติ</p>'
+                . emailInfoTable([
+                    'เลขใบขอเบิก' => '{requisition_no}',
+                    'รายการ' => '{items_summary}',
+                    'ผู้ขอเบิก' => '{requester_name}',
+                    'มูลค่ารวม' => '{total_amount} บาท',
+                ])
+                . emailNote('กรุณาตรวจสอบรายการก่อนอนุมัติ'),
+            'btn_label' => 'อนุมัติการเบิก',
+        ],
+        'report/weekly' => [
+            'subject' => 'รายงานสรุปงานซ่อมบำรุงประจำสัปดาห์ {week_range}',
+            'header_color' => '#2563eb',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">สรุปภาพรวมงานซ่อมบำรุง<strong>ประจำสัปดาห์</strong></p>'
+                . emailInfoTable([
+                    'รอบรายงาน' => '{week_range}',
+                    'งานซ่อมใหม่' => '{weekly_new} ใบ',
+                    'ปิดงานแล้ว' => '{weekly_resolved} ใบ',
+                    'งานค้างเปิดอยู่' => '{weekly_open} ใบ',
+                    'งานด่วน (High/Critical)' => '{weekly_urgent} ใบ',
+                    'PM เสร็จ' => '{weekly_pm_done} รายการ',
+                    'PM เกินกำหนด' => '{weekly_pm_overdue} รายการ',
+                    'อะไหล่ต่ำสต็อก' => '{weekly_low_stock} รายการ',
+                    'หยุดเครื่องรวม' => '{weekly_downtime} ชม.',
+                ])
+                . emailNote('รายงานนี้สร้างอัตโนมัติทุกวันจันทร์'),
+            'btn_label' => 'เปิดศูนย์รายงาน',
+        ],
+        'system/alert' => [
+            'subject' => 'แจ้งเตือนระบบ: {system_title}',
+            'header_color' => '#475569',
+            'body_html' => '<p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.7;">ระบบตรวจพบ<strong>เหตุการณ์ด้านระบบ / process</strong></p>'
+                . emailInfoTable([
+                    'เหตุการณ์' => '{system_title}',
+                    'รายละเอียด' => '<span style="white-space:pre-line;">{system_message}</span>',
+                    'เวลา' => '{alert_time}',
+                ])
+                . emailNote('อีเมลนี้ส่งจาก watchdog ของระบบ CMMS-TPT'),
+            'btn_label' => 'เปิดหน้าสถานะระบบ',
+        ],
+    ];
+}
+
+/**
+ * ส่งอีเมลแจ้งผู้ดูแลระบบ (admin / manager / asst.manager / foreman) ด้วยเทมเพลต
+ * คืนจำนวนผู้รับที่ส่งสำเร็จ — ไม่ throw เพื่อไม่ให้กระทบ flow หลัก
+ */
+function emailNotifyAdmins(PDO $pdo, $module, $event, array $vars = [], $targetUrl = ''): int {
+    if (getSettingValue('email_notify_enabled', '0') !== '1') return 0;
+    $sent = 0;
+    try {
+        $rows = $pdo->query("SELECT full_name, email FROM users
+                              WHERE is_active = 1 AND email IS NOT NULL AND email <> ''
+                                AND role IN ('admin','manager','asst.manager','foreman')
+                              ORDER BY id LIMIT 20")->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $u) {
+            $email = trim((string)($u['email'] ?? ''));
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
+            if (sendEmailWithTemplate($email, ($u['full_name'] ?: 'ผู้ดูแลระบบ'), $module, $event, $vars, $targetUrl)) {
+                $sent++;
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('[email] notify admins failed: ' . $e->getMessage());
+    }
+    return $sent;
 }
 
 /** Substitute {vars} in a string. */

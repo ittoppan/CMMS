@@ -96,7 +96,8 @@ const EVENTS: EventDef[] = [
     label: "งานถูกมอบหมาย (ถึงช่างผู้รับ)",
     hint: "ส่งถึงช่างเมื่อหัวหน้ามอบหมายหรือเปลี่ยนผู้รับผิดชอบ",
     wired: "เปลี่ยนผู้รับผิดชอบ — repair.php",
-    channels: ["LINE"],
+    emailKey: "email_tpl_work_assign",
+    channels: ["LINE", "Email"],
     Icon: Wrench,
   },
   {
@@ -104,7 +105,8 @@ const EVENTS: EventDef[] = [
     label: "ขอเบิกอะไหล่ (รออนุมัติ)",
     hint: "ส่งถึงหัวหน้า/แอดมินเมื่อช่างบันทึกอะไหล่ในใบซ่อม",
     wired: "บันทึกอะไหล่ในใบซ่อม — repair.php",
-    channels: ["LINE"],
+    emailKey: "email_tpl_spare_request",
+    channels: ["LINE", "Email"],
     Icon: PackageSearch,
   },
   {
@@ -148,7 +150,8 @@ const EVENTS: EventDef[] = [
     label: "PM ใกล้กำหนด (เตือนช่าง)",
     hint: "ใช้สวิตช์เดียวกับ \"แผน PM เกินกำหนด\" — ข้อความธรรมดาไม่มี Flex",
     wired: "สคริปต์ alert_check.php รายวัน",
-    channels: ["LINE"],
+    emailKey: "email_tpl_pm_due_soon",
+    channels: ["LINE", "Email"],
     Icon: Clock,
   },
   {
@@ -157,7 +160,8 @@ const EVENTS: EventDef[] = [
     hint: "สรุปงานซ่อม / PM / สต็อก ทุกวันจันทร์",
     wired: "สคริปต์ weekly_report.php",
     settingKey: "line_weekly_report",
-    channels: ["LINE"],
+    emailKey: "email_tpl_weekly_report",
+    channels: ["LINE", "Email", "Push"],
     Icon: BarChart3,
   },
   {
@@ -167,7 +171,8 @@ const EVENTS: EventDef[] = [
     wired: "สคริปต์ watchdog-notify.php",
     settingKey: "line_system_alerts",
     defaultOn: false,
-    channels: ["LINE", "Telegram"],
+    emailKey: "email_tpl_system_alerts",
+    channels: ["LINE", "Telegram", "Email"],
     Icon: ShieldCheck,
   },
 ];

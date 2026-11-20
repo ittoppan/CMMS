@@ -100,5 +100,23 @@ if ($pushOn === '1') {
     echo "push sent to {$pushed} device(s)\n";
 }
 
+// อีเมลรายงานสรุปตามเทมเพลต "รายงานสรุปประจำสัปดาห์" (เปิด/ปิดที่หน้าตั้งค่าการแจ้งเตือน)
+try {
+    emailNotifyAdmins($pdo, 'report', 'weekly', [
+        'week_range' => "{$weekStart} → {$weekEnd}",
+        'weekly_new' => (string)$newCount,
+        'weekly_resolved' => (string)$resolved,
+        'weekly_open' => (string)$openCount,
+        'weekly_urgent' => (string)$urgent,
+        'weekly_pm_done' => (string)$pmDone,
+        'weekly_pm_overdue' => (string)$pmOverdue,
+        'weekly_low_stock' => (string)$lowStock,
+        'weekly_downtime' => number_format($downtimeH, 1),
+        'top_machine' => $topMachine ? ($topMachine['code'] . ' (' . $topMachine['c'] . ' ครั้ง)') : '-',
+    ], rtrim((string)publicBaseUrl(), '/') . '/reports/work-orders');
+} catch (Throwable $e) {
+    echo "email failed: {$e->getMessage()}\n";
+}
+
 echo "== weekly report {$weekStart} sent (LINE) ==\n";
 exit(0);

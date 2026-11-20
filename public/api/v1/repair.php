@@ -411,6 +411,13 @@ try {
                         '{requester_name}' => (string)($data['receiver_name'] ?? '-'),
                         '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
                     ], publicBaseUrl() . '/repair/view?id=' . $newId, ['items' => $spareItems]);
+                    // อีเมลถึงผู้ดูแลตามเทมเพลต "ขอเบิกอะไหล่"
+                    emailNotifyAdmins($pdo, 'inventory', 'spare_request', [
+                        'work_order_id' => (string)($data['work_order_no'] ?? ''),
+                        'items_summary' => implode(', ', $sumParts),
+                        'requester_name' => (string)($data['receiver_name'] ?? '-'),
+                        'total_cost' => number_format((float)($r['cost_parts'] ?? 0)),
+                    ], publicBaseUrl() . '/repair/view?id=' . $newId);
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_request notify failed: ' . $e->getMessage());
                 }
@@ -550,7 +557,8 @@ try {
                         if ($mailName === '') $mailName = trim((string)($euRow['full_name'] ?? ''));
                     }
                 }
-                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)) {
+                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)
+                    && getSettingValue('email_notify_enabled', '0') === '1') {
                     $mCode = ''; $mName = '';
                     if (!empty($data['asset_id'])) {
                         $ma = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
@@ -918,10 +926,26 @@ try {
                         if (!empty($res['added'])) {
                             $names = [];
                             foreach ((array)$res['added'] as $uid) {
-                                $st = $pdo->prepare("SELECT full_name FROM users WHERE id = ? AND is_active = 1");
+                                $st = $pdo->prepare("SELECT full_name, email FROM users WHERE id = ? AND is_active = 1");
                                 $st->execute([(int)$uid]);
-                                $n = $st->fetchColumn();
+                                $nu = $st->fetch(PDO::FETCH_ASSOC);
+                                $n = $nu['full_name'] ?? null;
                                 if ($n) $names[] = (string)$n;
+                                // อีเมลถึงช่างผู้รับงานตามเทมเพลต "งานถูกมอบหมาย"
+                                $ae = trim((string)($nu['email'] ?? ''));
+                                if ($ae !== '' && filter_var($ae, FILTER_VALIDATE_EMAIL)
+                                    && getSettingValue('email_notify_enabled', '0') === '1') {
+                                    try {
+                                        sendEmailWithTemplate($ae, (string)($n ?: 'ช่างผู้รับงาน'), 'repair', 'assigned', [
+                                            'work_order_id' => (string)($row['work_order_no'] ?? ''),
+                                            'asset_code' => (string)($row['asset_code'] ?? '-'),
+                                            'asset_name' => (string)($row['asset_name'] ?? ''),
+                                            'title' => mb_substr((string)($row['title'] ?? ''), 0, 200),
+                                            'priority' => strtoupper((string)($row['priority'] ?? '')),
+                                            'assigner_name' => (string)($cu['full_name'] ?? '-'),
+                                        ], $detailUrl);
+                                    } catch (Throwable $e) {}
+                                }
                                 if (getSettingValue('line_notify_enabled', '0') === '1') {
                                     lineNotifyAssigned((int)$uid, [
                                         '{work_order_id}' => (string)($row['work_order_no'] ?? ''),
@@ -976,6 +1000,12 @@ try {
                                 '{requester_name}' => (string)($row['assigned_name'] ?? '-'),
                                 '{total_cost}' => number_format((float)($r['cost_parts'] ?? 0)),
                             ], $detailUrl, ['items' => $spareItems]);
+                            emailNotifyAdmins($pdo, 'inventory', 'spare_request', [
+                                'work_order_id' => (string)($row['work_order_no'] ?? ''),
+                                'items_summary' => implode(', ', $sumParts),
+                                'requester_name' => (string)($row['assigned_name'] ?? '-'),
+                                'total_cost' => number_format((float)($r['cost_parts'] ?? 0)),
+                            ], $detailUrl);
                         }
                         // Telegram — เหมือน LINE ขออนุมัติเบิกอะไหล่
                         if (getSettingValue('telegram_enabled', '1') === '1') {

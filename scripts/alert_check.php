@@ -46,7 +46,7 @@ echo "== alert_check " . date('Y-m-d H:i:s') . " (alertDays={$alertDays}, lowSto
 // ---------------- 1) PM ใกล้กำหนด / เกินกำหนด ----------------
 $pmRows = $pdo->query("
     SELECT p.title, p.due_date, p.assigned_to,
-           u.full_name AS assigned_name, u.line_user_id AS tech_line_id,
+           u.full_name AS assigned_name, u.line_user_id AS tech_line_id, u.email AS tech_email,
            a.name AS asset_name, a.code AS asset_code
     FROM pm_am p
     LEFT JOIN users u ON p.assigned_to = u.id
@@ -72,6 +72,17 @@ foreach ($pmRows as $r) {
     if ($days < 0) {
         // เกินกำหนดแล้ว — ใช้ helper เดิม (ข้อความ "เกินมา X วัน")
         NotificationService::notifyPMOverdue($code, $r['title'], $r['due_date'], abs($days));
+        // อีเมลตามเทมเพลต "แผน PM เกินกำหนด" (เปิด/ปิดได้ที่หน้าตั้งค่าการแจ้งเตือน)
+        try {
+            emailNotifyAdmins($pdo, 'pm_am', 'due_soon', [
+                'asset_code' => ($r['asset_code'] ?: '-'),
+                'asset_name' => (string)($r['asset_name'] ?? ''),
+                'title' => (string)$r['title'],
+                'due_date' => (string)$r['due_date'],
+                'days_overdue' => (string)abs($days),
+                'assigned_name' => ($r['assigned_name'] ?: 'ไม่ระบุ'),
+            ], rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/');
+        } catch (Throwable $e) {}
         echo "  alert OVERDUE: {$code} — {$r['title']} (due {$r['due_date']}, เกิน " . abs($days) . " วัน)\n";
     } else {
         // ใกล้กำหนด (ยังไม่เกิน) — ส่งตรงถึงช่างผู้รับผิดชอบ (ถ้ามี line_user_id) หรือ broadcast
@@ -101,6 +112,25 @@ foreach ($pmRows as $r) {
             NotificationService::sendLineMessage($msg);
             echo "  alert DUE-SOON (broadcast): {$code} — {$r['title']} (due {$r['due_date']}, {$days}d)\n";
         }
+
+        // อีเมลตามเทมเพลต "PM ใกล้กำหนด" — ถึงช่างผู้รับผิดชอบก่อน ถ้าไม่มีค่อยถึงผู้ดูแล
+        try {
+            $pmVars = [
+                'asset_code' => ($r['asset_code'] ?: '-'),
+                'asset_name' => (string)($r['asset_name'] ?? ''),
+                'title' => (string)$r['title'],
+                'due_date' => (string)$r['due_date'],
+                'days_left' => (string)$days,
+                'assigned_name' => ($r['assigned_name'] ?: 'ไม่ระบุ'),
+            ];
+            $techEmail = trim((string)($r['tech_email'] ?? ''));
+            if ($techEmail !== '' && filter_var($techEmail, FILTER_VALIDATE_EMAIL)
+                && getSettingValue('email_notify_enabled', '0') === '1') {
+                sendEmailWithTemplate($techEmail, ($r['assigned_name'] ?: 'ช่างผู้รับผิดชอบ'), 'pm_am', 'due_soon_reminder', $pmVars, $url);
+            } else {
+                emailNotifyAdmins($pdo, 'pm_am', 'due_soon_reminder', $pmVars, $url);
+            }
+        } catch (Throwable $e) {}
     }
     $sent++;
 }
@@ -141,6 +171,18 @@ if ($lowStockOn === '1') {
              . ($zeroCount > 0 ? "\n\n⚠️ อีก {$zeroCount} รายการยังไม่เคยบันทึกสต็อก (stock=0) — ตรวจสอบข้อมูล" : '')
              . "\n----------------------------------\n"
              . "🛒 จัดการสต็อก: " . rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/';
+
+        // อีเมลสรุปสต็อกต่ำ (ใช้อันดับแรกเป็นตัวอย่างในเทมเพลต)
+        try {
+            $first = $top[0] ?? null;
+            emailNotifyAdmins($pdo, 'inventory', 'low_stock', [
+                'item_code' => $first ? (string)$first['code'] : '-',
+                'item_name' => $first ? (string)$first['name'] : '-',
+                'qty' => $first ? (string)$first['stock_qty'] : '0',
+                'min_stock' => $first ? (string)$first['min_stock'] : '0',
+                'extra_count' => (string)max(0, $lowCount - 1),
+            ], rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/');
+        } catch (Throwable $e) {}
 
         if (NotificationService::isLineTemplateEnabled('line_tpl_low_stock')) {
             NotificationService::sendLineMessage($msg);

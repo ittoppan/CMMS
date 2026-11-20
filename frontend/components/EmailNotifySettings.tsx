@@ -41,10 +41,15 @@ interface EmailTemplateDef {
 
 const TEMPLATE_ORDER = [
   "email_tpl_breakdown",
+  "email_tpl_work_assign",
+  "email_tpl_spare_request",
   "email_tpl_pm_overdue",
+  "email_tpl_pm_due_soon",
   "email_tpl_low_stock",
   "email_tpl_completed",
   "email_tpl_sage_approval",
+  "email_tpl_weekly_report",
+  "email_tpl_system_alerts",
 ] as const;
 
 const VARIABLES = [
@@ -71,6 +76,12 @@ const SAMPLE_VARS: Record<string, string> = {
   item_name: "Bearing 6204", qty: "3", min_stock: "5",
   downtime_hours: "2.5", total_cost: "4,500", requisition_no: "REQ-001",
   items_summary: "Bearing 6204 x 2", requester_name: "วิชัย ช่างไฟและกลการ", total_amount: "1,250",
+  assigner_name: "สมชาย วิศวกรซ่อมบำรุง", days_left: "3",
+  week_range: "2026-11-09 → 2026-11-15", weekly_new: "12", weekly_resolved: "9",
+  weekly_open: "4", weekly_urgent: "2", weekly_pm_done: "7", weekly_pm_overdue: "1",
+  weekly_low_stock: "8", weekly_downtime: "6.5",
+  system_title: "Tunnel URL เปลี่ยน", system_message: "tunnel URL เปลี่ยนเป็น https://example.zrok.io",
+  alert_time: "2026-11-20 09:00",
 };
 
 function fillVars(text: string): string {
