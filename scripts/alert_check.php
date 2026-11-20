@@ -71,7 +71,12 @@ foreach ($pmRows as $r) {
 
     if ($days < 0) {
         // เกินกำหนดแล้ว — ใช้ helper เดิม (ข้อความ "เกินมา X วัน")
-        NotificationService::notifyPMOverdue($code, $r['title'], $r['due_date'], abs($days));
+        if (notify_channel_enabled('line_tpl_pm_overdue', 'line')) {
+            NotificationService::notifyPMOverdue($code, $r['title'], $r['due_date'], abs($days));
+        }
+        notify_event_extra_channels('line_tpl_pm_overdue', 'แผน PM เกินกำหนด',
+            "เครื่องจักร: {$code}\nรายการ: {$r['title']}\nกำหนดชำระ: {$r['due_date']} (เกินมา " . abs($days) . " วัน)",
+            rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/', 'WARN');
         // อีเมลตามเทมเพลต "แผน PM เกินกำหนด" (เปิด/ปิดได้ที่หน้าตั้งค่าการแจ้งเตือน)
         try {
             emailNotifyAdmins($pdo, 'pm_am', 'due_soon', [
@@ -81,7 +86,7 @@ foreach ($pmRows as $r) {
                 'due_date' => (string)$r['due_date'],
                 'days_overdue' => (string)abs($days),
                 'assigned_name' => ($r['assigned_name'] ?: 'ไม่ระบุ'),
-            ], rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/');
+            ], rtrim((string)publicBaseUrl(), '/') . '/pages/pm_am/', 'line_tpl_pm_overdue');
         } catch (Throwable $e) {}
         echo "  alert OVERDUE: {$code} — {$r['title']} (due {$r['due_date']}, เกิน " . abs($days) . " วัน)\n";
     } else {
@@ -97,7 +102,8 @@ foreach ($pmRows as $r) {
              . "----------------------------------\n"
              . "📋 ดำเนินการ PM: $url";
 
-        $pmTplOn = NotificationService::isLineTemplateEnabled('line_tpl_pm_overdue');
+        $pmTplOn = NotificationService::isLineTemplateEnabled('line_tpl_pm_overdue')
+            && notify_channel_enabled('line_tpl_pm_due_soon', 'line');
         if (!$pmTplOn) {
             echo "  skip LINE (pm_overdue template disabled): {$code} - {$r['title']}
 ";
@@ -126,10 +132,15 @@ foreach ($pmRows as $r) {
             $techEmail = trim((string)($r['tech_email'] ?? ''));
             if ($techEmail !== '' && filter_var($techEmail, FILTER_VALIDATE_EMAIL)
                 && getSettingValue('email_notify_enabled', '0') === '1') {
-                sendEmailWithTemplate($techEmail, ($r['assigned_name'] ?: 'ช่างผู้รับผิดชอบ'), 'pm_am', 'due_soon_reminder', $pmVars, $url);
+                if (notify_channel_enabled('line_tpl_pm_due_soon', 'email')) {
+                    sendEmailWithTemplate($techEmail, ($r['assigned_name'] ?: 'ช่างผู้รับผิดชอบ'), 'pm_am', 'due_soon_reminder', $pmVars, $url);
+                }
             } else {
-                emailNotifyAdmins($pdo, 'pm_am', 'due_soon_reminder', $pmVars, $url);
+                emailNotifyAdmins($pdo, 'pm_am', 'due_soon_reminder', $pmVars, $url, 'line_tpl_pm_due_soon');
             }
+            notify_event_extra_channels('line_tpl_pm_due_soon', 'PM ใกล้กำหนด',
+                "เครื่องจักร: {$code}\nรายการ: {$r['title']}\nกำหนดชำระ: {$r['due_date']} (อีก {$days} วัน)",
+                $url, 'INFO');
         } catch (Throwable $e) {}
     }
     $sent++;
@@ -181,10 +192,14 @@ if ($lowStockOn === '1') {
                 'qty' => $first ? (string)$first['stock_qty'] : '0',
                 'min_stock' => $first ? (string)$first['min_stock'] : '0',
                 'extra_count' => (string)max(0, $lowCount - 1),
-            ], rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/');
+            ], rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/', 'line_tpl_low_stock');
+            notify_event_extra_channels('line_tpl_low_stock', 'สต็อกต่ำกว่าจุดสั่งซื้อ',
+                "อะไหล่ต่ำกว่าจุดสั่งซื้อ {$lowCount} รายการ",
+                rtrim((string)publicBaseUrl(), '/') . '/pages/spare_parts/', 'WARN');
         } catch (Throwable $e) {}
 
-        if (NotificationService::isLineTemplateEnabled('line_tpl_low_stock')) {
+        if (NotificationService::isLineTemplateEnabled('line_tpl_low_stock')
+            && notify_channel_enabled('line_tpl_low_stock', 'line')) {
             NotificationService::sendLineMessage($msg);
             $sent++;
             echo "alert LOW STOCK: {$lowCount} items (แสดง 15 อันดับแรก, zero-stock {$zeroCount} ไม่นับ)\n";

@@ -36,7 +36,7 @@ try {
     $sysAlertsOn = (string)getSettingValue('line_system_alerts', '0');
 } catch (Throwable $e) {}
 $ok = true;
-if ($sysAlertsOn === '1') {
+if ($sysAlertsOn === '1' && notify_channel_enabled('line_system_alerts', 'line')) {
     try {
         $ok = NotificationService::sendLineMessage($message);
     } catch (Throwable $e) {
@@ -51,14 +51,14 @@ try {
         'system_title' => 'สถานะระบบ / กระบวนการ',
         'system_message' => $message,
         'alert_time' => date('Y-m-d H:i'),
-    ], '');
+    ], '', 'line_system_alerts');
 } catch (Throwable $e) {
     // ไม่บล็อก exit code
 }
 
-// แจ้งเตือนแอดมินผ่าน Telegram ด้วย (สถานะระบบ/กระบวนการ)
+// แจ้งเตือนแอดมินผ่าน Telegram / Teams / ntfy ตามเมทริกซ์ (สถานะระบบ/กระบวนการ)
 try {
-    telegramAdminAlert('สถานะระบบ / กระบวนการ', $message, '', 'WARN');
+    notify_event_extra_channels('line_system_alerts', 'สถานะระบบ / กระบวนการ', $message, '', 'WARN');
 } catch (Throwable $e) {
     // ไม่บล็อก exit code — LINE เป็นช่องทางหลัก
 }

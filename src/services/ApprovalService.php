@@ -190,7 +190,9 @@ class ApprovalService {
                  . "✅ กดอนุมัติ (1-Click Approve):\n$approveUrl\n\n"
                  . "❌ กดไม่อนุมัติ (1-Click Reject):\n$rejectUrl";
 
-        NotificationService::sendLineMessage($lineMsg);
+        if (notify_channel_enabled('line_tpl_sage_approval', 'line')) {
+            NotificationService::sendLineMessage($lineMsg);
+        }
     }
 
     /**
@@ -245,6 +247,9 @@ class ApprovalService {
         </div>
         ";
 
-        NotificationService::sendEmail($toEmail, $subject, $html);
+        if (getSettingValue('email_notify_enabled', '0') === '1'
+            && notify_channel_enabled('line_tpl_sage_approval', 'email')) {
+            NotificationService::sendEmail($toEmail, $subject, $html);
+        }
     }
 }

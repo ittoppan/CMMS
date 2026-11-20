@@ -79,7 +79,7 @@ $weeklyLine = '1';
 try {
     $weeklyLine = (string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'line_weekly_report'")->fetchColumn();
 } catch (Throwable $e) {}
-if ($weeklyLine === '1') {
+if ($weeklyLine === '1' && notify_channel_enabled('line_weekly_report', 'line')) {
     try {
         NotificationService::sendLineMessage($msg);
         $sent++;
@@ -95,7 +95,7 @@ $pushOn = '1';
 try {
     $pushOn = (string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'push_alert_enabled'")->fetchColumn();
 } catch (Throwable $e) {}
-if ($pushOn === '1') {
+if ($pushOn === '1' && notify_channel_enabled('line_weekly_report', 'push')) {
     $pushed = WebPushService::sendToUsers($pdo, null, '📊 CMMS รายงานประจำสัปดาห์', "งานซ่อมใหม่ {$newCount} | PM เสร็จ {$pmDone} | สต็อกต่ำ {$lowStock}", '/pages/repair/');
     echo "push sent to {$pushed} device(s)\n";
 }
@@ -113,7 +113,10 @@ try {
         'weekly_low_stock' => (string)$lowStock,
         'weekly_downtime' => number_format($downtimeH, 1),
         'top_machine' => $topMachine ? ($topMachine['code'] . ' (' . $topMachine['c'] . ' ครั้ง)') : '-',
-    ], rtrim((string)publicBaseUrl(), '/') . '/reports/work-orders');
+    ], rtrim((string)publicBaseUrl(), '/') . '/reports/work-orders', 'line_weekly_report');
+    notify_event_extra_channels('line_weekly_report', 'รายงานสรุปประจำสัปดาห์',
+        "รอบ {$weekStart} → {$weekEnd}\nงานซ่อมใหม่ {$newCount} | ปิดงาน {$resolved} | งานค้าง {$openCount} | PM เสร็จ {$pmDone} | สต็อกต่ำ {$lowStock}",
+        rtrim((string)publicBaseUrl(), '/') . '/reports/work-orders', 'INFO');
 } catch (Throwable $e) {
     echo "email failed: {$e->getMessage()}\n";
 }

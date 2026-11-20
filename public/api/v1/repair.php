@@ -417,7 +417,7 @@ try {
                         'items_summary' => implode(', ', $sumParts),
                         'requester_name' => (string)($data['receiver_name'] ?? '-'),
                         'total_cost' => number_format((float)($r['cost_parts'] ?? 0)),
-                    ], publicBaseUrl() . '/repair/view?id=' . $newId);
+                    ], publicBaseUrl() . '/repair/view?id=' . $newId, 'line_tpl_spare_request');
                 } catch (Exception $e) {
                     error_log('[repair.php] spare_request notify failed: ' . $e->getMessage());
                 }
@@ -513,9 +513,9 @@ try {
                 error_log("[repair.php] LINE notify failed: " . $e->getMessage());
             }
 
-            // ---- Telegram แจ้งงานซ่อมใหม่ (เหมือน LINE — อิสระจากสวิตช์ LINE เพื่อถนอม quota LINE ระหว่างทดสอบ) ----
+            // ---- ช่องทางเสริม (Telegram / Teams / ntfy) ตามเมทริกซ์เหตุการณ์ × ช่องทาง ----
             try {
-                if (getSettingValue('telegram_enabled', '1') === '1') {
+                {
                     $assetCode = ''; $assetName = '';
                     if (!empty($data['asset_id'])) {
                         $st = $pdo->prepare("SELECT code, name FROM asset_registry WHERE id = ?");
@@ -534,7 +534,8 @@ try {
                         "สถานะ: " . (string)($data['status'] ?? 'PENDING') . "\n" .
                         "ผู้แจ้ง: " . (string)($data['receiver_name'] ?? '-') . "\n" .
                         "สถานะเครื่อง: " . (string)($data['machine_status'] ?? '-');
-                    telegramAdminAlert(
+                    notify_event_extra_channels(
+                        'line_tpl_breakdown',
                         $isUrgent ? "แจ้งซ่อมด่วน $wo" : "งานซ่อมใหม่ $wo",
                         $msg,
                         publicBaseUrl() . '/repair/view?id=' . $newId,
@@ -542,7 +543,7 @@ try {
                     );
                 }
             } catch (Exception $e) {
-                error_log("[repair.php] Telegram notify failed: " . $e->getMessage());
+                error_log("[repair.php] extra channel notify failed: " . $e->getMessage());
             }
             // ---- อีเมลยืนยันการแจ้งซ่อมถึงผู้แจ้ง (ใช้เทมเพลต Email: แจ้งซ่อมด่วน) ----
             try {
@@ -557,8 +558,9 @@ try {
                         if ($mailName === '') $mailName = trim((string)($euRow['full_name'] ?? ''));
                     }
                 }
-                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)
-                    && getSettingValue('email_notify_enabled', '0') === '1') {
+                                                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)
+                    && getSettingValue('email_notify_enabled', '0') === '1'
+                    && notify_channel_enabled('line_tpl_breakdown', 'email')) {
                     $mCode = ''; $mName = '';
                     if (!empty($data['asset_id'])) {
                         $ma = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
@@ -603,7 +605,7 @@ try {
                     'users' => $createdUsers,
                     'roles' => [1, 2, 6],
                     'exclude_users' => $cuCreate && (int)$cuCreate['id'] ? [(int)$cuCreate['id']] : [],
-                    'channels' => ['app'],
+                    'channels' => array_merge(['app'], notify_channel_enabled('line_tpl_breakdown', 'push') ? ['push'] : []),
                     'url' => '/repair/view?id=' . $newId,
                 ]);
             } catch (Exception $e) {
@@ -934,7 +936,8 @@ try {
                                 // อีเมลถึงช่างผู้รับงานตามเทมเพลต "งานถูกมอบหมาย"
                                 $ae = trim((string)($nu['email'] ?? ''));
                                 if ($ae !== '' && filter_var($ae, FILTER_VALIDATE_EMAIL)
-                                    && getSettingValue('email_notify_enabled', '0') === '1') {
+                                    && getSettingValue('email_notify_enabled', '0') === '1'
+                                    && notify_channel_enabled('line_tpl_work_assign', 'email')) {
                                     try {
                                         sendEmailWithTemplate($ae, (string)($n ?: 'ช่างผู้รับงาน'), 'repair', 'assigned', [
                                             'work_order_id' => (string)($row['work_order_no'] ?? ''),
@@ -958,9 +961,10 @@ try {
                                     ], $detailUrl);
                                 }
                             }
-                            // Telegram — เหมือน LINE งานถูกมอบหมาย
-                            if (getSettingValue('telegram_enabled', '1') === '1') {
-                                telegramAdminAlert(
+                            // ช่องทางเสริม (Telegram / Teams / ntfy) ตามเมทริกซ์
+                            {
+                                notify_event_extra_channels(
+                                    'line_tpl_work_assign',
                                     "งานถูกมอบหมาย " . ($row['work_order_no'] ?? ''),
                                     "ใบงาน: " . ($row['work_order_no'] ?? '') . "\n" .
                                     "เครื่อง: " . ($row['asset_code'] ?? '-') . ($row['asset_name'] ? " {$row['asset_name']}" : '') . "\n" .
@@ -1005,11 +1009,12 @@ try {
                                 'items_summary' => implode(', ', $sumParts),
                                 'requester_name' => (string)($row['assigned_name'] ?? '-'),
                                 'total_cost' => number_format((float)($r['cost_parts'] ?? 0)),
-                            ], $detailUrl);
+                            ], $detailUrl, 'line_tpl_spare_request');
                         }
-                        // Telegram — เหมือน LINE ขออนุมัติเบิกอะไหล่
-                        if (getSettingValue('telegram_enabled', '1') === '1') {
-                            telegramAdminAlert(
+                        // ช่องทางเสริม (Telegram / Teams / ntfy) ตามเมทริกซ์
+                        {
+                            notify_event_extra_channels(
+                                'line_tpl_spare_request',
                                 "ขออนุมัติเบิกอะไหล่ " . ($row['work_order_no'] ?? ''),
                                 "ใบงาน: " . ($row['work_order_no'] ?? '') . "\n" .
                                 "รายการ: " . (implode(', ', $sumParts) ?: '-') . "\n" .
@@ -1067,9 +1072,10 @@ try {
                             }
                         }
 
-                        // Telegram — เหมือน LINE ปิดงานซ่อม
-                        if (getSettingValue('telegram_enabled', '1') === '1') {
-                            telegramAdminAlert(
+                        // ช่องทางเสริม (Telegram / Teams / ntfy) ตามเมทริกซ์
+                        {
+                            notify_event_extra_channels(
+                                'line_tpl_completed',
                                 "ซ่อมเสร็จเรียบร้อย " . ($row['work_order_no'] ?? 'EN-????-???'),
                                 "ใบงาน: " . ($row['work_order_no'] ?? 'EN-????-???') . "
 " .
@@ -1088,7 +1094,8 @@ try {
                         }
                         // อีเมลแจ้งผู้แจ้ง (requester/created_by) เมื่อปิดงาน
                         $creatorEmail = trim((string)($row['creator_email'] ?? ''));
-                        if ($creatorEmail !== '' && filter_var($creatorEmail, FILTER_VALIDATE_EMAIL)) {
+                        if ($creatorEmail !== '' && filter_var($creatorEmail, FILTER_VALIDATE_EMAIL)
+                            && notify_channel_enabled('line_tpl_completed', 'email')) {
                             $creatorName = trim((string)($row['creator_name'] ?? 'ผู้แจ้ง'));
                             $subj = '[CMMS-TPT] งานซ่อมเสร็จเรียบร้อย ' . (string)($row['work_order_no'] ?? '');
                             $msgBody = "ใบงาน: " . (string)($row['work_order_no'] ?? '-') . "

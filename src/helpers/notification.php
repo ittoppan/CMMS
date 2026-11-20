@@ -636,6 +636,8 @@ function getLineTemplate($tplKey) {
 function sendLineTemplatePush($lineUserId, $tplKey, array $vars = [], $targetUrl = '', $photos = []) {
     $tpl = getLineTemplate($tplKey);
     if ($tpl['enabled'] !== '1') return false;
+    // ปิดเฉพาะเหตุการณ์นี้ในช่องทาง LINE (เมทริกซ์หน้าตั้งค่าการแจ้งเตือน)
+    if (!notify_channel_enabled((string)$tplKey, 'line')) return false;
 
     // normalize: รองรับทั้ง {key} และ key (substituteVars ใช้ key ไม่มีปีกกา)
     $norm = [];
@@ -825,6 +827,45 @@ function sendTelegramMessage($text, $parseMode = 'HTML') {
  * แจ้งเตือนแอดมินระบบ (Telegram) — format ข้อความ HTML พร้อม level icon + ลิงก์
  * เคารพสวิตช์ telegram_enabled (default เปิด)
  */
+/**
+ * เมทริกซ์เหตุการณ์ × ช่องทาง — ค่าเก็บใน settings key `notify_channels` (JSON)
+ * ตัวอย่าง: {"line_tpl_breakdown":{"line":"1","email":"1","push":"0",...}}
+ * ยังไม่เคยบันทึก = เปิดทุกช่องทาง (พฤติกรรมเดิม)
+ */
+function notify_channel_enabled(string $eventKey, string $channel): bool {
+    static $matrix = null;
+    if ($matrix === null) {
+        $raw = getSettingValue('notify_channels', '');
+        $matrix = $raw !== '' ? (json_decode($raw, true) ?: []) : [];
+        if (!is_array($matrix)) $matrix = [];
+    }
+    if (!isset($matrix[$eventKey]) || !is_array($matrix[$eventKey])) return true;
+    return ((string)($matrix[$eventKey][$channel] ?? '1')) === '1';
+}
+
+/**
+ * ส่งเหตุการณ์ไปยังช่องทางเสริมตามเมทริกซ์ — Telegram / Teams / ntfy
+ * (LINE / Email มีรูปแบบเฉพาะของแต่ละเหตุการณ์แยกอยู่แล้ว)
+ */
+function notify_event_extra_channels(string $eventKey, string $title, string $message, string $url = '', string $level = 'INFO'): void {
+    try {
+        if (notify_channel_enabled($eventKey, 'telegram')) {
+            telegramAdminAlert($title, $message, $url, $level);
+        }
+    } catch (Throwable $e) {}
+    try {
+        if (notify_channel_enabled($eventKey, 'teams')) {
+            teamsAdminAlert($title, $message, $url, $level);
+        }
+    } catch (Throwable $e) {}
+    try {
+        if (notify_channel_enabled($eventKey, 'ntfy')) {
+            require_once __DIR__ . '/ntfy.php';
+            ntfyAdminAlert($title, $message, $url, $level);
+        }
+    } catch (Throwable $e) {}
+}
+
 function telegramAdminAlert($title, $message, $url = '', $level = 'INFO') {
     if (getSettingValue('telegram_enabled', '1') !== '1') return false;
     $icon = ['INFO' => 'ℹ️', 'WARN' => '⚠️', 'ERROR' => '🚨', 'SUCCESS' => '✅'][$level] ?? 'ℹ️';
@@ -1103,8 +1144,9 @@ function emailTemplateDefaults(): array {
  * ส่งอีเมลแจ้งผู้ดูแลระบบ (admin / manager / asst.manager / foreman) ด้วยเทมเพลต
  * คืนจำนวนผู้รับที่ส่งสำเร็จ — ไม่ throw เพื่อไม่ให้กระทบ flow หลัก
  */
-function emailNotifyAdmins(PDO $pdo, $module, $event, array $vars = [], $targetUrl = ''): int {
+function emailNotifyAdmins(PDO $pdo, $module, $event, array $vars = [], $targetUrl = '', $eventKey = ''): int {
     if (getSettingValue('email_notify_enabled', '0') !== '1') return 0;
+    if ($eventKey !== '' && !notify_channel_enabled($eventKey, 'email')) return 0;
     $sent = 0;
     try {
         $rows = $pdo->query("SELECT full_name, email FROM users

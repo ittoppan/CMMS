@@ -35,7 +35,7 @@ try {
     switch ($method) {
         case 'GET':
             // 1) LINE-related settings + Telegram + Teams
-            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            $keys = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled','notify_channels'];
             $settings = [];
             $in = implode(',', array_fill(0, count($keys), '?'));
             $stmt = $pdo->prepare("SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($in)");
@@ -107,7 +107,7 @@ try {
             $upsert = $pdo->prepare("INSERT INTO settings (setting_key, setting_value, setting_group, description) VALUES (?, ?, 'notification', ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
             $count = 0;
 
-            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled'];
+            $allowedSettings = ['line_notify_enabled','line_notify_token','line_channel_access_token','line_channel_secret','line_channel_id','line_liff_id','line_liff_register_id','line_callback_url','line_maintenance_group_id','line_group_enabled','low_stock_alert','maintenance_alert_days','email_notify_enabled','telegram_enabled','telegram_bot_token','telegram_chat_id','teams_enabled','teams_webhook_url','ntfy_enabled','ntfy_server_url','ntfy_topic','ntfy_token','ntfy_priority','ntfy_tags','ntfy_click_url','line_system_alerts','line_weekly_report','push_alert_enabled','notify_channels'];
             foreach (($data['settings'] ?? []) as $k => $v) {
                 if (!in_array($k, $allowedSettings, true)) continue;
                 // ค่าลับที่ UI ส่งคืนแบบ "••••••••" = ผู้ใช้ไม่ได้ตั้งใหม่ → ข้าม (ห้ามเขียนทับด้วย mask)

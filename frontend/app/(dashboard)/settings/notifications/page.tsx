@@ -223,6 +223,15 @@ const SAMPLE_VARS: Record<string, string> = {
 
 const VARIABLES = Object.keys(SAMPLE_VARS);
 
+const MATRIX_CHANNELS = [
+  { key: "line", label: "LINE" },
+  { key: "email", label: "อีเมล" },
+  { key: "push", label: "Push" },
+  { key: "telegram", label: "Telegram" },
+  { key: "teams", label: "Teams" },
+  { key: "ntfy", label: "ntfy" },
+] as const;
+
 const CHANNEL_SETTINGS = [
   { key: "line_notify_enabled", label: "LINE", Icon: MessageSquare, tab: "line" },
   { key: "email_notify_enabled", label: "อีเมล", Icon: Mail, tab: "email" },
@@ -253,6 +262,8 @@ export default function NotificationsSettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [templates, setTemplates] = useState<Record<string, LineTemplate>>({});
   const [emailTemplates, setEmailTemplates] = useState<Record<string, EmailTemplate>>({});
+  // เมทริกซ์เหตุการณ์ × ช่องทาง — ค่าเริ่มต้นเปิดทุกช่องทาง
+  const [matrix, setMatrix] = useState<Record<string, Record<string, string>>>({});
   const [emailAvailable, setEmailAvailable] = useState(true);
   const [me, setMe] = useState<{ full_name: string; line_bound: boolean } | null>(null);
   const [envInfo, setEnvInfo] = useState<{
@@ -273,6 +284,12 @@ export default function NotificationsSettingsPage() {
       if (!lineRes.ok) throw new Error(lineJson?.error || `HTTP ${lineRes.status}`);
       setSettings(lineJson.settings ?? {});
       setTemplates(lineJson.templates ?? {});
+      let matrixParsed: Record<string, Record<string, string>> = {};
+      try {
+        const raw = (lineJson.settings ?? {}).notify_channels;
+        if (raw) matrixParsed = JSON.parse(raw) ?? {};
+      } catch { matrixParsed = {}; }
+      setMatrix(matrixParsed);
       setMe(lineJson.me ?? null);
       setEnvInfo(lineJson.env ?? null);
 
@@ -295,6 +312,7 @@ export default function NotificationsSettingsPage() {
         settings: lineJson.settings ?? {},
         templates: lineJson.templates ?? {},
         emails,
+        matrix: matrixParsed,
       });
     } catch (e: any) {
       setError(e?.message || "โหลดการตั้งค่าการแจ้งเตือนไม่สำเร็จ");
@@ -316,8 +334,11 @@ export default function NotificationsSettingsPage() {
     setEmailTemplates((t) => ({ ...t, [key]: { ...t[key], ...patch } }));
 
   const hasChanges = useMemo(
-    () => snapshotRef.current !== "" && snapshotRef.current !== JSON.stringify({ settings, templates, emails: emailTemplates }),
-    [settings, templates, emailTemplates]
+    () =>
+      snapshotRef.current !== "" &&
+      snapshotRef.current !==
+        JSON.stringify({ settings, templates, emails: emailTemplates, matrix }),
+    [settings, templates, emailTemplates, matrix]
   );
 
   const handleSave = async () => {
@@ -328,7 +349,10 @@ export default function NotificationsSettingsPage() {
       const lineRes = await fetch("/api/v1/line_notify.php", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings, templates }),
+        body: JSON.stringify({
+          settings: { ...settings, notify_channels: JSON.stringify(matrix) },
+          templates,
+        }),
       });
       const lineJson = await lineRes.json();
       if (!lineRes.ok) throw new Error(lineJson?.error || "บันทึกการตั้งค่า LINE ไม่สำเร็จ");
@@ -345,7 +369,7 @@ export default function NotificationsSettingsPage() {
         saved += emailJson.saved ?? 0;
       }
 
-      snapshotRef.current = JSON.stringify({ settings, templates, emails: emailTemplates });
+      snapshotRef.current = JSON.stringify({ settings, templates, emails: emailTemplates, matrix });
       setMessage(`บันทึกการตั้งค่าแล้ว ${saved} รายการ`);
       setTimeout(() => setMessage(""), 4000);
     } catch (e: any) {
@@ -402,16 +426,22 @@ export default function NotificationsSettingsPage() {
         {activeTab === "overview" && (
           <OverviewTab
             settings={settings}
-            templates={templates}
-            emailTemplates={emailTemplates}
             emailAvailable={emailAvailable}
+            matrix={matrix}
             onSetting={setSetting}
-            onEvent={(key, on) => {
-              const ev = EVENTS.find((x) => x.key === key);
-              if (ev?.settingKey) setSetting(ev.settingKey, on ? "1" : "0");
-              else setTpl(key, { enabled: on ? "1" : "0" });
+            onCell={(eventKey, channel, on) => {
+              setMatrix((m) => ({
+                ...m,
+                [eventKey]: { ...(m[eventKey] ?? {}), [channel]: on ? "1" : "0" },
+              }));
+              const ev = EVENTS.find((x) => x.key === eventKey);
+              if (channel === "email" && ev?.emailKey) {
+                setEmailTpl(ev.emailKey, { enabled: on ? "1" : "0" });
+              }
+              if (channel === "line" && (TEMPLATE_ORDER as readonly string[]).includes(eventKey)) {
+                setTpl(eventKey, { enabled: on ? "1" : "0" });
+              }
             }}
-            onEmail={(key, on) => setEmailTpl(key, { enabled: on ? "1" : "0" })}
             onOpenTab={setActiveTab}
           />
         )}
@@ -482,33 +512,23 @@ export default function NotificationsSettingsPage() {
 
 function OverviewTab({
   settings,
-  templates,
-  emailTemplates,
   emailAvailable,
+  matrix,
   onSetting,
-  onEvent,
-  onEmail,
+  onCell,
   onOpenTab,
 }: {
   settings: Record<string, string>;
-  templates: Record<string, LineTemplate>;
-  emailTemplates: Record<string, EmailTemplate>;
   emailAvailable: boolean;
+  matrix: Record<string, Record<string, string>>;
   onSetting: (key: string, value: string) => void;
-  onEvent: (key: string, on: boolean) => void;
-  onEmail: (key: string, on: boolean) => void;
+  onCell: (eventKey: string, channel: string, on: boolean) => void;
   onOpenTab: (tab: string) => void;
 }) {
   const isOn = (key?: string) => (key ? (settings[key] ?? "0") === "1" : false);
-  const lineEventOn = (ev: EventDef) => {
-    if (ev.settingKey) {
-      // ค่าเริ่มต้นต้องตรงกับฝั่งเซิร์ฟเวอร์ (system alerts ปิดไว้โดย default)
-      return (settings[ev.settingKey] ?? (ev.defaultOn === false ? "0" : "1")) !== "0";
-    }
-    return (templates[ev.key]?.enabled ?? "1") !== "0";
-  };
-  const emailOn = (ev: EventDef) =>
-    ev.emailKey ? emailTemplates[ev.emailKey]?.enabled === "1" : false;
+  // ค่าเริ่มต้นของทุกช่องทาง = เปิด (เว้นแต่บันทึกปิดไว้)
+  const cellOn = (eventKey: string, channel: string) =>
+    (matrix[eventKey]?.[channel] ?? "1") !== "0";
 
   return (
     <VStack gap={5}>
@@ -554,69 +574,52 @@ function OverviewTab({
             <div>
               <h3 className="text-base font-semibold">เหตุการณ์และช่องทางที่แจ้ง</h3>
               <p className="text-sm text-muted-foreground">
-                สวิตช์ LINE และ Email ควบคุมทีละเหตุการณ์ — ช่องทางอื่นใช้สวิตช์ระดับระบบด้านบน
+                เปิด/ปิดได้ทุกช่องทางแยกตามเหตุการณ์ — สวิตช์ระดับระบบด้านบนต้องเปิดอยู่ด้วยจึงจะส่ง
               </p>
             </div>
             {!emailAvailable && <Badge variant="neutral">โหลดการตั้งค่าอีเมลไม่ได้ (ต้องเป็นผู้ดูแลระบบ)</Badge>}
           </div>
 
-          <div className="space-y-2">
-            {EVENTS.map((ev) => {
-              const lineOn = lineEventOn(ev);
-              const mailOn = emailOn(ev);
-              const sharedWithPmOverdue = ev.key === "line_tpl_pm_due_soon";
-              return (
-                <div
-                  key={ev.key}
-                  className="rounded-lg border border-[var(--cmms-border)] p-4"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <ev.Icon size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--cmms-text-secondary)]" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold">{ev.label}</p>
-                        <p className="text-xs text-muted-foreground">{ev.hint}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">ส่งอัตโนมัติเมื่อ: {ev.wired}</p>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {ev.channels.map((c) => (
-                            <Badge key={c} variant="neutral">{c}</Badge>
-                          ))}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] border-separate border-spacing-0 text-sm">
+              <thead>
+                <tr>
+                  <th className="sticky left-0 z-10 bg-[var(--cmms-bg-card)] px-3 py-2 text-left text-xs font-semibold text-muted-foreground">
+                    เหตุการณ์
+                  </th>
+                  {MATRIX_CHANNELS.map((ch) => (
+                    <th key={ch.key} className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground">
+                      {ch.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {EVENTS.map((ev) => (
+                  <tr key={ev.key}>
+                    <td className="sticky left-0 z-10 border-t border-[var(--cmms-border)] bg-[var(--cmms-bg-card)] px-3 py-3">
+                      <div className="flex items-start gap-2">
+                        <ev.Icon size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--cmms-text-secondary)]" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">{ev.label}</p>
+                          <p className="text-xs text-muted-foreground">{ev.hint}</p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex shrink-0 flex-wrap items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-muted-foreground">LINE</span>
-                        {sharedWithPmOverdue ? (
-                          <Badge variant="neutral">ตามสวิตช์ PM เกินกำหนด</Badge>
-                        ) : (
-                          <Switch
-                            label="แจ้ง LINE"
-                            isLabelHidden
-                            value={lineOn}
-                            onChange={(next) => onEvent(ev.key, next)}
-                          />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-muted-foreground">Email</span>
-                        {ev.emailKey && emailAvailable ? (
-                          <Switch
-                            label="แจ้งอีเมล"
-                            isLabelHidden
-                            value={mailOn}
-                            onChange={(next) => onEmail(ev.emailKey!, next)}
-                          />
-                        ) : (
-                          <Badge variant="neutral">ไม่มีเทมเพลต</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                    </td>
+                    {MATRIX_CHANNELS.map((ch) => (
+                      <td key={ch.key} className="border-t border-[var(--cmms-border)] px-2 py-3 text-center align-middle">
+                        <Switch
+                          label={`${ev.label} — ${ch.label}`}
+                          isLabelHidden
+                          value={cellOn(ev.key, ch.key)}
+                          onChange={(next) => onCell(ev.key, ch.key, next)}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-1">
