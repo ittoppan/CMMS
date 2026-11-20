@@ -317,6 +317,7 @@ export default function RepairRequestForm() {
   const [bindSubmitting, setBindSubmitting] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const videoCameraRef = useRef<HTMLInputElement>(null);
   const attachInputRef = useRef<HTMLInputElement>(null);
   const [videoBusy, setVideoBusy] = useState(false);
   const [videoErr, setVideoErr] = useState<string | null>(null);
@@ -383,7 +384,10 @@ export default function RepairRequestForm() {
     if (u.department_name) setReporterDeptName(u.department_name);
     setForm((prev) => {
       const next = { ...prev };
-      if (!prev.reporterName.trim() && u.full_name) next.reporterName = u.full_name;
+      // ใช้ชื่อ-นามสกุลจากระบบเป็นหลัก — ทับชื่อที่เติมมาจากโปรไฟล์ LINE ถ้าผู้ใช้ยังไม่ได้แก้เอง
+      const lineName = (liff.displayName || "").trim();
+      const current = prev.reporterName.trim();
+      if (u.full_name && (!current || (lineName !== "" && current === lineName))) next.reporterName = u.full_name;
       if (!prev.phone.trim() && u.phone) next.phone = u.phone;
       if (!prev.email.trim() && u.email) next.email = u.email;
       if (!prev.departmentCode && u.department_code) next.departmentCode = u.department_code;
@@ -1637,8 +1641,20 @@ const flushQueue = async (notifyOnAuthFail = false) => {
                 className="hidden"
                 onChange={(e) => { addPhotos(e.target.files); e.target.value = ""; }}
               />
-              {/* ไม่ใส่ capture: บางเบราว์เซอร์ (โดยเฉพาะ iOS) เปิดกล้องโหมดถ่ายรูปให้แม้
-                  accept=video/* → ถ่ายวิดีโอไม่ได้; ปล่อยให้ระบบให้เลือก "ถ่ายวิดีโอ/เลือกจากคลัง" */}
+              {/* กล้อง: capture="environment" เปิดโหมดถ่ายวิดีโอทันทีบนมือถือ (LINE/iOS/Android) */}
+              <input
+                ref={videoCameraRef}
+                type="file"
+                accept="video/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) uploadVideo(f);
+                }}
+              />
+              {/* คลังวิดีโอในเครื่อง — ไม่ใส่ capture เพื่อให้เลือกไฟล์ที่มีอยู่ได้ */}
               <input
                 ref={videoInputRef}
                 type="file"
@@ -1676,20 +1692,32 @@ const flushQueue = async (notifyOnAuthFail = false) => {
                   </div>
                 )}
                 {!form.video && (
-                  <button
-                    type="button"
-                    className="cmms-photo-add"
-                    onClick={() => videoInputRef.current?.click()}
-                    disabled={videoBusy}
-                    aria-label="เลือกวิดีโอ"
-                  >
-                    {videoBusy ? (
-                      <Loader2 size={24} strokeWidth={1.75} className="animate-spin" />
-                    ) : (
-                      <Video size={24} strokeWidth={1.75} />
-                    )}
-                    <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "ถ่าย / เลือกวิดีโอ"}</p>
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="cmms-photo-add"
+                      onClick={() => videoCameraRef.current?.click()}
+                      disabled={videoBusy}
+                      aria-label="ถ่ายวิดีโอด้วยกล้อง"
+                    >
+                      {videoBusy ? (
+                        <Loader2 size={24} strokeWidth={1.75} className="animate-spin" />
+                      ) : (
+                        <Video size={24} strokeWidth={1.75} />
+                      )}
+                      <p className="text-2xs font-bold m-0">{videoBusy ? "กำลังส่งวิดีโอ…" : "ถ่ายวิดีโอ"}</p>
+                    </button>
+                    <button
+                      type="button"
+                      className="cmms-photo-add"
+                      onClick={() => videoInputRef.current?.click()}
+                      disabled={videoBusy}
+                      aria-label="เลือกวิดีโอจากเครื่อง"
+                    >
+                      <Paperclip size={24} strokeWidth={1.75} />
+                      <p className="text-2xs font-bold m-0">เลือกจากเครื่อง</p>
+                    </button>
+                  </>
                 )}
               </div>
               <input

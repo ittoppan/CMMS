@@ -52,6 +52,7 @@ interface RepairData {
   priority: string;
   assigned_name: string;
   receiver_name: string;
+  creator_name?: string;
   receiver_signature_path: string;
   root_cause: string;
   solution: string;
@@ -95,7 +96,7 @@ function EditWorkOrderContent() {
   const [rootCause, setRootCause] = useState("");
   const [maintenanceDesc, setMaintenanceDesc] = useState("");
   const [maintenanceNote, setMaintenanceNote] = useState("");
-  const [mtnAction, setMtnAction] = useState("");
+
   const [status, setStatus] = useState("open");
   const [priority, setPriority] = useState("medium");
   const [contaminateChecking, setContaminateChecking] = useState("not_checked");
@@ -125,9 +126,11 @@ function EditWorkOrderContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [downtimeStart, downtimeEnd]);
 
+  // ฟิลด์สรุปผลการซ่อมกรอกได้หลังเปลี่ยนสถานะเป็น "ซ่อมเสร็จแล้ว" เท่านั้น
+  const closing = status === "completed";
   // computed inline errors — ต้องอยู่หลังประกาศ state ของฟิลด์ที่ใช้อ้างอิง
-  const rootCauseError = iv.errorFor("rootCause", !rootCause.trim() ? "กรุณาระบุสาเหตุของปัญหา (Root Cause)" : "");
-  const maintenanceDescError = iv.errorFor("maintenanceDesc", !maintenanceDesc.trim() ? "กรุณาระบุรายละเอียดการซ่อม" : "");
+  const rootCauseError = iv.errorFor("rootCause", closing && !rootCause.trim() ? "กรุณาระบุสาเหตุของปัญหา (Root Cause)" : "");
+  const maintenanceDescError = iv.errorFor("maintenanceDesc", closing && !maintenanceDesc.trim() ? "กรุณาระบุรายละเอียดการซ่อม" : "");
   const contaminateError = iv.errorFor(
     "contaminate",
     status === "completed" && contaminateChecking === "not_checked" ? "ต้องระบุผลตรวจการปนเปื้อนก่อนปิดงาน" : ""
@@ -148,7 +151,7 @@ function EditWorkOrderContent() {
           setRootCause(json.root_cause || "");
           setMaintenanceDesc(json.solution || json.resolution || "");
           setMaintenanceNote(json.notes || "");
-          setMtnAction(json.diagnosis || "");
+
           setStatus(json.status || "open");
           setPriority(json.priority || "medium");
           setContaminateChecking(json.contaminate_checking || "not_checked");
@@ -269,10 +272,9 @@ function EditWorkOrderContent() {
 
   const handleSubmit = async () => {
     iv.submit();
-    const closing = status === "completed";
     if (
-      !rootCause.trim() ||
-      !maintenanceDesc.trim() ||
+      (closing && !rootCause.trim()) ||
+      (closing && !maintenanceDesc.trim()) ||
       (closing && contaminateChecking === "not_checked") ||
       (closing && !receiverSignature)
     ) {
@@ -289,7 +291,7 @@ function EditWorkOrderContent() {
         root_cause: rootCause,
         solution: maintenanceDesc,
         notes: maintenanceNote,
-        diagnosis: mtnAction,
+
         status,
         priority,
         contaminate_checking: contaminateChecking,
@@ -365,7 +367,7 @@ function EditWorkOrderContent() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                <InfoRow label="ผู้แจ้ง" value={woData?.receiver_name || "-"} />
+                <InfoRow label="ผู้แจ้ง" value={woData?.creator_name || woData?.receiver_name || "-"} />
                 <InfoRow label="เครื่องจักร" value={`${woData?.asset_code || "-"} ${woData?.asset_name || ""}`} />
                 <InfoRow label="สถานะเครื่อง" value={woData?.machine_status || "-"} />
                 <InfoRow label="อาการเสีย" value={woData?.title || "-"} />
@@ -420,7 +422,9 @@ function EditWorkOrderContent() {
 
               {/* Root Cause */}
               <Textarea
-                label="Root Cause (สาเหตุของปัญหา) *"
+                label={closing ? "Root Cause (สาเหตุของปัญหา) *" : "Root Cause (สาเหตุของปัญหา)"}
+                disabled={!closing}
+                hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
                 placeholder="ระบุสาเหตุของปัญหา เช่น สึกหรอตามอายุการใช้งาน, ไม่ได้ทำความสะอาด, อะไหล่เสื่อมสภาพ..."
                 value={rootCause}
                 onChange={(e) => setRootCause(e.target.value)}
@@ -431,7 +435,9 @@ function EditWorkOrderContent() {
 
               {/* Maintenance Description */}
               <Textarea
-                label="Maintenance Description (รายละเอียดการซ่อม) *"
+                label={closing ? "Maintenance Description (รายละเอียดการซ่อม) *" : "Maintenance Description (รายละเอียดการซ่อม)"}
+                disabled={!closing}
+                hint={!closing ? "กรอกได้เมื่อเปลี่ยนสถานะเป็น \"ซ่อมเสร็จแล้ว\" เท่านั้น" : undefined}
                 placeholder="อธิบายว่าทำอะไรบ้าง เช่น เปลี่ยน bearing, ปรับตั้ง tension, ทำความสะอาด..."
                 value={maintenanceDesc}
                 onChange={(e) => setMaintenanceDesc(e.target.value)}
@@ -449,19 +455,13 @@ function EditWorkOrderContent() {
                 rows={2}
               />
 
-              {/* MTN. Action */}
-              <Textarea
-                label="MTN. Action (การดำเนินการ)"
-                placeholder="ระบุการดำเนินการที่ทำ เช่น ซ่อมแซม, ปรับเปลี่ยน, ทดสอบ..."
-                value={mtnAction}
-                onChange={(e) => setMtnAction(e.target.value)}
-                rows={2}
-              />
-
               {/* Contaminate Checking */}
               <div className="space-y-1.5">
-                <Label htmlFor="wo-edit-contam">Contaminate Checking (ตรวจสอบการปนเปื้อน)<span className="text-destructive"> *</span></Label>
-                <Select value={contaminateChecking} onValueChange={setContaminateChecking}>
+                <Label htmlFor="wo-edit-contam">
+                  Contaminate Checking (ตรวจสอบการปนเปื้อน)
+                  {closing && <span className="text-destructive"> *</span>}
+                </Label>
+                <Select value={contaminateChecking} onValueChange={setContaminateChecking} disabled={!closing}>
                   <SelectTrigger id="wo-edit-contam" className="w-full" aria-invalid={contaminateError ? true : undefined}>
                     <SelectValue />
                   </SelectTrigger>
@@ -475,6 +475,11 @@ function EditWorkOrderContent() {
                 {contaminateError && (
                   <p id="wo-edit-contam-error" role="alert" className="text-xs font-medium text-[var(--cmms-danger)]">
                     {contaminateError}
+                  </p>
+                )}
+                {!closing && (
+                  <p className="text-xs text-muted-foreground">
+                    กรอกได้เมื่อเปลี่ยนสถานะเป็น "ซ่อมเสร็จแล้ว" เท่านั้น
                   </p>
                 )}
               </div>

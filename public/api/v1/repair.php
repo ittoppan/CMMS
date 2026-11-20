@@ -104,7 +104,7 @@ try {
             }
             $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             if ($id) {
-                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id) WHERE r.id = ?');
+                $stmt = $pdo->prepare('SELECT r.*, a.name AS asset_name, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment, uc.full_name AS creator_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN users uc ON uc.id = r.created_by LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id) WHERE r.id = ?');
                 $stmt->execute([$id]);
                 $row = $stmt->fetch();
                 if (!$row) { http_response_code(404); echo json_encode(['error' => 'Not found']); exit; }
@@ -114,7 +114,7 @@ try {
             } else {
                 // รายการงานซ่อม (รองรับกรอง/แบ่งหน้าแบบ opt-in เพื่อความเข้ากันได้ย้อนหลัง)
                 $ratingJoin = ' LEFT JOIN repair_ratings rr ON rr.repair_id = r.id AND rr.id = (SELECT MAX(rr2.id) FROM repair_ratings rr2 WHERE rr2.repair_id = r.id)';
-                $baseSelect = 'SELECT r.*, a.name AS asset_name, a.code AS asset_code, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin;
+                $baseSelect = 'SELECT r.*, a.name AS asset_name, a.code AS asset_code, u.full_name AS assigned_name, u.avatar_path AS assigned_avatar, u.avatar AS assigned_avatar_legacy, fc.code AS failure_code, rc.code AS repair_code, rr.rating_score, rr.rating_comment, uc.full_name AS creator_name FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id LEFT JOIN users uc ON uc.id = r.created_by LEFT JOIN failure_codes fc ON r.failure_code_id = fc.id LEFT JOIN repair_codes rc ON r.repair_code_id = rc.id' . $ratingJoin;
                 $baseCount = 'SELECT COUNT(*) FROM repair r LEFT JOIN asset_registry a ON r.asset_id = a.id LEFT JOIN users u ON r.assigned_to = u.id';
 
                 $where = [];
@@ -536,6 +536,41 @@ try {
                 }
             } catch (Exception $e) {
                 error_log("[repair.php] Telegram notify failed: " . $e->getMessage());
+            }
+            // ---- อีเมลยืนยันการแจ้งซ่อมถึงผู้แจ้ง (ใช้เทมเพลต Email: แจ้งซ่อมด่วน) ----
+            try {
+                $mailTo = trim((string)($data['reporter_email'] ?? ''));
+                $mailName = trim((string)($data['receiver_name'] ?? ''));
+                if ($mailTo === '' && !empty($data['created_by'])) {
+                    $eu = $pdo->prepare('SELECT email, full_name FROM users WHERE id = ?');
+                    $eu->execute([(int)$data['created_by']]);
+                    $euRow = $eu->fetch(PDO::FETCH_ASSOC);
+                    if ($euRow) {
+                        $mailTo = trim((string)($euRow['email'] ?? ''));
+                        if ($mailName === '') $mailName = trim((string)($euRow['full_name'] ?? ''));
+                    }
+                }
+                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)) {
+                    $mCode = ''; $mName = '';
+                    if (!empty($data['asset_id'])) {
+                        $ma = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
+                        $ma->execute([(int)$data['asset_id']]);
+                        $maRow = $ma->fetch(PDO::FETCH_ASSOC);
+                        if ($maRow) { $mCode = (string)$maRow['code']; $mName = (string)$maRow['name']; }
+                    }
+                    $mailOk = sendEmailWithTemplate($mailTo, $mailName ?: 'ผู้แจ้งซ่อม', 'repair', 'created', [
+                        'work_order_id' => (string)($data['work_order_no'] ?? ''),
+                        'asset_code' => $mCode ?: '-',
+                        'asset_name' => $mName,
+                        'title' => mb_substr((string)($data['title'] ?? 'งานซ่อมใหม่'), 0, 200),
+                        'priority' => strtoupper((string)($data['priority'] ?? 'NORMAL')),
+                        'status' => (string)($data['status'] ?? 'pending'),
+                        'reporter_name' => $mailName ?: '-',
+                    ], repair_track_url());
+                    if (!$mailOk) error_log('[repair.php] reporter email not sent to ' . $mailTo);
+                }
+            } catch (Throwable $e) {
+                error_log('[repair.php] reporter email failed: ' . $e->getMessage());
             }
             // ---- Notification Center inbox (app channel — LINE/Telegram ส่งไปแล้วข้างบน) ----
             try {

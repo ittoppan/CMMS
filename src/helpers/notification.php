@@ -1111,6 +1111,36 @@ function smtpSendMail($toEmail, $subject, $htmlBody, $fromEmail, $fromName, $hos
 /* ============================================================
  * 5. EMAIL — legacy generic send (kept for backward compat)
  * ============================================================ */
+/**
+ * ชื่อที่แสดงของบัญชี LINE (displayName) — ใช้แสดงในหน้าโปรไฟล์
+ * cache 1 ชั่วโมงใน session เพื่อไม่เรียก LINE API ทุกครั้งที่เปิดหน้า
+ */
+function lineDisplayName($lineUserId, $useCache = true) {
+    $lineUserId = trim((string)$lineUserId);
+    if ($lineUserId === '') return '';
+    $cacheKey = 'line_display_name_' . md5($lineUserId);
+    if ($useCache && isset($_SESSION[$cacheKey]) && ($_SESSION[$cacheKey]['exp'] ?? 0) > time()) {
+        return (string)($_SESSION[$cacheKey]['name'] ?? '');
+    }
+    $token = getSettingValue('line_channel_access_token', '');
+    if ($token === '') $token = (string)(getenv('LINE_CHANNEL_ACCESS_TOKEN') ?: '');
+    if ($token === '' || !function_exists('curl_init')) return '';
+    $ch = curl_init('https://api.line.me/v2/bot/profile/' . rawurlencode($lineUserId));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+    $res = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($code !== 200 || !is_string($res)) return '';
+    $json = json_decode($res, true);
+    $name = trim((string)($json['displayName'] ?? ''));
+    if ($name !== '') {
+        $_SESSION[$cacheKey] = ['name' => $name, 'exp' => time() + 3600];
+    }
+    return $name;
+}
+
 function sendEmailNotification($toEmail, $toName, $title, $message, $targetUrl = '') {
     $subject = "[CMMS-TPT] " . strip_tags($title);
     $bodyHtml = "<b>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</b><br>" . nl2br(htmlspecialchars($message, ENT_QUOTES, 'UTF-8'));

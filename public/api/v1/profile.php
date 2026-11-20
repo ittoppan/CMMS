@@ -12,6 +12,7 @@ require_once __DIR__ . '/../../../src/config/db.php';
 require_once __DIR__ . '/../../../src/auth.php';
 require_once __DIR__ . '/../../../src/csrf.php';
 require_once __DIR__ . '/../../../src/helpers/audit.php';
+require_once __DIR__ . '/../../../src/helpers/notification.php';
 header('Content-Type: application/json; charset=utf-8');
 session_start();
 
@@ -38,6 +39,11 @@ try {
         $stmt->execute([$userId]);
         $u = $stmt->fetch();
         if (!$u) { http_response_code(404); echo json_encode(['error' => 'User not found']); exit; }
+        // ชื่อที่แสดงของบัญชี LINE (ถ้าผูกแล้ว) — ให้หน้าโปรไฟล์โชว์ชื่อ LINE ไม่ใช่อีเมล/ชื่อผู้ใช้
+        $u['line_display_name'] = '';
+        if (!empty($u['line_user_id'])) {
+            try { $u['line_display_name'] = lineDisplayName((string)$u['line_user_id']); } catch (Throwable $e) { $u['line_display_name'] = ''; }
+        }
         echo json_encode(['success' => true, 'user' => $u], JSON_UNESCAPED_UNICODE);
         exit;
     }

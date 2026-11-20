@@ -51,6 +51,7 @@ interface Profile {
   avatar: string | null;
   avatar_path: string | null;
   line_user_id: string | null;
+  line_display_name?: string | null;
   lang: string;
   created_at: string;
 }
@@ -291,6 +292,11 @@ export default function ProfilePage() {
             <Badge variant={profile?.line_user_id ? "success" : "neutral"}>
               {profile?.line_user_id ? "ผูกบัญชี LINE แล้ว" : "ยังไม่ผูกบัญชี LINE"}
             </Badge>
+            {profile?.line_display_name ? (
+              <p className="text-sm text-muted-foreground">
+                ชื่อ LINE: <span className="font-medium text-foreground">{profile.line_display_name}</span>
+              </p>
+            ) : null}
             {!profile?.line_user_id && (
               <Button variant="secondary" size="sm" onClick={() => router.push("/register")}>
                 <Link2 size={14} strokeWidth={1.75} aria-hidden="true" />

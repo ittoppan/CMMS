@@ -288,7 +288,7 @@ export default function RepairViewDetailsPage() {
             status: row.status || "",
             priority: row.priority || "",
             assignedName: row.assigned_name || "-",
-            receiverName: row.receiver_name || "-",
+            receiverName: row.creator_name || row.receiver_name || "-",
             beforeImg: row.before_image_path || "",
             videoPath: row.video_path || "",
             attachmentPath: row.attachment_path || "",
