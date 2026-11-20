@@ -170,7 +170,7 @@ export default function NotificationsSettingsPage() {
   const [ntfyTestResult, setNtfyTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
   // แก้เทมเพลตข้อความในแท็บ ntfy ได้เลย ไม่ต้องสลับไปแท็บ Web Push / PWA
   const [ntfyTemplateOpen, setNtfyTemplateOpen] = useState(false);
-  const [activeChannel, setActiveChannel] = useState<string>("line");
+  const [activeChannel, setActiveChannel] = useState<string>("overview");
 
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [templates, setTemplates] = useState<Record<string, TemplateDef>>({});
@@ -231,6 +231,45 @@ export default function NotificationsSettingsPage() {
       setTemplates((t) => ({ ...t, [k]: { ...(t[k] ?? activeTpl), enabled: v } }));
     } else {
       setSettingField(tplMeta.toggleKey ?? "", v);
+    }
+  };
+
+  // ── ภาพรวมเหตุการณ์: toggle ทุกเหตุการณ์ในที่เดียว ──
+  const EVENT_CHANNEL_BADGES: Record<string, string[]> = {
+    line_tpl_breakdown: ["LINE", "Push"],
+    line_tpl_pm_overdue: ["LINE", "Push"],
+    line_tpl_low_stock: ["LINE", "Push"],
+    line_tpl_completed: ["LINE"],
+    line_tpl_sage_approval: ["LINE"],
+    line_tpl_work_assign: ["LINE"],
+    line_tpl_spare_request: ["LINE"],
+    line_pm_due_soon: ["LINE"],
+    line_weekly_report: ["LINE"],
+    line_system_alerts: ["LINE", "Telegram"],
+  };
+
+  const eventEnabled = (key: string) => {
+    const meta = TEMPLATE_META[key];
+    if (meta?.plain) {
+      return meta.toggleType === "template"
+        ? (templates[meta.toggleKey ?? ""]?.enabled ?? "1") === "1"
+        : (settings[meta.toggleKey ?? ""] ?? "1") === "1";
+    }
+    return (templates[key]?.enabled ?? "1") === "1";
+  };
+
+  const setEventEnabled = (key: string, on: boolean) => {
+    const v = on ? "1" : "0";
+    const meta = TEMPLATE_META[key];
+    if (meta?.plain) {
+      if (meta.toggleType === "template") {
+        const k = meta.toggleKey ?? "";
+        setTemplates((t) => ({ ...t, [k]: { ...(t[k] ?? activeTpl), enabled: v } }));
+      } else {
+        setSettingField(meta.toggleKey ?? "", v);
+      }
+    } else {
+      setTemplates((t) => ({ ...t, [key]: { ...(t[key] ?? activeTpl), enabled: v } }));
     }
   };
 
@@ -571,6 +610,7 @@ export default function NotificationsSettingsPage() {
       {/* Channel tabs */}
       <Tabs value={activeChannel} onValueChange={setActiveChannel}>
         <TabsList aria-label="ช่องทางการแจ้งเตือน">
+          <TabsTrigger value="overview">ภาพรวมเหตุการณ์</TabsTrigger>
           <TabsTrigger value="line">LINE Messenger</TabsTrigger>
           <TabsTrigger value="push">Web Push / PWA</TabsTrigger>
           <TabsTrigger value="email">อีเมล (Email)</TabsTrigger>
@@ -579,6 +619,65 @@ export default function NotificationsSettingsPage() {
           <TabsTrigger value="ntfy">ntfy (มือถือ/PWA)</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {activeChannel === "overview" && (
+        <VStack gap={6}>
+          <Card>
+            <CardContent className="space-y-3 p-5">
+              <HStack gap={2} vAlign="center">
+                <BoltIcon size={18} strokeWidth={1.75} aria-hidden="true" className="text-[var(--cmms-primary)]" />
+                <VStack gap={0}>
+                  <h3 className="text-base font-semibold">ภาพรวมการแจ้งเตือน (ทุกเหตุการณ์)</h3>
+                  <p className="text-sm text-muted-foreground">เปิด/ปิดแต่ละเหตุการณ์ได้ที่นี่ — ไม่ต้องเข้าแท็บช่องทาง</p>
+                </VStack>
+              </HStack>
+              <p className="text-sm text-muted-foreground">
+                สวิตช์ควบคุมการส่งเข้า LINE (ช่องทางหลัก). ช่องทางอื่น (Email, Telegram, Teams, ntfy, Web Push) มีสวิตช์ของตัวเองในแท็บนั้น ๆ
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-2">
+            {TEMPLATE_ORDER.map((key) => {
+              const meta = TEMPLATE_META[key];
+              const on = eventEnabled(key);
+              const channels = EVENT_CHANNEL_BADGES[key] ?? ["LINE"];
+              return (
+                <Card key={key}>
+                  <CardContent className="flex items-center justify-between gap-4 p-4">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className="text-2xl" aria-hidden="true">{meta.icon}</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">{meta.label}</p>
+                        <p className="text-xs text-muted-foreground">{meta.hint}</p>
+                        <p className="text-xs text-muted-foreground mt-1">ส่งอัตโนมัติเมื่อ: {meta.wired}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {channels.map((c) => (
+                            <Badge key={c} variant={on ? "info" : "neutral"}>{c}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <Switch
+                      label={on ? "เปิด" : "ปิด"}
+                      value={on}
+                      onChange={(c) => setEventEnabled(key, c)}
+                    />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm text-muted-foreground">
+                แก้ไขรูปแบบข้อความ (Flex Template) ได้ที่แท็บ LINE Messenger → เลือกเหตุการณ์ → แก้ไขการ์ด
+              </p>
+            </CardContent>
+          </Card>
+        </VStack>
+      )}
 
       {activeChannel === "push" && <PushTemplateEditor />}
 
