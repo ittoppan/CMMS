@@ -479,10 +479,11 @@ function logLineSend($recipient, $template = '', $status = 'SENT', $content = ''
 function lineTemplateDefaults() {
     return [
         'line_tpl_breakdown' => [
-            'header_color' => '#dc2626',
-            'header_title' => '🚨 แจ้งซ่อมด่วน #{work_order_id}',
+            // ใช้กับใบแจ้งซ่อมทุกใบ (ไม่เฉพาะงานด่วน) — ระดับความเร่งด่วนแสดงในตัวข้อความ
+            'header_color' => '#1d4ed8',
+            'header_title' => '📋 ใบแจ้งซ่อมใหม่ #{work_order_id}',
             'body_text' => "เครื่องจักร: {asset_code} - {asset_name}\nอาการเสีย: {title}\nความเร่งด่วน: {priority} | สถานะ: {status}\nผู้แจ้งซ่อม: {reporter_name}",
-            'btn_label' => '⚡ รับงานซ่อมด่วน',
+            'btn_label' => 'เปิดใบงาน',
             'enabled' => '1', 'image_before' => '', 'image_after' => '',
         ],
         'line_tpl_completed' => [

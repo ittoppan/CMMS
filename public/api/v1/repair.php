@@ -536,7 +536,8 @@ try {
                         "สถานะเครื่อง: " . (string)($data['machine_status'] ?? '-');
                     notify_event_extra_channels(
                         'line_tpl_breakdown',
-                        $isUrgent ? "แจ้งซ่อมด่วน $wo" : "งานซ่อมใหม่ $wo",
+                        // เตือนทุกใบแจ้งซ่อม (ไม่เฉพาะงานด่วน) — งานด่วนเน้นในเนื้อข้อความ
+                        ($isUrgent ? "งานด่วน " : "") . "ใบแจ้งซ่อมใหม่ $wo",
                         $msg,
                         publicBaseUrl() . '/repair/view?id=' . $newId,
                         $isUrgent ? 'ERROR' : 'INFO'
@@ -545,7 +546,7 @@ try {
             } catch (Exception $e) {
                 error_log("[repair.php] extra channel notify failed: " . $e->getMessage());
             }
-            // ---- อีเมลยืนยันการแจ้งซ่อมถึงผู้แจ้ง (ใช้เทมเพลต Email: แจ้งซ่อมด่วน) ----
+            // ---- อีเมลแจ้งใบแจ้งซ่อมใหม่ (ผู้แจ้ง + ผู้ดูแล) — ทุกใบ ไม่เฉพาะงานด่วน ----
             try {
                 $mailTo = trim((string)($data['reporter_email'] ?? ''));
                 $mailName = trim((string)($data['receiver_name'] ?? ''));
@@ -558,29 +559,32 @@ try {
                         if ($mailName === '') $mailName = trim((string)($euRow['full_name'] ?? ''));
                     }
                 }
-                                                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)
+                $mCode = ''; $mName = '';
+                if (!empty($data['asset_id'])) {
+                    $ma = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
+                    $ma->execute([(int)$data['asset_id']]);
+                    $maRow = $ma->fetch(PDO::FETCH_ASSOC);
+                    if ($maRow) { $mCode = (string)$maRow['code']; $mName = (string)$maRow['name']; }
+                }
+                $mailVars = [
+                    'work_order_id' => (string)($data['work_order_no'] ?? ''),
+                    'asset_code' => $mCode ?: '-',
+                    'asset_name' => $mName,
+                    'title' => mb_substr((string)($data['title'] ?? 'งานซ่อมใหม่'), 0, 200),
+                    'priority' => strtoupper((string)($data['priority'] ?? 'NORMAL')),
+                    'status' => (string)($data['status'] ?? 'pending'),
+                    'reporter_name' => $mailName ?: (string)($data['receiver_name'] ?? '-'),
+                ];
+                if ($mailTo !== '' && filter_var($mailTo, FILTER_VALIDATE_EMAIL)
                     && getSettingValue('email_notify_enabled', '0') === '1'
                     && notify_channel_enabled('line_tpl_breakdown', 'email')) {
-                    $mCode = ''; $mName = '';
-                    if (!empty($data['asset_id'])) {
-                        $ma = $pdo->prepare('SELECT code, name FROM asset_registry WHERE id = ?');
-                        $ma->execute([(int)$data['asset_id']]);
-                        $maRow = $ma->fetch(PDO::FETCH_ASSOC);
-                        if ($maRow) { $mCode = (string)$maRow['code']; $mName = (string)$maRow['name']; }
-                    }
-                    $mailOk = sendEmailWithTemplate($mailTo, $mailName ?: 'ผู้แจ้งซ่อม', 'repair', 'created', [
-                        'work_order_id' => (string)($data['work_order_no'] ?? ''),
-                        'asset_code' => $mCode ?: '-',
-                        'asset_name' => $mName,
-                        'title' => mb_substr((string)($data['title'] ?? 'งานซ่อมใหม่'), 0, 200),
-                        'priority' => strtoupper((string)($data['priority'] ?? 'NORMAL')),
-                        'status' => (string)($data['status'] ?? 'pending'),
-                        'reporter_name' => $mailName ?: '-',
-                    ], repair_track_url());
+                    $mailOk = sendEmailWithTemplate($mailTo, $mailName ?: 'ผู้แจ้งซ่อม', 'repair', 'created', $mailVars, repair_track_url());
                     if (!$mailOk) error_log('[repair.php] reporter email not sent to ' . $mailTo);
                 }
+                // แจ้งผู้ดูแล/หัวหน้างานทางอีเมลด้วยทุกใบ (ไม่เฉพาะงานด่วน)
+                emailNotifyAdmins($pdo, 'repair', 'created', $mailVars, publicBaseUrl() . '/repair/view?id=' . $newId, 'line_tpl_breakdown');
             } catch (Throwable $e) {
-                error_log('[repair.php] reporter email failed: ' . $e->getMessage());
+                error_log('[repair.php] repair-created email failed: ' . $e->getMessage());
             }
             // ---- Notification Center inbox (app channel — LINE/Telegram ส่งไปแล้วข้างบน) ----
             try {

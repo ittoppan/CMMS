@@ -84,8 +84,8 @@ type EventDef = {
 const EVENTS: EventDef[] = [
   {
     key: "line_tpl_breakdown",
-    label: "แจ้งซ่อมด่วน / ใบแจ้งซ่อมใหม่",
-    hint: "ส่งทุกครั้งที่มีใบแจ้งซ่อมเข้าใหม่ (ด่วนเป็นพิเศษเมื่อเครื่องหยุด)",
+    label: "ใบแจ้งซ่อมใหม่ (ทุกงาน)",
+    hint: "เตือนทุกใบแจ้งซ่อมที่เข้ามา ไม่เฉพาะงานด่วน — ระดับความเร่งด่วนแสดงในข้อความ",
     wired: "สร้างใบแจ้งซ่อม — repair.php",
     emailKey: "email_tpl_breakdown",
     channels: ["LINE", "Email", "Push", "Telegram"],
@@ -188,7 +188,7 @@ const TEMPLATE_ORDER = [
 ] as const;
 
 const TEMPLATE_LABELS: Record<string, string> = {
-  line_tpl_breakdown: "แจ้งซ่อมด่วน (Breakdown)",
+  line_tpl_breakdown: "ใบแจ้งซ่อมใหม่ (ทุกงาน)",
   line_tpl_work_assign: "งานถูกมอบหมาย",
   line_tpl_spare_request: "ขอเบิกอะไหล่",
   line_tpl_pm_overdue: "แผน PM เกินกำหนด",

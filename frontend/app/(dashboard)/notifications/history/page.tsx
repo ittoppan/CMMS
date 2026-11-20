@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 
 const TEMPLATE_LABELS: Record<string, string> = {
-  line_tpl_breakdown: "แจ้งซ่อมด่วน (Breakdown)",
+  line_tpl_breakdown: "ใบแจ้งซ่อมใหม่ (ทุกงาน)",
   line_tpl_completed: "งานซ่อมเสร็จเรียบร้อย",
   line_tpl_low_stock: "สต็อกต่ำกว่าจุดสั่งซื้อ",
   line_tpl_pm_overdue: "แผน PM เกินกำหนด",
