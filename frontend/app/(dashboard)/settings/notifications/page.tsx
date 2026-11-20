@@ -75,6 +75,7 @@ type EventDef = {
   hint: string;
   wired: string;
   settingKey?: string;
+  defaultOn?: boolean;
   emailKey?: string;
   channels: string[];
   Icon: typeof BellRing;
@@ -165,6 +166,7 @@ const EVENTS: EventDef[] = [
     hint: "สถานะ server / tunnel / watchdog — แนะนำปิดไว้",
     wired: "สคริปต์ watchdog-notify.php",
     settingKey: "line_system_alerts",
+    defaultOn: false,
     channels: ["LINE", "Telegram"],
     Icon: ShieldCheck,
   },
@@ -493,8 +495,13 @@ function OverviewTab({
   onOpenTab: (tab: string) => void;
 }) {
   const isOn = (key?: string) => (key ? (settings[key] ?? "0") === "1" : false);
-  const lineEventOn = (ev: EventDef) =>
-    ev.settingKey ? (settings[ev.settingKey] ?? "0") !== "0" : (templates[ev.key]?.enabled ?? "1") !== "0";
+  const lineEventOn = (ev: EventDef) => {
+    if (ev.settingKey) {
+      // ค่าเริ่มต้นต้องตรงกับฝั่งเซิร์ฟเวอร์ (system alerts ปิดไว้โดย default)
+      return (settings[ev.settingKey] ?? (ev.defaultOn === false ? "0" : "1")) !== "0";
+    }
+    return (templates[ev.key]?.enabled ?? "1") !== "0";
+  };
   const emailOn = (ev: EventDef) =>
     ev.emailKey ? emailTemplates[ev.emailKey]?.enabled === "1" : false;
 
