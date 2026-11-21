@@ -306,7 +306,7 @@ export default function RepairKanbanPage() {
             <div className="flex items-center justify-between gap-2 border-b border-[var(--cmms-border)] pb-2.5">
               <div className="flex items-center gap-2">
                 <AndonLamp status={col.andon} size="sm" />
-                <span className="text-[0.95rem] font-bold">{col.title}</span>
+                <span className="text-sm font-bold">{col.title}</span>
               </div>
               <span className="cmms-count-pill">{col.items.length}</span>
             </div>
@@ -335,7 +335,7 @@ export default function RepairKanbanPage() {
               {loading ? (
                 <p className="p-5 text-center text-sm text-[var(--cmms-text-secondary)]">กำลังโหลด...</p>
               ) : col.items.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--cmms-border)] p-6 text-center text-[0.85rem] text-[var(--cmms-text-muted)]">
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[var(--cmms-border)] p-6 text-center text-sm text-[var(--cmms-text-muted)]">
                   <Inbox size={24} strokeWidth={1.5} className="opacity-50" aria-hidden="true" />
                   ไม่มีงานในสถานะนี้
                 </div>
@@ -369,7 +369,7 @@ export default function RepairKanbanPage() {
                           </span>
                         </div>
 
-                        <p className="text-[0.95rem] font-semibold">{item.asset}</p>
+                        <p className="text-sm font-semibold">{item.asset}</p>
 
                         <p className="line-clamp-2 text-sm text-[var(--cmms-text-secondary)]">{item.symptoms}</p>
 

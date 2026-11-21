@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
  * PageHeader — หัวหน้าหน้าอัตโนมัติ (eyebrow + title + description + actions)
  * ใช้แทน hero มือทำในทุกหน้า
  *
- * สเกล/ระยะห่างต้องตรงกับ PageShell (components/PageShell.tsx) และ .cmms-page-hero
+   * สเกล/ระยะห่างต้องตรงกับ PageShell (components/PageShell.tsx)
  * ใน globals.css — ระบบมีหัวหน้าหน้า 3 แบบที่ต้องดูเป็นตระกูลเดียวกัน
  */
 function PageHeader({

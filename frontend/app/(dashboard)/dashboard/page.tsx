@@ -1151,9 +1151,10 @@ export default function DashboardPage() {
           ) : data.spare.length === 0 ? (
             <Na note="ไม่มีอะไหล่ที่ถึงจุดสั่งซื้อ" value="สต็อกปกติ" />
           ) : (
-            <table className="tower-table">
-              <colgroup>
-                <col style={{ width: "50%" }} />
+            <div className="overflow-x-auto">
+              <table className="tower-table min-w-[480px]">
+                <colgroup>
+                  <col style={{ width: "50%" }} />
                 <col style={{ width: "16%" }} />
                 <col style={{ width: "14%" }} />
                 <col style={{ width: "20%" }} />
@@ -1192,6 +1193,7 @@ export default function DashboardPage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </Panel>
 
@@ -1266,9 +1268,10 @@ export default function DashboardPage() {
               {!pending || pending.items.length === 0 ? (
                 <p className="tower-modal-empty">ไม่พบงานค้างตามช่วงที่เลือก</p>
               ) : (
-                <table className="tower-table">
-                  <colgroup>
-                    <col style={{ width: "13%" }} />
+                <div className="overflow-x-auto">
+                  <table className="tower-table min-w-[480px]">
+                    <colgroup>
+                      <col style={{ width: "13%" }} />
                     <col style={{ width: "37%" }} />
                     <col style={{ width: "13%" }} />
                     <col style={{ width: "19%" }} />
@@ -1320,6 +1323,7 @@ export default function DashboardPage() {
                       })}
                   </tbody>
                 </table>
+                </div>
               )}
               {pending && pending.items.length > 0 ? (
                 <p className="tower-modal-foot">

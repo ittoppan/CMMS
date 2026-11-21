@@ -577,8 +577,8 @@ export default function PMPlanFormPage() {
             {ppSearching ? (
               <p className="text-xs text-[var(--cmms-text-muted)]">กำลังค้นหาบน Sage 300…</p>
             ) : ppResults.length > 0 ? (
-              <div className="overflow-hidden rounded-[10px] border" style={{ borderColor: "var(--cmms-border)" }}>
-                <table className="w-full text-sm">
+                             <div className="overflow-x-auto rounded-[10px] border" style={{ borderColor: "var(--cmms-border)" }}>
+                 <table className="w-full min-w-[480px] text-sm">
                   <tbody className="divide-y" style={{ borderColor: "var(--cmms-border)" }}>
                     {ppResults.map((it) => (
                       <tr key={it.item_no}>

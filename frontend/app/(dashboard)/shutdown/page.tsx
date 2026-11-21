@@ -146,7 +146,7 @@ export default function ShutdownBoardPage() {
             <div className="min-w-[8rem] space-y-1">
               <div className="text-sm font-semibold">{p === null ? "—" : `${p}%`}</div>
               <Progress value={p ?? 0} className="h-1.5" aria-label={`ความคืบหน้า ${r.shutdown_no}`} />
-              <div className="text-[0.7rem] text-muted-foreground">
+              <div className="text-xs text-muted-foreground">
                 {r.progress.done}/{r.progress.scope_count} ขอบเขต
               </div>
             </div>

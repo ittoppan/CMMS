@@ -264,7 +264,7 @@ export default function SyncCenterPage() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="truncate font-medium">{it.label}</div>
-                        <div className="truncate font-mono text-[0.65rem] text-muted-foreground">
+                        <div className="truncate font-mono text-xs text-muted-foreground">
                           {it.endpoint}
                         </div>
                       </div>

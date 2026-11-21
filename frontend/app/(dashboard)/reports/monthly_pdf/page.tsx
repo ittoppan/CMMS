@@ -323,7 +323,8 @@ export default function MonthlyPdfReportPage() {
               {/* ตารางสรุปแยกตามประเภท */}
               <div className="space-y-3">
                 <p className="text-base font-bold" style={{ color: "var(--tp-navy-dark)" }}>1. สรุปผลการทำ PM และ AM (แผนงานจริง {pmTotal} แผน)</p>
-                <table className="w-full text-[13px]" style={{ borderCollapse: "collapse", border: "1px solid var(--cmms-border)" }}>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px] text-[13px]" style={{ borderCollapse: "collapse", border: "1px solid var(--cmms-border)" }}>
                   <thead>
                     <tr style={{ backgroundColor: "var(--cmms-bg-muted)", textAlign: "left" }}>
                       <th scope="col" className="px-3 py-2" style={{ border: "1px solid var(--cmms-border)" }}>ความถี่</th>
@@ -367,6 +368,7 @@ export default function MonthlyPdfReportPage() {
                     )}
                   </tbody>
                 </table>
+                </div>
                 <p className="text-sm" style={{ color: "var(--cmms-text-muted)" }}>
                   หมายเหตุ: อุปกรณ์ที่ลงทะเบียน {assets} เครื่อง · ค่าใช้จ่ายซ่อมรวมทั้งปี (ใบสั่งงานจริง) ฿{fmt(yearCost)} · เกณฑ์ผ่าน ≥ 95%
                 </p>

@@ -348,7 +348,8 @@ export default function AuditLogPage() {
             <>
               {/* desktop table */}
               <div className="hidden overflow-hidden rounded-md border md:block">
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[720px] text-sm">
                   <thead>
                     <tr className="border-b bg-[var(--cmms-bg-muted)] text-left text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-3 py-2 font-semibold">เวลา (GMT+7)</th>
@@ -381,6 +382,7 @@ export default function AuditLogPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               {/* mobile cards */}

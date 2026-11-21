@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/cn";
 
 /**
- * PageHeader — หัวหน้าหน้าตัวกลาง (ตัวแทนของ PageShell / .cmms-page-hero / ui/page-header)
+   * PageHeader — หัวหน้าหน้าตัวกลาง (ตัวแทนของ PageShell / ui/page-header)
  *
  * สเกล/ระยะห่างคงไว้ให้ตรงกับ PageShell เดิม เพื่อให้หน้าที่ย้ายมาใช้แล้วหน้าตาไม่เปลี่ยน:
  * eyebrow → h1 (1.75rem, leading 1.2) → description (text-sm) + เส้นคั่นล่าง pb-5

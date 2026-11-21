@@ -358,11 +358,11 @@ function CostTab({ d }: { d: AdvData["cost"] | undefined }) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">ค่าใช้จ่ายรายแผนก</CardTitle>
           </CardHeader>
-          <CardContent>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ color: "var(--cmms-text-secondary)" }}>
-                  <th className="pb-2 text-left font-medium">แผนก</th>
+                     <CardContent className="overflow-x-auto">
+             <table className="w-full min-w-[560px] text-sm">
+               <thead>
+                 <tr style={{ color: "var(--cmms-text-secondary)" }}>
+                   <th className="pb-2 text-left font-medium">แผนก</th>
                   <th className="pb-2 text-right font-medium">ใบงาน</th>
                   <th className="pb-2 text-right font-medium">รวม (บาท)</th>
                 </tr>
@@ -534,11 +534,11 @@ function StockTab({ d }: { d: AdvData["stock"] | undefined }) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">มูลค่าสต็อกตามซัพพลายเออร์</CardTitle>
           </CardHeader>
-          <CardContent>
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ color: "var(--cmms-text-secondary)" }}>
-                  <th className="pb-2 text-left font-medium">ซัพพลายเออร์</th>
+                     <CardContent className="overflow-x-auto">
+             <table className="w-full min-w-[520px] text-sm">
+               <thead>
+                 <tr style={{ color: "var(--cmms-text-secondary)" }}>
+                   <th className="pb-2 text-left font-medium">ซัพพลายเออร์</th>
                   <th className="pb-2 text-right font-medium">รายการ</th>
                   <th className="pb-2 text-right font-medium">มูลค่า (บาท)</th>
                 </tr>

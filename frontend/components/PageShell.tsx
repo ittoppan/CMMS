@@ -78,7 +78,7 @@ export function PageShell({
         </Breadcrumb>
       )}
 
-      {/* Header — มาตรฐานเดียวกับ .cmms-page-hero: eyebrow → ชื่อเรื่อง → คำอธิบาย
+      {/* Header — มาตรฐานเดียวกับ PageHeader: eyebrow → ชื่อเรื่อง → คำอธิบาย
           ระยะห่าง/เส้นคั่น/สเกลตัวอักษรต้องตรงกันทุกหน้า (ดู globals.css) */}
       <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-2">

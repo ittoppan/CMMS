@@ -316,7 +316,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                 {currentUser?.name || roleName || "ผู้ใช้งาน"}
                 {simulated && (
-                  <span className="ml-1 text-[0.65rem] font-normal text-muted-foreground">(จำลอง)</span>
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">(จำลอง)</span>
                 )}
               </span>
             </button>
@@ -359,7 +359,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 onClick={() => setUserLang(lang === "th" ? "en" : "th")}
                 title={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
                 aria-label={lang === "th" ? "Switch to English" : "สลับเป็นภาษาไทย"}
-                className="inline-flex h-9 min-w-[34px] select-none items-center justify-center rounded-full border border-border bg-secondary px-2 text-[0.72rem] font-extrabold tracking-wider text-muted-foreground transition-colors cursor-pointer hover:bg-accent"
+                className="inline-flex h-9 min-w-[34px] select-none items-center justify-center rounded-full border border-border bg-secondary px-2 text-xs font-extrabold tracking-wider text-muted-foreground transition-colors cursor-pointer hover:bg-accent"
               >
                 {lang === "th" ? "EN" : "TH"}
               </button>
